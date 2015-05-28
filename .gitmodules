@@ -7,3 +7,6 @@
 [submodule "jni/snappy"]
 	path = jni/snappy
 	url = git@github.com:google/snappy.git
+[submodule "jni/leveldb"]
+	path = jni/leveldb
+	url = git@github.com:google/leveldb.git
