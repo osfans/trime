@@ -1,0 +1,3 @@
+[submodule "jni/OpenCC"]
+	path = jni/OpenCC
+	url = git@github.com:BYVoid/OpenCC.git
