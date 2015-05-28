@@ -1,3 +1,6 @@
 [submodule "jni/OpenCC"]
 	path = jni/OpenCC
 	url = git@github.com:BYVoid/OpenCC.git
+[submodule "jni/yaml-cpp"]
+	path = jni/yaml-cpp
+	url = git@github.com:jbeder/yaml-cpp.git
