@@ -4,3 +4,6 @@
 [submodule "jni/yaml-cpp"]
 	path = jni/yaml-cpp
 	url = git@github.com:jbeder/yaml-cpp.git
+[submodule "jni/snappy"]
+	path = jni/snappy
+	url = git@github.com:google/snappy.git
