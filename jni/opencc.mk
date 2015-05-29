@@ -44,20 +44,20 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_tool
 LOCAL_SRC_FILES := src/tools/CommandLine.cpp
-LOCAL_SHARED_LIBRARIES := libopencc
+LOCAL_SHARED_LIBRARIES := opencc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_dict
 LOCAL_SRC_FILES := src/tools/DictConverter.cpp
-LOCAL_SHARED_LIBRARIES := libopencc
+LOCAL_SHARED_LIBRARIES := opencc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_phrase_extract
 LOCAL_SRC_FILES := src/tools/PhraseExtract.cpp
-LOCAL_SHARED_LIBRARIES := libopencc
+LOCAL_SHARED_LIBRARIES := opencc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 include $(BUILD_EXECUTABLE)
