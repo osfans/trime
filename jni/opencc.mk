@@ -35,29 +35,29 @@ LOCAL_SRC_FILES := src/BinaryDict.cpp \
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps/rapidjson-0.11 $(LOCAL_PATH)/deps/darts-clone
 
-LOCAL_LDLIBS := -latomic
+#LOCAL_LDLIBS := -latomic
 #LOCAL_STATIC_LIBRARIES := c++_static
 #LOCAL_CLANG :=true
 #LOCAL_CFLAGS := -std=c++11
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_tool
 LOCAL_SRC_FILES := src/tools/CommandLine.cpp
-LOCAL_SHARED_LIBRARIES := opencc
+LOCAL_STATIC_LIBRARIES := opencc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_dict
 LOCAL_SRC_FILES := src/tools/DictConverter.cpp
-LOCAL_SHARED_LIBRARIES := opencc
+LOCAL_STATIC_LIBRARIES := opencc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_phrase_extract
 LOCAL_SRC_FILES := src/tools/PhraseExtract.cpp
-LOCAL_SHARED_LIBRARIES := opencc
+LOCAL_STATIC_LIBRARIES := opencc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 include $(BUILD_EXECUTABLE)

@@ -94,8 +94,7 @@ LOCAL_SRC_FILES += \
   src/lever/custom_settings.cc \
 
 LOCAL_CFLAGS := -DRIME_VERSION=\"1.2.9\"
-
-LOCAL_SHARED_LIBRARIES := boost leveldb marisa opencc yaml-cpp
+LOCAL_STATIC_LIBRARIES := boost leveldb marisa opencc yaml-cpp
 LOCAL_LDLIBS := -latomic
 include $(BUILD_SHARED_LIBRARY)
 
@@ -108,7 +107,7 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_console
 LOCAL_SRC_FILES := tools/rime_console.cc
-LOCAL_SHARED_LIBRARIES := rime boost
+LOCAL_SHARED_LIBRARIES := rime
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
 include $(BUILD_EXECUTABLE)
 
@@ -122,7 +121,7 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_dict_manager
 LOCAL_SRC_FILES := tools/rime_dict_manager.cc
-LOCAL_SHARED_LIBRARIES := rime boost
+LOCAL_SHARED_LIBRARIES := rime
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 include $(BUILD_EXECUTABLE)
 

@@ -39,7 +39,7 @@ LOCAL_SRC_FILES += \
   libs/signals/src/signal_base.cpp \
   libs/system/src/error_code.cpp \
 
-LOCAL_LDLIBS := -latomic
+#LOCAL_LDLIBS := -latomic
 # 如果要把boost集成到动态库里，-fPIC是必须的，不然会有链接错误。原因请自行Google
 #LOCAL_CFLAGS += -fPIC -frtti -fexceptions
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)

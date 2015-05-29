@@ -46,5 +46,5 @@ LOCAL_SRC_FILES := \
     src/stream.cpp \
     src/tag.cpp
 
-LOCAL_LDLIBS := -latomic
-include $(BUILD_SHARED_LIBRARY)
+#LOCAL_LDLIBS := -latomic
+include $(BUILD_STATIC_LIBRARY)
