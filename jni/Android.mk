@@ -14,7 +14,8 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-include jni/opencc.mk
-include jni/yaml-cpp.mk
-include jni/snappy.mk
-include jni/leveldb.mk
+include jni/opencc.mk #1.0.2
+include jni/yaml-cpp.mk #0.5.2
+include jni/snappy.mk #1.12
+include jni/leveldb.mk #1.18
+include jni/marisa-trie.mk #0.2.4
