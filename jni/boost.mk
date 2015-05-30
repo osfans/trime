@@ -1,7 +1,6 @@
 LOCAL_PATH := $(ROOT_PATH)/boost
 
 include $(CLEAR_VARS)
-
 LOCAL_MODULE := boost #1.58
 
 LOCAL_SRC_FILES += \
@@ -32,11 +31,6 @@ LOCAL_SRC_FILES += \
   libs/regex/src/regex_traits_defaults.cpp \
   libs/regex/src/regex.cpp \
   \
-  libs/signals/src/connection.cpp \
-  libs/signals/src/named_slot_map.cpp \
-  libs/signals/src/trackable.cpp \
-  libs/signals/src/slot.cpp \
-  libs/signals/src/signal_base.cpp \
   libs/system/src/error_code.cpp \
 
 #LOCAL_LDLIBS := -latomic
