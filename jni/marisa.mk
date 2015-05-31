@@ -15,5 +15,6 @@ LOCAL_SRC_FILES := \
 	lib/marisa/grimoire/trie/tail.cc \
 	lib/marisa/grimoire/vector/bit-vector.cc
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/lib
 #LOCAL_LDLIBS := -latomic
 include $(BUILD_STATIC_LIBRARY)

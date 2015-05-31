@@ -6,6 +6,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := rime #1.2.9
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES += \
   src/commit_history.cc \
@@ -111,7 +112,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_console
 LOCAL_SRC_FILES := tools/rime_console.cc
 LOCAL_SHARED_LIBRARIES := rime
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/thirdparty/include
 LOCAL_CFLAGS := $(CXX_DEFINES)
 include $(BUILD_EXECUTABLE)
 
@@ -119,7 +120,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_deployer
 LOCAL_SRC_FILES := tools/rime_deployer.cc
 LOCAL_SHARED_LIBRARIES := rime
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 LOCAL_CFLAGS := $(CXX_DEFINES)
 include $(BUILD_EXECUTABLE)
 
@@ -127,14 +127,12 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_dict_manager
 LOCAL_SRC_FILES := tools/rime_dict_manager.cc
 LOCAL_SHARED_LIBRARIES := rime
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 LOCAL_CFLAGS := $(CXX_DEFINES)
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_patch
 LOCAL_SRC_FILES := tools/rime_patch.cc
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 LOCAL_SHARED_LIBRARIES := rime
 LOCAL_CFLAGS := $(CXX_DEFINES)
 include $(BUILD_EXECUTABLE)

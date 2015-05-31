@@ -3,19 +3,8 @@ LOCAL_PATH := $(ROOT_PATH)/yaml-cpp
 include $(CLEAR_VARS)
 LOCAL_MODULE := yaml-cpp #0.5.2
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/ \
-    #$(ROOT_PATH)/boost/smart_ptr/include \
-    $(LOCAL_PATH)/boost/config/include/ \
-    $(LOCAL_PATH)/boost/assert/include/ \
-    $(LOCAL_PATH)/boost/core/include/ \
-    $(LOCAL_PATH)/boost/throw_exception/include/ \
-    $(LOCAL_PATH)/boost/iterator/include/ \
-    $(LOCAL_PATH)/boost/mpl/include/ \
-    $(LOCAL_PATH)/boost/preprocessor/include/ \
-    $(LOCAL_PATH)/boost/type_traits/include/ \
-    $(LOCAL_PATH)/boost/static_assert/include/ \
-    $(LOCAL_PATH)/boost/detail/include/ \
-    $(LOCAL_PATH)/boost/utility/include/
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES := \
     src/binary.cpp \
@@ -53,6 +42,5 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := yaml_parse
 LOCAL_SRC_FILES := util/parse.cpp
 LOCAL_STATIC_LIBRARIES := yaml-cpp
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 LOCAL_LDLIBS := -latomic
 include $(BUILD_EXECUTABLE)
