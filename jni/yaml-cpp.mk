@@ -38,9 +38,11 @@ LOCAL_SRC_FILES := \
 #LOCAL_LDLIBS := -latomic
 include $(BUILD_STATIC_LIBRARY)
 
+ifneq ($(YAML_CPP_TOOLS),)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := yaml_parse
 LOCAL_SRC_FILES := util/parse.cpp
 LOCAL_STATIC_LIBRARIES := yaml-cpp
 LOCAL_LDLIBS := -latomic
 include $(BUILD_EXECUTABLE)
+endif

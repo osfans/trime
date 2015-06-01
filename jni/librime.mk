@@ -101,6 +101,7 @@ LOCAL_STATIC_LIBRARIES := boost leveldb marisa opencc yaml-cpp
 LOCAL_LDLIBS := -latomic
 include $(BUILD_SHARED_LIBRARY)
 
+ifneq ($(RIME_TOOLS),)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := rime_api_console
 LOCAL_SRC_FILES := tools/rime_api_console.cc
@@ -136,3 +137,4 @@ LOCAL_SRC_FILES := tools/rime_patch.cc
 LOCAL_SHARED_LIBRARIES := rime
 LOCAL_CFLAGS := $(CXX_DEFINES)
 include $(BUILD_EXECUTABLE)
+endif

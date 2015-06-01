@@ -41,6 +41,7 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 #LOCAL_CFLAGS := -std=c++11
 include $(BUILD_STATIC_LIBRARY)
 
+ifneq ($(OPENCC_TOOLS),)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_tool
 LOCAL_SRC_FILES := src/tools/CommandLine.cpp
@@ -58,3 +59,4 @@ LOCAL_MODULE    := opencc_phrase_extract
 LOCAL_SRC_FILES := src/tools/PhraseExtract.cpp
 LOCAL_STATIC_LIBRARIES := opencc
 include $(BUILD_EXECUTABLE)
+endif
