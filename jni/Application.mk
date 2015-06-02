@@ -6,5 +6,5 @@
 NDK_TOOLCHAIN_VERSION := clang
 
 APP_STL         := c++_static
-APP_CPPFLAGS    := -fexceptions -frtti -Wno-format-security -Wno-extern-c-compat -Wno-constant-conversion -Wno-deprecated-register -Wno-format
+APP_CPPFLAGS    := -fPIC -fexceptions -frtti -Wno-format-security -Wno-extern-c-compat -Wno-constant-conversion -Wno-deprecated-register -Wno-format
 #APP_GNUSTL_FORCE_CPP_FEATURES := exceptions rtti
