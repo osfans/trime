@@ -15,43 +15,6 @@ template <typename T, int N>
 char (&ArraySizeHelper(T (&array)[N]))[N];
 #define NELEMS(x) (sizeof(ArraySizeHelper(x)))
 
-void print_status(RimeStatus *status) {
-  ALOGE("schema: %s / %s\n",
-         status->schema_id, status->schema_name);
-  ALOGE("status: ");
-  if (status->is_disabled) ALOGE("disabled ");
-  if (status->is_composing) ALOGE("composing ");
-  if (status->is_ascii_mode) ALOGE("ascii ");
-  if (status->is_full_shape) ALOGE("full_shape ");
-  if (status->is_simplified) ALOGE("simplified ");
-}
-
-void print_menu(RimeMenu *menu) {
-  if (menu->num_candidates == 0) return;
-  ALOGE("page: %d%c (of size %d)\n",
-         menu->page_no + 1,
-         menu->is_last_page ? '$' : ' ',
-         menu->page_size);
-  for (int i = 0; i < menu->num_candidates; ++i) {
-    bool highlighted = i == menu->highlighted_candidate_index;
-    ALOGE("%d. %c%s%c%s\n",
-           i + 1,
-           highlighted ? '[' : ' ',
-           menu->candidates[i].text,
-           highlighted ? ']' : ' ',
-           menu->candidates[i].comment ? menu->candidates[i].comment : "");
-  }
-}
-
-void print_context(RimeContext *context) {
-  if (context->composition.length > 0) {
-    print_menu(&context->menu);
-  }
-  else {
-    ALOGE("(not composing)\n");
-  }
-}
-
 void on_message(void* context_object,
                 RimeSessionId session_id,
                 const char* message_type,
@@ -122,13 +85,14 @@ static void clear_composition(JNIEnv *env, jobject thiz, jint session_id) {
 static jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id) {
   RIME_STRUCT(RimeCommit, commit);
   Bool r = RimeGetCommit((RimeSessionId)session_id, &commit);
+  jclass jc = env->GetObjectClass(thiz);
+  jfieldID fid = env->GetFieldID(jc, "commit_text", "Ljava/lang/String;");
+  jstring s = NULL;
   if (r) {
-    jclass jc = env->GetObjectClass(thiz);
-    jfieldID fid = env->GetFieldID(jc, "commit_text", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, env->NewStringUTF(commit.text));
+    s = env->NewStringUTF(commit.text);
     RimeFreeCommit(&commit);
   }
-  else ALOGE("no commit\n");
+  env->SetObjectField(thiz, fid, s);
   return r;
 }
 
