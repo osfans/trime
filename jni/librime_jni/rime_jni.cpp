@@ -218,6 +218,11 @@ static jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id
   return r;
 }
 
+static jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index) {
+  RimeApi* rime = rime_get_api();
+  return rime->select_candidate(session_id, index);
+}
+
 static jstring get_version(JNIEnv *env, jobject thiz) {
   RimeApi* rime = rime_get_api();
   const char* c = rime->get_version();
@@ -305,6 +310,11 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("simulate_key_sequence"),
         const_cast<char *>("(ILjava/lang/String;)Z"),
         reinterpret_cast<void *>(simulate_key_sequence)
+    },
+    {
+        const_cast<char *>("select_candidate"),
+        const_cast<char *>("(II)Z"),
+        reinterpret_cast<void *>(select_candidate)
     },
     {
         const_cast<char *>("get_version"),
