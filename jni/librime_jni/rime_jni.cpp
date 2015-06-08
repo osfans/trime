@@ -78,7 +78,7 @@ static jboolean commit_composition(JNIEnv *env, jobject thiz, jint session_id) {
 }
 
 static void clear_composition(JNIEnv *env, jobject thiz, jint session_id) {
-  return RimeClearComposition((RimeSessionId)session_id);
+  RimeClearComposition((RimeSessionId)session_id);
 }
 
 // output
@@ -174,9 +174,7 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
 //testing
 static jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id, jstring key_sequence) {
   const char* str = env->GetStringUTFChars(key_sequence, NULL); 
-  if (str == NULL) { //不要忘记检测，否则分配内存失败会抛出异常
-     return false; /* OutOfMemoryError already thrown */ 
-  } 
+  if (str == NULL) return false; /* OutOfMemoryError already thrown */
   jboolean r = RimeSimulateKeySequence((RimeSessionId)session_id, str);
   env->ReleaseStringUTFChars(key_sequence, str);
   return r;
