@@ -22,19 +22,27 @@ void on_message(void* context_object,
   ALOGE("message: [%lu] [%s] %s\n", session_id, message_type, message_value);
 }
 
-static void start(JNIEnv *env, jobject thiz, jboolean full_check) {
+static void start(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir) {
   RIME_STRUCT(RimeTraits, traits);
-  traits.shared_data_dir = "/sdcard/rime";
-  traits.user_data_dir = "/sdcard/rime";
-  traits.app_name = "rime.java";
+  
+  const char* str1 = shared_data_dir == NULL ? NULL : env->GetStringUTFChars(shared_data_dir, NULL); 
+  const char* str2 = user_data_dir == NULL ? NULL : env->GetStringUTFChars(user_data_dir, NULL); 
+  if (str1 != NULL) traits.shared_data_dir = str1;
+  if (str2 != NULL) traits.user_data_dir = str2;
+  traits.app_name = "rime.jni";
   ALOGE("setup...\n");
   RimeInitialize(&traits);
-  RimeStartMaintenance((Bool)full_check);
-  if (RimeIsMaintenancing()) RimeJoinMaintenanceThread();
-  RimeSetNotificationHandler(&on_message, NULL);
+  env->ReleaseStringUTFChars(shared_data_dir, str1);
+  env->ReleaseStringUTFChars(user_data_dir, str2);
 }
 
 static void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
+  RimeSetNotificationHandler(&on_message, NULL);
+}
+
+static void check(JNIEnv *env, jobject thiz, jboolean full_check) { //TODO
+  RimeStartMaintenance((Bool)full_check);
+  if (RimeIsMaintenancing()) RimeJoinMaintenanceThread();
   RimeSetNotificationHandler(&on_message, NULL);
 }
 
@@ -195,13 +203,18 @@ static const JNINativeMethod sMethods[] = {
     // init
     {
         const_cast<char *>("start"),
-        const_cast<char *>("(Z)V"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)V"),
         reinterpret_cast<void *>(start)
     },
     {
         const_cast<char *>("set_notification_handler"),
         const_cast<char *>("()V"),
         reinterpret_cast<void *>(set_notification_handler)
+    },
+    {
+        const_cast<char *>("check"),
+        const_cast<char *>("(Z)V"),
+        reinterpret_cast<void *>(check)
     },
     // entry and exit
     {
