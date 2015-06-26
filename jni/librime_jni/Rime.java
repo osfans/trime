@@ -4,7 +4,7 @@ public class Rime
 {
   private int session_id;
   private static Rime mRime;
-  private static Logger Log = Logger.getLogger(Rime.class.getName());
+  private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
   //RimeComposition;
   int composition_length;
@@ -58,6 +58,11 @@ public class Rime
     return is_composing;
   }
 
+  public String getCompositionText() {
+    if (composition_length > 0) return composition_preedit;
+    else return "";
+  }
+
   public static Rime getRime(){
       if(mRime == null) mRime = new Rime();
       return mRime;
@@ -73,20 +78,23 @@ public class Rime
   }
 
   public Rime() {
-    boolean full_check = true;
     start(null, null);
-    check(full_check);
-    session_id = create_session();
-    if (session_id == 0) Log.info( "Error creating rime session");
+    check(true);
+    createSession();
+    if (session_id == 0) Log.severe( "Error creating rime session");
     get_status(session_id);
-    Log.info("status name = " + schema_name);
+    Log.info("schema_name = " + schema_name + ",schema_id=" + schema_id);
   }
 
   public void destroy() {
     destroySession();
     finalize1();
   }
-  
+
+  public void createSession() {
+    if (session_id == 0 || !find_session(session_id)) session_id = create_session();
+  }
+
   public void destroySession() {
     if (session_id != 0) {
       destroy_session(session_id);
@@ -163,18 +171,21 @@ public class Rime
 
   public boolean commitComposition() {
     boolean b = commit_composition(session_id);
+    Log.info("commitComposition");
     getContexts();
     return b;
   }
 
   public void clearComposition() {
     clear_composition(session_id);
+    Log.info("clearComposition");
     getContexts();
   }
 
   public boolean selectCandidate(int index) {
     index += menu_page_no * menu_page_size; //從頭開始
     boolean b = select_candidate(session_id, index);
+    Log.info("selectCandidate");
     getContexts();
     return b;
   }
