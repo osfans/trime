@@ -22,6 +22,16 @@ void on_message(void* context_object,
   ALOGE("message: [%lu] [%s] %s\n", session_id, message_type, message_value);
 }
 
+jstring newJstring(JNIEnv* env, const char* pat)
+{
+  jclass strClass = env->FindClass("Ljava/lang/String;");
+  jmethodID ctorID = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
+  jbyteArray bytes = env->NewByteArray(strlen(pat));
+  env->SetByteArrayRegion(bytes, 0, strlen(pat), (jbyte*)pat);
+  jstring encoding = env->NewStringUTF("utf-8");
+  return (jstring)env->NewObject(strClass, ctorID, bytes, encoding);
+}
+
 static void start(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir) {
   RIME_STRUCT(RimeTraits, traits);
   
@@ -40,7 +50,7 @@ static void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
   RimeSetNotificationHandler(&on_message, NULL);
 }
 
-static void check(JNIEnv *env, jobject thiz, jboolean full_check) { //TODO
+static void check(JNIEnv *env, jobject thiz, jboolean full_check) {
   RimeStartMaintenance((Bool)full_check);
   if (RimeIsMaintenancing()) RimeJoinMaintenanceThread();
   RimeSetNotificationHandler(&on_message, NULL);
@@ -97,7 +107,7 @@ static jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id) {
   jfieldID fid = env->GetFieldID(jc, "commit_text", "Ljava/lang/String;");
   jstring s = NULL;
   if (r) {
-    s = env->NewStringUTF(commit.text);
+    s = newJstring(env, commit.text);
     RimeFreeCommit(&commit);
   }
   env->SetObjectField(thiz, fid, s);
@@ -110,9 +120,9 @@ static jboolean get_status(JNIEnv *env, jobject thiz, jint session_id) {
   if (r) {
     jclass jc = env->GetObjectClass(thiz);
     jfieldID fid = env->GetFieldID(jc, "schema_id", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, env->NewStringUTF(status.schema_id));
+    env->SetObjectField(thiz, fid, newJstring(env, status.schema_id));
     fid = env->GetFieldID(jc, "schema_name", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, env->NewStringUTF(status.schema_name));
+    env->SetObjectField(thiz, fid, newJstring(env, status.schema_name));
     fid = env->GetFieldID(jc, "is_disabled", "Z");
     env->SetBooleanField(thiz, fid, status.is_disabled);
     fid = env->GetFieldID(jc, "is_composing", "Z");
@@ -139,7 +149,7 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
     jclass jc = env->GetObjectClass(thiz);
     jfieldID fid;
     fid = env->GetFieldID(jc, "commit_text_preview", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, env->NewStringUTF(context.commit_text_preview));
+    env->SetObjectField(thiz, fid, newJstring(env, context.commit_text_preview));
 
     fid = env->GetFieldID(jc, "menu_num_candidates", "I");
     env->SetIntField(thiz, fid, context.menu.num_candidates);
@@ -152,7 +162,7 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
     fid = env->GetFieldID(jc, "menu_is_last_page", "Z");
     env->SetBooleanField(thiz, fid, context.menu.is_last_page);
     fid = env->GetFieldID(jc, "menu_select_keys", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, env->NewStringUTF(context.menu.select_keys));
+    env->SetObjectField(thiz, fid, newJstring(env, context.menu.select_keys));
 
     fid = env->GetFieldID(jc, "composition_length", "I");
     env->SetIntField(thiz, fid, context.composition.length);
@@ -163,7 +173,7 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
     fid = env->GetFieldID(jc, "composition_sel_end", "I");
     env->SetIntField(thiz, fid, context.composition.sel_end);
     fid = env->GetFieldID(jc, "composition_preedit", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, env->NewStringUTF(context.composition.preedit));
+    env->SetObjectField(thiz, fid, newJstring(env, context.composition.preedit));
 
     int n = context.menu.num_candidates;
     fid = env->GetFieldID(jc, "candidates_text", "[Ljava/lang/String;");
@@ -171,8 +181,8 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
     fid = env->GetFieldID(jc, "candidates_comment", "[Ljava/lang/String;");
     jobjectArray comments = (jobjectArray) env->GetObjectField(thiz, fid);
     for (int i = 0; i < n;  ++i) {
-      env->SetObjectArrayElement(texts,i,env->NewStringUTF(context.menu.candidates[i].text));  
-      env->SetObjectArrayElement(comments,i,env->NewStringUTF(context.menu.candidates[i].comment));  
+      env->SetObjectArrayElement(texts, i, newJstring(env, context.menu.candidates[i].text));
+      env->SetObjectArrayElement(comments, i, newJstring(env, context.menu.candidates[i].comment));
     }
     RimeFreeContext(&context);
   }
@@ -196,7 +206,7 @@ static jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jin
 static jstring get_version(JNIEnv *env, jobject thiz) {
   RimeApi* rime = rime_get_api();
   const char* c = rime->get_version();
-  return env->NewStringUTF(c);
+  return newJstring(env, c);
 }
 
 static const JNINativeMethod sMethods[] = {
