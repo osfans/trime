@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <string.h>
 #include <rime_api.h>
-#define LOG_TAG "RIME-JNI"
+#define LOG_TAG "Rime-JNI"
 
 #ifdef ANDROID
 #include <android/log.h>
@@ -24,10 +24,13 @@ void on_message(void* context_object,
 
 jstring newJstring(JNIEnv* env, const char* pat)
 {
-  jclass strClass = env->FindClass("Ljava/lang/String;");
+  jclass strClass = env->FindClass("java/lang/String");
   jmethodID ctorID = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
-  jbyteArray bytes = env->NewByteArray(strlen(pat));
-  env->SetByteArrayRegion(bytes, 0, strlen(pat), (jbyte*)pat);
+  if (!pat) return NULL;
+  int n = strlen(pat);
+  if (n == 0) return NULL;
+  jbyteArray bytes = env->NewByteArray(n);
+  env->SetByteArrayRegion(bytes, 0, n, (jbyte*)pat);
   jstring encoding = env->NewStringUTF("utf-8");
   return (jstring)env->NewObject(strClass, ctorID, bytes, encoding);
 }
