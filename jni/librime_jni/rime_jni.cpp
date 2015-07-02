@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <string.h>
 #include <rime_api.h>
+#include <rime/key_table.h>
 #define LOG_TAG "Rime-JNI"
 
 #ifdef ANDROID
@@ -212,6 +213,20 @@ static jstring get_version(JNIEnv *env, jobject thiz) {
   return newJstring(env, c);
 }
 
+static jint get_modifier_by_name(JNIEnv *env, jobject thiz, jstring name) {
+  const char* s = name == NULL ? NULL : env->GetStringUTFChars(name, NULL);
+  int keycode = RimeGetModifierByName(s);
+  env->ReleaseStringUTFChars(name, s);
+  return keycode;
+}
+
+static jint get_keycode_by_name(JNIEnv *env, jobject thiz, jstring name) {
+  const char* s = name == NULL ? NULL : env->GetStringUTFChars(name, NULL);
+  int keycode = RimeGetKeycodeByName(s);
+  env->ReleaseStringUTFChars(name, s);
+  return keycode;
+}
+
 static const JNINativeMethod sMethods[] = {
     // init
     {
@@ -308,6 +323,17 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("get_version"),
         const_cast<char *>("()Ljava/lang/String;"),
         reinterpret_cast<void *>(get_version)
+    },
+    // key_table
+    {
+        const_cast<char *>("get_keycode_by_name"),
+        const_cast<char *>("(Ljava/lang/String;)I"),
+        reinterpret_cast<void *>(get_modifier_by_name)
+    },
+    {
+        const_cast<char *>("get_keycode_by_name"),
+        const_cast<char *>("(Ljava/lang/String;)I"),
+        reinterpret_cast<void *>(get_keycode_by_name)
     },
 };
 
