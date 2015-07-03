@@ -142,6 +142,11 @@ public class Rime
     return b;
   }
 
+  public boolean onKey(String name, int mask) {
+    int keycode = get_keycode_by_name(name);
+    return onKey(keycode, mask);
+  }
+
   public boolean onKey(int keycode) {
     return onKey(keycode, 0);
   }

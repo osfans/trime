@@ -249,6 +249,11 @@ public class Trime extends InputMethodService implements
       Log.info("keyboardSwitch onKey");
       bindKeyboardToInputView();
       escape();
+    } else if (primaryCode == KeyEvent.KEYCODE_SWITCH_CHARSET) {
+      mRime.onKey("2", 1|4);
+      Log.info("Rime onToggle");
+      if (mRime.getCommit()) commitText(mRime.getCommitText());
+      updateComposing();
     } else if(mRime.onKey(Keyboard.getRimeKeycode(primaryCode))) {
       Log.info("Rime onKey");
       if (mRime.getCommit()) commitText(mRime.getCommitText());

@@ -182,7 +182,7 @@ public class Keyboard {
         "Page_Up",
         "Page_Down",
         "Pictsymbols",
-        "Switch_Charset",
+        "Mode_switch",
         "Button_A",
         "Button_B",
         "Button_C",
@@ -1169,6 +1169,8 @@ public class Keyboard {
       if (c == KeyEvent.KEYCODE_SPACE){
         if (key.label==null) key.label = "␣";
         key.repeatable = true;
+      } else if (c == KeyEvent.KEYCODE_SWITCH_CHARSET){
+        if (key.label==null) key.label = "⇪";
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT){
         if (key.label==null) key.label = "⇪";
         key.modifier = true;
