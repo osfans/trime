@@ -44,7 +44,7 @@ keyboard:
   - {text: n}
   - {text: m}
   - {code: BackSpace, width: 20}
-  - {label: '123', switch: 1, width: 15, code: <switch>, symbol: '...', symbolCode: F4}
+  - {label: '123', switch: 1, width: 15, code: <switch>, symbol: '...', symbolCode: Menu}
   - {symbol: '"', text: "'"}
   - {symbol: '<', text: ','}
   - {code: space, width: 30}

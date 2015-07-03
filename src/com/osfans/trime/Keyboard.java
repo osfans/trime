@@ -81,10 +81,6 @@ public class Keyboard {
     public static final int KEYCODE_DELETE = -5;
     public static final int KEYCODE_ALT = -6;
 
-    public static final int KEYCODE_OPTIONS = -10;
-    public static final int KEYCODE_SCHEMA_OPTIONS = -11;
-    public static final int KEYCODE_REVERSE = -12;
-
     public static final int KEYCODE_MODE_LAST = -20;
     public static final int KEYCODE_MODE_PREV = -21;
     public static final int KEYCODE_MODE_NEXT = -22;
@@ -1190,7 +1186,7 @@ public class Keyboard {
       } else if(s.contentEquals("<switch>")){
         key.codes = new int[] {KEYCODE_MODE_SWITCH - (Integer)getValue(mk, "switch", 0)};
         if (key.label==null) key.label = "⌨";
-        if (key.symbolCode == 0) key.symbolCode = KEYCODE_OPTIONS;
+        if (key.symbolCode == 0) key.symbolCode = KeyEvent.KEYCODE_MENU;
       } else if(s.contentEquals("<switch_last>")){
         key.codes = new int[] {KEYCODE_MODE_LAST};
         if (key.label==null) key.label = "⟲";

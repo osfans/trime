@@ -321,7 +321,7 @@ public class Trime extends InputMethodService implements
   }
 
   private boolean handleOption(int keyCode) {
-    if (keyCode == Keyboard.KEYCODE_OPTIONS) {
+    if (keyCode == KeyEvent.KEYCODE_MENU) {
         // Create a Dialog menu
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
         .setTitle(R.string.ime_name)
