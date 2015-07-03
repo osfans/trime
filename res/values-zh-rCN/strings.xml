@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Titles for IME  -->
+    <string name="ime_name">同文输入法平台</string>
+
+    <!-- Preference settings -->
+    <string name="pref_licensing">授权信息</string>
+    <string name="pref_vibrate_title">按键震动</string>
+    <string name="pref_ui">界面设置</string>
+    <string name="pref_sound_title">按键音效</string>
+    <string name="pref_keyboard_preview_title">按键提示</string>
+    <string name="pref_keyboard_preview_summary">打字速度较快时建议关闭</string>
+    <string name="pref_cand_font_size">候选字号</string>
+    <string name="pref_key_font_size">键盘字号</string>
+
+    <string name="pref_function">功能设置</string>
+    <string name="pref_embed_first">嵌入首选</string>
+
+    <string name="pref_commit_py_title">输出编码</string>
+    <string name="pref_commit_py_summary">出字时标出编码，如：拼音(pin yin)</string>
+
+    <string name="set_ime">全局设置</string>
+    <string name="set_schema">设置本方案</string>
+    <string name="other_ime">其他输入法</string>
+    <string name="pronunciation">【%s】的编码</string>
+    <string name="close">关闭</string>
+
+</resources>

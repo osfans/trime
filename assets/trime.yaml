@@ -1,0 +1,81 @@
+# Trime default keyboard settings
+# encoding: utf-8
+
+keyboard:
+- mode: 0
+  ascii_mode: 0
+  keys:
+  - {symbol: '!', text: '1'}
+  - {symbol: '@', text: '2'}
+  - {symbol: '#', text: '3'}
+  - {symbol: '$', text: '4'}
+  - {symbol: '%', text: '5'}
+  - {symbol: '^', text: '6'}
+  - {symbol: '&', text: '7'}
+  - {symbol: '*', text: '8'}
+  - {symbol: '(', text: '9'}
+  - {symbol: ')', text: '0'}
+  - {symbol: '_', text: q}
+  - {symbol: '-', text: w}
+  - {symbol: '+', text: e}
+  - {symbol: '=', text: r}
+  - {symbol: '|', text: t}
+  - {symbol: '\', text: y}
+  - {symbol: '[', text: u}
+  - {symbol: ']', text: i}
+  - {symbol: '{', text: o}
+  - {symbol: '}', text: p}
+  - {width: 5}
+  - {symbol: '`', text: a}
+  - {symbol: '~', text: s}
+  - {text: d}
+  - {text: f}
+  - {text: g}
+  - {text: h}
+  - {text: j}
+  - {symbol: ':', text: k}
+  - {symbol: ';', text: l}
+  - {code: "Shift_L"}
+  - {text: z}
+  - {text: x}
+  - {text: c}
+  - {text: v}
+  - {text: b}
+  - {text: n}
+  - {text: m}
+  - {code: BackSpace, width: 20}
+  - {label: '123', switch: 1, width: 15, code: <switch>, symbol: '...', symbolCode: F4}
+  - {symbol: '"', text: "'"}
+  - {symbol: '<', text: ','}
+  - {code: space, width: 30}
+  - {symbol: '>', text: '.'}
+  - {symbol: '?', text: '/'}
+  - {code: Return, width: 15}
+- mode: 1
+  width: 20
+  keys:
+  - {text: '+'}
+  - {text: '1'}
+  - {text: '2'}
+  - {text: '3'}
+  - {text: '#'}
+  - {text: '-'}
+  - {text: '4'}
+  - {text: '5'}
+  - {text: '6'}
+  - {text: '%'}
+  - {text: '*'}
+  - {text: '7'}
+  - {text: '8'}
+  - {text: '9'}
+  - {text: ':'}
+  - {text: '/'}
+  - {text: '±'}
+  - {text: '0'}
+  - {text: '.'}
+  - {text: ','}
+  - {text: '='}
+  - {code: <switch>, switch: 0}
+  - {code: space}
+  - {code: BackSpace}
+  - {code: Return}

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* 
+**
+** Copyright 2008, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**     http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+*/
+-->
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/keyboard_popup_panel_background"
+        >
+        
+    <com.osfans.trime.KeyboardView
+            xmlns:trime="http://schemas.android.com/apk/res/com.osfans.trime"
+
+            android:id="@android:id/keyboardView"
+            android:background="@android:color/transparent"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            trime:keyBackground="@drawable/key"
+            trime:verticalCorrection="-10dip"
+            trime:keyPreviewLayout="@layout/keyboard_key_preview"
+            trime:keyPreviewOffset="-12dip"
+            trime:keyPreviewHeight="80dip"
+            trime:keyTextColor="@android:color/white"
+            trime:keyTextSize="@dimen/key_text_size"
+            trime:labelTextSize="@dimen/label_text_size"
+            trime:popupLayout="@layout/keyboard_popup_keyboard"
+            trime:shadowColor="#BB000000"
+            trime:shadowRadius="0.5"
+            />
+    <ImageButton android:id="@android:id/closeButton"
+        android:background="@android:color/transparent"
+        android:src="@drawable/btn_close" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:clickable="true"
+        />
+</LinearLayout>
