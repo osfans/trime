@@ -218,7 +218,7 @@ public class Trime extends InputMethodService implements
 
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (onEvent(event)) return true;
+    if (canCompose && onEvent(event)) return true;
     return super.onKeyDown(keyCode, event);
   }
 
@@ -241,7 +241,7 @@ public class Trime extends InputMethodService implements
     }
     int i = event.getUnicodeChar();
     if (i >= 0) {
-      if(canCompose && event.hasNoModifiers()) onText(String.valueOf((char)i));
+      if (event.hasNoModifiers()) onText(String.valueOf((char)i));
     } else {
       onKey(keyCode, null);
     }
