@@ -225,7 +225,12 @@ public class Trime extends InputMethodService implements
   private boolean onEvent(KeyEvent event) { //實體鍵盤
     Log.info("onEvent="+event);
     int keyCode = event.getKeyCode();
-    if (keyCode==KeyEvent.KEYCODE_VOLUME_DOWN || keyCode==KeyEvent.KEYCODE_VOLUME_UP) return false;
+    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+        keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
+        keyCode == KeyEvent.KEYCODE_VOLUME_MUTE ||
+        keyCode == KeyEvent.KEYCODE_HOME ||
+        keyCode == KeyEvent.KEYCODE_MENU ||
+        keyCode == KeyEvent.KEYCODE_SEARCH) return false;
     if (keyCode == KeyEvent.KEYCODE_BACK) {
       escape(); //返回鍵清屏
       return false;
