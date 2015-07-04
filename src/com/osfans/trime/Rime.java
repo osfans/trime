@@ -60,6 +60,7 @@ public class Rime
   boolean is_ascii_punct;
 
   static{
+    System.loadLibrary("rime");
     System.loadLibrary("rime_jni");
   }
 
