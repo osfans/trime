@@ -302,7 +302,7 @@ public class Trime extends InputMethodService implements
   }
 
   public void swipeDown() {
-    requestHideSelf(0);
+    // requestHideSelf(0); //隱藏輸入窗
   }
 
   public void onPickCandidate(int i) {
