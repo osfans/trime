@@ -19,3 +19,6 @@
 [submodule "jni/marisa-trie"]
 	path = jni/marisa-trie
 	url = git@github.com:salarshad/marisa-trie.git
+[submodule "jni/miniglog"]
+	path = jni/miniglog
+	url = git@github.com:osfans/miniglog.git

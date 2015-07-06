@@ -36,9 +36,6 @@ LOCAL_SRC_FILES := src/BinaryDict.cpp \
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps/rapidjson-0.11 $(LOCAL_PATH)/deps/darts-clone
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 #LOCAL_LDLIBS := -latomic
-#LOCAL_STATIC_LIBRARIES := c++_static
-#LOCAL_CLANG :=true
-#LOCAL_CFLAGS := -std=c++11
 include $(BUILD_STATIC_LIBRARY)
 
 ifneq ($(OPENCC_TOOLS),)

@@ -20,5 +20,6 @@ include jni/snappy.mk #1.12
 include jni/leveldb.mk #1.18
 include jni/marisa.mk #0.2.4
 include jni/boost.mk #1.58
+include jni/miniglog.mk
 include jni/librime.mk #1.2.9
 include jni/librime_jni.mk
