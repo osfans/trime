@@ -23,7 +23,8 @@
 
     <!-- Preference settings -->
     <string name="pref_other">其他</string>
-    <string name="pref_licensing">授权信息</string>
+    <string name="pref_librimever">Librime版本</string>
+    <string name="pref_ver">平台版本</string>
     <string name="pref_vibrate_title">按键震动</string>
     <string name="pref_general">一般</string>
     <string name="pref_sound_title">按键音效</string>

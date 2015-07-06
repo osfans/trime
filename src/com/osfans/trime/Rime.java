@@ -248,7 +248,7 @@ public class Rime
   public native final boolean simulate_key_sequence(int session_id, String key_sequence);
 
   public native final boolean select_candidate(int session_id, int index);
-  public native final String get_version();
+  public static native final String get_version();
 
   // key_table
   public static native final int get_modifier_by_name(String name);

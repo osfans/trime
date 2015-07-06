@@ -38,10 +38,23 @@ public class PrefActivity extends PreferenceActivity {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
 
+  public String getVersion() {
+    try {
+       return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
+
+    Preference pref = findPreference("pref_librimever");
+    pref.setSummary(Rime.get_version());
+    pref = findPreference("pref_ver");
+    pref.setSummary(getVersion());
 
     ListPreference candFontSize = (ListPreference)findPreference("pref_cand_font_size");
     candFontSize.setSummary(candFontSize.getValue());
@@ -82,17 +95,16 @@ public class PrefActivity extends PreferenceActivity {
 
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-    Rime mRime = Rime.getRime();
     String key = preference.getKey();
     if (key.contentEquals("pref_maintenance")) { //維護
-      mRime.check(true);
+      Rime.getRime().check(true);
       return true;
     } else if (key.contentEquals("pref_deploy")) { //部署
       //mRime.finalize1(); //TODO: 會卡住
-      mRime.init(true);
+      Rime.getRime().init(true);
       return true;
     } else if (key.contentEquals("pref_sync")) { //TODO：同步會卡住
-      mRime.sync_user_data();
+      Rime.getRime().sync_user_data();
       return true;
     } else if (key.contentEquals("pref_licensing")) { //資訊
       showLicenseDialog();

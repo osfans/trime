@@ -70,10 +70,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:key="pref_other" android:title="@string/pref_other">
-        <Preference
-            android:key="pref_licensing"
-            android:title="@string/pref_licensing"
-            android:persistent="false"/>
+        <Preference android:key="pref_librimever" android:title="@string/pref_librimever" />
+        <Preference android:key="pref_ver" android:title="@string/pref_ver" />
     </PreferenceCategory>
 
 </PreferenceScreen>
