@@ -61,10 +61,15 @@ static void check(JNIEnv *env, jobject thiz, jboolean full_check) {
 }
 
 // entry and exit
-
 static void finalize(JNIEnv *env, jobject thiz) {
   ALOGE("finalize...");
   RimeFinalize();
+}
+
+// deployment
+static jboolean sync_user_data(JNIEnv *env, jobject thiz) {
+  ALOGE("sync user data...");
+  return RimeSyncUserData();
 }
 
 // session management
@@ -249,6 +254,12 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("finalize1"),
         const_cast<char *>("()V"),
         reinterpret_cast<void *>(finalize)
+    },
+    // deployment
+    {
+        const_cast<char *>("sync_user_data"),
+        const_cast<char *>("()Z"),
+        reinterpret_cast<void *>(sync_user_data)
     },
     // session management
     {

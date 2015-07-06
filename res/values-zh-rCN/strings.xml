@@ -22,18 +22,21 @@
     <string name="ime_name">同文输入法平台</string>
 
     <!-- Preference settings -->
+    <string name="pref_other">其他</string>
     <string name="pref_licensing">授权信息</string>
     <string name="pref_vibrate_title">按键震动</string>
-    <string name="pref_ui">界面设置</string>
+    <string name="pref_general">一般</string>
     <string name="pref_sound_title">按键音效</string>
     <string name="pref_keyboard_preview_title">按键提示</string>
     <string name="pref_keyboard_preview_summary">打字速度较快时建议关闭</string>
     <string name="pref_cand_font_size">候选字号</string>
     <string name="pref_key_font_size">键盘字号</string>
 
-    <string name="pref_function">功能设置</string>
+    <string name="pref_function">功能</string>
+    <string name="pref_maintenance">维护</string>
+    <string name="pref_deploy">部署</string>
+    <string name="pref_sync">同步</string>
     <string name="pref_embed_first">嵌入首选</string>
-
     <string name="pref_commit_py_title">输出编码</string>
     <string name="pref_commit_py_summary">出字时标出编码，如：拼音(pin yin)</string>
 

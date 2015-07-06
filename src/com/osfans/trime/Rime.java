@@ -96,8 +96,12 @@ public class Rime
   }
 
   public Rime() {
+    init(true);
+  }
+
+  public void init(boolean full_check) {
     start("/sdcard/rime", "/sdcard/rime");
-    check(true);
+    check(full_check);
     createSession();
     if (session_id == 0) Log.severe( "Error creating rime session");
     get_status(session_id);
@@ -219,6 +223,9 @@ public class Rime
   public native final void start(String shared_data_dir, String user_data_dir);
   public native final void check(boolean full_check);
   public native final void finalize1();
+
+  // deployment
+  public native final boolean sync_user_data();
 
   // session management
   public native final int create_session();

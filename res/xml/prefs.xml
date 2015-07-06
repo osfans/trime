@@ -20,9 +20,24 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/ime_name">
 
-    <PreferenceCategory
-        android:key="pref_ui"
-        android:title="@string/pref_ui">
+    <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
+        <Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" />
+        <Preference android:key="pref_deploy" android:title="@string/pref_deploy" />
+        <Preference android:key="pref_sync" android:title="@string/pref_sync" android:enabled="false"/>
+        <CheckBoxPreference
+            android:key="pref_commit_py"
+            android:title="@string/pref_commit_py_title"
+            android:summary="@string/pref_commit_py_summary"
+            android:persistent="true"/>
+
+        <CheckBoxPreference
+            android:key="pref_embed_first"
+            android:title="@string/pref_embed_first"
+            android:defaultValue="false"
+            android:persistent="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="pref_general" android:title="@string/pref_general">
         <CheckBoxPreference
             android:key="pref_vibrate"
             android:title="@string/pref_vibrate_title"
@@ -54,28 +69,11 @@
             android:entryValues="@array/pref_cand_font_size_values" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="pref_function"
-        android:title="@string/pref_function">
-
-        <CheckBoxPreference
-            android:key="pref_commit_py"
-            android:title="@string/pref_commit_py_title"
-            android:summary="@string/pref_commit_py_summary"
-            android:persistent="true"/>
-
-        <CheckBoxPreference
-            android:key="pref_embed_first"
-            android:title="@string/pref_embed_first"
-            android:defaultValue="false"
-            android:persistent="true"/>
-
+    <PreferenceCategory android:key="pref_other" android:title="@string/pref_other">
+        <Preference
+            android:key="pref_licensing"
+            android:title="@string/pref_licensing"
+            android:persistent="false"/>
     </PreferenceCategory>
-
-
-    <Preference
-        android:key="pref_licensing"
-        android:title="@string/pref_licensing"
-        android:persistent="false"/>
 
 </PreferenceScreen>

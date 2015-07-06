@@ -25,10 +25,11 @@ import android.preference.ListPreference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceScreen;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-//import android.util.Log;
+import android.util.Log;
 
 /**
  * Manages IME preferences. 
@@ -41,14 +42,6 @@ public class PrefActivity extends PreferenceActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
-
-    Preference license = findPreference("pref_licensing");
-    license.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-      public boolean onPreferenceClick(Preference preference) {
-        showLicenseDialog();
-        return true;
-      }
-    });
 
     ListPreference candFontSize = (ListPreference)findPreference("pref_cand_font_size");
     candFontSize.setSummary(candFontSize.getValue());
@@ -85,5 +78,26 @@ public class PrefActivity extends PreferenceActivity {
       .setTitle(R.string.ime_name)
       .setView(licenseView)
       .show();
+  }
+
+  @Override
+  public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+    Rime mRime = Rime.getRime();
+    String key = preference.getKey();
+    if (key.contentEquals("pref_maintenance")) { //維護
+      mRime.check(true);
+      return true;
+    } else if (key.contentEquals("pref_deploy")) { //部署
+      //mRime.finalize1(); //TODO: 會卡住
+      mRime.init(true);
+      return true;
+    } else if (key.contentEquals("pref_sync")) { //TODO：同步會卡住
+      mRime.sync_user_data();
+      return true;
+    } else if (key.contentEquals("pref_licensing")) { //資訊
+      showLicenseDialog();
+      return true;
+    }
+    return false;
   }
 }
