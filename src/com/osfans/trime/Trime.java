@@ -203,9 +203,8 @@ public class Trime extends InputMethodService implements
       } else {
         ic.commitText(text, 1);
       }
-      escape();
     }
-    mRime.commitComposition();
+    if (!mRime.hasComposingText()) mRime.commitComposition(); //自動上屏
   }
 
   private CharSequence getLastText() {

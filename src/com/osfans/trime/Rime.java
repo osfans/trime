@@ -130,7 +130,7 @@ public class Rime
 
   public boolean getCommit() {
     boolean b = get_commit(session_id);
-    Log.info( "output="+commit_text);
+    Log.info( "b="+b+",commit="+commit_text);
     return b;
   }
 
