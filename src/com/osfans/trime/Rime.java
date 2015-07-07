@@ -217,6 +217,14 @@ public class Rime
     return b;
   }
 
+  public void setOption(String option, boolean value) {
+    set_option(session_id, option, value);
+  }
+
+  public boolean getOption(String option) {
+    return get_option(session_id, option);
+  }
+
   // init
   public native final int get_api();
   public native final void set_notification_handler();
@@ -243,6 +251,10 @@ public class Rime
   public native final boolean get_commit(int session_id);
   public native final boolean get_context(int session_id);
   public native final boolean get_status(int session_id);
+
+  // runtime options
+  public native final void set_option(int session_id, String option, boolean value);
+  public native final boolean get_option(int session_id, String option);
 
   // testing
   public native final boolean simulate_key_sequence(int session_id, String key_sequence);

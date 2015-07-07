@@ -151,6 +151,20 @@ static jboolean get_status(JNIEnv *env, jobject thiz, jint session_id) {
   return r;
 }
 
+// runtime options
+static void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboolean value) {
+  const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
+  RimeSetOption(session_id, s, value);
+  env->ReleaseStringUTFChars(option, s);
+}
+
+static jboolean get_option(JNIEnv *env, jobject thiz, jint session_id, jstring option) {
+  const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
+  bool value = RimeGetOption(session_id, s);
+  env->ReleaseStringUTFChars(option, s);
+  return value;
+}
+
 static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
   RIME_STRUCT(RimeContext, context);
   Bool r = RimeGetContext(session_id, &context);
@@ -318,6 +332,17 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("get_status"),
         const_cast<char *>("(I)Z"),
         reinterpret_cast<void *>(get_status)
+    },
+    // runtime options
+    {
+        const_cast<char *>("set_option"),
+        const_cast<char *>("(ILjava/lang/String;Z)V"),
+        reinterpret_cast<void *>(set_option)
+    },
+    {
+        const_cast<char *>("get_option"),
+        const_cast<char *>("(ILjava/lang/String;)Z"),
+        reinterpret_cast<void *>(get_option)
     },
     // test
     {
