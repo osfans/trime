@@ -18,10 +18,10 @@
 -->
 
 <resources>
-    <dimen name="key_height">53dip</dimen>
+    <dimen name="key_height">48dip</dimen>
     <dimen name="candidate_view_height">42sp</dimen>
 
-    <dimen name="candidate_text_size">28sp</dimen>
+    <dimen name="candidate_text_size">24sp</dimen>
     <dimen name="pinyin_text_size">12sp</dimen>
     <dimen name="key_text_size">20sp</dimen>
     <dimen name="label_text_size">16sp</dimen>
