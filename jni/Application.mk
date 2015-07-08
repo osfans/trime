@@ -1,4 +1,4 @@
-#APP_ABI := armeabi armeabi-v7a x86 mips arm64-v8a x86_64 mips64
+#APP_ABI := armeabi armeabi-v7a arm64-v8a #x86 mips x86_64 mips64
 APP_PLATFORM := android-4
 #APP_PIE := true
 #NDK_TOOLCHAIN_VERSION := 4.9
