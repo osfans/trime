@@ -225,6 +225,15 @@ public class Rime
     return get_option(session_id, option);
   }
 
+  public String getCurrentSchema() {
+    schema_id = get_current_schema(session_id);
+    return schema_id;
+  }
+
+  public boolean selectSchema(String schema_id) {
+    return select_schema(session_id, schema_id);
+  }
+
   // init
   public native final int get_api();
   public native final void set_notification_handler();
@@ -255,6 +264,10 @@ public class Rime
   // runtime options
   public native final void set_option(int session_id, String option, boolean value);
   public native final boolean get_option(int session_id, String option);
+  public native final String[] get_schema_names();
+  public native final String[] get_schema_ids();
+  public native final String get_current_schema(int session_id);
+  public native final boolean select_schema(int session_id, String schema_id);
 
   // testing
   public native final boolean simulate_key_sequence(int session_id, String key_sequence);

@@ -151,20 +151,6 @@ static jboolean get_status(JNIEnv *env, jobject thiz, jint session_id) {
   return r;
 }
 
-// runtime options
-static void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboolean value) {
-  const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
-  RimeSetOption(session_id, s, value);
-  env->ReleaseStringUTFChars(option, s);
-}
-
-static jboolean get_option(JNIEnv *env, jobject thiz, jint session_id, jstring option) {
-  const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
-  bool value = RimeGetOption(session_id, s);
-  env->ReleaseStringUTFChars(option, s);
-  return value;
-}
-
 static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
   RIME_STRUCT(RimeContext, context);
   Bool r = RimeGetContext(session_id, &context);
@@ -210,6 +196,64 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
     RimeFreeContext(&context);
   }
   return r;
+}
+
+// runtime options
+static void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboolean value) {
+  const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
+  RimeSetOption(session_id, s, value);
+  env->ReleaseStringUTFChars(option, s);
+}
+
+static jboolean get_option(JNIEnv *env, jobject thiz, jint session_id, jstring option) {
+  const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
+  bool value = RimeGetOption(session_id, s);
+  env->ReleaseStringUTFChars(option, s);
+  return value;
+}
+
+static jobjectArray get_schema_names(JNIEnv *env, jobject thiz) {
+  RimeSchemaList list;
+  bool value =RimeGetSchemaList(&list);
+  jobjectArray ret = NULL;
+  if (value) {
+    int n = list.size;
+    ret = (jobjectArray) env->NewObjectArray(n, env->FindClass("java/lang/String"), NULL);
+    for (size_t i = 0; i < list.size; ++i) {
+      env->SetObjectArrayElement(ret, i, newJstring(env, list.list[i].name));
+    }
+    RimeFreeSchemaList(&list);
+  }
+  return ret;
+}
+
+static jobjectArray get_schema_ids(JNIEnv *env, jobject thiz) {
+  RimeSchemaList list;
+  bool value =RimeGetSchemaList(&list);
+  jobjectArray ret = NULL;
+  if (value) {
+    int n = list.size;
+    ret = (jobjectArray) env->NewObjectArray(n, env->FindClass("java/lang/String"), NULL);
+    for (size_t i = 0; i < list.size; ++i) {
+      env->SetObjectArrayElement(ret, i, newJstring(env, list.list[i].schema_id));
+    }
+    RimeFreeSchemaList(&list);
+  }
+  return ret;
+}
+
+static jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
+  char current[100] = {0};
+  bool value = RimeGetCurrentSchema(session_id, current, sizeof(current));
+  if (value) return newJstring(env, current);
+  return NULL;
+}
+
+static jboolean select_schema(JNIEnv *env, jobject thiz, jint session_id, jstring schema_id) {
+  const char* s = schema_id == NULL ? NULL : env->GetStringUTFChars(schema_id, NULL);
+  bool value = RimeSelectSchema(session_id, s);
+  env->ReleaseStringUTFChars(schema_id, s);
+  return value;
 }
 
 //testing
@@ -343,6 +387,26 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("get_option"),
         const_cast<char *>("(ILjava/lang/String;)Z"),
         reinterpret_cast<void *>(get_option)
+    },
+    {
+        const_cast<char *>("get_schema_names"),
+        const_cast<char *>("()[Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_schema_names)
+    },
+    {
+        const_cast<char *>("get_schema_ids"),
+        const_cast<char *>("()[Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_schema_ids)
+    },
+    {
+        const_cast<char *>("get_current_schema"),
+        const_cast<char *>("(I)Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_current_schema)
+    },
+    {
+        const_cast<char *>("select_schema"),
+        const_cast<char *>("(ILjava/lang/String;)Z"),
+        reinterpret_cast<void *>(select_schema)
     },
     // test
     {
