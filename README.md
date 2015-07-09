@@ -1,6 +1,3 @@
-# android-rime
-同文安卓輸入法平臺3.x【中州韻】Rime Input Method Engine for Android
-
 # 同文安卓輸入法平臺/Trime/android-rime
 =====
 源於開源的[注音倉頡輸入法]，
