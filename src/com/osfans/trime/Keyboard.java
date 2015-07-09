@@ -1182,7 +1182,7 @@ public class Keyboard {
         if (key.label==null) key.label = "⌫";
         key.repeatable = true;
       } else if (c == KeyEvent.KEYCODE_CLEAR){
-        if (key.label==null) key.label = "⎚";
+        if (key.label==null) key.label = "⌧";
       } else if (c == KeyEvent.KEYCODE_ENTER){
         if (key.label==null) key.label = "⏎";
       } else if(s.contentEquals("<switch>")){
