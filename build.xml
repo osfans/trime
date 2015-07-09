@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="trime" default="help">
 
+    <exec executable="git" outputproperty="tag">
+        <arg value="describe"/>
+        <arg value="--tags"/>
+    </exec>
+
+    <exec executable="date" outputproperty="date">
+        <arg value="+%Y%m%d"/>
+    </exec>
+
+    <property name="version.name" value="${tag}-${date}" />
+    <property name="version.code" value="${date}" />
+
     <!-- The local.properties file is created and updated by the 'android' tool.
          It contains the path to the SDK. It should *NOT* be checked into
          Version Control Systems. -->
@@ -88,5 +100,5 @@
     -->
     <!-- version-tag: 1 -->
     <import file="${sdk.dir}/tools/ant/build.xml" />
-
+    <property name="out.final.file" location="${out.absolute.dir}/${ant.project.name}-${date}.apk" />
 </project>
