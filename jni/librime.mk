@@ -97,7 +97,7 @@ LOCAL_SRC_FILES += \
 
 LOCAL_CFLAGS := $(CXX_DEFINES)
 LOCAL_STATIC_LIBRARIES := boost leveldb marisa opencc yaml-cpp miniglog
-LOCAL_LDLIBS := -latomic -llog
+LOCAL_LDLIBS := -latomic
 include $(BUILD_SHARED_LIBRARY)
 
 ifneq ($(RIME_TOOLS),)
