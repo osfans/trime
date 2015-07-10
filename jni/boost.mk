@@ -33,6 +33,15 @@ LOCAL_SRC_FILES += \
   \
   libs/system/src/error_code.cpp \
 
+ifeq ($(BOOST_SIGNALS2),)
+LOCAL_SRC_FILES += \
+  libs/signals/src/connection.cpp \
+  libs/signals/src/signal_base.cpp \
+  libs/signals/src/trackable.cpp \
+  libs/signals/src/named_slot_map.cpp \
+  libs/signals/src/slot.cpp
+endif
+
 #LOCAL_LDLIBS := -latomic
 # 如果要把boost集成到动态库里，-fPIC是必须的，不然会有链接错误。原因请自行Google
 #LOCAL_CFLAGS += -fPIC -frtti -fexceptions
