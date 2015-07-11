@@ -76,7 +76,7 @@ public class Trime extends InputMethodService implements
   public void onDestroy() {
     super.onDestroy();
     self = null;
-    //mRime.destroy();
+    mRime.destroy();
   }
 
   public static Trime getService() {
@@ -181,6 +181,7 @@ public class Trime extends InputMethodService implements
         }
         break;
     }
+    mRime = Rime.getRime();
     // Select a keyboard based on the input type of the editing field.
     keyboardSwitch.init(getMaxWidth());
     keyboardSwitch.onStartInput(inputType);
@@ -188,6 +189,11 @@ public class Trime extends InputMethodService implements
     escape();
     setCandidatesViewShown(false);
   }
+
+  private boolean hasComposingText() {
+    return mRime.hasComposingText();
+  }
+
   /**
    * Commits the given text to the editing field.
    */
@@ -204,7 +210,13 @@ public class Trime extends InputMethodService implements
         ic.commitText(text, 1);
       }
     }
-    if (!mRime.hasComposingText()) mRime.commitComposition(); //自動上屏
+    if (!hasComposingText()) mRime.commitComposition(); //自動上屏
+  }
+
+  private boolean commitText() { //Rime commit text
+    boolean r = mRime.getCommit();
+    if (r) commitText(mRime.getCommitText());
+    return r;
   }
 
   private CharSequence getLastText() {
@@ -234,7 +246,7 @@ public class Trime extends InputMethodService implements
       escape(); //返回鍵清屏
       return false;
     }
-    if (!mRime.hasComposingText()) {
+    if (!hasComposingText()) {
       if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_ENTER)
       return false;
     }
@@ -256,11 +268,11 @@ public class Trime extends InputMethodService implements
     } else if (primaryCode == KeyEvent.KEYCODE_SWITCH_CHARSET) {
       mRime.onKey("2", 1|4);
       Log.info("Rime onToggle");
-      if (mRime.getCommit()) commitText(mRime.getCommitText());
+      commitText();
       updateComposing();
     } else if(mRime.onKey(Keyboard.getRimeKeycode(primaryCode))) {
       Log.info("Rime onKey");
-      if (mRime.getCommit()) commitText(mRime.getCommitText());
+      commitText();
       updateComposing();
     } else if (handleOption(primaryCode) || handleCapsLock(primaryCode)
         || handleClear(primaryCode) || handleEnter(primaryCode)) {
@@ -274,8 +286,7 @@ public class Trime extends InputMethodService implements
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText="+text);
     mRime.onText(text);
-    if(mRime.getCommit()) commitText(mRime.getCommitText());
-    else if(!mRime.hasComposingText()) commitText(text);
+    if(!commitText() && !hasComposingText()) commitText(text);
     updateComposing();
   }
 
@@ -309,7 +320,7 @@ public class Trime extends InputMethodService implements
     if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, null);
     else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, null);
     else if (mRime.selectCandidate(i)) {
-      if (mRime.getCommit()) commitText(mRime.getCommitText());
+      commitText();
       updateComposing();
     }
   }
@@ -393,7 +404,7 @@ public class Trime extends InputMethodService implements
    * Simulates PC Esc-key function by clearing all composing-text or candidates.
    */
   private void escape() {
-    if (mRime.hasComposingText()) {
+    if (hasComposingText()) {
       mRime.clearComposition();
       updateComposing();
     }

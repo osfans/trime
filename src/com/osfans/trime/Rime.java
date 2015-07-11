@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class Rime
 {
   private int session_id;
-  private static Rime mRime;
+  private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
   //RimeComposition;
@@ -82,8 +82,8 @@ public class Rime
   }
 
   public static Rime getRime(){
-      if(mRime == null) mRime = new Rime();
-      return mRime;
+      if(self == null) self = new Rime();
+      return self;
   }
 
   public boolean hasComposingText() {
@@ -111,6 +111,7 @@ public class Rime
   public void destroy() {
     destroySession();
     finalize1();
+    self = null;
   }
 
   public void createSession() {

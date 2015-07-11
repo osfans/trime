@@ -107,6 +107,7 @@ public class CandView extends View {
    * Highlight the first candidate as the default candidate.
    */
   public void update() {
+    mRime = Rime.getRime();
     removeHighlight();
     updateCandidateWidth();
     if (mRime.getCandNum() > 0) {

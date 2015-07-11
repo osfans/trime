@@ -23,7 +23,7 @@
     <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
         <Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" />
         <Preference android:key="pref_deploy" android:title="@string/pref_deploy" />
-        <Preference android:key="pref_sync" android:title="@string/pref_sync" android:enabled="false"/>
+        <Preference android:key="pref_sync" android:title="@string/pref_sync" />
         <CheckBoxPreference
             android:key="pref_commit_py"
             android:title="@string/pref_commit_py_title"

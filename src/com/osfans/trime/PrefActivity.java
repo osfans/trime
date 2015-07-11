@@ -100,10 +100,10 @@ public class PrefActivity extends PreferenceActivity {
       Rime.getRime().check(true);
       return true;
     } else if (key.contentEquals("pref_deploy")) { //部署
-      //mRime.finalize1(); //TODO: 會卡住
+      Rime.getRime().finalize1();
       Rime.getRime().init(true);
       return true;
-    } else if (key.contentEquals("pref_sync")) { //TODO：同步會卡住
+    } else if (key.contentEquals("pref_sync")) { //同步
       Rime.getRime().sync_user_data();
       return true;
     } else if (key.contentEquals("pref_licensing")) { //資訊

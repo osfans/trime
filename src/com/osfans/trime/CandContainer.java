@@ -30,16 +30,11 @@ import android.util.Log;
  */
 public class CandContainer extends LinearLayout {
 
-  private static final int ARROW_ALPHA_ENABLED = 0xff;
-  private static final int ARROW_ALPHA_DISABLED = 0x40;
-
   private CandView candidateView;
   private TextView text;
-  private Rime mRime;
 
   public CandContainer(Context context, AttributeSet attrs) {
     super(context, attrs);
-    mRime = Rime.getRime();
   }
   
   @Override
@@ -64,6 +59,6 @@ public class CandContainer extends LinearLayout {
 
   public void updatePage() {
     candidateView.update();
-    text.setText(mRime.getCompositionText());
+    text.setText(Rime.getRime().getCompositionText());
   }
 }
