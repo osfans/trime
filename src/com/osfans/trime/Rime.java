@@ -16,6 +16,8 @@
 
 package com.osfans.trime;
 import java.util.logging.Logger;
+import java.util.List;
+import java.util.Arrays;
 
 public class Rime
 {
@@ -231,8 +233,20 @@ public class Rime
     return schema_id;
   }
 
+  public int getCurrentSchemaId() {
+    schema_id = get_current_schema(session_id);
+    List<String> schemas = Arrays.asList(get_schema_ids());
+    return schemas.indexOf(schema_id);
+  }
+
   public boolean selectSchema(String schema_id) {
     return select_schema(session_id, schema_id);
+  }
+
+  public boolean selectSchema(int id) {
+    List<String> schemas = Arrays.asList(get_schema_ids());
+    if (schemas.indexOf(schema_id) == id) return false;
+    return select_schema(session_id, schemas.get(id));
   }
 
   // init

@@ -347,6 +347,16 @@ public class Trime extends InputMethodService implements
         .setTitle(R.string.ime_name)
         //.setIcon(android.R.drawable.ic_menu_preferences)
         .setCancelable(true)
+        .setSingleChoiceItems(mRime.get_schema_names(), mRime.getCurrentSchemaId(),
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface di, int id) {
+            di.dismiss();
+            if (mRime.selectSchema(id)) {
+              keyboardSwitch.init();
+              bindKeyboardToInputView();
+            }
+          }
+        })
         .setNegativeButton(R.string.other_ime, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
                 di.dismiss();
