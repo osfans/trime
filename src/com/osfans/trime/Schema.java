@@ -21,11 +21,13 @@ import android.content.Context;
 import java.util.Map;
 import java.util.List;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 
 import org.yaml.snakeyaml.Yaml;
 
 public class Schema {
-  private Map<String,Object> mDefaultSchema;
+  private Map<String,Object> mSchema, mDefaultSchema;
   private Context mContext;
 
   public Schema(Context context) {
@@ -41,14 +43,28 @@ public class Schema {
     }
   }
 
+  public void load() {
+    File f = new File("/sdcard/rime", Rime.getRime().getCurrentSchema() + ".trime.yaml");
+    if (!f.exists()) f = new File("/sdcard/rime", "trime.yaml");
+    try {
+      mSchema = (Map<String,Object>)new Yaml().load(new FileInputStream(f));
+    } catch (IOException e) {
+      mSchema = null;
+    }
+  }
 
   private Object _getValue(String k1) {
+    if (mSchema != null && mSchema.containsKey(k1)) return mSchema.get(k1);
     if (mDefaultSchema.containsKey(k1)) return mDefaultSchema.get(k1);
     return null;
   }
 
   private Object _getValue(String k1, String k2) {
     Map<String, Object> m;
+    if (mSchema != null && mSchema.containsKey(k1)) {
+      m = (Map<String, Object>)mSchema.get(k1);
+      if (m != null && m.containsKey(k2)) return m.get(k2);
+    }
     if (mDefaultSchema.containsKey(k1)) {
       m = (Map<String, Object>)mDefaultSchema.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
@@ -64,6 +80,7 @@ public class Schema {
   }
 
   public List<Object> getKeyboards() {
+    load();
     return (List<Object>)getValue("keyboard");
   }
 
