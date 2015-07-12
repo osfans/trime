@@ -105,6 +105,8 @@ public class PrefActivity extends PreferenceActivity {
       return true;
     } else if (key.contentEquals("pref_sync")) { //同步
       Rime.getRime().sync_user_data();
+      Rime.getRime().finalize1();
+      Rime.getRime().init(false);
       return true;
     } else if (key.contentEquals("pref_licensing")) { //資訊
       showLicenseDialog();
