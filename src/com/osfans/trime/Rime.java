@@ -84,21 +84,20 @@ public class Rime
   }
 
   public static Rime getRime(){
-      if(self == null) self = new Rime();
-      return self;
-  }
-
-  public boolean hasComposingText() {
-    return (commit_text_preview != null);
+    if(self == null) self = new Rime();
+    return self;
   }
 
   public String getComposingText() {
-    if(hasComposingText()) return commit_text_preview;
-    return "";
+    return commit_text_preview != null ? commit_text_preview : "";
   }
 
   public Rime() {
     init(true);
+  }
+
+  public void getStatus() {
+    get_status(session_id);
   }
 
   public void init(boolean full_check) {
@@ -139,6 +138,7 @@ public class Rime
 
   public boolean getContexts() {
     boolean b = get_context(session_id);
+    getStatus();
     Log.info( "compose="+is_composing+",preview="+commit_text_preview);
     return b;
   }
@@ -226,6 +226,11 @@ public class Rime
 
   public boolean getOption(String option) {
     return get_option(session_id, option);
+  }
+
+ public void toggleOption(String option) {
+    boolean r = getOption(option);
+    setOption(option, !r);
   }
 
   public String getCurrentSchema() {

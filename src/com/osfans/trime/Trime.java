@@ -190,8 +190,8 @@ public class Trime extends InputMethodService implements
     setCandidatesViewShown(false);
   }
 
-  private boolean hasComposingText() {
-    return mRime.hasComposingText();
+  private boolean isComposing() {
+    return mRime.isComposing();
   }
 
   /**
@@ -210,7 +210,7 @@ public class Trime extends InputMethodService implements
         ic.commitText(text, 1);
       }
     }
-    if (!hasComposingText()) mRime.commitComposition(); //自動上屏
+    if (!isComposing()) mRime.commitComposition(); //自動上屏
   }
 
   private boolean commitText() { //Rime commit text
@@ -246,7 +246,7 @@ public class Trime extends InputMethodService implements
       escape(); //返回鍵清屏
       return false;
     }
-    if (!hasComposingText()) {
+    if (!isComposing()) {
       if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_ENTER)
       return false;
     }
@@ -286,7 +286,7 @@ public class Trime extends InputMethodService implements
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText="+text);
     mRime.onText(text);
-    if(!commitText() && !hasComposingText()) commitText(text);
+    if(!commitText() && !isComposing()) commitText(text);
     updateComposing();
   }
 
@@ -330,8 +330,7 @@ public class Trime extends InputMethodService implements
       InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
         // Set cursor position 1 to advance the cursor to the text end.
-        String s = mRime.getComposingText();
-        ic.setComposingText(s, 1);
+        ic.setComposingText(mRime.getComposingText(), 1);
       }
     }
     if (candidatesContainer != null) {
@@ -414,7 +413,7 @@ public class Trime extends InputMethodService implements
    * Simulates PC Esc-key function by clearing all composing-text or candidates.
    */
   private void escape() {
-    if (hasComposingText()) {
+    if (isComposing()) {
       mRime.clearComposition();
       updateComposing();
     }
