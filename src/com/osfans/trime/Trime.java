@@ -351,6 +351,7 @@ public class Trime extends InputMethodService implements
           public void onClick(DialogInterface di, int id) {
             di.dismiss();
             if (mRime.selectSchema(id)) {
+              escape();
               keyboardSwitch.init();
               bindKeyboardToInputView();
             }
