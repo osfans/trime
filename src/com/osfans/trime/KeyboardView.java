@@ -132,13 +132,13 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mCurrentKeyIndex = NOT_A_KEY;
     private int mLabelTextSize;
     private int mKeyTextSize;
-    private int mKeyTextColor;
+    private int key_text_color, hilited_key_text_color;
     private float mShadowRadius;
     private int mShadowColor;
     private float mBackgroundDimAmount;
     
     private Typeface tf;
-    private int mSymbolColor;
+    private int key_symbol_color, hilited_key_symbol_color;
     private int mSymbolSize;
     private Paint mPaintSymbol;
     
@@ -266,11 +266,14 @@ public class KeyboardView extends View implements View.OnClickListener {
         super(context, attrs, defStyle);
         Resources r = context.getResources();
         mSymbolSize = r.getDimensionPixelSize(R.dimen.symbol_text_size);
-        mSymbolColor = r.getColor(R.color.symbol);
+        key_text_color = r.getColor(R.color.key_text_color);
+        hilited_key_text_color = r.getColor(R.color.hilited_key_text_color);
+        key_symbol_color = r.getColor(R.color.key_symbol_color);
+        hilited_key_symbol_color = r.getColor(R.color.hilited_key_symbol_color);
         tf = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
         mPaintSymbol = new Paint();
         mPaintSymbol.setTypeface(tf);
-        mPaintSymbol.setColor(mSymbolColor);
+        mPaintSymbol.setColor(key_symbol_color);
         mPaintSymbol.setTextSize(mSymbolSize);
         mPaintSymbol.setAntiAlias(true);
         mPaintSymbol.setTextAlign(Align.CENTER);
@@ -311,7 +314,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mKeyTextSize = a.getDimensionPixelSize(attr, 18);
                 break;
             case R.styleable.KeyboardView_keyTextColor:
-                mKeyTextColor = a.getColor(attr, 0xFF000000);
+                key_text_color = a.getColor(attr, 0xFF000000);
                 break;
             case R.styleable.KeyboardView_labelTextSize:
                 mLabelTextSize = a.getDimensionPixelSize(attr, 14);
@@ -611,8 +614,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         final Key[] keys = mKeys;
         final Key invalidKey = mInvalidatedKey;
 
-        paint.setAlpha(255);
-        paint.setColor(mKeyTextColor);
+        //paint.setAlpha(255);
+        paint.setColor(key_text_color);
         boolean drawSingleKey = false;
         if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
           // Is clipRegion completely contained within the invalidated key?
@@ -625,7 +628,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
         final int keyCount = keys.length;
-        final float symbolTop = (mPaintSymbol.getTextSize() - mPaintSymbol.descent()) / 2;
+        final float symbolTop = (mPaintSymbol.getTextSize());//mPaintSymbol.descent();
         for (int i = 0; i < keyCount; i++) {
             final Key key = keys[i];
             if (drawSingleKey && invalidKey != key) {
@@ -633,7 +636,9 @@ public class KeyboardView extends View implements View.OnClickListener {
             }
             int[] drawableState = key.getCurrentDrawableState();
             keyBackground.setState(drawableState);
-            
+            mPaint.setColor(key.pressed ? hilited_key_text_color: key_text_color);
+            mPaintSymbol.setColor(key.pressed ? hilited_key_symbol_color: key_symbol_color);
+
             // Switch the character to uppercase if shift is pressed
             String label = key.label == null ? null : adjustCase(key.label).toString();
             String symbol = key.symbolLabel == null ? key.symbol : key.symbolLabel;

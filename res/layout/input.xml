@@ -25,11 +25,11 @@
         android:layout_alignParentBottom="true"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/keyboard_background"
+        android:background="@color/back_color"
 
         trime:keyBackground="@drawable/key"
         trime:keyPreviewLayout="@layout/keyboard_key_preview"
-        trime:keyTextColor="@android:color/white"
+        trime:keyTextColor="@color/key_text_color"
         trime:keyPreviewOffset="-12dip"
         trime:keyPreviewHeight="80dip"
         trime:labelTextSize="@dimen/label_text_size"

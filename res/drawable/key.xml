@@ -20,19 +20,19 @@
     
     <item android:state_checkable="true" android:state_checked="true" 
           android:state_pressed="true"
-          android:drawable="@drawable/btn_keyboard_key_trans_pressed_on" />
+          android:drawable="@drawable/hilited_key_back_color" />
     <item android:state_checkable="true" android:state_pressed="true"
-          android:drawable="@drawable/btn_keyboard_key_trans_pressed_off" />
+          android:drawable="@drawable/hilited_key_back_color" />
     <item android:state_checkable="true" android:state_checked="true"
-          android:drawable="@drawable/btn_keyboard_key_trans_normal_on" />
+          android:drawable="@drawable/key_back_color" />
     <item android:state_checkable="true"
-          android:drawable="@drawable/btn_keyboard_key_trans_normal_off" />
+          android:drawable="@drawable/key_back_color" />
 
     <!-- Normal keys -->
 
     <item android:state_pressed="true"
-          android:drawable="@drawable/btn_keyboard_key_trans_pressed" />
+          android:drawable="@drawable/hilited_key_back_color" />
     <item
-          android:drawable="@drawable/btn_keyboard_key_trans_normal" />
+          android:drawable="@drawable/key_back_color" />
           
 </selector>

@@ -22,6 +22,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
+
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -53,10 +55,11 @@ public class CandView extends View {
   private int highlightIndex;
   private Rime mRime;
 
-  private Drawable candidateHighlight;
-  private Drawable candidateSeparator;
+  private Drawable candidateHighlight, candidateSeparator;
   private Paint paint, paintpy;
   private Typeface tf, tfb, tfl, tfs;
+  private int candidate_text_color, hilited_candidate_text_color;
+  private int comment_text_color, hilited_comment_text_color;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
   private final String candFontSizeKey = "pref_cand_font_size";
@@ -74,22 +77,26 @@ public class CandView extends View {
     preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
     Resources r = context.getResources();
-    candidateHighlight = r.getDrawable(R.drawable.candidate_highlight);
-    candidateSeparator = r.getDrawable(R.drawable.candidate_separator);
+    candidateHighlight = new ColorDrawable(r.getColor(R.color.hilited_candidate_back_color));
+    candidateSeparator = new ColorDrawable(r.getColor(R.color.candidate_separator_color));
+    candidate_text_color = r.getColor(R.color.candidate_text_color);
+    comment_text_color = r.getColor(R.color.comment_text_color);
+    hilited_candidate_text_color = r.getColor(R.color.hilited_candidate_text_color);
+    hilited_comment_text_color = r.getColor(R.color.hilited_comment_text_color);
 
     tf = getFont("han.ttf");
     tfb = getFont("hanb.ttf");
     tfl = getFont("latin.ttf");
     tfs = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
     paint = new Paint();
-    paint.setColor(r.getColor(android.R.color.black));
+    paint.setColor(r.getColor(R.color.candidate_text_color));
     paint.setAntiAlias(true);
     paint.setTextSize(r.getDimensionPixelSize(R.dimen.candidate_text_size));
     paint.setStrokeWidth(0);
     paint.setTypeface(tf);
 
     paintpy = new Paint();
-    paintpy.setColor(r.getColor(R.color.pinyin_normal));
+    paintpy.setColor(r.getColor(R.color.comment_text_color));
     paintpy.setAntiAlias(true);
     paintpy.setTextSize(r.getDimensionPixelSize(R.dimen.pinyin_text_size));
     paintpy.setStrokeWidth(0);
@@ -190,6 +197,8 @@ public class CandView extends View {
     while (i < count) {
       // Calculate a position where the text could be centered in the rectangle.
       paint.setTypeface(tf);
+      paint.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
+      paintpy.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
       drawText(mRime.getCandidate(i), canvas, paint, tf, candidateRect[i].centerX(), y);
       drawText(mRime.getComment(i), canvas, paintpy, tfl, candidateRect[i].centerX(), - paintpy.ascent());
       // Draw the separator at the right edge of each candidate.

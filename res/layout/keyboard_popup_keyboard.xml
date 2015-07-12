@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@drawable/keyboard_popup_panel_background"
+        android:background="@android:color/black"
         >
         
     <com.osfans.trime.KeyboardView
@@ -46,13 +46,4 @@
             trime:shadowColor="#BB000000"
             trime:shadowRadius="0.5"
             />
-    <ImageButton android:id="@android:id/closeButton"
-        android:background="@android:color/transparent"
-        android:src="@drawable/btn_close" 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginStart="8dp"
-        android:clickable="true"
-        />
 </LinearLayout>

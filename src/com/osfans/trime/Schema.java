@@ -73,6 +73,7 @@ public class Schema {
   }
 
   public Object getValue(String s) {
+    load();
     String[] ss = s.split("/");
     if (ss.length == 1) return _getValue(ss[0]);
     else if(ss.length == 2) return _getValue(ss[0], ss[1]);
@@ -80,7 +81,6 @@ public class Schema {
   }
 
   public List<Object> getKeyboards() {
-    load();
     return (List<Object>)getValue("keyboard");
   }
 

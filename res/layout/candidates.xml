@@ -23,7 +23,7 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/candidates_container_bg"
+        android:background="@color/candidate_back_color"
         >
     <LinearLayout
         android:layout_width="fill_parent"
@@ -32,6 +32,7 @@
               android:layout_width="wrap_content"
               android:layout_height="fill_parent"
               android:textSize="@dimen/pinyin_text_size"
+              android:textColor="@color/text_color"
               android:ellipsize ="end"/>
     </LinearLayout>
 

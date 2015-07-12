@@ -18,6 +18,27 @@
 -->
 
 <resources>
-    <color name="pinyin_normal">#666666</color>
-    <color name="symbol">#E5E5E5</color>
+    <color name="text_color">#23948E</color>
+    <color name="back_color">#ECEFF1</color>
+    <color name="border_color">#C1C7CA</color>
+    <color name="label_color">#000000</color>
+    <color name="hilited_text_color">#000000</color>
+    <color name="hilited_back_color">#D3D7DA</color>
+    <color name="candidate_text_color">#5A676E</color>
+    <color name="comment_text_color">#7B868C</color>
+    <color name="hilited_candidate_text_color">#000000</color>
+    <color name="hilited_comment_text_color">#000000</color>
+    <color name="hilited_candidate_back_color">#D3D7DA</color>
+    <color name="candidate_back_color">#E4E7E9</color>
+
+    <color name="candidate_separator_color">#C1C7CA</color>
+    <color name="key_text_color">#37474F</color>
+    <drawable name="key_back_color">#ECEFF1</drawable>
+    <color name="hilited_key_text_color">#000000</color>
+    <drawable name="hilited_key_back_color">#D3D7DA</drawable>
+    <color name="key_symbol_color">#5F6B73</color>
+    <color name="hilited_key_symbol_color">#000000</color>
+    <color name="preview_text_color">#000000</color>
+    <color name="preview_back_color">#66BFBFBF</color>
+
 </resources>
