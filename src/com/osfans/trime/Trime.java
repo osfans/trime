@@ -317,7 +317,12 @@ public class Trime extends InputMethodService implements
 
   public void onPickCandidate(int i) {
     // Commit the picked candidate and suggest its following words.
-    if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, null);
+    if (!isComposing()) {
+      if (i >=0) {
+        mRime.toggleOption(i);
+        updateComposing();
+      }
+    } else if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, null);
     else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, null);
     else if (mRime.selectCandidate(i)) {
       commitText();

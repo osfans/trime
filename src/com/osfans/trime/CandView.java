@@ -114,11 +114,10 @@ public class CandView extends View {
    * Highlight the first candidate as the default candidate.
    */
   public void update() {
-    mRime = Rime.getRime();
     removeHighlight();
     updateCandidateWidth();
-    if (mRime.getCandNum() > 0) {
-      highlightIndex = mRime.getCandHighlightIndex();
+    if (getCandNum() > 0) {
+      highlightIndex = mRime.isComposing() ? mRime.getCandHighlightIndex() : -1;
       invalidate();
     }    
   }
@@ -187,7 +186,7 @@ public class CandView extends View {
       paint.setTextSize(size);
     }
 
-    final int count = mRime.getCandNum();
+    final int count = getCandNum();
     if (count <= 0) return;
 
     final float y = candidateRect[0].centerY() - (paint.ascent() + paintpy.getTextSize() - paint.getTextSize()) / 2;
@@ -199,8 +198,8 @@ public class CandView extends View {
       paint.setTypeface(tf);
       paint.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
       paintpy.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
-      drawText(mRime.getCandidate(i), canvas, paint, tf, candidateRect[i].centerX(), y);
-      drawText(mRime.getComment(i), canvas, paintpy, tfl, candidateRect[i].centerX(), - paintpy.ascent());
+      drawText(getCandidate(i), canvas, paint, tf, candidateRect[i].centerX(), y);
+      drawText(getComment(i), canvas, paintpy, tfl, candidateRect[i].centerX(), - paintpy.ascent());
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -242,11 +241,11 @@ public class CandView extends View {
     final int bottom = getHeight();
     int i = 0;
     int x = 0;
-    if (!mRime.isFirst()) x += getCandidateWidth(-4);
-    int count = mRime.getCandNum();
+    if (mRime.hasLeft()) x += getCandidateWidth(-4);
+    int count = getCandNum();
     for (i = 0; i < count; i++) candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
-    if (!mRime.isFirst()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
-    if (!mRime.isLast()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
+    if (mRime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
+    if (mRime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
     params.width = x;
     setLayoutParams(params);
@@ -287,7 +286,7 @@ public class CandView extends View {
     Rect r = new Rect();
 
     int j = 0;
-    int n = mRime.getCandNum();
+    int n = getCandNum();
     for (int i = 0; i < n; i++) {
       // Enlarge the rectangle to be more responsive to user clicks.
       r.set(candidateRect[j++]);
@@ -298,7 +297,7 @@ public class CandView extends View {
       }
     }
 
-    if (!mRime.isFirst()) { //Page Up
+    if (mRime.hasLeft()) { //Page Up
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
@@ -306,7 +305,7 @@ public class CandView extends View {
       }
     }
 
-    if (!mRime.isLast()) { //Page Down
+    if (mRime.hasRight()) { //Page Down
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
@@ -322,11 +321,23 @@ public class CandView extends View {
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, Resources.getSystem().getDisplayMetrics());
   }
 
+  private int getCandNum() {
+    mRime = Rime.getRime();
+    if (mRime.isComposing()) return mRime.getCandNum();
+    return mRime.options.length;
+  }
+
   private String getCandidate(int i) {
     String s = null;
-    if (i >= 0) s = mRime.getCandidate(i);
-    else if (i == -4 && !mRime.isFirst()) s = "◀";
-    else if (i == -5 && !mRime.isLast()) s = "▶";
+    if (i >= 0) s = mRime.isComposing() ? mRime.getCandidate(i) : mRime.getStatusTexts()[i];
+    else if (i == -4 && mRime.hasLeft()) s = "◀";
+    else if (i == -5 && mRime.hasRight()) s = "▶";
+    return s;
+  }
+
+  private String getComment(int i) {
+    String s = null;
+    if (i >= 0) s = mRime.isComposing() ? mRime.getComment(i) : "→" + mRime.getStatusComments()[i];
     return s;
   }
 
@@ -336,7 +347,7 @@ public class CandView extends View {
     n += n < 2 ? 0.8f : 0.4f;
     float x = n * getCandFontSize();
     if (i >= 0) {
-      String comment = mRime.getComment(i);
+      String comment = getComment(i);
       if (comment != null) {
         float x2 = paintpy.measureText(comment);
         if (x2 > x) x = x2;

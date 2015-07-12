@@ -57,21 +57,31 @@ public class Rime
   boolean is_composing;
   boolean is_ascii_mode;
   boolean is_full_shape;
+  boolean is_ascii_punct;
   boolean is_simplified;
   boolean is_traditional;
-  boolean is_ascii_punct;
+  String[] options = new String[] {
+    "ascii_mode",
+    "full_shape",
+    "ascii_punct"
+  };
+  String[][] statusTexts= new String[][] {
+    {"中文", "西文"},
+    {"半角", "全角"},
+    {"句讀", "符號"},
+  };
 
   static{
     System.loadLibrary("rime");
     System.loadLibrary("rime_jni");
   }
 
-  public boolean isFirst() {
-    return menu_page_no == 0;
+  public boolean hasLeft() {
+    return is_composing && menu_page_no != 0;
   }
 
-  public boolean isLast() {
-    return menu_num_candidates == 0 || menu_is_last_page;
+  public boolean hasRight() {
+    return is_composing && menu_num_candidates != 0 && !menu_is_last_page;
   }
 
   public boolean isComposing() {
@@ -96,8 +106,25 @@ public class Rime
     init(true);
   }
 
-  public void getStatus() {
+  public boolean[] getStatus() {
     get_status(session_id);
+    return new boolean[] {is_ascii_mode, is_full_shape, is_ascii_punct};
+  }
+
+  public String[] getStatusTexts() {
+    boolean[] list = getStatus();
+    int n = list.length;
+    String[] s = new String[n];
+    for (int i = 0; i < n; i++) s[i] = statusTexts[i][list[i] ? 1 : 0];
+    return s;
+  }
+
+  public String[] getStatusComments() {
+    boolean[] list = getStatus();
+    int n = list.length;
+    String[] s = new String[n];
+    for (int i = 0; i < n; i++) s[i] = statusTexts[i][list[i] ? 0 : 1];
+    return s;
   }
 
   public void init(boolean full_check) {
@@ -228,11 +255,18 @@ public class Rime
     return get_option(session_id, option);
   }
 
- public void toggleOption(String option) {
+  public void toggleOption(String option) {
     boolean r = getOption(option);
     setOption(option, !r);
   }
 
+  public void toggleOption(int i) {
+    if (i >= 0 && i < options.length) {
+      String option = options[i];
+      boolean r = getOption(option);
+      setOption(option, !r);
+    }
+  }
   public String getCurrentSchema() {
     schema_id = get_current_schema(session_id);
     return schema_id;
