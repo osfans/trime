@@ -33,7 +33,7 @@ LOCAL_SRC_FILES += \
   \
   libs/system/src/error_code.cpp \
 
-ifneq ($(BOOST_SIGNALS),)
+ifeq ($(BOOST_SIGNALS2),)
 LOCAL_SRC_FILES += \
   libs/signals/src/connection.cpp \
   libs/signals/src/signal_base.cpp \
