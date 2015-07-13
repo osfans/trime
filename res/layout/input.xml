@@ -36,6 +36,6 @@
         trime:keyTextSize="@dimen/key_text_size"
         trime:verticalCorrection="-10dip"
         trime:shadowColor="#BB000000"
-        trime:shadowRadius="2.75"
+        trime:shadowRadius="0"
         trime:popupLayout="@layout/keyboard_popup_keyboard"
         />
