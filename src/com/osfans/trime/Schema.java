@@ -20,33 +20,40 @@ import android.content.Context;
 
 import java.util.Map;
 import java.util.List;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 
 import org.yaml.snakeyaml.Yaml;
 
 public class Schema {
   private Map<String,Object> mSchema, mDefaultSchema;
-  private Context mContext;
+  private String defaultName = "trime.yaml";
+  private int BLK_SIZE = 1024;
 
   public Schema(Context context) {
-    mContext = context;
-    mDefaultSchema = loadPreset("trime");
+    mDefaultSchema = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
   }
 
-  private Map<String,Object> loadPreset(String name) {
+  public FileInputStream openFile(Context context, String name) {
     try{
-      File f = new File("/sdcard/rime", "trime.yaml");
-      if (f.exists()) return (Map<String,Object>)new Yaml().load(new FileInputStream(f));
-      return (Map<String,Object>)new Yaml().load(mContext.getAssets().open(name + ".yaml"));
+      File f = new File("/sdcard/rime", name);
+      if (!f.exists()) { //從assets複製默認文件
+        InputStream is = context.getAssets().open(name);
+        OutputStream os = new FileOutputStream(f);
+        byte[] buffer = new byte[BLK_SIZE];
+        int length = 0;
+        while ((length = is.read(buffer)) > 0) os.write(buffer, 0, length);
+        os.flush();
+        os.close();
+        is.close();
+      }
+      return new FileInputStream(f);
     } catch (IOException e) {
-      throw new RuntimeException("Error load " + name + ".yaml", e);
+      throw new RuntimeException("Error load " + defaultName, e);
     }
   }
 
   public void load() {
-    File f = new File("/sdcard/rime", Rime.getRime().getCurrentSchema() + ".trime.yaml");
+    File f = new File("/sdcard/rime", Rime.getRime().getCurrentSchema() + "." + defaultName);
     mSchema = null;
     if (!f.exists()) return;
     try {
