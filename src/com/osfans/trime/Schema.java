@@ -37,6 +37,8 @@ public class Schema {
 
   private Map<String,Object> loadPreset(String name) {
     try{
+      File f = new File("/sdcard/rime", "trime.yaml");
+      if (f.exists()) return (Map<String,Object>)new Yaml().load(new FileInputStream(f));
       return (Map<String,Object>)new Yaml().load(mContext.getAssets().open(name + ".yaml"));
     } catch (IOException e) {
       throw new RuntimeException("Error load " + name + ".yaml", e);
@@ -45,11 +47,11 @@ public class Schema {
 
   public void load() {
     File f = new File("/sdcard/rime", Rime.getRime().getCurrentSchema() + ".trime.yaml");
-    if (!f.exists()) f = new File("/sdcard/rime", "trime.yaml");
+    mSchema = null;
+    if (!f.exists()) return;
     try {
       mSchema = (Map<String,Object>)new Yaml().load(new FileInputStream(f));
     } catch (IOException e) {
-      mSchema = null;
     }
   }
 
