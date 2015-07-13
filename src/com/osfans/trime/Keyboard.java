@@ -1224,7 +1224,8 @@ public class Keyboard {
       } else if (c == KeyEvent.KEYCODE_DEL){
         if (key.label==null) key.label = "⌫";
         key.repeatable = true;
-      } else if (c == KeyEvent.KEYCODE_CLEAR){
+      } else if (c == KeyEvent.KEYCODE_CLEAR || c == KeyEvent.KEYCODE_ESCAPE){ //清屏
+        key.codes[0] = KeyEvent.KEYCODE_ESCAPE;
         if (key.label==null) key.label = "⌧";
       } else if (c == KeyEvent.KEYCODE_ENTER){
         if (key.label==null) key.label = "⏎";

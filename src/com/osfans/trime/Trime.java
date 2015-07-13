@@ -264,8 +264,7 @@ public class Trime extends InputMethodService implements
       Log.info("Rime onKey");
       commitText();
       updateComposing();
-    } else if (handleOption(primaryCode)
-        || handleClear(primaryCode) || handleEnter(primaryCode)) {
+    } else if (handleOption(primaryCode) || handleEnter(primaryCode)) {
       Log.info("Trime onKey");
     } else {
       Log.info("send Key");
@@ -377,14 +376,6 @@ public class Trime extends InputMethodService implements
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         mOptionsDialog.show();
         return true;
-    }
-    return false;
-  }
-
-  private boolean handleClear(int keyCode) {
-    if (keyCode == KeyEvent.KEYCODE_CLEAR) {
-      escape();
-      return true;
     }
     return false;
   }
