@@ -291,7 +291,7 @@ public class Keyboard {
         "Button_14",
         "Button_15",
         "Button_16",
-        "Language_Switch",
+        "Language_switch",
         "Manner_Mode",
         "3d_Mode",
         "Contacts",

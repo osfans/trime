@@ -260,6 +260,10 @@ public class Trime extends InputMethodService implements
       Log.info("keyboardSwitch onKey");
       bindKeyboardToInputView();
       escape();
+    } else if (primaryCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
+      mRime.toggleOption("ascii_mode");
+      commitText();
+      updateComposing();
     } else if(mRime.onKey(Keyboard.getRimeKeyEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
