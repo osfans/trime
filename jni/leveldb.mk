@@ -13,6 +13,10 @@ ifeq ($(TARGET_ARCH_ABI), arm64-v8a)
 LOCAL_CFLAGS += -D__ARMEL__
 endif
 
+ifneq ($(filter $(TARGET_ARCH_ABI), mips mips64),)
+LOCAL_CFLAGS += -DARCH_CPU_X86_FAMILY=1
+endif
+
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
