@@ -35,6 +35,7 @@
     <color name="key_text_color">#37474F</color>
     <drawable name="key_back_color">#ECEFF1</drawable>
     <color name="hilited_key_text_color">#000000</color>
+    <drawable name="checked_key_back_color">#4423948E</drawable>
     <drawable name="hilited_key_back_color">#D3D7DA</drawable>
     <color name="key_symbol_color">#5F6B73</color>
     <color name="hilited_key_symbol_color">#000000</color>

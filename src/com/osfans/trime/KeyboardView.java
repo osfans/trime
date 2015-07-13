@@ -41,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.KeyEvent;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -94,7 +95,7 @@ public class KeyboardView extends View implements View.OnClickListener {
          * These codes are useful to correct for accidental presses of a key adjacent to
          * the intended key.
          */
-        void onKey(int primaryCode, int[] keyCodes);
+        void onKey(int primaryCode, int mask);
 
         /**
          * Sends a sequence of characters to the listener.
@@ -125,7 +126,6 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     // private static final boolean DEBUG = false;
     private static final int NOT_A_KEY = -1;
-    private static final int[] KEY_DELETE = { Keyboard.KEYCODE_DELETE };
     private static final int[] LONG_PRESSABLE_STATE_SET = { android.R.attr.state_long_pressable };   
     
     private Keyboard mKeyboard;
@@ -448,9 +448,20 @@ public class KeyboardView extends View implements View.OnClickListener {
      * @return true if the shift key state changed, false if there was no change
      * @see KeyboardView#isShifted()
      */
-    public boolean setShifted(boolean shifted) {
+    public boolean setShifted(boolean on, boolean shifted) {
         if (mKeyboard != null) {
-            if (mKeyboard.setShifted(shifted)) {
+            if (mKeyboard.setShifted(on, shifted)) {
+                // The whole keyboard probably needs to be redrawn
+                invalidateAllKeys();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean resetShifted() {
+        if (mKeyboard != null) {
+            if (mKeyboard.resetShifted()) {
                 // The whole keyboard probably needs to be redrawn
                 invalidateAllKeys();
                 return true;
@@ -774,9 +785,12 @@ public class KeyboardView extends View implements View.OnClickListener {
         int index = mCurrentKey;
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
-            if (key.text != null) {
-                mKeyboardActionListener.onText(key.text);
+            if (mKeyboard.isShiftKey(key)) {
+               setShifted(false, !isShifted());
+            } else if (key.text != null) {
+                mKeyboardActionListener.onText(adjustCase(key.text));
                 mKeyboardActionListener.onRelease(NOT_A_KEY);
+                resetShifted();
             } else {
                 int code = key.codes[0];
                 //TextEntryState.keyPressedAt(key, x, y);
@@ -786,14 +800,15 @@ public class KeyboardView extends View implements View.OnClickListener {
                 // Multi-tap
                 if (mInMultiTap) {
                     if (mTapCount != -1) {
-                        mKeyboardActionListener.onKey(Keyboard.KEYCODE_DELETE, KEY_DELETE);
+                        mKeyboardActionListener.onKey(KeyEvent.KEYCODE_DEL, 0);
                     } else {
                         mTapCount = 0;
                     }
                     code = key.codes[mTapCount];
                 }
-                mKeyboardActionListener.onKey(code, codes);
+                mKeyboardActionListener.onKey(code, 0);
                 mKeyboardActionListener.onRelease(code);
+                resetShifted();
             }
             mLastSentIndex = index;
             mLastTapTime = eventTime;
@@ -988,11 +1003,10 @@ public class KeyboardView extends View implements View.OnClickListener {
                         android.R.id.closeButton);
                 if (closeButton != null) closeButton.setOnClickListener(this);
                 mMiniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
-                    public void onKey(int primaryCode, int[] keyCodes) {
-                        mKeyboardActionListener.onKey(primaryCode, keyCodes);
+                    public void onKey(int primaryCode, int mask) {
+                        mKeyboardActionListener.onKey(primaryCode, mask);
                         dismissPopupKeyboard();
                     }
-                    
                     public void onText(CharSequence text) {
                         mKeyboardActionListener.onText(text);
                         dismissPopupKeyboard();
@@ -1039,7 +1053,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             final int x = mPopupX + mMiniKeyboardContainer.getPaddingRight() + mWindowOffset[0];
             final int y = mPopupY + mMiniKeyboardContainer.getPaddingBottom() + mWindowOffset[1];
             mMiniKeyboard.setPopupOffset(x < 0 ? 0 : x, y);
-            mMiniKeyboard.setShifted(isShifted());
+            mMiniKeyboard.setShifted(false, isShifted());
             mPopupKeyboard.setContentView(mMiniKeyboardContainer);
             mPopupKeyboard.setWidth(mMiniKeyboardContainer.getMeasuredWidth());
             mPopupKeyboard.setHeight(mMiniKeyboardContainer.getMeasuredHeight());
@@ -1051,7 +1065,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         } else {
             Key key = popupKey;
             if (key.symbolCode != 0) {
-                mKeyboardActionListener.onKey(key.symbolCode, null);
+                mKeyboardActionListener.onKey(key.symbolCode, 0);
                 return true;
             }
             if (key.symbol!=null){
@@ -1059,7 +1073,11 @@ public class KeyboardView extends View implements View.OnClickListener {
                 return true;
             }
             if(key.codes[0] >= 97 && key.codes[0] <= 124){
-                mKeyboardActionListener.onKey(key.codes[0] - 32, null);
+                mKeyboardActionListener.onKey(key.codes[0] - 32, 0);
+                return true;
+            }
+            if (mKeyboard.isShiftKey(key)) {
+                setShifted(!key.on, !key.on);
                 return true;
             }
         }

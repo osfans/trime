@@ -250,33 +250,23 @@ public class Trime extends InputMethodService implements
       if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_ENTER)
       return false;
     }
-    int i = event.getUnicodeChar();
-    if (i >= 0) {
-      if (event.hasNoModifiers()) onText(String.valueOf((char)i));
-    } else {
-      onKey(keyCode, null);
-    }
+    onKey(event.getKeyCode(), event.getModifiers());
     return true;
   }
 
-  public void onKey(int primaryCode, int[] keyCodes) { //軟鍵盤
+  public void onKey(int primaryCode, int mask) { //軟鍵盤
     Log.info("onKey="+primaryCode);
     if (keyboardSwitch.onKey(primaryCode)) {
       Log.info("keyboardSwitch onKey");
       bindKeyboardToInputView();
       escape();
-    } else if (primaryCode == KeyEvent.KEYCODE_SWITCH_CHARSET) {
-      mRime.onKey("2", 1|4);
-      Log.info("Rime onToggle");
-      commitText();
-      updateComposing();
-    } else if(mRime.onKey(Keyboard.getRimeKeycode(primaryCode))) {
+    } else if(mRime.onKey(Keyboard.getRimeKeyEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
       updateComposing();
-    } else if (handleOption(primaryCode) || handleCapsLock(primaryCode)
+    } else if (handleOption(primaryCode)
         || handleClear(primaryCode) || handleEnter(primaryCode)) {
-          Log.info("Trime onKey");
+      Log.info("Trime onKey");
     } else {
       Log.info("send Key");
       sendDownUpKeyEvents(primaryCode);
@@ -322,8 +312,8 @@ public class Trime extends InputMethodService implements
         mRime.toggleOption(i);
         updateComposing();
       }
-    } else if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, null);
-    else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, null);
+    } else if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, 0);
+    else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
     else if (mRime.selectCandidate(i)) {
       commitText();
       updateComposing();
@@ -389,10 +379,6 @@ public class Trime extends InputMethodService implements
         return true;
     }
     return false;
-  }
-
-  private boolean handleCapsLock(int keyCode) {
-    return (keyCode == Keyboard.KEYCODE_SHIFT) && inputView.setShifted(!inputView.isShifted());
   }
 
   private boolean handleClear(int keyCode) {

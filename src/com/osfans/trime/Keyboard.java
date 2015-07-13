@@ -74,12 +74,12 @@ public class Keyboard {
     public static final int EDGE_TOP = 0x04;
     public static final int EDGE_BOTTOM = 0x08;
 
-    public static final int KEYCODE_SHIFT = -1;
+    // public static final int KEYCODE_SHIFT = -1;
     public static final int KEYCODE_MODE_CHANGE = -2;
     public static final int KEYCODE_CANCEL = -3;
     public static final int KEYCODE_DONE = -4;
-    public static final int KEYCODE_DELETE = -5;
-    public static final int KEYCODE_ALT = -6;
+    // public static final int KEYCODE_DELETE = -5;
+    // public static final int KEYCODE_ALT = -6;
 
     public static final int KEYCODE_MODE_LAST = -20;
     public static final int KEYCODE_MODE_PREV = -21;
@@ -393,6 +393,7 @@ public class Keyboard {
     
     /** List of modifier keys such as Shift & Alt, if any */
     private List<Key> mModifierKeys;
+    private int mMetaState;
     
     /** Width of the screen available to fit the keyboard */
     private int mDisplayWidth;
@@ -909,25 +910,59 @@ public class Keyboard {
         return mTotalWidth;
     }
 
-    public boolean setShifted(boolean shiftState) {
-        if (mShiftKey != null) {
-            mShiftKey.on = shiftState;
-        }
-        if (mShifted != shiftState) {
-            mShifted = shiftState;
-            return true;
-        }
-        return false;
-    }
+  public boolean hasModifier(int modifiers) {
+    return (mMetaState & modifiers) != 0;
+  }
 
-    public boolean isShifted() {
-        return mShifted;
-    }
+  public boolean hasModifier() {
+    return mMetaState != 0;
+  }
 
-    public int getShiftKeyIndex() {
-        return mShiftKeyIndex;
-    }
-    
+  public boolean toggleModifier(int mask) {
+    boolean value = !hasModifier(mask);
+    if (value) mMetaState |= mask;
+    else mMetaState &= ~mask;
+    return value;
+  }
+
+  public boolean setModifier(int mask, boolean value) {
+    boolean b = hasModifier(mask);
+    if (b == value) return false;
+    if (value) mMetaState |= mask;
+    else mMetaState &= ~mask;
+    return true;
+  }
+
+  public boolean isAlted() {
+    return hasModifier(KeyEvent.META_ALT_ON);
+  }
+
+  public boolean isShifted() {
+    return hasModifier(KeyEvent.META_SHIFT_ON);
+  }
+
+  public boolean isCtrled() {
+    return hasModifier(KeyEvent.META_CTRL_ON);
+  }
+
+  public boolean setShifted(boolean on, boolean value) {
+    if (mShiftKey != null) mShiftKey.on = on;
+    return setModifier(KeyEvent.META_SHIFT_ON, on || value);
+  }
+
+  public boolean resetShifted() {
+    if (mShiftKey != null && !mShiftKey.on) return setModifier(KeyEvent.META_SHIFT_ON, false);
+    return false;
+  }
+
+  public boolean isModiferKey(Key key) {
+    return key.modifier;
+  }
+
+  public boolean isShiftKey(Key key) {
+    return key.modifier && (key.codes[0] == KeyEvent.KEYCODE_SHIFT_LEFT || key.codes[0] == KeyEvent.KEYCODE_SHIFT_RIGHT);
+  }
+
     private void computeNearestNeighbors() {
         // Round-up so we don't have any pixels outside the grid
         mCellWidth = (getMinWidth() + GRID_WIDTH - 1) / GRID_WIDTH;
@@ -1013,11 +1048,11 @@ public class Keyboard {
                         inKey = true;
                         key = createKeyFromXml(res, currentRow, x, y, parser);
                         mKeys.add(key);
-                        if (key.codes[0] == KEYCODE_SHIFT) {
+                        if (key.codes[0] == KeyEvent.KEYCODE_SHIFT_LEFT || key.codes[0] == KeyEvent.KEYCODE_SHIFT_RIGHT) {
                             mShiftKey = key;
                             mShiftKeyIndex = mKeys.size()-1;
                             mModifierKeys.add(key);
-                        } else if (key.codes[0] == KEYCODE_ALT) {
+                        } else if (key.codes[0] == KeyEvent.KEYCODE_ALT_LEFT || key.codes[0] == KeyEvent.KEYCODE_ALT_RIGHT) {
                             mModifierKeys.add(key);
                         }
                     } else if (TAG_KEYBOARD.equals(tag)) {
@@ -1095,11 +1130,20 @@ public class Keyboard {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
-  public static int getRimeKeycode(int code) {
+  public static int[] getRimeKeyEvent(int code, int mask) {
     String s = keynames.get(code);
     int i = Rime.get_keycode_by_name(s);
-    Log.e(TAG, "rime keyName=" + s + ",val=" + i +",code=" + code);
-    return i;
+    int m = 0;
+    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_SHIFT_ON)) {
+      m |= Rime.get_modifier_by_name("Shift");
+    }
+    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
+      m |= Rime.get_modifier_by_name("Control");
+    }
+    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_ALT_ON)) {
+      m |= Rime.get_modifier_by_name("Alt");
+    }
+    return new int[] {i, m};
   }
 
   public Keyboard(Context context, Object o) {
@@ -1171,12 +1215,11 @@ public class Keyboard {
         key.repeatable = true;
       } else if (c == KeyEvent.KEYCODE_SWITCH_CHARSET){
         if (key.label==null) key.label = "⇪";
-      } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT){
+      } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
         if (key.label==null) key.label = "⇪";
         key.modifier = true;
         key.sticky = true;
         mShiftKey = key;
-        mShiftKeyIndex = mKeys.size()-2;
         mModifierKeys.add(key);
       } else if (c == KeyEvent.KEYCODE_DEL){
         if (key.label==null) key.label = "⌫";

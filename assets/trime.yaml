@@ -35,7 +35,7 @@ keyboard:
   - {text: j}
   - {symbol: ':', text: k}
   - {symbol: ';', text: l}
-  - {code: "Mode_switch", symbol: 'F4', symbolCode: F4}
+  - {code: "Shift_L"}
   - {text: z}
   - {text: x}
   - {text: c}

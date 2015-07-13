@@ -20,11 +20,11 @@
     
     <item android:state_checkable="true" android:state_checked="true" 
           android:state_pressed="true"
-          android:drawable="@drawable/hilited_key_back_color" />
+          android:drawable="@drawable/checked_key_back_color" />
     <item android:state_checkable="true" android:state_pressed="true"
           android:drawable="@drawable/hilited_key_back_color" />
     <item android:state_checkable="true" android:state_checked="true"
-          android:drawable="@drawable/key_back_color" />
+          android:drawable="@drawable/checked_key_back_color" />
     <item android:state_checkable="true"
           android:drawable="@drawable/key_back_color" />
 

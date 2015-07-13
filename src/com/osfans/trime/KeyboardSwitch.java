@@ -88,7 +88,7 @@ public class KeyboardSwitch {
           currentId = 0;
           lastId = 0;
           currentKeyboard = keyboards[currentId];
-          currentKeyboard.setShifted(currentKeyboard.isShifted());
+          currentKeyboard.setShifted(false, currentKeyboard.isShifted());
         } else reset();
      }
   }
