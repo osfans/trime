@@ -426,7 +426,7 @@ static const JNINativeMethod sMethods[] = {
     },
     // key_table
     {
-        const_cast<char *>("get_keycode_by_name"),
+        const_cast<char *>("get_modifier_by_name"),
         const_cast<char *>("(Ljava/lang/String;)I"),
         reinterpret_cast<void *>(get_modifier_by_name)
     },
