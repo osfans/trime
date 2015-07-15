@@ -284,6 +284,14 @@ public class Rime
     return select_schema(session_id, schemas.get(id));
   }
 
+  public String RimeGetInput() {
+    return get_input(session_id);
+  }
+
+  public int RimeGetCaretPos() {
+    return get_caret_pos(session_id);
+  }
+
   // init
   public native final int get_api();
   public native final void set_notification_handler();
@@ -322,6 +330,8 @@ public class Rime
   // testing
   public native final boolean simulate_key_sequence(int session_id, String key_sequence);
 
+  public native final String get_input(int session_id);
+  public native final int get_caret_pos(int session_id);
   public native final boolean select_candidate(int session_id, int index);
   public static native final String get_version();
 

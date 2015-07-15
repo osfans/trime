@@ -265,6 +265,15 @@ static jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id
   return r;
 }
 
+static jstring get_input(JNIEnv *env, jobject thiz, jint session_id) {
+  const char* c = rime_get_api()->get_input(session_id);
+  return newJstring(env, c);
+}
+
+static jint get_caret_pos(JNIEnv *env, jobject thiz, jint session_id) {
+  return rime_get_api()->get_caret_pos(session_id);
+}
+
 static jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index) {
   RimeApi* rime = rime_get_api();
   return rime->select_candidate(session_id, index);
@@ -413,6 +422,16 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("simulate_key_sequence"),
         const_cast<char *>("(ILjava/lang/String;)Z"),
         reinterpret_cast<void *>(simulate_key_sequence)
+    },
+    {
+        const_cast<char *>("get_input"),
+        const_cast<char *>("(I)Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_input)
+    },
+    {
+        const_cast<char *>("get_caret_pos"),
+        const_cast<char *>("(I)I"),
+        reinterpret_cast<void *>(get_caret_pos)
     },
     {
         const_cast<char *>("select_candidate"),
