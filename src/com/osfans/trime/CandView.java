@@ -117,7 +117,7 @@ public class CandView extends View {
     removeHighlight();
     updateCandidateWidth();
     if (getCandNum() > 0) {
-      highlightIndex = mRime.isComposing() ? mRime.getCandHighlightIndex() : -1;
+      highlightIndex = mRime.getCandHighlightIndex();
       invalidate();
     }    
   }
@@ -323,13 +323,12 @@ public class CandView extends View {
 
   private int getCandNum() {
     mRime = Rime.getRime();
-    if (mRime.isComposing()) return mRime.getCandNum();
-    return mRime.options.length;
+    return mRime.getCandNum();
   }
 
   private String getCandidate(int i) {
     String s = null;
-    if (i >= 0) s = mRime.isComposing() ? mRime.getCandidate(i) : mRime.getStatusTexts()[i];
+    if (i >= 0) s = mRime.getCandidate(i);
     else if (i == -4 && mRime.hasLeft()) s = "◀";
     else if (i == -5 && mRime.hasRight()) s = "▶";
     return s;
@@ -337,7 +336,7 @@ public class CandView extends View {
 
   private String getComment(int i) {
     String s = null;
-    if (i >= 0) s = mRime.isComposing() ? mRime.getComment(i) : "→" + mRime.getStatusComments()[i];
+    if (i >= 0) s = mRime.getComment(i);
     return s;
   }
 
