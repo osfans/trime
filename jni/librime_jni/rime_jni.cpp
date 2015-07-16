@@ -15,6 +15,7 @@
 template <typename T, int N>
 char (&ArraySizeHelper(T (&array)[N]))[N];
 #define NELEMS(x) (sizeof(ArraySizeHelper(x)))
+#define BUFSIZE 256
 
 void on_message(void* context_object,
                 RimeSessionId session_id,
@@ -212,6 +213,22 @@ static jboolean get_option(JNIEnv *env, jobject thiz, jint session_id, jstring o
   return value;
 }
 
+static void set_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop, jstring value) {
+  const char* s = prop == NULL ? NULL : env->GetStringUTFChars(prop, NULL);
+  const char* v = value == NULL ? NULL : env->GetStringUTFChars(value, NULL);
+  RimeSetProperty(session_id, s, v);
+  env->ReleaseStringUTFChars(prop, s);
+  env->ReleaseStringUTFChars(value, v);
+}
+
+static jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop, jstring defaultvalue) {
+  const char* s = prop == NULL ? NULL : env->GetStringUTFChars(prop, NULL);
+  char value[BUFSIZE] = {0};
+  bool b = RimeGetProperty(session_id, s, value, BUFSIZE);
+  env->ReleaseStringUTFChars(prop, s);
+  return b ? newJstring(env, value) : defaultvalue;
+}
+
 static jobjectArray get_schema_names(JNIEnv *env, jobject thiz) {
   RimeSchemaList list;
   bool value =RimeGetSchemaList(&list);
@@ -243,7 +260,7 @@ static jobjectArray get_schema_ids(JNIEnv *env, jobject thiz) {
 }
 
 static jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
-  char current[100] = {0};
+  char current[BUFSIZE] = {0};
   bool value = RimeGetCurrentSchema(session_id, current, sizeof(current));
   if (value) return newJstring(env, current);
   return NULL;
@@ -253,6 +270,140 @@ static jboolean select_schema(JNIEnv *env, jobject thiz, jint session_id, jstrin
   const char* s = schema_id == NULL ? NULL : env->GetStringUTFChars(schema_id, NULL);
   bool value = RimeSelectSchema(session_id, s);
   env->ReleaseStringUTFChars(schema_id, s);
+  return value;
+}
+
+// configuration
+static jboolean config_get_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean defaultvalue) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  Bool value;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigGetBool(&config, s, &value);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b ? value : defaultvalue;
+}
+
+static jboolean config_set_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean value) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigSetBool(&config, s, value);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b;
+}
+
+static jint config_get_int(JNIEnv *env, jobject thiz, jstring name, jstring key, jint defaultvalue) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  int value;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigGetInt(&config, s, &value);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b ? value :defaultvalue;
+}
+
+static jboolean config_set_int(JNIEnv *env, jobject thiz, jstring name, jstring key, jint value) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigSetInt(&config, s, value);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b;
+}
+
+static jdouble config_get_double(JNIEnv *env, jobject thiz, jstring name, jstring key, jdouble defaultvalue) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  double value;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigGetDouble(&config, s, &value);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b ? value : defaultvalue;
+}
+
+static jboolean config_set_double(JNIEnv *env, jobject thiz, jstring name, jstring key, jdouble value) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigSetDouble(&config, s, value);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b;
+}
+
+static jstring config_get_string(JNIEnv *env, jobject thiz, jstring name, jstring key, jstring defaultvalue) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  char value[BUFSIZE] = {0};
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    b = RimeConfigGetString(&config, s, value, BUFSIZE);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return b ? newJstring(env, value) : defaultvalue;
+}
+
+static jboolean config_set_string(JNIEnv *env, jobject thiz, jstring name, jstring key, jstring value) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    const char* v = env->GetStringUTFChars(value, NULL);
+    b = RimeConfigSetString(&config, s, v);
+    env->ReleaseStringUTFChars(key, s);
+    env->ReleaseStringUTFChars(key, v);
+  }
+  RimeConfigClose(&config);
+  return b;
+}
+
+static jint config_list_size(JNIEnv *env, jobject thiz, jstring name, jstring key) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  int value = 0;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    value = RimeConfigListSize(&config, s);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
   return value;
 }
 
@@ -398,6 +549,16 @@ static const JNINativeMethod sMethods[] = {
         reinterpret_cast<void *>(get_option)
     },
     {
+        const_cast<char *>("set_property"),
+        const_cast<char *>("(ILjava/lang/String;Ljava/lang/String;)V"),
+        reinterpret_cast<void *>(set_property)
+    },
+    {
+        const_cast<char *>("get_property"),
+        const_cast<char *>("(ILjava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_property)
+    },
+    {
         const_cast<char *>("get_schema_names"),
         const_cast<char *>("()[Ljava/lang/String;"),
         reinterpret_cast<void *>(get_schema_names)
@@ -416,6 +577,52 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("select_schema"),
         const_cast<char *>("(ILjava/lang/String;)Z"),
         reinterpret_cast<void *>(select_schema)
+    },
+    // configuration
+    {
+        const_cast<char *>("config_get_bool"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Z)Z"),
+        reinterpret_cast<void *>(config_get_bool)
+    },
+    {
+        const_cast<char *>("config_set_bool"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Z)Z"),
+        reinterpret_cast<void *>(config_set_bool)
+    },
+    {
+        const_cast<char *>("config_get_int"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;I)I"),
+        reinterpret_cast<void *>(config_get_int)
+    },
+    {
+        const_cast<char *>("config_set_int"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;I)Z"),
+        reinterpret_cast<void *>(config_set_int)
+    },
+    {
+        const_cast<char *>("config_get_double"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;D)D"),
+        reinterpret_cast<void *>(config_get_double)
+    },
+    {
+        const_cast<char *>("config_set_double"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;D)Z"),
+        reinterpret_cast<void *>(config_set_int)
+    },
+    {
+        const_cast<char *>("config_get_string"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
+        reinterpret_cast<void *>(config_get_string)
+    },
+    {
+        const_cast<char *>("config_set_string"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z"),
+        reinterpret_cast<void *>(config_set_string)
+    },
+    {
+        const_cast<char *>("config_list_size"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)I"),
+        reinterpret_cast<void *>(config_list_size)
     },
     // test
     {

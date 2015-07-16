@@ -133,7 +133,6 @@ public class Rime
     createSession();
     if (session_id == 0) Log.severe( "Error creating rime session");
     get_status(session_id);
-    Log.info("schema_name = " + schema_name + ",schema_id=" + schema_id);
   }
 
   public void destroy() {
@@ -256,6 +255,14 @@ public class Rime
     setOption(option, !r);
   }
 
+  public void setProperty(String prop, String value) {
+    set_property(session_id, prop, value);
+  }
+
+  public String getProperty(String prop, String defaultvalue) {
+    return get_property(session_id, prop, defaultvalue);
+  }
+
   public void toggleOption(int i) {
     if (i >= 0 && i < options.length) {
       String option = options[i];
@@ -322,10 +329,23 @@ public class Rime
   // runtime options
   public native final void set_option(int session_id, String option, boolean value);
   public native final boolean get_option(int session_id, String option);
+  public native final void set_property(int session_id, String prop, String value);
+  public native final String get_property(int session_id, String prop, String defaultvalue);
   public native final String[] get_schema_names();
   public native final String[] get_schema_ids();
   public native final String get_current_schema(int session_id);
   public native final boolean select_schema(int session_id, String schema_id);
+
+  // configuration
+  public static native final boolean config_get_bool(String name, String key, boolean defaultvalue);
+  public static native final boolean config_set_bool(String name, String key, boolean value);
+  public static native final int config_get_int(String name, String key, int defaultvalue);
+  public static native final boolean config_set_int(String name, String key, int value);
+  public static native final double config_get_double(String name, String key, double defaultvalue);
+  public static native final boolean config_set_double(String name, String key, double value);
+  public static native final String config_get_string(String name, String key, String defaultvalue);
+  public static native final boolean config_set_string(String name, String key, String value);
+  public static native final int config_list_size(String name, String key);
 
   // testing
   public native final boolean simulate_key_sequence(int session_id, String key_sequence);
