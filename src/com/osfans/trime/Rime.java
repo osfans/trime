@@ -365,26 +365,26 @@ public class Rime
   }
 
   // init
-  public native final int get_api();
-  public native final void set_notification_handler();
-  public native final void start(String shared_data_dir, String user_data_dir);
-  public native final void check(boolean full_check);
-  public native final void finalize1();
+  public static native final int get_api();
+  public static native final void set_notification_handler();
+  public static native final void start(String shared_data_dir, String user_data_dir);
+  public static native final void check(boolean full_check);
+  public static native final void finalize1();
 
   // deployment
-  public native final boolean sync_user_data();
+  public static native final boolean sync_user_data();
 
   // session management
-  public native final int create_session();
-  public native final boolean find_session(int session_id);
-  public native final boolean destroy_session(int session_id);
-  public native final void cleanup_stale_sessions();
-  public native final void cleanup_all_sessions();
+  public static native final int create_session();
+  public static native final boolean find_session(int session_id);
+  public static native final boolean destroy_session(int session_id);
+  public static native final void cleanup_stale_sessions();
+  public static native final void cleanup_all_sessions();
 
   // input
-  public native final boolean process_key(int session_id, int keycode, int mask);
-  public native final boolean commit_composition(int session_id);
-  public native final void clear_composition(int session_id);
+  public static native final boolean process_key(int session_id, int keycode, int mask);
+  public static native final boolean commit_composition(int session_id);
+  public static native final void clear_composition(int session_id);
 
   // output
   public native final boolean get_commit(int session_id);
@@ -392,14 +392,14 @@ public class Rime
   public native final boolean get_status(int session_id);
 
   // runtime options
-  public native final void set_option(int session_id, String option, boolean value);
-  public native final boolean get_option(int session_id, String option);
-  public native final void set_property(int session_id, String prop, String value);
-  public native final String get_property(int session_id, String prop, String defaultvalue);
-  public native final String[] get_schema_names();
-  public native final String[] get_schema_ids();
-  public native final String get_current_schema(int session_id);
-  public native final boolean select_schema(int session_id, String schema_id);
+  public static native final void set_option(int session_id, String option, boolean value);
+  public static native final boolean get_option(int session_id, String option);
+  public static native final void set_property(int session_id, String prop, String value);
+  public static native final String get_property(int session_id, String prop, String defaultvalue);
+  public static native final String[] get_schema_names();
+  public static native final String[] get_schema_ids();
+  public static native final String get_current_schema(int session_id);
+  public static native final boolean select_schema(int session_id, String schema_id);
 
   // configuration
   public static native final boolean config_get_bool(String name, String key, boolean defaultvalue);
@@ -413,11 +413,11 @@ public class Rime
   public static native final int config_list_size(String name, String key);
 
   // testing
-  public native final boolean simulate_key_sequence(int session_id, String key_sequence);
+  public static native final boolean simulate_key_sequence(int session_id, String key_sequence);
 
-  public native final String get_input(int session_id);
-  public native final int get_caret_pos(int session_id);
-  public native final boolean select_candidate(int session_id, int index);
+  public static native final String get_input(int session_id);
+  public static native final int get_caret_pos(int session_id);
+  public static native final boolean select_candidate(int session_id, int index);
   public static native final String get_version();
 
   // key_table

@@ -19,22 +19,28 @@ char (&ArraySizeHelper(T (&array)[N]))[N];
 
 jstring newJstring(JNIEnv* env, const char* pat)
 {
-  jclass strClass = env->FindClass("java/lang/String");
-  jmethodID ctorID = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
   if (!pat) return NULL;
   int n = strlen(pat);
   if (n == 0) return NULL;
+  jclass strClass = env->FindClass("java/lang/String");
+  jmethodID ctorID = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
   jbyteArray bytes = env->NewByteArray(n);
   env->SetByteArrayRegion(bytes, 0, n, (jbyte*)pat);
   jstring encoding = env->NewStringUTF("utf-8");
-  return (jstring)env->NewObject(strClass, ctorID, bytes, encoding);
+  jstring ret = (jstring)env->NewObject(strClass, ctorID, bytes, encoding);
+  env->DeleteLocalRef(strClass);
+  env->DeleteLocalRef(bytes);
+  env->DeleteLocalRef(encoding);
+  return ret;
 }
 
 void on_message(void* context_object,
                 RimeSessionId session_id,
                 const char* message_type,
                 const char* message_value) {
-  JNIEnv* env = (JNIEnv*) context_object;
+  if (session_id == 0) return;
+  JNIEnv* env = (JNIEnv*)context_object;
+  if (env == NULL) return;
   jclass clazz = env->FindClass(CLASSNAME);
   if (clazz == NULL) return;
   jmethodID mid_static_method = env->GetStaticMethodID(clazz, "onMessage","(ILjava/lang/String;Ljava/lang/String;)V");
@@ -88,8 +94,7 @@ static jboolean sync_user_data(JNIEnv *env, jobject thiz) {
 
 // session management
 static jint create_session(JNIEnv *env, jobject thiz) {
-  RimeSessionId session_id = RimeCreateSession();
-  return session_id;
+  return RimeCreateSession();
 }
 
 static jboolean find_session(JNIEnv *env, jobject thiz, jint session_id) {
