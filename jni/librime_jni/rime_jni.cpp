@@ -17,13 +17,6 @@ char (&ArraySizeHelper(T (&array)[N]))[N];
 #define NELEMS(x) (sizeof(ArraySizeHelper(x)))
 #define BUFSIZE 256
 
-void on_message(void* context_object,
-                RimeSessionId session_id,
-                const char* message_type,
-                const char* message_value) {
-  ALOGE("message: [%lu] [%s] %s\n", session_id, message_type, message_value);
-}
-
 jstring newJstring(JNIEnv* env, const char* pat)
 {
   jclass strClass = env->FindClass("java/lang/String");
@@ -35,6 +28,26 @@ jstring newJstring(JNIEnv* env, const char* pat)
   env->SetByteArrayRegion(bytes, 0, n, (jbyte*)pat);
   jstring encoding = env->NewStringUTF("utf-8");
   return (jstring)env->NewObject(strClass, ctorID, bytes, encoding);
+}
+
+void on_message(void* context_object,
+                RimeSessionId session_id,
+                const char* message_type,
+                const char* message_value) {
+  JNIEnv* env = (JNIEnv*) context_object;
+  jclass clazz = env->FindClass(CLASSNAME);
+  if (clazz == NULL) return;
+  jmethodID mid_static_method = env->GetStaticMethodID(clazz, "onMessage","(ILjava/lang/String;Ljava/lang/String;)V");
+  if (mid_static_method == NULL) {
+    env->DeleteLocalRef(clazz);
+    return;
+  }
+  jstring str_arg1 = newJstring(env, message_type);
+  jstring str_arg2 = newJstring(env, message_value);
+  env->CallStaticVoidMethod(clazz, mid_static_method, session_id, str_arg1, str_arg2);
+  env->DeleteLocalRef(clazz);
+  env->DeleteLocalRef(str_arg1);
+  env->DeleteLocalRef(str_arg2);
 }
 
 static void start(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir) {
@@ -52,13 +65,13 @@ static void start(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring us
 }
 
 static void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
-  RimeSetNotificationHandler(&on_message, NULL);
+  RimeSetNotificationHandler(&on_message, env);
 }
 
 static void check(JNIEnv *env, jobject thiz, jboolean full_check) {
   RimeStartMaintenance((Bool)full_check);
   if (RimeIsMaintenancing()) RimeJoinMaintenanceThread();
-  RimeSetNotificationHandler(&on_message, NULL);
+  RimeSetNotificationHandler(&on_message, env);
 }
 
 // entry and exit
@@ -76,7 +89,6 @@ static jboolean sync_user_data(JNIEnv *env, jobject thiz) {
 // session management
 static jint create_session(JNIEnv *env, jobject thiz) {
   RimeSessionId session_id = RimeCreateSession();
-  RimeSetOption(session_id, "soft_cursor", True);
   return session_id;
 }
 

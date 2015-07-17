@@ -113,7 +113,6 @@ public class Rime
     for (int i = 0; i < n1; i++) {
       String k = "switches/@"+i;
       String s = config_get_string(config, k+"/name", "");
-      Log.info("switches="+s);
       if (!s.isEmpty()) {
         nameList.add(s);
         stateList.add(config_get_string(config, k+"/states/@0", ""));
@@ -359,6 +358,10 @@ public class Rime
 
   public int RimeGetCaretPos() {
     return get_caret_pos(session_id);
+  }
+
+  public static void onMessage(int session_id, String message_type, String message_value) {
+    Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
   }
 
   // init
