@@ -56,7 +56,7 @@ public class Rime
   //RimeStatus
   boolean is_composing;
   String[] options;
-  List<String> radios;
+  List<String> radios = new ArrayList<String>();
   boolean[] states;
   String[][] switchStates;
   String[][] switchComments;
@@ -102,6 +102,7 @@ public class Rime
     int n1 = config_list_size(config, "switches");
     List<String> nameList = new ArrayList<String>();
     List<String> stateList = new ArrayList<String>();
+    radios.clear();
     for (int i = 0; i < n1; i++) {
       String k = "switches/@"+i;
       String s = config_get_string(config, k+"/name", "");
@@ -111,7 +112,6 @@ public class Rime
         stateList.add(config_get_string(config, k+"/states/@1", ""));
       } else {
         int n2 = config_list_size(config, k + "/options");
-        radios = new ArrayList<String>();
         for (int j = 0; j < n2; j++) {
           s = config_get_string(config, k + "/options/@" + j, "");
           radios.add(s);
@@ -142,6 +142,7 @@ public class Rime
         switchComments[i][1] = kRightArrow + off;
       }
     }
+    getStatus();
   }
 
   public void getStatus() {
@@ -352,6 +353,16 @@ public class Rime
 
   public static void onMessage(int session_id, String message_type, String message_value) {
     Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
+    switch (message_type) {
+      case "schema":
+        Rime.getRime().initSwitches();
+        Trime trime = Trime.getService();
+        if (trime != null) {
+          trime.initKeyboard();
+          trime.updateComposing();
+        }
+        break;
+    }
   }
 
   // init

@@ -163,6 +163,12 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  public void initKeyboard() {
+    Log.info("init keyboard");
+    keyboardSwitch.init();
+    bindKeyboardToInputView();
+  }
+
   /**
    * Resets the internal state of this editor, typically called when a new input
    * session commences.
@@ -314,7 +320,7 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  private void updateComposing() {
+  public void updateComposing() {
     if (mPref.isEmbedFirst()) { //嵌入首選
       InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
@@ -339,12 +345,7 @@ public class Trime extends InputMethodService implements
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface di, int id) {
             di.dismiss();
-            if (mRime.selectSchema(id)) {
-              mRime.initSwitches();
-              escape();
-              keyboardSwitch.init();
-              bindKeyboardToInputView();
-            }
+            mRime.selectSchema(id);
           }
         })
         .setNegativeButton(R.string.other_ime, new DialogInterface.OnClickListener() {
