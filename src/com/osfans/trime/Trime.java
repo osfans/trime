@@ -200,16 +200,7 @@ public class Trime extends InputMethodService implements
   private void commitText(CharSequence text) {
     if (text == null) return;
     InputConnection ic = getCurrentInputConnection();
-    if (ic != null) {
-      if (text.length() > 1) {
-        // Batch edit a sequence of characters.
-        ic.beginBatchEdit();
-        ic.commitText(text, 1);
-        ic.endBatchEdit();
-      } else {
-        ic.commitText(text, 1);
-      }
-    }
+    if (ic != null) ic.commitText(text, 1);
     if (!isComposing()) mRime.commitComposition(); //自動上屏
   }
 

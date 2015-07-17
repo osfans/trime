@@ -54,15 +54,7 @@ public class Rime
   String commit_text_preview;
 
   //RimeStatus
-  String schema_id;
-  String schema_name;
-  boolean is_disabled;
   boolean is_composing;
-  boolean is_ascii_mode;
-  boolean is_full_shape;
-  boolean is_ascii_punct;
-  boolean is_simplified;
-  boolean is_traditional;
   String[] options;
   List<String> radios;
   boolean[] states;
@@ -153,7 +145,7 @@ public class Rime
   }
 
   public void getStatus() {
-    get_status(session_id);
+    is_composing = is_composing(session_id);
     int n = states.length;
     for (int i = 0; i < n; i++) states[i] = getOption(options[i]);
   }
@@ -177,7 +169,6 @@ public class Rime
     check(full_check);
     createSession();
     if (session_id == 0) Log.severe( "Error creating rime session");
-    get_status(session_id);
     initSwitches();
   }
 
@@ -203,9 +194,8 @@ public class Rime
   }
 
   public boolean getCommit() {
-    boolean b = get_commit(session_id);
-    Log.info( "b="+b+",commit="+commit_text);
-    return b;
+    commit_text = get_commit_text(session_id);
+    return commit_text != null && !commit_text.isEmpty();
   }
 
   public boolean getContexts() {
@@ -237,11 +227,11 @@ public class Rime
 
   public int getCandNum() {
     getStatus();
-    return isComposing() ? menu_num_candidates : options.length;
+    return is_composing ? menu_num_candidates : options.length;
   }
 
   public String[] getCandidates() {
-    if (!isComposing()) return getStatusTexts();
+    if (!is_composing) return getStatusTexts();
     if (menu_num_candidates == 0) return null;
     String[] r = new String[menu_num_candidates];
     for(int i = 0; i < menu_num_candidates; i++) r[i] = candidates_text[i];
@@ -249,7 +239,7 @@ public class Rime
   }
 
   public String[] getComments() {
-    if (!isComposing()) return getStatusComments();
+    if (!is_composing) return getStatusComments();
     if (menu_num_candidates == 0) return null;
     String[] r = new String[menu_num_candidates];
     for(int i = 0; i < menu_num_candidates; i++) r[i] = candidates_comment[i];
@@ -257,17 +247,17 @@ public class Rime
   }
 
   public String getCandidate(int i) {
-    if (!isComposing()) return getStatusTexts()[i];
+    if (!is_composing) return getStatusTexts()[i];
     if (menu_num_candidates == 0) return null;
     return candidates_text[i];
   }
 
   public int getCandHighlightIndex() {
-    return isComposing() ? menu_highlighted_candidate_index : -1;
+    return is_composing ? menu_highlighted_candidate_index : -1;
   }
 
   public String getComment(int i) {
-    if (!isComposing()) return getStatusComments()[i];
+    if (!is_composing) return getStatusComments()[i];
     if (menu_num_candidates == 0) return null;
     return candidates_comment[i];
   }
@@ -330,12 +320,11 @@ public class Rime
   }
 
   public String getCurrentSchema() {
-    schema_id = get_current_schema(session_id);
-    return schema_id;
+    return get_current_schema(session_id);
   }
 
   public int getCurrentSchemaId() {
-    schema_id = get_current_schema(session_id);
+    String schema_id = get_current_schema(session_id);
     List<String> schemas = Arrays.asList(get_schema_ids());
     return schemas.indexOf(schema_id);
   }
@@ -348,6 +337,7 @@ public class Rime
 
   public boolean selectSchema(int id) {
     List<String> schemas = Arrays.asList(get_schema_ids());
+    String schema_id = getCurrentSchema();
     if (schemas.indexOf(schema_id) == id) return false;
     return select_schema(session_id, schemas.get(id));
   }
@@ -387,9 +377,9 @@ public class Rime
   public static native final void clear_composition(int session_id);
 
   // output
-  public native final boolean get_commit(int session_id);
+  public static native final String get_commit_text(int session_id);
   public native final boolean get_context(int session_id);
-  public native final boolean get_status(int session_id);
+  public static native final boolean is_composing(int session_id);
 
   // runtime options
   public static native final void set_option(int session_id, String option, boolean value);

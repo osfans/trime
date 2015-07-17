@@ -127,43 +127,22 @@ static void clear_composition(JNIEnv *env, jobject thiz, jint session_id) {
 }
 
 // output
-static jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id) {
+static jstring get_commit_text(JNIEnv *env, jobject thiz, jint session_id) {
   RIME_STRUCT(RimeCommit, commit);
   Bool r = RimeGetCommit((RimeSessionId)session_id, &commit);
-  jclass jc = env->GetObjectClass(thiz);
-  jfieldID fid = env->GetFieldID(jc, "commit_text", "Ljava/lang/String;");
   jstring s = NULL;
   if (r) {
     s = newJstring(env, commit.text);
     RimeFreeCommit(&commit);
   }
-  env->SetObjectField(thiz, fid, s);
-  return r;
+  return s;
 }
 
-static jboolean get_status(JNIEnv *env, jobject thiz, jint session_id) {
+static jboolean is_composing(JNIEnv *env, jobject thiz, jint session_id) {
   RIME_STRUCT(RimeStatus, status);
   Bool r = RimeGetStatus(session_id, &status);
   if (r) {
-    jclass jc = env->GetObjectClass(thiz);
-    jfieldID fid = env->GetFieldID(jc, "schema_id", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, newJstring(env, status.schema_id));
-    fid = env->GetFieldID(jc, "schema_name", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, newJstring(env, status.schema_name));
-    fid = env->GetFieldID(jc, "is_disabled", "Z");
-    env->SetBooleanField(thiz, fid, status.is_disabled);
-    fid = env->GetFieldID(jc, "is_composing", "Z");
-    env->SetBooleanField(thiz, fid, status.is_composing);
-    fid = env->GetFieldID(jc, "is_ascii_mode", "Z");
-    env->SetBooleanField(thiz, fid, status.is_ascii_mode);
-    fid = env->GetFieldID(jc, "is_full_shape", "Z");
-    env->SetBooleanField(thiz, fid, status.is_full_shape);
-    fid = env->GetFieldID(jc, "is_simplified", "Z");
-    env->SetBooleanField(thiz, fid, status.is_simplified);
-    fid = env->GetFieldID(jc, "is_traditional", "Z");
-    env->SetBooleanField(thiz, fid, status.is_traditional);
-    fid = env->GetFieldID(jc, "is_ascii_punct", "Z");
-    env->SetBooleanField(thiz, fid, status.is_ascii_punct);
+    r = status.is_composing;
     RimeFreeStatus(&status);
   }
   return r;
@@ -212,6 +191,9 @@ static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
       env->SetObjectArrayElement(comments, i, newJstring(env, context.menu.candidates[i].comment));
     }
     RimeFreeContext(&context);
+    env->DeleteLocalRef(jc);
+    env->DeleteLocalRef(texts);
+    env->DeleteLocalRef(comments);
   }
   return r;
 }
@@ -426,7 +408,7 @@ static jint config_list_size(JNIEnv *env, jobject thiz, jstring name, jstring ke
 
 //testing
 static jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id, jstring key_sequence) {
-  const char* str = env->GetStringUTFChars(key_sequence, NULL); 
+  const char* str = key_sequence == NULL ? NULL : env->GetStringUTFChars(key_sequence, NULL); 
   if (str == NULL) return false; /* OutOfMemoryError already thrown */
   jboolean r = RimeSimulateKeySequence((RimeSessionId)session_id, str);
   env->ReleaseStringUTFChars(key_sequence, str);
@@ -443,13 +425,11 @@ static jint get_caret_pos(JNIEnv *env, jobject thiz, jint session_id) {
 }
 
 static jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index) {
-  RimeApi* rime = rime_get_api();
-  return rime->select_candidate(session_id, index);
+  return rime_get_api()->select_candidate(session_id, index);
 }
 
 static jstring get_version(JNIEnv *env, jobject thiz) {
-  RimeApi* rime = rime_get_api();
-  const char* c = rime->get_version();
+  const char* c = rime_get_api()->get_version();
   return newJstring(env, c);
 }
 
@@ -540,9 +520,9 @@ static const JNINativeMethod sMethods[] = {
     },
     // output
     {
-        const_cast<char *>("get_commit"),
-        const_cast<char *>("(I)Z"),
-        reinterpret_cast<void *>(get_commit)
+        const_cast<char *>("get_commit_text"),
+        const_cast<char *>("(I)Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_commit_text)
     },
     {
         const_cast<char *>("get_context"),
@@ -550,9 +530,9 @@ static const JNINativeMethod sMethods[] = {
         reinterpret_cast<void *>(get_context)
     },
     {
-        const_cast<char *>("get_status"),
+        const_cast<char *>("is_composing"),
         const_cast<char *>("(I)Z"),
-        reinterpret_cast<void *>(get_status)
+        reinterpret_cast<void *>(is_composing)
     },
     // runtime options
     {
