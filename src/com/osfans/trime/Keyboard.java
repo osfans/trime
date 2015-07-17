@@ -1211,7 +1211,7 @@ public class Keyboard {
       key.codes = new int[]{c};
 
       if (c == KeyEvent.KEYCODE_SPACE){
-        if (key.label==null) key.label = "␣";
+        if (key.label==null) key.label = Rime.getRime().getSchemaName();
         key.repeatable = true;
       } else if (c == KeyEvent.KEYCODE_SWITCH_CHARSET){
         if (key.label==null) key.label = "⇪";

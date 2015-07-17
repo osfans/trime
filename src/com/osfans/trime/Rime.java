@@ -98,7 +98,7 @@ public class Rime
   }
 
   public void initSwitches() {
-    String config = getCurrentSchema() + ".schema";
+    String config = getSchemaId() + ".schema";
     int n1 = config_list_size(config, "switches");
     List<String> nameList = new ArrayList<String>();
     List<String> stateList = new ArrayList<String>();
@@ -320,14 +320,19 @@ public class Rime
     }
   }
 
-  public String getCurrentSchema() {
+  public String getSchemaId() {
     return get_current_schema(session_id);
   }
 
-  public int getCurrentSchemaId() {
+  public int getSchemaIndex() {
     String schema_id = get_current_schema(session_id);
     List<String> schemas = Arrays.asList(get_schema_ids());
     return schemas.indexOf(schema_id);
+  }
+
+  public String getSchemaName() {
+    int i = getSchemaIndex();
+    return get_schema_names()[i];
   }
 
   public boolean selectSchema(String schema_id) {
@@ -338,7 +343,7 @@ public class Rime
 
   public boolean selectSchema(int id) {
     List<String> schemas = Arrays.asList(get_schema_ids());
-    String schema_id = getCurrentSchema();
+    String schema_id = getSchemaId();
     if (schemas.indexOf(schema_id) == id) return false;
     return select_schema(session_id, schemas.get(id));
   }

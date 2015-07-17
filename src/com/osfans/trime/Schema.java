@@ -53,7 +53,7 @@ public class Schema {
   }
 
   public void load() {
-    File f = new File("/sdcard/rime", Rime.getRime().getCurrentSchema() + "." + defaultName);
+    File f = new File("/sdcard/rime", Rime.getRime().getSchemaId() + "." + defaultName);
     mSchema = null;
     if (!f.exists()) return;
     try {
