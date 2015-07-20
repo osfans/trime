@@ -22,39 +22,89 @@ import java.util.Arrays;
 
 public class Rime
 {
+  public class RimeTraits {
+    int data_size;
+    // v0.9
+    String shared_data_dir;
+    String user_data_dir;
+    String distribution_name;
+    String distribution_code_name;
+    String distribution_version;
+    // v1.0
+    /*!
+     * Pass a C-string constant in the format "rime.x"
+     * where 'x' is the name of your application.
+     * Add prefix "rime." to ensure old log files are automatically cleaned.
+     */
+    String app_name;
+
+    //! A list of modules to load before initializing
+    String[] modules;
+  };
+
+  public class RimeComposition {
+    int length;
+    int cursor_pos;
+    int sel_start;
+    int sel_end;
+    String preedit;
+  };
+
+  public class RimeCandidate {
+    String text;
+    String comment;
+  };
+
+  public class RimeMenu {
+    int page_size;
+    int page_no;
+    boolean is_last_page;
+    int highlighted_candidate_index;
+    int num_candidates;
+    RimeCandidate[] candidates;
+    String select_keys;
+  };
+  
+  public class RimeCommit {
+    int data_size;
+    // v0.9
+    String text;
+  }
+
+  public class RimeContext {
+    int data_size;
+    // v0.9
+    RimeComposition composition;
+    RimeMenu menu;
+    // v0.9.2
+    String commit_text_preview;
+  };
+
+  public class RimeStatus {
+    int data_size;
+    // v0.9
+    String schema_id;
+    String schema_name;
+    boolean is_disabled;
+    boolean is_composing;
+    boolean is_ascii_mode;
+    boolean is_full_shape;
+    boolean is_simplified;
+    boolean is_traditional;
+    boolean is_ascii_punct;
+  };
+
+  RimeCommit mCommit = new RimeCommit();
+  RimeContext mContext = new RimeContext();
+  RimeStatus mStatus = new RimeStatus();
+
   private int session_id;
   private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
   private String kRightArrow = "→ ";
   private String kRadioSelected = " ✓";
 
-  //RimeComposition;
-  int composition_length;
-  int composition_cursor_pos;
-  int composition_sel_start;
-  int composition_sel_end;
-  String composition_preedit;
-
-  //RimeCandidate
-  String[] candidates_text = new String[10];
-  String[] candidates_comment = new String[10];
-
-  //RimeMenu
-  int menu_page_size;
-  int menu_page_no;
-  boolean menu_is_last_page;
-  int menu_highlighted_candidate_index;
-  int menu_num_candidates;
-  String menu_select_keys;
-  
-  //RimeCommit
-  String commit_text;
-  
-  //RimeContext
-  String commit_text_preview;
-
   //RimeStatus
-  boolean is_composing;
   String[] options;
   List<String> radios = new ArrayList<String>();
   boolean[] states;
@@ -67,19 +117,19 @@ public class Rime
   }
 
   public boolean hasLeft() {
-    return is_composing && menu_page_no != 0;
+    return isComposing() && mContext.menu.page_no != 0;
   }
 
   public boolean hasRight() {
-    return is_composing && menu_num_candidates != 0 && !menu_is_last_page;
+    return isComposing() && mContext.menu.num_candidates != 0 && !mContext.menu.is_last_page;
   }
 
   public boolean isComposing() {
-    return is_composing;
+    return mStatus.is_composing;
   }
 
   public String getCompositionText() {
-    if (composition_length > 0) return composition_preedit;
+    if (mContext.composition.length > 0) return mContext.composition.preedit;
     else return "";
   }
 
@@ -89,7 +139,7 @@ public class Rime
   }
 
   public String getComposingText() {
-    return commit_text_preview != null ? commit_text_preview : "";
+    return mContext.commit_text_preview != null ? mContext.commit_text_preview : "";
   }
 
   public Rime() {
@@ -145,10 +195,11 @@ public class Rime
     getStatus();
   }
 
-  public void getStatus() {
-    is_composing = is_composing(session_id);
+  public boolean getStatus() {
+    boolean r = get_status(session_id, mStatus);
     int n = states.length;
     for (int i = 0; i < n; i++) states[i] = getOption(options[i]);
+    return r;
   }
 
   public String[] getStatusTexts() {
@@ -166,7 +217,11 @@ public class Rime
   }
 
   public void init(boolean full_check) {
-    start("/sdcard/rime", "/sdcard/rime");
+    RimeTraits traits = new RimeTraits();
+    traits.user_data_dir = "/sdcard/rime";
+    traits.shared_data_dir = "/sdcard/rime";
+    traits.app_name = "rime.trime";
+    initialize(traits);
     check(full_check);
     createSession();
     if (session_id == 0) Log.severe( "Error creating rime session");
@@ -191,18 +246,16 @@ public class Rime
   }
 
   public String getCommitText() {
-    return commit_text;
+    return mCommit.text;
   }
 
   public boolean getCommit() {
-    commit_text = get_commit_text(session_id);
-    return commit_text != null && !commit_text.isEmpty();
+    return get_commit(session_id, mCommit);
   }
 
   public boolean getContexts() {
-    boolean b = get_context(session_id);
+    boolean b = get_context(session_id, mContext);
     getStatus();
-    Log.info( "compose="+is_composing+",preview="+commit_text_preview);
     return b;
   }
 
@@ -228,39 +281,41 @@ public class Rime
 
   public int getCandNum() {
     getStatus();
-    return is_composing ? menu_num_candidates : options.length;
+    return isComposing() ? mContext.menu.num_candidates : options.length;
   }
 
   public String[] getCandidates() {
-    if (!is_composing) return getStatusTexts();
-    if (menu_num_candidates == 0) return null;
-    String[] r = new String[menu_num_candidates];
-    for(int i = 0; i < menu_num_candidates; i++) r[i] = candidates_text[i];
+    if (!isComposing()) return getStatusTexts();
+    int n = mContext.menu.num_candidates;
+    if (n == 0) return null;
+    String[] r = new String[n];
+    for(int i = 0; i < n; i++) r[i] = mContext.menu.candidates[i].text;
     return r;
   }
 
   public String[] getComments() {
-    if (!is_composing) return getStatusComments();
-    if (menu_num_candidates == 0) return null;
-    String[] r = new String[menu_num_candidates];
-    for(int i = 0; i < menu_num_candidates; i++) r[i] = candidates_comment[i];
+    if (!isComposing()) return getStatusComments();
+    int n = mContext.menu.num_candidates;
+    if (n == 0) return null;
+    String[] r = new String[n];
+    for(int i = 0; i < n; i++) r[i] = mContext.menu.candidates[i].comment;
     return r;
   }
 
   public String getCandidate(int i) {
-    if (!is_composing) return getStatusTexts()[i];
-    if (menu_num_candidates == 0) return null;
-    return candidates_text[i];
-  }
-
-  public int getCandHighlightIndex() {
-    return is_composing ? menu_highlighted_candidate_index : -1;
+    if (!isComposing()) return getStatusTexts()[i];
+    if (mContext.menu.num_candidates == 0) return null;
+    return mContext.menu.candidates[i].text;
   }
 
   public String getComment(int i) {
-    if (!is_composing) return getStatusComments()[i];
-    if (menu_num_candidates == 0) return null;
-    return candidates_comment[i];
+    if (!isComposing()) return getStatusComments()[i];
+    if (mContext.menu.num_candidates == 0) return null;
+    return mContext.menu.candidates[i].comment;
+  }
+
+  public int getCandHighlightIndex() {
+    return isComposing() ? mContext.menu.highlighted_candidate_index : -1;
   }
 
   public boolean commitComposition() {
@@ -277,7 +332,7 @@ public class Rime
   }
 
   public boolean selectCandidate(int index) {
-    index += menu_page_no * menu_page_size; //從頭開始
+    index += mContext.menu.page_no * mContext.menu.page_size; //從頭開始
     boolean b = select_candidate(session_id, index);
     Log.info("selectCandidate");
     getContexts();
@@ -325,14 +380,13 @@ public class Rime
   }
 
   public int getSchemaIndex() {
-    String schema_id = get_current_schema(session_id);
+    String schema_id = getSchemaId();
     List<String> schemas = Arrays.asList(get_schema_ids());
     return schemas.indexOf(schema_id);
   }
 
   public String getSchemaName() {
-    int i = getSchemaIndex();
-    return get_schema_names()[i];
+    return mStatus.schema_name;
   }
 
   public boolean selectSchema(String schema_id) {
@@ -373,9 +427,9 @@ public class Rime
   // init
   public static native final int get_api();
   public static native final void set_notification_handler();
-  public static native final void start(String shared_data_dir, String user_data_dir);
-  public static native final void check(boolean full_check);
+  public static native final void initialize(RimeTraits traits);
   public static native final void finalize1();
+  public static native final void check(boolean full_check);
 
   // deployment
   public static native final boolean sync_user_data();
@@ -393,9 +447,9 @@ public class Rime
   public static native final void clear_composition(int session_id);
 
   // output
-  public static native final String get_commit_text(int session_id);
-  public native final boolean get_context(int session_id);
-  public static native final boolean is_composing(int session_id);
+  public static native final boolean get_commit(int session_id, RimeCommit commit);
+  public static native final boolean get_context(int session_id, RimeContext context);
+  public static native final boolean get_status(int session_id, RimeStatus status);
 
   // runtime options
   public static native final void set_option(int session_id, String option, boolean value);

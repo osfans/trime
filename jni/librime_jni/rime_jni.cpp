@@ -56,20 +56,6 @@ void on_message(void* context_object,
   env->DeleteLocalRef(str_arg2);
 }
 
-static void start(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir) {
-  RIME_STRUCT(RimeTraits, traits);
-  
-  const char* str1 = shared_data_dir == NULL ? NULL : env->GetStringUTFChars(shared_data_dir, NULL); 
-  const char* str2 = user_data_dir == NULL ? NULL : env->GetStringUTFChars(user_data_dir, NULL); 
-  if (str1 != NULL) traits.shared_data_dir = str1;
-  if (str2 != NULL) traits.user_data_dir = str2;
-  traits.app_name = "rime.jni";
-  ALOGE("setup...\n");
-  RimeInitialize(&traits);
-  env->ReleaseStringUTFChars(shared_data_dir, str1);
-  env->ReleaseStringUTFChars(user_data_dir, str2);
-}
-
 static void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
   RimeSetNotificationHandler(&on_message, env);
 }
@@ -81,6 +67,45 @@ static void check(JNIEnv *env, jobject thiz, jboolean full_check) {
 }
 
 // entry and exit
+static void initialize(JNIEnv *env, jobject thiz, jobject jtraits) {
+  RIME_STRUCT(RimeTraits, traits);
+  jclass jc = env->GetObjectClass(jtraits);
+  jfieldID fid;
+  jstring jshared_data_dir, juser_data_dir, japp_name;
+  char* shared_data_dir;
+  char* user_data_dir;
+  char* app_name;
+
+  fid = env->GetFieldID(jc, "shared_data_dir", "Ljava/lang/String;");
+  jshared_data_dir = (jstring)env->GetObjectField(jtraits, fid);
+  if (jshared_data_dir != NULL) {
+    shared_data_dir = (char *)env->GetStringUTFChars(jshared_data_dir, NULL); 
+    traits.shared_data_dir = shared_data_dir;
+  }
+
+  fid = env->GetFieldID(jc, "user_data_dir", "Ljava/lang/String;");
+  juser_data_dir = (jstring)env->GetObjectField(jtraits, fid);
+  if (juser_data_dir != NULL) {
+    user_data_dir = (char *)env->GetStringUTFChars(juser_data_dir, NULL);
+    traits.user_data_dir = user_data_dir;
+  }
+
+  fid = env->GetFieldID(jc, "app_name", "Ljava/lang/String;");
+  japp_name = (jstring)env->GetObjectField(jtraits, fid);
+  if (japp_name != NULL) {
+    app_name = (char *)env->GetStringUTFChars(japp_name, NULL);
+    traits.app_name = app_name;
+  }
+
+  ALOGE("setup...\n");
+  RimeInitialize(&traits);
+
+  env->ReleaseStringUTFChars(jshared_data_dir, shared_data_dir);
+  env->ReleaseStringUTFChars(juser_data_dir, user_data_dir);
+  env->ReleaseStringUTFChars(japp_name, app_name);
+  env->DeleteLocalRef(jc);
+}
+
 static void finalize(JNIEnv *env, jobject thiz) {
   ALOGE("finalize...");
   RimeFinalize();
@@ -127,73 +152,117 @@ static void clear_composition(JNIEnv *env, jobject thiz, jint session_id) {
 }
 
 // output
-static jstring get_commit_text(JNIEnv *env, jobject thiz, jint session_id) {
+static jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id, jobject jcommit) {
   RIME_STRUCT(RimeCommit, commit);
   Bool r = RimeGetCommit((RimeSessionId)session_id, &commit);
-  jstring s = NULL;
   if (r) {
-    s = newJstring(env, commit.text);
+    jclass jc = env->GetObjectClass(jcommit);
+    jfieldID fid;
+    fid = env->GetFieldID(jc, "data_size", "I");
+    env->SetIntField(jcommit, fid, commit.data_size);
+    fid = env->GetFieldID(jc, "text", "Ljava/lang/String;");
+    env->SetObjectField(jcommit, fid, newJstring(env, commit.text));
+    env->DeleteLocalRef(jc);
     RimeFreeCommit(&commit);
-  }
-  return s;
-}
-
-static jboolean is_composing(JNIEnv *env, jobject thiz, jint session_id) {
-  RIME_STRUCT(RimeStatus, status);
-  Bool r = RimeGetStatus(session_id, &status);
-  if (r) {
-    r = status.is_composing;
-    RimeFreeStatus(&status);
   }
   return r;
 }
 
-static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id) {
+static jboolean get_context(JNIEnv *env, jobject thiz, jint session_id, jobject jcontext) {
   RIME_STRUCT(RimeContext, context);
   Bool r = RimeGetContext(session_id, &context);
   if (r) {
-    jclass jc = env->GetObjectClass(thiz);
+    jclass jc = env->GetObjectClass(jcontext);
     jfieldID fid;
+    fid = env->GetFieldID(jc, "data_size", "I");
+    env->SetIntField(jcontext, fid, context.data_size);
     fid = env->GetFieldID(jc, "commit_text_preview", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, newJstring(env, context.commit_text_preview));
-
-    fid = env->GetFieldID(jc, "menu_num_candidates", "I");
-    env->SetIntField(thiz, fid, context.menu.num_candidates);
-    fid = env->GetFieldID(jc, "menu_page_size", "I");
-    env->SetIntField(thiz, fid, context.menu.page_size);
-    fid = env->GetFieldID(jc, "menu_page_no", "I");
-    env->SetIntField(thiz, fid, context.menu.page_no);
-    fid = env->GetFieldID(jc, "menu_highlighted_candidate_index", "I");
-    env->SetIntField(thiz, fid, context.menu.highlighted_candidate_index);
-    fid = env->GetFieldID(jc, "menu_is_last_page", "Z");
-    env->SetBooleanField(thiz, fid, context.menu.is_last_page);
-    fid = env->GetFieldID(jc, "menu_select_keys", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, newJstring(env, context.menu.select_keys));
-
-    fid = env->GetFieldID(jc, "composition_length", "I");
-    env->SetIntField(thiz, fid, context.composition.length);
-    fid = env->GetFieldID(jc, "composition_cursor_pos", "I");
-    env->SetIntField(thiz, fid, context.composition.cursor_pos);
-    fid = env->GetFieldID(jc, "composition_sel_start", "I");
-    env->SetIntField(thiz, fid, context.composition.sel_start);
-    fid = env->GetFieldID(jc, "composition_sel_end", "I");
-    env->SetIntField(thiz, fid, context.composition.sel_end);
-    fid = env->GetFieldID(jc, "composition_preedit", "Ljava/lang/String;");
-    env->SetObjectField(thiz, fid, newJstring(env, context.composition.preedit));
+    env->SetObjectField(jcontext, fid, newJstring(env, context.commit_text_preview));
+    jclass jc1 = env->FindClass(CLASSNAME "$RimeMenu");
+    jobject jobj = (jobject) env->AllocObject(jc1);
+    fid = env->GetFieldID(jc1, "num_candidates", "I");
+    env->SetIntField(jobj, fid, context.menu.num_candidates);
+    fid = env->GetFieldID(jc1, "page_size", "I");
+    env->SetIntField(jobj, fid, context.menu.page_size);
+    fid = env->GetFieldID(jc1, "page_no", "I");
+    env->SetIntField(jobj, fid, context.menu.page_no);
+    fid = env->GetFieldID(jc1, "highlighted_candidate_index", "I");
+    env->SetIntField(jobj, fid, context.menu.highlighted_candidate_index);
+    fid = env->GetFieldID(jc1, "is_last_page", "Z");
+    env->SetBooleanField(jobj, fid, context.menu.is_last_page);
+    fid = env->GetFieldID(jc1, "select_keys", "Ljava/lang/String;");
+    env->SetObjectField(jobj, fid, newJstring(env, context.menu.select_keys));
 
     int n = context.menu.num_candidates;
-    fid = env->GetFieldID(jc, "candidates_text", "[Ljava/lang/String;");
-    jobjectArray texts = (jobjectArray) env->GetObjectField(thiz, fid);
-    fid = env->GetFieldID(jc, "candidates_comment", "[Ljava/lang/String;");
-    jobjectArray comments = (jobjectArray) env->GetObjectField(thiz, fid);
+    jclass jc2 = env->FindClass(CLASSNAME "$RimeCandidate");
+    jobjectArray jcandidates = (jobjectArray) env->NewObjectArray(n, jc2, NULL);
     for (int i = 0; i < n;  ++i) {
-      env->SetObjectArrayElement(texts, i, newJstring(env, context.menu.candidates[i].text));
-      env->SetObjectArrayElement(comments, i, newJstring(env, context.menu.candidates[i].comment));
+      jobject jcandidate = (jobject) env->AllocObject(jc2);
+      fid = env->GetFieldID(jc2, "text", "Ljava/lang/String;");
+      env->SetObjectField(jcandidate, fid, newJstring(env, context.menu.candidates[i].text));
+      fid = env->GetFieldID(jc2, "comment", "Ljava/lang/String;");
+      env->SetObjectField(jcandidate, fid, newJstring(env, context.menu.candidates[i].comment));
+      env->SetObjectArrayElement(jcandidates, i, jcandidate);
+      env->DeleteLocalRef(jcandidate);
     }
-    RimeFreeContext(&context);
+    fid = env->GetFieldID(jc1, "candidates", "[L" CLASSNAME "$RimeCandidate;");
+    env->SetObjectField(jobj, fid, jcandidates);
+    env->DeleteLocalRef(jcandidates);
+
+    fid = env->GetFieldID(jc, "menu", "L" CLASSNAME "$RimeMenu;");
+    env->SetObjectField(jcontext, fid, jobj);
+
+    jc1 = env->FindClass(CLASSNAME "$RimeComposition");
+    jobj = (jobject) env->AllocObject(jc1);
+    fid = env->GetFieldID(jc1, "length", "I");
+    env->SetIntField(jobj, fid, context.composition.length);
+    fid = env->GetFieldID(jc1, "cursor_pos", "I");
+    env->SetIntField(jobj, fid, context.composition.cursor_pos);
+    fid = env->GetFieldID(jc1, "sel_start", "I");
+    env->SetIntField(jobj, fid, context.composition.sel_start);
+    fid = env->GetFieldID(jc1, "sel_end", "I");
+    env->SetIntField(jobj, fid, context.composition.sel_end);
+    fid = env->GetFieldID(jc1, "preedit", "Ljava/lang/String;");
+    env->SetObjectField(jobj, fid, newJstring(env, context.composition.preedit));
+    fid = env->GetFieldID(jc, "composition", "L" CLASSNAME "$RimeComposition;");
+    env->SetObjectField(jcontext, fid, jobj);
+
     env->DeleteLocalRef(jc);
-    env->DeleteLocalRef(texts);
-    env->DeleteLocalRef(comments);
+    env->DeleteLocalRef(jc1);
+    env->DeleteLocalRef(jc2);
+    RimeFreeContext(&context);
+  }
+  return r;
+}
+
+static jboolean get_status(JNIEnv *env, jobject thiz, jint session_id, jobject jstatus) {
+  RIME_STRUCT(RimeStatus, status);
+  Bool r = RimeGetStatus(session_id, &status);
+  if (r) {
+    jclass jc = env->GetObjectClass(jstatus);
+    jfieldID fid;
+    fid = env->GetFieldID(jc, "data_size", "I");
+    env->SetIntField(jstatus, fid, status.data_size);
+    fid = env->GetFieldID(jc, "schema_id", "Ljava/lang/String;");
+    env->SetObjectField(jstatus, fid, newJstring(env, status.schema_id));
+    fid = env->GetFieldID(jc, "schema_name", "Ljava/lang/String;");
+    env->SetObjectField(jstatus, fid, newJstring(env, status.schema_name));
+    fid = env->GetFieldID(jc, "is_disabled", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_disabled);
+    fid = env->GetFieldID(jc, "is_composing", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_composing);
+    fid = env->GetFieldID(jc, "is_ascii_mode", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_ascii_mode);
+    fid = env->GetFieldID(jc, "is_full_shape", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_full_shape);
+    fid = env->GetFieldID(jc, "is_simplified", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_simplified);
+    fid = env->GetFieldID(jc, "is_traditional", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_traditional);
+    fid = env->GetFieldID(jc, "is_ascii_punct", "Z");
+    env->SetBooleanField(jstatus, fid, status.is_ascii_punct);
+    env->DeleteLocalRef(jc);
+    RimeFreeStatus(&status);
   }
   return r;
 }
@@ -450,9 +519,9 @@ static jint get_keycode_by_name(JNIEnv *env, jobject thiz, jstring name) {
 static const JNINativeMethod sMethods[] = {
     // init
     {
-        const_cast<char *>("start"),
-        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)V"),
-        reinterpret_cast<void *>(start)
+        const_cast<char *>("initialize"),
+        const_cast<char *>("(L" CLASSNAME "$RimeTraits;)V"),
+        reinterpret_cast<void *>(initialize)
     },
     {
         const_cast<char *>("set_notification_handler"),
@@ -520,19 +589,19 @@ static const JNINativeMethod sMethods[] = {
     },
     // output
     {
-        const_cast<char *>("get_commit_text"),
-        const_cast<char *>("(I)Ljava/lang/String;"),
-        reinterpret_cast<void *>(get_commit_text)
+        const_cast<char *>("get_commit"),
+        const_cast<char *>("(IL" CLASSNAME "$RimeCommit;)Z"),
+        reinterpret_cast<void *>(get_commit)
     },
     {
         const_cast<char *>("get_context"),
-        const_cast<char *>("(I)Z"),
+        const_cast<char *>("(IL" CLASSNAME "$RimeContext;)Z"),
         reinterpret_cast<void *>(get_context)
     },
     {
-        const_cast<char *>("is_composing"),
-        const_cast<char *>("(I)Z"),
-        reinterpret_cast<void *>(is_composing)
+        const_cast<char *>("get_status"),
+        const_cast<char *>("(IL" CLASSNAME "$RimeStatus;)Z"),
+        reinterpret_cast<void *>(get_status)
     },
     // runtime options
     {
