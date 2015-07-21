@@ -556,30 +556,30 @@ public class Keyboard {
         public boolean repeatable;
 
         
-        private final static int[] KEY_STATE_NORMAL_ON = { 
+        public final static int[] KEY_STATE_NORMAL_ON = { 
             android.R.attr.state_checkable, 
             android.R.attr.state_checked
         };
         
-        private final static int[] KEY_STATE_PRESSED_ON = { 
+        public final static int[] KEY_STATE_PRESSED_ON = { 
             android.R.attr.state_pressed, 
             android.R.attr.state_checkable, 
             android.R.attr.state_checked 
         };
         
-        private final static int[] KEY_STATE_NORMAL_OFF = { 
+        public final static int[] KEY_STATE_NORMAL_OFF = { 
             android.R.attr.state_checkable 
         };
         
-        private final static int[] KEY_STATE_PRESSED_OFF = { 
+        public final static int[] KEY_STATE_PRESSED_OFF = { 
             android.R.attr.state_pressed, 
             android.R.attr.state_checkable 
         };
         
-        private final static int[] KEY_STATE_NORMAL = {
+        public final static int[] KEY_STATE_NORMAL = {
         };
         
-        private final static int[] KEY_STATE_PRESSED = {
+        public final static int[] KEY_STATE_PRESSED = {
             android.R.attr.state_pressed
         };
 

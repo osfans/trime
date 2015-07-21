@@ -29,11 +29,6 @@
         <!-- Default KeyboardView style. -->
         <attr name="keyboardViewStyle" format="reference" />
 
-        <!-- Image for the key. This image needs to be a StateListDrawable, with the following
-             possible states: normal, pressed, checkable, checkable+pressed, checkable+checked,
-             checkable+checked+pressed. -->
-        <attr name="keyBackground" format="reference" />
-
         <!-- Size of the text for character keys. -->
         <attr name="keyTextSize" format="dimension" />
 

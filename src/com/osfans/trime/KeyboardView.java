@@ -30,6 +30,8 @@ import android.graphics.Typeface;
 import android.graphics.Paint.Align;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -295,9 +297,6 @@ public class KeyboardView extends View implements View.OnClickListener {
             int attr = a.getIndex(i);
 
             switch (attr) {
-            case R.styleable.KeyboardView_keyBackground:
-                mKeyBackground = a.getDrawable(attr);
-                break;
             case R.styleable.KeyboardView_verticalCorrection:
                 mVerticalCorrection = a.getDimensionPixelOffset(attr, 0);
                 break;
@@ -363,6 +362,16 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         mPadding = new Rect(0, 0, 0, 0);
         mMiniKeyboardCache = new HashMap<Key,View>();
+
+        StateListDrawable keyBackground = new StateListDrawable();
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_ON, new ColorDrawable(r.getColor(R.color.hilited_on_key_back_color)));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_OFF, new ColorDrawable(r.getColor(R.color.hilited_off_key_back_color)));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_ON, new ColorDrawable(r.getColor(R.color.on_key_back_color)));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_OFF, new ColorDrawable(r.getColor(R.color.off_key_back_color)));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED, new ColorDrawable(r.getColor(R.color.hilited_key_back_color)));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL, new ColorDrawable(r.getColor(R.color.key_back_color)));
+
+        mKeyBackground = keyBackground;
         mKeyBackground.getPadding(mPadding);
         
         resetMultiTap();

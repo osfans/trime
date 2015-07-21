@@ -34,7 +34,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            trime:keyBackground="@drawable/key"
             trime:verticalCorrection="-10dip"
             trime:keyPreviewLayout="@layout/keyboard_key_preview"
             trime:keyPreviewOffset="-12dip"

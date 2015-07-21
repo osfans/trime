@@ -27,7 +27,6 @@
         android:layout_height="wrap_content"
         android:background="@color/back_color"
 
-        trime:keyBackground="@drawable/key"
         trime:keyPreviewLayout="@layout/keyboard_key_preview"
         trime:keyTextColor="@color/key_text_color"
         trime:keyPreviewOffset="-12dip"
