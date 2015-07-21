@@ -393,6 +393,8 @@ public class Trime extends InputMethodService implements
    * Simulates PC Esc-key function by clearing all composing-text or candidates.
    */
   private void escape() {
-    onKey(KeyEvent.KEYCODE_ESCAPE, 0);
+    if (isComposing()) {
+      onKey(KeyEvent.KEYCODE_ESCAPE, 0);
+    }
   }
 }
