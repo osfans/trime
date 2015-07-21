@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string.h>
+#include <stdio.h>
 #include <rime_api.h>
 #include <rime/key_table.h>
 #define LOG_TAG "Rime-JNI"
@@ -8,7 +9,6 @@
 #include <android/log.h>
 #define ALOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##__VA_ARGS__)
 #else
-#include <stdio.h>
 #define ALOGE printf
 #endif
 
@@ -516,6 +516,96 @@ static jint get_keycode_by_name(JNIEnv *env, jobject thiz, jstring name) {
   return keycode;
 }
 
+static jobjectArray get_string_list(JNIEnv *env, RimeConfig* config, const char* key) {
+  jobjectArray jobj = NULL;
+  jclass jc = env->FindClass("java/lang/String");
+  int n = RimeConfigListSize(config, key);
+  if (n > 0) {
+    jobj = (jobjectArray) env->NewObjectArray(n, jc, NULL);
+    RimeConfigIterator iter = {0};
+    RimeConfigBeginList(&iter, config, key);
+    int i = 0;
+    while(RimeConfigNext(&iter)) {
+      env->SetObjectArrayElement(jobj, i++, newJstring(env, RimeConfigGetCString(config, iter.path)));
+    }
+    RimeConfigEnd(&iter);
+  }
+  env->DeleteLocalRef(jc);
+  return jobj;
+}
+
+static jboolean get_schema(JNIEnv *env, jobject thiz, jstring name, jobject jschema) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool r = RimeSchemaOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  if (r) {
+    jclass jc = env->GetObjectClass(jschema);
+    jfieldID fid;
+    fid = env->GetFieldID(jc, "schema_id", "Ljava/lang/String;");
+    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/schema_id")));
+    fid = env->GetFieldID(jc, "name", "Ljava/lang/String;");
+    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/name")));
+    fid = env->GetFieldID(jc, "version", "Ljava/lang/String;");
+    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/version")));
+    fid = env->GetFieldID(jc, "description", "Ljava/lang/String;");
+    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/description")));
+    fid = env->GetFieldID(jc, "author", "[Ljava/lang/String;");
+    jobjectArray jauthor = get_string_list(env, &config, "schema/author");
+    env->SetObjectField(jschema, fid, jauthor);
+    env->DeleteLocalRef(jauthor);
+
+    jobjectArray jswitches = NULL;
+    int n = RimeConfigListSize(&config, "switches");
+    if (n > 0) {
+      int i = 0;
+      jclass jc1 = env->FindClass(CLASSNAME "$RimeSwitches");
+      jswitches = (jobjectArray) env->NewObjectArray(n, jc1, NULL);
+      RimeConfigIterator iter = {0};
+      RimeConfigBeginList(&iter, &config, "switches");
+      while(RimeConfigNext(&iter)) {
+        char path[BUFSIZE] = {0};
+        char value[BUFSIZE] = {0};
+        jobject jobj = env->AllocObject(jc1);
+        jobject jobj2 = NULL;
+        fid = env->GetFieldID(jc1, "is_radio", "Z");
+        sprintf(path, "%s/name", iter.path);
+        if (RimeConfigGetString(&config, path, value, BUFSIZE)) { //name
+          env->SetBooleanField(jobj, fid, false);
+          fid = env->GetFieldID(jc1, "name", "Ljava/lang/String;");
+          env->SetObjectField(jobj, fid, newJstring(env, value));
+        } else { //option list
+          env->SetBooleanField(jobj, fid, true);
+          sprintf(path, "%s/options", iter.path);
+          jobj2 = get_string_list(env, &config, path);
+          fid = env->GetFieldID(jc1, "options", "[Ljava/lang/String;");
+          env->SetObjectField(jobj, fid, jobj2);
+          env->DeleteLocalRef(jobj2);
+        }
+        sprintf(path, "%s/states", iter.path);
+        jobj2 = get_string_list(env, &config, path);
+        fid = env->GetFieldID(jc1, "states", "[Ljava/lang/String;");
+        env->SetObjectField(jobj, fid, jobj2);
+        env->SetObjectArrayElement(jswitches, i++, jobj);
+        env->DeleteLocalRef(jobj2);
+        env->DeleteLocalRef(jobj);
+      }
+      RimeConfigEnd(&iter);
+      env->DeleteLocalRef(jc1);
+    }
+    fid = env->GetFieldID(jc, "switches", "[L" CLASSNAME "$RimeSwitches;");
+    env->SetObjectField(jschema, fid, jswitches);
+    env->DeleteLocalRef(jswitches);
+
+    env->DeleteLocalRef(jc);
+    RimeConfigClose(&config);
+  }
+  return r;
+}
+
+
+
+
 static const JNINativeMethod sMethods[] = {
     // init
     {
@@ -727,9 +817,14 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("(Ljava/lang/String;)I"),
         reinterpret_cast<void *>(get_keycode_by_name)
     },
+    {
+        const_cast<char *>("get_schema"),
+        const_cast<char *>("(Ljava/lang/String;L" CLASSNAME "$RimeSchema;)Z"),
+        reinterpret_cast<void *>(get_schema)
+    },
 };
 
-int registerNativeMethods(JNIEnv *env, const char *const className, const JNINativeMethod *methods,
+int registerNativeMethods(JNIEnv *env, const char * className, const JNINativeMethod *methods,
         const int numMethods) {
     jclass clazz = env->FindClass(className);
     if (!clazz) {
@@ -759,4 +854,3 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     return JNI_VERSION_1_6;
 }
-

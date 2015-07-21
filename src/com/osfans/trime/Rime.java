@@ -98,18 +98,104 @@ public class Rime
   RimeContext mContext = new RimeContext();
   RimeStatus mStatus = new RimeStatus();
 
+  public class RimeSwitches {
+    boolean is_radio;
+    String name;
+    String[] states;
+    String[] options;
+    int value;
+  };
+
+  public class RimeSchema {
+    private String kRightArrow = "→ ";
+    private String kRadioSelected = " ✓";
+
+    String schema_id;
+    String name;
+    String version;
+    String[] author;
+    String description;
+
+    RimeSwitches[] switches;
+
+    public int size() {
+      return switches != null ? switches.length : 0;
+    }
+
+    public String[] getTexts() {
+      int n = size();
+      if (n == 0) return null;
+      String[] texts = new String[n];
+      int i = 0;
+      for (RimeSwitches o: switches) {
+        texts[i++] = o.states[o.value];
+      }
+      return texts;
+    }
+
+    public String getText(int i) {
+      int n = size();
+      if (n == 0) return null;
+      RimeSwitches o = switches[i];
+      return o.states[o.value];
+    }
+
+    public String[] getComments() {
+      int n = size();
+      if (n == 0) return null;
+      String[] comments = new String[n];
+      int i = 0;
+      for (RimeSwitches o: switches) {
+        comments[i++] = o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
+      }
+      return comments;
+    }
+
+    public String getComment(int i) {
+      int n = size();
+      if (n == 0) return null;
+      RimeSwitches o = switches[i];
+      return o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
+    }
+
+    public void getValue(int session_id) {
+      for (RimeSwitches o: switches) {
+        if (o.is_radio) {
+          o.value = 0;
+          for (int i = 0; i < o.options.length; i++) {
+            String s = o.options[i];
+            if (Rime.get_option(session_id, s)) {
+              o.value = i;
+              break;
+            }
+          }
+        } else {
+          o.value = Rime.get_option(session_id, o.name) ? 1 : 0;
+        }
+      }
+    }
+
+    public void toggleOption(int i) {
+      int n = size();
+      if (n == 0) return;
+      Rime rime = Rime.getRime();
+      RimeSwitches o = switches[i];
+      if (o.is_radio) {
+        rime.setOption(o.options[o.value], false);
+        o.value = (o.value + 1) % o.options.length;
+        rime.setOption(o.options[o.value], true);
+      } else {
+        o.value = 1 - o.value;
+        rime.setOption(o.name, o.value == 1);
+      }
+    }
+  };
+
   private int session_id;
   private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
-  private String kRightArrow = "→ ";
-  private String kRadioSelected = " ✓";
 
-  //RimeStatus
-  String[] options;
-  List<String> radios = new ArrayList<String>();
-  boolean[] states;
-  String[][] switchStates;
-  String[][] switchComments;
+  RimeSchema mSchema = new RimeSchema();
 
   static{
     System.loadLibrary("rime");
@@ -144,76 +230,17 @@ public class Rime
 
   public Rime() {
     init(true);
-    initSwitches();
   }
 
-  public void initSwitches() {
-    String config = getSchemaId() + ".schema";
-    int n1 = config_list_size(config, "switches");
-    List<String> nameList = new ArrayList<String>();
-    List<String> stateList = new ArrayList<String>();
-    radios.clear();
-    for (int i = 0; i < n1; i++) {
-      String k = "switches/@"+i;
-      String s = config_get_string(config, k+"/name", "");
-      if (!s.isEmpty()) {
-        nameList.add(s);
-        stateList.add(config_get_string(config, k+"/states/@0", ""));
-        stateList.add(config_get_string(config, k+"/states/@1", ""));
-      } else {
-        int n2 = config_list_size(config, k + "/options");
-        for (int j = 0; j < n2; j++) {
-          s = config_get_string(config, k + "/options/@" + j, "");
-          radios.add(s);
-          nameList.add(s);
-          stateList.add(config_get_string(config, k + "/states/@" + j, ""));
-          stateList.add("");
-        }
-      }
-    }
-    int n = nameList.size();
-    options = new String[n];
-    states = new boolean[n];
-    nameList.toArray(options);
-    switchStates = new String[n][2];
-    switchComments = new String[n][2];
-    for (int i = 0; i < n; i ++) {
-      states[i] = getOption(options[i]);
-      String off = stateList.get(i * 2);
-      String on = stateList.get(i * 2 + 1);
-      switchStates[i][0] = off;
-      if (on.isEmpty()) {
-        switchStates[i][1] = off;
-        switchComments[i][0] = "";
-        switchComments[i][1] = kRadioSelected;
-      } else {
-        switchStates[i][1] = on;
-        switchComments[i][0] = kRightArrow + on;
-        switchComments[i][1] = kRightArrow + off;
-      }
-    }
+  public void initSchema() {
+    String schema_id = getSchemaId();
+    get_schema(schema_id, mSchema);
     getStatus();
   }
 
   public boolean getStatus() {
-    boolean r = get_status(session_id, mStatus);
-    int n = states.length;
-    for (int i = 0; i < n; i++) states[i] = getOption(options[i]);
-    return r;
-  }
-
-  public String[] getStatusTexts() {
-    int n = states.length;
-    String[] s = new String[n];
-    for (int i = 0; i < n; i++) s[i] = switchStates[i][states[i] ? 1 : 0];
-    return s;
-  }
-
-  public String[] getStatusComments() {
-    int n = states.length;
-    String[] s = new String[n];
-    for (int i = 0; i < n; i++) s[i] = switchComments[i][states[i] ? 1 : 0];
-    return s;
+    mSchema.getValue(session_id);
+    return get_status(session_id, mStatus);
   }
 
   public void init(boolean full_check) {
@@ -224,8 +251,11 @@ public class Rime
     initialize(traits);
     check(full_check);
     createSession();
-    if (session_id == 0) Log.severe( "Error creating rime session");
-    initSwitches();
+    if (session_id == 0) {
+      Log.severe( "Error creating rime session");
+      return;
+    }
+    initSchema();
   }
 
   public void destroy() {
@@ -281,11 +311,11 @@ public class Rime
 
   public int getCandNum() {
     getStatus();
-    return isComposing() ? mContext.menu.num_candidates : options.length;
+    return isComposing() ? mContext.menu.num_candidates : mSchema.size();
   }
 
   public String[] getCandidates() {
-    if (!isComposing()) return getStatusTexts();
+    if (!isComposing()) return mSchema.getTexts();
     int n = mContext.menu.num_candidates;
     if (n == 0) return null;
     String[] r = new String[n];
@@ -294,7 +324,7 @@ public class Rime
   }
 
   public String[] getComments() {
-    if (!isComposing()) return getStatusComments();
+    if (!isComposing()) return mSchema.getComments();
     int n = mContext.menu.num_candidates;
     if (n == 0) return null;
     String[] r = new String[n];
@@ -303,13 +333,13 @@ public class Rime
   }
 
   public String getCandidate(int i) {
-    if (!isComposing()) return getStatusTexts()[i];
+    if (!isComposing()) return mSchema.getText(i);
     if (mContext.menu.num_candidates == 0) return null;
     return mContext.menu.candidates[i].text;
   }
 
   public String getComment(int i) {
-    if (!isComposing()) return getStatusComments()[i];
+    if (!isComposing()) return mSchema.getComment(i);
     if (mContext.menu.num_candidates == 0) return null;
     return mContext.menu.candidates[i].comment;
   }
@@ -348,17 +378,12 @@ public class Rime
   }
 
   public void toggleOption(String option) {
-    boolean r = getOption(option);
-    if (radios.contains(option)) {
-      if (r) return;
-      for (String s: radios) {
-        if (getOption(s)) {
-          setOption(s, false);
-          break;
-        }
-      }
-      setOption(option, true);
-    } else setOption(option, !r);
+    boolean b = getOption(option);
+    setOption(option, !b);
+  }
+
+  public void toggleOption(int i) {
+    mSchema.toggleOption(i);
   }
 
   public void setProperty(String prop, String value) {
@@ -367,12 +392,6 @@ public class Rime
 
   public String getProperty(String prop, String defaultvalue) {
     return get_property(session_id, prop, defaultvalue);
-  }
-
-  public void toggleOption(int i) {
-    if (i >= 0 && i < options.length) {
-      toggleOption(options[i]);
-    }
   }
 
   public String getSchemaId() {
@@ -414,7 +433,7 @@ public class Rime
     Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
     switch (message_type) {
       case "schema":
-        Rime.getRime().initSwitches();
+        Rime.getRime().initSchema();
         Trime trime = Trime.getService();
         if (trime != null) {
           trime.initKeyboard();
@@ -483,4 +502,6 @@ public class Rime
   // key_table
   public static native final int get_modifier_by_name(String name);
   public static native final int get_keycode_by_name(String name);
+
+  public static native final boolean get_schema(String name, RimeSchema schema);
 }
