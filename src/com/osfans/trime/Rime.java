@@ -78,6 +78,14 @@ public class Rime
     RimeMenu menu;
     // v0.9.2
     String commit_text_preview;
+
+    public int size() {
+      return menu.num_candidates;
+    }
+
+    public RimeCandidate[] getCandidates() {
+      return size() == 0 ? null : menu.candidates;
+    }
   };
 
   public class RimeStatus {
@@ -122,40 +130,18 @@ public class Rime
       return switches != null ? switches.length : 0;
     }
 
-    public String[] getTexts() {
+    public RimeCandidate[] getCandidates() {
       int n = size();
       if (n == 0) return null;
-      String[] texts = new String[n];
+      RimeCandidate[] candidates = new RimeCandidate[n];
       int i = 0;
       for (RimeSwitches o: switches) {
-        texts[i++] = o.states[o.value];
+        candidates[i] = new RimeCandidate();
+        candidates[i].text = o.states[o.value];
+        candidates[i].comment = o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
+        i++;
       }
-      return texts;
-    }
-
-    public String getText(int i) {
-      int n = size();
-      if (n == 0) return null;
-      RimeSwitches o = switches[i];
-      return o.states[o.value];
-    }
-
-    public String[] getComments() {
-      int n = size();
-      if (n == 0) return null;
-      String[] comments = new String[n];
-      int i = 0;
-      for (RimeSwitches o: switches) {
-        comments[i++] = o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
-      }
-      return comments;
-    }
-
-    public String getComment(int i) {
-      int n = size();
-      if (n == 0) return null;
-      RimeSwitches o = switches[i];
-      return o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
+      return candidates;
     }
 
     public void getValue(int session_id) {
@@ -309,39 +295,9 @@ public class Rime
     return b;
   }
 
-  public int getCandNum() {
-    getStatus();
-    return isComposing() ? mContext.menu.num_candidates : mSchema.size();
-  }
-
-  public String[] getCandidates() {
-    if (!isComposing()) return mSchema.getTexts();
-    int n = mContext.menu.num_candidates;
-    if (n == 0) return null;
-    String[] r = new String[n];
-    for(int i = 0; i < n; i++) r[i] = mContext.menu.candidates[i].text;
-    return r;
-  }
-
-  public String[] getComments() {
-    if (!isComposing()) return mSchema.getComments();
-    int n = mContext.menu.num_candidates;
-    if (n == 0) return null;
-    String[] r = new String[n];
-    for(int i = 0; i < n; i++) r[i] = mContext.menu.candidates[i].comment;
-    return r;
-  }
-
-  public String getCandidate(int i) {
-    if (!isComposing()) return mSchema.getText(i);
-    if (mContext.menu.num_candidates == 0) return null;
-    return mContext.menu.candidates[i].text;
-  }
-
-  public String getComment(int i) {
-    if (!isComposing()) return mSchema.getComment(i);
-    if (mContext.menu.num_candidates == 0) return null;
-    return mContext.menu.candidates[i].comment;
+  public RimeCandidate[] getCandidates() {
+    if (!isComposing()) return mSchema.getCandidates();
+    return mContext.getCandidates();
   }
 
   public int getCandHighlightIndex() {

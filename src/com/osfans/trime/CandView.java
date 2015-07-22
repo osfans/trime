@@ -54,6 +54,8 @@ public class CandView extends View {
   private CandViewListener listener;
   private int highlightIndex;
   private Rime mRime;
+  private Rime.RimeCandidate[] candidates;
+  private int num_candidates;
 
   private Drawable candidateHighlight, candidateSeparator;
   private Paint paint, paintpy;
@@ -117,9 +119,8 @@ public class CandView extends View {
     removeHighlight();
     updateCandidateWidth();
     if (getCandNum() > 0) {
-      highlightIndex = mRime.getCandHighlightIndex();
       invalidate();
-    }    
+    }
   }
 
   /**
@@ -186,14 +187,13 @@ public class CandView extends View {
       paint.setTextSize(size);
     }
 
-    final int count = getCandNum();
-    if (count <= 0) return;
+    if (candidates == null) return;
 
     final float y = candidateRect[0].centerY() - (paint.ascent() + paintpy.getTextSize() - paint.getTextSize()) / 2;
     float x = 0;
     int i = 0;
 
-    while (i < count) {
+    while (i < num_candidates) {
       // Calculate a position where the text could be centered in the rectangle.
       paint.setTypeface(tf);
       paint.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
@@ -242,8 +242,8 @@ public class CandView extends View {
     int i = 0;
     int x = 0;
     if (mRime.hasLeft()) x += getCandidateWidth(-4);
-    int count = getCandNum();
-    for (i = 0; i < count; i++) candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
+    getCandNum();
+    for (i = 0; i < num_candidates; i++) candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
     if (mRime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
     if (mRime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
@@ -286,14 +286,13 @@ public class CandView extends View {
     Rect r = new Rect();
 
     int j = 0;
-    int n = getCandNum();
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < num_candidates; i++) {
       // Enlarge the rectangle to be more responsive to user clicks.
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
         // Returns -1 if there is no candidate in the hitting rectangle.
-        return (i < n) ? i : -1;
+        return (i < num_candidates) ? i : -1;
       }
     }
 
@@ -323,12 +322,15 @@ public class CandView extends View {
 
   private int getCandNum() {
     mRime = Rime.getRime();
-    return mRime.getCandNum();
+    candidates = mRime.getCandidates();
+    highlightIndex = mRime.getCandHighlightIndex();
+    num_candidates = candidates == null ? 0 : candidates.length;
+    return num_candidates;
   }
 
   private String getCandidate(int i) {
     String s = null;
-    if (i >= 0) s = mRime.getCandidate(i);
+    if (candidates != null && i >= 0) s = candidates[i].text;
     else if (i == -4 && mRime.hasLeft()) s = "◀";
     else if (i == -5 && mRime.hasRight()) s = "▶";
     return s;
@@ -336,7 +338,7 @@ public class CandView extends View {
 
   private String getComment(int i) {
     String s = null;
-    if (i >= 0) s = mRime.getComment(i);
+    if (candidates != null && i >= 0) s = candidates[i].comment;
     return s;
   }
 
