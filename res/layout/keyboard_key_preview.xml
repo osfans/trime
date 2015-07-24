@@ -22,9 +22,7 @@
     android:layout_width="wrap_content" 
     android:layout_height="wrap_content"
     android:textSize="32sp"
-    android:textColor="@color/preview_text_color"
     android:minWidth="32sp"
     android:minHeight="80sp"
     android:gravity="bottom|center_horizontal"
-    android:background="@color/preview_back_color"
     />

@@ -55,24 +55,6 @@ public class PrefActivity extends PreferenceActivity {
     pref.setSummary(Rime.get_version());
     pref = findPreference("pref_ver");
     pref.setSummary(getVersion());
-
-    ListPreference candFontSize = (ListPreference)findPreference("pref_cand_font_size");
-    candFontSize.setSummary(candFontSize.getValue());
-    candFontSize.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-      public boolean onPreferenceChange(Preference preference, Object newValue) {
-        ((ListPreference)preference).setSummary(newValue.toString());
-        return true;
-      }
-    });
-
-    ListPreference keyFontSize = (ListPreference)findPreference("pref_key_font_size");
-    keyFontSize.setSummary(keyFontSize.getValue());
-    keyFontSize.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-      public boolean onPreferenceChange(Preference preference, Object newValue) {
-        ((ListPreference)preference).setSummary(newValue.toString());
-        return true;
-      }
-    });
   }
 
   private void showLicenseDialog() {

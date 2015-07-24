@@ -29,12 +29,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.util.Log;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.graphics.Typeface;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * View to show candidate words.
@@ -62,10 +61,9 @@ public class CandView extends View {
   private Typeface tf, tfb, tfl, tfs;
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
+  private int candidate_text_size, comment_text_size;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
-  private final String candFontSizeKey = "pref_cand_font_size";
-  private final SharedPreferences preferences;
 
   public Typeface getFont(String name){
     File f = new File("/sdcard/rime/fonts", name);
@@ -73,34 +71,37 @@ public class CandView extends View {
     return null;
   }
 
+  public void loadSettings() {
+    Schema schema = Schema.get();
+    candidateHighlight = new ColorDrawable(schema.getColor("hilited_candidate_back_color"));
+    candidateSeparator = new ColorDrawable(schema.getColor("candidate_separator_color"));
+    candidate_text_color = schema.getColor("candidate_text_color");
+    comment_text_color = schema.getColor("comment_text_color");
+    hilited_candidate_text_color = schema.getColor("hilited_candidate_text_color");
+    hilited_comment_text_color = schema.getColor("hilited_comment_text_color");
+
+    candidate_text_size = schema.getInt("candidate_text_size");
+    comment_text_size = schema.getInt("comment_text_size");
+
+    tf = getFont(schema.getString("text_font"));
+    tfb = getFont(schema.getString("text_font_b"));
+    tfl = getFont(schema.getString("text_font_latin"));
+  }
+
   public CandView(Context context, AttributeSet attrs) {
     super(context, attrs);
-
-    preferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-    Resources r = context.getResources();
-    candidateHighlight = new ColorDrawable(r.getColor(R.color.hilited_candidate_back_color));
-    candidateSeparator = new ColorDrawable(r.getColor(R.color.candidate_separator_color));
-    candidate_text_color = r.getColor(R.color.candidate_text_color);
-    comment_text_color = r.getColor(R.color.comment_text_color);
-    hilited_candidate_text_color = r.getColor(R.color.hilited_candidate_text_color);
-    hilited_comment_text_color = r.getColor(R.color.hilited_comment_text_color);
-
-    tf = getFont("han.ttf");
-    tfb = getFont("hanb.ttf");
-    tfl = getFont("latin.ttf");
+    loadSettings();
     tfs = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
+    Resources r = context.getResources();
     paint = new Paint();
-    paint.setColor(r.getColor(R.color.candidate_text_color));
     paint.setAntiAlias(true);
-    paint.setTextSize(r.getDimensionPixelSize(R.dimen.candidate_text_size));
+    paint.setTextSize(candidate_text_size);
     paint.setStrokeWidth(0);
     paint.setTypeface(tf);
 
     paintpy = new Paint();
-    paintpy.setColor(r.getColor(R.color.comment_text_color));
     paintpy.setAntiAlias(true);
-    paintpy.setTextSize(r.getDimensionPixelSize(R.dimen.pinyin_text_size));
+    paintpy.setTextSize(comment_text_size);
     paintpy.setStrokeWidth(0);
     paintpy.setTypeface(tfl);
 
@@ -182,7 +183,7 @@ public class CandView extends View {
   }
 
   private void drawCandidates(Canvas canvas) {
-    float size = getCandFontSize();
+    float size = candidate_text_size;
     if (size != paint.getTextSize()) {
       paint.setTextSize(size);
     }
@@ -315,11 +316,6 @@ public class CandView extends View {
     return -1;
   }
 
-  public float getCandFontSize() {
-    int size = Integer.parseInt(preferences.getString(candFontSizeKey, "20"));
-    return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, Resources.getSystem().getDisplayMetrics());
-  }
-
   private int getCandNum() {
     mRime = Rime.getRime();
     candidates = mRime.getCandidates();
@@ -346,7 +342,7 @@ public class CandView extends View {
     String s = getCandidate(i);
     float n = (s == null ? 0 : s.codePointCount(0, s.length()));
     n += n < 2 ? 0.8f : 0.4f;
-    float x = n * getCandFontSize();
+    float x = n * candidate_text_size;
     if (i >= 0) {
       String comment = getComment(i);
       if (comment != null) {

@@ -51,22 +51,8 @@
         <CheckBoxPreference
             android:key="pref_keyboard_preview"
             android:title="@string/pref_keyboard_preview_title"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:persistent="true"/>
-
-        <ListPreference
-            android:key="pref_cand_font_size"
-            android:defaultValue="22"
-            android:title="@string/pref_cand_font_size"
-            android:entries="@array/pref_cand_font_size_values"
-            android:entryValues="@array/pref_cand_font_size_values" />
-
-        <ListPreference
-            android:key="pref_key_font_size"
-            android:defaultValue="22"
-            android:title="@string/pref_key_font_size"
-            android:entries="@array/pref_cand_font_size_values"
-            android:entryValues="@array/pref_cand_font_size_values" />
     </PreferenceCategory>
 
     <PreferenceCategory android:key="pref_other" android:title="@string/pref_other">

@@ -30,8 +30,6 @@
     <string name="pref_sound_title">按鍵音效</string>
     <string name="pref_keyboard_preview_title">按鍵提示</string>
     <string name="pref_keyboard_preview_summary">打字速度較快時建議關閉</string>
-    <string name="pref_cand_font_size">候選字號</string>
-    <string name="pref_key_font_size">鍵盤字號</string>
 
     <string name="pref_function">功能</string>
     <string name="pref_maintenance">維護</string>

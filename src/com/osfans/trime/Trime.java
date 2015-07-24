@@ -43,6 +43,7 @@ public class Trime extends InputMethodService implements
   protected KeyboardView inputView;
   private CandContainer candidatesContainer;
   private KeyboardSwitch keyboardSwitch;
+  private Schema mSchema;
   private Pref mPref;
   private Effect effect;
   private int orientation;
@@ -63,6 +64,7 @@ public class Trime extends InputMethodService implements
     self = this;
     mPref = new Pref(this);
     effect = new Effect(this);
+    mSchema = new Schema(this);
     keyboardSwitch = new KeyboardSwitch(this);
     keyboardSwitch.init();
     mRime = Rime.getRime();
@@ -155,8 +157,6 @@ public class Trime extends InputMethodService implements
     if (inputView != null) {
       // Bind the selected keyboard to the input view.
       Keyboard sk = (Keyboard)keyboardSwitch.getCurrentKeyboard();
-      int i = mPref.getKeyTextSize();
-      inputView.setTextSize(i);
       inputView.setKeyboard(sk);
       inputView.setPreviewEnabled(mPref.isKeyboardPreview());
       //updateCursorCapsToInputView();

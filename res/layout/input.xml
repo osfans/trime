@@ -19,22 +19,10 @@
 
 <com.osfans.trime.KeyboardView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:trime="http://schemas.android.com/apk/res/com.osfans.trime"
 
         android:id="@+id/keyboard"
         android:layout_alignParentBottom="true"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/back_color"
 
-        trime:keyPreviewLayout="@layout/keyboard_key_preview"
-        trime:keyTextColor="@color/key_text_color"
-        trime:keyPreviewOffset="-12dip"
-        trime:keyPreviewHeight="80dip"
-        trime:labelTextSize="@dimen/label_text_size"
-        trime:keyTextSize="@dimen/key_text_size"
-        trime:verticalCorrection="-10dip"
-        trime:shadowColor="#BB000000"
-        trime:shadowRadius="0"
-        trime:popupLayout="@layout/keyboard_popup_keyboard"
         />

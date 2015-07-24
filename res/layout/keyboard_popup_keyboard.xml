@@ -22,27 +22,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@android:color/black"
         >
         
     <com.osfans.trime.KeyboardView
-            xmlns:trime="http://schemas.android.com/apk/res/com.osfans.trime"
 
             android:id="@android:id/keyboardView"
-            android:background="@android:color/transparent"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            trime:verticalCorrection="-10dip"
-            trime:keyPreviewLayout="@layout/keyboard_key_preview"
-            trime:keyPreviewOffset="-12dip"
-            trime:keyPreviewHeight="80dip"
-            trime:keyTextColor="@android:color/white"
-            trime:keyTextSize="@dimen/key_text_size"
-            trime:labelTextSize="@dimen/label_text_size"
-            trime:popupLayout="@layout/keyboard_popup_keyboard"
-            trime:shadowColor="#BB000000"
-            trime:shadowRadius="0.5"
             />
 </LinearLayout>

@@ -23,7 +23,6 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/candidate_back_color"
         >
     <LinearLayout
         android:layout_width="fill_parent"
@@ -31,14 +30,13 @@
     <TextView android:id="@+id/text"
               android:layout_width="wrap_content"
               android:layout_height="fill_parent"
-              android:textSize="@dimen/pinyin_text_size"
-              android:textColor="@color/text_color"
+              android:textSize="16sp"
               android:ellipsize ="end"/>
     </LinearLayout>
 
   <HorizontalScrollView android:id="@+id/scroll"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/candidate_view_height"
+    android:layout_height="42sp"
     android:fillViewport="true">
     <LinearLayout
         android:layout_width="wrap_content"

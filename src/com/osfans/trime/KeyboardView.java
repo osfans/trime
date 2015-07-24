@@ -20,7 +20,6 @@ import com.osfans.trime.Keyboard.Key;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -260,18 +259,65 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
     };
 
-    public KeyboardView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.keyboardViewStyle);
+
+    public void loadSettings() {
+        Schema schema = Schema.get();
+        key_text_color = schema.getColor("key_text_color");
+        hilited_key_text_color = schema.getColor("hilited_key_text_color");
+        key_symbol_color = schema.getColor("key_symbol_color");
+        hilited_key_symbol_color = schema.getColor("hilited_key_symbol_color");
+        mShadowColor = schema.getColor("shadow_color");
+
+        mSymbolSize = schema.getInt("symbol_text_size");
+        mKeyTextSize = schema.getInt("key_text_size");
+        mVerticalCorrection = schema.getInt("vertical_correction");
+        mPreviewOffset = schema.getInt("preview_offset");
+        mPreviewHeight = schema.getInt("preview_height");
+        mLabelTextSize = schema.getInt("label_text_size");
+        mPreviewTextSizeLarge = schema.getInt("preview_text_size");
+
+        mBackgroundDimAmount = schema.getFloat("background_dim_amount");
+        mShadowRadius = schema.getFloat("shadow_radius");
+
+        StateListDrawable keyBackground = new StateListDrawable();
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_ON, new ColorDrawable(schema.getColor("hilited_on_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_OFF, new ColorDrawable(schema.getColor("hilited_off_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_ON, new ColorDrawable(schema.getColor("on_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_OFF, new ColorDrawable(schema.getColor("off_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED, new ColorDrawable(schema.getColor("hilited_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL, new ColorDrawable(schema.getColor("key_back_color")));
+        mKeyBackground = keyBackground;
+
+        mPreviewText.setTextColor(schema.getColor("preview_text_color"));
+        mPreviewText.setBackgroundColor(schema.getColor("preview_back_color"));
+        setBackgroundColor(schema.getColor("keyboard_back_color"));
     }
 
-    public KeyboardView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        Resources r = context.getResources();
-        mSymbolSize = r.getDimensionPixelSize(R.dimen.symbol_text_size);
-        key_text_color = r.getColor(R.color.key_text_color);
-        hilited_key_text_color = r.getColor(R.color.hilited_key_text_color);
-        key_symbol_color = r.getColor(R.color.key_symbol_color);
-        hilited_key_symbol_color = r.getColor(R.color.hilited_key_symbol_color);
+    public KeyboardView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        LayoutInflater inflate =
+                (LayoutInflater) context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mPreviewText = (TextView) inflate.inflate(R.layout.keyboard_key_preview, null);
+
+        loadSettings();
+
+        mPreviewPopup = new PopupWindow(context);
+        mPreviewPopup.setContentView(mPreviewText);
+        mPreviewPopup.setBackgroundDrawable(null);
+        mPreviewPopup.setTouchable(false);
+
+        mPopupLayout = R.layout.keyboard_popup_keyboard;
+        mPopupKeyboard = new PopupWindow(context);
+        mPopupKeyboard.setBackgroundDrawable(null);
+        //mPopupKeyboard.setClippingEnabled(false);        
+        mPopupParent = this;
+        //mPredicting = true;
+
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setTextAlign(Align.CENTER);
         tf = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
         mPaintSymbol = new Paint();
         mPaintSymbol.setTypeface(tf);
@@ -279,99 +325,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPaintSymbol.setTextSize(mSymbolSize);
         mPaintSymbol.setAntiAlias(true);
         mPaintSymbol.setTextAlign(Align.CENTER);
-        
-        TypedArray a =
-            context.obtainStyledAttributes(
-                attrs, R.styleable.KeyboardView, defStyle, 0);
-
-        LayoutInflater inflate =
-                (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        int previewLayout = 0;
-        int keyTextSize = 0;
-
-        int n = a.getIndexCount();
-        
-        for (int i = 0; i < n; i++) {
-            int attr = a.getIndex(i);
-
-            switch (attr) {
-            case R.styleable.KeyboardView_verticalCorrection:
-                mVerticalCorrection = a.getDimensionPixelOffset(attr, 0);
-                break;
-            case R.styleable.KeyboardView_keyPreviewLayout:
-                previewLayout = a.getResourceId(attr, 0);
-                break;
-            case R.styleable.KeyboardView_keyPreviewOffset:
-                mPreviewOffset = a.getDimensionPixelOffset(attr, 0);
-                break;
-            case R.styleable.KeyboardView_keyPreviewHeight:
-                mPreviewHeight = a.getDimensionPixelSize(attr, 80);
-                break;
-            case R.styleable.KeyboardView_keyTextSize:
-                mKeyTextSize = a.getDimensionPixelSize(attr, 18);
-                break;
-            case R.styleable.KeyboardView_keyTextColor:
-                key_text_color = a.getColor(attr, 0xFF000000);
-                break;
-            case R.styleable.KeyboardView_labelTextSize:
-                mLabelTextSize = a.getDimensionPixelSize(attr, 14);
-                break;
-            case R.styleable.KeyboardView_popupLayout:
-                mPopupLayout = a.getResourceId(attr, 0);
-                break;
-            case R.styleable.KeyboardView_shadowColor:
-                mShadowColor = a.getColor(attr, 0);
-                break;
-            case R.styleable.KeyboardView_shadowRadius:
-                mShadowRadius = a.getFloat(attr, 0f);
-                break;
-            }
-        }
-        a.recycle();
-        
-        a = getContext().obtainStyledAttributes(
-                R.styleable.Theme);
-        mBackgroundDimAmount = a.getFloat(R.styleable.Theme_backgroundDimAmount, 0.5f);
-        a.recycle();
-        
-        mPreviewPopup = new PopupWindow(context);
-        if (previewLayout != 0) {
-            mPreviewText = (TextView) inflate.inflate(previewLayout, null);
-            mPreviewTextSizeLarge = (int) mPreviewText.getTextSize();
-            mPreviewPopup.setContentView(mPreviewText);
-            mPreviewPopup.setBackgroundDrawable(null);
-        } else {
-            mShowPreview = false;
-        }
-        
-        mPreviewPopup.setTouchable(false);
-        
-        mPopupKeyboard = new PopupWindow(context);
-        mPopupKeyboard.setBackgroundDrawable(null);
-        //mPopupKeyboard.setClippingEnabled(false);
-        
-        mPopupParent = this;
-        //mPredicting = true;
-        
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setTextSize(keyTextSize);
-        mPaint.setTextAlign(Align.CENTER);
 
         mPadding = new Rect(0, 0, 0, 0);
         mMiniKeyboardCache = new HashMap<Key,View>();
 
-        StateListDrawable keyBackground = new StateListDrawable();
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_ON, new ColorDrawable(r.getColor(R.color.hilited_on_key_back_color)));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_OFF, new ColorDrawable(r.getColor(R.color.hilited_off_key_back_color)));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_ON, new ColorDrawable(r.getColor(R.color.on_key_back_color)));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_OFF, new ColorDrawable(r.getColor(R.color.off_key_back_color)));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED, new ColorDrawable(r.getColor(R.color.hilited_key_back_color)));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL, new ColorDrawable(r.getColor(R.color.key_back_color)));
-
-        mKeyBackground = keyBackground;
         mKeyBackground.getPadding(mPadding);
         
         resetMultiTap();
@@ -430,6 +387,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mKeyboard != null) {
             showPreview(NOT_A_KEY);
         }
+        loadSettings();
         mKeyboard = keyboard;
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);
@@ -608,10 +566,6 @@ public class KeyboardView extends View implements View.OnClickListener {
             onBufferDraw();
         }
         canvas.drawBitmap(mBuffer, 0, 0, null);
-    }
-    
-    public void setTextSize(int size){
-      mKeyTextSize = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, (float) size, Resources.getSystem().getDisplayMetrics());
     }
     
     private void onBufferDraw() {
@@ -890,10 +844,10 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPreviewText.setCompoundDrawables(null, null, null, null);
             mPreviewText.setText(getPreviewText(key));
             if (key.label.length() > 1 && key.codes.length < 2) {
-                mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mKeyTextSize);
+                mPreviewText.setTextSize(mKeyTextSize);
                 mPreviewText.setTypeface(tf);
             } else {
-                mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mPreviewTextSizeLarge);
+                mPreviewText.setTextSize(mPreviewTextSizeLarge);
                 mPreviewText.setTypeface(tf);
             }
         }

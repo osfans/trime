@@ -122,8 +122,4 @@ public class KeyboardSwitch {
     // Return false if the key isn't consumed to switch a keyboard.
     return false;
   }
-
-  public boolean getAsciiMode() {
-    return currentKeyboard.getAsciiMode();
-  }
 }
