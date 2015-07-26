@@ -46,7 +46,7 @@ public class CandContainer extends LinearLayout {
     setBackgroundColor(schema.getColor("candidate_back_color"));
     text = (TextView) findViewById(R.id.text);
     text.setTextColor(schema.getColor("text_color"));
-    text.setBackgroundColor(schema.getColor("back_color"));
+    //text.setBackgroundColor(schema.getColor("back_color"));
     text.setTextSize(schema.getInt("text_size"));
     text.setOnTouchListener(new View.OnTouchListener() {
       public boolean onTouch(View v, MotionEvent event) {
