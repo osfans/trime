@@ -147,7 +147,6 @@ public class Rime
     public void getValue(int session_id) {
       for (RimeSwitches o: switches) {
         if (o.is_radio) {
-          o.value = 0;
           for (int i = 0; i < o.options.length; i++) {
             String s = o.options[i];
             if (Rime.get_option(session_id, s)) {
@@ -395,6 +394,9 @@ public class Rime
           trime.initKeyboard();
           trime.updateComposing();
         }
+        break;
+      case "option":
+        Rime.getRime().getStatus();
         break;
     }
   }
