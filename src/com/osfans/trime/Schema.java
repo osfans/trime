@@ -53,8 +53,8 @@ public class Schema {
     fallback.put("key_back_color", "back_color");
     fallback.put("keyboard_back_color", "key_back_color");
     fallback.put("key_border_color", "border_color");
-    fallback.put("key_symbol_color", "key_back_color");
     fallback.put("key_text_color", "text_color");
+    fallback.put("key_symbol_color", "key_text_color");
     fallback.put("label_color", "candidate_text_color");
     fallback.put("off_key_back_color", "key_back_color");
     fallback.put("off_key_text_color", "key_text_color");
