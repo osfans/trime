@@ -17,6 +17,7 @@
 package com.osfans.trime;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.Map;
 import java.util.List;
@@ -63,6 +64,8 @@ public class Schema {
     fallback.put("preview_back_color", "key_back_color");
     fallback.put("preview_text_color", "key_text_color");
     fallback.put("shadow_color", "border_color");
+
+    refresh();
   }
 
   public FileInputStream openFile(Context context, String name) {
@@ -84,7 +87,7 @@ public class Schema {
     }
   }
 
-  public void load() {
+  public void refresh() {
     File f = new File("/sdcard/rime", Rime.getRime().getSchemaId() + "." + defaultName);
     mSchema = null;
     if (!f.exists()) return;
@@ -114,7 +117,6 @@ public class Schema {
   }
 
   public Object getValue(String s) {
-    load();
     String[] ss = s.split("/");
     if (ss.length == 1) return _getValue(ss[0]);
     else if(ss.length == 2) return _getValue(ss[0], ss[1]);

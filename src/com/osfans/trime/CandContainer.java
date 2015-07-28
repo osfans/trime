@@ -42,18 +42,23 @@ public class CandContainer extends LinearLayout {
     super.onFinishInflate();
 
     candidateView = (CandView) findViewById(R.id.candidate_view);
-    Schema schema = Schema.get();
-    setBackgroundColor(schema.getColor("candidate_back_color"));
     text = (TextView) findViewById(R.id.text);
-    text.setTextColor(schema.getColor("text_color"));
-    //text.setBackgroundColor(schema.getColor("back_color"));
-    text.setTextSize(schema.getInt("text_size"));
     text.setOnTouchListener(new View.OnTouchListener() {
       public boolean onTouch(View v, MotionEvent event) {
         Log.e("Trime", "n="+text.getOffsetForPosition(event.getX(),event.getY()));
         return true;
       }
     });
+    refresh();
+  }
+
+  public void refresh() {
+    Schema schema = Schema.get();
+    setBackgroundColor(schema.getColor("back_color"));
+    text.setTextColor(schema.getColor("text_color"));
+    text.setTextSize(schema.getInt("text_size"));
+    //text.setBackgroundColor(schema.getColor("back_color"));
+    candidateView.refresh();
   }
 
   public void setCandViewListener(

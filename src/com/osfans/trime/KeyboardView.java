@@ -260,7 +260,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     };
 
 
-    public void loadSettings() {
+    public void refresh() {
         Schema schema = Schema.get();
         key_text_color = schema.getColor("key_text_color");
         hilited_key_text_color = schema.getColor("hilited_key_text_color");
@@ -301,7 +301,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mPreviewText = (TextView) inflate.inflate(R.layout.keyboard_key_preview, null);
 
-        loadSettings();
+        refresh();
 
         mPreviewPopup = new PopupWindow(context);
         mPreviewPopup.setContentView(mPreviewText);
@@ -387,7 +387,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mKeyboard != null) {
             showPreview(NOT_A_KEY);
         }
-        loadSettings();
+        if (mKeyboard == keyboard) return;
         mKeyboard = keyboard;
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);

@@ -71,7 +71,7 @@ public class CandView extends View {
     return null;
   }
 
-  public void loadSettings() {
+  public void refresh() {
     Schema schema = Schema.get();
     candidateHighlight = new ColorDrawable(schema.getColor("hilited_candidate_back_color"));
     candidateSeparator = new ColorDrawable(schema.getColor("candidate_separator_color"));
@@ -90,7 +90,7 @@ public class CandView extends View {
 
   public CandView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    loadSettings();
+    refresh();
     tfs = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
     Resources r = context.getResources();
     paint = new Paint();
