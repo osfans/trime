@@ -143,6 +143,7 @@ public class Trime extends InputMethodService implements
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
+    setCandidatesViewShown(true);
   }
 
   @Override
@@ -195,7 +196,7 @@ public class Trime extends InputMethodService implements
     keyboardSwitch.init(getMaxWidth());
     keyboardSwitch.onStartInput(inputType);
     setCandidatesViewShown(true);
-    escape();
+    //escape();
     setCandidatesViewShown(false);
   }
 
