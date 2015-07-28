@@ -32,9 +32,9 @@ style:
     key_text_size: 22
     key_width: 10 #percent
     label_text_size: 16
-    preview_height: 80
+    preview_height: 60
     preview_offset: -12
-    preview_text_size: 80
+    preview_text_size: 40
     shadow_radius: 0.0
     symbol_text_size: 10
     text_height: 14
@@ -50,7 +50,7 @@ preset_color_schemes:
   default:
     name: 默認／default
     author: osfans
-    back_color: 0x00e4e7e9
+    back_color: 0xffe4e7e9
     border_color: 0xffc1c7ca
     candidate_back_color: 0xffe4e7e9
     candidate_separator_color: 0xffc1c7ca
@@ -78,8 +78,8 @@ preset_color_schemes:
     off_key_text_color: 0xff37474f
     on_key_back_color: 0xff23948e
     on_key_text_color: 0xff37474f
-    preview_back_color: 0xffbfbfbf
-    preview_text_color: 0xff000000
+    preview_back_color: 0x55bfbfbf
+    preview_text_color: 0xff23948e
     shadow_color: 0xff000000
     text_color: 0xff23948e
 

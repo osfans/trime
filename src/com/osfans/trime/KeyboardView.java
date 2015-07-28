@@ -274,7 +274,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPreviewOffset = schema.getPixel("preview_offset");
         mPreviewHeight = schema.getPixel("preview_height");
         mLabelTextSize = schema.getPixel("label_text_size");
-        mPreviewTextSizeLarge = schema.getPixel("preview_text_size");
 
         mBackgroundDimAmount = schema.getFloat("background_dim_amount");
         mShadowRadius = schema.getFloat("shadow_radius");
@@ -290,6 +289,8 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         mPreviewText.setTextColor(schema.getColor("preview_text_color"));
         mPreviewText.setBackgroundColor(schema.getColor("preview_back_color"));
+        mPreviewTextSizeLarge = schema.getInt("preview_text_size");
+        mPreviewText.setTextSize(mPreviewTextSizeLarge);
         setBackgroundColor(schema.getColor("keyboard_back_color"));
     }
 
@@ -319,6 +320,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPaint.setAntiAlias(true);
         mPaint.setTextAlign(Align.CENTER);
         tf = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
+        mPreviewText.setTypeface(tf);
         mPaintSymbol = new Paint();
         mPaintSymbol.setTypeface(tf);
         mPaintSymbol.setColor(key_symbol_color);
@@ -843,13 +845,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         } else {
             mPreviewText.setCompoundDrawables(null, null, null, null);
             mPreviewText.setText(getPreviewText(key));
-            if (key.label.length() > 1 && key.codes.length < 2) {
-                mPreviewText.setTextSize(mKeyTextSize);
-                mPreviewText.setTypeface(tf);
-            } else {
-                mPreviewText.setTextSize(mPreviewTextSizeLarge);
-                mPreviewText.setTypeface(tf);
-            }
         }
         mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 
                 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));

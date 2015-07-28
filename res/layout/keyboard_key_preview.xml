@@ -21,8 +21,8 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content" 
     android:layout_height="wrap_content"
-    android:textSize="32sp"
-    android:minWidth="32sp"
-    android:minHeight="80sp"
+    android:textSize="40sp"
+    android:minWidth="40sp"
+    android:minHeight="60sp"
     android:gravity="bottom|center_horizontal"
     />
