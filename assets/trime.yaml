@@ -24,9 +24,9 @@ style:
     round_corner: 4
     background_dim_amount: 0.5
     candidate_text_size: 22
-    candidate_view_height: 60
-    comment_height: 10
-    comment_text_size: 10
+    candidate_view_height: 40
+    comment_height: 12
+    comment_text_size: 12
     horizontal_gap: 1
     key_height: 42
     key_text_size: 22
@@ -37,8 +37,8 @@ style:
     preview_text_size: 80
     shadow_radius: 0.0
     symbol_text_size: 10
-    text_height: 12
-    text_size: 10
+    text_height: 14
+    text_size: 12
     vertical_correction: -10
     vertical_gap: 1
     text_font: han.ttf

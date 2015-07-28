@@ -62,6 +62,7 @@ public class CandView extends View {
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
+  private int candidate_view_height;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
@@ -82,6 +83,7 @@ public class CandView extends View {
 
     candidate_text_size = schema.getPixel("candidate_text_size");
     comment_text_size = schema.getPixel("comment_text_size");
+    candidate_view_height = schema.getPixel("candidate_view_height");
 
     tf = getFont(schema.getString("text_font"));
     tfb = getFont(schema.getString("text_font_b"));
@@ -244,6 +246,7 @@ public class CandView extends View {
     if (mRime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
     params.width = x;
+    params.height = candidate_view_height;
     setLayoutParams(params);
   }
 
