@@ -165,6 +165,7 @@ public class Schema {
       map = (Map<String, Object>)getValue(fallbackScheme);
       o = map.get(key);
     }
+    if (o instanceof Integer) return ((Integer)o).intValue();
     return ((Long)o).intValue();
   }
 }
