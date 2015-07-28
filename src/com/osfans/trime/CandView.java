@@ -80,8 +80,8 @@ public class CandView extends View {
     hilited_candidate_text_color = schema.getColor("hilited_candidate_text_color");
     hilited_comment_text_color = schema.getColor("hilited_comment_text_color");
 
-    candidate_text_size = schema.getInt("candidate_text_size");
-    comment_text_size = schema.getInt("comment_text_size");
+    candidate_text_size = schema.getPixel("candidate_text_size");
+    comment_text_size = schema.getPixel("comment_text_size");
 
     tf = getFont(schema.getString("text_font"));
     tfb = getFont(schema.getString("text_font_b"));
@@ -183,11 +183,6 @@ public class CandView extends View {
   }
 
   private void drawCandidates(Canvas canvas) {
-    float size = candidate_text_size;
-    if (size != paint.getTextSize()) {
-      paint.setTextSize(size);
-    }
-
     if (candidates == null) return;
 
     final float y = candidateRect[0].centerY() - (paint.ascent() + paintpy.getTextSize() - paint.getTextSize()) / 2;

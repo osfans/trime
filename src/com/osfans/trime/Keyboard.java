@@ -696,10 +696,10 @@ public class Keyboard {
         //Log.v(TAG, "keyboard's display metrics:" + dm);
 
         Schema schema = Schema.get();
-        mDefaultHorizontalGap = schema.getInt("horizontal_gap");
-        mDefaultVerticalGap = schema.getInt("vertical_gap");
+        mDefaultHorizontalGap = schema.getPixel("horizontal_gap");
+        mDefaultVerticalGap = schema.getPixel("vertical_gap");
         mDefaultWidth = (int)(mDisplayWidth * schema.getInt("key_width") / 100);
-        mDefaultHeight = schema.getInt("key_height");
+        mDefaultHeight = schema.getPixel("key_height");
         mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
         mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
 

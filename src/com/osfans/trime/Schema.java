@@ -17,6 +17,8 @@
 package com.osfans.trime;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.TypedValue;
 import android.util.Log;
 
 import java.util.Map;
@@ -136,14 +138,21 @@ public class Schema {
     return (Boolean)map.get(key);
   }
 
-  public int getInt(String key) {
-    Map map = (Map<String, Object>)getValue("style/layout");
-    return (Integer)map.get(key);
-  }
-
   public float getFloat(String key) {
     Map map = (Map<String, Object>)getValue("style/layout");
-    return ((Double)map.get(key)).floatValue();
+    Object o = map.get(key);
+    float size = 0;
+    if (o instanceof Integer) size = ((Integer)o).floatValue();
+    else if (o instanceof Float) size = ((Float)o).floatValue();
+    return size;
+  }
+
+  public int getInt(String key) {
+    return (int)getFloat(key);
+  }
+
+  public int getPixel(String key) {
+    return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, getFloat(key), Resources.getSystem().getDisplayMetrics());
   }
 
   public String getString(String key) {

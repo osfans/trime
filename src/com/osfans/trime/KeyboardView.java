@@ -268,13 +268,13 @@ public class KeyboardView extends View implements View.OnClickListener {
         hilited_key_symbol_color = schema.getColor("hilited_key_symbol_color");
         mShadowColor = schema.getColor("shadow_color");
 
-        mSymbolSize = schema.getInt("symbol_text_size");
-        mKeyTextSize = schema.getInt("key_text_size");
-        mVerticalCorrection = schema.getInt("vertical_correction");
-        mPreviewOffset = schema.getInt("preview_offset");
-        mPreviewHeight = schema.getInt("preview_height");
-        mLabelTextSize = schema.getInt("label_text_size");
-        mPreviewTextSizeLarge = schema.getInt("preview_text_size");
+        mSymbolSize = schema.getPixel("symbol_text_size");
+        mKeyTextSize = schema.getPixel("key_text_size");
+        mVerticalCorrection = schema.getPixel("vertical_correction");
+        mPreviewOffset = schema.getPixel("preview_offset");
+        mPreviewHeight = schema.getPixel("preview_height");
+        mLabelTextSize = schema.getPixel("label_text_size");
+        mPreviewTextSizeLarge = schema.getPixel("preview_text_size");
 
         mBackgroundDimAmount = schema.getFloat("background_dim_amount");
         mShadowRadius = schema.getFloat("shadow_radius");
