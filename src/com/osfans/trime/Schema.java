@@ -133,9 +133,18 @@ public class Schema {
     return self;
   }
 
+  public static Schema get(Context context) {
+    if (self == null) self = new Schema(context);
+    return self;
+  }
+
+  public static void destroy() {
+    self = null;
+  }
+
   public boolean getBoolean(String key) {
-    Map map = (Map<String, Object>)getValue("style/layout");
-    return (Boolean)map.get(key);
+    Object o = getValue("style/" + key);
+    return o == null ? false : (Boolean)o;
   }
 
   public float getFloat(String key) {
@@ -157,7 +166,8 @@ public class Schema {
 
   public String getString(String key) {
     Map map = (Map<String, Object>)getValue("style/layout");
-    return (String)map.get(key);
+    Object o = map.get(key);
+    return o == null ? null : (String)o;
   }
 
   public int getColor(String key) {

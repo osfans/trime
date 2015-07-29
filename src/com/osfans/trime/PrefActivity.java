@@ -84,6 +84,8 @@ public class PrefActivity extends PreferenceActivity {
     } else if (key.contentEquals("pref_deploy")) { //部署
       Rime.getRime().finalize1();
       Rime.getRime().init(true);
+      Trime trime = Trime.getService();
+      if (trime != null) trime.invalidate();
       return true;
     } else if (key.contentEquals("pref_sync")) { //同步
       Rime.getRime().sync_user_data();

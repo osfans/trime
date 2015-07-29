@@ -64,8 +64,8 @@ public class Trime extends InputMethodService implements
     self = this;
     mPref = new Pref(this);
     effect = new Effect(this);
-    mRime = new Rime();
-    mSchema = new Schema(this);
+    mRime = Rime.getRime();
+    mSchema = Schema.get(this);
     keyboardSwitch = new KeyboardSwitch(this);
 
     orientation = getResources().getConfiguration().orientation;
@@ -77,13 +77,24 @@ public class Trime extends InputMethodService implements
   public void onDestroy() {
     super.onDestroy();
     self = null;
-    mRime.destroy();
-    mRime = null;
-    mSchema = null;
+    if (mSchema.getBoolean("destroy_on_quit")) {
+      mRime.destroy();
+      mRime = null;
+      mSchema.destroy();
+      mSchema = null;
+    }
   }
 
   public static Trime getService() {
     return self;
+  }
+
+  public void invalidate() {
+    mRime = Rime.getRime();
+    mSchema = new Schema(this);
+    keyboardSwitch.refresh();
+    inputView.refresh();
+    candidatesContainer.refresh();
   }
 
   @Override
