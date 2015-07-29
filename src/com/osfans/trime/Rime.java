@@ -214,7 +214,7 @@ public class Rime
   }
 
   public Rime() {
-    init(true);
+    init(false); //不做full check
   }
 
   public void initSchema() {
