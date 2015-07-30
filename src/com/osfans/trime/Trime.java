@@ -91,6 +91,7 @@ public class Trime extends InputMethodService implements
 
   public void invalidate() {
     mRime = Rime.getRime();
+    mSchema.destroy();
     mSchema = new Schema(this);
     keyboardSwitch.refresh();
     inputView.refresh();

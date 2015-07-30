@@ -30,6 +30,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class Schema {
   private Map<String,Object> mSchema, mDefaultSchema;
+  private Map<String, Map> maps;
   private String defaultName = "trime.yaml";
   private int BLK_SIZE = 1024;
   private static Schema self = null;
@@ -37,6 +38,7 @@ public class Schema {
 
   public Schema(Context context) {
     self = this;
+    maps = new HashMap<String, Map>();
     mDefaultSchema = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
     fallback.put("candidate_text_color", "text_color");
     fallback.put("border_color", "back_color");
@@ -90,11 +92,17 @@ public class Schema {
   }
 
   public void refresh() {
-    File f = new File("/sdcard/rime", Rime.getRime().getSchemaId() + "." + defaultName);
+    String schema_id = Rime.getRime().getSchemaId();
+    if (maps.containsKey(schema_id)) {
+      mSchema = maps.get(schema_id);
+      return;
+    }
     mSchema = null;
+    File f = new File("/sdcard/rime", schema_id + "." + defaultName);
     if (!f.exists()) return;
     try {
       mSchema = (Map<String,Object>)new Yaml().load(new FileInputStream(f));
+      maps.put(schema_id, mSchema); //緩存各方案自定義配置
     } catch (IOException e) {
     }
   }
@@ -138,7 +146,10 @@ public class Schema {
     return self;
   }
 
-  public static void destroy() {
+  public void destroy() {
+    maps.clear();
+    mSchema.clear();
+    mDefaultSchema.clear();
     self = null;
   }
 
