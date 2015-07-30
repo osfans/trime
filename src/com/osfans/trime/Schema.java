@@ -147,9 +147,9 @@ public class Schema {
   }
 
   public void destroy() {
-    maps.clear();
-    mSchema.clear();
-    mDefaultSchema.clear();
+    if (maps != null) maps.clear();
+    if (mDefaultSchema != null) mDefaultSchema.clear();
+    if (mSchema != null) mSchema.clear();
     self = null;
   }
 
