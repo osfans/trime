@@ -345,7 +345,7 @@ public class Trime extends InputMethodService implements
     }
     if (candidatesContainer != null) {
       candidatesContainer.updatePage();
-      setCandidatesViewShown(canCompose);
+      //setCandidatesViewShown(canCompose); //InputType爲0x80000時無候選條
     }
   }
 
