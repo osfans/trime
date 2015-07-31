@@ -125,9 +125,20 @@ public class Rime
     String description;
 
     RimeSwitches[] switches;
+    List<Integer> index = new ArrayList<Integer>();
+
+    public void check() {
+      if (switches == null) return;
+      index.clear();
+      int i = 0;
+      for (RimeSwitches o: switches) {
+        if (o.states != null && o.states.length > 0) index.add(i);
+        i++;
+      }
+    }
 
     public int size() {
-      return switches != null ? switches.length : 0;
+      return index.size();
     }
 
     public RimeCandidate[] getCandidates() {
@@ -135,7 +146,8 @@ public class Rime
       if (n == 0) return null;
       RimeCandidate[] candidates = new RimeCandidate[n];
       int i = 0;
-      for (RimeSwitches o: switches) {
+      for (Integer j: index) {
+        RimeSwitches o = switches[j];
         candidates[i] = new RimeCandidate();
         candidates[i].text = o.states[o.value];
         candidates[i].comment = o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
@@ -164,7 +176,7 @@ public class Rime
       int n = size();
       if (n == 0) return;
       Rime rime = Rime.getRime();
-      RimeSwitches o = switches[i];
+      RimeSwitches o = switches[index.get(i)];
       if (o.is_radio) {
         rime.setOption(o.options[o.value], false);
         o.value = (o.value + 1) % o.options.length;
@@ -220,6 +232,7 @@ public class Rime
   public void initSchema() {
     String schema_id = getSchemaId();
     get_schema(schema_id, mSchema);
+    mSchema.check(); //檢查不在選單中顯示的選項
     getStatus();
   }
 
