@@ -95,7 +95,10 @@ public class Trime extends InputMethodService implements
     mSchema = new Schema(this);
     if (keyboardSwitch != null) keyboardSwitch.refresh();
     if (inputView != null) inputView.refresh();
-    candidatesContainer.refresh();
+    if (candidatesContainer != null) {
+      candidatesContainer.refresh(); //刷新狀態欄配置
+      candidatesContainer.updatePage(); //刷新顯示
+    }
   }
 
   @Override
