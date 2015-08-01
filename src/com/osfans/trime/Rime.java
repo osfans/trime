@@ -157,6 +157,7 @@ public class Rime
     }
 
     public void getValue(int session_id) {
+      if (switches == null) return; //無方案
       for (RimeSwitches o: switches) {
         if (o.is_radio) {
           for (int i = 0; i < o.options.length; i++) {
@@ -366,6 +367,14 @@ public class Rime
 
   public String getSchemaId() {
     return get_current_schema(session_id);
+  }
+
+  public boolean isEmpty(String s) {
+    return s.contentEquals(".default"); //無方案
+  }
+
+  public boolean isEmpty() {
+    return isEmpty(getSchemaId());
   }
 
   public int getSchemaIndex() {

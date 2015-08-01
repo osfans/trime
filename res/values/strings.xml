@@ -32,7 +32,7 @@
     <string name="pref_sync">同步</string>
 
     <string name="set_ime">全局設定</string>
-    <string name="set_schema">設定本方案</string>
+    <string name="no_schemas">請在/sdcard/rime中添加essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
 
 </resources>

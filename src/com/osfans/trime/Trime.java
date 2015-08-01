@@ -169,7 +169,7 @@ public class Trime extends InputMethodService implements
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
-    setCandidatesViewShown(true);
+    setCandidatesViewShown(!mRime.isEmpty());
   }
 
   @Override
@@ -375,13 +375,6 @@ public class Trime extends InputMethodService implements
         .setTitle(R.string.ime_name)
         //.setIcon(android.R.drawable.ic_menu_preferences)
         .setCancelable(true)
-        .setSingleChoiceItems(mRime.get_schema_names(), mRime.getSchemaIndex(),
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface di, int id) {
-            di.dismiss();
-            mRime.selectSchema(id);
-          }
-        })
         .setNegativeButton(R.string.other_ime, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
                 di.dismiss();
@@ -397,6 +390,14 @@ public class Trime extends InputMethodService implements
                 startActivity(iSetting);
                 escape(); //全局設置時清屏
             }
+        });
+        if (mRime.isEmpty()) builder.setMessage(R.string.no_schemas);
+        else builder.setSingleChoiceItems(mRime.get_schema_names(), mRime.getSchemaIndex(),
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface di, int id) {
+            di.dismiss();
+            mRime.selectSchema(id);
+          }
         });
         mOptionsDialog = builder.create();
         Window window = mOptionsDialog.getWindow();

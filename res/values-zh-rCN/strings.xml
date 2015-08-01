@@ -32,7 +32,6 @@
     <string name="pref_sync">同步</string>
 
     <string name="set_ime">全局设置</string>
-    <string name="set_schema">设置本方案</string>
     <string name="other_ime">其他输入法</string>
 
 </resources>
