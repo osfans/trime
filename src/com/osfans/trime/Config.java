@@ -29,20 +29,20 @@ import java.io.*;
 
 import org.yaml.snakeyaml.Yaml;
 
-public class Schema {
-  private Map<String,Object> mSchema, mDefaultSchema;
+public class Config {
+  private Map<String,Object> mConfig, mDefaultConfig;
   private Map<String, Map> maps;
   private String defaultName = "trime.yaml";
   private int BLK_SIZE = 1024;
-  private static Schema self = null;
+  private static Config self = null;
   private Map<String,String> fallback = new HashMap<String, String>();
   private Typeface tf;
 
-  public Schema(Context context) {
+  public Config(Context context) {
     self = this;
     tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
     maps = new HashMap<String, Map>();
-    mDefaultSchema = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
+    mDefaultConfig = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
     fallback.put("candidate_text_color", "text_color");
     fallback.put("border_color", "back_color");
     fallback.put("hilited_text_color", "text_color");
@@ -97,33 +97,33 @@ public class Schema {
   public void refresh() {
     String schema_id = Rime.getRime().getSchemaId();
     if (maps.containsKey(schema_id)) {
-      mSchema = maps.get(schema_id);
+      mConfig = maps.get(schema_id);
       return;
     }
-    mSchema = null;
+    mConfig = null;
     File f = new File("/sdcard/rime", schema_id + "." + defaultName);
     if (!f.exists()) return;
     try {
-      mSchema = (Map<String,Object>)new Yaml().load(new FileInputStream(f));
-      maps.put(schema_id, mSchema); //緩存各方案自定義配置
+      mConfig = (Map<String,Object>)new Yaml().load(new FileInputStream(f));
+      maps.put(schema_id, mConfig); //緩存各方案自定義配置
     } catch (IOException e) {
     }
   }
 
   private Object _getValue(String k1) {
-    if (mSchema != null && mSchema.containsKey(k1)) return mSchema.get(k1);
-    if (mDefaultSchema.containsKey(k1)) return mDefaultSchema.get(k1);
+    if (mConfig != null && mConfig.containsKey(k1)) return mConfig.get(k1);
+    if (mDefaultConfig.containsKey(k1)) return mDefaultConfig.get(k1);
     return null;
   }
 
   private Object _getValue(String k1, String k2) {
     Map<String, Object> m;
-    if (mSchema != null && mSchema.containsKey(k1)) {
-      m = (Map<String, Object>)mSchema.get(k1);
+    if (mConfig != null && mConfig.containsKey(k1)) {
+      m = (Map<String, Object>)mConfig.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
-    if (mDefaultSchema.containsKey(k1)) {
-      m = (Map<String, Object>)mDefaultSchema.get(k1);
+    if (mDefaultConfig.containsKey(k1)) {
+      m = (Map<String, Object>)mDefaultConfig.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
     return null;
@@ -140,19 +140,19 @@ public class Schema {
     return (List<Object>)getValue("keyboard");
   }
 
-  public static Schema get() {
+  public static Config get() {
     return self;
   }
 
-  public static Schema get(Context context) {
-    if (self == null) self = new Schema(context);
+  public static Config get(Context context) {
+    if (self == null) self = new Config(context);
     return self;
   }
 
   public void destroy() {
     if (maps != null) maps.clear();
-    if (mDefaultSchema != null) mDefaultSchema.clear();
-    if (mSchema != null) mSchema.clear();
+    if (mDefaultConfig != null) mDefaultConfig.clear();
+    if (mConfig != null) mConfig.clear();
     self = null;
   }
 
@@ -162,8 +162,7 @@ public class Schema {
   }
 
   public float getFloat(String key) {
-    Map map = (Map<String, Object>)getValue("style/layout");
-    Object o = map.get(key);
+    Object o = getValue("style/" + key);
     float size = 0;
     if (o instanceof Integer) size = ((Integer)o).floatValue();
     else if (o instanceof Float) size = ((Float)o).floatValue();
@@ -179,9 +178,7 @@ public class Schema {
   }
 
   public String getString(String key) {
-    Map map = (Map<String, Object>)getValue("style/layout");
-    Object o = map.get(key);
-    return o == null ? null : (String)o;
+    return (String)getValue("style/" + key);
   }
 
   public int getColor(String key) {

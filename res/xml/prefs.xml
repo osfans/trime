@@ -24,38 +24,9 @@
         <Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" />
         <Preference android:key="pref_deploy" android:title="@string/pref_deploy" />
         <Preference android:key="pref_sync" android:title="@string/pref_sync" />
-        <CheckBoxPreference
-            android:key="pref_commit_py"
-            android:title="@string/pref_commit_py_title"
-            android:summary="@string/pref_commit_py_summary"
-            android:persistent="true"/>
-
-        <CheckBoxPreference
-            android:key="pref_embed_first"
-            android:title="@string/pref_embed_first"
-            android:defaultValue="false"
-            android:persistent="true"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:key="pref_general" android:title="@string/pref_general">
-        <CheckBoxPreference
-            android:key="pref_vibrate"
-            android:title="@string/pref_vibrate_title"
-            android:persistent="true"/>
-
-        <CheckBoxPreference
-            android:key="pref_sound"
-            android:title="@string/pref_sound_title"
-            android:persistent="true"/>
-
-        <CheckBoxPreference
-            android:key="pref_keyboard_preview"
-            android:title="@string/pref_keyboard_preview_title"
-            android:defaultValue="false"
-            android:persistent="true"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory android:key="pref_other" android:title="@string/pref_other">
+    <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">
         <Preference android:key="pref_librimever" android:title="@string/pref_librimever" />
         <Preference android:key="pref_ver" android:title="@string/pref_ver" />
     </PreferenceCategory>

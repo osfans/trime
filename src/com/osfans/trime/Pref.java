@@ -16,39 +16,86 @@
 
 package com.osfans.trime;
 
-import android.content.Context;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.ListPreference;
+import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceScreen;
+import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.util.Log;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
-public class Pref {
-  private final SharedPreferences mPref;
+/**
+ * Manages IME preferences. 
+ */
+public class Pref extends PreferenceActivity {
 
-  protected Pref(Context context) {
-    mPref = PreferenceManager.getDefaultSharedPreferences(context);
+  private final String licenseUrl = "file:///android_asset/licensing.html";
+
+  public String getVersion() {
+    try {
+       return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
-  public boolean isCommitPy() {
-    return mPref.getBoolean("pref_commit_py", false);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    addPreferencesFromResource(R.xml.prefs);
+
+    Preference pref = findPreference("pref_librimever");
+    pref.setSummary(Rime.get_version());
+    pref = findPreference("pref_ver");
+    pref.setSummary(getVersion());
   }
 
-  public String getOpenCC() {
-    return mPref.getString("pref_opencc", "");
+  private void showLicenseDialog() {
+    View licenseView = View.inflate(this, R.layout.licensing, null);
+    WebView webView = (WebView) licenseView.findViewById(R.id.license_view);
+    webView.setWebViewClient(new WebViewClient() {
+      @Override
+      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        // Disable all links open from this web view.
+        return true;
+      }
+    });
+    webView.loadUrl(licenseUrl);
+
+    new AlertDialog.Builder(this)
+      .setTitle(R.string.ime_name)
+      .setView(licenseView)
+      .show();
   }
 
-  public boolean isKeyboardPreview() {
-    return mPref.getBoolean("pref_keyboard_preview", true);
-  }
-
-  public boolean isEmbedFirst() {
-    return mPref.getBoolean("pref_embed_first", false);
-  }
-
-  public int getCandTextSize() {
-    return Integer.parseInt(mPref.getString("pref_cand_font_size", "22"));
-  }
-
-  public int getKeyTextSize() {
-    return Integer.parseInt(mPref.getString("pref_key_font_size", "22"));
+  @Override
+  public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+    String key = preference.getKey();
+    if (key.contentEquals("pref_maintenance")) { //維護
+      Rime.getRime().check(true);
+      return true;
+    } else if (key.contentEquals("pref_deploy")) { //部署
+      Rime.getRime().finalize1();
+      Rime.getRime().init(true);
+      Trime trime = Trime.getService();
+      if (trime != null) trime.invalidate();
+      return true;
+    } else if (key.contentEquals("pref_sync")) { //同步
+      Rime.getRime().sync_user_data();
+      Rime.getRime().finalize1();
+      Rime.getRime().init(false);
+      return true;
+    } else if (key.contentEquals("pref_licensing")) { //資訊
+      showLicenseDialog();
+      return true;
+    }
+    return false;
   }
 }

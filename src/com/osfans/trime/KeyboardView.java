@@ -260,43 +260,43 @@ public class KeyboardView extends View implements View.OnClickListener {
 
 
     public void refresh() {
-        Schema schema = Schema.get();
-        key_text_color = schema.getColor("key_text_color");
-        hilited_key_text_color = schema.getColor("hilited_key_text_color");
-        key_symbol_color = schema.getColor("key_symbol_color");
-        hilited_key_symbol_color = schema.getColor("hilited_key_symbol_color");
-        mShadowColor = schema.getColor("shadow_color");
+        Config config = Config.get();
+        key_text_color = config.getColor("key_text_color");
+        hilited_key_text_color = config.getColor("hilited_key_text_color");
+        key_symbol_color = config.getColor("key_symbol_color");
+        hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
+        mShadowColor = config.getColor("shadow_color");
 
-        mSymbolSize = schema.getPixel("symbol_text_size");
-        mKeyTextSize = schema.getPixel("key_text_size");
-        mVerticalCorrection = schema.getPixel("vertical_correction");
-        mPreviewOffset = schema.getPixel("preview_offset");
-        mPreviewHeight = schema.getPixel("preview_height");
-        mLabelTextSize = schema.getPixel("label_text_size");
+        mSymbolSize = config.getPixel("symbol_text_size");
+        mKeyTextSize = config.getPixel("key_text_size");
+        mVerticalCorrection = config.getPixel("vertical_correction");
+        mPreviewOffset = config.getPixel("preview_offset");
+        mPreviewHeight = config.getPixel("preview_height");
+        mLabelTextSize = config.getPixel("label_text_size");
 
-        mBackgroundDimAmount = schema.getFloat("background_dim_amount");
-        mShadowRadius = schema.getFloat("shadow_radius");
+        mBackgroundDimAmount = config.getFloat("background_dim_amount");
+        mShadowRadius = config.getFloat("shadow_radius");
 
         StateListDrawable keyBackground = new StateListDrawable();
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_ON, new ColorDrawable(schema.getColor("hilited_on_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_OFF, new ColorDrawable(schema.getColor("hilited_off_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_ON, new ColorDrawable(schema.getColor("on_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_OFF, new ColorDrawable(schema.getColor("off_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED, new ColorDrawable(schema.getColor("hilited_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL, new ColorDrawable(schema.getColor("key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_ON, new ColorDrawable(config.getColor("hilited_on_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_OFF, new ColorDrawable(config.getColor("hilited_off_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_ON, new ColorDrawable(config.getColor("on_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_OFF, new ColorDrawable(config.getColor("off_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED, new ColorDrawable(config.getColor("hilited_key_back_color")));
+        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL, new ColorDrawable(config.getColor("key_back_color")));
         mKeyBackground = keyBackground;
 
-        mPreviewText.setTextColor(schema.getColor("preview_text_color"));
-        mPreviewText.setBackgroundColor(schema.getColor("preview_back_color"));
-        mPreviewTextSizeLarge = schema.getInt("preview_text_size");
+        mPreviewText.setTextColor(config.getColor("preview_text_color"));
+        mPreviewText.setBackgroundColor(config.getColor("preview_back_color"));
+        mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
-        setBackgroundColor(schema.getColor("keyboard_back_color"));
+        setBackgroundColor(config.getColor("keyboard_back_color"));
 
-        mPaint.setTypeface(schema.getFont("key_font"));
-        mPaintSymbol.setTypeface(schema.getFont("symbol_font"));
+        mPaint.setTypeface(config.getFont("key_font"));
+        mPaintSymbol.setTypeface(config.getFont("symbol_font"));
         mPaintSymbol.setColor(key_symbol_color);
         mPaintSymbol.setTextSize(mSymbolSize);
-        mPreviewText.setTypeface(schema.getFont("preview_font"));
+        mPreviewText.setTypeface(config.getFont("preview_font"));
     }
 
     public KeyboardView(Context context, AttributeSet attrs) {

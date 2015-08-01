@@ -67,22 +67,22 @@ public class CandView extends View {
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
   public void refresh() {
-    Schema schema = Schema.get();
-    candidateHighlight = new ColorDrawable(schema.getColor("hilited_candidate_back_color"));
-    candidateSeparator = new ColorDrawable(schema.getColor("candidate_separator_color"));
-    candidate_text_color = schema.getColor("candidate_text_color");
-    comment_text_color = schema.getColor("comment_text_color");
-    hilited_candidate_text_color = schema.getColor("hilited_candidate_text_color");
-    hilited_comment_text_color = schema.getColor("hilited_comment_text_color");
+    Config config = Config.get();
+    candidateHighlight = new ColorDrawable(config.getColor("hilited_candidate_back_color"));
+    candidateSeparator = new ColorDrawable(config.getColor("candidate_separator_color"));
+    candidate_text_color = config.getColor("candidate_text_color");
+    comment_text_color = config.getColor("comment_text_color");
+    hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
+    hilited_comment_text_color = config.getColor("hilited_comment_text_color");
 
-    candidate_text_size = schema.getPixel("candidate_text_size");
-    comment_text_size = schema.getPixel("comment_text_size");
-    candidate_view_height = schema.getPixel("candidate_view_height");
+    candidate_text_size = config.getPixel("candidate_text_size");
+    comment_text_size = config.getPixel("comment_text_size");
+    candidate_view_height = config.getPixel("candidate_view_height");
 
-    tfCandidate = schema.getFont("candidate_font");
-    tfb = schema.getFont("hanb_font");
-    tfComment = schema.getFont("comment_font");
-    tfs = schema.getFont("symbol_font");
+    tfCandidate = config.getFont("candidate_font");
+    tfb = config.getFont("hanb_font");
+    tfComment = config.getFont("comment_font");
+    tfs = config.getFont("symbol_font");
 
     paintCandidate.setTextSize(candidate_text_size);
     paintCandidate.setTypeface(tfCandidate);

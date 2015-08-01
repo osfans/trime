@@ -3,91 +3,92 @@
 
 config_version: "3.0"
 
-app_options:
-  cmd.exe:
-    ascii_mode: true
-
 style:
+  background_dim_amount: 0.5
+  border_width: 3
+  candidate_font: han.ttf #候選字體
+  candidate_spacing: 5
+  candidate_text_size: 22 #候選字號
+  candidate_view_height: 40 #候選區高度
   color_scheme: default #配色方案
+  comment_font: latin.ttf #編碼提示字體
+  comment_height: 12 #編碼提示區高度
+  comment_text_size: 12 #編碼提示字號
   destroy_on_quit: false #退出時清理內存
-  soft_cursor: true #軟光標
-  inline_preedit: false
   display_tray_icon: false
-  layout:
-    min_width: 160
-    min_height: 0
-    border_width: 3
-    margin_x: 12
-    margin_y: 12
-    spacing: 10
-    candidate_spacing: 5
-    hilite_spacing: 4
-    hilite_padding: 2
-    round_corner: 4
-    background_dim_amount: 0.5
-    candidate_text_size: 22 #候選字號
-    candidate_view_height: 40 #候選區高度
-    comment_height: 12 #編碼提示區高度
-    comment_text_size: 12 ##編碼提示字號
-    horizontal_gap: 1 #鍵水平間距
-    key_height: 42 #鍵高
-    key_text_size: 22 #鍵字號
-    key_width: 10 #鍵寬
-    label_text_size: 14 #鍵長標籤字號
-    preview_height: 60 #按鍵提示高度
-    preview_offset: -12 #按鍵提示縱向偏移
-    preview_text_size: 40 #按鍵提示字號
-    shadow_radius: 0.0
-    symbol_text_size: 10 #符號字號
-    text_height: 16 #編碼區高度
-    text_size: 12 #編碼區字號
-    vertical_correction: -10
-    vertical_gap: 1
-    candidate_font: han.ttf #候選字體
-    comment_font: latin.ttf #編碼提示字體
-    key_font: han.ttf #鍵盤字體
-    text_font: latin.ttf #編碼字體
-    hanb_font: hanb.ttf #擴展字體
-    latin_font: latin.ttf #字母字體
-    symbol_font: symbol.ttf #符號字體
-    preview_font: latin.ttf #按鍵提示字體
+  hanb_font: hanb.ttf #擴展字體
+  hilite_padding: 2
+  hilite_spacing: 4
+  horizontal_gap: 1 #鍵水平間距
+  inline_code: false #嵌入編碼
+  inline_preedit: true #嵌入首選
+  keyboard_preview: true #按鍵提示
+  key_font: han.ttf #鍵盤字體
+  key_height: 42 #鍵高
+  key_sound: false #按鍵聲音
+  key_sound_volumn: -1 #按鍵音量
+  key_text_size: 22 #鍵字號
+  key_vibrate_duration: 30 #按鍵震動時長
+  key_vibrate: false #按鍵震動
+  key_width: 10 #鍵寬
+  label_text_size: 14 #長標籤字號
+  latin_font: latin.ttf #文字字體
+  margin_x: 12
+  margin_y: 12
+  min_height: 0
+  min_width: 160
+  preview_font: latin.ttf #按鍵提示字體
+  preview_height: 60 #按鍵提示高度
+  preview_offset: -12 #按鍵提示縱向偏移
+  preview_text_size: 40 #按鍵提示字號
+  round_corner: 4
+  shadow_radius: 0.0
+  soft_cursor: true #軟光標
+  spacing: 10
+  symbol_font: symbol.ttf #符號字體
+  symbol_text_size: 10 #符號字號
+  text_font: latin.ttf #編碼字體
+  text_height: 16 #編碼區高度
+  text_size: 12 #編碼區字號
+  vertical_correction: -10
+  vertical_gap: 1 #鍵盤行距
 
 preset_color_schemes:
   default:
-    name: 默認／default
-    author: osfans
-    back_color: 0xffe4e7e9
-    border_color: 0xffc1c7ca
-    candidate_back_color: 0xffe4e7e9
-    candidate_separator_color: 0xffc1c7ca
-    candidate_text_color: 0xff5a676e
-    comment_text_color: 0xff7b868c
-    hilited_back_color: 0xffd3d7da
-    hilited_candidate_back_color: 0xffd3d7da
-    hilited_candidate_text_color: 0xff000000
-    hilited_comment_text_color: 0xff000000
-    hilited_key_back_color: 0xffd3d7da
-    hilited_key_symbol_color: 0xff000000
-    hilited_key_text_color: 0xff000000
-    hilited_off_key_back_color: 0xffd3d7da
-    hilited_off_key_text_color: 0xff000000
-    hilited_on_key_back_color: 0xffd3d7da
-    hilited_on_key_text_color: 0xff000000
-    hilited_text_color: 0xff000000
-    key_back_color: 0xffeceff1
-    key_border_color: 0xffeceff1
-    key_symbol_color: 0xff5f6b73
-    key_text_color: 0xff37474f
-    keyboard_back_color: 0xffffffff
-    label_color: 0xff000000
-    off_key_back_color: 0xffeceff1
-    off_key_text_color: 0xff37474f
-    on_key_back_color: 0xff23948e
-    on_key_text_color: 0xff37474f
-    preview_back_color: 0x55bfbfbf
-    preview_text_color: 0xff23948e
-    shadow_color: 0xff000000
-    text_color: 0xff23948e
+    name: 默認／default #方案名稱
+    author: osfans #作者信息
+    back_color: 0xffe4e7e9 #候選區背景
+    border_color: 0xffc1c7ca #邊框
+    candidate_back_color: 0xffe4e7e9 #候選背景
+    candidate_separator_color: 0xffc1c7ca #候選分割背景
+    candidate_text_color: 0xff5a676e #候選文字
+    comment_text_color: 0xff7b868c #提示
+    hilited_back_color: 0xffd3d7da #高亮編碼背景
+    hilited_candidate_back_color: 0xffd3d7da #高亮候選背景
+    hilited_candidate_text_color: 0xff000000 #高亮候選文字
+    hilited_comment_text_color: 0xff000000 #高亮提示
+    hilited_key_back_color: 0xffd3d7da #高亮按鍵背景
+    hilited_key_symbol_color: 0xff000000 #高亮按鍵符號
+    hilited_key_text_color: 0xff000000 #高亮按鍵文字
+    hilited_off_key_back_color: 0xffd3d7da #高亮按鍵關閉狀態背景
+    hilited_off_key_text_color: 0xff000000 #高亮按鍵關閉狀態文字
+    hilited_on_key_back_color: 0xffd3d7da #高亮按鍵打開狀態背景
+    hilited_on_key_text_color: 0xff000000 #高亮按鍵打開狀態文字
+    hilited_text_color: 0xff000000 #高亮編碼
+    key_back_color: 0xffeceff1 #按鍵背景
+    key_border_color: 0xffeceff1 #按鍵邊框
+    key_symbol_color: 0xff5f6b73 #按鍵符號
+    key_text_color: 0xff37474f #按鍵文字
+    keyboard_back_color: 0xffffffff #鍵盤背景
+    label_color: 0xff000000 #標籤
+    off_key_back_color: 0xffeceff1 #按鍵關閉狀態背景
+    off_key_text_color: 0xff37474f #按鍵關閉狀態文字
+    on_key_back_color: 0xff23948e #按鍵打開狀態背景
+    on_key_text_color: 0xff37474f #按鍵打開狀態文字
+    preview_back_color: 0x55bfbfbf #按鍵提示背景
+    preview_text_color: 0xff23948e #按鍵提示文字
+    shadow_color: 0xff000000 #陰影
+    text_color: 0xff23948e #編碼
 
   aqua:
     name: 碧水／Aqua

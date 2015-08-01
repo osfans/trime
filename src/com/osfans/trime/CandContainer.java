@@ -53,13 +53,13 @@ public class CandContainer extends LinearLayout {
   }
 
   public void refresh() {
-    Schema schema = Schema.get();
-    setBackgroundColor(schema.getColor("back_color"));
-    text.setTextColor(schema.getColor("text_color"));
-    text.setTextSize(schema.getInt("text_size"));
-    text.setHeight(schema.getPixel("text_height"));
-    //text.setBackgroundColor(schema.getColor("back_color"));
-    text.setTypeface(schema.getFont("text_color"));
+    Config config = Config.get();
+    setBackgroundColor(config.getColor("back_color"));
+    text.setTextColor(config.getColor("text_color"));
+    text.setTextSize(config.getInt("text_size"));
+    text.setHeight(config.getPixel("text_height"));
+    //text.setBackgroundColor(config.getColor("back_color"));
+    text.setTypeface(config.getFont("text_color"));
     candidateView.refresh();
   }
 

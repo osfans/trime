@@ -43,8 +43,7 @@ public class KeyboardSwitch {
   }
 
   public void refresh() {
-    Schema schema = Schema.get();
-    List<Object> keys = schema.getKeyboards();
+    List<Object> keys = Config.get().getKeyboards();
     int n = keys.size();
     keyboards = new Keyboard[n];
     for (int i = 0; i < n; i++ ) {

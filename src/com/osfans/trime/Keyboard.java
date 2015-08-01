@@ -695,11 +695,11 @@ public class Keyboard {
         mDisplayHeight = dm.heightPixels;
         //Log.v(TAG, "keyboard's display metrics:" + dm);
 
-        Schema schema = Schema.get();
-        mDefaultHorizontalGap = schema.getPixel("horizontal_gap");
-        mDefaultVerticalGap = schema.getPixel("vertical_gap");
-        mDefaultWidth = (int)(mDisplayWidth * schema.getInt("key_width") / 100);
-        mDefaultHeight = schema.getPixel("key_height");
+        Config config = Config.get();
+        mDefaultHorizontalGap = config.getPixel("horizontal_gap");
+        mDefaultVerticalGap = config.getPixel("vertical_gap");
+        mDefaultWidth = (int)(mDisplayWidth * config.getInt("key_width") / 100);
+        mDefaultHeight = config.getPixel("key_height");
         mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
         mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
 
@@ -1022,7 +1022,7 @@ public class Keyboard {
         mModifierKeys.add(key);
       } else if (c == KeyEvent.KEYCODE_DEL){
         if (key.label==null) key.label = "⌫";
-        if (key.symbol == null && key.symbolCode == 0) key.repeatable = true;
+        key.repeatable = true;
       } else if (c == KeyEvent.KEYCODE_CLEAR){ //清屏
         if (key.label==null) key.label = "⌧";
       } else if (c == KeyEvent.KEYCODE_ENTER){

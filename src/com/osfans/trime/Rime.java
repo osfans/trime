@@ -222,7 +222,7 @@ public class Rime
   }
 
   public String getComposingText() {
-    return mContext.commit_text_preview != null ? mContext.commit_text_preview : "";
+    return mContext.commit_text_preview;
   }
 
   public Rime() {

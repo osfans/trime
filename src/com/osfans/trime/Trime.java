@@ -43,13 +43,13 @@ public class Trime extends InputMethodService implements
   protected KeyboardView inputView;
   private CandContainer candidatesContainer;
   private KeyboardSwitch keyboardSwitch;
-  private Schema mSchema;
-  private Pref mPref;
+  private Config mConfig;
   private Effect effect;
   private int orientation;
 
   private boolean canCompose;
   private boolean enterAsLineBreak;
+  private boolean inlinePreedit, inlineCode; //嵌入首選 
 
   private AlertDialog mOptionsDialog;
   private static Trime self;
@@ -60,13 +60,16 @@ public class Trime extends InputMethodService implements
   public void onCreate() {
     super.onCreate();
     self = this;
-    mPref = new Pref(this);
+
     effect = new Effect(this);
     mRime = Rime.getRime();
-    mSchema = Schema.get(this);
-    if (mSchema.getBoolean("soft_cursor")) {
+    mConfig = Config.get(this);
+    if (mConfig.getBoolean("soft_cursor")) {
       mRime.setOption("soft_cursor", true); //軟光標
     }
+    inlinePreedit = mConfig.getBoolean("inline_preedit");
+    inlineCode = mConfig.getBoolean("inline_code");
+    effect.reset();
 
     keyboardSwitch = new KeyboardSwitch(this);
 
@@ -79,11 +82,11 @@ public class Trime extends InputMethodService implements
   public void onDestroy() {
     super.onDestroy();
     self = null;
-    if (mSchema.getBoolean("destroy_on_quit")) {
+    if (mConfig.getBoolean("destroy_on_quit")) {
       mRime.destroy();
       mRime = null;
-      mSchema.destroy();
-      mSchema = null;
+      mConfig.destroy();
+      mConfig = null;
     }
   }
 
@@ -93,17 +96,21 @@ public class Trime extends InputMethodService implements
 
   public void invalidate() {
     mRime = Rime.getRime();
-    if (mSchema != null) mSchema.destroy();
-    mSchema = new Schema(this);
-    if (mSchema.getBoolean("soft_cursor")) {
+    if (mConfig != null) mConfig.destroy();
+    mConfig = new Config(this);
+    if (mConfig.getBoolean("soft_cursor")) {
       mRime.setOption("soft_cursor", true); //軟光標
     }
+    inlinePreedit = mConfig.getBoolean("inline_preedit");
+    inlineCode = mConfig.getBoolean("inline_code");
+
     if (keyboardSwitch != null) keyboardSwitch.refresh();
     if (inputView != null) inputView.refresh();
     if (candidatesContainer != null) {
       candidatesContainer.refresh(); //刷新狀態欄配置
       candidatesContainer.updatePage(); //刷新顯示
     }
+    effect.reset();
   }
 
   @Override
@@ -156,7 +163,6 @@ public class Trime extends InputMethodService implements
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
     editorstart(attribute.inputType);
-    effect.reset();
   }
 
   @Override
@@ -180,13 +186,13 @@ public class Trime extends InputMethodService implements
       // Bind the selected keyboard to the input view.
       Keyboard sk = (Keyboard)keyboardSwitch.getCurrentKeyboard();
       inputView.setKeyboard(sk);
-      inputView.setPreviewEnabled(mPref.isKeyboardPreview());
+      inputView.setPreviewEnabled(mConfig.getBoolean("keyboard_preview"));
       //updateCursorCapsToInputView();
     }
   }
 
   public void initKeyboard() {
-    mSchema.refresh();
+    mConfig.refresh();
     keyboardSwitch.refresh();
     candidatesContainer.refresh();
     inputView.refresh();
@@ -347,11 +353,13 @@ public class Trime extends InputMethodService implements
   }
 
   public void updateComposing() {
-    if (mPref.isEmbedFirst()) { //嵌入首選
+    if (inlinePreedit) { //嵌入首選
+      String s = inlineCode ? mRime.RimeGetInput() : mRime.getComposingText();
+      if (s == null) s = "";
       InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
         // Set cursor position 1 to advance the cursor to the text end.
-        ic.setComposingText(mRime.getComposingText(), 1);
+        ic.setComposingText(s, 1);
       }
     }
     if (candidatesContainer != null) {
@@ -384,7 +392,7 @@ public class Trime extends InputMethodService implements
             public void onClick(DialogInterface di, int id) {
                 di.dismiss();
                 Intent iSetting = new Intent();
-                iSetting.setClass(Trime.this, PrefActivity.class);
+                iSetting.setClass(Trime.this, Pref.class);
                 iSetting.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(iSetting);
                 escape(); //全局設置時清屏
