@@ -210,9 +210,9 @@ public class KeyboardView extends View implements View.OnClickListener {
     
     private Drawable mKeyBackground;
 
-    private static final int REPEAT_INTERVAL = 50; // ~20 keys per second
-    private static final int REPEAT_START_DELAY = 400;
-    private static final int LONGPRESS_TIMEOUT = 500;
+    private int repeat_interval = 50; // ~20 keys per second
+    private int repeat_start_delay = 400;
+    private int longpress_timeout = 500;
     // Deemed to be too short : ViewConfiguration.getLongPressTimeout();
 
     private static int MAX_NEARBY_KEYS = 12;
@@ -223,7 +223,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mTapCount;
     private long mLastTapTime;
     private boolean mInMultiTap;
-    private static final int MULTITAP_INTERVAL = 800; // milliseconds
+    private int multitap_interval = 800; // milliseconds
     private StringBuilder mPreviewLabel = new StringBuilder(1);
 
     /** Whether the keyboard bitmap needs to be redrawn before it's blitted. **/
@@ -248,7 +248,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 case MSG_REPEAT:
                     if (repeatKey()) {
                         Message repeat = Message.obtain(this, MSG_REPEAT);
-                        sendMessageDelayed(repeat, REPEAT_INTERVAL);                        
+                        sendMessageDelayed(repeat, repeat_interval);
                     }
                     break;
                 case MSG_LONGPRESS:
@@ -297,6 +297,11 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPaintSymbol.setColor(key_symbol_color);
         mPaintSymbol.setTextSize(mSymbolSize);
         mPreviewText.setTypeface(config.getFont("preview_font"));
+
+        repeat_interval = config.getInt("repeat_interval");
+        repeat_start_delay = config.getInt("repeat_start_delay");
+        longpress_timeout = config.getInt("longpress_timeout");
+        multitap_interval = config.getInt("multitap_interval");
     }
 
     public KeyboardView(Context context, AttributeSet attrs) {
@@ -1079,11 +1084,11 @@ public class KeyboardView extends View implements View.OnClickListener {
                     mRepeatKeyIndex = mCurrentKey;
                     repeatKey();
                     Message msg = mHandler.obtainMessage(MSG_REPEAT);
-                    mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);
+                    mHandler.sendMessageDelayed(msg, repeat_start_delay);
                 }
                 if (mCurrentKey != NOT_A_KEY) {
                     Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
-                    mHandler.sendMessageDelayed(msg, LONGPRESS_TIMEOUT);
+                    mHandler.sendMessageDelayed(msg, longpress_timeout);
                 }
                 showPreview(keyIndex);
                 break;
@@ -1120,7 +1125,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     // Start new longpress if key has changed
                     if (keyIndex != NOT_A_KEY) {
                         Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
-                        mHandler.sendMessageDelayed(msg, LONGPRESS_TIMEOUT);
+                        mHandler.sendMessageDelayed(msg, longpress_timeout);
                     }
                 }
                 showPreview(keyIndex);
@@ -1229,7 +1234,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         Key key = mKeys[keyIndex];
         if (key.codes.length > 1) {
             mInMultiTap = true;
-            if (eventTime < mLastTapTime + MULTITAP_INTERVAL
+            if (eventTime < mLastTapTime + multitap_interval
                     && keyIndex == mLastSentIndex) {
                 mTapCount = (mTapCount + 1) % key.codes.length;
                 return;
@@ -1238,7 +1243,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 return;
             }
         }
-        if (eventTime > mLastTapTime + MULTITAP_INTERVAL || keyIndex != mLastSentIndex) {
+        if (eventTime > mLastTapTime + multitap_interval || keyIndex != mLastSentIndex) {
             resetMultiTap();
         }
     }

@@ -33,14 +33,18 @@ style:
   key_width: 10 #鍵寬
   label_text_size: 14 #長標籤字號
   latin_font: latin.ttf #文字字體
+  longpress_timeout: 800 #按鍵超過800毫秒即爲長按
   margin_x: 12
   margin_y: 12
   min_height: 0
   min_width: 160
+  multitap_interval: 800 #800毫秒內快速按兩次鍵
   preview_font: latin.ttf #按鍵提示字體
   preview_height: 60 #按鍵提示高度
   preview_offset: -12 #按鍵提示縱向偏移
   preview_text_size: 40 #按鍵提示字號
+  repeat_interval: 50 #空格鍵、刪除鍵等自動重複間隔：50毫秒即1秒20次
+  repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
   round_corner: 4
   shadow_radius: 0.0
   soft_cursor: true #軟光標
