@@ -1001,12 +1001,17 @@ public class Keyboard {
       key.symbolLabel = (String)getValue(mk, "symbolLabel", null);
       key.hint = (String)getValue(mk, "hint", null);
 
-      String symbolcode = (String)getValue(mk, "symbolCode", null);
-      if (symbolcode != null) key.symbolCode = keynames.indexOf(symbolcode);
+      String symbolcode = (String)getValue(mk, "symbolCode", "");
+      if (!symbolcode.isEmpty()) {
+        int c = keynames.indexOf(symbolcode);
+        if (c < 0) c = 0;
+        key.symbolCode = c;
+      }
 
       String s = (String) getValue(mk, "code", ""); 
       int c = 0;
       if (!s.isEmpty()) c = keynames.indexOf(s);
+      if (c < 0) c = 0;
       key.codes = new int[]{c};
 
       if (c == KeyEvent.KEYCODE_SPACE){
