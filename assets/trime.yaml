@@ -602,7 +602,7 @@ keyboard:
   - {text: b}
   - {text: n}
   - {text: m}
-  - {code: BackSpace, width: 20}
+  - {code: BackSpace, width: 20, symbol: Clear, symbolCode: Clear}
   - {code: Language_switch, label: 🌐, symbol: F4, symbolCode: F4}
   - {label: '123', switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
   - {symbol: '"', text: "'"}
@@ -610,7 +610,7 @@ keyboard:
   - {code: space, width: 25}
   - {symbol: '>', text: '.'}
   - {symbol: '?', text: '/'}
-  - {code: Return, width: 15}
+  - {code: Return, width: 15, symbol: 'Esc', symbolCode: Escape}
 - mode: 1
   width: 20
   keys:

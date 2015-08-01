@@ -272,14 +272,16 @@ public class Trime extends InputMethodService implements
 
   public void onKey(int primaryCode, int mask) { //軟鍵盤
     Log.info("onKey="+primaryCode);
-    if (keyboardSwitch.onKey(primaryCode)) {
-      Log.info("keyboardSwitch onKey");
-      bindKeyboardToInputView();
-      escape();
+    if (primaryCode == KeyEvent.KEYCODE_CLEAR) {
+      getCurrentInputConnection().deleteSurroundingText(65536,0);
     } else if (primaryCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
       mRime.toggleOption("ascii_mode");
       commitText();
       updateComposing();
+    } else if (keyboardSwitch.onKey(primaryCode)) {
+      Log.info("keyboardSwitch onKey");
+      bindKeyboardToInputView();
+      escape();
     } else if(mRime.onKey(Keyboard.getRimeKeyEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
