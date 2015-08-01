@@ -212,8 +212,9 @@ public class Rime
   }
 
   public String getCompositionText() {
+    if (mContext == null || mContext.composition == null) return "";
     if (mContext.composition.length > 0) return mContext.composition.preedit;
-    else return "";
+    return "";
   }
 
   public static Rime getRime(){
@@ -222,6 +223,7 @@ public class Rime
   }
 
   public String getComposingText() {
+    if (mContext == null || mContext.commit_text_preview == null) return "";
     return mContext.commit_text_preview;
   }
 
@@ -390,7 +392,8 @@ public class Rime
   }
 
   public String RimeGetInput() {
-    return get_input(session_id);
+    String s = get_input(session_id);
+    return s == null ? "" : s;
   }
 
   public int RimeGetCaretPos() {
