@@ -10,6 +10,7 @@ app_options:
 style:
   color_scheme: default
   destroy_on_quit: false
+  soft_cursor: true #軟光標
   inline_preedit: false
   display_tray_icon: false
   layout:
@@ -584,33 +585,33 @@ keyboard:
   - {symbol: ']', text: i}
   - {symbol: '{', text: o}
   - {symbol: '}', text: p}
-  - {width: 5}
   - {symbol: '`', text: a}
-  - {symbol: '~', text: s}
-  - {text: d}
+  - {symbol: '↑', text: s, symbolCode: Up}
+  - {symbol: '~', text: d}
   - {text: f}
   - {text: g}
   - {text: h}
   - {text: j}
-  - {symbol: ':', text: k}
-  - {symbol: ';', text: l}
-  - {code: "Shift_L"}
-  - {text: z}
-  - {text: x}
-  - {text: c}
+  - {text: k}
+  - {text: l}
+  - {symbol: ':', text: ';'}
+  - {text: z, symbol: '←', symbolCode: Left}
+  - {text: x, symbol: '↓', symbolCode: Down}
+  - {text: c, symbol: '→', symbolCode: Right}
   - {text: v}
   - {text: b}
   - {text: n}
   - {text: m}
-  - {code: BackSpace, width: 20, symbol: Clear, symbolCode: Clear}
-  - {code: Language_switch, label: 🌐, symbol: F4, symbolCode: F4}
-  - {label: '123', switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
-  - {symbol: '"', text: "'"}
   - {symbol: '<', text: ','}
-  - {code: space, width: 25}
   - {symbol: '>', text: '.'}
   - {symbol: '?', text: '/'}
-  - {code: Return, width: 15, symbol: 'Esc', symbolCode: Escape}
+  - {code: "Shift_L"}
+  - {label: '123', switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
+  - {code: Language_switch, label: 🌐, symbol: F4, symbolCode: F4}
+  - {code: space, width: 30}
+  - {symbol: '"', text: "'"}
+  - {code: BackSpace, width: 15, symbol: Esc, symbolCode: Escape}
+  - {code: Return, width: 15, symbol: Clear, symbolCode: Clear}
 - mode: 1
   width: 20
   keys:

@@ -50,8 +50,6 @@ public class Trime extends InputMethodService implements
 
   private boolean canCompose;
   private boolean enterAsLineBreak;
-  private boolean isLeftApo = true;
-  private boolean isLeftQuote = true;
 
   private AlertDialog mOptionsDialog;
   private static Trime self;
@@ -66,6 +64,10 @@ public class Trime extends InputMethodService implements
     effect = new Effect(this);
     mRime = Rime.getRime();
     mSchema = Schema.get(this);
+    if (mSchema.getBoolean("soft_cursor")) {
+      mRime.setOption("soft_cursor", true); //軟光標
+    }
+
     keyboardSwitch = new KeyboardSwitch(this);
 
     orientation = getResources().getConfiguration().orientation;
@@ -93,6 +95,9 @@ public class Trime extends InputMethodService implements
     mRime = Rime.getRime();
     if (mSchema != null) mSchema.destroy();
     mSchema = new Schema(this);
+    if (mSchema.getBoolean("soft_cursor")) {
+      mRime.setOption("soft_cursor", true); //軟光標
+    }
     if (keyboardSwitch != null) keyboardSwitch.refresh();
     if (inputView != null) inputView.refresh();
     if (candidatesContainer != null) {
