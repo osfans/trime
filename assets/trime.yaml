@@ -8,8 +8,8 @@ app_options:
     ascii_mode: true
 
 style:
-  color_scheme: default
-  destroy_on_quit: false
+  color_scheme: default #配色方案
+  destroy_on_quit: false #退出時清理內存
   soft_cursor: true #軟光標
   inline_preedit: false
   display_tray_icon: false
@@ -25,28 +25,32 @@ style:
     hilite_padding: 2
     round_corner: 4
     background_dim_amount: 0.5
-    candidate_text_size: 22
-    candidate_view_height: 40
-    comment_height: 12
-    comment_text_size: 12
-    horizontal_gap: 1
-    key_height: 42
-    key_text_size: 22
-    key_width: 10 #percent
-    label_text_size: 16
-    preview_height: 60
-    preview_offset: -12
-    preview_text_size: 40
+    candidate_text_size: 22 #候選字號
+    candidate_view_height: 40 #候選區高度
+    comment_height: 12 #編碼提示區高度
+    comment_text_size: 12 ##編碼提示字號
+    horizontal_gap: 1 #鍵水平間距
+    key_height: 42 #鍵高
+    key_text_size: 22 #鍵字號
+    key_width: 10 #鍵寬
+    label_text_size: 14 #鍵長標籤字號
+    preview_height: 60 #按鍵提示高度
+    preview_offset: -12 #按鍵提示縱向偏移
+    preview_text_size: 40 #按鍵提示字號
     shadow_radius: 0.0
-    symbol_text_size: 10
-    text_height: 14
-    text_size: 12
+    symbol_text_size: 10 #符號字號
+    text_height: 16 #編碼區高度
+    text_size: 12 #編碼區字號
     vertical_correction: -10
     vertical_gap: 1
-    text_font: han.ttf
-    text_font_b: hanb.ttf
-    text_font_latin: latin.ttf
-    text_font_symbol: symbol.ttf
+    candidate_font: han.ttf #候選字體
+    comment_font: latin.ttf #編碼提示字體
+    key_font: han.ttf #鍵盤字體
+    text_font: latin.ttf #編碼字體
+    hanb_font: hanb.ttf #擴展字體
+    latin_font: latin.ttf #字母字體
+    symbol_font: symbol.ttf #符號字體
+    preview_font: latin.ttf #按鍵提示字體
 
 preset_color_schemes:
   default:

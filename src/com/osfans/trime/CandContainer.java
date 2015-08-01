@@ -59,6 +59,7 @@ public class CandContainer extends LinearLayout {
     text.setTextSize(schema.getInt("text_size"));
     text.setHeight(schema.getPixel("text_height"));
     //text.setBackgroundColor(schema.getColor("back_color"));
+    text.setTypeface(schema.getFont("text_color"));
     candidateView.refresh();
   }
 

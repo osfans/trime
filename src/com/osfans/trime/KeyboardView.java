@@ -138,7 +138,6 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mShadowColor;
     private float mBackgroundDimAmount;
     
-    private Typeface tf;
     private int key_symbol_color, hilited_key_symbol_color;
     private int mSymbolSize;
     private Paint mPaintSymbol;
@@ -292,6 +291,12 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPreviewTextSizeLarge = schema.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
         setBackgroundColor(schema.getColor("keyboard_back_color"));
+
+        mPaint.setTypeface(schema.getFont("key_font"));
+        mPaintSymbol.setTypeface(schema.getFont("symbol_font"));
+        mPaintSymbol.setColor(key_symbol_color);
+        mPaintSymbol.setTextSize(mSymbolSize);
+        mPreviewText.setTypeface(schema.getFont("preview_font"));
     }
 
     public KeyboardView(Context context, AttributeSet attrs) {
@@ -301,7 +306,12 @@ public class KeyboardView extends View implements View.OnClickListener {
                 (LayoutInflater) context
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mPreviewText = (TextView) inflate.inflate(R.layout.keyboard_key_preview, null);
-
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setTextAlign(Align.CENTER);
+        mPaintSymbol = new Paint();
+        mPaintSymbol.setAntiAlias(true);
+        mPaintSymbol.setTextAlign(Align.CENTER);
         refresh();
 
         mPreviewPopup = new PopupWindow(context);
@@ -315,18 +325,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         //mPopupKeyboard.setClippingEnabled(false);        
         mPopupParent = this;
         //mPredicting = true;
-
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setTextAlign(Align.CENTER);
-        tf = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
-        mPreviewText.setTypeface(tf);
-        mPaintSymbol = new Paint();
-        mPaintSymbol.setTypeface(tf);
-        mPaintSymbol.setColor(key_symbol_color);
-        mPaintSymbol.setTextSize(mSymbolSize);
-        mPaintSymbol.setAntiAlias(true);
-        mPaintSymbol.setTextAlign(Align.CENTER);
 
         mPadding = new Rect(0, 0, 0, 0);
         mMiniKeyboardCache = new HashMap<Key,View>();
@@ -634,10 +632,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 // For characters, use large font. For labels like "Done", use small font.
                 if (label.length() > 1 && key.codes.length < 2) {
                     paint.setTextSize(mLabelTextSize);
-                    paint.setTypeface(Typeface.DEFAULT_BOLD);
                 } else {
                     paint.setTextSize(mKeyTextSize);
-                    paint.setTypeface(tf);
                 }
                 // Draw a drop shadow for the text
                 paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);

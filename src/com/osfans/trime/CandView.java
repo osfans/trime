@@ -57,20 +57,14 @@ public class CandView extends View {
   private int num_candidates;
 
   private Drawable candidateHighlight, candidateSeparator;
-  private Paint paint, paintpy;
-  private Typeface tf, tfb, tfl, tfs;
+  private Paint paintCandidate, paintComment;
+  private Typeface tfCandidate, tfb, tfComment, tfs;
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
   private int candidate_view_height;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
-
-  public Typeface getFont(String name){
-    File f = new File("/sdcard/rime/fonts", name);
-    if(f.exists()) return Typeface.createFromFile(f);
-    return null;
-  }
 
   public void refresh() {
     Schema schema = Schema.get();
@@ -85,27 +79,27 @@ public class CandView extends View {
     comment_text_size = schema.getPixel("comment_text_size");
     candidate_view_height = schema.getPixel("candidate_view_height");
 
-    tf = getFont(schema.getString("text_font"));
-    tfb = getFont(schema.getString("text_font_b"));
-    tfl = getFont(schema.getString("text_font_latin"));
+    tfCandidate = schema.getFont("candidate_font");
+    tfb = schema.getFont("hanb_font");
+    tfComment = schema.getFont("comment_font");
+    tfs = schema.getFont("symbol_font");
+
+    paintCandidate.setTextSize(candidate_text_size);
+    paintCandidate.setTypeface(tfCandidate);
+    paintComment.setTextSize(comment_text_size);
+    paintComment.setTypeface(tfComment);
   }
 
   public CandView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    refresh();
-    tfs = Typeface.createFromAsset(context.getAssets(), "symbol.ttf");
-    Resources r = context.getResources();
-    paint = new Paint();
-    paint.setAntiAlias(true);
-    paint.setTextSize(candidate_text_size);
-    paint.setStrokeWidth(0);
-    paint.setTypeface(tf);
+    paintCandidate = new Paint();
+    paintCandidate.setAntiAlias(true);
+    paintCandidate.setStrokeWidth(0);
+    paintComment = new Paint();
+    paintComment.setAntiAlias(true);
+    paintComment.setStrokeWidth(0);
 
-    paintpy = new Paint();
-    paintpy.setAntiAlias(true);
-    paintpy.setTextSize(comment_text_size);
-    paintpy.setStrokeWidth(0);
-    paintpy.setTypeface(tfl);
+    refresh();
 
     setWillNotDraw(false);
     mRime = Rime.getRime();
@@ -162,42 +156,42 @@ public class CandView extends View {
     }
   }
 
-  private void drawText(String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
+  private void drawText(String s, Canvas canvas, Paint paintCandidate, Typeface font, float center, float y) {
     if (s == null) return;
     int length = s.length();
     if (length == 0) return;
     int points = s.codePointCount(0, length);
-    float x = center - paint.measureText(s) / 2;
+    float x = center - paintCandidate.measureText(s) / 2;
     if (tfb != null && length > points) {
       for (int offset = 0; offset < length; ) {
         int codepoint = s.codePointAt(offset);
         int charCount = Character.charCount(codepoint);
         int end = offset + charCount;
-        paint.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfb : font);
-        canvas.drawText(s, offset, end, x, y, paint);
-        x += paint.measureText(s, offset, end);
+        paintCandidate.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfb : font);
+        canvas.drawText(s, offset, end, x, y, paintCandidate);
+        x += paintCandidate.measureText(s, offset, end);
         offset += charCount;
       }
     } else {
-      paint.setTypeface(font);
-      canvas.drawText(s, x, y, paint);
+      paintCandidate.setTypeface(font);
+      canvas.drawText(s, x, y, paintCandidate);
     }
   }
 
   private void drawCandidates(Canvas canvas) {
     if (candidates == null) return;
 
-    final float y = candidateRect[0].centerY() - (paint.ascent() + paintpy.getTextSize() - paint.getTextSize()) / 2;
+    final float y = candidateRect[0].centerY() - (paintCandidate.ascent() + paintComment.getTextSize() - paintCandidate.getTextSize()) / 2;
     float x = 0;
     int i = 0;
 
     while (i < num_candidates) {
       // Calculate a position where the text could be centered in the rectangle.
-      paint.setTypeface(tf);
-      paint.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
-      paintpy.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
-      drawText(getCandidate(i), canvas, paint, tf, candidateRect[i].centerX(), y);
-      drawText(getComment(i), canvas, paintpy, tfl, candidateRect[i].centerX(), - paintpy.ascent());
+      paintCandidate.setTypeface(tfCandidate);
+      paintCandidate.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
+      paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
+      drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, candidateRect[i].centerX(), y);
+      drawText(getComment(i), canvas, paintComment, tfComment, candidateRect[i].centerX(), - paintComment.ascent());
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -210,9 +204,9 @@ public class CandView extends View {
     for (int j = -4; j >= -5; j--) { // -4: left, -5: right
       String candidate = getCandidate(j);
       if (candidate == null) continue;
-      paint.setTypeface(tfs);
-      x = candidateRect[i].centerX() - paint.measureText(candidate) / 2;
-      canvas.drawText(candidate, x, y, paint);
+      paintCandidate.setTypeface(tfs);
+      x = candidateRect[i].centerX() - paintCandidate.measureText(candidate) / 2;
+      canvas.drawText(candidate, x, y, paintCandidate);
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
         candidateRect[i].top,
@@ -344,7 +338,7 @@ public class CandView extends View {
     if (i >= 0) {
       String comment = getComment(i);
       if (comment != null) {
-        float x2 = paintpy.measureText(comment);
+        float x2 = paintComment.measureText(comment);
         if (x2 > x) x = x2;
       }
     }

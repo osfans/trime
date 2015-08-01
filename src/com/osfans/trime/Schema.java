@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.TypedValue;
 import android.util.Log;
+import android.graphics.Typeface;
 
 import java.util.Map;
 import java.util.List;
@@ -35,9 +36,11 @@ public class Schema {
   private int BLK_SIZE = 1024;
   private static Schema self = null;
   private Map<String,String> fallback = new HashMap<String, String>();
+  private Typeface tf;
 
   public Schema(Context context) {
     self = this;
+    tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
     maps = new HashMap<String, Map>();
     mDefaultSchema = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
     fallback.put("candidate_text_color", "text_color");
@@ -197,5 +200,13 @@ public class Schema {
     }
     if (o instanceof Integer) return ((Integer)o).intValue();
     return ((Long)o).intValue();
+  }
+
+  public Typeface getFont(String key){
+    String name = getString(key);
+    if (name == null) return tf;
+    File f = new File("/sdcard/rime/fonts", name);
+    if(f.exists()) return Typeface.createFromFile(f);
+    return tf;
   }
 }
