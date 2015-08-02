@@ -290,6 +290,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPreviewText.setBackgroundColor(config.getColor("preview_back_color"));
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
+        mShowPreview = config.getBoolean("show_preview");
         setBackgroundColor(config.getColor("keyboard_back_color"));
 
         mPaint.setTypeface(config.getFont("key_font"));

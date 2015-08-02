@@ -9,7 +9,7 @@ style:
   candidate_font: han.ttf #候選字體
   candidate_spacing: 5
   candidate_text_size: 22 #候選字號
-  candidate_view_height: 40 #候選區高度
+  candidate_view_height: 28 #候選區高度
   color_scheme: default #配色方案
   comment_font: latin.ttf #編碼提示字體
   comment_height: 12 #編碼提示區高度
@@ -22,7 +22,6 @@ style:
   horizontal_gap: 1 #鍵水平間距
   inline_code: false #嵌入編碼
   inline_preedit: true #嵌入首選
-  keyboard_preview: true #按鍵提示
   key_font: han.ttf #鍵盤字體
   key_height: 42 #鍵高
   key_sound: false #按鍵聲音
@@ -47,6 +46,10 @@ style:
   repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
   round_corner: 4
   shadow_radius: 0.0
+  show_candidate: true #顯示候選區
+  show_comment: true #顯示提示區
+  show_preview: true #按鍵提示
+  show_text: true #顯示編碼區
   soft_cursor: true #軟光標
   spacing: 10
   symbol_font: symbol.ttf #符號字體

@@ -60,6 +60,10 @@ public class CandContainer extends LinearLayout {
     text.setHeight(config.getPixel("text_height"));
     //text.setBackgroundColor(config.getColor("back_color"));
     text.setTypeface(config.getFont("text_color"));
+    boolean show = config.getBoolean("show_text");
+    text.setVisibility(show ? View.VISIBLE : View.GONE);
+    show = config.getBoolean("show_candidate");
+    candidateView.setVisibility(show ? View.VISIBLE : View.GONE);
     candidateView.refresh();
   }
 

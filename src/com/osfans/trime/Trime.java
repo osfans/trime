@@ -186,7 +186,6 @@ public class Trime extends InputMethodService implements
       // Bind the selected keyboard to the input view.
       Keyboard sk = (Keyboard)keyboardSwitch.getCurrentKeyboard();
       inputView.setKeyboard(sk);
-      inputView.setPreviewEnabled(mConfig.getBoolean("keyboard_preview"));
       //updateCursorCapsToInputView();
     }
   }

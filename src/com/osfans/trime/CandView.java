@@ -62,7 +62,8 @@ public class CandView extends View {
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
-  private int candidate_view_height;
+  private int candidate_view_height, comment_height;
+  private boolean show_comment;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
@@ -78,6 +79,7 @@ public class CandView extends View {
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");
     candidate_view_height = config.getPixel("candidate_view_height");
+    comment_height = config.getPixel("comment_height");
 
     tfCandidate = config.getFont("candidate_font");
     tfb = config.getFont("hanb_font");
@@ -88,6 +90,8 @@ public class CandView extends View {
     paintCandidate.setTypeface(tfCandidate);
     paintComment.setTextSize(comment_text_size);
     paintComment.setTypeface(tfComment);
+
+    show_comment = config.getBoolean("show_comment");
   }
 
   public CandView(Context context, AttributeSet attrs) {
@@ -181,7 +185,9 @@ public class CandView extends View {
   private void drawCandidates(Canvas canvas) {
     if (candidates == null) return;
 
-    final float y = candidateRect[0].centerY() - (paintCandidate.ascent() + paintComment.getTextSize() - paintCandidate.getTextSize()) / 2;
+    float y = candidateRect[0].centerY() - (paintCandidate.ascent() - paintCandidate.getTextSize()) / 2;
+    if (show_comment) y -= comment_height / 2;
+    else y -= comment_height;
     float x = 0;
     int i = 0;
 
@@ -189,9 +195,11 @@ public class CandView extends View {
       // Calculate a position where the text could be centered in the rectangle.
       paintCandidate.setTypeface(tfCandidate);
       paintCandidate.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
-      paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
       drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, candidateRect[i].centerX(), y);
-      drawText(getComment(i), canvas, paintComment, tfComment, candidateRect[i].centerX(), - paintComment.ascent());
+      if (show_comment) {
+        paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
+        drawText(getComment(i), canvas, paintComment, tfComment, candidateRect[i].centerX(), - paintComment.ascent());
+      }
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -241,6 +249,7 @@ public class CandView extends View {
     LayoutParams params = getLayoutParams();
     params.width = x;
     params.height = candidate_view_height;
+    if (show_comment) params.height += comment_height;
     setLayoutParams(params);
   }
 
@@ -335,7 +344,7 @@ public class CandView extends View {
     float n = (s == null ? 0 : s.codePointCount(0, s.length()));
     n += n < 2 ? 0.8f : 0.4f;
     float x = n * candidate_text_size;
-    if (i >= 0) {
+    if (i >= 0 && show_comment) {
       String comment = getComment(i);
       if (comment != null) {
         float x2 = paintComment.measureText(comment);
