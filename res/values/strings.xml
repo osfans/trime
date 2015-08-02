@@ -30,6 +30,13 @@
     <string name="pref_maintenance">維護</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_sync">同步</string>
+    <string name="pref_reset">回廠</string>
+    <string name="pref_reset_summary">使用默認配置覆蓋/sdcard/rime/trime.yaml</string>
+
+    <string name="sync_success">同步成功</string>
+    <string name="sync_failure">同步失敗</string>
+    <string name="reset_success">回廠成功</string>
+    <string name="reset_failure">回廠失敗</string>
 
     <string name="set_ime">全局設定</string>
     <string name="no_schemas">請在/sdcard/rime中添加essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>

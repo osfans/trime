@@ -33,7 +33,7 @@ public class Config {
   private Map<String,Object> mConfig, mDefaultConfig;
   private Map<String, Map> maps;
   private String defaultName = "trime.yaml";
-  private int BLK_SIZE = 1024;
+  private static int BLK_SIZE = 1024;
   private static Config self = null;
   private Map<String,String> fallback = new HashMap<String, String>();
   private Typeface tf;
@@ -75,22 +75,34 @@ public class Config {
     refresh();
   }
 
-  public FileInputStream openFile(Context context, String name) {
-    try{
+  public static boolean copyFromAssets(Context context, String name) {
+    try {
       File f = new File("/sdcard/rime", name);
-      if (!f.exists()) { //從assets複製默認文件
-        InputStream is = context.getAssets().open(name);
-        OutputStream os = new FileOutputStream(f);
-        byte[] buffer = new byte[BLK_SIZE];
-        int length = 0;
-        while ((length = is.read(buffer)) > 0) os.write(buffer, 0, length);
-        os.flush();
-        os.close();
-        is.close();
-      }
-      return new FileInputStream(f);
+      InputStream is = context.getAssets().open(name);
+      OutputStream os = new FileOutputStream(f);
+      byte[] buffer = new byte[BLK_SIZE];
+      int length = 0;
+      while ((length = is.read(buffer)) > 0) os.write(buffer, 0, length);
+      os.flush();
+      os.close();
+      is.close();
+      return true;
     } catch (IOException e) {
-      throw new RuntimeException("Error load " + defaultName, e);
+      Log.e("Config", "Error copy file: " + e);
+      return false;
+    }
+  }
+
+  public InputStream openFile(Context context, String name) {
+    try {
+      File f = new File("/sdcard/rime", name);
+      boolean b = true;
+      if (!f.exists()) b = copyFromAssets(context, name); //從assets複製默認文件
+      if (b) return new FileInputStream(f);
+      return context.getAssets().open(name);
+    } catch (IOException e) {
+      Log.e("Config", "Error open file: " + e);
+      return null;
     }
   }
 

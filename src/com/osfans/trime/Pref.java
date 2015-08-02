@@ -30,6 +30,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * Manages IME preferences. 
@@ -78,6 +79,7 @@ public class Pref extends PreferenceActivity {
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     String key = preference.getKey();
+    boolean b;
     if (key.contentEquals("pref_maintenance")) { //維護
       Rime.getRime().check(true);
       return true;
@@ -88,9 +90,14 @@ public class Pref extends PreferenceActivity {
       if (trime != null) trime.invalidate();
       return true;
     } else if (key.contentEquals("pref_sync")) { //同步
-      Rime.getRime().sync_user_data();
+      b = Rime.getRime().sync_user_data();
       Rime.getRime().finalize1();
       Rime.getRime().init(false);
+      Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
+      return true;
+    } else if (key.contentEquals("pref_reset")) { //回廠
+      b = Config.copyFromAssets(this, "trime.yaml");
+      Toast.makeText(this, b ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT).show();
       return true;
     } else if (key.contentEquals("pref_licensing")) { //資訊
       showLicenseDialog();

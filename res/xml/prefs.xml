@@ -24,6 +24,7 @@
         <Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" />
         <Preference android:key="pref_deploy" android:title="@string/pref_deploy" />
         <Preference android:key="pref_sync" android:title="@string/pref_sync" />
+        <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">
