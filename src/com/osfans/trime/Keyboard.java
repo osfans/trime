@@ -939,6 +939,41 @@ public class Keyboard {
     return 0f;
   }
 
+  public static String getShiftedSymbol(int keyCode) {
+    if (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z)
+      return String.valueOf((char)(keyCode - KeyEvent.KEYCODE_A + 'A'));
+    if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+      String s = ")!@#$%^&*(";
+      int i = keyCode - KeyEvent.KEYCODE_0;
+      return s.substring(i, i+1);
+    }
+    switch (keyCode) {
+      case KeyEvent.KEYCODE_COMMA:
+        return "<";
+      case KeyEvent.KEYCODE_PERIOD:
+        return ">";
+      case KeyEvent.KEYCODE_SEMICOLON:
+        return ":";
+      case KeyEvent.KEYCODE_SLASH:
+        return "?";
+      case KeyEvent.KEYCODE_BACKSLASH:
+        return "|";
+      case KeyEvent.KEYCODE_MINUS:
+        return "_";
+      case KeyEvent.KEYCODE_PLUS:
+        return "=";
+      case KeyEvent.KEYCODE_APOSTROPHE:
+        return "\"";
+      case KeyEvent.KEYCODE_GRAVE:
+        return "~";
+      case KeyEvent.KEYCODE_LEFT_BRACKET:
+        return "{";
+      case KeyEvent.KEYCODE_RIGHT_BRACKET:
+        return "}";
+    }
+    return null;
+  }
+
   public static int[] getRimeKeyEvent(int code, int mask) {
     String s = keynames.get(code);
     int i = Rime.get_keycode_by_name(s);

@@ -194,7 +194,7 @@ public class Trime extends InputMethodService implements
     mConfig.refresh();
     keyboardSwitch.refresh();
     candidatesContainer.refresh();
-    inputView.refresh();
+    if (inputView != null) inputView.refresh(); //實體鍵盤無view
     bindKeyboardToInputView();
   }
 
@@ -276,7 +276,16 @@ public class Trime extends InputMethodService implements
       if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_ENTER)
       return false;
     }
-    onKey(event.getKeyCode(), event.getModifiers());
+    if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
+      return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
+    if (!event.isAltPressed() && event.isShiftPressed()) {
+      String s = Keyboard.getShiftedSymbol(keyCode); //上檔符號
+      if (s != null) {
+        onText(s);
+        return true;
+      }
+    }
+    onKey(event.getKeyCode(), event.getMetaState());
     return true;
   }
 
