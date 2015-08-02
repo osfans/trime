@@ -223,7 +223,7 @@ public class Trime extends InputMethodService implements
     keyboardSwitch.onStartInput(inputType);
     setCandidatesViewShown(true);
     //escape();
-    setCandidatesViewShown(false);
+    setCandidatesViewShown(canCompose);
   }
 
   private boolean isComposing() {
