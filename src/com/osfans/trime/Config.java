@@ -173,16 +173,21 @@ public class Config {
     return o == null ? false : (Boolean)o;
   }
 
-  public float getFloat(String key) {
+  public double getDouble(String key) {
     Object o = getValue("style/" + key);
-    float size = 0;
-    if (o instanceof Integer) size = ((Integer)o).floatValue();
-    else if (o instanceof Float) size = ((Float)o).floatValue();
+    double size = 0;
+    if (o instanceof Integer) size = ((Integer)o).doubleValue();
+    else if (o instanceof Float) size = ((Float)o).doubleValue();
+    else if (o instanceof Double) size = ((Double)o).doubleValue();
     return size;
   }
 
+  public float getFloat(String key) {
+    return (float)getDouble(key);
+  }
+
   public int getInt(String key) {
-    return (int)getFloat(key);
+    return (int)getDouble(key);
   }
 
   public int getPixel(String key) {

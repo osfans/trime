@@ -698,7 +698,7 @@ public class Keyboard {
         Config config = Config.get();
         mDefaultHorizontalGap = config.getPixel("horizontal_gap");
         mDefaultVerticalGap = config.getPixel("vertical_gap");
-        mDefaultWidth = (int)(mDisplayWidth * config.getInt("key_width") / 100);
+        mDefaultWidth = (int)(mDisplayWidth * config.getDouble("key_width") / 100);
         mDefaultHeight = config.getPixel("key_height");
         mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
         mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
@@ -931,6 +931,14 @@ public class Keyboard {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
+  private double getDouble(Map m, String k, Object i) {
+    Object o = getValue(m, k, i);
+    if (o instanceof Integer) return ((Integer)o).doubleValue();
+    else if (o instanceof Float) return ((Float)o).doubleValue();
+    else if (o instanceof Double) return ((Double)o).doubleValue();
+    return 0f;
+  }
+
   public static int[] getRimeKeyEvent(int code, int mask) {
     String s = keynames.get(code);
     int i = Rime.get_keycode_by_name(s);
@@ -950,8 +958,8 @@ public class Keyboard {
   public Keyboard(Context context, Object o) {
     this(context, 0);
     Map<String,Object> m = (Map<String,Object>)o;
-    int columns = (Integer)getValue(m, "columns", 10);
-    int defaultWidth = (Integer)getValue(m, "width", 0) * mDisplayWidth / 100;
+    int columns = (Integer)getValue(m, "columns", 20);
+    int defaultWidth = (int)(getDouble(m, "width", 0) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
     List<Map<String,Object>> lm = (List<Map<String,Object>>)m.get("keys");
     mKeyboardMode = (Integer)getValue(m, "mode", 0);
@@ -972,7 +980,7 @@ public class Keyboard {
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String,Object> mk: lm) {
       int gap = mDefaultHorizontalGap;
-      int w = (Integer)getValue(mk, "width", 0) * mDisplayWidth / 100;
+      int w = (int)(getDouble(mk, "width", 0) * mDisplayWidth / 100);
       if (w == 0 && (mk.containsKey("text") || mk.containsKey("code"))) w = defaultWidth;
       w -= gap;
       if (column >= maxColumns 
@@ -989,7 +997,8 @@ public class Keyboard {
       final Key key = new Key(row);
       key.x = x;
       key.y = y;
-      key.width = w;
+      int right_gap = Math.abs(mDisplayWidth - x - w - gap);
+      key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x : w; //右側不留白
       key.height = mDefaultHeight;
       key.gap = gap;
       

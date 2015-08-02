@@ -30,7 +30,7 @@ style:
   key_text_size: 22 #鍵字號
   key_vibrate_duration: 30 #按鍵震動時長
   key_vibrate: false #按鍵震動
-  key_width: 10 #鍵寬
+  key_width: 10.0 #鍵寬，佔屏寬的百分比
   label_text_size: 14 #長標籤字號
   latin_font: latin.ttf #文字字體
   longpress_timeout: 800 #按鍵超過800毫秒即爲長按
