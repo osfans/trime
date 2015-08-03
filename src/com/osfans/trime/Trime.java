@@ -71,6 +71,7 @@ public class Trime extends InputMethodService implements
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
+
     effect.reset();
 
     keyboardSwitch = new KeyboardSwitch(this);
@@ -106,6 +107,7 @@ public class Trime extends InputMethodService implements
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
+
     if (keyboardSwitch != null) keyboardSwitch.refresh();
     if (inputView != null) inputView.refresh();
     if (candidatesContainer != null) {
@@ -224,7 +226,7 @@ public class Trime extends InputMethodService implements
     keyboardSwitch.onStartInput(inputType);
     //setCandidatesViewShown(true);
     //escape();
-    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !mRime.isEmpty()); //實體鍵盤
     if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
