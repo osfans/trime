@@ -597,23 +597,23 @@ keyboard:
   - {symbol: ']', text: i}
   - {symbol: '{', text: o}
   - {symbol: '}', text: p}
-  - {symbol: '`', text: a}
-  - {symbol: '↑', text: s, symbolCode: Up}
-  - {symbol: '~', text: d}
-  - {text: f}
-  - {text: g}
-  - {text: h}
-  - {text: j}
-  - {text: k}
-  - {text: l}
+  - {text: a, symbol: '全選', symbolCode: Control+a}
+  - {text: s, symbol: '行首', symbolCode: Home}
+  - {text: d, symbol: '行尾', symbolCode: End}
+  - {text: f, symbol: '上頁', symbolCode: Page_Up}
+  - {text: g, symbol: '下頁', symbolCode: Page_Down}
+  - {text: h, symbol: '←', symbolCode: Left}
+  - {text: j, symbol: '↓', symbolCode: Down}
+  - {text: k, symbol: '↑', symbolCode: Up}
+  - {text: l, symbol: '→', symbolCode: Right}
   - {symbol: ':', text: ';'}
-  - {text: z, symbol: '←', symbolCode: Left}
-  - {text: x, symbol: '↓', symbolCode: Down}
-  - {text: c, symbol: '→', symbolCode: Right}
-  - {text: v}
-  - {text: b}
-  - {text: n}
-  - {text: m}
+  - {symbol: '`', text: z}
+  - {text: x, symbol: '剪切', symbolCode: Control+x}
+  - {text: c, symbol: '複製', symbolCode: Control+c}
+  - {text: v, symbol: '粘貼', symbolCode: Control+v}
+  - {symbol: '~', text: b}
+  - {text: n, symbol: '插入', symbolCode: Insert}
+  - {text: m, symbol: '刪除', symbolCode: Delete}
   - {symbol: '<', text: ','}
   - {symbol: '>', text: '.'}
   - {symbol: '?', text: '/'}
@@ -623,7 +623,7 @@ keyboard:
   - {code: space, width: 30}
   - {symbol: '"', text: "'"}
   - {code: BackSpace, width: 15, symbol: Esc, symbolCode: Escape}
-  - {code: Return, width: 15, symbol: Clear, symbolCode: Clear}
+  - {code: Return, width: 15, symbol: 清空, symbolCode: Clear}
 - mode: 1
   width: 20
   keys:

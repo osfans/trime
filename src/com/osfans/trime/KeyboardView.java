@@ -773,7 +773,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     }
                     code = key.codes[mTapCount];
                 }
-                mKeyboardActionListener.onKey(code, 0);
+                mKeyboardActionListener.onKey(code, key.mask);
                 mKeyboardActionListener.onRelease(code);
                 resetShifted();
             }
@@ -1025,7 +1025,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         } else {
             Key key = popupKey;
             if (key.symbolCode != 0) {
-                mKeyboardActionListener.onKey(key.symbolCode, 0);
+                mKeyboardActionListener.onKey(key.symbolCode, key.symbolMask);
                 return true;
             }
             if (key.symbol!=null){

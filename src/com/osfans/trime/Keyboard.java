@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 
@@ -85,6 +86,14 @@ public class Keyboard {
     public static final int KEYCODE_MODE_PREV = -21;
     public static final int KEYCODE_MODE_NEXT = -22;
     public static final int KEYCODE_MODE_SWITCH = -30;
+
+    public static Map<String,Integer> masks = new HashMap<String,Integer>() {
+      {
+        put("Shift", KeyEvent.META_SHIFT_ON);
+        put("Control", KeyEvent.META_CTRL_ON);
+        put("Alt", KeyEvent.META_ALT_ON);
+      }
+    };
 
     public static final List<String> keynames = Arrays.asList(new String[] {
         "VoidSymbol",
@@ -477,6 +486,7 @@ public class Keyboard {
          * being the most important.
          */
         public int[] codes;
+        public int mask;
         
         /** Label to display */
         public CharSequence label;
@@ -507,7 +517,7 @@ public class Keyboard {
         public CharSequence popupCharacters;
         
         public String symbol, symbolLabel, hint;
-        public int symbolCode;
+        public int symbolCode, symbolMask;
 
         public CharSequence labelPreview;
 
@@ -990,6 +1000,23 @@ public class Keyboard {
     return new int[] {i, m};
   }
 
+  public int[] parseCode(String s) {
+    if (s == null || s.isEmpty()) return new int[]{0, 0};
+    int c = 0;
+    int m = 0;
+    String code;
+    if (!s.contains("+")) code = s;
+    else {
+      String[] ss = s.split("\\+");
+      int n = ss.length;
+      for (int i = 0; i < n - 1; i++) if (masks.containsKey(ss[i])) m |= masks.get(ss[i]);
+      code = ss[n - 1];
+    }
+    c = keynames.indexOf(code);
+    if (c < 0) c = 0;
+    return new int[] {c, m};
+  }
+
   public Keyboard(Context context, Object o) {
     this(context, 0);
     Map<String,Object> m = (Map<String,Object>)o;
@@ -1045,18 +1072,15 @@ public class Keyboard {
       key.symbolLabel = (String)getValue(mk, "symbolLabel", null);
       key.hint = (String)getValue(mk, "hint", null);
 
-      String symbolcode = (String)getValue(mk, "symbolCode", "");
-      if (!symbolcode.isEmpty()) {
-        int c = keynames.indexOf(symbolcode);
-        if (c < 0) c = 0;
-        key.symbolCode = c;
-      }
+      int[] pairs = parseCode((String)getValue(mk, "symbolCode", ""));
+      key.symbolCode = pairs[0];
+      key.symbolMask = pairs[1];
 
-      String s = (String) getValue(mk, "code", ""); 
-      int c = 0;
-      if (!s.isEmpty()) c = keynames.indexOf(s);
-      if (c < 0) c = 0;
+      String s = (String)getValue(mk, "code", "");
+      pairs = parseCode(s);
+      int c = pairs[0];
       key.codes = new int[]{c};
+      key.mask = pairs[1];
 
       if (c == KeyEvent.KEYCODE_SPACE){
         if (key.label==null) key.label = Rime.getRime().getSchemaName();
