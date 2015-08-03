@@ -384,9 +384,10 @@ public class Trime extends InputMethodService implements
   private boolean handleOption(int keyCode) {
     if (keyCode == KeyEvent.KEYCODE_MENU) {
         // Create a Dialog menu
+        if (mOptionsDialog != null && mOptionsDialog.isShowing()) return true; //對話框單例
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
         .setTitle(R.string.ime_name)
-        //.setIcon(android.R.drawable.ic_menu_preferences)
+        .setIcon(R.drawable.icon)
         .setCancelable(true)
         .setNegativeButton(R.string.other_ime, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
