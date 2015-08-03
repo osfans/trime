@@ -170,7 +170,7 @@ public class Config {
 
   public boolean getBoolean(String key) {
     Object o = getValue("style/" + key);
-    return o == null ? false : (Boolean)o;
+    return o == null ? true : (Boolean)o;
   }
 
   public double getDouble(String key) {
