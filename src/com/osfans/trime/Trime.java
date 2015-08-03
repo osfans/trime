@@ -220,9 +220,9 @@ public class Trime extends InputMethodService implements
     // Select a keyboard based on the input type of the editing field.
     keyboardSwitch.init(getMaxWidth());
     keyboardSwitch.onStartInput(inputType);
-    setCandidatesViewShown(true);
+    //setCandidatesViewShown(true);
     //escape();
-    setCandidatesViewShown(canCompose);
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤
   }
 
   private boolean isComposing() {
