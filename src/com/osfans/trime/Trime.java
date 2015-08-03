@@ -258,6 +258,24 @@ public class Trime extends InputMethodService implements
     return "";
   }
 
+  public boolean handleAciton(int code, int mask) { //編輯操作
+    InputConnection ic = getCurrentInputConnection();
+    if (ic == null) return false;
+    if (code == KeyEvent.KEYCODE_CLEAR) {
+      ic.beginBatchEdit();
+      ic.performContextMenuAction(android.R.id.selectAll);
+      ic.performContextMenuAction(android.R.id.cut);
+      ic.endBatchEdit();
+      return true;
+    } else if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
+      if (code == KeyEvent.KEYCODE_A) return ic.performContextMenuAction(android.R.id.selectAll);
+      if (code == KeyEvent.KEYCODE_X) return ic.performContextMenuAction(android.R.id.cut);
+      if (code == KeyEvent.KEYCODE_C) return ic.performContextMenuAction(android.R.id.copy);
+      if (code == KeyEvent.KEYCODE_V) return ic.performContextMenuAction(android.R.id.paste);
+    }
+    return false; // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
+  }
+
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (canCompose && onEvent(event)) return true;
@@ -296,8 +314,8 @@ public class Trime extends InputMethodService implements
 
   public void onKey(int primaryCode, int mask) { //軟鍵盤
     Log.info("onKey="+primaryCode);
-    if (primaryCode == KeyEvent.KEYCODE_CLEAR) {
-      getCurrentInputConnection().deleteSurroundingText(65536,0);
+    if (handleAciton(primaryCode, mask)) { //編輯操作
+      return;
     } else if (primaryCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
       mRime.toggleOption("ascii_mode");
       commitText();
