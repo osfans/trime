@@ -299,16 +299,18 @@ public class Trime extends InputMethodService implements
       if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_ENTER)
       return false;
     }
+
     if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
       return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
+
     if (!event.isAltPressed() && event.isShiftPressed()) {
-      String s = Keyboard.getShiftedSymbol(keyCode); //上檔符號
-      if (s != null) {
-        onText(s);
+      int c = event.getUnicodeChar();
+      if (c > 0) {
+        onText(String.valueOf((char)c));
         return true;
       }
     }
-    onKey(event.getKeyCode(), event.getMetaState());
+    onKey(keyCode, event.getMetaState());
     return true;
   }
 
