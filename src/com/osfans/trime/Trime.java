@@ -384,7 +384,7 @@ public class Trime extends InputMethodService implements
   }
 
   public void updateComposing() {
-    if (inlinePreedit) { //嵌入首選
+    if (inlinePreedit || inlineCode) { //嵌入首選
       String s = inlineCode ? mRime.RimeGetInput() : mRime.getComposingText();
       if (s == null) s = "";
       InputConnection ic = getCurrentInputConnection();
