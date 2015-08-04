@@ -280,6 +280,14 @@ public class Trime extends InputMethodService implements
     return false; // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
   }
 
+  public boolean handleBack(int code) {
+    if (code == KeyEvent.KEYCODE_BACK) {
+      requestHideSelf(0); //隱藏
+      return true;
+    }
+    return false;
+  }
+
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (canCompose && onEvent(event)) return true;
@@ -334,7 +342,8 @@ public class Trime extends InputMethodService implements
       updateComposing();
     } else if (handleOption(primaryCode)
       || handleEnter(primaryCode)
-      || handleAciton(primaryCode, mask)) {
+      || handleAciton(primaryCode, mask)
+      || handleBack(primaryCode)) {
       Log.info("Trime onKey");
     } else {
       Log.info("send Key");
