@@ -960,8 +960,8 @@ public class Keyboard {
         return "|";
       case KeyEvent.KEYCODE_MINUS:
         return "_";
-      case KeyEvent.KEYCODE_PLUS:
-        return "=";
+      case KeyEvent.KEYCODE_EQUALS:
+        return "+";
       case KeyEvent.KEYCODE_APOSTROPHE:
         return "\"";
       case KeyEvent.KEYCODE_GRAVE:
