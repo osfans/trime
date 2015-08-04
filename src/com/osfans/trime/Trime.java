@@ -268,10 +268,14 @@ public class Trime extends InputMethodService implements
       ic.endBatchEdit();
       return true;
     } else if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
-      if (code == KeyEvent.KEYCODE_A) return ic.performContextMenuAction(android.R.id.selectAll);
-      if (code == KeyEvent.KEYCODE_X) return ic.performContextMenuAction(android.R.id.cut);
-      if (code == KeyEvent.KEYCODE_C) return ic.performContextMenuAction(android.R.id.copy);
-      if (code == KeyEvent.KEYCODE_V) return ic.performContextMenuAction(android.R.id.paste);
+      if (code == KeyEvent.KEYCODE_A)
+        return ic.performContextMenuAction(android.R.id.selectAll);
+      if (code == KeyEvent.KEYCODE_X)
+        return ic.performContextMenuAction(android.R.id.cut);
+      if (code == KeyEvent.KEYCODE_C)
+        return ic.performContextMenuAction(android.R.id.copy);
+      if (code == KeyEvent.KEYCODE_V)
+        return ic.performContextMenuAction(android.R.id.paste);
     }
     return false; // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
   }
@@ -315,10 +319,8 @@ public class Trime extends InputMethodService implements
   }
 
   public void onKey(int primaryCode, int mask) { //軟鍵盤
-    Log.info("onKey="+primaryCode);
-    if (handleAciton(primaryCode, mask)) { //編輯操作
-      return;
-    } else if (primaryCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
+    Log.info("onKey="+primaryCode+",mask="+mask);
+    if (primaryCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
       mRime.toggleOption("ascii_mode");
       commitText();
       updateComposing();
@@ -330,7 +332,9 @@ public class Trime extends InputMethodService implements
       Log.info("Rime onKey");
       commitText();
       updateComposing();
-    } else if (handleOption(primaryCode) || handleEnter(primaryCode)) {
+    } else if (handleOption(primaryCode)
+      || handleEnter(primaryCode)
+      || handleAciton(primaryCode, mask)) {
       Log.info("Trime onKey");
     } else {
       Log.info("send Key");

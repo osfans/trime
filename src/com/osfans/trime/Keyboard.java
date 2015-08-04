@@ -840,6 +840,10 @@ public class Keyboard {
     return value;
   }
 
+  public int getModifer() {
+    return mMetaState;
+  }
+
   public boolean setModifier(int mask, boolean value) {
     boolean b = hasModifier(mask);
     if (b == value) return false;
@@ -953,13 +957,13 @@ public class Keyboard {
     String s = keynames.get(code);
     int i = Rime.get_keycode_by_name(s);
     int m = 0;
-    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_SHIFT_ON)) {
+    if ((mask & KeyEvent.META_SHIFT_ON) > 0) {
       m |= Rime.get_modifier_by_name("Shift");
     }
-    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
+    if ((mask & KeyEvent.META_CTRL_ON) > 0) {
       m |= Rime.get_modifier_by_name("Control");
     }
-    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_ALT_ON)) {
+    if ((mask & KeyEvent.META_ALT_ON) > 0) {
       m |= Rime.get_modifier_by_name("Alt");
     }
     return new int[] {i, m};
