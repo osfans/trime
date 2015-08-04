@@ -15,7 +15,7 @@ style:
   comment_height: 12 #編碼提示區高度
   comment_text_size: 12 #編碼提示字號
   destroy_on_quit: false #退出時清理內存
-  display_tray_icon: true #狀態欄圖標
+  display_tray_icon: false #狀態欄圖標
   hanb_font: hanb.ttf #擴展字體
   hilite_padding: 2
   hilite_spacing: 4
