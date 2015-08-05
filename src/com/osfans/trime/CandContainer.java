@@ -45,7 +45,13 @@ public class CandContainer extends LinearLayout {
     text = (TextView) findViewById(R.id.text);
     text.setOnTouchListener(new View.OnTouchListener() {
       public boolean onTouch(View v, MotionEvent event) {
-        Log.e("Trime", "n="+text.getOffsetForPosition(event.getX(),event.getY()));
+        int n = text.getOffsetForPosition(event.getX(),event.getY());
+        if (event.getAction() == MotionEvent.ACTION_UP && n >= 0) {
+          String s = text.getText().toString().substring(0, n).replaceAll("[ ‸]", "");
+          n = s.length();
+          Rime.getRime().RimeSetCaretPos(n);
+          Trime.getService().updateComposing();
+        }
         return true;
       }
     });

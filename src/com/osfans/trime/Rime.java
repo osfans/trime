@@ -409,6 +409,11 @@ public class Rime
     return get_caret_pos(session_id);
   }
 
+  public void RimeSetCaretPos(int caret_pos) {
+    set_caret_pos(session_id, caret_pos);
+    getContexts();
+  }
+
   public static void onMessage(int session_id, String message_type, String message_value) {
     Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
     switch (message_type) {
@@ -479,6 +484,7 @@ public class Rime
 
   public static native final String get_input(int session_id);
   public static native final int get_caret_pos(int session_id);
+  public static native final void set_caret_pos(int session_id, int caret_pos);
   public static native final boolean select_candidate(int session_id, int index);
   public static native final String get_version();
 

@@ -493,6 +493,10 @@ static jint get_caret_pos(JNIEnv *env, jobject thiz, jint session_id) {
   return rime_get_api()->get_caret_pos(session_id);
 }
 
+static void set_caret_pos(JNIEnv *env, jobject thiz, jint session_id, jint caret_pos) {
+  return rime_get_api()->set_caret_pos(session_id, caret_pos);
+}
+
 static jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index) {
   return rime_get_api()->select_candidate(session_id, index);
 }
@@ -795,6 +799,11 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("get_caret_pos"),
         const_cast<char *>("(I)I"),
         reinterpret_cast<void *>(get_caret_pos)
+    },
+    {
+        const_cast<char *>("set_caret_pos"),
+        const_cast<char *>("(II)V"),
+        reinterpret_cast<void *>(set_caret_pos)
     },
     {
         const_cast<char *>("select_candidate"),
