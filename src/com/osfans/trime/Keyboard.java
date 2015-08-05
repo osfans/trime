@@ -1101,4 +1101,8 @@ public class Keyboard {
     }
     mTotalHeight = y + mDefaultHeight; 
   }
+
+  public boolean getAsciiMode() {
+    return mAsciiMode != 0;
+  }
 }

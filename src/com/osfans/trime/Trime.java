@@ -332,8 +332,10 @@ public class Trime extends InputMethodService implements
       updateComposing();
     } else if (keyboardSwitch.onKey(primaryCode)) {
       Log.info("keyboardSwitch onKey");
+      mRime.setOption("ascii_mode", keyboardSwitch.getAsciiMode()); //根據鍵盤設定中英文狀態
       bindKeyboardToInputView();
-      escape();
+      //escape();
+      updateComposing();
     } else if(mRime.onKey(Keyboard.getRimeKeyEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
