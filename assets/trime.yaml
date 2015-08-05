@@ -50,13 +50,14 @@ style:
   show_comment: true #顯示提示區
   show_preview: true #按鍵提示
   show_text: true #顯示編碼區
-  soft_cursor: true #軟光標
+  soft_cursor: true #編碼區軟光標
+  soft_cursor_text: "‸" #編碼區軟光標字符，librime默認爲"‸"
   spacing: 10
   symbol_font: symbol.ttf #符號字體
   symbol_text_size: 10 #符號字號
   text_font: latin.ttf #編碼字體
-  text_height: 16 #編碼區高度
-  text_size: 12 #編碼區字號
+  text_height: 22 #編碼區高度
+  text_size: 16 #編碼區字號
   vertical_correction: -10
   vertical_gap: 1 #鍵盤行距
 

@@ -32,6 +32,9 @@ public class CandContainer extends LinearLayout {
 
   private CandView candidateView;
   private TextView text;
+  private boolean soft_cursor;
+  private String soft_cursor_text;
+  private static String caret = "‸";
 
   public CandContainer(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -47,7 +50,8 @@ public class CandContainer extends LinearLayout {
       public boolean onTouch(View v, MotionEvent event) {
         int n = text.getOffsetForPosition(event.getX(),event.getY());
         if (event.getAction() == MotionEvent.ACTION_UP && n >= 0) {
-          String s = text.getText().toString().substring(0, n).replaceAll("[ ‸]", "");
+          String s = text.getText().toString().substring(0, n);
+          if (soft_cursor) s = s.replace(soft_cursor_text, "").replace(" ", "");
           n = s.length();
           Rime.getRime().RimeSetCaretPos(n);
           Trime.getService().updateComposing();
@@ -69,6 +73,9 @@ public class CandContainer extends LinearLayout {
     boolean show = config.getBoolean("show_text");
     text.setVisibility(show ? View.VISIBLE : View.GONE);
     show = config.getBoolean("show_candidate");
+    soft_cursor = config.getBoolean("soft_cursor");
+    soft_cursor_text = config.getString("soft_cursor_text");
+    if (soft_cursor_text == null || soft_cursor_text.isEmpty()) soft_cursor_text = caret;
     candidateView.setVisibility(show ? View.VISIBLE : View.GONE);
     candidateView.refresh();
   }
@@ -80,6 +87,8 @@ public class CandContainer extends LinearLayout {
 
   public void updatePage() {
     candidateView.update();
-    text.setText(Rime.getRime().getCompositionText());
+    String s = Rime.getRime().getCompositionText();
+    if (soft_cursor) s = s.replace(caret, soft_cursor_text);
+    text.setText(s);
   }
 }
