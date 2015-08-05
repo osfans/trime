@@ -20,23 +20,21 @@
 <com.osfans.trime.CandContainer
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/candidates_container"
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_weight="1" android:gravity="left">
     <TextView android:id="@+id/text"
+              android:layout_alignParentTop="true"
+              android:layout_alignParentLeft="true"
               android:layout_width="wrap_content"
-              android:layout_height="fill_parent"
-              android:textSize="12sp"
+              android:layout_height="wrap_content"
               android:ellipsize ="end"/>
-    </LinearLayout>
 
   <HorizontalScrollView android:id="@+id/scroll"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_below="@id/text"
+    android:layout_alignParentLeft="true"
     android:fillViewport="true">
     <LinearLayout
         android:layout_width="wrap_content"

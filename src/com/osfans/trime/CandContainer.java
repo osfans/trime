@@ -21,14 +21,14 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.TextView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.util.Log;
 
 /**
  * Contains all candidates in pages where users could move forward (next page)
  * or move backward (previous) page to select one of these candidates. 
  */
-public class CandContainer extends LinearLayout {
+public class CandContainer extends RelativeLayout {
 
   private CandView candidateView;
   private TextView text;
