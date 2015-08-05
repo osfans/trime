@@ -107,22 +107,22 @@ public class KeyboardView extends View implements View.OnClickListener {
         /**
          * Called when the user quickly moves the finger from right to left.
          */
-        void swipeLeft();
+        boolean swipeLeft();
         
         /**
          * Called when the user quickly moves the finger from left to right.
          */
-        void swipeRight();
+        boolean swipeRight();
         
         /**
          * Called when the user quickly moves the finger from up to down.
          */
-        void swipeDown();
+        boolean swipeDown();
         
         /**
          * Called when the user quickly moves the finger from down to up.
          */
-        void swipeUp();
+        boolean swipeUp();
     }
 
     // private static final boolean DEBUG = false;
@@ -349,17 +349,13 @@ public class KeyboardView extends View implements View.OnClickListener {
                 final float absX = Math.abs(velocityX);
                 final float absY = Math.abs(velocityY);
                 if (velocityX > 500 && absY < absX) {
-                    swipeRight();
-                    return true;
+                    return swipeRight();
                 } else if (velocityX < -500 && absY < absX) {
-                    swipeLeft();
-                    return true;
+                    return swipeLeft();
                 } else if (velocityY < -500 && absX < absY) {
-                    swipeUp();
-                    return true;
+                    return swipeUp();
                 } else if (velocityY > 500 && absX < 200) {
-                    swipeDown();
-                    return true;
+                    return swipeDown();
                 } else if (absX > 800 || absY > 800) {
                     return true;
                 }
@@ -972,10 +968,10 @@ public class KeyboardView extends View implements View.OnClickListener {
                         dismissPopupKeyboard();
                     }
                     
-                    public void swipeLeft() { }
-                    public void swipeRight() { }
-                    public void swipeUp() { }
-                    public void swipeDown() { }
+                    public boolean swipeLeft() { return false; }
+                    public boolean swipeRight() { return false; }
+                    public boolean swipeUp() { return false; }
+                    public boolean swipeDown() { return false; }
                     public void onPress(int primaryCode) {
                         mKeyboardActionListener.onPress(primaryCode);
                     }
@@ -1051,7 +1047,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         int action = me.getAction();
         long eventTime = me.getEventTime();
         int keyIndex = getKeyIndices(touchX, touchY, null);
-        
+
         if (mGestureDetector.onTouchEvent(me)) {
             showPreview(NOT_A_KEY);
             mHandler.removeMessages(MSG_REPEAT);
@@ -1171,20 +1167,20 @@ public class KeyboardView extends View implements View.OnClickListener {
         return true;
     }
     
-    protected void swipeRight() {
-        mKeyboardActionListener.swipeRight();
+    protected boolean swipeRight() {
+        return mKeyboardActionListener.swipeRight();
     }
     
-    protected void swipeLeft() {
-        mKeyboardActionListener.swipeLeft();
+    protected boolean swipeLeft() {
+        return mKeyboardActionListener.swipeLeft();
     }
 
-    protected void swipeUp() {
-        mKeyboardActionListener.swipeUp();
+    protected boolean swipeUp() {
+        return mKeyboardActionListener.swipeUp();
     }
 
-    protected void swipeDown() {
-        mKeyboardActionListener.swipeDown();
+    protected boolean swipeDown() {
+        return mKeyboardActionListener.swipeDown();
     }
 
     public void closing() {
