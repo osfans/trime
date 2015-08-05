@@ -1051,9 +1051,9 @@ public class Keyboard {
       key.codes = new int[]{c};
       key.mask = pairs[1];
 
+      key.repeatable = (Boolean)getValue(mk, "repeatable", false);
       if (c == KeyEvent.KEYCODE_SPACE){
         if (key.label==null) key.label = Rime.getRime().getSchemaName();
-        key.repeatable = true;
       } else if (c == KeyEvent.KEYCODE_SWITCH_CHARSET){
         if (key.label==null) key.label = "⇪";
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
@@ -1064,7 +1064,6 @@ public class Keyboard {
         mModifierKeys.add(key);
       } else if (c == KeyEvent.KEYCODE_DEL){
         if (key.label==null) key.label = "⌫";
-        key.repeatable = true;
       } else if (c == KeyEvent.KEYCODE_CLEAR){ //清屏
         if (key.label==null) key.label = "⌧";
       } else if (c == KeyEvent.KEYCODE_ENTER){

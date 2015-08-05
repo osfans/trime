@@ -620,9 +620,9 @@ keyboard:
   - {code: "Shift_L"}
   - {label: '123', switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
   - {code: Language_switch, label: 🌐, symbol: F4, symbolCode: F4}
-  - {code: space, width: 30}
+  - {code: space, repeatable: true, width: 30}
   - {symbol: '"', text: "'"}
-  - {code: BackSpace, width: 15, symbol: Esc, symbolCode: Escape}
+  - {code: BackSpace, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
   - {code: Return, width: 15, symbol: 清空, symbolCode: Clear}
 - mode: 1
   width: 20
@@ -649,6 +649,6 @@ keyboard:
   - {text: ','}
   - {text: '='}
   - {code: <switch>, switch: 0}
-  - {code: space}
-  - {code: BackSpace}
+  - {code: space, repeatable: true}
+  - {code: BackSpace, repeatable: true}
   - {code: Return}
