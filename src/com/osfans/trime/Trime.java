@@ -315,12 +315,10 @@ public class Trime extends InputMethodService implements
     if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
       return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
 
-    if (!event.isAltPressed() && event.isShiftPressed()) {
-      int c = event.getUnicodeChar();
-      if (c > 0) {
-        onText(String.valueOf((char)c));
-        return true;
-      }
+    int c = event.getUnicodeChar();
+    if (c > 0) {
+      onText(String.valueOf((char)c));
+      return true;
     }
     onKey(keyCode, event.getMetaState());
     return true;
