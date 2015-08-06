@@ -32,19 +32,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.app.AlertDialog;
 
+import android.os.Handler;
+import android.view.Gravity;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.PopupWindow;
+import android.widget.LinearLayout;
+import android.view.LayoutInflater;
+
 import java.util.logging.Logger;
 
 /**
  * Abstract class extended by all Dialect IME.
  */
 public class Trime extends InputMethodService implements 
-    KeyboardView.OnKeyboardActionListener, CandView.CandViewListener {
+    KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
 
   protected KeyboardView inputView;
-  private CandContainer candidatesContainer;
   private KeyboardSwitch keyboardSwitch;
   private Config mConfig;
-  private Effect effect;
+  private Effect mEffect;
   private int orientation;
 
   private boolean canCompose;
@@ -57,12 +63,53 @@ public class Trime extends InputMethodService implements
   private Rime mRime;
   private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
 
+  private LinearLayout mCandidateContainer,  mCompositionContainer;
+  private Candidate mCandidate;
+  private Composition mComposition;
+  private PopupWindow mFloatingWindow;
+  private PopupTimer mFloatingWindowTimer = new PopupTimer();
+
+  private class PopupTimer extends Handler implements Runnable {
+      private int mParentLocation[] = new int[2];
+
+      void postShowFloatingWindow() {
+          mCompositionContainer.measure(LayoutParams.WRAP_CONTENT,
+                  LayoutParams.WRAP_CONTENT);
+          mFloatingWindow.setWidth(mCompositionContainer.getMeasuredWidth());
+          mFloatingWindow.setHeight(mCompositionContainer.getMeasuredHeight());
+          post(this);
+      }
+
+      void cancelShowing() {
+          if (mFloatingWindow.isShowing()) {
+              mFloatingWindow.dismiss();
+          }
+          removeCallbacks(this);
+      }
+
+      public void run() {
+          mCandidateContainer.getLocationInWindow(mParentLocation);
+
+          if (!mFloatingWindow.isShowing()) {
+              mFloatingWindow.showAtLocation(mCandidateContainer,
+                      Gravity.LEFT | Gravity.TOP, mParentLocation[0],
+                      mParentLocation[1] -mFloatingWindow.getHeight());
+          } else {
+              mFloatingWindow
+              .update(mParentLocation[0],
+                      mParentLocation[1] - mFloatingWindow.getHeight(),
+                      mFloatingWindow.getWidth(),
+                      mFloatingWindow.getHeight());
+          }
+      }
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();
     self = this;
 
-    effect = new Effect(this);
+    mEffect = new Effect(this);
     mRime = Rime.getRime();
     mConfig = Config.get(this);
     if (mConfig.getBoolean("soft_cursor")) {
@@ -72,7 +119,7 @@ public class Trime extends InputMethodService implements
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
 
-    effect.reset();
+    mEffect.reset();
 
     keyboardSwitch = new KeyboardSwitch(this);
 
@@ -95,26 +142,6 @@ public class Trime extends InputMethodService implements
 
   public static Trime getService() {
     return self;
-  }
-
-  public void invalidate() {
-    mRime = Rime.getRime();
-    if (mConfig != null) mConfig.destroy();
-    mConfig = new Config(this);
-    if (mConfig.getBoolean("soft_cursor")) {
-      mRime.setOption("soft_cursor", true); //軟光標
-    }
-    inlinePreedit = mConfig.getBoolean("inline_preedit");
-    inlineCode = mConfig.getBoolean("inline_code");
-    display_tray_icon = mConfig.getBoolean("display_tray_icon");
-
-    if (keyboardSwitch != null) keyboardSwitch.refresh();
-    if (inputView != null) inputView.refresh();
-    if (candidatesContainer != null) {
-      candidatesContainer.refresh(); //刷新狀態欄配置
-      candidatesContainer.updatePage(); //刷新顯示
-    }
-    effect.reset();
   }
 
   @Override
@@ -157,10 +184,25 @@ public class Trime extends InputMethodService implements
 
   @Override
   public View onCreateCandidatesView() {
-    candidatesContainer = (CandContainer) getLayoutInflater().inflate(
-        R.layout.candidates, null);
-    candidatesContainer.setCandViewListener(this);
-    return candidatesContainer;
+    LayoutInflater inflater = getLayoutInflater();
+    mCompositionContainer = (LinearLayout) inflater.inflate(
+            R.layout.composition_container, null);
+    if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
+        mFloatingWindowTimer.cancelShowing();
+        mFloatingWindow.dismiss();
+    }
+    mComposition = (Composition) mCompositionContainer.getChildAt(0);
+    mFloatingWindow = new PopupWindow(this);
+    mFloatingWindow.setClippingEnabled(false);
+    mFloatingWindow.setBackgroundDrawable(null);
+    mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+    mFloatingWindow.setContentView(mCompositionContainer);
+
+    mCandidateContainer = (LinearLayout) inflater.inflate(R.layout.candidate_container, null);
+    mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
+    mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
+    mCandidate.setCandidateListener(this);
+    return mCandidateContainer;
   }
     
   @Override
@@ -182,6 +224,12 @@ public class Trime extends InputMethodService implements
     // Dismiss any pop-ups when the input-view is being finished and hidden.
     inputView.closing();
     escape();
+    try {
+        mFloatingWindowTimer.cancelShowing();
+        mFloatingWindow.dismiss();
+    } catch (Exception e) {
+        Log.info("Fail to show the PopupWindow.");
+    }
   }
 
 
@@ -194,12 +242,34 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  public void initKeyboard() {
+  public void refresh() {
     mConfig.refresh();
-    keyboardSwitch.refresh();
-    candidatesContainer.refresh();
+    if (mConfig.getBoolean("soft_cursor")) {
+      mRime.setOption("soft_cursor", true); //軟光標
+    }
+    inlinePreedit = mConfig.getBoolean("inline_preedit");
+    inlineCode = mConfig.getBoolean("inline_code");
+    display_tray_icon = mConfig.getBoolean("display_tray_icon");
+    if (keyboardSwitch != null) keyboardSwitch.refresh();
+    if (mCandidateContainer != null) {
+      mCandidate.refresh();
+      mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
+      mComposition.refresh();
+    }
     if (inputView != null) inputView.refresh(); //實體鍵盤無view
+    mEffect.reset();
+  }
+
+  public void initKeyboard() {
+    refresh();
     bindKeyboardToInputView();
+  }
+
+  public void invalidate() {
+    mRime = Rime.getRime();
+    if (mConfig != null) mConfig.destroy();
+    mConfig = new Config(this);
+    refresh();
   }
 
   /**
@@ -359,8 +429,8 @@ public class Trime extends InputMethodService implements
   }
 
   public void onPress(int primaryCode) {
-    effect.vibrate();
-    effect.playSound(primaryCode);
+    mEffect.vibrate();
+    mEffect.playSound(primaryCode);
   }
 
   public void onRelease(int primaryCode) {
@@ -412,9 +482,11 @@ public class Trime extends InputMethodService implements
         ic.setComposingText(s, 1);
       }
     }
-    if (candidatesContainer != null) {
-      candidatesContainer.updatePage();
+    if (mCandidateContainer != null) {
+      mCandidate.setText();
       //setCandidatesViewShown(canCompose); //InputType爲0x80000時無候選條
+      mComposition.setText();
+      mFloatingWindowTimer.postShowFloatingWindow();
     }
   }
 
@@ -453,7 +525,7 @@ public class Trime extends InputMethodService implements
         mOptionsDialog = builder.create();
         Window window = mOptionsDialog.getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
-        if (candidatesContainer != null) lp.token = candidatesContainer.getWindowToken();
+        if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
         lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
         window.setAttributes(lp);
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);

@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.graphics.Typeface;
@@ -38,19 +39,19 @@ import java.util.Map;
 /**
  * View to show candidate words.
  */
-public class CandView extends View {
+public class Candidate extends View {
 
   /**
    * Listens to candidate-view actions.
    */
-  public static interface CandViewListener {
+  public static interface CandidateListener {
     void onPickCandidate(int index);
   }
 
   public static final int MAX_CANDIDATE_COUNT = 20;
   private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
-  private CandViewListener listener;
+  private CandidateListener listener;
   private int highlightIndex;
   private Rime mRime;
   private Rime.RimeCandidate[] candidates;
@@ -92,9 +93,11 @@ public class CandView extends View {
     paintComment.setTypeface(tfComment);
 
     show_comment = config.getBoolean("show_comment");
+    boolean show = config.getBoolean("show_candidate");
+    setVisibility(show ? View.VISIBLE : View.GONE);
   }
 
-  public CandView(Context context, AttributeSet attrs) {
+  public Candidate(Context context, AttributeSet attrs) {
     super(context, attrs);
     paintCandidate = new Paint();
     paintCandidate.setAntiAlias(true);
@@ -109,14 +112,14 @@ public class CandView extends View {
     mRime = Rime.getRime();
   }
   
-  public void setCandViewListener(CandViewListener listener) {
+  public void setCandidateListener(CandidateListener listener) {
     this.listener = listener;
   }
 
   /**
    * Highlight the first candidate as the default candidate.
    */
-  public void update() {
+  public void setText() {
     removeHighlight();
     updateCandidateWidth();
     if (getCandNum() > 0) {

@@ -45,6 +45,7 @@ public class Config {
       put("hilited_candidate_text_color", "hilited_text_color");
       put("hilited_candidate_back_color", "hilited_back_color");
       put("hilited_comment_text_color", "comment_text_color");
+      put("text_back_color", "back_color");
 
       put("hilited_key_back_color", "hilited_candidate_back_color");
       put("hilited_key_text_color", "hilited_candidate_text_color");
