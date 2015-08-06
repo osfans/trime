@@ -23,6 +23,10 @@ import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.RelativeLayout;
 import android.util.Log;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.UnderlineSpan;
 
 /**
  * Contains all candidates in pages where users could move forward (next page)
@@ -35,6 +39,9 @@ public class CandContainer extends RelativeLayout {
   private boolean soft_cursor;
   private String soft_cursor_text;
   private static String caret = "‸";
+  private ForegroundColorSpan hilited_text_color_span;
+  private BackgroundColorSpan hilited_back_color_span;
+  private UnderlineSpan underline_span = new UnderlineSpan();
 
   public CandContainer(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -66,6 +73,8 @@ public class CandContainer extends RelativeLayout {
     Config config = Config.get();
     setBackgroundColor(config.getColor("back_color"));
     text.setTextColor(config.getColor("text_color"));
+    hilited_text_color_span = new ForegroundColorSpan(config.getColor("hilited_text_color"));
+    hilited_back_color_span = new BackgroundColorSpan(config.getColor("hilited_back_color"));
     text.setTextSize(config.getInt("text_size"));
     text.setHeight(config.getPixel("text_height"));
     //text.setBackgroundColor(config.getColor("back_color"));
@@ -87,8 +96,19 @@ public class CandContainer extends RelativeLayout {
 
   public void updatePage() {
     candidateView.update();
-    String s = Rime.getRime().getCompositionText();
+    Rime.RimeComposition r = Rime.getRime().getComposition();
+    String s = "";
+    if (r != null) s = r.getText();
     if (soft_cursor) s = s.replace(caret, soft_cursor_text);
     text.setText(s);
+    int n = s.length();
+    if (n > 0 && r != null) {
+      SpannableString ss = (SpannableString)text.getText();
+      int start = r.getStart();
+      int end = r.getEnd();
+      ss.setSpan(hilited_text_color_span, start, end, SpannableString.SPAN_INCLUSIVE_INCLUSIVE);
+      ss.setSpan(hilited_back_color_span, start, end, SpannableString.SPAN_INCLUSIVE_INCLUSIVE);
+      ss.setSpan(underline_span, start, end, SpannableString.SPAN_INCLUSIVE_INCLUSIVE);
+    }
   }
 }

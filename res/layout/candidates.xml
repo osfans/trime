@@ -28,6 +28,7 @@
               android:layout_alignParentLeft="true"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
+              android:bufferType="spannable"
               android:ellipsize ="end"/>
 
   <HorizontalScrollView android:id="@+id/scroll"

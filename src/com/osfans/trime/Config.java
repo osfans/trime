@@ -35,43 +35,45 @@ public class Config {
   private String defaultName = "trime.yaml";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
-  private Map<String,String> fallback = new HashMap<String, String>();
   private Typeface tf;
+  private static Map<String,String> fallback = new HashMap<String, String>() {
+    {
+      put("candidate_text_color", "text_color");
+      put("border_color", "back_color");
+      put("hilited_text_color", "text_color");
+      put("hilited_back_color", "back_color");
+      put("hilited_candidate_text_color", "hilited_text_color");
+      put("hilited_candidate_back_color", "hilited_back_color");
+      put("hilited_comment_text_color", "comment_text_color");
+
+      put("hilited_key_back_color", "hilited_candidate_back_color");
+      put("hilited_key_text_color", "hilited_candidate_text_color");
+      put("hilited_key_symbol_color", "hilited_key_text_color");
+      put("hilited_off_key_back_color", "hilited_key_back_color");
+      put("hilited_on_key_back_color", "hilited_key_back_color");
+      put("hilited_off_key_text_color", "hilited_key_text_color");
+      put("hilited_on_key_text_color", "hilited_key_text_color");
+      put("key_back_color", "back_color");
+      put("keyboard_back_color", "key_back_color");
+      put("key_border_color", "border_color");
+      put("key_text_color", "text_color");
+      put("key_symbol_color", "key_text_color");
+      put("label_color", "candidate_text_color");
+      put("off_key_back_color", "key_back_color");
+      put("off_key_text_color", "key_text_color");
+      put("on_key_back_color", "hilited_key_back_color");
+      put("on_key_text_color", "hilited_key_text_color");
+      put("preview_back_color", "key_back_color");
+      put("preview_text_color", "key_text_color");
+      put("shadow_color", "border_color");
+    }
+  };
 
   public Config(Context context) {
     self = this;
     tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
     maps = new HashMap<String, Map>();
     mDefaultConfig = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
-    fallback.put("candidate_text_color", "text_color");
-    fallback.put("border_color", "back_color");
-    fallback.put("hilited_text_color", "text_color");
-    fallback.put("hilited_back_color", "back_color");
-    fallback.put("hilited_candidate_text_color", "hilited_text_color");
-    fallback.put("hilited_candidate_back_color", "hilited_back_color");
-    fallback.put("hilited_comment_text_color", "comment_text_color");
-
-    fallback.put("hilited_key_back_color", "hilited_candidate_back_color");
-    fallback.put("hilited_key_text_color", "hilited_candidate_text_color");
-    fallback.put("hilited_key_symbol_color", "hilited_key_text_color");
-    fallback.put("hilited_off_key_back_color", "hilited_key_back_color");
-    fallback.put("hilited_on_key_back_color", "hilited_key_back_color");
-    fallback.put("hilited_off_key_text_color", "hilited_key_text_color");
-    fallback.put("hilited_on_key_text_color", "hilited_key_text_color");
-    fallback.put("key_back_color", "back_color");
-    fallback.put("keyboard_back_color", "key_back_color");
-    fallback.put("key_border_color", "border_color");
-    fallback.put("key_text_color", "text_color");
-    fallback.put("key_symbol_color", "key_text_color");
-    fallback.put("label_color", "candidate_text_color");
-    fallback.put("off_key_back_color", "key_back_color");
-    fallback.put("off_key_text_color", "key_text_color");
-    fallback.put("on_key_back_color", "hilited_key_back_color");
-    fallback.put("on_key_text_color", "hilited_key_text_color");
-    fallback.put("preview_back_color", "key_back_color");
-    fallback.put("preview_text_color", "key_text_color");
-    fallback.put("shadow_color", "border_color");
-
     refresh();
   }
 

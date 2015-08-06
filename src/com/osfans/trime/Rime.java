@@ -48,6 +48,25 @@ public class Rime
     int sel_start;
     int sel_end;
     String preedit;
+    byte[] bytes;
+
+    public String getText() {
+      if (length == 0) return "";
+      bytes = preedit.getBytes();
+      return preedit;
+    }
+
+    public int getStart() {
+      if (length == 0) return 0;
+      Log.info("i="+sel_start+",start ="+ new String(bytes, 0, sel_start));
+      return new String(bytes, 0, sel_start).length();
+    }
+
+    public int getEnd() {
+      if (length == 0) return 0;
+      Log.info("i="+sel_end+",end ="+ new String(bytes, 0, sel_end));
+      return new String(bytes, 0, sel_end).length();
+    }
   };
 
   public class RimeCandidate {
@@ -212,10 +231,9 @@ public class Rime
     return mStatus.is_composing;
   }
 
-  public String getCompositionText() {
-    if (mContext == null || mContext.composition == null) return "";
-    if (mContext.composition.length > 0) return mContext.composition.preedit;
-    return "";
+  public RimeComposition getComposition() {
+    if (mContext == null) return null;
+    return mContext.composition;
   }
 
   public static Rime getRime(){
