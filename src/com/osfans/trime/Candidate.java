@@ -64,7 +64,7 @@ public class Candidate extends View {
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
   private int candidate_view_height, comment_height;
-  private boolean show_comment;
+  private boolean show_comment, comment_on_top;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
@@ -95,6 +95,7 @@ public class Candidate extends View {
     show_comment = config.getBoolean("show_comment");
     boolean show = config.getBoolean("show_candidate");
     setVisibility(show ? View.VISIBLE : View.GONE);
+    comment_on_top = config.getBoolean("comment_on_top");
   }
 
   public Candidate(Context context, AttributeSet attrs) {
@@ -163,46 +164,64 @@ public class Candidate extends View {
     }
   }
 
-  private void drawText(String s, Canvas canvas, Paint paintCandidate, Typeface font, float center, float y) {
+  private void drawText(String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
     if (s == null) return;
     int length = s.length();
     if (length == 0) return;
     int points = s.codePointCount(0, length);
-    float x = center - paintCandidate.measureText(s) / 2;
+    float x = center - paint.measureText(s) / 2;
     if (tfb != null && length > points) {
       for (int offset = 0; offset < length; ) {
         int codepoint = s.codePointAt(offset);
         int charCount = Character.charCount(codepoint);
         int end = offset + charCount;
-        paintCandidate.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfb : font);
-        canvas.drawText(s, offset, end, x, y, paintCandidate);
-        x += paintCandidate.measureText(s, offset, end);
+        paint.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfb : font);
+        canvas.drawText(s, offset, end, x, y, paint);
+        x += paint.measureText(s, offset, end);
         offset += charCount;
       }
     } else {
-      paintCandidate.setTypeface(font);
-      canvas.drawText(s, x, y, paintCandidate);
+      paint.setTypeface(font);
+      canvas.drawText(s, x, y, paint);
     }
   }
 
   private void drawCandidates(Canvas canvas) {
     if (candidates == null) return;
 
-    float y = candidateRect[0].centerY() - (paintCandidate.ascent() - paintCandidate.getTextSize()) / 2;
-    if (show_comment) y -= comment_height / 2;
-    else y -= comment_height;
     float x = 0;
+    float y = 0;
     int i = 0;
+    float comment_x, comment_y;
+    float comment_width;
+    String candidate, comment;
+
+    y = candidateRect[0].centerY() - (paintCandidate.ascent() + paintCandidate.descent()) / 2;
+    if (show_comment && comment_on_top) y += comment_height / 2;
+    comment_y = comment_height / 2 - (paintComment.ascent() + paintComment.descent()) / 2;
+    if (show_comment && !comment_on_top) comment_y += candidateRect[0].bottom - comment_height;
 
     while (i < num_candidates) {
       // Calculate a position where the text could be centered in the rectangle.
+      x = candidateRect[i].centerX();
+      if (show_comment) {
+        comment = getComment(i);
+        if (comment != null && !comment.isEmpty()) {
+          comment_width = paintComment.measureText(comment);
+          if (comment_on_top) {
+            comment_x = candidateRect[i].centerX();
+          } else {
+            x -= comment_width / 2;
+            comment_x = candidateRect[i].right -  comment_width / 2;
+          }
+          paintComment.setTypeface(tfComment);
+          paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
+          drawText(comment, canvas, paintComment, tfComment, comment_x, comment_y);
+        }
+      }
       paintCandidate.setTypeface(tfCandidate);
       paintCandidate.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
-      drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, candidateRect[i].centerX(), y);
-      if (show_comment) {
-        paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
-        drawText(getComment(i), canvas, paintComment, tfComment, candidateRect[i].centerX(), - paintComment.ascent());
-      }
+      drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, x, y);
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -213,7 +232,7 @@ public class Candidate extends View {
       i++;
     }
     for (int j = -4; j >= -5; j--) { // -4: left, -5: right
-      String candidate = getCandidate(j);
+      candidate = getCandidate(j);
       if (candidate == null) continue;
       paintCandidate.setTypeface(tfs);
       x = candidateRect[i].centerX() - paintCandidate.measureText(candidate) / 2;
@@ -252,7 +271,7 @@ public class Candidate extends View {
     LayoutParams params = getLayoutParams();
     params.width = x;
     params.height = candidate_view_height;
-    if (show_comment) params.height += comment_height;
+    if (show_comment && comment_on_top) params.height += comment_height;
     setLayoutParams(params);
   }
 
@@ -351,7 +370,8 @@ public class Candidate extends View {
       String comment = getComment(i);
       if (comment != null) {
         float x2 = paintComment.measureText(comment);
-        if (x2 > x) x = x2;
+        if (comment_on_top) { if (x2 > x) x = x2; } //提示在上方
+        else x += x2;  //提示在右方
       }
     }
     return x;

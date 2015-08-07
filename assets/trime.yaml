@@ -13,6 +13,7 @@ style:
   color_scheme: default #配色方案
   comment_font: latin.ttf #編碼提示字體
   comment_height: 12 #編碼提示區高度
+  comment_on_top: true #編碼提示在上方或右側
   comment_text_size: 12 #編碼提示字號
   destroy_on_quit: false #退出時清理內存
   display_tray_icon: false #狀態欄圖標
