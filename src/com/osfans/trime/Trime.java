@@ -287,8 +287,8 @@ public class Trime extends InputMethodService implements
     }
     mRime = Rime.getRime();
     // Select a keyboard based on the input type of the editing field.
-    mKeyboardSwitch.init(getMaxWidth());
-    mKeyboardSwitch.onStartInput(inputType);
+    mKeyboardSwitch.init(getMaxWidth());  //橫豎屏切換時重置鍵盤
+    // mKeyboardSwitch.onStartInput(inputType);
     //setCandidatesViewShown(true);
     //escape();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !mRime.isEmpty()); //實體鍵盤

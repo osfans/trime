@@ -52,11 +52,6 @@ public class KeyboardSwitch {
     currentKeyboard = keyboards[currentId];
   }
 
-  /**
-   * Recreates the keyboards if the display-width has been changed.
-   * 
-   * @param displayWidth the display-width for keyboards.
-   */
   public void init(int displayWidth) {
     if ((currentKeyboard != null) && (displayWidth == currentDisplayWidth)) {
       return;
@@ -79,16 +74,15 @@ public class KeyboardSwitch {
    */
   public void onStartInput(int inputType) {
     if ((inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_CLASS_TEXT) {
-        int variation = inputType & InputType.TYPE_MASK_VARIATION;
-        if ((variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-            || (variation == InputType.TYPE_TEXT_VARIATION_URI)
-            || (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD)
-            || (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
-          lastId = 0;
-          setKeyboard(0);
-          currentKeyboard.setShifted(false, currentKeyboard.isShifted());
-        }
-     }
+      int variation = inputType & InputType.TYPE_MASK_VARIATION;
+      if ((variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+          || (variation == InputType.TYPE_TEXT_VARIATION_URI)
+          || (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD)
+          || (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
+        setKeyboard(0);
+        currentKeyboard.setShifted(false, currentKeyboard.isShifted());
+      }
+    }
   }
 
   private boolean switchMode(int newId) {
