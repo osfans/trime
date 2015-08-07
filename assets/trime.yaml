@@ -26,9 +26,9 @@ style:
   key_font: han.ttf #鍵盤字體
   key_height: 42 #鍵高
   key_sound: false #按鍵聲音
-  key_sound_volumn: -1 #按鍵音量
+  key_sound_volume: -1 #按鍵音量
   key_text_size: 22 #鍵字號
-  key_vibrate_duration: 30 #按鍵震動時長
+  key_vibrate_duration: 30 #按鍵震動時長：毫秒
   key_vibrate: false #按鍵震動
   key_width: 10.0 #鍵寬，佔屏寬的百分比
   label_text_size: 14 #長標籤字號

@@ -242,27 +242,27 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  public void refresh() {
-    mConfig.refresh();
+  public void reset() {
+    mConfig.reset();
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
-    if (keyboardSwitch != null) keyboardSwitch.refresh();
+    if (keyboardSwitch != null) keyboardSwitch.reset();
     if (mCandidateContainer != null) {
       mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
-      mCandidate.refresh();
-      mComposition.refresh();
+      mCandidate.reset();
+      mComposition.reset();
     }
     if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
         mFloatingWindowTimer.cancelShowing();
         mFloatingWindow.dismiss();
     }
-    if (inputView != null) inputView.refresh(); //實體鍵盤無view
+    if (inputView != null) inputView.reset(); //實體鍵盤無view
     mEffect.reset();
   }
 
   public void initKeyboard() {
-    refresh();
+    reset();
     bindKeyboardToInputView();
   }
 
@@ -270,7 +270,7 @@ public class Trime extends InputMethodService implements
     mRime = Rime.getRime();
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
-    refresh();
+    reset();
     if (mConfig.getBoolean("soft_cursor")) {
       mRime.setOption("soft_cursor", true); //軟光標
     }

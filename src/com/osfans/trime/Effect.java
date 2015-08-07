@@ -26,7 +26,7 @@ import android.view.KeyEvent;
  */
 public class Effect {
   private int duration = 30;
-  private float volumn = -1.0f;
+  private float volume = -1.0f;
 
   private final Context context;
 
@@ -44,11 +44,12 @@ public class Effect {
     vibrateOn = config.getBoolean("key_vibrate");
     duration = config.getInt("key_vibrate_duration");
     if (vibrateOn && (vibrator == null)) {
-      vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+      vibrator =
+        (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     soundOn = config.getBoolean("key_sound");
-    volumn = config.getFloat("key_sound_volumn");
+    volume = config.getFloat("key_sound_volume");
     if (soundOn && (audioManager == null)) {
       audioManager = 
         (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -56,29 +57,27 @@ public class Effect {
   }
 
   public void vibrate() {
-    if (vibrateOn && (vibrator != null)) {
-      vibrator.vibrate(duration);
-    }
+    if (vibrateOn && (vibrator != null)) vibrator.vibrate(duration);
   }
 
   public void playSound(final int code) {
     if (soundOn && (audioManager != null)) {
-            final int sound;
-            switch (code) {
-            case KeyEvent.KEYCODE_DEL:
-                sound = AudioManager.FX_KEYPRESS_DELETE;
-                break;
-            case KeyEvent.KEYCODE_ENTER:
-                sound = AudioManager.FX_KEYPRESS_RETURN;
-                break;
-            case KeyEvent.KEYCODE_SPACE:
-                sound = AudioManager.FX_KEYPRESS_SPACEBAR;
-                break;
-            default:
-                sound = AudioManager.FX_KEYPRESS_STANDARD;
-                break;
-            }
-      audioManager.playSoundEffect(sound, volumn);
+      final int sound;
+      switch (code) {
+        case KeyEvent.KEYCODE_DEL:
+            sound = AudioManager.FX_KEYPRESS_DELETE;
+            break;
+        case KeyEvent.KEYCODE_ENTER:
+            sound = AudioManager.FX_KEYPRESS_RETURN;
+            break;
+        case KeyEvent.KEYCODE_SPACE:
+            sound = AudioManager.FX_KEYPRESS_SPACEBAR;
+            break;
+        default:
+            sound = AudioManager.FX_KEYPRESS_STANDARD;
+            break;
+      }
+      audioManager.playSoundEffect(sound, volume);
     }
   }
 }

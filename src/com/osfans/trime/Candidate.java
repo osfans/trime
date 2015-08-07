@@ -68,7 +68,7 @@ public class Candidate extends View {
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
-  public void refresh() {
+  public void reset() {
     Config config = Config.get();
     candidateHighlight = new ColorDrawable(config.getColor("hilited_candidate_back_color"));
     candidateSeparator = new ColorDrawable(config.getColor("candidate_separator_color"));
@@ -107,7 +107,7 @@ public class Candidate extends View {
     paintComment.setAntiAlias(true);
     paintComment.setStrokeWidth(0);
 
-    refresh();
+    reset();
 
     setWillNotDraw(false);
     mRime = Rime.getRime();

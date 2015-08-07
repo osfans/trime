@@ -34,22 +34,22 @@ public class KeyboardSwitch {
     this.context = context;
     currentId = 0;
     lastId = 0;
-    refresh();
+    reset();
   }
 
-  public void reset(){
-    currentId = 0;
-    currentKeyboard = keyboards[currentId];
-  }
-
-  public void refresh() {
+  public void reset() {
     List<Object> keys = Config.get().getKeyboards();
     int n = keys.size();
     keyboards = new Keyboard[n];
     for (int i = 0; i < n; i++ ) {
       keyboards[i] = new Keyboard(context, keys.get(i));
     }
-    reset();
+    setKeyboard(0);
+  }
+
+  public void setKeyboard(int i){
+    currentId = i;
+    currentKeyboard = keyboards[currentId];
   }
 
   /**
@@ -63,7 +63,7 @@ public class KeyboardSwitch {
     }
 
     currentDisplayWidth = displayWidth;
-    refresh();
+    reset();
   }
 
   public Keyboard getCurrentKeyboard() {
@@ -84,11 +84,10 @@ public class KeyboardSwitch {
             || (variation == InputType.TYPE_TEXT_VARIATION_URI)
             || (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD)
             || (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
-          currentId = 0;
           lastId = 0;
-          currentKeyboard = keyboards[currentId];
+          setKeyboard(0);
           currentKeyboard.setShifted(false, currentKeyboard.isShifted());
-        } else reset();
+        }
      }
   }
 

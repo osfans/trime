@@ -75,7 +75,7 @@ public class Config {
     tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
     maps = new HashMap<String, Map>();
     mDefaultConfig = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
-    refresh();
+    reset();
   }
 
   public static boolean copyFromAssets(Context context, String name) {
@@ -109,7 +109,7 @@ public class Config {
     }
   }
 
-  public void refresh() {
+  public void reset() {
     String schema_id = Rime.getRime().getSchemaId();
     if (maps.containsKey(schema_id)) {
       mConfig = maps.get(schema_id);

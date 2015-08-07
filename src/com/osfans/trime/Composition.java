@@ -42,7 +42,7 @@ public class Composition extends TextView {
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
-    refresh();
+    reset();
   }
 
   public boolean onTouchEvent(MotionEvent event) {
@@ -57,7 +57,7 @@ public class Composition extends TextView {
     return true;
   }
 
-  public void refresh() {
+  public void reset() {
     Config config = Config.get();
     setBackgroundColor(config.getColor("text_back_color"));
     setTextColor(config.getColor("text_color"));
