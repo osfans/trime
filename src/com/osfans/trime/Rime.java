@@ -504,7 +504,7 @@ public class Rime
   public static native final int get_caret_pos(int session_id);
   public static native final void set_caret_pos(int session_id, int caret_pos);
   public static native final boolean select_candidate(int session_id, int index);
-  public static native final String get_version();
+  public static native final String get_version(String module);
 
   // key_table
   public static native final int get_modifier_by_name(String name);

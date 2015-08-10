@@ -52,8 +52,10 @@ public class Pref extends PreferenceActivity {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
 
-    Preference pref = findPreference("pref_librimever");
-    pref.setSummary(Rime.get_version());
+    Preference pref = findPreference("pref_librime_ver");
+    pref.setSummary(Rime.get_version("librime"));
+    pref = findPreference("pref_opencc_ver");
+    pref.setSummary(Rime.get_version("opencc"));
     pref = findPreference("pref_ver");
     pref.setSummary(getVersion());
   }

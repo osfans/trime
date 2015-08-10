@@ -23,7 +23,8 @@
 
     <!-- Preference settings -->
     <string name="pref_about">关于</string>
-    <string name="pref_librimever">Librime版本</string>
+    <string name="pref_librime_ver">Librime版本</string>
+    <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_ver">平台版本</string>
 
     <string name="pref_function">功能</string>

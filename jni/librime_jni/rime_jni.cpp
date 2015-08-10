@@ -501,9 +501,16 @@ static jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jin
   return rime_get_api()->select_candidate(session_id, index);
 }
 
-static jstring get_version(JNIEnv *env, jobject thiz) {
-  const char* c = rime_get_api()->get_version();
-  return newJstring(env, c);
+static jstring get_version(JNIEnv *env, jobject thiz, jstring module) {
+  const char* c = module == NULL ? NULL : env->GetStringUTFChars(module, NULL);
+
+  jstring s = NULL;
+  if (!strcmp(c, "opencc")) s = newJstring(env, OPENCC_VERSION);
+  else if (!strcmp(c, "librime")) s = newJstring(env, LIBRIME_VERSION);
+  else s = newJstring(env, rime_get_api()->get_version());
+
+  env->ReleaseStringUTFChars(module, c);
+  return s;
 }
 
 static jint get_modifier_by_name(JNIEnv *env, jobject thiz, jstring name) {
@@ -606,9 +613,6 @@ static jboolean get_schema(JNIEnv *env, jobject thiz, jstring name, jobject jsch
   }
   return r;
 }
-
-
-
 
 static const JNINativeMethod sMethods[] = {
     // init
@@ -812,7 +816,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("get_version"),
-        const_cast<char *>("()Ljava/lang/String;"),
+        const_cast<char *>("(Ljava/lang/String;)Ljava/lang/String;"),
         reinterpret_cast<void *>(get_version)
     },
     // key_table

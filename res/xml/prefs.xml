@@ -28,7 +28,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">
-        <Preference android:key="pref_librimever" android:title="@string/pref_librimever" />
+        <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver" />
+        <Preference android:key="pref_opencc_ver" android:title="@string/pref_opencc_ver" />
         <Preference android:key="pref_ver" android:title="@string/pref_ver" />
     </PreferenceCategory>
 

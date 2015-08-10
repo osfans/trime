@@ -4,6 +4,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := rime_jni
 LOCAL_SRC_FILES := rime_jni.cpp
 LOCAL_SHARED_LIBRARIES := rime
-LOCAL_CFLAGS := -DCLASSNAME=\"com/osfans/trime/Rime\"
+LOCAL_CFLAGS := -DCLASSNAME=\"com/osfans/trime/Rime\" -DOPENCC_VERSION="\"$(shell git --git-dir $(ROOT_PATH)/OpenCC/.git describe --tags)\"" -DLIBRIME_VERSION="\"$(shell git --git-dir $(ROOT_PATH)/librime/.git describe --tags)\""
 LOCAL_LDLIBS := -llog -latomic
 include $(BUILD_SHARED_LIBRARY)
