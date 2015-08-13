@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.File;
 
 public class Rime
 {
@@ -449,6 +450,14 @@ public class Rime
     }
   }
 
+  public String openccConvert(String line, String name) {
+    if (name != null) {
+      File f = new File("/sdcard/rime/opencc", name);
+      if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
+    }
+    return line;
+  }
+
   // init
   public static native final int get_api();
   public static native final void set_notification_handler();
@@ -511,4 +520,8 @@ public class Rime
   public static native final int get_keycode_by_name(String name);
 
   public static native final boolean get_schema(String name, RimeSchema schema);
+
+  // opencc
+  public static native final String opencc_convert(String line, String name);
+
 }
