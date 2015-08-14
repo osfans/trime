@@ -481,45 +481,15 @@ public class Keyboard {
      * @attr ref android.R.styleable#Keyboard_Key_keyEdgeFlags
      */
     public static class Key {
-        /** 
-         * All the key codes (unicode or custom code) that this key could generate, zero'th 
-         * being the most important.
-         */
+        public Drawable icon, iconPreview;
+        public int width, height, gap, x, y;
+        public boolean sticky, pressed, on;
+        public String popupCharacters;
         public int[] codes;
         public int mask;
-        
-        /** Label to display */
-        public CharSequence label;
-        
-        /** Icon to display instead of a label. Icon takes precedence over a label */
-        public Drawable icon;
-        /** Preview version of the icon, for the preview popup */
-        public Drawable iconPreview;
-        /** Width of the key, not including the gap */
-        public int width;
-        /** Height of the key, not including the gap */
-        public int height;
-        /** The horizontal gap before this key */
-        public int gap;
-        /** Whether this key is sticky, i.e., a toggle key */
-        public boolean sticky;
-        /** X coordinate of the key in the keyboard layout */
-        public int x;
-        /** Y coordinate of the key in the keyboard layout */
-        public int y;
-        /** The current pressed state of this key */
-        public boolean pressed;
-        /** If this is a sticky key, is it on? */
-        public boolean on;
-        /** Text to output when pressed. This can be multiple characters, like ".com" */
-        public CharSequence text;
-        /** Popup characters */
-        public CharSequence popupCharacters;
-        
-        public String symbol, symbolLabel, hint;
+        public String text, label, labelPreview;
         public int symbolCode, symbolMask;
-
-        public CharSequence labelPreview;
+        public String symbol, symbolLabel, hint;
 
         /** 
          * Flags that specify the anchoring to edges of the keyboard for detecting touch events
@@ -945,6 +915,11 @@ public class Keyboard {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
+  private String getString(Map<String,Object> m, String k) {
+    if (m.containsKey(k)) return m.get(k).toString();
+    return "";
+  }
+
   private double getDouble(Map m, String k, Object i) {
     Object o = getValue(m, k, i);
     if (o instanceof Integer) return ((Integer)o).doubleValue();
@@ -1032,20 +1007,19 @@ public class Keyboard {
       key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x : w; //右側不留白
       key.height = mDefaultHeight;
       key.gap = gap;
-      
-      key.text = (String)getValue(mk, "text", null);
-      key.label = (String)getValue(mk, "label", null);
 
-      key.labelPreview = (String)getValue(mk, "preview", null);
-      key.symbol = (String)getValue(mk, "symbol", null);
-      key.symbolLabel = (String)getValue(mk, "symbolLabel", null);
-      key.hint = (String)getValue(mk, "hint", null);
+      key.text = getString(mk, "text");
+      key.label = getString(mk, "label");
+      key.labelPreview = getString(mk, "preview");
+      key.symbol = getString(mk, "symbol");
+      key.symbolLabel = getString(mk,  "symbolLabel");
+      key.hint = getString(mk, "hint");
 
-      int[] pairs = parseCode((String)getValue(mk, "symbolCode", ""));
+      int[] pairs = parseCode(getString(mk, "symbolCode"));
       key.symbolCode = pairs[0];
       key.symbolMask = pairs[1];
 
-      String s = (String)getValue(mk, "code", "");
+      String s = getString(mk, "code");
       pairs = parseCode(s);
       int c = pairs[0];
       key.codes = new int[]{c};
@@ -1053,37 +1027,37 @@ public class Keyboard {
 
       key.repeatable = (Boolean)getValue(mk, "repeatable", false);
       if (c == KeyEvent.KEYCODE_SPACE){
-        if (key.label==null) key.label = Rime.getRime().getSchemaName();
+        if (key.label.isEmpty()) key.label = Rime.getRime().getSchemaName();
       } else if (c == KeyEvent.KEYCODE_SWITCH_CHARSET){
-        if (key.label==null) key.label = "⇪";
+        if (key.label.isEmpty()) key.label = "⇪";
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
-        if (key.label==null) key.label = "⇪";
+        if (key.label.isEmpty()) key.label = "⇪";
         key.modifier = true;
         key.sticky = true;
         mShiftKey = key;
         mModifierKeys.add(key);
       } else if (c == KeyEvent.KEYCODE_DEL){
-        if (key.label==null) key.label = "⌫";
+        if (key.label.isEmpty()) key.label = "⌫";
       } else if (c == KeyEvent.KEYCODE_CLEAR){ //清屏
-        if (key.label==null) key.label = "⌧";
+        if (key.label.isEmpty()) key.label = "⌧";
       } else if (c == KeyEvent.KEYCODE_ENTER){
-        if (key.label==null) key.label = "⏎";
+        if (key.label.isEmpty()) key.label = "⏎";
       } else if(s.contentEquals("<switch>")){
         key.codes = new int[] {KEYCODE_MODE_SWITCH - (Integer)getValue(mk, "switch", 0)};
-        if (key.label==null) key.label = "⌨";
+        if (key.label.isEmpty()) key.label = "⌨";
         if (key.symbolCode == 0) key.symbolCode = KeyEvent.KEYCODE_MENU;
       } else if(s.contentEquals("<switch_last>")){
         key.codes = new int[] {KEYCODE_MODE_LAST};
-        if (key.label==null) key.label = "⟲";
+        if (key.label.isEmpty()) key.label = "⟲";
       } else if(s.contentEquals("<switch_prev>")){
         key.codes = new int[] {KEYCODE_MODE_PREV};
-        if (key.label==null) key.label = "⬆";
+        if (key.label.isEmpty()) key.label = "⬆";
       } else if(s.contentEquals("<switch_next>")){
         key.codes = new int[] {KEYCODE_MODE_NEXT};
-        if (key.label==null) key.label = "⬇";
+        if (key.label.isEmpty()) key.label = "⬇";
       }
-      if (key.label == null) {
-          key.label = (key.text == null && c > 0) ? String.valueOf((char)c) : key.text;
+      if (key.label.isEmpty()) {
+          key.label = (key.text.isEmpty() && c > 0) ? String.valueOf((char)c) : key.text;
       }
       if (key.icon != null) {
           key.icon.setBounds(0, 0, key.icon.getIntrinsicWidth(), key.icon.getIntrinsicHeight());

@@ -616,8 +616,8 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPaintSymbol.setColor(key.pressed ? hilited_key_symbol_color: key_symbol_color);
 
             // Switch the character to uppercase if shift is pressed
-            String label = key.label == null ? null : adjustCase(key.label).toString();
-            String symbol = key.symbolLabel == null ? key.symbol : key.symbolLabel;
+            String label = key.label.isEmpty() ? "" : adjustCase(key.label).toString();
+            String symbol = key.symbolLabel.isEmpty() ? key.symbol : key.symbolLabel;
             String hint = key.hint;
             int left = (key.width - padding.left - padding.right) / 2 + padding.left;
             int top = padding.top;
@@ -630,7 +630,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             canvas.translate(key.x + kbdPaddingLeft, key.y + kbdPaddingTop);
             keyBackground.draw(canvas);
             
-            if (label != null) {
+            if (!label.isEmpty()) {
                 // For characters, use large font. For labels like "Done", use small font.
                 if (label.length() > 1 && key.codes.length < 2) {
                     paint.setTextSize(mLabelTextSize);
@@ -645,12 +645,12 @@ public class KeyboardView extends View implements View.OnClickListener {
                             + (paint.getTextSize() - paint.descent()) / 2 + top,
                     paint);
 
-                if (symbol != null) {
+                if (!symbol.isEmpty()) {
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
                     canvas.drawText(symbol, left, symbolTop + top, mPaintSymbol);
                 }
 
-                if (hint != null) {
+                if (!hint.isEmpty()) {
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
                     canvas.drawText(hint, left, key.height  - padding.bottom - symbolTop + top, mPaintSymbol);
                 }
@@ -750,7 +750,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             final Key key = mKeys[index];
             if (mKeyboard.isShiftKey(key)) {
                setShifted(false, !isShifted());
-            } else if (key.text != null) {
+            } else if (!key.text.isEmpty()) {
                 mKeyboardActionListener.onText(adjustCase(key.text));
                 mKeyboardActionListener.onRelease(NOT_A_KEY);
                 resetShifted();
@@ -788,7 +788,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPreviewLabel.append((char) key.codes[mTapCount < 0 ? 0 : mTapCount]);
             return adjustCase(mPreviewLabel);
         } else {
-            return key.labelPreview != null ? key.labelPreview: adjustCase(key.label);
+            return !key.labelPreview.isEmpty()? key.labelPreview: adjustCase(key.label);
         }
     }
     
@@ -1024,7 +1024,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mKeyboardActionListener.onKey(key.symbolCode, key.symbolMask > 0 ? key.symbolMask : mKeyboard.getModifer());
                 return true;
             }
-            if (key.symbol!=null){
+            if (!key.symbol.isEmpty()){
                 mKeyboardActionListener.onText(key.symbol);
                 return true;
             }
