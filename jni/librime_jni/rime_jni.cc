@@ -117,6 +117,22 @@ static void finalize(JNIEnv *env, jobject thiz) {
 }
 
 // deployment
+static jboolean deploy_schema(JNIEnv *env, jobject thiz, jstring schema_file) {
+  const char* s = schema_file == NULL ? NULL : env->GetStringUTFChars(schema_file, NULL);
+  bool b = RimeDeploySchema(s);
+  env->ReleaseStringUTFChars(schema_file, s);
+  return b;
+}
+
+static jboolean deploy_config_file(JNIEnv *env, jobject thiz, jstring file_name, jstring version_key) {
+  const char* s = file_name == NULL ? NULL : env->GetStringUTFChars(file_name, NULL);
+  const char* s2 = version_key == NULL ? NULL : env->GetStringUTFChars(version_key, NULL);
+  bool b = RimeDeployConfigFile(s, s2);
+  env->ReleaseStringUTFChars(file_name, s);
+  env->ReleaseStringUTFChars(version_key, s2);
+  return b;
+}
+
 static jboolean sync_user_data(JNIEnv *env, jobject thiz) {
   ALOGE("sync user data...");
   return RimeSyncUserData();
@@ -669,6 +685,16 @@ static const JNINativeMethod sMethods[] = {
         reinterpret_cast<void *>(finalize)
     },
     // deployment
+    {
+        const_cast<char *>("deploy_schema"),
+        const_cast<char *>("(Ljava/lang/String;)Z"),
+        reinterpret_cast<void *>(deploy_schema)
+    },
+    {
+        const_cast<char *>("deploy_config_file"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Z"),
+        reinterpret_cast<void *>(deploy_config_file)
+    },
     {
         const_cast<char *>("sync_user_data"),
         const_cast<char *>("()Z"),

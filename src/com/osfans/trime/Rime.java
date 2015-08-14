@@ -270,6 +270,7 @@ public class Rime
     traits.app_name = "rime.trime";
     initialize(traits);
     check(full_check);
+    deployConfigFile();
     createSession();
     if (session_id == 0) {
       Log.severe( "Error creating rime session");
@@ -458,6 +459,10 @@ public class Rime
     return line;
   }
 
+  public static boolean deployConfigFile() {
+    return deploy_config_file("trime.yaml", "config_version");
+  }
+
   // init
   public static native final int get_api();
   public static native final void set_notification_handler();
@@ -466,6 +471,8 @@ public class Rime
   public static native final void check(boolean full_check);
 
   // deployment
+  public static native final boolean deploy_schema(String schema_file);
+  public static native final boolean deploy_config_file(String file_name, String version_key);
   public static native final boolean sync_user_data();
 
   // session management
