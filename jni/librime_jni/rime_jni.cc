@@ -1,8 +1,11 @@
 #include <jni.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctime>
+
 #include <rime_api.h>
 #include <rime/key_table.h>
+
 #include <opencc/Config.hpp>
 #include <opencc/Converter.hpp>
 #define LOG_TAG "Rime-JNI"
@@ -338,6 +341,15 @@ static jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
 
 static jboolean select_schema(JNIEnv *env, jobject thiz, jint session_id, jstring schema_id) {
   const char* s = schema_id == NULL ? NULL : env->GetStringUTFChars(schema_id, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen("user", &config);
+  if (b) {
+    b = RimeConfigSetString(&config, "var/previously_selected_schema", s);
+    std::string str(s);
+    str = "var/schema_access_time/" + str;
+    b = RimeConfigSetInt(&config, str.c_str(), time(NULL));
+  }
+  RimeConfigClose(&config);
   bool value = RimeSelectSchema(session_id, s);
   env->ReleaseStringUTFChars(schema_id, s);
   return value;
