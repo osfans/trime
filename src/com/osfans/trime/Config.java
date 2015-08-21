@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.HashMap;
 import java.io.*;
 
-import org.yaml.snakeyaml.Yaml;
-
 public class Config {
   private Map<String,Object> mConfig, mDefaultConfig;
   private Map<String, Map> maps;
@@ -36,6 +34,7 @@ public class Config {
   private static int BLK_SIZE = 1024;
   private static Config self = null;
   private Typeface tf;
+
   private static Map<String,String> fallback = new HashMap<String, String>() {
     {
       put("candidate_text_color", "text_color");
@@ -74,7 +73,7 @@ public class Config {
     self = this;
     tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
     maps = new HashMap<String, Map>();
-    mDefaultConfig = (Map<String,Object>)new Yaml().load(openFile(context, defaultName));
+    mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime","");//new Yaml().load(openFile(context, defaultName));
     reset();
   }
 
@@ -118,11 +117,8 @@ public class Config {
     mConfig = null;
     File f = new File("/sdcard/rime", schema_id + "." + defaultName);
     if (!f.exists()) return;
-    try {
-      mConfig = (Map<String,Object>)new Yaml().load(new FileInputStream(f));
-      maps.put(schema_id, mConfig); //緩存各方案自定義配置
-    } catch (IOException e) {
-    }
+    mConfig = (Map<String,Object>)Rime.config_get_map(schema_id+".trime","");//new Yaml().load(new FileInputStream(f));
+    maps.put(schema_id, mConfig); //緩存各方案自定義配置
   }
 
   private Object _getValue(String k1) {
@@ -202,7 +198,7 @@ public class Config {
   }
 
   public int getColor(String key) {
-    String scheme = "preset_color_schemes/" + (String)getValue("style/color_scheme");
+    String scheme = "preset_color_schemes/" + getString("color_scheme");
     Map map = (Map<String, Object>)getValue(scheme);
     String fallbackScheme = "preset_color_schemes/default";
     Object o = map.get(key);
