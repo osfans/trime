@@ -318,34 +318,26 @@ static jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring 
   return b ? newJstring(env, value) : defaultvalue;
 }
 
-static jobjectArray get_schema_names(JNIEnv *env, jobject thiz) {
+static jboolean get_schema_list(JNIEnv *env, jobject thiz, jobject schema_list) {
   RimeSchemaList list;
-  bool value =RimeGetSchemaList(&list);
-  jobjectArray ret = NULL;
-  if (value) {
+  bool b = RimeGetSchemaList(&list);
+  jclass mapClass = env->GetObjectClass(schema_list);
+  jmethodID put = env->GetMethodID(mapClass, "put",
+            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+  if (b) {
     int n = list.size;
-    ret = (jobjectArray) env->NewObjectArray(n, env->FindClass("java/lang/String"), NULL);
     for (size_t i = 0; i < list.size; ++i) {
-      env->SetObjectArrayElement(ret, i, newJstring(env, list.list[i].name));
+      jstring key = newJstring(env, list.list[i].schema_id);
+      jstring value = newJstring(env, list.list[i].name);
+      env->CallObjectMethod(schema_list, put, key, value);
+      env->DeleteLocalRef(key);
+      env->DeleteLocalRef(value);
     }
     RimeFreeSchemaList(&list);
+    env->DeleteLocalRef(mapClass);
+    env->DeleteLocalRef(schema_list);
   }
-  return ret;
-}
-
-static jobjectArray get_schema_ids(JNIEnv *env, jobject thiz) {
-  RimeSchemaList list;
-  bool value =RimeGetSchemaList(&list);
-  jobjectArray ret = NULL;
-  if (value) {
-    int n = list.size;
-    ret = (jobjectArray) env->NewObjectArray(n, env->FindClass("java/lang/String"), NULL);
-    for (size_t i = 0; i < list.size; ++i) {
-      env->SetObjectArrayElement(ret, i, newJstring(env, list.list[i].schema_id));
-    }
-    RimeFreeSchemaList(&list);
-  }
-  return ret;
+  return b;
 }
 
 static jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
@@ -780,14 +772,9 @@ static const JNINativeMethod sMethods[] = {
         reinterpret_cast<void *>(get_property)
     },
     {
-        const_cast<char *>("get_schema_names"),
-        const_cast<char *>("()[Ljava/lang/String;"),
-        reinterpret_cast<void *>(get_schema_names)
-    },
-    {
-        const_cast<char *>("get_schema_ids"),
-        const_cast<char *>("()[Ljava/lang/String;"),
-        reinterpret_cast<void *>(get_schema_ids)
+        const_cast<char *>("get_schema_list"),
+        const_cast<char *>("(Ljava/util/Map;)Z"),
+        reinterpret_cast<void *>(get_schema_list)
     },
     {
         const_cast<char *>("get_current_schema"),
