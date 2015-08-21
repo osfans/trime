@@ -310,12 +310,12 @@ static void set_property(JNIEnv *env, jobject thiz, jint session_id, jstring pro
   env->ReleaseStringUTFChars(value, v);
 }
 
-static jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop, jstring defaultvalue) {
+static jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop) {
   const char* s = prop == NULL ? NULL : env->GetStringUTFChars(prop, NULL);
   char value[BUFSIZE] = {0};
   bool b = RimeGetProperty(session_id, s, value, BUFSIZE);
   env->ReleaseStringUTFChars(prop, s);
-  return b ? newJstring(env, value) : defaultvalue;
+  return b ? newJstring(env, value) : NULL;
 }
 
 static jboolean get_schema_list(JNIEnv *env, jobject thiz, jobject schema_list) {
@@ -342,8 +342,8 @@ static jboolean get_schema_list(JNIEnv *env, jobject thiz, jobject schema_list) 
 
 static jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
   char current[BUFSIZE] = {0};
-  bool value = RimeGetCurrentSchema(session_id, current, sizeof(current));
-  if (value) return newJstring(env, current);
+  bool b = RimeGetCurrentSchema(session_id, current, sizeof(current));
+  if (b) return newJstring(env, current);
   return NULL;
 }
 
@@ -364,7 +364,7 @@ static jboolean select_schema(JNIEnv *env, jobject thiz, jint session_id, jstrin
 }
 
 // configuration
-static jboolean config_get_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean defaultvalue) {
+static jobject config_get_bool(JNIEnv *env, jobject thiz, jstring name, jstring key) {
   const char* s = env->GetStringUTFChars(name, NULL);
   RimeConfig config = {0};
   Bool b = RimeConfigOpen(s, &config);
@@ -376,7 +376,12 @@ static jboolean config_get_bool(JNIEnv *env, jobject thiz, jstring name, jstring
     env->ReleaseStringUTFChars(key, s);
   }
   RimeConfigClose(&config);
-  return b ? value : defaultvalue;
+  if (!b) return NULL;
+  jclass jc = env->FindClass("java/lang/Boolean");
+  jmethodID ctorID = env->GetMethodID(jc, "<init>", "(Z)V");
+  jobject ret = (jobject)env->NewObject(jc, ctorID, value);
+  env->DeleteLocalRef(jc);
+  return ret;
 }
 
 static jboolean config_set_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean value) {
@@ -393,7 +398,7 @@ static jboolean config_set_bool(JNIEnv *env, jobject thiz, jstring name, jstring
   return b;
 }
 
-static jint config_get_int(JNIEnv *env, jobject thiz, jstring name, jstring key, jint defaultvalue) {
+static jobject config_get_int(JNIEnv *env, jobject thiz, jstring name, jstring key) {
   const char* s = env->GetStringUTFChars(name, NULL);
   RimeConfig config = {0};
   Bool b = RimeConfigOpen(s, &config);
@@ -405,7 +410,12 @@ static jint config_get_int(JNIEnv *env, jobject thiz, jstring name, jstring key,
     env->ReleaseStringUTFChars(key, s);
   }
   RimeConfigClose(&config);
-  return b ? value :defaultvalue;
+  if (!b) return NULL;
+  jclass jc = env->FindClass("java/lang/Integer");
+  jmethodID ctorID = env->GetMethodID(jc, "<init>", "(I)V");
+  jobject ret = (jobject)env->NewObject(jc, ctorID, value);
+  env->DeleteLocalRef(jc);
+  return ret;
 }
 
 static jboolean config_set_int(JNIEnv *env, jobject thiz, jstring name, jstring key, jint value) {
@@ -422,7 +432,7 @@ static jboolean config_set_int(JNIEnv *env, jobject thiz, jstring name, jstring 
   return b;
 }
 
-static jdouble config_get_double(JNIEnv *env, jobject thiz, jstring name, jstring key, jdouble defaultvalue) {
+static jobject config_get_double(JNIEnv *env, jobject thiz, jstring name, jstring key) {
   const char* s = env->GetStringUTFChars(name, NULL);
   RimeConfig config = {0};
   Bool b = RimeConfigOpen(s, &config);
@@ -434,7 +444,12 @@ static jdouble config_get_double(JNIEnv *env, jobject thiz, jstring name, jstrin
     env->ReleaseStringUTFChars(key, s);
   }
   RimeConfigClose(&config);
-  return b ? value : defaultvalue;
+  if (!b) return NULL;
+  jclass jc = env->FindClass("java/lang/Double");
+  jmethodID ctorID = env->GetMethodID(jc, "<init>", "(D)V");
+  jobject ret = (jobject)env->NewObject(jc, ctorID, value);
+  env->DeleteLocalRef(jc);
+  return ret;
 }
 
 static jboolean config_set_double(JNIEnv *env, jobject thiz, jstring name, jstring key, jdouble value) {
@@ -451,7 +466,7 @@ static jboolean config_set_double(JNIEnv *env, jobject thiz, jstring name, jstri
   return b;
 }
 
-static jstring config_get_string(JNIEnv *env, jobject thiz, jstring name, jstring key, jstring defaultvalue) {
+static jstring config_get_string(JNIEnv *env, jobject thiz, jstring name, jstring key) {
   const char* s = env->GetStringUTFChars(name, NULL);
   RimeConfig config = {0};
   Bool b = RimeConfigOpen(s, &config);
@@ -463,7 +478,7 @@ static jstring config_get_string(JNIEnv *env, jobject thiz, jstring name, jstrin
     env->ReleaseStringUTFChars(key, s);
   }
   RimeConfigClose(&config);
-  return b ? newJstring(env, value) : defaultvalue;
+  return b ? newJstring(env, value) : NULL;
 }
 
 static jboolean config_set_string(JNIEnv *env, jobject thiz, jstring name, jstring key, jstring value) {
@@ -768,7 +783,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("get_property"),
-        const_cast<char *>("(ILjava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
+        const_cast<char *>("(ILjava/lang/String;)Ljava/lang/String;"),
         reinterpret_cast<void *>(get_property)
     },
     {
@@ -789,7 +804,7 @@ static const JNINativeMethod sMethods[] = {
     // configuration
     {
         const_cast<char *>("config_get_bool"),
-        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Z)Z"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Boolean;"),
         reinterpret_cast<void *>(config_get_bool)
     },
     {
@@ -799,7 +814,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("config_get_int"),
-        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;I)I"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Integer;"),
         reinterpret_cast<void *>(config_get_int)
     },
     {
@@ -809,7 +824,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("config_get_double"),
-        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;D)D"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Double;"),
         reinterpret_cast<void *>(config_get_double)
     },
     {
@@ -819,7 +834,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("config_get_string"),
-        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
         reinterpret_cast<void *>(config_get_string)
     },
     {

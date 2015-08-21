@@ -386,8 +386,8 @@ public class Rime
     set_property(session_id, prop, value);
   }
 
-  public String getProperty(String prop, String defaultvalue) {
-    return get_property(session_id, prop, defaultvalue);
+  public String getProperty(String prop) {
+    return get_property(session_id, prop);
   }
 
   public String getSchemaId() {
@@ -523,19 +523,19 @@ public class Rime
   public static native final void set_option(int session_id, String option, boolean value);
   public static native final boolean get_option(int session_id, String option);
   public static native final void set_property(int session_id, String prop, String value);
-  public static native final String get_property(int session_id, String prop, String defaultvalue);
+  public static native final String get_property(int session_id, String prop);
   public static native final boolean get_schema_list(Map schema_list);
   public static native final String get_current_schema(int session_id);
   public static native final boolean select_schema(int session_id, String schema_id);
 
   // configuration
-  public static native final boolean config_get_bool(String name, String key, boolean defaultvalue);
+  public static native final Boolean config_get_bool(String name, String key);
   public static native final boolean config_set_bool(String name, String key, boolean value);
-  public static native final int config_get_int(String name, String key, int defaultvalue);
+  public static native final Integer config_get_int(String name, String key);
   public static native final boolean config_set_int(String name, String key, int value);
-  public static native final double config_get_double(String name, String key, double defaultvalue);
+  public static native final Double config_get_double(String name, String key);
   public static native final boolean config_set_double(String name, String key, double value);
-  public static native final String config_get_string(String name, String key, String defaultvalue);
+  public static native final String config_get_string(String name, String key);
   public static native final boolean config_set_string(String name, String key, String value);
   public static native final int config_list_size(String name, String key);
 
