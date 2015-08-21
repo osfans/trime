@@ -22,6 +22,8 @@ char (&ArraySizeHelper(T (&array)[N]))[N];
 #define NELEMS(x) (sizeof(ArraySizeHelper(x)))
 #define BUFSIZE 256
 
+static jobject _get_value(JNIEnv *env, RimeConfig* config, const char* key);
+
 jstring newJstring(JNIEnv* env, const char* pat)
 {
   if (!pat) return NULL;
@@ -655,6 +657,128 @@ static jboolean get_schema(JNIEnv *env, jobject thiz, jstring name, jobject jsch
   return r;
 }
 
+static jobject _get_list(JNIEnv *env, RimeConfig* config, const char* key) {
+  RimeConfigIterator iter = {0};
+  bool b = RimeConfigBeginList(&iter, config, key);
+  if (!b) return NULL;
+  jclass jc = env->FindClass("java/util/ArrayList");
+  if(jc == NULL) return NULL;
+  jmethodID init = env->GetMethodID(jc, "<init>", "()V");
+  jobject jobj = env->NewObject(jc, init);
+  jmethodID add = env->GetMethodID(jc, "add", "(Ljava/lang/Object;)Z");
+  while (RimeConfigNext(&iter)) {
+    jobject o = _get_value(env, config, iter.path);
+    env->CallObjectMethod(jobj, add, o);
+    env->DeleteLocalRef(o);
+  }
+  RimeConfigEnd(&iter);
+  env->DeleteLocalRef(jc);
+  return jobj;
+}
+
+static jobject config_get_list(JNIEnv *env, jobject thiz, jstring name, jstring key) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  jobject value = NULL;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    value = _get_list(env, &config, s);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return value;
+}
+
+static jobject _get_map(JNIEnv *env, RimeConfig* config, const char* key) {
+  RimeConfigIterator iter = {0};
+  bool b = RimeConfigBeginMap(&iter, config, key);
+  if (!b) return NULL;
+  jclass jc = env->FindClass("java/util/HashMap");
+  if(jc == NULL) return NULL;
+  jmethodID init = env->GetMethodID(jc, "<init>", "()V");
+  jobject jobj = env->NewObject(jc, init);
+  jmethodID put = env->GetMethodID(jc, "put",
+            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+  while (RimeConfigNext(&iter)) {
+    jstring s = newJstring(env, iter.key);
+    jobject o = _get_value(env, config, iter.path);
+    env->CallObjectMethod(jobj, put, s, o);
+    env->DeleteLocalRef(s);
+    env->DeleteLocalRef(o);
+  }
+  RimeConfigEnd(&iter);
+  env->DeleteLocalRef(jc);
+  return jobj;
+}
+
+static jobject config_get_map(JNIEnv *env, jobject thiz, jstring name, jstring key) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  jobject value = NULL;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    value = _get_map(env, &config, s);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return value;
+}
+
+static jobject _get_value(JNIEnv *env, RimeConfig* config, const char* key) {
+  jobject ret;
+  jclass jc;
+  jmethodID init;
+  Bool b_value;
+  if (RimeConfigGetBool(config, key, &b_value)) {
+    jc = env->FindClass("java/lang/Boolean");
+    init = env->GetMethodID(jc, "<init>", "(Z)V");
+    ret = (jobject)env->NewObject(jc, init, b_value);
+    env->DeleteLocalRef(jc);
+    return ret;
+  }
+  int i_value;
+  if (RimeConfigGetInt(config, key, &i_value)) {
+    jc = env->FindClass("java/lang/Integer");
+    init = env->GetMethodID(jc, "<init>", "(I)V");
+    ret = (jobject)env->NewObject(jc, init, i_value);
+    env->DeleteLocalRef(jc);
+    return ret;
+  }
+  double d_value;
+  if (RimeConfigGetDouble(config, key, &d_value)) {
+    jc = env->FindClass("java/lang/Double");
+    init = env->GetMethodID(jc, "<init>", "(D)V");
+    ret = (jobject)env->NewObject(jc, init, d_value);
+    env->DeleteLocalRef(jc);
+    return ret;
+  }
+  const char *value = RimeConfigGetCString(config, key);
+  if (value != NULL) return newJstring(env, value);
+  ret = _get_list(env, config, key);
+  if (ret) return ret;
+  ret = _get_map(env, config, key);
+  return ret;
+}
+
+static jobject config_get_value(JNIEnv *env, jobject thiz, jstring name, jstring key) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeConfigOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  jobject ret = NULL;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    ret = _get_value(env, &config, s);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  RimeConfigClose(&config);
+  return ret;
+}
+
 // opencc
 static jstring opencc_convert(JNIEnv *env, jobject thiz, jstring line, jstring name) {
   if (name == NULL) return line;
@@ -849,6 +973,21 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("config_list_size"),
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)I"),
         reinterpret_cast<void *>(config_list_size)
+    },
+    {
+        const_cast<char *>("config_get_list"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;"),
+        reinterpret_cast<void *>(config_get_list)
+    },
+    {
+        const_cast<char *>("config_get_map"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/util/Map;"),
+        reinterpret_cast<void *>(config_get_map)
+    },
+    {
+        const_cast<char *>("config_get_value"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;"),
+        reinterpret_cast<void *>(config_get_value)
     },
     // test
     {

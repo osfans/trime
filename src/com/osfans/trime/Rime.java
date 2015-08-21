@@ -530,6 +530,9 @@ public class Rime
   public static native final String config_get_string(String name, String key);
   public static native final boolean config_set_string(String name, String key, String value);
   public static native final int config_list_size(String name, String key);
+  public static native final List config_get_list(String name, String key);
+  public static native final Map config_get_map(String name, String key);
+  public static native final Object config_get_value(String name, String key);
 
   // testing
   public static native final boolean simulate_key_sequence(int session_id, String key_sequence);
