@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.Collection;
 import java.io.File;
 
 public class Rime
@@ -218,7 +216,6 @@ public class Rime
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
   RimeSchema mSchema = new RimeSchema();
-  Map mSchemaList = new HashMap<String, String>();
 
   static{
     System.loadLibrary("rime");
@@ -402,25 +399,20 @@ public class Rime
     return isEmpty(getSchemaId());
   }
 
-  public void getSchemaList() {
-    mSchemaList.clear();
-    get_schema_list(mSchemaList);
-  }
-
   public List<String> get_schema_ids() {
-    getSchemaList();
-    int n = mSchemaList.size();
+    Map schema_list = get_schema_list();
+    int n = schema_list.size();
     String[] strArrays = new String[n];
-    mSchemaList.keySet().toArray(strArrays);
+    schema_list.keySet().toArray(strArrays);
     List<String> schemas = Arrays.asList(strArrays);
     return schemas;
   }
 
   public String[] get_schema_names() {
-    getSchemaList();
-    int n = mSchemaList.size();
+    Map schema_list = get_schema_list();
+    int n = schema_list.size();
     String[] strArrays = new String[n];
-    mSchemaList.values().toArray(strArrays);
+    schema_list.values().toArray(strArrays);
     return strArrays;
   }
 
@@ -444,7 +436,7 @@ public class Rime
     List<String> schemas = get_schema_ids();
     String schema_id = getSchemaId();
     if (schemas.indexOf(schema_id) == id) return false;
-    return select_schema(session_id, schemas.get(id));
+    return selectSchema(schemas.get(id));
   }
 
   public String RimeGetInput() {
@@ -524,7 +516,7 @@ public class Rime
   public static native final boolean get_option(int session_id, String option);
   public static native final void set_property(int session_id, String prop, String value);
   public static native final String get_property(int session_id, String prop);
-  public static native final boolean get_schema_list(Map schema_list);
+  public static native final Map get_schema_list();
   public static native final String get_current_schema(int session_id);
   public static native final boolean select_schema(int session_id, String schema_id);
 

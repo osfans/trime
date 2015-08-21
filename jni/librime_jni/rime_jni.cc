@@ -318,10 +318,13 @@ static jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring 
   return b ? newJstring(env, value) : NULL;
 }
 
-static jboolean get_schema_list(JNIEnv *env, jobject thiz, jobject schema_list) {
+static jobject get_schema_list(JNIEnv *env, jobject thiz) {
   RimeSchemaList list;
   bool b = RimeGetSchemaList(&list);
-  jclass mapClass = env->GetObjectClass(schema_list);
+  jclass mapClass = env->FindClass("java/util/HashMap");
+  if(mapClass == NULL) return NULL;
+  jmethodID init = env->GetMethodID(mapClass, "<init>", "()V");
+  jobject schema_list = env->NewObject(mapClass, init);
   jmethodID put = env->GetMethodID(mapClass, "put",
             "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
   if (b) {
@@ -335,9 +338,9 @@ static jboolean get_schema_list(JNIEnv *env, jobject thiz, jobject schema_list) 
     }
     RimeFreeSchemaList(&list);
     env->DeleteLocalRef(mapClass);
-    env->DeleteLocalRef(schema_list);
+    return schema_list;
   }
-  return b;
+  return NULL;
 }
 
 static jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
@@ -788,7 +791,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("get_schema_list"),
-        const_cast<char *>("(Ljava/util/Map;)Z"),
+        const_cast<char *>("()Ljava/util/Map;"),
         reinterpret_cast<void *>(get_schema_list)
     },
     {
