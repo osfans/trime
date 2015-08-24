@@ -1,7 +1,7 @@
 LOCAL_PATH := $(ROOT_PATH)/boost
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := boost #1.58
+LOCAL_MODULE := boost #1.59
 
 LOCAL_SRC_FILES += \
   libs/filesystem/src/operations.cpp \
@@ -33,7 +33,7 @@ LOCAL_SRC_FILES += \
   \
   libs/system/src/error_code.cpp \
 
-ifeq ($(BOOST_SIGNALS2),)
+ifeq ($(BOOST_USE_SIGNALS2),)
 LOCAL_SRC_FILES += \
   libs/signals/src/connection.cpp \
   libs/signals/src/signal_base.cpp \

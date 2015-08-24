@@ -96,6 +96,9 @@ LOCAL_SRC_FILES += \
   src/lever/custom_settings.cc \
 
 LOCAL_CFLAGS := $(CXX_DEFINES)
+ifneq ($(BOOST_USE_SIGNALS2),)
+LOCAL_CFLAGS += -DBOOST_SIGNALS2
+endif
 LOCAL_STATIC_LIBRARIES := boost leveldb marisa opencc yaml-cpp miniglog
 LOCAL_LDLIBS := -latomic
 include $(BUILD_SHARED_LIBRARY)
