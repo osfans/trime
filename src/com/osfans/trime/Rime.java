@@ -250,7 +250,12 @@ public class Rime
   }
 
   public Rime() {
-    init(false); //不做full check
+    this(false); //不做full check
+  }
+
+  public Rime(boolean full_check) {
+    init(full_check);
+    self = this;
   }
 
   public void initSchema() {

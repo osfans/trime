@@ -98,7 +98,7 @@ public class Pref extends PreferenceActivity {
       Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
       return true;
     } else if (key.contentEquals("pref_reset")) { //回廠
-      b = Config.copyFromAssets(this, "trime.yaml");
+      b = Config.copyFile(this, "rime/trime.yaml", true);
       Toast.makeText(this, b ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT).show();
       return true;
     } else if (key.contentEquals("pref_licensing")) { //資訊

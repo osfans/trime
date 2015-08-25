@@ -17,6 +17,7 @@
 package com.osfans.trime;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.util.TypedValue;
 import android.util.Log;
@@ -73,39 +74,64 @@ public class Config {
     self = this;
     tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
     maps = new HashMap<String, Map>();
-    mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime","");//new Yaml().load(openFile(context, defaultName));
+    mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime", "");
     reset();
   }
 
-  public static boolean copyFromAssets(Context context, String name) {
-    try {
-      File f = new File("/sdcard/rime", name);
-      InputStream is = context.getAssets().open(name);
-      OutputStream os = new FileOutputStream(f);
-      byte[] buffer = new byte[BLK_SIZE];
-      int length = 0;
-      while ((length = is.read(buffer)) > 0) os.write(buffer, 0, length);
-      os.flush();
-      os.close();
-      is.close();
-      return true;
-    } catch (IOException e) {
-      Log.e("Config", "Error copy file: " + e);
-      return false;
-    }
+  public static boolean prepareRime(Context context) {
+    Log.e("Config", "prepare rime");
+    if (new File("/sdcard/rime").exists()) return false;
+    copyFileOrDir(context, "rime", false);
+    new Rime(true);
+    return true;
   }
 
-  public InputStream openFile(Context context, String name) {
+  public static boolean copyFileOrDir(Context context, String path, boolean overwrite) {
+    AssetManager assetManager = context.getAssets();
+    String assets[] = null;
     try {
-      File f = new File("/sdcard/rime", name);
-      boolean b = true;
-      if (!f.exists()) b = copyFromAssets(context, name); //從assets複製默認文件
-      if (b) return new FileInputStream(f);
-      return context.getAssets().open(name);
-    } catch (IOException e) {
-      Log.e("Config", "Error open file: " + e);
-      return null;
+      assets = assetManager.list(path);
+      if (assets.length == 0) {
+        copyFile(context, path, overwrite);
+      } else {
+        String fullPath = "/sdcard/" + path;
+        File dir = new File(fullPath);
+        if (!dir.exists()) dir.mkdir();
+        for (int i = 0; i < assets.length; ++i) {
+          copyFileOrDir(context, path + "/" + assets[i], overwrite);
+        }
+      }
+    } catch (IOException ex) {
+      Log.e("Config", "I/O Exception", ex);
+      return false;
     }
+    return true;
+  }
+
+  public static boolean copyFile(Context context, String filename, boolean overwrite) {
+    AssetManager assetManager = context.getAssets();
+    InputStream in = null;
+    OutputStream out = null;
+    try {
+      in = assetManager.open(filename);
+      String newFileName = "/sdcard/" + filename;
+      if (new File(newFileName).exists() && !overwrite) return true;
+      out = new FileOutputStream(newFileName);
+      byte[] buffer = new byte[BLK_SIZE];
+      int read;
+      while ((read = in.read(buffer)) != -1) {
+          out.write(buffer, 0, read);
+      }
+      in.close();
+      in = null;
+      out.flush();
+      out.close();
+      out = null;
+    } catch (Exception e) {
+      Log.e("Config", e.getMessage());
+      return false;
+    }
+    return true;
   }
 
   public void reset() {
@@ -117,7 +143,7 @@ public class Config {
     mConfig = null;
     File f = new File("/sdcard/rime", schema_id + "." + defaultName);
     if (!f.exists()) return;
-    mConfig = (Map<String,Object>)Rime.config_get_map(schema_id+".trime","");//new Yaml().load(new FileInputStream(f));
+    mConfig = (Map<String,Object>)Rime.config_get_map(schema_id + ".trime", "");
     maps.put(schema_id, mConfig); //緩存各方案自定義配置
   }
 
