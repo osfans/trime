@@ -4,15 +4,16 @@
 #include <ctime>
 
 #include <rime_api.h>
+#include <rime_levers_api.h>
 #include <rime/key_table.h>
 
 #include <opencc/Config.hpp>
 #include <opencc/Converter.hpp>
-#define LOG_TAG "Rime-JNI"
+#define TAG "Rime-JNI"
 
 #ifdef ANDROID
 #include <android/log.h>
-#define ALOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##__VA_ARGS__)
+#define ALOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, TAG, fmt, ##__VA_ARGS__)
 #else
 #define ALOGE printf
 #endif
@@ -517,6 +518,69 @@ static jint config_list_size(JNIEnv *env, jobject thiz, jstring name, jstring ke
   return value;
 }
 
+// customize settings
+static jboolean customize_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean value) {
+  RimeLeversApi* levers = (RimeLeversApi*)(rime_get_api()->find_module("levers")->get_api());
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeCustomSettings* settings = levers->custom_settings_init(s, TAG);
+  Bool b = levers->load_settings(settings);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    if (levers->customize_bool(settings, s, value)) levers->save_settings(settings);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  levers->custom_settings_destroy(settings);
+  return b;
+}
+
+static jboolean customize_int(JNIEnv *env, jobject thiz, jstring name, jstring key, jint value) {
+  RimeLeversApi* levers = (RimeLeversApi*)(rime_get_api()->find_module("levers")->get_api());
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeCustomSettings* settings = levers->custom_settings_init(s, TAG);
+  Bool b = levers->load_settings(settings);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    if (levers->customize_int(settings, s, value)) levers->save_settings(settings);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  levers->custom_settings_destroy(settings);
+  return b;
+}
+
+static jboolean customize_double(JNIEnv *env, jobject thiz, jstring name, jstring key, jdouble value) {
+  RimeLeversApi* levers = (RimeLeversApi*)(rime_get_api()->find_module("levers")->get_api());
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeCustomSettings* settings = levers->custom_settings_init(s, TAG);
+  Bool b = levers->load_settings(settings);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    if (levers->customize_double(settings, s, value)) levers->save_settings(settings);
+    env->ReleaseStringUTFChars(key, s);
+  }
+  levers->custom_settings_destroy(settings);
+  return b;
+}
+
+static jboolean customize_string(JNIEnv *env, jobject thiz, jstring name, jstring key, jstring value) {
+  RimeLeversApi* levers = (RimeLeversApi*)(rime_get_api()->find_module("levers")->get_api());
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeCustomSettings* settings = levers->custom_settings_init(s, TAG);
+  Bool b = levers->load_settings(settings);
+  env->ReleaseStringUTFChars(name, s);
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    const char* c_value = env->GetStringUTFChars(value, NULL);
+    if (levers->customize_string(settings, s, c_value)) levers->save_settings(settings);
+    env->ReleaseStringUTFChars(key, s);
+    env->ReleaseStringUTFChars(value, c_value);
+  }
+  levers->custom_settings_destroy(settings);
+  return b;
+}
+
 //testing
 static jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id, jstring key_sequence) {
   const char* str = key_sequence == NULL ? NULL : env->GetStringUTFChars(key_sequence, NULL); 
@@ -957,7 +1021,7 @@ static const JNINativeMethod sMethods[] = {
     {
         const_cast<char *>("config_set_double"),
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;D)Z"),
-        reinterpret_cast<void *>(config_set_int)
+        reinterpret_cast<void *>(config_set_double)
     },
     {
         const_cast<char *>("config_get_string"),
@@ -988,6 +1052,27 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("config_get_value"),
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;"),
         reinterpret_cast<void *>(config_get_value)
+    },
+    // customize settings
+    {
+        const_cast<char *>("customize_bool"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Z)Z"),
+        reinterpret_cast<void *>(customize_bool)
+    },
+    {
+        const_cast<char *>("customize_int"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;I)Z"),
+        reinterpret_cast<void *>(customize_int)
+    },
+    {
+        const_cast<char *>("customize_double"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;D)Z"),
+        reinterpret_cast<void *>(customize_double)
+    },
+    {
+        const_cast<char *>("customize_string"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z"),
+        reinterpret_cast<void *>(customize_string)
     },
     // test
     {
@@ -1066,11 +1151,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
-
-    // Get jclass with env->FindClass.
-    // Register methods with env->RegisterNatives.
-    //const char *const kClassPathName = "com/osfans/trime/Rime";
     registerNativeMethods(env, CLASSNAME, sMethods, NELEMS(sMethods));
-
     return JNI_VERSION_1_6;
 }

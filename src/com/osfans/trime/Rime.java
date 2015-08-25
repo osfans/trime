@@ -539,6 +539,12 @@ public class Rime
   public static native final Map config_get_map(String name, String key);
   public static native final Object config_get_value(String name, String key);
 
+  // customize setting
+  public static native final boolean customize_bool(String name, String key, boolean value);
+  public static native final boolean customize_int(String name, String key, int value);
+  public static native final boolean customize_double(String name, String key, double value);
+  public static native final boolean customize_string(String name, String key, String value);
+
   // testing
   public static native final boolean simulate_key_sequence(int session_id, String key_sequence);
 
