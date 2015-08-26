@@ -9,4 +9,8 @@ jboolean customize_int(JNIEnv *env, jobject thiz, jstring name, jstring key, jin
 jboolean customize_double(JNIEnv *env, jobject thiz, jstring name, jstring key, jdouble value);
 jboolean customize_string(JNIEnv *env, jobject thiz, jstring name, jstring key, jstring value);
 
+jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list);
+jobject get_available_schema_list(JNIEnv *env, jobject thiz);
+jobject get_selected_schema_list(JNIEnv *env, jobject thiz);
+
 #endif  // LEVERS_H_

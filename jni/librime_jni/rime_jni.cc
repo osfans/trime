@@ -239,6 +239,16 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z"),
         reinterpret_cast<void *>(customize_string)
     },
+    {
+        const_cast<char *>("get_available_schema_list"),
+        const_cast<char *>("()Ljava/util/List;"),
+        reinterpret_cast<void *>(get_available_schema_list)
+    },
+    {
+        const_cast<char *>("get_selected_schema_list"),
+        const_cast<char *>("()Ljava/util/List;"),
+        reinterpret_cast<void *>(get_selected_schema_list)
+    },
     // test
     {
         const_cast<char *>("simulate_key_sequence"),

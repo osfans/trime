@@ -543,12 +543,6 @@ public class Rime
   public static native final Map config_get_map(String name, String key);
   public static native final Object config_get_value(String name, String key);
 
-  // customize setting
-  public static native final boolean customize_bool(String name, String key, boolean value);
-  public static native final boolean customize_int(String name, String key, int value);
-  public static native final boolean customize_double(String name, String key, double value);
-  public static native final boolean customize_string(String name, String key, String value);
-
   // testing
   public static native final boolean simulate_key_sequence(int session_id, String key_sequence);
 
@@ -563,6 +557,14 @@ public class Rime
   public static native final int get_keycode_by_name(String name);
 
   public static native final boolean get_schema(String name, RimeSchema schema);
+
+  // customize setting
+  public static native final boolean customize_bool(String name, String key, boolean value);
+  public static native final boolean customize_int(String name, String key, int value);
+  public static native final boolean customize_double(String name, String key, double value);
+  public static native final boolean customize_string(String name, String key, String value);
+  public static native final List get_available_schema_list();
+  public static native final List get_selected_schema_list();
 
   // opencc
   public static native final String get_opencc_version();
