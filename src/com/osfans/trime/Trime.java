@@ -510,7 +510,7 @@ public class Trime extends InputMethodService implements
       });
       if (mRime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
       else { //
-        builder.setSingleChoiceItems(mRime.get_schema_names(), mRime.getSchemaIndex(),
+        builder.setSingleChoiceItems(mRime.getSchemaNames(), mRime.getSchemaIndex(),
           new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
               di.dismiss();

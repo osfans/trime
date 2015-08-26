@@ -324,23 +324,35 @@ static jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring 
 static jobject get_schema_list(JNIEnv *env, jobject thiz) {
   RimeSchemaList list;
   bool b = RimeGetSchemaList(&list);
+  jclass jc = env->FindClass("java/util/ArrayList");
+  if(jc == NULL) return NULL;
+  jmethodID init = env->GetMethodID(jc, "<init>", "()V");
+  jobject schema_list = env->NewObject(jc, init);
+  jmethodID add = env->GetMethodID(jc, "add", "(Ljava/lang/Object;)Z");
+
   jclass mapClass = env->FindClass("java/util/HashMap");
   if(mapClass == NULL) return NULL;
-  jmethodID init = env->GetMethodID(mapClass, "<init>", "()V");
-  jobject schema_list = env->NewObject(mapClass, init);
+  jmethodID mapInit = env->GetMethodID(mapClass, "<init>", "()V");
   jmethodID put = env->GetMethodID(mapClass, "put",
             "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
   if (b) {
     int n = list.size;
     for (size_t i = 0; i < list.size; ++i) {
-      jstring key = newJstring(env, list.list[i].schema_id);
-      jstring value = newJstring(env, list.list[i].name);
-      env->CallObjectMethod(schema_list, put, key, value);
+      jobject schema_item = env->NewObject(mapClass, mapInit);
+      jstring key = newJstring(env, "schema_id");
+      jstring value = newJstring(env, list.list[i].schema_id);
+      env->CallObjectMethod(schema_item, put, key, value);
+      key = newJstring(env, "name");
+      value = newJstring(env, list.list[i].name);
+      env->CallObjectMethod(schema_item, put, key, value);
       env->DeleteLocalRef(key);
       env->DeleteLocalRef(value);
+
+      env->CallObjectMethod(schema_list, add, schema_item);
     }
     RimeFreeSchemaList(&list);
     env->DeleteLocalRef(mapClass);
+    env->DeleteLocalRef(jc);
     return schema_list;
   }
   return NULL;
@@ -979,7 +991,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("get_schema_list"),
-        const_cast<char *>("()Ljava/util/Map;"),
+        const_cast<char *>("()Ljava/util/List;"),
         reinterpret_cast<void *>(get_schema_list)
     },
     {

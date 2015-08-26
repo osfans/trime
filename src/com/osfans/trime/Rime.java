@@ -216,6 +216,7 @@ public class Rime
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
   RimeSchema mSchema = new RimeSchema();
+  List mSchemaList;
 
   static{
     System.loadLibrary("rime");
@@ -259,6 +260,7 @@ public class Rime
   }
 
   public void initSchema() {
+    mSchemaList = get_schema_list();
     String schema_id = getSchemaId();
     get_schema(schema_id, mSchema);
     mSchema.check(); //檢查不在選單中顯示的選項
@@ -404,27 +406,26 @@ public class Rime
     return isEmpty(getSchemaId());
   }
 
-  public List<String> get_schema_ids() {
-    Map schema_list = get_schema_list();
-    int n = schema_list.size();
-    String[] strArrays = new String[n];
-    schema_list.keySet().toArray(strArrays);
-    List<String> schemas = Arrays.asList(strArrays);
-    return schemas;
-  }
-
-  public String[] get_schema_names() {
-    Map schema_list = get_schema_list();
-    int n = schema_list.size();
-    String[] strArrays = new String[n];
-    schema_list.values().toArray(strArrays);
-    return strArrays;
+  public String[] getSchemaNames() {
+    int n = mSchemaList.size();
+    String[] names = new String[n];
+    int i = 0;
+    for (Object o: mSchemaList) {
+      Map<String, String> m = (Map<String, String>)o;
+      names[i++] = m.get("name");
+    }
+    return names;
   }
 
   public int getSchemaIndex() {
     String schema_id = getSchemaId();
-    List<String> schemas = get_schema_ids();
-    return schemas.indexOf(schema_id);
+    int i = 0;
+    for (Object o: mSchemaList) {
+        Map<String, String> m = (Map<String, String>)o;
+        if (m.get("schema_id").contentEquals(schema_id)) return i;
+        i++;
+    }
+    return 0;
   }
 
   public String getSchemaName() {
@@ -438,10 +439,13 @@ public class Rime
   }
 
   public boolean selectSchema(int id) {
-    List<String> schemas = get_schema_ids();
+    int n = mSchemaList.size();
+    if (id < 0 || id >= n) return false;
     String schema_id = getSchemaId();
-    if (schemas.indexOf(schema_id) == id) return false;
-    return selectSchema(schemas.get(id));
+    Map<String, String> m = (Map<String, String>)mSchemaList.get(id);
+    String target = m.get("schema_id");
+    if (target.contentEquals(schema_id)) return false;
+    return selectSchema(target);
   }
 
   public String RimeGetInput() {
@@ -521,7 +525,7 @@ public class Rime
   public static native final boolean get_option(int session_id, String option);
   public static native final void set_property(int session_id, String prop, String value);
   public static native final String get_property(int session_id, String prop);
-  public static native final Map get_schema_list();
+  public static native final List get_schema_list();
   public static native final String get_current_schema(int session_id);
   public static native final boolean select_schema(int session_id, String schema_id);
 
