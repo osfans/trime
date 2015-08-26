@@ -5,9 +5,22 @@
 
 #define BUFSIZE 256
 
+#ifndef SHARED_DATA_DIR
+#define SHARED_DATA_DIR "/sdcard/rime"
+#endif
+
+#ifndef USER_DATA_DIR
+#define USER_DATA_DIR "/sdcard/rime"
+#endif
+
+#ifndef APP_NAME
+#define APP_NAME "Rime-JNI"
+#endif
+
+void setup();
 void set_notification_handler(JNIEnv *env, jobject thiz);
 void check(JNIEnv *env, jobject thiz, jboolean full_check);
-void initialize(JNIEnv *env, jobject thiz, jobject jtraits);
+void initialize(JNIEnv *env, jobject thiz);
 void finalize(JNIEnv *env, jobject thiz);
 jboolean deploy_schema(JNIEnv *env, jobject thiz, jstring schema_file);
 jboolean deploy_config_file(JNIEnv *env, jobject thiz, jstring file_name, jstring version_key);

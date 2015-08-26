@@ -39,43 +39,12 @@ void check(JNIEnv *env, jobject thiz, jboolean full_check) {
 }
 
 // entry and exit
-void initialize(JNIEnv *env, jobject thiz, jobject jtraits) {
+void initialize(JNIEnv *env, jobject thiz) {
   RIME_STRUCT(RimeTraits, traits);
-  jclass jc = env->GetObjectClass(jtraits);
-  jfieldID fid;
-  jstring jshared_data_dir, juser_data_dir, japp_name;
-  char* shared_data_dir;
-  char* user_data_dir;
-  char* app_name;
-
-  fid = env->GetFieldID(jc, "shared_data_dir", "Ljava/lang/String;");
-  jshared_data_dir = (jstring)env->GetObjectField(jtraits, fid);
-  if (jshared_data_dir != NULL) {
-    shared_data_dir = (char *)env->GetStringUTFChars(jshared_data_dir, NULL); 
-    traits.shared_data_dir = shared_data_dir;
-  }
-
-  fid = env->GetFieldID(jc, "user_data_dir", "Ljava/lang/String;");
-  juser_data_dir = (jstring)env->GetObjectField(jtraits, fid);
-  if (juser_data_dir != NULL) {
-    user_data_dir = (char *)env->GetStringUTFChars(juser_data_dir, NULL);
-    traits.user_data_dir = user_data_dir;
-  }
-
-  fid = env->GetFieldID(jc, "app_name", "Ljava/lang/String;");
-  japp_name = (jstring)env->GetObjectField(jtraits, fid);
-  if (japp_name != NULL) {
-    app_name = (char *)env->GetStringUTFChars(japp_name, NULL);
-    traits.app_name = app_name;
-  }
-
-  ALOGE("setup...\n");
+  traits.shared_data_dir = SHARED_DATA_DIR;
+  traits.user_data_dir = USER_DATA_DIR;
+  traits.app_name = APP_NAME;
   RimeInitialize(&traits);
-
-  env->ReleaseStringUTFChars(jshared_data_dir, shared_data_dir);
-  env->ReleaseStringUTFChars(juser_data_dir, user_data_dir);
-  env->ReleaseStringUTFChars(japp_name, app_name);
-  env->DeleteLocalRef(jc);
 }
 
 void finalize(JNIEnv *env, jobject thiz) {

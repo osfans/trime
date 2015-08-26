@@ -28,7 +28,7 @@ static const JNINativeMethod sMethods[] = {
     // init
     {
         const_cast<char *>("initialize"),
-        const_cast<char *>("(L" CLASSNAME "$RimeTraits;)V"),
+        const_cast<char *>("()V"),
         reinterpret_cast<void *>(initialize)
     },
     {

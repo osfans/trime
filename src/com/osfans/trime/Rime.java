@@ -25,26 +25,6 @@ import java.io.File;
 
 public class Rime
 {
-  public class RimeTraits {
-    int data_size;
-    // v0.9
-    String shared_data_dir;
-    String user_data_dir;
-    String distribution_name;
-    String distribution_code_name;
-    String distribution_version;
-    // v1.0
-    /*!
-     * Pass a C-string constant in the format "rime.x"
-     * where 'x' is the name of your application.
-     * Add prefix "rime." to ensure old log files are automatically cleaned.
-     */
-    String app_name;
-
-    //! A list of modules to load before initializing
-    String[] modules;
-  };
-
   public class RimeComposition {
     int length;
     int cursor_pos;
@@ -273,11 +253,7 @@ public class Rime
   }
 
   public void init(boolean full_check) {
-    RimeTraits traits = new RimeTraits();
-    traits.user_data_dir = "/sdcard/rime";
-    traits.shared_data_dir = "/sdcard/rime";
-    traits.app_name = "rime.trime";
-    initialize(traits);
+    initialize();
     check(full_check);
     deployConfigFile();
     createSession();
@@ -492,9 +468,8 @@ public class Rime
   }
 
   // init
-  public static native final int get_api();
   public static native final void set_notification_handler();
-  public static native final void initialize(RimeTraits traits);
+  public static native final void initialize();
   public static native final void finalize1();
   public static native final void check(boolean full_check);
 
