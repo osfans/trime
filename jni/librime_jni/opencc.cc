@@ -3,6 +3,11 @@
 #include <opencc/Converter.hpp>
 
 // opencc
+
+jstring get_opencc_version(JNIEnv *env, jobject thiz) {
+  return newJstring(env, OPENCC_VERSION);
+}
+
 jstring opencc_convert(JNIEnv *env, jobject thiz, jstring line, jstring name) {
   if (name == NULL) return line;
   const char* s = env->GetStringUTFChars(name, NULL);

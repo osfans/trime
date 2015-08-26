@@ -267,7 +267,7 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("get_version"),
-        const_cast<char *>("(Ljava/lang/String;)Ljava/lang/String;"),
+        const_cast<char *>("()Ljava/lang/String;"),
         reinterpret_cast<void *>(get_version)
     },
     // key_table
@@ -287,7 +287,12 @@ static const JNINativeMethod sMethods[] = {
         reinterpret_cast<void *>(get_schema)
     },
     // opencc
-     {
+    {
+        const_cast<char *>("get_opencc_version"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_opencc_version)
+    },
+    {
         const_cast<char *>("opencc_convert"),
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
         reinterpret_cast<void *>(opencc_convert)

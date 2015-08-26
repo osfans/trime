@@ -519,17 +519,9 @@ jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index
   return rime_get_api()->select_candidate(session_id, index);
 }
 
-jstring get_version(JNIEnv *env, jobject thiz, jstring module) {
-  const char* c = module == NULL ? NULL : env->GetStringUTFChars(module, NULL);
-
-  jstring s = NULL;
-  if (c == NULL) s = newJstring(env, rime_get_api()->get_version());
-  else if (!strcmp(c, "opencc")) s = newJstring(env, OPENCC_VERSION);
-  else if (!strcmp(c, "librime")) s = newJstring(env, LIBRIME_VERSION);
-  else s = newJstring(env, rime_get_api()->get_version());
-
-  env->ReleaseStringUTFChars(module, c);
-  return s;
+jstring get_version(JNIEnv *env, jobject thiz) {
+  //jstring s = newJstring(env, rime_get_api()->get_version());
+  return newJstring(env, LIBRIME_VERSION);
 }
 
 jint get_modifier_by_name(JNIEnv *env, jobject thiz, jstring name) {

@@ -44,7 +44,7 @@ jstring get_input(JNIEnv *env, jobject thiz, jint session_id);
 jint get_caret_pos(JNIEnv *env, jobject thiz, jint session_id);
 void set_caret_pos(JNIEnv *env, jobject thiz, jint session_id, jint caret_pos);
 jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index);
-jstring get_version(JNIEnv *env, jobject thiz, jstring module);
+jstring get_version(JNIEnv *env, jobject thiz);
 jint get_modifier_by_name(JNIEnv *env, jobject thiz, jstring name);
 jint get_keycode_by_name(JNIEnv *env, jobject thiz, jstring name);
 jboolean get_schema(JNIEnv *env, jobject thiz, jstring name, jobject jschema);
