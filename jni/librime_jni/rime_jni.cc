@@ -9,15 +9,15 @@ char (&ArraySizeHelper(T (&array)[N]))[N];
 
 jstring newJstring(JNIEnv* env, const char* pat)
 {
-  if (!pat) return NULL;
+  if (pat == NULL) return NULL;
   int n = strlen(pat);
   if (n == 0) return NULL;
   jclass strClass = env->FindClass("java/lang/String");
-  jmethodID ctorID = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
+  jmethodID init = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
   jbyteArray bytes = env->NewByteArray(n);
   env->SetByteArrayRegion(bytes, 0, n, (jbyte*)pat);
   jstring encoding = env->NewStringUTF("utf-8");
-  jstring ret = (jstring)env->NewObject(strClass, ctorID, bytes, encoding);
+  jstring ret = (jstring)env->NewObject(strClass, init, bytes, encoding);
   env->DeleteLocalRef(strClass);
   env->DeleteLocalRef(bytes);
   env->DeleteLocalRef(encoding);

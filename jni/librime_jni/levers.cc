@@ -77,14 +77,14 @@ jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list) {
   jmethodID add = env->GetMethodID(jc, "add", "(Ljava/lang/Object;)Z");
 
   jclass mapClass = env->FindClass("java/util/HashMap");
-  if(mapClass == NULL) return NULL;
+  if (mapClass == NULL) return NULL;
   jmethodID mapInit = env->GetMethodID(mapClass, "<init>", "()V");
   jmethodID put = env->GetMethodID(mapClass, "put",
             "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
   int n = list->size;
   if (n > 0) {
     RimeLeversApi* api_ = get_levers();
-    for (size_t i = 0; i < n; ++i) {
+    for (int i = 0; i < n; i++) {
       jobject schema_item = env->NewObject(mapClass, mapInit);
       jstring key;
       jstring value;
@@ -92,34 +92,35 @@ jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list) {
       key = newJstring(env, "schema_id");
       value = newJstring(env, item.schema_id);
       env->CallObjectMethod(schema_item, put, key, value);
-      key = newJstring(env, "name");
-      value = newJstring(env, item.name);
-      env->CallObjectMethod(schema_item, put, key, value);
-      RimeSchemaInfo* info = (RimeSchemaInfo*)item.reserved;
-      if (info != NULL) {
-          key = newJstring(env, "version");
-          value = newJstring(env, api_->get_schema_version(info));
-          env->CallObjectMethod(schema_item, put, key, value);
-          key = newJstring(env, "author");
-          value = newJstring(env, api_->get_schema_author(info));
-          env->CallObjectMethod(schema_item, put, key, value);
-          key = newJstring(env, "description");
-          value = newJstring(env, api_->get_schema_description(info));
-          env->CallObjectMethod(schema_item, put, key, value);
-          key = newJstring(env, "author");
-          value = newJstring(env, api_->get_schema_author(info));
-          env->CallObjectMethod(schema_item, put, key, value);
+      if (item.name) {
+        key = newJstring(env, "name");
+        value = newJstring(env, item.name);
+        env->CallObjectMethod(schema_item, put, key, value);
+      }
+      if (item.reserved) {
+        RimeSchemaInfo* info = (RimeSchemaInfo*) item.name;
+        key = newJstring(env, "version");
+        value = newJstring(env, api_->get_schema_version(info));
+        env->CallObjectMethod(schema_item, put, key, value);
+        key = newJstring(env, "author");
+        value = newJstring(env, api_->get_schema_author(info));
+        env->CallObjectMethod(schema_item, put, key, value);
+        key = newJstring(env, "description");
+        value = newJstring(env, api_->get_schema_description(info));
+        env->CallObjectMethod(schema_item, put, key, value);
+        key = newJstring(env, "author");
+        value = newJstring(env, api_->get_schema_author(info));
+        env->CallObjectMethod(schema_item, put, key, value);
       }
       env->DeleteLocalRef(key);
       env->DeleteLocalRef(value);
 
       env->CallObjectMethod(schema_list, add, schema_item);
     }
-    env->DeleteLocalRef(mapClass);
-    env->DeleteLocalRef(jc);
-    return schema_list;
   }
-  return NULL;
+  env->DeleteLocalRef(mapClass);
+  env->DeleteLocalRef(jc);
+  return schema_list;
 }
 
 jobject get_available_schema_list(JNIEnv *env, jobject thiz) {
