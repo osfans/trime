@@ -38,6 +38,14 @@ void check(JNIEnv *env, jobject thiz, jboolean full_check) {
   RimeSetNotificationHandler(&on_message, env);
 }
 
+void setup() {
+  RIME_STRUCT(RimeTraits, traits);
+  traits.shared_data_dir = SHARED_DATA_DIR;
+  traits.user_data_dir = USER_DATA_DIR;
+  traits.app_name = APP_NAME;
+  RimeSetup(&traits);
+}
+
 // entry and exit
 void initialize(JNIEnv *env, jobject thiz) {
   RIME_STRUCT(RimeTraits, traits);

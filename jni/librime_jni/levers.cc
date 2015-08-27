@@ -1,8 +1,10 @@
 #include "levers.h"
+#include "rime.h"
 
 // customize settings
 
 static RimeLeversApi* get_levers() {
+  setup();
   return (RimeLeversApi*)(rime_get_api()->find_module("levers")->get_api());
 }
 
@@ -98,7 +100,7 @@ jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list) {
         env->CallObjectMethod(schema_item, put, key, value);
       }
       if (item.reserved) {
-        RimeSchemaInfo* info = (RimeSchemaInfo*) item.name;
+        RimeSchemaInfo* info = (RimeSchemaInfo*) item.reserved;
         key = newJstring(env, "version");
         value = newJstring(env, api_->get_schema_version(info));
         env->CallObjectMethod(schema_item, put, key, value);
