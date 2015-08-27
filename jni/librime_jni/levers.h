@@ -12,5 +12,6 @@ jboolean customize_string(JNIEnv *env, jobject thiz, jstring name, jstring key, 
 jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list);
 jobject get_available_schema_list(JNIEnv *env, jobject thiz);
 jobject get_selected_schema_list(JNIEnv *env, jobject thiz);
+jboolean select_schemas(JNIEnv *env, jobject thiz, jobjectArray stringArray);
 
 #endif  // LEVERS_H_

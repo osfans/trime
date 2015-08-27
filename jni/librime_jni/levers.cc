@@ -152,3 +152,31 @@ jobject get_selected_schema_list(JNIEnv *env, jobject thiz) {
   }
   return jobj;
 }
+
+jboolean select_schemas(JNIEnv *env, jobject thiz, jobjectArray stringArray) {
+  if (stringArray == NULL) return false;
+  int count = env->GetArrayLength(stringArray);
+  if (count == 0) return false;
+  const char** schema_id_list = new const char*[count];
+  for (int i = 0; i < count; i++) {
+    jstring string = (jstring) env->GetObjectArrayElement(stringArray, i);
+    const char *rawString = env->GetStringUTFChars(string, NULL);
+    schema_id_list[i] = rawString;
+  }
+  RimeLeversApi* api_ = get_levers();
+  RimeSwitcherSettings* settings_ = api_->switcher_settings_init();
+  RimeCustomSettings * custom_settings_ = (RimeCustomSettings *)settings_;
+  Bool b = api_->load_settings(custom_settings_);
+  if (b) {
+    b = api_->select_schemas(settings_, schema_id_list, count);
+    api_->save_settings(custom_settings_);
+    api_->custom_settings_destroy(custom_settings_);
+  }
+  for (int i = 0; i < count; i++) {
+    jstring string = (jstring) env->GetObjectArrayElement(stringArray, i);
+    const char *rawString = schema_id_list[i];
+    env->ReleaseStringUTFChars(string, rawString);
+  }
+  delete schema_id_list;
+  return b;
+}
