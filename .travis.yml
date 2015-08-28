@@ -4,13 +4,13 @@ install: ant release
 git:
     submodules: false
 # Use sed to replace the SSH URL with the public URL, then initialize submodules
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch p7zip
-  - wget --timeout=120 http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86.bin -O ndk.bin
-  - md5sum ndk.bin | grep 70ed6d8c34e7e620c145b791e8eeef89
-  - 7zr x ndk.bin | grep -v Extracting
-  - export ANDROID_HOME=$(pwd)/android-sdk-linux
-  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-  - git submodule update --init --recursive
+#before_install:
+  #- sudo apt-get update -qq
+  #- sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch p7zip
+  #- wget --timeout=120 http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86.bin -O ndk.bin
+  #- md5sum ndk.bin | grep 70ed6d8c34e7e620c145b791e8eeef89
+  #- 7zr x ndk.bin | grep -v Extracting
+  #- export ANDROID_HOME=$(pwd)/android-sdk-linux
+  #- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  #- git submodule update --init --recursive
 
