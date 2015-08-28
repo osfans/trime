@@ -1,5 +1,5 @@
 language: android
-install: ant release
+script: ant release
 # Handle git submodules yourself
 git:
     submodules: false
