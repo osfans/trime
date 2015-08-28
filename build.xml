@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="trime" default="help">
 
+    <!-- if sdk.dir was not set from one of the property file, then
+         get it from the ANDROID_NDK env var.
+         This must be done before we load project.properties since
+         the proguard config can use sdk.dir -->
+    <property environment="env" />
+    <condition property="ndk.dir" value="${env.ANDROID_NDK}">
+        <isset property="env.ANDROID_NDK" />
+    </condition>
+
+    <target name="-pre-build">
+        <exec executable="${ndk.dir}/ndk-build" failonerror="true"/>
+    </target>
+
+    <target name="clean" depends="android_rules.clean">
+        <exec executable="${ndk.dir}/ndk-build" failonerror="true">
+            <arg value="clean"/>
+        </exec>
+    </target>
+
     <exec executable="git" outputproperty="tag">
         <arg value="describe"/>
         <arg value="--tags"/>
