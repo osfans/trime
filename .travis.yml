@@ -13,4 +13,10 @@ git:
   #- export ANDROID_HOME=$(pwd)/android-sdk-linux
   #- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   #- git submodule update --init --recursive
+android:
+  components:
+    # The BuildTools version used by your project
+    - build-tools-23.0.0
 
+    # The SDK version used to compile your project
+    - android-23
