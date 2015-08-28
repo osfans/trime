@@ -37,28 +37,28 @@ LOCAL_SRC_FILES := src/BinaryDict.cpp \
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps/rapidjson-0.11 $(LOCAL_PATH)/deps/darts-clone
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/ $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 LOCAL_CFLAGS := $(CXX_DEFINES)
-#LOCAL_LDLIBS := -latomic
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_LDLIBS := -latomic
+include $(BUILD_SHARED_LIBRARY)
 
 ifneq ($(OPENCC_TOOLS),)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_tool
 LOCAL_SRC_FILES := src/tools/CommandLine.cpp
 LOCAL_CFLAGS := $(CXX_DEFINES)
-LOCAL_STATIC_LIBRARIES := opencc
+LOCAL_SHARED_LIBRARIES := opencc
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_dict
 LOCAL_SRC_FILES := src/tools/DictConverter.cpp
 LOCAL_CFLAGS := $(CXX_DEFINES)
-LOCAL_STATIC_LIBRARIES := opencc
+LOCAL_SHARED_LIBRARIES := opencc
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc_phrase_extract
 LOCAL_SRC_FILES := src/tools/PhraseExtract.cpp
 LOCAL_CFLAGS := $(CXX_DEFINES)
-LOCAL_STATIC_LIBRARIES := opencc
+LOCAL_SHARED_LIBRARIES := opencc
 include $(BUILD_EXECUTABLE)
 endif
