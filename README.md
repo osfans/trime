@@ -1,4 +1,6 @@
 # 同文安卓輸入法平臺/Trime/android-rime
+[![自動編譯](https://travis-ci.org/osfans/trime.svg?branch=master)](https://travis-ci.org/osfans/trime)
+
 =====
 源於開源的[注音倉頡輸入法]，
 基於著名的[Rime](https://github.com/rime/librime)輸入法框架，
