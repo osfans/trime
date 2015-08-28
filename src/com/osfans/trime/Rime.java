@@ -546,5 +546,7 @@ public class Rime
   // opencc
   public static native final String get_opencc_version();
   public static native final String opencc_convert(String line, String name);
+  public static native final void opencc_convert_dictionary(String inputFileName, String outputFileName,
+                       String formatFrom, String formatTo);
 
 }

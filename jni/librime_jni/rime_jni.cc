@@ -312,6 +312,11 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"),
         reinterpret_cast<void *>(opencc_convert)
     },
+    {
+        const_cast<char *>("opencc_convert_dictionary"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"),
+        reinterpret_cast<void *>(opencc_convert_dictionary)
+    },
 };
 
 int registerNativeMethods(JNIEnv *env, const char * className, const JNINativeMethod *methods,
