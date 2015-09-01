@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.io.*;
 
 public class Config {
-  private Map<String,Object> mConfig, mDefaultConfig;
-  private Map<String, Map> maps;
+  private Map<String, Object> mConfig, mDefaultConfig;
+  private Map<String, Map<String, Object>> maps;
   private String defaultName = "trime.yaml";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
@@ -73,7 +73,7 @@ public class Config {
   public Config(Context context) {
     self = this;
     tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
-    maps = new HashMap<String, Map>();
+    maps = new HashMap<String, Map<String, Object>>();
     mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime", "");
     reset();
   }

@@ -32,6 +32,11 @@ import android.webkit.WebViewClient;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * Manages IME preferences. 
  */
@@ -39,9 +44,35 @@ public class Pref extends PreferenceActivity {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
 
+  boolean[] checkedSchemaItems;
+  String[] schemaItems;
+  DialogInterface.OnClickListener selectSchemasListener = new DialogInterface.OnClickListener() {
+    public void onClick(DialogInterface di, int id) {
+      List<String> checkedIds = new ArrayList<String>();
+      int i = 0;
+      for (boolean b: checkedSchemaItems) {
+        if (b) checkedIds.add(schemaItems[i]);
+        i++;
+      }
+      int n = checkedIds.size();
+      if (n > 0) {
+        String[] schema_id_list = new String[n];
+        checkedIds.toArray(schema_id_list);
+        Rime.select_schemas(schema_id_list);
+        deploy();
+      }
+      di.dismiss();
+    }
+  };
+  DialogInterface.OnMultiChoiceClickListener checkSchemasListener = new DialogInterface.OnMultiChoiceClickListener() {
+    public void onClick(DialogInterface di, int id, boolean isChecked) {
+      checkedSchemaItems[id] = isChecked;
+    }
+  };
+
   public String getVersion() {
     try {
-       return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+      return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
     } catch (Exception e) {
       return null;
     }
@@ -78,32 +109,73 @@ public class Pref extends PreferenceActivity {
       .show();
   }
 
+  private void selectSchemas() {
+    List schemas = Rime.get_available_schema_list();
+    if (schemas == null || schemas.size() == 0) return;
+    List selected_schemas = Rime.get_selected_schema_list();
+    List<String> selected_Ids = new ArrayList<String>();
+    int n = schemas.size();
+    String[] schemaNames = new String[n];
+    String schema_id;
+    checkedSchemaItems = new boolean[n];
+    schemaItems = new String[n];
+    int i = 0;
+    if (selected_schemas.size() > 0) {
+      for (Object o: selected_schemas) {
+        Map<String, String> m = (Map<String, String>)o;
+        selected_Ids.add(m.get("schema_id"));
+      }
+    }
+    for (Object o: schemas) {
+      Map<String, String> m = (Map<String, String>)o;
+      schemaNames[i] = m.get("name");
+      schema_id = m.get("schema_id");
+      schemaItems[i] = schema_id;
+      checkedSchemaItems[i] = selected_Ids.contains(schema_id);
+      i++;
+    }
+    new AlertDialog.Builder(this)
+      .setTitle(R.string.pref_schemas)
+      .setCancelable(true)
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok, selectSchemasListener)
+      .setMultiChoiceItems(schemaNames, checkedSchemaItems, checkSchemasListener)
+      .show();
+  }
+
+  public void deploy() {
+    Rime.getRime().finalize1();
+    Rime.getRime().init(true);
+    Trime trime = Trime.getService();
+    if (trime != null) trime.invalidate();
+  }
+
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-    String key = preference.getKey();
     boolean b;
-    if (key.contentEquals("pref_maintenance")) { //維護
-      Rime.getRime().check(true);
-      return true;
-    } else if (key.contentEquals("pref_deploy")) { //部署
-      Rime.getRime().finalize1();
-      Rime.getRime().init(true);
-      Trime trime = Trime.getService();
-      if (trime != null) trime.invalidate();
-      return true;
-    } else if (key.contentEquals("pref_sync")) { //同步
-      b = Rime.getRime().sync_user_data();
-      Rime.getRime().finalize1();
-      Rime.getRime().init(false);
-      Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
-      return true;
-    } else if (key.contentEquals("pref_reset")) { //回廠
-      b = Config.copyFile(this, "rime/trime.yaml", true);
-      Toast.makeText(this, b ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT).show();
-      return true;
-    } else if (key.contentEquals("pref_licensing")) { //資訊
-      showLicenseDialog();
-      return true;
+    switch (preference.getKey()) {
+      case "pref_schemas": //方案
+        selectSchemas();
+        return true;
+      case "pref_maintenance": //維護
+        Rime.getRime().check(true);
+        return true;
+      case "pref_deploy": //部署
+        deploy();
+        return true;
+      case "pref_sync": //同步
+        b = Rime.getRime().sync_user_data();
+        Rime.getRime().finalize1();
+        Rime.getRime().init(false);
+        Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
+        return true;
+      case "pref_reset": //回廠
+        b = Config.copyFile(this, "rime/trime.yaml", true);
+        Toast.makeText(this, b ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT).show();
+        return true;
+      case "pref_licensing": //資訊
+        showLicenseDialog();
+        return true;
     }
     return false;
   }

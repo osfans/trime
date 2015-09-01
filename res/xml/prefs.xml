@@ -21,6 +21,7 @@
     android:title="@string/ime_name">
 
     <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
+        <Preference android:key="pref_schemas" android:title="@string/pref_schemas" />
         <Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" />
         <Preference android:key="pref_deploy" android:title="@string/pref_deploy" />
         <Preference android:key="pref_sync" android:title="@string/pref_sync" />
