@@ -539,8 +539,8 @@ public class Rime
   public static native final boolean customize_int(String name, String key, int value);
   public static native final boolean customize_double(String name, String key, double value);
   public static native final boolean customize_string(String name, String key, String value);
-  public static native final List get_available_schema_list();
-  public static native final List get_selected_schema_list();
+  public static native final List<Map<String,String>> get_available_schema_list();
+  public static native final List<Map<String,String>> get_selected_schema_list();
   public static native final boolean select_schemas(String[] schema_id_list);
 
   // opencc

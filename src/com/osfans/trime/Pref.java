@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Manages IME preferences. 
@@ -109,10 +111,19 @@ public class Pref extends PreferenceActivity {
       .show();
   }
 
+  public class SortByName implements Comparator<Map<String,String>>{
+    public int compare(Map<String,String> m1, Map<String,String> m2) {
+      String s1 = m1.get("schema_id");
+      String s2 = m2.get("schema_id");
+      return s1.compareTo(s2);
+    }
+  }
+
   private void selectSchemas() {
-    List schemas = Rime.get_available_schema_list();
+    List<Map<String,String>> schemas = Rime.get_available_schema_list();
     if (schemas == null || schemas.size() == 0) return;
-    List selected_schemas = Rime.get_selected_schema_list();
+    Collections.sort(schemas, new SortByName());
+    List<Map<String,String>> selected_schemas = Rime.get_selected_schema_list();
     List<String> selected_Ids = new ArrayList<String>();
     int n = schemas.size();
     String[] schemaNames = new String[n];
@@ -121,13 +132,11 @@ public class Pref extends PreferenceActivity {
     schemaItems = new String[n];
     int i = 0;
     if (selected_schemas.size() > 0) {
-      for (Object o: selected_schemas) {
-        Map<String, String> m = (Map<String, String>)o;
+      for (Map<String,String> m: selected_schemas) {
         selected_Ids.add(m.get("schema_id"));
       }
     }
-    for (Object o: schemas) {
-      Map<String, String> m = (Map<String, String>)o;
+    for (Map<String,String> m: schemas) {
       schemaNames[i] = m.get("name");
       schema_id = m.get("schema_id");
       schemaItems[i] = schema_id;
