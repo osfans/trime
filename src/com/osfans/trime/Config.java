@@ -241,6 +241,32 @@ public class Config {
     return ((Long)o).intValue();
   }
 
+  public void setColor(String color) {
+    Rime.customize_string("trime", "style/color_scheme", color);
+    Rime.deployConfigFile();
+    Map<String, Object> style = (Map<String, Object>)mDefaultConfig.get("style");
+    style.put("color_scheme", color);
+    mDefaultConfig.put("style", style);
+  }
+
+  public String[] getColorKeys() {
+    Map<String, Object> m = (Map<String, Object>)getValue("preset_color_schemes");
+    String[] keys = new String[m.size()];
+    m.keySet().toArray(keys);
+    return keys;
+  }
+
+  public String[] getColorNames(String[] keys) {
+    int n = keys.length;
+    String[] names = new String[n];
+    Map<String, Object> m = (Map<String, Object>)getValue("preset_color_schemes");
+    for (int i = 0; i < n; i++) {
+      Map<String, Object> m2 = (Map<String, Object>)m.get(keys[i]);
+      names[i] = (String)m2.get("name");
+    }
+    return names;
+  }
+
   public Typeface getFont(String key){
     String name = getString(key);
     if (name == null) return tf;

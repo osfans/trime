@@ -28,6 +28,7 @@
     <string name="pref_ver">平臺版本</string>
 
     <string name="pref_function">功能</string>
+    <string name="pref_colors">配色</string>
     <string name="pref_schemas">方案</string>
     <string name="pref_maintenance">維護</string>
     <string name="pref_deploy">部署</string>

@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Arrays;
 
 /**
  * Manages IME preferences. 
@@ -48,6 +49,8 @@ public class Pref extends PreferenceActivity {
 
   boolean[] checkedSchemaItems;
   String[] schemaItems;
+  String[] colorKeys;
+  int checkedColor;
   DialogInterface.OnClickListener selectSchemasListener = new DialogInterface.OnClickListener() {
     public void onClick(DialogInterface di, int id) {
       List<String> checkedIds = new ArrayList<String>();
@@ -159,10 +162,45 @@ public class Pref extends PreferenceActivity {
     if (trime != null) trime.invalidate();
   }
 
+  public void selectColor() {
+    String color = colorKeys[checkedColor];
+    Config config = Config.get(this);
+    config.setColor(color);
+    Trime trime = Trime.getService();
+    if (trime != null) trime.reset();
+  }
+
+  public void showSelectColors() {
+    Config config = Config.get(this);
+    colorKeys = config.getColorKeys();
+    Arrays.sort(colorKeys);
+    String colorScheme = config.getString("color_scheme");
+    checkedColor = Arrays.binarySearch(colorKeys, colorScheme);
+    String[] colorNames = config.getColorNames(colorKeys);
+    new AlertDialog.Builder(this)
+      .setTitle(R.string.pref_colors)
+      .setCancelable(true)
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface di, int id) {
+          selectColor();
+        }
+      })
+      .setSingleChoiceItems(colorNames, checkedColor, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface di, int id) {
+          checkedColor = id;
+        }
+      })
+      .show();
+  }
+
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     boolean b;
     switch (preference.getKey()) {
+      case "pref_colors": //配色
+        showSelectColors();
+        return true;
       case "pref_schemas": //方案
         selectSchemas();
         return true;
