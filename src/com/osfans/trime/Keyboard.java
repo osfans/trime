@@ -967,6 +967,9 @@ public class Keyboard {
     int columns = (Integer)getValue(m, "columns", 20);
     int defaultWidth = (int)(getDouble(m, "width", 0) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
+    double height = getDouble(m, "height", 0);
+    int defaultHeight = mDefaultHeight;
+    if (height > 0) defaultHeight = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, (float)height, Resources.getSystem().getDisplayMetrics());
     List<Map<String,Object>> lm = (List<Map<String,Object>>)m.get("keys");
     mKeyboardMode = (Integer)getValue(m, "mode", 0);
     mAsciiMode = (Integer)getValue(m, "ascii_mode", 1);
@@ -977,7 +980,7 @@ public class Keyboard {
     mTotalWidth = 0;
 
     Row row = new Row(this);
-    row.defaultHeight = mDefaultHeight;
+    row.defaultHeight = defaultHeight;
     row.defaultWidth = defaultWidth;
     row.defaultHorizontalGap = mDefaultHorizontalGap;
     row.verticalGap = mDefaultVerticalGap;
@@ -992,7 +995,7 @@ public class Keyboard {
       if (column >= maxColumns 
               || x + w > mDisplayWidth) {
           x = 0;
-          y += mDefaultVerticalGap + mDefaultHeight;
+          y += mDefaultVerticalGap + defaultHeight;
           column = 0;
       }
       if(!(mk.containsKey("text") || mk.containsKey("code"))){
@@ -1005,7 +1008,7 @@ public class Keyboard {
       key.y = y;
       int right_gap = Math.abs(mDisplayWidth - x - w - gap);
       key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x : w; //右側不留白
-      key.height = mDefaultHeight;
+      key.height = defaultHeight;
       key.gap = gap;
 
       key.text = getString(mk, "text");
@@ -1073,7 +1076,7 @@ public class Keyboard {
           mTotalWidth = x;
       }
     }
-    mTotalHeight = y + mDefaultHeight; 
+    mTotalHeight = y + defaultHeight;
   }
 
   public boolean getAsciiMode() {

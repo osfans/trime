@@ -579,6 +579,8 @@ preset_color_schemes:
 keyboard:
 - mode: 0
   ascii_mode: 0
+  width: 10
+  height: 42
   keys:
   - {symbol: '!', text: '1'}
   - {symbol: '@', text: '2'}
@@ -629,6 +631,7 @@ keyboard:
   - {code: Return, width: 15, symbol: 編碼, symbolCode: Control+Shift+Return}
 - mode: 1
   width: 20
+  height: 42
   keys:
   - {text: '+'}
   - {text: '1'}
