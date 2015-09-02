@@ -72,7 +72,7 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    tf = Typeface.createFromAsset(context.getAssets(), "DejaVuSans.ttf");
+    tf = Typeface.DEFAULT;
     maps = new HashMap<String, Map<String, Object>>();
     mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime", "");
     reset();

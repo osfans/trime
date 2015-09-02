@@ -23,7 +23,7 @@ style:
   horizontal_gap: 1 #鍵水平間距
   inline_code: false #嵌入編碼
   inline_preedit: true #嵌入首選
-  key_font: han.ttf #鍵盤字體
+  key_font: symbol.ttf #鍵盤字體
   key_height: 42 #鍵高
   key_sound: false #按鍵聲音
   key_sound_volume: -1 #按鍵音量
@@ -626,7 +626,7 @@ keyboard:
   - {code: space, repeatable: true, width: 30}
   - {symbol: '"', text: "'"}
   - {code: BackSpace, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
-  - {code: Return, width: 15, symbol: 清空, symbolCode: Clear}
+  - {code: Return, width: 15, symbol: 編碼, symbolCode: Control+Shift+Return}
 - mode: 1
   width: 20
   keys:
