@@ -149,7 +149,7 @@ public class Config {
 
   private Object _getValue(String k1) {
     if (mConfig != null && mConfig.containsKey(k1)) return mConfig.get(k1);
-    if (mDefaultConfig.containsKey(k1)) return mDefaultConfig.get(k1);
+    if (mDefaultConfig != null && mDefaultConfig.containsKey(k1)) return mDefaultConfig.get(k1);
     return null;
   }
 
@@ -182,7 +182,10 @@ public class Config {
   }
 
   public static Config get(Context context) {
-    if (self == null) self = new Config(context);
+    if (self == null) {
+      prepareRime(context);
+      self = new Config(context);
+    }
     return self;
   }
 
@@ -251,12 +254,14 @@ public class Config {
 
   public String[] getColorKeys() {
     Map<String, Object> m = (Map<String, Object>)getValue("preset_color_schemes");
+    if (m == null) return null;
     String[] keys = new String[m.size()];
     m.keySet().toArray(keys);
     return keys;
   }
 
   public String[] getColorNames(String[] keys) {
+    if (keys == null) return null;
     int n = keys.length;
     String[] names = new String[n];
     Map<String, Object> m = (Map<String, Object>)getValue("preset_color_schemes");

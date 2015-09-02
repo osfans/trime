@@ -20,13 +20,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/ime_name">
 
-    <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
-        <Preference android:key="pref_colors" android:title="@string/pref_colors" />
+    <PreferenceCategory android:key="pref_config" android:title="@string/pref_config">
         <Preference android:key="pref_schemas" android:title="@string/pref_schemas" />
+        <Preference android:key="pref_colors" android:title="@string/pref_colors" />
+        <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
         <Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" />
         <Preference android:key="pref_deploy" android:title="@string/pref_deploy" />
         <Preference android:key="pref_sync" android:title="@string/pref_sync" />
-        <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">

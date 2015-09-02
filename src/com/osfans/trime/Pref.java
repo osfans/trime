@@ -51,29 +51,6 @@ public class Pref extends PreferenceActivity {
   String[] schemaItems;
   String[] colorKeys;
   int checkedColor;
-  DialogInterface.OnClickListener selectSchemasListener = new DialogInterface.OnClickListener() {
-    public void onClick(DialogInterface di, int id) {
-      List<String> checkedIds = new ArrayList<String>();
-      int i = 0;
-      for (boolean b: checkedSchemaItems) {
-        if (b) checkedIds.add(schemaItems[i]);
-        i++;
-      }
-      int n = checkedIds.size();
-      if (n > 0) {
-        String[] schema_id_list = new String[n];
-        checkedIds.toArray(schema_id_list);
-        Rime.select_schemas(schema_id_list);
-        deploy();
-      }
-      di.dismiss();
-    }
-  };
-  DialogInterface.OnMultiChoiceClickListener checkSchemasListener = new DialogInterface.OnMultiChoiceClickListener() {
-    public void onClick(DialogInterface di, int id, boolean isChecked) {
-      checkedSchemaItems[id] = isChecked;
-    }
-  };
 
   public String getVersion() {
     try {
@@ -122,9 +99,28 @@ public class Pref extends PreferenceActivity {
     }
   }
 
-  private void selectSchemas() {
+  private void selectSchema() {
+    List<String> checkedIds = new ArrayList<String>();
+    int i = 0;
+    for (boolean b: checkedSchemaItems) {
+      if (b) checkedIds.add(schemaItems[i]);
+      i++;
+    }
+    int n = checkedIds.size();
+    if (n > 0) {
+      String[] schema_id_list = new String[n];
+      checkedIds.toArray(schema_id_list);
+      Rime.select_schemas(schema_id_list);
+      deploy();
+    }
+  }
+
+  private void showSelectSchemas() {
     List<Map<String,String>> schemas = Rime.get_available_schema_list();
-    if (schemas == null || schemas.size() == 0) return;
+    if (schemas == null || schemas.size() == 0) {
+      Toast.makeText(this, R.string.no_schemas, Toast.LENGTH_LONG).show();
+      return;
+    }
     Collections.sort(schemas, new SortByName());
     List<Map<String,String>> selected_schemas = Rime.get_selected_schema_list();
     List<String> selected_Ids = new ArrayList<String>();
@@ -150,8 +146,16 @@ public class Pref extends PreferenceActivity {
       .setTitle(R.string.pref_schemas)
       .setCancelable(true)
       .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, selectSchemasListener)
-      .setMultiChoiceItems(schemaNames, checkedSchemaItems, checkSchemasListener)
+      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface di, int id) {
+          selectSchema();
+        }
+      })
+      .setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
+        public void onClick(DialogInterface di, int id, boolean isChecked) {
+          checkedSchemaItems[id] = isChecked;
+        }
+      })
       .show();
   }
 
@@ -173,6 +177,7 @@ public class Pref extends PreferenceActivity {
   public void showSelectColors() {
     Config config = Config.get(this);
     colorKeys = config.getColorKeys();
+    if (colorKeys == null) return;
     Arrays.sort(colorKeys);
     String colorScheme = config.getString("color_scheme");
     checkedColor = Arrays.binarySearch(colorKeys, colorScheme);
@@ -202,7 +207,7 @@ public class Pref extends PreferenceActivity {
         showSelectColors();
         return true;
       case "pref_schemas": //方案
-        selectSchemas();
+        showSelectSchemas();
         return true;
       case "pref_maintenance": //維護
         Rime.getRime().check(true);
