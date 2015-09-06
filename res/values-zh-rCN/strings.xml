@@ -30,13 +30,13 @@
     <string name="pref_config">配置</string>
     <string name="pref_colors">配色</string>
     <string name="pref_schemas">方案</string>
+    <string name="pref_reset">回厂</string>
+    <string name="pref_reset_summary">使用默认配置覆盖/sdcard/rime/下同名文件</string>
 
     <string name="pref_function">功能</string>
     <string name="pref_maintenance">维护</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_sync">同步</string>
-    <string name="pref_reset">回厂</string>
-    <string name="pref_reset_summary">使用默认配置覆盖/sdcard/rime/trime.yaml</string>
 
     <string name="sync_success">同步成功</string>
     <string name="sync_failure">同步失败</string>

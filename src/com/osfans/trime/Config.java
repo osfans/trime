@@ -86,6 +86,17 @@ public class Config {
     return true;
   }
 
+  public static String[] list(Context context, String path) {
+    AssetManager assetManager = context.getAssets();
+    String assets[] = null;
+    try {
+      assets = assetManager.list(path);
+    } catch (IOException ex) {
+      Log.e("Config", "I/O Exception", ex);
+    }
+    return assets;
+  }
+
   public static boolean copyFileOrDir(Context context, String path, boolean overwrite) {
     AssetManager assetManager = context.getAssets();
     String assets[] = null;
@@ -159,7 +170,7 @@ public class Config {
       m = (Map<String, Object>)mConfig.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
-    if (mDefaultConfig.containsKey(k1)) {
+    if (mDefaultConfig != null && mDefaultConfig.containsKey(k1)) {
       m = (Map<String, Object>)mDefaultConfig.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }

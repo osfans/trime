@@ -113,8 +113,7 @@ public class Pref extends PreferenceActivity {
         sync();
         return true;
       case "pref_reset": //回廠
-        b = Config.copyFile(this, "rime/trime.yaml", true);
-        Toast.makeText(this, b ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT).show();
+        new ResetDialog(this).show();
         return true;
       case "pref_licensing": //資訊
         showLicenseDialog();
