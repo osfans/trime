@@ -90,8 +90,8 @@ preset_color_schemes:
     key_text_color: 0xff37474f #按鍵文字
     keyboard_back_color: 0xffffffff #鍵盤背景
     label_color: 0xff000000 #標籤
-    off_key_back_color: 0xffeceff1 #按鍵關閉狀態背景
-    off_key_text_color: 0xff37474f #按鍵關閉狀態文字
+    off_key_back_color: 0xffd3d7da #按鍵關閉狀態背景
+    off_key_text_color: 0xff000000 #按鍵關閉狀態文字
     on_key_back_color: 0xff23948e #按鍵打開狀態背景
     on_key_text_color: 0xff37474f #按鍵打開狀態文字
     preview_back_color: 0x55bfbfbf #按鍵提示背景
@@ -623,12 +623,12 @@ keyboard:
   - {symbol: '>', text: '.'}
   - {symbol: '?', text: '/'}
   - {code: "Shift_L"}
-  - {label: '123', switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
-  - {code: Language_switch, symbol: F4, symbolCode: F4}
+  - {label: '123', functional: true, switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
+  - {code: Language_switch, functional: true, symbol: F4, symbolCode: F4}
   - {code: space, repeatable: true, width: 30}
   - {symbol: '"', text: "'"}
-  - {code: BackSpace, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
-  - {code: Return, width: 15, symbol: 編碼, symbolCode: Control+Shift+Return}
+  - {code: BackSpace, functional: true, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
+  - {code: Return, functional: true, width: 15, symbol: 編碼, symbolCode: Control+Shift+Return}
 - mode: 1
   width: 20
   height: 42

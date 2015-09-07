@@ -19,6 +19,7 @@ package com.osfans.trime;
 import com.osfans.trime.Keyboard.Key;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -30,7 +31,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -133,7 +133,6 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mCurrentKeyIndex = NOT_A_KEY;
     private int mLabelTextSize;
     private int mKeyTextSize;
-    private int key_text_color, hilited_key_text_color;
     private float mShadowRadius;
     private int mShadowColor;
     private float mBackgroundDimAmount;
@@ -208,7 +207,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private Key mInvalidatedKey;
     private Rect mClipRegion = new Rect(0, 0, 0, 0);
     
-    private Drawable mKeyBackground;
+    private ColorStateList mKeyBackColor, mKeyTextColor;
 
     private int repeat_interval = 50; // ~20 keys per second
     private int repeat_start_delay = 400;
@@ -261,8 +260,6 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     public void reset() {
         Config config = Config.get();
-        key_text_color = config.getColor("key_text_color");
-        hilited_key_text_color = config.getColor("hilited_key_text_color");
         key_symbol_color = config.getColor("key_symbol_color");
         hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
         mShadowColor = config.getColor("shadow_color");
@@ -277,14 +274,23 @@ public class KeyboardView extends View implements View.OnClickListener {
         mBackgroundDimAmount = config.getFloat("background_dim_amount");
         mShadowRadius = config.getFloat("shadow_radius");
 
-        StateListDrawable keyBackground = new StateListDrawable();
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_ON, new ColorDrawable(config.getColor("hilited_on_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED_OFF, new ColorDrawable(config.getColor("hilited_off_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_ON, new ColorDrawable(config.getColor("on_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL_OFF, new ColorDrawable(config.getColor("off_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_PRESSED, new ColorDrawable(config.getColor("hilited_key_back_color")));
-        keyBackground.addState(Keyboard.Key.KEY_STATE_NORMAL, new ColorDrawable(config.getColor("key_back_color")));
-        mKeyBackground = keyBackground;
+        mKeyBackColor = new ColorStateList(Keyboard.Key.KEY_STATES, new int[]{
+            config.getColor("hilited_on_key_back_color"),
+            config.getColor("hilited_off_key_back_color"),
+            config.getColor("on_key_back_color"),
+            config.getColor("off_key_back_color"),
+            config.getColor("hilited_key_back_color"),
+            config.getColor("key_back_color")
+        });
+
+        mKeyTextColor = new ColorStateList(Keyboard.Key.KEY_STATES, new int[]{
+            config.getColor("hilited_on_key_text_color"),
+            config.getColor("hilited_off_key_text_color"),
+            config.getColor("on_key_text_color"),
+            config.getColor("off_key_text_color"),
+            config.getColor("hilited_key_text_color"),
+            config.getColor("key_text_color")
+        });
 
         mPreviewText.setTextColor(config.getColor("preview_text_color"));
         mPreviewText.setBackgroundColor(config.getColor("preview_back_color"));
@@ -335,7 +341,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPadding = new Rect(0, 0, 0, 0);
         mMiniKeyboardCache = new HashMap<Key,View>();
 
-        mKeyBackground.getPadding(mPadding);
+        //mKeyBackground.getPadding(mPadding);
         
         resetMultiTap();
         initGestureDetector();
@@ -582,7 +588,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mKeyboard == null) return;
         
         final Paint paint = mPaint;
-        final Drawable keyBackground = mKeyBackground;
+        Drawable keyBackground;
         final Rect clipRegion = mClipRegion;
         final Rect padding = mPadding;
         final int kbdPaddingLeft = getPaddingLeft();
@@ -590,8 +596,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         final Key[] keys = mKeys;
         final Key invalidKey = mInvalidatedKey;
 
-        //paint.setAlpha(255);
-        paint.setColor(key_text_color);
         boolean drawSingleKey = false;
         if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
           // Is clipRegion completely contained within the invalidated key?
@@ -611,8 +615,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 continue;
             }
             int[] drawableState = key.getCurrentDrawableState();
-            keyBackground.setState(drawableState);
-            mPaint.setColor(key.pressed ? hilited_key_text_color: key_text_color);
+            keyBackground = new ColorDrawable(mKeyBackColor.getColorForState(drawableState, 0));
+            mPaint.setColor(mKeyTextColor.getColorForState(drawableState, 0));
             mPaintSymbol.setColor(key.pressed ? hilited_key_symbol_color: key_symbol_color);
 
             // Switch the character to uppercase if shift is pressed

@@ -484,7 +484,7 @@ public class Keyboard {
     public static class Key {
         public Drawable icon, iconPreview;
         public int width, height, gap, x, y;
-        public boolean sticky, pressed, on;
+        public boolean sticky, pressed, on, functional;
         public String popupCharacters;
         public int[] codes;
         public int mask;
@@ -537,6 +537,15 @@ public class Keyboard {
         
         public final static int[] KEY_STATE_PRESSED = {
             android.R.attr.state_pressed
+        };
+
+        public final static int[][] KEY_STATES = new int[][]{
+            KEY_STATE_PRESSED_ON,
+            KEY_STATE_PRESSED_OFF,
+            KEY_STATE_NORMAL_ON,
+            KEY_STATE_NORMAL_OFF,
+            KEY_STATE_PRESSED,
+            KEY_STATE_NORMAL
         };
 
         /** Create an empty key with no attributes. */
@@ -638,7 +647,7 @@ public class Keyboard {
                     states = KEY_STATE_NORMAL_ON;
                 }
             } else {
-                if (sticky) {
+                if (sticky || functional) {
                     if (pressed) {
                         states = KEY_STATE_PRESSED_OFF;
                     } else {
@@ -1033,34 +1042,42 @@ public class Keyboard {
       key.codes = new int[]{c};
       key.mask = pairs[1];
 
-      key.repeatable = (Boolean)getValue(mk, "repeatable", false);
       if (c == KeyEvent.KEYCODE_SPACE){
         if (key.label.isEmpty()) key.label = Rime.getRime().getSchemaName();
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
         if (key.label.isEmpty()) key.label = "⇪";
+        key.functional = true;
         key.modifier = true;
         key.sticky = true;
         mShiftKey = key;
         mModifierKeys.add(key);
       } else if (c == KeyEvent.KEYCODE_LANGUAGE_SWITCH){
+        key.functional = true;
         if (key.label.isEmpty()) key.label = canColorEmoji() ? "🌐" : "語言";
       } else if (c == KeyEvent.KEYCODE_DEL){
+        key.functional = true;
         if (key.label.isEmpty()) key.label = canColorEmoji() ? "🔙" : "退格";
       } else if (c == KeyEvent.KEYCODE_CLEAR){ //清屏
+        key.functional = true;
         if (key.label.isEmpty()) key.label = canColorEmoji() ? "❎" : "清屏";
       } else if (c == KeyEvent.KEYCODE_ENTER){
+        key.functional = true;
         if (key.label.isEmpty()) key.label = canColorEmoji() ? "↩️️" : "回車";
       } else if(s.contentEquals("<switch>")){
+        key.functional = true;
         key.codes = new int[] {KEYCODE_MODE_SWITCH - (Integer)getValue(mk, "switch", 0)};
         if (key.label.isEmpty()) key.label = canColorEmoji() ? "🔤" : "鍵盤";
         if (key.symbolCode == 0) key.symbolCode = KeyEvent.KEYCODE_MENU;
       } else if(s.contentEquals("<switch_last>")){
+        key.functional = true;
         key.codes = new int[] {KEYCODE_MODE_LAST};
         if (key.label.isEmpty()) key.label = "⟲";
       } else if(s.contentEquals("<switch_prev>")){
+        key.functional = true;
         key.codes = new int[] {KEYCODE_MODE_PREV};
         if (key.label.isEmpty()) key.label = "⬆";
       } else if(s.contentEquals("<switch_next>")){
+        key.functional = true;
         key.codes = new int[] {KEYCODE_MODE_NEXT};
         if (key.label.isEmpty()) key.label = "⬇";
       }
@@ -1074,6 +1091,8 @@ public class Keyboard {
           key.iconPreview.setBounds(0, 0, key.iconPreview.getIntrinsicWidth(), 
                   key.iconPreview.getIntrinsicHeight());
       }
+      key.repeatable = (Boolean)getValue(mk, "repeatable", key.repeatable);
+      key.functional = (Boolean)getValue(mk, "functional", key.functional);
       column++;
       x += key.width + key.gap;
       mKeys.add(key);
