@@ -624,7 +624,7 @@ keyboard:
   - {symbol: '?', text: '/'}
   - {code: "Shift_L"}
   - {label: '123', switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
-  - {code: Language_switch, label: 🌐, symbol: F4, symbolCode: F4}
+  - {code: Language_switch, symbol: F4, symbolCode: F4}
   - {code: space, repeatable: true, width: 30}
   - {symbol: '"', text: "'"}
   - {code: BackSpace, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}

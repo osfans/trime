@@ -29,6 +29,7 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
+import android.os.Build;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -961,6 +962,10 @@ public class Keyboard {
     return new int[] {c, m};
   }
 
+  private static boolean canColorEmoji() {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+  }
+
   public Keyboard(Context context, Object o) {
     this(context, 0);
     Map<String,Object> m = (Map<String,Object>)o;
@@ -1031,23 +1036,23 @@ public class Keyboard {
       key.repeatable = (Boolean)getValue(mk, "repeatable", false);
       if (c == KeyEvent.KEYCODE_SPACE){
         if (key.label.isEmpty()) key.label = Rime.getRime().getSchemaName();
-      } else if (c == KeyEvent.KEYCODE_SWITCH_CHARSET){
-        if (key.label.isEmpty()) key.label = "⇪";
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
         if (key.label.isEmpty()) key.label = "⇪";
         key.modifier = true;
         key.sticky = true;
         mShiftKey = key;
         mModifierKeys.add(key);
+      } else if (c == KeyEvent.KEYCODE_LANGUAGE_SWITCH){
+        if (key.label.isEmpty()) key.label = canColorEmoji() ? "🌐" : "語言";
       } else if (c == KeyEvent.KEYCODE_DEL){
-        if (key.label.isEmpty()) key.label = "⌫";
+        if (key.label.isEmpty()) key.label = canColorEmoji() ? "🔙" : "退格";
       } else if (c == KeyEvent.KEYCODE_CLEAR){ //清屏
-        if (key.label.isEmpty()) key.label = "⌧";
+        if (key.label.isEmpty()) key.label = canColorEmoji() ? "❎" : "清屏";
       } else if (c == KeyEvent.KEYCODE_ENTER){
-        if (key.label.isEmpty()) key.label = "⏎";
+        if (key.label.isEmpty()) key.label = canColorEmoji() ? "↩️️" : "回車";
       } else if(s.contentEquals("<switch>")){
         key.codes = new int[] {KEYCODE_MODE_SWITCH - (Integer)getValue(mk, "switch", 0)};
-        if (key.label.isEmpty()) key.label = "⌨";
+        if (key.label.isEmpty()) key.label = canColorEmoji() ? "🔤" : "鍵盤";
         if (key.symbolCode == 0) key.symbolCode = KeyEvent.KEYCODE_MENU;
       } else if(s.contentEquals("<switch_last>")){
         key.codes = new int[] {KEYCODE_MODE_LAST};
