@@ -394,6 +394,8 @@ public class Trime extends InputMethodService implements
       mRime.toggleOption("ascii_mode");
       commitText();
       updateComposing();
+    } else if (primaryCode == Keyboard.KEYCODE_COLOR) {
+      showColorDialog();
     } else if (mKeyboardSwitch.onKey(primaryCode)) {
       Log.info("mKeyboardSwitch onKey");
       mRime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode()); //根據鍵盤設定中英文狀態
@@ -484,9 +486,36 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  private void showDialog(AlertDialog dialog) {
+      Window window = dialog.getWindow();
+      WindowManager.LayoutParams lp = window.getAttributes();
+      if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
+      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      window.setAttributes(lp);
+      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+      dialog.show();
+  }
+
+  private void showColorDialog() {
+    AlertDialog dialog = new ColorDialog(this).getDialog();
+    showDialog(dialog);
+  }
+
+  private void showSchemaDialog() {
+    AlertDialog dialog = new SchemaDialog(this).getDialog();
+    showDialog(dialog);
+  }
+
+  private void showPrefDialog() {
+    requestHideSelf(0);
+    Intent iSetting = new Intent();
+    iSetting.setClass(Trime.this, Pref.class);
+    iSetting.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+    startActivity(iSetting);
+  }
+
   private boolean handleOption(int keyCode) {
     if (keyCode == KeyEvent.KEYCODE_MENU) {
-      // Create a Dialog menu
       if (mOptionsDialog != null && mOptionsDialog.isShowing()) return true; //對話框單例
       AlertDialog.Builder builder = new AlertDialog.Builder(this)
       .setTitle(R.string.ime_name)
@@ -498,34 +527,30 @@ public class Trime extends InputMethodService implements
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         }
       })
+      .setNeutralButton(R.string.pref_schemas, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface di, int id) {
+          showSchemaDialog(); //部署方案
+          di.dismiss();
+        }
+      })
       .setPositiveButton(R.string.set_ime, new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface di, int id) {
+          showPrefDialog(); //全局設置
           di.dismiss();
-          Intent iSetting = new Intent();
-          iSetting.setClass(Trime.this, Pref.class);
-          iSetting.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-          startActivity(iSetting);
-          escape(); //全局設置時清屏
         }
       });
       if (mRime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
-      else { //
+      else {
         builder.setSingleChoiceItems(mRime.getSchemaNames(), mRime.getSchemaIndex(),
           new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
               di.dismiss();
-              mRime.selectSchema(id);
+              mRime.selectSchema(id); //切換方案
             }
         });
       }
       mOptionsDialog = builder.create();
-      Window window = mOptionsDialog.getWindow();
-      WindowManager.LayoutParams lp = window.getAttributes();
-      if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
-      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-      window.setAttributes(lp);
-      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-      mOptionsDialog.show();
+      showDialog(mOptionsDialog);
       return true;
     }
     return false;

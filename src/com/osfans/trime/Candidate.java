@@ -96,6 +96,7 @@ public class Candidate extends View {
     boolean show = config.getBoolean("show_candidate");
     setVisibility(show ? View.VISIBLE : View.GONE);
     comment_on_top = config.getBoolean("comment_on_top");
+    invalidate();
   }
 
   public Candidate(Context context, AttributeSet attrs) {

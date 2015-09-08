@@ -356,8 +356,14 @@ public class Keyboard {
         "TV_Contents_Menu",
         "TV_Media_Context_Menu",
         "TV_Timer_Programming",
-        "Help"
+        "Help",
+        "NAVIGATE_PREVIOUS",
+        "NAVIGATE_NEXT",
+        "NAVIGATE_IN",
+        "NAVIGATE_OUT",
+        "Color",
     });
+    public static final int KEYCODE_COLOR = KeyEvent.KEYCODE_NAVIGATE_OUT + 1;
 
     /** Keyboard label **/
     //private CharSequence mLabel;

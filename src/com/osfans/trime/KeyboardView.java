@@ -309,6 +309,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         repeat_start_delay = config.getInt("repeat_start_delay");
         longpress_timeout = config.getInt("longpress_timeout");
         multitap_interval = config.getInt("multitap_interval");
+        invalidateAllKeys();
     }
 
     public KeyboardView(Context context, AttributeSet attrs) {

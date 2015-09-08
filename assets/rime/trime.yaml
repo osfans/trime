@@ -623,8 +623,8 @@ keyboard:
   - {symbol: '>', text: '.'}
   - {symbol: '?', text: '/'}
   - {code: "Shift_L"}
-  - {label: '123', functional: true, switch: 1, code: <switch>, symbol: '...', symbolCode: Menu}
-  - {code: Language_switch, functional: true, symbol: F4, symbolCode: F4}
+  - {label: '123', functional: true, switch: 1, code: <switch>, symbol: 配色, symbolCode: Color}
+  - {code: Language_switch, functional: true, symbol: '...', symbolCode: Menu}
   - {code: space, repeatable: true, width: 30}
   - {symbol: '"', text: "'"}
   - {code: BackSpace, functional: true, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
