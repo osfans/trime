@@ -1045,7 +1045,7 @@ public class Keyboard {
       if (c == KeyEvent.KEYCODE_SPACE){
         if (key.label.isEmpty()) key.label = Rime.getRime().getSchemaName();
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
-        if (key.label.isEmpty()) key.label = "⇪";
+        if (key.label.isEmpty()) key.label = canColorEmoji() ? "⇪" : "換檔";
         key.functional = true;
         key.modifier = true;
         key.sticky = true;
