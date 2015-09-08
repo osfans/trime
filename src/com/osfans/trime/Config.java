@@ -34,7 +34,6 @@ public class Config {
   private String defaultName = "trime.yaml";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
-  private Typeface tf;
 
   private static Map<String,String> fallback = new HashMap<String, String>() {
     {
@@ -72,9 +71,8 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    tf = Typeface.DEFAULT;
     maps = new HashMap<String, Map<String, Object>>();
-    mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime", "");
+    mDefaultConfig = (Map<String,Object>)Rime.getRime().config_get_map("trime", "");
     reset();
   }
 
@@ -154,7 +152,7 @@ public class Config {
     mConfig = null;
     File f = new File("/sdcard/rime", schema_id + "." + defaultName);
     if (!f.exists()) return;
-    mConfig = (Map<String,Object>)Rime.config_get_map(schema_id + ".trime", "");
+    mConfig = (Map<String,Object>)Rime.getRime().config_get_map(schema_id + ".trime", "");
     maps.put(schema_id, mConfig); //緩存各方案自定義配置
   }
 
@@ -256,8 +254,8 @@ public class Config {
   }
 
   public void setColor(String color) {
-    Rime.customize_string("trime", "style/color_scheme", color);
-    Rime.deployConfigFile();
+    Rime.getRime().customize_string("trime", "style/color_scheme", color);
+    Rime.getRime().deployConfigFile();
     Map<String, Object> style = (Map<String, Object>)mDefaultConfig.get("style");
     style.put("color_scheme", color);
     mDefaultConfig.put("style", style);
@@ -285,9 +283,10 @@ public class Config {
 
   public Typeface getFont(String key){
     String name = getString(key);
-    if (name == null) return tf;
-    File f = new File("/sdcard/rime/fonts", name);
-    if(f.exists()) return Typeface.createFromFile(f);
-    return tf;
+    if (name != null) {
+      File f = new File("/sdcard/rime/fonts", name);
+      if(f.exists()) return Typeface.createFromFile(f);
+    }
+    return Typeface.DEFAULT;
   }
 }

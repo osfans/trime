@@ -39,10 +39,10 @@ public class ColorDialog {
 
   public ColorDialog(Context context) {
     Config config = Config.get(context);
+    String colorScheme = config.getString("color_scheme");
     colorKeys = config.getColorKeys();
     if (colorKeys == null) return;
     Arrays.sort(colorKeys);
-    String colorScheme = config.getString("color_scheme");
     checkedColor = Arrays.binarySearch(colorKeys, colorScheme);
     colorNames = config.getColorNames(colorKeys);
     dialog = new AlertDialog.Builder(context)

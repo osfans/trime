@@ -443,7 +443,7 @@ public class Rime
     Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
     switch (message_type) {
       case "schema":
-        Rime.getRime().initSchema();
+        getRime().initSchema();
         Trime trime = Trime.getService();
         if (trime != null) {
           trime.initKeyboard();
@@ -451,7 +451,7 @@ public class Rime
         }
         break;
       case "option":
-        Rime.getRime().getStatus();
+        getRime().getStatus();
         break;
     }
   }
