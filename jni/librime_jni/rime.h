@@ -60,9 +60,9 @@ jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index
 jstring get_version(JNIEnv *env, jobject thiz);
 jint get_modifier_by_name(JNIEnv *env, jobject thiz, jstring name);
 jint get_keycode_by_name(JNIEnv *env, jobject thiz, jstring name);
-jboolean get_schema(JNIEnv *env, jobject thiz, jstring name, jobject jschema);
 jobject config_get_list(JNIEnv *env, jobject thiz, jstring name, jstring key);
 jobject config_get_map(JNIEnv *env, jobject thiz, jstring name, jstring key);
 jobject config_get_value(JNIEnv *env, jobject thiz, jstring name, jstring key);
+jobject schema_get_value(JNIEnv *env, jobject thiz, jstring schema_id, jstring key);
 
 #endif  // RIME_H_

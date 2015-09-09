@@ -218,6 +218,11 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;"),
         reinterpret_cast<void *>(config_get_value)
     },
+    {
+        const_cast<char *>("schema_get_value"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;"),
+        reinterpret_cast<void *>(schema_get_value)
+    },
     // customize settings
     {
         const_cast<char *>("customize_bool"),
@@ -295,11 +300,6 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("get_keycode_by_name"),
         const_cast<char *>("(Ljava/lang/String;)I"),
         reinterpret_cast<void *>(get_keycode_by_name)
-    },
-    {
-        const_cast<char *>("get_schema"),
-        const_cast<char *>("(Ljava/lang/String;L" CLASSNAME "$RimeSchema;)Z"),
-        reinterpret_cast<void *>(get_schema)
     },
     // opencc
     {

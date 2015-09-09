@@ -505,75 +505,6 @@ jobjectArray get_string_list(JNIEnv *env, RimeConfig* config, const char* key) {
   return jobj;
 }
 
-jboolean get_schema(JNIEnv *env, jobject thiz, jstring name, jobject jschema) {
-  const char* s = env->GetStringUTFChars(name, NULL);
-  RimeConfig config = {0};
-  Bool r = RimeSchemaOpen(s, &config);
-  env->ReleaseStringUTFChars(name, s);
-  if (r) {
-    jclass jc = env->GetObjectClass(jschema);
-    jfieldID fid;
-    fid = env->GetFieldID(jc, "schema_id", "Ljava/lang/String;");
-    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/schema_id")));
-    fid = env->GetFieldID(jc, "name", "Ljava/lang/String;");
-    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/name")));
-    fid = env->GetFieldID(jc, "version", "Ljava/lang/String;");
-    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/version")));
-    fid = env->GetFieldID(jc, "description", "Ljava/lang/String;");
-    env->SetObjectField(jschema, fid, newJstring(env, RimeConfigGetCString(&config, "schema/description")));
-    fid = env->GetFieldID(jc, "author", "[Ljava/lang/String;");
-    jobjectArray jauthor = get_string_list(env, &config, "schema/author");
-    env->SetObjectField(jschema, fid, jauthor);
-    env->DeleteLocalRef(jauthor);
-
-    jobjectArray jswitches = NULL;
-    int n = RimeConfigListSize(&config, "switches");
-    if (n > 0) {
-      int i = 0;
-      jclass jc1 = env->FindClass(CLASSNAME "$RimeSwitches");
-      jswitches = (jobjectArray) env->NewObjectArray(n, jc1, NULL);
-      RimeConfigIterator iter = {0};
-      RimeConfigBeginList(&iter, &config, "switches");
-      while(RimeConfigNext(&iter)) {
-        char path[BUFSIZE] = {0};
-        char value[BUFSIZE] = {0};
-        jobject jobj = env->AllocObject(jc1);
-        jobject jobj2 = NULL;
-        fid = env->GetFieldID(jc1, "is_radio", "Z");
-        sprintf(path, "%s/name", iter.path);
-        if (RimeConfigGetString(&config, path, value, BUFSIZE)) { //name
-          env->SetBooleanField(jobj, fid, false);
-          fid = env->GetFieldID(jc1, "name", "Ljava/lang/String;");
-          env->SetObjectField(jobj, fid, newJstring(env, value));
-        } else { //option list
-          env->SetBooleanField(jobj, fid, true);
-          sprintf(path, "%s/options", iter.path);
-          jobj2 = get_string_list(env, &config, path);
-          fid = env->GetFieldID(jc1, "options", "[Ljava/lang/String;");
-          env->SetObjectField(jobj, fid, jobj2);
-          env->DeleteLocalRef(jobj2);
-        }
-        sprintf(path, "%s/states", iter.path);
-        jobj2 = get_string_list(env, &config, path);
-        fid = env->GetFieldID(jc1, "states", "[Ljava/lang/String;");
-        env->SetObjectField(jobj, fid, jobj2);
-        env->SetObjectArrayElement(jswitches, i++, jobj);
-        env->DeleteLocalRef(jobj2);
-        env->DeleteLocalRef(jobj);
-      }
-      RimeConfigEnd(&iter);
-      env->DeleteLocalRef(jc1);
-    }
-    fid = env->GetFieldID(jc, "switches", "[L" CLASSNAME "$RimeSwitches;");
-    env->SetObjectField(jschema, fid, jswitches);
-    env->DeleteLocalRef(jswitches);
-
-    env->DeleteLocalRef(jc);
-    RimeConfigClose(&config);
-  }
-  return r;
-}
-
 static jobject _get_list(JNIEnv *env, RimeConfig* config, const char* key) {
   RimeConfigIterator iter = {0};
   bool b = RimeConfigBeginList(&iter, config, key);
@@ -691,7 +622,22 @@ jobject config_get_value(JNIEnv *env, jobject thiz, jstring name, jstring key) {
     s = env->GetStringUTFChars(key, NULL);
     ret = _get_value(env, &config, s);
     env->ReleaseStringUTFChars(key, s);
+    RimeConfigClose(&config);
   }
-  RimeConfigClose(&config);
+  return ret;
+}
+
+jobject schema_get_value(JNIEnv *env, jobject thiz, jstring name, jstring key) {
+  const char* s = env->GetStringUTFChars(name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeSchemaOpen(s, &config);
+  env->ReleaseStringUTFChars(name, s);
+  jobject ret = NULL;
+  if (b) {
+    s = env->GetStringUTFChars(key, NULL);
+    ret = _get_value(env, &config, s);
+    env->ReleaseStringUTFChars(key, s);
+    RimeConfigClose(&config);
+  }
   return ret;
 }

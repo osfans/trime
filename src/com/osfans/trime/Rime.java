@@ -108,86 +108,84 @@ public class Rime
   RimeContext mContext = new RimeContext();
   RimeStatus mStatus = new RimeStatus();
 
-  public class RimeSwitches {
-    boolean is_radio;
-    String name;
-    String[] states;
-    String[] options;
-    int value;
-  };
-
   public class RimeSchema {
     private String kRightArrow = "→ ";
     private String kRadioSelected = " ✓";
 
-    String schema_id;
-    String name;
-    String version;
-    String[] author;
-    String description;
+    Map<String, Object> schema = new HashMap<String, Object>();
+    List<Map<String, Object>> switches = new ArrayList<Map<String, Object>>();
 
-    RimeSwitches[] switches;
-    List<Integer> index = new ArrayList<Integer>();
+    public RimeSchema(String schema_id) {
+      Object o;
+      o = schema_get_value(schema_id, "schema");
+      if (o == null || !(o instanceof Map)) return;
+      schema = (Map<String, Object>)o;
+      o = schema_get_value(schema_id, "switches");
+      if (o == null || !(o instanceof List)) return;
+      switches = (List<Map<String, Object>>)o;
+      check(); //檢查不在選單中顯示的選項
+    }
 
     public void check() {
-      if (switches == null) return;
-      index.clear();
+      if (switches.isEmpty()) return;
       int i = 0;
-      for (RimeSwitches o: switches) {
-        if (o.states != null && o.states.length > 0) index.add(i);
+      for (Map<String, Object> o: switches) {
+        if (!o.containsKey("states")) switches.remove(i);
         i++;
       }
     }
 
-    public int size() {
-      return index.size();
-    }
-
     public RimeCandidate[] getCandidates() {
-      int n = size();
-      if (n == 0) return null;
-      RimeCandidate[] candidates = new RimeCandidate[n];
+      if (switches.isEmpty()) return null;
+      RimeCandidate[] candidates = new RimeCandidate[switches.size()];
       int i = 0;
-      for (Integer j: index) {
-        RimeSwitches o = switches[j];
+      for (Map<String, Object> o: switches) {
         candidates[i] = new RimeCandidate();
-        candidates[i].text = o.states[o.value];
-        candidates[i].comment = o.is_radio ? "" : kRightArrow + o.states[1 - o.value];
+        List<String> states = (List<String>)o.get("states");
+        int value = (Integer)o.get("value");
+        candidates[i].text = states.get(value);
+        candidates[i].comment = o.containsKey("option") ? "" : kRightArrow + states.get(1 - value);
         i++;
       }
       return candidates;
     }
 
     public void getValue(int session_id) {
-      if (switches == null) return; //無方案
-      for (RimeSwitches o: switches) {
-        if (o.is_radio) {
-          for (int i = 0; i < o.options.length; i++) {
-            String s = o.options[i];
+      if (switches.isEmpty()) return; //無方案
+      for (int j = 0; j < switches.size(); j++) {
+        Map<String, Object> o =  switches.get(j);
+        if (o.containsKey("option")) {
+          List<String> options = (List<String>)o.get("option");
+          for (int i = 0; i < options.size(); i++) {
+            String s = options.get(i);
             if (Rime.get_option(session_id, s)) {
-              o.value = i;
+              o.put("value", i);
               break;
             }
           }
         } else {
-          o.value = Rime.get_option(session_id, o.name) ? 1 : 0;
+          o.put("value", Rime.get_option(session_id, (String)o.get("name")) ? 1 : 0);
         }
+        switches.set(j, o);
       }
     }
 
     public void toggleOption(int i) {
-      int n = size();
-      if (n == 0) return;
+      if (switches.isEmpty()) return;
       Rime rime = Rime.getRime();
-      RimeSwitches o = switches[index.get(i)];
-      if (o.is_radio) {
-        rime.setOption(o.options[o.value], false);
-        o.value = (o.value + 1) % o.options.length;
-        rime.setOption(o.options[o.value], true);
+      Map<String, Object> o =  switches.get(i);
+      Integer value = (Integer)o.get("value");
+      if (o.containsKey("option")) {
+        List<String> options = (List<String>)o.get("option");
+        rime.setOption(options.get(value), false);
+        value = (value + 1) % options.size();
+        rime.setOption(options.get(value), true);
       } else {
-        o.value = 1 - o.value;
-        rime.setOption(o.name, o.value == 1);
+        value = 1 - value;
+        rime.setOption((String)o.get("name"), value == 1);
       }
+      o.put("value", value);
+      switches.set(i, o);
     }
   };
 
@@ -195,7 +193,7 @@ public class Rime
   private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
-  RimeSchema mSchema = new RimeSchema();
+  RimeSchema mSchema;
   List mSchemaList;
 
   static{
@@ -243,8 +241,7 @@ public class Rime
   public void initSchema() {
     mSchemaList = get_schema_list();
     String schema_id = getSchemaId();
-    get_schema(schema_id, mSchema);
-    mSchema.check(); //檢查不在選單中顯示的選項
+    mSchema = new RimeSchema(schema_id);
     getStatus();
   }
 
@@ -518,6 +515,7 @@ public class Rime
   public static native final List config_get_list(String name, String key);
   public static native final Map<String,Object> config_get_map(String name, String key);
   public static native final Object config_get_value(String name, String key);
+  public static native final Object schema_get_value(String name, String key);
 
   // testing
   public static native final boolean simulate_key_sequence(int session_id, String key_sequence);
@@ -531,8 +529,6 @@ public class Rime
   // key_table
   public static native final int get_modifier_by_name(String name);
   public static native final int get_keycode_by_name(String name);
-
-  public static native final boolean get_schema(String name, RimeSchema schema);
 
   // customize setting
   public static native final boolean customize_bool(String name, String key, boolean value);
