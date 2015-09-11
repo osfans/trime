@@ -197,7 +197,6 @@ public class Rime
   List mSchemaList;
 
   static{
-    System.loadLibrary("opencc");
     System.loadLibrary("rime");
     System.loadLibrary("rime_jni");
   }

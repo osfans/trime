@@ -99,8 +99,7 @@ LOCAL_CFLAGS := $(CXX_DEFINES)
 ifneq ($(BOOST_USE_SIGNALS2),)
 LOCAL_CFLAGS += -DBOOST_SIGNALS2
 endif
-LOCAL_STATIC_LIBRARIES := boost leveldb marisa yaml-cpp miniglog
-LOCAL_SHARED_LIBRARIES := opencc
+LOCAL_STATIC_LIBRARIES := boost leveldb marisa yaml-cpp miniglog opencc
 LOCAL_LDLIBS := -latomic
 include $(BUILD_SHARED_LIBRARY)
 
