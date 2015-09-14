@@ -72,7 +72,7 @@ public class Config {
   public Config(Context context) {
     self = this;
     maps = new HashMap<String, Map<String, Object>>();
-    mDefaultConfig = (Map<String,Object>)Rime.getRime().config_get_map("trime", "");
+    mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime", "");
     reset();
   }
 
@@ -144,7 +144,7 @@ public class Config {
   }
 
   public void reset() {
-    String schema_id = Rime.getRime().getSchemaId();
+    String schema_id = Rime.getSchemaId();
     if (maps.containsKey(schema_id)) {
       mConfig = maps.get(schema_id);
       return;
@@ -152,7 +152,7 @@ public class Config {
     mConfig = null;
     File f = new File("/sdcard/rime", schema_id + "." + defaultName);
     if (!f.exists()) return;
-    mConfig = (Map<String,Object>)Rime.getRime().config_get_map(schema_id + ".trime", "");
+    mConfig = (Map<String,Object>)Rime.config_get_map(schema_id + ".trime", "");
     maps.put(schema_id, mConfig); //緩存各方案自定義配置
   }
 
@@ -254,8 +254,8 @@ public class Config {
   }
 
   public void setColor(String color) {
-    Rime.getRime().customize_string("trime", "style/color_scheme", color);
-    Rime.getRime().deployConfigFile();
+    Rime.customize_string("trime", "style/color_scheme", color);
+    Rime.deployConfigFile();
     Map<String, Object> style = (Map<String, Object>)mDefaultConfig.get("style");
     style.put("color_scheme", color);
     mDefaultConfig.put("style", style);

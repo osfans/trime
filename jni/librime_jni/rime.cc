@@ -2,7 +2,6 @@
 #include "levers.h"
 #include <ctime>
 #include <rime_api.h>
-#include <rime/key_table.h>
 
 static jobject _get_value(JNIEnv *env, RimeConfig* config, const char* key);
 
@@ -32,13 +31,7 @@ void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
   RimeSetNotificationHandler(&on_message, env);
 }
 
-void check(JNIEnv *env, jobject thiz, jboolean full_check) {
-  RimeStartMaintenance((Bool)full_check);
-  if (RimeIsMaintenancing()) RimeJoinMaintenanceThread();
-  RimeSetNotificationHandler(&on_message, env);
-}
-
-void setup() {
+void setup(JNIEnv */*env*/, jobject /*thiz*/) {
   RIME_STRUCT(RimeTraits, traits);
   traits.shared_data_dir = SHARED_DATA_DIR;
   traits.user_data_dir = USER_DATA_DIR;
@@ -60,7 +53,35 @@ void finalize(JNIEnv *env, jobject thiz) {
   RimeFinalize();
 }
 
+jboolean start_maintenance(JNIEnv *env, jobject thiz, jboolean full_check) {
+  return RimeStartMaintenance((Bool)full_check);
+}
+
+jboolean is_maintenance_mode(JNIEnv *env, jobject thiz) {
+  return RimeIsMaintenancing();
+}
+
+void join_maintenance_thread(JNIEnv *env, jobject thiz) {
+  RimeJoinMaintenanceThread();
+}
+
 // deployment
+void deployer_initialize(JNIEnv *env, jobject thiz) {
+  RIME_STRUCT(RimeTraits, traits);
+  traits.shared_data_dir = SHARED_DATA_DIR;
+  traits.user_data_dir = USER_DATA_DIR;
+  traits.app_name = APP_NAME;
+  RimeDeployerInitialize(&traits);
+}
+
+jboolean prebuild(JNIEnv *env, jobject thiz) {
+  return RimePrebuildAllSchemas();
+}
+
+jboolean deploy(JNIEnv *env, jobject thiz) {
+  return RimeDeployWorkspace();
+}
+
 jboolean deploy_schema(JNIEnv *env, jobject thiz, jstring schema_file) {
   const char* s = schema_file == NULL ? NULL : env->GetStringUTFChars(schema_file, NULL);
   bool b = RimeDeploySchema(s);
@@ -469,22 +490,11 @@ jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index
 }
 
 jstring get_version(JNIEnv *env, jobject thiz) {
-  //jstring s = newJstring(env, rime_get_api()->get_version());
+  return newJstring(env, rime_get_api()->get_version());
+}
+
+jstring get_librime_version(JNIEnv *env, jobject thiz) {
   return newJstring(env, LIBRIME_VERSION);
-}
-
-jint get_modifier_by_name(JNIEnv *env, jobject thiz, jstring name) {
-  const char* s = name == NULL ? NULL : env->GetStringUTFChars(name, NULL);
-  int keycode = RimeGetModifierByName(s);
-  env->ReleaseStringUTFChars(name, s);
-  return keycode;
-}
-
-jint get_keycode_by_name(JNIEnv *env, jobject thiz, jstring name) {
-  const char* s = name == NULL ? NULL : env->GetStringUTFChars(name, NULL);
-  int keycode = RimeGetKeycodeByName(s);
-  env->ReleaseStringUTFChars(name, s);
-  return keycode;
 }
 
 jobjectArray get_string_list(JNIEnv *env, RimeConfig* config, const char* key) {
@@ -516,7 +526,7 @@ static jobject _get_list(JNIEnv *env, RimeConfig* config, const char* key) {
   jmethodID add = env->GetMethodID(jc, "add", "(Ljava/lang/Object;)Z");
   while (RimeConfigNext(&iter)) {
     jobject o = _get_value(env, config, iter.path);
-    env->CallObjectMethod(jobj, add, o);
+    env->CallBooleanMethod(jobj, add, o);
     env->DeleteLocalRef(o);
   }
   RimeConfigEnd(&iter);
@@ -640,4 +650,28 @@ jobject schema_get_value(JNIEnv *env, jobject thiz, jstring name, jstring key) {
     RimeConfigClose(&config);
   }
   return ret;
+}
+
+jboolean run_task(JNIEnv *env, jobject thiz, jstring task_name) {
+  const char* s = env->GetStringUTFChars(task_name, NULL);
+  RimeConfig config = {0};
+  Bool b = RimeRunTask(s);
+  env->ReleaseStringUTFChars(task_name, s);
+  return b;
+}
+
+jstring get_shared_data_dir(JNIEnv *env, jobject thiz) {
+  return newJstring(env, RimeGetSharedDataDir());
+}
+
+jstring get_user_data_dir(JNIEnv *env, jobject thiz) {
+  return newJstring(env, RimeGetUserDataDir());
+}
+
+jstring get_sync_dir(JNIEnv *env, jobject thiz) {
+  return newJstring(env, RimeGetSyncDir());
+}
+
+jstring get_user_id(JNIEnv *env, jobject thiz) {
+  return newJstring(env, RimeGetUserId());
 }

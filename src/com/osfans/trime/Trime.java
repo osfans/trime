@@ -49,7 +49,6 @@ public class Trime extends InputMethodService implements
 
   private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
-  private Rime mRime;
   protected KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
@@ -108,9 +107,9 @@ public class Trime extends InputMethodService implements
 
     mEffect = new Effect(this);
     Config.prepareRime(this);
-    mRime = Rime.getRime();
+    Rime.getRime();
     mConfig = Config.get(this);
-    mRime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+    Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
@@ -123,11 +122,11 @@ public class Trime extends InputMethodService implements
   }
 
   public void invalidate() {
-    mRime = Rime.getRime();
+    Rime.getRime();
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
     reset();
-    mRime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+    Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
   }
 
   public void reset() {
@@ -159,8 +158,7 @@ public class Trime extends InputMethodService implements
     super.onDestroy();
     self = null;
     if (mConfig.getBoolean("destroy_on_quit")) {
-      mRime.destroy();
-      mRime = null;
+      Rime.destroy();
       mConfig.destroy();
       mConfig = null;
     }
@@ -241,7 +239,7 @@ public class Trime extends InputMethodService implements
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
-    setCandidatesViewShown(!mRime.isEmpty());
+    setCandidatesViewShown(!Rime.isEmpty());
   }
 
   @Override
@@ -286,30 +284,30 @@ public class Trime extends InputMethodService implements
         }
         break;
     }
-    mRime = Rime.getRime();
+    Rime.getRime();
     // Select a keyboard based on the input type of the editing field.
     mKeyboardSwitch.init(getMaxWidth());  //橫豎屏切換時重置鍵盤
     // mKeyboardSwitch.onStartInput(inputType);
     //setCandidatesViewShown(true);
     //escape();
-    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !mRime.isEmpty()); //實體鍵盤
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !Rime.isEmpty()); //實體鍵盤
     if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
   private boolean isComposing() {
-    return mRime.isComposing();
+    return Rime.isComposing();
   }
 
   private void commitText(CharSequence text) { //指定上屏
     if (text == null) return;
     InputConnection ic = getCurrentInputConnection();
     if (ic != null) ic.commitText(text, 1);
-    if (!isComposing()) mRime.commitComposition(); //自動上屏
+    if (!isComposing()) Rime.commitComposition(); //自動上屏
   }
 
   private boolean commitText() { //Rime上屏
-    boolean r = mRime.getCommit();
-    if (r) commitText(mRime.getCommitText());
+    boolean r = Rime.getCommit();
+    if (r) commitText(Rime.getCommitText());
     return r;
   }
 
@@ -391,18 +389,18 @@ public class Trime extends InputMethodService implements
   public void onKey(int primaryCode, int mask) { //軟鍵盤
     Log.info("onKey="+primaryCode+",mask="+mask);
     if (primaryCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
-      mRime.toggleOption("ascii_mode");
+      Rime.toggleOption("ascii_mode");
       commitText();
       updateComposing();
     } else if (primaryCode == Keyboard.KEYCODE_COLOR) {
       showColorDialog();
     } else if (mKeyboardSwitch.onKey(primaryCode)) {
       Log.info("mKeyboardSwitch onKey");
-      mRime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode()); //根據鍵盤設定中英文狀態
+      Rime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode()); //根據鍵盤設定中英文狀態
       bindKeyboardToInputView();
       //escape();
       updateComposing();
-    } else if(mRime.onKey(Keyboard.getRimeKeyEvent(primaryCode, mask))) {
+    } else if(Rime.onKey(Keyboard.getRimeKeyEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
       updateComposing();
@@ -419,7 +417,7 @@ public class Trime extends InputMethodService implements
 
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText="+text);
-    mRime.onText(text);
+    Rime.onText(text);
     if(!commitText() && !isComposing()) commitText(text);
     updateComposing();
   }
@@ -457,12 +455,12 @@ public class Trime extends InputMethodService implements
     // Commit the picked candidate and suggest its following words.
     if (!isComposing()) {
       if (i >=0) {
-        mRime.toggleOption(i);
+        Rime.toggleOption(i);
         updateComposing();
       }
     } else if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, 0);
     else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
-    else if (mRime.selectCandidate(i)) {
+    else if (Rime.selectCandidate(i)) {
       commitText();
       updateComposing();
     }
@@ -470,7 +468,7 @@ public class Trime extends InputMethodService implements
 
   public void updateComposing() {
     if (inlinePreedit || inlineCode) { //嵌入首選
-      String s = inlineCode ? mRime.RimeGetInput() : mRime.getComposingText();
+      String s = inlineCode ? Rime.RimeGetInput() : Rime.getComposingText();
       if (s == null) s = "";
       InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
@@ -539,13 +537,13 @@ public class Trime extends InputMethodService implements
           di.dismiss();
         }
       });
-      if (mRime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
+      if (Rime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
       else {
-        builder.setSingleChoiceItems(mRime.getSchemaNames(), mRime.getSchemaIndex(),
+        builder.setSingleChoiceItems(Rime.getSchemaNames(), Rime.getSchemaIndex(),
           new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
               di.dismiss();
-              mRime.selectSchema(id); //切換方案
+              Rime.selectSchema(id); //切換方案
             }
         });
       }

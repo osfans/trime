@@ -51,7 +51,7 @@ public class Composition extends TextView {
       String s = getText().toString().substring(0, n);
       if (soft_cursor) s = s.replace(soft_cursor_text, "").replace(" ", "");
       n = s.length();
-      Rime.getRime().RimeSetCaretPos(n);
+      Rime.RimeSetCaretPos(n);
       Trime.getService().updateComposing();
     }
     return true;
@@ -76,7 +76,7 @@ public class Composition extends TextView {
 
   public void setText() {
     if (getVisibility() != View.VISIBLE) return;
-    Rime.RimeComposition r = Rime.getRime().getComposition();
+    Rime.RimeComposition r = Rime.getComposition();
     String s = "";
     if (r != null) s = r.getText();
     if (soft_cursor) s = s.replace(caret, soft_cursor_text);

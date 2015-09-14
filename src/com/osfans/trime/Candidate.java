@@ -53,7 +53,6 @@ public class Candidate extends View {
 
   private CandidateListener listener;
   private int highlightIndex;
-  private Rime mRime;
   private Rime.RimeCandidate[] candidates;
   private int num_candidates;
 
@@ -111,7 +110,6 @@ public class Candidate extends View {
     reset();
 
     setWillNotDraw(false);
-    mRime = Rime.getRime();
   }
   
   public void setCandidateListener(CandidateListener listener) {
@@ -264,11 +262,11 @@ public class Candidate extends View {
     final int bottom = getHeight();
     int i = 0;
     int x = 0;
-    if (mRime.hasLeft()) x += getCandidateWidth(-4);
+    if (Rime.hasLeft()) x += getCandidateWidth(-4);
     getCandNum();
     for (i = 0; i < num_candidates; i++) candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
-    if (mRime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
-    if (mRime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
+    if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
+    if (Rime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
     params.width = x;
     params.height = candidate_view_height;
@@ -321,7 +319,7 @@ public class Candidate extends View {
       }
     }
 
-    if (mRime.hasLeft()) { //Page Up
+    if (Rime.hasLeft()) { //Page Up
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
@@ -329,7 +327,7 @@ public class Candidate extends View {
       }
     }
 
-    if (mRime.hasRight()) { //Page Down
+    if (Rime.hasRight()) { //Page Down
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
@@ -341,9 +339,8 @@ public class Candidate extends View {
   }
 
   private int getCandNum() {
-    mRime = Rime.getRime();
-    candidates = mRime.getCandidates();
-    highlightIndex = mRime.getCandHighlightIndex();
+    candidates = Rime.getCandidates();
+    highlightIndex = Rime.getCandHighlightIndex();
     num_candidates = candidates == null ? 0 : candidates.length;
     return num_candidates;
   }
@@ -351,8 +348,8 @@ public class Candidate extends View {
   private String getCandidate(int i) {
     String s = null;
     if (candidates != null && i >= 0) s = candidates[i].text;
-    else if (i == -4 && mRime.hasLeft()) s = "◀";
-    else if (i == -5 && mRime.hasRight()) s = "▶";
+    else if (i == -4 && Rime.hasLeft()) s = "◀";
+    else if (i == -5 && Rime.hasRight()) s = "▶";
     return s;
   }
 

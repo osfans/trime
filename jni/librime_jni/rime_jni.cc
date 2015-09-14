@@ -1,6 +1,7 @@
 #include "rime_jni.h"
 #include "rime.h"
 #include "levers.h"
+#include "key_table.h"
 #include "opencc.h"
 
 template <typename T, int N>
@@ -27,27 +28,57 @@ jstring newJstring(JNIEnv* env, const char* pat)
 static const JNINativeMethod sMethods[] = {
     // init
     {
-        const_cast<char *>("initialize"),
+        const_cast<char *>("setup"),
         const_cast<char *>("()V"),
-        reinterpret_cast<void *>(initialize)
+        reinterpret_cast<void *>(setup)
     },
     {
         const_cast<char *>("set_notification_handler"),
         const_cast<char *>("()V"),
         reinterpret_cast<void *>(set_notification_handler)
     },
-    {
-        const_cast<char *>("check"),
-        const_cast<char *>("(Z)V"),
-        reinterpret_cast<void *>(check)
-    },
     // entry and exit
+    {
+        const_cast<char *>("initialize"),
+        const_cast<char *>("()V"),
+        reinterpret_cast<void *>(initialize)
+    },
     {
         const_cast<char *>("finalize1"),
         const_cast<char *>("()V"),
         reinterpret_cast<void *>(finalize)
     },
+    {
+        const_cast<char *>("start_maintenance"),
+        const_cast<char *>("(Z)Z"),
+        reinterpret_cast<void *>(start_maintenance)
+    },
+    {
+        const_cast<char *>("is_maintenance_mode"),
+        const_cast<char *>("()Z"),
+        reinterpret_cast<void *>(is_maintenance_mode)
+    },
+    {
+        const_cast<char *>("join_maintenance_thread"),
+        const_cast<char *>("()V"),
+        reinterpret_cast<void *>(join_maintenance_thread)
+    },
     // deployment
+    {
+        const_cast<char *>("deployer_initialize"),
+        const_cast<char *>("()V"),
+        reinterpret_cast<void *>(deployer_initialize)
+    },
+    {
+        const_cast<char *>("prebuild"),
+        const_cast<char *>("()Z"),
+        reinterpret_cast<void *>(prebuild)
+    },
+    {
+        const_cast<char *>("deploy"),
+        const_cast<char *>("()Z"),
+        reinterpret_cast<void *>(deploy)
+    },
     {
         const_cast<char *>("deploy_schema"),
         const_cast<char *>("(Ljava/lang/String;)Z"),
@@ -289,6 +320,37 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("get_version"),
         const_cast<char *>("()Ljava/lang/String;"),
         reinterpret_cast<void *>(get_version)
+    },
+    {
+        const_cast<char *>("get_librime_version"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_librime_version)
+    },
+    // module
+    {
+        const_cast<char *>("run_task"),
+        const_cast<char *>("(Ljava/lang/String;)Z"),
+        reinterpret_cast<void *>(run_task)
+    },
+    {
+        const_cast<char *>("get_shared_data_dir"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_shared_data_dir)
+    },
+    {
+        const_cast<char *>("get_user_data_dir"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_user_data_dir)
+    },
+    {
+        const_cast<char *>("get_sync_dir"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_sync_dir)
+    },
+    {
+        const_cast<char *>("get_user_id"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_user_id)
     },
     // key_table
     {

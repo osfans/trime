@@ -53,7 +53,7 @@ public class Pref extends PreferenceActivity {
     addPreferencesFromResource(R.xml.prefs);
 
     Preference pref = findPreference("pref_librime_ver");
-    pref.setSummary(Rime.get_version());
+    pref.setSummary(Rime.get_librime_version());
     pref = findPreference("pref_opencc_ver");
     pref.setSummary(Rime.get_opencc_version());
     pref = findPreference("pref_ver");
@@ -79,16 +79,16 @@ public class Pref extends PreferenceActivity {
   }
 
   public static void deploy() {
-    Rime.getRime().finalize1();
-    Rime.getRime().init(true);
+    Rime.finalize1();
+    Rime.init(true);
     Trime trime = Trime.getService();
     if (trime != null) trime.invalidate();
   }
 
   public boolean sync() {
-    boolean b = Rime.getRime().sync_user_data();
-    Rime.getRime().finalize1();
-    Rime.getRime().init(false);
+    boolean b = Rime.sync_user_data();
+    Rime.finalize1();
+    Rime.init(false);
     Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
     return b;
   }
@@ -104,7 +104,7 @@ public class Pref extends PreferenceActivity {
         new SchemaDialog(this).show();
         return true;
       case "pref_maintenance": //維護
-        Rime.getRime().check(true);
+        Rime.check(true);
         return true;
       case "pref_deploy": //部署
         deploy();

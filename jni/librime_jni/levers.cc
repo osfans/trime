@@ -4,8 +4,8 @@
 // customize settings
 
 static RimeLeversApi* get_levers() {
-  setup();
-  return (RimeLeversApi*)(rime_get_api()->find_module("levers")->get_api());
+  setup(NULL, NULL);
+  return (RimeLeversApi*)(RimeFindModule("levers")->get_api());
 }
 
 jboolean customize_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean value) {
@@ -117,7 +117,8 @@ jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list) {
       env->DeleteLocalRef(key);
       env->DeleteLocalRef(value);
 
-      env->CallObjectMethod(schema_list, add, schema_item);
+      env->CallBooleanMethod(schema_list, add, schema_item);
+      env->DeleteLocalRef(schema_item);
     }
   }
   env->DeleteLocalRef(mapClass);

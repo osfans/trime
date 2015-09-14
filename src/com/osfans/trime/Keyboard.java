@@ -1049,7 +1049,7 @@ public class Keyboard {
       key.mask = pairs[1];
 
       if (c == KeyEvent.KEYCODE_SPACE){
-        if (key.label.isEmpty()) key.label = Rime.getRime().getSchemaName();
+        if (key.label.isEmpty()) key.label = Rime.getSchemaName();
       } else if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT){
         if (key.label.isEmpty()) key.label = canColorEmoji() ? "⇪" : "換檔";
         key.functional = true;
