@@ -79,16 +79,14 @@ public class Pref extends PreferenceActivity {
   }
 
   public static void deploy() {
-    Rime.finalize1();
-    Rime.init(true);
+    Rime.destroy();
+    new Rime(true);
     Trime trime = Trime.getService();
     if (trime != null) trime.invalidate();
   }
 
   public boolean sync() {
     boolean b = Rime.sync_user_data();
-    Rime.finalize1();
-    Rime.init(false);
     Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
     return b;
   }

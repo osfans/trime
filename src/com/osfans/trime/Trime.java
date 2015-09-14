@@ -107,7 +107,7 @@ public class Trime extends InputMethodService implements
 
     mEffect = new Effect(this);
     Config.prepareRime(this);
-    Rime.getRime();
+    Rime.get();
     mConfig = Config.get(this);
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
     inlinePreedit = mConfig.getBoolean("inline_preedit");
@@ -122,7 +122,7 @@ public class Trime extends InputMethodService implements
   }
 
   public void invalidate() {
-    Rime.getRime();
+    Rime.get();
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
     reset();
@@ -284,7 +284,7 @@ public class Trime extends InputMethodService implements
         }
         break;
     }
-    Rime.getRime();
+    Rime.get();
     // Select a keyboard based on the input type of the editing field.
     mKeyboardSwitch.init(getMaxWidth());  //橫豎屏切換時重置鍵盤
     // mKeyboardSwitch.onStartInput(inputType);

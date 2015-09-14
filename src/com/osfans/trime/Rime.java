@@ -245,7 +245,9 @@ public class Rime
   public static void init(boolean full_check) {
     initialize();
     check(full_check);
+    set_notification_handler();
     deployConfigFile();
+    cleanup_all_sessions();
     createSession();
     if (session_id == 0) {
       Log.severe( "Error creating rime session");
@@ -256,6 +258,7 @@ public class Rime
 
   public static void destroy() {
     destroySession();
+    cleanup_all_sessions();
     finalize1();
     self = null;
   }
@@ -414,8 +417,8 @@ public class Rime
     return selectSchema(target);
   }
 
-  public static Rime getRime(){
-    if(self == null) self = new Rime();
+  public static Rime get(){
+    if (self == null) self = new Rime();
     return self;
   }
 
@@ -465,7 +468,6 @@ public class Rime
   public static void check(boolean full_check) {
     start_maintenance(full_check);
     if (is_maintenance_mode()) join_maintenance_thread();
-    set_notification_handler();
   }
 
   // init
