@@ -161,6 +161,7 @@ public class Trime extends InputMethodService implements
       Rime.destroy();
       mConfig.destroy();
       mConfig = null;
+      System.exit(0); //清理內存
     }
   }
 

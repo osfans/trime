@@ -83,6 +83,7 @@ public class Pref extends PreferenceActivity {
     new Rime(true);
     Trime trime = Trime.getService();
     if (trime != null) trime.invalidate();
+    System.exit(0); //清理內存
   }
 
   public boolean sync() {
@@ -103,6 +104,7 @@ public class Pref extends PreferenceActivity {
         return true;
       case "pref_maintenance": //維護
         Rime.check(true);
+        System.exit(0); //清理內存
         return true;
       case "pref_deploy": //部署
         deploy();
