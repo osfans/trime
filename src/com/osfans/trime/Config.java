@@ -80,7 +80,7 @@ public class Config {
     Log.e("Config", "prepare rime");
     if (new File("/sdcard/rime").exists()) return false;
     copyFileOrDir(context, "rime", false);
-    new Rime(true);
+    Rime.get(true);
     return true;
   }
 

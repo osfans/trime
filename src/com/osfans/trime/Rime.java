@@ -221,10 +221,6 @@ public class Rime
     return mContext.commit_text_preview;
   }
 
-  public Rime() {
-    this(false); //不做full check
-  }
-
   public Rime(boolean full_check) {
     init(full_check);
     self = this;
@@ -247,7 +243,6 @@ public class Rime
     check(full_check);
     set_notification_handler();
     deployConfigFile();
-    cleanup_all_sessions();
     createSession();
     if (session_id == 0) {
       Log.severe( "Error creating rime session");
@@ -258,7 +253,6 @@ public class Rime
 
   public static void destroy() {
     destroySession();
-    cleanup_all_sessions();
     finalize1();
     self = null;
   }
@@ -417,9 +411,13 @@ public class Rime
     return selectSchema(target);
   }
 
-  public static Rime get(){
-    if (self == null) self = new Rime();
+  public static Rime get(boolean full_check){
+    if (self == null) self = new Rime(full_check);
     return self;
+  }
+
+  public static Rime get(){
+    return get(false);
   }
 
   public static String RimeGetInput() {
@@ -468,6 +466,13 @@ public class Rime
   public static void check(boolean full_check) {
     start_maintenance(full_check);
     if (is_maintenance_mode()) join_maintenance_thread();
+  }
+
+  public static boolean syncUserData() {
+    boolean b = sync_user_data();
+    destroy();
+    get();
+    return b;
   }
 
   // init

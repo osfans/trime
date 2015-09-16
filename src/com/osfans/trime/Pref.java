@@ -78,18 +78,22 @@ public class Pref extends PreferenceActivity {
       .show();
   }
 
+  public static void check() {
+    Rime.check(true);
+    System.exit(0); //清理內存
+  }
+
   public static void deploy() {
     Rime.destroy();
-    new Rime(true);
+    Rime.get(true);
     Trime trime = Trime.getService();
     if (trime != null) trime.invalidate();
     System.exit(0); //清理內存
   }
 
-  public boolean sync() {
-    boolean b = Rime.sync_user_data();
+  public void sync() {
+    boolean b = Rime.syncUserData();
     Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
-    return b;
   }
 
   @Override
@@ -103,8 +107,7 @@ public class Pref extends PreferenceActivity {
         new SchemaDialog(this).show();
         return true;
       case "pref_maintenance": //維護
-        Rime.check(true);
-        System.exit(0); //清理內存
+        check();
         return true;
       case "pref_deploy": //部署
         deploy();
