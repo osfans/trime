@@ -32,7 +32,9 @@ style:
   key_vibrate: false #按鍵震動
   key_width: 10.0 #鍵寬，佔屏寬的百分比
   label_text_size: 14 #長標籤字號
-  latin_font: latin.ttf #文字字體
+  latin_font: latin.ttf #西文字體
+  latin_locale: en_US #西文語言
+  locale: zh_TW #默認語言 zh_TW,zh_CN,zh_HK,""
   longpress_timeout: 800 #按鍵超過800毫秒即爲長按
   margin_x: 12
   margin_y: 12
@@ -54,6 +56,8 @@ style:
   soft_cursor: true #編碼區軟光標
   soft_cursor_text: "‸" #編碼區軟光標字符，librime默認爲"‸"
   spacing: 10
+  speak_commit: false #朗讀上屏文字
+  speak_key: false #朗讀按鍵
   symbol_font: symbol.ttf #符號字體
   symbol_text_size: 10 #符號字號
   text_font: latin.ttf #編碼字體

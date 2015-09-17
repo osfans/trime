@@ -20,6 +20,9 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Vibrator;
 import android.view.KeyEvent;
+import android.speech.tts.TextToSpeech;
+
+import java.util.Locale;
 
 /**
  * Plays sound and motion effect.
@@ -34,6 +37,8 @@ public class Effect {
   private Vibrator vibrator;
   private boolean soundOn;
   private AudioManager audioManager;
+  private boolean isSpeakCommit, isSpeakKey;
+  private TextToSpeech mTTS;
 
   public Effect(Context context) {
     this.context = context;
@@ -53,6 +58,16 @@ public class Effect {
     if (soundOn && (audioManager == null)) {
       audioManager = 
         (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    isSpeakCommit = config.getBoolean("speak_commit");
+    isSpeakKey = config.getBoolean("speak_key");
+    if (mTTS == null && (isSpeakCommit || isSpeakKey)) {
+      mTTS = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+        public void onInit(int status) {
+          //初始化結果
+        }
+      });
     }
   }
 
@@ -79,5 +94,35 @@ public class Effect {
       }
       audioManager.playSoundEffect(sound, volume);
     }
+  }
+
+  public void setLanguage(Locale loc) {
+    if (mTTS != null) mTTS.setLanguage(loc);
+  }
+
+  public void speak(CharSequence text) {
+    if (text!= null && mTTS != null) mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+  }
+
+  public void speakCommit(CharSequence text) {
+    if (isSpeakCommit) speak(text);
+  }
+
+  public void speakKey(CharSequence text) {
+    if (isSpeakKey) speak(text);
+  }
+
+  public void speakKey(int code) {
+    if (code <= 0) return;
+    String text = KeyEvent.keyCodeToString(code).replace("KEYCODE_","").replace("_", " ").toLowerCase();
+    speakKey(text);
+  }
+
+  public void destory() {
+     if (mTTS != null) {
+       mTTS.stop();
+       mTTS.shutdown();
+       mTTS = null;
+     }
   }
 }

@@ -40,6 +40,7 @@ import android.widget.LinearLayout;
 import android.view.LayoutInflater;
 
 import java.util.logging.Logger;
+import java.util.Locale;
 
 /**
  * Abstract class extended by all Dialect IME.
@@ -66,6 +67,7 @@ public class Trime extends InputMethodService implements
   private boolean inlinePreedit, inlineCode; //嵌入首選
   private boolean display_tray_icon;
   private String soft_cursor = "soft_cursor"; //軟光標
+  private Locale[] locales = new Locale[2];
 
   private class PopupTimer extends Handler implements Runnable {
     private int mParentLocation[] = new int[2];
@@ -116,9 +118,29 @@ public class Trime extends InputMethodService implements
     mEffect.reset();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
+    String s;
+    String[] ss;
+    s = mConfig.getString("locale");
+    if (s == null || s.isEmpty()) s = "";
+    ss = s.split("[-_]");
+    if (ss.length == 2) locales[0] = new Locale(ss[0], ss[1]);
+    else if (ss.length == 3) locales[0] = new Locale(ss[0], ss[1], ss[2]);
+    else locales[0] = Locale.getDefault();
+    s = mConfig.getString("latin_locale");
+    if (s == null || s.isEmpty()) s = "en_US";
+    ss = s.split("[-_]");
+    if (ss.length == 1) locales[1] = new Locale(ss[0]);
+    else if (ss.length == 2) locales[1] = new Locale(ss[0], ss[1]);
+    else if (ss.length == 3) locales[1] = new Locale(ss[0], ss[1], ss[2]);
+    else locales[0] = Locale.ENGLISH;
+
     orientation = getResources().getConfiguration().orientation;
     // Use the following line to debug IME service.
     //android.os.Debug.waitForDebugger();
+  }
+
+  public void setLanguage(boolean isAsciiMode) {
+    mEffect.setLanguage(locales[isAsciiMode ? 1 : 0]);
   }
 
   public void invalidate() {
@@ -301,6 +323,7 @@ public class Trime extends InputMethodService implements
 
   private void commitText(CharSequence text) { //指定上屏
     if (text == null) return;
+    mEffect.speakCommit(text);
     InputConnection ic = getCurrentInputConnection();
     if (ic != null) ic.commitText(text, 1);
     if (!isComposing()) Rime.commitComposition(); //自動上屏
@@ -418,6 +441,7 @@ public class Trime extends InputMethodService implements
 
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText="+text);
+    mEffect.speakKey(text);
     Rime.onText(text);
     if(!commitText() && !isComposing()) commitText(text);
     updateComposing();
@@ -426,6 +450,7 @@ public class Trime extends InputMethodService implements
   public void onPress(int primaryCode) {
     mEffect.vibrate();
     mEffect.playSound(primaryCode);
+    mEffect.speakKey(primaryCode);
   }
 
   public void onRelease(int primaryCode) {

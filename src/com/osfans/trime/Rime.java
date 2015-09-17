@@ -211,6 +211,10 @@ public class Rime
     return mStatus.is_composing;
   }
 
+  public static boolean isAsciiMode() {
+    return mStatus.is_ascii_mode;
+  }
+
   public static RimeComposition getComposition() {
     if (mContext == null) return null;
     return mContext.composition;
@@ -436,10 +440,10 @@ public class Rime
 
   public static void onMessage(int session_id, String message_type, String message_value) {
     Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
+    Trime trime = Trime.getService();
     switch (message_type) {
       case "schema":
         initSchema();
-        Trime trime = Trime.getService();
         if (trime != null) {
           trime.initKeyboard();
           trime.updateComposing();
@@ -447,6 +451,7 @@ public class Rime
         break;
       case "option":
         getStatus();
+        if (message_value.endsWith("ascii_mode") && trime != null) trime.setLanguage(isAsciiMode());
         break;
     }
   }
