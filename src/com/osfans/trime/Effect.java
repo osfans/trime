@@ -101,7 +101,7 @@ public class Effect {
   }
 
   public void speak(CharSequence text) {
-    if (text!= null && mTTS != null) mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+    if (text!= null && mTTS != null) mTTS.speak(text.toString(), TextToSpeech.QUEUE_FLUSH, null);
   }
 
   public void speakCommit(CharSequence text) {
