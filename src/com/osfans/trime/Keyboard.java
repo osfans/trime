@@ -328,7 +328,7 @@ public class Keyboard {
         "12",
         "Last_Channel",
         "TV_Data_Service",
-        "Voice_Assist",
+        "VOICE_ASSIST",
         "TV_Radio_Service",
         "TV_Teletext",
         "TV_Number_Entry",

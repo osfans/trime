@@ -321,7 +321,7 @@ public class Trime extends InputMethodService implements
     return Rime.isComposing();
   }
 
-  private void commitText(CharSequence text) { //指定上屏
+  public void commitText(CharSequence text) { //指定上屏
     if (text == null) return;
     mEffect.speakCommit(text);
     InputConnection ic = getCurrentInputConnection();
@@ -418,6 +418,8 @@ public class Trime extends InputMethodService implements
       updateComposing();
     } else if (primaryCode == Keyboard.KEYCODE_COLOR) {
       showColorDialog();
+    } else if (primaryCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
+      new Speech(this).start();
     } else if (mKeyboardSwitch.onKey(primaryCode)) {
       Log.info("mKeyboardSwitch onKey");
       Rime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode()); //根據鍵盤設定中英文狀態

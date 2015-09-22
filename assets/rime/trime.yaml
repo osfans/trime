@@ -58,6 +58,7 @@ style:
   spacing: 10
   speak_commit: false #朗讀上屏文字
   speak_key: false #朗讀按鍵
+  speech_opencc_config: s2t.json #語音輸入簡繁轉換
   symbol_font: symbol.ttf #符號字體
   symbol_text_size: 10 #符號字號
   text_font: latin.ttf #編碼字體
@@ -632,7 +633,7 @@ keyboard:
   - {code: space, repeatable: true, width: 30}
   - {symbol: '"', text: "'"}
   - {code: BackSpace, functional: true, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
-  - {code: Return, functional: true, width: 15, symbol: 編碼, symbolCode: Control+Shift+Return}
+  - {code: Return, functional: true, width: 15, symbol: 語音, symbolCode: VOICE_ASSIST}
 - mode: 1
   width: 20
   height: 42
