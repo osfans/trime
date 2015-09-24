@@ -411,28 +411,28 @@ public class Trime extends InputMethodService implements
   }
 
   public void onEvent(Event event) {
-    if (event.code > 0) onKey(event.code, event.mask);
-    else if (!event.text.isEmpty()) onText(event.text);
+    int code = event.code;
+    if (code > 0) {
+      if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
+        Rime.toggleOption(event.getToggle());
+        commitText();
+        updateComposing();
+      } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
+        mKeyboardSwitch.setKeyboard(event.select);
+        bindKeyboardToInputView();
+        updateComposing();
+      } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
+        new Speech(this).start();
+      } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
+        showColorDialog();
+      } else {
+        onKey(event.code, event.mask);
+      }
+    } else if (!event.text.isEmpty()) onText(event.text);
   }
 
   public void onKey(int primaryCode, int mask) { //軟鍵盤
-    Log.info("onKey="+primaryCode+",mask="+mask);
-    if (primaryCode == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
-      Rime.toggleOption("ascii_mode");
-      commitText();
-      updateComposing();
-    } else if (primaryCode == KeyEvent.KEYCODE_PROG_RED) { //配色方案
-      showColorDialog();
-    } else if (primaryCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
-      new Speech(this).start();
-    } else if (primaryCode == KeyEvent.KEYCODE_EISU) {
-      Log.info("mKeyboardSwitch onKey");
-      mKeyboardSwitch.onKey(primaryCode);
-      Rime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode()); //根據鍵盤設定中英文狀態
-      bindKeyboardToInputView();
-      //escape();
-      updateComposing();
-    } else if(Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
+    if (Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
       updateComposing();

@@ -77,6 +77,11 @@ public class Event {
     return label;
   }
 
+  public String getToggle() {
+    if (toggle != null && !toggle.isEmpty()) return toggle;
+    return "ascii_mode";
+  }
+
   public String getPreviewText() {
     if (preview != null && !preview.isEmpty()) return preview;
     return getLabel();

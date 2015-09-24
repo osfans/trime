@@ -48,13 +48,24 @@ public class KeyboardSwitch {
   }
 
   public void setKeyboard(String name){
-    int i = mKeyboardNames.indexOf(name);
+    int i;
+    if (name == null) {
+      i = 0;
+    } else if (name.contentEquals(".prior")) { //前一個
+      i = currentId - 1;
+      if (i < 0) i = mKeyboards.length - 1;
+    } else {
+      i = mKeyboardNames.indexOf(name); //指定鍵盤
+    }
+    if (i < 0) i = currentId + 1; //默認下一個
     setKeyboard(i);
   }
 
   public void setKeyboard(int i){
-    if (i < 0) i = 0;
+    if (i < 0 || i >= mKeyboards.length) i = 0;
+    lastId = currentId;
     currentId = i;
+    Rime.setOption("ascii_mode", getAsciiMode()); //根據鍵盤設定中英文狀態
   }
 
   public void init(int displayWidth) {
@@ -91,29 +102,7 @@ public class KeyboardSwitch {
     }
   }
 
-  private boolean switchMode(int newId) {
-    if(newId >= mKeyboards.length) newId = 0;
-    if(newId < 0) newId = mKeyboards.length - 1;
-    lastId = currentId;
-    currentId = newId;
-    return true;
-  }
-
-  /**
-   * Consumes the pressed key-code and switch keyboard if applicable.
-   * 
-   * @return {@code true} if the keyboard is switched; otherwise {@code false}.
-   */
-  public boolean onKey(int keyCode) {
-    int newId = -10;
-    newId = currentId + 1;
-    //newId = lastId;
-    if (newId >= -1) return switchMode(newId);
-    // Return false if the key isn't consumed to switch a keyboard.
-    return false;
-  }
-
   public boolean getAsciiMode() {
-    return mKeyboards[currentId].getAsciiMode();
+    return getCurrentKeyboard().getAsciiMode();
   }
 }
