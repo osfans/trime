@@ -421,6 +421,12 @@ public class Trime extends InputMethodService implements
         mKeyboardSwitch.setKeyboard(event.select);
         bindKeyboardToInputView();
         updateComposing();
+      } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
+        String s = Function.handle(event.command, event.option);
+        if (s != null) {
+          commitText(s);
+          updateComposing();
+        }
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
         new Speech(this).start();
       } else if (code == KeyEvent.KEYCODE_BUTTON_START) { //啓動程序
