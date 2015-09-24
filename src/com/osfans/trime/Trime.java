@@ -423,6 +423,10 @@ public class Trime extends InputMethodService implements
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
         new Speech(this).start();
+      } else if (code == KeyEvent.KEYCODE_BUTTON_START) { //啓動程序
+        openApp(event.option);
+      } else if (code == KeyEvent.KEYCODE_SETTINGS) { //全局設定
+        showPrefDialog();
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
         showColorDialog();
       } else {
@@ -538,12 +542,21 @@ public class Trime extends InputMethodService implements
     showDialog(dialog);
   }
 
-  private void showPrefDialog() {
+  private void startIntent(Intent intent) {
     requestHideSelf(0);
-    Intent iSetting = new Intent();
-    iSetting.setClass(Trime.this, Pref.class);
-    iSetting.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-    startActivity(iSetting);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+    startActivity(intent);
+  }
+
+  private void openApp(String s) {
+    Intent intent = getPackageManager().getLaunchIntentForPackage(s);
+    startIntent(intent);
+  }
+
+  private void showPrefDialog() {
+    Intent intent = new Intent();
+    intent.setClass(Trime.this, Pref.class);
+    startIntent(intent);
   }
 
   private boolean handleOption(int keyCode) {
