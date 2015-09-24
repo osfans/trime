@@ -31,6 +31,7 @@ style:
   key_vibrate_duration: 30 #按鍵震動時長：毫秒
   key_vibrate: false #按鍵震動
   key_width: 10.0 #鍵寬，佔屏寬的百分比
+  keyboards: [default, number] #鍵盤佈局
   label_text_size: 14 #長標籤字號
   latin_font: latin.ttf #西文字體
   latin_locale: en_US #西文語言
@@ -66,6 +67,36 @@ style:
   text_size: 16 #編碼區字號
   vertical_correction: -10
   vertical_gap: 1 #鍵盤行距
+
+fallback_colors:
+  candidate_text_color: text_color
+  border_color: back_color
+  hilited_text_color: text_color
+  hilited_back_color: back_color
+  hilited_candidate_text_color: hilited_text_color
+  hilited_candidate_back_color: hilited_back_color
+  hilited_comment_text_color: comment_text_color
+  text_back_color: back_color
+  hilited_key_back_color: hilited_candidate_back_color
+  hilited_key_text_color: hilited_candidate_text_color
+  hilited_key_symbol_color: hilited_key_text_color
+  hilited_off_key_back_color: hilited_key_back_color
+  hilited_on_key_back_color: hilited_key_back_color
+  hilited_off_key_text_color: hilited_key_text_color
+  hilited_on_key_text_color: hilited_key_text_color
+  key_back_color: back_color
+  keyboard_back_color: key_back_color
+  key_border_color: border_color
+  key_text_color: text_color
+  key_symbol_color: key_text_color
+  label_color: candidate_text_color
+  off_key_back_color: key_back_color
+  off_key_text_color: key_text_color
+  on_key_back_color: hilited_key_back_color
+  on_key_text_color: hilited_key_text_color
+  preview_back_color: key_back_color
+  preview_text_color: key_text_color
+  shadow_color: border_color
 
 preset_color_schemes:
   default:
@@ -581,85 +612,227 @@ preset_color_schemes:
     hilited_comment_text_color: 0xffb00000
     hilited_candidate_back_color: 0xffffffff
 
-keyboard:
-- mode: 0
-  ascii_mode: 0
-  width: 10
-  height: 42
-  keys:
-  - {symbol: '!', text: '1'}
-  - {symbol: '@', text: '2'}
-  - {symbol: '#', text: '3'}
-  - {symbol: '$', text: '4'}
-  - {symbol: '%', text: '5'}
-  - {symbol: '^', text: '6'}
-  - {symbol: '&', text: '7'}
-  - {symbol: '*', text: '8'}
-  - {symbol: '(', text: '9'}
-  - {symbol: ')', text: '0'}
-  - {symbol: '_', text: q}
-  - {symbol: '-', text: w}
-  - {symbol: '+', text: e}
-  - {symbol: '=', text: r}
-  - {symbol: '|', text: t}
-  - {symbol: '\', text: y}
-  - {symbol: '[', text: u}
-  - {symbol: ']', text: i}
-  - {symbol: '{', text: o}
-  - {symbol: '}', text: p}
-  - {text: a, symbol: '全選', symbolCode: Control+a}
-  - {text: s, symbol: '行首', symbolCode: Home}
-  - {text: d, symbol: '行尾', symbolCode: End}
-  - {text: f, symbol: '上頁', symbolCode: Page_Up}
-  - {text: g, symbol: '下頁', symbolCode: Page_Down}
-  - {text: h, symbol: '←', symbolCode: Left}
-  - {text: j, symbol: '↓', symbolCode: Down}
-  - {text: k, symbol: '↑', symbolCode: Up}
-  - {text: l, symbol: '→', symbolCode: Right}
-  - {symbol: ':', text: ';'}
-  - {symbol: '`', text: z}
-  - {text: x, symbol: '剪切', symbolCode: Control+x}
-  - {text: c, symbol: '複製', symbolCode: Control+c}
-  - {text: v, symbol: '粘貼', symbolCode: Control+v}
-  - {symbol: '~', text: b}
-  - {text: n, symbol: '插入', symbolCode: Insert}
-  - {text: m, symbol: '刪除', symbolCode: Delete}
-  - {symbol: '<', text: ','}
-  - {symbol: '>', text: '.'}
-  - {symbol: '?', text: '/'}
-  - {code: "Shift_L"}
-  - {label: '123', functional: true, switch: 1, code: <switch>, symbol: 配色, symbolCode: Color}
-  - {code: Language_switch, functional: true, symbol: '...', symbolCode: Menu}
-  - {code: space, repeatable: true, width: 30}
-  - {symbol: '"', text: "'"}
-  - {code: BackSpace, functional: true, repeatable: true, width: 15, symbol: Esc, symbolCode: Escape}
-  - {code: Return, functional: true, width: 15, symbol: 語音, symbolCode: VOICE_ASSIST}
-- mode: 1
-  width: 20
-  height: 42
-  keys:
-  - {text: '+'}
-  - {text: '1'}
-  - {text: '2'}
-  - {text: '3'}
-  - {text: '#'}
-  - {text: '-'}
-  - {text: '4'}
-  - {text: '5'}
-  - {text: '6'}
-  - {text: '%'}
-  - {text: '*'}
-  - {text: '7'}
-  - {text: '8'}
-  - {text: '9'}
-  - {text: ':'}
-  - {text: '/'}
-  - {text: '±'}
-  - {text: '0'}
-  - {text: '.'}
-  - {text: ','}
-  - {text: '='}
-  - {code: <switch>, switch: 0}
-  - {code: space, repeatable: true}
-  - {code: BackSpace, repeatable: true}
-  - {code: Return}
+android_keys:
+  name: [VoidSymbol, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    asterisk, numbersign, Up, Down, Left, Right, CENTER,
+    VOLUME_UP, VOLUME_DOWN, POWER, CAMERA, Clear,
+    a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
+    comma, period, Alt_L, Alt_R, Shift_L, Shift_R, Tab, space,
+    SYM, EXPLORER, ENVELOPE, Return, BackSpace,
+    grave, minus, equal, bracketleft, bracketright, backslash, semicolon, apostrophe, slash, at,
+    NUM, HEADSETHOOK, FOCUS, plus, Menu, NOTIFICATION, Find,
+    MEDIA_PLAY_PAUSE, MEDIA_STOP, MEDIA_NEXT, MEDIA_PREVIOUS, MEDIA_REWIND, MEDIA_FAST_FORWARD, MUTE,
+    Page_Up, Page_Down, PICTSYMBOLS, Mode_switch,
+    BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_X, BUTTON_Y, BUTTON_Z,
+    BUTTON_L1, BUTTON_R1, BUTTON_L2, BUTTON_R2,
+    BUTTON_THUMBL, BUTTON_THUMBR, BUTTON_START, BUTTON_SELECT, BUTTON_MODE,
+    Escape, Delete, Control_L, Control_R, Caps_Lock, Scroll_Lock, Meta_L, Meta_R,
+    function, Sys_Req, Pause, Home, End, Insert, Next,
+    MEDIA_PLAY, MEDIA_PAUSE, MEDIA_CLOSE, MEDIA_EJECT, MEDIA_RECORD,
+    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+    Num_Lock, KP_0, KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
+    KP_Divide, KP_Multiply, KP_Subtract, KP_Add, KP_Decimal, KP_Separator, KP_Enter, KP_Equal,
+    parenleft, parenright,
+    VOLUME_MUTE, INFO, CHANNEL_UP, CHANNEL_DOWN, ZOOM_IN, ZOOM_OUT,
+    TV, WINDOW, GUIDE, DVR, BOOKMARK, CAPTIONS, SETTINGS,
+    TV_POWER, TV_INPUT, STB_POWER, STB_INPUT, AVR_POWER, AVR_INPUT,
+    PROG_RED, PROG_GREEN, PROG_YELLOW, PROG_BLUE, APP_SWITCH,
+    BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4, BUTTON_5, BUTTON_6, BUTTON_7, BUTTON_8,
+    BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12, BUTTON_13, BUTTON_14, BUTTON_15, BUTTON_16,
+    LANGUAGE_SWITCH, MANNER_MODE, 3D_MODE, CONTACTS, CALENDAR, MUSIC, CALCULATOR,
+    Zenkaku_Hankaku, Eisu_toggle, Muhenkan, Henkan, Hiragana_Katakana, yen, RO, Kana_Lock,
+    ASSIST, BRIGHTNESS_DOWN, BRIGHTNESS_UP, MEDIA_AUDIO_TRACK,
+    SLEEP, WAKEUP, PAIRING, MEDIA_TOP_MENU, '11', '12', LAST_CHANNEL, TV_DATA_SERVICE, VOICE_ASSIST,
+    TV_RADIO_SERVICE, TV_TELETEXT, TV_NUMBER_ENTRY, TV_TERRESTRIAL_ANALOG, TV_TERRESTRIAL_DIGITAL,
+    TV_SATELLITE, TV_SATELLITE_BS, TV_SATELLITE_CS, TV_SATELLITE_SERVICE, TV_NETWORK, TV_ANTENNA_CABLE,
+    TV_INPUT_HDMI_1, TV_INPUT_HDMI_2, TV_INPUT_HDMI_3, TV_INPUT_HDMI_4,
+    TV_INPUT_COMPOSITE_1, TV_INPUT_COMPOSITE_2, TV_INPUT_COMPONENT_1, TV_INPUT_COMPONENT_2, TV_INPUT_VGA_1,
+    TV_AUDIO_DESCRIPTION, TV_AUDIO_DESCRIPTION_MIX_UP, TV_AUDIO_DESCRIPTION_MIX_DOWN,
+    TV_ZOOM_MODE, TV_CONTENTS_MENU, TV_MEDIA_CONTEXT_MENU, TV_TIMER_PROGRAMMING,
+    Help, NAVIGATE_PREVIOUS, NAVIGATE_NEXT, NAVIGATE_IN, NAVIGATE_OUT]
+  when:
+    paging: 翻頁
+    has_menu: 菜單
+    composing: 輸入
+    #always: 始終
+    #hover: 滑過
+    click: 單擊
+    long_click: 長按
+    #double_click: 雙擊
+    #swipe_left: 左滑
+    #swipe_right: 右滑
+    #swipe_up: 上滑
+    #swipe_down: 下滑
+  property:
+    width: 寬度
+    height: 高度
+    gap: 間隔
+    preview: 預覽
+    hint: 提示
+    label: 標籤
+    text: 文字
+    states: 狀態標籤
+    repeatable: 連續按鍵
+    functional: 功能鍵
+  action:
+    command: 命令
+    option: 參數
+    select: 選擇
+    toggle: 狀態
+    send: 按鍵
+
+preset_keys:
+  # 安卓
+  BRIGHTNESS_DOWN: {label: 亮度-, send: BRIGHTNESS_DOWN}
+  BRIGHTNESS_UP: {label: 亮度+, send: BRIGHTNESS_UP}
+  CALCULATOR: {label: 計算器, send: CALCULATOR}
+  CALENDAR: {label: 日曆, send: CALENDAR}
+  CONTACTS: {label: 電話簿, send: CONTACTS}
+  ENVELOPE: {label: 郵箱, send: ENVELOPE}
+  EXPLORER: {label: 瀏覽器, send: EXPLORER}
+  MUSIC: {label: 音樂, send: MUSIC}
+  POWER: {label: 電源, send: POWER}
+  SEARCH: {label: 搜索, send: Find}
+  SLEEP: {label: 休眠, send: SLEEP}
+  VOICE_ASSIST: {label: 語音, send: VOICE_ASSIST}
+  VOLUME_DOWN: {label: 音量-, send: VOLUME_DOWN}
+  VOLUME_UP: {label: 音量+, send: VOLUME_UP}
+  VOLUME_MUTE: {label: 靜音, send: VOLUME_MUTE}
+  # 編輯
+  Shift_L: {label: 換檔, send: Shift_L}
+  Return: {label: 回車, send: Return}
+  Hide: {label: 隱藏, send: BACK}
+  BackSpace: {label: 退格, repeatable: true, send: BackSpace}
+  space: {repeatable: true, functional: false, send: space}
+  Clear: {label: 清空, send: Clear}
+  Escape: {label: Esc, send: Escape}
+  Home: {label: 行首, send: Home}
+  Insert: {label: 插入, send: Insert}
+  Delete: {label: 刪除, send: Delete}
+  End: {label: 行尾, send: End}
+  Page_Up: {label: 上頁, send: Page_Up}
+  Page_Down: {label: 下頁, send: Page_Down}
+  Left: {label: '←', send: Left}
+  Down: {label: '↓', send: Down}
+  Up: {label: '↑', send: Up}
+  Right: {label: '→', send: Right}
+  select_all: {label: 全選, send: Control+a}
+  cut: {label: 剪切, send: Control+x}
+  copy: {label: 複製, send: Control+c}
+  paste: {label: 粘貼, send: Control+v}
+  # rime組合鍵
+  F4: {label: 方案選單, send: F4}
+  BackToPreviousSyllable: {label: 刪音節, send: Control+BackSpace}
+  CommitRawInput: {label: 編碼, send: Control+Return}
+  CommitScriptText: {label: 編碼, send: Shift+Return}
+  CommitComment: {label: 編碼, send: Control+Shift+Return}
+  DeleteCandidate: {label: 刪詞, send: Control+Delete}
+  # rime狀態
+  Mode_switch: {toggle: ascii_mode, send: Mode_switch, states: [ 中文, 西文 ]}
+  Zenkaku_Hankaku: {toggle: full_shape, send: Mode_switch, states: [ 半角, 全角 ]}
+  Henkan: {toggle: simplification, send: Mode_switch, states: [ 漢字, 汉字 ]}
+  Charset_switch: {toggle: extended_charset, send: Mode_switch, states: [ 常用, 增廣 ]}
+  Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
+  # trime設定
+  IME_switch: {label: 其他輸入法, send: APP_SWITCH, select: .next}
+  Keyboard_number: {label: 數字, send: Eisu_toggle, select: number}
+  Keyboard_default: {label: 字母, send: Eisu_toggle, select: default}
+  Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
+  Schema_switch: {label: 方案, send: LANGUAGE_SWITCH, select: .next}
+  Color_switch: {label: 配色, send: PROG_RED}
+  Help: {label: 幫助, send: Help}
+  Info: {label: 關於, send: INFO}
+  Menu: {label: 菜單, send: Menu}
+  Settings: {label: 設定, send: SETTINGS}
+  # trime命令
+  Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
+  Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"}
+  Tieba: {label: 貼吧, send: BUTTON_START, option: "com.baidu.tieba"}
+
+preset_keyboards:
+  default:
+    name: 默認40鍵
+    author: "osfans <waxaca@163.com>"
+    ascii_mode: 0
+    width: 10
+    height: 42
+    keys:
+    - {click: '1', long_click: '!'}
+    - {click: '2', long_click: '@'}
+    - {click: '3', long_click: '#'}
+    - {click: '4', long_click: '$'}
+    - {click: '5', long_click: '%'}
+    - {click: '6', long_click: '^'}
+    - {click: '7', long_click: '&'}
+    - {click: '8', long_click: '*'}
+    - {click: '9', long_click: '('}
+    - {click: '0', long_click: ')'}
+    - {click: 'q', long_click: '_'}
+    - {click: 'w', long_click: '-'}
+    - {click: 'e', long_click: '+'}
+    - {click: 'r', long_click: '='}
+    - {click: 't', long_click: '|'}
+    - {click: 'y', long_click: '\'}
+    - {click: 'u', long_click: '['}
+    - {click: 'i', long_click: ']'}
+    - {click: 'o', long_click: '{'}
+    - {click: 'p', long_click: '}'}
+    - {click: 'a', long_click: select_all }
+    - {click: 's', long_click: Home}
+    - {click: 'd', long_click: End}
+    - {click: 'f', long_click: Page_Up}
+    - {click: 'g', long_click: Page_Down}
+    - {click: 'h', long_click: Left}
+    - {click: 'j', long_click: Down}
+    - {click: 'k', long_click: Up}
+    - {click: 'l', long_click: Right}
+    - {click: ';', long_click: ':'}
+    - {click: 'z', long_click: '`'}
+    - {click: 'x', long_click: cut}
+    - {click: 'c', long_click: copy}
+    - {click: 'v', long_click: paste}
+    - {click: 'b', long_click: '~'}
+    - {click: 'n', long_click: Insert}
+    - {click: 'm', long_click: Delete}
+    - {click: ',', long_click: '<'}
+    - {click: '.', long_click: '>'}
+    - {click: '/', long_click: '?'}
+    - {click: Shift_L, composing: "'"}
+    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: Mode_switch, long_click: Menu}
+    - {click: space, width: 30}
+    - {click: "'", long_click: '"'}
+    - {click: BackSpace, long_click: Escape, width: 15}
+    - {click: Return, long_click: CommitComment, width: 15}
+  number:
+    name: 默認數字
+    author: "osfans <waxaca@163.com>"
+    width: 20
+    height: 42
+    keys:
+    - {click: '+'}
+    - {click: '1'}
+    - {click: '2'}
+    - {click: '3'}
+    - {click: '#'}
+    - {click: '-'}
+    - {click: '4'}
+    - {click: '5'}
+    - {click: '6'}
+    - {click: '%'}
+    - {click: '*'}
+    - {click: '7'}
+    - {click: '8'}
+    - {click: '9'}
+    - {click: ':'}
+    - {click: '/'}
+    - {click: '±'}
+    - {click: '0'}
+    - {click: '.'}
+    - {click: ','}
+    - {click: '='}
+    - {click: Keyboard_switch}
+    - {click: space}
+    - {click: BackSpace}
+    - {click: Return}

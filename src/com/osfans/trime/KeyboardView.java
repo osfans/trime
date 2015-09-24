@@ -16,8 +16,6 @@
 
 package com.osfans.trime;
 
-import com.osfans.trime.Keyboard.Key;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -51,77 +49,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A view that renders a virtual {@link Keyboard}. It handles rendering of keys and
- * detecting key presses and touch movements.
- * 
- * @attr ref android.R.styleable#KeyboardView_keyBackground
- * @attr ref android.R.styleable#KeyboardView_keyPreviewLayout
- * @attr ref android.R.styleable#KeyboardView_keyPreviewOffset
- * @attr ref android.R.styleable#KeyboardView_labelTextSize
- * @attr ref android.R.styleable#KeyboardView_keyTextSize
- * @attr ref android.R.styleable#KeyboardView_keyTextColor
- * @attr ref android.R.styleable#KeyboardView_verticalCorrection
- * @attr ref android.R.styleable#KeyboardView_popupLayout
- */
 public class KeyboardView extends View implements View.OnClickListener {
-
-    /**
-     * Listener for virtual keyboard events.
-     */
     public interface OnKeyboardActionListener {
-        
-        /**
-         * Called when the user presses a key. This is sent before the {@link #onKey} is called.
-         * For keys that repeat, this is only called once.
-         * @param primaryCode the unicode of the key being pressed. If the touch is not on a valid
-         * key, the value will be zero.
-         */
         void onPress(int primaryCode);
-        
-        /**
-         * Called when the user releases a key. This is sent after the {@link #onKey} is called.
-         * For keys that repeat, this is only called once.
-         * @param primaryCode the code of the key that was released
-         */
         void onRelease(int primaryCode);
-
-        /**
-         * Send a key press to the listener.
-         * @param primaryCode this is the key that was pressed
-         * @param keyCodes the codes for all the possible alternative keys
-         * with the primary code being the first. If the primary key code is
-         * a single character such as an alphabet or number or symbol, the alternatives
-         * will include other characters that may be on the same key or adjacent keys.
-         * These codes are useful to correct for accidental presses of a key adjacent to
-         * the intended key.
-         */
+        void onEvent(Event event);
         void onKey(int primaryCode, int mask);
-
-        /**
-         * Sends a sequence of characters to the listener.
-         * @param text the sequence of characters to be displayed.
-         */
         void onText(CharSequence text);
-        
-        /**
-         * Called when the user quickly moves the finger from right to left.
-         */
         boolean swipeLeft();
-        
-        /**
-         * Called when the user quickly moves the finger from left to right.
-         */
         boolean swipeRight();
-        
-        /**
-         * Called when the user quickly moves the finger from up to down.
-         */
         boolean swipeDown();
-        
-        /**
-         * Called when the user quickly moves the finger from down to up.
-         */
         boolean swipeUp();
     }
 
@@ -274,7 +211,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mBackgroundDimAmount = config.getFloat("background_dim_amount");
         mShadowRadius = config.getFloat("shadow_radius");
 
-        mKeyBackColor = new ColorStateList(Keyboard.Key.KEY_STATES, new int[]{
+        mKeyBackColor = new ColorStateList(Key.KEY_STATES, new int[]{
             config.getColor("hilited_on_key_back_color"),
             config.getColor("hilited_off_key_back_color"),
             config.getColor("on_key_back_color"),
@@ -283,7 +220,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             config.getColor("key_back_color")
         });
 
-        mKeyTextColor = new ColorStateList(Keyboard.Key.KEY_STATES, new int[]{
+        mKeyTextColor = new ColorStateList(Key.KEY_STATES, new int[]{
             config.getColor("hilited_on_key_text_color"),
             config.getColor("hilited_off_key_text_color"),
             config.getColor("on_key_text_color"),
@@ -518,14 +455,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         dismissPopupKeyboard();
     }
 
-    private CharSequence adjustCase(CharSequence label) {
-        if (mKeyboard.isShifted() && label != null && label.length() < 3
-                && Character.isLowerCase(label.charAt(0))) {
-            label = label.toString().toUpperCase();
-        }
-        return label;
-    }
-
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Round up a little
@@ -621,8 +550,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPaintSymbol.setColor(key.pressed ? hilited_key_symbol_color: key_symbol_color);
 
             // Switch the character to uppercase if shift is pressed
-            String label = key.label.isEmpty() ? "" : adjustCase(key.label).toString();
-            String symbol = key.symbolLabel.isEmpty() ? key.symbol : key.symbolLabel;
+            String label = key.getLabel();
             String hint = key.hint;
             int left = (key.width - padding.left - padding.right) / 2 + padding.left;
             int top = padding.top;
@@ -637,7 +565,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             
             if (!label.isEmpty()) {
                 // For characters, use large font. For labels like "Done", use small font.
-                if (label.length() > 1 && key.codes.length < 2) {
+                if (label.length() > 1) {
                     paint.setTextSize(mLabelTextSize);
                 } else {
                     paint.setTextSize(mKeyTextSize);
@@ -650,9 +578,9 @@ public class KeyboardView extends View implements View.OnClickListener {
                             + (paint.getTextSize() - paint.descent()) / 2 + top,
                     paint);
 
-                if (!symbol.isEmpty()) {
+                if (key.long_click != null) {
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
-                    canvas.drawText(symbol, left, symbolTop + top, mPaintSymbol);
+                    canvas.drawText(key.getSymbolLabel(), left, symbolTop + top, mPaintSymbol);
                 }
 
                 if (!hint.isEmpty()) {
@@ -662,16 +590,6 @@ public class KeyboardView extends View implements View.OnClickListener {
 
                 // Turn off drop shadow
                 paint.setShadowLayer(0, 0, 0, 0);
-            } else if (key.icon != null) {
-                final int drawableX = (key.width - padding.left - padding.right 
-                                - key.icon.getIntrinsicWidth()) / 2 + padding.left;
-                final int drawableY = (key.height - padding.top - padding.bottom 
-                        - key.icon.getIntrinsicHeight()) / 2 + padding.top;
-                canvas.translate(drawableX, drawableY);
-                key.icon.setBounds(0, 0, 
-                        key.icon.getIntrinsicWidth(), key.icon.getIntrinsicHeight());
-                key.icon.draw(canvas);
-                canvas.translate(-drawableX, -drawableY);
             }
             canvas.translate(-key.x - kbdPaddingLeft, -key.y - kbdPaddingTop);
         }
@@ -713,9 +631,9 @@ public class KeyboardView extends View implements View.OnClickListener {
             if (((mProximityCorrectOn 
                     && (dist = key.squaredDistanceFrom(x, y)) < mProximityThreshold) 
                     || isInside)
-                    && key.codes[0] > 32) {
+                    && key.click.code > 32) {
                 // Find insertion point
-                final int nCodes = key.codes.length;
+                final int nCodes = 1;
                 if (dist < closestKeyDist) {
                     closestKeyDist = dist;
                     closestKey = nearestKeyIndices[i];
@@ -730,10 +648,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                                 mDistances.length - j - nCodes);
                         System.arraycopy(allKeys, j, allKeys, j + nCodes,
                                 allKeys.length - j - nCodes);
-                        for (int c = 0; c < nCodes; c++) {
-                            allKeys[j + c] = key.codes[c];
-                            mDistances[j + c] = dist;
-                        }
+                        allKeys[j] = key.click.code;
+                        mDistances[j] = dist;
                         break;
                     }
                 }
@@ -753,29 +669,16 @@ public class KeyboardView extends View implements View.OnClickListener {
         int index = mCurrentKey;
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
-            if (mKeyboard.isShiftKey(key)) {
+            if (key.isShift()) {
                setShifted(false, !isShifted());
-            } else if (!key.text.isEmpty()) {
-                mKeyboardActionListener.onText(adjustCase(key.text));
-                mKeyboardActionListener.onRelease(NOT_A_KEY);
-                resetShifted();
             } else {
-                int code = key.codes[0];
+                int code = key.click.code;
                 //TextEntryState.keyPressedAt(key, x, y);
                 int[] codes = new int[MAX_NEARBY_KEYS];
                 Arrays.fill(codes, NOT_A_KEY);
                 getKeyIndices(x, y, codes);
-                // Multi-tap
-                if (mInMultiTap) {
-                    if (mTapCount != -1) {
-                        mKeyboardActionListener.onKey(KeyEvent.KEYCODE_DEL, 0);
-                    } else {
-                        mTapCount = 0;
-                    }
-                    code = key.codes[mTapCount];
-                }
-                mKeyboardActionListener.onKey(code, key.mask > 0 ? key.mask : mKeyboard.getModifer());
-                mKeyboardActionListener.onRelease(code);
+                mKeyboardActionListener.onEvent(key.click);
+                mKeyboardActionListener.onRelease(NOT_A_KEY);
                 resetShifted();
             }
             mLastSentIndex = index;
@@ -783,20 +686,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
     }
 
-    /**
-     * Handle multi-tap keys by producing the key label for the current multi-tap state.
-     */
-    private CharSequence getPreviewText(Key key) {
-        if (mInMultiTap) {
-            // Multi-tap
-            mPreviewLabel.setLength(0);
-            mPreviewLabel.append((char) key.codes[mTapCount < 0 ? 0 : mTapCount]);
-            return adjustCase(mPreviewLabel);
-        } else {
-            return !key.labelPreview.isEmpty()? key.labelPreview: adjustCase(key.label);
-        }
-    }
-    
     private void showPreview(int keyIndex) {
         int oldKeyIndex = mCurrentKeyIndex;
         final PopupWindow previewPopup = mPreviewPopup;
@@ -841,14 +730,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         final PopupWindow previewPopup = mPreviewPopup;
         final Key[] keys = mKeys;
         Key key = keys[keyIndex];
-        if (key.icon != null || key.iconPreview != null) {
-            mPreviewText.setCompoundDrawables(null, null, null, 
-                    key.iconPreview != null ? key.iconPreview : key.icon);
-            mPreviewText.setText(null);
-        } else {
-            mPreviewText.setCompoundDrawables(null, null, null, null);
-            mPreviewText.setText(getPreviewText(key));
-        }
+        mPreviewText.setCompoundDrawables(null, null, null, null);
+        mPreviewText.setText(key.getPreviewText());
         mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 
                 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
         int popupWidth = Math.max(mPreviewText.getMeasuredWidth(), key.width 
@@ -964,6 +847,10 @@ public class KeyboardView extends View implements View.OnClickListener {
                         android.R.id.closeButton);
                 if (closeButton != null) closeButton.setOnClickListener(this);
                 mMiniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
+                    public void onEvent(Event event) {
+                        mKeyboardActionListener.onEvent(event);
+                        dismissPopupKeyboard();
+                    }
                     public void onKey(int primaryCode, int mask) {
                         mKeyboardActionListener.onKey(primaryCode, mask);
                         dismissPopupKeyboard();
@@ -987,10 +874,9 @@ public class KeyboardView extends View implements View.OnClickListener {
                 //mInputView.setSuggest(mSuggest);
                 Keyboard keyboard;
                 if (popupKey.popupCharacters != null) {
-                    keyboard = new Keyboard(getContext(), popupKeyboardId, 
-                            popupKey.popupCharacters, -1, getPaddingLeft() + getPaddingRight());
+                    keyboard = new Keyboard(getContext(), popupKey.popupCharacters, -1, getPaddingLeft() + getPaddingRight());
                 } else {
-                    keyboard = new Keyboard(getContext(), popupKeyboardId);
+                    keyboard = new Keyboard(getContext());
                 }
                 mMiniKeyboard.setKeyboard(keyboard);
                 mMiniKeyboard.setPopupParent(this);
@@ -1025,19 +911,15 @@ public class KeyboardView extends View implements View.OnClickListener {
             return true;
         } else {
             Key key = popupKey;
-            if (key.symbolCode != 0) {
-                mKeyboardActionListener.onKey(key.symbolCode, key.symbolMask > 0 ? key.symbolMask : mKeyboard.getModifer());
-                return true;
+            if (key.long_click != null) {
+              mKeyboardActionListener.onEvent(key.long_click);
+              return true;
             }
-            if (!key.symbol.isEmpty()){
-                mKeyboardActionListener.onText(key.symbol);
-                return true;
+            if (key.click.code >= 97 && key.click.code <= 124){
+              mKeyboardActionListener.onKey(key.click.code - 32, 0);
+              return true;
             }
-            if(key.codes[0] >= 97 && key.codes[0] <= 124){
-                mKeyboardActionListener.onKey(key.codes[0] - 32, 0);
-                return true;
-            }
-            if (mKeyboard.isShiftKey(key)) {
+            if (key.isShift()) {
                 setShifted(!key.on, !key.on);
                 return true;
             }
@@ -1081,8 +963,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mLastMoveTime = mDownTime;
                 checkMultiTap(eventTime, keyIndex);
                 mKeyboardActionListener.onPress(keyIndex != NOT_A_KEY ? 
-                        mKeys[keyIndex].codes[0] : 0);
-                if (mCurrentKey >= 0 && mKeys[mCurrentKey].repeatable) {
+                        mKeys[keyIndex].click.code : 0);
+                if (mCurrentKey >= 0 && mKeys[mCurrentKey].click.repeatable) {
                     mRepeatKeyIndex = mCurrentKey;
                     repeatKey();
                     Message msg = mHandler.obtainMessage(MSG_REPEAT);
@@ -1234,17 +1116,6 @@ public class KeyboardView extends View implements View.OnClickListener {
     private void checkMultiTap(long eventTime, int keyIndex) {
         if (keyIndex == NOT_A_KEY) return;
         Key key = mKeys[keyIndex];
-        if (key.codes.length > 1) {
-            mInMultiTap = true;
-            if (eventTime < mLastTapTime + multitap_interval
-                    && keyIndex == mLastSentIndex) {
-                mTapCount = (mTapCount + 1) % key.codes.length;
-                return;
-            } else {
-                mTapCount = -1;
-                return;
-            }
-        }
         if (eventTime > mLastTapTime + multitap_interval || keyIndex != mLastSentIndex) {
             resetMultiTap();
         }

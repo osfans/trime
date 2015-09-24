@@ -29,56 +29,31 @@ import java.util.HashMap;
 import java.io.*;
 
 public class Config {
-  private Map<String, Object> mConfig, mDefaultConfig;
+  private Map<String, Object> mStyle, mDefaultStyle;
   private Map<String, Map<String, Object>> maps;
   private String defaultName = "trime.yaml";
+  private static String USER_DATA_DIR = "/sdcard/rime";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
 
-  private static Map<String,String> fallback = new HashMap<String, String>() {
-    {
-      put("candidate_text_color", "text_color");
-      put("border_color", "back_color");
-      put("hilited_text_color", "text_color");
-      put("hilited_back_color", "back_color");
-      put("hilited_candidate_text_color", "hilited_text_color");
-      put("hilited_candidate_back_color", "hilited_back_color");
-      put("hilited_comment_text_color", "comment_text_color");
-      put("text_back_color", "back_color");
-
-      put("hilited_key_back_color", "hilited_candidate_back_color");
-      put("hilited_key_text_color", "hilited_candidate_text_color");
-      put("hilited_key_symbol_color", "hilited_key_text_color");
-      put("hilited_off_key_back_color", "hilited_key_back_color");
-      put("hilited_on_key_back_color", "hilited_key_back_color");
-      put("hilited_off_key_text_color", "hilited_key_text_color");
-      put("hilited_on_key_text_color", "hilited_key_text_color");
-      put("key_back_color", "back_color");
-      put("keyboard_back_color", "key_back_color");
-      put("key_border_color", "border_color");
-      put("key_text_color", "text_color");
-      put("key_symbol_color", "key_text_color");
-      put("label_color", "candidate_text_color");
-      put("off_key_back_color", "key_back_color");
-      put("off_key_text_color", "key_text_color");
-      put("on_key_back_color", "hilited_key_back_color");
-      put("on_key_text_color", "hilited_key_text_color");
-      put("preview_back_color", "key_back_color");
-      put("preview_text_color", "key_text_color");
-      put("shadow_color", "border_color");
-    }
-  };
+  private Map<String,String> fallbackColors;
+  private Map presetColorSchemes, presetKeyboards;
 
   public Config(Context context) {
     self = this;
     maps = new HashMap<String, Map<String, Object>>();
-    mDefaultConfig = (Map<String,Object>)Rime.config_get_map("trime", "");
+    mDefaultStyle = (Map<String,Object>)Rime.config_get_map("trime", "style");
+    fallbackColors = (Map<String,String>)Rime.config_get_map("trime", "fallback_colors");
+    Key.androidKeys = (List<String>)Rime.config_get_list("trime", "android_keys/name");
+    Key.presetKeys = (Map<String, Map>)Rime.config_get_map("trime", "preset_keys");
+    presetColorSchemes = Rime.config_get_map("trime", "preset_color_schemes");
+    presetKeyboards = Rime.config_get_map("trime", "preset_keyboards");
     reset();
   }
 
   public static boolean prepareRime(Context context) {
     Log.e("Config", "prepare rime");
-    if (new File("/sdcard/rime").exists()) return false;
+    if (new File(USER_DATA_DIR).exists()) return false;
     copyFileOrDir(context, "rime", false);
     Rime.get(true);
     return true;
@@ -146,44 +121,28 @@ public class Config {
   public void reset() {
     String schema_id = Rime.getSchemaId();
     if (maps.containsKey(schema_id)) {
-      mConfig = maps.get(schema_id);
+      mStyle = maps.get(schema_id);
       return;
     }
-    mConfig = null;
-    File f = new File("/sdcard/rime", schema_id + "." + defaultName);
+    mStyle = null;
+    File f = new File(USER_DATA_DIR, schema_id + "." + defaultName);
     if (!f.exists()) return;
-    mConfig = (Map<String,Object>)Rime.config_get_map(schema_id + ".trime", "");
-    maps.put(schema_id, mConfig); //緩存各方案自定義配置
+    mStyle = (Map<String,Object>)Rime.config_get_map(schema_id + ".trime", "style");
+    maps.put(schema_id, mStyle); //緩存各方案自定義配置
   }
 
-  private Object _getValue(String k1) {
-    if (mConfig != null && mConfig.containsKey(k1)) return mConfig.get(k1);
-    if (mDefaultConfig != null && mDefaultConfig.containsKey(k1)) return mDefaultConfig.get(k1);
+  private Object getValue(String k1) {
+    if (mStyle != null && mStyle.containsKey(k1)) return mStyle.get(k1);
+    if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) return mDefaultStyle.get(k1);
     return null;
   }
 
-  private Object _getValue(String k1, String k2) {
-    Map<String, Object> m;
-    if (mConfig != null && mConfig.containsKey(k1)) {
-      m = (Map<String, Object>)mConfig.get(k1);
-      if (m != null && m.containsKey(k2)) return m.get(k2);
-    }
-    if (mDefaultConfig != null && mDefaultConfig.containsKey(k1)) {
-      m = (Map<String, Object>)mDefaultConfig.get(k1);
-      if (m != null && m.containsKey(k2)) return m.get(k2);
-    }
-    return null;
+  public Map<String, Object> getKeyboard(String name) {
+    return (Map<String, Object>)presetKeyboards.get(name);
   }
 
-  public Object getValue(String s) {
-    String[] ss = s.split("/");
-    if (ss.length == 1) return _getValue(ss[0]);
-    else if(ss.length == 2) return _getValue(ss[0], ss[1]);
-    return null;
-  }
-
-  public List<Object> getKeyboards() {
-    return (List<Object>)getValue("keyboard");
+  public List<String> getKeyboardNames() {
+    return (List<String>)getValue("keyboards");
   }
 
   public static Config get() {
@@ -200,18 +159,18 @@ public class Config {
 
   public void destroy() {
     if (maps != null) maps.clear();
-    if (mDefaultConfig != null) mDefaultConfig.clear();
-    if (mConfig != null) mConfig.clear();
+    if (mDefaultStyle != null) mDefaultStyle.clear();
+    if (mStyle != null) mStyle.clear();
     self = null;
   }
 
   public boolean getBoolean(String key) {
-    Object o = getValue("style/" + key);
+    Object o = getValue(key);
     return o == null ? true : (Boolean)o;
   }
 
   public double getDouble(String key) {
-    Object o = getValue("style/" + key);
+    Object o = getValue(key);
     double size = 0;
     if (o instanceof Integer) size = ((Integer)o).doubleValue();
     else if (o instanceof Float) size = ((Float)o).doubleValue();
@@ -232,21 +191,20 @@ public class Config {
   }
 
   public String getString(String key) {
-    return (String)getValue("style/" + key);
+    return (String)getValue(key);
   }
 
   public int getColor(String key) {
-    String scheme = "preset_color_schemes/" + getString("color_scheme");
-    Map map = (Map<String, Object>)getValue(scheme);
-    String fallbackScheme = "preset_color_schemes/default";
+    String scheme = getString("color_scheme");
+    Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
     Object o = map.get(key);
     String fallbackKey = key;
-    while (o == null && fallback.containsKey(fallbackKey)) {
-      fallbackKey = fallback.get(fallbackKey);
+    while (o == null && fallbackColors.containsKey(fallbackKey)) {
+      fallbackKey = fallbackColors.get(fallbackKey);
       o = map.get(fallbackKey);
     }
     if (o == null) {
-      map = (Map<String, Object>)getValue(fallbackScheme);
+      map = (Map<String, Object>)presetColorSchemes.get("default");
       o = map.get(key);
     }
     if (o instanceof Integer) return ((Integer)o).intValue();
@@ -256,16 +214,13 @@ public class Config {
   public void setColor(String color) {
     Rime.customize_string("trime", "style/color_scheme", color);
     Rime.deployConfigFile();
-    Map<String, Object> style = (Map<String, Object>)mDefaultConfig.get("style");
-    style.put("color_scheme", color);
-    mDefaultConfig.put("style", style);
+    mDefaultStyle.put("color_scheme", color);
   }
 
   public String[] getColorKeys() {
-    Map<String, Object> m = (Map<String, Object>)getValue("preset_color_schemes");
-    if (m == null) return null;
-    String[] keys = new String[m.size()];
-    m.keySet().toArray(keys);
+    if (presetColorSchemes == null) return null;
+    String[] keys = new String[presetColorSchemes.size()];
+    presetColorSchemes.keySet().toArray(keys);
     return keys;
   }
 
@@ -273,10 +228,9 @@ public class Config {
     if (keys == null) return null;
     int n = keys.length;
     String[] names = new String[n];
-    Map<String, Object> m = (Map<String, Object>)getValue("preset_color_schemes");
     for (int i = 0; i < n; i++) {
-      Map<String, Object> m2 = (Map<String, Object>)m.get(keys[i]);
-      names[i] = (String)m2.get("name");
+      Map<String, Object> m = (Map<String, Object>)presetColorSchemes.get(keys[i]);
+      names[i] = (String)m.get("name");
     }
     return names;
   }
@@ -284,7 +238,7 @@ public class Config {
   public Typeface getFont(String key){
     String name = getString(key);
     if (name != null) {
-      File f = new File("/sdcard/rime/fonts", name);
+      File f = new File(USER_DATA_DIR + "/fonts", name);
       if(f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;

@@ -25,35 +25,40 @@ public class KeyboardSwitch {
 
   private final Context context;
 
-  private Keyboard[] keyboards;
-  private Keyboard currentKeyboard;
+  private Keyboard[] mKeyboards;
+  private List<String> mKeyboardNames;
   private int currentId, lastId;
   private int currentDisplayWidth;
 
   public KeyboardSwitch(Context context) {
     this.context = context;
-    currentId = 0;
+    currentId = -1;
     lastId = 0;
     reset();
   }
 
   public void reset() {
-    List<Object> keys = Config.get().getKeyboards();
-    int n = keys.size();
-    keyboards = new Keyboard[n];
+    mKeyboardNames = Config.get().getKeyboardNames();
+    int n = mKeyboardNames.size();
+    mKeyboards = new Keyboard[n];
     for (int i = 0; i < n; i++ ) {
-      keyboards[i] = new Keyboard(context, keys.get(i));
+      mKeyboards[i] = new Keyboard(context, mKeyboardNames.get(i));
     }
     setKeyboard(0);
   }
 
+  public void setKeyboard(String name){
+    int i = mKeyboardNames.indexOf(name);
+    setKeyboard(i);
+  }
+
   public void setKeyboard(int i){
+    if (i < 0) i = 0;
     currentId = i;
-    currentKeyboard = keyboards[currentId];
   }
 
   public void init(int displayWidth) {
-    if ((currentKeyboard != null) && (displayWidth == currentDisplayWidth)) {
+    if ((currentId >= 0) && (displayWidth == currentDisplayWidth)) {
       return;
     }
 
@@ -62,7 +67,7 @@ public class KeyboardSwitch {
   }
 
   public Keyboard getCurrentKeyboard() {
-    return currentKeyboard;
+    return mKeyboards[currentId];
   }
   
   /**
@@ -79,18 +84,18 @@ public class KeyboardSwitch {
           || (variation == InputType.TYPE_TEXT_VARIATION_URI)
           || (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD)
           || (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
-        setKeyboard(0);
-        currentKeyboard.setShifted(false, currentKeyboard.isShifted());
+        currentId = 0;
+        setKeyboard(currentId);
+        mKeyboards[currentId].setShifted(false, mKeyboards[currentId].isShifted());
       }
     }
   }
 
   private boolean switchMode(int newId) {
-    if(newId >= keyboards.length) newId = 0;
-    if(newId < 0) newId = keyboards.length - 1;
+    if(newId >= mKeyboards.length) newId = 0;
+    if(newId < 0) newId = mKeyboards.length - 1;
     lastId = currentId;
     currentId = newId;
-    currentKeyboard = keyboards[currentId];
     return true;
   }
 
@@ -101,21 +106,14 @@ public class KeyboardSwitch {
    */
   public boolean onKey(int keyCode) {
     int newId = -10;
-    if (keyCode <= Keyboard.KEYCODE_MODE_SWITCH) {
-      newId = Keyboard.KEYCODE_MODE_SWITCH - keyCode;
-    } else if (keyCode == Keyboard.KEYCODE_MODE_NEXT) {
-      newId = currentId + 1;
-    } else if (keyCode == Keyboard.KEYCODE_MODE_PREV) {
-      newId = currentId - 1;
-    } else if (keyCode == Keyboard.KEYCODE_MODE_LAST) {
-      newId = lastId;
-    }
+    newId = currentId + 1;
+    //newId = lastId;
     if (newId >= -1) return switchMode(newId);
     // Return false if the key isn't consumed to switch a keyboard.
     return false;
   }
 
   public boolean getAsciiMode() {
-    return currentKeyboard.getAsciiMode();
+    return mKeyboards[currentId].getAsciiMode();
   }
 }
