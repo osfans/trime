@@ -655,6 +655,7 @@ android_keys:
     paging: 翻頁
     has_menu: 菜單
     composing: 輸入
+    ascii: 西文
     #always: 始終
     #hover: 滑過
     click: 單擊

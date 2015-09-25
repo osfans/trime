@@ -451,7 +451,10 @@ public class Rime
         break;
       case "option":
         getStatus();
-        if (message_value.endsWith("ascii_mode") && trime != null) trime.setLanguage(isAsciiMode());
+        if (trime != null) {
+          trime.invalidateKeyboard(); //鍵盤狀態
+          if (message_value.endsWith("ascii_mode")) trime.setLanguage(isAsciiMode());
+        }
         break;
     }
   }

@@ -31,7 +31,7 @@ import java.util.HashMap;
 public class Key {
   private String TAG = "Key";
   private Keyboard mKeyboard;
-  public Event click, long_click, composing, has_menu, paging;
+  public Event click, long_click, composing, ascii, has_menu, paging;
   public int width, height, gap, edgeFlags;
   public String hint;
 
@@ -61,6 +61,8 @@ public class Key {
       composing = new Event(mKeyboard, s);
       mKeyboard.mComposingKeys.add(this);
     }
+    s = getString(mk, "ascii");
+    if (!s.isEmpty()) ascii = new Event(mKeyboard, s);
     hint = getString(mk, "hint");
     if (isShift()) mKeyboard.mShiftKey = this;
   }
@@ -209,7 +211,9 @@ public class Key {
   }
 
   public Event getEvent() {
-    return (composing != null && Rime.isComposing()) ? composing : click;
+    if (composing != null && Rime.isComposing()) return composing;
+    if (ascii != null && Rime.isAsciiMode()) return ascii;
+    return click;
   }
 
   public int getCode() {
