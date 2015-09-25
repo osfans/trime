@@ -631,7 +631,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             if (((mProximityCorrectOn 
                     && (dist = key.squaredDistanceFrom(x, y)) < mProximityThreshold) 
                     || isInside)
-                    && key.click.code > 32) {
+                    && key.getCode() > 32) {
                 // Find insertion point
                 final int nCodes = 1;
                 if (dist < closestKeyDist) {
@@ -648,7 +648,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                                 mDistances.length - j - nCodes);
                         System.arraycopy(allKeys, j, allKeys, j + nCodes,
                                 allKeys.length - j - nCodes);
-                        allKeys[j] = key.click.code;
+                        allKeys[j] = key.getCode();
                         mDistances[j] = dist;
                         break;
                     }
@@ -672,12 +672,12 @@ public class KeyboardView extends View implements View.OnClickListener {
             if (key.isShift()) {
                setShifted(false, !isShifted());
             } else {
-                int code = key.click.code;
+                int code = key.getCode();
                 //TextEntryState.keyPressedAt(key, x, y);
                 int[] codes = new int[MAX_NEARBY_KEYS];
                 Arrays.fill(codes, NOT_A_KEY);
                 getKeyIndices(x, y, codes);
-                mKeyboardActionListener.onEvent(key.click);
+                mKeyboardActionListener.onEvent(key.getEvent());
                 mKeyboardActionListener.onRelease(NOT_A_KEY);
                 resetShifted();
             }
@@ -807,6 +807,22 @@ public class KeyboardView extends View implements View.OnClickListener {
                 key.x + key.width + getPaddingLeft(), key.y + key.height + getPaddingTop());
     }
 
+    public void invalidateKeys(List<Key> keys) {
+      if (keys == null || keys.size() == 0) return;
+      for (Key key: keys) {
+        mDirtyRect.union(key.x + getPaddingLeft(), key.y + getPaddingTop(), 
+                key.x + key.width + getPaddingLeft(), key.y + key.height + getPaddingTop());
+      }
+      onBufferDraw();
+      invalidate();
+    }
+
+    public void invalidateComposingKeys() {
+      List<Key> keys = mKeyboard.getComposingKeys();
+      if (keys != null && keys.size() > 5) invalidateAllKeys();
+      else invalidateKeys(keys);
+    }
+
     private boolean openPopupIfRequired(MotionEvent me) {
         // Check if we have a popup layout specified first.
         if (mPopupLayout == 0) {
@@ -913,10 +929,6 @@ public class KeyboardView extends View implements View.OnClickListener {
             Key key = popupKey;
             if (key.long_click != null) {
               mKeyboardActionListener.onEvent(key.long_click);
-              return true;
-            }
-            if (key.click.code >= 97 && key.click.code <= 124){
-              mKeyboardActionListener.onKey(key.click.code - 32, 0);
               return true;
             }
             if (key.isShift()) {

@@ -150,6 +150,10 @@ public class Trime extends InputMethodService implements
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
   }
 
+  public void invalidateKeyboard() {
+    if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
+  }
+
   public void reset() {
     mConfig.reset();
     inlinePreedit = mConfig.getBoolean("inline_preedit");
@@ -528,6 +532,7 @@ public class Trime extends InputMethodService implements
       mComposition.setText();
       mFloatingWindowTimer.postShowFloatingWindow();
     }
+    mKeyboardView.invalidateComposingKeys();
   }
 
   private void showDialog(AlertDialog dialog) {

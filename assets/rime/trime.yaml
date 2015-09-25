@@ -832,7 +832,7 @@ preset_keyboards:
     - {click: '.'}
     - {click: ','}
     - {click: '='}
-    - {click: Keyboard_switch}
+    - {click: Keyboard_default}
     - {click: space}
     - {click: BackSpace}
     - {click: Return}

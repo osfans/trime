@@ -66,10 +66,7 @@ public class Keyboard {
     private boolean mShifted;
     
     /** Key instance for the shift key, if present */
-    private Key mShiftKey;
-    
-    /** Key index for the shift key, if present */
-    private int mShiftKeyIndex = -1;
+    public Key mShiftKey;
     
     /** Current key width, while loading the keyboard */
     //private int mKeyWidth;
@@ -87,7 +84,7 @@ public class Keyboard {
     private int mTotalWidth;
     
     /** List of keys in this keyboard */
-    private List<Key> mKeys;
+    public List<Key> mKeys, mComposingKeys;
 
     private int mMetaState;
     
@@ -132,6 +129,7 @@ public class Keyboard {
       mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
 
       mKeys = new ArrayList<Key>();
+      mComposingKeys = new ArrayList<Key>();
     }
 
     /**
@@ -183,6 +181,10 @@ public class Keyboard {
 
     public List<Key> getKeys() {
         return mKeys;
+    }
+
+    public List<Key> getComposingKeys() {
+        return mComposingKeys;
     }
 
     protected int getHorizontalGap() {
@@ -358,9 +360,6 @@ public class Keyboard {
       }
 
       final Key key = new Key(this, mk);
-      if (key.isShift()) {
-        mShiftKey = key;
-      }
       key.x = x;
       key.y = y;
       int right_gap = Math.abs(mDisplayWidth - x - w - gap);

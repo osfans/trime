@@ -56,7 +56,13 @@ public class Key {
     if (!s.isEmpty()) click = new Event(mKeyboard, s);
     s = getString(mk, "long_click");
     if (!s.isEmpty()) long_click = new Event(mKeyboard, s);
+    s = getString(mk, "composing");
+    if (!s.isEmpty()) {
+      composing = new Event(mKeyboard, s);
+      mKeyboard.mComposingKeys.add(this);
+    }
     hint = getString(mk, "hint");
+    if (isShift()) mKeyboard.mShiftKey = this;
   }
   
   public final static int[] KEY_STATE_NORMAL_ON = { 
@@ -181,7 +187,7 @@ public class Key {
     }
 
   public boolean isShift() {
-    int c = click.code;
+    int c = getCode();
     return (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT);
   }
 
@@ -202,12 +208,20 @@ public class Key {
     return 0f;
   }
 
+  public Event getEvent() {
+    return (composing != null && Rime.isComposing()) ? composing : click;
+  }
+
+  public int getCode() {
+    return getEvent().code;
+  }
+
   public String getLabel() {
-    return click.getLabel();
+    return getEvent().getLabel();
   }
 
   public String getPreviewText() {
-    return click.getPreviewText();
+    return getEvent().getPreviewText();
   }
 
   public String getSymbolLabel() {
