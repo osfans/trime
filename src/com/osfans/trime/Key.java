@@ -53,9 +53,9 @@ public class Key {
     this(parent);
     String s;
     s = getString(mk, "click");
-    if (!s.isEmpty()) click = new Event(s);
+    if (!s.isEmpty()) click = new Event(mKeyboard, s);
     s = getString(mk, "long_click");
-    if (!s.isEmpty()) long_click = new Event(s);
+    if (!s.isEmpty()) long_click = new Event(mKeyboard, s);
     hint = getString(mk, "hint");
   }
   
@@ -202,21 +202,15 @@ public class Key {
     return 0f;
   }
 
-  public String adjustCase(String s) {
-    if (s == null) return "";
-    if (s.length() == 1 && mKeyboard.isShifted()) return s.toUpperCase();
-    return s;
-  }
-
   public String getLabel() {
-    return adjustCase(click.getLabel());
+    return click.getLabel();
   }
 
   public String getPreviewText() {
-    return adjustCase(click.getPreviewText());
+    return click.getPreviewText();
   }
 
   public String getSymbolLabel() {
-    return adjustCase(long_click.label);
+    return long_click.getLabel();
   }
 }

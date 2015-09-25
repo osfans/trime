@@ -28,13 +28,15 @@ import java.util.HashMap;
 
 public class Event {
   private String TAG = "Event";
+  private Keyboard mKeyboard;
   int code, mask;
   String text, label, preview;
   List<String> states;
   String command, option, select, toggle;
   public boolean functional, repeatable, sticky;
 
-  public Event(String s) {
+  public Event(Keyboard keyboard, String s) {
+    mKeyboard = keyboard;
     if (Key.presetKeys.containsKey(s)) {
       Map m = Key.presetKeys.get(s);
       text = Key.getString(m, "text");
@@ -72,19 +74,32 @@ public class Event {
     code = Key.androidKeys.indexOf(codes);
   }
 
-  public String getLabel() {
-    if (toggle != null && !toggle.isEmpty()) return states.get(Rime.getOption(toggle) ? 1 : 0);
-    return label;
+  public String adjustCase(String s) {
+    if (s == null) return "";
+    if (s.length() == 1 && mKeyboard.isShifted()) s = s.toUpperCase();
+    return s;
   }
 
-  public String getToggle() {
-    if (toggle != null && !toggle.isEmpty()) return toggle;
-    return "ascii_mode";
+  public String getLabel() {
+    if (toggle != null && !toggle.isEmpty()) return states.get(Rime.getOption(toggle) ? 1 : 0);
+    return adjustCase(label);
+  }
+
+  public String getText() {
+    String s = "";
+    if (text != null && !text.isEmpty()) s = text;
+    else if (mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
+    return adjustCase(s);
   }
 
   public String getPreviewText() {
     if (preview != null && !preview.isEmpty()) return preview;
     return getLabel();
+  }
+
+  public String getToggle() {
+    if (toggle != null && !toggle.isEmpty()) return toggle;
+    return "ascii_mode";
   }
 
   private void parseLabel() {

@@ -410,8 +410,11 @@ public class Trime extends InputMethodService implements
   }
 
   public void onEvent(Event event) {
-    int code = event.code;
-    if (code > 0) {
+    String s = event.getText();
+    if (!s.isEmpty()) {
+      onText(s);
+    } else if (event.code > 0) {
+      int code = event.code;
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
         Rime.toggleOption(event.getToggle());
         commitText();
@@ -423,7 +426,7 @@ public class Trime extends InputMethodService implements
         bindKeyboardToInputView();
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
-        String s = Function.handle(this, event.command, event.option);
+        s = Function.handle(this, event.command, event.option);
         if (s != null) {
           commitText(s);
           updateComposing();
@@ -437,7 +440,7 @@ public class Trime extends InputMethodService implements
       } else {
         onKey(event.code, event.mask);
       }
-    } else if (!event.text.isEmpty()) onText(event.text);
+    }
   }
 
   public void onKey(int primaryCode, int mask) { //軟鍵盤
