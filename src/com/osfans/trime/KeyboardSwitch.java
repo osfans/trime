@@ -65,7 +65,6 @@ public class KeyboardSwitch {
     if (i < 0 || i >= mKeyboards.length) i = 0;
     lastId = currentId;
     currentId = i;
-    Rime.setOption("ascii_mode", getAsciiMode()); //根據鍵盤設定中英文狀態
   }
 
   public void init(int displayWidth) {

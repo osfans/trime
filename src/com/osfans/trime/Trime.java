@@ -418,6 +418,8 @@ public class Trime extends InputMethodService implements
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
         mKeyboardSwitch.setKeyboard(event.select);
+        //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
+        Rime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode());
         bindKeyboardToInputView();
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
