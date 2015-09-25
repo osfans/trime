@@ -19,7 +19,6 @@ package com.osfans.trime;
 import android.content.res.Configuration;
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.inputmethodservice.InputMethodService;
 import android.text.InputType;
 import android.util.Log;
@@ -422,17 +421,15 @@ public class Trime extends InputMethodService implements
         bindKeyboardToInputView();
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
-        String s = Function.handle(event.command, event.option);
+        String s = Function.handle(this, event.command, event.option);
         if (s != null) {
           commitText(s);
           updateComposing();
         }
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
         new Speech(this).start();
-      } else if (code == KeyEvent.KEYCODE_BUTTON_START) { //啓動程序
-        openApp(event.option);
       } else if (code == KeyEvent.KEYCODE_SETTINGS) { //全局設定
-        showPrefDialog();
+        Function.showPrefDialog(this);
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
         showColorDialog();
       } else {
@@ -529,13 +526,13 @@ public class Trime extends InputMethodService implements
   }
 
   private void showDialog(AlertDialog dialog) {
-      Window window = dialog.getWindow();
-      WindowManager.LayoutParams lp = window.getAttributes();
-      if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
-      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-      window.setAttributes(lp);
-      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-      dialog.show();
+    Window window = dialog.getWindow();
+    WindowManager.LayoutParams lp = window.getAttributes();
+    if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
+    lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+    window.setAttributes(lp);
+    window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    dialog.show();
   }
 
   private void showColorDialog() {
@@ -546,23 +543,6 @@ public class Trime extends InputMethodService implements
   private void showSchemaDialog() {
     AlertDialog dialog = new SchemaDialog(this).getDialog();
     showDialog(dialog);
-  }
-
-  private void startIntent(Intent intent) {
-    requestHideSelf(0);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-    startActivity(intent);
-  }
-
-  private void openApp(String s) {
-    Intent intent = getPackageManager().getLaunchIntentForPackage(s);
-    startIntent(intent);
-  }
-
-  private void showPrefDialog() {
-    Intent intent = new Intent();
-    intent.setClass(Trime.this, Pref.class);
-    startIntent(intent);
   }
 
   private boolean handleOption(int keyCode) {
@@ -586,7 +566,7 @@ public class Trime extends InputMethodService implements
       })
       .setPositiveButton(R.string.set_ime, new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface di, int id) {
-          showPrefDialog(); //全局設置
+          Function.showPrefDialog(Trime.this); //全局設置
           di.dismiss();
         }
       });

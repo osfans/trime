@@ -748,7 +748,7 @@ preset_keys:
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
   Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"}
-  Tieba: {label: 貼吧, send: BUTTON_START, option: "com.baidu.tieba"}
+  Tieba: {label: 貼吧, send: function, command: run, option: "com.baidu.tieba"}
 
 preset_keyboards:
   default:

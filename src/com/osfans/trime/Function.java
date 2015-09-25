@@ -16,19 +16,37 @@
 
 package com.osfans.trime;
 
+import android.content.Context;
+import android.content.Intent;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Function {
   private static String TAG = "Function";
 
-  public static String handle(String command, String option) {
+  public static void openApp(Context context, String s) {
+    Intent intent = context.getPackageManager().getLaunchIntentForPackage(s);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+    context.startActivity(intent);
+  }
+
+  public static void showPrefDialog(Context context) {
+    Intent intent = new Intent();
+    intent.setClass(context, Pref.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+    context.startActivity(intent);
+  }
+
+  public static String handle(Context context, String command, String option) {
     String s = null;
     if (command == null) return s;
     switch (command) {
       case "date":
-        s = new SimpleDateFormat(option).format(new Date());
+        s = new SimpleDateFormat(option).format(new Date()); //時間
         break;
+      case "run":
+        openApp(context, option); //啓動程序
       default:
         break;
     }
