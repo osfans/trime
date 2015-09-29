@@ -611,6 +611,18 @@ preset_color_schemes:
     hilited_candidate_text_color: 0xffb00000
     hilited_comment_text_color: 0xffb00000
     hilited_candidate_back_color: 0xffffffff
+  tantsing:
+    name: 丹青
+    author: Mijiag
+    back_color: 0xffe3e3e3
+    border_color: 0xff000000
+    text_color: 0xff000000
+    hilited_text_color: 0xffe3e3e3
+    hilited_back_color: 0xff91071a
+    hilited_candidate_text_color: 0xffe3e3e3
+    hilited_candidate_back_color: 0xff730b6f
+    candidate_text_color: 0xff000000
+    comment_text_color: 0xff474747
 
 android_keys:
   name: [VoidSymbol, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
