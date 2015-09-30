@@ -812,7 +812,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 Arrays.fill(codes, NOT_A_KEY);
                 getKeyIndices(x, y, codes);
                 mKeyboardActionListener.onEvent(key.getEvent());
-                mKeyboardActionListener.onRelease(NOT_A_KEY);
+                mKeyboardActionListener.onRelease(code);
                 resetShifted();
             }
             mLastSentIndex = index;
@@ -1079,8 +1079,8 @@ public class KeyboardView extends View implements View.OnClickListener {
               return true;
             }
             if (key.isShift()) {
-                setShifted(!key.on, !key.on);
-                return true;
+              setShifted(!key.on, !key.on);
+              return true;
             }
         }
         return false;

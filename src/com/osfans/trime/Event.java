@@ -88,7 +88,7 @@ public class Event {
   public String getText() {
     String s = "";
     if (text != null && !text.isEmpty()) s = text;
-    else if (mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
+    else if (mKeyboard.isShifted() && mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
     return adjustCase(s);
   }
 
@@ -116,9 +116,13 @@ public class Event {
     return getRimeEvent(code, mask);
   }
 
-  public static int[] getRimeEvent(int code, int mask) {
+  public static int getRimeCode(int code) {
     String s = Key.androidKeys.get(code);
-    int i = Rime.get_keycode_by_name(s);
+    return Rime.get_keycode_by_name(s);
+  }
+
+  public static int[] getRimeEvent(int code, int mask) {
+    int i = getRimeCode(code);
     int m = 0;
     if ((mask & KeyEvent.META_SHIFT_ON) > 0) {
       m |= Rime.get_modifier_by_name("Shift");
@@ -129,6 +133,7 @@ public class Event {
     if ((mask & KeyEvent.META_ALT_ON) > 0) {
       m |= Rime.get_modifier_by_name("Alt");
     }
+    if (mask == (1<<30)) m |= Rime.get_modifier_by_name("Release");
     return new int[] {i, m};
   }
 

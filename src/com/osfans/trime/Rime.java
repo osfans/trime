@@ -286,7 +286,7 @@ public class Rime
 
   public static boolean onKey(int keycode, int mask) {
     boolean b = process_key(session_id, keycode, mask);
-    Log.info( "b="+b+",keycode="+keycode);
+    Log.info( "b="+b+",keycode="+keycode+",mask="+mask);
     getContexts();
     return b;
   }

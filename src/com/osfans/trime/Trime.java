@@ -448,12 +448,13 @@ public class Trime extends InputMethodService implements
   }
 
   public void onKey(int primaryCode, int mask) { //軟鍵盤
-    if (Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
+    if (handleOption(primaryCode)) {
+      Log.info("onOption");
+    } else if (Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
       updateComposing();
-    } else if (handleOption(primaryCode)
-      || handleEnter(primaryCode)
+    } else if (handleEnter(primaryCode)
       || handleAciton(primaryCode, mask)
       || handleBack(primaryCode)) {
       Log.info("Trime onKey");
@@ -478,7 +479,10 @@ public class Trime extends InputMethodService implements
   }
 
   public void onRelease(int primaryCode) {
-    // no-op
+    if (Rime.onKey(Event.getRimeEvent(primaryCode, 1<<30))) {
+      commitText();
+      updateComposing();
+    }
   }
 
   public void swipeLeft() {
