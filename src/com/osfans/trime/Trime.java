@@ -481,24 +481,20 @@ public class Trime extends InputMethodService implements
     // no-op
   }
 
-  public boolean swipeLeft() {
+  public void swipeLeft() {
     // no-op
-    return false;
   }
 
-  public boolean swipeRight() {
+  public void swipeRight() {
     // no-op
-    return false;
   }
 
-  public boolean swipeUp() {
+  public void swipeUp() {
     // no-op
-    return false;
   }
 
-  public boolean swipeDown() {
-    // requestHideSelf(0); //隱藏輸入窗
-    return false;
+  public void swipeDown() {
+    requestHideSelf(0); //隱藏輸入窗
   }
 
   public void onPickCandidate(int i) {

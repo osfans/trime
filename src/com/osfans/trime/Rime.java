@@ -41,13 +41,11 @@ public class Rime
 
     public int getStart() {
       if (length == 0) return 0;
-      Log.info("i="+sel_start+",start ="+ new String(bytes, 0, sel_start));
       return new String(bytes, 0, sel_start).length();
     }
 
     public int getEnd() {
       if (length == 0) return 0;
-      Log.info("i="+sel_end+",end ="+ new String(bytes, 0, sel_end));
       return new String(bytes, 0, sel_end).length();
     }
   };
@@ -317,21 +315,18 @@ public class Rime
 
   public static boolean commitComposition() {
     boolean b = commit_composition(session_id);
-    Log.info("commitComposition");
     getContexts();
     return b;
   }
 
   public static void clearComposition() {
     clear_composition(session_id);
-    Log.info("clearComposition");
     getContexts();
   }
 
   public static boolean selectCandidate(int index) {
     index += mContext.menu.page_no * mContext.menu.page_size; //從頭開始
     boolean b = select_candidate(session_id, index);
-    Log.info("selectCandidate");
     getContexts();
     return b;
   }
