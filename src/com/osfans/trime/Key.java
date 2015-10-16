@@ -33,7 +33,7 @@ public class Key {
   private Keyboard mKeyboard;
   public Event click, long_click, composing, ascii, has_menu, paging;
   public int width, height, gap, edgeFlags;
-  public String hint;
+  public String label, hint;
 
   public int x, y;
   public boolean pressed, on;
@@ -63,6 +63,7 @@ public class Key {
     }
     s = getString(mk, "ascii");
     if (!s.isEmpty()) ascii = new Event(mKeyboard, s);
+    label = getString(mk, "label");
     hint = getString(mk, "hint");
     if (isShift()) mKeyboard.mShiftKey = this;
   }
@@ -221,7 +222,9 @@ public class Key {
   }
 
   public String getLabel() {
-    return getEvent().getLabel();
+    Event event = getEvent();
+    if (!label.isEmpty() && event == click) return label;
+    return event.getLabel();
   }
 
   public String getPreviewText() {
