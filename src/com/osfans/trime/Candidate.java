@@ -57,8 +57,8 @@ public class Candidate extends View {
   private int num_candidates;
 
   private Drawable candidateHighlight, candidateSeparator;
-  private Paint paintCandidate, paintComment;
-  private Typeface tfCandidate, tfb, tfComment, tfs;
+  private Paint paintCandidate, paintSymbol, paintComment;
+  private Typeface tfCandidate, tfSymbol, tfComment, tfHanB;
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
@@ -82,12 +82,14 @@ public class Candidate extends View {
     comment_height = config.getPixel("comment_height");
 
     tfCandidate = config.getFont("candidate_font");
-    tfb = config.getFont("hanb_font");
+    tfHanB = config.getFont("hanb_font");
     tfComment = config.getFont("comment_font");
-    tfs = config.getFont("symbol_font");
+    tfSymbol = config.getFont("symbol_font");
 
     paintCandidate.setTextSize(candidate_text_size);
     paintCandidate.setTypeface(tfCandidate);
+    paintSymbol.setTextSize(candidate_text_size);
+    paintSymbol.setTypeface(tfSymbol);
     paintComment.setTextSize(comment_text_size);
     paintComment.setTypeface(tfComment);
 
@@ -103,6 +105,9 @@ public class Candidate extends View {
     paintCandidate = new Paint();
     paintCandidate.setAntiAlias(true);
     paintCandidate.setStrokeWidth(0);
+    paintSymbol = new Paint();
+    paintSymbol.setAntiAlias(true);
+    paintSymbol.setStrokeWidth(0);
     paintComment = new Paint();
     paintComment.setAntiAlias(true);
     paintComment.setStrokeWidth(0);
@@ -169,12 +174,12 @@ public class Candidate extends View {
     if (length == 0) return;
     int points = s.codePointCount(0, length);
     float x = center - paint.measureText(s) / 2;
-    if (tfb != null && length > points) {
+    if (tfHanB != null && length > points) {
       for (int offset = 0; offset < length; ) {
         int codepoint = s.codePointAt(offset);
         int charCount = Character.charCount(codepoint);
         int end = offset + charCount;
-        paint.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfb : font);
+        paint.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfHanB : font);
         canvas.drawText(s, offset, end, x, y, paint);
         x += paint.measureText(s, offset, end);
         offset += charCount;
@@ -213,12 +218,10 @@ public class Candidate extends View {
             x -= comment_width / 2;
             comment_x = candidateRect[i].right -  comment_width / 2;
           }
-          paintComment.setTypeface(tfComment);
           paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
           drawText(comment, canvas, paintComment, tfComment, comment_x, comment_y);
         }
       }
-      paintCandidate.setTypeface(tfCandidate);
       paintCandidate.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
       drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, x, y);
       // Draw the separator at the right edge of each candidate.
@@ -233,9 +236,9 @@ public class Candidate extends View {
     for (int j = -4; j >= -5; j--) { // -4: left, -5: right
       candidate = getCandidate(j);
       if (candidate == null) continue;
-      paintCandidate.setTypeface(tfs);
-      x = candidateRect[i].centerX() - paintCandidate.measureText(candidate) / 2;
-      canvas.drawText(candidate, x, y, paintCandidate);
+      paintSymbol.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
+      x = candidateRect[i].centerX() - paintSymbol.measureText(candidate) / 2;
+      canvas.drawText(candidate, x, y, paintSymbol);
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
         candidateRect[i].top,
