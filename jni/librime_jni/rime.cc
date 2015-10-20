@@ -179,6 +179,20 @@ jboolean get_context(JNIEnv *env, jobject thiz, jint session_id, jobject jcontex
     fid = env->GetFieldID(jc1, "select_keys", "Ljava/lang/String;");
     env->SetObjectField(jobj, fid, newJstring(env, context.menu.select_keys));
 
+    Bool has_labels = RIME_STRUCT_HAS_MEMBER(context, context.select_labels) && context.select_labels;
+    if (has_labels) {
+      int n = context.menu.page_size;
+      fid = env->GetFieldID(jc, "select_labels", "[Ljava/lang/String;");
+      jclass jcs = env->FindClass("java/lang/String");
+      jobjectArray jlabels = (jobjectArray) env->NewObjectArray(n, jcs, NULL);
+      for (int i = 0; i < n; ++i) {
+        env->SetObjectArrayElement(jlabels, i, newJstring(env, context.select_labels[i]));
+      }
+      env->SetObjectField(jcontext, fid, jlabels);
+      env->DeleteLocalRef(jlabels);
+      env->DeleteLocalRef(jcs);
+    }
+
     int n = context.menu.num_candidates;
     jclass jc2 = env->FindClass(CLASSNAME "$RimeCandidate");
     jobjectArray jcandidates = (jobjectArray) env->NewObjectArray(n, jc2, NULL);

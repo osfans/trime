@@ -78,6 +78,7 @@ public class Rime
     RimeMenu menu;
     // v0.9.2
     String commit_text_preview;
+    String[] select_labels;
 
     public int size() {
       return menu.num_candidates;
