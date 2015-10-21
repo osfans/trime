@@ -81,6 +81,7 @@ public class Rime
     String[] select_labels;
 
     public int size() {
+      if (menu == null) return 0;
       return menu.num_candidates;
     }
 
@@ -308,6 +309,20 @@ public class Rime
   public static RimeCandidate[] getCandidates() {
     if (!isComposing()) return mSchema.getCandidates();
     return mContext.getCandidates();
+  }
+
+  public static String[] getSelectLabels() {
+    if (mContext != null && mContext.size() > 0) {
+      if (mContext.select_labels != null) return mContext.select_labels;
+      if (mContext.menu.select_keys != null) return mContext.menu.select_keys.split("\\B");
+      int n = mContext.size();
+      String[] labels = new String[n];
+      for (int i = 0; i < n; i++) {
+        labels[i] = String.valueOf((i + 1)% 10);
+      }
+      return labels;
+    }
+    return null;
   }
 
   public static int getCandHighlightIndex() {
