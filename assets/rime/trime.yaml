@@ -811,12 +811,12 @@ preset_keyboards:
     - {click: ',', long_click: '<'}
     - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
-    - {click: Shift_L, composing: "'"}
+    - {click: Shift_L}
     - {click: 'Keyboard_number', long_click: Color_switch}
     - {click: Mode_switch, long_click: Menu}
     - {click: space, width: 30}
     - {click: "'", long_click: '"'}
-    - {click: BackSpace, long_click: Escape, width: 15}
+    - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
   number:
     name: 默認數字

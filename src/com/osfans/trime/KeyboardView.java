@@ -981,7 +981,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             return false;
         }
 
-        Key popupKey = mKeys[mCurrentKey];        
+        Key popupKey = mKeys[mCurrentKey];
         boolean result = onLongPress(popupKey);
         if (result) {
             mAbortKey = true;
@@ -1074,6 +1074,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             return true;
         } else {
             Key key = popupKey;
+            if (key.getEvent().repeatable) return false;
             if (key.long_click != null) {
               mKeyboardActionListener.onEvent(key.long_click);
               return true;
