@@ -387,15 +387,17 @@ public class KeyboardView extends View implements View.OnClickListener {
                 final float absY = Math.abs(velocityY);
                 float deltaX = me2.getX() - me1.getX();
                 float deltaY = me2.getY() - me1.getY();
-                int travelX = getWidth() / 2; // Half the keyboard width
-                int travelY = getHeight() / 2; // Half the keyboard height
-                mSwipeTracker.computeCurrentVelocity(1000);
+                int travelX = 0; //getWidth() / 2; // Half the keyboard width
+                int travelY = 0; //getHeight() / 2; // Half the keyboard height
+                mSwipeTracker.computeCurrentVelocity(100);
                 final float endingVelocityX = mSwipeTracker.getXVelocity();
                 final float endingVelocityY = mSwipeTracker.getYVelocity();
                 boolean sendDownKey = false;
+                int direction = -1;
                 if (velocityX > mSwipeThreshold && absY < absX && deltaX > travelX) {
                     if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
                         sendDownKey = true;
+                        direction = 1;
                     } else {
                         swipeRight();
                         return true;
@@ -403,6 +405,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
                     if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
                         sendDownKey = true;
+                        direction = 0;
                     } else {
                         swipeLeft();
                         return true;
@@ -410,6 +413,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
                     if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
                         sendDownKey = true;
+                        direction = 2;
                     } else {
                         swipeUp();
                         return true;
@@ -417,6 +421,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
                     if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                         sendDownKey = true;
+                        direction = 3;
                     } else {
                         swipeDown();
                         return true;
@@ -424,7 +429,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 }
 
                 if (sendDownKey) {
-                    detectAndSendKey(mDownKey, mStartX, mStartY, me1.getEventTime());
+                    detectAndSendKey(mDownKey, mStartX, mStartY, me1.getEventTime(), direction);
+                    return true;
                 }
                 return false;
             }
@@ -800,24 +806,28 @@ public class KeyboardView extends View implements View.OnClickListener {
         return primaryIndex;
     }
 
-    private void detectAndSendKey(int index, int x, int y, long eventTime) {
+    private void detectAndSendKey(int index, int x, int y, long eventTime, int direction) {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
             if (key.isShift()) {
                setShifted(false, !isShifted());
             } else {
-                int code = key.getCode();
+                int code = key.getCode(direction);
                 //TextEntryState.keyPressedAt(key, x, y);
                 int[] codes = new int[MAX_NEARBY_KEYS];
                 Arrays.fill(codes, NOT_A_KEY);
                 getKeyIndices(x, y, codes);
-                mKeyboardActionListener.onEvent(key.getEvent());
+                mKeyboardActionListener.onEvent(key.getEvent(direction));
                 mKeyboardActionListener.onRelease(code);
                 resetShifted();
             }
             mLastSentIndex = index;
             mLastTapTime = eventTime;
         }
+    }
+
+    private void detectAndSendKey(int index, int x, int y, long eventTime) {
+        detectAndSendKey(index, x, y, eventTime, -1);
     }
 
     private void showPreview(int keyIndex) {

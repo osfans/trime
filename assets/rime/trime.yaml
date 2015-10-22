@@ -673,10 +673,10 @@ android_keys:
     click: 單擊
     long_click: 長按
     #double_click: 雙擊
-    #swipe_left: 左滑
-    #swipe_right: 右滑
-    #swipe_up: 上滑
-    #swipe_down: 下滑
+    swipe_left: 左滑
+    swipe_right: 右滑
+    swipe_up: 上滑
+    swipe_down: 下滑
   property:
     width: 寬度
     height: 高度

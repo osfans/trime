@@ -32,6 +32,8 @@ public class Key {
   private String TAG = "Key";
   private Keyboard mKeyboard;
   public Event click, long_click, composing, ascii, has_menu, paging;
+  public Event[] swipes = new Event[4];
+  public String[] directions = new String[]{"swipe_left", "swipe_right", "swipe_up", "swipe_down"};
   public int width, height, gap, edgeFlags;
   public String label, hint;
 
@@ -63,6 +65,11 @@ public class Key {
     }
     s = getString(mk, "ascii");
     if (!s.isEmpty()) ascii = new Event(mKeyboard, s);
+    for (int i = 0; i < 4; i++) {
+      String direction = directions[i];
+      s = getString(mk, direction);
+      if (!s.isEmpty()) swipes[i] = new Event(mKeyboard, s);
+    }
     label = getString(mk, "label");
     hint = getString(mk, "hint");
     if (isShift()) mKeyboard.mShiftKey = this;
@@ -217,8 +224,22 @@ public class Key {
     return click;
   }
 
+  public Event getEvent(int i) {
+    Event e = null;
+    if (i >= 0 && i < 4) e = swipes[i];
+    if (e != null) return e;
+    if (composing != null && Rime.isComposing()) return composing;
+    if (ascii != null && Rime.isAsciiMode()) return ascii;
+    if (long_click != null && i >= 0) return long_click;
+    return click;
+  }
+
   public int getCode() {
     return getEvent().code;
+  }
+
+  public int getCode(int direction) {
+    return getEvent(direction).code;
   }
 
   public String getLabel() {
