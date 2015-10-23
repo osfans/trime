@@ -31,9 +31,17 @@ import java.util.HashMap;
 public class Key {
   private String TAG = "Key";
   private Keyboard mKeyboard;
-  public Event click, long_click, composing, ascii, has_menu, paging;
-  public Event[] swipes = new Event[4];
-  public String[] directions = new String[]{"swipe_left", "swipe_right", "swipe_up", "swipe_down"};
+  public Event composing, ascii, has_menu, paging;
+  public String[] eventTypes = new String[]{"click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down"};
+  public static final int CLICK = 0;
+  public static final int LONG_CLICK = 1;
+  public static final int SWIPE_LEFT = 2;
+  public static final int SWIPE_RIGHT = 3;
+  public static final int SWIPE_UP = 4;
+  public static final int SWIPE_DOWN = 5;
+  public static final int EVENT_NUM = 6;
+  public Event[] events = new Event[EVENT_NUM];
+
   public int width, height, gap, edgeFlags;
   public String label, hint;
 
@@ -54,10 +62,11 @@ public class Key {
   public Key(Keyboard parent, Map<String,Object> mk) {
     this(parent);
     String s;
-    s = getString(mk, "click");
-    if (!s.isEmpty()) click = new Event(mKeyboard, s);
-    s = getString(mk, "long_click");
-    if (!s.isEmpty()) long_click = new Event(mKeyboard, s);
+    for (int i = 0; i < EVENT_NUM; i++) {
+      String eventType = eventTypes[i];
+      s = getString(mk, eventType);
+      if (!s.isEmpty()) events[i] = new Event(mKeyboard, s);
+    }
     s = getString(mk, "composing");
     if (!s.isEmpty()) {
       composing = new Event(mKeyboard, s);
@@ -65,11 +74,6 @@ public class Key {
     }
     s = getString(mk, "ascii");
     if (!s.isEmpty()) ascii = new Event(mKeyboard, s);
-    for (int i = 0; i < 4; i++) {
-      String direction = directions[i];
-      s = getString(mk, direction);
-      if (!s.isEmpty()) swipes[i] = new Event(mKeyboard, s);
-    }
     label = getString(mk, "label");
     hint = getString(mk, "hint");
     if (isShift()) mKeyboard.mShiftKey = this;
@@ -128,7 +132,7 @@ public class Key {
      */
     public void onReleased(boolean inside) {
         pressed = !pressed;
-        if (click.sticky) on = !on;
+        if (getClick().sticky) on = !on;
     }
 
     /**
@@ -181,7 +185,7 @@ public class Key {
                 states = KEY_STATE_NORMAL_ON;
             }
         } else {
-            if (click.sticky || click.functional) {
+            if (getClick().sticky || getClick().functional) {
                 if (pressed) {
                     states = KEY_STATE_PRESSED_OFF;
                 } else {
@@ -221,38 +225,46 @@ public class Key {
   public Event getEvent() {
     if (composing != null && Rime.isComposing()) return composing;
     if (ascii != null && Rime.isAsciiMode()) return ascii;
-    return click;
+    return getClick();
+  }
+
+  public Event getClick() {
+    return events[CLICK];
+  }
+
+  public Event getLongClick() {
+    return events[LONG_CLICK];
   }
 
   public Event getEvent(int i) {
     Event e = null;
-    if (i >= 0 && i < 4) e = swipes[i];
+    if (i >= 0 && i <= EVENT_NUM) e = events[i];
     if (e != null) return e;
     if (composing != null && Rime.isComposing()) return composing;
     if (ascii != null && Rime.isAsciiMode()) return ascii;
-    if (long_click != null && i >= 0) return long_click;
-    return click;
+    if (getLongClick() != null && i >= 0) return getLongClick();
+    return getClick();
   }
 
   public int getCode() {
     return getEvent().code;
   }
 
-  public int getCode(int direction) {
-    return getEvent(direction).code;
+  public int getCode(int type) {
+    return getEvent(type).code;
   }
 
   public String getLabel() {
     Event event = getEvent();
-    if (!label.isEmpty() && event == click) return label;
+    if (!label.isEmpty() && event == getClick()) return label;
     return event.getLabel();
   }
 
-  public String getPreviewText() {
-    return getEvent().getPreviewText();
+  public String getPreviewText(int type) {
+    return getEvent(type).getPreviewText();
   }
 
   public String getSymbolLabel() {
-    return long_click.getLabel();
+    return getLongClick().getLabel();
   }
 }

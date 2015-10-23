@@ -168,7 +168,7 @@ public class Keyboard {
             key.width = mDefaultWidth;
             key.height = mDefaultHeight;
             key.gap = mDefaultHorizontalGap;
-            key.click = new Event(this, String.valueOf(c));
+            key.events[0] = new Event(this, String.valueOf(c));
             column++;
             x += key.width + key.gap;
             mKeys.add(key);
