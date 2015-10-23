@@ -49,7 +49,7 @@ public class KeyboardSwitch {
 
   public void setKeyboard(String name){
     int i;
-    if (name == null) {
+    if (name == null || name.contentEquals(".default")) {
       i = 0;
     } else if (name.contentEquals(".prior")) { //前一個
       i = currentId - 1;

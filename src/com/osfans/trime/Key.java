@@ -256,7 +256,9 @@ public class Key {
 
   public String getLabel() {
     Event event = getEvent();
-    if (!label.isEmpty() && event == getClick()) return label;
+    if (!label.isEmpty() && event == getClick()
+    && (ascii == null && !Rime.isAsciiMode()))
+      return label; //中文狀態顯示標籤
     return event.getLabel();
   }
 

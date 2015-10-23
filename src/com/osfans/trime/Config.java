@@ -32,6 +32,7 @@ public class Config {
   private Map<String, Object> mStyle, mDefaultStyle;
   private Map<String, Map<String, Object>> maps;
   private String defaultName = "trime.yaml";
+  private String schema_id;
   private static String USER_DATA_DIR = "/sdcard/rime";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
@@ -119,7 +120,7 @@ public class Config {
   }
 
   public void reset() {
-    String schema_id = Rime.getSchemaId();
+    schema_id = Rime.getSchemaId();
     if (maps.containsKey(schema_id)) {
       mStyle = maps.get(schema_id);
       return;
@@ -138,6 +139,25 @@ public class Config {
   }
 
   public Map<String, Object> getKeyboard(String name) {
+    if (name.contentEquals(".default")) {
+      if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名
+      else if (schema_id.indexOf("_") >= 0) {
+        name = schema_id.split("_")[0];
+        if (!presetKeyboards.containsKey(name)) { //匹配“_”前的方案名
+          Object o = Rime.schema_get_value(schema_id, "speller/alphabet");
+          name = "qwerty"; //26
+          if (o != null) {
+            String alphabet = (String) o;
+            if (presetKeyboards.containsKey(alphabet)) name = alphabet; //匹配字母表
+            else {
+              if (alphabet.indexOf(",") >= 0 || alphabet.indexOf(";") >= 0) name += "_";
+              if (alphabet.indexOf("0") >= 0 || alphabet.indexOf("1") >= 0) name += "0";
+            }
+          }
+        }
+      }
+    }
+    if (!presetKeyboards.containsKey(name)) name = "default";
     return (Map<String, Object>)presetKeyboards.get(name);
   }
 
