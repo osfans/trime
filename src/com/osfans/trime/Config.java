@@ -158,7 +158,12 @@ public class Config {
       }
     }
     if (!presetKeyboards.containsKey(name)) name = "default";
-    return (Map<String, Object>)presetKeyboards.get(name);
+    Map<String, Object> m = (Map<String, Object>)presetKeyboards.get(name);
+    if (m.containsKey("import_preset")) {
+      name = (String)m.get("import_preset");
+      m = (Map<String, Object>)presetKeyboards.get(name);
+    }
+    return m;
   }
 
   public List<String> getKeyboardNames() {

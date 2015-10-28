@@ -1174,3 +1174,5 @@ preset_keyboards:
     - {click: space, width: 40}
     - {click: 'Keyboard_letter', long_click: Menu, width: 10}
     - {click: Return, long_click: CommitComment, width: 20}
+  scj6:
+    import_preset: cangjie5
