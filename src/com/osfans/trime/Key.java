@@ -242,7 +242,7 @@ public class Key {
     if (e != null) return e;
     if (composing != null && Rime.isComposing()) return composing;
     if (ascii != null && Rime.isAsciiMode()) return ascii;
-    if (getLongClick() != null && i >= 0) return getLongClick();
+    //if (getLongClick() != null && i >= 0) return getLongClick(); //滑動默認長按
     return getClick();
   }
 
