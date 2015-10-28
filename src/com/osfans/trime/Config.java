@@ -138,7 +138,7 @@ public class Config {
     return null;
   }
 
-  public Map<String, Object> getKeyboard(String name) {
+  public String getKeyboardName(String name) {
     if (name.contentEquals(".default")) {
       if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名
       else if (schema_id.indexOf("_") >= 0) {
@@ -161,13 +161,22 @@ public class Config {
     Map<String, Object> m = (Map<String, Object>)presetKeyboards.get(name);
     if (m.containsKey("import_preset")) {
       name = (String)m.get("import_preset");
-      m = (Map<String, Object>)presetKeyboards.get(name);
     }
-    return m;
+    return name;
   }
 
   public List<String> getKeyboardNames() {
-    return (List<String>)getValue("keyboards");
+    List<String> names = (List<String>)getValue("keyboards");
+    int n = names.size();
+    for (int i = 0; i < n; i++) {
+      names.set(i, getKeyboardName(names.get(i)));
+    }
+    return names;
+  }
+
+  public Map<String, Object> getKeyboard(String name) {
+    if (!presetKeyboards.containsKey(name)) name = "default";
+    return (Map<String, Object>)presetKeyboards.get(name);
   }
 
   public static Config get() {
