@@ -26,6 +26,7 @@ import android.graphics.Typeface;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.io.*;
 
 public class Config {
@@ -53,7 +54,6 @@ public class Config {
   }
 
   public static boolean prepareRime(Context context) {
-    Log.e("Config", "prepare rime");
     if (new File(USER_DATA_DIR).exists()) return false;
     copyFileOrDir(context, "rime", false);
     Rime.get(true);
@@ -167,11 +167,12 @@ public class Config {
 
   public List<String> getKeyboardNames() {
     List<String> names = (List<String>)getValue("keyboards");
-    int n = names.size();
-    for (int i = 0; i < n; i++) {
-      names.set(i, getKeyboardName(names.get(i)));
+    List<String> keyboards = new ArrayList<String>();
+    for (String s: names) {
+      s = getKeyboardName(s);
+      if (!keyboards.contains(s)) keyboards.add(s);
     }
-    return names;
+    return keyboards;
   }
 
   public Map<String, Object> getKeyboard(String name) {
