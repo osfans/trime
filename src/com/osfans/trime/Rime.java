@@ -138,9 +138,10 @@ public class Rime
       for (Map<String, Object> o: switches) {
         candidates[i] = new RimeCandidate();
         List<String> states = (List<String>)o.get("states");
-        int value = (Integer)o.get("value");
+        Integer value = (Integer)o.get("value");
+        if (value == null) value = 0;
         candidates[i].text = states.get(value);
-        candidates[i].comment = o.containsKey("option") ? "" : kRightArrow + states.get(1 - value);
+        candidates[i].comment = o.containsKey("options") ? "" : kRightArrow + states.get(1 - value);
         i++;
       }
       return candidates;
@@ -150,8 +151,8 @@ public class Rime
       if (switches.isEmpty()) return; //無方案
       for (int j = 0; j < switches.size(); j++) {
         Map<String, Object> o =  switches.get(j);
-        if (o.containsKey("option")) {
-          List<String> options = (List<String>)o.get("option");
+        if (o.containsKey("options")) {
+          List<String> options = (List<String>)o.get("options");
           for (int i = 0; i < options.size(); i++) {
             String s = options.get(i);
             if (Rime.get_option(session_id, s)) {
@@ -170,8 +171,9 @@ public class Rime
       if (switches.isEmpty()) return;
       Map<String, Object> o =  switches.get(i);
       Integer value = (Integer)o.get("value");
-      if (o.containsKey("option")) {
-        List<String> options = (List<String>)o.get("option");
+      if (value == null) value = 0;
+      if (o.containsKey("options")) {
+        List<String> options = (List<String>)o.get("options");
         Rime.setOption(options.get(value), false);
         value = (value + 1) % options.size();
         Rime.setOption(options.get(value), true);
