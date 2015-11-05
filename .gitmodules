@@ -22,3 +22,6 @@
 [submodule "jni/librime"]
 	path = jni/librime
 	url = git@github.com:rime/librime.git
+[submodule "jni/libiconv"]
+	path = jni/libiconv
+	url = git@github.com:zhengyi0802/android-external-libiconv.git

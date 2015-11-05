@@ -23,3 +23,4 @@ include jni/boost.mk #1.59
 include jni/miniglog.mk
 include jni/librime.mk #1.2.9
 include jni/librime_jni.mk
+include jni/libiconv.mk #1.14

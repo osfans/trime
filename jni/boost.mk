@@ -32,6 +32,8 @@ LOCAL_SRC_FILES += \
   libs/regex/src/regex.cpp \
   \
   libs/system/src/error_code.cpp \
+  \
+  libs/locale/src/encoding/codepage.cpp \
 
 ifeq ($(BOOST_USE_SIGNALS2),)
 LOCAL_SRC_FILES += \
@@ -41,6 +43,9 @@ LOCAL_SRC_FILES += \
   libs/signals/src/named_slot_map.cpp \
   libs/signals/src/slot.cpp
 endif
+
+LOCAL_CFLAGS += -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_LOCALE_WITH_ICONV
+LOCAL_STATIC_LIBRARIES += iconv
 
 #LOCAL_LDLIBS := -latomic
 # 如果要把boost集成到动态库里，-fPIC是必须的，不然会有链接错误。原因请自行Google
