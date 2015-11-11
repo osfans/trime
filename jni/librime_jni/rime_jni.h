@@ -2,8 +2,9 @@
 #define RIME_JNI_H_
 
 #include <jni.h>
-#include <string>
 #include <stdio.h>
+#include <string.h>
+#include <string>
 
 #define TAG "Rime-JNI"
 #ifdef ANDROID

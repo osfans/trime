@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := rime #1.2.9
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
 
 LOCAL_SRC_FILES += \
   src/commit_history.cc \
@@ -96,7 +96,9 @@ LOCAL_SRC_FILES += \
   src/lever/custom_settings.cc \
 
 LOCAL_CFLAGS := $(CXX_DEFINES)
-ifneq ($(BOOST_USE_SIGNALS2),)
+ifeq ($(BOOST_USE_SIGNALS2),)
+LOCAL_CFLAGS +=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING
+else
 LOCAL_CFLAGS += -DBOOST_SIGNALS2
 endif
 LOCAL_STATIC_LIBRARIES := boost leveldb marisa yaml-cpp miniglog opencc

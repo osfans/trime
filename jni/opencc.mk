@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 LOCAL_PATH := $(ROOT_PATH)/OpenCC
-CXX_DEFINES := -DVERSION="\"1.0.3\""
+CXX_DEFINES := -DVERSION="\"1.0.3\"" -DOpencc_BUILT_AS_STATIC
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc #1.0.3
@@ -37,6 +37,7 @@ LOCAL_SRC_FILES := src/BinaryDict.cpp \
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps/rapidjson-0.11 $(LOCAL_PATH)/deps/darts-clone
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/ $(LOCAL_PATH)/src $(LOCAL_PATH)/deps/tclap-1.2.1
 LOCAL_CFLAGS := $(CXX_DEFINES)
+LOCAL_EXPORT_CFLAGS := -DOpencc_BUILT_AS_STATIC
 include $(BUILD_STATIC_LIBRARY)
 
 ifneq ($(OPENCC_TOOLS),)

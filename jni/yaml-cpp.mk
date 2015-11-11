@@ -36,6 +36,7 @@ LOCAL_SRC_FILES := \
     src/tag.cpp
 
 #LOCAL_LDLIBS := -latomic
+LOCAL_STATIC_LIBRARIES := boost
 include $(BUILD_STATIC_LIBRARY)
 
 ifneq ($(YAML_CPP_TOOLS),)
