@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_TOOLCHAIN_FILE=$(dirname $0)/android-cmake/android.toolchain.cmake \
+    -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 \
+    -DANDROID_ABI=armeabi \
+    -DANDROID_STL=c++_static \
+    -DANDROID_NATIVE_API_LEVEL=4 \
+    "$@"
