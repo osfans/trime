@@ -83,7 +83,10 @@ add_library(boost-static STATIC ${BOOST_SOURCES} ${BOOST_SIGNAL_SOURCES})
 target_compile_definitions(boost-static PRIVATE BOOST_LOCALE_WITH_ICONV)
 target_link_libraries(boost-static iconv-static)
 if(WIN32)
-target_link_libraries(boost-static boost_thread-mt.a)
+  file(GLOB BOOST_THREAD_SOURCES boost/libs/thread/src/win32/*.cpp)
+  target_sources(boost-static PRIVATE ${BOOST_THREAD_SOURCES})
+  target_compile_definitions(boost-static PRIVATE BOOST_THREAD_BUILD_LIB)
+  #target_link_libraries(boost-static boost_thread-mt.a)
 endif()
 
 # leveldb
