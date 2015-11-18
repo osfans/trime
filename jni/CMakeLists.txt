@@ -196,6 +196,28 @@ elseif(UNIX)
 target_compile_definitions(opencc-static PRIVATE PKGDATADIR="/usr/share/opencc")
 endif()
 
+# opencc tools
+add_executable(opencc OpenCC/src/tools/CommandLine.cpp)
+target_link_libraries(opencc opencc-static)
+target_include_directories(opencc BEFORE PRIVATE
+  OpenCC/src
+  OpenCC/deps/tclap-1.2.1
+  )
+## opencc_dict
+add_executable(opencc_dict OpenCC/src/tools/DictConverter.cpp)
+target_link_libraries(opencc_dict opencc-static)
+target_include_directories(opencc_dict BEFORE PRIVATE
+  OpenCC/src
+  OpenCC/deps/tclap-1.2.1
+  )
+## opencc_phrase_extract
+add_executable(opencc_phrase_extract OpenCC/src/tools/PhraseExtract.cpp)
+target_link_libraries(opencc_phrase_extract opencc-static)
+target_include_directories(opencc_phrase_extract BEFORE PRIVATE
+  OpenCC/src
+  OpenCC/deps/tclap-1.2.1
+  )
+
 # rime
 #add_subdirectory(librime)
 find_package (Threads)
@@ -224,13 +246,10 @@ if(ANDROID)
 endif()
 
 # rime tools
-if(ANDROID)
-else()
 foreach(tool rime_api_console rime_console rime_deployer rime_dict_manager rime_patch)
 add_executable(${tool} "librime/tools/${tool}.cc")
 target_link_libraries(${tool} rime ${CMAKE_THREAD_LIBS_INIT})
 endforeach(tool)
-endif(ANDROID)
 
 # rime_jni
 if(UNIX)
