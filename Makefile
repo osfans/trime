@@ -1,6 +1,6 @@
 .PHONY: all install apk android linux win32 win64
 
-all: android linux win32 win64
+all: android linux win32
 
 install: android
 	ant release install
@@ -22,15 +22,15 @@ android:
 
 linux:
 	mkdir -p build-linux
-	(cd build-linux; cmake ../jni)
+	(cd build-linux; cmake -DCMAKE_BUILD_TYPE=Release ../jni)
 	${MAKE} -C build-linux
 
 win32:
 	mkdir -p build-win32
-	(cd build-win32; i686-w64-mingw32-cmake ../jni)
+	(cd build-win32; i686-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release ../jni)
 	${MAKE} -C build-win32 rime
 
 win64:
 	mkdir -p build-win64
-	(cd build-win64; x86_64-w64-mingw32-cmake ../jni)
+	(cd build-win64; x86_64-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release ../jni)
 	${MAKE} -C build-win64 rime
