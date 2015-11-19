@@ -6,7 +6,6 @@ add_subdirectory(jni)
 if(ANDROID)
 # make [trime|apk]
 add_custom_target(trime ALL
-  COMMAND ${CMAKE_STRIP} --strip-unneeded libs/*/*.so
   COMMAND ant release
   DEPENDS rime_jni)
 add_custom_target(apk DEPENDS trime)

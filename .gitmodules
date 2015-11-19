@@ -9,7 +9,7 @@
 	url = git@github.com:google/snappy.git
 [submodule "jni/leveldb"]
 	path = jni/leveldb
-	url = git@github.com:google/leveldb.git
+	url = git@github.com:GamerSg/leveldb-mingw.git
 [submodule "jni/boost"]
 	path = jni/boost
 	url = git@github.com:boostorg/boost.git

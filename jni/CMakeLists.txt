@@ -27,8 +27,13 @@ include_directories(
 # flags
 add_definitions(-w -DOpencc_BUILT_AS_STATIC)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpic -frtti -fexceptions")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s")
 if(UNIX)
   add_definitions(-fPIC)
+elseif(WIN32)
+  set(STATIC_FLAGS "-static-libstdc++ -static-libgcc -static")
+  set(CMAKE_SHARED_LIBRARY_PREFIX "")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${STATIC_FLAGS}")
 endif()
 if(ANDROID AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_definitions(-no-integrated-as)
@@ -82,14 +87,13 @@ endif()
 add_library(boost-static STATIC ${BOOST_SOURCES} ${BOOST_SIGNAL_SOURCES})
 target_compile_definitions(boost-static PRIVATE BOOST_LOCALE_WITH_ICONV)
 target_link_libraries(boost-static iconv-static)
-if(WIN32)
-  file(GLOB BOOST_THREAD_SOURCES boost/libs/thread/src/win32/*.cpp)
-  target_sources(boost-static PRIVATE ${BOOST_THREAD_SOURCES})
-  target_compile_definitions(boost-static PRIVATE BOOST_THREAD_BUILD_LIB)
-  #target_link_libraries(boost-static boost_thread-mt.a)
-endif()
 
 # leveldb
+if(WIN32)
+  set(LEVELDB_PLATFORM win)
+else()
+  set(LEVELDB_PLATFORM posix)
+endif()
 set(LEVELDB_SOURCES
   leveldb/db/builder.cc
   leveldb/db/c.cc
@@ -127,19 +131,9 @@ set(LEVELDB_SOURCES
   leveldb/util/logging.cc
   leveldb/util/options.cc
   leveldb/util/status.cc
+  leveldb/util/env_${LEVELDB_PLATFORM}.cc
+  leveldb/port/port_${LEVELDB_PLATFORM}.cc
   )
-if(UNIX)
-list(APPEND LEVELDB_SOURCES
-  leveldb/util/env_posix.cc
-  leveldb/port/port_posix.cc
-  )
-elseif(WIN32)
-list(APPEND LEVELDB_SOURCES
-  leveldb/port/port_win.cc
-  leveldb/util/env_boost.cc
-  leveldb/util/win_logger.cc
-  )
-endif(UNIX)
 set(LEVELDB_FLAGS _REENTRANT NDEBUG LEVELDB_ATOMIC_PRESENT)
 if(ANDROID)
 list(APPEND LEVELDB_FLAGS OS_ANDROID LEVELDB_PLATFORM_POSIX)
@@ -155,6 +149,9 @@ target_compile_options(leveldb-static PRIVATE -fno-builtin-memcmp)
 if(LEVELDB_USE_SNAPPY)
 target_compile_definitions(leveldb-static PRIVATE SNAPPY)
 target_link_libraries(leveldb-static snappy-static)
+endif()
+if(WIN32)
+target_link_libraries(leveldb-static snappy-static shlwapi)
 endif()
 
 # yaml-cpp
@@ -201,21 +198,21 @@ endif()
 
 # opencc tools
 add_executable(opencc OpenCC/src/tools/CommandLine.cpp)
-target_link_libraries(opencc opencc-static)
+target_link_libraries(opencc opencc-static ${STATIC_FLAGS})
 target_include_directories(opencc BEFORE PRIVATE
   OpenCC/src
   OpenCC/deps/tclap-1.2.1
   )
 ## opencc_dict
 add_executable(opencc_dict OpenCC/src/tools/DictConverter.cpp)
-target_link_libraries(opencc_dict opencc-static)
+target_link_libraries(opencc_dict opencc-static ${STATIC_FLAGS})
 target_include_directories(opencc_dict BEFORE PRIVATE
   OpenCC/src
   OpenCC/deps/tclap-1.2.1
   )
 ## opencc_phrase_extract
 add_executable(opencc_phrase_extract OpenCC/src/tools/PhraseExtract.cpp)
-target_link_libraries(opencc_phrase_extract opencc-static)
+target_link_libraries(opencc_phrase_extract opencc-static ${STATIC_FLAGS})
 target_include_directories(opencc_phrase_extract BEFORE PRIVATE
   OpenCC/src
   OpenCC/deps/tclap-1.2.1
