@@ -1,6 +1,8 @@
-.PHONY: all install clean apk android linux win32 win64
+.PHONY: all release install clean apk android linux win32
 
 all: android linux win32
+
+release: apk win32
 
 install: android
 	ant release install
@@ -29,11 +31,8 @@ win32:
 	mkdir -p build-win32
 	(cd build-win32; i686-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release ../jni)
 	${MAKE} -C build-win32 rime
-
-win64:
-	mkdir -p build-win64
-	(cd build-win64; x86_64-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release ../jni)
-	${MAKE} -C build-win64 rime
+	mkdir -p bin
+	7z a bin/rime-win32-`date +%Y%m%d`.dll.7z build-win32/rime.dll
 
 clean:
 	git clean -fd
