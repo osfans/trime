@@ -34,6 +34,12 @@ import android.widget.Toast;
 import android.content.Intent;
 import android.provider.Settings;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodInfo;
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build.VERSION_CODES;
+import android.os.Build.VERSION;
 
 /**
  * Manages IME preferences. 
@@ -99,12 +105,32 @@ public class Pref extends PreferenceActivity {
     Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
   }
 
+  public boolean isEnabled() {
+    boolean enabled = false;
+    for(InputMethodInfo i: ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).getEnabledInputMethodList()) {
+      if(getPackageName().contentEquals(i.getPackageName())) {
+        enabled = true;
+        break;
+      }
+    }
+    return enabled;
+  }
+
+  public void requestPermission() {
+    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+      if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+      }
+    }
+  }
+
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     boolean b;
     switch (preference.getKey()) {
       case "pref_enable": //啓用
-        startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
+        requestPermission();
+        if (!isEnabled()) startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
         return true;
       case "pref_select": //切換
         ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
