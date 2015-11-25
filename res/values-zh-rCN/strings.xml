@@ -28,8 +28,10 @@
     <string name="pref_ver">平台版本</string>
 
     <string name="pref_config">配置</string>
-    <string name="pref_colors">配色</string>
+    <string name="pref_enable">启用</string>
+    <string name="pref_select">切换</string>
     <string name="pref_schemas">方案</string>
+    <string name="pref_colors">配色</string>
     <string name="pref_reset">回厂</string>
     <string name="pref_reset_summary">使用默认配置覆盖/sdcard/rime/下同名文件</string>
 

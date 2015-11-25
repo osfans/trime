@@ -31,6 +31,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.util.Log;
 import android.widget.Toast;
+import android.content.Intent;
+import android.provider.Settings;
+import android.view.inputmethod.InputMethodManager;
 
 /**
  * Manages IME preferences. 
@@ -100,6 +103,12 @@ public class Pref extends PreferenceActivity {
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     boolean b;
     switch (preference.getKey()) {
+      case "pref_enable": //啓用
+        startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
+        return true;
+      case "pref_select": //切換
+        ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
+        return true;
       case "pref_colors": //配色
         new ColorDialog(this).show();
         return true;
