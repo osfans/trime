@@ -22,7 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.PaintDrawable;
 
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -69,8 +69,10 @@ public class Candidate extends View {
 
   public void reset() {
     Config config = Config.get();
-    candidateHighlight = new ColorDrawable(config.getColor("hilited_candidate_back_color"));
-    candidateSeparator = new ColorDrawable(config.getColor("candidate_separator_color"));
+    candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
+    ((PaintDrawable)candidateHighlight).setCornerRadius(config.getFloat("round_corner"));
+    candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
+
     candidate_text_color = config.getColor("candidate_text_color");
     comment_text_color = config.getColor("comment_text_color");
     hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");

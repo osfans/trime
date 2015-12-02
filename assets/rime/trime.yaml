@@ -48,7 +48,7 @@ style:
   preview_text_size: 40 #按鍵提示字號
   repeat_interval: 50 #空格鍵、刪除鍵等自動重複間隔：50毫秒即1秒20次
   repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
-  round_corner: 4
+  round_corner: 15.0 #按鍵圓角半徑
   shadow_radius: 0.0
   show_candidate: true #顯示候選區
   show_comment: true #顯示提示區
@@ -85,17 +85,17 @@ fallback_colors:
   hilited_off_key_text_color: hilited_key_text_color
   hilited_on_key_text_color: hilited_key_text_color
   key_back_color: back_color
-  keyboard_back_color: key_back_color
   key_border_color: border_color
   key_text_color: text_color
   key_symbol_color: key_text_color
+  keyboard_back_color: border_color
   label_color: candidate_text_color
   off_key_back_color: key_back_color
   off_key_text_color: key_text_color
   on_key_back_color: hilited_key_back_color
   on_key_text_color: hilited_key_text_color
-  preview_back_color: key_back_color
-  preview_text_color: key_text_color
+  preview_back_color: key_text_color
+  preview_text_color: key_back_color
   shadow_color: border_color
 
 preset_color_schemes:

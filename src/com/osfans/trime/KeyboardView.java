@@ -18,7 +18,6 @@ package com.osfans.trime;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -33,6 +32,8 @@ import android.graphics.Typeface;
 import android.graphics.Paint.Align;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PaintDrawable;
+
 //import android.inputmethodservice.Keyboard.Key;
 //import android.media.AudioManager;
 import android.os.Handler;
@@ -147,7 +148,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int key_symbol_color, hilited_key_symbol_color;
     private int mSymbolSize;
     private Paint mPaintSymbol;
-    private float mShadowRadius;
+    private float mShadowRadius, mRoundCorner;
     private int mShadowColor;
     private float mBackgroundDimAmount;
     
@@ -299,6 +300,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         mBackgroundDimAmount = config.getFloat("background_dim_amount");
         mShadowRadius = config.getFloat("shadow_radius");
+        mRoundCorner = config.getFloat("round_corner");
 
         mKeyBackColor = new ColorStateList(Key.KEY_STATES, new int[]{
             config.getColor("hilited_on_key_back_color"),
@@ -319,7 +321,9 @@ public class KeyboardView extends View implements View.OnClickListener {
         });
 
         mPreviewText.setTextColor(config.getColor("preview_text_color"));
-        mPreviewText.setBackgroundColor(config.getColor("preview_back_color"));
+        PaintDrawable background = new PaintDrawable(config.getColor("preview_back_color"));
+        background.setCornerRadius(mRoundCorner);
+        mPreviewText.setBackground(background);
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
         mShowPreview = config.getBoolean("show_preview");
@@ -689,7 +693,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 continue;
             }
             int[] drawableState = key.getCurrentDrawableState();
-            keyBackground = new ColorDrawable(mKeyBackColor.getColorForState(drawableState, 0));
+            keyBackground = new PaintDrawable(mKeyBackColor.getColorForState(drawableState, 0));
+            ((PaintDrawable)keyBackground).setCornerRadius(mRoundCorner);
             mPaint.setColor(mKeyTextColor.getColorForState(drawableState, 0));
             mPaintSymbol.setColor(key.pressed ? hilited_key_symbol_color: key_symbol_color);
 
