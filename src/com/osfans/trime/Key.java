@@ -223,8 +223,8 @@ public class Key {
   }
 
   public Event getEvent() {
-    if (composing != null && Rime.isComposing()) return composing;
     if (ascii != null && Rime.isAsciiMode()) return ascii;
+    if (composing != null && Rime.isComposing()) return composing;
     return getClick();
   }
 
@@ -240,9 +240,6 @@ public class Key {
     Event e = null;
     if (i >= 0 && i <= EVENT_NUM) e = events[i];
     if (e != null) return e;
-    if (composing != null && Rime.isComposing()) return composing;
-    if (ascii != null && Rime.isAsciiMode()) return ascii;
-    //if (getLongClick() != null && i >= 0) return getLongClick(); //滑動默認長按
     return getClick();
   }
 
