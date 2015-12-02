@@ -7,6 +7,12 @@ release: apk win32
 install: android
 	ant release install
 
+icon: icon.svg
+	inkscape -z -e res/drawable-xxhdpi/icon.png -w 144 -h 144 icon.svg
+	inkscape -z -e res/drawable-xhdpi/icon.png -w 96 -h 96 icon.svg
+	inkscape -z -e res/drawable-hdpi/icon.png -w 72 -h 72 icon.svg
+	inkscape -z -e res/drawable/icon.png -w 48 -h 48 icon.svg
+
 apk: android
 	ant release
 
