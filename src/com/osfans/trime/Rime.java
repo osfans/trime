@@ -201,12 +201,20 @@ public class Rime
     System.loadLibrary("rime_jni");
   }
 
+  public static boolean hasMenu() {
+    return isComposing() && mContext.menu.num_candidates != 0;
+  }
+
   public static boolean hasLeft() {
-    return isComposing() && mContext.menu.page_no != 0;
+    return hasMenu() && mContext.menu.page_no != 0;
   }
 
   public static boolean hasRight() {
-    return isComposing() && mContext.menu.num_candidates != 0 && !mContext.menu.is_last_page;
+    return hasMenu() && !mContext.menu.is_last_page;
+  }
+
+  public static boolean isPaging() {
+    return hasLeft();
   }
 
   public static boolean isComposing() {

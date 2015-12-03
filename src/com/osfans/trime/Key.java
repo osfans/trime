@@ -70,8 +70,16 @@ public class Key {
     s = getString(mk, "composing");
     if (!s.isEmpty()) {
       composing = new Event(mKeyboard, s);
-      mKeyboard.mComposingKeys.add(this);
     }
+    s = getString(mk, "has_menu");
+    if (!s.isEmpty()) {
+      has_menu = new Event(mKeyboard, s);
+    }
+    s = getString(mk, "paging");
+    if (!s.isEmpty()) {
+      paging = new Event(mKeyboard, s);
+    }
+    if (composing != null || has_menu != null || paging != null) mKeyboard.mComposingKeys.add(this);
     s = getString(mk, "ascii");
     if (!s.isEmpty()) ascii = new Event(mKeyboard, s);
     label = getString(mk, "label");
@@ -224,6 +232,8 @@ public class Key {
 
   public Event getEvent() {
     if (ascii != null && Rime.isAsciiMode()) return ascii;
+    if (paging != null && Rime.isPaging()) return paging;
+    if (has_menu != null && Rime.hasMenu()) return has_menu;
     if (composing != null && Rime.isComposing()) return composing;
     return getClick();
   }
@@ -244,7 +254,7 @@ public class Key {
   }
 
   public int getCode() {
-    return getEvent().code;
+    return getEvent(CLICK).code;
   }
 
   public int getCode(int type) {
@@ -260,6 +270,7 @@ public class Key {
   }
 
   public String getPreviewText(int type) {
+    if (type == CLICK) return getEvent().getPreviewText();
     return getEvent(type).getPreviewText();
   }
 

@@ -1097,7 +1097,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             return true;
         } else {
             Key key = popupKey;
-            if (key.getEvent().repeatable) return false;
+            if (key.getClick().repeatable) return false;
             if (key.getLongClick() != null) {
               mKeyboardActionListener.onEvent(key.getLongClick());
               return true;
@@ -1224,7 +1224,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 checkMultiTap(eventTime, keyIndex);
                 mKeyboardActionListener.onPress(keyIndex != NOT_A_KEY ? 
                         mKeys[keyIndex].getCode() : 0);
-                if (mCurrentKey >= 0 && mKeys[mCurrentKey].getEvent().repeatable) {
+                if (mCurrentKey >= 0 && mKeys[mCurrentKey].getClick().repeatable) {
                     mRepeatKeyIndex = mCurrentKey;
                     Message msg = mHandler.obtainMessage(MSG_REPEAT);
                     mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);

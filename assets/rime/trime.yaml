@@ -664,10 +664,10 @@ android_keys:
     TV_ZOOM_MODE, TV_CONTENTS_MENU, TV_MEDIA_CONTEXT_MENU, TV_TIMER_PROGRAMMING,
     Help, NAVIGATE_PREVIOUS, NAVIGATE_NEXT, NAVIGATE_IN, NAVIGATE_OUT]
   when:
-    paging: 翻頁
-    has_menu: 菜單
-    composing: 輸入
-    ascii: 西文
+    ascii: 西文標籤
+    paging: 翻頁標籤
+    has_menu: 菜單標籤
+    composing: 輸入狀態標籤
     #always: 始終
     #hover: 滑過
     click: 單擊
@@ -809,8 +809,8 @@ preset_keyboards:
     - {click: 'b', long_click: '~'}
     - {click: 'n', long_click: Insert}
     - {click: 'm', long_click: Delete}
-    - {click: ',', long_click: '<'}
-    - {click: '.', long_click: '>'}
+    - {click: ',', long_click: '<', paging: Page_Up}
+    - {click: '.', long_click: '>', has_menu: Page_Down}
     - {click: '/', long_click: '?'}
     - {click: Shift_L}
     - {click: 'Keyboard_number', long_click: Color_switch}
@@ -869,9 +869,9 @@ preset_keyboards:
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: 'Keyboard_number', long_click: Color_switch}
     - {click: "'", long_click: '"'}
-    - {click: ',', long_click: '<'}
+    - {click: ',', long_click: '<', paging: Page_Up}
     - {click: space, width: 20}
-    - {click: '.', long_click: '>'}
+    - {click: '.', long_click: '>', has_menu: Page_Down}
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
   qwerty_:
@@ -908,8 +908,8 @@ preset_keyboards:
     - {click: 'b', long_click: Time, swipe_up: Date}
     - {click: 'n', long_click: Insert}
     - {click: 'm', long_click: Delete}
-    - {click: ',', long_click: '<'}
-    - {click: '.', long_click: '>'}
+    - {click: ',', long_click: '<', paging: Page_Up}
+    - {click: '.', long_click: '>', has_menu: Page_Down}
     - {click: '/', long_click: '?'}
     - {click: Shift_L}
     - {click: 'Keyboard_number', long_click: Color_switch}
@@ -958,9 +958,9 @@ preset_keyboards:
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: Keyboard_number, long_click: Color_switch}
     - {click: "'", long_click: '"'}
-    - {click: ',', long_click: '<'}
+    - {click: ',', long_click: '<', paging: Page_Up}
     - {click: space, width: 20}
-    - {click: '.', long_click: '>'}
+    - {click: '.', long_click: '>', has_menu: Page_Down}
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
   number:
