@@ -6,47 +6,47 @@ config_version: "3.0"
 style:
   background_dim_amount: 0.5
   border_width: 3
-  candidate_font: han.ttf #候選字體
+  candidate_font: han.ttf #候選字型
   candidate_spacing: 5
-  candidate_text_size: 22 #候選字號
+  candidate_text_size: 22 #候選字大小
   candidate_view_height: 28 #候選區高度
   color_scheme: default #配色方案
-  comment_font: latin.ttf #編碼提示字體
+  comment_font: latin.ttf #編碼提示字型
   comment_height: 12 #編碼提示區高度
   comment_on_top: true #編碼提示在上方或右側
-  comment_text_size: 12 #編碼提示字號
-  destroy_on_quit: false #退出時清理內存
-  display_tray_icon: false #狀態欄圖標
-  hanb_font: hanb.ttf #擴展字體
+  comment_text_size: 12 #編碼提示大小
+  destroy_on_quit: false #離開時清理記憶體
+  display_tray_icon: false #狀態列圖示
+  hanb_font: hanb.ttf #擴充字型
   hilite_padding: 2
   hilite_spacing: 4
   horizontal_gap: 1 #鍵水平間距
   inline_code: false #嵌入編碼
-  inline_preedit: true #嵌入首選
-  key_font: symbol.ttf #鍵盤字體
+  inline_preedit: true #嵌入偏好
+  key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_sound: false #按鍵聲音
   key_sound_volume: -1 #按鍵音量
-  key_text_size: 22 #鍵字號
+  key_text_size: 22 #鍵大小
   key_vibrate_duration: 30 #按鍵震動時長：毫秒
   key_vibrate: false #按鍵震動
-  key_width: 10.0 #鍵寬，佔屏寬的百分比
-  keyboards: [.default, default, number] #鍵盤佈局
-  label_text_size: 14 #長標籤字號
-  latin_font: latin.ttf #西文字體
+  key_width: 10.0 #鍵寬，佔螢幕寬的百分比
+  keyboards: [.default, default, number] #鍵盤配置
+  label_text_size: 14 #長標籤大小
+  latin_font: latin.ttf #西文字型
   latin_locale: en_US #西文語言
-  locale: zh_TW #默認語言 zh_TW,zh_CN,zh_HK,""
-  longpress_timeout: 800 #按鍵超過800毫秒即爲長按
+  locale: zh_TW #預設語言 zh_TW,zh_CN,zh_HK,""
+  longpress_timeout: 800 #按鍵超過800毫秒即為長按
   margin_x: 12
   margin_y: 12
   min_height: 0
   min_width: 160
   multitap_interval: 800 #800毫秒內快速按兩次鍵
-  preview_font: latin.ttf #按鍵提示字體
+  preview_font: latin.ttf #按鍵提示字型
   preview_height: 60 #按鍵提示高度
   preview_offset: -12 #按鍵提示縱向偏移
-  preview_text_size: 40 #按鍵提示字號
-  repeat_interval: 50 #空格鍵、刪除鍵等自動重複間隔：50毫秒即1秒20次
+  preview_text_size: 40 #按鍵提示大小
+  repeat_interval: 50 #空白鍵、刪除鍵等自動重複間隔：50毫秒即1秒20次
   repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
   round_corner: 15.0 #按鍵圓角半徑
   shadow_radius: 0.0
@@ -54,17 +54,17 @@ style:
   show_comment: true #顯示提示區
   show_preview: true #按鍵提示
   show_text: true #顯示編碼區
-  soft_cursor: true #編碼區軟光標
-  soft_cursor_text: "‸" #編碼區軟光標字符，librime默認爲"‸"
+  soft_cursor: true #編碼區軟游標
+  soft_cursor_text: "‸" #編碼區軟光標字元，librime預設爲"‸"
   spacing: 10
   speak_commit: false #朗讀上屏文字
   speak_key: false #朗讀按鍵
   speech_opencc_config: s2t.json #語音輸入簡繁轉換
-  symbol_font: symbol.ttf #符號字體
-  symbol_text_size: 10 #符號字號
-  text_font: latin.ttf #編碼字體
+  symbol_font: symbol.ttf #符號字型
+  symbol_text_size: 10 #符號大小
+  text_font: latin.ttf #編碼字型
   text_height: 22 #編碼區高度
-  text_size: 16 #編碼區字號
+  text_size: 16 #編碼區大小
   vertical_correction: -10
   vertical_gap: 1 #鍵盤行距
 
@@ -100,26 +100,26 @@ fallback_colors:
 
 preset_color_schemes:
   default:
-    name: 默認／default #方案名稱
-    author: osfans #作者信息
+    name: 預設／default #方案名稱
+    author: osfans #作者資訊
     back_color: 0xffe4e7e9 #候選區背景
     border_color: 0xffc1c7ca #邊框
     candidate_back_color: 0xffe4e7e9 #候選背景
     candidate_separator_color: 0xffc1c7ca #候選分割背景
     candidate_text_color: 0xff5a676e #候選文字
     comment_text_color: 0xff7b868c #提示
-    hilited_back_color: 0xccd3d7da #高亮編碼背景
-    hilited_candidate_back_color: 0xffd3d7da #高亮候選背景
-    hilited_candidate_text_color: 0xff000000 #高亮候選文字
-    hilited_comment_text_color: 0xff000000 #高亮提示
-    hilited_key_back_color: 0xffd3d7da #高亮按鍵背景
-    hilited_key_symbol_color: 0xff000000 #高亮按鍵符號
-    hilited_key_text_color: 0xff000000 #高亮按鍵文字
-    hilited_off_key_back_color: 0xffd3d7da #高亮按鍵關閉狀態背景
-    hilited_off_key_text_color: 0xff000000 #高亮按鍵關閉狀態文字
-    hilited_on_key_back_color: 0xffd3d7da #高亮按鍵打開狀態背景
-    hilited_on_key_text_color: 0xff000000 #高亮按鍵打開狀態文字
-    hilited_text_color: 0xff23948e #高亮編碼
+    hilited_back_color: 0xccd3d7da #標明編碼背景
+    hilited_candidate_back_color: 0xffd3d7da #標明候選背景
+    hilited_candidate_text_color: 0xff000000 #標明候選文字
+    hilited_comment_text_color: 0xff000000 #標明提示
+    hilited_key_back_color: 0xffd3d7da #標明按鍵背景
+    hilited_key_symbol_color: 0xff000000 #標明按鍵符號
+    hilited_key_text_color: 0xff000000 #標明按鍵文字
+    hilited_off_key_back_color: 0xffd3d7da #標明按鍵關閉狀態背景
+    hilited_off_key_text_color: 0xff000000 #標明按鍵關閉狀態文字
+    hilited_on_key_back_color: 0xffd3d7da #標明按鍵打開狀態背景
+    hilited_on_key_text_color: 0xff000000 #標明按鍵打開狀態文字
+    hilited_text_color: 0xff23948e #標明編碼
     key_back_color: 0xffeceff1 #按鍵背景
     key_border_color: 0xffeceff1 #按鍵邊框
     key_symbol_color: 0xff5f6b73 #按鍵符號
@@ -595,10 +595,10 @@ preset_color_schemes:
 
   flypy:
     # description: |
-    #   小鹤飞扬：白底蓝字，红色高亮。
-    #   根据小鹤双拼官网图片制作
+    #   小鶴飛揚：白底藍字，紅色標明。
+    #   根據小鶴雙拼官網圖片製作
     #   http://www.flypy.com/images/mr.png
-    name: "小鹤飞扬／flypy"
+    name: "小鶴飛揚／flypy"
     author: "Pal.lxk <Pal.lxk@gmail.com>"
     text_color: 0xff000000
     back_color: 0xffffffff
@@ -666,13 +666,13 @@ android_keys:
   when:
     ascii: 西文標籤
     paging: 翻頁標籤
-    has_menu: 菜單標籤
+    has_menu: 選單標籤
     composing: 輸入狀態標籤
     #always: 始終
     #hover: 滑過
-    click: 單擊
+    click: 單按
     long_click: 長按
-    #double_click: 雙擊
+    #double_click: 雙按
     swipe_left: 左滑
     swipe_right: 右滑
     swipe_up: 上滑
@@ -699,26 +699,26 @@ preset_keys:
   # 安卓
   BRIGHTNESS_DOWN: {label: 亮度-, send: BRIGHTNESS_DOWN}
   BRIGHTNESS_UP: {label: 亮度+, send: BRIGHTNESS_UP}
-  CALCULATOR: {label: 計算器, send: CALCULATOR}
+  CALCULATOR: {label: 計算機, send: CALCULATOR}
   CALENDAR: {label: 日曆, send: CALENDAR}
   CONTACTS: {label: 電話簿, send: CONTACTS}
-  ENVELOPE: {label: 郵箱, send: ENVELOPE}
+  ENVELOPE: {label: 信箱, send: ENVELOPE}
   EXPLORER: {label: 瀏覽器, send: EXPLORER}
   MUSIC: {label: 音樂, send: MUSIC}
   POWER: {label: 電源, send: POWER}
-  SEARCH: {label: 搜索, send: Find}
+  SEARCH: {label: 搜尋, send: Find}
   SLEEP: {label: 休眠, send: SLEEP}
   VOICE_ASSIST: {label: 語音, send: VOICE_ASSIST}
   VOLUME_DOWN: {label: 音量-, send: VOLUME_DOWN}
   VOLUME_UP: {label: 音量+, send: VOLUME_UP}
   VOLUME_MUTE: {label: 靜音, send: VOLUME_MUTE}
   # 編輯
-  Shift_L: {label: 換檔, send: Shift_L}
-  Return: {label: 回車, send: Return}
+  Shift_L: {label: Shift, send: Shift_L}
+  Return: {label: Enter, send: Return}
   Hide: {label: 隱藏, send: BACK}
   BackSpace: {label: 退格, repeatable: true, send: BackSpace}
   space: {repeatable: true, functional: false, send: space}
-  Clear: {label: 清空, send: Clear}
+  Clear: {label: 清除, send: Clear}
   Escape: {label: Esc, send: Escape}
   Home: {label: 行首, send: Home}
   Insert: {label: 插入, send: Insert}
@@ -731,9 +731,9 @@ preset_keys:
   Up: {label: '↑', send: Up}
   Right: {label: '→', send: Right}
   select_all: {label: 全選, send: Control+a}
-  cut: {label: 剪切, send: Control+x}
+  cut: {label: 剪下, send: Control+x}
   copy: {label: 複製, send: Control+c}
-  paste: {label: 粘貼, send: Control+v}
+  paste: {label: 貼上, send: Control+v}
   # rime組合鍵
   F4: {label: 方案選單, send: F4}
   BackToPreviousSyllable: {label: 刪音節, send: Control+BackSpace}
@@ -755,9 +755,9 @@ preset_keys:
   Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
   Schema_switch: {label: 方案, send: LANGUAGE_SWITCH, select: .next}
   Color_switch: {label: 配色, send: PROG_RED}
-  Help: {label: 幫助, send: Help}
+  Help: {label: 說明, send: Help}
   Info: {label: 關於, send: INFO}
-  Menu: {label: 菜單, send: Menu}
+  Menu: {label: 選單, send: Menu}
   Settings: {label: 設定, send: SETTINGS}
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
@@ -766,7 +766,7 @@ preset_keys:
 
 preset_keyboards:
   default:
-    name: 默認40鍵
+    name: 預設40鍵
     author: "osfans <waxaca@163.com>"
     ascii_mode: 0
     width: 10
@@ -820,7 +820,7 @@ preset_keyboards:
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
   qwerty0:
-    name: 默認36鍵
+    name: 預設36鍵
     author: "osfans <waxaca@163.com>"
     ascii_mode: 0
     width: 10
@@ -875,7 +875,7 @@ preset_keyboards:
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
   qwerty_:
-    name: 默認30鍵
+    name: 預設30鍵
     author: "osfans <waxaca@163.com>"
     ascii_mode: 0
     width: 10
@@ -919,7 +919,7 @@ preset_keyboards:
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
   qwerty:
-    name: 默認26鍵
+    name: 預設26鍵
     author: "osfans <waxaca@163.com>"
     ascii_mode: 0
     width: 10
@@ -964,7 +964,7 @@ preset_keyboards:
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
   number:
-    name: 默認數字
+    name: 預設數字
     author: "osfans <waxaca@163.com>"
     width: 20
     height: 44

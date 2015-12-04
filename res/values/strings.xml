@@ -19,7 +19,7 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Titles for IME  -->
-    <string name="ime_name">同文輸入法平臺</string>
+    <string name="ime_name">同文平臺</string>
 
     <!-- Preference settings -->
     <string name="pref_about">關於</string>
@@ -27,26 +27,33 @@
     <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_ver">平臺版本</string>
 
-    <string name="pref_config">配置</string>
+    <string name="pref_config">設定</string>
     <string name="pref_enable">啓用</string>
-    <string name="pref_select">切換</string>
+    <string name="pref_enable_summary">啓用同文輸入法平臺</string>
+    <string name="pref_select">選取</string>
+    <string name="pref_select_summary">選取同文輸入法平臺</string>
     <string name="pref_schemas">方案</string>
+    <string name="pref_schemas_summary">從已安裝的方案中選擇要使用的方案</string>
     <string name="pref_colors">配色</string>
+    <string name="pref_colors_summary">選取想要的鍵盤配色</string>
     <string name="pref_reset">回廠</string>
-    <string name="pref_reset_summary">使用默認配置覆蓋/sdcard/rime下同名文件</string>
+    <string name="pref_reset_summary">使用預設設定覆蓋/sdcard/rime下同名檔案</string>
 
     <string name="pref_function">功能</string>
     <string name="pref_maintenance">維護</string>
+    <string name="pref_maintenance_summary">自動維護輸入法方案</string>
     <string name="pref_deploy">部署</string>
+    <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
     <string name="pref_sync">同步</string>
+    <string name="pref_sync_summary">與/sdcard/rime/sync資料夾同步使用者字典</string>
 
     <string name="sync_success">同步成功</string>
     <string name="sync_failure">同步失敗</string>
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>
 
-    <string name="set_ime">全局設定</string>
-    <string name="no_schemas">請在/sdcard/rime中添加essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
+    <string name="set_ime">整體設定</string>
+    <string name="no_schemas">請在/sdcard/rime中放入essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
 
 </resources>
