@@ -32,8 +32,7 @@ public class Function {
   }
 
   public static void showPrefDialog(Context context) {
-    Intent intent = new Intent();
-    intent.setClass(context, Pref.class);
+    Intent intent = new Intent(context, Pref.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
     context.startActivity(intent);
   }
