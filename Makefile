@@ -1,6 +1,6 @@
 .PHONY: all release install clean apk android linux win32
 
-all: android linux win32
+all: android javadoc linux win32
 
 release: apk win32
 
@@ -15,6 +15,9 @@ icon: icon.svg
 
 apk: android
 	ant release
+
+javadoc:
+	ant javadoc
 
 android:
 	mkdir -p build-android

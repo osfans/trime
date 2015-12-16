@@ -101,4 +101,23 @@
     <!-- version-tag: 1 -->
     <import file="${sdk.dir}/tools/ant/build.xml" />
     <property name="out.final.file" location="${out.absolute.dir}/${ant.project.name}-${date}.apk" />
+
+    <target
+      name="javadoc" depends="release"
+      description="Generate JavaDoc documentation" >
+
+      <javadoc
+        access="private"
+        author="true"
+        classpath="${sdk.dir}/platforms/${target}/android.jar"
+        destdir="docs"
+        linkoffline="http://developer.android.com/reference ${sdk.dir}/docs/reference"
+        linksource="true"
+        sourcepath="${source.dir};gen"
+        use="true"
+        locale="zh_CN"
+        charset="utf-8">
+            <arg value="-notimestamp" />
+        </javadoc>
+    </target>
 </project>

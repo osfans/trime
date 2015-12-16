@@ -28,3 +28,7 @@
 [submodule "android-cmake"]
 	path = android-cmake
 	url = git@github.com:zhuowei/android-cmake.git
+[submodule "docs"]
+	path = docs
+	url = github.com:osfans/trime.git
+	branch = gh-pages
