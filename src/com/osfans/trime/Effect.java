@@ -24,9 +24,7 @@ import android.speech.tts.TextToSpeech;
 
 import java.util.Locale;
 
-/**
- * Plays sound and motion effect.
- */
+/** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
   private int duration = 30;
   private float volume = -1.0f;

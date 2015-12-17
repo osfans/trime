@@ -23,6 +23,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+/** 顯示配色方案列表 */
 public class ColorDialog {
   String[] colorKeys;
   String[] colorNames;

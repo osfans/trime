@@ -22,6 +22,7 @@ import android.content.Intent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
   private static String TAG = "Function";
 

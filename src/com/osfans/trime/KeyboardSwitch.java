@@ -21,6 +21,7 @@ import java.util.List;
 import android.content.Context;
 import android.text.InputType;
 
+/** 管理多個{@link Keyboard 鍵盤} */
 public class KeyboardSwitch {
 
   private final Context context;

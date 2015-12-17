@@ -23,8 +23,13 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.File;
 
+/** Rime與OpenCC的Java實現
+ * @see <a href="https://github.com/rime/librime">Rime</a>
+ * <a href="https://github.com/BYVoid/OpenCC">OpenCC</a>
+ */
 public class Rime
 {
+  /** Rime編碼區 */
   public static class RimeComposition {
     int length;
     int cursor_pos;
@@ -50,11 +55,13 @@ public class Rime
     }
   };
 
+  /** Rime候選項 */
   public static class RimeCandidate {
     String text;
     String comment;
   };
 
+  /** Rime候選區，包含多個{@link RimeCandidate 候選項} */
   public static class RimeMenu {
     int page_size;
     int page_no;
@@ -64,13 +71,16 @@ public class Rime
     RimeCandidate[] candidates;
     String select_keys;
   };
-  
+
+  /** Rime上屏的字符串 */
   public static class RimeCommit {
     int data_size;
     // v0.9
     String text;
   }
 
+  /** Rime環境，包括
+   * {@link RimeComposition 編碼區} 、{@link RimeMenu 候選區}*/
   public static class RimeContext {
     int data_size;
     // v0.9
@@ -90,6 +100,7 @@ public class Rime
     }
   };
 
+  /** Rime狀態 */
   public static class RimeStatus {
     int data_size;
     // v0.9
@@ -104,6 +115,7 @@ public class Rime
     boolean is_ascii_punct;
   };
 
+  /** Rime方案 */
   public static class RimeSchema {
     private String kRightArrow = "→ ";
     private String kRadioSelected = " ✓";

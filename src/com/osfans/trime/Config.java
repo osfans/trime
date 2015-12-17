@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.io.*;
 
+/** 解析YAML配置文件 */
 public class Config {
   private Map<String, Object> mStyle, mDefaultStyle;
   private Map<String, Map<String, Object>> maps;

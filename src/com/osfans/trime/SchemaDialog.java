@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
 
+/** 顯示輸入法方案列表 */
 public class SchemaDialog {
   boolean[] checkedSchemaItems;
   String[] schemaItems;

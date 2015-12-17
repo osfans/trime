@@ -36,14 +36,10 @@ import android.graphics.Typeface;
 import java.io.File;
 import java.util.Map;
 
-/**
- * View to show candidate words.
- */
+/** 顯示候選字詞 */
 public class Candidate extends View {
 
-  /**
-   * Listens to candidate-view actions.
-   */
+  /** 處理候選條選字事件 */
   public static interface CandidateListener {
     void onPickCandidate(int index);
   }
@@ -135,9 +131,10 @@ public class Candidate extends View {
   }
 
   /**
-   * Picks the highlighted candidate.
+   * 選取候選項
    *
-   * @return {@code false} if no candidate is highlighted and picked.
+   * @param index 候選項序號（從0開始），{@code -1}表示選擇當前高亮候選項
+   * @return 是否成功選字
    */
   public boolean pickHighlighted(int index) {
     if ((highlightIndex != -1) && (listener != null)) {
@@ -306,9 +303,14 @@ public class Candidate extends View {
   }
 
   /**
-   * Returns the index of the candidate which the given coordinate points to.
-   * 
-   * @return -1 if no candidate is mapped to the given (x, y) coordinate.
+   * 獲得觸摸處候選項序號
+   * @param x 觸摸點橫座標
+   * @param y 觸摸點縱座標
+   * @return
+   * {@code >=0}: 觸摸點 (x, y) 處候選項序號，從0開始編號；
+   * {@code -1}: 觸摸點 (x, y) 處無候選項；
+   * {@code -4}: 觸摸點 (x, y) 處爲{@code Page_Up}；
+   * {@code -5}: 觸摸點 (x, y) 處爲{@code Page_Down}
    */
   private int getCandidateIndex(int x, int y) {
     Rect r = new Rect();

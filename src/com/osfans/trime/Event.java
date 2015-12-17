@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+/** {@link Key 按鍵}的各種事件（單擊、長按、滑動等） */
 public class Event {
   private String TAG = "Event";
   private Keyboard mKeyboard;

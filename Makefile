@@ -18,6 +18,8 @@ apk: android
 
 javadoc:
 	ant javadoc
+	@echo "convert javadoc by opencc:"
+	@find docs -type f -name *.html| xargs -i opencc -i {} -o {}
 
 android:
 	mkdir -p build-android

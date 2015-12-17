@@ -28,10 +28,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.UnderlineSpan;
 
-/**
- * Contains all candidates in pages where users could move forward (next page)
- * or move backward (previous) page to select one of these candidates. 
- */
+/** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
 public class Composition extends TextView {
   private boolean soft_cursor;
   private String soft_cursor_text;

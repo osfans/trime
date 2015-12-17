@@ -18,10 +18,8 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Titles for IME  -->
     <string name="ime_name">同文平台</string>
 
-    <!-- Preference settings -->
     <string name="pref_about">关于</string>
     <string name="pref_librime_ver">Librime版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>

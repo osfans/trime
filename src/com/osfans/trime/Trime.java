@@ -41,9 +41,7 @@ import android.view.LayoutInflater;
 import java.util.logging.Logger;
 import java.util.Locale;
 
-/**
- * Abstract class extended by all Dialect IME.
- */
+/** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService implements 
     KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
 
@@ -293,8 +291,8 @@ public class Trime extends InputMethodService implements
   }
 
   /**
-   * Resets the internal state of this editor, typically called when a new input
-   * session commences.
+   * 重置鍵盤、候選條、狀態欄等，進入新的文本框時通常會調用。
+   * @param inputType 文本框的{@link InputType 輸入類型}
    */
   private void editorstart(int inputType) {
     canCompose = false;
@@ -324,7 +322,11 @@ public class Trime extends InputMethodService implements
     return Rime.isComposing();
   }
 
-  public void commitText(CharSequence text) { //指定上屏
+  /**
+   * 指定字符串上屏
+   * @param text 要上屏的字符串
+   */
+  public void commitText(CharSequence text) {
     if (text == null) return;
     mEffect.speakCommit(text);
     InputConnection ic = getCurrentInputConnection();
@@ -332,13 +334,21 @@ public class Trime extends InputMethodService implements
     if (!isComposing()) Rime.commitComposition(); //自動上屏
   }
 
-  private boolean commitText() { //Rime上屏
+  /**
+   * 從Rime獲得字符串並上屏
+   * @return 是否成功上屏
+   */
+  private boolean commitText() {
     boolean r = Rime.getCommit();
     if (r) commitText(Rime.getCommitText());
     return r;
   }
 
-  private CharSequence getLastText() { //獲取最後一個漢字
+  /**
+   * 獲取光標處的字符
+   * @return 光標處的字符
+   */
+  private CharSequence getLastText() {
     InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
       return ic.getTextBeforeCursor(1,0);
@@ -369,9 +379,14 @@ public class Trime extends InputMethodService implements
     return false; 
   }
 
-  public boolean handleBack(int code) {
-    if (code == KeyEvent.KEYCODE_BACK) {
-      requestHideSelf(0); //隱藏軟鍵盤
+  /**
+   * 如果爲{@link KeyEvent#KEYCODE_BACK Back鍵}，則隱藏鍵盤
+   * @param keyCode {@link KeyEvent#getKeyCode() 鍵碼}
+   * @return 是否處理了Back鍵事件
+   * */
+  private boolean handleBack(int keyCode) {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+      requestHideSelf(0);
       return true;
     }
     return false;
@@ -383,7 +398,11 @@ public class Trime extends InputMethodService implements
     return super.onKeyDown(keyCode, event);
   }
 
-  private boolean onKeyEvent(KeyEvent event) { //實體鍵盤
+  /** 處理實體鍵盤事件
+   * @param event {@link KeyEvent 按鍵事件}
+   * @return 是否成功處理
+   * */
+  private boolean onKeyEvent(KeyEvent event) {
     Log.info("onKeyEvent="+event);
     int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
@@ -497,8 +516,9 @@ public class Trime extends InputMethodService implements
     // no-op
   }
 
+  /** 在鍵盤視圖中從上往下滑動，隱藏鍵盤 */
   public void swipeDown() {
-    requestHideSelf(0); //隱藏輸入窗
+    requestHideSelf(0);
   }
 
   public void onPickCandidate(int i) {
@@ -545,11 +565,13 @@ public class Trime extends InputMethodService implements
     dialog.show();
   }
 
+  /** 彈出{@link ColorDialog 配色對話框} */
   private void showColorDialog() {
     AlertDialog dialog = new ColorDialog(this).getDialog();
     showDialog(dialog);
   }
 
+  /** 彈出{@link SchemaDialog 輸入法方案對話框} */
   private void showSchemaDialog() {
     AlertDialog dialog = new SchemaDialog(this).getDialog();
     showDialog(dialog);
@@ -597,6 +619,12 @@ public class Trime extends InputMethodService implements
     return false;
   }
 
+  /**
+   * 如果爲{@link KeyEvent#KEYCODE_ENTER 回車鍵}，則換行
+   * 
+   * @param keyCode {@link KeyEvent#getKeyCode() 鍵碼}
+   * @return 是否處理了回車事件
+   * */
   private boolean handleEnter(int keyCode) { //回車
     if (keyCode == KeyEvent.KEYCODE_ENTER) {
       if (enterAsLineBreak) {
@@ -609,10 +637,8 @@ public class Trime extends InputMethodService implements
     return false;
   }
 
-  /**
-   * Simulates PC Esc-key function by clearing all composing-text or candidates.
-   */
-  private void escape() { //清屏
+  /** 模擬PC鍵盤中Esc鍵的功能：清除輸入的編碼和候選項 */
+  private void escape() {
     if (isComposing()) onKey(KeyEvent.KEYCODE_ESCAPE, 0);
   }
 }

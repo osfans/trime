@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+/** {@link Keyboard 鍵盤}中的各個按鍵，包含單擊、長按、滑動等多種{@link Event 事件} */
 public class Key {
   private String TAG = "Key";
   private Keyboard mKeyboard;
@@ -54,11 +55,19 @@ public class Key {
   public static List<String> androidKeys;
   public static Map<String, Map> presetKeys;
 
-  /** Create an empty key with no attributes. */
+  /**
+   * Create an empty key with no attributes.
+   * @param parent 按鍵所在的{@link Keyboard 鍵盤}
+   */
   public Key(Keyboard parent) {
       mKeyboard = parent;
   }
 
+  /**
+   * Create an empty key with no attributes.
+   * @param parent 按鍵所在的{@link Keyboard 鍵盤}
+   * @param mk 從YAML中解析得到的Map
+   */
   public Key(Keyboard parent, Map<String,Object> mk) {
     this(parent);
     String s;

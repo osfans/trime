@@ -41,9 +41,7 @@ import android.content.pm.PackageManager;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
 
-/**
- * Manages IME preferences. 
- */
+/** 配置輸入法 */
 public class Pref extends PreferenceActivity {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+/** {@link RecognitionListener 語音輸入} */
 public class Speech implements RecognitionListener {
   private SpeechRecognizer speech = null;
   private Intent recognizerIntent;

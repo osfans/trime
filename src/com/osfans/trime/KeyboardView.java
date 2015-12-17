@@ -61,24 +61,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A view that renders a virtual {@link Keyboard}. It handles rendering of keys and
- * detecting key presses and touch movements.
- * 
- * @attr ref android.R.styleable#KeyboardView_keyBackground
- * @attr ref android.R.styleable#KeyboardView_keyPreviewLayout
- * @attr ref android.R.styleable#KeyboardView_keyPreviewOffset
- * @attr ref android.R.styleable#KeyboardView_labelTextSize
- * @attr ref android.R.styleable#KeyboardView_keyTextSize
- * @attr ref android.R.styleable#KeyboardView_keyTextColor
- * @attr ref android.R.styleable#KeyboardView_verticalCorrection
- * @attr ref android.R.styleable#KeyboardView_popupLayout
- */
+/** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
 public class KeyboardView extends View implements View.OnClickListener {
 
-    /**
-     * Listener for virtual keyboard events.
-     */
+    /** 處理按鍵、觸摸等輸入事件 */
     public interface OnKeyboardActionListener {
         
         /**
@@ -96,17 +82,18 @@ public class KeyboardView extends View implements View.OnClickListener {
          */
         void onRelease(int primaryCode);
 
+        void onEvent(Event event);
+
         /**
          * Send a key press to the listener.
          * @param primaryCode this is the key that was pressed
-         * @param keyCodes the codes for all the possible alternative keys
+         * @param mask the codes for all the possible alternative keys
          * with the primary code being the first. If the primary key code is
          * a single character such as an alphabet or number or symbol, the alternatives
          * will include other characters that may be on the same key or adjacent keys.
          * These codes are useful to correct for accidental presses of a key adjacent to
          * the intended key.
          */
-        void onEvent(Event event);
         void onKey(int primaryCode, int mask);
 
         /**
@@ -494,10 +481,11 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
     
     /**
-     * Sets the state of the shift key of the keyboard, if any.
-     * @param shifted whether or not to enable the state of the shift key
-     * @return true if the shift key state changed, false if there was no change
-     * @see KeyboardView#isShifted()
+     * 設定鍵盤的Shift鍵狀態
+     * @param on 是否保持Shift按下狀態
+     * @param shifted 是否按下Shift
+     * @return Shift鍵狀態是否改變
+     * @see Keyboard#setShifted(boolean, boolean) KeyboardView#isShifted()
      */
     public boolean setShifted(boolean on, boolean shifted) {
         if (mKeyboard != null) {
@@ -525,7 +513,7 @@ public class KeyboardView extends View implements View.OnClickListener {
      * Returns the state of the shift key of the keyboard, if any.
      * @return true if the shift is in a pressed state, false otherwise. If there is
      * no shift key on the keyboard or there is no keyboard attached, it returns false.
-     * @see KeyboardView#setShifted(boolean)
+     * @see KeyboardView#setShifted(boolean, boolean)
      */
     public boolean isShifted() {
         if (mKeyboard != null) {
@@ -579,15 +567,16 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     /**
-     * Returns true if proximity correction is enabled.
+     * 檢查是否允許距離校正
+     * @return 是否允許距離校正
      */
     public boolean isProximityCorrectionEnabled() {
         return mProximityCorrectOn;
     }
 
-    /** 
-     * Popup keyboard close button clicked.
-     * @hide 
+    /**
+     * 關閉彈出鍵盤
+     * @param v 鍵盤視圖
      */
     public void onClick(View v) {
         dismissPopupKeyboard();
@@ -608,10 +597,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     /**
-     * Compute the average distance between adjacent keys (horizontally and vertically)
-     * and square it to get the proximity threshold. We use a square here and in computing
-     * the touch distance from a key's center to avoid taking a square root.
-     * @param keyboard
+     * 計算水平和豎直方向的相鄰按鍵中心的平均距離的平方，這樣不需要做開方運算
+     * @param keyboard 鍵盤
      */
     private void computeProximityThreshold(Keyboard keyboard) {
         if (keyboard == null) return;
@@ -1393,6 +1380,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
     }
 
+    /** 識別滑動手勢 */
     private static class SwipeTracker {
 
         static final int NUM_PAST = 4;

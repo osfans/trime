@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+/** 從YAML中加載鍵盤配置，包含多個{@link Key 按鍵}。 */
 public class Keyboard {
 
     static final String TAG = "Keyboard";
@@ -47,32 +48,23 @@ public class Keyboard {
     public static final int EDGE_TOP = 0x04;
     public static final int EDGE_BOTTOM = 0x08;
 
-    /** Keyboard label **/
-    //private CharSequence mLabel;
-
-    /** Horizontal gap default for all rows */
+    /** 按鍵默認水平間距 */
     private int mDefaultHorizontalGap;
     
-    /** Default key width */
+    /** 默認鍵寬 */
     private int mDefaultWidth;
 
-    /** Default key height */
+    /** 默認鍵高 */
     private int mDefaultHeight;
 
-    /** Default gap between rows */
+    /** 默認行距 */
     private int mDefaultVerticalGap;
 
-    /** Is the keyboard in the shifted state */
+    /** 鍵盤的Shift鍵是否按住 */
     private boolean mShifted;
     
-    /** Key instance for the shift key, if present */
+    /** 鍵盤的Shift鍵 */
     public Key mShiftKey;
-    
-    /** Current key width, while loading the keyboard */
-    //private int mKeyWidth;
-    
-    /** Current key height, while loading the keyboard */
-    //private int mKeyHeight;
     
     /** Total height of the keyboard, including the padding and keys */
     private int mTotalHeight;
@@ -112,7 +104,6 @@ public class Keyboard {
     /**
      * Creates a keyboard from the given xml key layout file.
      * @param context the application or service context
-     * @param xmlLayoutResId the resource file that contains the keyboard layout and keys.
      */
     public Keyboard(Context context) {
       DisplayMetrics dm = context.getResources().getDisplayMetrics();
@@ -139,12 +130,12 @@ public class Keyboard {
      * <p>If the specified number of columns is -1, then the keyboard will fit as many keys as
      * possible in each row.</p>
      * @param context the application or service context
-     * @param layoutTemplateResId the layout template file, containing no keys.
      * @param characters the list of characters to display on the keyboard. One key will be created
      * for each character.
      * @param columns the number of columns of keys to display. If this number is greater than the 
      * number of keys that can fit in a row, it will be ignored. If this number is -1, the 
      * keyboard will fit as many keys as possible in each row.
+     * @param horizontalPadding 按鍵水平間距
      */
     public Keyboard(Context context, CharSequence characters, int columns, int horizontalPadding) {
         this(context);
@@ -270,9 +261,15 @@ public class Keyboard {
     return hasModifier(KeyEvent.META_CTRL_ON);
   }
 
-  public boolean setShifted(boolean on, boolean value) {
+  /**
+   * 設定鍵盤的Shift鍵狀態
+   * @param on 是否保持Shift按下狀態
+   * @param shifted 是否按下Shift
+   * @return Shift鍵狀態是否改變
+   */
+  public boolean setShifted(boolean on, boolean shifted) {
     if (mShiftKey != null) mShiftKey.on = on;
-    return setModifier(KeyEvent.META_SHIFT_ON, on || value);
+    return setModifier(KeyEvent.META_SHIFT_ON, on || shifted);
   }
 
   public boolean resetShifted() {
