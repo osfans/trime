@@ -142,8 +142,8 @@ public class Config {
   public String getKeyboardName(String name) {
     if (name.contentEquals(".default")) {
       if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名
-      else if (schema_id.indexOf("_") >= 0) {
-        name = schema_id.split("_")[0];
+      else {
+        if (schema_id.indexOf("_") >= 0) name = schema_id.split("_")[0];
         if (!presetKeyboards.containsKey(name)) { //匹配“_”前的方案名
           Object o = Rime.schema_get_value(schema_id, "speller/alphabet");
           name = "qwerty"; //26
