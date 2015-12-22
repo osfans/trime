@@ -19,7 +19,6 @@ package com.osfans.trime;
 import java.util.List;
 
 import android.content.Context;
-import android.text.InputType;
 
 /** 管理多個{@link Keyboard 鍵盤} */
 public class KeyboardSwitch {
@@ -81,27 +80,6 @@ public class KeyboardSwitch {
     return mKeyboards[currentId];
   }
   
-  /**
-   * Switches to the appropriate keyboard based on the type of text being
-   * edited, for example, the symbol keyboard for numbers.
-   * 
-   * @param inputType one of the {@code InputType.TYPE_CLASS_*} values listed in
-   *     {@link android.text.InputType}.
-   */
-  public void onStartInput(int inputType) {
-    if ((inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_CLASS_TEXT) {
-      int variation = inputType & InputType.TYPE_MASK_VARIATION;
-      if ((variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-          || (variation == InputType.TYPE_TEXT_VARIATION_URI)
-          || (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD)
-          || (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
-        currentId = 0;
-        setKeyboard(currentId);
-        mKeyboards[currentId].setShifted(false, mKeyboards[currentId].isShifted());
-      }
-    }
-  }
-
   public boolean getAsciiMode() {
     return getCurrentKeyboard().getAsciiMode();
   }

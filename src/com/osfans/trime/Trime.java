@@ -63,6 +63,10 @@ public class Trime extends InputMethodService implements
   private boolean enterAsLineBreak;
   private boolean inlinePreedit, inlineCode; //嵌入首選
   private boolean display_tray_icon;
+  /** 臨時中英文狀態*/
+  private boolean mTempAsciiMode;
+  /** 默認中英文狀態*/
+  private boolean mAsciiMode;
   private String soft_cursor = "soft_cursor"; //軟光標
   private Locale[] locales = new Locale[2];
 
@@ -137,6 +141,7 @@ public class Trime extends InputMethodService implements
   }
 
   public void setLanguage(boolean isAsciiMode) {
+    if (!mTempAsciiMode) mAsciiMode = isAsciiMode; //切換中西文時保存狀態
     mEffect.setLanguage(locales[isAsciiMode ? 1 : 0]);
   }
 
@@ -252,11 +257,52 @@ public class Trime extends InputMethodService implements
     mCandidate.setCandidateListener(this);
     return mCandidateContainer;
   }
-    
+
+  /**
+   * 重置鍵盤、候選條、狀態欄等，進入文本框時通常會調用。
+   * @param attribute 文本框的{@link EditorInfo 屬性}
+   * @param restarting 是否重啓
+   */
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
-    editorstart(attribute.inputType);
+    canCompose = false;
+    enterAsLineBreak = false;
+    mTempAsciiMode = false;
+    int inputType = attribute.inputType;
+    int inputClass = inputType & InputType.TYPE_MASK_CLASS;
+    int variation = inputType & InputType.TYPE_MASK_VARIATION;
+    String keyboard = null;
+    switch (inputClass) {
+      case InputType.TYPE_CLASS_NUMBER:
+      case InputType.TYPE_CLASS_PHONE:
+      case InputType.TYPE_CLASS_DATETIME:
+        mTempAsciiMode = true;
+        keyboard = "number";
+        break;
+      case InputType.TYPE_CLASS_TEXT:
+      default:
+        canCompose = true;
+        if (variation == InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE) {
+          // Make enter-key as line-breaks for messaging.
+          enterAsLineBreak = true;
+        }
+        if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+         || variation == InputType.TYPE_TEXT_VARIATION_URI
+         || variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
+         || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+           mAsciiMode = true;
+        }
+        break;
+    }
+    Rime.get();
+    // Select a keyboard based on the input type of the editing field.
+    mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
+    mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
+    updateAsciiMode();
+    updateComposing();
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !Rime.isEmpty()); //實體鍵盤
+    if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
   @Override
@@ -288,34 +334,6 @@ public class Trime extends InputMethodService implements
       mKeyboardView.setKeyboard(sk);
       //updateCursorCapsToInputView();
     }
-  }
-
-  /**
-   * 重置鍵盤、候選條、狀態欄等，進入新的文本框時通常會調用。
-   * @param inputType 文本框的{@link InputType 輸入類型}
-   */
-  private void editorstart(int inputType) {
-    canCompose = false;
-    enterAsLineBreak = false;
-
-    switch (inputType & InputType.TYPE_MASK_CLASS) {
-      case InputType.TYPE_CLASS_TEXT:
-        canCompose = true;
-        int variation = inputType & InputType.TYPE_MASK_VARIATION;
-        if (variation == InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE) {
-          // Make enter-key as line-breaks for messaging.
-          enterAsLineBreak = true;
-        }
-        break;
-    }
-    Rime.get();
-    // Select a keyboard based on the input type of the editing field.
-    mKeyboardSwitch.init(getMaxWidth());  //橫豎屏切換時重置鍵盤
-    // mKeyboardSwitch.onStartInput(inputType);
-    //setCandidatesViewShown(true);
-    //escape();
-    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !Rime.isEmpty()); //實體鍵盤
-    if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
   private boolean isComposing() {
@@ -445,7 +463,8 @@ public class Trime extends InputMethodService implements
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
         mKeyboardSwitch.setKeyboard(event.select);
         //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
-        Rime.setOption("ascii_mode", mKeyboardSwitch.getAsciiMode());
+        mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); //切換到西文鍵盤時不保存狀態
+        updateAsciiMode();
         bindKeyboardToInputView();
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
@@ -552,7 +571,7 @@ public class Trime extends InputMethodService implements
       mComposition.setText();
       mFloatingWindowTimer.postShowFloatingWindow();
     }
-    mKeyboardView.invalidateComposingKeys();
+    if (mKeyboardView != null) mKeyboardView.invalidateComposingKeys();
   }
 
   private void showDialog(AlertDialog dialog) {
@@ -640,5 +659,10 @@ public class Trime extends InputMethodService implements
   /** 模擬PC鍵盤中Esc鍵的功能：清除輸入的編碼和候選項 */
   private void escape() {
     if (isComposing()) onKey(KeyEvent.KEYCODE_ESCAPE, 0);
+  }
+
+  /** 更新Rime的中西文狀態 */
+  private void updateAsciiMode() {
+    Rime.setOption("ascii_mode", mTempAsciiMode || mAsciiMode);
   }
 }
