@@ -290,8 +290,11 @@ public class Trime extends InputMethodService implements
         if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
          || variation == InputType.TYPE_TEXT_VARIATION_URI
          || variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
-         || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
-           mAsciiMode = true;
+         || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+         || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+         || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
+         ) {
+           mTempAsciiMode = true;
         }
         break;
     }
