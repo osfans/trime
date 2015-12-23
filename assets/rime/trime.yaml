@@ -31,7 +31,7 @@ style:
   key_vibrate_duration: 30 #按鍵震動時長：毫秒
   key_vibrate: false #按鍵震動
   key_width: 10.0 #鍵寬，佔螢幕寬的百分比
-  keyboards: [.default, default, number] #鍵盤配置
+  keyboards: [.default, default, symbols, number] #鍵盤配置
   label_text_size: 14 #長標籤大小
   latin_font: latin.ttf #西文字型
   latin_locale: en_US #西文語言
@@ -749,6 +749,7 @@ preset_keys:
   Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
   # trime設定
   IME_switch: {label: 其他輸入法, send: APP_SWITCH, select: .next}
+  Keyboard_symbols: {label: 符號, send: Eisu_toggle, select: symbols}
   Keyboard_number: {label: 數字, send: Eisu_toggle, select: number}
   Keyboard_letter: {label: 字母, send: Eisu_toggle, select: default}
   Keyboard_default: {label: 字母, send: Eisu_toggle, select: .default}
@@ -813,7 +814,7 @@ preset_keyboards:
     - {click: '.', long_click: '>', has_menu: Page_Down}
     - {click: '/', long_click: '?'}
     - {click: Shift_L}
-    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: Mode_switch, long_click: Menu}
     - {click: space, width: 30}
     - {click: "'", long_click: '"'}
@@ -867,7 +868,7 @@ preset_keyboards:
     - {click: 'm', long_click: Delete}
     - {click: BackSpace, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
-    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: "'", long_click: '"'}
     - {click: ',', long_click: '<', paging: Page_Up}
     - {click: space, width: 20}
@@ -912,7 +913,7 @@ preset_keyboards:
     - {click: '.', long_click: '>', has_menu: Page_Down}
     - {click: '/', long_click: '?'}
     - {click: Shift_L}
-    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: Mode_switch, long_click: Menu}
     - {click: space, width: 30}
     - {click: "'", long_click: '"'}
@@ -956,7 +957,7 @@ preset_keyboards:
     - {click: 'm', long_click: Delete}
     - {click: BackSpace, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
-    - {click: Keyboard_number, long_click: Color_switch}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: "'", long_click: '"'}
     - {click: ',', long_click: '<', paging: Page_Up}
     - {click: space, width: 20}
@@ -990,10 +991,65 @@ preset_keyboards:
     - {click: '.'}
     - {click: ','}
     - {click: '='}
-    - {click: Keyboard_switch}
+    - {click: Keyboard_default, long_click: Keyboard_symbols}
     - {click: space}
     - {click: BackSpace}
     - {click: Return}
+  symbols:
+    name: 符號
+    author: "天真可愛的滿滿"
+    ascii_mode: 1
+    width: 10
+    height: 44
+    keys:
+    - {click: '1'}
+    - {click: '2'}
+    - {click: '3'}
+    - {click: '4'}
+    - {click: '5'}
+    - {click: '6'}
+    - {click: '7'}
+    - {click: '8'}
+    - {click: '9'}
+    - {click: '0'}
+    - {click: '~',long_click: '`'}
+    - {click: '!'}
+    - {click: '@'}
+    - {click: '#'}
+    - {click: '$'}
+    - {click: '￥'}
+    - {click: '%'}
+    - {click: '^'}
+    - {click: '&'}
+    - {click: '*'}
+    - {click: '(', long_click: '{'}
+    - {click: ')', long_click: '}'}
+    - {click: '[', long_click: '【'}
+    - {click: ']', long_click: '】'}
+    - {click: '「', long_click: '『'}
+    - {click: '」', long_click: '』'}
+    - {click: '\', long_click: '|'}
+    - {click: '/', long_click: '√'}
+    - {click: ':', long_click: ';'}
+    - {click: '、'}
+    - {click: '+'}
+    - {click: '-', long_click: '_'}
+    - {click: '='}
+    - {click: '<', long_click: '〈'}
+    - {click: '>', long_click: '〉'}
+    - {click: '.', long_click: '’'}
+    - {click: '“'}
+    - {click: '”'}
+    - {click: '?'}
+    - {click: select_all}
+    - {click: Hide, long_click: Delete}
+    - {click: 'Keyboard_default', long_click: Menu}
+    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: space, width: 30}
+    - {click: '，'}
+    - {click: '。'}
+    - {click: BackSpace, long_click: Escape, width: 10}
+    - {click: Return, width: 10}
   bopomofo:
     name: 註音鍵盤
     author: "註音 皛筱晓小笨鱼"
@@ -1043,7 +1099,7 @@ preset_keyboards:
     - {label: 'ㄥ', long_click: '?', click: '/'}
     - {click: Hide, long_click: Delete}
     - {click: 'Mode_switch', long_click: Menu}
-    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: space, width: 30}
     - {label: 'ㄦ', long_click: '"', click: "-"}
     - {long_click: '。', click: '，'}
@@ -1088,7 +1144,7 @@ preset_keyboards:
     - {click: BackSpace, long_click: Escape, width: 10}
     - {click: Hide}
     - {long_click: '"', click: "'"}
-    - {click: 'Keyboard_number', long_click: Color_switch}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: space, width: 40}
     - {click: 'Mode_switch', long_click: Menu}
     - {long_click: '>', click: '.'}
@@ -1145,8 +1201,8 @@ preset_keyboards:
     - {click: BackSpace, width: 13.8}
     - {width: 2}
     - {width: 3}
-    - {click: Mode_switch, long_click: Menu, width: 14}
-    - {click: Keyboard_number, long_click: Color_switch, width: 11.5}
+    - {click: Menu, long_click: Color_switch, width: 14}
+    - {click: Keyboard_symbols, long_click: Keyboard_number, width: 11.5}
     - {click: ",", long_click: .}
     - {click: space, width: 25}
     - {click: "'", long_click: "?"}
@@ -1170,7 +1226,7 @@ preset_keyboards:
     - {click: ',', long_click: '.'}
     - {click: Hide, width: 10}
     - {click: '/', long_click: '^', width: 10}
-    - {click: 'Keyboard_number', long_click: Color_switch, width: 10}
+    - {click: Keyboard_symbols, long_click: Keyboard_number, width: 10}
     - {click: space, width: 40}
     - {click: 'Keyboard_letter', long_click: Menu, width: 10}
     - {click: Return, long_click: CommitComment, width: 20}
