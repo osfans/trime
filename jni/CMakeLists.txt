@@ -5,13 +5,10 @@ cmake_minimum_required (VERSION 3.3)
 option(BUILD_TEST "Build and run tests" OFF)
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 option(ENABLE_LOGGING "Enable logging with google-glog library" ON)
-option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" OFF)
+option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" ON)
 option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
 
 # includes
-if(WIN32)
-  include_directories(boost/libs/uuid/include)
-endif()
 include_directories(
   librime/include
   librime/thirdparty/include
@@ -81,7 +78,7 @@ file(GLOB BOOST_SOURCES
   boost/libs/locale/src/encoding/codepage.cpp
   )
 if(NOT BOOST_USE_SIGNALS2)
-  add_definitions(-DBOOST_SIGNALS_NO_DEPRECATION_WARNING)
+  #add_definitions(-DBOOST_SIGNALS_NO_DEPRECATION_WARNING)
   file(GLOB BOOST_SIGNAL_SOURCES boost/libs/signals/src/*.cpp)
 endif()
 add_library(boost-static STATIC ${BOOST_SOURCES} ${BOOST_SIGNAL_SOURCES})
