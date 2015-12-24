@@ -148,7 +148,7 @@ public class Config {
           Object o = Rime.schema_get_value(schema_id, "speller/alphabet");
           name = "qwerty"; //26
           if (o != null) {
-            String alphabet = (String) o;
+            String alphabet = o.toString();
             if (presetKeyboards.containsKey(alphabet)) name = alphabet; //匹配字母表
             else {
               if (alphabet.indexOf(",") >= 0 || alphabet.indexOf(";") >= 0) name += "_";
@@ -161,7 +161,7 @@ public class Config {
     if (!presetKeyboards.containsKey(name)) name = "default";
     Map<String, Object> m = (Map<String, Object>)presetKeyboards.get(name);
     if (m.containsKey("import_preset")) {
-      name = (String)m.get("import_preset");
+      name = m.get("import_preset").toString();
     }
     return name;
   }
@@ -227,7 +227,7 @@ public class Config {
   }
 
   public String getString(String key) {
-    return (String)getValue(key);
+    return getValue(key).toString();
   }
 
   public int getColor(String key) {
@@ -266,7 +266,7 @@ public class Config {
     String[] names = new String[n];
     for (int i = 0; i < n; i++) {
       Map<String, Object> m = (Map<String, Object>)presetColorSchemes.get(keys[i]);
-      names[i] = (String)m.get("name");
+      names[i] = m.get("name").toString();
     }
     return names;
   }

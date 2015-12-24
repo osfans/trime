@@ -173,7 +173,7 @@ public class Rime
             }
           }
         } else {
-          o.put("value", Rime.get_option(session_id, (String)o.get("name")) ? 1 : 0);
+          o.put("value", Rime.get_option(session_id, o.get("name").toString()) ? 1 : 0);
         }
         switches.set(j, o);
       }
@@ -191,7 +191,7 @@ public class Rime
         Rime.setOption(options.get(value), true);
       } else {
         value = 1 - value;
-        Rime.setOption((String)o.get("name"), value == 1);
+        Rime.setOption(o.get("name").toString(), value == 1);
       }
       o.put("value", value);
       switches.set(i, o);
