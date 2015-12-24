@@ -12,6 +12,10 @@ icon: icon.svg
 	inkscape -z -e res/drawable-xhdpi/icon.png -w 96 -h 96 icon.svg
 	inkscape -z -e res/drawable-hdpi/icon.png -w 72 -h 72 icon.svg
 	inkscape -z -e res/drawable/icon.png -w 48 -h 48 icon.svg
+	inkscape -z -e res/drawable-xxhdpi/status.png -w 72 -h 72 icon.svg
+	inkscape -z -e res/drawable-xhdpi/status.png -w 48 -h 48 icon.svg
+	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 38 icon.svg
+	inkscape -z -e res/drawable/status.png -w 24 -h 24 icon.svg
 
 apk: android
 	ant release
