@@ -54,6 +54,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import android.os.Build.VERSION_CODES;
+import android.os.Build.VERSION;
+
 //import com.android.internal.R;
 
 import java.util.Arrays;
@@ -308,9 +311,14 @@ public class KeyboardView extends View implements View.OnClickListener {
         });
 
         mPreviewText.setTextColor(config.getColor("preview_text_color"));
-        PaintDrawable background = new PaintDrawable(config.getColor("preview_back_color"));
-        background.setCornerRadius(mRoundCorner);
-        mPreviewText.setBackground(background);
+        int previewBackColor = config.getColor("preview_back_color");
+        if (VERSION.SDK_INT < VERSION_CODES.JELLY_BEAN) {
+          mPreviewText.setBackgroundColor(previewBackColor); //不支持圓角
+        } else {
+          PaintDrawable background = new PaintDrawable(previewBackColor);
+          background.setCornerRadius(mRoundCorner);
+          mPreviewText.setBackground(background);
+        }
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
         mShowPreview = config.getBoolean("show_preview");
