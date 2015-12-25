@@ -312,12 +312,12 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         mPreviewText.setTextColor(config.getColor("preview_text_color"));
         int previewBackColor = config.getColor("preview_back_color");
-        if (VERSION.SDK_INT < VERSION_CODES.JELLY_BEAN) {
-          mPreviewText.setBackgroundColor(previewBackColor); //不支持圓角
-        } else {
+        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           PaintDrawable background = new PaintDrawable(previewBackColor);
           background.setCornerRadius(mRoundCorner);
           mPreviewText.setBackground(background);
+        } else {
+          mPreviewText.setBackgroundColor(previewBackColor); //不支持圓角
         }
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
@@ -707,7 +707,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             canvas.translate(key.x + kbdPaddingLeft, key.y + kbdPaddingTop);
             keyBackground.draw(canvas);
             
-            if (!label.isEmpty()) {
+            if (!Function.isEmpty(label)) {
                 // For characters, use large font. For labels like "Done", use small font.
                 if (label.length() > 1) {
                     paint.setTextSize(mLabelTextSize);
@@ -727,7 +727,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     canvas.drawText(key.getSymbolLabel(), left, symbolTop + top, mPaintSymbol);
                 }
 
-                if (!hint.isEmpty()) {
+                if (!Function.isEmpty(hint)) {
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
                     canvas.drawText(hint, left, key.height  - padding.bottom - symbolTop + top, mPaintSymbol);
                 }
@@ -1128,6 +1128,11 @@ public class KeyboardView extends View implements View.OnClickListener {
     */
 
     @Override
+    public boolean performClick() {
+      return super.performClick();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent me) {
         // Convert multi-pointer up/down events to single up/down events to 
         // deal with the typical multi-pointer behavior of two-thumb typing
@@ -1165,7 +1170,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             }
         }
         mOldPointerCount = pointerCount;
-
+        performClick();
         return result;
     }
 

@@ -74,23 +74,23 @@ public class Key {
     for (int i = 0; i < EVENT_NUM; i++) {
       String eventType = eventTypes[i];
       s = getString(mk, eventType);
-      if (!s.isEmpty()) events[i] = new Event(mKeyboard, s);
+      if (s.length() > 0) events[i] = new Event(mKeyboard, s);
     }
     s = getString(mk, "composing");
-    if (!s.isEmpty()) {
+    if (s.length() > 0) {
       composing = new Event(mKeyboard, s);
     }
     s = getString(mk, "has_menu");
-    if (!s.isEmpty()) {
+    if (s.length() > 0) {
       has_menu = new Event(mKeyboard, s);
     }
     s = getString(mk, "paging");
-    if (!s.isEmpty()) {
+    if (s.length() > 0) {
       paging = new Event(mKeyboard, s);
     }
     if (composing != null || has_menu != null || paging != null) mKeyboard.mComposingKeys.add(this);
     s = getString(mk, "ascii");
-    if (!s.isEmpty()) ascii = new Event(mKeyboard, s);
+    if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = getString(mk, "label");
     hint = getString(mk, "hint");
     if (isShift()) mKeyboard.mShiftKey = this;
@@ -272,7 +272,7 @@ public class Key {
 
   public String getLabel() {
     Event event = getEvent();
-    if (!label.isEmpty() && event == getClick()
+    if (!Function.isEmpty(label) && event == getClick()
     && (ascii == null && !Rime.isAsciiMode()))
       return label; //中文狀態顯示標籤
     return event.getLabel();

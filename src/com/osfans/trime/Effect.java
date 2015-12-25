@@ -21,6 +21,8 @@ import android.media.AudioManager;
 import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.speech.tts.TextToSpeech;
+import android.os.Build.VERSION_CODES;
+import android.os.Build.VERSION;
 
 import java.util.Locale;
 
@@ -112,6 +114,7 @@ public class Effect {
 
   public void speakKey(int code) {
     if (code <= 0) return;
+    if (VERSION.SDK_INT < VERSION_CODES.HONEYCOMB_MR1) return;
     String text = KeyEvent.keyCodeToString(code).replace("KEYCODE_","").replace("_", " ").toLowerCase();
     speakKey(text);
   }

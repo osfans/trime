@@ -35,8 +35,8 @@
         android:orientation="horizontal">
       <com.osfans.trime.Candidate
           android:id="@+id/candidate"
-          android:layout_width="1000px"
-          android:layout_height="120px"
+          android:layout_width="1000dp"
+          android:layout_height="120dp"
           />
     </LinearLayout>
   </HorizontalScrollView>

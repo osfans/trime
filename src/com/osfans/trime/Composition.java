@@ -27,6 +27,8 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.UnderlineSpan;
+import android.os.Build.VERSION_CODES;
+import android.os.Build.VERSION;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
 public class Composition extends TextView {
@@ -43,13 +45,15 @@ public class Composition extends TextView {
   }
 
   public boolean onTouchEvent(MotionEvent event) {
-    int n = getOffsetForPosition(event.getX(),event.getY());
-    if (event.getAction() == MotionEvent.ACTION_UP && n >= 0) {
-      String s = getText().toString().substring(0, n);
-      if (soft_cursor) s = s.replace(soft_cursor_text, "").replace(" ", "");
-      n = s.length();
-      Rime.RimeSetCaretPos(n);
-      Trime.getService().updateComposing();
+    if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH) {
+      int n = getOffsetForPosition(event.getX(),event.getY());
+      if (event.getAction() == MotionEvent.ACTION_UP && n >= 0) {
+        String s = getText().toString().substring(0, n);
+        if (soft_cursor) s = s.replace(soft_cursor_text, "").replace(" ", "");
+        n = s.length();
+        Rime.RimeSetCaretPos(n);
+        Trime.getService().updateComposing();
+      }
     }
     return true;
   }
@@ -68,7 +72,7 @@ public class Composition extends TextView {
     setVisibility(show ? View.VISIBLE : View.GONE);
     soft_cursor = config.getBoolean("soft_cursor");
     soft_cursor_text = config.getString("soft_cursor_text");
-    if (soft_cursor_text == null || soft_cursor_text.isEmpty()) soft_cursor_text = caret;
+    if (soft_cursor_text == null || soft_cursor_text.length() == 0) soft_cursor_text = caret;
   }
 
   public void setText() {

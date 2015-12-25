@@ -209,7 +209,7 @@ public class Candidate extends View {
       x = candidateRect[i].centerX();
       if (show_comment) {
         comment = getComment(i);
-        if (comment != null && !comment.isEmpty()) {
+        if (!Function.isEmpty(comment)) {
           comment_width = paintComment.measureText(comment);
           if (comment_on_top) {
             comment_x = candidateRect[i].centerX();
@@ -283,6 +283,11 @@ public class Candidate extends View {
   }
 
   @Override
+  public boolean performClick() {
+    return super.performClick();
+  }
+
+  @Override
   public boolean onTouchEvent(MotionEvent me) {
     int action = me.getAction();
     int x = (int) me.getX();
@@ -299,6 +304,7 @@ public class Candidate extends View {
         }
         break;
     }
+    performClick();
     return true;
   }
 

@@ -30,13 +30,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.view.WindowManager;
 import android.app.AlertDialog;
-
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.LinearLayout;
 import android.view.LayoutInflater;
+import android.os.Build.VERSION_CODES;
+import android.os.Build.VERSION;
 
 import java.util.logging.Logger;
 import java.util.Locale;
@@ -122,13 +123,13 @@ public class Trime extends InputMethodService implements
     String s;
     String[] ss;
     s = mConfig.getString("locale");
-    if (s == null || s.isEmpty()) s = "";
+    if (Function.isEmpty(s)) s = "";
     ss = s.split("[-_]");
     if (ss.length == 2) locales[0] = new Locale(ss[0], ss[1]);
     else if (ss.length == 3) locales[0] = new Locale(ss[0], ss[1], ss[2]);
     else locales[0] = Locale.getDefault();
     s = mConfig.getString("latin_locale");
-    if (s == null || s.isEmpty()) s = "en_US";
+    if (Function.isEmpty(s)) s = "en_US";
     ss = s.split("[-_]");
     if (ss.length == 1) locales[1] = new Locale(ss[0]);
     else if (ss.length == 2) locales[1] = new Locale(ss[0], ss[1]);
@@ -386,7 +387,9 @@ public class Trime extends InputMethodService implements
       ic.performContextMenuAction(android.R.id.cut);
       ic.endBatchEdit();
       return true;
-    } else if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
+    }
+    if (VERSION.SDK_INT < VERSION_CODES.HONEYCOMB) return false;
+    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
       // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
       if (code == KeyEvent.KEYCODE_A)
         return ic.performContextMenuAction(android.R.id.selectAll);
@@ -441,8 +444,10 @@ public class Trime extends InputMethodService implements
       return false;
     }
 
-    if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
-      return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
+    if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+      if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
+        return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
+    }
 
     int c = event.getUnicodeChar();
     if (c > 0) {
@@ -455,7 +460,7 @@ public class Trime extends InputMethodService implements
 
   public void onEvent(Event event) {
     String s = event.getText();
-    if (!s.isEmpty()) {
+    if (!Function.isEmpty(s)) {
       onText(s);
     } else if (event.code > 0) {
       int code = event.code;

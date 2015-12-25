@@ -63,7 +63,7 @@ public class Event {
   }
 
   private void parseSend(String s) {
-    if (s.isEmpty()) return;
+    if (Function.isEmpty(s)) return;
     String codes;
     if (!s.contains("+")) codes = s;
     else {
@@ -82,29 +82,29 @@ public class Event {
   }
 
   public String getLabel() {
-    if (toggle != null && !toggle.isEmpty()) return states.get(Rime.getOption(toggle) ? 1 : 0);
+    if (!Function.isEmpty(toggle)) return states.get(Rime.getOption(toggle) ? 1 : 0);
     return adjustCase(label);
   }
 
   public String getText() {
     String s = "";
-    if (text != null && !text.isEmpty()) s = text;
+    if (!Function.isEmpty(text)) s = text;
     else if (mKeyboard.isShifted() && mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
     return adjustCase(s);
   }
 
   public String getPreviewText() {
-    if (preview != null && !preview.isEmpty()) return preview;
+    if (!Function.isEmpty(preview)) return preview;
     return getLabel();
   }
 
   public String getToggle() {
-    if (toggle != null && !toggle.isEmpty()) return toggle;
+    if (!Function.isEmpty(toggle)) return toggle;
     return "ascii_mode";
   }
 
   private void parseLabel() {
-    if (label != null && !label.isEmpty()) return;
+    if (!Function.isEmpty(label)) return;
     int c = code;
     if (c == KeyEvent.KEYCODE_SPACE){
       label = Rime.getSchemaName();
