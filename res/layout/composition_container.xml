@@ -21,7 +21,6 @@
 
   <com.osfans.trime.Composition
     android:id="@+id/composition"
-    android:editable="false"
     android:singleLine="true"
     android:lines="1"
     android:maxLines="1"

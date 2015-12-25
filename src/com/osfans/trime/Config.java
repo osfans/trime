@@ -35,7 +35,8 @@ public class Config {
   private Map<String, Map<String, Object>> maps;
   private String defaultName = "trime.yaml";
   private String schema_id;
-  private static String USER_DATA_DIR = "/sdcard/rime";
+  public static String SDCARD = "/sdcard/";
+  private static String USER_DATA_DIR = SDCARD + "rime";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
 
@@ -80,7 +81,7 @@ public class Config {
       if (assets.length == 0) {
         copyFile(context, path, overwrite);
       } else {
-        String fullPath = "/sdcard/" + path;
+        String fullPath = SDCARD + path;
         File dir = new File(fullPath);
         if (!dir.exists()) dir.mkdir();
         for (int i = 0; i < assets.length; ++i) {
@@ -100,7 +101,7 @@ public class Config {
     OutputStream out = null;
     try {
       in = assetManager.open(filename);
-      String newFileName = "/sdcard/" + filename;
+      String newFileName = SDCARD + filename;
       if (new File(newFileName).exists() && !overwrite) return true;
       out = new FileOutputStream(newFileName);
       byte[] buffer = new byte[BLK_SIZE];
