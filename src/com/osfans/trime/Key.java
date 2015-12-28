@@ -32,7 +32,8 @@ import java.util.HashMap;
 public class Key {
   private String TAG = "Key";
   private Keyboard mKeyboard;
-  public Event composing, ascii, has_menu, paging;
+  public Event ascii, composing, has_menu, paging;
+  private boolean send_bindings = true;
   public String[] eventTypes = new String[]{"click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down"};
   public static final int CLICK = 0;
   public static final int LONG_CLICK = 1;
@@ -93,6 +94,7 @@ public class Key {
     if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = getString(mk, "label");
     hint = getString(mk, "hint");
+    if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     if (isShift()) mKeyboard.mShiftKey = this;
   }
   
@@ -257,8 +259,14 @@ public class Key {
 
   public Event getEvent(int i) {
     Event e = null;
-    if (i >= 0 && i <= EVENT_NUM) e = events[i];
+    if (i > 0 && i <= EVENT_NUM) e = events[i];
     if (e != null) return e;
+    if (ascii != null && Rime.isAsciiMode()) return ascii;
+    if (send_bindings) {
+      if (paging != null && Rime.isPaging()) return paging;
+      if (has_menu != null && Rime.hasMenu()) return has_menu;
+      if (composing != null && Rime.isComposing()) return composing;
+    }
     return getClick();
   }
 
