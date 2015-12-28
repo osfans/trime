@@ -21,6 +21,7 @@ import android.content.Intent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
@@ -43,7 +44,7 @@ public class Function {
     if (command == null) return s;
     switch (command) {
       case "date":
-        s = new SimpleDateFormat(option).format(new Date()); //時間
+        s = new SimpleDateFormat(option, Locale.getDefault()).format(new Date()); //時間
         break;
       case "run":
         openApp(context, option); //啓動程序

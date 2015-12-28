@@ -36,6 +36,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.LinearLayout;
 import android.view.LayoutInflater;
+import android.widget.FrameLayout;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
 
@@ -54,7 +55,8 @@ public class Trime extends InputMethodService implements
   private Effect mEffect; //音效
   private Candidate mCandidate; //候選
   private Composition mComposition; //編碼
-  private LinearLayout mCandidateContainer,  mCompositionContainer;
+  private LinearLayout mCompositionContainer;
+  private FrameLayout mCandidateContainer;
   private PopupWindow mFloatingWindow;
   private PopupTimer mFloatingWindowTimer = new PopupTimer();
   private AlertDialog mOptionsDialog; //對話框
@@ -252,7 +254,7 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setContentView(mCompositionContainer);
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
-    mCandidateContainer = (LinearLayout) inflater.inflate(R.layout.candidate_container, null);
+    mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
     mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);

@@ -40,8 +40,10 @@
     <string name="pref_reset_summary">使用預設設定覆蓋/sdcard/rime下同名檔案</string>
 
     <string name="pref_function">功能</string>
+<!--
     <string name="pref_maintenance">維護</string>
     <string name="pref_maintenance_summary">自動維護輸入法方案</string>
+-->
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
     <string name="pref_sync">同步</string>

@@ -115,7 +115,7 @@ public class Effect {
   public void speakKey(int code) {
     if (code <= 0) return;
     if (VERSION.SDK_INT < VERSION_CODES.HONEYCOMB_MR1) return;
-    String text = KeyEvent.keyCodeToString(code).replace("KEYCODE_","").replace("_", " ").toLowerCase();
+    String text = KeyEvent.keyCodeToString(code).replace("KEYCODE_","").replace("_", " ").toLowerCase(Locale.getDefault());
     speakKey(text);
   }
 

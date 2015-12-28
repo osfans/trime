@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Locale;
 
 /** {@link Key 按鍵}的各種事件（單擊、長按、滑動等） */
 public class Event {
@@ -77,7 +78,7 @@ public class Event {
 
   public String adjustCase(String s) {
     if (s == null) return "";
-    if (s.length() == 1 && mKeyboard.isShifted()) s = s.toUpperCase();
+    if (s.length() == 1 && mKeyboard.isShifted()) s = s.toUpperCase(Locale.getDefault());
     return s;
   }
 
