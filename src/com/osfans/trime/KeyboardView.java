@@ -811,7 +811,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private void detectAndSendKey(int index, int x, int y, long eventTime, int type) {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
-            if (key.isShift()) {
+            if (key.isShift() && !Rime.isComposing()) {
                setShifted(false, !isShifted());
             } else {
                 int code = key.getCode(type);
