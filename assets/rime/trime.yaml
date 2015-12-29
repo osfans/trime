@@ -864,8 +864,8 @@ preset_keyboards:
     - {click: 'c', long_click: copy}
     - {click: 'v', long_click: paste}
     - {click: 'b', long_click: '~'}
-    - {click: 'n', long_click: Insert}
-    - {click: 'm', long_click: Delete}
+    - {click: 'n', long_click: '"'}
+    - {click: 'm', long_click: "'"}
     - {click: BackSpace, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
@@ -952,8 +952,8 @@ preset_keyboards:
     - {click: 'c', long_click: copy}
     - {click: 'v', long_click: paste}
     - {click: 'b', long_click: Time, swipe_up: Date}
-    - {click: 'n', long_click: Insert}
-    - {click: 'm', long_click: Delete}
+    - {click: 'n', long_click: '"'}
+    - {click: 'm', long_click: "'"}
     - {click: BackSpace, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
@@ -1194,7 +1194,7 @@ preset_keyboards:
     - {click: c, label: "金", long_click: copy}
     - {click: v, label: "女", long_click: paste}
     - {click: b, label: "月", long_click: "~"}
-    - {click: n, label: "弓", long_click: Insert}
+    - {click: n, label: "弓", long_click: '"'}
     - {click: m, label: "一", long_click: Delete}
     - {click: BackSpace, width: 13.8}
     - {width: 2}
