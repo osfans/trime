@@ -95,6 +95,7 @@ public class Key {
     label = getString(mk, "label");
     hint = getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
+    else if(composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.mShiftKey = this;
   }
   
@@ -222,6 +223,10 @@ public class Key {
   public boolean isShift() {
     int c = getCode();
     return (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT);
+  }
+
+  public boolean sendBindings() {
+    return (composing == null || Rime.isComposing()) && !Rime.isAsciiMode() && send_bindings;
   }
 
   public static String getString(Map m, String k) {
