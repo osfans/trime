@@ -306,7 +306,7 @@ public class Trime extends InputMethodService implements
     mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
     mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
     updateAsciiMode();
-    updateComposing();
+    //updateComposing(); //可能會清空文本框
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !Rime.isEmpty()); //實體鍵盤
     if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
