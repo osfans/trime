@@ -285,19 +285,19 @@ public class Trime extends InputMethodService implements
         break;
       case InputType.TYPE_CLASS_TEXT:
       default:
-        canCompose = true;
         if (variation == InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE) {
           // Make enter-key as line-breaks for messaging.
           enterAsLineBreak = true;
         }
         if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-         || variation == InputType.TYPE_TEXT_VARIATION_URI
          || variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
          || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
          || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
          || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
          ) {
            mTempAsciiMode = true;
+        } else {
+          canCompose = true;
         }
         break;
     }
