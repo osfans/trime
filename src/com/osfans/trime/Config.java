@@ -31,12 +31,14 @@ import java.io.*;
 
 /** 解析YAML配置文件 */
 public class Config {
+  public static String SDCARD = "/sdcard/";
+
   private Map<String, Object> mStyle, mDefaultStyle;
   private Map<String, Map<String, Object>> maps;
-  private String defaultName = "trime.yaml";
+  private static String defaultName = "trime.yaml";
   private String schema_id;
-  public static String SDCARD = "/sdcard/";
-  private static String USER_DATA_DIR = SDCARD + "rime";
+  private static String RIME = "rime";
+  private static String USER_DATA_DIR = SDCARD + RIME;
   private static int BLK_SIZE = 1024;
   private static Config self = null;
 
@@ -56,8 +58,11 @@ public class Config {
   }
 
   public static boolean prepareRime(Context context) {
-    if (new File(USER_DATA_DIR).exists()) return false;
-    copyFileOrDir(context, "rime", false);
+    if (new File(USER_DATA_DIR).exists()) {
+      copyFileOrDir(context, RIME + "/" + defaultName, false);
+      return false;
+    }
+    copyFileOrDir(context, RIME, false);
     Rime.get(true);
     return true;
   }
