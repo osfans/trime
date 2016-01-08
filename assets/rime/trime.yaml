@@ -908,8 +908,8 @@ preset_keyboards:
     - {click: 'b', long_click: Time, swipe_up: Date}
     - {click: 'n', long_click: Insert}
     - {click: 'm', long_click: Delete}
-    - {click: ',', long_click: '<', paging: Page_Up}
-    - {click: '.', long_click: '>', has_menu: Page_Down}
+    - {click: ',', long_click: '<'}
+    - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
     - {click: Shift_L}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
