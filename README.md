@@ -37,11 +37,10 @@ make apk
 ```
 
 ## 致謝
-- 忠實的用戶
-- 在[Issues](https://github.com/osfans/trime/issues)、貼吧、QQ羣中反饋意見的網友
-- [佛振](https://github.com/lotem)
-- 圖文教程：xiaoqun26
+- Rime: [佛振](https://github.com/lotem)
+- 圖文教程：[xiaoqun2016](https://github.com/xiaoqun2016)
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo
+- 在[Issues](https://github.com/osfans/trime/issues)、貼吧、QQ羣中反饋意見的網友
 - 依賴的開源項目
 
 [注音倉頡輸入法]: https://code.google.com/p/android-traditional-chinese-ime/

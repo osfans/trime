@@ -1,22 +1,21 @@
 language: android
-script: gradle release
-# Handle git submodules yourself
+script:
+  - git fetch origin --tags
+  - ant clean
+  - ant release
 git:
-    submodules: false
-# Use sed to replace the SSH URL with the public URL, then initialize submodules
-#before_install:
-  #- sudo apt-get update -qq
-  #- sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch p7zip
-  #- wget --timeout=120 http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86.bin -O ndk.bin
-  #- md5sum ndk.bin | grep 70ed6d8c34e7e620c145b791e8eeef89
-  #- 7zr x ndk.bin | grep -v Extracting
-  #- export ANDROID_HOME=$(pwd)/android-sdk-linux
-  #- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-  #- git submodule update --init --recursive
+  submodules: false
 android:
   components:
-    # The BuildTools version used by your project
-    - build-tools-23.0.0
-
-    # The SDK version used to compile your project
-    - android-23
+  - build-tools-23.0.0
+  - android-23
+deploy:
+  provider: releases
+  prerelease: true
+  api_key:
+    secure: Re05JVyUGeHmpcC8fZgv9KFfaYl1Mm0C7t1qhkhLpc1V1AMBexEVVTPbMapkrrssZa9QRTX7qPUrnABYPCVJEM7faOA7Toy1pKI2RK4AnWDiIxUAH+2kZhAiNis21dXAt2ucQFvAbwOXJ952xjoVOXHrMMRgDFmAotfYYgRfapAypfkIHqBb0pF2NPEvuj/KKAwzXtjvfVcdPBZHOxNZecJPJh5rvDHTigLHeh7XrnzEkqGBlgrj04Orf8wNrGCWhVu9cGGtn9rLYxf4Jq24fe9tvGNlAt3z6n7nUOHDpr2QwirzSF12YO8q/ouS4JrGDODVgnwPpKau5z1lwedsnA6KxwfHnfuoCDD2xbS/2lLnU3fCjTXqjX/QZ0f/i3s0fIz7a7FfHEdSUTp/nRUfhncHqkBPA1J3xFdlPkHsIIu6BX+IkYeVb6u7Ta381O6/EFVTalFG1/avBggUvjuU5vP7vgD46ToQVYrA7cFiPuI8a9QpG5Sju7Nq0xap/twVsexny16duGWKHHlppRUjFn8dmStOPcSebPlRhQr2E9roDSh2jhVo++PTw+jATO/mfzNE7VFYTKnLHUQYWkWXjA5clCEgEYHZciZz1OG7WrIRpekp0Ow0o4hWg59Y2LqYHoVKjwmAhQb0AGK6TLI8Ss560cPO8pNYsdv+UzGDtYM=
+  skip_cleanup: true
+  file_glob: true
+  file: bin/trime-20*.apk
+  on:
+    tags: true
