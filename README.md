@@ -8,14 +8,17 @@
 旨在保護漢語各地方言，
 音碼形碼通用輸入法平臺。
 
-## 歷史
+## 歷史/History
 - 最初，輸入法是寫給[泰如拼音]（thae5 rv2）的，中文名爲“泰如輸入法”。
 - 然後，添加了吳語等方言碼表，做成了一個輸入法平臺，更名爲“漢字方言輸入法”。
 - 後來，兼容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名爲“同文輸入法平臺2.x”。寓意音碼形碼同臺，方言官話同文。
 - 之後，藉助JNI技術，享受了librime的成果，升級爲“同文輸入法平臺3.x”，簡稱“同文輸入法”。
 - 所以，你可以認爲TRIME是Tongwen RIME或是ThaeRvInputMEthod的縮寫。
 
-## 依賴
+## 許可協議/License
+Apache License 2.0
+
+## 第三方庫/3rd Party Library
 - [android-cmake](https://github.com/taka-no-me/android-cmake) (BSD 3-Clause License)
 - [minilog](http://ceres-solver.org/) (New BSD License)
 - [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
@@ -29,14 +32,14 @@
  - [LevelDB](https://github.com/google/leveldb) (New BSD License)
    - [snappy](https://google.github.io/snappy/)(BSD License)
 
-## 編譯
+## 編譯/Build
 - Arch Linux
 ```bash
-yaourt -S android-ndk android-sdk android-sdk-build-tools android-sdk-platform-tools android-platform apache-ant
+yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} apache-ant
 make apk
 ```
 
-## 致謝
+## 鳴謝/Credits
 - Rime: [佛振](https://github.com/lotem)
 - 圖文教程：[xiaoqun2016](https://github.com/xiaoqun2016)
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo
