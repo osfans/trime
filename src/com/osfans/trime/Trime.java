@@ -217,7 +217,16 @@ public class Trime extends InputMethodService implements
         candidatesStart, candidatesEnd);
     if ((candidatesEnd != -1) &&
         ((newSelStart != candidatesEnd) || (newSelEnd != candidatesEnd))) {
-      // Clear composing text and its candidates for cursor movement.
+      //移動光標時，更新候選區
+      if ((newSelEnd < candidatesEnd) && (newSelEnd >= candidatesStart)) {
+        int n = newSelEnd - candidatesStart;
+        Rime.RimeSetCaretPos(n);
+        updateComposing();
+      }
+    }
+    if ((candidatesStart == -1 && candidatesEnd == -1) &&
+        (newSelStart == 0 && newSelEnd == 0)) {
+      //上屏後，清除候選區
       escape();
     }
     // Update the caps-lock status for the current cursor position.
