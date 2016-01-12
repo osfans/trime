@@ -1205,6 +1205,8 @@ preset_keyboards:
     - {click: space, width: 25}
     - {click: "'", long_click: "?"}
     - {click: Return, long_click: CommitComment, width: 25.5}
+  scj6:
+    import_preset: cangjie5
   stroke:
     name: 五筆畫鍵盤
     author: 皛筱晓小笨鱼
@@ -1257,5 +1259,47 @@ preset_keyboards:
     - {click: Keyboard_letter, long_click: Menu}
     - {click: space, width: 60}
     - {click: Return}
-  scj6:
-    import_preset: cangjie5
+  terra_pinyin:
+    name: 地球拼音鍵盤
+    author: 默默ㄇㄛˋ
+    ascii_mode: 0
+    width: 10
+    height: 55
+    keys:
+    - {click: 'q', long_click: '_'}
+    - {click: 'w', long_click: '-'}
+    - {click: 'e', long_click: '+'}
+    - {click: 'r', long_click: '='}
+    - {click: 't', long_click: '|'}
+    - {click: 'y', long_click: '^'}
+    - {click: 'u', long_click: '['}
+    - {click: 'i', long_click: ']'}
+    - {click: 'o', long_click: '{'}
+    - {click: 'p', long_click: '}'}
+    - {click: 'a', long_click: '`' }
+    - {click: 's', long_click: Time, swipe_up: Date}
+    - {click: 'd', long_click: '~'}
+    - {click: 'f', long_click: '!'}
+    - {click: 'g', long_click: '@'}
+    - {click: 'h', long_click: '#'}
+    - {click: 'j', long_click: '$'}
+    - {click: 'k', long_click: '%'}
+    - {click: 'l', long_click: '>'}
+    - {click: ';', long_click: ':', composing: 'ˉ', send_bindings: false}  #一聲
+    - {click: 'z', long_click: cut}
+    - {click: 'x', long_click: copy}
+    - {click: 'c', long_click: paste}
+    - {click: 'v', long_click: '&'}
+    - {click: 'b', long_click: '*'}
+    - {click: 'n', long_click: '('}
+    - {click: 'm', long_click: ')'}
+    - {click: '/', long_click: '?', composing: 'ˊ', send_bindings: false}  #二聲
+    - {click: ',', long_click: '<', composing: 'ˇ', send_bindings: false}  #三聲
+    - {click: BackSpace, long_click: Escape}
+    - {click: Mode_switch, long_click: Menu}
+    - {click: Shift_L, composing: "'"}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
+    - {click: space, width: 40}
+    - {click: ".", long_click: '"'}
+    - {click: '\', long_click: '.', composing: 'ˋ', send_bindings: false}  #四聲
+    - {click: Return, long_click: CommitComment}
