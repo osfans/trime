@@ -996,7 +996,7 @@ preset_keyboards:
   symbols:
     name: 符號
     author: "天真可愛的滿滿"
-    ascii_mode: 1
+    ascii_mode: 0
     width: 10
     height: 44
     keys:
@@ -1026,28 +1026,27 @@ preset_keyboards:
     - {click: ']', long_click: '】'}
     - {click: '「', long_click: '『'}
     - {click: '」', long_click: '』'}
-    - {click: '\', long_click: '|'}
+    - {click: '、', ascii: '\', long_click: '|'}
     - {click: '/', long_click: '√'}
-    - {click: ':', long_click: ';'}
-    - {click: '、'}
+    - {click: ':'}
+    - {click: ';'}
     - {click: '+'}
     - {click: '-', long_click: '_'}
     - {click: '='}
-    - {click: '<', long_click: '〈'}
-    - {click: '>', long_click: '〉'}
-    - {click: '.', long_click: '’'}
-    - {click: '“'}
-    - {click: '”'}
-    - {click: '?'}
+    - {click: '〈', long_click: '《', ascii: '<'}
+    - {click: '〉', long_click: '》', ascii: '>'}
+    - {click: '“', ascii: '"', long_click: '‘'}
+    - {click: '”', ascii: "'", long_click: '’'}
+    - {click: '，', ascii: ','}
+    - {click: '？', ascii: '?'}
     - {click: select_all}
     - {click: Hide, long_click: Delete}
     - {click: Keyboard_default, long_click: Menu}
     - {click: Keyboard_number, long_click: Color_switch}
-    - {click: space, width: 30}
-    - {click: '，'}
-    - {click: '。'}
-    - {click: BackSpace, long_click: Escape, width: 10}
-    - {click: Return, width: 10}
+    - {click: space, width: 40}
+    - {click: '。', ascii: '.'}
+    - {click: BackSpace, long_click: Escape}
+    - {click: Return}
   bopomofo:
     name: 註音鍵盤
     author: "皛筱晓小笨鱼"
