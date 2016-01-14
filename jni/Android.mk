@@ -15,12 +15,12 @@
 
 ROOT_PATH := $(call my-dir)
 include jni/opencc.mk #1.0.3
-include jni/yaml-cpp.mk #0.5.2
+include jni/yaml-cpp.mk #0.5.3
 include jni/snappy.mk #1.1.3
 include jni/leveldb.mk #1.18
 include jni/marisa.mk #0.2.4
 include jni/boost.mk #1.59
-include jni/miniglog.mk
+include jni/libiconv.mk #1.14
 include jni/librime.mk #1.2.9
 include jni/librime_jni.mk
-include jni/libiconv.mk #1.14
+include jni/miniglog.mk
