@@ -1,7 +1,7 @@
 LOCAL_PATH := $(ROOT_PATH)/boost
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := boost #1.59
+LOCAL_MODULE := boost
 
 LOCAL_SRC_FILES += \
   libs/filesystem/src/operations.cpp \

@@ -16,7 +16,7 @@ LOCAL_PATH := $(ROOT_PATH)/OpenCC
 CXX_DEFINES := -DVERSION="\"1.0.3\"" -DOpencc_BUILT_AS_STATIC
 
 include $(CLEAR_VARS)
-LOCAL_MODULE    := opencc #1.0.3
+LOCAL_MODULE    := opencc
 LOCAL_SRC_FILES := src/BinaryDict.cpp \
   src/Config.cpp \
   src/Conversion.cpp \

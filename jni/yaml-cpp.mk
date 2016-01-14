@@ -1,7 +1,7 @@
 LOCAL_PATH := $(ROOT_PATH)/yaml-cpp
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := yaml-cpp #0.5.2
+LOCAL_MODULE := yaml-cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
