@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.io.File;
 
 /** Rime與OpenCC的Java實現
@@ -136,10 +137,9 @@ public class Rime
 
     public void check() {
       if (switches.isEmpty()) return;
-      int i = 0;
-      for (Map<String, Object> o: switches) {
-        if (!o.containsKey("states")) switches.remove(i);
-        i++;
+      for (Iterator it = switches.iterator(); it.hasNext();) {
+        Map<String, Object> o = (Map<String, Object>) it.next();
+        if (!o.containsKey("states")) it.remove();
       }
     }
 
