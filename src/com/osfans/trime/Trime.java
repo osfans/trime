@@ -71,6 +71,7 @@ public class Trime extends InputMethodService implements
   /** 默認中英文狀態*/
   private boolean mAsciiMode;
   private String soft_cursor = "soft_cursor"; //軟光標
+  private String horizontal_mode = "_horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
 
   private class PopupTimer extends Handler implements Runnable {
@@ -116,6 +117,7 @@ public class Trime extends InputMethodService implements
     Rime.get();
     mConfig = Config.get(this);
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+    Rime.setOption(horizontal_mode, mConfig.getBoolean(horizontal_mode)); //水平模式
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
@@ -154,6 +156,7 @@ public class Trime extends InputMethodService implements
     mConfig = new Config(this);
     reset();
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+    Rime.setOption(horizontal_mode, mConfig.getBoolean(horizontal_mode)); //水平模式
   }
 
   public void invalidateKeyboard() {
