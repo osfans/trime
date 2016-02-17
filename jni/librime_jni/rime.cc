@@ -505,6 +505,10 @@ jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index
   return rime_get_api()->select_candidate(session_id, index);
 }
 
+jboolean select_candidate_on_current_page(JNIEnv *env, jobject thiz, jint session_id, jint index) {
+  return rime_get_api()->select_candidate_on_current_page(session_id, index);
+}
+
 jstring get_version(JNIEnv *env, jobject thiz) {
   return newJstring(env, rime_get_api()->get_version());
 }

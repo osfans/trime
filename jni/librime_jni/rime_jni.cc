@@ -317,6 +317,11 @@ static const JNINativeMethod sMethods[] = {
         reinterpret_cast<void *>(select_candidate)
     },
     {
+        const_cast<char *>("select_candidate_on_current_page"),
+        const_cast<char *>("(II)Z"),
+        reinterpret_cast<void *>(select_candidate_on_current_page)
+    },
+    {
         const_cast<char *>("get_version"),
         const_cast<char *>("()Ljava/lang/String;"),
         reinterpret_cast<void *>(get_version)

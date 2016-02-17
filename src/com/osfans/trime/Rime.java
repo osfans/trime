@@ -363,8 +363,7 @@ public class Rime
   }
 
   public static boolean selectCandidate(int index) {
-    index += mContext.menu.page_no * mContext.menu.page_size; //從頭開始
-    boolean b = select_candidate(session_id, index);
+    boolean b = select_candidate_on_current_page(session_id, index);
     getContexts();
     return b;
   }
@@ -583,6 +582,7 @@ public class Rime
   public static native final int get_caret_pos(int session_id);
   public static native final void set_caret_pos(int session_id, int caret_pos);
   public static native final boolean select_candidate(int session_id, int index);
+  public static native final boolean select_candidate_on_current_page(int session_id, int index);
   public static native final String get_version();
   public static native final String get_librime_version();
 
