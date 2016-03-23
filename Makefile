@@ -35,7 +35,7 @@ android:
 		-DLIBRARY_OUTPUT_PATH_ROOT=.. \
 		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 \
 		-DANDROID_ABI=armeabi \
-		-DANDROID_STL=c++_static \
+		-DANDROID_STL=c++_shared \
 		-DANDROID_NATIVE_API_LEVEL=4 ../jni)
 	${MAKE} -C build-android rime_jni
 
