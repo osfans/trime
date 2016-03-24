@@ -77,7 +77,9 @@ file(GLOB BOOST_SOURCES
   boost/libs/system/src/error_code.cpp
   boost/libs/locale/src/encoding/codepage.cpp
   )
-if(NOT BOOST_USE_SIGNALS2)
+if(BOOST_USE_SIGNALS2)
+  add_definitions(-DBOOST_SIGNALS2)
+else(BOOST_USE_SIGNALS2)
   #add_definitions(-DBOOST_SIGNALS_NO_DEPRECATION_WARNING)
   file(GLOB BOOST_SIGNAL_SOURCES boost/libs/signals/src/*.cpp)
 endif()
@@ -235,9 +237,6 @@ target_compile_definitions(rime PRIVATE
   RIME_ENABLE_LOGGING
   RIME_EXPORTS
 )
-if(BOOST_USE_SIGNALS2)
-  target_compile_definitions(rime PRIVATE BOOST_SIGNALS2)
-endif(BOOST_USE_SIGNALS2)
 if(ANDROID)
   target_link_libraries(rime log atomic)
 endif()
