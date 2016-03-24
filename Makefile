@@ -49,7 +49,7 @@ win32:
 	(cd build-win32; i686-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release ../jni)
 	${MAKE} -C build-win32 rime
 	mkdir -p bin
-	7z a bin/rime-win32-`date +%Y%m%d`.dll.7z build-win32/rime.dll
+	(cd build-win32; 7z a ../bin/rime-win32-`date +%Y%m%d`.dll.7z rime.dll)
 
 clean:
 	git clean -fd
