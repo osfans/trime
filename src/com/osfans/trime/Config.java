@@ -62,13 +62,16 @@ public class Config {
   }
 
   public static boolean prepareRime(Context context) {
+    boolean b = false;
     if (new File(USER_DATA_DIR).exists()) {
       copyFileOrDir(context, RIME + "/" + defaultName, false);
-      return false;
+      b = false;
+    } else {
+      copyFileOrDir(context, RIME, false);
+      b = true;
     }
-    copyFileOrDir(context, RIME, false);
-    Rime.get(true);
-    return true;
+    Rime.get(b);
+    return b;
   }
 
   public static String[] list(Context context, String path) {

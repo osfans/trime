@@ -114,7 +114,6 @@ public class Trime extends InputMethodService implements
 
     mEffect = new Effect(this);
     Config.prepareRime(this);
-    Rime.get();
     mConfig = Config.get(this);
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
     Rime.setOption(horizontal_mode, mConfig.getBoolean(horizontal_mode)); //水平模式
