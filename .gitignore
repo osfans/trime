@@ -12,6 +12,7 @@
 bin/
 gen/
 obj/
+assets/rime/opencc/
 
 # Gradle files
 .gradle/

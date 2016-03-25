@@ -39,6 +39,7 @@ public class Config {
   private String schema_id;
   private static String RIME = "rime";
   private static String USER_DATA_DIR = SDCARD + RIME;
+  private static String OPENCC_DATA_DIR = USER_DATA_DIR + "/opencc/";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
 
@@ -61,17 +62,33 @@ public class Config {
     reset();
   }
 
-  public static boolean prepareRime(Context context) {
-    boolean b = false;
-    if (new File(USER_DATA_DIR).exists()) {
+  public static void prepareRime(Context context) {
+    boolean b = new File(USER_DATA_DIR).exists();
+    if (b) {
       copyFileOrDir(context, RIME + "/" + defaultName, false);
-      b = false;
     } else {
       copyFileOrDir(context, RIME, false);
-      b = true;
     }
-    Rime.get(b);
-    return b;
+    Rime.get(!b);
+    if (!b) deployOpencc();
+  }
+
+  public static boolean deployOpencc() {
+    File d = new File(OPENCC_DATA_DIR);
+    if (d.exists()) {
+      FilenameFilter txtFilter = new FilenameFilter(){
+        @Override
+        public boolean accept(File dir, String filename) {
+          return filename.endsWith(".txt");
+        }
+      };
+      for (String txtName: d.list(txtFilter)) {
+        txtName = OPENCC_DATA_DIR + txtName;
+        String ocdName = txtName.replace(".txt", ".ocd");
+        Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd");
+      }
+    }
+    return true;
   }
 
   public static String[] list(Context context, String path) {

@@ -1,10 +1,10 @@
 .PHONY: all release install clean apk android linux win32
 
-all: android javadoc linux win32
+all: apk javadoc linux win32
 
 release: apk win32
 
-install: android
+install: apk
 	ant release install
 
 icon: icon.svg
@@ -19,13 +19,23 @@ icon: icon.svg
 	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 38 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
-apk: android
+apk: opencc-data ndk
 	ant release
+
+opencc-data:
+	@echo "copy opencc data:"
+	@rm -rf assets/rime/opencc
+	@mkdir -p assets/rime/opencc
+	@cp jni/OpenCC/data/dictionary/* assets/rime/opencc/
+	@cp jni/OpenCC/data/config/* assets/rime/opencc/
 
 javadoc:
 	ant javadoc
 	@echo "convert javadoc by opencc:"
 	@find docs -type f -name *.html| xargs -i opencc -i {} -o {}
+
+ndk:
+	ndk-build
 
 android:
 	mkdir -p build-android

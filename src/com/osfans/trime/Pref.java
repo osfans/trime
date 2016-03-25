@@ -122,6 +122,11 @@ public class Pref extends PreferenceActivity {
     }
   }
 
+  public void deployOpencc() {
+    boolean b = Config.deployOpencc();
+    Toast.makeText(this, b ? R.string.deploy_success : R.string.deploy_failure, Toast.LENGTH_SHORT).show();
+  }
+
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     boolean b;
@@ -141,6 +146,9 @@ public class Pref extends PreferenceActivity {
         return true;
       case "pref_maintenance": //維護
         check();
+        return true;
+      case "pref_deploy_opencc": //部署OpenCC
+        deployOpencc();
         return true;
       case "pref_deploy": //部署
         deploy();

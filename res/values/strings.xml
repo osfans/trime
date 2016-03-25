@@ -46,11 +46,15 @@
     <string name="pref_maintenance">維護</string>
     <string name="pref_maintenance_summary">自動維護輸入法方案</string>
 -->
+    <string name="pref_deploy_opencc">部署OpenCC</string>
+    <string name="pref_deploy_opencc_summary">修改/sdcard/rime/opencc下的txt後需再次部署</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
     <string name="pref_sync">同步</string>
     <string name="pref_sync_summary">與/sdcard/rime/sync資料夾同步使用者字典</string>
 
+    <string name="deploy_success">部署成功</string>
+    <string name="deploy_failure">部署失敗</string>
     <string name="sync_success">同步成功</string>
     <string name="sync_failure">同步失敗</string>
     <string name="reset_success">回廠成功</string>
