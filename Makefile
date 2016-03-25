@@ -36,7 +36,7 @@ android:
 		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 \
 		-DANDROID_ABI=armeabi \
 		-DANDROID_STL=c++_shared \
-		-DANDROID_NATIVE_API_LEVEL=4 ../jni)
+		-DANDROID_NATIVE_API_LEVEL=9 ../jni)
 	${MAKE} -C build-android rime_jni
 
 linux:
