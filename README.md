@@ -16,7 +16,7 @@
 - 所以，TRIME是Tongwen RIME或是ThaeRvInputMEthod的縮寫。
 
 ## 許可協議/License
-Apache License 2.0
+[Apache License 2.0](COPYING)
 
 ## 第三方庫/3rd Party Library
 - [android-cmake](https://github.com/taka-no-me/android-cmake) (BSD 3-Clause License)
@@ -33,7 +33,7 @@ Apache License 2.0
    - [snappy](https://google.github.io/snappy/)(BSD License)
 
 ## 編譯/Build
-- Arch Linux
+- [Arch Linux](https://www.archlinux.org/)
 ```bash
 yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} apache-ant
 make apk
