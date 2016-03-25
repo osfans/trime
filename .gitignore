@@ -13,6 +13,7 @@ bin/
 gen/
 obj/
 assets/rime/opencc/
+res/values-zh-rCN/
 
 # Gradle files
 .gradle/
