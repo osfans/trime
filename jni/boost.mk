@@ -33,7 +33,16 @@ LOCAL_SRC_FILES += \
   \
   libs/system/src/error_code.cpp \
   \
-  libs/locale/src/encoding/codepage.cpp
+  libs/locale/src/encoding/codepage.cpp \
+
+ifeq ($(BOOST_USE_SIGNALS2),)
+LOCAL_SRC_FILES += \
+  libs/signals/src/connection.cpp \
+  libs/signals/src/signal_base.cpp \
+  libs/signals/src/trackable.cpp \
+  libs/signals/src/named_slot_map.cpp \
+  libs/signals/src/slot.cpp
+endif
 
 LOCAL_CFLAGS += -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_LOCALE_WITH_ICONV
 LOCAL_STATIC_LIBRARIES += iconv
