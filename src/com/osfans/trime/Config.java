@@ -39,7 +39,7 @@ public class Config {
   private String schema_id;
   private static String RIME = "rime";
   private static String USER_DATA_DIR = SDCARD + RIME;
-  private static String OPENCC_DATA_DIR = USER_DATA_DIR + "/opencc/";
+  public static String OPENCC_DATA_DIR = USER_DATA_DIR + "/opencc/";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
 
@@ -70,7 +70,6 @@ public class Config {
       copyFileOrDir(context, RIME, false);
     }
     Rime.get(!b);
-    if (!b) deployOpencc();
   }
 
   public static boolean deployOpencc() {

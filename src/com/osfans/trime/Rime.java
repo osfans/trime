@@ -448,7 +448,10 @@ public class Rime
   }
 
   public static Rime get(boolean full_check){
-    if (self == null) self = new Rime(full_check);
+    if (self == null) {
+      if (full_check) Config.deployOpencc();
+      self = new Rime(full_check);
+    }
     return self;
   }
 
@@ -493,7 +496,7 @@ public class Rime
 
   public static String openccConvert(String line, String name) {
     if (name != null) {
-      File f = new File(Config.SDCARD + "rime/opencc", name);
+      File f = new File(Config.OPENCC_DATA_DIR, name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;
