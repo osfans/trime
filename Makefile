@@ -31,6 +31,11 @@ opencc-data:
 	@mkdir -p assets/rime/opencc
 	@cp jni/OpenCC/data/dictionary/* assets/rime/opencc/
 	@cp jni/OpenCC/data/config/* assets/rime/opencc/
+	@rm assets/rime/opencc/TWPhrases*.txt
+	python jni/OpenCC/data/scripts/merge.py jni/OpenCC/data/dictionary/TWPhrases*.txt assets/rime/opencc/TWPhrases.txt
+	python jni/OpenCC/data/scripts/reverse.py assets/rime/opencc/TWPhrases.txt assets/rime/opencc/TWPhrasesRev.txt
+	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/TWVariants.txt assets/rime/opencc/TWVariantsRev.txt
+	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/HKVariants.txt assets/rime/opencc/HKVariantsRev.txt
 
 javadoc:
 	ant javadoc
