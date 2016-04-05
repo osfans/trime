@@ -35,6 +35,9 @@ endif()
 if(ANDROID AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_definitions(-no-integrated-as)
 endif()
+if(ANDROID AND "${ANDROID_STL}" STREQUAL c++_static)
+  set(CMAKE_CXX_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY} -latomic")
+endif()
 
 # snappy
 set(SNAPPY_SOURCES

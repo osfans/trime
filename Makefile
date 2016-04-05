@@ -19,7 +19,7 @@ icon: icon.svg
 	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 38 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
-apk: opencc-data ndk
+apk: opencc-data android
 	@mkdir -p res/values-zh-rCN/
 	@opencc -c tw2sp -i res/values/strings.xml -o res/values-zh-rCN/strings.xml
 	@sed -i '/translatable="false"/d' res/values-zh-rCN/strings.xml
@@ -51,9 +51,9 @@ android:
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=../android-cmake/android.toolchain.cmake \
 		-DLIBRARY_OUTPUT_PATH_ROOT=.. \
-		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 \
+		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang3.6 \
 		-DANDROID_ABI=armeabi \
-		-DANDROID_STL=c++_shared \
+		-DANDROID_STL=c++_static \
 		-DANDROID_NATIVE_API_LEVEL=9 ../jni)
 	${MAKE} -C build-android rime_jni
 

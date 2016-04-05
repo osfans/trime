@@ -25,10 +25,10 @@
 [submodule "jni/libiconv"]
 	path = jni/libiconv
 	url = git@github.com:zhengyi0802/android-external-libiconv.git
-[submodule "android-cmake"]
-	path = android-cmake
-	url = git@github.com:zhuowei/android-cmake.git
 [submodule "docs"]
 	path = docs
 	url = github.com:osfans/trime.git
 	branch = gh-pages
+[submodule "android-cmake"]
+	path = android-cmake
+	url = git@github.com:chenxiaolong/android-cmake.git
