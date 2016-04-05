@@ -189,7 +189,7 @@ target_include_directories(opencc-static BEFORE PRIVATE
   OpenCC/deps/rapidjson-0.11
   OpenCC/deps/tclap-1.2.1
   )
-target_compile_definitions(opencc-static PRIVATE VERSION="1.0.3")
+target_compile_definitions(opencc-static PRIVATE VERSION="1.0.4")
 if(ANDROID)
 elseif(UNIX)
 target_compile_definitions(opencc-static PRIVATE PKGDATADIR="/usr/share/opencc")

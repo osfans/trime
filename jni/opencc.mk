@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 LOCAL_PATH := $(ROOT_PATH)/OpenCC
-CXX_DEFINES := -DVERSION="\"1.0.3\"" -DOpencc_BUILT_AS_STATIC
+CXX_DEFINES := -DVERSION="\"1.0.4\"" -DOpencc_BUILT_AS_STATIC
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc
