@@ -53,7 +53,7 @@ style:
   shadow_radius: 0.0
   show_candidate: true #顯示候選區
   show_comment: true #顯示提示區
-  show_preview: true #按鍵提示
+  show_preview: false #按鍵提示
   show_text: true #顯示編碼區
   soft_cursor: true #編碼區軟游標
   soft_cursor_text: "‸" #編碼區軟光標字元，librime預設爲"‸"
