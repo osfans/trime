@@ -66,10 +66,9 @@ public class Trime extends InputMethodService implements
   private boolean enterAsLineBreak;
   private boolean inlinePreedit, inlineCode; //嵌入首選
   private boolean display_tray_icon;
-  /** 臨時中英文狀態*/
-  private boolean mTempAsciiMode;
-  /** 默認中英文狀態*/
-  private boolean mAsciiMode;
+  private boolean mTempAsciiMode; //臨時中英文狀態
+  private boolean mAsciiMode; //默認中英文狀態
+  private boolean reset_ascii_mode; //重置中英文狀態
   private String soft_cursor = "soft_cursor"; //軟光標
   private String horizontal_mode = "_horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
@@ -120,6 +119,7 @@ public class Trime extends InputMethodService implements
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
+    reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     mEffect.reset();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
@@ -167,6 +167,7 @@ public class Trime extends InputMethodService implements
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
+    reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
     if (mCandidateContainer != null) {
       mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
@@ -313,6 +314,7 @@ public class Trime extends InputMethodService implements
         break;
     }
     Rime.get();
+    if (reset_ascii_mode) mAsciiMode = false;
     // Select a keyboard based on the input type of the editing field.
     mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
     mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
