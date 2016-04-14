@@ -664,6 +664,8 @@ public class Trime extends InputMethodService implements
             public void onClick(DialogInterface di, int id) {
               di.dismiss();
               Rime.selectSchema(id); //切換方案
+              Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+              Rime.setOption(horizontal_mode, mConfig.getBoolean("horizontal_mode")); //水平模式
             }
         });
       }
