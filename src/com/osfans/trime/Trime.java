@@ -162,6 +162,10 @@ public class Trime extends InputMethodService implements
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
   }
 
+  /**
+   * 重置鍵盤、候選條、狀態欄等
+   * !!注意，如果其中調用Rime.setOption，切換方案會卡住
+   */
   public void reset() {
     mConfig.reset();
     inlinePreedit = mConfig.getBoolean("inline_preedit");
