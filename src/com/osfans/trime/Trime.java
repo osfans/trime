@@ -154,6 +154,8 @@ public class Trime extends InputMethodService implements
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
     reset();
+    Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+    Rime.setOption(horizontal_mode, mConfig.getBoolean("horizontal_mode")); //水平模式
   }
 
   public void invalidateKeyboard() {
@@ -162,8 +164,6 @@ public class Trime extends InputMethodService implements
 
   public void reset() {
     mConfig.reset();
-    Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
-    Rime.setOption(horizontal_mode, mConfig.getBoolean("horizontal_mode")); //水平模式
     inlinePreedit = mConfig.getBoolean("inline_preedit");
     inlineCode = mConfig.getBoolean("inline_code");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
