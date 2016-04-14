@@ -5,7 +5,7 @@ all: apk javadoc linux win32
 release: apk win32
 
 install: apk
-	ant release install
+	ant install
 
 icon: icon.svg
 	inkscape -z -e res/drawable-xxxhdpi/icon.png -w 192 -h 192 icon.svg
