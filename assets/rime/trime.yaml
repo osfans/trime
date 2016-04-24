@@ -900,8 +900,8 @@ preset_keyboards:
     - {click: 'g', long_click: '\', swipe_down: '|'}
     - {click: 'h', long_click: '[]', swipe_left: '[', swipe_right: ']'}
     - {click: 'j', long_click: '{}', swipe_left: '{', swipe_right: '}'}
-    - {click: 'k'}
-    - {click: 'l'}
+    - {click: 'k', long_click: '"'}
+    - {click: 'l', long_click: "'"}
     - {click: ';', long_click: ':'}
     - {click: 'z', long_click: '`'}
     - {click: 'x', long_click: cut}
@@ -916,8 +916,7 @@ preset_keyboards:
     - {click: Shift_L}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: Mode_switch, long_click: Menu}
-    - {click: space, width: 30}
-    - {click: "'", long_click: '"'}
+    - {click: space, width: 40}
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
   qwerty:
