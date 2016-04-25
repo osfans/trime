@@ -645,12 +645,6 @@ public class Trime extends InputMethodService implements
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         }
       })
-      .setNeutralButton(R.string.pref_schemas, new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface di, int id) {
-          showSchemaDialog(); //部署方案
-          di.dismiss();
-        }
-      })
       .setPositiveButton(R.string.set_ime, new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface di, int id) {
           Function.showPrefDialog(Trime.this); //全局設置
@@ -659,6 +653,12 @@ public class Trime extends InputMethodService implements
       });
       if (Rime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
       else {
+        builder.setNeutralButton(R.string.pref_schemas, new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface di, int id) {
+            showSchemaDialog(); //部署方案
+            di.dismiss();
+          }
+        });
         builder.setSingleChoiceItems(Rime.getSchemaNames(), Rime.getSchemaIndex(),
           new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface di, int id) {
