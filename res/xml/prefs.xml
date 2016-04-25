@@ -36,9 +36,26 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">
-        <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver" />
-        <Preference android:key="pref_opencc_ver" android:title="@string/pref_opencc_ver" />
-        <Preference android:key="pref_ver" android:title="@string/pref_ver" />
+        <Preference android:key="pref_wiki" android:title="@string/pref_wiki">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/osfans/trime/wiki/UserGuide" />
+        </Preference>
+        <Preference android:key="pref_issues" android:title="@string/pref_issues">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/osfans/trime/issues" />
+        </Preference>
+        <Preference android:key="pref_ver" android:title="@string/pref_ver">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/osfans/trime" />
+        </Preference>
+        <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/rime/librime" />
+        </Preference>
+        <Preference android:key="pref_opencc_ver" android:title="@string/pref_opencc_ver">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/BYVoid/OpenCC" />
+        </Preference>
         <Preference android:key="pref_licensing" android:title="@string/pref_licensing" android:summary="@string/pref_licensing_summary"/>
     </PreferenceCategory>
 
