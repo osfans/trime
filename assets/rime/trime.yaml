@@ -20,8 +20,8 @@ style:
   hanb_font: hanb.ttf #擴充字型
   hilite_padding: 2
   hilite_spacing: 4
+  horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
-  horizontal_mode: true #水平模式
   inline_code: false #嵌入編碼
   inline_preedit: true #嵌入偏好
   key_font: symbol.ttf #鍵盤字型
