@@ -34,7 +34,6 @@ public class Config {
   public static String SDCARD = "/sdcard/";
 
   private Map<String, Object> mStyle, mDefaultStyle;
-  private Map<String, Map<String, Object>> maps;
   private static String defaultName = "trime.yaml";
   private String schema_id;
   private static String RIME = "rime";
@@ -48,7 +47,6 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    maps = new HashMap<String, Map<String, Object>>();
     mDefaultStyle = (Map<String,Object>)Rime.config_get_map("trime", "style");
     fallbackColors = (Map<String,String>)Rime.config_get_map("trime", "fallback_colors");
     List<Object> androidKeys = Rime.config_get_list("trime", "android_keys/name");
@@ -151,15 +149,7 @@ public class Config {
 
   public void reset() {
     schema_id = Rime.getSchemaId();
-    if (maps.containsKey(schema_id)) {
-      mStyle = maps.get(schema_id);
-      return;
-    }
-    mStyle = null;
-    File f = new File(USER_DATA_DIR, schema_id + "." + defaultName);
-    if (!f.exists()) return;
-    mStyle = (Map<String,Object>)Rime.config_get_map(schema_id + ".trime", "style");
-    maps.put(schema_id, mStyle); //緩存各方案自定義配置
+    mStyle = (Map<String,Object>)Rime.schema_get_value(schema_id, "style");
   }
 
   private Object getValue(String k1) {
@@ -223,7 +213,6 @@ public class Config {
   }
 
   public void destroy() {
-    if (maps != null) maps.clear();
     if (mDefaultStyle != null) mDefaultStyle.clear();
     if (mStyle != null) mStyle.clear();
     self = null;
