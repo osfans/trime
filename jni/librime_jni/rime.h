@@ -5,8 +5,12 @@
 
 #define BUFSIZE 256
 
+#ifndef CLASSNAME
+#define CLASSNAME "com/osfans/trime/Rime"
+#endif
+
 #ifndef SHARED_DATA_DIR
-#define SHARED_DATA_DIR "/sdcard/rime"
+#define SHARED_DATA_DIR "/data/data/com.osfans.trime/rime"
 #endif
 
 #ifndef USER_DATA_DIR
