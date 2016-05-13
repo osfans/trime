@@ -258,6 +258,8 @@ public class Trime extends InputMethodService implements
   @Override
   public View onCreateCandidatesView() {
     LayoutInflater inflater = getLayoutInflater();
+    
+    //构造显示编码区域
     mCompositionContainer = (LinearLayout) inflater.inflate(
             R.layout.composition_container, null);
     if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
@@ -271,6 +273,7 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setContentView(mCompositionContainer);
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
+    //构造显示候选字区域
     mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
     mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
