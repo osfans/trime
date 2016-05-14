@@ -15,7 +15,7 @@ obj/
 assets/rime/opencc/
 res/values-zh-rCN/
 
-# Eclipse工程生成的文件
+# Eclipse Generate files
 .classpath      
 .project
 .settings/
