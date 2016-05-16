@@ -90,6 +90,7 @@ public class Trime extends InputMethodService implements
     }
 
     public void run() {
+      if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
       mCandidateContainer.getLocationInWindow(mParentLocation);
 
       if (!mFloatingWindow.isShowing()) {
