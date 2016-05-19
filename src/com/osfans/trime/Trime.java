@@ -29,6 +29,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.view.WindowManager;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Handler;
 import android.view.Gravity;
@@ -258,6 +259,8 @@ public class Trime extends InputMethodService implements
   @Override
   public View onCreateCandidatesView() {
     LayoutInflater inflater = getLayoutInflater();
+    
+    //构造显示编码区域
     mCompositionContainer = (LinearLayout) inflater.inflate(
             R.layout.composition_container, null);
     if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
@@ -271,6 +274,7 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setContentView(mCompositionContainer);
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
+    //构造显示候选字区域
     mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
     mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
@@ -398,6 +402,7 @@ public class Trime extends InputMethodService implements
     return "";
   }
 
+  @SuppressLint("NewApi") 
   public boolean handleAciton(int code, int mask) { //編輯操作
     InputConnection ic = getCurrentInputConnection();
     if (ic == null) return false;
@@ -446,6 +451,7 @@ public class Trime extends InputMethodService implements
    * @param event {@link KeyEvent 按鍵事件}
    * @return 是否成功處理
    * */
+  @SuppressLint("NewApi") 
   private boolean onKeyEvent(KeyEvent event) {
     Log.info("onKeyEvent="+event);
     int keyCode = event.getKeyCode();
@@ -501,8 +507,8 @@ public class Trime extends InputMethodService implements
           commitText(s);
           updateComposing();
         }
-      } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
-        new Speech(this).start();
+//      } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
+//        new Speech(this).start();
       } else if (code == KeyEvent.KEYCODE_SETTINGS) { //全局設定
         Function.showPrefDialog(this);
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案

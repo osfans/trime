@@ -115,11 +115,11 @@ public class Pref extends PreferenceActivity {
   }
 
   public void requestPermission() {
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
-      }
-    }
+//    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+//      if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+//      }
+//    }
   }
 
   public void deployOpencc() {
