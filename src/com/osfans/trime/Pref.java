@@ -56,6 +56,11 @@ public class Pref extends PreferenceActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      setTheme(android.R.style.Theme_Material);
+    } else if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+      setTheme(android.R.style.Theme_Holo);
+    }
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
 
