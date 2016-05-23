@@ -22,9 +22,14 @@
     <string name="ime_name">同文輸入法</string>
 
     <!-- Preference settings -->
-    <string name="pref_about">關於</string>
-    <string name="pref_wiki">維基文檔</string>
+    <string name="pref_help">求助</string>
+    <string name="pref_wiki">維基教程</string>
     <string name="pref_issues">問題反饋</string>
+    <string name="pref_qq1">Rime菜鳥QQ羣</string>
+    <string name="pref_qq2">中州韻QQ羣</string>
+    <string name="pref_market">市場評論</string>
+
+    <string name="pref_about">關於</string>
     <string name="pref_librime_ver">Librime版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_ver">平臺版本</string>
