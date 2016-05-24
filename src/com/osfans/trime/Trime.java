@@ -324,7 +324,7 @@ public class Trime extends InputMethodService implements
     mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
     mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
     updateAsciiMode();
-    //updateComposing(); //可能會清空文本框
+    updateComposing();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !Rime.isEmpty()); //實體鍵盤
     if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
@@ -583,14 +583,18 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
     if (inlinePreedit || inlineCode) { //嵌入首選
       String s = inlineCode ? Rime.RimeGetInput() : Rime.getComposingText();
       if (s == null) s = "";
       InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
-        // Set cursor position 1 to advance the cursor to the text end.
-        ic.setComposingText(s, 1);
+        CharSequence cs = ic.getSelectedText(0);
+        if (cs == null || !Function.isEmpty(s)) {
+          // 無選中文本或編碼不爲空時更新編輯區
+          ic.setComposingText(s, 1);
+        }
       }
     }
     if (mCandidateContainer != null) {
