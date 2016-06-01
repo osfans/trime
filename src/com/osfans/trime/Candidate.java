@@ -375,8 +375,9 @@ public class Candidate extends View {
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
     float n = (s == null ? 0 : s.codePointCount(0, s.length()));
-    n += n < 2 ? 0.8f : 0.4f;
-    float x = n * candidate_text_size;
+    float x = (n < 2 ? 0.8f : 0.4f) * candidate_text_size;
+    if (s == null) x += n * candidate_text_size;
+    else x += paintCandidate.measureText(s);
     if (i >= 0 && show_comment) {
       String comment = getComment(i);
       if (comment != null) {
