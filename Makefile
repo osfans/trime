@@ -51,7 +51,7 @@ android:
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=../android-cmake/android.toolchain.cmake \
 		-DLIBRARY_OUTPUT_PATH_ROOT=.. \
-		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang3.6 \
+		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang \
 		-DANDROID_ABI=armeabi \
 		-DANDROID_STL=c++_static \
 		-DANDROID_NATIVE_API_LEVEL=9 ../jni)
