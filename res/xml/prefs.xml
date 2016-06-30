@@ -44,6 +44,10 @@
             <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/osfans/trime/issues" />
         </Preference>
+        <Preference android:key="pref_market" android:title="@string/pref_market">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="http://www.coolapk.com/apk/com.osfans.trime" />
+        </Preference>
         <Preference android:key="pref_qq1" android:title="@string/pref_qq1">
             <intent android:action="android.intent.action.VIEW"
                     android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DOBDf-6APetdl220ZnP4INo1Ty7xlfgSB" />
@@ -51,10 +55,6 @@
         <Preference android:key="pref_qq2" android:title="@string/pref_qq2">
             <intent android:action="android.intent.action.VIEW"
                     android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DKkW6hWq64hh62lKsEqimTJ20Vh1xtiRp" />
-        </Preference>
-        <Preference android:key="pref_market" android:title="@string/pref_market">
-            <intent android:action="android.intent.action.VIEW"
-                    android:data="http://www.coolapk.com/apk/com.osfans.trime" />
         </Preference>
     </PreferenceCategory>
 

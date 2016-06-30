@@ -23,7 +23,7 @@ style:
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
   inline_code: false #嵌入編碼
-  inline_preedit: true #嵌入偏好
+  inline_preedit: true #嵌入首字
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_sound: false #按鍵聲音
