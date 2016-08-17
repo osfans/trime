@@ -470,7 +470,7 @@ public class Trime extends InputMethodService implements
     }
 
     int c = event.getUnicodeChar();
-    if (c > 0) {
+    if (c > 0x20) { //實體鍵盤空格、回車等發送onKey，字符發送onText
       onText(String.valueOf((char)c));
       return true;
     }

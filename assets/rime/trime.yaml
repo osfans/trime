@@ -997,7 +997,7 @@ preset_keyboards:
   symbols:
     name: 符號
     author: "天真可愛的滿滿"
-    ascii_mode: 0
+    ascii_mode: 1
     width: 10
     height: 44
     keys:
