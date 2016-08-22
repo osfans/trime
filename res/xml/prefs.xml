@@ -61,7 +61,7 @@
     <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">
         <Preference android:key="pref_ver" android:title="@string/pref_ver">
             <intent android:action="android.intent.action.VIEW"
-                    android:data="https://github.com/osfans/trime" />
+		    android:data="https://github.com/osfans/trime/releases" />
         </Preference>
         <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver">
             <intent android:action="android.intent.action.VIEW"
