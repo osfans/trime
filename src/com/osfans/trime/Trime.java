@@ -72,6 +72,7 @@ public class Trime extends InputMethodService implements
   private String soft_cursor = "soft_cursor"; //軟光標
   private String horizontal = "_horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
+  private boolean keyComposing; //實體鍵盤編輯狀態
 
   private class PopupTimer extends Handler implements Runnable {
     private int mParentLocation[] = new int[2];
@@ -438,8 +439,19 @@ public class Trime extends InputMethodService implements
 
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
+    Log.info("onKeyDown="+event);
     if (canCompose && onKeyEvent(event)) return true;
     return super.onKeyDown(keyCode, event);
+  }
+
+  @Override
+  public boolean onKeyUp(int keyCode, KeyEvent event) {
+    Log.info("onKeyUp="+event);
+    if (keyComposing) {
+      onRelease(keyCode);
+      return true;
+    }
+    return super.onKeyUp(keyCode, event);
   }
 
   /** 處理實體鍵盤事件
@@ -448,6 +460,7 @@ public class Trime extends InputMethodService implements
    * */
   private boolean onKeyEvent(KeyEvent event) {
     Log.info("onKeyEvent="+event);
+    keyComposing = false;
     int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
         keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
@@ -455,13 +468,15 @@ public class Trime extends InputMethodService implements
         keyCode == KeyEvent.KEYCODE_HOME ||
         keyCode == KeyEvent.KEYCODE_MENU ||
         keyCode == KeyEvent.KEYCODE_SEARCH) return false;
-    if (keyCode == KeyEvent.KEYCODE_BACK) {
-      escape(); //返回鍵清屏
-      return false;
-    }
-    if (!isComposing()) {
-      if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_ENTER)
-      return false;
+    keyComposing = isComposing();
+    if (!keyComposing) {
+      if (keyCode == KeyEvent.KEYCODE_DEL ||
+          keyCode == KeyEvent.KEYCODE_ENTER ||
+          keyCode == KeyEvent.KEYCODE_BACK) {
+        return false;
+      }
+    } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+      keyCode = KeyEvent.KEYCODE_ESCAPE; //返回鍵清屏
     }
 
     if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
