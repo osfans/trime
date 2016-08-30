@@ -757,7 +757,9 @@ preset_keys:
   Keyboard_letter: {label: 字母, send: Eisu_toggle, select: default}
   Keyboard_default: {label: 返回, send: Eisu_toggle, select: .default}
   Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
-  Schema_switch: {label: 方案, send: Hiragana_Katakana, select: .next}
+  Schema_switch: {label: 下一方案, send: Hiragana_Katakana, select: .next}
+  Schema_last: {label: 上一方案, send: Hiragana_Katakana, select: .last}
+  Schema_pinyin: {label: 朙月拼音, send: Hiragana_Katakana, select: luna_pinyin}
   Color_switch: {label: 配色, send: PROG_RED}
   Help: {label: 說明, send: Help}
   Info: {label: 關於, send: INFO}

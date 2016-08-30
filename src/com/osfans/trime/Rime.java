@@ -416,15 +416,18 @@ public class Rime
     return names;
   }
 
-  public static int getSchemaIndex() {
-    String schema_id = getSchemaId();
+  public static int getSchemaIndex(String schema_id) {
     int i = 0;
     for (Object o: mSchemaList) {
         Map<String, String> m = (Map<String, String>)o;
         if (m.get("schema_id").contentEquals(schema_id)) return i;
         i++;
     }
-    return 0;
+    return -1;
+  }
+
+  public static int getSchemaIndex() {
+    return getSchemaIndex(getSchemaId());
   }
 
   public static String getSchemaName() {
@@ -432,6 +435,7 @@ public class Rime
   }
 
   public static boolean selectSchema(String schema_id) {
+    if (getSchemaIndex(schema_id) < 0) return false;
     boolean b = select_schema(session_id, schema_id);
     getContexts();
     return b;
@@ -439,6 +443,8 @@ public class Rime
 
   public static boolean selectSchema(int id) {
     int n = mSchemaList.size();
+    if (id == -1) id = n - 1;
+    else if (id == n) id = 0;
     if (id < 0 || id >= n) return false;
     String schema_id = getSchemaId();
     Map<String, String> m = (Map<String, String>)mSchemaList.get(id);

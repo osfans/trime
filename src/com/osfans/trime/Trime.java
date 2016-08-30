@@ -505,12 +505,14 @@ public class Trime extends InputMethodService implements
         commitText();
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
-        mKeyboardSwitch.setKeyboard(event.select);
-        //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
-        mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); //切換到西文鍵盤時不保存狀態
-        updateAsciiMode();
-        bindKeyboardToInputView();
-        updateComposing();
+        if (!Function.isEmpty(event.select)) {
+          mKeyboardSwitch.setKeyboard(event.select);
+          //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
+          mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); //切換到西文鍵盤時不保存狀態
+          updateAsciiMode();
+          bindKeyboardToInputView();
+          updateComposing();
+        }
       } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { //切換輸入法
         IBinder imeToken = getWindow().getWindow().getAttributes().token;
         InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
@@ -518,6 +520,18 @@ public class Trime extends InputMethodService implements
           imm.switchToNextInputMethod(imeToken, false);
         } else {
           imm.switchToLastInputMethod(imeToken);
+        }
+      } else if (code == KeyEvent.KEYCODE_KATAKANA_HIRAGANA) { //切換方案
+        if (!Function.isEmpty(event.select)) {
+          if (event.select.contentEquals(".next")) {
+            Rime.selectSchema(Rime.getSchemaIndex() + 1);
+          } else if (event.select.contentEquals(".last")) {
+            Rime.selectSchema(Rime.getSchemaIndex() - 1);
+          } else {
+            Rime.selectSchema(event.select);
+          }
+          Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
+          Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
         s = Function.handle(this, event.command, event.option);
