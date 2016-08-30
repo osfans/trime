@@ -39,6 +39,7 @@ import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
+import android.os.IBinder;
 
 import java.util.logging.Logger;
 import java.util.Locale;
@@ -510,6 +511,14 @@ public class Trime extends InputMethodService implements
         updateAsciiMode();
         bindKeyboardToInputView();
         updateComposing();
+      } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { //切換輸入法
+        IBinder imeToken = getWindow().getWindow().getAttributes().token;
+        InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        if (event.select.contentEquals(".next") && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+          imm.switchToNextInputMethod(imeToken, false);
+        } else {
+          imm.switchToLastInputMethod(imeToken);
+        }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
         s = Function.handle(this, event.command, event.option);
         if (s != null) {
