@@ -22,7 +22,7 @@
 - [android-cmake](https://github.com/taka-no-me/android-cmake) (BSD 3-Clause License)
 - [minilog](http://ceres-solver.org/) (New BSD License)
 - [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
-- [RIME](http://rime.im)(BSD License)
+- [RIME](http://rime.im) (BSD License)
  - [Boost C++ Libraries](http://www.boost.org/) (Boost Software License)
    - [libiconv](http://www.gnu.org/software/libiconv/) (LGPL License)
  - [darts-clone](https://code.google.com/p/darts-clone/) (New BSD License)
@@ -40,11 +40,13 @@ make apk
 ```
 
 ## 鳴謝/Credits
-- [Rime]: [佛振](https://github.com/lotem)
-- [維基](https://github.com/osfans/trime/wiki)、圖文教程：[xiaoqun2016](https://github.com/xiaoqun2016)
+- [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)
+- 教程：[xiaoqun2016](https://github.com/xiaoqun2016)
+- 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo、默默ㄇㄛˋ
+- [捐贈](https://github.com/osfans/trime/releases)：[yueduz](https://github.com/yueduz)、[xiaoqun2016](https://github.com/xiaoqun2016)
 - 在[Issues](https://github.com/osfans/trime/issues)、貼吧、QQ羣中反饋意見的網友
-- 依賴的第三方庫等開源項目
+- 依賴的[Rime]、[OpenCC]等第三方庫開源項目
 
 [Rime]: http://rime.im
-
+[OpenCC]: https://github.com/BYVoid/OpenCC
