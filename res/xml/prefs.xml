@@ -30,7 +30,7 @@
 
     <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
         <!--<Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" android:summary="@string/pref_maintenance_summary"/>-->
-        <Preference android:key="pref_deploy_opencc" android:title="@string/pref_deploy_opencc" android:summary="@string/pref_deploy_opencc_summary"/>
+	<!--<Preference android:key="pref_deploy_opencc" android:title="@string/pref_deploy_opencc" android:summary="@string/pref_deploy_opencc_summary"/>-->
         <Preference android:key="pref_deploy" android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>
         <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
     </PreferenceCategory>
@@ -72,6 +72,7 @@
                     android:data="https://github.com/BYVoid/OpenCC" />
         </Preference>
         <Preference android:key="pref_licensing" android:title="@string/pref_licensing" android:summary="@string/pref_licensing_summary"/>
+        <Preference android:key="pref_credits" android:title="@string/pref_credits"/>
     </PreferenceCategory>
 
 </PreferenceScreen>
