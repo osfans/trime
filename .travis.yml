@@ -7,8 +7,10 @@ git:
   submodules: false
 android:
   components:
-  - build-tools-23.0.0
-  - android-23
+    - tools # to get the new `repository-11.xml`
+    - tools # to install Android SDK tools 25.1.x (x = 6 right now)
+    - build-tools-24.0.2
+    - android-24
 deploy:
   provider: releases
   prerelease: true
