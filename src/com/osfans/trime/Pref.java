@@ -45,7 +45,6 @@ import android.os.Build.VERSION;
 public class Pref extends PreferenceActivity {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
-  private final String creditsUrl = "file:///android_asset/credits.html";
 
   public String getVersion() {
     try {
@@ -73,7 +72,7 @@ public class Pref extends PreferenceActivity {
     pref.setSummary(getVersion());
   }
 
-  private void showUrlDialog(String url) {
+  private void showLicenseDialog() {
     View licenseView = View.inflate(this, R.layout.licensing, null);
     WebView webView = (WebView) licenseView.findViewById(R.id.license_view);
     webView.setWebViewClient(new WebViewClient() {
@@ -83,7 +82,7 @@ public class Pref extends PreferenceActivity {
         return true;
       }
     });
-    webView.loadUrl(url);
+    webView.loadUrl(licenseUrl);
 
     new AlertDialog.Builder(this)
       .setTitle(R.string.ime_name)
@@ -166,10 +165,7 @@ public class Pref extends PreferenceActivity {
         new ResetDialog(this).show();
         return true;
       case "pref_licensing": //資訊
-        showUrlDialog(licenseUrl);
-        return true;
-      case "pref_credits": //鳴謝
-        showUrlDialog(creditsUrl);
+        showLicenseDialog();
         return true;
     }
     return false;
