@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.view.WindowManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
@@ -494,6 +495,18 @@ public class Trime extends InputMethodService implements
     return true;
   }
 
+  private IBinder getToken() {
+      final Dialog dialog = getWindow();
+      if (dialog == null) {
+          return null;
+      }
+      final Window window = dialog.getWindow();
+      if (window == null) {
+          return null;
+      }
+      return window.getAttributes().token;
+  }
+
   public void onEvent(Event event) {
     String s = event.getText();
     if (!Function.isEmpty(s)) {
@@ -514,7 +527,7 @@ public class Trime extends InputMethodService implements
           updateComposing();
         }
       } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { //切換輸入法
-        IBinder imeToken = getWindow().getWindow().getAttributes().token;
+        IBinder imeToken = getToken();
         InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         if (event.select.contentEquals(".next") && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           imm.switchToNextInputMethod(imeToken, false);
