@@ -22,8 +22,7 @@ style:
   hilite_spacing: 4
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
-  inline_code: false #嵌入編碼
-  inline_preedit: true #嵌入首字
+  inline_preedit: preview #嵌入模式：preview|composition|input|none
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_sound: false #按鍵聲音

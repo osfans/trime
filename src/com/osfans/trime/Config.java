@@ -32,6 +32,10 @@ import java.io.*;
 /** 解析YAML配置文件 */
 public class Config {
   public static String SDCARD = "/sdcard/";
+  public final static int INLINE_NONE = 0;
+  public final static int INLINE_PREVIEW = 1;
+  public final static int INLINE_COMPOSITION = 2;
+  public final static int INLINE_INPUT = 3;
 
   private Map<String, Object> mStyle, mDefaultStyle;
   private static String defaultName = "trime.yaml";
@@ -245,7 +249,8 @@ public class Config {
   }
 
   public String getString(String key) {
-    return getValue(key).toString();
+    Object o = getValue(key);
+    return (o == null) ? "" : o.toString();
   }
 
   public int getColor(String key) {
@@ -296,5 +301,20 @@ public class Config {
       if(f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
+  }
+
+  public int getInlinePreedit() {
+    if (getString("inline_code").contentEquals("true")) return INLINE_INPUT;
+    switch (getString("inline_preedit")) {
+        case "preview":
+        case "preedit":
+        case "true":
+          return INLINE_PREVIEW;
+        case "composition":
+          return INLINE_COMPOSITION;
+        case "input":
+          return INLINE_INPUT;
+    }
+    return INLINE_NONE;
   }
 }

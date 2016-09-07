@@ -242,6 +242,11 @@ public class Rime
     return mContext.composition;
   }
 
+  public static String getCompositionText() {
+    RimeComposition composition = getComposition();
+    return (composition == null) ? "" : composition.preedit;
+  }
+
   public static String getComposingText() {
     if (mContext == null || mContext.commit_text_preview == null) return "";
     return mContext.commit_text_preview;

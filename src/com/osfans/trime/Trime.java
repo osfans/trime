@@ -66,7 +66,7 @@ public class Trime extends InputMethodService implements
   private int orientation;
   private boolean canCompose;
   private boolean enterAsLineBreak;
-  private boolean inlinePreedit, inlineCode; //嵌入首選
+  private int inlinePreedit; //嵌入模式
   private boolean display_tray_icon;
   private boolean mTempAsciiMode; //臨時中英文狀態
   private boolean mAsciiMode; //默認中英文狀態
@@ -120,8 +120,7 @@ public class Trime extends InputMethodService implements
     mConfig = Config.get(this);
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
     Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
-    inlinePreedit = mConfig.getBoolean("inline_preedit");
-    inlineCode = mConfig.getBoolean("inline_code");
+    inlinePreedit = mConfig.getInlinePreedit();
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     mEffect.reset();
@@ -172,8 +171,7 @@ public class Trime extends InputMethodService implements
    */
   public void reset() {
     mConfig.reset();
-    inlinePreedit = mConfig.getBoolean("inline_preedit");
-    inlineCode = mConfig.getBoolean("inline_code");
+    inlinePreedit = mConfig.getInlinePreedit();
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
@@ -627,8 +625,19 @@ public class Trime extends InputMethodService implements
 
   /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
-    if (inlinePreedit || inlineCode) { //嵌入首選
-      String s = inlineCode ? Rime.RimeGetInput() : Rime.getComposingText();
+    if (inlinePreedit != Config.INLINE_NONE) { //嵌入模式
+      String s = null;
+      switch (inlinePreedit) {
+        case Config.INLINE_PREVIEW:
+          s = Rime.getComposingText();
+          break;
+        case Config.INLINE_COMPOSITION:
+          s = Rime.getCompositionText();
+          break;
+        case Config.INLINE_INPUT:
+          s = Rime.RimeGetInput();
+          break;
+      }
       if (s == null) s = "";
       InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
