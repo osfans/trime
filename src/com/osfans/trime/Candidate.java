@@ -58,7 +58,7 @@ public class Candidate extends View {
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
-  private int candidate_view_height, comment_height;
+  private int candidate_view_height, comment_height, candidate_spacing;
   private boolean show_comment, comment_on_top;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
@@ -68,6 +68,7 @@ public class Candidate extends View {
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
     ((PaintDrawable)candidateHighlight).setCornerRadius(config.getFloat("round_corner"));
     candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
+    candidate_spacing = config.getPixel("candidate_spacing");
 
     candidate_text_color = config.getColor("candidate_text_color");
     comment_text_color = config.getColor("comment_text_color");
@@ -227,7 +228,7 @@ public class Candidate extends View {
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
         candidateRect[i].top,
-        candidateRect[i].right,
+        candidateRect[i].right + candidate_spacing,
         candidateRect[i].bottom);
       candidateSeparator.draw(canvas);
       i++;
@@ -241,7 +242,7 @@ public class Candidate extends View {
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
         candidateRect[i].top,
-        candidateRect[i].right,
+        candidateRect[i].right + candidate_spacing,
         candidateRect[i].bottom);
       candidateSeparator.draw(canvas);
       i++;
@@ -264,9 +265,12 @@ public class Candidate extends View {
     final int bottom = getHeight();
     int i = 0;
     int x = 0;
-    if (Rime.hasLeft()) x += getCandidateWidth(-4);
+    if (Rime.hasLeft()) x += getCandidateWidth(-4) + candidate_spacing;
     getCandNum();
-    for (i = 0; i < num_candidates; i++) candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
+    for (i = 0; i < num_candidates; i++) {
+      candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
+      x += candidate_spacing;
+    }
     if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
     if (Rime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
