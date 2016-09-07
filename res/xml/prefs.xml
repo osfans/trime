@@ -72,6 +72,10 @@
                     android:data="https://github.com/BYVoid/OpenCC" />
         </Preference>
         <Preference android:key="pref_licensing" android:title="@string/pref_licensing" android:summary="@string/pref_licensing_summary"/>
+        <Preference android:key="pref_pime" android:title="@string/pref_pime">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/osfans/PIME/releases" />
+        </Preference>
         <Preference android:key="pref_credits" android:title="@string/pref_credits">
             <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/osfans/trime/blob/develop/README.md#鳴謝credits" />

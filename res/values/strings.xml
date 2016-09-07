@@ -36,6 +36,7 @@
     <string name="pref_licensing">許可證</string>
     <string name="pref_licensing_summary" translatable="false">Apache License 2.0</string>
     <string name="pref_credits">鳴謝</string>
+    <string name="pref_pime">Win10 PIME輸入法平臺</string>
 
     <string name="pref_config">設定</string>
     <string name="pref_enable">啓用</string>

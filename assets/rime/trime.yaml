@@ -50,7 +50,7 @@ style:
   repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
   reset_ascii_mode: false #顯示鍵盤時重置爲中文狀態
   round_corner: 15.0 #按鍵圓角半徑
-  shadow_radius: 0.0
+  shadow_radius: 0.0 #按鍵陰影半徑
   show_candidate: true #顯示候選區
   show_comment: true #顯示提示區
   show_preview: false #按鍵提示
