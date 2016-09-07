@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
+import android.graphics.Typeface;
 
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -54,7 +55,7 @@ public class Candidate extends View {
 
   private Drawable candidateHighlight, candidateSeparator;
   private Paint paintCandidate, paintSymbol, paintComment;
-  private Typeface tfCandidate, tfSymbol, tfComment, tfHanB;
+  private Typeface tfCandidate, tfSymbol, tfComment, tfHanB, tfLatin;
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
@@ -81,6 +82,7 @@ public class Candidate extends View {
     comment_height = config.getPixel("comment_height");
 
     tfCandidate = config.getFont("candidate_font");
+    tfLatin= config.getFont("latin_font");
     tfHanB = config.getFont("hanb_font");
     tfComment = config.getFont("comment_font");
     tfSymbol = config.getFont("symbol_font");
@@ -168,21 +170,28 @@ public class Candidate extends View {
     }
   }
 
+  private Typeface getFont(int codepoint, Typeface font) {
+    if (tfHanB != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint)) return tfHanB;
+    if (tfLatin != Typeface.DEFAULT && codepoint < 0x2e80) return tfLatin;
+    return font;
+  }
+
   private void drawText(String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
     if (s == null) return;
     int length = s.length();
     if (length == 0) return;
     int points = s.codePointCount(0, length);
     float x = center - paint.measureText(s) / 2;
-    if (tfHanB != null && length > points) {
-      for (int offset = 0; offset < length; ) {
+    if (tfLatin != Typeface.DEFAULT || (tfHanB != Typeface.DEFAULT && length > points)) {
+      int offset = 0;
+      while (offset < length) {
         int codepoint = s.codePointAt(offset);
         int charCount = Character.charCount(codepoint);
         int end = offset + charCount;
-        paint.setTypeface(Character.isSupplementaryCodePoint(codepoint) ? tfHanB : font);
+        paint.setTypeface(getFont(codepoint, font));
         canvas.drawText(s, offset, end, x, y, paint);
         x += paint.measureText(s, offset, end);
-        offset += charCount;
+        offset = end;
       }
     } else {
       paint.setTypeface(font);

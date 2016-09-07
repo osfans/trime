@@ -11,7 +11,7 @@ style:
   candidate_text_size: 22 #候選字大小
   candidate_view_height: 28 #候選區高度
   color_scheme: default #配色方案
-  comment_font: latin.ttf #編碼提示字型
+  comment_font: comment.ttf #編碼提示字型
   comment_height: 12 #編碼提示區高度
   comment_on_top: true #編碼提示在上方或右側
   comment_text_size: 12 #編碼提示大小
