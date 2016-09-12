@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.3)
 option(BUILD_TEST "Build and run tests" OFF)
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 option(ENABLE_LOGGING "Enable logging with google-glog library" ON)
-option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" OFF)
+option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" ON)
 option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
 
 # includes
