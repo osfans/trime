@@ -7,7 +7,7 @@ style:
   background_dim_amount: 0.5
   border_width: 3
   candidate_font: han.ttf #候選字型
-  candidate_spacing: 1 #候選間距
+  candidate_spacing: 0.5 #候選間距
   candidate_text_size: 22 #候選字大小
   candidate_view_height: 28 #候選區高度
   color_scheme: default #配色方案
@@ -71,7 +71,9 @@ style:
 
 fallback_colors:
   candidate_text_color: text_color
+  comment_text_color: candidate_text_color
   border_color: back_color
+  candidate_separator_color: border_color
   hilited_text_color: text_color
   hilited_back_color: back_color
   hilited_candidate_text_color: hilited_text_color
@@ -80,15 +82,15 @@ fallback_colors:
   text_back_color: back_color
   hilited_key_back_color: hilited_candidate_back_color
   hilited_key_text_color: hilited_candidate_text_color
-  hilited_key_symbol_color: hilited_key_text_color
+  hilited_key_symbol_color: hilited_comment_text_color
   hilited_off_key_back_color: hilited_key_back_color
   hilited_on_key_back_color: hilited_key_back_color
   hilited_off_key_text_color: hilited_key_text_color
   hilited_on_key_text_color: hilited_key_text_color
   key_back_color: back_color
   key_border_color: border_color
-  key_text_color: text_color
-  key_symbol_color: key_text_color
+  key_text_color: candidate_text_color
+  key_symbol_color: comment_text_color
   keyboard_back_color: border_color
   label_color: candidate_text_color
   off_key_back_color: key_back_color
