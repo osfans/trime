@@ -5,6 +5,8 @@ script:
   - ant release
 git:
   submodules: false
+jdk:
+    - oraclejdk8
 android:
   components:
     - tools # to get the new `repository-11.xml`
