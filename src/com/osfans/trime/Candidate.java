@@ -181,7 +181,7 @@ public class Candidate extends View {
     int length = s.length();
     if (length == 0) return;
     int points = s.codePointCount(0, length);
-    float x = center - paint.measureText(s) / 2;
+    float x = center - measureText(s, paint, font) / 2;
     if (tfLatin != Typeface.DEFAULT || (tfHanB != Typeface.DEFAULT && length > points)) {
       int offset = 0;
       while (offset < length) {
@@ -220,7 +220,7 @@ public class Candidate extends View {
       if (show_comment) {
         comment = getComment(i);
         if (!Function.isEmpty(comment)) {
-          comment_width = paintComment.measureText(comment);
+          comment_width = measureText(comment, paintComment, tfComment);
           if (comment_on_top) {
             comment_x = candidateRect[i].centerX();
           } else {
@@ -246,7 +246,7 @@ public class Candidate extends View {
       candidate = getCandidate(j);
       if (candidate == null) continue;
       paintSymbol.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
-      x = candidateRect[i].centerX() - paintSymbol.measureText(candidate) / 2;
+      x = candidateRect[i].centerX() - measureText(candidate, paintSymbol, tfSymbol) / 2;
       canvas.drawText(candidate, x, y, paintSymbol);
       candidateSeparator.setBounds(
         candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -385,16 +385,40 @@ public class Candidate extends View {
     return s;
   }
 
+  private float measureText(String s, Paint paint, Typeface font) {
+    float x = 0;
+    if (s == null) return x;
+    int length = s.length();
+    if (length == 0) return x;
+    int points = s.codePointCount(0, length);
+    if (tfLatin != Typeface.DEFAULT || (tfHanB != Typeface.DEFAULT && length > points)) {
+      int offset = 0;
+      while (offset < length) {
+        int codepoint = s.codePointAt(offset);
+        int charCount = Character.charCount(codepoint);
+        int end = offset + charCount;
+        paint.setTypeface(getFont(codepoint, font));
+        x += paint.measureText(s, offset, end);
+        offset = end;
+      }
+      paint.setTypeface(font);
+    } else {
+      paint.setTypeface(font);
+      x += paint.measureText(s);
+    }
+    return x;
+  }
+
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
     float n = (s == null ? 0 : s.codePointCount(0, s.length()));
     float x = (n < 2 ? 0.8f : 0.4f) * candidate_text_size;
     if (s == null) x += n * candidate_text_size;
-    else x += paintCandidate.measureText(s);
+    else x += measureText(s, paintCandidate, tfCandidate);
     if (i >= 0 && show_comment) {
       String comment = getComment(i);
       if (comment != null) {
-        float x2 = paintComment.measureText(comment);
+        float x2 = measureText(comment, paintComment, tfComment);
         if (comment_on_top) { if (x2 > x) x = x2; } //提示在上方
         else x += x2;  //提示在右方
       }
