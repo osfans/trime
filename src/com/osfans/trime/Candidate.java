@@ -52,6 +52,7 @@ public class Candidate extends View {
   private int highlightIndex;
   private Rime.RimeCandidate[] candidates;
   private int num_candidates;
+  private int start_num = 0;
 
   private Drawable candidateHighlight, candidateSeparator;
   private Paint paintCandidate, paintSymbol, paintComment;
@@ -126,7 +127,8 @@ public class Candidate extends View {
   /**
    * Highlight the first candidate as the default candidate.
    */
-  public void setText() {
+  public void setText(int i) {
+    start_num = i;
     removeHighlight();
     updateCandidateWidth();
     if (getCandNum() > 0) {
@@ -142,7 +144,9 @@ public class Candidate extends View {
    */
   public boolean pickHighlighted(int index) {
     if ((highlightIndex != -1) && (listener != null)) {
-      listener.onPickCandidate(index == -1 ? highlightIndex : index);
+      if (index == -1) index = highlightIndex;
+      if (index >= 0) index += start_num;
+      listener.onPickCandidate(index);
       return true;
     }
     return false;
@@ -367,14 +371,14 @@ public class Candidate extends View {
 
   private int getCandNum() {
     candidates = Rime.getCandidates();
-    highlightIndex = Rime.getCandHighlightIndex();
-    num_candidates = candidates == null ? 0 : candidates.length;
+    highlightIndex = Rime.getCandHighlightIndex() - start_num;
+    num_candidates = candidates == null ? 0 : candidates.length - start_num;
     return num_candidates;
   }
 
   private String getCandidate(int i) {
     String s = null;
-    if (candidates != null && i >= 0) s = candidates[i].text;
+    if (candidates != null && i >= 0) s = candidates[i + start_num].text;
     else if (i == -4 && Rime.hasLeft()) s = "◀";
     else if (i == -5 && Rime.hasRight()) s = "▶";
     return s;
@@ -382,7 +386,7 @@ public class Candidate extends View {
 
   private String getComment(int i) {
     String s = null;
-    if (candidates != null && i >= 0) s = candidates[i].comment;
+    if (candidates != null && i >= 0) s = candidates[i + start_num].comment;
     return s;
   }
 

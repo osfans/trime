@@ -5,7 +5,6 @@ config_version: "3.0"
 
 style:
   background_dim_amount: 0.5
-  border_width: 3
   candidate_font: han.ttf #候選字型
   candidate_padding: 5 #候選項內邊距
   candidate_spacing: 0.5 #候選間距
@@ -19,11 +18,26 @@ style:
   destroy_on_quit: false #離開時清理記憶體
   display_tray_icon: false #狀態列圖示
   hanb_font: hanb.ttf #擴充字型
-  hilite_padding: 2
-  hilite_spacing: 4
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
   inline_preedit: preview #嵌入模式：preview|composition|input|none
+  layout:
+    position: fixed #候選窗口位置：left|right|fixed(Android5.0以上)
+    entries: 1 #候選窗口項數
+    border: 2 #候選窗口邊框寬度
+    max_width: 230 #最大寬度，超過則自動換行
+    max_height: 400 #最大高度
+    min_length: 5 #候選窗口最小詞長
+    min_width: 40 #最小寬度
+    min_height: 0 #最小高度
+    margin_x: 5 #水平邊距
+    margin_y: 5 #豎直邊距
+    line_spacing: 0 #候选詞的行間距(px)
+    line_spacing_multiplier: 1.2 #候选詞的行間距(倍數)
+    spacing: 5 #與預編輯的距離
+    round_corner: 4 #候選窗口圓角
+    alpha: 0xdd #透明度(0-255)
+    elevation: 5 #陰影(Android5.0以上)
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_sound: false #按鍵聲音
@@ -37,12 +51,8 @@ style:
   latin_font: latin.ttf #西文字型
   latin_locale: en_US #西文語言
   locale: zh_TW #預設語言 zh_TW,zh_CN,zh_HK,""
-  longpress_timeout: 800 #按鍵超過800毫秒即為長按
-  margin_x: 12
-  margin_y: 12
-  min_height: 0
-  min_width: 160
-  multitap_interval: 800 #800毫秒內快速按兩次鍵
+  longpress_timeout: 400 #按鍵超過800毫秒即為長按
+  multitap_interval: 400 #800毫秒內快速按兩次鍵
   preview_font: latin.ttf #按鍵提示字型
   preview_height: 60 #按鍵提示高度
   preview_offset: -12 #按鍵提示縱向偏移
@@ -56,9 +66,7 @@ style:
   show_comment: true #顯示提示區
   show_preview: false #按鍵提示
   show_text: true #顯示編碼區
-  soft_cursor: true #編碼區軟游標
-  soft_cursor_text: "‸" #編碼區軟光標字元，librime預設爲"‸"
-  spacing: 10
+  soft_cursor: false #編碼區軟游標
   speak_commit: false #朗讀上屏文字
   speak_key: false #朗讀按鍵
   speech_opencc_config: s2t.json #語音輸入簡繁轉換
@@ -108,7 +116,6 @@ preset_color_schemes:
     author: osfans #作者資訊
     back_color: 0xffe4e7e9 #候選區背景
     border_color: 0xffc1c7ca #邊框
-    candidate_back_color: 0xffe4e7e9 #候選背景
     candidate_separator_color: 0xffc1c7ca #候選分割背景
     candidate_text_color: 0xff5a676e #候選文字
     comment_text_color: 0xff7b868c #提示

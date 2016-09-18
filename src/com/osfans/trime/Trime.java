@@ -25,8 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.*;
 import android.view.Window;
 import android.view.WindowManager;
 import android.app.AlertDialog;
@@ -41,6 +40,8 @@ import android.widget.FrameLayout;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
 import android.os.IBinder;
+import android.graphics.RectF;
+import android.graphics.drawable.GradientDrawable;
 
 import java.util.logging.Logger;
 import java.util.Locale;
@@ -61,12 +62,17 @@ public class Trime extends InputMethodService implements
   private FrameLayout mCandidateContainer;
   private PopupWindow mFloatingWindow;
   private PopupTimer mFloatingWindowTimer = new PopupTimer();
+  public RectF mPopupRectF = new RectF();
   private AlertDialog mOptionsDialog; //對話框
 
   private int orientation;
   private boolean canCompose;
   private boolean enterAsLineBreak;
   private int inlinePreedit; //嵌入模式
+  private int candPos; //候選窗口位置
+  private int candSpacing; //候選窗口間距
+  private boolean cursorUpdated = false; //光標是否移動
+  private int min_length;
   private boolean display_tray_icon;
   private boolean mTempAsciiMode; //臨時中英文狀態
   private boolean mAsciiMode; //默認中英文狀態
@@ -76,10 +82,18 @@ public class Trime extends InputMethodService implements
   private Locale[] locales = new Locale[2];
   private boolean keyComposing; //實體鍵盤編輯狀態
 
+  private boolean isCandPosFixed() {
+    return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP || candPos >= Config.CAND_POS_FIXED;
+  }
+
   private class PopupTimer extends Handler implements Runnable {
     private int mParentLocation[] = new int[2];
 
     void postShowFloatingWindow() {
+      if (Function.isEmpty(Rime.getCompositionText())) {
+        hideComposition();
+        return;
+      }
       mCompositionContainer.measure(LayoutParams.WRAP_CONTENT,
               LayoutParams.WRAP_CONTENT);
       mFloatingWindow.setWidth(mCompositionContainer.getMeasuredWidth());
@@ -94,16 +108,27 @@ public class Trime extends InputMethodService implements
 
     public void run() {
       if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
-      mCandidateContainer.getLocationInWindow(mParentLocation);
-
+      int x, y;
+      if (isCandPosFixed() || !cursorUpdated) {
+        //setCandidatesViewShown(true);
+        mCandidateContainer.getLocationInWindow(mParentLocation);
+        x = mParentLocation[0];
+        y = mParentLocation[1] - mFloatingWindow.getHeight();
+      } else {
+        //setCandidatesViewShown(false);
+        mCandidateContainer.getLocationOnScreen(mParentLocation);
+        x = (int)mPopupRectF.left;
+        y = (int)mPopupRectF.bottom - mParentLocation[1] + candSpacing;
+        if (y + mFloatingWindow.getHeight() > 0) {
+          y = (int)mPopupRectF.top - mParentLocation[1] -  mFloatingWindow.getHeight() - candSpacing;
+        }
+      }
       if (!mFloatingWindow.isShowing()) {
         mFloatingWindow.showAtLocation(mCandidateContainer,
-                Gravity.LEFT | Gravity.TOP, mParentLocation[0],
-                mParentLocation[1] -mFloatingWindow.getHeight());
+                Gravity.LEFT | Gravity.TOP, x, y);
       } else {
         mFloatingWindow
-        .update(mParentLocation[0],
-                mParentLocation[1] - mFloatingWindow.getHeight(),
+        .update(x, y,
                 mFloatingWindow.getWidth(),
                 mFloatingWindow.getHeight());
       }
@@ -121,6 +146,9 @@ public class Trime extends InputMethodService implements
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
     Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
     inlinePreedit = mConfig.getInlinePreedit();
+    candPos = mConfig.getCandPos();
+    candSpacing = mConfig.getPixel("layout/spacing");
+    min_length = mConfig.getInt("layout/min_length");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     mEffect.reset();
@@ -165,6 +193,13 @@ public class Trime extends InputMethodService implements
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
   }
 
+  private void hideComposition() {
+    if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
+        mFloatingWindowTimer.cancelShowing();
+        mFloatingWindow.dismiss();
+    }
+  }
+
   /**
    * 重置鍵盤、候選條、狀態欄等
    * !!注意，如果其中調用Rime.setOption，切換方案會卡住
@@ -172,6 +207,9 @@ public class Trime extends InputMethodService implements
   public void reset() {
     mConfig.reset();
     inlinePreedit = mConfig.getInlinePreedit();
+    candPos = mConfig.getCandPos();
+    candSpacing = mConfig.getInt("layout/spacing");
+    min_length = mConfig.getInt("layout/min_length");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
@@ -180,10 +218,7 @@ public class Trime extends InputMethodService implements
       mCandidate.reset();
       mComposition.reset();
     }
-    if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
-        mFloatingWindowTimer.cancelShowing();
-        mFloatingWindow.dismiss();
-    }
+    hideComposition();
     if (mKeyboardView != null) mKeyboardView.reset(); //實體鍵盤無軟鍵盤
     mEffect.reset();
   }
@@ -217,6 +252,25 @@ public class Trime extends InputMethodService implements
       orientation = newConfig.orientation;
     }
     super.onConfigurationChanged(newConfig);
+  }
+
+  @Override
+  public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      int i = cursorAnchorInfo.getComposingTextStart();
+      if (candPos == Config.CAND_POS_LEFT && i >=0 ) {
+        mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
+      } else {
+        mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
+        mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
+        mPopupRectF.right =  mPopupRectF.left;
+        mPopupRectF.bottom = cursorAnchorInfo.getInsertionMarkerBottom();
+      }
+      cursorAnchorInfo.getMatrix().mapRect(mPopupRectF);
+      if (mCandidateContainer != null) {
+        mFloatingWindowTimer.postShowFloatingWindow();
+      }
+    }
   }
 
   @Override
@@ -261,15 +315,19 @@ public class Trime extends InputMethodService implements
     LayoutInflater inflater = getLayoutInflater();
     mCompositionContainer = (LinearLayout) inflater.inflate(
             R.layout.composition_container, null);
-    if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
-      mFloatingWindowTimer.cancelShowing();
-      mFloatingWindow.dismiss();
-    }
+    hideComposition();
     mFloatingWindow = new PopupWindow(this);
     mFloatingWindow.setClippingEnabled(false);
     mFloatingWindow.setBackgroundDrawable(null);
     mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
     mFloatingWindow.setContentView(mCompositionContainer);
+    GradientDrawable gd = new GradientDrawable();
+    gd.setColor(mConfig.getColor("text_back_color"));
+    if (mConfig.getInt("layout/alpha") > 0) gd.setAlpha(mConfig.getInt("layout/alpha"));
+    gd.setCornerRadius(mConfig.getPixel("layout/round_corner"));
+    gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
+    mFloatingWindow.setBackgroundDrawable(gd);
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
     mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
@@ -349,8 +407,7 @@ public class Trime extends InputMethodService implements
     mKeyboardView.closing();
     escape();
     try {
-      mFloatingWindowTimer.cancelShowing();
-      mFloatingWindow.dismiss();
+      hideComposition();
     } catch (Exception e) {
       Log.info("Fail to show the PopupWindow.");
     }
@@ -625,6 +682,7 @@ public class Trime extends InputMethodService implements
 
   /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
+    InputConnection ic = getCurrentInputConnection();
     if (inlinePreedit != Config.INLINE_NONE) { //嵌入模式
       String s = null;
       switch (inlinePreedit) {
@@ -639,7 +697,6 @@ public class Trime extends InputMethodService implements
           break;
       }
       if (s == null) s = "";
-      InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
         CharSequence cs = ic.getSelectedText(0);
         if (cs == null || !Function.isEmpty(s)) {
@@ -648,11 +705,12 @@ public class Trime extends InputMethodService implements
         }
       }
     }
+    if (ic != null && !isCandPosFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
-      mCandidate.setText();
       //setCandidatesViewShown(canCompose); //InputType爲0x80000時無候選條
-      mComposition.setText();
-      mFloatingWindowTimer.postShowFloatingWindow();
+      int start_num = mComposition.setCompositionText(min_length);
+      mCandidate.setText(start_num);
+      if (isCandPosFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
     }
     if (mKeyboardView != null) mKeyboardView.invalidateComposingKeys();
   }

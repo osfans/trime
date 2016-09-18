@@ -37,6 +37,10 @@ public class Config {
   public final static int INLINE_COMPOSITION = 2;
   public final static int INLINE_INPUT = 3;
 
+  public final static int CAND_POS_LEFT = 0;
+  public final static int CAND_POS_RIGHT = 1;
+  public final static int CAND_POS_FIXED = 2;
+
   private Map<String, Object> mStyle, mDefaultStyle;
   private static String defaultName = "trime.yaml";
   private String schema_id;
@@ -156,9 +160,29 @@ public class Config {
     mStyle = (Map<String,Object>)Rime.schema_get_value(schema_id, "style");
   }
 
-  private Object getValue(String k1) {
+  private Object _getValue(String k1, String k2) {
+    Map<String, Object> m;
+    if (mStyle != null && mStyle.containsKey(k1)) {
+      m = (Map<String, Object>)mStyle.get(k1);
+      if (m != null && m.containsKey(k2)) return m.get(k2);
+    }
+    if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) {
+      m = (Map<String, Object>)mDefaultStyle.get(k1);
+      if (m != null && m.containsKey(k2)) return m.get(k2);
+    }
+    return null;
+  }
+
+  private Object _getValue(String k1) {
     if (mStyle != null && mStyle.containsKey(k1)) return mStyle.get(k1);
     if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) return mDefaultStyle.get(k1);
+    return null;
+  }
+
+  public Object getValue(String s) {
+    String[] ss = s.split("/");
+    if (ss.length == 1) return _getValue(ss[0]);
+    else if(ss.length == 2) return _getValue(ss[0], ss[1]);
     return null;
   }
 
@@ -316,5 +340,15 @@ public class Config {
           return INLINE_INPUT;
     }
     return INLINE_NONE;
+  }
+
+  public int getCandPos() {
+    switch (getString("layout/position")) {
+        case "left":
+          return getInlinePreedit() == 0 ? CAND_POS_RIGHT : CAND_POS_LEFT;
+        case "right":
+          return CAND_POS_RIGHT;
+    }
+    return CAND_POS_FIXED;
   }
 }
