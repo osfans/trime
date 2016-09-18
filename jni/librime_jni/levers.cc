@@ -180,6 +180,6 @@ jboolean select_schemas(JNIEnv *env, jobject thiz, jobjectArray stringArray) {
     const char *rawString = schema_id_list[i];
     env->ReleaseStringUTFChars(string, rawString);
   }
-  delete schema_id_list;
+  delete[] schema_id_list;
   return b;
 }
