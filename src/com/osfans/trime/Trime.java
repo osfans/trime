@@ -605,7 +605,7 @@ public class Trime extends InputMethodService implements
 
   /** 在鍵盤視圖中從上往下滑動，隱藏鍵盤 */
   public void swipeDown() {
-    requestHideSelf(0);
+    //requestHideSelf(0);
   }
 
   public void onPickCandidate(int i) {
