@@ -149,11 +149,11 @@ public class Rime
       int i = 0;
       for (Map<String, Object> o: switches) {
         candidates[i] = new RimeCandidate();
-        List<String> states = (List<String>)o.get("states");
+        List states = (List)o.get("states");
         Integer value = (Integer)o.get("value");
         if (value == null) value = 0;
-        candidates[i].text = states.get(value);
-        candidates[i].comment = o.containsKey("options") ? "" : kRightArrow + states.get(1 - value);
+        candidates[i].text = states.get(value).toString();
+        candidates[i].comment = o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
         i++;
       }
       return candidates;
