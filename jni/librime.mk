@@ -88,6 +88,7 @@ LOCAL_SRC_FILES += \
   src/gear/table_translator.cc \
   src/gear/matcher.cc \
   src/gear/punctuator.cc \
+  src/gear/codepoint_translator.cc \
   src/lever/levers_module.cc \
   src/lever/switcher_settings.cc \
   src/lever/user_dict_manager.cc \
