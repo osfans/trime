@@ -814,8 +814,8 @@ preset_keyboards:
     - {click: 'b', long_click: '~'}
     - {click: 'n', long_click: Insert}
     - {click: 'm', long_click: Delete}
-    - {click: ',', long_click: '<', paging: Page_Up}
-    - {click: '.', long_click: '>', has_menu: Page_Down}
+    - {click: ',', long_click: '<'}
+    - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
     - {click: Shift_L}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
@@ -862,7 +862,7 @@ preset_keyboards:
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
-    - {click: Shift_L, composing: "'", send_bindings: true, width: 15}
+    - {click: Shift_L, send_bindings: true, width: 15}
     - {click: 'z', long_click: '`'}
     - {click: 'x', long_click: cut}
     - {click: 'c', long_click: copy}
@@ -873,9 +873,9 @@ preset_keyboards:
     - {click: BackSpace, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
-    - {click: ',', long_click: '<', paging: Page_Up}
+    - {click: ',', long_click: '<'}
     - {click: space, width: 30}
-    - {click: '.', long_click: '>', has_menu: Page_Down}
+    - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
   qwerty_:
@@ -949,7 +949,7 @@ preset_keyboards:
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
-    - {click: Shift_L, composing: "'", send_bindings: true, width: 15}
+    - {click: Shift_L, send_bindings: true, width: 15}
     - {click: 'z', long_click: '`'}
     - {click: 'x', long_click: cut}
     - {click: 'c', long_click: copy}
@@ -960,9 +960,9 @@ preset_keyboards:
     - {click: BackSpace, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
-    - {click: ',', long_click: '<', paging: Page_Up}
+    - {click: ',', long_click: '<'}
     - {click: space, width: 30, swipe_right: Schema_switch}
-    - {click: '.', long_click: '>', has_menu: Page_Down}
+    - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
   number:
@@ -1042,14 +1042,13 @@ preset_keyboards:
     - {click: '”', ascii: "'", long_click: '’'}
     - {click: '，', ascii: ','}
     - {click: '？', ascii: '?'}
-    - {click: select_all}
-    - {click: Hide, long_click: Delete}
-    - {click: Keyboard_default, long_click: Menu}
+    - {click: BackSpace, long_click: Escape}
+    - {click: Keyboard_default, long_click: Menu, width: 15}
     - {click: Keyboard_number, long_click: Color_switch}
     - {click: space, width: 40}
     - {click: '。', ascii: '.'}
-    - {click: BackSpace, long_click: Escape}
-    - {click: Return}
+    - {click: Hide, long_click: Delete}
+    - {click: Return, long_click: select_all, width: 15}
   bopomofo:
     name: 註音鍵盤
     author: "皛筱晓小笨鱼"
@@ -1143,7 +1142,7 @@ preset_keyboards:
     - {long_click: '<', click: ','}
     - {click: BackSpace, long_click: Escape, width: 10}
     - {click: Hide}
-    - {click: Shift_L, composing: "'", send_bindings: true}
+    - {click: Shift_L, send_bindings: true}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: space, width: 40}
     - {click: Mode_switch, long_click: Menu}
@@ -1190,7 +1189,7 @@ preset_keyboards:
     - {click: l, label: "中", long_click: Right}
     - {width: 6}
     - {width: 3}
-    - {click: Shift_L, composing: "'", width: 13.8}
+    - {click: Shift_L, width: 13.8}
     - {click: z, label: "片", long_click: "`"}
     - {click: x, label: "止", long_click: cut}
     - {click: c, label: "金", long_click: copy}
@@ -1299,7 +1298,7 @@ preset_keyboards:
     - {click: ',', long_click: '<', composing: 'ˇ', send_bindings: false}  #三聲
     - {click: BackSpace, long_click: Escape}
     - {click: Mode_switch, long_click: Menu}
-    - {click: Shift_L, composing: "'"}
+    - {click: Shift_L}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: space, width: 40}
     - {click: ".", long_click: '"'}
