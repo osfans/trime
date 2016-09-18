@@ -59,7 +59,7 @@ public class Candidate extends View {
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
-  private int candidate_view_height, comment_height, candidate_spacing;
+  private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
   private boolean show_comment, comment_on_top;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
@@ -70,6 +70,7 @@ public class Candidate extends View {
     ((PaintDrawable)candidateHighlight).setCornerRadius(config.getFloat("round_corner"));
     candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
     candidate_spacing = config.getPixel("candidate_spacing");
+    candidate_padding = config.getPixel("candidate_padding");
 
     candidate_text_color = config.getColor("candidate_text_color");
     comment_text_color = config.getColor("comment_text_color");
@@ -412,9 +413,8 @@ public class Candidate extends View {
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
     float n = (s == null ? 0 : s.codePointCount(0, s.length()));
-    float x = (n < 2 ? 0.8f : 0.4f) * candidate_text_size;
-    if (s == null) x += n * candidate_text_size;
-    else x += measureText(s, paintCandidate, tfCandidate);
+    float x = 2 * candidate_padding;
+    if (s != null) x += measureText(s, paintCandidate, tfCandidate);
     if (i >= 0 && show_comment) {
       String comment = getComment(i);
       if (comment != null) {
