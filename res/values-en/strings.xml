@@ -25,7 +25,7 @@
     <string name="pref_help">Help</string>
     <string name="pref_wiki">Courses</string>
     <string name="pref_issues">Report</string>
-    <string name="pref_qq1">Starters\' QQ Group</string>
+    <string name="pref_qq1">QQ Group for Newbies</string>
     <string name="pref_qq2">Rime QQ Group</string>
     <string name="pref_market">Commentaries on Google Play
 </string>
@@ -44,10 +44,10 @@
     <string name="pref_select">Select</string>
     <string name="pref_select_summary">Select TRIME</string>
     <string name="pref_schemas">Schemas</string>
-    <string name="pref_schemas_summary">Select One from Installed Schemas
+    <string name="pref_schemas_summary">Select Some from Installed Schemas
 </string>
     <string name="pref_colors">Colors</string>
-    <string name="pref_colors_summary">Select Desired Color for Keyboard
+    <string name="pref_colors_summary">Select Desired Theme for Keyboard
 </string>
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in /sdcard/rime</string>
@@ -58,7 +58,7 @@
     <string name="pref_maintenance_summary">Automatically Maintain Input Schemas</string>
 -->
     <string name="pref_deploy_opencc">Deploy OpenCC</string>
-    <string name="pref_deploy_opencc_summary">Gotta Deploy after Modifying txt files in/sdcard/rime/opencc</string>
+    <string name="pref_deploy_opencc_summary">Must Deploy after Modifying txt files in/sdcard/rime/opencc</string>
     <string name="pref_deploy">Deploy</string>
     <string name="pref_deploy_summary">Gotta Deploy after Modifying Settings </string>
     <string name="pref_sync">Synchronize</string>
@@ -68,11 +68,11 @@
     <string name="deploy_failure">Job Failed!</string>
     <string name="sync_success">Synchronized</string>
     <string name="sync_failure">Not Synchronized</string>
-    <string name="reset_success">Reset!</string>
-    <string name="reset_failure">Not Reset!</string>
+    <string name="reset_success">Succeeded!</string>
+    <string name="reset_failure">Failed!</string>
 
-    <string name="set_ime">Settings</string>
-    <string name="no_schemas">Place essay.txt, default.yaml, symbols.yaml and Schemas into /sdcard/rime!</string>
+    <string name="set_ime">Preferences</string>
+    <string name="no_schemas">Put essay.txt, default.yaml, symbols.yaml and Schemas into /sdcard/rime!</string>
     <string name="other_ime">Other IMEs</string>
 
 </resources>
