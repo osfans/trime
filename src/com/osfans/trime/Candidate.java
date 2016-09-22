@@ -61,7 +61,7 @@ public class Candidate extends View {
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
   private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
-  private boolean show_comment, comment_on_top;
+  private boolean show_comment, comment_on_top, candidate_use_cursor;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
@@ -100,6 +100,7 @@ public class Candidate extends View {
     boolean show = config.getBoolean("show_candidate");
     setVisibility(show ? View.VISIBLE : View.GONE);
     comment_on_top = config.getBoolean("comment_on_top");
+    candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     invalidate();
   }
 
@@ -168,8 +169,12 @@ public class Candidate extends View {
     requestLayout();
   }
 
+  private boolean isHighlighted(int i) {
+    return candidate_use_cursor && i >=0 && i == highlightIndex;
+  }
+
   private void drawHighlight(Canvas canvas) {
-    if (highlightIndex >= 0) {
+    if (isHighlighted(highlightIndex)) {
       candidateHighlight.setBounds(candidateRect[highlightIndex]);
       candidateHighlight.draw(canvas);
     }
@@ -232,11 +237,11 @@ public class Candidate extends View {
             x -= comment_width / 2;
             comment_x = candidateRect[i].right -  comment_width / 2;
           }
-          paintComment.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
+          paintComment.setColor(isHighlighted(i) ? hilited_comment_text_color : comment_text_color);
           drawText(comment, canvas, paintComment, tfComment, comment_x, comment_y);
         }
       }
-      paintCandidate.setColor(highlightIndex == i ? hilited_candidate_text_color : candidate_text_color);
+      paintCandidate.setColor(isHighlighted(i) ? hilited_candidate_text_color : candidate_text_color);
       drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, x, y);
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
@@ -250,7 +255,7 @@ public class Candidate extends View {
     for (int j = -4; j >= -5; j--) { // -4: left, -5: right
       candidate = getCandidate(j);
       if (candidate == null) continue;
-      paintSymbol.setColor(highlightIndex == i ? hilited_comment_text_color : comment_text_color);
+      paintSymbol.setColor(isHighlighted(i) ? hilited_comment_text_color : comment_text_color);
       x = candidateRect[i].centerX() - measureText(candidate, paintSymbol, tfSymbol) / 2;
       canvas.drawText(candidate, x, y, paintSymbol);
       candidateSeparator.setBounds(

@@ -9,6 +9,7 @@ style:
   candidate_padding: 5 #候選項內邊距
   candidate_spacing: 0.5 #候選間距
   candidate_text_size: 22 #候選字大小
+  candidate_use_cursor: true #高亮候選項
   candidate_view_height: 28 #候選區高度
   color_scheme: default #配色方案
   comment_font: comment.ttf #編碼提示字型

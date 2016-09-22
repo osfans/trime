@@ -42,6 +42,7 @@ public class Composition extends TextView {
   private int[] positions = new int[Candidate.MAX_CANDIDATE_COUNT];
   private int page_up, page_down;
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
+  private boolean candidate_use_cursor = true;
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -84,6 +85,7 @@ public class Composition extends TextView {
   public void reset() {
     Config config = Config.get();
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
+    candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     text_size = config.getPixel("text_size");
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");
@@ -137,7 +139,7 @@ public class Composition extends TextView {
     positions[i] = ss.length();
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
     if (candidates != null) {
-      int highlightIndex = Rime.getCandHighlightIndex();
+      int highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
       for (Rime.RimeCandidate o: candidates) {
         String cand = o.text;
         if (i >= max_entries || cand.length() < length) break;
