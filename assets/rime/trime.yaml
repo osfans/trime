@@ -23,11 +23,11 @@ style:
   inline_preedit: preview #嵌入模式：preview|composition|input|none
   layout:
     position: fixed #候選窗口位置：left|right|fixed(Android5.0以上)
-    entries: 1 #候選窗口項數
+    min_length: 5 #候選窗口最小詞長
+    max_entries: 2 #候選窗口最大詞條數
     border: 2 #候選窗口邊框寬度
     max_width: 230 #最大寬度，超過則自動換行
     max_height: 400 #最大高度
-    min_length: 5 #候選窗口最小詞長
     min_width: 40 #最小寬度
     min_height: 0 #最小高度
     margin_x: 5 #水平邊距

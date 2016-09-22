@@ -186,6 +186,10 @@ public class Config {
     return null;
   }
 
+  public boolean hasKey(String s) {
+    return getValue(s) != null;
+  }
+
   public String getKeyboardName(String name) {
     if (name.contentEquals(".default")) {
       if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名

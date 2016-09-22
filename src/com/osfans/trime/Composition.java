@@ -39,8 +39,9 @@ public class Composition extends TextView {
   private int text_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
   private int back_color, hilited_back_color, hilited_candidate_back_color;
-  private int[] positions = new int[20];
+  private int[] positions = new int[Candidate.MAX_CANDIDATE_COUNT];
   private int page_up, page_down;
+  private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -82,6 +83,7 @@ public class Composition extends TextView {
 
   public void reset() {
     Config config = Config.get();
+    if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     text_size = config.getPixel("text_size");
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");
@@ -138,7 +140,7 @@ public class Composition extends TextView {
       int highlightIndex = Rime.getCandHighlightIndex();
       for (Rime.RimeCandidate o: candidates) {
         String cand = o.text;
-        if (cand.length() < length) break;
+        if (i >= max_entries || cand.length() < length) break;
         start = ss.length();
         ss.append("\n" + cand);
         end = ss.length();
