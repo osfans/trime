@@ -708,7 +708,7 @@ public class Trime extends InputMethodService implements
     if (ic != null && !isCandPosFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
       //setCandidatesViewShown(canCompose); //InputType爲0x80000時無候選條
-      int start_num = mComposition.setCompositionText(min_length);
+      int start_num = mComposition.setWindow(min_length);
       mCandidate.setText(start_num);
       if (isCandPosFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
     }

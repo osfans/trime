@@ -91,7 +91,7 @@ public class Event {
   public String getText() {
     String s = "";
     if (!Function.isEmpty(text)) s = text;
-    else if (mKeyboard.isShifted() && mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
+    else if (mKeyboard != null && mKeyboard.isShifted() && mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
     return adjustCase(s);
   }
 

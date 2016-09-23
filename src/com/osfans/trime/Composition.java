@@ -30,8 +30,13 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spannable;
 import android.text.style.*;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
+
+import java.util.Map;
+import java.util.List;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
 public class Composition extends TextView {
@@ -39,51 +44,72 @@ public class Composition extends TextView {
   private int text_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
   private int back_color, hilited_back_color, hilited_candidate_back_color;
-  private int[] positions = new int[Candidate.MAX_CANDIDATE_COUNT];
-  private int page_up, page_down;
+  private int key_text_size, key_text_color, key_back_color;
+  private int composition_start, composition_end;
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
   private boolean candidate_use_cursor = true;
+  private int highlightIndex;
+  private List<Map<String,Object>> components;
+  private SpannableStringBuilder ss;
+  private int span = 0;
+
+  private class CandidateSpan extends ClickableSpan{
+      int index;
+      public CandidateSpan(int i) {
+          super();
+          index = i;
+      }
+      @Override
+      public void onClick(View tv) {
+         Trime.getService().onPickCandidate(index);
+      }
+      @Override
+      public void updateDrawState(TextPaint ds) {
+          ds.setUnderlineText(false);
+      }
+  }
+
+  private class EventSpan extends ClickableSpan{
+      Event event;
+      public EventSpan(Event e) {
+          super();
+          event = e;
+      }
+
+      @Override
+      public void onClick(View tv) {
+         Trime.getService().onEvent(event);
+      }
+      @Override
+      public void updateDrawState(TextPaint ds) {
+          ds.setUnderlineText(false);
+      }
+  }
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
     reset();
   }
 
-  private int getLineForPostion(int n) {
-    if (n < 0) return -1;
-    int i = 0;
-    while(i < 20 && positions[i] < n) {
-      i++;
-    }
-    if (i == 20) {
-      if (n < page_up) return -4;
-      if (n < page_down) return -5;
-    }
-    return i;
-  }
-
+  @Override
   public boolean onTouchEvent(MotionEvent event) {
-    if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH) {
-      if (event.getAction() == MotionEvent.ACTION_UP) {
-        int n = getOffsetForPosition(event.getX(),event.getY());
-        int i = getLineForPostion(n);
-        if (i == 0) {
-          String s = getText().toString().substring(0, n).replace(" ", "");
-          n = s.length();
-          Rime.RimeSetCaretPos(n);
-          Trime.getService().updateComposing();
-        } else if (i < 0) {
-          //Trime.getService().onKey(i == -4 ? KeyEvent.KEYCODE_PAGE_UP : KeyEvent.KEYCODE_PAGE_DOWN, 0);
-        } else if (i > 0){
-          Trime.getService().onPickCandidate(i - 1);
-        }
+    if (event.getAction() == MotionEvent.ACTION_UP) {
+      int n = getOffsetForPosition(event.getX(),event.getY());
+      if (composition_start <= n && n <= composition_end) {
+        String s = getText().toString().substring(0, n).replace(" ", "");
+        n = s.length();
+        Rime.RimeSetCaretPos(n);
+        Trime.getService().updateComposing();
+        return true;
       }
     }
-    return true;
+    return super.onTouchEvent(event);
   }
+
 
   public void reset() {
     Config config = Config.get();
+    components = (List<Map<String,Object>>)config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     text_size = config.getPixel("text_size");
@@ -101,6 +127,10 @@ public class Composition extends TextView {
     hilited_back_color = config.getColor("hilited_back_color");
     hilited_candidate_back_color = config.getColor("hilited_candidate_back_color");
     
+    key_text_size = config.getPixel("key_text_size");
+    key_text_color = config.getColor("key_text_color");
+    key_back_color = config.getColor("key_back_color");
+    
     float line_spacing_multiplier = config.getFloat("layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;
     setLineSpacing(config.getFloat("layout/line_spacing"), line_spacing_multiplier);
@@ -112,66 +142,119 @@ public class Composition extends TextView {
     margin_x = config.getPixel("layout/margin_x");
     margin_y = config.getPixel("layout/margin_y");
     setPadding(margin_x, margin_y, margin_x, margin_y);
-    boolean show = config.getBoolean("show_text");
+    boolean show = config.getBoolean("show_window");
     setVisibility(show ? View.VISIBLE : View.GONE);
   }
 
-  public int setCompositionText(int length) {
+  private void appendComposition(Map m) {
+    Rime.RimeComposition r = Rime.getComposition();
+    String s = r.getText();
+    String format = (String)m.get("composition");
+    String sep = (String) m.get("start");
+    if (!Function.isEmpty(sep)) ss.append(sep);
+    int start, end;
+    start = ss.length();
+    ss.append(s);
+    end = ss.length();
+    composition_start = start;
+    composition_end = end;
+    ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
+    ss.setSpan(new ForegroundColorSpan(text_color), start, end, span);
+    ss.setSpan(new BackgroundColorSpan(back_color), start, end, span);
+    start = composition_start + r.getStart();
+    end = composition_start + r.getEnd();
+    ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
+    ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
+    sep = (String) m.get("end");
+    if (!Function.isEmpty(sep))ss.append(sep);
+  }
+
+  private int appendCandidates(Map m, int length) {
+    int start, end;
+    int i = 0;
+    Rime.RimeCandidate[] candidates = Rime.getCandidates();
+    if (candidates == null) return i;
+    String sep = (String) m.get("start");
+    highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
+    String candidate_format = (String) m.get("candidate");
+    String comment_format = (String) m.get("comment");
+    String line = (String) m.get("sep");
+    for (Rime.RimeCandidate o: candidates) {
+      String cand = o.text;
+      if (i >= max_entries || cand.length() < length) break;
+      String line_sep = i == 0 ? sep : line;
+      if (!Function.isEmpty(line_sep))ss.append(line_sep);
+      start = ss.length();
+      ss.append(String.format(candidate_format, cand));
+      end = ss.length();
+      ss.setSpan(new CandidateSpan(i), start, end, span);
+      ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
+      if (i == highlightIndex) {
+        ss.setSpan(new ForegroundColorSpan(hilited_candidate_text_color), start, end, span);
+        ss.setSpan(new BackgroundColorSpan(hilited_candidate_back_color), start, end, span);
+      } else {
+        ss.setSpan(new ForegroundColorSpan(candidate_text_color), start, end, span);
+      }
+      String comment = o.comment;
+      if (!Function.isEmpty(comment)) {
+        start = ss.length();
+        ss.append(String.format(comment_format, comment));
+        end = ss.length();
+        ss.setSpan(new CandidateSpan(i), start, end, span);
+        ss.setSpan(new AbsoluteSizeSpan(comment_text_size), start, end, span);
+        if (i == highlightIndex) {
+          ss.setSpan(new ForegroundColorSpan(hilited_comment_text_color), start, end, span);
+          ss.setSpan(new BackgroundColorSpan(hilited_candidate_back_color), start, end, span);
+        } else {
+          ss.setSpan(new ForegroundColorSpan(comment_text_color), start, end, span);
+        }
+      }
+      i++;
+    }
+    sep = (String) m.get("end");
+    if (!Function.isEmpty(sep)) ss.append(sep);
+    return i;
+  }
+
+  private void appendButton(Map m) {
+    if (m.containsKey("when")) {
+      String when = (String)m.get("when");
+      if (when.contentEquals("paging") && !Rime.isPaging()) return;
+      if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
+    }
+    String label;
+    Event e = new Event(null, (String)m.get("click"));
+    if (m.containsKey("label")) label = (String)m.get("label");
+    else label = e.getLabel();
+    String sep = (String) m.get("start");
+    if (!Function.isEmpty(sep)) ss.append(sep);
+    int start, end;
+    start = ss.length();
+    ss.append(label);
+    end = ss.length();
+    ss.setSpan(new EventSpan(e), start, end, span);
+    ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
+    ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
+    ss.setSpan(new BackgroundColorSpan(key_back_color), start, end, span);
+    sep = (String) m.get("end");
+    if (!Function.isEmpty(sep)) ss.append(sep);
+  }
+
+  public int setWindow(int length) {
     if (getVisibility() != View.VISIBLE) return 0;
     Rime.RimeComposition r = Rime.getComposition();
     if (r == null) return 0;
     String s = r.getText();
     if (Function.isEmpty(s)) return 0;
-    SpannableStringBuilder ss = new SpannableStringBuilder();
-    int span = 0; //SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE;
-    int start, end;
-    start = ss.length();
-    ss.append(s);
-    end = ss.length();
-    ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
-    ss.setSpan(new ForegroundColorSpan(text_color), start, end, span);
-    ss.setSpan(new BackgroundColorSpan(back_color), start, end, span);
-    start = r.getStart();
-    end = r.getEnd();
-    ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
-    ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
+    ss = new SpannableStringBuilder();
     int i = 0;
-    positions[i] = ss.length();
-    Rime.RimeCandidate[] candidates = Rime.getCandidates();
-    if (candidates != null) {
-      int highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
-      for (Rime.RimeCandidate o: candidates) {
-        String cand = o.text;
-        if (i >= max_entries || cand.length() < length) break;
-        start = ss.length();
-        ss.append("\n" + cand);
-        end = ss.length();
-        ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
-        if (i == highlightIndex) {
-          ss.setSpan(new ForegroundColorSpan(hilited_candidate_text_color), start, end, span);
-          ss.setSpan(new BackgroundColorSpan(hilited_candidate_back_color), start, end, span);
-        } else {
-          ss.setSpan(new ForegroundColorSpan(candidate_text_color), start, end, span);
-        }
-        String comment = o.comment;
-        if (!Function.isEmpty(comment)) {
-          start = ss.length();
-          ss.append(" " + comment);
-          end = ss.length();
-          ss.setSpan(new AbsoluteSizeSpan(comment_text_size), start, end, span);
-          if (i == highlightIndex) {
-            ss.setSpan(new ForegroundColorSpan(hilited_comment_text_color), start, end, span);
-            ss.setSpan(new BackgroundColorSpan(hilited_candidate_back_color), start, end, span);
-          } else {
-            ss.setSpan(new ForegroundColorSpan(comment_text_color), start, end, span);
-          }
-        }
-        positions[++i] = ss.length();
-      }
-      //if (Rime.hasLeft()) {ss.append("  ◀  "); page_up = ss.length();}
-      //if (Rime.hasRight()) {ss.append("  ▶  "); page_down = ss.length();}
+    for (Map<String,Object> m: components) {
+      if (m.containsKey("composition")) appendComposition(m);
+      else if (m.containsKey("candidate")) i = appendCandidates(m, length);
+      else if (m.containsKey("click"))appendButton(m);
     }
     setText(ss);
+    setMovementMethod(LinkMovementMethod.getInstance());
     return i;
   }
 }

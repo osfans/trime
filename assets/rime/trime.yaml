@@ -39,6 +39,14 @@ style:
     round_corner: 4 #候選窗口圓角
     alpha: 0xdd #透明度(0-255)
     elevation: 5 #陰影(Android5.0以上)
+  window: #懸浮窗口組件
+    - {start: " ", click: 'Left', label: ' ⬅ '}
+    - {start: " ", click: 'Right', label: ' ➡️ '}
+    - {start: " ", click: 'Page_Up', label: ' ⬆ ', when: paging}
+    - {start: " ", click: 'Page_Down', label: ' ⬇ ', when: has_menu}
+    - {start: " ", click: 'Escape', label: '❌'}
+    - {start: "\n", composition: "%s", end: " "}
+    - {start: "\n", candidate: "%s", comment: " %s", end: "", sep: "\n"}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_sound: false #按鍵聲音
@@ -66,7 +74,7 @@ style:
   show_candidate: true #顯示候選區
   show_comment: true #顯示提示區
   show_preview: false #按鍵提示
-  show_text: true #顯示編碼區
+  show_window: true #顯示浮動窗口
   soft_cursor: false #編碼區軟游標
   speak_commit: false #朗讀上屏文字
   speak_key: false #朗讀按鍵
