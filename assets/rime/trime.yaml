@@ -39,6 +39,7 @@ style:
     round_corner: 4 #候選窗口圓角
     alpha: 0xdd #透明度(0-255)
     elevation: 5 #陰影(Android5.0以上)
+    background: 0xffe4e7e9
   window: #懸浮窗口組件
     - {start: " ", click: 'Left', label: ' ⬅ '}
     - {start: " ", click: 'Right', label: ' ➡️ '}

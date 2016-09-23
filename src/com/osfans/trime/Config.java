@@ -22,7 +22,10 @@ import android.content.res.Resources;
 import android.util.TypedValue;
 import android.util.Log;
 import android.graphics.Typeface;
-
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
@@ -329,6 +332,25 @@ public class Config {
       if(f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
+  }
+
+  public Drawable getDrawable(String key){
+    Object o = getValue(key);
+    if (o != null) {
+      if (o instanceof Integer) {
+        Integer color = ((Integer)o).intValue();
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(color);
+        return gd;
+      }
+      String name = getString(key);
+      name = USER_DATA_DIR + "/backgrounds/" + name;
+      File f = new File(name);
+      if (f.exists()) {
+        return new BitmapDrawable(BitmapFactory.decodeFile(name));
+      }
+    }
+    return null;
   }
 
   public int getInlinePreedit() {

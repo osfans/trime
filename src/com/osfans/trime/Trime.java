@@ -42,6 +42,7 @@ import android.os.Build.VERSION;
 import android.os.IBinder;
 import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Drawable;
 
 import java.util.logging.Logger;
 import java.util.Locale;
@@ -321,12 +322,18 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setBackgroundDrawable(null);
     mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
     mFloatingWindow.setContentView(mCompositionContainer);
-    GradientDrawable gd = new GradientDrawable();
-    gd.setColor(mConfig.getColor("text_back_color"));
-    if (mConfig.getInt("layout/alpha") > 0) gd.setAlpha(mConfig.getInt("layout/alpha"));
-    gd.setCornerRadius(mConfig.getPixel("layout/round_corner"));
-    gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
-    mFloatingWindow.setBackgroundDrawable(gd);
+    Drawable d = mConfig.getDrawable("layout/background");
+    if (d == null) {
+      GradientDrawable gd = new GradientDrawable();
+      gd.setColor(mConfig.getColor("text_back_color"));
+      d = gd;
+    }
+    if (d instanceof GradientDrawable) {
+      ((GradientDrawable)d).setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
+      ((GradientDrawable)d).setCornerRadius(mConfig.getPixel("layout/round_corner"));
+    }
+    if (mConfig.getInt("layout/alpha") > 0) d.setAlpha(mConfig.getInt("layout/alpha"));
+    mFloatingWindow.setBackgroundDrawable(d);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
