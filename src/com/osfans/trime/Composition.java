@@ -96,7 +96,7 @@ public class Composition extends TextView {
     if (event.getAction() == MotionEvent.ACTION_UP) {
       int n = getOffsetForPosition(event.getX(),event.getY());
       if (composition_start <= n && n <= composition_end) {
-        String s = getText().toString().substring(0, n).replace(" ", "");
+        String s = getText().toString().substring(composition_start, n).replace(" ", "").replace("‸", "");
         n = s.length();
         Rime.RimeSetCaretPos(n);
         Trime.getService().updateComposing();

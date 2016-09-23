@@ -75,7 +75,7 @@ style:
   show_comment: true #顯示提示區
   show_preview: false #按鍵提示
   show_window: true #顯示浮動窗口
-  soft_cursor: false #編碼區軟游標
+  soft_cursor: true #編碼區軟游標
   speak_commit: false #朗讀上屏文字
   speak_key: false #朗讀按鍵
   speech_opencc_config: s2t.json #語音輸入簡繁轉換
