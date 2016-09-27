@@ -30,6 +30,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spannable;
 import android.text.style.*;
+import android.text.Layout;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.os.Build.VERSION_CODES;
@@ -146,16 +147,43 @@ public class Composition extends TextView {
     setVisibility(show ? View.VISIBLE : View.GONE);
   }
 
+  private Object getAlign(Map m) {
+    Layout.Alignment i = Layout.Alignment.ALIGN_NORMAL;
+    if (m.containsKey("align")) {
+      String align = (String)m.get("align");
+      switch (align) {
+        case "left":
+        case "normal":
+          i = Layout.Alignment.ALIGN_NORMAL;
+          break;
+        case "right":
+        case "opposite":
+          i = Layout.Alignment.ALIGN_OPPOSITE;
+          break;
+        case "center":
+          i = Layout.Alignment.ALIGN_CENTER;
+          break;
+      }
+    }
+    return new AlignmentSpan.Standard(i);
+  }
+
   private void appendComposition(Map m) {
     Rime.RimeComposition r = Rime.getComposition();
     String s = r.getText();
     String format = (String)m.get("composition");
-    String sep = (String) m.get("start");
-    if (!Function.isEmpty(sep)) ss.append(sep);
     int start, end;
+    String sep = (String) m.get("start");
+    if (!Function.isEmpty(sep)) {
+      start = ss.length();
+      ss.append(sep);
+      end = ss.length();
+      ss.setSpan(getAlign(m), start, end, span);
+    }
     start = ss.length();
     ss.append(s);
     end = ss.length();
+    ss.setSpan(getAlign(m), start, end, span);
     composition_start = start;
     composition_end = end;
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
@@ -183,10 +211,16 @@ public class Composition extends TextView {
       String cand = o.text;
       if (i >= max_entries || cand.length() < length) break;
       String line_sep = i == 0 ? sep : line;
-      if (!Function.isEmpty(line_sep))ss.append(line_sep);
+      if (!Function.isEmpty(line_sep)) {
+        start = ss.length();
+        ss.append(line_sep);
+        end = ss.length();
+        ss.setSpan(getAlign(m), start, end, span);
+      }
       start = ss.length();
       ss.append(String.format(candidate_format, cand));
       end = ss.length();
+      ss.setSpan(getAlign(m), start, end, span);
       ss.setSpan(new CandidateSpan(i), start, end, span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
       if (i == highlightIndex) {
@@ -200,6 +234,7 @@ public class Composition extends TextView {
         start = ss.length();
         ss.append(String.format(comment_format, comment));
         end = ss.length();
+        ss.setSpan(getAlign(m), start, end, span);
         ss.setSpan(new CandidateSpan(i), start, end, span);
         ss.setSpan(new AbsoluteSizeSpan(comment_text_size), start, end, span);
         if (i == highlightIndex) {
@@ -226,12 +261,18 @@ public class Composition extends TextView {
     Event e = new Event(null, (String)m.get("click"));
     if (m.containsKey("label")) label = (String)m.get("label");
     else label = e.getLabel();
-    String sep = (String) m.get("start");
-    if (!Function.isEmpty(sep)) ss.append(sep);
     int start, end;
+    String sep = (String) m.get("start");
+    if (!Function.isEmpty(sep)) {
+      start = ss.length();
+      ss.append(sep);
+      end = ss.length();
+      ss.setSpan(getAlign(m), start, end, span);
+    }
     start = ss.length();
     ss.append(label);
     end = ss.length();
+    ss.setSpan(getAlign(m), start, end, span);
     ss.setSpan(new EventSpan(e), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);

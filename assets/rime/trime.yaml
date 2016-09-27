@@ -41,12 +41,8 @@ style:
     elevation: 5 #陰影(Android5.0以上)
     background: 0xffe4e7e9
   window: #懸浮窗口組件
-    - {start: " ", click: 'Left', label: ' ⬅ '}
-    - {start: " ", click: 'Right', label: ' ➡️ '}
-    - {start: " ", click: 'Page_Up', label: ' ⬆ ', when: paging}
-    - {start: " ", click: 'Page_Down', label: ' ⬇ ', when: has_menu}
-    - {start: " ", click: 'Escape', label: '❌'}
-    - {start: "\n", composition: "%s", end: " "}
+    - {start: "", click: 'Escape', label: '❌', end: "\n", align: right}
+    - {start: "", composition: "%s", end: ""}
     - {start: "\n", candidate: "%s", comment: " %s", end: "", sep: "\n"}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
