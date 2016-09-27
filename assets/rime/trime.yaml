@@ -627,6 +627,27 @@ preset_color_schemes:
     hilited_candidate_back_color: 0xff730b6f
     candidate_text_color: 0xff000000
     comment_text_color: 0xff474747
+  yygc:
+    author: "小辛"
+    back_color: 0xffffffff
+    border_color: 0xffffffff
+    candidate_text_color: 0xff7f7f7f
+    comment_text_color: 0xff7f7f7f
+    hilited_back_color: 0xffffffff
+    hilited_candidate_back_color: 0xffffffff
+    hilited_candidate_text_color: 0xff7f7f7f
+    hilited_comment_text_color: 0xff7f7f7f
+    hilited_key_text_color: 0xff7f7f7f
+    hilited_off_key_back_color: 0xffffffff
+    hilited_off_key_text_color: 0xff7f7f7f
+    hilited_on_key_back_color: 0xffffffff
+    hilited_on_key_text_color: 0xff7f7f7f
+    hilited_text_color: 0xff7f7f7f
+    key_text_color: 0xff7f7f7f
+    label_color: 0xff7f7f7f
+    name: "一葉孤城"
+    off_key_text_color: 0xff7f7f7f
+    text_color: 0xff7f7f7f
 
 android_keys:
   name: [VoidSymbol, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
