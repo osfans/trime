@@ -42,7 +42,7 @@ style:
     background: 0xffe4e7e9
   window: #懸浮窗口組件
     - {start: "", click: 'Escape', label: '❌', end: "\n", align: right}
-    - {start: "", composition: "%s", end: ""}
+    - {start: "", composition: "%s", end: "", letter_spacing: 0.2}
     - {start: "\n", candidate: "%s", comment: " %s", end: "", sep: "\n"}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高

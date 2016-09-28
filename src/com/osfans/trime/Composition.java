@@ -32,6 +32,8 @@ import android.text.Spannable;
 import android.text.style.*;
 import android.text.Layout;
 import android.text.TextPaint;
+import android.annotation.TargetApi;
+import android.os.Parcel;
 import android.text.method.LinkMovementMethod;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
@@ -85,6 +87,24 @@ public class Composition extends TextView {
       public void updateDrawState(TextPaint ds) {
           ds.setUnderlineText(false);
       }
+  }
+
+  @TargetApi(21)
+  public class LetterSpacingSpan extends UnderlineSpan {
+      private float letterSpacing;
+
+      /**
+       * @param letterSpacing
+       */
+      public LetterSpacingSpan(float letterSpacing) {
+          this.letterSpacing = letterSpacing;
+      }
+
+      @Override
+      public void updateDrawState(TextPaint ds) {
+          ds.setLetterSpacing(letterSpacing);
+      }
+
   }
 
   public Composition(Context context, AttributeSet attrs) {
@@ -189,6 +209,14 @@ public class Composition extends TextView {
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(back_color), start, end, span);
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && m.containsKey("letter_spacing")) {
+      Object o = m.get("letter_spacing");
+      double size = 1d;
+      if (o instanceof Integer) size = ((Integer)o).doubleValue();
+      else if (o instanceof Float) size = ((Float)o).doubleValue();
+      else if (o instanceof Double) size = ((Double)o).doubleValue();
+      ss.setSpan(new LetterSpacingSpan((float)size), start, end, span);
+    }
     start = composition_start + r.getStart();
     end = composition_start + r.getEnd();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
