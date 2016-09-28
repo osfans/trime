@@ -25,7 +25,9 @@ style:
   layout:
     position: fixed #候選窗口位置：left|right|fixed(Android5.0以上)
     min_length: 5 #候選窗口最小詞長
-    max_entries: 2 #候選窗口最大詞條數
+    max_length: 10 #超過字數則換行
+    sticky_lines: 0 #固頂行數
+    max_entries: 1 #候選窗口最大詞條數
     border: 2 #候選窗口邊框寬度
     max_width: 230 #最大寬度，超過則自動換行
     max_height: 400 #最大高度
@@ -42,8 +44,8 @@ style:
     background: 0xffe4e7e9
   window: #懸浮窗口組件
     - {start: "", click: 'Escape', label: '❌', end: "\n", align: right}
-    - {start: "", composition: "%s", end: "", letter_spacing: 0.2}
-    - {start: "\n", candidate: "%s", comment: " %s", end: "", sep: "\n"}
+    - {start: "", composition: "%s", end: "", letter_spacing: 0.2} #letter_spacing需要Android5.0
+    - {start: "\n", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_sound: false #按鍵聲音

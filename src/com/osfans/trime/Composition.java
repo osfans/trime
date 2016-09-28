@@ -49,6 +49,7 @@ public class Composition extends TextView {
   private int back_color, hilited_back_color, hilited_candidate_back_color;
   private int key_text_size, key_text_color, key_back_color;
   private int composition_start, composition_end;
+  private int max_length, sticky_lines;
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
   private boolean candidate_use_cursor = true;
   private int highlightIndex;
@@ -165,6 +166,8 @@ public class Composition extends TextView {
     setPadding(margin_x, margin_y, margin_x, margin_y);
     boolean show = config.getBoolean("show_window");
     setVisibility(show ? View.VISIBLE : View.GONE);
+    max_length = config.getInt("layout/max_length");
+    sticky_lines = config.getInt("layout/sticky_lines");
   }
 
   private Object getAlign(Map m) {
@@ -235,10 +238,22 @@ public class Composition extends TextView {
     String candidate_format = (String) m.get("candidate");
     String comment_format = (String) m.get("comment");
     String line = (String) m.get("sep");
+    int last_cand_length = 0;
+    int line_length = 0;
     for (Rime.RimeCandidate o: candidates) {
       String cand = o.text;
       if (i >= max_entries || cand.length() < length) break;
-      String line_sep = i == 0 ? sep : line;
+      cand = String.format(candidate_format, cand);
+      String line_sep;
+      if (i == 0) {
+        line_sep = sep;
+      } else if ((sticky_lines > 0 && sticky_lines >= i)
+            || (max_length > 0 && line_length + cand.length() > max_length)){
+        line_sep = "\n";
+        line_length = 0;
+      } else {
+        line_sep = line;
+      }
       if (!Function.isEmpty(line_sep)) {
         start = ss.length();
         ss.append(line_sep);
@@ -246,8 +261,9 @@ public class Composition extends TextView {
         ss.setSpan(getAlign(m), start, end, span);
       }
       start = ss.length();
-      ss.append(String.format(candidate_format, cand));
+      ss.append(cand);
       end = ss.length();
+      line_length += cand.length();
       ss.setSpan(getAlign(m), start, end, span);
       ss.setSpan(new CandidateSpan(i), start, end, span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
@@ -259,8 +275,9 @@ public class Composition extends TextView {
       }
       String comment = o.comment;
       if (!Function.isEmpty(comment)) {
+        comment = String.format(comment_format, comment);
         start = ss.length();
-        ss.append(String.format(comment_format, comment));
+        ss.append(comment);
         end = ss.length();
         ss.setSpan(getAlign(m), start, end, span);
         ss.setSpan(new CandidateSpan(i), start, end, span);
@@ -271,6 +288,7 @@ public class Composition extends TextView {
         } else {
           ss.setSpan(new ForegroundColorSpan(comment_text_color), start, end, span);
         }
+        line_length += comment.length();
       }
       i++;
     }
