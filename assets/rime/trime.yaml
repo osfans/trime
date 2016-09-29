@@ -884,7 +884,7 @@ preset_keyboards:
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
-    - {click: Shift_L, send_bindings: true, width: 15}
+    - {click: Shift_L, send_bindings: false, width: 15}
     - {click: 'z', long_click: '`'}
     - {click: 'x', long_click: cut}
     - {click: 'c', long_click: copy}
@@ -971,7 +971,7 @@ preset_keyboards:
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
-    - {click: Shift_L, send_bindings: true, width: 15}
+    - {click: Shift_L, send_bindings: false, width: 15}
     - {click: 'z', long_click: '`'}
     - {click: 'x', long_click: cut}
     - {click: 'c', long_click: copy}
@@ -1164,7 +1164,7 @@ preset_keyboards:
     - {long_click: '<', click: ','}
     - {click: BackSpace, long_click: Escape, width: 10}
     - {click: Hide}
-    - {click: Shift_L, send_bindings: true}
+    - {click: Shift_L, send_bindings: false}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: space, width: 40}
     - {click: Mode_switch, long_click: Menu}
