@@ -491,6 +491,7 @@ public class Rime
         break;
       case "option":
         getStatus();
+        getContexts(); //切換中英文、簡繁體時更新候選
         if (trime != null) {
           trime.invalidateKeyboard(); //鍵盤狀態
           if (message_value.endsWith("ascii_mode")) trime.setLanguage(isAsciiMode());
