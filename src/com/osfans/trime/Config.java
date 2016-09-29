@@ -368,13 +368,9 @@ public class Config {
     return INLINE_NONE;
   }
 
-  public int getCandPos() {
-    switch (getString("layout/position")) {
-        case "left":
-          return getInlinePreedit() == 0 ? CAND_POS_RIGHT : CAND_POS_LEFT;
-        case "right":
-          return CAND_POS_RIGHT;
-    }
-    return CAND_POS_FIXED;
+  public WinPos getWinPos() {
+    WinPos wp = WinPos.fromString(getString("layout/position"));
+    if (getInlinePreedit() == 0 && wp == WinPos.RIGHT) wp = WinPos.LEFT;
+    return wp;
   }
 }

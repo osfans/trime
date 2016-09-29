@@ -70,7 +70,7 @@ public class Trime extends InputMethodService implements
   private boolean canCompose;
   private boolean enterAsLineBreak;
   private int inlinePreedit; //嵌入模式
-  private int candPos; //候選窗口位置
+  private WinPos winPos; //候選窗口位置
   private int candSpacing; //候選窗口間距
   private boolean cursorUpdated = false; //光標是否移動
   private int min_length;
@@ -83,8 +83,9 @@ public class Trime extends InputMethodService implements
   private Locale[] locales = new Locale[2];
   private boolean keyComposing; //實體鍵盤編輯狀態
 
-  private boolean isCandPosFixed() {
-    return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP || candPos >= Config.CAND_POS_FIXED;
+  private boolean isWinFixed() {
+    return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
+    || (winPos != WinPos.LEFT && winPos != WinPos.RIGHT && winPos != WinPos.LEFT_UP && winPos != WinPos.RIGHT_UP);
   }
 
   private class PopupTimer extends Handler implements Runnable {
@@ -110,18 +111,43 @@ public class Trime extends InputMethodService implements
     public void run() {
       if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
       int x, y;
-      if (isCandPosFixed() || !cursorUpdated) {
+      if (isWinFixed() || !cursorUpdated) {
         //setCandidatesViewShown(true);
-        mCandidateContainer.getLocationInWindow(mParentLocation);
-        x = mParentLocation[0];
-        y = mParentLocation[1] - mFloatingWindow.getHeight();
+        switch (winPos) {
+          case TOP_RIGHT:
+            mCandidateContainer.getLocationOnScreen(mParentLocation);
+            x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
+            y = - mParentLocation[1] + candSpacing;
+            break;
+          case TOP_LEFT:
+            mCandidateContainer.getLocationOnScreen(mParentLocation);
+            x = 0;
+            y = - mParentLocation[1] + candSpacing;
+            break;
+          case BOTTOM_RIGHT:
+            mCandidateContainer.getLocationInWindow(mParentLocation);
+            x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
+            y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
+            break;
+          case FIXED:
+          case BOTTOM_LEFT:
+          default:
+            mCandidateContainer.getLocationInWindow(mParentLocation);
+            x = mParentLocation[0];
+            y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
+            break;
+        }
       } else {
         //setCandidatesViewShown(false);
         mCandidateContainer.getLocationOnScreen(mParentLocation);
         x = (int)mPopupRectF.left;
+        if (x > mCandidateContainer.getWidth() - mFloatingWindow.getWidth()) {
+          x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
+        } else if (x < 0) x = 0;
         y = (int)mPopupRectF.bottom - mParentLocation[1] + candSpacing;
-        if (y + mFloatingWindow.getHeight() > 0) {
+        if (y + mFloatingWindow.getHeight() > 0 || winPos == WinPos.LEFT_UP || winPos == WinPos.RIGHT_UP) {
           y = (int)mPopupRectF.top - mParentLocation[1] -  mFloatingWindow.getHeight() - candSpacing;
+          if (y < - mParentLocation[1]) y = - mParentLocation[1];
         }
       }
       if (!mFloatingWindow.isShowing()) {
@@ -136,6 +162,15 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  private void loadConfig() {
+    inlinePreedit = mConfig.getInlinePreedit();
+    winPos = mConfig.getWinPos();
+    candSpacing = mConfig.getPixel("layout/spacing");
+    min_length = mConfig.getInt("layout/min_length");
+    display_tray_icon = mConfig.getBoolean("display_tray_icon");
+    reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -146,12 +181,7 @@ public class Trime extends InputMethodService implements
     mConfig = Config.get(this);
     Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
     Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
-    inlinePreedit = mConfig.getInlinePreedit();
-    candPos = mConfig.getCandPos();
-    candSpacing = mConfig.getPixel("layout/spacing");
-    min_length = mConfig.getInt("layout/min_length");
-    display_tray_icon = mConfig.getBoolean("display_tray_icon");
-    reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
+    loadConfig();
     mEffect.reset();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
@@ -207,12 +237,7 @@ public class Trime extends InputMethodService implements
    */
   public void reset() {
     mConfig.reset();
-    inlinePreedit = mConfig.getInlinePreedit();
-    candPos = mConfig.getCandPos();
-    candSpacing = mConfig.getInt("layout/spacing");
-    min_length = mConfig.getInt("layout/min_length");
-    display_tray_icon = mConfig.getBoolean("display_tray_icon");
-    reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
+    loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
     if (mCandidateContainer != null) {
       mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
@@ -259,7 +284,7 @@ public class Trime extends InputMethodService implements
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       int i = cursorAnchorInfo.getComposingTextStart();
-      if (candPos == Config.CAND_POS_LEFT && i >=0 ) {
+      if ((winPos == WinPos.LEFT || winPos == WinPos.LEFT_UP) && i >= 0 ) {
         mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
       } else {
         mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
@@ -712,12 +737,12 @@ public class Trime extends InputMethodService implements
         }
       }
     }
-    if (ic != null && !isCandPosFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) cursorUpdated = ic.requestCursorUpdates(1);
+    if (ic != null && !isWinFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
       //setCandidatesViewShown(canCompose); //InputType爲0x80000時無候選條
       int start_num = mComposition.setWindow(min_length);
       mCandidate.setText(start_num);
-      if (isCandPosFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
+      if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
     }
     if (mKeyboardView != null) mKeyboardView.invalidateComposingKeys();
   }
