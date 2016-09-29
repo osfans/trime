@@ -31,7 +31,7 @@ import java.util.Locale;
 public class Event {
   private String TAG = "Event";
   private Keyboard mKeyboard;
-  int code, mask;
+  int code = 0, mask = 0;
   String text, label, preview;
   List<String> states;
   String command, option, select, toggle;
@@ -41,7 +41,6 @@ public class Event {
     mKeyboard = keyboard;
     if (Key.presetKeys.containsKey(s)) {
       Map m = Key.presetKeys.get(s);
-      text = Key.getString(m, "text");
       command = Key.getString(m, "command");
       option = Key.getString(m, "option");
       select = Key.getString(m, "select");
@@ -50,6 +49,8 @@ public class Event {
       preview = Key.getString(m, "preview");
       parseSend(Key.getString(m, "send"));
       parseLabel();
+      text = Key.getString(m, "text");
+      if (code == 0 && Function.isEmpty(text)) text = s;
       if (m.containsKey("states")) states = (List<String>)m.get("states");
       sticky = (Boolean)Key.getValue(m, "sticky", false);
       repeatable = (Boolean)Key.getValue(m, "repeatable", false);
