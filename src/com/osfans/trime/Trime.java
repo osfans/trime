@@ -63,15 +63,16 @@ public class Trime extends InputMethodService implements
   private FrameLayout mCandidateContainer;
   private PopupWindow mFloatingWindow;
   private PopupTimer mFloatingWindowTimer = new PopupTimer();
-  public RectF mPopupRectF = new RectF();
+  private RectF mPopupRectF = new RectF();
   private AlertDialog mOptionsDialog; //對話框
 
   private int orientation;
   private boolean canCompose;
   private boolean enterAsLineBreak;
   private int inlinePreedit; //嵌入模式
-  private WinPos winPos; //候選窗口位置
-  private int candSpacing; //候選窗口間距
+  private WinPos winPos; //候選窗口彈出位置
+  private int winX, winY; //候選窗座標
+  private int candSpacing; //候選窗與邊緣間距
   private boolean cursorUpdated = false; //光標是否移動
   private int min_length;
   private boolean display_tray_icon;
@@ -86,6 +87,15 @@ public class Trime extends InputMethodService implements
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
     || (winPos != WinPos.LEFT && winPos != WinPos.RIGHT && winPos != WinPos.LEFT_UP && winPos != WinPos.RIGHT_UP);
+  }
+
+  public void updateWindow(int offsetX, int offsetY) {
+    int location[] = new int[2];
+    winPos = WinPos.DRAG;
+    mCandidateContainer.getLocationOnScreen(location);
+    winX = offsetX;
+    winY = offsetY - location[1];
+    mFloatingWindow.update(winX, winY, -1, -1, true);
   }
 
   private class PopupTimer extends Handler implements Runnable {
@@ -129,6 +139,10 @@ public class Trime extends InputMethodService implements
             x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
             y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
             break;
+          case DRAG:
+            x = winX;
+            y = winY;
+            break;
           case FIXED:
           case BOTTOM_LEFT:
           default:
@@ -154,8 +168,7 @@ public class Trime extends InputMethodService implements
         mFloatingWindow.showAtLocation(mCandidateContainer,
                 Gravity.LEFT | Gravity.TOP, x, y);
       } else {
-        mFloatingWindow
-        .update(x, y,
+        mFloatingWindow.update(x, y,
                 mFloatingWindow.getWidth(),
                 mFloatingWindow.getHeight());
       }

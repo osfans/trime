@@ -22,6 +22,7 @@ public enum WinPos {
   LEFT_UP,
   RIGHT,
   RIGHT_UP,
+  DRAG,
   FIXED,
   BOTTOM_LEFT,
   BOTTOM_RIGHT,

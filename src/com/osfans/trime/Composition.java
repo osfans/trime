@@ -48,7 +48,7 @@ public class Composition extends TextView {
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
   private int back_color, hilited_back_color, hilited_candidate_back_color;
   private int key_text_size, key_text_color, key_back_color;
-  private int composition_start, composition_end;
+  private int composition_pos[] = new int[2];
   private int max_length, sticky_lines;
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
   private boolean candidate_use_cursor = true;
@@ -56,6 +56,11 @@ public class Composition extends TextView {
   private List<Map<String,Object>> components;
   private SpannableStringBuilder ss;
   private int span = 0;
+  private boolean movable;
+  private int move_pos[] = new int[2];
+  private boolean first_move = true;
+  private float mDx, mDy;
+  private int mCurrentX, mCurrentY;
 
   private class CandidateSpan extends ClickableSpan{
       int index;
@@ -115,13 +120,34 @@ public class Composition extends TextView {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    if (event.getAction() == MotionEvent.ACTION_UP) {
-      int n = getOffsetForPosition(event.getX(),event.getY());
-      if (composition_start <= n && n <= composition_end) {
-        String s = getText().toString().substring(composition_start, n).replace(" ", "").replace("‸", "");
+    int action = event.getAction();
+    if (action == MotionEvent.ACTION_UP) {
+      int n = getOffsetForPosition(event.getX(), event.getY());
+      if (composition_pos[0] <= n && n <= composition_pos[1]) {
+        String s = getText().toString().substring(composition_pos[0], n).replace(" ", "").replace("‸", "");
         n = s.length();
         Rime.RimeSetCaretPos(n);
         Trime.getService().updateComposing();
+        return true;
+      }
+    } else if (movable && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
+      int n = getOffsetForPosition(event.getX(), event.getY());
+      if (move_pos[0] <= n && n <= move_pos[1]) {
+        if (action == MotionEvent.ACTION_DOWN) {
+          if (first_move) {
+            first_move = false;
+            int location[] = new int[2];
+            getLocationOnScreen(location);
+            mCurrentX =location[0];
+            mCurrentY = location[1];
+          }
+          mDx = mCurrentX - event.getRawX();
+          mDy = mCurrentY - event.getRawY();
+        } else { //MotionEvent.ACTION_MOVE
+          mCurrentX = (int) (event.getRawX() + mDx);
+          mCurrentY = (int) (event.getRawY() + mDy);
+          Trime.getService().updateWindow(mCurrentX, mCurrentY);
+        }
         return true;
       }
     }
@@ -168,6 +194,7 @@ public class Composition extends TextView {
     setVisibility(show ? View.VISIBLE : View.GONE);
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
+    movable = config.getBoolean("layout/movable");
   }
 
   private Object getAlign(Map m) {
@@ -207,8 +234,8 @@ public class Composition extends TextView {
     ss.append(s);
     end = ss.length();
     ss.setSpan(getAlign(m), start, end, span);
-    composition_start = start;
-    composition_end = end;
+    composition_pos[0] = start;
+    composition_pos[1] = end;
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(back_color), start, end, span);
@@ -220,8 +247,8 @@ public class Composition extends TextView {
       else if (o instanceof Double) size = ((Double)o).doubleValue();
       ss.setSpan(new LetterSpacingSpan((float)size), start, end, span);
     }
-    start = composition_start + r.getStart();
-    end = composition_start + r.getEnd();
+    start = composition_pos[0] + r.getStart();
+    end = composition_pos[0] + r.getEnd();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
     sep = (String) m.get("end");
@@ -327,6 +354,28 @@ public class Composition extends TextView {
     if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
+  private void appendMove(Map m) {
+    String s = (String)m.get("move");
+    int start, end;
+    String sep = (String) m.get("start");
+    if (!Function.isEmpty(sep)) {
+      start = ss.length();
+      ss.append(sep);
+      end = ss.length();
+      ss.setSpan(getAlign(m), start, end, span);
+    }
+    start = ss.length();
+    ss.append(s);
+    end = ss.length();
+    ss.setSpan(getAlign(m), start, end, span);
+    move_pos[0] = start;
+    move_pos[1] = end;
+    ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
+    ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
+    sep = (String) m.get("end");
+    if (!Function.isEmpty(sep))ss.append(sep);
+  }
+
   public int setWindow(int length) {
     if (getVisibility() != View.VISIBLE) return 0;
     Rime.RimeComposition r = Rime.getComposition();
@@ -339,6 +388,7 @@ public class Composition extends TextView {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) i = appendCandidates(m, length);
       else if (m.containsKey("click"))appendButton(m);
+      else if (m.containsKey("move"))appendMove(m);
     }
     setText(ss);
     setMovementMethod(LinkMovementMethod.getInstance());
