@@ -71,6 +71,7 @@ public class Trime extends InputMethodService implements
   private boolean enterAsLineBreak;
   private int inlinePreedit; //嵌入模式
   private WinPos winPos; //候選窗口彈出位置
+  private String movable; //候選窗口是否可移動
   private int winX, winY; //候選窗座標
   private int candSpacing; //候選窗與邊緣間距
   private boolean cursorUpdated = false; //光標是否移動
@@ -178,6 +179,7 @@ public class Trime extends InputMethodService implements
   private void loadConfig() {
     inlinePreedit = mConfig.getInlinePreedit();
     winPos = mConfig.getWinPos();
+    movable = mConfig.getString("layout/movable");
     candSpacing = mConfig.getPixel("layout/spacing");
     min_length = mConfig.getInt("layout/min_length");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
@@ -238,6 +240,7 @@ public class Trime extends InputMethodService implements
   }
 
   private void hideComposition() {
+    if (movable.contentEquals("once")) winPos = mConfig.getWinPos();
     if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
         mFloatingWindowTimer.cancelShowing();
         mFloatingWindow.dismiss();

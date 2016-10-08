@@ -56,7 +56,7 @@ public class Composition extends TextView {
   private List<Map<String,Object>> components;
   private SpannableStringBuilder ss;
   private int span = 0;
-  private boolean movable;
+  private String movable;
   private int move_pos[] = new int[2];
   private boolean first_move = true;
   private float mDx, mDy;
@@ -130,11 +130,11 @@ public class Composition extends TextView {
         Trime.getService().updateComposing();
         return true;
       }
-    } else if (movable && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
+    } else if (!movable.contentEquals("false") && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
       int n = getOffsetForPosition(event.getX(), event.getY());
       if (move_pos[0] <= n && n <= move_pos[1]) {
         if (action == MotionEvent.ACTION_DOWN) {
-          if (first_move) {
+          if (first_move || movable.contentEquals("once")) {
             first_move = false;
             int location[] = new int[2];
             getLocationOnScreen(location);
@@ -194,7 +194,7 @@ public class Composition extends TextView {
     setVisibility(show ? View.VISIBLE : View.GONE);
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
-    movable = config.getBoolean("layout/movable");
+    movable = config.getString("layout/movable");
   }
 
   private Object getAlign(Map m) {
