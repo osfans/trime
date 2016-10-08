@@ -23,7 +23,7 @@ style:
   horizontal_gap: 1 #鍵水平間距
   inline_preedit: preview #嵌入模式：preview|composition|input|none
   layout:
-    position: left_up #候選窗口位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要Android5.0以上)
+    position: fixed #候選窗口位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要Android5.0以上)
     min_length: 5 #候選窗口最小詞長
     max_length: 10 #超過字數則換行
     sticky_lines: 0 #固頂行數
@@ -44,7 +44,7 @@ style:
     background: 0xffe4e7e9 #顏色或者backgrounds目錄下的圖片文件名
     movable: true #是否可移動窗口
   window: #懸浮窗口組件
-    - {start: "", move: ' ✦ ', end: ""}
+    - {start: "", move: '✦ ', end: ""}
     - {start: "", composition: "%s", end: "", letter_spacing: 0.3} #letter_spacing需要Android5.0
     - {start: "\n", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型
