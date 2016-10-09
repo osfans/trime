@@ -41,7 +41,7 @@ style:
     round_corner: 4 #候選窗口圓角
     alpha: 0xdd #透明度(0-255)
     elevation: 5 #陰影(>=Android5.0)
-    background: 0xffe4e7e9 #顏色或者backgrounds目錄下的圖片文件名
+    background: background.png #顏色或者backgrounds目錄下的圖片文件名
     movable: once #是否可移動窗口，或僅移動一次 true|false|once
   window: #懸浮窗口組件
     - {start: "", move: '✦ ', end: ""}

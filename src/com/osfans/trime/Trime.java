@@ -360,7 +360,6 @@ public class Trime extends InputMethodService implements
     hideComposition();
     mFloatingWindow = new PopupWindow(this);
     mFloatingWindow.setClippingEnabled(false);
-    mFloatingWindow.setBackgroundDrawable(null);
     mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
     mFloatingWindow.setContentView(mCompositionContainer);
     Drawable d = mConfig.getDrawable("layout/background");
