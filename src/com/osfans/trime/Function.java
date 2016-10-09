@@ -22,6 +22,7 @@ import android.content.Intent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
@@ -56,5 +57,13 @@ public class Function {
 
   public static boolean isEmpty(String s) {
     return (s == null) || (s.length() == 0);
+  }
+
+  public static String getString(Map m, String k) {
+    if (m.containsKey(k)) {
+      Object o = m.get(k);
+      if (o != null) return o.toString();
+    }
+    return "";
   }
 }

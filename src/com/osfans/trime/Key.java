@@ -74,26 +74,26 @@ public class Key {
     String s;
     for (int i = 0; i < EVENT_NUM; i++) {
       String eventType = eventTypes[i];
-      s = getString(mk, eventType);
+      s = Function.getString(mk, eventType);
       if (s.length() > 0) events[i] = new Event(mKeyboard, s);
     }
-    s = getString(mk, "composing");
+    s = Function.getString(mk, "composing");
     if (s.length() > 0) {
       composing = new Event(mKeyboard, s);
     }
-    s = getString(mk, "has_menu");
+    s = Function.getString(mk, "has_menu");
     if (s.length() > 0) {
       has_menu = new Event(mKeyboard, s);
     }
-    s = getString(mk, "paging");
+    s = Function.getString(mk, "paging");
     if (s.length() > 0) {
       paging = new Event(mKeyboard, s);
     }
     if (composing != null || has_menu != null || paging != null) mKeyboard.mComposingKeys.add(this);
-    s = getString(mk, "ascii");
+    s = Function.getString(mk, "ascii");
     if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
-    label = getString(mk, "label");
-    hint = getString(mk, "hint");
+    label = Function.getString(mk, "label");
+    hint = Function.getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     else if(composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.mShiftKey = this;
@@ -227,11 +227,6 @@ public class Key {
 
   public boolean sendBindings() {
     return (composing == null || Rime.isComposing()) && !Rime.isAsciiMode() && send_bindings;
-  }
-
-  public static String getString(Map m, String k) {
-    if (m.containsKey(k)) return m.get(k).toString();
-    return "";
   }
 
   public static Object getValue(Map m, String k, Object o) {

@@ -60,7 +60,7 @@ public class Config {
     self = this;
     mDefaultStyle = (Map<String,Object>)Rime.config_get_map("trime", "style");
     fallbackColors = (Map<String,String>)Rime.config_get_map("trime", "fallback_colors");
-    List<Object> androidKeys = Rime.config_get_list("trime", "android_keys/name");
+    List androidKeys = Rime.config_get_list("trime", "android_keys/name");
     Key.androidKeys = new ArrayList<String>(androidKeys.size());
     for (Object o : androidKeys) {
       Key.androidKeys.add(o.toString());

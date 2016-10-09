@@ -200,7 +200,7 @@ public class Composition extends TextView {
   private Object getAlign(Map m) {
     Layout.Alignment i = Layout.Alignment.ALIGN_NORMAL;
     if (m.containsKey("align")) {
-      String align = (String)m.get("align");
+      String align = Function.getString(m, "align");
       switch (align) {
         case "left":
         case "normal":
@@ -221,9 +221,8 @@ public class Composition extends TextView {
   private void appendComposition(Map m) {
     Rime.RimeComposition r = Rime.getComposition();
     String s = r.getText();
-    String format = (String)m.get("composition");
     int start, end;
-    String sep = (String) m.get("start");
+    String sep = Function.getString(m, "start");
     if (!Function.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -251,7 +250,7 @@ public class Composition extends TextView {
     end = composition_pos[0] + r.getEnd();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
-    sep = (String) m.get("end");
+    sep = Function.getString(m, "end");
     if (!Function.isEmpty(sep))ss.append(sep);
   }
 
@@ -260,11 +259,11 @@ public class Composition extends TextView {
     int i = 0;
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
     if (candidates == null) return i;
-    String sep = (String) m.get("start");
+    String sep = Function.getString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
-    String candidate_format = (String) m.get("candidate");
-    String comment_format = (String) m.get("comment");
-    String line = (String) m.get("sep");
+    String candidate_format = Function.getString(m, "candidate");
+    String comment_format = Function.getString(m, "comment");
+    String line = Function.getString(m, "sep");
     int last_cand_length = 0;
     int line_length = 0;
     for (Rime.RimeCandidate o: candidates) {
@@ -319,23 +318,24 @@ public class Composition extends TextView {
       }
       i++;
     }
-    sep = (String) m.get("end");
+    sep = Function.getString(m, "end");
     if (!Function.isEmpty(sep)) ss.append(sep);
     return i;
   }
 
   private void appendButton(Map m) {
     if (m.containsKey("when")) {
-      String when = (String)m.get("when");
+      String when = Function.getString(m, "when");
       if (when.contentEquals("paging") && !Rime.isPaging()) return;
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     String label;
-    Event e = new Event(null, (String)m.get("click"));
-    if (m.containsKey("label")) label = (String)m.get("label");
+    Event e = new Event(null, Function.getString(m, "click"));
+    if (m.containsKey("label")) label = Function.getString(m, "label");
     else label = e.getLabel();
     int start, end;
-    String sep = (String) m.get("start");
+    String sep = null;
+    if (m.containsKey("start")) sep = Function.getString(m, "start");
     if (!Function.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -350,14 +350,14 @@ public class Composition extends TextView {
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(key_back_color), start, end, span);
-    sep = (String) m.get("end");
+    sep = Function.getString(m, "end");
     if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
   private void appendMove(Map m) {
-    String s = (String)m.get("move");
+    String s = Function.getString(m, "move");
     int start, end;
-    String sep = (String) m.get("start");
+    String sep = Function.getString(m, "start");
     if (!Function.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -372,7 +372,7 @@ public class Composition extends TextView {
     move_pos[1] = end;
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
-    sep = (String) m.get("end");
+    sep = Function.getString(m, "end");
     if (!Function.isEmpty(sep))ss.append(sep);
   }
 

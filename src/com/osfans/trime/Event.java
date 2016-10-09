@@ -41,15 +41,15 @@ public class Event {
     mKeyboard = keyboard;
     if (Key.presetKeys.containsKey(s)) {
       Map m = Key.presetKeys.get(s);
-      command = Key.getString(m, "command");
-      option = Key.getString(m, "option");
-      select = Key.getString(m, "select");
-      toggle = Key.getString(m, "toggle");
-      label = Key.getString(m, "label");
-      preview = Key.getString(m, "preview");
-      parseSend(Key.getString(m, "send"));
+      command = Function.getString(m, "command");
+      option = Function.getString(m, "option");
+      select = Function.getString(m, "select");
+      toggle = Function.getString(m, "toggle");
+      label = Function.getString(m, "label");
+      preview = Function.getString(m, "preview");
+      parseSend(Function.getString(m, "send"));
       parseLabel();
-      text = Key.getString(m, "text");
+      text = Function.getString(m, "text");
       if (code == 0 && Function.isEmpty(text)) text = s;
       if (m.containsKey("states")) states = (List<String>)m.get("states");
       sticky = (Boolean)Key.getValue(m, "sticky", false);
@@ -78,8 +78,8 @@ public class Event {
   }
 
   public String adjustCase(String s) {
-    if (s == null) return "";
-    if (s.length() == 1 && mKeyboard.isShifted()) s = s.toUpperCase(Locale.getDefault());
+    if (Function.isEmpty(s)) return "";
+    if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted()) s = s.toUpperCase(Locale.getDefault());
     return s;
   }
 
