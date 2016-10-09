@@ -247,6 +247,24 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  private void loadBackground() {
+      Drawable d = mConfig.getDrawable("layout/background");
+      if (d == null) {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(mConfig.getColor("text_back_color"));
+        d = gd;
+      }
+      if (d instanceof GradientDrawable) {
+        ((GradientDrawable)d).setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
+        ((GradientDrawable)d).setCornerRadius(mConfig.getPixel("layout/round_corner"));
+      }
+      if (mConfig.getInt("layout/alpha") > 0) d.setAlpha(mConfig.getInt("layout/alpha"));
+      mFloatingWindow.setBackgroundDrawable(d);
+      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
+
+      mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
+  }
+
   /**
    * 重置鍵盤、候選條、狀態欄等
    * !!注意，如果其中調用Rime.setOption，切換方案會卡住
@@ -256,7 +274,7 @@ public class Trime extends InputMethodService implements
     loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
     if (mCandidateContainer != null) {
-      mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
+      loadBackground();
       mCandidate.reset();
       mComposition.reset();
     }
@@ -362,25 +380,12 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setClippingEnabled(false);
     mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
     mFloatingWindow.setContentView(mCompositionContainer);
-    Drawable d = mConfig.getDrawable("layout/background");
-    if (d == null) {
-      GradientDrawable gd = new GradientDrawable();
-      gd.setColor(mConfig.getColor("text_back_color"));
-      d = gd;
-    }
-    if (d instanceof GradientDrawable) {
-      ((GradientDrawable)d).setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
-      ((GradientDrawable)d).setCornerRadius(mConfig.getPixel("layout/round_corner"));
-    }
-    if (mConfig.getInt("layout/alpha") > 0) d.setAlpha(mConfig.getInt("layout/alpha"));
-    mFloatingWindow.setBackgroundDrawable(d);
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
     mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
-    mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
+    loadBackground();
     return mCandidateContainer;
   }
 
