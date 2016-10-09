@@ -286,7 +286,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         mVerticalCorrection = config.getPixel("vertical_correction");
         mPreviewOffset = config.getPixel("preview_offset");
         mPreviewHeight = config.getPixel("preview_height");
-        mLabelTextSize = config.getPixel("label_text_size");
+        mLabelTextSize = config.getPixel("key_long_text_size");
+        if (mLabelTextSize == 0) mLabelTextSize = mKeyTextSize;
 
         mBackgroundDimAmount = config.getFloat("background_dim_amount");
         mShadowRadius = config.getFloat("shadow_radius");

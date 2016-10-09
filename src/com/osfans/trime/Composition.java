@@ -44,12 +44,11 @@ import java.util.List;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
 public class Composition extends TextView {
-  private int text_size, candidate_text_size, comment_text_size;
-  private int text_color, candidate_text_color, comment_text_color;
+  private int key_text_size, text_size, label_text_size, candidate_text_size, comment_text_size;
+  private int key_text_color, text_color, label_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
-  private int back_color, hilited_back_color, hilited_candidate_back_color;
-  private int key_text_size, key_text_color, key_back_color;
-  private Typeface tfText, tfCandidate, tfComment;
+  private int key_back_color, back_color, hilited_back_color, hilited_candidate_back_color;
+  private Typeface tfText, tfLabel, tfCandidate, tfComment;
   private int composition_pos[] = new int[2];
   private int max_length, sticky_lines;
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
@@ -192,6 +191,7 @@ public class Composition extends TextView {
     text_size = config.getPixel("text_size");
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");
+    label_text_size = config.getPixel("label_text_size");
 
     text_color = config.getColor("text_color");
     candidate_text_color = config.getColor("candidate_text_color");
@@ -199,6 +199,7 @@ public class Composition extends TextView {
     hilited_text_color = config.getColor("hilited_text_color");
     hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
     hilited_comment_text_color = config.getColor("hilited_comment_text_color");
+    label_color = config.getColor("label_color");
     
     back_color = config.getColor("back_color");
     hilited_back_color = config.getColor("hilited_back_color");
@@ -224,6 +225,7 @@ public class Composition extends TextView {
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
     movable = config.getString("layout/movable");
+    tfLabel = config.getFont("label_font");
     tfText = config.getFont("text_font");
     tfCandidate = config.getFont("candidate_font");
     tfComment = config.getFont("comment_font");
@@ -292,11 +294,13 @@ public class Composition extends TextView {
     if (candidates == null) return i;
     String sep = Function.getString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
+    String label_format = Function.getString(m, "label");
     String candidate_format = Function.getString(m, "candidate");
     String comment_format = Function.getString(m, "comment");
     String line = Function.getString(m, "sep");
     int last_cand_length = 0;
     int line_length = 0;
+    String[] labels = Rime.getSelectLabels();
     for (Rime.RimeCandidate o: candidates) {
       String cand = o.text;
       if (i >= max_entries || cand.length() < length) break;
@@ -317,6 +321,14 @@ public class Composition extends TextView {
         end = ss.length();
         ss.setSpan(getAlign(m), start, end, span);
       }
+      if (!Function.isEmpty(label_format) && labels != null) {
+        String label = String.format(label_format, labels[i]);
+        start = ss.length();
+        ss.append(label);
+        end = ss.length();
+        ss.setSpan(new CandidateSpan(i, tfLabel, hilited_candidate_text_color, hilited_candidate_back_color, label_color), start, end, span);
+        ss.setSpan(new AbsoluteSizeSpan(label_text_size), start, end, span);
+      }
       start = ss.length();
       ss.append(cand);
       end = ss.length();
@@ -325,7 +337,7 @@ public class Composition extends TextView {
       ss.setSpan(new CandidateSpan(i, tfCandidate, hilited_candidate_text_color, hilited_candidate_back_color, candidate_text_color), start, end, span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
       String comment = o.comment;
-      if (!Function.isEmpty(comment)) {
+      if (!Function.isEmpty(comment_format) && !Function.isEmpty(comment)) {
         comment = String.format(comment_format, comment);
         start = ss.length();
         ss.append(comment);
