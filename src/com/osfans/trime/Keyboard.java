@@ -335,8 +335,8 @@ public class Keyboard {
     if (height > 0) defaultHeight = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, (float)height, Resources.getSystem().getDisplayMetrics());
     List<Map<String,Object>> lm = (List<Map<String,Object>>)m.get("keys");
 
-    int x = 0;
-    int y = 0;
+    int x = mDefaultHorizontalGap/2;
+    int y = mDefaultVerticalGap;
     int column = 0;
     mTotalWidth = 0;
 
@@ -347,7 +347,7 @@ public class Keyboard {
       if (w == 0 && mk.containsKey("click")) w = defaultWidth;
       w -= gap;
       if (column >= maxColumns || x + w > mDisplayWidth) {
-        x = 0;
+        x = gap/2;
         y += mDefaultVerticalGap + defaultHeight;
         column = 0;
       }
@@ -359,8 +359,8 @@ public class Keyboard {
       final Key key = new Key(this, mk);
       key.x = x;
       key.y = y;
-      int right_gap = Math.abs(mDisplayWidth - x - w - gap);
-      key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x : w; //右側不留白
+      int right_gap = Math.abs(mDisplayWidth - x - w - gap/2);
+      key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap/2: w; //右側不留白
       key.height = defaultHeight;
       key.gap = gap;
       column++;
@@ -370,7 +370,7 @@ public class Keyboard {
           mTotalWidth = x;
       }
     }
-    mTotalHeight = y + defaultHeight;
+    mTotalHeight = y + defaultHeight + mDefaultVerticalGap;
   }
 
   public boolean getAsciiMode() {
