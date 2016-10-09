@@ -32,7 +32,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.util.Log;
 import android.util.TypedValue;
-import android.graphics.Typeface;
 
 import java.io.File;
 import java.util.Map;
