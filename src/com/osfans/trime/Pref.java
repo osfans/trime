@@ -70,6 +70,8 @@ public class Pref extends PreferenceActivity {
     pref.setSummary(Rime.get_opencc_version());
     pref = findPreference("pref_ver");
     pref.setSummary(getVersion());
+    pref = findPreference("pref_enable");
+    if (isEnabled()) getPreferenceScreen().removePreference(pref);
   }
 
   private void showLicenseDialog() {

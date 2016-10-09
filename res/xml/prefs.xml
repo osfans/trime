@@ -20,22 +20,18 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/ime_name">
 
-    <PreferenceCategory android:key="pref_config" android:title="@string/pref_config">
-        <Preference android:key="pref_enable" android:title="@string/pref_enable" android:summary="@string/pref_enable_summary"/>
-        <Preference android:key="pref_select" android:title="@string/pref_select" android:summary="@string/pref_select_summary"/>
+    <Preference android:key="pref_enable" android:title="@string/pref_enable" android:summary="@string/pref_enable_summary"/>
+    <Preference android:key="pref_select" android:title="@string/pref_select" android:summary="@string/pref_select_summary"/>
+    <Preference android:key="pref_deploy" android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>
+    <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
+
+    <PreferenceScreen android:key="pref_config" android:title="@string/pref_config">
         <Preference android:key="pref_schemas" android:title="@string/pref_schemas" android:summary="@string/pref_schemas_summary"/>
         <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
         <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
-    </PreferenceCategory>
+    </PreferenceScreen>
 
-    <PreferenceCategory android:key="pref_function" android:title="@string/pref_function">
-        <!--<Preference android:key="pref_maintenance" android:title="@string/pref_maintenance" android:summary="@string/pref_maintenance_summary"/>-->
-	<!--<Preference android:key="pref_deploy_opencc" android:title="@string/pref_deploy_opencc" android:summary="@string/pref_deploy_opencc_summary"/>-->
-        <Preference android:key="pref_deploy" android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>
-        <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory android:key="pref_help" android:title="@string/pref_help">
+    <PreferenceScreen android:key="pref_help" android:title="@string/pref_help">
         <Preference android:key="pref_wiki" android:title="@string/pref_wiki">
             <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/osfans/trime/wiki/UserGuide" />
@@ -56,9 +52,9 @@
             <intent android:action="android.intent.action.VIEW"
                     android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DKkW6hWq64hh62lKsEqimTJ20Vh1xtiRp" />
         </Preference>
-    </PreferenceCategory>
+    </PreferenceScreen>
 
-    <PreferenceCategory android:key="pref_about" android:title="@string/pref_about">
+    <PreferenceScreen android:key="pref_about" android:title="@string/pref_about">
         <Preference android:key="pref_ver" android:title="@string/pref_ver">
             <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/osfans/trime/releases" />
@@ -80,6 +76,6 @@
             <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/osfans/trime/blob/develop/README.md#鳴謝credits" />
         </Preference>
-    </PreferenceCategory>
+    </PreferenceScreen>
 
 </PreferenceScreen>
