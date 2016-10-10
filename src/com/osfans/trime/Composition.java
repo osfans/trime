@@ -52,7 +52,7 @@ public class Composition extends TextView {
   private int composition_pos[] = new int[2];
   private int max_length, sticky_lines;
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
-  private boolean candidate_use_cursor = true;
+  private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
   private List<Map<String,Object>> components;
   private SpannableStringBuilder ss;
@@ -188,6 +188,7 @@ public class Composition extends TextView {
     components = (List<Map<String,Object>>)config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
+    show_comment = config.getBoolean("show_comment");
     text_size = config.getPixel("text_size");
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");
@@ -337,7 +338,7 @@ public class Composition extends TextView {
       ss.setSpan(new CandidateSpan(i, tfCandidate, hilited_candidate_text_color, hilited_candidate_back_color, candidate_text_color), start, end, span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
       String comment = o.comment;
-      if (!Function.isEmpty(comment_format) && !Function.isEmpty(comment)) {
+      if (show_comment && !Function.isEmpty(comment_format) && !Function.isEmpty(comment)) {
         comment = String.format(comment_format, comment);
         start = ss.length();
         ss.append(comment);
