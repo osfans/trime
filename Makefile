@@ -49,7 +49,7 @@ android:
 	mkdir -p build-android
 	(cd build-android; cmake \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=../android-cmake/android.toolchain.cmake \
+		-DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
 		-DLIBRARY_OUTPUT_PATH_ROOT=.. \
 		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang \
 		-DANDROID_ABI=armeabi \

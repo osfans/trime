@@ -29,6 +29,3 @@
 	path = docs
 	url = github.com:osfans/trime.git
 	branch = gh-pages
-[submodule "android-cmake"]
-	path = android-cmake
-	url = git@github.com:chenxiaolong/android-cmake.git
