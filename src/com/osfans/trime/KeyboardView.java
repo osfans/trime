@@ -689,9 +689,9 @@ public class KeyboardView extends View implements View.OnClickListener {
                 continue;
             }
             int[] drawableState = key.getCurrentDrawableState();
-            keyBackground = new PaintDrawable(mKeyBackColor.getColorForState(drawableState, 0));
+            keyBackground = new PaintDrawable((key.key_back_color != null && drawableState == Key.KEY_STATE_NORMAL)? key.key_back_color : mKeyBackColor.getColorForState(drawableState, 0));
             ((PaintDrawable)keyBackground).setCornerRadius(mRoundCorner);
-            mPaint.setColor(mKeyTextColor.getColorForState(drawableState, 0));
+            mPaint.setColor((key.key_text_color != null && drawableState == Key.KEY_STATE_NORMAL) ? key.key_text_color : mKeyTextColor.getColorForState(drawableState, 0));
             mPaintSymbol.setColor(key.pressed ? hilited_key_symbol_color: key_symbol_color);
 
             // Switch the character to uppercase if shift is pressed

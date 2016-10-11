@@ -44,7 +44,7 @@ style:
     background: background.png #顏色或者backgrounds目錄下的圖片文件名
     movable: once #是否可移動窗口，或僅移動一次 true|false|once
   window: #懸浮窗口組件
-    - {start: "", move: '✦ ', end: ""}
+    - {start: "", move: 'ㄓ ', end: ""}
     - {start: "", composition: "%s", end: "", letter_spacing: 0.3} #letter_spacing需要Android5.0
     - {start: "\n", label: "%s.", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型

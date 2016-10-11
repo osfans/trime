@@ -47,6 +47,7 @@ public class Key {
   public int width, height, gap, edgeFlags;
   public int row, column;
   public String label, hint;
+  public Integer key_text_color, key_back_color;
 
   public int x, y;
   public boolean pressed, on;
@@ -98,6 +99,23 @@ public class Key {
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     else if(composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.mShiftKey = this;
+    Config config = Config.get();
+    if (mk.containsKey("key_text_color")) {
+      Object o = mk.get("key_text_color");
+      if (o instanceof Integer) key_text_color = (Integer) o;
+      else {
+        s = o.toString();
+        key_text_color = config.getColor(s);
+      }
+    }
+    if (mk.containsKey("key_back_color")) {
+      Object o = mk.get("key_back_color");
+      if (o instanceof Integer) key_back_color = (Integer) o;
+      else {
+        s = o.toString();
+        key_back_color = config.getColor(s);
+      }
+    }
   }
   
   public final static int[] KEY_STATE_NORMAL_ON = { 

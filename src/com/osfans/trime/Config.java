@@ -284,7 +284,7 @@ public class Config {
     return (o == null) ? "" : o.toString();
   }
 
-  public int getColor(String key) {
+  public Integer getColor(String key) {
     String scheme = getString("color_scheme");
     Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
     Object o = map.get(key);
@@ -298,7 +298,8 @@ public class Config {
       o = map.get(key);
     }
     if (o instanceof Integer) return ((Integer)o).intValue();
-    return ((Long)o).intValue();
+    if (o instanceof Float || o instanceof Double) return ((Long)o).intValue();
+    return null;
   }
 
   public void setColor(String color) {
