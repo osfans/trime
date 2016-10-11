@@ -294,7 +294,11 @@ public class Keyboard {
                             key.squaredDistanceFrom(x + mCellWidth - 1, y) < mProximityThreshold ||
                             key.squaredDistanceFrom(x + mCellWidth - 1, y + mCellHeight - 1) 
                                 < mProximityThreshold ||
-                            key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold) {
+                            key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold ||
+                            key.isInside(x, y) ||
+                            key.isInside(x + mCellWidth - 1, y) ||
+                            key.isInside(x + mCellWidth - 1, y + mCellHeight - 1) ||
+                            key.isInside(x, y + mCellHeight - 1)) {
                         indices[count++] = i;
                     }
                 }
