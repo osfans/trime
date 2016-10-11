@@ -50,11 +50,10 @@ android:
 	(cd build-android; cmake \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
-		-DLIBRARY_OUTPUT_PATH_ROOT=.. \
-		-DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang \
-		-DANDROID_ABI=armeabi \
 		-DANDROID_STL=c++_static \
-		-DANDROID_NATIVE_API_LEVEL=14 ../jni)
+		-DANDROID_PLATFORM=android-14 \
+		-DANDROID_ABI=armeabi \
+		-DLIBRARY_OUTPUT_PATH=../libs/armeabi/ ../jni)
 	${MAKE} -C build-android rime_jni
 
 linux:

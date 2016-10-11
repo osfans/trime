@@ -34,3 +34,7 @@ proguard/
 
 # Log Files
 *.log
+
+# Make
+build*/
+*/*/*.a
