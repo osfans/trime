@@ -99,7 +99,7 @@ public class Keyboard {
     private int[][] mGridNeighbors;
     private int mProximityThreshold;
     /** Number of key widths from current touch point to search for nearest keys. */
-    private static float SEARCH_DISTANCE = 1.4f;
+    public static float SEARCH_DISTANCE = 1.4f;
 
     /**
      * Creates a keyboard from the given xml key layout file.
@@ -338,6 +338,7 @@ public class Keyboard {
 
     int x = mDefaultHorizontalGap/2;
     int y = mDefaultVerticalGap;
+    int row = 0;
     int column = 0;
     mTotalWidth = 0;
 
@@ -351,6 +352,8 @@ public class Keyboard {
         x = gap/2;
         y += mDefaultVerticalGap + rowHeight;
         column = 0;
+        row++;
+        if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
       }
       if (column == 0) {
         double heightK = Key.getDouble(mk, "height", 0);
@@ -372,6 +375,8 @@ public class Keyboard {
       key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap/2: w; //右側不留白
       key.height = rowHeight;
       key.gap = gap;
+      key.row = row;
+      key.column = column;
       column++;
       x += key.width + key.gap;
       mKeys.add(key);
@@ -379,7 +384,13 @@ public class Keyboard {
           mTotalWidth = x;
       }
     }
+    if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
     mTotalHeight = y + rowHeight + mDefaultVerticalGap;
+    for (Key key: mKeys) {
+      if (key.column == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
+      if (key.row == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
+      if (key.row == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
+    }
   }
 
   public boolean getAsciiMode() {

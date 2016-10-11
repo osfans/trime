@@ -45,6 +45,7 @@ public class Key {
   public Event[] events = new Event[EVENT_NUM];
 
   public int width, height, gap, edgeFlags;
+  public int row, column;
   public String label, hint;
 
   public int x, y;

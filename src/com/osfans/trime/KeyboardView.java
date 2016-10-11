@@ -620,7 +620,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             dimensionSum += Math.min(key.width, key.height) + key.gap;
         }
         if (dimensionSum < 0 || length == 0) return;
-        mProximityThreshold = (int) (dimensionSum * 1.4f / length);
+        mProximityThreshold = (int) (dimensionSum * Keyboard.SEARCH_DISTANCE / length);
         mProximityThreshold *= mProximityThreshold; // Square it
     }
 
