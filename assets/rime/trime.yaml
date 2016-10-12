@@ -761,7 +761,7 @@ preset_keys:
   Return: {label: Enter, send: Return}
   Hide: {label: 隱藏, send: BACK}
   BackSpace: {label: 退格, repeatable: true, send: BackSpace}
-  space: {repeatable: true, functional: false, send: space}
+  space: {repeatable: false, functional: false, send: space}
   Clear: {label: 清除, send: Clear}
   Escape: {label: Esc, send: Escape}
   Home: {label: 行首, send: Home}
