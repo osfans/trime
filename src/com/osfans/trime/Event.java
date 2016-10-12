@@ -60,8 +60,12 @@ public class Event {
       parseLabel();
     } else {
       text = s;
-      label = s;
+      label = containsMarker(s) ? s.replace("|", "") : s;
     }
+  }
+
+  public static boolean containsMarker(String s) {
+    return (!Function.isEmpty(s)) && s.length() > 1 && s.contains("|");
   }
 
   private void parseSend(String s) {

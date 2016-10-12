@@ -619,7 +619,13 @@ public class Trime extends InputMethodService implements
   public void onEvent(Event event) {
     String s = event.getText();
     if (!Function.isEmpty(s)) {
+      int left_count = 0; //左移光標
+      if (Event.containsMarker(s)) {
+        left_count = s.length() -1 - s.indexOf("|");
+        s = s.replace("|", "");
+      }
       onText(s);
+      if (left_count > 0) onKeyMultiple(KeyEvent.KEYCODE_DPAD_LEFT, left_count);
     } else if (event.code > 0) {
       int code = event.code;
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
@@ -674,6 +680,11 @@ public class Trime extends InputMethodService implements
       Log.info("send Key");
       sendDownUpKeyEvents(primaryCode);
     }
+  }
+
+  public boolean onKeyMultiple(int keyCode, int count) {
+    while (count-- > 0) onKey(keyCode, 0);
+    return true;
   }
 
   public void onText(CharSequence text) { //軟鍵盤

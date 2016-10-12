@@ -940,8 +940,8 @@ preset_keyboards:
     - {click: 'd', long_click: '-', swipe_down: '_'}
     - {click: 'f', long_click: '+', swipe_down: '='}
     - {click: 'g', long_click: '\', swipe_down: '|'}
-    - {click: 'h', long_click: '[]', swipe_left: '[', swipe_right: ']'}
-    - {click: 'j', long_click: '{}', swipe_left: '{', swipe_right: '}'}
+    - {click: 'h', long_click: '[|]', swipe_left: '[', swipe_right: ']'}
+    - {click: 'j', long_click: '{|}', swipe_left: '{', swipe_right: '}'}
     - {click: 'k', long_click: '"'}
     - {click: 'l', long_click: "'"}
     - {click: ';', long_click: ':'}
@@ -984,8 +984,8 @@ preset_keyboards:
     - {click: 'd', long_click: '-', swipe_down: '_'}
     - {click: 'f', long_click: '+', swipe_down: '='}
     - {click: 'g', long_click: '\', swipe_down: '|'}
-    - {click: 'h', long_click: '[]', swipe_left: '[', swipe_right: ']'}
-    - {click: 'j', long_click: '{}', swipe_left: '{', swipe_right: '}'}
+    - {click: 'h', long_click: '[|]', swipe_left: '[', swipe_right: ']'}
+    - {click: 'j', long_click: '{|}', swipe_left: '{', swipe_right: '}'}
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
@@ -1292,7 +1292,7 @@ preset_keyboards:
     - {click: '2'}
     - {click: '3'}
     - {click: ',', label: '，'}
-    - {click: '"', label: '“”'}
+    - {click: '"', label: '“|”'}
     - {click: ':', label: '：'}
     - {click: '0'}
     - {click: '.', label: '。'}
