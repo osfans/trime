@@ -152,8 +152,8 @@ public class Composition extends TextView {
     if (action == MotionEvent.ACTION_UP) {
       int n = getOffsetForPosition(event.getX(), event.getY());
       if (composition_pos[0] <= n && n <= composition_pos[1]) {
-        String s = getText().toString().substring(composition_pos[0], n).replace(" ", "").replace("‸", "");
-        n = s.length();
+        String s = getText().toString().substring(n, composition_pos[1]).replace(" ", "").replace("‸", "");
+        n = Rime.RimeGetInput().length() - s.length(); //從右側定位
         Rime.RimeSetCaretPos(n);
         Trime.getService().updateComposing();
         return true;
