@@ -467,6 +467,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         // Remove any pending messages
         removeMessages();
+        mRepeatKeyIndex = NOT_A_KEY;
         mKeyboard = keyboard;
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);
