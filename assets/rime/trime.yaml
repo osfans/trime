@@ -72,6 +72,7 @@ style:
   repeat_interval: 50 #空白鍵、刪除鍵等自動重複間隔：50毫秒即1秒20次
   repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
   reset_ascii_mode: false #顯示鍵盤時重置爲中文狀態
+  round_corner: 8 #按鍵圓角半徑
   shadow_radius: 0.0 #按鍵陰影半徑
   show_candidate: true #顯示候選區
   show_comment: true #顯示提示區
