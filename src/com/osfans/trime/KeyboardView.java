@@ -284,6 +284,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mSymbolSize = config.getPixel("symbol_text_size");
         mKeyTextSize = config.getPixel("key_text_size");
         mVerticalCorrection = config.getPixel("vertical_correction");
+        setProximityCorrectionEnabled(config.getBoolean("proximity_correction"));
         mPreviewOffset = config.getPixel("preview_offset");
         mPreviewHeight = config.getPixel("preview_height");
         mLabelTextSize = config.getPixel("key_long_text_size");

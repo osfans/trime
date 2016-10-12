@@ -68,6 +68,7 @@ style:
   preview_height: 60 #按鍵提示高度
   preview_offset: -12 #按鍵提示縱向偏移
   preview_text_size: 40 #按鍵提示字號
+  proximity_correction: true #按鍵糾錯
   repeat_interval: 50 #空白鍵、刪除鍵等自動重複間隔：50毫秒即1秒20次
   repeat_start_delay: 400 #按鍵超過400毫秒後開始重複按鍵
   reset_ascii_mode: false #顯示鍵盤時重置爲中文狀態
