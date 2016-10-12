@@ -248,20 +248,17 @@ public class Trime extends InputMethodService implements
   }
 
   private void loadBackground() {
+      GradientDrawable gd = new GradientDrawable();
+      gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
+      gd.setCornerRadius(mConfig.getFloat("layout/round_corner"));
       Drawable d = mConfig.getDrawable("layout/background");
       if (d == null) {
-        GradientDrawable gd = new GradientDrawable();
         gd.setColor(mConfig.getColor("text_back_color"));
         d = gd;
-      }
-      if (d instanceof GradientDrawable) {
-        ((GradientDrawable)d).setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
-        ((GradientDrawable)d).setCornerRadius(mConfig.getPixel("layout/round_corner"));
       }
       if (mConfig.getInt("layout/alpha") > 0) d.setAlpha(mConfig.getInt("layout/alpha"));
       mFloatingWindow.setBackgroundDrawable(d);
       if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
-
       mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
   }
 

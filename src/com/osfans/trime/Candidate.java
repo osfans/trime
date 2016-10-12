@@ -67,7 +67,7 @@ public class Candidate extends View {
   public void reset() {
     Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
-    ((PaintDrawable)candidateHighlight).setCornerRadius(config.getFloat("round_corner"));
+    ((PaintDrawable)candidateHighlight).setCornerRadius(config.getFloat("layout/round_corner"));
     candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
     candidate_spacing = config.getPixel("candidate_spacing");
     candidate_padding = config.getPixel("candidate_padding");

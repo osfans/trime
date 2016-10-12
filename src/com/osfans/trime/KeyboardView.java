@@ -291,7 +291,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         mBackgroundDimAmount = config.getFloat("background_dim_amount");
         mShadowRadius = config.getFloat("shadow_radius");
-        mRoundCorner = config.getFloat("round_corner");
+        mRoundCorner = config.getFloat("layout/round_corner");
 
         mKeyBackColor = new ColorStateList(Key.KEY_STATES, new int[]{
             config.getColor("hilited_on_key_back_color"),
