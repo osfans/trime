@@ -2,6 +2,8 @@
 # encoding: utf-8
 
 config_version: "3.0"
+name: 預設／default #方案名稱
+author: osfans #作者資訊
 
 style:
   background_dim_amount: 0.5

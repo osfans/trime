@@ -45,7 +45,9 @@ public class Config {
   public final static int CAND_POS_FIXED = 2;
 
   private Map<String, Object> mStyle, mDefaultStyle;
-  private static String defaultName = "trime.yaml";
+  private static String defaultName = "trime";
+  private static String defaultFile = "trime.yaml";
+  private String themeName;
   private String schema_id;
   private static String RIME = "rime";
   private static String USER_DATA_DIR = SDCARD + RIME;
@@ -58,23 +60,13 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    mDefaultStyle = (Map<String,Object>)Rime.config_get_map("trime", "style");
-    fallbackColors = (Map<String,String>)Rime.config_get_map("trime", "fallback_colors");
-    List androidKeys = Rime.config_get_list("trime", "android_keys/name");
-    Key.androidKeys = new ArrayList<String>(androidKeys.size());
-    for (Object o : androidKeys) {
-      Key.androidKeys.add(o.toString());
-    }
-    Key.presetKeys = (Map<String, Map>)Rime.config_get_map("trime", "preset_keys");
-    presetColorSchemes = Rime.config_get_map("trime", "preset_color_schemes");
-    presetKeyboards = Rime.config_get_map("trime", "preset_keyboards");
     reset();
   }
 
   public static void prepareRime(Context context) {
     boolean b = new File(USER_DATA_DIR).exists();
     if (b) {
-      copyFileOrDir(context, RIME + "/" + defaultName, false);
+      copyFileOrDir(context, RIME + "/" + defaultFile, false);
     } else {
       copyFileOrDir(context, RIME, false);
     }
@@ -159,6 +151,19 @@ public class Config {
   }
 
   public void reset() {
+    themeName = Rime.config_get_string("user", "var/previously_selected_theme");
+    String name = Rime.config_get_string(themeName, "name");
+    if (Function.isEmpty(name)) themeName = defaultName;
+    mDefaultStyle = (Map<String,Object>)Rime.config_get_map(themeName, "style");
+    fallbackColors = (Map<String,String>)Rime.config_get_map(themeName, "fallback_colors");
+    List androidKeys = Rime.config_get_list(themeName, "android_keys/name");
+    Key.androidKeys = new ArrayList<String>(androidKeys.size());
+    for (Object o : androidKeys) {
+      Key.androidKeys.add(o.toString());
+    }
+    Key.presetKeys = (Map<String, Map>)Rime.config_get_map(themeName, "preset_keys");
+    presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
+    presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");
     schema_id = Rime.getSchemaId();
     mStyle = (Map<String,Object>)Rime.schema_get_value(schema_id, "style");
   }
@@ -303,7 +308,7 @@ public class Config {
   }
 
   public void setColor(String color) {
-    Rime.customize_string("trime", "style/color_scheme", color);
+    Rime.customize_string(themeName, "style/color_scheme", color);
     Rime.deployConfigFile();
     mDefaultStyle.put("color_scheme", color);
   }
