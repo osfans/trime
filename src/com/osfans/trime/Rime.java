@@ -273,7 +273,6 @@ public class Rime
     initialize();
     check(full_check);
     set_notification_handler();
-    deployConfigFile();
     createSession();
     if (session_id == 0) {
       Log.severe( "Error creating rime session");
@@ -506,10 +505,6 @@ public class Rime
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;
-  }
-
-  public static boolean deployConfigFile() {
-    return deploy_config_file("trime.yaml", "config_version");
   }
 
   public static void check(boolean full_check) {

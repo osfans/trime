@@ -60,7 +60,7 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    reset();
+    init();
   }
 
   public static void prepareRime(Context context) {
@@ -150,10 +150,16 @@ public class Config {
     return true;
   }
 
-  public void reset() {
+  private void deployConfig() {
+    Rime.deploy_config_file(themeName + ".yaml" , "config_version");
+  }
+
+  public void init() {
     themeName = Rime.config_get_string("user", "var/previously_selected_theme");
+    if (!Function.isEmpty(themeName)) themeName += ".trime";
     String name = Rime.config_get_string(themeName, "name");
     if (Function.isEmpty(name)) themeName = defaultName;
+    deployConfig();
     mDefaultStyle = (Map<String,Object>)Rime.config_get_map(themeName, "style");
     fallbackColors = (Map<String,String>)Rime.config_get_map(themeName, "fallback_colors");
     List androidKeys = Rime.config_get_list(themeName, "android_keys/name");
@@ -164,6 +170,10 @@ public class Config {
     Key.presetKeys = (Map<String, Map>)Rime.config_get_map(themeName, "preset_keys");
     presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
     presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");
+    reset();
+  }
+
+  public void reset() {
     schema_id = Rime.getSchemaId();
     mStyle = (Map<String,Object>)Rime.schema_get_value(schema_id, "style");
   }
@@ -309,7 +319,7 @@ public class Config {
 
   public void setColor(String color) {
     Rime.customize_string(themeName, "style/color_scheme", color);
-    Rime.deployConfigFile();
+    deployConfig();
     mDefaultStyle.put("color_scheme", color);
   }
 
