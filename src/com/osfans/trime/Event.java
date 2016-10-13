@@ -47,7 +47,9 @@ public class Event {
       toggle = Function.getString(m, "toggle");
       label = Function.getString(m, "label");
       preview = Function.getString(m, "preview");
-      parseSend(Function.getString(m, "send"));
+      int[] sends = parseSend(Function.getString(m, "send"));
+      code = sends[0];
+      mask = sends[1];
       parseLabel();
       text = Function.getString(m, "text");
       if (code == 0 && Function.isEmpty(text)) text = s;
@@ -60,25 +62,32 @@ public class Event {
       parseLabel();
     } else {
       text = s;
-      label = containsMarker(s) ? s.replace("|", "") : s;
+      label = s;
+      if (containsSend(s)) {
+        if (s.contains("{}")) label = s.replace("{}", "[]");
+        label = label.replaceAll("\\{.+?\\}", "");
+        if (s.contains("{}")) label = label.replace("[]", "{}");
+      }
     }
   }
 
-  public static boolean containsMarker(String s) {
-    return (!Function.isEmpty(s)) && s.length() > 1 && s.contains("|");
+  public static boolean containsSend(String s) {
+    return (!Function.isEmpty(s)) && s.length() > 1 && s.matches(".*\\{.+\\}.*");
   }
 
-  private void parseSend(String s) {
-    if (Function.isEmpty(s)) return;
+  public static int [] parseSend(String s) {
+    int[] sends = new int[2];
+    if (Function.isEmpty(s)) return sends;
     String codes;
     if (!s.contains("+")) codes = s;
     else {
       String[] ss = s.split("\\+");
       int n = ss.length;
-      for (int i = 0; i < n - 1; i++) if (masks.containsKey(ss[i])) mask |= masks.get(ss[i]);
+      for (int i = 0; i < n - 1; i++) if (masks.containsKey(ss[i])) sends[1] |= masks.get(ss[i]);
       codes = ss[n - 1];
     }
-    code = Key.androidKeys.indexOf(codes);
+    sends[0] = Key.androidKeys.indexOf(codes);
+    return sends;
   }
 
   public String adjustCase(String s) {

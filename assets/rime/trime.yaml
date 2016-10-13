@@ -85,7 +85,7 @@ style:
   symbol_font: symbol.ttf #符號字型
   symbol_text_size: 10 #符號字號
   text_font: latin.ttf #編碼字型
-  text_height: 22 #編碼區高度
+  #text_height: 22 #編碼區高度
   text_size: 16 #編碼區字號
   vertical_correction: -10
   vertical_gap: 1 #鍵盤行距
@@ -941,8 +941,8 @@ preset_keyboards:
     - {click: 'd', long_click: '-', swipe_down: '_'}
     - {click: 'f', long_click: '+', swipe_down: '='}
     - {click: 'g', long_click: '\', swipe_down: '|'}
-    - {click: 'h', long_click: '[|]', swipe_left: '[', swipe_right: ']'}
-    - {click: 'j', long_click: '{|}', swipe_left: '{', swipe_right: '}'}
+    - {click: 'h', long_click: '[]{Left}', swipe_left: '[', swipe_right: ']'}
+    - {click: 'j', long_click: '{}{Left}', swipe_left: '{', swipe_right: '}'}
     - {click: 'k', long_click: '"'}
     - {click: 'l', long_click: "'"}
     - {click: ';', long_click: ':'}
@@ -985,8 +985,8 @@ preset_keyboards:
     - {click: 'd', long_click: '-', swipe_down: '_'}
     - {click: 'f', long_click: '+', swipe_down: '='}
     - {click: 'g', long_click: '\', swipe_down: '|'}
-    - {click: 'h', long_click: '[|]', swipe_left: '[', swipe_right: ']'}
-    - {click: 'j', long_click: '{|}', swipe_left: '{', swipe_right: '}'}
+    - {click: 'h', long_click: '[]{Left}', swipe_left: '[', swipe_right: ']'}
+    - {click: 'j', long_click: '{}{Left}', swipe_left: '{', swipe_right: '}'}
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
@@ -1293,7 +1293,7 @@ preset_keyboards:
     - {click: '2'}
     - {click: '3'}
     - {click: ',', label: '，'}
-    - {click: '"', label: '“|”'}
+    - {click: '"', label: '“”{Left}'}
     - {click: ':', label: '：'}
     - {click: '0'}
     - {click: '.', label: '。'}

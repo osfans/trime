@@ -327,7 +327,7 @@ public class Rime
 
   public static boolean onText(CharSequence text) {
     if(text == null || text.length() == 0) return false;
-    boolean b = simulate_key_sequence(session_id, text.toString());
+    boolean b = simulate_key_sequence(session_id, text.toString().replace("{}","{braceleft}{braceright}"));
     Log.info( "b="+b+",input="+text);
     getContexts();
     return b;

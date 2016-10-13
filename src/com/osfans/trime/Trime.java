@@ -619,13 +619,7 @@ public class Trime extends InputMethodService implements
   public void onEvent(Event event) {
     String s = event.getText();
     if (!Function.isEmpty(s)) {
-      int left_count = 0; //左移光標
-      if (Event.containsMarker(s)) {
-        left_count = s.length() -1 - s.indexOf("|");
-        s = s.replace("|", "");
-      }
       onText(s);
-      if (left_count > 0) onKeyMultiple(KeyEvent.KEYCODE_DPAD_LEFT, left_count);
     } else if (event.code > 0) {
       int code = event.code;
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
@@ -682,16 +676,39 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  public boolean onKeyMultiple(int keyCode, int count) {
-    while (count-- > 0) onKey(keyCode, 0);
-    return true;
+  public void commitEventText(CharSequence text) {
+    String s = text.toString();
+    if (!Event.containsSend(s)) {
+      commitText(s);
+      return;
+    } else {
+      int i = 0, n = s.length(), start = 0, end = 0;
+      start = s.indexOf("{", i);
+      end = s.indexOf("}", start);
+      while (start >= 0 && end > start) {
+        commitText(s.substring(i, start));
+        if (start + 1 == end) commitText("{}");
+        else {
+          int[] sends = Event.parseSend(s.substring(start + 1, end));
+          if (sends[0] + sends[1] > 0) onKey(sends[0], sends[1]);
+        }
+        i = end + 1;
+        start = s.indexOf("{", i);
+        end = s.indexOf("}", start);
+      }
+      if (i < n) commitText(s.substring(i, n));
+    }
   }
 
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText="+text);
     mEffect.speakKey(text);
+    String s = text.toString();
+    boolean b = s.endsWith("{Left}"); //用於前臺左移光標
+    if (b) text = s.substring(0, s.length() - "{Left}".length());
     Rime.onText(text);
-    if(!commitText() && !isComposing()) commitText(text);
+    if(!commitText() && !isComposing()) commitEventText(text);
+    if (b) onKey(KeyEvent.KEYCODE_DPAD_LEFT, 0);
     updateComposing();
   }
 
