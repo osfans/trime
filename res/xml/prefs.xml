@@ -26,6 +26,7 @@
     <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
 
     <PreferenceScreen android:key="pref_config" android:title="@string/pref_config">
+        <Preference android:key="pref_themes" android:title="@string/pref_themes"/>
         <Preference android:key="pref_schemas" android:title="@string/pref_schemas" android:summary="@string/pref_schemas_summary"/>
         <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
         <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>

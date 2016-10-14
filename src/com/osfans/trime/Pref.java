@@ -145,6 +145,9 @@ public class Pref extends PreferenceActivity {
       case "pref_select": //切換
         ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         return true;
+      case "pref_themes": //主題
+        new ThemeDlg(this).show();
+        return true;
       case "pref_colors": //配色
         new ColorDialog(this).show();
         return true;

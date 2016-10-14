@@ -60,9 +60,14 @@ public class Config {
 
   public Config(Context context) {
     self = this;
+    themeName = Rime.config_get_string("user", "var/previously_selected_theme");
+    if (!Function.isEmpty(themeName)) themeName += ".trime";
     init();
   }
 
+  public String getTheme() {
+    return themeName;
+  }
   public static void prepareRime(Context context) {
     boolean b = new File(USER_DATA_DIR).exists();
     if (b) {
@@ -71,6 +76,29 @@ public class Config {
       copyFileOrDir(context, RIME, false);
     }
     Rime.get(!b);
+  }
+
+  public static String[] getThemeKeys() {
+    File d = new File(USER_DATA_DIR);
+    FilenameFilter trimeFilter = new FilenameFilter(){
+      @Override
+      public boolean accept(File dir, String filename) {
+        return filename.endsWith("trime.yaml");
+      }
+    };
+    return d.list(trimeFilter);
+  }
+
+  public static String[] getThemeNames(String[] keys) {
+    if (keys == null) return null;
+    int n = keys.length;
+    String[] names = new String[n];
+    for (int i = 0; i < n; i++) {
+      String k = keys[i].replace(".yaml","");
+      String s = Rime.config_get_string(k, "name");
+      names[i] = Function.isEmpty(s) ? k : (k+".yaml: " + s);
+    }
+    return names;
   }
 
   public static boolean deployOpencc() {
@@ -154,9 +182,13 @@ public class Config {
     Rime.deploy_config_file(themeName + ".yaml" , "config_version");
   }
 
+  public void setTheme(String theme) {
+    themeName = theme;
+    Rime.config_set_string("user", "var/previously_selected_theme", themeName);    
+    init();
+  }
+
   public void init() {
-    themeName = Rime.config_get_string("user", "var/previously_selected_theme");
-    if (!Function.isEmpty(themeName)) themeName += ".trime";
     String name = Rime.config_get_string(themeName, "name");
     if (Function.isEmpty(name)) themeName = defaultName;
     deployConfig();
