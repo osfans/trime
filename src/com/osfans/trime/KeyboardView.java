@@ -715,10 +715,10 @@ public class KeyboardView extends View implements View.OnClickListener {
             
             if (!Function.isEmpty(label)) {
                 // For characters, use large font. For labels like "Done", use small font.
-                if (label.length() > 1) {
-                    paint.setTextSize(mLabelTextSize);
+                if (key.key_text_size != null) {
+                  paint.setTextSize(key.key_text_size);
                 } else {
-                    paint.setTextSize(mKeyTextSize);
+                  paint.setTextSize(label.length() > 1 ? mLabelTextSize: mKeyTextSize);
                 }
                 // Draw a drop shadow for the text
                 paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
@@ -729,6 +729,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     paint);
 
                 if (key.getLongClick() != null) {
+                    mPaintSymbol.setTextSize(key.symbol_text_size != null ? key.symbol_text_size : mSymbolSize);
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
                     canvas.drawText(key.getSymbolLabel(), left, symbolTop + top, mPaintSymbol);
                 }

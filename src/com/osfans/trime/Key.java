@@ -49,6 +49,7 @@ public class Key {
   public String label, hint;
   public Integer key_text_color, key_back_color, key_symbol_color;
   public Integer hilited_key_text_color, hilited_key_back_color, hilited_key_symbol_color;
+  public Integer key_text_size, symbol_text_size;
 
   public int x, y;
   public boolean pressed, on;
@@ -100,12 +101,20 @@ public class Key {
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     else if(composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.mShiftKey = this;
+    key_text_size = getPixel(mk, "key_text_size");
+    symbol_text_size = getPixel(mk, "symbol_text_size");
     key_text_color = getColor(mk, "key_text_color");
     hilited_key_text_color = getColor(mk, "hilited_key_text_color");
     key_back_color = getColor(mk, "key_back_color");
     hilited_key_text_color = getColor(mk, "hilited_key_text_color");
     key_symbol_color = getColor(mk, "key_symbol_color");
     hilited_key_symbol_color = getColor(mk, "hilited_key_symbol_color");
+  }
+
+  private Integer getPixel(Map<String,Object> mk, String k) {
+    Object o = getValue(mk, k, null);
+    if (o instanceof Integer) return Config.getPixel(((Integer)o).floatValue());
+    return null;
   }
 
   private Integer getColor(Map<String,Object> mk, String k){

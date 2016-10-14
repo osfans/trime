@@ -321,8 +321,12 @@ public class Config {
     return (int)getDouble(key);
   }
 
+  public static int getPixel(float f) {
+    return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, f, Resources.getSystem().getDisplayMetrics());
+  }
+
   public int getPixel(String key) {
-    return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, getFloat(key), Resources.getSystem().getDisplayMetrics());
+    return getPixel(getFloat(key));
   }
 
   public String getString(String key) {
