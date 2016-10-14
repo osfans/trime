@@ -334,7 +334,7 @@ public class Config {
     return (o == null) ? "" : o.toString();
   }
 
-  public Integer getColor(String key) {
+  public Integer getCurrentColor(String key) {
     String scheme = getString("color_scheme");
     Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
     Object o = map.get(key);
@@ -343,10 +343,19 @@ public class Config {
       fallbackKey = fallbackColors.get(fallbackKey);
       o = map.get(fallbackKey);
     }
+
+    if (o instanceof Integer) return ((Integer)o).intValue();
+    if (o instanceof Float || o instanceof Double) return ((Long)o).intValue();
+    return null;
+  }
+
+  public Integer getColor(String key) {
+    Object o = getCurrentColor(key);
+
     if (o == null) {
-      map = (Map<String, Object>)presetColorSchemes.get("default");
-      o = map.get(key);
+      o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
     }
+
     if (o instanceof Integer) return ((Integer)o).intValue();
     if (o instanceof Float || o instanceof Double) return ((Long)o).intValue();
     return null;

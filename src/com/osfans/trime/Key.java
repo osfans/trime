@@ -124,7 +124,7 @@ public class Key {
       Object o = mk.get(k);
       if (o instanceof Integer) color = (Integer) o;
       else {
-        color = config.getColor(o.toString());
+        color = config.getCurrentColor(o.toString());
       }
     }
     return color;
