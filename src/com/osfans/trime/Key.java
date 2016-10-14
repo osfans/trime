@@ -47,7 +47,8 @@ public class Key {
   public int width, height, gap, edgeFlags;
   public int row, column;
   public String label, hint;
-  public Integer key_text_color, key_back_color;
+  public Integer key_text_color, key_back_color, key_symbol_color;
+  public Integer hilited_key_text_color, hilited_key_back_color, hilited_key_symbol_color;
 
   public int x, y;
   public boolean pressed, on;
@@ -99,25 +100,27 @@ public class Key {
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     else if(composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.mShiftKey = this;
-    Config config = Config.get();
-    if (mk.containsKey("key_text_color")) {
-      Object o = mk.get("key_text_color");
-      if (o instanceof Integer) key_text_color = (Integer) o;
-      else {
-        s = o.toString();
-        key_text_color = config.getColor(s);
-      }
-    }
-    if (mk.containsKey("key_back_color")) {
-      Object o = mk.get("key_back_color");
-      if (o instanceof Integer) key_back_color = (Integer) o;
-      else {
-        s = o.toString();
-        key_back_color = config.getColor(s);
-      }
-    }
+    key_text_color = getColor(mk, "key_text_color");
+    hilited_key_text_color = getColor(mk, "hilited_key_text_color");
+    key_back_color = getColor(mk, "key_back_color");
+    hilited_key_text_color = getColor(mk, "hilited_key_text_color");
+    key_symbol_color = getColor(mk, "key_symbol_color");
+    hilited_key_symbol_color = getColor(mk, "hilited_key_symbol_color");
   }
-  
+
+  private Integer getColor(Map<String,Object> mk, String k){
+    Config config = Config.get();
+    Integer color = null;
+    if (mk.containsKey(k)) {
+      Object o = mk.get(k);
+      if (o instanceof Integer) color = (Integer) o;
+      else {
+        color = config.getColor(o.toString());
+      }
+    }
+    return color;
+  }
+
   public final static int[] KEY_STATE_NORMAL_ON = { 
       android.R.attr.state_checkable, 
       android.R.attr.state_checked
@@ -153,6 +156,24 @@ public class Key {
       KEY_STATE_PRESSED,
       KEY_STATE_NORMAL
   };
+
+  public Integer getBackColorForState(int[] drawableState) {
+    if (drawableState == KEY_STATE_NORMAL) return key_back_color;
+    if (drawableState == KEY_STATE_PRESSED) return hilited_key_back_color;
+    return null;
+  }
+
+  public Integer getTextColorForState(int[] drawableState) {
+    if (drawableState == KEY_STATE_NORMAL) return key_text_color;
+    if (drawableState == KEY_STATE_PRESSED) return hilited_key_text_color;
+    return null;
+  }
+
+  public Integer getSymbolColorForState(int[] drawableState) {
+    if (drawableState == KEY_STATE_NORMAL) return key_symbol_color;
+    if (drawableState == KEY_STATE_PRESSED) return hilited_key_symbol_color;
+    return null;
+  }
 
     /**
      * Informs the key that it has been pressed, in case it needs to change its appearance or
