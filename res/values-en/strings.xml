@@ -44,12 +44,11 @@
     <string name="pref_select">Select</string>
     <string name="pref_select_summary">Select TRIME</string>
     <string name="pref_themes">Themes</string>
+    <string name="pref_themes_summary">Select Desired Theme</string>
     <string name="pref_schemas">Schemas</string>
-    <string name="pref_schemas_summary">Select Some from Installed Schemas
-</string>
+    <string name="pref_schemas_summary">Select Some from Installed Schemas</string>
     <string name="pref_colors">Colors</string>
-    <string name="pref_colors_summary">Select Desired Theme for Keyboard
-</string>
+    <string name="pref_colors_summary">Select Desired Color for Keyboard</string>
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in /sdcard/rime</string>
 

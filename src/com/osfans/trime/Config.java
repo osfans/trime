@@ -184,7 +184,7 @@ public class Config {
 
   public void setTheme(String theme) {
     themeName = theme;
-    Rime.config_set_string("user", "var/previously_selected_theme", themeName);    
+    Rime.config_set_string("user", "var/previously_selected_theme", themeName.replace(".trime", ""));
     init();
   }
 

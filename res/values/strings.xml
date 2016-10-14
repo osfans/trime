@@ -44,6 +44,7 @@
     <string name="pref_select">選取</string>
     <string name="pref_select_summary">選取同文輸入法平臺</string>
     <string name="pref_themes">主題</string>
+    <string name="pref_themes_summary">選取想要的主題</string>
     <string name="pref_schemas">方案</string>
     <string name="pref_schemas_summary">從已安裝的方案中選擇要使用的方案</string>
     <string name="pref_colors">配色</string>

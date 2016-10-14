@@ -649,8 +649,21 @@ public class Trime extends InputMethodService implements
         }
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
         new Speech(this).start();
-      } else if (code == KeyEvent.KEYCODE_SETTINGS) { //全局設定
-        Function.showPrefDialog(this);
+      } else if (code == KeyEvent.KEYCODE_SETTINGS) { //設定
+        switch (event.option) {
+          case "theme":
+            showThemeDialog();
+            break;
+          case "color":
+            showColorDialog();
+            break;
+          case "schema":
+            showSchemaDialog();
+            break;
+          default:
+            Function.showPrefDialog(this);
+            break;
+        }
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
         showColorDialog();
       } else {
@@ -811,6 +824,12 @@ public class Trime extends InputMethodService implements
   /** 彈出{@link SchemaDialog 輸入法方案對話框} */
   private void showSchemaDialog() {
     AlertDialog dialog = new SchemaDialog(this).getDialog();
+    showDialog(dialog);
+  }
+
+  /** 彈出{@link ThemeDialog 配色對話框} */
+  private void showThemeDialog() {
+    AlertDialog dialog = new ThemeDlg(this).getDialog();
     showDialog(dialog);
   }
 

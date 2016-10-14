@@ -807,6 +807,9 @@ preset_keys:
   Info: {label: 關於, send: INFO}
   Menu: {label: 選單, send: Menu}
   Settings: {label: 設定, send: SETTINGS}
+  Color_settings: {label: 配色, send: SETTINGS, option: "color"}
+  Theme_settings: {label: 主題, send: SETTINGS, option: "theme"}
+  Schema_settings: {label: 方案, send: SETTINGS, option: "schema"}
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
   Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"}
