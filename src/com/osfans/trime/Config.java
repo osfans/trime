@@ -94,9 +94,8 @@ public class Config {
     int n = keys.length;
     String[] names = new String[n];
     for (int i = 0; i < n; i++) {
-      String k = keys[i].replace(".yaml","");
-      String s = Rime.config_get_string(k, "name");
-      names[i] = Function.isEmpty(s) ? k : (k+".yaml: " + s);
+      String k = keys[i].replace(".trime.yaml","").replace(".yaml","");
+      names[i] = k;
     }
     return names;
   }
@@ -189,7 +188,7 @@ public class Config {
   }
 
   public void init() {
-    String name = Rime.config_get_string(themeName, "name");
+    String name = Rime.config_get_string(themeName, "config_version");
     if (Function.isEmpty(name)) themeName = defaultName;
     deployConfig();
     mDefaultStyle = (Map<String,Object>)Rime.config_get_map(themeName, "style");
