@@ -106,7 +106,7 @@ public class Key {
     key_text_color = getColor(mk, "key_text_color");
     hilited_key_text_color = getColor(mk, "hilited_key_text_color");
     key_back_color = getColor(mk, "key_back_color");
-    hilited_key_text_color = getColor(mk, "hilited_key_text_color");
+    hilited_key_back_color = getColor(mk, "hilited_key_back_color");
     key_symbol_color = getColor(mk, "key_symbol_color");
     hilited_key_symbol_color = getColor(mk, "hilited_key_symbol_color");
   }
