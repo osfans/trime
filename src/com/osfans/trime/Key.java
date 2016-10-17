@@ -50,6 +50,7 @@ public class Key {
   public Integer key_text_color, key_back_color, key_symbol_color;
   public Integer hilited_key_text_color, hilited_key_back_color, hilited_key_symbol_color;
   public Integer key_text_size, symbol_text_size;
+  public Float round_corner;
 
   public int x, y;
   public boolean pressed, on;
@@ -109,6 +110,7 @@ public class Key {
     hilited_key_back_color = getColor(mk, "hilited_key_back_color");
     key_symbol_color = getColor(mk, "key_symbol_color");
     hilited_key_symbol_color = getColor(mk, "hilited_key_symbol_color");
+    round_corner = getFloat(mk, "round_corner");
   }
 
   private Integer getPixel(Map<String,Object> mk, String k) {
@@ -280,6 +282,14 @@ public class Key {
 
   public static Object getValue(Map m, String k, Object o) {
     return m.containsKey(k) ? m.get(k) : o;
+  }
+
+  public static Float getFloat(Map m, String k) {
+    Object o = getValue(m, k, null);
+    if (o instanceof Integer) return ((Integer)o).floatValue();
+    else if (o instanceof Float) return ((Float)o);
+    else if (o instanceof Double) return ((Double)o).floatValue();
+    return null;
   }
 
   public static double getDouble(Map m, String k, Object i) {

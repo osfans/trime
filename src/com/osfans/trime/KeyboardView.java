@@ -693,7 +693,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             int[] drawableState = key.getCurrentDrawableState();
             Integer color = key.getBackColorForState(drawableState);
             keyBackground = new PaintDrawable(color != null ? color : mKeyBackColor.getColorForState(drawableState, 0));
-            ((PaintDrawable)keyBackground).setCornerRadius(mRoundCorner);
+            ((PaintDrawable)keyBackground).setCornerRadius(key.round_corner != null ? key.round_corner : mRoundCorner);
             color = key.getTextColorForState(drawableState);
             mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
             color = key.getSymbolColorForState(drawableState);
