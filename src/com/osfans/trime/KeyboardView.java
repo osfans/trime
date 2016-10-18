@@ -782,10 +782,9 @@ public class KeyboardView extends View implements View.OnClickListener {
                 primaryIndex = nearestKeyIndices[i];
             }
 
-            if (((mProximityCorrectOn 
+            if ((mProximityCorrectOn 
                     && (dist = key.squaredDistanceFrom(x, y)) < mProximityThreshold) 
-                    || isInside)
-                    && key.getCode() > 32) {
+                    || isInside) {
                 // Find insertion point
                 final int nCodes = 1;
                 if (dist < closestKeyDist) {
