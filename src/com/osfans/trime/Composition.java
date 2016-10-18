@@ -412,6 +412,7 @@ public class Composition extends TextView {
     if (r == null) return 0;
     String s = r.getText();
     if (Function.isEmpty(s)) return 0;
+    setSingleLine(true); //設置單行
     ss = new SpannableStringBuilder();
     int i = 0;
     for (Map<String,Object> m: components) {
@@ -420,6 +421,7 @@ public class Composition extends TextView {
       else if (m.containsKey("click"))appendButton(m);
       else if (m.containsKey("move"))appendMove(m);
     }
+    if (i > 0 || ss.toString().contains("\n")) setSingleLine(false); //設置單行
     setText(ss);
     setMovementMethod(LinkMovementMethod.getInstance());
     return i;
