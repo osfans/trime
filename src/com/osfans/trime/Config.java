@@ -357,7 +357,7 @@ public class Config {
     }
 
     if (o instanceof Integer) return ((Integer)o).intValue();
-    if (o instanceof Float || o instanceof Double) return ((Long)o).intValue();
+    if (o instanceof Float || o instanceof Double || o instanceof Long) return ((Long)o).intValue();
     return null;
   }
 
@@ -394,20 +394,55 @@ public class Config {
     return Typeface.DEFAULT;
   }
 
-  public Drawable getDrawable(String key){
-    Object o = getValue(key);
-    if (o != null) {
-      if (o instanceof Integer) {
-        Integer color = ((Integer)o).intValue();
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(color);
-        return gd;
-      }
-      String name = getString(key);
+  public Drawable getColorDrawable(String key) {
+    String scheme = getString("color_scheme");
+    Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
+    Object o = map.get(key);
+    String fallbackKey = key;
+    while (o == null && fallbackColors.containsKey(fallbackKey)) {
+      fallbackKey = fallbackColors.get(fallbackKey);
+      o = map.get(fallbackKey);
+    }
+    if (o == null) {
+      o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
+    }
+    Integer color = null;
+    if (o instanceof Integer) color = ((Integer)o).intValue();
+    else if (o instanceof Float || o instanceof Double || o instanceof Long) color = ((Long)o).intValue();
+    else if (o instanceof String) {
+      String name = o.toString();
       name = USER_DATA_DIR + "/backgrounds/" + name;
       File f = new File(name);
       if (f.exists()) {
         return new BitmapDrawable(BitmapFactory.decodeFile(name));
+      }
+    }
+    if (color != null) {
+      GradientDrawable gd = new GradientDrawable();
+      gd.setColor(color);
+      return gd;
+    }
+    return null;
+  }
+
+  public Drawable getDrawable(String key){
+    Object o = getValue(key);
+    if (o != null) {
+      Integer color = null;
+      if (o instanceof Integer) color = ((Integer)o).intValue();
+      else if (o instanceof Float || o instanceof Double || o instanceof Long) color = ((Long)o).intValue();
+      else if (o instanceof String) {
+        String name = o.toString();
+        name = USER_DATA_DIR + "/backgrounds/" + name;
+        File f = new File(name);
+        if (f.exists()) {
+          return new BitmapDrawable(BitmapFactory.decodeFile(name));
+        }
+      }
+      if (color != null) {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(color);
+        return gd;
       }
     }
     return null;
