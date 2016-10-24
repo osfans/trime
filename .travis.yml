@@ -11,8 +11,7 @@ android:
   components:
     - tools # to get the new `repository-11.xml`
     - tools # to install Android SDK tools 25.1.x (x = 6 right now)
-    - build-tools-24.0.2
-    - android-24
+    - android-25
 deploy:
   provider: releases
   prerelease: true
