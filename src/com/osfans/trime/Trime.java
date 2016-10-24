@@ -80,6 +80,7 @@ public class Trime extends InputMethodService implements
   private boolean mTempAsciiMode; //臨時中英文狀態
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
+  private String auto_caps; //句首自動大寫
   private String soft_cursor = "soft_cursor"; //軟光標
   private String horizontal = "_horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
@@ -184,6 +185,7 @@ public class Trime extends InputMethodService implements
     min_length = mConfig.getInt("layout/min_length");
     display_tray_icon = mConfig.getBoolean("display_tray_icon");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
+    auto_caps = mConfig.getString("auto_caps");
   }
 
   @Override
@@ -350,7 +352,7 @@ public class Trime extends InputMethodService implements
       escape();
     }
     // Update the caps-lock status for the current cursor position.
-    //updateCursorCapsToInputView();
+    updateCursorCapsToInputView();
   }
 
   @Override
@@ -468,7 +470,23 @@ public class Trime extends InputMethodService implements
       // Bind the selected keyboard to the input view.
       Keyboard sk = (Keyboard)mKeyboardSwitch.getCurrentKeyboard();
       mKeyboardView.setKeyboard(sk);
-      //updateCursorCapsToInputView();
+      updateCursorCapsToInputView();
+    }
+  }
+
+  //句首自動大小寫
+  private void updateCursorCapsToInputView() {
+    if (auto_caps.contentEquals("false") || Function.isEmpty(auto_caps)) return;
+    if (auto_caps.contentEquals("true") || Rime.isAsciiMode()) {
+      InputConnection ic = getCurrentInputConnection();
+      if ((ic != null) && (mKeyboardView != null)) {
+        int caps = 0;
+        EditorInfo ei = getCurrentInputEditorInfo();
+        if ((ei != null) && (ei.inputType != EditorInfo.TYPE_NULL)) {
+          caps = ic.getCursorCapsMode(ei.inputType);
+        }
+        mKeyboardView.setShifted(false, caps != 0);
+      }
     }
   }
 

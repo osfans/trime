@@ -6,6 +6,7 @@ name: 預設 #方案名稱
 author: osfans #作者資訊
 
 style:
+  auto_caps: false #自動句首大寫:true|false|ascii
   background_dim_amount: 0.5
   candidate_font: han.ttf #候選字型
   candidate_padding: 5 #候選項內邊距
