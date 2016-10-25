@@ -48,7 +48,7 @@ style:
     movable: once #是否可移動窗口，或僅移動一次 true|false|once
   window: #懸浮窗口組件
     - {start: "", move: 'ㄓ ', end: ""}
-    - {start: "", composition: "%s", end: "", letter_spacing: 0.3} #letter_spacing需要Android5.0
+    - {start: "", composition: "%s", end: "", letter_spacing: 0} #letter_spacing需要Android5.0。TODO: 不爲0時，會導致不換行的問題
     - {start: "\n", label: "%s.", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
