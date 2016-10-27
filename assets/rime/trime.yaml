@@ -31,6 +31,7 @@ style:
     max_length: 10 #超過字數則換行
     sticky_lines: 0 #固頂行數
     max_entries: 1 #候選窗口最大詞條數
+    all_phrases: false #所有滿足條件的詞語都顯示在窗口
     border: 2 #候選窗口邊框寬度
     max_width: 230 #最大寬度，超過則自動換行
     max_height: 400 #最大高度

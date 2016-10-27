@@ -62,6 +62,8 @@ public class Composition extends TextView {
   private boolean first_move = true;
   private float mDx, mDy;
   private int mCurrentX, mCurrentY;
+  private int candidate_num;
+  private boolean all_phrases;
 
   private class CompositionSpan extends UnderlineSpan{
       public CompositionSpan() {
@@ -226,6 +228,7 @@ public class Composition extends TextView {
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
     movable = config.getString("layout/movable");
+    all_phrases = config.getBoolean("layout/all_phrases");
     tfLabel = config.getFont("label_font");
     tfText = config.getFont("text_font");
     tfCandidate = config.getFont("candidate_font");
@@ -290,9 +293,9 @@ public class Composition extends TextView {
 
   private int appendCandidates(Map m, int length) {
     int start, end;
-    int i = 0;
+    int start_num = 0;
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
-    if (candidates == null) return i;
+    if (candidates == null) return start_num;
     String sep = Function.getString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
     String label_format = Function.getString(m, "label");
@@ -302,12 +305,23 @@ public class Composition extends TextView {
     int last_cand_length = 0;
     int line_length = 0;
     String[] labels = Rime.getSelectLabels();
+    int i = -1;
+    candidate_num = 0;
     for (Rime.RimeCandidate o: candidates) {
       String cand = o.text;
-      if (i >= max_entries || cand.length() < length) break;
+      i++;
+      if (candidate_num >= max_entries) {
+        if (start_num == 0 && candidate_num == i) start_num = candidate_num;
+        break;
+      }
+      if (cand.length() < length) {
+        if (start_num == 0 && candidate_num == i) start_num = candidate_num;
+        if (all_phrases) continue;
+        else break;
+      }
       cand = String.format(candidate_format, cand);
       String line_sep;
-      if (i == 0) {
+      if (candidate_num == 0) {
         line_sep = sep;
       } else if ((sticky_lines > 0 && sticky_lines >= i)
             || (max_length > 0 && line_length + cand.length() > max_length)){
@@ -348,11 +362,12 @@ public class Composition extends TextView {
         ss.setSpan(new AbsoluteSizeSpan(comment_text_size), start, end, span);
         line_length += comment.length();
       }
-      i++;
+      candidate_num++;
     }
+    if (start_num == 0 && candidate_num == i + 1) start_num = candidate_num;
     sep = Function.getString(m, "end");
     if (!Function.isEmpty(sep)) ss.append(sep);
-    return i;
+    return start_num;
   }
 
   private void appendButton(Map m) {
@@ -414,16 +429,16 @@ public class Composition extends TextView {
     if (Function.isEmpty(s)) return 0;
     setSingleLine(true); //設置單行
     ss = new SpannableStringBuilder();
-    int i = 0;
+    int start_num = 0;
     for (Map<String,Object> m: components) {
       if (m.containsKey("composition")) appendComposition(m);
-      else if (m.containsKey("candidate")) i = appendCandidates(m, length);
+      else if (m.containsKey("candidate")) start_num = appendCandidates(m, length);
       else if (m.containsKey("click"))appendButton(m);
       else if (m.containsKey("move"))appendMove(m);
     }
-    if (i > 0 || ss.toString().contains("\n")) setSingleLine(false); //設置單行
+    if (candidate_num > 0 || ss.toString().contains("\n")) setSingleLine(false); //設置單行
     setText(ss);
     setMovementMethod(LinkMovementMethod.getInstance());
-    return i;
+    return start_num;
   }
 }
