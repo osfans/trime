@@ -46,27 +46,30 @@ ndk:
 	ndk-build
 
 android:
-	mkdir -p build-android
-	(cd build-android; cmake \
+	cmake -Bbuild-android \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
 		-DANDROID_STL=c++_static \
 		-DANDROID_PLATFORM=android-14 \
 		-DANDROID_ABI=armeabi \
-		-DLIBRARY_OUTPUT_PATH=../libs/armeabi/ ../jni)
+		-DLIBRARY_OUTPUT_PATH=libs/armeabi/ -Hjni
 	${MAKE} -C build-android rime_jni
 
 linux:
-	mkdir -p build-linux
-	(cd build-linux; cmake -DCMAKE_BUILD_TYPE=Release ../jni)
+	cmake -Bbuild-linux -DCMAKE_BUILD_TYPE=Release -Hjni
 	${MAKE} -C build-linux
 
 win32:
-	mkdir -p build-win32
-	(cd build-win32; i686-w64-mingw32-cmake -DCMAKE_BUILD_TYPE=Release ../jni)
+	i686-w64-mingw32-cmake -Bbuild-win32 -DCMAKE_BUILD_TYPE=Release -Hjni
 	${MAKE} -C build-win32 rime
 	mkdir -p bin
 	(cd build-win32; 7z a ../bin/rime-win32-`date +%Y%m%d`.dll.7z rime.dll)
+
+win64:
+	x86_64-w64-mingw32-cmake -Bbuild-win64 -DCMAKE_BUILD_TYPE=Release -Hjni
+	${MAKE} -C build-win64 rime
+	mkdir -p bin
+	(cd build-win64; 7z a ../bin/rime-win64-`date +%Y%m%d`.dll.7z rime.dll)
 
 clean:
 	git clean -fd

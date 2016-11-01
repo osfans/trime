@@ -242,6 +242,8 @@ target_compile_definitions(rime PRIVATE
 )
 if(ANDROID)
   target_link_libraries(rime log atomic)
+elseif(WIN32)
+  target_link_libraries(rime wsock32)
 endif()
 
 # rime tools
