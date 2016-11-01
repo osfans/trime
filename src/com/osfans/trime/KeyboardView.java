@@ -684,7 +684,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
         final int keyCount = keys.length;
-        final float symbolTop = (mPaintSymbol.getTextSize());//mPaintSymbol.descent();
+        final float symbolBase = padding.top - mPaintSymbol.getFontMetrics().top;
+        final float hintBase =  - padding.bottom - mPaintSymbol.getFontMetrics().bottom;
         for (int i = 0; i < keyCount; i++) {
             final Key key = keys[i];
             if (drawSingleKey && invalidKey != key) {
@@ -731,12 +732,12 @@ public class KeyboardView extends View implements View.OnClickListener {
                 if (key.getLongClick() != null) {
                     mPaintSymbol.setTextSize(key.symbol_text_size != null ? key.symbol_text_size : mSymbolSize);
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
-                    canvas.drawText(key.getSymbolLabel(), left, symbolTop + top, mPaintSymbol);
+                    canvas.drawText(key.getSymbolLabel(), left, symbolBase, mPaintSymbol);
                 }
 
                 if (!Function.isEmpty(hint)) {
                     mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
-                    canvas.drawText(hint, left, key.height  - padding.bottom - symbolTop + top, mPaintSymbol);
+                    canvas.drawText(hint, left, key.height + hintBase, mPaintSymbol);
                 }
 
                 // Turn off drop shadow
