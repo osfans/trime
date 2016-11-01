@@ -152,7 +152,7 @@ public class Pref extends PreferenceActivity {
         new ColorDialog(this).show();
         return true;
       case "pref_schemas": //方案
-        new SchemaDialog(this).show();
+        new SchemaDialog(this).execute();//.show();
         return true;
       case "pref_maintenance": //維護
         check();

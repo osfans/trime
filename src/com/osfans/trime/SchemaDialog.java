@@ -16,11 +16,18 @@
 
 package com.osfans.trime;
 
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+import android.os.AsyncTask;
+import android.os.IBinder;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -31,10 +38,17 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /** 顯示輸入法方案列表 */
-public class SchemaDialog {
+public class SchemaDialog extends AsyncTask{
   boolean[] checkedSchemaItems;
   String[] schemaItems;
-  AlertDialog dialog;
+  AlertDialog.Builder builder;
+  AlertDialog alertDialog;
+  List<Map<String,String>> schemas;
+  List<Map<String,String>> selected_schemas;
+  String[] schemaNames;
+  Context mContext;
+  IBinder mToken;
+  private ProgressDialog mDialog;
 
   public class SortByName implements Comparator<Map<String,String>>{
     public int compare(Map<String,String> m1, Map<String,String> m2) {
@@ -61,16 +75,45 @@ public class SchemaDialog {
   }
 
   public SchemaDialog(Context context) {
-    List<Map<String,String>> schemas = Rime.get_available_schema_list();
+    mContext = context;
+    builder = new AlertDialog.Builder(mContext)
+      .setTitle(R.string.pref_schemas)
+      .setCancelable(true)
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface di, int id) {
+          selectSchema();
+        }
+      });
+    mDialog = new ProgressDialog(mContext);
+    mDialog.setMessage(mContext.getString(R.string.schemas_progress));
+    mDialog.setCancelable(false);
+  }
+
+  public SchemaDialog(Context context, IBinder token) {
+    this(context);
+    if (token != null) {
+      mToken = token;
+      Window window = mDialog.getWindow();
+      WindowManager.LayoutParams lp = window.getAttributes();
+      lp.token = mToken;
+      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      window.setAttributes(lp);
+      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+  }
+
+  private void initSchema() {
+    schemas = Rime.get_available_schema_list();
     if (schemas == null || schemas.size() == 0) {
-      Toast.makeText(context, R.string.no_schemas, Toast.LENGTH_LONG).show();
+      Toast.makeText(mContext, R.string.no_schemas, Toast.LENGTH_LONG).show();
       return;
     }
     Collections.sort(schemas, new SortByName());
-    List<Map<String,String>> selected_schemas = Rime.get_selected_schema_list();
+    selected_schemas = Rime.get_selected_schema_list();
     List<String> selected_Ids = new ArrayList<String>();
     int n = schemas.size();
-    String[] schemaNames = new String[n];
+    schemaNames = new String[n];
     String schema_id;
     checkedSchemaItems = new boolean[n];
     schemaItems = new String[n];
@@ -87,28 +130,41 @@ public class SchemaDialog {
       checkedSchemaItems[i] = selected_Ids.contains(schema_id);
       i++;
     }
-    dialog = new AlertDialog.Builder(context)
-      .setTitle(R.string.pref_schemas)
-      .setCancelable(true)
-      .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface di, int id) {
-          selectSchema();
-        }
-      })
-      .setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
-        public void onClick(DialogInterface di, int id, boolean isChecked) {
-          checkedSchemaItems[id] = isChecked;
-        }
-      })
-      .create();
   }
 
   public AlertDialog getDialog() {
-    return dialog;
+    builder.setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
+        public void onClick(DialogInterface di, int id, boolean isChecked) {
+          checkedSchemaItems[id] = isChecked;
+        }
+    });
+    alertDialog = builder.create();
+    if (mToken != null) {
+      Window window = alertDialog.getWindow();
+      WindowManager.LayoutParams lp = window.getAttributes();
+      lp.token = mToken;
+      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      window.setAttributes(lp);
+      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+    return alertDialog;
   }
 
-  public void show() {
-    if (dialog != null) dialog.show();
+  protected void onPreExecute() {
+    mDialog.show();
   }
+
+ protected String doInBackground(Object... o) {
+   initSchema();
+   return "ok";
+ }
+
+ protected void onProgressUpdate(Object o) {
+ }
+
+ protected void onPostExecute(Object o) {
+   getDialog().show();
+   mDialog.dismiss();
+ }
+
 }

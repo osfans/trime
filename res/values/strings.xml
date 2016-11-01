@@ -71,6 +71,13 @@
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>
 
+    <string name="deploy_progress">正在部署...</string>
+    <string name="sync_progress">正在同步...</string>
+    <string name="themes_progress">正在應用主題...</string>
+    <string name="schemas_progress">正在加載方案...</string>
+    <string name="colors_progress">正在應用配色...</string>
+    <string name="switch_progress">正在切換方案...</string>
+
     <string name="set_ime">整體設定</string>
     <string name="no_schemas">請在/sdcard/rime中放入essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
