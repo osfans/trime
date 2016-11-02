@@ -52,7 +52,7 @@ android:
 		-DANDROID_STL=c++_static \
 		-DANDROID_PLATFORM=android-14 \
 		-DANDROID_ABI=armeabi \
-		-DLIBRARY_OUTPUT_PATH=libs/armeabi/ -Hjni
+		-DLIBRARY_OUTPUT_PATH=../libs/armeabi/ -Hjni
 	${MAKE} -C build-android rime_jni
 
 linux:
