@@ -45,6 +45,7 @@ import android.os.Build.VERSION;
 public class Pref extends PreferenceActivity {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
+  private ProgressDialog mProgressDialog;
 
   public String getVersion() {
     try {
@@ -72,6 +73,8 @@ public class Pref extends PreferenceActivity {
     pref.setSummary(getVersion());
     pref = findPreference("pref_enable");
     if (isEnabled()) getPreferenceScreen().removePreference(pref);
+    mProgressDialog = new ProgressDialog(this);
+    mProgressDialog.setCancelable(false);
   }
 
   private void showLicenseDialog() {
@@ -100,14 +103,12 @@ public class Pref extends PreferenceActivity {
   public static void deploy() {
     Rime.destroy();
     Rime.get(true);
-    Trime trime = Trime.getService();
-    if (trime != null) trime.invalidate();
-    System.exit(0); //清理內存
+    //Trime trime = Trime.getService();
+    //if (trime != null) trime.invalidate();
   }
 
   public void sync() {
     boolean b = Rime.syncUserData();
-    Toast.makeText(this, b ? R.string.sync_success : R.string.sync_failure, Toast.LENGTH_SHORT).show();
   }
 
   public boolean isEnabled() {
@@ -161,10 +162,40 @@ public class Pref extends PreferenceActivity {
         deployOpencc();
         return true;
       case "pref_deploy": //部署
-        deploy();
+        mProgressDialog.setMessage(getString(R.string.deploy_progress));
+        mProgressDialog.show();
+        new Thread(new Runnable(){
+          @Override
+          public void run() {
+            try{
+              deploy();
+            }
+            catch(Exception e){
+            }
+            finally{
+              mProgressDialog.dismiss();
+              System.exit(0); //清理內存
+            }
+          }
+        }).start();
         return true;
       case "pref_sync": //同步
-        sync();
+        mProgressDialog.setMessage(getString(R.string.sync_progress));
+        mProgressDialog.show();
+        new Thread(new Runnable(){
+          @Override
+          public void run() {
+            try{
+              sync();
+            }
+            catch(Exception e){
+            }
+            finally{
+              mProgressDialog.dismiss();
+              System.exit(0); //清理內存
+            }
+          }
+        }).start();
         return true;
       case "pref_reset": //回廠
         new ResetDialog(this).show();
