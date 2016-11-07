@@ -41,14 +41,13 @@ import java.util.Comparator;
 public class SchemaDialog extends AsyncTask{
   boolean[] checkedSchemaItems;
   String[] schemaItems;
-  AlertDialog.Builder builder;
-  AlertDialog alertDialog;
   List<Map<String,String>> schemas;
   List<Map<String,String>> selected_schemas;
   String[] schemaNames;
   Context mContext;
   IBinder mToken;
-  private ProgressDialog mDialog;
+  ProgressDialog mProgressDialog;
+  AlertDialog mDialog;
 
   public class SortByName implements Comparator<Map<String,String>>{
     public int compare(Map<String,String> m1, Map<String,String> m2) {
@@ -74,33 +73,30 @@ public class SchemaDialog extends AsyncTask{
     }
   }
 
-  public SchemaDialog(Context context) {
-    mContext = context;
-    builder = new AlertDialog.Builder(mContext)
-      .setTitle(R.string.pref_schemas)
-      .setCancelable(true)
-      .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface di, int id) {
-          selectSchema();
-        }
-      });
-    mDialog = new ProgressDialog(mContext);
-    mDialog.setMessage(mContext.getString(R.string.schemas_progress));
-    mDialog.setCancelable(false);
-  }
-
-  public SchemaDialog(Context context, IBinder token) {
-    this(context);
-    if (token != null) {
-      mToken = token;
-      Window window = mDialog.getWindow();
+  private void showProgressDialog() {
+    mProgressDialog = new ProgressDialog(mContext);
+    mProgressDialog.setMessage(mContext.getString(R.string.schemas_progress));
+    mProgressDialog.setCancelable(false);
+    if (mToken != null) {
+      Window window = mProgressDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();
       lp.token = mToken;
       lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
       window.setAttributes(lp);
       window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
+    mProgressDialog.show();
+  }
+
+  public SchemaDialog(Context context) {
+    this(context, null);
+  }
+
+  public SchemaDialog(Context context, IBinder token) {
+    mContext = context;
+    mToken = token;
+    showProgressDialog();
+    execute();
   }
 
   private void initSchema() {
@@ -132,39 +128,60 @@ public class SchemaDialog extends AsyncTask{
     }
   }
 
-  public AlertDialog getDialog() {
-    builder.setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
+  public void showDialog() {
+    mDialog = new AlertDialog.Builder(mContext)
+      .setTitle(R.string.pref_schemas)
+      .setCancelable(true)
+      .setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
         public void onClick(DialogInterface di, int id, boolean isChecked) {
           checkedSchemaItems[id] = isChecked;
         }
-    });
-    alertDialog = builder.create();
+      })
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface di, int id) {
+          mProgressDialog.setMessage(mContext.getString(R.string.deploy_progress));
+          mProgressDialog.show();
+          new Thread(new Runnable(){
+            @Override
+            public void run() {
+              try{
+                selectSchema();
+              }
+              catch(Exception e){
+              }
+              finally{
+                mProgressDialog.dismiss();
+                System.exit(0); //清理內存
+              }
+            }
+          }).start();
+        }
+      }).create();
     if (mToken != null) {
-      Window window = alertDialog.getWindow();
+      Window window = mDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();
       lp.token = mToken;
       lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
       window.setAttributes(lp);
       window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
-    return alertDialog;
-  }
-
-  protected void onPreExecute() {
     mDialog.show();
   }
 
- protected String doInBackground(Object... o) {
-   initSchema();
-   return "ok";
- }
+  protected void onPreExecute() {
+  }
 
- protected void onProgressUpdate(Object o) {
- }
+  protected String doInBackground(Object... o) {
+    initSchema();
+    return "ok";
+  }
 
- protected void onPostExecute(Object o) {
-   getDialog().show();
-   mDialog.dismiss();
- }
+  protected void onProgressUpdate(Object o) {
+  }
 
+  protected void onPostExecute(Object o) {
+    mProgressDialog.dismiss();
+    showDialog();
+  }
 }

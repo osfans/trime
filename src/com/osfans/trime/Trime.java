@@ -841,7 +841,7 @@ public class Trime extends InputMethodService implements
 
   /** 彈出{@link SchemaDialog 輸入法方案對話框} */
   private void showSchemaDialog() {
-    new SchemaDialog(this, mCandidateContainer.getWindowToken()).execute();
+    new SchemaDialog(this, mCandidateContainer.getWindowToken());
   }
 
   /** 彈出{@link ThemeDialog 配色對話框} */
