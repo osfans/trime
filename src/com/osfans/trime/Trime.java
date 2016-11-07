@@ -846,8 +846,7 @@ public class Trime extends InputMethodService implements
 
   /** 彈出{@link ThemeDialog 配色對話框} */
   private void showThemeDialog() {
-    AlertDialog dialog = new ThemeDlg(this).getDialog();
-    showDialog(dialog);
+    new ThemeDlg(this, mCandidateContainer.getWindowToken());
   }
 
   private boolean handleOption(int keyCode) {

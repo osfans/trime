@@ -20,25 +20,51 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Context;
 import android.util.Log;
+import android.os.AsyncTask;
+import android.os.IBinder;
+import android.app.ProgressDialog;
+import android.view.Window;
+import android.view.WindowManager;
 
 import java.util.Arrays;
 
 /** 顯示配色方案列表 */
-public class ThemeDlg {
+public class ThemeDlg extends AsyncTask{
   String[] keys;
   String[] names;
   int checked;
-  AlertDialog dialog;
+  AlertDialog mDialog;
+  ProgressDialog mProgressDialog;
+  Context mContext;
+  IBinder mToken;
 
   public void selectTheme() {
     String theme = keys[checked].replace(".yaml","");
     Config config = Config.get();
     config.setTheme(theme);
-    Trime trime = Trime.getService();
-    if (trime != null) trime.initKeyboard(); //實時生效
+  }
+
+  private void initProgressDialog() {
+    mProgressDialog = new ProgressDialog(mContext);
+    mProgressDialog.setMessage(mContext.getString(R.string.themes_progress));
+    mProgressDialog.setCancelable(false);
+    if (mToken != null) {
+      Window window = mProgressDialog.getWindow();
+      WindowManager.LayoutParams lp = window.getAttributes();
+      lp.token = mToken;
+      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      window.setAttributes(lp);
+      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
   }
 
   public ThemeDlg(Context context) {
+    this(context, null);
+  }
+
+  public ThemeDlg(Context context, IBinder token) {
+    mContext = context;
+    mToken = token;
     Config config = Config.get(context);
     String theme = config.getTheme()+".yaml";
     keys = config.getThemeKeys();
@@ -46,13 +72,18 @@ public class ThemeDlg {
     Arrays.sort(keys);
     checked = Arrays.binarySearch(keys, theme);
     names = config.getThemeNames(keys);
-    dialog = new AlertDialog.Builder(context)
+    showDialog();
+    initProgressDialog();
+  }
+
+  public void showDialog() {
+    mDialog = new AlertDialog.Builder(mContext)
       .setTitle(R.string.pref_themes)
       .setCancelable(true)
       .setNegativeButton(android.R.string.cancel, null)
       .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface di, int id) {
-          selectTheme();
+          execute();
         }
       })
       .setSingleChoiceItems(names, checked, new DialogInterface.OnClickListener() {
@@ -60,13 +91,32 @@ public class ThemeDlg {
           checked = id;
         }
       }).create();
+    if (mToken != null) {
+      Window window = mDialog.getWindow();
+      WindowManager.LayoutParams lp = window.getAttributes();
+      lp.token = mToken;
+      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      window.setAttributes(lp);
+      window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+    mDialog.show();
   }
 
-  public AlertDialog getDialog() {
-    return dialog;
+  protected void onPreExecute() {
+    mProgressDialog.show();
   }
 
-  public void show() {
-    if (dialog != null) dialog.show();
+  protected String doInBackground(Object... o) {
+    selectTheme();
+    return "ok";
+  }
+
+  protected void onProgressUpdate(Object o) {
+  }
+
+  protected void onPostExecute(Object o) {
+    mProgressDialog.dismiss();
+    Trime trime = Trime.getService();
+    if (trime != null) trime.initKeyboard(); //實時生效
   }
 }
