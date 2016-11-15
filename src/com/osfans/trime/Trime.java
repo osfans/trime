@@ -701,6 +701,8 @@ public class Trime extends InputMethodService implements
       || handleAciton(primaryCode, mask)
       || handleBack(primaryCode)) {
       Log.info("Trime onKey");
+    } else if (Function.openCategory(this, primaryCode)) {
+      Log.info("open category");
     } else {
       Log.info("send Key");
       sendDownUpKeyEvents(primaryCode);

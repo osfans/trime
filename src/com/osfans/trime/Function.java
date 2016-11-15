@@ -18,6 +18,8 @@ package com.osfans.trime;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.SparseArray;
+import android.view.KeyEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,6 +29,33 @@ import java.util.Map;
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
   private static String TAG = "Function";
+  static SparseArray<String> sApplicationLaunchKeyCategories;
+  static {
+      sApplicationLaunchKeyCategories = new SparseArray<String>();
+      sApplicationLaunchKeyCategories.append(
+              KeyEvent.KEYCODE_EXPLORER, Intent.CATEGORY_APP_BROWSER);
+      sApplicationLaunchKeyCategories.append(
+              KeyEvent.KEYCODE_ENVELOPE, Intent.CATEGORY_APP_EMAIL);
+      sApplicationLaunchKeyCategories.append(
+              KeyEvent.KEYCODE_CONTACTS, Intent.CATEGORY_APP_CONTACTS);
+      sApplicationLaunchKeyCategories.append(
+              KeyEvent.KEYCODE_CALENDAR, Intent.CATEGORY_APP_CALENDAR);
+      sApplicationLaunchKeyCategories.append(
+              KeyEvent.KEYCODE_MUSIC, Intent.CATEGORY_APP_MUSIC);
+      sApplicationLaunchKeyCategories.append(
+              KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
+  }
+
+  public static boolean openCategory(Context context, int keyCode) {
+    String category = sApplicationLaunchKeyCategories.get(keyCode);
+    if (category != null) {
+      Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+      context.startActivity(intent);
+      return true;
+    }
+    return false;
+  }
 
   public static void openApp(Context context, String s) {
     Intent intent = context.getPackageManager().getLaunchIntentForPackage(s);
