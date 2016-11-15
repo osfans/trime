@@ -52,24 +52,31 @@
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in /sdcard/rime</string>
 
-    <string name="pref_function">Functions</string>
 <!--
+    <string name="pref_function">Functions</string>
     <string name="pref_maintenance">Maintain</string>
     <string name="pref_maintenance_summary">Automatically Maintain Input Schemas</string>
--->
     <string name="pref_deploy_opencc">Deploy OpenCC</string>
     <string name="pref_deploy_opencc_summary">Must Deploy after Modifying txt files in/sdcard/rime/opencc</string>
+    <string name="deploy_success">Job Done!</string>
+    <string name="deploy_failure">Job Failed!</string>
+    <string name="sync_success">Synchronized</string>
+    <string name="sync_failure">Not Synchronized</string>
+    <string name="colors_progress">Applying color…</string>
+    <string name="switch_progress">Switching progress…</string>
+-->
     <string name="pref_deploy">Deploy</string>
     <string name="pref_deploy_summary">Gotta Deploy after Modifying Settings </string>
     <string name="pref_sync">Synchronize</string>
     <string name="pref_sync_summary">Synchronize User Dictionary in /sdcard/rime/sync</string>
 
-    <string name="deploy_success">Job Done!</string>
-    <string name="deploy_failure">Job Failed!</string>
-    <string name="sync_success">Synchronized</string>
-    <string name="sync_failure">Not Synchronized</string>
     <string name="reset_success">Succeeded!</string>
     <string name="reset_failure">Failed!</string>
+
+    <string name="deploy_progress">Deploying…</string>
+    <string name="sync_progress">Syncing…</string>
+    <string name="themes_progress">Applying theme…</string>
+    <string name="schemas_progress">Loading schemas…</string>
 
     <string name="set_ime">Preferences</string>
     <string name="no_schemas">Put essay.txt, default.yaml, symbols.yaml and Schemas into /sdcard/rime!</string>

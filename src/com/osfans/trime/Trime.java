@@ -168,7 +168,7 @@ public class Trime extends InputMethodService implements
       }
       if (!mFloatingWindow.isShowing()) {
         mFloatingWindow.showAtLocation(mCandidateContainer,
-                Gravity.LEFT | Gravity.TOP, x, y);
+                Gravity.START | Gravity.TOP, x, y);
       } else {
         mFloatingWindow.update(x, y,
                 mFloatingWindow.getWidth(),

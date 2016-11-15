@@ -30,7 +30,6 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.util.Log;
-import android.widget.Toast;
 import android.content.Intent;
 import android.provider.Settings;
 import android.view.inputmethod.InputMethodManager;
@@ -40,6 +39,7 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
+import android.annotation.TargetApi;
 
 /** 配置輸入法 */
 public class Pref extends PreferenceActivity {
@@ -57,11 +57,7 @@ public class Pref extends PreferenceActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-      setTheme(android.R.style.Theme_Material);
-    } else if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
-      setTheme(android.R.style.Theme_Holo);
-    }
+    setTheme(VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP ? 0x01030224 : android.R.style.Theme_Holo);
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
 
@@ -122,17 +118,15 @@ public class Pref extends PreferenceActivity {
     return enabled;
   }
 
+  @TargetApi(VERSION_CODES.M)
   public void requestPermission() {
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
-      }
+    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+      requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
     }
   }
 
   public void deployOpencc() {
     boolean b = Config.deployOpencc();
-    Toast.makeText(this, b ? R.string.deploy_success : R.string.deploy_failure, Toast.LENGTH_SHORT).show();
   }
 
   @Override
