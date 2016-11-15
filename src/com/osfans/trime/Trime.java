@@ -258,7 +258,12 @@ public class Trime extends InputMethodService implements
         gd.setColor(mConfig.getColor("text_back_color"));
         d = gd;
       }
-      if (mConfig.getInt("layout/alpha") > 0) d.setAlpha(mConfig.getInt("layout/alpha"));
+      if (mConfig.hasKey("layout/alpha")) {
+        int alpha = mConfig.getInt("layout/alpha");
+        if (alpha <= 0) alpha = 0;
+        else if (alpha >= 255) alpha = 255;
+        d.setAlpha(alpha);
+      }
       mFloatingWindow.setBackgroundDrawable(d);
       if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
       mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
