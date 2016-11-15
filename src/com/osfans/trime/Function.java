@@ -22,6 +22,7 @@ import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.os.Build;
 import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,7 +55,10 @@ public class Function {
     if (category != null) {
       Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-      context.startActivity(intent);
+      try {
+          context.startActivity(intent);
+      } catch (ActivityNotFoundException ex) {
+      }
       return true;
     }
     return false;
@@ -63,7 +67,10 @@ public class Function {
   public static void openApp(Context context, String s) {
     Intent intent = context.getPackageManager().getLaunchIntentForPackage(s);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-    context.startActivity(intent);
+    try {
+      context.startActivity(intent);
+    } catch (ActivityNotFoundException ex) {
+    }
   }
 
   public static void showPrefDialog(Context context) {
