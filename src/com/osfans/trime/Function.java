@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.SparseArray;
 import android.view.KeyEvent;
+import android.os.Build;
+import android.annotation.TargetApi;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,21 +33,22 @@ public class Function {
   private static String TAG = "Function";
   static SparseArray<String> sApplicationLaunchKeyCategories;
   static {
-      sApplicationLaunchKeyCategories = new SparseArray<String>();
-      sApplicationLaunchKeyCategories.append(
-              KeyEvent.KEYCODE_EXPLORER, Intent.CATEGORY_APP_BROWSER);
-      sApplicationLaunchKeyCategories.append(
-              KeyEvent.KEYCODE_ENVELOPE, Intent.CATEGORY_APP_EMAIL);
-      sApplicationLaunchKeyCategories.append(
-              KeyEvent.KEYCODE_CONTACTS, Intent.CATEGORY_APP_CONTACTS);
-      sApplicationLaunchKeyCategories.append(
-              KeyEvent.KEYCODE_CALENDAR, Intent.CATEGORY_APP_CALENDAR);
-      sApplicationLaunchKeyCategories.append(
-              KeyEvent.KEYCODE_MUSIC, Intent.CATEGORY_APP_MUSIC);
-      sApplicationLaunchKeyCategories.append(
-              KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
+    sApplicationLaunchKeyCategories = new SparseArray<String>();
+    sApplicationLaunchKeyCategories.append(
+            KeyEvent.KEYCODE_EXPLORER, "android.intent.category.APP_BROWSER");
+    sApplicationLaunchKeyCategories.append(
+            KeyEvent.KEYCODE_ENVELOPE, "android.intent.category.APP_EMAIL");
+    sApplicationLaunchKeyCategories.append(
+            207, "android.intent.category.APP_CONTACTS");
+    sApplicationLaunchKeyCategories.append(
+            208, "android.intent.category.APP_CALENDAR");
+    sApplicationLaunchKeyCategories.append(
+            209, "android.intent.category.APP_EMAIL");
+    sApplicationLaunchKeyCategories.append(
+            210, "android.intent.category.APP_CALCULATOR");
   }
 
+  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
   public static boolean openCategory(Context context, int keyCode) {
     String category = sApplicationLaunchKeyCategories.get(keyCode);
     if (category != null) {
