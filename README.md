@@ -32,7 +32,7 @@ make apk
 ```
 
 ## 許可協議/License
-[Apache License 2.0](COPYING)
+[GPLv3](LICENSE)
 
 ## 第三方庫/3rd Party Library
 - [android-cmake](https://github.com/taka-no-me/android-cmake) (BSD 3-Clause License)
