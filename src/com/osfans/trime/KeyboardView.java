@@ -534,6 +534,15 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     /**
+     * 返回鍵盤是否爲大寫狀態
+     * @return true 如果大寫
+     */
+    public boolean isCapsOn() {
+        if (mKeyboard != null && mKeyboard.mShiftKey != null) return mKeyboard.mShiftKey.on;
+        return false;
+    }
+
+    /**
      * Enables or disables the key feedback popup. This is a popup that shows a magnified
      * version of the depressed key. By default the preview is enabled. 
      * @param previewEnabled whether or not to enable the key feedback popup

@@ -482,9 +482,9 @@ public class Trime extends InputMethodService implements
   //句首自動大小寫
   private void updateCursorCapsToInputView() {
     if (auto_caps.contentEquals("false") || Function.isEmpty(auto_caps)) return;
-    if (auto_caps.contentEquals("true") || Rime.isAsciiMode()) {
+    if ((auto_caps.contentEquals("true") || Rime.isAsciiMode()) && (mKeyboardView != null && !mKeyboardView.isCapsOn())) {
       InputConnection ic = getCurrentInputConnection();
-      if ((ic != null) && (mKeyboardView != null)) {
+      if (ic != null) {
         int caps = 0;
         EditorInfo ei = getCurrentInputEditorInfo();
         if ((ei != null) && (ei.inputType != EditorInfo.TYPE_NULL)) {
