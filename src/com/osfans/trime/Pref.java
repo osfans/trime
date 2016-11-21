@@ -134,7 +134,7 @@ public class Pref extends PreferenceActivity {
     boolean b;
     switch (preference.getKey()) {
       case "pref_enable": //啓用
-        requestPermission();
+        if (VERSION.SDK_INT >= VERSION_CODES.M) requestPermission();
         if (!isEnabled()) startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
         return true;
       case "pref_select": //切換

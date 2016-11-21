@@ -309,6 +309,7 @@ public class Composition extends TextView {
     candidate_num = 0;
     for (Rime.RimeCandidate o: candidates) {
       String cand = o.text;
+      if (Function.isEmpty(cand)) cand = "";
       i++;
       if (candidate_num >= max_entries) {
         if (start_num == 0 && candidate_num == i) start_num = candidate_num;
