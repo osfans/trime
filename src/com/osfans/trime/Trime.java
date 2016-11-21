@@ -81,8 +81,8 @@ public class Trime extends InputMethodService implements
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
   private String auto_caps; //句首自動大寫
-  private String soft_cursor = "soft_cursor"; //軟光標
-  private String horizontal = "_horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
+  private static String soft_cursor_key = "soft_cursor"; //軟光標
+  private static String horizontal_key = "horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
   private boolean keyComposing; //實體鍵盤編輯狀態
 
@@ -188,6 +188,11 @@ public class Trime extends InputMethodService implements
     auto_caps = mConfig.getString("auto_caps");
   }
 
+  public void updateRimeOption() {
+    Rime.setOption(soft_cursor_key, mConfig.getBoolean(soft_cursor_key)); //軟光標
+    Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -196,8 +201,7 @@ public class Trime extends InputMethodService implements
     mEffect = new Effect(this);
     Config.prepareRime(this);
     mConfig = Config.get(this);
-    Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
-    Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
+    updateRimeOption();
     loadConfig();
     mEffect.reset();
     mKeyboardSwitch = new KeyboardSwitch(this);
@@ -233,8 +237,7 @@ public class Trime extends InputMethodService implements
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
     reset();
-    Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
-    Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
+    updateRimeOption();
   }
 
   public void invalidateKeyboard() {
@@ -287,8 +290,9 @@ public class Trime extends InputMethodService implements
     mEffect.reset();
   }
 
-  public void initKeyboard() {
+  public void initKeyboard(boolean update) {
     reset();
+    if (update) updateRimeOption(); //不能在Rime.onMessage中調用，會卡死
     bindKeyboardToInputView();
   }
 
@@ -888,8 +892,7 @@ public class Trime extends InputMethodService implements
             public void onClick(DialogInterface di, int id) {
               di.dismiss();
               Rime.selectSchema(id); //切換方案
-              Rime.setOption(soft_cursor, mConfig.getBoolean(soft_cursor)); //軟光標
-              Rime.setOption(horizontal, mConfig.getBoolean("horizontal")); //水平模式
+              updateRimeOption();
             }
         });
       }

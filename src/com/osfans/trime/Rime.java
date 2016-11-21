@@ -484,7 +484,7 @@ public class Rime
       case "schema":
         initSchema();
         if (trime != null) {
-          trime.initKeyboard();
+          trime.initKeyboard(false);
           trime.updateComposing();
         }
         break;
