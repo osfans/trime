@@ -35,7 +35,6 @@ public class Effect {
 
   private boolean vibrateOn;
   private Vibrator vibrator;
-  private boolean soundOn;
   private AudioManager audioManager;
   private boolean isSpeakCommit, isSpeakKey;
   private TextToSpeech mTTS;
@@ -53,11 +52,15 @@ public class Effect {
         (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
-    soundOn = config.getBoolean("key_sound");
     volume = config.getFloat("key_sound_volume");
-    if (soundOn && (audioManager == null)) {
-      audioManager = 
-        (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    if (volume > 0) {
+      if (audioManager == null) {
+        audioManager =
+          (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+      }
+      int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+      volume = max * volume;
+      audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM , (int)(volume), 0);
     }
 
     isSpeakCommit = config.getBoolean("speak_commit");
@@ -76,7 +79,7 @@ public class Effect {
   }
 
   public void playSound(final int code) {
-    if (soundOn && (audioManager != null)) {
+    if (volume > 0 && (audioManager != null)) {
       final int sound;
       switch (code) {
         case KeyEvent.KEYCODE_DEL:
@@ -92,7 +95,7 @@ public class Effect {
             sound = AudioManager.FX_KEYPRESS_STANDARD;
             break;
       }
-      audioManager.playSoundEffect(sound, volume);
+      audioManager.playSoundEffect(sound, -1);
     }
   }
 
