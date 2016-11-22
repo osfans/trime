@@ -82,4 +82,5 @@
     <string name="no_schemas">Put essay.txt, default.yaml, symbols.yaml and Schemas into /sdcard/rime!</string>
     <string name="other_ime">Other IMEs</string>
 
+    <string name="pref_ui">Night Mode</string>
 </resources>

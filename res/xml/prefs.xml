@@ -20,6 +20,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/ime_name">
 
+    <SwitchPreference android:key="pref_ui" android:title="@string/pref_ui" android:persistent="true" />
     <Preference android:key="pref_enable" android:title="@string/pref_enable" android:summary="@string/pref_enable_summary"/>
     <Preference android:key="pref_select" android:title="@string/pref_select" android:summary="@string/pref_select_summary"/>
     <Preference android:key="pref_deploy" android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>

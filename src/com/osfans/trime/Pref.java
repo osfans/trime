@@ -19,9 +19,11 @@ package com.osfans.trime;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.ListPreference;
+import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
@@ -57,7 +59,13 @@ public class Pref extends PreferenceActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    setTheme(VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP ? 0x01030224 : android.R.style.Theme_Holo);
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    boolean is_dark = prefs.getBoolean("pref_ui", false);
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      setTheme(is_dark ? 0x01030224 : 0x01030237);
+    } else {
+      setTheme(is_dark ? android.R.style.Theme_Holo : android.R.style.Theme_Holo_Light);
+    }
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
 
@@ -196,6 +204,10 @@ public class Pref extends PreferenceActivity {
         return true;
       case "pref_licensing": //資訊
         showLicenseDialog();
+        return true;
+      case "pref_ui": //色調
+        finish();
+        Function.showPrefDialog(this);
         return true;
     }
     return false;

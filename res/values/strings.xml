@@ -83,4 +83,5 @@
     <string name="no_schemas">請在/sdcard/rime中放入essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
 
+    <string name="pref_ui">夜間</string>
 </resources>
