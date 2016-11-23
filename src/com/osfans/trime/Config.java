@@ -334,7 +334,7 @@ public class Config {
     return (o == null) ? "" : o.toString();
   }
 
-  public Integer getCurrentColor(String key) {
+  private Object getColorObject(String key) {
     String scheme = getString("color_scheme");
     Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
     Object o = map.get(key);
@@ -343,15 +343,18 @@ public class Config {
       fallbackKey = fallbackColors.get(fallbackKey);
       o = map.get(fallbackKey);
     }
+    return o;
+  }
 
+  public Integer getCurrentColor(String key) {
+    Object o = getColorObject(key);
     if (o instanceof Integer) return ((Integer)o).intValue();
     if (o instanceof Float || o instanceof Double) return ((Long)o).intValue();
     return null;
   }
 
   public Integer getColor(String key) {
-    Object o = getCurrentColor(key);
-
+    Object o = getColorObject(key);
     if (o == null) {
       o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
     }
@@ -394,18 +397,8 @@ public class Config {
     return Typeface.DEFAULT;
   }
 
-  public Drawable getColorDrawable(String key) {
-    String scheme = getString("color_scheme");
-    Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
-    Object o = map.get(key);
-    String fallbackKey = key;
-    while (o == null && fallbackColors.containsKey(fallbackKey)) {
-      fallbackKey = fallbackColors.get(fallbackKey);
-      o = map.get(fallbackKey);
-    }
-    if (o == null) {
-      o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
-    }
+  public Drawable drawableObject(Object o) {
+    if (o == null) return null;
     Integer color = null;
     if (o instanceof Integer) color = ((Integer)o).intValue();
     else if (o instanceof Float || o instanceof Double || o instanceof Long) color = ((Long)o).intValue();
@@ -425,27 +418,22 @@ public class Config {
     return null;
   }
 
+  public Drawable getCurrentColorDrawable(String key) {
+    Object o = getColorObject(key);
+    return drawableObject(o);
+  }
+
+  public Drawable getColorDrawable(String key) {
+    Object o = getColorObject(key);
+    if (o == null) {
+      o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
+    }
+    return drawableObject(o);
+  }
+
   public Drawable getDrawable(String key){
     Object o = getValue(key);
-    if (o != null) {
-      Integer color = null;
-      if (o instanceof Integer) color = ((Integer)o).intValue();
-      else if (o instanceof Float || o instanceof Double || o instanceof Long) color = ((Long)o).intValue();
-      else if (o instanceof String) {
-        String name = o.toString();
-        name = USER_DATA_DIR + "/backgrounds/" + name;
-        File f = new File(name);
-        if (f.exists()) {
-          return new BitmapDrawable(BitmapFactory.decodeFile(name));
-        }
-      }
-      if (color != null) {
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(color);
-        return gd;
-      }
-    }
-    return null;
+    return drawableObject(o);
   }
 
   public int getInlinePreedit() {

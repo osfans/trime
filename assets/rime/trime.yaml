@@ -122,8 +122,8 @@ fallback_colors:
   off_key_text_color: key_text_color
   on_key_back_color: hilited_key_back_color
   on_key_text_color: hilited_key_text_color
-  preview_back_color: key_text_color
-  preview_text_color: key_back_color
+  preview_back_color: key_back_color
+  preview_text_color: key_text_color
   shadow_color: border_color
 
 preset_color_schemes:

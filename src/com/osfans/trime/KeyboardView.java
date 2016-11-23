@@ -32,7 +32,8 @@ import android.graphics.Typeface;
 import android.graphics.Paint.Align;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 
 //import android.inputmethodservice.Keyboard.Key;
 //import android.media.AudioManager;
@@ -63,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.reflect.Method;
 
 /** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
 public class KeyboardView extends View implements View.OnClickListener {
@@ -134,7 +136,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mCurrentKeyIndex = NOT_A_KEY;
     private int mLabelTextSize;
     private int mKeyTextSize;
-    private ColorStateList mKeyTextColor, mKeyBackColor;
+    private ColorStateList mKeyTextColor;
+    private StateListDrawable mKeyBackColor;
     private int key_symbol_color, hilited_key_symbol_color;
     private int mSymbolSize;
     private Paint mPaintSymbol;
@@ -251,6 +254,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     /** Whether the requirement of a headset to hear passwords if accessibility is enabled is announced. */
     private boolean mHeadsetRequiredToHearPasswordsAnnounced;
 
+    Method getStateDrawableIndex, getStateDrawable;
+
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -294,14 +299,13 @@ public class KeyboardView extends View implements View.OnClickListener {
         mShadowRadius = config.getFloat("shadow_radius");
         mRoundCorner = config.getFloat("round_corner");
 
-        mKeyBackColor = new ColorStateList(Key.KEY_STATES, new int[]{
-            config.getColor("hilited_on_key_back_color"),
-            config.getColor("hilited_off_key_back_color"),
-            config.getColor("on_key_back_color"),
-            config.getColor("off_key_back_color"),
-            config.getColor("hilited_key_back_color"),
-            config.getColor("key_back_color")
-        });
+        mKeyBackColor = new StateListDrawable();
+        mKeyBackColor.addState(Key.KEY_STATE_PRESSED_ON, config.getColorDrawable("hilited_on_key_back_color"));
+        mKeyBackColor.addState(Key.KEY_STATE_PRESSED_OFF,config.getColorDrawable("hilited_off_key_back_color"));
+        mKeyBackColor.addState(Key.KEY_STATE_NORMAL_ON,config.getColorDrawable("on_key_back_color"));
+        mKeyBackColor.addState(Key.KEY_STATE_NORMAL_OFF,config.getColorDrawable("off_key_back_color"));
+        mKeyBackColor.addState(Key.KEY_STATE_PRESSED,config.getColorDrawable("hilited_key_back_color"));
+        mKeyBackColor.addState(Key.KEY_STATE_NORMAL,config.getColorDrawable("key_back_color"));
 
         mKeyTextColor = new ColorStateList(Key.KEY_STATES, new int[]{
             config.getColor("hilited_on_key_text_color"),
@@ -312,14 +316,18 @@ public class KeyboardView extends View implements View.OnClickListener {
             config.getColor("key_text_color")
         });
 
-        mPreviewText.setTextColor(config.getColor("preview_text_color"));
-        int previewBackColor = config.getColor("preview_back_color");
-        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
-          PaintDrawable background = new PaintDrawable(previewBackColor);
-          background.setCornerRadius(mRoundCorner);
-          mPreviewText.setBackground(background);
-        } else {
-          mPreviewText.setBackgroundColor(previewBackColor); //不支持圓角
+        Integer color = config.getColor("preview_text_color");
+        if (color != null) mPreviewText.setTextColor(color);
+        Integer previewBackColor = config.getColor("preview_back_color");
+        if (previewBackColor != null) {
+            if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+              GradientDrawable background = new GradientDrawable();
+              background.setColor(previewBackColor);
+              background.setCornerRadius(mRoundCorner);
+              mPreviewText.setBackground(background);
+            } else {
+              mPreviewText.setBackgroundColor(previewBackColor); //不支持圓角
+            }
         }
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
@@ -341,6 +349,12 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     public KeyboardView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        try {
+            getStateDrawableIndex = StateListDrawable.class.getMethod("getStateDrawableIndex", int[].class);
+            getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
+        } catch (Exception ex){
+        }
 
         LayoutInflater inflate =
                 (LayoutInflater) context
@@ -701,10 +715,18 @@ public class KeyboardView extends View implements View.OnClickListener {
                 continue;
             }
             int[] drawableState = key.getCurrentDrawableState();
-            Integer color = key.getBackColorForState(drawableState);
-            keyBackground = new PaintDrawable(color != null ? color : mKeyBackColor.getColorForState(drawableState, 0));
-            ((PaintDrawable)keyBackground).setCornerRadius(key.round_corner != null ? key.round_corner : mRoundCorner);
-            color = key.getTextColorForState(drawableState);
+            keyBackground = key.getBackColorForState(drawableState);
+            if (keyBackground == null) {
+                try {
+                    int index = (int) getStateDrawableIndex.invoke(mKeyBackColor, drawableState);
+                    keyBackground = (Drawable) getStateDrawable.invoke(mKeyBackColor, index);
+                } catch (Exception ex){
+                }
+            }
+            if (keyBackground instanceof GradientDrawable) {
+                ((GradientDrawable)keyBackground).setCornerRadius(key.round_corner != null ? key.round_corner : mRoundCorner);
+            }
+            Integer color = key.getTextColorForState(drawableState);
             mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
             color = key.getSymbolColorForState(drawableState);
             mPaintSymbol.setColor(color != null ? color : (key.pressed ? hilited_key_symbol_color: key_symbol_color));

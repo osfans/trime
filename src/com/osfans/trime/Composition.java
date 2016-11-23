@@ -47,7 +47,8 @@ public class Composition extends TextView {
   private int key_text_size, text_size, label_text_size, candidate_text_size, comment_text_size;
   private int key_text_color, text_color, label_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
-  private int key_back_color, back_color, hilited_back_color, hilited_candidate_back_color;
+  private int back_color, hilited_back_color, hilited_candidate_back_color;
+  private Integer key_back_color;
   private Typeface tfText, tfLabel, tfCandidate, tfComment;
   private int composition_pos[] = new int[2];
   private int max_length, sticky_lines;
@@ -121,7 +122,7 @@ public class Composition extends TextView {
       public void updateDrawState(TextPaint ds) {
           ds.setUnderlineText(false);
           ds.setColor(key_text_color);
-          ds.bgColor = key_back_color;
+          if (key_back_color != null) ds.bgColor = key_back_color;
       }
   }
 

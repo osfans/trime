@@ -17,6 +17,8 @@
 package com.osfans.trime;
 
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+
 import android.view.KeyEvent;
 import android.util.Log;
 import android.os.Build;
@@ -47,8 +49,9 @@ public class Key {
   public int width, height, gap, edgeFlags;
   public int row, column;
   public String label, hint;
-  public Integer key_text_color, key_back_color, key_symbol_color;
-  public Integer hilited_key_text_color, hilited_key_back_color, hilited_key_symbol_color;
+  public Drawable key_back_color, hilited_key_back_color;
+  public Integer key_text_color, key_symbol_color;
+  public Integer hilited_key_text_color, hilited_key_symbol_color;
   public Integer key_text_size, symbol_text_size;
   public Float round_corner;
 
@@ -106,8 +109,8 @@ public class Key {
     symbol_text_size = getPixel(mk, "symbol_text_size");
     key_text_color = getColor(mk, "key_text_color");
     hilited_key_text_color = getColor(mk, "hilited_key_text_color");
-    key_back_color = getColor(mk, "key_back_color");
-    hilited_key_back_color = getColor(mk, "hilited_key_back_color");
+    key_back_color = getColorDrawable(mk, "key_back_color");
+    hilited_key_back_color = getColorDrawable(mk, "hilited_key_back_color");
     key_symbol_color = getColor(mk, "key_symbol_color");
     hilited_key_symbol_color = getColor(mk, "hilited_key_symbol_color");
     round_corner = getFloat(mk, "round_corner");
@@ -130,6 +133,25 @@ public class Key {
       }
     }
     return color;
+  }
+
+  private Drawable getColorDrawable(Map<String,Object> mk, String k){
+    Config config = Config.get();
+    Integer color = null;
+    if (mk.containsKey(k)) {
+      Object o = mk.get(k);
+      if (o instanceof Integer) {
+        color = (Integer) o;
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(color);
+        return gd;
+      } else if (o instanceof String){
+        Drawable d = config.getCurrentColorDrawable(o.toString());
+        if (d == null) d = config.drawableObject(o);
+        return d;
+      }
+    }
+    return null;
   }
 
   public final static int[] KEY_STATE_NORMAL_ON = { 
@@ -168,22 +190,25 @@ public class Key {
       KEY_STATE_NORMAL
   };
 
-  public Integer getBackColorForState(int[] drawableState) {
-    if (drawableState == KEY_STATE_NORMAL) return key_back_color;
-    if (drawableState == KEY_STATE_PRESSED) return hilited_key_back_color;
-    return null;
+  private boolean isNormal(int[] drawableState) {
+      return (drawableState == KEY_STATE_NORMAL
+      || drawableState == KEY_STATE_NORMAL_ON
+      || drawableState == KEY_STATE_NORMAL_OFF);
+  }
+
+  public Drawable getBackColorForState(int[] drawableState) {
+    if (isNormal(drawableState)) return key_back_color;
+    else return hilited_key_back_color;
   }
 
   public Integer getTextColorForState(int[] drawableState) {
-    if (drawableState == KEY_STATE_NORMAL) return key_text_color;
-    if (drawableState == KEY_STATE_PRESSED) return hilited_key_text_color;
-    return null;
+    if (isNormal(drawableState)) return key_text_color;
+    else return hilited_key_text_color;
   }
 
   public Integer getSymbolColorForState(int[] drawableState) {
-    if (drawableState == KEY_STATE_NORMAL) return key_symbol_color;
-    if (drawableState == KEY_STATE_PRESSED) return hilited_key_symbol_color;
-    return null;
+    if (isNormal(drawableState)) return key_symbol_color;
+    else return hilited_key_symbol_color;
   }
 
     /**
