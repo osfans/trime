@@ -33,7 +33,6 @@ public class Effect {
 
   private final Context context;
 
-  private boolean vibrateOn;
   private Vibrator vibrator;
   private AudioManager audioManager;
   private boolean isSpeakCommit, isSpeakKey;
@@ -45,9 +44,8 @@ public class Effect {
 
   public void reset() {
     Config config = Config.get();
-    vibrateOn = config.getBoolean("key_vibrate");
     duration = config.getInt("key_vibrate_duration");
-    if (vibrateOn && (vibrator == null)) {
+    if (duration > 0 && (vibrator == null)) {
       vibrator =
         (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
@@ -75,7 +73,7 @@ public class Effect {
   }
 
   public void vibrate() {
-    if (vibrateOn && (vibrator != null)) vibrator.vibrate(duration);
+    if (duration > 0 && (vibrator != null)) vibrator.vibrate(duration);
   }
 
   public void playSound(final int code) {
