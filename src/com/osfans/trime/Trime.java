@@ -294,6 +294,7 @@ public class Trime extends InputMethodService implements
     reset();
     if (update) updateRimeOption(); //不能在Rime.onMessage中調用，會卡死
     bindKeyboardToInputView();
+    updateComposing(); //切換主題時刷新候選
   }
 
   @Override
