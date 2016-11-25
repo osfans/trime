@@ -219,8 +219,9 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     // Variables for dealing with multiple pointers
     private int mOldPointerCount = 1;
-    private float mOldPointerX;
-    private float mOldPointerY;
+    private int[] mComboCodes = new int[10];
+    private int mComboCount = 0;
+    private boolean mComboMode = false;
 
     private static int REPEAT_INTERVAL = 50; // ~20 keys per second
     private static int REPEAT_START_DELAY = 400;
@@ -269,7 +270,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 case MSG_REPEAT:
                     if (repeatKey()) {
                         Message repeat = Message.obtain(this, MSG_REPEAT);
-                        sendMessageDelayed(repeat, REPEAT_INTERVAL);                        
+                        sendMessageDelayed(repeat, REPEAT_INTERVAL);
                     }
                     break;
                 case MSG_LONGPRESS:
@@ -846,6 +847,21 @@ public class KeyboardView extends View implements View.OnClickListener {
         return primaryIndex;
     }
 
+    private void releaseKey(int code) {
+        if (mComboMode) {
+            if (mComboCount > 9 ) mComboCount = 9;
+            mComboCodes[mComboCount++] = code;
+        } else {
+            mKeyboardActionListener.onRelease(code);
+            if (mComboCount > 0) {
+                for (int i = 0; i < mComboCount; i++) {
+                    mKeyboardActionListener.onRelease(mComboCodes[i]);
+                }
+                mComboCount = 0;
+            }
+        }
+    }
+
     private void detectAndSendKey(int index, int x, int y, long eventTime, int type) {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
@@ -858,7 +874,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 Arrays.fill(codes, NOT_A_KEY);
                 getKeyIndices(x, y, codes);
                 mKeyboardActionListener.onEvent(key.getEvent(type));
-                mKeyboardActionListener.onRelease(code);
+                releaseKey(code);
                 resetShifted();
             }
             mLastSentIndex = index;
@@ -1174,50 +1190,51 @@ public class KeyboardView extends View implements View.OnClickListener {
     public boolean onTouchEvent(MotionEvent me) {
         // Convert multi-pointer up/down events to single up/down events to 
         // deal with the typical multi-pointer behavior of two-thumb typing
+        final int index = me.getActionIndex();
         final int pointerCount = me.getPointerCount();
-        final int action = me.getAction();
+        final int action = me.getActionMasked();
         boolean result = false;
         final long now = me.getEventTime();
 
-        if (pointerCount != mOldPointerCount) {
-            if (pointerCount == 1) {
-                // Send a down event for the latest pointer
-                MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN,
-                        me.getX(), me.getY(), me.getMetaState());
-                result = onModifiedTouchEvent(down, false);
-                down.recycle();
-                // If it's an up action, then deliver the up as well.
-                if (action == MotionEvent.ACTION_UP) {
-                    result = onModifiedTouchEvent(me, true);
-                }
-            } else {
-                // Send an up event for the last pointer
-                MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP,
-                        mOldPointerX, mOldPointerY, me.getMetaState());
-                result = onModifiedTouchEvent(up, true);
-                up.recycle();
-            }
-        } else {
-            if (pointerCount == 1) {
-                result = onModifiedTouchEvent(me, false);
-                mOldPointerX = me.getX();
-                mOldPointerY = me.getY();
-            } else {
-                // Don't do anything when 2 pointers are down and moving.
-                result = true;
-            }
+        mComboMode = false;
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_CANCEL) {
+            mComboCount = 0;
+        } else if (pointerCount > 1 || action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_POINTER_UP) {
+            mComboMode = true;
         }
-        mOldPointerCount = pointerCount;
+
+        if (action == MotionEvent.ACTION_POINTER_UP || (mOldPointerCount > 1 && action == MotionEvent.ACTION_UP)) {
+            //並擊鬆開前的虛擬按鍵事件
+            MotionEvent ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_POINTER_DOWN,
+                me.getX(index), me.getY(index), me.getMetaState());
+            result = onModifiedTouchEvent(ev, false);
+            ev.recycle();
+        }
+
+        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+            //並擊中的按鍵事件，需要按鍵提示
+            MotionEvent ev = MotionEvent.obtain(now, now,
+                MotionEvent.ACTION_DOWN,
+                me.getX(index), me.getY(index), me.getMetaState());
+            result = onModifiedTouchEvent(ev, false);
+            ev.recycle();
+        } else {
+            result = onModifiedTouchEvent(me, false);
+        }
+
+        if (action != MotionEvent.ACTION_MOVE) mOldPointerCount = pointerCount;
         performClick();
         return result;
     }
 
     private boolean onModifiedTouchEvent(MotionEvent me, boolean possiblePoly) {
-        int touchX = (int) me.getX() - getPaddingLeft();
-        int touchY = (int) me.getY() - getPaddingTop();
+        final int pointerCount = me.getPointerCount();
+        final int index = me.getActionIndex();
+        int touchX = (int) me.getX(index) - getPaddingLeft();
+        int touchY = (int) me.getY(index) - getPaddingTop();
         if (touchY >= -mVerticalCorrection)
             touchY += mVerticalCorrection;
-        final int action = me.getAction();
+        final int action = me.getActionMasked();
         final long eventTime = me.getEventTime();
         int keyIndex = getKeyIndices(touchX, touchY, null);
         mPossiblePoly = possiblePoly;
@@ -1247,6 +1264,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
                 mAbortKey = false;
                 mStartX = touchX;
                 mStartY = touchY;
@@ -1259,6 +1277,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mDownKey = keyIndex;
                 mDownTime = me.getEventTime();
                 mLastMoveTime = mDownTime;
+                if (action == MotionEvent.ACTION_POINTER_DOWN) break; //並擊鬆開前的虛擬按鍵事件
                 checkMultiTap(eventTime, keyIndex);
                 mKeyboardActionListener.onPress(keyIndex != NOT_A_KEY ? 
                         mKeys[keyIndex].getCode() : 0);
@@ -1302,7 +1321,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                         }
                     }
                 }
-                if (!continueLongPress) {
+                if (!mComboMode && !continueLongPress) {
                     // Cancel old longpress
                     mHandler.removeMessages(MSG_LONGPRESS);
                     // Start new longpress if key has changed
@@ -1316,6 +1335,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 break;
 
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
                 removeMessages();
                 if (keyIndex == mCurrentKey) {
                     mCurrentKeyTime += eventTime - mLastMoveTime;
@@ -1336,7 +1356,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 Arrays.fill(mKeyIndices, NOT_A_KEY);
                 // If we're not on a repeating key (which sends on a DOWN event)
                 if (mRepeatKeyIndex == NOT_A_KEY && !mMiniKeyboardOnScreen && !mAbortKey) {
-                    detectAndSendKey(mCurrentKey, touchX, touchY, eventTime);
+                    detectAndSendKey(mCurrentKey, touchX, touchY, eventTime,
+                        (mOldPointerCount > 1 || mComboMode) ? Key.COMBO : 0);
                 }
                 invalidateKey(keyIndex);
                 mRepeatKeyIndex = NOT_A_KEY;

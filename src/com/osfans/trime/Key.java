@@ -36,14 +36,15 @@ public class Key {
   private Keyboard mKeyboard;
   public Event ascii, composing, has_menu, paging;
   private boolean send_bindings = true;
-  public String[] eventTypes = new String[]{"click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down"};
+  public String[] eventTypes = new String[]{"click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"};
   public static final int CLICK = 0;
   public static final int LONG_CLICK = 1;
   public static final int SWIPE_LEFT = 2;
   public static final int SWIPE_RIGHT = 3;
   public static final int SWIPE_UP = 4;
   public static final int SWIPE_DOWN = 5;
-  public static final int EVENT_NUM = 6;
+  public static final int COMBO = 6;
+  public static final int EVENT_NUM = 7;
   public Event[] events = new Event[EVENT_NUM];
 
   public int width, height, gap, edgeFlags;

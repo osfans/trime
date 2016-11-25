@@ -716,6 +716,7 @@ android_keys:
     composing: 輸入狀態標籤
     #always: 始終
     #hover: 滑過
+    combo: 並擊
     click: 單按
     long_click: 長按
     #double_click: 雙按
