@@ -2,7 +2,8 @@ language: android
 script:
   - git fetch origin --tags
   - ant clean
-  - ant release
+  - rm assets/rime/*.trime.yaml build.gradle
+  - ant release lint
 git:
   submodules: false
 jdk:
