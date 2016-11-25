@@ -1,5 +1,5 @@
 # 同文安卓輸入法平臺/Trime/android-rime
-[![自動編譯](https://travis-ci.org/osfans/trime.svg?branch=master)](https://travis-ci.org/osfans/trime)
+[![自動編譯](https://travis-ci.org/osfans/trime.svg?branch=develop)](https://travis-ci.org/osfans/trime)
 
 =====
 源於開源的[注音倉頡輸入法]前端，
