@@ -116,7 +116,7 @@ public class Trime extends InputMethodService implements
     }
 
     void cancelShowing() {
-      if (mFloatingWindow.isShowing()) mFloatingWindow.dismiss();
+      if (null != mFloatingWindow && mFloatingWindow.isShowing()) mFloatingWindow.dismiss();
       removeCallbacks(this);
     }
 
@@ -246,10 +246,7 @@ public class Trime extends InputMethodService implements
 
   private void hideComposition() {
     if (movable.contentEquals("once")) winPos = mConfig.getWinPos();
-    if (null != mFloatingWindow && mFloatingWindow.isShowing()) {
-        mFloatingWindowTimer.cancelShowing();
-        mFloatingWindow.dismiss();
-    }
+    mFloatingWindowTimer.cancelShowing();
   }
 
   private void loadBackground() {
