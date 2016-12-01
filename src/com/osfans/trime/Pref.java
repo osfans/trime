@@ -19,11 +19,9 @@ package com.osfans.trime;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.ListPreference;
-import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
@@ -49,18 +47,9 @@ public class Pref extends PreferenceActivity {
   private final String licenseUrl = "file:///android_asset/licensing.html";
   private ProgressDialog mProgressDialog;
 
-  public String getVersion() {
-    try {
-      return this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-    } catch (Exception e) {
-      return null;
-    }
-  }
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    boolean is_dark = prefs.getBoolean("pref_ui", false);
+    boolean is_dark = Function.getPref(this).getBoolean("pref_ui", false);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       setTheme(is_dark ? 0x01030224 : 0x01030237);
     } else {
@@ -74,7 +63,7 @@ public class Pref extends PreferenceActivity {
     pref = findPreference("pref_opencc_ver");
     pref.setSummary(Rime.get_opencc_version());
     pref = findPreference("pref_ver");
-    pref.setSummary(getVersion());
+    pref.setSummary(Function.getVersion(this));
     pref = findPreference("pref_enable");
     if (isEnabled()) getPreferenceScreen().removePreference(pref);
     mProgressDialog = new ProgressDialog(this);
@@ -97,22 +86,6 @@ public class Pref extends PreferenceActivity {
       .setTitle(R.string.ime_name)
       .setView(licenseView)
       .show();
-  }
-
-  public static void check() {
-    Rime.check(true);
-    System.exit(0); //清理內存
-  }
-
-  public static void deploy() {
-    Rime.destroy();
-    Rime.get(true);
-    //Trime trime = Trime.getService();
-    //if (trime != null) trime.invalidate();
-  }
-
-  public void sync() {
-    boolean b = Rime.syncUserData();
   }
 
   public boolean isEnabled() {
@@ -158,7 +131,7 @@ public class Pref extends PreferenceActivity {
         new SchemaDialog(this);
         return true;
       case "pref_maintenance": //維護
-        check();
+        Function.check();
         return true;
       case "pref_deploy_opencc": //部署OpenCC
         deployOpencc();
@@ -170,7 +143,7 @@ public class Pref extends PreferenceActivity {
           @Override
           public void run() {
             try{
-              deploy();
+              Function.deploy();
             }
             catch(Exception e){
             }
@@ -188,7 +161,7 @@ public class Pref extends PreferenceActivity {
           @Override
           public void run() {
             try{
-              sync();
+              Function.sync();
             }
             catch(Exception e){
             }

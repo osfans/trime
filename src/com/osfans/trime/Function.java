@@ -23,6 +23,8 @@ import android.view.KeyEvent;
 import android.os.Build;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -104,5 +106,33 @@ public class Function {
       if (o != null) return o.toString();
     }
     return "";
+  }
+
+  public static void check() {
+    Rime.check(true);
+    System.exit(0); //清理內存
+  }
+
+  public static void deploy() {
+    Rime.destroy();
+    Rime.get(true);
+    //Trime trime = Trime.getService();
+    //if (trime != null) trime.invalidate();
+  }
+
+  public static void sync() {
+    Rime.syncUserData();
+  }
+
+  public static String getVersion(Context context) {
+    try {
+      return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public static SharedPreferences getPref(Context context) {
+    return PreferenceManager.getDefaultSharedPreferences(context);
   }
 }

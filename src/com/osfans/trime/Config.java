@@ -68,6 +68,7 @@ public class Config {
   public String getTheme() {
     return themeName;
   }
+
   public static void prepareRime(Context context) {
     boolean b = new File(USER_DATA_DIR).exists();
     if (b) {

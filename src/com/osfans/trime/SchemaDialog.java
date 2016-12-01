@@ -69,7 +69,7 @@ public class SchemaDialog extends AsyncTask{
       String[] schema_id_list = new String[n];
       checkedIds.toArray(schema_id_list);
       Rime.select_schemas(schema_id_list);
-      Pref.deploy();
+      Function.deploy();
     }
   }
 

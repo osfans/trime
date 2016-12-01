@@ -32,7 +32,7 @@ public class DebugCommandReceiver extends BroadcastReceiver {
 		
 		switch(command){
 		case COMMAND_DEPLOY:
-			Pref.deploy();
+			Function.deploy();
 			break;
 		}
 	}
