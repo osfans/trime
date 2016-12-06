@@ -137,6 +137,10 @@ public class Event {
     return Rime.get_keycode_by_name(s);
   }
 
+  public static String getCodeText(int code) {
+    return (code >= 280) ? Key.androidKeys.get(code) : "";
+  }
+
   public static int[] getRimeEvent(int code, int mask) {
     int i = getRimeCode(code);
     int m = 0;

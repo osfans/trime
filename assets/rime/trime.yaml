@@ -708,7 +708,12 @@ android_keys:
     TV_INPUT_COMPOSITE_1, TV_INPUT_COMPOSITE_2, TV_INPUT_COMPONENT_1, TV_INPUT_COMPONENT_2, TV_INPUT_VGA_1,
     TV_AUDIO_DESCRIPTION, TV_AUDIO_DESCRIPTION_MIX_UP, TV_AUDIO_DESCRIPTION_MIX_DOWN,
     TV_ZOOM_MODE, TV_CONTENTS_MENU, TV_MEDIA_CONTEXT_MENU, TV_TIMER_PROGRAMMING,
-    Help, NAVIGATE_PREVIOUS, NAVIGATE_NEXT, NAVIGATE_IN, NAVIGATE_OUT]
+    Help, NAVIGATE_PREVIOUS, NAVIGATE_NEXT, NAVIGATE_IN, NAVIGATE_OUT,
+    STEM_PRIMARY, STEM_1, STEM_2, STEM_3,
+    Pointer_UpLeft, Pointer_DownLeft, Pointer_UpRight, Pointer_DownRight,
+    MEDIA_SKIP_FORWARD, MEDIA_SKIP_BACKWARD, MEDIA_STEP_FORWARD, MEDIA_STEP_BACKWARD,
+    SOFT_SLEEP, CUT, COPY, PASTE, LAST_KEYCODE,
+    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
   when:
     ascii: 西文標籤
     paging: 翻頁標籤
@@ -983,8 +988,8 @@ preset_keyboards:
     - {click: 'y', long_click: '^', swipe_up: 6}
     - {click: 'u', long_click: '&', swipe_up: 7}
     - {click: 'i', long_click: '*', swipe_up: 8}
-    - {click: 'o', long_click: '(', swipe_up: 9}
-    - {click: 'p', long_click: ')', swipe_up: 0}
+    - {click: 'o', long_click: '(){Left}', swipe_up: 9}
+    - {click: 'p', long_click: 'Hide', swipe_up: 0}
     - {width: 5}
     - {click: 'a', long_click: select_all, swipe_left: Left, swipe_right: Right, swipe_up: Up, swipe_down: Down}
     - {click: 's', long_click: '~', swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}

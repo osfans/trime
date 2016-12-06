@@ -711,8 +711,10 @@ public class Trime extends InputMethodService implements
     } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, primaryCode)) {
       Log.info("open category");
     } else {
-      Log.info("send Key");
-      sendDownUpKeyEvents(primaryCode);
+      String s = Event.getCodeText(primaryCode);
+      //Log.info("send Key="+primaryCode+",s="+s);
+      if (!Function.isEmpty(s)) commitText(s);
+      else sendDownUpKeyEvents(primaryCode);
     }
   }
 
