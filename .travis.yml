@@ -8,6 +8,10 @@ git:
   submodules: false
 jdk:
     - oraclejdk8
+licenses:
+    - 'android-sdk-preview-license-.+'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
 android:
   components:
     - tools # to get the new `repository-11.xml`
