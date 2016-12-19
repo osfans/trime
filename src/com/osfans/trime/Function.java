@@ -135,4 +135,17 @@ public class Function {
   public static SharedPreferences getPref(Context context) {
     return PreferenceManager.getDefaultSharedPreferences(context);
   }
+
+  public static boolean isDiffVer(Context context) {
+    String version = getVersion(context);
+    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+    String pref_ver = pref.getString("version_name", "");
+    boolean isDiff = !version.contentEquals(pref_ver);
+    if (isDiff) {
+      SharedPreferences.Editor edit = pref.edit();
+      edit.putString("version_name", version);
+      edit.commit();
+    }
+    return isDiff;
+  }
 }

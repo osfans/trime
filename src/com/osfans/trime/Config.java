@@ -70,13 +70,16 @@ public class Config {
   }
 
   public static void prepareRime(Context context) {
-    boolean b = new File(USER_DATA_DIR).exists();
-    if (b) {
+    boolean isExist = new File(USER_DATA_DIR).exists();
+    boolean isOverwrite = Function.isDiffVer(context);
+    if (isOverwrite) {
+      copyFileOrDir(context, RIME, true);
+    } else if (isExist) {
       copyFileOrDir(context, RIME + "/" + defaultFile, false);
     } else {
       copyFileOrDir(context, RIME, false);
     }
-    Rime.get(!b);
+    Rime.get(isOverwrite || !isExist);
   }
 
   public static String[] getThemeKeys() {
