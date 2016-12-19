@@ -340,21 +340,23 @@ public class Keyboard {
     int rowHeight = defaultHeight;
     List<Map<String,Object>> lm = (List<Map<String,Object>>)m.get("keys");
 
-    int x = mDefaultHorizontalGap/2;
-    int y = mDefaultVerticalGap;
+    int h_gap = m.containsKey("horizontal_gap") ? Key.getPixel(m, "horizontal_gap") : mDefaultHorizontalGap;
+    int v_gap = m.containsKey("vertical_gap") ? Key.getPixel(m, "vertical_gap") : mDefaultVerticalGap;
+    int x = h_gap/2;
+    int y = v_gap;
     int row = 0;
     int column = 0;
     mTotalWidth = 0;
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String,Object> mk: lm) {
-      int gap = mDefaultHorizontalGap;
+      int gap = h_gap;
       int w = (int)(Key.getDouble(mk, "width", 0) * mDisplayWidth / 100);
       if (w == 0 && mk.containsKey("click")) w = defaultWidth;
       w -= gap;
       if (column >= maxColumns || x + w > mDisplayWidth) {
         x = gap/2;
-        y += mDefaultVerticalGap + rowHeight;
+        y += v_gap + rowHeight;
         column = 0;
         row++;
         if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
@@ -389,7 +391,7 @@ public class Keyboard {
       }
     }
     if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
-    mTotalHeight = y + rowHeight + mDefaultVerticalGap;
+    mTotalHeight = y + rowHeight + v_gap;
     for (Key key: mKeys) {
       if (key.column == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
       if (key.row == 0) key.edgeFlags |= Keyboard.EDGE_TOP;

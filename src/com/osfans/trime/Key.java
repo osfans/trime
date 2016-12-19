@@ -117,7 +117,7 @@ public class Key {
     round_corner = getFloat(mk, "round_corner");
   }
 
-  private Integer getPixel(Map<String,Object> mk, String k) {
+  public static Integer getPixel(Map<String,Object> mk, String k) {
     Object o = getValue(mk, k, null);
     if (o instanceof Integer) return Config.getPixel(((Integer)o).floatValue());
     return null;
