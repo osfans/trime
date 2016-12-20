@@ -22,7 +22,8 @@ icon: icon.svg
 apk: opencc-data android
 	@mkdir -p res/values-zh-rCN/
 	@opencc -c tw2sp -i res/values/strings.xml -o res/values-zh-rCN/strings.xml
-	@sed -i '/translatable="false"/d' res/values-zh-rCN/strings.xml
+	@grep -v "translatable=\"false\"" res/values-zh-rCN/strings.xml > res/values-zh-rCN/strings_bak.xml
+	@mv res/values-zh-rCN/strings_bak.xml res/values-zh-rCN/strings.xml
 	ant release
 
 opencc-data:
