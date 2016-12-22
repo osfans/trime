@@ -25,14 +25,78 @@
 - 所以，TRIME是Tongwen RIME或是ThaeRvInputMEthod的縮寫。
 
 ## 編譯/Build
+
+  Clone the project, **pay attention** it costs long time to clone the project.
+  You should wait a long time to complete, and make sure your disk is big enough to hold the source.
+  Especially the boost repository, you can change hosts to speed the procedure
+  (search hosts in github).
+  ```bash
+  cd ${your_folder}
+  git clone --recursive https://github.com/osfans/trime.git
+  ```
+
 - [Arch Linux](https://www.archlinux.org/)
-```bash
-yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} apache-ant
-make apk
-```
+  ```bash
+   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} apache-ant
+   make apk
+  ```
+
+- Linux other distribution
+
+  Use the package manager to install the dev environment and Android SDK NDK.
+
+- [Windows Msys2](https://lug.ustc.edu.cn/wiki/mirrors/help/msys2)
+
+  I'm try to build it and someone can improve this guide.
+
+- macOS
+
+  Install Android [SDK](https://developer.android.com/studio/index.html)
+  and [NDK](https://developer.android.com/ndk/index.html)
+  (You'd better install it by Android Studio or manually instead of by Homebrew).
+
+  Install [Homebrew](http://brew.sh/) and setting
+  [USTC mirror](https://github.com/ustclug/mirrorhelp/commit/d1cfccc1bba19d0c122f4e440b0f3ed24460830e) of it.
+
+  Install the basic dev environment and use brew to install others
+  (Set the [mirror](https://mirrors.ustc.edu.cn/) by this
+  [way](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git)
+   can speed up installation).
+
+  ```bash
+   brew install automake cmake opencc boost python ant snappy
+  ```
+
+  Setting the environment in ~/.bashrc if you use bash like this
+  ```bash
+   # Android
+   export ANDROID_HOME="your_android_sdk"
+   export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+   export ANDROID_NDK="your_android_ndk"
+  ```
+
+  Set the **boost** header folder
+  ```bash
+   cd $trime_folder/jni/include
+   ln -s $your_folder_boost boost
+  ```
+
+  (Optionally)Set the libreadline.dylib
+
+  If you have the libreadline problem in make process, you should make
+  a soft link to your local libreadline.dylib and google it.
+
+  After the project is ready go to the folder and build it yourself.
+  ```bash
+   cd $trime_folder
+   make apk
+  ```
+
+  If you have problem you can google or make issues or
+  [discussion](http://www.coolapk.com/apk/com.osfans.trime).
 
 ## 許可協議/License
-[GPLv3](LICENSE)
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## 第三方庫/3rd Party Library
 - [android-cmake](https://github.com/taka-no-me/android-cmake) (BSD 3-Clause License)
