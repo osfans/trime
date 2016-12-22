@@ -269,9 +269,43 @@ jboolean get_status(JNIEnv *env, jobject thiz, jint session_id, jobject jstatus)
   return r;
 }
 
+static bool is_save_option(const char* p) {
+  bool is_save = false;
+  std::string option_name(p);
+  if (option_name.empty()) return is_save;
+  RimeConfig config = {0};
+  bool b = RimeConfigOpen("default", &config);
+  if (!b) return is_save;
+  const char *key = "switcher/save_options";
+  RimeConfigIterator iter = {0};
+  RimeConfigBeginList(&iter, &config, key);
+  while(RimeConfigNext(&iter)) {
+    std::string item(RimeConfigGetCString(&config, iter.path));
+    if (option_name == item) {
+      is_save = true;
+      break;
+    }
+  }
+  RimeConfigEnd(&iter);
+  RimeConfigClose(&config);
+  return is_save;
+}
+
 // runtime options
 void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboolean value) {
   const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
+  std::string option_name(s);
+  RimeConfig config = {0};
+  bool b;
+  if (is_save_option(s)) {
+    b = RimeConfigOpen("user", &config);
+    if (b) {
+      std::string str("var/option/");
+      str += option_name;
+      b = RimeConfigSetBool(&config, str.c_str(), value);
+    }
+    RimeConfigClose(&config);
+  }
   RimeSetOption(session_id, s, value);
   env->ReleaseStringUTFChars(option, s);
 }
