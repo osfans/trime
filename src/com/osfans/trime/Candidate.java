@@ -125,10 +125,11 @@ public class Candidate extends View {
   }
 
   /**
-   * Highlight the first candidate as the default candidate.
+   * 刷新候選列表
+   * @param start 候選的起始編號
    */
-  public void setText(int i) {
-    start_num = i;
+  public void setText(int start) {
+    start_num = start;
     removeHighlight();
     updateCandidateWidth();
     if (getCandNum() > 0) {

@@ -117,6 +117,7 @@
         locale="zh_CN"
         charset="utf-8">
             <arg value="-notimestamp" />
+            <arg value="-Xdoclint:none" />
         </javadoc>
     </target>
 </project>

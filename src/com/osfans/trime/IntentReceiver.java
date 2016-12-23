@@ -25,7 +25,6 @@ import android.util.Log;
 public class IntentReceiver extends BroadcastReceiver {
   private static final String TAG = "IntentReceiver";
   public static final String COMMAND_DEPLOY = "com.osfans.trime.deploy";
-  public static final String COMMAND_SYNC = "com.osfans.trime.sync";
 
   @Override
   public void onReceive(Context ctx, Intent intent) {

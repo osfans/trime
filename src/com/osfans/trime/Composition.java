@@ -131,7 +131,7 @@ public class Composition extends TextView {
       private float letterSpacing;
 
       /**
-       * @param letterSpacing
+       * @param letterSpacing 字符間距
        */
       public LetterSpacingSpan(float letterSpacing) {
           this.letterSpacing = letterSpacing;

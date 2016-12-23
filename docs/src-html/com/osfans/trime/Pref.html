@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh">
+<head>
+<title>源代碼</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * Copyright 2010 Google Inc.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Licensed under the Apache License, Version 2.0 (the "License");<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * you may not use this file except in compliance with the License.<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * You may obtain a copy of the License at<a name="line.6"></a>
+<span class="sourceLineNo">007</span> *<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *      http://www.apache.org/licenses/LICENSE-2.0<a name="line.8"></a>
+<span class="sourceLineNo">009</span> *<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * Unless required by applicable law or agreed to in writing, software<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * distributed under the License is distributed on an "AS IS" BASIS,<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing permissions and<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> */<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>package com.osfans.trime;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>import android.app.AlertDialog;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import android.app.ProgressDialog;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import android.content.DialogInterface;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import android.os.Bundle;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import android.preference.Preference;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import android.preference.ListPreference;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import android.preference.Preference.OnPreferenceChangeListener;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import android.preference.Preference.OnPreferenceClickListener;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import android.preference.PreferenceActivity;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import android.preference.PreferenceScreen;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import android.view.View;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import android.webkit.WebView;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import android.webkit.WebViewClient;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import android.util.Log;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import android.content.Intent;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import android.provider.Settings;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import android.view.inputmethod.InputMethodManager;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import android.view.inputmethod.InputMethodInfo;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import android.Manifest;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import android.app.Activity;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import android.content.pm.PackageManager;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import android.os.Build.VERSION_CODES;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import android.os.Build.VERSION;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import android.annotation.TargetApi;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>/** 配置輸入法 */<a name="line.44"></a>
+<span class="sourceLineNo">045</span>public class Pref extends PreferenceActivity {<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>  private final String licenseUrl = "file:///android_asset/licensing.html";<a name="line.47"></a>
+<span class="sourceLineNo">048</span>  private ProgressDialog mProgressDialog;<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>  @Override<a name="line.50"></a>
+<span class="sourceLineNo">051</span>  protected void onCreate(Bundle savedInstanceState) {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    if (VERSION.SDK_INT &gt;= VERSION_CODES.M) requestPermission();<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    boolean is_dark = Function.getPref(this).getBoolean("pref_ui", false);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    if (VERSION.SDK_INT &gt;= VERSION_CODES.LOLLIPOP) {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>      setTheme(is_dark ? 0x01030224 : 0x01030237);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    } else {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>      setTheme(is_dark ? android.R.style.Theme_Holo : android.R.style.Theme_Holo_Light);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    }<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    super.onCreate(savedInstanceState);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    addPreferencesFromResource(R.xml.prefs);<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>    Preference pref = findPreference("pref_librime_ver");<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    pref.setSummary(Rime.get_librime_version());<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    pref = findPreference("pref_opencc_ver");<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    pref.setSummary(Rime.get_opencc_version());<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    pref = findPreference("pref_ver");<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    pref.setSummary(Function.getVersion(this));<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    pref = findPreference("pref_enable");<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    if (isEnabled()) getPreferenceScreen().removePreference(pref);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    mProgressDialog = new ProgressDialog(this);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    mProgressDialog.setCancelable(false);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>  }<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>  private void showLicenseDialog() {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    View licenseView = View.inflate(this, R.layout.licensing, null);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    WebView webView = (WebView) licenseView.findViewById(R.id.license_view);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    webView.setWebViewClient(new WebViewClient() {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>      @Override<a name="line.78"></a>
+<span class="sourceLineNo">079</span>      public boolean shouldOverrideUrlLoading(WebView view, String url) {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        // Disable all links open from this web view.<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        return true;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>      }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    });<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    webView.loadUrl(licenseUrl);<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>    new AlertDialog.Builder(this)<a name="line.86"></a>
+<span class="sourceLineNo">087</span>      .setTitle(R.string.ime_name)<a name="line.87"></a>
+<span class="sourceLineNo">088</span>      .setView(licenseView)<a name="line.88"></a>
+<span class="sourceLineNo">089</span>      .show();<a name="line.89"></a>
+<span class="sourceLineNo">090</span>  }<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>  public boolean isEnabled() {<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    boolean enabled = false;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    for(InputMethodInfo i: ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).getEnabledInputMethodList()) {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>      if(getPackageName().contentEquals(i.getPackageName())) {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        enabled = true;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        break;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>      }<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    }<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    return enabled;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>  }<a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>  @TargetApi(VERSION_CODES.M)<a name="line.103"></a>
+<span class="sourceLineNo">104</span>  public void requestPermission() {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>      requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>  }<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>  public void deployOpencc() {<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    boolean b = Config.deployOpencc();<a name="line.111"></a>
+<span class="sourceLineNo">112</span>  }<a name="line.112"></a>
+<span class="sourceLineNo">113</span><a name="line.113"></a>
+<span class="sourceLineNo">114</span>  @Override<a name="line.114"></a>
+<span class="sourceLineNo">115</span>  public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    boolean b;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    switch (preference.getKey()) {<a name="line.117"></a>
+<span class="sourceLineNo">118</span>      case "pref_enable": //啓用<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        if (!isEnabled()) startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        return true;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>      case "pref_select": //切換<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        return true;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>      case "pref_themes": //主題<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        new ThemeDlg(this);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        return true;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>      case "pref_colors": //配色<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        new ColorDialog(this).show();<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        return true;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>      case "pref_schemas": //方案<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        new SchemaDialog(this);<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        return true;<a name="line.132"></a>
+<span class="sourceLineNo">133</span>      case "pref_maintenance": //維護<a name="line.133"></a>
+<span class="sourceLineNo">134</span>        Function.check();<a name="line.134"></a>
+<span class="sourceLineNo">135</span>        return true;<a name="line.135"></a>
+<span class="sourceLineNo">136</span>      case "pref_deploy_opencc": //部署OpenCC<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        deployOpencc();<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        return true;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>      case "pref_deploy": //部署<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        mProgressDialog.setMessage(getString(R.string.deploy_progress));<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        mProgressDialog.show();<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        new Thread(new Runnable(){<a name="line.142"></a>
+<span class="sourceLineNo">143</span>          @Override<a name="line.143"></a>
+<span class="sourceLineNo">144</span>          public void run() {<a name="line.144"></a>
+<span class="sourceLineNo">145</span>            try{<a name="line.145"></a>
+<span class="sourceLineNo">146</span>              Function.deploy();<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            }<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            catch(Exception e){<a name="line.148"></a>
+<span class="sourceLineNo">149</span>            }<a name="line.149"></a>
+<span class="sourceLineNo">150</span>            finally{<a name="line.150"></a>
+<span class="sourceLineNo">151</span>              mProgressDialog.dismiss();<a name="line.151"></a>
+<span class="sourceLineNo">152</span>              System.exit(0); //清理內存<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            }<a name="line.153"></a>
+<span class="sourceLineNo">154</span>          }<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        }).start();<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        return true;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>      case "pref_sync": //同步<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        mProgressDialog.setMessage(getString(R.string.sync_progress));<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        mProgressDialog.show();<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        new Thread(new Runnable(){<a name="line.160"></a>
+<span class="sourceLineNo">161</span>          @Override<a name="line.161"></a>
+<span class="sourceLineNo">162</span>          public void run() {<a name="line.162"></a>
+<span class="sourceLineNo">163</span>            try{<a name="line.163"></a>
+<span class="sourceLineNo">164</span>              Function.sync();<a name="line.164"></a>
+<span class="sourceLineNo">165</span>            }<a name="line.165"></a>
+<span class="sourceLineNo">166</span>            catch(Exception e){<a name="line.166"></a>
+<span class="sourceLineNo">167</span>            }<a name="line.167"></a>
+<span class="sourceLineNo">168</span>            finally{<a name="line.168"></a>
+<span class="sourceLineNo">169</span>              mProgressDialog.dismiss();<a name="line.169"></a>
+<span class="sourceLineNo">170</span>              System.exit(0); //清理內存<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            }<a name="line.171"></a>
+<span class="sourceLineNo">172</span>          }<a name="line.172"></a>
+<span class="sourceLineNo">173</span>        }).start();<a name="line.173"></a>
+<span class="sourceLineNo">174</span>        return true;<a name="line.174"></a>
+<span class="sourceLineNo">175</span>      case "pref_reset": //回廠<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        new ResetDialog(this).show();<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        return true;<a name="line.177"></a>
+<span class="sourceLineNo">178</span>      case "pref_licensing": //資訊<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        showLicenseDialog();<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        return true;<a name="line.180"></a>
+<span class="sourceLineNo">181</span>      case "pref_ui": //色調<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        finish();<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        Function.showPrefDialog(this);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        return true;<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    }<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    return false;<a name="line.186"></a>
+<span class="sourceLineNo">187</span>  }<a name="line.187"></a>
+<span class="sourceLineNo">188</span>}<a name="line.188"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

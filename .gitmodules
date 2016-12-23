@@ -25,7 +25,3 @@
 [submodule "jni/libiconv"]
 	path = jni/libiconv
 	url = https://github.com/zhengyi0802/android-external-libiconv.git
-[submodule "docs"]
-	path = docs
-	url = https://github.com/osfans/trime.git
-	branch = gh-pages
