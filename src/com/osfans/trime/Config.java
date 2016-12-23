@@ -79,7 +79,7 @@ public class Config {
     } else {
       copyFileOrDir(context, RIME, false);
     }
-    Rime.get(isOverwrite || !isExist);
+    Rime.get(!isExist); //覆蓋時不強制部署
   }
 
   public static String[] getThemeKeys() {
