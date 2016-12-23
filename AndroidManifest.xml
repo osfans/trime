@@ -20,6 +20,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
         package="com.osfans.trime" android:versionCode="20161129">
     <uses-sdk android:minSdkVersion="14"  android:targetSdkVersion="25"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -44,13 +45,15 @@
             </intent-filter>
         </activity>
         
-         <receiver android:name="DebugCommandReceiver"
-             	   android:enabled="true"
-            	   android:exported = "true">
+        <receiver android:name="IntentReceiver" >
             <intent-filter>
-                <action android:name="com.osfans.trime.deploy"></action>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.osfans.trime.deploy" />
             </intent-filter>
         </receiver>
-        
     </application>
 </manifest>
