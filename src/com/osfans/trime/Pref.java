@@ -49,6 +49,7 @@ public class Pref extends PreferenceActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    if (VERSION.SDK_INT >= VERSION_CODES.M) requestPermission();
     boolean is_dark = Function.getPref(this).getBoolean("pref_ui", false);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       setTheme(is_dark ? 0x01030224 : 0x01030237);
@@ -115,7 +116,6 @@ public class Pref extends PreferenceActivity {
     boolean b;
     switch (preference.getKey()) {
       case "pref_enable": //啓用
-        if (VERSION.SDK_INT >= VERSION_CODES.M) requestPermission();
         if (!isEnabled()) startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
         return true;
       case "pref_select": //切換
