@@ -102,7 +102,8 @@ public class SchemaDialog extends AsyncTask{
   private void initSchema() {
     schemas = Rime.get_available_schema_list();
     if (schemas == null || schemas.size() == 0) {
-      Toast.makeText(mContext, R.string.no_schemas, Toast.LENGTH_LONG).show();
+      //不能在線程中使用Toast
+      //Toast.makeText(mContext, R.string.no_schemas, Toast.LENGTH_LONG).show();
       return;
     }
     Collections.sort(schemas, new SortByName());
@@ -129,16 +130,20 @@ public class SchemaDialog extends AsyncTask{
   }
 
   public void showDialog() {
-    mDialog = new AlertDialog.Builder(mContext)
+    AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
       .setTitle(R.string.pref_schemas)
       .setCancelable(true)
-      .setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
+      .setPositiveButton(android.R.string.ok, null);
+    if (schemas == null || schemas.size() == 0) {
+      builder.setMessage(R.string.no_schemas);
+    } else {
+      builder.setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
         public void onClick(DialogInterface di, int id, boolean isChecked) {
           checkedSchemaItems[id] = isChecked;
         }
-      })
-      .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+      });
+      builder.setNegativeButton(android.R.string.cancel, null);
+      builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface di, int id) {
           mProgressDialog.setMessage(mContext.getString(R.string.deploy_progress));
           mProgressDialog.show();
@@ -157,7 +162,9 @@ public class SchemaDialog extends AsyncTask{
             }
           }).start();
         }
-      }).create();
+      });
+    }
+    mDialog = builder.create();
     if (mToken != null) {
       Window window = mDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();
