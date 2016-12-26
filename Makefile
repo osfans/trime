@@ -52,6 +52,7 @@ android:
 		-DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
 		-DANDROID_STL=c++_static \
 		-DANDROID_PLATFORM=android-14 \
+		-DANDROID_TOOLCHAIN=gcc \
 		-DANDROID_ABI=armeabi \
 		-DLIBRARY_OUTPUT_PATH=../libs/armeabi/ -Hjni
 	${MAKE} -C build-android rime_jni

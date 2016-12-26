@@ -7,4 +7,4 @@ APP_CFLAGS := -Ijni/include
 APP_CPPFLAGS := -fpic -fexceptions -frtti
 APP_GNUSTL_FORCE_CPP_FEATURES := pic exceptions rtti
 
-NDK_TOOLCHAIN_VERSION := clang
+#NDK_TOOLCHAIN_VERSION := 4.9
