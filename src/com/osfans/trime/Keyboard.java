@@ -60,6 +60,9 @@ public class Keyboard {
     /** 默認行距 */
     private int mDefaultVerticalGap;
 
+    /** 默認按鍵圓角半徑 */
+    private float mRoundCorner;
+
     /** 鍵盤的Shift鍵是否按住 */
     private boolean mShifted;
     
@@ -118,6 +121,7 @@ public class Keyboard {
       mDefaultHeight = config.getPixel("key_height");
       mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
       mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
+      mRoundCorner = config.getFloat("round_corner");
 
       mKeys = new ArrayList<Key>();
       mComposingKeys = new ArrayList<Key>();
@@ -340,23 +344,24 @@ public class Keyboard {
     int rowHeight = defaultHeight;
     List<Map<String,Object>> lm = (List<Map<String,Object>>)m.get("keys");
 
-    int h_gap = m.containsKey("horizontal_gap") ? Key.getPixel(m, "horizontal_gap") : mDefaultHorizontalGap;
-    int v_gap = m.containsKey("vertical_gap") ? Key.getPixel(m, "vertical_gap") : mDefaultVerticalGap;
-    int x = h_gap/2;
-    int y = v_gap;
+    if (m.containsKey("horizontal_gap")) mDefaultHorizontalGap = Key.getPixel(m, "horizontal_gap");
+    if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Key.getPixel(m, "vertical_gap");
+    if (m.containsKey("round_corner")) mRoundCorner = Key.getFloat(m, "round_corner");
+    int x = mDefaultHorizontalGap/2;
+    int y = mDefaultVerticalGap;
     int row = 0;
     int column = 0;
     mTotalWidth = 0;
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String,Object> mk: lm) {
-      int gap = h_gap;
+      int gap = mDefaultHorizontalGap;
       int w = (int)(Key.getDouble(mk, "width", 0) * mDisplayWidth / 100);
       if (w == 0 && mk.containsKey("click")) w = defaultWidth;
       w -= gap;
       if (column >= maxColumns || x + w > mDisplayWidth) {
         x = gap/2;
-        y += v_gap + rowHeight;
+        y += mDefaultVerticalGap + rowHeight;
         column = 0;
         row++;
         if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
@@ -391,7 +396,7 @@ public class Keyboard {
       }
     }
     if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
-    mTotalHeight = y + rowHeight + v_gap;
+    mTotalHeight = y + rowHeight + mDefaultVerticalGap;
     for (Key key: mKeys) {
       if (key.column == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
       if (key.row == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
@@ -401,5 +406,9 @@ public class Keyboard {
 
   public boolean getAsciiMode() {
     return mAsciiMode != 0;
+  }
+
+  public float getRoundCorner() {
+    return mRoundCorner;
   }
 }

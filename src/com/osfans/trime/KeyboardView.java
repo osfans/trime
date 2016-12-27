@@ -321,14 +321,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (color != null) mPreviewText.setTextColor(color);
         Integer previewBackColor = config.getColor("preview_back_color");
         if (previewBackColor != null) {
-            if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
-              GradientDrawable background = new GradientDrawable();
-              background.setColor(previewBackColor);
-              background.setCornerRadius(mRoundCorner);
-              mPreviewText.setBackground(background);
-            } else {
-              mPreviewText.setBackgroundColor(previewBackColor); //不支持圓角
-            }
+          GradientDrawable background = new GradientDrawable();
+          background.setColor(previewBackColor);
+          background.setCornerRadius(mRoundCorner);
+          mPreviewText.setBackgroundDrawable(background);
         }
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
@@ -469,6 +465,15 @@ public class KeyboardView extends View implements View.OnClickListener {
         return mKeyboardActionListener;
     }
 
+    private void setKeyboardBackground() {
+        if (mKeyboard == null) return;
+        Drawable d = mPreviewText.getBackground();
+        if (d instanceof GradientDrawable) {
+            ((GradientDrawable)d).setCornerRadius(mKeyboard.getRoundCorner());
+            mPreviewText.setBackgroundDrawable(d);
+        }
+    }
+
     /**
      * Attaches a keyboard to this view. The keyboard can be switched at any time and the
      * view will re-layout itself to accommodate the keyboard.
@@ -486,6 +491,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mKeyboard = keyboard;
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);
+        setKeyboardBackground();
         requestLayout();
         // Hint to reallocate the buffer if the size changed
         mKeyboardChanged = true;
@@ -725,7 +731,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 }
             }
             if (keyBackground instanceof GradientDrawable) {
-                ((GradientDrawable)keyBackground).setCornerRadius(key.round_corner != null ? key.round_corner : mRoundCorner);
+                ((GradientDrawable)keyBackground).setCornerRadius(key.round_corner != null ? key.round_corner : mKeyboard.getRoundCorner());
             }
             Integer color = key.getTextColorForState(drawableState);
             mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
