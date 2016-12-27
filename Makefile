@@ -19,7 +19,7 @@ icon: icon.svg
 	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 38 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
-apk: opencc-data android
+apk: opencc-data ndk
 	@mkdir -p res/values-zh-rCN/
 	@opencc -c tw2sp -i res/values/strings.xml -o res/values-zh-rCN/strings.xml
 	@grep -v "translatable=\"false\"" res/values-zh-rCN/strings.xml > res/values-zh-rCN/strings_bak.xml
