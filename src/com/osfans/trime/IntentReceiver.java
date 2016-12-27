@@ -41,8 +41,7 @@ public class IntentReceiver extends BroadcastReceiver {
       Function.deploy();
       break;
     default:
-      if (command.contentEquals(intent.ACTION_BOOT_COMPLETED)) Rime.get();
-      else if (command.contentEquals(intent.ACTION_SHUTDOWN)) Rime.destroy();
+      if (command.contentEquals(intent.ACTION_SHUTDOWN)) Rime.destroy();
       break;
     }
   }

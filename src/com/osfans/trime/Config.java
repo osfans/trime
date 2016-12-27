@@ -26,6 +26,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.SystemClock;
+
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
@@ -78,6 +80,10 @@ public class Config {
       copyFileOrDir(context, RIME + "/" + defaultFile, false);
     } else {
       copyFileOrDir(context, RIME, false);
+    }
+    while (!new File(USER_DATA_DIR + "/" + defaultFile).exists()) {
+      SystemClock.sleep(3000);
+      copyFileOrDir(context, RIME, isOverwrite);
     }
     Rime.get(!isExist); //覆蓋時不強制部署
   }
