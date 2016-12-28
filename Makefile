@@ -19,11 +19,12 @@ icon: icon.svg
 	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 38 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
+apk: resDir = res/values-zh-rCN
 apk: opencc-data ndk
-	@mkdir -p res/values-zh-rCN/
-	@opencc -c tw2sp -i res/values/strings.xml -o res/values-zh-rCN/strings.xml
-	@grep -v "translatable=\"false\"" res/values-zh-rCN/strings.xml > res/values-zh-rCN/strings_bak.xml
-	@mv res/values-zh-rCN/strings_bak.xml res/values-zh-rCN/strings.xml
+	@mkdir -p $(resDir)
+	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
+	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
+	@mv $(resDir)/strings.xml.bak $(resDir)/strings.xml
 	ant release
 
 opencc-data:
