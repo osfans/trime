@@ -9,12 +9,13 @@
 音碼形碼通用的輸入法平臺。
 
 ## 鳴謝/Credits
-- 開發：[osfans](https://github.com/osfans)、[boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)
+- 開發：[osfans](https://github.com/osfans)、[boboIqiqi](https://github.com/boboIqiqi)
+- 貢獻：[Bambooin](https://github.com/Bambooin)
 - [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)
 - 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo、默默ㄇㄛˋ
 - [捐贈](https://github.com/osfans/trime/releases)：[yueduz](https://github.com/yueduz)、[xiaoqun2016](https://github.com/xiaoqun2016)、[ipcjs](https://github.com/ipcjs)、Anonymous、啸傲居士、 矛矛、[zcunlin](https://github.com/zcunlin)、北冥有鱼、[biopolyhedron](https://github.com/biopolyhedron)、李進、國林、雷、天使的心跳、幸運超人、小雷先生、yeachdata、忠潤、大熊
-- 社區：在[Issues](https://github.com/osfans/trime/issues)、[貼吧](http://tieba.baidu.com/f?kw=rime)、QQ羣中反饋意見的網友
+- 社區：在[Issues](https://github.com/osfans/trime/issues)、[貼吧](http://tieba.baidu.com/f?kw=rime)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、QQ羣中反饋意見的網友
 - 項目：[Rime]、[OpenCC]、[注音倉頡輸入法]等開源項目
 
 ## 沿革/History
@@ -30,10 +31,10 @@
   You should wait a long time to complete, and make sure your disk is big enough to hold the source.
   Especially the boost repository, you can change hosts to speed the procedure
   (search hosts in github).
-  ```bash
-  cd ${your_folder}
-  git clone --recursive https://github.com/osfans/trime.git
-  ```
+```bash
+cd ${your_folder}
+git clone --recursive https://github.com/osfans/trime.git
+```
 
 - [Arch Linux](https://www.archlinux.org/)
   ```bash
@@ -56,23 +57,21 @@
   (You'd better install it by Android Studio or manually instead of by Homebrew).
 
   Install [Homebrew](http://brew.sh/) and setting
-  [USTC mirror](https://github.com/ustclug/mirrorhelp/commit/d1cfccc1bba19d0c122f4e440b0f3ed24460830e) of it.
+  [USTC mirror](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git)(Optional) of it.
 
   Install the basic dev environment and use brew to install others
-  (Set the [mirror](https://mirrors.ustc.edu.cn/) by this
-  [way](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git)
-   can speed up installation).
+  (Set the [mirror](https://mirrors.ustc.edu.cn/) can speed up installation).
 
   ```bash
-   brew install automake cmake opencc boost python ant snappy
+   brew install automake cmake opencc boost python ant
   ```
 
   Setting the environment in ~/.bashrc if you use bash like this
   ```bash
    # Android
    export ANDROID_HOME="your_android_sdk"
-   export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
    export ANDROID_NDK="your_android_ndk"
+   export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_NDK
   ```
 
   Set the **boost** header folder
@@ -92,8 +91,7 @@
    make apk
   ```
 
-  If you have problem you can google or make issues or
-  [discussion](http://www.coolapk.com/apk/com.osfans.trime).
+  If you have any problem you can make issues or go to forum.
 
 ## 許可協議/License
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
