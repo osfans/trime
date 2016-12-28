@@ -144,6 +144,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private float mShadowRadius, mRoundCorner;
     private int mShadowColor;
     private float mBackgroundDimAmount;
+    private Drawable mBackground;
     
     private TextView mPreviewText;
     private PopupWindow mPreviewPopup;
@@ -329,7 +330,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
         mShowPreview = config.getBoolean("show_preview");
-        setBackgroundDrawable(config.getColorDrawable("keyboard_back_color"));
 
         mPaint.setTypeface(config.getFont("key_font"));
         mPaintSymbol.setTypeface(config.getFont("symbol_font"));
@@ -472,6 +472,11 @@ public class KeyboardView extends View implements View.OnClickListener {
             ((GradientDrawable)d).setCornerRadius(mKeyboard.getRoundCorner());
             mPreviewText.setBackgroundDrawable(d);
         }
+        d = mKeyboard.getBackground();
+        if (d instanceof GradientDrawable) {
+            ((GradientDrawable)d).setCornerRadius(mKeyboard.getRoundCorner());
+        }
+        setBackgroundDrawable(d);
     }
 
     /**

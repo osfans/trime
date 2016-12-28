@@ -136,7 +136,7 @@ public class Key {
     return color;
   }
 
-  private Drawable getColorDrawable(Map<String,Object> mk, String k){
+  public static Drawable getColorDrawable(Map<String,Object> mk, String k){
     Config config = Config.get();
     Integer color = null;
     if (mk.containsKey(k)) {

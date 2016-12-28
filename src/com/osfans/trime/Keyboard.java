@@ -63,6 +63,9 @@ public class Keyboard {
     /** 默認按鍵圓角半徑 */
     private float mRoundCorner;
 
+    /** 鍵盤背景 */
+    private Drawable mBackground;
+
     /** 鍵盤的Shift鍵是否按住 */
     private boolean mShifted;
     
@@ -122,6 +125,7 @@ public class Keyboard {
       mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
       mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
       mRoundCorner = config.getFloat("round_corner");
+      mBackground = config.getColorDrawable("keyboard_back_color");
 
       mKeys = new ArrayList<Key>();
       mComposingKeys = new ArrayList<Key>();
@@ -347,6 +351,10 @@ public class Keyboard {
     if (m.containsKey("horizontal_gap")) mDefaultHorizontalGap = Key.getPixel(m, "horizontal_gap");
     if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Key.getPixel(m, "vertical_gap");
     if (m.containsKey("round_corner")) mRoundCorner = Key.getFloat(m, "round_corner");
+    if (m.containsKey("keyboard_back_color")) {
+      Drawable background = Key.getColorDrawable(m, "keyboard_back_color");
+      if (background != null) mBackground = background;
+    }
     int x = mDefaultHorizontalGap/2;
     int y = mDefaultVerticalGap;
     int row = 0;
@@ -410,5 +418,9 @@ public class Keyboard {
 
   public float getRoundCorner() {
     return mRoundCorner;
+  }
+
+  public Drawable getBackground() {
+    return mBackground;
   }
 }
