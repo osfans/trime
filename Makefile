@@ -8,15 +8,17 @@ install: apk
 	ant install
 
 icon: icon.svg
+	@echo "updating the icons..."
 	inkscape -z -e res/drawable-xxxhdpi/icon.png -w 192 -h 192 icon.svg
 	inkscape -z -e res/drawable-xxhdpi/icon.png -w 144 -h 144 icon.svg
 	inkscape -z -e res/drawable-xhdpi/icon.png -w 96 -h 96 icon.svg
 	inkscape -z -e res/drawable-hdpi/icon.png -w 72 -h 72 icon.svg
 	inkscape -z -e res/drawable-mdpi/icon.png -w 48 -h 48 icon.svg
-	inkscape -z -e res/drawable-xxxhdpi/status.png -w 96 -h 96 icon.svg
-	inkscape -z -e res/drawable-xxhdpi/status.png -w 72 -h 72 icon.svg
-	inkscape -z -e res/drawable-xhdpi/status.png -w 48 -h 48 icon.svg
-	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 38 icon.svg
+	# just copy the already converted icon to status
+	yes | cp res/drawable-xhdpi/icon.png res/drawable-xxxhdpi/status.png
+	yes | cp res/drawable-hdpi/icon.png res/drawable-xxhdpi/status.png
+	yes | cp res/drawable-mdpi/icon.png res/drawable-xhdpi/status.png
+	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 36 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
 apk: resDir = res/values-zh-rCN
