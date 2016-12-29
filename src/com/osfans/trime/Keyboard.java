@@ -360,6 +360,13 @@ public class Keyboard {
     int row = 0;
     int column = 0;
     mTotalWidth = 0;
+    int key_text_offset_x, key_text_offset_y, key_symbol_offset_x, key_symbol_offset_y, key_hint_offset_x, key_hint_offset_y;
+    key_text_offset_x = Key.getPixel(m, "key_text_offset_x", 0);
+    key_text_offset_y = Key.getPixel(m, "key_text_offset_y", 0);
+    key_symbol_offset_x = Key.getPixel(m, "key_symbol_offset_x", 0);
+    key_symbol_offset_y = Key.getPixel(m, "key_symbol_offset_y", 0);
+    key_hint_offset_x = Key.getPixel(m, "key_hint_offset_x", 0);
+    key_hint_offset_y = Key.getPixel(m, "key_hint_offset_y", 0);
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String,Object> mk: lm) {
@@ -388,6 +395,13 @@ public class Keyboard {
       }
 
       final Key key = new Key(this, mk);
+      key.key_text_offset_x = Key.getPixel(mk, "key_text_offset_x", key_text_offset_x);
+      key.key_text_offset_y = Key.getPixel(mk, "key_text_offset_y", key_text_offset_y);
+      key.key_symbol_offset_x = Key.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x);
+      key.key_symbol_offset_y = Key.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y);
+      key.key_hint_offset_x = Key.getPixel(mk, "key_hint_offset_x", key_hint_offset_x);
+      key.key_hint_offset_y = Key.getPixel(mk, "key_hint_offset_y", key_hint_offset_y);
+
       key.x = x;
       key.y = y;
       int right_gap = Math.abs(mDisplayWidth - x - w - gap/2);

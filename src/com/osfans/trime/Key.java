@@ -55,6 +55,7 @@ public class Key {
   public Integer hilited_key_text_color, hilited_key_symbol_color;
   public Integer key_text_size, symbol_text_size;
   public Float round_corner;
+  public int key_text_offset_x, key_text_offset_y, key_symbol_offset_x, key_symbol_offset_y, key_hint_offset_x, key_hint_offset_y;
 
   public int x, y;
   public boolean pressed, on;
@@ -121,6 +122,12 @@ public class Key {
     Object o = getValue(mk, k, null);
     if (o instanceof Integer) return Config.getPixel(((Integer)o).floatValue());
     return null;
+  }
+
+  public static Integer getPixel(Map<String,Object> mk, String k, int defaultValue) {
+    Object o = getValue(mk, k, defaultValue);
+    if (o instanceof Integer) return Config.getPixel(((Integer)o).floatValue());
+    return defaultValue;
   }
 
   private Integer getColor(Map<String,Object> mk, String k){
