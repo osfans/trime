@@ -7,6 +7,7 @@ release: apk win32
 install: apk
 	ant install
 
+.PHONY: icon
 icon: icon.svg
 	@echo "updating the icons..."
 	inkscape -z -e res/drawable-xxxhdpi/icon.png -w 192 -h 192 icon.svg
@@ -21,15 +22,20 @@ icon: icon.svg
 	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 36 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
-apk: resDir = res/values-zh-rCN
-apk: opencc-data ndk
+.PHONY: translate
+translate: resDir = res/values-zh-rCN
+translate: res/values/strings.xml
+	@echo "translate traditional to simple Chinese:"
 	@mkdir -p $(resDir)
 	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
 	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
 	@mv $(resDir)/strings.xml.bak $(resDir)/strings.xml
+
+apk: opencc-data translate icon ndk
 	ant release
 
-opencc-data:
+.PHONY: opencc-data
+opencc-data: $(shell find jni/OpenCC)
 	@echo "copy opencc data:"
 	@rm -rf assets/rime/opencc
 	@mkdir -p assets/rime/opencc
