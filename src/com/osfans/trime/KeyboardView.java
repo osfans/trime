@@ -473,9 +473,6 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPreviewText.setBackgroundDrawable(d);
         }
         d = mKeyboard.getBackground();
-        if (d instanceof GradientDrawable) {
-            ((GradientDrawable)d).setCornerRadius(mKeyboard.getRoundCorner());
-        }
         setBackgroundDrawable(d);
     }
 
