@@ -2,9 +2,10 @@
 
 all: apk javadoc linux win32
 
-release: apk win32
+release:
+	ant release
 
-install: apk
+install: release
 	ant install
 
 icon: icon.svg
@@ -21,14 +22,6 @@ icon: icon.svg
 	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 36 icon.svg
 	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
 
-apk: resDir = res/values-zh-rCN
-apk: opencc-data ndk
-	@mkdir -p $(resDir)
-	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
-	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
-	@mv $(resDir)/strings.xml.bak $(resDir)/strings.xml
-	ant release
-
 opencc-data:
 	@echo "copy opencc data:"
 	@rm -rf assets/rime/opencc
@@ -40,6 +33,14 @@ opencc-data:
 	python jni/OpenCC/data/scripts/reverse.py assets/rime/opencc/TWPhrases.txt assets/rime/opencc/TWPhrasesRev.txt
 	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/TWVariants.txt assets/rime/opencc/TWVariantsRev.txt
 	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/HKVariants.txt assets/rime/opencc/HKVariantsRev.txt
+
+apk: resDir = res/values-zh-rCN
+apk: opencc-data ndk
+	@mkdir -p $(resDir)
+	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
+	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
+	@mv $(resDir)/strings.xml.bak $(resDir)/strings.xml
+	ant release
 
 javadoc:
 	ant javadoc
