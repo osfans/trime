@@ -29,11 +29,11 @@ import java.util.Locale;
 /** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
   private int duration = 30;
-  private float volume = -1.0f;
 
   private final Context context;
 
   private Vibrator vibrator;
+  private boolean soundOn;
   private AudioManager audioManager;
   private boolean isSpeakCommit, isSpeakKey;
   private TextToSpeech mTTS;
@@ -50,15 +50,10 @@ public class Effect {
         (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
-    volume = config.getFloat("key_sound_volume");
-    if (volume > 0) {
-      if (audioManager == null) {
-        audioManager =
-          (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-      }
-      int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-      volume = max * volume;
-      audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM , (int)(volume), 0);
+    soundOn = config.getBoolean("key_sound");
+    if (soundOn && (audioManager == null)) {
+      audioManager = 
+        (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     isSpeakCommit = config.getBoolean("speak_commit");
@@ -77,7 +72,7 @@ public class Effect {
   }
 
   public void playSound(final int code) {
-    if (volume > 0 && (audioManager != null)) {
+    if (soundOn && (audioManager != null)) {
       final int sound;
       switch (code) {
         case KeyEvent.KEYCODE_DEL:

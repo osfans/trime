@@ -60,7 +60,7 @@ style:
     - {start: "\n", label: "%s.", candidate: "%s", comment: "%s", end: "", sep: "☁️️"}
   key_font: symbol.ttf #键盘字体
   key_height: 48 #键高
-  key_sound_volume: 0.2 #按键音量
+  key_sound: true #按键声音
   key_long_text_size: 18 #长标签字号
   key_text_size: 24 #键字号
   key_vibrate_duration: 0 #按键震动时长：毫秒
