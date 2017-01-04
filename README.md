@@ -1,5 +1,8 @@
 # 同文安卓輸入法平臺/Trime/android-rime
 [![自動編譯](https://travis-ci.org/osfans/trime.svg?branch=develop)](https://travis-ci.org/osfans/trime)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
+
+[<img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
 
 =====
 源於開源的[注音倉頡輸入法]前端，
@@ -14,7 +17,7 @@
 - [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)
 - 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo、默默ㄇㄛˋ
-- [捐贈](https://github.com/osfans/trime/releases)：[yueduz](https://github.com/yueduz)、[xiaoqun2016](https://github.com/xiaoqun2016)、[ipcjs](https://github.com/ipcjs)、Anonymous、啸傲居士、 矛矛、[zcunlin](https://github.com/zcunlin)、北冥有鱼、[biopolyhedron](https://github.com/biopolyhedron)、李進、國林、雷、天使的心跳、幸運超人、小雷先生、yeachdata、忠潤、大熊
+- [捐贈](https://github.com/osfans/trime/releases)：[yueduz](https://github.com/yueduz)、[xiaoqun2016](https://github.com/xiaoqun2016)、[ipcjs](https://github.com/ipcjs)、Anonymous、啸傲居士、 矛矛、[zcunlin](https://github.com/zcunlin)、北冥有鱼、[biopolyhedron](https://github.com/biopolyhedron)、李進、國林、雷、天使的心跳、幸運超人、小雷先生、yeachdata、忠潤、大熊、天真可愛的滿滿（[谷歌開發人員帳號](https://play.google.com/apps/publish/)）
 - 社區：在[Issues](https://github.com/osfans/trime/issues)、[貼吧](http://tieba.baidu.com/f?kw=rime)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、QQ羣中反饋意見的網友
 - 項目：[Rime]、[OpenCC]、[注音倉頡輸入法]等開源項目
 
@@ -92,9 +95,6 @@ git clone --recursive https://github.com/osfans/trime.git
   ```
 
   If you have any problem you can make issues or go to forum.
-
-## 許可協議/License
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## 第三方庫/3rd Party Library
 - [minilog](http://ceres-solver.org/) (New BSD License)
