@@ -11,8 +11,20 @@
         <arg value="+%Y%m%d"/>
     </exec>
 
+    <exec executable="git" outputproperty="count">
+        <arg value="rev-list"/>
+        <arg value="develop"/>
+        <arg value="--count"/>
+    </exec>
+
+    <exec executable="expr" outputproperty="code">
+        <arg value="${count}"/>
+        <arg value="+"/>
+        <arg value="20170000"/>
+    </exec>
+
     <property name="version.name" value="${tag}-${date}" />
-    <property name="version.code" value="${date}" />
+    <property name="version.code" value="${code}" />
 
     <!-- The local.properties file is created and updated by the 'android' tool.
          It contains the path to the SDK. It should *NOT* be checked into
