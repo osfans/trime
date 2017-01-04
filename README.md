@@ -35,9 +35,29 @@
   Especially the boost repository, you can change hosts to speed the procedure
   (search hosts in github).
 ```bash
-cd ${your_folder}
+cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
+
+  Now you can build apk(recommended):
+```bash
+cd $trime_folder
+make release
+```
+
+  This will just compile android java file and pack the newer resource file.
+
+  librime.so and librime_jni.so will be uploaded by us regularly,
+  and you won't worry about the outdated *so files.
+
+  If you want compile the librime.so and librime_jni.so or the source code
+  under the 'jni' folder changed by upstream, you can use:
+```bash
+cd $trime_folder
+make apk
+```
+  And read the guide by different platform to build the *.so files.
+
 
 - [Arch Linux](https://www.archlinux.org/)
   ```bash
@@ -83,7 +103,7 @@ git clone --recursive https://github.com/osfans/trime.git
    ln -s $your_folder_boost boost
   ```
 
-  (Optionally)Set the libreadline.dylib
+  (Optional)Set the libreadline.dylib
 
   If you have the libreadline problem in make process, you should make
   a soft link to your local libreadline.dylib and google it.
@@ -94,7 +114,8 @@ git clone --recursive https://github.com/osfans/trime.git
    make apk
   ```
 
-  If you have any problem you can make issues or go to forum.
+  If you have any problems, you can make [issues] (https://github.com/osfans/trime/issues)
+   or go to [forum](http://www.coolapk.com/apk/com.osfans.trime).
 
 ## 第三方庫/3rd Party Library
 - [minilog](http://ceres-solver.org/) (New BSD License)
