@@ -24,13 +24,16 @@
     <Preference android:key="pref_enable" android:title="@string/pref_enable" android:summary="@string/pref_enable_summary"/>
     <Preference android:key="pref_select" android:title="@string/pref_select" android:summary="@string/pref_select_summary"/>
     <Preference android:key="pref_deploy" android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>
-    <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
 
-    <PreferenceScreen android:key="pref_config" android:title="@string/pref_config">
+    <PreferenceScreen android:key="pref_input" android:title="@string/pref_input">
+        <Preference android:key="pref_schemas" android:title="@string/pref_schemas" android:summary="@string/pref_schemas_summary"/>
+        <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
+        <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
+    </PreferenceScreen>
+
+    <PreferenceScreen android:key="pref_keyboard" android:title="@string/pref_keyboard">
         <Preference android:key="pref_themes" android:title="@string/pref_themes" android:summary="@string/pref_themes_summary"/>
         <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
-        <Preference android:key="pref_schemas" android:title="@string/pref_schemas" android:summary="@string/pref_schemas_summary"/>
-        <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_help" android:title="@string/pref_help">
