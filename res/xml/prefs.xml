@@ -44,6 +44,10 @@
         </Preference>
         <Preference android:key="pref_market" android:title="@string/pref_market">
             <intent android:action="android.intent.action.VIEW"
+                    android:data="https://play.google.com/store/apps/details?id=com.osfans.trime" />
+        </Preference>
+        <Preference android:key="pref_coolmarket" android:title="@string/pref_coolmarket">
+            <intent android:action="android.intent.action.VIEW"
                     android:data="http://www.coolapk.com/apk/com.osfans.trime" />
         </Preference>
         <Preference android:key="pref_qq1" android:title="@string/pref_qq1">
