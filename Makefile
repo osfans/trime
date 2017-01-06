@@ -35,7 +35,7 @@ opencc-data:
 	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/HKVariants.txt assets/rime/opencc/HKVariantsRev.txt
 
 apk: resDir = res/values-zh-rCN
-apk: opencc-data ndk
+apk: opencc-data android
 	@mkdir -p $(resDir)
 	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
 	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
@@ -51,13 +51,13 @@ ndk:
 	ndk-build
 
 android:
-	cmake-3.6 -Bbuild-android \
+	cmake -Bbuild-android \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
-		-DANDROID_STL=c++_static \
-		-DANDROID_PLATFORM=android-14 \
-		-DANDROID_TOOLCHAIN=clang \
-		-DANDROID_ABI=armeabi \
+		-DCMAKE_SYSTEM_NAME=Android \
+		-DCMAKE_ANDROID_STL_TYPE=c++_static \
+		-DCMAKE_SYSTEM_VERSION=14 \
+		-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang \
+		-DCMAKE_ANDROID_ARCH_ABI=armeabi \
 		-DLIBRARY_OUTPUT_PATH=../libs/armeabi/ -Hjni
 	${MAKE} -C build-android rime_jni
 
