@@ -37,7 +37,7 @@ proguard/
 
 # Make
 build*/
-*/*/*.a
+libs/*
 
 # Android Studio
 .idea/*

@@ -35,7 +35,7 @@ opencc-data:
 	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/HKVariants.txt assets/rime/opencc/HKVariantsRev.txt
 
 apk: resDir = res/values-zh-rCN
-apk: opencc-data android
+apk: opencc-data ndk
 	@mkdir -p $(resDir)
 	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
 	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
@@ -78,4 +78,5 @@ win64:
 	(cd build-win64; 7z a ../bin/rime-win64-`date +%Y%m%d`.dll.7z rime.dll)
 
 clean:
+	ndk-build clean
 	git clean -fd
