@@ -56,7 +56,8 @@ style:
   key_sound: true #按鍵聲音
   key_long_text_size: 14 #長標籤字號
   key_text_size: 22 #鍵字號
-  key_vibrate_duration: 0 #按鍵震動時長：毫秒
+  key_vibrate_duration: 30 #按鍵震動時長：毫秒
+  key_vibrate: false #按鍵震動
   key_width: 10.0 #鍵寬，佔螢幕寬的百分比
   keyboards: [.default, default, symbols, number] #鍵盤配置
   label_text_size: 22 #標籤字號
