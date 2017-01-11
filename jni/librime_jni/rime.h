@@ -38,26 +38,26 @@ jboolean deploy_config_file(JNIEnv *env, jobject thiz, jstring file_name, jstrin
 jboolean sync_user_data(JNIEnv *env, jobject thiz);
 // session management
 jint create_session(JNIEnv *env, jobject thiz);
-jboolean find_session(JNIEnv *env, jobject thiz, jint session_id);
-jboolean destroy_session(JNIEnv *env, jobject thiz, jint session_id);
+jboolean find_session(JNIEnv *env, jobject thiz);
+jboolean destroy_session(JNIEnv *env, jobject thiz);
 void cleanup_stale_sessions(JNIEnv *env, jobject thiz);
 void cleanup_all_sessions(JNIEnv *env, jobject thiz);
 // input
-jboolean process_key(JNIEnv *env, jobject thiz, jint session_id, jint keycode, jint mask);
-jboolean commit_composition(JNIEnv *env, jobject thiz, jint session_id);
-void clear_composition(JNIEnv *env, jobject thiz, jint session_id);
+jboolean process_key(JNIEnv *env, jobject thiz, jint keycode, jint mask);
+jboolean commit_composition(JNIEnv *env, jobject thiz);
+void clear_composition(JNIEnv *env, jobject thiz);
 // output
-jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id, jobject jcommit);
-jboolean get_context(JNIEnv *env, jobject thiz, jint session_id, jobject jcontext);
-jboolean get_status(JNIEnv *env, jobject thiz, jint session_id, jobject jstatus);
+jboolean get_commit(JNIEnv *env, jobject thiz, jobject jcommit);
+jboolean get_context(JNIEnv *env, jobject thiz, jobject jcontext);
+jboolean get_status(JNIEnv *env, jobject thiz, jobject jstatus);
 // runtime options
-void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboolean value);
-jboolean get_option(JNIEnv *env, jobject thiz, jint session_id, jstring option);
-void set_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop, jstring value);
-jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop);
+void set_option(JNIEnv *env, jobject thiz, jstring option, jboolean value);
+jboolean get_option(JNIEnv *env, jobject thiz, jstring option);
+void set_property(JNIEnv *env, jobject thiz, jstring prop, jstring value);
+jstring get_property(JNIEnv *env, jobject thiz, jstring prop);
 jobject get_schema_list(JNIEnv *env, jobject thiz);
-jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id);
-jboolean select_schema(JNIEnv *env, jobject thiz, jint session_id, jstring schema_id);
+jstring get_current_schema(JNIEnv *env, jobject thiz);
+jboolean select_schema(JNIEnv *env, jobject thiz, jstring schema_id);
 // configuration
 jobject config_get_bool(JNIEnv *env, jobject thiz, jstring name, jstring key);
 jboolean config_set_bool(JNIEnv *env, jobject thiz, jstring name, jstring key, jboolean value);
@@ -73,12 +73,12 @@ jobject config_get_map(JNIEnv *env, jobject thiz, jstring name, jstring key);
 jobject config_get_value(JNIEnv *env, jobject thiz, jstring name, jstring key);
 jobject schema_get_value(JNIEnv *env, jobject thiz, jstring schema_id, jstring key);
 
-jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id, jstring key_sequence);
-jstring get_input(JNIEnv *env, jobject thiz, jint session_id);
-jint get_caret_pos(JNIEnv *env, jobject thiz, jint session_id);
-void set_caret_pos(JNIEnv *env, jobject thiz, jint session_id, jint caret_pos);
-jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index);
-jboolean select_candidate_on_current_page(JNIEnv *env, jobject thiz, jint session_id, jint index);
+jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jstring key_sequence);
+jstring get_input(JNIEnv *env, jobject thiz);
+jint get_caret_pos(JNIEnv *env, jobject thiz);
+void set_caret_pos(JNIEnv *env, jobject thiz, jint caret_pos);
+jboolean select_candidate(JNIEnv *env, jobject thiz, jint index);
+jboolean select_candidate_on_current_page(JNIEnv *env, jobject thiz, jint index);
 jstring get_version(JNIEnv *env, jobject thiz);
 jstring get_librime_version(JNIEnv *env, jobject thiz);
 //module

@@ -15,14 +15,14 @@ void on_message(void* context_object,
   if (env == NULL) return;
   jclass clazz = env->FindClass(CLASSNAME);
   if (clazz == NULL) return;
-  jmethodID mid_static_method = env->GetStaticMethodID(clazz, "onMessage","(ILjava/lang/String;Ljava/lang/String;)V");
+  jmethodID mid_static_method = env->GetStaticMethodID(clazz, "onMessage","(Ljava/lang/String;Ljava/lang/String;)V");
   if (mid_static_method == NULL) {
     env->DeleteLocalRef(clazz);
     return;
   }
   jstring str_arg1 = newJstring(env, message_type);
   jstring str_arg2 = newJstring(env, message_value);
-  env->CallStaticVoidMethod(clazz, mid_static_method, _session_id, str_arg1, str_arg2);
+  env->CallStaticVoidMethod(clazz, mid_static_method, str_arg1, str_arg2);
   env->DeleteLocalRef(clazz);
   env->DeleteLocalRef(str_arg1);
   env->DeleteLocalRef(str_arg2);
@@ -110,11 +110,11 @@ jint create_session(JNIEnv *env, jobject thiz) {
   return _session_id;
 }
 
-jboolean find_session(JNIEnv *env, jobject thiz, jint session_id) {
+jboolean find_session(JNIEnv *env, jobject thiz) {
   return RimeFindSession((RimeSessionId)_session_id);
 }
 
-jboolean destroy_session(JNIEnv *env, jobject thiz, jint session_id) {
+jboolean destroy_session(JNIEnv *env, jobject thiz) {
   bool ret = RimeDestroySession((RimeSessionId)_session_id);
   _session_id = 0;
   return ret;
@@ -129,20 +129,20 @@ void cleanup_all_sessions(JNIEnv *env, jobject thiz) {
 }
 
 // input
-jboolean process_key(JNIEnv *env, jobject thiz, jint session_id, jint keycode, jint mask) {
+jboolean process_key(JNIEnv *env, jobject thiz, jint keycode, jint mask) {
   return RimeProcessKey((RimeSessionId)_session_id, keycode, mask);
 }
 
-jboolean commit_composition(JNIEnv *env, jobject thiz, jint session_id) {
+jboolean commit_composition(JNIEnv *env, jobject thiz) {
   return RimeCommitComposition((RimeSessionId)_session_id);
 }
 
-void clear_composition(JNIEnv *env, jobject thiz, jint session_id) {
+void clear_composition(JNIEnv *env, jobject thiz) {
   RimeClearComposition((RimeSessionId)_session_id);
 }
 
 // output
-jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id, jobject jcommit) {
+jboolean get_commit(JNIEnv *env, jobject thiz, jobject jcommit) {
   RIME_STRUCT(RimeCommit, commit);
   Bool r = RimeGetCommit((RimeSessionId)_session_id, &commit);
   if (r) {
@@ -158,7 +158,7 @@ jboolean get_commit(JNIEnv *env, jobject thiz, jint session_id, jobject jcommit)
   return r;
 }
 
-jboolean get_context(JNIEnv *env, jobject thiz, jint session_id, jobject jcontext) {
+jboolean get_context(JNIEnv *env, jobject thiz, jobject jcontext) {
   RIME_STRUCT(RimeContext, context);
   Bool r = RimeGetContext(_session_id, &context);
   if (r) {
@@ -241,7 +241,7 @@ jboolean get_context(JNIEnv *env, jobject thiz, jint session_id, jobject jcontex
   return r;
 }
 
-jboolean get_status(JNIEnv *env, jobject thiz, jint session_id, jobject jstatus) {
+jboolean get_status(JNIEnv *env, jobject thiz, jobject jstatus) {
   RIME_STRUCT(RimeStatus, status);
   Bool r = RimeGetStatus(_session_id, &status);
   if (r) {
@@ -296,7 +296,7 @@ static bool is_save_option(const char* p) {
 }
 
 // runtime options
-void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboolean value) {
+void set_option(JNIEnv *env, jobject thiz, jstring option, jboolean value) {
   const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
   std::string option_name(s);
   RimeConfig config = {0};
@@ -314,14 +314,14 @@ void set_option(JNIEnv *env, jobject thiz, jint session_id, jstring option, jboo
   env->ReleaseStringUTFChars(option, s);
 }
 
-jboolean get_option(JNIEnv *env, jobject thiz, jint session_id, jstring option) {
+jboolean get_option(JNIEnv *env, jobject thiz, jstring option) {
   const char* s = option == NULL ? NULL : env->GetStringUTFChars(option, NULL);
   bool value = RimeGetOption(_session_id, s);
   env->ReleaseStringUTFChars(option, s);
   return value;
 }
 
-void set_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop, jstring value) {
+void set_property(JNIEnv *env, jobject thiz, jstring prop, jstring value) {
   const char* s = prop == NULL ? NULL : env->GetStringUTFChars(prop, NULL);
   const char* v = value == NULL ? NULL : env->GetStringUTFChars(value, NULL);
   RimeSetProperty(_session_id, s, v);
@@ -329,7 +329,7 @@ void set_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop, jstr
   env->ReleaseStringUTFChars(value, v);
 }
 
-jstring get_property(JNIEnv *env, jobject thiz, jint session_id, jstring prop) {
+jstring get_property(JNIEnv *env, jobject thiz, jstring prop) {
   const char* s = prop == NULL ? NULL : env->GetStringUTFChars(prop, NULL);
   char value[BUFSIZE] = {0};
   bool b = RimeGetProperty(_session_id, s, value, BUFSIZE);
@@ -345,14 +345,14 @@ jobject get_schema_list(JNIEnv *env, jobject thiz) {
   return jobj;
 }
 
-jstring get_current_schema(JNIEnv *env, jobject thiz, jint session_id) {
+jstring get_current_schema(JNIEnv *env, jobject thiz) {
   char current[BUFSIZE] = {0};
   bool b = RimeGetCurrentSchema(_session_id, current, sizeof(current));
   if (b) return newJstring(env, current);
   return NULL;
 }
 
-jboolean select_schema(JNIEnv *env, jobject thiz, jint session_id, jstring schema_id) {
+jboolean select_schema(JNIEnv *env, jobject thiz, jstring schema_id) {
   const char* s = schema_id == NULL ? NULL : env->GetStringUTFChars(schema_id, NULL);
   RimeConfig config = {0};
   Bool b = RimeConfigOpen("user", &config);
@@ -518,7 +518,7 @@ jint config_list_size(JNIEnv *env, jobject thiz, jstring name, jstring key) {
 }
 
 //testing
-jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id, jstring key_sequence) {
+jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jstring key_sequence) {
   const char* str = key_sequence == NULL ? NULL : env->GetStringUTFChars(key_sequence, NULL); 
   if (str == NULL) return false; /* OutOfMemoryError already thrown */
   jboolean r = RimeSimulateKeySequence((RimeSessionId)_session_id, str);
@@ -526,24 +526,24 @@ jboolean simulate_key_sequence(JNIEnv *env, jobject thiz, jint session_id, jstri
   return r;
 }
 
-jstring get_input(JNIEnv *env, jobject thiz, jint session_id) {
+jstring get_input(JNIEnv *env, jobject thiz) {
   const char* c = rime_get_api()->get_input(_session_id);
   return newJstring(env, c);
 }
 
-jint get_caret_pos(JNIEnv *env, jobject thiz, jint session_id) {
+jint get_caret_pos(JNIEnv *env, jobject thiz) {
   return rime_get_api()->get_caret_pos(_session_id);
 }
 
-void set_caret_pos(JNIEnv *env, jobject thiz, jint session_id, jint caret_pos) {
+void set_caret_pos(JNIEnv *env, jobject thiz, jint caret_pos) {
   return rime_get_api()->set_caret_pos(_session_id, caret_pos);
 }
 
-jboolean select_candidate(JNIEnv *env, jobject thiz, jint session_id, jint index) {
+jboolean select_candidate(JNIEnv *env, jobject thiz, jint index) {
   return rime_get_api()->select_candidate(_session_id, index);
 }
 
-jboolean select_candidate_on_current_page(JNIEnv *env, jobject thiz, jint session_id, jint index) {
+jboolean select_candidate_on_current_page(JNIEnv *env, jobject thiz, jint index) {
   return rime_get_api()->select_candidate_on_current_page(_session_id, index);
 }
 

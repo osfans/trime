@@ -159,7 +159,7 @@ public class Rime
       return candidates;
     }
 
-    public void getValue(int session_id) {
+    public void getValue() {
       if (switches.isEmpty()) return; //無方案
       for (int j = 0; j < switches.size(); j++) {
         Map<String, Object> o =  switches.get(j);
@@ -167,13 +167,13 @@ public class Rime
           List<String> options = (List<String>)o.get("options");
           for (int i = 0; i < options.size(); i++) {
             String s = options.get(i);
-            if (Rime.get_option(session_id, s)) {
+            if (Rime.get_option(s)) {
               o.put("value", i);
               break;
             }
           }
         } else {
-          o.put("value", Rime.get_option(session_id, o.get("name").toString()) ? 1 : 0);
+          o.put("value", Rime.get_option(o.get("name").toString()) ? 1 : 0);
         }
         switches.set(j, o);
       }
@@ -198,7 +198,6 @@ public class Rime
     }
   };
 
-  private static int session_id;
   private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
@@ -265,37 +264,27 @@ public class Rime
   }
 
   public static boolean getStatus() {
-    mSchema.getValue(session_id);
-    return get_status(session_id, mStatus);
+    mSchema.getValue();
+    return get_status(mStatus);
   }
 
   public static void init(boolean full_check) {
     initialize();
     check(full_check);
     set_notification_handler();
-    createSession();
-    if (session_id == 0) {
-      Log.severe( "Error creating rime session");
-      return;
+    if (!find_session()) {
+      if (create_session() == 0) {
+        Log.severe( "Error creating rime session");
+        return;
+      }
     }
     initSchema();
   }
 
   public static void destroy() {
-    destroySession();
+    destroy_session();
     finalize1();
     self = null;
-  }
-
-  public static void createSession() {
-    if (session_id == 0 || !find_session(session_id)) session_id = create_session();
-  }
-
-  public static void destroySession() {
-    if (session_id != 0) {
-      destroy_session(session_id);
-      session_id = 0;
-    }
   }
 
   public static String getCommitText() {
@@ -303,17 +292,17 @@ public class Rime
   }
 
   public static boolean getCommit() {
-    return get_commit(session_id, mCommit);
+    return get_commit(mCommit);
   }
 
   public static boolean getContexts() {
-    boolean b = get_context(session_id, mContext);
+    boolean b = get_context(mContext);
     getStatus();
     return b;
   }
 
   public static boolean onKey(int keycode, int mask) {
-    boolean b = process_key(session_id, keycode, mask);
+    boolean b = process_key(keycode, mask);
     Log.info( "b="+b+",keycode="+keycode+",mask="+mask);
     getContexts();
     return b;
@@ -326,7 +315,7 @@ public class Rime
 
   public static boolean onText(CharSequence text) {
     if(text == null || text.length() == 0) return false;
-    boolean b = simulate_key_sequence(session_id, text.toString().replace("{}","{braceleft}{braceright}"));
+    boolean b = simulate_key_sequence(text.toString().replace("{}","{braceleft}{braceright}"));
     Log.info( "b="+b+",input="+text);
     getContexts();
     return b;
@@ -356,28 +345,28 @@ public class Rime
   }
 
   public static boolean commitComposition() {
-    boolean b = commit_composition(session_id);
+    boolean b = commit_composition();
     getContexts();
     return b;
   }
 
   public static void clearComposition() {
-    clear_composition(session_id);
+    clear_composition();
     getContexts();
   }
 
   public static boolean selectCandidate(int index) {
-    boolean b = select_candidate_on_current_page(session_id, index);
+    boolean b = select_candidate_on_current_page(index);
     getContexts();
     return b;
   }
 
   public static void setOption(String option, boolean value) {
-    set_option(session_id, option, value);
+    set_option(option, value);
   }
 
   public static boolean getOption(String option) {
-    return get_option(session_id, option);
+    return get_option(option);
   }
 
   public static void toggleOption(String option) {
@@ -390,15 +379,15 @@ public class Rime
   }
 
   public static void setProperty(String prop, String value) {
-    set_property(session_id, prop, value);
+    set_property(prop, value);
   }
 
   public static String getProperty(String prop) {
-    return get_property(session_id, prop);
+    return get_property(prop);
   }
 
   public static String getSchemaId() {
-    return get_current_schema(session_id);
+    return get_current_schema();
   }
 
   public static boolean isEmpty(String s) {
@@ -436,7 +425,7 @@ public class Rime
   }
 
   public static boolean selectSchema(String schema_id) {
-    boolean b = select_schema(session_id, schema_id);
+    boolean b = select_schema(schema_id);
     getContexts();
     return b;
   }
@@ -464,21 +453,21 @@ public class Rime
   }
 
   public static String RimeGetInput() {
-    String s = get_input(session_id);
+    String s = get_input();
     return s == null ? "" : s;
   }
 
   public static int RimeGetCaretPos() {
-    return get_caret_pos(session_id);
+    return get_caret_pos();
   }
 
   public static void RimeSetCaretPos(int caret_pos) {
-    set_caret_pos(session_id, caret_pos);
+    set_caret_pos(caret_pos);
     getContexts();
   }
 
-  public static void onMessage(int session_id, String message_type, String message_value) {
-    Log.info(String.format("message: [%d] [%s] %s", session_id, message_type, message_value));
+  public static void onMessage(String message_type, String message_value) {
+    Log.info(String.format("message: [%s] %s", message_type, message_value));
     Trime trime = Trime.getService();
     switch (message_type) {
       case "schema":
@@ -540,29 +529,29 @@ public class Rime
 
   // session management
   public static native final int create_session();
-  public static native final boolean find_session(int session_id);
-  public static native final boolean destroy_session(int session_id);
+  public static native final boolean find_session();
+  public static native final boolean destroy_session();
   public static native final void cleanup_stale_sessions();
   public static native final void cleanup_all_sessions();
 
   // input
-  public static native final boolean process_key(int session_id, int keycode, int mask);
-  public static native final boolean commit_composition(int session_id);
-  public static native final void clear_composition(int session_id);
+  public static native final boolean process_key(int keycode, int mask);
+  public static native final boolean commit_composition();
+  public static native final void clear_composition();
 
   // output
-  public static native final boolean get_commit(int session_id, RimeCommit commit);
-  public static native final boolean get_context(int session_id, RimeContext context);
-  public static native final boolean get_status(int session_id, RimeStatus status);
+  public static native final boolean get_commit(RimeCommit commit);
+  public static native final boolean get_context(RimeContext context);
+  public static native final boolean get_status(RimeStatus status);
 
   // runtime options
-  public static native final void set_option(int session_id, String option, boolean value);
-  public static native final boolean get_option(int session_id, String option);
-  public static native final void set_property(int session_id, String prop, String value);
-  public static native final String get_property(int session_id, String prop);
+  public static native final void set_option(String option, boolean value);
+  public static native final boolean get_option(String option);
+  public static native final void set_property(String prop, String value);
+  public static native final String get_property(String prop);
   public static native final List get_schema_list();
-  public static native final String get_current_schema(int session_id);
-  public static native final boolean select_schema(int session_id, String schema_id);
+  public static native final String get_current_schema();
+  public static native final boolean select_schema(String schema_id);
 
   // configuration
   public static native final Boolean config_get_bool(String name, String key);
@@ -580,13 +569,13 @@ public class Rime
   public static native final Object schema_get_value(String name, String key);
 
   // testing
-  public static native final boolean simulate_key_sequence(int session_id, String key_sequence);
+  public static native final boolean simulate_key_sequence(String key_sequence);
 
-  public static native final String get_input(int session_id);
-  public static native final int get_caret_pos(int session_id);
-  public static native final void set_caret_pos(int session_id, int caret_pos);
-  public static native final boolean select_candidate(int session_id, int index);
-  public static native final boolean select_candidate_on_current_page(int session_id, int index);
+  public static native final String get_input();
+  public static native final int get_caret_pos();
+  public static native final void set_caret_pos(int caret_pos);
+  public static native final boolean select_candidate(int index);
+  public static native final boolean select_candidate_on_current_page(int index);
   public static native final String get_version();
   public static native final String get_librime_version();
 

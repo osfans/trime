@@ -102,12 +102,12 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("find_session"),
-        const_cast<char *>("(I)Z"),
+        const_cast<char *>("()Z"),
         reinterpret_cast<void *>(find_session)
     },
     {
         const_cast<char *>("destroy_session"),
-        const_cast<char *>("(I)Z"),
+        const_cast<char *>("()Z"),
         reinterpret_cast<void *>(destroy_session)
     },
     {
@@ -123,54 +123,54 @@ static const JNINativeMethod sMethods[] = {
     // input
     {
         const_cast<char *>("process_key"),
-        const_cast<char *>("(III)Z"),
+        const_cast<char *>("(II)Z"),
         reinterpret_cast<void *>(process_key)
     },
     {
         const_cast<char *>("commit_composition"),
-        const_cast<char *>("(I)Z"),
+        const_cast<char *>("()Z"),
         reinterpret_cast<void *>(commit_composition)
     },
     {
         const_cast<char *>("clear_composition"),
-        const_cast<char *>("(I)V"),
+        const_cast<char *>("()V"),
         reinterpret_cast<void *>(clear_composition)
     },
     // output
     {
         const_cast<char *>("get_commit"),
-        const_cast<char *>("(IL" CLASSNAME "$RimeCommit;)Z"),
+        const_cast<char *>("(L" CLASSNAME "$RimeCommit;)Z"),
         reinterpret_cast<void *>(get_commit)
     },
     {
         const_cast<char *>("get_context"),
-        const_cast<char *>("(IL" CLASSNAME "$RimeContext;)Z"),
+        const_cast<char *>("(L" CLASSNAME "$RimeContext;)Z"),
         reinterpret_cast<void *>(get_context)
     },
     {
         const_cast<char *>("get_status"),
-        const_cast<char *>("(IL" CLASSNAME "$RimeStatus;)Z"),
+        const_cast<char *>("(L" CLASSNAME "$RimeStatus;)Z"),
         reinterpret_cast<void *>(get_status)
     },
     // runtime options
     {
         const_cast<char *>("set_option"),
-        const_cast<char *>("(ILjava/lang/String;Z)V"),
+        const_cast<char *>("(Ljava/lang/String;Z)V"),
         reinterpret_cast<void *>(set_option)
     },
     {
         const_cast<char *>("get_option"),
-        const_cast<char *>("(ILjava/lang/String;)Z"),
+        const_cast<char *>("(Ljava/lang/String;)Z"),
         reinterpret_cast<void *>(get_option)
     },
     {
         const_cast<char *>("set_property"),
-        const_cast<char *>("(ILjava/lang/String;Ljava/lang/String;)V"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)V"),
         reinterpret_cast<void *>(set_property)
     },
     {
         const_cast<char *>("get_property"),
-        const_cast<char *>("(ILjava/lang/String;)Ljava/lang/String;"),
+        const_cast<char *>("(Ljava/lang/String;)Ljava/lang/String;"),
         reinterpret_cast<void *>(get_property)
     },
     {
@@ -180,12 +180,12 @@ static const JNINativeMethod sMethods[] = {
     },
     {
         const_cast<char *>("get_current_schema"),
-        const_cast<char *>("(I)Ljava/lang/String;"),
+        const_cast<char *>("()Ljava/lang/String;"),
         reinterpret_cast<void *>(get_current_schema)
     },
     {
         const_cast<char *>("select_schema"),
-        const_cast<char *>("(ILjava/lang/String;)Z"),
+        const_cast<char *>("(Ljava/lang/String;)Z"),
         reinterpret_cast<void *>(select_schema)
     },
     // configuration
@@ -293,32 +293,32 @@ static const JNINativeMethod sMethods[] = {
     // test
     {
         const_cast<char *>("simulate_key_sequence"),
-        const_cast<char *>("(ILjava/lang/String;)Z"),
+        const_cast<char *>("(Ljava/lang/String;)Z"),
         reinterpret_cast<void *>(simulate_key_sequence)
     },
     {
         const_cast<char *>("get_input"),
-        const_cast<char *>("(I)Ljava/lang/String;"),
+        const_cast<char *>("()Ljava/lang/String;"),
         reinterpret_cast<void *>(get_input)
     },
     {
         const_cast<char *>("get_caret_pos"),
-        const_cast<char *>("(I)I"),
+        const_cast<char *>("()I"),
         reinterpret_cast<void *>(get_caret_pos)
     },
     {
         const_cast<char *>("set_caret_pos"),
-        const_cast<char *>("(II)V"),
+        const_cast<char *>("(I)V"),
         reinterpret_cast<void *>(set_caret_pos)
     },
     {
         const_cast<char *>("select_candidate"),
-        const_cast<char *>("(II)Z"),
+        const_cast<char *>("(I)Z"),
         reinterpret_cast<void *>(select_candidate)
     },
     {
         const_cast<char *>("select_candidate_on_current_page"),
-        const_cast<char *>("(II)Z"),
+        const_cast<char *>("(I)Z"),
         reinterpret_cast<void *>(select_candidate_on_current_page)
     },
     {
