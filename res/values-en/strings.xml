@@ -39,7 +39,6 @@
     <string name="pref_pime">Win10 PIME Platform</string>
 
     <string name="pref_input">Input</string>
-    <string name="pref_keyboard">Keyboard</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
     <string name="pref_select">Select</string>
@@ -52,6 +51,13 @@
     <string name="pref_colors_summary">Select Desired Color for Keyboard</string>
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in /sdcard/rime</string>
+
+    <string name="pref_keyboard">Keyboard</string>
+    <string name="key_sound">Sound on keypress</string>
+    <string name="key_vibrate">Vibrate on keypress</string>
+    <string name="key_vibrate_duration">Vibration strength on keypress</string>
+    <string name="speak_key">Speak on keypress</string>
+    <string name="speak_commit">Speak on commit</string>
 
 <!--
     <string name="pref_function">Functions</string>

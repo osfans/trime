@@ -17,6 +17,8 @@
 package com.osfans.trime;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+
 import android.media.AudioManager;
 import android.os.Vibrator;
 import android.view.KeyEvent;
@@ -28,7 +30,7 @@ import java.util.Locale;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
-  private int duration = 30;
+  private long duration = 20L;
 
   private final Context context;
 
@@ -44,22 +46,22 @@ public class Effect {
   }
 
   public void reset() {
-    Config config = Config.get();
-    duration = config.getInt("key_vibrate_duration");
-    vibrateOn = config.getBoolean("key_vibrate") && (duration > 0);
+    SharedPreferences pref = Function.getPref(context);
+    duration = pref.getLong("key_vibrate_duration", duration);
+    vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
     if (vibrateOn && (vibrator == null)) {
       vibrator =
         (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
-    soundOn = config.getBoolean("key_sound");
+    soundOn = pref.getBoolean("key_sound", false);
     if (soundOn && (audioManager == null)) {
       audioManager = 
         (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
-    isSpeakCommit = config.getBoolean("speak_commit");
-    isSpeakKey = config.getBoolean("speak_key");
+    isSpeakCommit = pref.getBoolean("speak_commit", false);
+    isSpeakKey = pref.getBoolean("speak_key", false);
     if (mTTS == null && (isSpeakCommit || isSpeakKey)) {
       mTTS = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
         public void onInit(int status) {

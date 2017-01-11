@@ -40,7 +40,6 @@
     <string name="pref_pime">Win10 PIME輸入法平臺</string>
 
     <string name="pref_input">輸入</string>
-    <string name="pref_keyboard">鍵盤</string>
     <string name="pref_enable">啓用</string>
     <string name="pref_enable_summary">啓用同文輸入法平臺</string>
     <string name="pref_select">選取</string>
@@ -53,6 +52,13 @@
     <string name="pref_colors_summary">選取想要的鍵盤配色</string>
     <string name="pref_reset">回廠</string>
     <string name="pref_reset_summary">使用預設設定覆蓋/sdcard/rime下同名檔案</string>
+
+    <string name="pref_keyboard">鍵盤</string>
+    <string name="key_sound">按鍵聲音</string>
+    <string name="key_vibrate">按鍵時震動</string>
+    <string name="key_vibrate_duration">按鍵時的振動強度</string>
+    <string name="speak_key">按鍵時朗讀字符</string>
+    <string name="speak_commit">上屏時朗讀字符</string>
 
 <!--
     <string name="pref_function">功能</string>

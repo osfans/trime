@@ -53,11 +53,8 @@ style:
     - {start: "\n", label: "%s.", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
-  key_sound: true #按鍵聲音
   key_long_text_size: 14 #長標籤字號
   key_text_size: 22 #鍵字號
-  key_vibrate_duration: 30 #按鍵震動時長：毫秒
-  key_vibrate: false #按鍵震動
   key_width: 10.0 #鍵寬，佔螢幕寬的百分比
   keyboards: [.default, default, symbols, number] #鍵盤配置
   label_text_size: 22 #標籤字號
@@ -82,8 +79,6 @@ style:
   show_preview: false #按鍵提示
   show_window: true #顯示浮動窗口
   soft_cursor: true #編碼區軟游標
-  speak_commit: false #朗讀上屏文字
-  speak_key: false #朗讀按鍵
   speech_opencc_config: s2t.json #語音輸入簡繁轉換
   symbol_font: symbol.ttf #符號字型
   symbol_text_size: 10 #符號字號

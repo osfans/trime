@@ -26,6 +26,8 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
+
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -114,7 +116,8 @@ public class Pref extends PreferenceActivity {
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     boolean b;
-    switch (preference.getKey()) {
+    String key = preference.getKey();
+    switch (key) {
       case "pref_enable": //啓用
         if (!isEnabled()) startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
         return true;
@@ -181,6 +184,15 @@ public class Pref extends PreferenceActivity {
       case "pref_ui": //色調
         finish();
         Function.showPrefDialog(this);
+        return true;
+      case "key_sound":
+      case "key_sound_volume":
+      case "key_vibrate":
+      case "key_vibrate_duration":
+      case "speak_key":
+      case "speak_commit":
+        Trime trime = Trime.getService();
+        if (trime != null) trime.resetEffect();
         return true;
     }
     return false;

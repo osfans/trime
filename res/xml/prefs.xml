@@ -34,6 +34,10 @@
     <PreferenceScreen android:key="pref_keyboard" android:title="@string/pref_keyboard">
         <Preference android:key="pref_themes" android:title="@string/pref_themes" android:summary="@string/pref_themes_summary"/>
         <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
+        <SwitchPreference android:key="key_sound" android:title="@string/key_sound"/>
+        <SwitchPreference android:key="key_vibrate" android:title="@string/key_vibrate"/>
+        <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
+        <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_help" android:title="@string/pref_help">

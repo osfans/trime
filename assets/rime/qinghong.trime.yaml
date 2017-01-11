@@ -60,11 +60,8 @@ style:
     - {start: "\n", label: "%s.", candidate: "%s", comment: "%s", end: "", sep: "☁️️"}
   key_font: gunplay.ttf #键盘字体
   key_height: 55.5 #键高
-  key_sound: true #按键声音
   key_long_text_size: 19 #长标签字号
   key_text_size: 22 #键字号
-  key_vibrate_duration: 5 #按键震动时长：毫秒
-  key_vibrate: false #按键震动
   key_width: 10.0 #键宽，占屏幕宽的百分比
   keyboards: [.default, default, number, symbols, edit, move, bqrw1, bqrw2, bqrw3, bqrw4, bqrw5, bqqt1, bqqt2, bqqt3, bqqt4, bqqz1, bqqz2, bqqz3, bqqz4, bqqz5, bqpt1, bqpt2, bqhd1, bqhd2, bqhc1, bqhc2, bqlx1, bqlx2, bqlx3, bqlx4, bqlx5, bqkj1, bqkj2, bqkj3, bqkj4, bqfh1, bqfh2, bqfh3, bqfh4, kao_fond, kao_sad, kao_mad, kao_astonished, kao_impotent, kao_happy] #键盘配置
   label_text_size: 22 #标签字号
@@ -89,8 +86,6 @@ style:
   show_preview: false #按键提示
   show_window: true #显示浮动窗口
   soft_cursor: true #编码区软光标
-  speak_commit: false #朗读上屏文本
-  speak_key: false #朗读按键
   speech_opencc_config: none #语音输入简繁转换
   symbol_font: symbol.ttf #符号字体
   symbol_text_size: 10 #符号字号

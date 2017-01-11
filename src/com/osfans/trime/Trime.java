@@ -193,6 +193,10 @@ public class Trime extends InputMethodService implements
     Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
   }
 
+  public void resetEffect() {
+    if (mEffect != null) mEffect.reset();
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -203,7 +207,7 @@ public class Trime extends InputMethodService implements
     mConfig = Config.get(this);
     updateRimeOption();
     loadConfig();
-    mEffect.reset();
+    resetEffect();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
     String s;
@@ -284,7 +288,7 @@ public class Trime extends InputMethodService implements
     }
     hideComposition();
     if (mKeyboardView != null) mKeyboardView.reset(); //實體鍵盤無軟鍵盤
-    mEffect.reset();
+    resetEffect();
   }
 
   public void initKeyboard(boolean update) {
