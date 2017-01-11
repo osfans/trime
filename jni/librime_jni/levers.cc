@@ -99,7 +99,7 @@ jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list) {
         value = newJstring(env, item.name);
         env->CallObjectMethod(schema_item, put, key, value);
       }
-      if (item.reserved) {
+      if (0 && item.reserved) { //workaround for jni string overflow
         RimeSchemaInfo* info = (RimeSchemaInfo*) item.reserved;
         key = newJstring(env, "version");
         value = newJstring(env, api_->get_schema_version(info));
@@ -109,9 +109,6 @@ jobject _get_schema_list(JNIEnv *env, RimeSchemaList* list) {
         env->CallObjectMethod(schema_item, put, key, value);
         key = newJstring(env, "description");
         value = newJstring(env, api_->get_schema_description(info));
-        env->CallObjectMethod(schema_item, put, key, value);
-        key = newJstring(env, "author");
-        value = newJstring(env, api_->get_schema_author(info));
         env->CallObjectMethod(schema_item, put, key, value);
       }
       env->DeleteLocalRef(key);
