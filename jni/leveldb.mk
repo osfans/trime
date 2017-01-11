@@ -2,19 +2,11 @@ LOCAL_PATH := $(ROOT_PATH)/leveldb
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := leveldb
-LOCAL_CFLAGS := -D_REENTRANT -DOS_ANDROID -DLEVELDB_PLATFORM_POSIX -DNDEBUG
+LOCAL_CFLAGS := -D_REENTRANT -DOS_ANDROID -DLEVELDB_PLATFORM_POSIX -DNDEBUG -DLEVELDB_ATOMIC_PRESENT
 
 ifneq ($(SNAPPY),n)
 LOCAL_CFLAGS += -DSNAPPY
 LOCAL_STATIC_LIBRARIES += snappy
-endif
-
-ifeq ($(TARGET_ARCH_ABI), arm64-v8a)
-LOCAL_CFLAGS += -D__ARMEL__
-endif
-
-ifneq ($(filter $(TARGET_ARCH_ABI), mips mips64),)
-LOCAL_CFLAGS += -DARCH_CPU_X86_FAMILY=1
 endif
 
 LOCAL_CPP_EXTENSION := .cc
@@ -27,6 +19,7 @@ LOCAL_SRC_FILES := \
     db/db_impl.cc \
     db/db_iter.cc \
     db/dbformat.cc \
+    db/dumpfile.cc \
     db/filename.cc \
     db/log_reader.cc \
     db/log_writer.cc \

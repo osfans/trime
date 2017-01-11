@@ -91,17 +91,13 @@ target_compile_definitions(boost-static PRIVATE BOOST_LOCALE_WITH_ICONV)
 target_link_libraries(boost-static iconv-static)
 
 # leveldb
-if(WIN32)
-  set(LEVELDB_PLATFORM win)
-else()
-  set(LEVELDB_PLATFORM posix)
-endif()
 set(LEVELDB_SOURCES
   leveldb/db/builder.cc
   leveldb/db/c.cc
   leveldb/db/db_impl.cc
   leveldb/db/db_iter.cc
   leveldb/db/dbformat.cc
+  leveldb/db/dumpfile.cc
   leveldb/db/filename.cc
   leveldb/db/log_reader.cc
   leveldb/db/log_writer.cc
@@ -133,16 +129,16 @@ set(LEVELDB_SOURCES
   leveldb/util/logging.cc
   leveldb/util/options.cc
   leveldb/util/status.cc
-  leveldb/util/env_${LEVELDB_PLATFORM}.cc
-  leveldb/port/port_${LEVELDB_PLATFORM}.cc
+  leveldb/util/env_posix.cc
+  leveldb/port/port_posix.cc
   )
-set(LEVELDB_FLAGS _REENTRANT NDEBUG LEVELDB_ATOMIC_PRESENT)
+set(LEVELDB_FLAGS _REENTRANT NDEBUG LEVELDB_PLATFORM_POSIX LEVELDB_ATOMIC_PRESENT)
 if(ANDROID)
-list(APPEND LEVELDB_FLAGS OS_ANDROID LEVELDB_PLATFORM_POSIX)
+list(APPEND LEVELDB_FLAGS OS_ANDROID)
 elseif(UNIX)
-list(APPEND LEVELDB_FLAGS OS_LINUX LEVELDB_PLATFORM_POSIX)
+list(APPEND LEVELDB_FLAGS OS_LINUX)
 elseif(WIN32)
-list(APPEND LEVELDB_FLAGS OS_WINDOWS LEVELDB_PLATFORM_WINDOWS __USE_MINGW_ANSI_STDIO=1)
+list(APPEND LEVELDB_FLAGS CYGWIN)
 endif()
 add_library(leveldb-static STATIC ${LEVELDB_SOURCES})
 target_include_directories(leveldb-static BEFORE PRIVATE leveldb)

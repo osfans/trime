@@ -9,7 +9,7 @@
 	url = https://github.com/google/snappy.git
 [submodule "jni/leveldb"]
 	path = jni/leveldb
-  url = https://github.com/GamerSg/leveldb-mingw.git
+	url = https://github.com/google/leveldb.git
 [submodule "jni/boost"]
 	path = jni/boost
 	url = https://github.com/boostorg/boost.git
