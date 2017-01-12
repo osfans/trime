@@ -1,4 +1,4 @@
-.PHONY: all release install clean apk android linux win32
+.PHONY: all release install clean apk ndk android linux win32 win64
 
 all: apk javadoc linux win32
 
