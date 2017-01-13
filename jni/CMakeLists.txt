@@ -12,7 +12,7 @@ option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
 include_directories(
   librime/include
   librime/thirdparty/include
-  marisa-trie/lib
+  marisa-trie/include
   leveldb/include
   yaml-cpp/include
   libiconv/libiconv-1.14/include
@@ -56,6 +56,17 @@ endif()
 # marisa
 file(GLOB_RECURSE MARISA_SOURCES marisa-trie/lib/marisa/*.cc)
 add_library(marisa-static STATIC ${MARISA_SOURCES})
+target_include_directories(marisa-static BEFORE PRIVATE
+  marisa-trie/lib
+  )
+
+# marisa tools
+set(MARISA_CMDOPT marisa-trie/tools/cmdopt.cc)
+foreach(tool benchmark build common-prefix-search dump lookup predictive-search reverse-lookup)
+set(tool marisa-${tool})
+add_executable(${tool} ${MARISA_CMDOPT} marisa-trie/tools/${tool}.cc)
+target_link_libraries(${tool} marisa-static ${STATIC_FLAGS})
+endforeach(tool)
 
 # iconv
 set(ICONV_SOURCES
@@ -243,7 +254,8 @@ elseif(WIN32)
 endif()
 
 # rime tools
-foreach(tool rime_api_console rime_console rime_deployer rime_dict_manager rime_patch)
+foreach(tool api_console console deployer dict_manager patch)
+set(tool rime_${tool})
 add_executable(${tool} "librime/tools/${tool}.cc")
 target_link_libraries(${tool} rime ${CMAKE_THREAD_LIBS_INIT})
 endforeach(tool)

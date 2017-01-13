@@ -15,7 +15,7 @@
 	url = https://github.com/boostorg/boost.git
 [submodule "jni/marisa-trie"]
 	path = jni/marisa-trie
-	url = https://github.com/salarshad/marisa-trie.git
+	url = https://github.com/s-yata/marisa-trie.git
 [submodule "jni/miniglog"]
 	path = jni/miniglog
 	url = https://github.com/osfans/miniglog.git
