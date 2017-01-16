@@ -1,4 +1,4 @@
-APP_ABI := armeabi arm64-v8a #armeabi-v7a x86 mips x86_64 mips64
+APP_ABI := armeabi-v7a arm64-v8a #armeabi x86 mips x86_64 mips64
 APP_PLATFORM := android-14
 APP_STL := c++_static
 

@@ -94,7 +94,7 @@ file(GLOB BOOST_SOURCES
 if(BOOST_USE_SIGNALS2)
   add_definitions(-DBOOST_SIGNALS2)
 else(BOOST_USE_SIGNALS2)
-  #add_definitions(-DBOOST_SIGNALS_NO_DEPRECATION_WARNING)
+  add_definitions(-DBOOST_SIGNALS_NO_DEPRECATION_WARNING)
   file(GLOB BOOST_SIGNAL_SOURCES boost/libs/signals/src/*.cpp)
 endif()
 add_library(boost-static STATIC ${BOOST_SOURCES} ${BOOST_SIGNAL_SOURCES})
