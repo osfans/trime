@@ -4,12 +4,13 @@ CXX_DEFINES = -DBOOST_NO_CXX11_SCOPED_ENUMS -DRIME_BUILD_SHARED_LIBS -DRIME_EXPO
 include $(CLEAR_VARS)
 LOCAL_MODULE := rime
 LOCAL_CPP_EXTENSION := .cc
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/thirdparty/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src $(LOCAL_PATH)/thirdparty/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/src $(LOCAL_PATH)/thirdparty/include
 
 LOCAL_SRC_FILES += \
   $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/src/*.cc)) \
-  $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/src/**/*.cc))
+  $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/src/**/*.cc)) \
+  $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/src/**/**/*.cc))
 
 LOCAL_CFLAGS := $(CXX_DEFINES)
 ifeq ($(BOOST_USE_SIGNALS2),n)

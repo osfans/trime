@@ -10,7 +10,7 @@ option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
 
 # includes
 include_directories(
-  librime/include
+  librime/src
   librime/thirdparty/include
   marisa-trie/include
   leveldb/include
