@@ -23,14 +23,16 @@ import android.media.AudioManager;
 import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.speech.tts.TextToSpeech;
-import android.os.Build.VERSION_CODES;
-import android.os.Build.VERSION;
 
 import java.util.Locale;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
+  private final static int MAX_VOLUME = 100;
   private int duration = 10;
+  private long durationLong;
+  private int volume = 100;
+  private float volumeFloat;
 
   private final Context context;
 
@@ -48,12 +50,15 @@ public class Effect {
   public void reset() {
     SharedPreferences pref = Function.getPref(context);
     duration = pref.getInt("key_vibrate_duration", duration);
+    durationLong = duration * 1L;
     vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
     if (vibrateOn && (vibrator == null)) {
       vibrator =
         (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
+    volume = pref.getInt("key_sound_volume", volume);
+    volumeFloat = (float) (1 - (Math.log(MAX_VOLUME - volume) / Math.log(MAX_VOLUME)));
     soundOn = pref.getBoolean("key_sound", false);
     if (soundOn && (audioManager == null)) {
       audioManager = 
@@ -72,7 +77,7 @@ public class Effect {
   }
 
   public void vibrate() {
-    if (vibrateOn && (vibrator != null)) vibrator.vibrate(duration * 1L);
+    if (vibrateOn && (vibrator != null)) vibrator.vibrate(durationLong);
   }
 
   public void playSound(final int code) {
@@ -92,7 +97,7 @@ public class Effect {
             sound = AudioManager.FX_KEYPRESS_STANDARD;
             break;
       }
-      audioManager.playSoundEffect(sound, -1);
+      audioManager.playSoundEffect(sound, volumeFloat);
     }
   }
 
@@ -114,7 +119,6 @@ public class Effect {
 
   public void speakKey(int code) {
     if (code <= 0) return;
-    if (VERSION.SDK_INT < VERSION_CODES.HONEYCOMB_MR1) return;
     String text = KeyEvent.keyCodeToString(code).replace("KEYCODE_","").replace("_", " ").toLowerCase(Locale.getDefault());
     speakKey(text);
   }
