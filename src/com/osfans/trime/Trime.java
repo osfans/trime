@@ -197,6 +197,14 @@ public class Trime extends InputMethodService implements
     if (mEffect != null) mEffect.reset();
   }
 
+  public void vibrateEffect() {
+    if (mEffect != null) mEffect.vibrate();
+  }
+
+  public void soundEffect() {
+    if (mEffect != null) mEffect.playSound(0);
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();

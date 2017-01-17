@@ -36,6 +36,12 @@
         <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
         <SwitchPreference android:key="key_sound" android:title="@string/key_sound"/>
         <SwitchPreference android:key="key_vibrate" android:title="@string/key_vibrate"/>
+        <com.osfans.trime.SeekBarPreference
+            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:key="key_vibrate_duration"
+            android:title="@string/key_vibrate_duration"
+            android:max="100"
+            android:defaultValue="10" />
         <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
         <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
     </PreferenceScreen>

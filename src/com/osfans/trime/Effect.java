@@ -30,7 +30,7 @@ import java.util.Locale;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
-  private long duration = 20L;
+  private int duration = 10;
 
   private final Context context;
 
@@ -47,7 +47,7 @@ public class Effect {
 
   public void reset() {
     SharedPreferences pref = Function.getPref(context);
-    duration = pref.getLong("key_vibrate_duration", duration);
+    duration = pref.getInt("key_vibrate_duration", duration);
     vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
     if (vibrateOn && (vibrator == null)) {
       vibrator =
@@ -72,7 +72,7 @@ public class Effect {
   }
 
   public void vibrate() {
-    if (vibrateOn && (vibrator != null)) vibrator.vibrate(duration);
+    if (vibrateOn && (vibrator != null)) vibrator.vibrate(duration * 1L);
   }
 
   public void playSound(final int code) {

@@ -27,6 +27,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.content.SharedPreferences;
 
 import android.view.View;
 import android.webkit.WebView;
@@ -52,7 +53,8 @@ public class Pref extends PreferenceActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) requestPermission();
-    boolean is_dark = Function.getPref(this).getBoolean("pref_ui", false);
+    SharedPreferences prefs = Function.getPref(this);
+    boolean is_dark = prefs.getBoolean("pref_ui", false);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       setTheme(is_dark ? 0x01030224 : 0x01030237);
     } else {
@@ -71,6 +73,28 @@ public class Pref extends PreferenceActivity {
     if (isEnabled()) getPreferenceScreen().removePreference(pref);
     mProgressDialog = new ProgressDialog(this);
     mProgressDialog.setCancelable(false);
+    prefs.registerOnSharedPreferenceChangeListener(new
+                           SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                String key) {
+          switch (key) {
+            case "key_sound":
+            case "key_sound_volume":
+            case "key_vibrate":
+            case "key_vibrate_duration":
+            case "speak_key":
+            case "speak_commit":
+              Trime trime = Trime.getService();
+              if (trime != null) {
+                trime.resetEffect();
+                if (key.startsWith("key_vibrate")) trime.vibrateEffect();
+                else if (key.startsWith("key_sound")) trime.soundEffect();
+              }
+              break;
+          }
+        }
+    });
   }
 
   private void showLicenseDialog() {
@@ -184,15 +208,6 @@ public class Pref extends PreferenceActivity {
       case "pref_ui": //色調
         finish();
         Function.showPrefDialog(this);
-        return true;
-      case "key_sound":
-      case "key_sound_volume":
-      case "key_vibrate":
-      case "key_vibrate_duration":
-      case "speak_key":
-      case "speak_commit":
-        Trime trime = Trime.getService();
-        if (trime != null) trime.resetEffect();
         return true;
     }
     return false;
