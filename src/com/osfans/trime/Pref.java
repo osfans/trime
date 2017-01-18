@@ -45,7 +45,8 @@ import android.os.Build.VERSION;
 import android.annotation.TargetApi;
 
 /** 配置輸入法 */
-public class Pref extends PreferenceActivity {
+public class Pref extends PreferenceActivity
+                  implements SharedPreferences.OnSharedPreferenceChangeListener {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
   private ProgressDialog mProgressDialog;
@@ -78,43 +79,54 @@ public class Pref extends PreferenceActivity {
     mKeyVibrateDurationPref = findPreference("key_vibrate_duration");
     mKeySoundVolumePref.setEnabled(prefs.getBoolean("key_sound", false));
     mKeyVibrateDurationPref.setEnabled(prefs.getBoolean("key_vibrate", false));
-    prefs.registerOnSharedPreferenceChangeListener(new
-                           SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences prefs,
-                String key) {
-          Trime trime = Trime.getService();
-          boolean value;
-          switch (key) {
-            case "key_sound":
-              if (trime!= null) trime.resetEffect();
-              value = prefs.getBoolean(key, false);
-              mKeySoundVolumePref.setEnabled(value);
-              break;
-            case "key_vibrate":
-              if (trime!= null) trime.resetEffect();
-              value = prefs.getBoolean(key, false);
-              mKeyVibrateDurationPref.setEnabled(value);
-              break;
-            case "key_sound_volume":
-              if (trime!= null) {
-                trime.resetEffect();
-                trime.soundEffect();
-              }
-              break;
-            case "key_vibrate_duration":
-              if (trime!= null) {
-                trime.resetEffect();
-                trime.vibrateEffect();
-              }
-              break;
-            case "speak_key":
-            case "speak_commit":
-              if (trime!= null) trime.resetEffect();
-              break;
-          }
+  }
+
+  public void onSharedPreferenceChanged(SharedPreferences prefs,
+          String key) {
+    Trime trime = Trime.getService();
+    boolean value;
+    switch (key) {
+      case "key_sound":
+        if (trime!= null) trime.resetEffect();
+        value = prefs.getBoolean(key, false);
+        mKeySoundVolumePref.setEnabled(value);
+        break;
+      case "key_vibrate":
+        if (trime!= null) trime.resetEffect();
+        value = prefs.getBoolean(key, false);
+        mKeyVibrateDurationPref.setEnabled(value);
+        break;
+      case "key_sound_volume":
+        if (trime!= null) {
+          trime.resetEffect();
+          trime.soundEffect();
         }
-    });
+        break;
+      case "key_vibrate_duration":
+        if (trime!= null) {
+          trime.resetEffect();
+          trime.vibrateEffect();
+        }
+        break;
+      case "speak_key":
+      case "speak_commit":
+        if (trime!= null) trime.resetEffect();
+        break;
+    }
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    getPreferenceScreen().getSharedPreferences()
+            .registerOnSharedPreferenceChangeListener(this);
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    getPreferenceScreen().getSharedPreferences()
+            .unregisterOnSharedPreferenceChangeListener(this);
   }
 
   private void showLicenseDialog() {
