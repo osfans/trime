@@ -49,6 +49,7 @@ public class Pref extends PreferenceActivity {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
   private ProgressDialog mProgressDialog;
+  private Preference mKeySoundVolumePref, mKeyVibrateDurationPref;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -73,24 +74,43 @@ public class Pref extends PreferenceActivity {
     if (isEnabled()) getPreferenceScreen().removePreference(pref);
     mProgressDialog = new ProgressDialog(this);
     mProgressDialog.setCancelable(false);
+    mKeySoundVolumePref = findPreference("key_sound_volume");
+    mKeyVibrateDurationPref = findPreference("key_vibrate_duration");
+    mKeySoundVolumePref.setEnabled(prefs.getBoolean("key_sound", false));
+    mKeyVibrateDurationPref.setEnabled(prefs.getBoolean("key_vibrate", false));
     prefs.registerOnSharedPreferenceChangeListener(new
                            SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+        public void onSharedPreferenceChanged(SharedPreferences prefs,
                 String key) {
+          Trime trime = Trime.getService();
+          boolean value;
           switch (key) {
             case "key_sound":
-            case "key_sound_volume":
+              if (trime!= null) trime.resetEffect();
+              value = prefs.getBoolean(key, false);
+              mKeySoundVolumePref.setEnabled(value);
+              break;
             case "key_vibrate":
+              if (trime!= null) trime.resetEffect();
+              value = prefs.getBoolean(key, false);
+              mKeyVibrateDurationPref.setEnabled(value);
+              break;
+            case "key_sound_volume":
+              if (trime!= null) {
+                trime.resetEffect();
+                trime.soundEffect();
+              }
+              break;
             case "key_vibrate_duration":
+              if (trime!= null) {
+                trime.resetEffect();
+                trime.vibrateEffect();
+              }
+              break;
             case "speak_key":
             case "speak_commit":
-              Trime trime = Trime.getService();
-              if (trime != null) {
-                trime.resetEffect();
-                if (key.startsWith("key_vibrate")) trime.vibrateEffect();
-                else if (key.startsWith("key_sound")) trime.soundEffect();
-              }
+              if (trime!= null) trime.resetEffect();
               break;
           }
         }
