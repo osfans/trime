@@ -83,7 +83,13 @@ public class SeekBarPreference extends Preference
 
     @Override
     public CharSequence getSummary() {
-        return null;
+        String unit = "%";
+        switch (getKey()) {
+        case "key_vibrate_duration":
+            unit = getContext().getString(R.string.key_vibrate_duration_unit);
+            break;
+        }
+        return getProgress() + unit;
     }
 
     @Override
@@ -133,6 +139,7 @@ public class SeekBarPreference extends Preference
             if (notifyChanged) {
                 notifyChanged();
             }
+            setSummary(getSummary());
         }
     }
 

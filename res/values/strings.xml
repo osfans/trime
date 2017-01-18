@@ -58,6 +58,7 @@
     <string name="key_sound_volume">按鍵音量</string>
     <string name="key_vibrate">按鍵時震動</string>
     <string name="key_vibrate_duration">按鍵振動強度</string>
+    <string name="key_vibrate_duration_unit">毫秒</string>
     <string name="speak_key">按鍵時朗讀字符</string>
     <string name="speak_commit">上屏時朗讀字符</string>
 

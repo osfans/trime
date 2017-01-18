@@ -56,7 +56,8 @@
     <string name="key_sound">Sound on keypress</string>
     <string name="key_sound_volume">Volume on keypress</string>
     <string name="key_vibrate">Vibrate on keypress</string>
-    <string name="key_vibrate_duration">Vibration strength on keypress</string>
+    <string name="key_vibrate_duration">Vibration strength</string>
+    <string name="key_vibrate_duration_unit">ms</string>
     <string name="speak_key">Speak on keypress</string>
     <string name="speak_commit">Speak on commit</string>
 
