@@ -37,29 +37,15 @@ public class SeekBarPreference extends Preference
     private int mMax;
     private boolean mTrackingTouch;
 
-    public SeekBarPreference(
-            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+    public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         int[] set = {
             android.R.attr.max
         };
         TypedArray a = context.obtainStyledAttributes(
-                attrs, set, defStyleAttr, defStyleRes);
+                attrs, set);
         setMax(a.getInt(0, 100));
         a.recycle();
-
-        /*a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.SeekBarPreference, defStyleAttr, defStyleRes);
-        final int layoutResId = a.getResourceId(
-                com.android.internal.R.styleable.SeekBarPreference_layout,
-                com.android.internal.R.layout.preference_widget_seekbar);
-        a.recycle();
-
-        setLayoutResource(layoutResId);*/
-    }
-
-    public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
     }
 
     public SeekBarPreference(Context context, AttributeSet attrs) {
