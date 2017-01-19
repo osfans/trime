@@ -585,17 +585,30 @@ public class Trime extends InputMethodService implements
     return false;
   }
 
+  private boolean composeKey(int keyCode) {
+    if (!canCompose) return false;
+    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+        keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
+        keyCode == KeyEvent.KEYCODE_VOLUME_MUTE ||
+        keyCode == KeyEvent.KEYCODE_HOME ||
+        keyCode == KeyEvent.KEYCODE_MENU ||
+        keyCode == KeyEvent.KEYCODE_CAMERA ||
+        keyCode == KeyEvent.KEYCODE_FOCUS ||
+        keyCode == KeyEvent.KEYCODE_SEARCH) return false;
+    return true;
+  }
+
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     Log.info("onKeyDown="+event);
-    if (canCompose && onKeyEvent(event)) return true;
+    if (composeKey(keyCode) && onKeyEvent(event)) return true;
     return super.onKeyDown(keyCode, event);
   }
 
   @Override
   public boolean onKeyUp(int keyCode, KeyEvent event) {
     Log.info("onKeyUp="+event);
-    if (keyComposing) {
+    if (composeKey(keyCode) && keyComposing) {
       onRelease(keyCode);
       return true;
     }
@@ -610,12 +623,6 @@ public class Trime extends InputMethodService implements
     Log.info("onKeyEvent="+event);
     keyComposing = false;
     int keyCode = event.getKeyCode();
-    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
-        keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
-        keyCode == KeyEvent.KEYCODE_VOLUME_MUTE ||
-        keyCode == KeyEvent.KEYCODE_HOME ||
-        keyCode == KeyEvent.KEYCODE_MENU ||
-        keyCode == KeyEvent.KEYCODE_SEARCH) return false;
     keyComposing = isComposing();
     if (!keyComposing) {
       if (keyCode == KeyEvent.KEYCODE_DEL ||
