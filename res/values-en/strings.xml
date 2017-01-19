@@ -23,10 +23,10 @@
 
     <!-- Preference settings -->
     <string name="pref_help">Help</string>
-    <string name="pref_wiki">Courses</string>
-    <string name="pref_issues">Report</string>
-    <string name="pref_qq1">QQ Group for Newbies</string>
-    <string name="pref_qq2">Rime QQ Group</string>
+    <string name="pref_wiki">Wiki</string>
+    <string name="pref_issues">Report Issues</string>
+    <string name="pref_rime_qq_newbie">QQ Group for Rime Newbies</string>
+    <string name="pref_rime_qq">Rime QQ Group</string>
     <string name="pref_market">Google Play</string>
     <string name="pref_coolmarket">Cool Market</string>
 
@@ -38,15 +38,15 @@
     <string name="pref_credits">Credits</string>
     <string name="pref_pime">Win10 PIME Platform</string>
 
-    <string name="pref_input">Input</string>
+    <string name="pref_input">Input Setting</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
-    <string name="pref_select">Select</string>
+    <string name="pref_select">Change Keyboard</string>
     <string name="pref_select_summary">Select TRIME</string>
     <string name="pref_themes">Themes</string>
     <string name="pref_themes_summary">Select Desired Theme</string>
     <string name="pref_schemas">Schemas</string>
-    <string name="pref_schemas_summary">Select Some from Installed Schemas</string>
+    <string name="pref_schemas_summary">Select Installed Schema</string>
     <string name="pref_colors">Colors</string>
     <string name="pref_colors_summary">Select Desired Color for Keyboard</string>
     <string name="pref_reset">Reset</string>
@@ -79,8 +79,8 @@
     <string name="pref_sync">Synchronize</string>
     <string name="pref_sync_summary">Synchronize User Dictionary in /sdcard/rime/sync</string>
 
-    <string name="reset_success">Succeeded!</string>
-    <string name="reset_failure">Failed!</string>
+    <string name="reset_success">Reset Succeeded!</string>
+    <string name="reset_failure">Reset Failed!</string>
 
     <string name="deploy_progress">Deploying…</string>
     <string name="sync_progress">Syncing…</string>

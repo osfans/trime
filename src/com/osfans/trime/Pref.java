@@ -222,7 +222,7 @@ public class Pref extends PreferenceActivity {
       case "pref_reset": //回廠
         new ResetDialog(this).show();
         return true;
-      case "pref_licensing": //資訊
+      case "pref_licensing": //許可協議
         showLicenseDialog();
         return true;
       case "pref_ui": //色調
