@@ -38,7 +38,7 @@
     <string name="pref_credits">Credits</string>
     <string name="pref_pime">Win10 PIME Platform</string>
 
-    <string name="pref_advanced">Advanced</string>
+    <string name="pref_input">Advanced</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
     <string name="pref_select">Change Keyboard</string>
@@ -52,7 +52,7 @@
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in /sdcard/rime</string>
 
-    <string name="pref_preferences">Preferences</string>
+    <string name="pref_keyboard">Preferences</string>
     <string name="key_sound">Sound on keypress</string>
     <string name="key_sound_volume">Volume on keypress</string>
     <string name="key_vibrate">Vibrate on keypress</string>
