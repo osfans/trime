@@ -34,11 +34,11 @@
     <string name="pref_librime_ver">Librime Version</string>
     <string name="pref_opencc_ver">OpenCC Version</string>
     <string name="pref_ver">Platform Version</string>
-    <string name="pref_licensing">Licensing</string>
+    <string name="pref_licensing">License</string>
     <string name="pref_credits">Credits</string>
     <string name="pref_pime">Win10 PIME Platform</string>
 
-    <string name="pref_input">Input Setting</string>
+    <string name="pref_input">Input</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
     <string name="pref_select">Change Keyboard</string>
@@ -58,8 +58,8 @@
     <string name="key_vibrate">Vibrate on keypress</string>
     <string name="key_vibrate_duration">Vibration strength</string>
     <string name="key_vibrate_duration_unit">ms</string>
-    <string name="speak_key">Speak on keypress</string>
-    <string name="speak_commit">Speak on commit</string>
+    <string name="speak_key">Voice on keypress</string>
+    <string name="speak_commit">Voice on commit</string>
 
 <!--
     <string name="pref_function">Functions</string>
