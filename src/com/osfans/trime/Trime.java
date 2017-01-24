@@ -430,7 +430,6 @@ public class Trime extends InputMethodService implements
         keyboard = "number";
         break;
       case InputType.TYPE_CLASS_TEXT:
-      default:
         if (variation == InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE) {
           // Make enter-key as line-breaks for messaging.
           enterAsLineBreak = true;
@@ -446,6 +445,8 @@ public class Trime extends InputMethodService implements
           canCompose = true;
         }
         break;
+      default: //0
+        return;
     }
     Rime.get();
     if (reset_ascii_mode) mAsciiMode = false;
@@ -453,7 +454,8 @@ public class Trime extends InputMethodService implements
     mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
     mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
     updateAsciiMode();
-    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose && !Rime.isEmpty()); //實體鍵盤
+    canCompose = canCompose && !Rime.isEmpty();
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤
     if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
@@ -467,7 +469,7 @@ public class Trime extends InputMethodService implements
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
-    setCandidatesViewShown(!Rime.isEmpty());
+    setCandidatesViewShown(canCompose);
   }
 
   @Override
@@ -845,7 +847,6 @@ public class Trime extends InputMethodService implements
     }
     if (ic != null && !isWinFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
-      //setCandidatesViewShown(canCompose); //InputType爲0x80000時無候選條
       int start_num = mComposition.setWindow(min_length);
       mCandidate.setText(start_num);
       if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
