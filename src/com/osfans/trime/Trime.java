@@ -580,7 +580,7 @@ public class Trime extends InputMethodService implements
    * @return 是否處理了Back鍵事件
    * */
   private boolean handleBack(int keyCode) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {
+    if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
       requestHideSelf(0);
       return true;
     }
@@ -629,6 +629,7 @@ public class Trime extends InputMethodService implements
     if (!keyComposing) {
       if (keyCode == KeyEvent.KEYCODE_DEL ||
           keyCode == KeyEvent.KEYCODE_ENTER ||
+          keyCode == KeyEvent.KEYCODE_ESCAPE ||
           keyCode == KeyEvent.KEYCODE_BACK) {
         return false;
       }
