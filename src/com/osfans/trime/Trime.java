@@ -455,7 +455,7 @@ public class Trime extends InputMethodService implements
     mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
-    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤進入文本框時顯示候選欄
     if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
@@ -469,7 +469,7 @@ public class Trime extends InputMethodService implements
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
-    setCandidatesViewShown(canCompose);
+    setCandidatesViewShown(canCompose); //軟鍵盤出現時顯示候選欄
   }
 
   @Override
@@ -852,6 +852,7 @@ public class Trime extends InputMethodService implements
       if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
     }
     if (mKeyboardView != null) mKeyboardView.invalidateComposingKeys();
+    setCandidatesViewShown(canCompose); //實體鍵盤打字時顯示候選欄
   }
 
   private void showDialog(AlertDialog dialog) {
