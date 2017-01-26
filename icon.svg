@@ -9,20 +9,20 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="144"
-   height="144"
+   width="153.60001"
+   height="153.60001"
    viewBox="0 0 144 144"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.0 r"
    sodipodi:docname="icon.svg"
    inkscape:export-filename="res/drawable-xxhdpi/icon.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-xdpi="24"
+   inkscape:export-ydpi="24">
   <defs
      id="defs4">
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        inkscape:label="Drop Shadow"
        id="filter3371">
       <feFlood
@@ -101,9 +101,9 @@
        x="188.5714"
        y="232.3622"
        style="fill:#ffffff"
-       inkscape:export-filename="/home/kyle/rect3348.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90"
+       inkscape:export-filename="res/drawable-xxhdpi/icon.png"
+       inkscape:export-xdpi="24"
+       inkscape:export-ydpi="24"
        ry="15" />
     <text
        xml:space="preserve"
@@ -111,10 +111,9 @@
        x="193.42857"
        y="350.36221"
        id="text3344"
-       sodipodi:linespacing="125%"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90"
-       inkscape:export-filename="/home/kyle/text3344.png"><tspan
+       inkscape:export-xdpi="24"
+       inkscape:export-ydpi="24"
+       inkscape:export-filename="res/drawable-xxhdpi/icon.png"><tspan
          sodipodi:role="line"
          id="tspan3346"
          x="193.42857"
