@@ -183,6 +183,7 @@ set(OPENCC_SOURCES
   OpenCC/src/Converter.cpp
   OpenCC/src/DartsDict.cpp
   OpenCC/src/Dict.cpp
+  OpenCC/src/DictConverter.cpp
   OpenCC/src/DictEntry.cpp
   OpenCC/src/DictGroup.cpp
   OpenCC/src/MaxMatchSegmentation.cpp

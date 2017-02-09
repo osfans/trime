@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 LOCAL_PATH := $(ROOT_PATH)/OpenCC
-CXX_DEFINES := -DVERSION="\"1.0.4\"" -DOpencc_BUILT_AS_STATIC
+CXX_DEFINES := -DVERSION="\"1.0.5\"" -DOpencc_BUILT_AS_STATIC
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := opencc
@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := src/BinaryDict.cpp \
   src/Converter.cpp \
   src/DartsDict.cpp \
   src/Dict.cpp \
+  src/DictConverter.cpp \
   src/DictEntry.cpp \
   src/DictGroup.cpp \
   src/MaxMatchSegmentation.cpp \
