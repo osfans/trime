@@ -85,7 +85,7 @@
     <PreferenceScreen android:key="pref_about" android:order="64" android:title="@string/pref_about">
         <Preference android:key="pref_ver" android:title="@string/pref_ver">
             <intent android:action="android.intent.action.VIEW"
-            android:data="https://github.com/osfans/trime/releases" />
+            android:data="https://github.com/osfans/trime" />
         </Preference>
         <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver">
             <intent android:action="android.intent.action.VIEW"
@@ -102,7 +102,7 @@
         </Preference>
         <Preference android:key="pref_credits" android:title="@string/pref_credits">
             <intent android:action="android.intent.action.VIEW"
-                    android:data="https://github.com/osfans/trime/blob/develop/README.md#鳴謝credits" />
+                    android:data="https://github.com/osfans/trime/releases" />
         </Preference>
     </PreferenceScreen>
 
