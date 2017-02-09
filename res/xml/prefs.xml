@@ -96,6 +96,10 @@
                     android:data="https://github.com/BYVoid/OpenCC" />
         </Preference>
         <Preference android:key="pref_licensing" android:title="@string/pref_licensing" android:summary="@string/pref_licensing_summary"/>
+        <Preference android:key="pref_pravcy" android:title="@string/pref_privacy">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/osfans/trime/blob/develop/PRIVACY.md" />
+        </Preference>
         <Preference android:key="pref_pime" android:title="@string/pref_pime">
             <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/osfans/PIME/releases" />
