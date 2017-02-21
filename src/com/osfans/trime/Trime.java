@@ -446,6 +446,8 @@ public class Trime extends InputMethodService implements
         }
         break;
       default: //0
+        canCompose = (inputType > 0); //0x80000 FX重命名文本框
+        if (canCompose) break;
         return;
     }
     Rime.get();
@@ -469,7 +471,7 @@ public class Trime extends InputMethodService implements
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
-    setCandidatesViewShown(canCompose); //軟鍵盤出現時顯示候選欄
+    setCandidatesViewShown(!Rime.isEmpty()); //軟鍵盤出現時顯示候選欄
   }
 
   @Override
@@ -853,7 +855,7 @@ public class Trime extends InputMethodService implements
       if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
     }
     if (mKeyboardView != null) mKeyboardView.invalidateComposingKeys();
-    setCandidatesViewShown(canCompose); //實體鍵盤打字時顯示候選欄
+    if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤打字時顯示候選欄
   }
 
   private void showDialog(AlertDialog dialog) {
