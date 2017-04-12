@@ -8,7 +8,7 @@ LOCAL_SRC_FILES := \
   $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/lib/marisa/*.cc)) \
   $(subst $(LOCAL_PATH)/,,$(wildcard $(LOCAL_PATH)/lib/marisa/grimoire/**/**.cc))
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/lib #$(LOCAL_PATH)/include
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/lib $(LOCAL_PATH)/include
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 include $(BUILD_STATIC_LIBRARY)
 
