@@ -52,6 +52,7 @@ LOCAL_SRC_FILES := \
     util/logging.cc \
     util/options.cc \
     util/status.cc \
-    port/port_posix.cc
+    port/port_posix.cc \
+    port/port_posix_sse.cc
 
 include $(BUILD_STATIC_LIBRARY)
