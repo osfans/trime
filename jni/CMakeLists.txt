@@ -15,7 +15,7 @@ include_directories(
   marisa-trie/include
   leveldb/include
   yaml-cpp/include
-  libiconv/libiconv-1.14/include
+  libiconv/include
   leveldb/include
   snappy
   include
@@ -70,18 +70,17 @@ endforeach(tool)
 
 # iconv
 set(ICONV_SOURCES
-  libiconv/libiconv-1.14/libcharset/lib/localcharset.c
-  libiconv/libiconv-1.14/lib/iconv.c
-  libiconv/libiconv-1.14/lib/relocatable.c
+  libiconv/libcharset/lib/localcharset.c
+  libiconv/lib/iconv.c
+  libiconv/lib/relocatable.c
   )
 add_library(iconv-static STATIC ${ICONV_SOURCES})
 target_compile_definitions(iconv-static PRIVATE
-  ANDROID LIBDIR="c" BUILDING_LIBICONV IN_LIBRARY
+  LIBDIR="c" BUILDING_LIBICONV IN_LIBRARY
   )
 target_include_directories(iconv-static BEFORE PRIVATE
-  libiconv/libiconv-1.14/libcharset
-  libiconv/libiconv-1.14/lib
-  libiconv/libiconv-1.14/libcharset/include
+  libiconv/lib
+  libiconv/libcharset/include
   )
 
 # boost

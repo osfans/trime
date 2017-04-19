@@ -24,4 +24,4 @@
 	url = https://github.com/rime/librime.git
 [submodule "jni/libiconv"]
 	path = jni/libiconv
-	url = https://github.com/zhengyi0802/android-external-libiconv.git
+	url = https://github.com/osfans/libiconv-gnu.git
