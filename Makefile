@@ -1,85 +1,82 @@
-.PHONY: all release install clean apk translate ndk android linux win32 win64
+mainDir=app/src/main
+resDir=$(mainDir)/res
+jniDir=$(mainDir)/jni
 
-all: apk javadoc linux win32
+.PHONY: all clean build debug release install icon opencc-data translate ndk android linux
 
-release: translate
-	ant release
+all: release linux
+
+clean:
+	gradle clean
+
+debug:
+	gradle assembleDebug
+
+build:
+	gradle build
+
+release: icon opencc-data $(TRANSLATE)
+release:
+	gradle assembleRelease
 
 install: release
-	ant install
+	gradle installRelease
 
 icon: icon.svg
 	@echo "updating the icons..."
-	inkscape -z -e res/drawable-xxxhdpi/icon.png -w 192 -h 192 icon.svg
-	inkscape -z -e res/drawable-xxhdpi/icon.png -w 144 -h 144 icon.svg
-	inkscape -z -e res/drawable-xhdpi/icon.png -w 96 -h 96 icon.svg
-	inkscape -z -e res/drawable-hdpi/icon.png -w 72 -h 72 icon.svg
-	inkscape -z -e res/drawable-mdpi/icon.png -w 48 -h 48 icon.svg
+	inkscape -z -e $(resDir)/drawable-xxxhdpi/icon.png -w 192 -h 192 $<
+	inkscape -z -e $(resDir)/drawable-xxhdpi/icon.png -w 144 -h 144 $<
+	inkscape -z -e $(resDir)/drawable-xhdpi/icon.png -w 96 -h 96 $<
+	inkscape -z -e $(resDir)/drawable-hdpi/icon.png -w 72 -h 72 $<
+	inkscape -z -e $(resDir)/drawable-mdpi/icon.png -w 48 -h 48 $<
 	# just copy the already converted icon to status
-	yes | cp res/drawable-xhdpi/icon.png res/drawable-xxxhdpi/status.png
-	yes | cp res/drawable-hdpi/icon.png res/drawable-xxhdpi/status.png
-	yes | cp res/drawable-mdpi/icon.png res/drawable-xhdpi/status.png
-	inkscape -z -e res/drawable-hdpi/status.png -w 36 -h 36 icon.svg
-	inkscape -z -e res/drawable-mdpi/status.png -w 24 -h 24 icon.svg
+	yes | cp $(resDir)/drawable-xhdpi/icon.png $(resDir)/drawable-xxxhdpi/status.png
+	yes | cp $(resDir)/drawable-hdpi/icon.png $(resDir)/drawable-xxhdpi/status.png
+	yes | cp $(resDir)/drawable-mdpi/icon.png $(resDir)/drawable-xhdpi/status.png
+	inkscape -z -e $(resDir)/drawable-hdpi/status.png -w 36 -h 36 $<
+	inkscape -z -e $(resDir)/drawable-mdpi/status.png -w 24 -h 24 $<
 
-translate: resDir = res/values-zh-rCN
-translate: res/values/strings.xml
-	@echo "translate traditional to simple Chinese:"
-	@mkdir -p $(resDir)
-	@opencc -c tw2sp -i res/values/strings.xml -o $(resDir)/strings.xml
-	@grep -v "translatable=\"false\"" $(resDir)/strings.xml > $(resDir)/strings.xml.bak
-	@mv $(resDir)/strings.xml.bak $(resDir)/strings.xml
+TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
+$(TRANSLATE): $(resDir)/values/strings.xml
+	@echo "translate traditional to simple Chinese: $@"
+	@mkdir -p $(resDir)/values-zh-rCN
+	@opencc -c tw2sp -i $< -o $@
+	@sed -i "/translatable=\"false\"/d" $@
 
+translate: $(TRANSLATE)
+
+opencc-data: srcDir = $(jniDir)/OpenCC/data
+opencc-data: targetDir = $(mainDir)/assets/rime/opencc
 opencc-data:
 	@echo "copy opencc data:"
-	@rm -rf assets/rime/opencc
-	@mkdir -p assets/rime/opencc
-	@cp jni/OpenCC/data/dictionary/* assets/rime/opencc/
-	@cp jni/OpenCC/data/config/* assets/rime/opencc/
-	@rm assets/rime/opencc/TWPhrases*.txt
-	python jni/OpenCC/data/scripts/merge.py jni/OpenCC/data/dictionary/TWPhrases*.txt assets/rime/opencc/TWPhrases.txt
-	python jni/OpenCC/data/scripts/reverse.py assets/rime/opencc/TWPhrases.txt assets/rime/opencc/TWPhrasesRev.txt
-	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/TWVariants.txt assets/rime/opencc/TWVariantsRev.txt
-	python jni/OpenCC/data/scripts/reverse.py jni/OpenCC/data/dictionary/HKVariants.txt assets/rime/opencc/HKVariantsRev.txt
-
-apk: opencc-data ndk translate
-	ant release
-
-javadoc:
-	ant javadoc
-	@echo "convert javadoc by opencc:"
-	@find docs -type f -name *.html| xargs -i opencc -i {} -o {}
+	@rm -rf $(targetDir)
+	@mkdir -p $(targetDir)
+	@cp $(srcDir)/dictionary/* $(targetDir)/
+	@cp $(srcDir)/config/* $(targetDir)/
+	@rm $(targetDir)/TWPhrases*.txt
+	python $(srcDir)/scripts/merge.py $(srcDir)/dictionary/TWPhrases*.txt $(targetDir)/TWPhrases.txt
+	python $(srcDir)/scripts/reverse.py $(targetDir)/TWPhrases.txt $(targetDir)/TWPhrasesRev.txt
+	python $(srcDir)/scripts/reverse.py $(srcDir)/dictionary/TWVariants.txt $(targetDir)/TWVariantsRev.txt
+	python $(srcDir)/scripts/reverse.py $(srcDir)/dictionary/HKVariants.txt $(targetDir)/HKVariantsRev.txt
 
 ndk:
-	ndk-build
+	(cd $(mainDir); ndk-build)
 
 android:
-	cmake -Bbuild-android \
-		-DCMAKE_BUILD_TYPE=Release \
+	cmake -Bbuild-$@ -DCMAKE_BUILD_TYPE=Release -H$(jniDir)\
 		-DCMAKE_SYSTEM_NAME=Android \
 		-DCMAKE_ANDROID_STL_TYPE=c++_static \
 		-DCMAKE_SYSTEM_VERSION=14 \
 		-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang \
-		-DCMAKE_ANDROID_ARCH_ABI=armeabi \
-		-DLIBRARY_OUTPUT_PATH=../libs/armeabi/ -Hjni
-	${MAKE} -C build-android rime_jni
+		-DCMAKE_ANDROID_ARCH_ABI=armeabi
+	${MAKE} -C build-$@ rime_jni
 
 linux:
-	cmake -Bbuild-linux -DCMAKE_BUILD_TYPE=Release -Hjni
-	${MAKE} -C build-linux
+	cmake -Bbuild-$@ -DCMAKE_BUILD_TYPE=Release -H$(jniDir)
+	${MAKE} -C build-$@
 
-win32:
-	i686-w64-mingw32-cmake -Bbuild-win32 -DCMAKE_BUILD_TYPE=Release -Hjni
-	${MAKE} -C build-win32 rime
+i686 x86_64:
+	$@-w64-mingw32-cmake -Bbuild-$@ -DCMAKE_BUILD_TYPE=Release -H$(jniDir)
+	${MAKE} -C build-$@ rime
 	mkdir -p bin
-	(cd build-win32; 7z a ../bin/rime-win32-`date +%Y%m%d`.dll.7z rime.dll)
-
-win64:
-	x86_64-w64-mingw32-cmake -Bbuild-win64 -DCMAKE_BUILD_TYPE=Release -Hjni
-	${MAKE} -C build-win64 rime
-	mkdir -p bin
-	(cd build-win64; 7z a ../bin/rime-win64-`date +%Y%m%d`.dll.7z rime.dll)
-
-clean:
-	ndk-build clean
-	git clean -fd
+	(cd build-$@; 7z a ../bin/rime-$@-`date +%Y%m%d`.dll.7z rime.dll)

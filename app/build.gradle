@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+def countCmd = 'git rev-list develop --count'
+def count = countCmd.execute().text.trim().toInteger() + 20170000
+def tagCmd = 'git describe develop --tags'
+def tag = tagCmd.execute().text.trim()
+def dateCmd = 'date +%Y%m%d'
+def date = dateCmd.execute().text.trim()
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+
+    defaultConfig {
+        applicationId "com.osfans.trime"
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode count
+        versionName tag-date
+        ndk {
+            abiFilters "armeabi"
+        }
+        externalNativeBuild {
+            cmake {
+                cFlags "-fexceptions", "-frtti"
+                cppFlags "-fpic"
+                arguments "-DANDROID_STL=c++_static"
+            }
+        }
+    }
+
+    signingConfigs {
+       release {
+           storeFile rootProject.file(RELEASE_STORE_FILE)
+           storePassword RELEASE_STORE_PASSWORD
+           keyAlias RELEASE_KEY_ALIAS
+           keyPassword RELEASE_KEY_PASSWORD
+       }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-android.txt'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/jni/CMakeLists.txt"
+        }
+    }
+}

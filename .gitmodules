@@ -1,27 +1,27 @@
-[submodule "jni/OpenCC"]
-	path = jni/OpenCC
+[submodule "app/src/main/jni/OpenCC"]
+	path = app/src/main/jni/OpenCC
 	url = https://github.com/BYVoid/OpenCC.git
-[submodule "jni/yaml-cpp"]
-	path = jni/yaml-cpp
+[submodule "app/src/main/jni/yaml-cpp"]
+	path = app/src/main/jni/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
-[submodule "jni/snappy"]
-	path = jni/snappy
+[submodule "app/src/main/jni/snappy"]
+	path = app/src/main/jni/snappy
 	url = https://github.com/google/snappy.git
-[submodule "jni/leveldb"]
-	path = jni/leveldb
+[submodule "app/src/main/jni/leveldb"]
+	path = app/src/main/jni/leveldb
 	url = https://github.com/google/leveldb.git
-[submodule "jni/boost"]
-	path = jni/boost
+[submodule "app/src/main/jni/boost"]
+	path = app/src/main/jni/boost
 	url = https://github.com/boostorg/boost.git
-[submodule "jni/marisa-trie"]
-	path = jni/marisa-trie
+[submodule "app/src/main/jni/marisa-trie"]
+	path = app/src/main/jni/marisa-trie
 	url = https://github.com/s-yata/marisa-trie.git
-[submodule "jni/miniglog"]
-	path = jni/miniglog
+[submodule "app/src/main/jni/miniglog"]
+	path = app/src/main/jni/miniglog
 	url = https://github.com/osfans/miniglog.git
-[submodule "jni/librime"]
-	path = jni/librime
+[submodule "app/src/main/jni/librime"]
+	path = app/src/main/jni/librime
 	url = https://github.com/rime/librime.git
-[submodule "jni/libiconv"]
-	path = jni/libiconv
+[submodule "app/src/main/jni/libiconv"]
+	path = app/src/main/jni/libiconv
 	url = https://github.com/osfans/libiconv-gnu.git
