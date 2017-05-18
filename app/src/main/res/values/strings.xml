@@ -25,8 +25,8 @@
     <string name="pref_help">Help</string>
     <string name="pref_wiki">Wiki</string>
     <string name="pref_issues">Report Issues</string>
-    <string name="pref_rime_qq_newbie">QQ Group for Rime Newbies</string>
-    <string name="pref_rime_qq_newbie_summary" translatable="false">523571568</string>
+    <string name="pref_rime_qq_newbie">Trime QQ Group</string>
+    <string name="pref_rime_qq_newbie_summary" translatable="false">480159874</string>
     <string name="pref_rime_qq">Rime QQ Group</string>
     <string name="pref_rime_qq_summary" translatable="false">77608640</string>
     <string name="pref_market">Google Play</string>
