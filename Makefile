@@ -37,11 +37,10 @@ icon: icon.svg
 	inkscape -z -e $(resDir)/drawable-mdpi/status.png -w 24 -h 24 $<
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
-$(TRANSLATE): $(resDir)/values/strings.xml
+$(TRANSLATE): $(resDir)/values-zh-rTW/strings.xml
 	@echo "translate traditional to simple Chinese: $@"
 	@mkdir -p $(resDir)/values-zh-rCN
 	@opencc -c tw2sp -i $< -o $@
-	@sed -i "/translatable=\"false\"/d" $@
 
 translate: $(TRANSLATE)
 

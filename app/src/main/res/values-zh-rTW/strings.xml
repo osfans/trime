@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- 輸入法平臺名稱  -->
+    <string name="ime_name">同文輸入法</string>
+
+    <!-- Preference settings -->
+    <string name="pref_help">求助</string>
+    <string name="pref_wiki">維基教程</string>
+    <string name="pref_issues">問題反饋</string>
+    <string name="pref_rime_qq_newbie">Rime菜鳥QQ羣</string>
+    <string name="pref_rime_qq">中州韻QQ羣</string>
+    <string name="pref_market">谷歌市場</string>
+    <string name="pref_coolmarket">酷安市場</string>
+
+    <string name="pref_about">關於</string>
+    <string name="pref_librime_ver">RIME版本</string>
+    <string name="pref_opencc_ver">OpenCC版本</string>
+    <string name="pref_ver">平臺版本</string>
+    <string name="pref_licensing">許可證</string>
+    <string name="pref_credits">鳴謝</string>
+    <string name="pref_pime">Win10 PIME輸入法平臺</string>
+    <string name="pref_privacy">隱私權政策</string>
+
+    <string name="pref_input">輸入</string>
+    <string name="pref_enable">啓用</string>
+    <string name="pref_enable_summary">啓用同文輸入法平臺</string>
+    <string name="pref_select">選取</string>
+    <string name="pref_select_summary">選取同文輸入法平臺</string>
+    <string name="pref_themes">主題</string>
+    <string name="pref_themes_summary">選取想要的主題</string>
+    <string name="pref_schemas">方案</string>
+    <string name="pref_schemas_summary">從已安裝的方案中選擇要使用的方案</string>
+    <string name="pref_colors">配色</string>
+    <string name="pref_colors_summary">選取想要的鍵盤配色</string>
+    <string name="pref_reset">回廠</string>
+    <string name="pref_reset_summary">使用預設設定覆蓋/sdcard/rime下同名檔案</string>
+
+    <string name="pref_keyboard">鍵盤</string>
+    <string name="key_sound">按鍵聲音</string>
+    <string name="key_sound_volume">按鍵音量</string>
+    <string name="key_vibrate">按鍵時震動</string>
+    <string name="key_vibrate_duration">按鍵振動強度</string>
+    <string name="key_vibrate_duration_unit">毫秒</string>
+    <string name="speak_key">按鍵時朗讀字符</string>
+    <string name="speak_commit">上屏時朗讀字符</string>
+
+<!--
+    <string name="pref_function">功能</string>
+    <string name="pref_maintenance">維護</string>
+    <string name="pref_maintenance_summary">自動維護輸入法方案</string>
+    <string name="pref_deploy_opencc">部署OpenCC</string>
+    <string name="pref_deploy_opencc_summary">修改/sdcard/rime/opencc下的txt後需再次部署</string>
+    <string name="deploy_success">部署成功</string>
+    <string name="deploy_failure">部署失敗</string>
+    <string name="sync_success">同步成功</string>
+    <string name="sync_failure">同步失敗</string>
+    <string name="colors_progress">正在應用配色…</string>
+    <string name="switch_progress">正在切換方案…</string>
+-->
+    <string name="pref_deploy">部署</string>
+    <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
+    <string name="pref_sync">同步</string>
+    <string name="pref_sync_summary">與/sdcard/rime/sync資料夾同步使用者字典</string>
+
+    <string name="reset_success">回廠成功</string>
+    <string name="reset_failure">回廠失敗</string>
+
+    <string name="deploy_progress">正在部署…</string>
+    <string name="sync_progress">正在同步…</string>
+    <string name="themes_progress">正在應用主題…</string>
+    <string name="schemas_progress">正在加載方案…</string>
+
+    <string name="set_ime">整體設定</string>
+    <string name="no_schemas">請在/sdcard/rime中放入essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
+    <string name="other_ime">其他輸入法</string>
+
+    <string name="pref_ui">夜間</string>
+</resources>
