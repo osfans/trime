@@ -2,9 +2,9 @@ mainDir=app/src/main
 resDir=$(mainDir)/res
 jniDir=$(mainDir)/jni
 
-.PHONY: all clean build debug release install icon opencc-data translate ndk android linux
+.PHONY: all clean build debug release install icon opencc-data translate ndk android
 
-all: release linux
+all: release
 
 clean:
 	gradle clean
@@ -63,20 +63,10 @@ ndk:
 	(cd $(mainDir); ndk-build)
 
 android:
-	cmake -Bbuild-$@ -DCMAKE_BUILD_TYPE=Release -H$(jniDir)\
+	cmake -Bbuild-$@ -H$(jniDir)\
 		-DCMAKE_SYSTEM_NAME=Android \
 		-DCMAKE_ANDROID_STL_TYPE=c++_static \
 		-DCMAKE_SYSTEM_VERSION=14 \
 		-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang \
 		-DCMAKE_ANDROID_ARCH_ABI=armeabi
 	${MAKE} -C build-$@ rime_jni
-
-linux:
-	cmake -Bbuild-$@ -DCMAKE_BUILD_TYPE=Release -H$(jniDir)
-	${MAKE} -C build-$@
-
-i686 x86_64:
-	$@-w64-mingw32-cmake -Bbuild-$@ -DCMAKE_BUILD_TYPE=Release -H$(jniDir)
-	${MAKE} -C build-$@ rime
-	mkdir -p bin
-	(cd build-$@; 7z a ../bin/rime-$@-`date +%Y%m%d`.dll.7z rime.dll)
