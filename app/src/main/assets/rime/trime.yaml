@@ -1150,7 +1150,7 @@ preset_keyboards:
     - {label: 'ㄝ', long_click: '<', click: ','}
     - {label: 'ㄡ', long_click: '>', click: '.'}
     - {label: 'ㄥ', long_click: '?', click: '/'}
-    - {click: Hide, long_click: Delete}
+    - {click: Shift_L, send_bindings: false}
     - {click: Mode_switch, long_click: Menu}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: space, width: 30}
