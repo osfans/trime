@@ -16,7 +16,8 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode count
-        versionName tag-date
+        versionName "$tag-$date"
+        setProperty("archivesBaseName", "trime-$date")
         ndk {
             abiFilters "armeabi"
         }
