@@ -24,12 +24,15 @@ import android.os.Build;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.List;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
@@ -130,6 +133,20 @@ public class Function {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public static boolean isAppAvailable(Context context, String app) {
+    final PackageManager packageManager = context.getPackageManager();
+    List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
+    if (pinfo != null) {
+        for (int i = 0; i < pinfo.size(); i++) {
+            String pn = pinfo.get(i).packageName;
+            if (pn.equals(app)) {
+                return true;
+            }
+        }
+    }
+    return false;
   }
 
   public static SharedPreferences getPref(Context context) {

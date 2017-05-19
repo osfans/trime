@@ -79,6 +79,11 @@ public class Pref extends PreferenceActivity
     mKeyVibrateDurationPref = findPreference("key_vibrate_duration");
     mKeySoundVolumePref.setEnabled(prefs.getBoolean("key_sound", false));
     mKeyVibrateDurationPref.setEnabled(prefs.getBoolean("key_vibrate", false));
+    boolean isQQ = Function.isAppAvailable(this, "com.tencent.mobileqq");
+    pref = findPreference("pref_trime_qq");
+    pref.setSelectable(isQQ);
+    pref = findPreference("pref_rime_qq");
+    pref.setSelectable(isQQ);
   }
 
   public void onSharedPreferenceChanged(SharedPreferences prefs,
