@@ -6,7 +6,6 @@ option(BUILD_TEST "Build and run tests" OFF)
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 option(ENABLE_LOGGING "Enable logging with google-glog library" ON)
 option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" ON)
-option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
 
 # includes
 include_directories(
@@ -17,7 +16,6 @@ include_directories(
   yaml-cpp/include
   libiconv/include
   leveldb/include
-  snappy
   include
   )
 
@@ -37,20 +35,6 @@ if(ANDROID AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 if(ANDROID AND "${ANDROID_STL}" STREQUAL c++_static)
   set(CMAKE_CXX_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY} -latomic")
-endif()
-
-# snappy
-set(SNAPPY_SOURCES
-  snappy/snappy.cc
-  snappy/snappy-sinksource.cc
-  )
-add_library(snappy-static STATIC ${SNAPPY_SOURCES})
-if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h)
-add_custom_target(snappy_h
-  COMMAND ${CMAKE_CURRENT_LIST_DIR}/snappy/autogen.sh
-  COMMAND ./configure
-  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/snappy)
-add_dependencies(snappy-static snappy_h)
 endif()
 
 # marisa
@@ -155,12 +139,8 @@ add_library(leveldb-static STATIC ${LEVELDB_SOURCES})
 target_include_directories(leveldb-static BEFORE PRIVATE leveldb)
 target_compile_definitions(leveldb-static PRIVATE ${LEVELDB_FLAGS})
 target_compile_options(leveldb-static PRIVATE -fno-builtin-memcmp)
-if(LEVELDB_USE_SNAPPY)
-target_compile_definitions(leveldb-static PRIVATE SNAPPY)
-target_link_libraries(leveldb-static snappy-static)
-endif()
 if(WIN32)
-target_link_libraries(leveldb-static snappy-static shlwapi)
+target_link_libraries(leveldb-static shlwapi)
 endif()
 
 # yaml-cpp

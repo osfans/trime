@@ -19,6 +19,7 @@ package com.osfans.trime;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.content.SharedPreferences;
 import android.util.TypedValue;
 import android.util.Log;
 import android.graphics.Typeface;
@@ -56,14 +57,15 @@ public class Config {
   public static String OPENCC_DATA_DIR = USER_DATA_DIR + "/opencc/";
   private static int BLK_SIZE = 1024;
   private static Config self = null;
+  private SharedPreferences mPref;
 
   private Map<String,String> fallbackColors;
   private Map presetColorSchemes, presetKeyboards;
 
   public Config(Context context) {
     self = this;
-    themeName = Rime.config_get_string("user", "var/previously_selected_theme");
-    if (!Function.isEmpty(themeName)) themeName += ".trime";
+    mPref = Function.getPref(context);
+    themeName = mPref.getString("pref_selected_theme", "trime");
     init();
   }
 
@@ -193,7 +195,9 @@ public class Config {
 
   public void setTheme(String theme) {
     themeName = theme;
-    Rime.config_set_string("user", "var/previously_selected_theme", themeName.replace(".trime", ""));
+    SharedPreferences.Editor edit = mPref.edit();
+    edit.putString("pref_selected_theme", themeName);
+    edit.commit();
     init();
   }
 
@@ -345,8 +349,13 @@ public class Config {
   }
 
   private Object getColorObject(String key) {
-    String scheme = getString("color_scheme");
+    String scheme = getColorScheme();
     Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
+    if (map == null) {
+      scheme = getString("color_scheme");
+      map = (Map<String, Object>)presetColorSchemes.get(scheme);
+      setColor(scheme);
+    }
     Object o = map.get(key);
     String fallbackKey = key;
     while (o == null && fallbackColors.containsKey(fallbackKey)) {
@@ -374,10 +383,15 @@ public class Config {
     return null;
   }
 
+  public String getColorScheme() {
+    return mPref.getString("pref_selected_color_scheme", "default");
+  }
+
   public void setColor(String color) {
-    Rime.customize_string(themeName, "style/color_scheme", color);
+    SharedPreferences.Editor edit = mPref.edit();
+    edit.putString("pref_selected_color_scheme", color);
+    edit.commit();
     deployConfig();
-    mDefaultStyle.put("color_scheme", color);
   }
 
   public String[] getColorKeys() {

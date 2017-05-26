@@ -40,7 +40,7 @@ public class ColorDialog {
 
   public ColorDialog(Context context) {
     Config config = Config.get(context);
-    String colorScheme = config.getString("color_scheme");
+    String colorScheme = config.getColorScheme();
     colorKeys = config.getColorKeys();
     if (colorKeys == null) return;
     Arrays.sort(colorKeys);
