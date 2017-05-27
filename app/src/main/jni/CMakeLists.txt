@@ -256,6 +256,8 @@ execute_process(
   OUTPUT_VARIABLE LIBRIME_VERSION
   )
 string(STRIP ${LIBRIME_VERSION} LIBRIME_VERSION)
+set(LIBRIME_VERSION "${LIBRIME_VERSION}-${ANDROID_ABI}")
+message(${LIBRIME_VERSION})
 target_compile_definitions(rime_jni PRIVATE
   CLASSNAME="com/osfans/trime/Rime"
   OPENCC_VERSION="${OPENCC_VERSION}"
