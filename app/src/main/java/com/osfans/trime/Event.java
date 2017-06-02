@@ -133,11 +133,13 @@ public class Event {
   }
 
   public static int getRimeCode(int code) {
+    if (code >= Key.androidKeys.size()) return 0;
     String s = Key.androidKeys.get(code);
     return Rime.get_keycode_by_name(s);
   }
 
   public static String getCodeText(int code) {
+    if (code >= Key.androidKeys.size()) return "";
     return (code >= 280) ? Key.androidKeys.get(code) : "";
   }
 
