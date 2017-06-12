@@ -55,15 +55,15 @@ make release
   under the 'jni' folder changed by upstream, you can use:
 ```bash
 cd $trime_folder
-make apk
+make release
 ```
   And read the guide by different platform to build the *.so files.
 
 
 - [Arch Linux](https://www.archlinux.org/)
   ```bash
-   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} apache-ant
-   make apk
+   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle
+   make release
   ```
 
 - Other Linux distributions
@@ -87,7 +87,7 @@ make apk
   (Set the [mirror](https://mirrors.ustc.edu.cn/) can speed up installation).
 
   ```bash
-   brew install automake cmake opencc boost python ant
+   brew install automake cmake opencc boost python gradle
   ```
 
   Setting the environment in ~/.bashrc if you use bash like this
@@ -112,7 +112,7 @@ make apk
   After the project is ready go to the folder and build it yourself.
   ```bash
    cd $trime_folder
-   make apk
+   make release
   ```
 
   If you have any problems, you can make [issues] (https://github.com/osfans/trime/issues)
