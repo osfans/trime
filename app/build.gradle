@@ -8,13 +8,13 @@ def dateCmd = 'date +%Y%m%d'
 def date = dateCmd.execute().text.trim()
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.0"
 
     defaultConfig {
         applicationId "com.osfans.trime"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode count
         versionName "$tag-$date"
         setProperty("archivesBaseName", "trime-$date")
