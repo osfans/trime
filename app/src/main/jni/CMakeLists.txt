@@ -23,20 +23,14 @@ include_directories(
 
 # flags
 add_definitions(-w -DOpencc_BUILT_AS_STATIC)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpic -frtti -fexceptions")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -frtti -fexceptions")
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 if(UNIX)
   add_definitions(-fPIC)
 elseif(WIN32)
   set(STATIC_FLAGS "-static-libstdc++ -static-libgcc -static")
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${STATIC_FLAGS}")
-endif()
-if(ANDROID AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  add_definitions(-no-integrated-as)
-endif()
-if(ANDROID AND "${ANDROID_STL}" STREQUAL c++_static)
-  set(CMAKE_CXX_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY} -latomic")
 endif()
 
 # snappy

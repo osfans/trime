@@ -23,9 +23,7 @@ android {
         }
         externalNativeBuild {
             cmake {
-                cFlags "-fexceptions", "-frtti"
-                cppFlags "-fpic"
-                arguments "-DANDROID_STL=c++_static"
+                arguments "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-14"
             }
         }
     }
