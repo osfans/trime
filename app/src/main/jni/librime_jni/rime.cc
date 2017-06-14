@@ -50,7 +50,7 @@ void initialize(JNIEnv *env, jobject thiz) {
 }
 
 void finalize(JNIEnv *env, jobject thiz) {
-  ALOGE("finalize...");
+  ALOGI("finalize...");
   RimeFinalize();
 }
 
@@ -100,7 +100,7 @@ jboolean deploy_config_file(JNIEnv *env, jobject thiz, jstring file_name, jstrin
 }
 
 jboolean sync_user_data(JNIEnv *env, jobject thiz) {
-  ALOGE("sync user data...");
+  ALOGI("sync user data...");
   return RimeSyncUserData();
 }
 
