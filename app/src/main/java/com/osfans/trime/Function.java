@@ -161,7 +161,7 @@ public class Function {
     if (isDiff) {
       SharedPreferences.Editor edit = pref.edit();
       edit.putString("version_name", version);
-      edit.commit();
+      edit.apply();
     }
     return isDiff;
   }

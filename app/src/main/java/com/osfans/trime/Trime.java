@@ -561,7 +561,6 @@ public class Trime extends InputMethodService implements
       ic.endBatchEdit();
       return true;
     }
-    if (VERSION.SDK_INT < VERSION_CODES.HONEYCOMB) return false;
     if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
       // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
       if (code == KeyEvent.KEYCODE_A)
@@ -639,10 +638,8 @@ public class Trime extends InputMethodService implements
       keyCode = KeyEvent.KEYCODE_ESCAPE; //返回鍵清屏
     }
 
-    if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
-      if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
-        return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
-    }
+    if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
+      return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
 
     int c = event.getUnicodeChar();
     if (c > 0x20) { //實體鍵盤空格、回車等發送onKey，字符發送onText

@@ -197,7 +197,7 @@ public class Config {
     themeName = theme;
     SharedPreferences.Editor edit = mPref.edit();
     edit.putString("pref_selected_theme", themeName);
-    edit.commit();
+    edit.apply();
     init();
   }
 
@@ -390,7 +390,7 @@ public class Config {
   public void setColor(String color) {
     SharedPreferences.Editor edit = mPref.edit();
     edit.putString("pref_selected_color_scheme", color);
-    edit.commit();
+    edit.apply();
     deployConfig();
   }
 
