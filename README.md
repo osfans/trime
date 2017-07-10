@@ -5,7 +5,6 @@
 
 [<img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
 
-=====
 源於開源的[注音倉頡輸入法]前端，
 基於著名的[Rime]輸入法框架，
 使用JNI的C語言和安卓的java語言書寫，
