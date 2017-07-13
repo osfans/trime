@@ -563,6 +563,20 @@ public class Trime extends InputMethodService implements
     }
     if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
       // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
+      if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        if (code == KeyEvent.KEYCODE_V && Event.hasModifier(mask, KeyEvent.META_ALT_ON) && Event.hasModifier(mask, KeyEvent.META_SHIFT_ON)) {
+          return ic.performContextMenuAction(android.R.id.pasteAsPlainText);
+        }
+        if (code == KeyEvent.KEYCODE_S && Event.hasModifier(mask, KeyEvent.META_ALT_ON)) {
+          CharSequence cs = ic.getSelectedText(0);
+          if (cs == null) ic.performContextMenuAction(android.R.id.selectAll);
+          return ic.performContextMenuAction(android.R.id.shareText);
+        }
+        if (code == KeyEvent.KEYCODE_Y)
+          return ic.performContextMenuAction(android.R.id.redo);
+        if (code == KeyEvent.KEYCODE_Z)
+          return ic.performContextMenuAction(android.R.id.undo);
+      }
       if (code == KeyEvent.KEYCODE_A)
         return ic.performContextMenuAction(android.R.id.selectAll);
       if (code == KeyEvent.KEYCODE_X)
