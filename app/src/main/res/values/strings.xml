@@ -32,6 +32,9 @@
     <string name="pref_market">Google Play</string>
     <string name="pref_coolmarket">Cool Market</string>
 
+    <string name="pref_donate">Donate</string>
+    <string name="pref_donate_summary">Use Alipay to support TRIME and PRIME</string>
+
     <string name="pref_about">About</string>
     <string name="pref_librime_ver">RIME Version</string>
     <string name="pref_opencc_ver">OpenCC Version</string>
@@ -39,7 +42,7 @@
     <string name="pref_licensing">License</string>
     <string name="pref_licensing_summary" translatable="false">GPLv3</string>
     <string name="pref_credits">Credits</string>
-    <string name="pref_pime">Win10 PIME Platform</string>
+    <string name="pref_pime">Win10 PRIME Platform</string>
     <string name="pref_privacy">Privacy Policy</string>
 
     <string name="pref_input">Input</string>

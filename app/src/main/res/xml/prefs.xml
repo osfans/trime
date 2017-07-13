@@ -55,8 +55,6 @@
     <Preference android:key="pref_deploy" android:order="16"
         android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>
 
-
-
     <PreferenceScreen android:key="pref_help" android:order="32" android:title="@string/pref_help">
         <Preference android:key="pref_wiki" android:title="@string/pref_wiki">
             <intent android:action="android.intent.action.VIEW"
@@ -107,6 +105,10 @@
         <Preference android:key="pref_pime" android:title="@string/pref_pime">
             <intent android:action="android.intent.action.VIEW"
                     android:data="https://github.com/osfans/PIME/releases" />
+        </Preference>
+        <Preference android:key="pref_donate" android:title="@string/pref_donate" android:summary="@string/pref_donate_summary">
+            <intent android:action="android.intent.action.VIEW"
+            android:data="https://qr.alipay.com/a6x09868encanwom40txs3c" />
         </Preference>
         <Preference android:key="pref_credits" android:title="@string/pref_credits">
             <intent android:action="android.intent.action.VIEW"

@@ -30,13 +30,16 @@
     <string name="pref_market">谷歌市場</string>
     <string name="pref_coolmarket">酷安市場</string>
 
+    <string name="pref_donate">捐贈</string>
+    <string name="pref_donate_summary">自願用支付寶捐助同文和PRIME的開發</string>
+
     <string name="pref_about">關於</string>
     <string name="pref_librime_ver">RIME版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_ver">平臺版本</string>
     <string name="pref_licensing">許可證</string>
     <string name="pref_credits">鳴謝</string>
-    <string name="pref_pime">Win10 PIME輸入法平臺</string>
+    <string name="pref_pime">Win10 PRIME輸入法平臺</string>
     <string name="pref_privacy">隱私權政策</string>
 
     <string name="pref_input">輸入</string>
