@@ -561,7 +561,7 @@ public class Trime extends InputMethodService implements
       ic.endBatchEdit();
       return true;
     }
-    if (KeyEvent.metaStateHasModifiers(mask, KeyEvent.META_CTRL_ON)) {
+    if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
       // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
       if (code == KeyEvent.KEYCODE_A)
         return ic.performContextMenuAction(android.R.id.selectAll);
