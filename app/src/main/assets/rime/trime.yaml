@@ -25,14 +25,14 @@ style:
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
   inline_preedit: preview #嵌入模式：preview|composition|input|none
-  layout:
-    position: fixed #候選窗口位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要Android5.0以上)
-    min_length: 5 #候選窗口最小詞長
+  layout: #懸浮窗口設置
+    position: fixed #位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要>=Android5.0)
+    min_length: 5 #最小詞長
     max_length: 10 #超過字數則換行
     sticky_lines: 0 #固頂行數
-    max_entries: 1 #候選窗口最大詞條數
+    max_entries: 1 #最大詞條數
     all_phrases: false #所有滿足條件的詞語都顯示在窗口
-    border: 2 #候選窗口邊框寬度
+    border: 2 #邊框寬度
     max_width: 230 #最大寬度，超過則自動換行
     max_height: 400 #最大高度
     min_width: 40 #最小寬度
@@ -42,14 +42,14 @@ style:
     line_spacing: 0 #候选詞的行間距(px)
     line_spacing_multiplier: 1.2 #候选詞的行間距(倍數)
     spacing: 1 #與預編輯或邊緣的距離
-    round_corner: 8 #候選窗口圓角
+    round_corner: 8 #窗口圓角
     alpha: 0xdd #透明度(0-255)
     elevation: 5 #陰影(>=Android5.0)
     background: background.png #顏色或者backgrounds目錄下的圖片文件名
     movable: once #是否可移動窗口，或僅移動一次 true|false|once
   window: #懸浮窗口組件
     - {start: "", move: 'ㄓ ', end: ""}
-    - {start: "", composition: "%s", end: "", letter_spacing: 0} #letter_spacing需要Android5.0。TODO: 不爲0時，會導致不換行的問題
+    - {start: "", composition: "%s", end: "", letter_spacing: 0} #letter_spacing需要>=Android5.0。TODO: 不爲0時，會導致不換行的問題
     - {start: "\n", label: "%s.", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
