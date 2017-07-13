@@ -588,7 +588,14 @@ public class Trime extends InputMethodService implements
     return false;
   }
 
-  private boolean composeKey(int keyCode) {
+  private boolean composeEvent(KeyEvent event) {
+    int keyCode = event.getKeyCode();
+    if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)){
+      Rime.onKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : 1<<30));
+      commitText();
+      updateComposing();
+      return false;
+    }
     if (!canCompose) return false;
     if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
         keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
@@ -604,14 +611,14 @@ public class Trime extends InputMethodService implements
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     Log.info("onKeyDown="+event);
-    if (composeKey(keyCode) && onKeyEvent(event)) return true;
+    if (composeEvent(event) && onKeyEvent(event)) return true;
     return super.onKeyDown(keyCode, event);
   }
 
   @Override
   public boolean onKeyUp(int keyCode, KeyEvent event) {
     Log.info("onKeyUp="+event);
-    if (composeKey(keyCode) && keyComposing) {
+    if (composeEvent(event) && keyComposing) {
       onRelease(keyCode);
       return true;
     }
@@ -638,8 +645,14 @@ public class Trime extends InputMethodService implements
       keyCode = KeyEvent.KEYCODE_ESCAPE; //返回鍵清屏
     }
 
-    if (KeyEvent.KEYCODE_SPACE == keyCode && event.isCtrlPressed())
-      return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
+    if (event.getAction() == KeyEvent.ACTION_DOWN
+            && event.isCtrlPressed()
+            && event.getRepeatCount() == 0
+            && !KeyEvent.isModifierKey(keyCode)) {
+      if (KeyEvent.KEYCODE_SPACE == keyCode)
+        return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
+      if (handleAciton(keyCode, event.getMetaState())) return true;
+    }
 
     int c = event.getUnicodeChar();
     if (c > 0x20) { //實體鍵盤空格、回車等發送onKey，字符發送onText
