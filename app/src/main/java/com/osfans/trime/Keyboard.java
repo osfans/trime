@@ -94,6 +94,7 @@ public class Keyboard {
 
     /** Keyboard mode, or zero, if none.  */
     private int mAsciiMode;
+    private String mLabelTransform;
 
     // Variables for pre-computing nearest keys.
     
@@ -338,6 +339,7 @@ public class Keyboard {
   public Keyboard(Context context, String name) {
     this(context);
     Map<String,Object> m = Config.get().getKeyboard(name);
+    mLabelTransform = (String)Key.getValue(m, "label_transform", "none");
     mAsciiMode = (Integer)Key.getValue(m, "ascii_mode", 1);
     int columns = (Integer)Key.getValue(m, "columns", 20);
     int defaultWidth = (int)(Key.getDouble(m, "width", 0) * mDisplayWidth / 100);
@@ -428,6 +430,10 @@ public class Keyboard {
 
   public boolean getAsciiMode() {
     return mAsciiMode != 0;
+  }
+
+  public boolean isLabelUppercase() {
+    return mLabelTransform.contentEquals("uppercase");
   }
 
   public float getRoundCorner() {

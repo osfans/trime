@@ -93,6 +93,7 @@ public class Event {
   public String adjustCase(String s) {
     if (Function.isEmpty(s)) return "";
     if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted()) s = s.toUpperCase(Locale.getDefault());
+    else if (s.length() == 1 && mKeyboard != null && !Rime.isAsciiMode() && mKeyboard.isLabelUppercase()) s = s.toUpperCase(Locale.getDefault());
     return s;
   }
 

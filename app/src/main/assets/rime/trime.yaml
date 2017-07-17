@@ -882,6 +882,7 @@ preset_keyboards:
     ascii_mode: 0
     width: 10
     height: 44
+    label_transform: uppercase #uppercase|none 中文模式下的字母標籤自動大寫
     keys:
     - {click: '1', long_click: '!'}
     - {click: '2', long_click: '@'}
