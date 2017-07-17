@@ -23,7 +23,6 @@ include_directories(
 
 # flags
 add_definitions(-w -DOpencc_BUILT_AS_STATIC)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -frtti -fexceptions")
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 if(UNIX)
   add_definitions(-fPIC)
