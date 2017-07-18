@@ -38,7 +38,7 @@
     <string name="pref_about">About</string>
     <string name="pref_librime_ver">RIME Version</string>
     <string name="pref_opencc_ver">OpenCC Version</string>
-    <string name="pref_ver">Platform Version</string>
+    <string name="pref_changelog">Change Log</string>
     <string name="pref_licensing">License</string>
     <string name="pref_licensing_summary" translatable="false">GPLv3</string>
     <string name="pref_credits">Credits</string>
