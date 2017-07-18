@@ -915,7 +915,7 @@ preset_keyboards:
     - {click: 'k', long_click: ':'}
     - {click: 'l', long_click: ';'}
     - {width: 5}
-    - {click: Shift_L, send_bindings: false, width: 15}
+    - {click: Shift_L, has_menu: "'", width: 15}
     - {click: 'z', long_click: '`'}
     - {click: 'x', long_click: cut}
     - {click: 'c', long_click: copy}

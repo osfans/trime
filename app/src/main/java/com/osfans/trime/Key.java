@@ -310,7 +310,13 @@ public class Key {
   }
 
   public boolean sendBindings() {
-    return (composing == null || Rime.isComposing()) && !Rime.isAsciiMode() && send_bindings;
+    if (ascii != null && Rime.isAsciiMode()) return false;
+    if (send_bindings) {
+      if (paging != null && Rime.isPaging()) return true;
+      if (has_menu != null && Rime.hasMenu()) return true;
+      if (composing != null && Rime.isComposing()) return true;
+    }
+    return false;
   }
 
   public static Object getValue(Map m, String k, Object o) {
