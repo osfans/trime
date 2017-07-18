@@ -35,7 +35,7 @@ public class ColorDialog {
     Config config = Config.get();
     config.setColor(color);
     Trime trime = Trime.getService();
-    if (trime != null) trime.initKeyboard(true); //實時生效
+    if (trime != null) trime.initKeyboard(); //實時生效
   }
 
   public ColorDialog(Context context) {

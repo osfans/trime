@@ -85,6 +85,7 @@ public class Trime extends InputMethodService implements
   private static String horizontal_key = "horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
   private boolean keyComposing; //實體鍵盤編輯狀態
+  private boolean mNeedUpdateRimeOption = true;
 
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
@@ -188,9 +189,13 @@ public class Trime extends InputMethodService implements
     auto_caps = mConfig.getString("auto_caps");
   }
 
-  public void updateRimeOption() {
-    Rime.setOption(soft_cursor_key, mConfig.getBoolean(soft_cursor_key)); //軟光標
-    Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
+  private boolean updateRimeOption() {
+    if (mNeedUpdateRimeOption) {
+      Rime.setOption(soft_cursor_key, mConfig.getBoolean(soft_cursor_key)); //軟光標
+      Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
+      mNeedUpdateRimeOption = false;
+    }
+    return true;
   }
 
   public void resetEffect() {
@@ -213,7 +218,7 @@ public class Trime extends InputMethodService implements
     mEffect = new Effect(this);
     //Config.prepareRime(this);
     mConfig = Config.get(this);
-    updateRimeOption();
+    mNeedUpdateRimeOption = true;
     loadConfig();
     resetEffect();
     mKeyboardSwitch = new KeyboardSwitch(this);
@@ -249,7 +254,7 @@ public class Trime extends InputMethodService implements
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
     reset();
-    updateRimeOption();
+    mNeedUpdateRimeOption = true;
   }
 
   public void invalidateKeyboard() {
@@ -299,9 +304,9 @@ public class Trime extends InputMethodService implements
     resetEffect();
   }
 
-  public void initKeyboard(boolean update) {
+  public void initKeyboard() {
     reset();
-    if (update) updateRimeOption(); //不能在Rime.onMessage中調用，會卡死
+    mNeedUpdateRimeOption = true; //不能在Rime.onMessage中調用set_option，會卡死
     bindKeyboardToInputView();
     updateComposing(); //切換主題時刷新候選
   }
@@ -605,6 +610,7 @@ public class Trime extends InputMethodService implements
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)){
+      updateRimeOption();
       Rime.onKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : 1<<30));
       commitText();
       updateComposing();
@@ -748,7 +754,7 @@ public class Trime extends InputMethodService implements
   public void onKey(int primaryCode, int mask) { //軟鍵盤
     if (handleOption(primaryCode)) {
       Log.info("onOption");
-    } else if (Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
+    } else if (updateRimeOption() && Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
       commitText();
       updateComposing();
@@ -940,7 +946,7 @@ public class Trime extends InputMethodService implements
             public void onClick(DialogInterface di, int id) {
               di.dismiss();
               Rime.selectSchema(id); //切換方案
-              updateRimeOption();
+              mNeedUpdateRimeOption = true;
             }
         });
       }
