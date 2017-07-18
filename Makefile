@@ -15,6 +15,7 @@ debug:
 build:
 	gradle build
 
+TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
 release: icon opencc-data $(TRANSLATE)
 release:
 	gradle assembleRelease
@@ -36,7 +37,6 @@ icon: icon.svg
 	inkscape -z -e $(resDir)/drawable-hdpi/status.png -w 36 -h 36 $<
 	inkscape -z -e $(resDir)/drawable-mdpi/status.png -w 24 -h 24 $<
 
-TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
 $(TRANSLATE): $(resDir)/values-zh-rTW/strings.xml
 	@echo "translate traditional to simple Chinese: $@"
 	@mkdir -p $(resDir)/values-zh-rCN
