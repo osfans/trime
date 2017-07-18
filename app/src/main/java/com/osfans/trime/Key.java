@@ -281,8 +281,8 @@ public class Key {
      */
     public int[] getCurrentDrawableState() {
         int[] states = KEY_STATE_NORMAL;
-
-        if (on) {
+        boolean isShifted = isShift() && mKeyboard.isShifted(); //臨時大寫
+        if (isShifted || on) {
             if (pressed) {
                 states = KEY_STATE_PRESSED_ON;
             } else {
