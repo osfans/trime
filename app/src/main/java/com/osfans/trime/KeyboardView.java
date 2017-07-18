@@ -873,7 +873,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private void detectAndSendKey(int index, int x, int y, long eventTime, int type) {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
-            if (key.isShift() && !key.sendBindings()) {
+            if (key.isShift() && !key.sendBindings(type)) {
                setShifted(false, !isShifted());
             } else {
                 int code = key.getCode(type);
@@ -1159,7 +1159,7 @@ public class KeyboardView extends View implements View.OnClickListener {
               mKeyboardActionListener.onEvent(key.getLongClick());
               return true;
             }
-            if (key.isShift() && !key.sendBindings()) {
+            if (key.isShift() && !key.sendBindings(Key.LONG_CLICK)) {
               setShifted(!key.on, !key.on);
               return true;
             }

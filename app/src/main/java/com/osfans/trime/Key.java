@@ -309,7 +309,10 @@ public class Key {
     return (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT);
   }
 
-  public boolean sendBindings() {
+  public boolean sendBindings(int type) {
+    Event e = null;
+    if (type > 0 && type <= EVENT_NUM) e = events[type];
+    if (e != null) return true;
     if (ascii != null && Rime.isAsciiMode()) return false;
     if (send_bindings) {
       if (paging != null && Rime.isPaging()) return true;
