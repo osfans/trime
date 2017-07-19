@@ -818,8 +818,9 @@ preset_keys:
   Schema_settings: {label: 方案, send: SETTINGS, option: "schema"}
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
-  Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"}
-  Tieba: {label: 貼吧, send: function, command: run, option: "com.baidu.tieba"}
+  Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"} #時間： date 格式
+  Tieba: {label: 貼吧, send: function, command: run, option: "com.baidu.tieba"} #運行程序: run 包名
+  Homepage: {label: 主頁, send: function, command: view, option: "https://github.com/osfans/trime"} #查看網頁: view 網址
 
 preset_keyboards:
   default:

@@ -18,6 +18,7 @@ package com.osfans.trime;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.os.Build;
@@ -78,6 +79,14 @@ public class Function {
     }
   }
 
+  public static void viewData(Context context, String s) {
+    try {
+      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(s));
+      context.startActivity(intent);
+    } catch (ActivityNotFoundException ex) {
+    }
+  }
+
   public static void showPrefDialog(Context context) {
     Intent intent = new Intent(context, Pref.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -93,6 +102,8 @@ public class Function {
         break;
       case "run":
         openApp(context, option); //啓動程序
+      case "view":
+        viewData(context, option); //打開網址
       default:
         break;
     }
