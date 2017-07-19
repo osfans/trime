@@ -21,8 +21,8 @@
     android:title="@string/ime_name">
 
     <SwitchPreference android:key="pref_ui" android:order="1" android:title="@string/pref_ui" android:persistent="true" />
-    <Preference android:key="pref_enable" android:title="@string/pref_enable" android:summary="@string/pref_enable_summary"/>
-    <Preference android:key="pref_select" android:order="2" android:title="@string/pref_select" android:summary="@string/pref_select_summary"/>
+    <Preference android:key="pref_enable" android:order="2" android:title="@string/pref_enable" android:summary="@string/pref_enable_summary"/>
+    <Preference android:key="pref_select" android:order="3" android:title="@string/pref_select" android:summary="@string/pref_select_summary"/>
 
     <PreferenceScreen android:key="pref_keyboard" android:order="4" android:title="@string/pref_keyboard">
         <Preference android:key="pref_themes" android:title="@string/pref_themes" android:summary="@string/pref_themes_summary"/>
