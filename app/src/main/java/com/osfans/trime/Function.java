@@ -82,6 +82,7 @@ public class Function {
   public static void viewData(Context context, String s) {
     try {
       Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(s));
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
     } catch (ActivityNotFoundException ex) {
     }
