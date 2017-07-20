@@ -10,7 +10,7 @@ clean:
 	gradle clean
 
 debug:
-	./gradlew assembleDebug
+	gradle assembleDebug
 
 build:
 	gradle build

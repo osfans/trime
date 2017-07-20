@@ -29,10 +29,6 @@ android {
 
     signingConfigs {
        release {
-           storeFile rootProject.file(RELEASE_STORE_FILE)
-           storePassword RELEASE_STORE_PASSWORD
-           keyAlias RELEASE_KEY_ALIAS
-           keyPassword RELEASE_KEY_PASSWORD
        }
     }
 
@@ -41,6 +37,20 @@ android {
             minifyEnabled false
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-android.txt'
             signingConfig signingConfigs.release
+        }
+    }
+
+    def propsFile = rootProject.file('gradle.properties') //store release config in gradle.properties
+    def configName = 'release'
+
+    if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
+        def props = new Properties()
+        props.load(new FileInputStream(propsFile))
+        if (props!=null && props.containsKey('storeFile')) {
+            android.signingConfigs[configName].storeFile = rootProject.file(props['storeFile'])
+            android.signingConfigs[configName].storePassword = props['storePassword']
+            android.signingConfigs[configName].keyAlias = props['keyAlias']
+            android.signingConfigs[configName].keyPassword = props['keyPassword']
         }
     }
 
@@ -72,3 +82,4 @@ android {
         }
     }
 }
+
