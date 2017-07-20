@@ -4,8 +4,7 @@ def countCmd = 'git rev-list develop --count'
 def count = countCmd.execute().text.trim().toInteger() + 20170000
 def tagCmd = 'git describe develop --tags'
 def tag = tagCmd.execute().text.trim()
-def dateCmd = 'date +%Y%m%d'
-def date = dateCmd.execute().text.trim()
+def date = new Date().format('yyyyMMdd')
 
 android {
     compileSdkVersion 26
