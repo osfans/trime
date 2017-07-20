@@ -70,7 +70,7 @@ public class Function {
     return false;
   }
 
-  public static void openApp(Context context, String arg) {
+  public static void startIntent(Context context, String arg) {
     Intent intent;
     try {
       if (arg.indexOf(':') >= 0) {
@@ -85,9 +85,7 @@ public class Function {
         intent.setComponent(ComponentName.unflattenFromString(arg));
       } else {
         // Assume the argument is a package name.
-        intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setPackage(arg);
+        intent = context.getPackageManager().getLaunchIntentForPackage(arg);
       }
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
@@ -118,7 +116,7 @@ public class Function {
         s = new SimpleDateFormat(option, Locale.getDefault()).format(new Date()); //時間
         break;
       case "run":
-        openApp(context, option); //啓動程序
+        startIntent(context, option); //啓動程序
       case "view":
         viewData(context, option); //打開網址
       default:
