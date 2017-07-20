@@ -18,12 +18,11 @@ package com.osfans.trime;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.ComponentName;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.os.Build;
 import android.annotation.TargetApi;
-import android.content.ActivityNotFoundException;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -34,6 +33,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.List;
+import java.lang.Exception;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
@@ -63,28 +63,44 @@ public class Function {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       try {
           context.startActivity(intent);
-      } catch (ActivityNotFoundException ex) {
+      } catch (Exception ex) {
       }
       return true;
     }
     return false;
   }
 
-  public static void openApp(Context context, String s) {
-    Intent intent = context.getPackageManager().getLaunchIntentForPackage(s);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+  public static void openApp(Context context, String arg) {
+    Intent intent;
     try {
+      if (arg.indexOf(':') >= 0) {
+        // The argument is a URI.  Fully parse it, and use that result
+        // to fill in any data not specified so far.
+        intent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
+      } else if (arg.indexOf('/') >= 0) {
+        // The argument is a component name.  Build an Intent to launch
+        // it.
+        intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setComponent(ComponentName.unflattenFromString(arg));
+      } else {
+        // Assume the argument is a package name.
+        intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setPackage(arg);
+      }
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
-    } catch (ActivityNotFoundException ex) {
+    } catch (Exception ex) {
     }
   }
 
-  public static void viewData(Context context, String s) {
+  public static void viewData(Context context, String arg) {
     try {
-      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(s));
+      Intent intent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
-    } catch (ActivityNotFoundException ex) {
+    } catch (Exception ex) {
     }
   }
 

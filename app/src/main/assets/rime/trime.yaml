@@ -819,8 +819,9 @@ preset_keys:
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
   Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"} #時間： date 格式
-  Tieba: {label: 貼吧, send: function, command: run, option: "com.baidu.tieba"} #運行程序: run 包名
-  Homepage: {label: 主頁, send: function, command: view, option: "https://github.com/osfans/trime"} #查看網頁: view 網址
+  TrimeApp: {label: 同文, send: function, command: run, option: "com.osfans.trime"} #運行程序: run 包名
+  TrimeCmp: {label: 同文組件, send: function, command: run, option: "com.osfans.trime/.Pref"} #運行程序指定組件: run 包名/組件名
+  Homepage: {label: 同文主頁, send: function, command: run, option: "https://github.com/osfans/trime"} #查看網頁: run/view 網址
 
 preset_keyboards:
   default:
