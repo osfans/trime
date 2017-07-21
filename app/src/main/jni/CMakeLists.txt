@@ -38,13 +38,16 @@ set(SNAPPY_SOURCES
   snappy/snappy-sinksource.cc
   )
 add_library(snappy-static STATIC ${SNAPPY_SOURCES})
-if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h)
-add_custom_target(snappy_h
-  COMMAND ${CMAKE_CURRENT_LIST_DIR}/snappy/autogen.sh
-  COMMAND ./configure
-  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/snappy)
-add_dependencies(snappy-static snappy_h)
-endif()
+
+MESSAGE("Configuring snappy-stubs-public.h ...")
+set(ac_cv_have_stdint_h 1)
+set(ac_cv_have_stddef_h 1)
+set(ac_cv_have_sys_uio_h 0)
+set(SNAPPY_MAJOR 1)
+set(SNAPPY_MINOR 1)
+set(SNAPPY_PATCHLEVEL 4)
+configure_file("${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h.in"
+"${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h" )
 
 # marisa
 file(GLOB_RECURSE MARISA_SOURCES marisa-trie/lib/marisa/*.cc)
