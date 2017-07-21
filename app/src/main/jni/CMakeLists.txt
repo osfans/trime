@@ -46,8 +46,10 @@ set(ac_cv_have_sys_uio_h 0)
 set(SNAPPY_MAJOR 1)
 set(SNAPPY_MINOR 1)
 set(SNAPPY_PATCHLEVEL 4)
-configure_file("${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h.in"
-"${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h" )
+configure_file(
+  "${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h.in"
+  "${CMAKE_CURRENT_LIST_DIR}/include/snappy-stubs-public.h"
+  )
 
 # marisa
 file(GLOB_RECURSE MARISA_SOURCES marisa-trie/lib/marisa/*.cc)
@@ -168,6 +170,10 @@ add_library(yaml-cpp-static STATIC ${YAML-CPP_SOURCES})
 #add_subdirectory(miniglog)
 set(GLOG_SOURCES miniglog/miniglog/logging.cc)
 add_library(miniglog-static STATIC ${GLOG_SOURCES})
+configure_file(
+  "${CMAKE_CURRENT_LIST_DIR}/miniglog/miniglog/logging.h"
+  "${CMAKE_CURRENT_LIST_DIR}/include/glog/logging.h"
+  COPYONLY)
 
 # opencc
 #add_subdirectory(OpenCC)
@@ -201,6 +207,41 @@ if(ANDROID)
 elseif(UNIX)
 target_compile_definitions(opencc-static PRIVATE PKGDATADIR="/usr/share/opencc")
 endif()
+
+set(
+  LIBOPENCC_HEADERS
+  BinaryDict.hpp
+  Common.hpp
+  Config.hpp
+  Conversion.hpp
+  ConversionChain.hpp
+  Converter.hpp
+  DartsDict.hpp
+  Dict.hpp
+  DictConverter.hpp
+  DictEntry.hpp
+  DictGroup.hpp
+  Exception.hpp
+  Export.hpp
+  Lexicon.hpp
+  MaxMatchSegmentation.hpp
+  Optional.hpp
+  PhraseExtract.hpp
+  Segmentation.hpp
+  Segments.hpp
+  SerializableDict.hpp
+  SimpleConverter.hpp
+  TextDict.hpp
+  UTF8StringSlice.hpp
+  UTF8Util.hpp
+  opencc.h
+)
+foreach(head ${LIBOPENCC_HEADERS})
+  configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/OpenCC/src/${head}"
+    "${CMAKE_CURRENT_LIST_DIR}/include/opencc/${head}"
+    COPYONLY)
+endforeach(head)
 
 # opencc tools
 add_executable(opencc OpenCC/src/tools/CommandLine.cpp)
