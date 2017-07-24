@@ -31,35 +31,29 @@
 
 ## 編譯/Build
 
-  Clone the project, **pay attention** it costs long time to clone the project.
-  You should wait a long time to complete, and make sure your disk is big enough to hold the source.
-  Especially the boost repository, you can change hosts to speed the procedure
-  (search hosts in github).
+  Clone the project, **pay attention** it will take a while for large submodule boost and make sure your disk is enough to hold the source(about 1.5GB).
 ```bash
 cd $your_folder
-git clone --recursive https://github.com/osfans/trime.git
+git clone --recursive https://github.com/osfans/trime.git trime
 ```
-
-  Now you can build apk(recommended):
+  If you want to test the application, run the command:
+```bash
+cd $trime_folder
+make debug
+```
+  Or you can build signed application for release and make sure you create a file named gradle.properties which contains:
+```bash
+storePassword=myStorePassword
+keyPassword=mykeyPassword
+keyAlias=myKeyAlias
+storeFile=myStoreFileLocation
+```
+for [signing information](https://developer.android.com/studio/publish/app-signing.html). And run the command:
 ```bash
 cd $trime_folder
 make release
 ```
-
-  This will just compile android java file and pack the newer resource file.
-
-  librime.so and librime_jni.so will be uploaded by us regularly,
-  and you won't worry about the outdated *so files.
-
-  If you want compile the librime.so and librime_jni.so or the source code
-  under the 'jni' folder changed by upstream, you can use:
-```bash
-cd $trime_folder
-make release
-```
-  And read the guide by different platform to build the *.so files.
-
-
+The following guide is for the specific platform prebuild setting:
 - [Arch Linux](https://www.archlinux.org/)
   ```bash
    yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle
@@ -70,54 +64,26 @@ make release
 
   Use the package manager to install the dev environment and Android SDK NDK.
 
-- [Windows Msys2](https://lug.ustc.edu.cn/wiki/mirrors/help/msys2)
-
-  I'm try to build it and someone can improve this guide.
-
 - macOS
 
   Install Android [SDK](https://developer.android.com/studio/index.html)
   and [NDK](https://developer.android.com/ndk/index.html)
   (You'd better install it by Android Studio or manually instead of by Homebrew).
 
-  Install [Homebrew](http://brew.sh/) and setting
-  [USTC mirror](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git)(Optional) of it.
-
-  Install the basic dev environment and use brew to install others
-  (Set the [mirror](https://mirrors.ustc.edu.cn/) can speed up installation).
+  Install [Homebrew](http://brew.sh/) and set
+  [Homebrew mirror](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git) of it if your network is slow.
 
   ```bash
-   brew install automake cmake opencc boost python gradle
+   brew install automake cmake opencc boost python gradle doxygen
   ```
 
-  Setting the environment in ~/.bashrc if you use bash like this
+  Set the path environment in ~/.bashrc if you use bash like this
   ```bash
    # Android
    export ANDROID_HOME="your_android_sdk"
    export ANDROID_NDK="your_android_ndk"
    export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_NDK
   ```
-
-  Set the **boost** header folder
-  ```bash
-   cd $trime_folder/jni/include
-   ln -s $your_folder_boost boost
-  ```
-
-  (Optional)Set the libreadline.dylib
-
-  If you have the libreadline problem in make process, you should make
-  a soft link to your local libreadline.dylib and google it.
-
-  After the project is ready go to the folder and build it yourself.
-  ```bash
-   cd $trime_folder
-   make release
-  ```
-
-  If you have any problems, you can make [issues] (https://github.com/osfans/trime/issues)
-   or go to [forum](http://www.coolapk.com/apk/com.osfans.trime).
-
 ## 第三方庫/3rd Party Library
 - [minilog](http://ceres-solver.org/) (New BSD License)
 - [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
