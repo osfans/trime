@@ -98,6 +98,15 @@ add_library(boost-static STATIC ${BOOST_SOURCES} ${BOOST_SIGNAL_SOURCES})
 target_compile_definitions(boost-static PRIVATE BOOST_LOCALE_WITH_ICONV)
 target_link_libraries(boost-static iconv-static)
 
+file(GLOB_RECURSE BOOST_HEADERS boost/libs/*.[ih]*)
+foreach(head ${BOOST_HEADERS})
+  STRING(REGEX REPLACE "^.*boost/libs" "boost/libs" head ${head})
+  STRING(REGEX REPLACE "^.*include/boost/" "" headout ${head})
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/${head}
+    ${CMAKE_CURRENT_LIST_DIR}/include/boost/${headout} COPYONLY)
+endforeach(head)
+
 # leveldb
 set(LEVELDB_SOURCES
   leveldb/db/builder.cc
