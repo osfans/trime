@@ -22,6 +22,7 @@ app/src/main/res/values-zh-rCN/
 
 
 # Gradle files
+*.iml
 .gradle/
 build/
 /*/build/
