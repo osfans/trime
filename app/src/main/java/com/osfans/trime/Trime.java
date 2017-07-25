@@ -251,7 +251,7 @@ public class Trime extends InputMethodService implements
       mEffect.setLanguage(locales[value ? 1 : 0]);
       break;
     case "_hide_comment":
-      mCandidate.setShowComment(!value);
+      if (mCandidateContainer != null) mCandidate.setShowComment(!value);
       break;
     case "_hide_candidate":
       if (mCandidateContainer != null) mCandidate.setVisibility(!value ? View.VISIBLE : View.GONE);
@@ -306,15 +306,15 @@ public class Trime extends InputMethodService implements
     loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
     if (mCandidateContainer != null) {
-      onOptionChanged("_hide_comment", Rime.getOption("_hide_comment"));
-      onOptionChanged("_hide_candidate", Rime.getOption("_hide_candidate"));
       loadBackground();
+      mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
+      mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset();
       mComposition.reset();
     }
     hideComposition();
     if (mKeyboardView != null) {
-      onOptionChanged("_hide_key_hint", Rime.getOption("_hide_key_hint"));
+      mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
       mKeyboardView.reset(); //實體鍵盤無軟鍵盤
     }
     resetEffect();
@@ -406,6 +406,7 @@ public class Trime extends InputMethodService implements
     mKeyboardView = (KeyboardView) getLayoutInflater().inflate(
         R.layout.input, null);
     mKeyboardView.setOnKeyboardActionListener(this);
+    mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
     return mKeyboardView;
   }
 
@@ -424,6 +425,8 @@ public class Trime extends InputMethodService implements
     mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
+    mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
+    mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
     loadBackground();
     return mCandidateContainer;
   }
