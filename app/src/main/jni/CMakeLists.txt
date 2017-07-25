@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.3)
 
 # options
 option(BUILD_TEST "Build and run tests" OFF)
-OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 option(ENABLE_LOGGING "Enable logging with google-glog library" ON)
 option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" ON)
 option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
@@ -100,8 +100,8 @@ target_link_libraries(boost-static iconv-static)
 
 file(GLOB_RECURSE BOOST_HEADERS boost/libs/*.[ih]*)
 foreach(head ${BOOST_HEADERS})
-  STRING(REGEX REPLACE "^.*boost/libs" "boost/libs" head ${head})
-  STRING(REGEX REPLACE "^.*include/boost/" "" headout ${head})
+  string(REGEX REPLACE "^.*boost/libs" "boost/libs" head ${head})
+  string(REGEX REPLACE "^.*include/boost/" "" headout ${head})
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/${head}
     ${CMAKE_CURRENT_LIST_DIR}/include/boost/${headout} COPYONLY)
@@ -323,7 +323,7 @@ execute_process(
   )
 string(STRIP ${LIBRIME_VERSION} LIBRIME_VERSION)
 set(LIBRIME_VERSION "${LIBRIME_VERSION}-${ANDROID_ABI}")
-message(${LIBRIME_VERSION})
+MESSAGE(${LIBRIME_VERSION})
 target_compile_definitions(rime_jni PRIVATE
   CLASSNAME="com/osfans/trime/Rime"
   OPENCC_VERSION="${OPENCC_VERSION}"
