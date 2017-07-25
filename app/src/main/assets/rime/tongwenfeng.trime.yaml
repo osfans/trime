@@ -81,8 +81,6 @@ style:
   reset_ascii_mode: false #显示键盘时重置为中文状态
   round_corner: 12 #按键圆角半径
   shadow_radius: 0.0 #按键阴影半径
-  show_candidate: true #显示候选区
-  show_comment: true #显示提示区
   show_preview: false #按键提示
   show_window: true #显示浮动窗口
   soft_cursor: true #编码区软光标

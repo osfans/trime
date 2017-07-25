@@ -60,7 +60,7 @@ public class Candidate extends View {
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_text_size, comment_text_size;
   private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
-  private boolean show_comment, comment_on_top, candidate_use_cursor;
+  private boolean show_comment = true, comment_on_top, candidate_use_cursor;
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
 
@@ -95,12 +95,13 @@ public class Candidate extends View {
     paintComment.setTextSize(comment_text_size);
     paintComment.setTypeface(tfComment);
 
-    show_comment = config.getBoolean("show_comment");
-    boolean show = config.getBoolean("show_candidate");
-    setVisibility(show ? View.VISIBLE : View.GONE);
     comment_on_top = config.getBoolean("comment_on_top");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     invalidate();
+  }
+
+  public void setShowComment(boolean value) {
+    show_comment = value;
   }
 
   public Candidate(Context context, AttributeSet attrs) {

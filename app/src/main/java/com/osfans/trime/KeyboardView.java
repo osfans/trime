@@ -256,6 +256,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     /** Whether the requirement of a headset to hear passwords if accessibility is enabled is announced. */
     private boolean mHeadsetRequiredToHearPasswordsAnnounced;
 
+    private boolean mShowHint = true;
+
     Method getStateDrawableIndex, getStateDrawable;
 
     Handler mHandler = new Handler() {
@@ -281,6 +283,9 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
     };
 
+    public void setShowHint(boolean value) {
+        mShowHint = value;
+    }
 
     public void reset() {
         Config config = Config.get();
@@ -768,16 +773,17 @@ public class KeyboardView extends View implements View.OnClickListener {
                     (key.height - padding.top - padding.bottom) / 2
                             + (paint.getTextSize() - paint.descent()) / 2 + top + key.key_text_offset_y,
                     paint);
+                if (mShowHint) {
+                    if (key.getLongClick() != null) {
+                        mPaintSymbol.setTextSize(key.symbol_text_size != null ? key.symbol_text_size : mSymbolSize);
+                        mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
+                        canvas.drawText(key.getSymbolLabel(), left + key.key_symbol_offset_x, symbolBase + key.key_symbol_offset_y, mPaintSymbol);
+                    }
 
-                if (key.getLongClick() != null) {
-                    mPaintSymbol.setTextSize(key.symbol_text_size != null ? key.symbol_text_size : mSymbolSize);
-                    mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
-                    canvas.drawText(key.getSymbolLabel(), left + key.key_symbol_offset_x, symbolBase + key.key_symbol_offset_y, mPaintSymbol);
-                }
-
-                if (!Function.isEmpty(hint)) {
-                    mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
-                    canvas.drawText(hint, left + key.key_hint_offset_x, key.height + hintBase + key.key_hint_offset_y, mPaintSymbol);
+                    if (!Function.isEmpty(hint)) {
+                        mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
+                        canvas.drawText(hint, left + key.key_hint_offset_x, key.height + hintBase + key.key_hint_offset_y, mPaintSymbol);
+                    }
                 }
 
                 // Turn off drop shadow

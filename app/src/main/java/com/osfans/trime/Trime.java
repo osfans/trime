@@ -244,9 +244,24 @@ public class Trime extends InputMethodService implements
     //android.os.Debug.waitForDebugger();
   }
 
-  public void setLanguage(boolean isAsciiMode) {
-    if (!mTempAsciiMode) mAsciiMode = isAsciiMode; //切換中西文時保存狀態
-    mEffect.setLanguage(locales[isAsciiMode ? 1 : 0]);
+  public void onOptionChanged(String option, boolean value) {
+    switch (option) {
+    case "ascii_mode":
+      if (!mTempAsciiMode) mAsciiMode = value; //切換中西文時保存狀態
+      mEffect.setLanguage(locales[value ? 1 : 0]);
+      break;
+    case "_hide_comment":
+      mCandidate.setShowComment(!value);
+      break;
+    case "_hide_candidate":
+      if (mCandidateContainer != null) mCandidate.setVisibility(!value ? View.VISIBLE : View.GONE);
+      setCandidatesViewShown(canCompose && !value);
+      break;
+    case "_hide_key_hint":
+      if (mKeyboardView != null) mKeyboardView.setShowHint(!value);
+      break;
+    }
+    if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
   }
 
   public void invalidate() {
@@ -255,10 +270,6 @@ public class Trime extends InputMethodService implements
     mConfig = new Config(this);
     reset();
     mNeedUpdateRimeOption = true;
-  }
-
-  public void invalidateKeyboard() {
-    if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
   }
 
   private void hideComposition() {
@@ -295,12 +306,17 @@ public class Trime extends InputMethodService implements
     loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
     if (mCandidateContainer != null) {
+      onOptionChanged("_hide_comment", Rime.getOption("_hide_comment"));
+      onOptionChanged("_hide_candidate", Rime.getOption("_hide_candidate"));
       loadBackground();
       mCandidate.reset();
       mComposition.reset();
     }
     hideComposition();
-    if (mKeyboardView != null) mKeyboardView.reset(); //實體鍵盤無軟鍵盤
+    if (mKeyboardView != null) {
+      onOptionChanged("_hide_key_hint", Rime.getOption("_hide_key_hint"));
+      mKeyboardView.reset(); //實體鍵盤無軟鍵盤
+    }
     resetEffect();
   }
 

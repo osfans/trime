@@ -74,8 +74,6 @@ style:
   reset_ascii_mode: false #顯示鍵盤時重置爲中文狀態
   round_corner: 8 #按鍵圓角半徑
   shadow_radius: 0.0 #按鍵陰影半徑
-  show_candidate: true #顯示候選區
-  show_comment: true #顯示提示區
   show_preview: false #按鍵提示
   show_window: true #顯示浮動窗口
   soft_cursor: true #編碼區軟游標
@@ -816,6 +814,9 @@ preset_keys:
   Color_settings: {label: 配色, send: SETTINGS, option: "color"}
   Theme_settings: {label: 主題, send: SETTINGS, option: "theme"}
   Schema_settings: {label: 方案, send: SETTINGS, option: "schema"}
+  Candidate_switch: {toggle: _hide_candidate, send: Mode_switch, states: [ 有候選, 無候選]}
+  Comment_switch: {toggle: _hide_comment, send: Mode_switch, states: [ 有註釋, 無註釋]}
+  Hint_switch: {toggle: _hide_key_hint, send: Mode_switch, states: [ 有助記, 無助記]}
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
   Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"} #時間： date 格式

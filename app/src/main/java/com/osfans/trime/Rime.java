@@ -481,8 +481,9 @@ public class Rime
         getStatus();
         getContexts(); //切換中英文、簡繁體時更新候選
         if (trime != null) {
-          trime.invalidateKeyboard(); //鍵盤狀態
-          if (message_value.endsWith("ascii_mode")) trime.setLanguage(isAsciiMode());
+          boolean value = !message_value.startsWith("!");
+          String option = message_value.substring(value ? 0 : 1);
+          trime.onOptionChanged(option, value);
         }
         break;
     }
