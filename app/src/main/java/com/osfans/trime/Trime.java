@@ -744,7 +744,7 @@ public class Trime extends InputMethodService implements
           imm.switchToLastInputMethod(imeToken);
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
-        String arg = String.format(event.option, getActiveText(1), getActiveText(2), getActiveText(3));
+        String arg = String.format(event.option, getActiveText(1), getActiveText(2), getActiveText(3), getActiveText(4));
         s = Function.handle(this, event.command, arg);
         if (s != null) {
           commitText(s);
@@ -877,7 +877,7 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  /** 獲得當前漢字：候選字、剛上屏字、選中字、光標前字、光標後所有字 */
+  /** 獲得當前漢字：候選字、選中字、剛上屏字/光標前字/光標前所有字、光標後所有字 */
   public String getActiveText(int type) {
     if (type == 2) return Rime.RimeGetInput(); //當前編碼
     String s = Rime.getComposingText(); //當前候選
@@ -885,7 +885,9 @@ public class Trime extends InputMethodService implements
       InputConnection ic = getCurrentInputConnection();
       CharSequence cs = ic.getSelectedText(0); //選中字
       if (type == 1 && Function.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
-      if (Function.isEmpty(cs)) cs = ic.getTextBeforeCursor(1, 0); //光標前字
+      if (Function.isEmpty(cs)) {
+        cs = ic.getTextBeforeCursor(type == 4 ? 1024 : 1, 0); //光標前字
+      }
       if (Function.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
       if (cs != null) s = cs.toString();
     }
