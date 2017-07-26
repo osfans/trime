@@ -86,6 +86,7 @@ public class Trime extends InputMethodService implements
   private Locale[] locales = new Locale[2];
   private boolean keyComposing; //實體鍵盤編輯狀態
   private boolean mNeedUpdateRimeOption = true;
+  private String lastCommittedText;
 
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
@@ -549,7 +550,10 @@ public class Trime extends InputMethodService implements
     if (text == null) return;
     mEffect.speakCommit(text);
     InputConnection ic = getCurrentInputConnection();
-    if (ic != null) ic.commitText(text, 1);
+    if (ic != null) {
+      ic.commitText(text, 1);
+      lastCommittedText = text.toString();
+    }
     if (!isComposing()) Rime.commitComposition(); //自動上屏
   }
 
@@ -740,7 +744,7 @@ public class Trime extends InputMethodService implements
           imm.switchToLastInputMethod(imeToken);
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
-        String arg = String.format(event.option, getActiveText(), Rime.RimeGetInput());
+        String arg = String.format(event.option, getActiveText(1), getActiveText(2), getActiveText(3));
         s = Function.handle(this, event.command, arg);
         if (s != null) {
           commitText(s);
@@ -873,13 +877,16 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  /** 獲得當前漢字：候選字、選中字、光標處字 */
-  public String getActiveText() {
-    String s = Rime.getComposingText();
-    if(Function.isEmpty(s)) {
+  /** 獲得當前漢字：候選字、剛上屏字、選中字、光標前字、光標後所有字 */
+  public String getActiveText(int type) {
+    if (type == 2) return Rime.RimeGetInput(); //當前編碼
+    String s = Rime.getComposingText(); //當前候選
+    if (Function.isEmpty(s)) {
       InputConnection ic = getCurrentInputConnection();
-      CharSequence cs = ic.getSelectedText(0);
-      if (cs == null) cs = ic.getTextBeforeCursor(1, 0);
+      CharSequence cs = ic.getSelectedText(0); //選中字
+      if (type == 1 && Function.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
+      if (Function.isEmpty(cs)) cs = ic.getTextBeforeCursor(1, 0); //光標前字
+      if (Function.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
       if (cs != null) s = cs.toString();
     }
     return s;
