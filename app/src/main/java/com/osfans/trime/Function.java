@@ -93,15 +93,6 @@ public class Function {
     }
   }
 
-  public static void viewData(Context context, String arg) {
-    try {
-      Intent intent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-      context.startActivity(intent);
-    } catch (Exception ex) {
-    }
-  }
-
   public static void showPrefDialog(Context context) {
     Intent intent = new Intent(context, Pref.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -116,9 +107,8 @@ public class Function {
         s = new SimpleDateFormat(option, Locale.getDefault()).format(new Date()); //時間
         break;
       case "run":
-        startIntent(context, option); //啓動程序
       case "view":
-        viewData(context, option); //打開網址
+        startIntent(context, option); //啓動程序
       default:
         break;
     }

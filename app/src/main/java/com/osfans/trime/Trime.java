@@ -193,6 +193,9 @@ public class Trime extends InputMethodService implements
     if (mNeedUpdateRimeOption) {
       Rime.setOption(soft_cursor_key, mConfig.getBoolean(soft_cursor_key)); //軟光標
       Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
+      Rime.setProperty("test", "value0");
+      Rime.setProperty("test", "value1");
+      Log.info("rime test="+Rime.getProperty("test"));
       mNeedUpdateRimeOption = false;
     }
     return true;
@@ -740,7 +743,8 @@ public class Trime extends InputMethodService implements
           imm.switchToLastInputMethod(imeToken);
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
-        s = Function.handle(this, event.command, event.option);
+        String arg = String.format(event.option, getActiveText(), Rime.RimeGetInput());
+        s = Function.handle(this, event.command, arg);
         if (s != null) {
           commitText(s);
           updateComposing();
@@ -870,6 +874,18 @@ public class Trime extends InputMethodService implements
       commitText();
       updateComposing();
     }
+  }
+
+  /** 獲得當前漢字：候選字、選中字、光標處字 */
+  public String getActiveText() {
+    String s = Rime.getComposingText();
+    if(Function.isEmpty(s)) {
+      InputConnection ic = getCurrentInputConnection();
+      CharSequence cs = ic.getSelectedText(0);
+      if (cs == null) cs = ic.getTextBeforeCursor(1, 0);
+      if (cs != null) s = cs.toString();
+    }
+    return s;
   }
 
   /** 更新Rime的中西文狀態、編輯區文本 */
