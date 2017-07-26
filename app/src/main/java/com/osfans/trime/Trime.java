@@ -698,11 +698,14 @@ public class Trime extends InputMethodService implements
     }
 
     int c = event.getUnicodeChar();
-    if (c > 0x20) { //實體鍵盤空格、回車等發送onKey，字符發送onText
-      onText(String.valueOf((char)c));
-      return true;
+    String s = String.valueOf((char)c);
+    if (Key.androidKeys.contains(s)) { //字母數字
+      onKey(Key.androidKeys.indexOf(s), 0);
+    } else if (c > 0x20) { //其他可見字符
+      onText(s);
+    } else { //空格、回車等
+      onKey(keyCode, event.getMetaState());
     }
-    onKey(keyCode, event.getMetaState());
     return true;
   }
 
