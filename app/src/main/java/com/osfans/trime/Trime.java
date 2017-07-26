@@ -193,9 +193,6 @@ public class Trime extends InputMethodService implements
     if (mNeedUpdateRimeOption) {
       Rime.setOption(soft_cursor_key, mConfig.getBoolean(soft_cursor_key)); //軟光標
       Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
-      Rime.setProperty("test", "value0");
-      Rime.setProperty("test", "value1");
-      Log.info("rime test="+Rime.getProperty("test"));
       mNeedUpdateRimeOption = false;
     }
     return true;
