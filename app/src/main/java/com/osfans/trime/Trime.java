@@ -564,6 +564,7 @@ public class Trime extends InputMethodService implements
   private boolean commitText() {
     boolean r = Rime.getCommit();
     if (r) commitText(Rime.getCommitText());
+    updateComposing();
     return r;
   }
 
@@ -630,15 +631,19 @@ public class Trime extends InputMethodService implements
     return false;
   }
 
+  private boolean onRimeKey(int[] event) {
+    updateRimeOption();
+    boolean ret = Rime.onKey(event);
+    commitText();
+    return ret;
+  }
+
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)){
-      updateRimeOption();
-      Rime.onKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : 1<<30));
-      commitText();
-      updateComposing();
+      boolean ret = onRimeKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : 1<<30));
       if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
-      return false;
+      return ret;
     }
     if (!canCompose) return false;
     if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
@@ -732,7 +737,6 @@ public class Trime extends InputMethodService implements
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
         Rime.toggleOption(event.getToggle());
         commitText();
-        updateComposing();
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
         mKeyboardSwitch.setKeyboard(event.select);
         //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
@@ -783,10 +787,8 @@ public class Trime extends InputMethodService implements
   public void onKey(int primaryCode, int mask) { //軟鍵盤
     if (handleOption(primaryCode)) {
       Log.info("onOption");
-    } else if (updateRimeOption() && Rime.onKey(Event.getRimeEvent(primaryCode, mask))) {
+    } else if (onRimeKey(Event.getRimeEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
-      commitText();
-      updateComposing();
     } else if (handleEnter(primaryCode)
       || handleAciton(primaryCode, mask)
       || handleBack(primaryCode)) {
@@ -831,7 +833,7 @@ public class Trime extends InputMethodService implements
     boolean b = s.endsWith("{Left}"); //用於前臺左移光標
     if (b) text = s.substring(0, s.length() - "{Left}".length());
     Rime.onText(text);
-    if(!commitText() && !isComposing()) commitEventText(text);
+    if (!commitText() && !isComposing()) commitEventText(text);
     if (b) onKey(KeyEvent.KEYCODE_DPAD_LEFT, 0);
     updateComposing();
   }
@@ -843,10 +845,7 @@ public class Trime extends InputMethodService implements
   }
 
   public void onRelease(int primaryCode) {
-    if (Rime.onKey(Event.getRimeEvent(primaryCode, 1<<30))) {
-      commitText();
-      updateComposing();
-    }
+    onRimeKey(Event.getRimeEvent(primaryCode, 1<<30));
   }
 
   public void swipeLeft() {
@@ -877,7 +876,6 @@ public class Trime extends InputMethodService implements
     else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
     else if (Rime.selectCandidate(i)) {
       commitText();
-      updateComposing();
     }
   }
 
