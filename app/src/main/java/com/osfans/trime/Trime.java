@@ -637,6 +637,7 @@ public class Trime extends InputMethodService implements
       Rime.onKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : 1<<30));
       commitText();
       updateComposing();
+      if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
       return false;
     }
     if (!canCompose) return false;
@@ -706,6 +707,7 @@ public class Trime extends InputMethodService implements
     } else { //空格、回車等
       onKey(keyCode, event.getMetaState());
     }
+    if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
     return true;
   }
 
