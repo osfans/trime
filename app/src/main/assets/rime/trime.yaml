@@ -829,6 +829,7 @@ preset_keys:
   Baidu: {label: 百度搜索, send: function, command: run, option: "http://www.baidu.com/s?wd=%4$s"} #搜索網頁: %4s爲光標前所有字符
   Zdic: {label: 漢典, send: function, command: run, option: "http://www.zdic.net/sousuo/?q=%1$s"} #搜索網頁: %s或者%1$s爲當前字符
   Zdic2: {label: 漢典, send: function, command: run, option: "http://www.zdic.net/sousuo/?q=%2$s"} #搜索網頁: %2$s爲當前輸入的編碼
+  WebSearch: {label: 搜索網頁, send: function, command: web_search, option: "%4$s"} #搜索，其他view、dial、edit、search等intent，參考安卓的intent文檔：https://developer.android.com/reference/android/content/Intent.html
 
 preset_keyboards:
   default:

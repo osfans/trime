@@ -27,6 +27,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
+import android.app.SearchManager;
+import android.net.Uri;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -93,6 +95,25 @@ public class Function {
     }
   }
 
+  public static void startIntent(Context context, String action, String arg) {
+    action = "android.intent.action." + action.toUpperCase(Locale.getDefault());
+    try {
+      Intent intent = new Intent(action);
+      switch (action) {
+        case Intent.ACTION_WEB_SEARCH:
+        case Intent.ACTION_SEARCH:
+          intent.putExtra(SearchManager.QUERY, arg);
+          break;
+        default:
+          if (!isEmpty(arg)) intent.setData(Uri.parse(arg));
+          break;
+      }
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+      context.startActivity(intent);
+    } catch (Exception ex) {
+    }
+  }
+
   public static void showPrefDialog(Context context) {
     Intent intent = new Intent(context, Pref.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -107,9 +128,10 @@ public class Function {
         s = new SimpleDateFormat(option, Locale.getDefault()).format(new Date()); //時間
         break;
       case "run":
-      case "view":
         startIntent(context, option); //啓動程序
+        break;
       default:
+        startIntent(context, command, option); //其他intent
         break;
     }
     return s;
