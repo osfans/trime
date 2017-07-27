@@ -102,6 +102,10 @@ public class Function {
       switch (action) {
         case Intent.ACTION_WEB_SEARCH:
         case Intent.ACTION_SEARCH:
+          if (arg.startsWith("http")) { //web_search無法直接打開網址
+            startIntent(context, arg);
+            return;
+          }
           intent.putExtra(SearchManager.QUERY, arg);
           break;
         default:
