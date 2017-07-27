@@ -65,6 +65,7 @@ public class Key {
 
   public static List<String> androidKeys;
   public static Map<String, Map> presetKeys;
+  public static int keyUpperA;
 
   /**
    * Create an empty key with no attributes.

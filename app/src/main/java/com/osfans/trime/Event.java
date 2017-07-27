@@ -139,9 +139,12 @@ public class Event {
     return Rime.get_keycode_by_name(s);
   }
 
+  public static boolean isPhysicalUpper(int code) {
+    return code >= Key.keyUpperA && code < Key.androidKeys.size();
+  }
+
   public static String getCodeText(int code) {
-    if (code >= Key.androidKeys.size()) return "";
-    return (code >= 280) ? Key.androidKeys.get(code) : "";
+    return isPhysicalUpper(code) ? Key.androidKeys.get(code) : "";
   }
 
   public static boolean hasModifier(int mask, int modifier) {

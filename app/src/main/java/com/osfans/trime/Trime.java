@@ -793,11 +793,10 @@ public class Trime extends InputMethodService implements
       Log.info("Trime onKey");
     } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, primaryCode)) {
       Log.info("open category");
+    } else if (Event.isPhysicalUpper(primaryCode)) { //大寫字母
+      commitText(Event.getCodeText(primaryCode));
     } else {
-      String s = Event.getCodeText(primaryCode);
-      //Log.info("send Key="+primaryCode+",s="+s);
-      if (!Function.isEmpty(s)) commitText(s);
-      else sendDownUpKeyEvents(primaryCode);
+      sendDownUpKeyEvents(primaryCode); //系統處理
     }
   }
 
