@@ -1,10 +1,8 @@
 apply plugin: 'com.android.application'
 
-def countCmd = 'git rev-list develop --count'
-def count = countCmd.execute().text.trim().toInteger() + 20170000
 def tagCmd = 'git describe develop --tags'
 def tag = tagCmd.execute().text.trim()
-def date = new Date().format('yyyyMMdd')
+def date = new Date().format('yyyyMMdd').toInteger()
 
 android {
     compileSdkVersion 26
@@ -14,7 +12,7 @@ android {
         applicationId "com.osfans.trime"
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode count
+        versionCode date
         versionName "$tag-$date"
         setProperty("archivesBaseName", "trime-$date")
         ndk {
