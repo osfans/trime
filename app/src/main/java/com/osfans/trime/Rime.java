@@ -207,10 +207,16 @@ public class Rime
   private static RimeSchema mSchema;
   private static List mSchemaList;
 
-  static{
+  static {
     System.loadLibrary("rime");
     System.loadLibrary("rime_jni");
   }
+
+  public static int META_SHIFT_ON = get_modifier_by_name("Shift");
+  public static int META_CTRL_ON = get_modifier_by_name("Control");
+  public static int META_ALT_ON = get_modifier_by_name("Alt");
+  public static int META_RELEASE_ON = get_modifier_by_name("Release");
+  private static int XK_VoidSymbol = 0xffffff;
 
   public static boolean hasMenu() {
     return isComposing() && mContext.menu.num_candidates != 0;
@@ -301,7 +307,12 @@ public class Rime
     return b;
   }
 
+  public static boolean isVoidKeycode(int keycode) {
+    return keycode <= 0 || keycode == XK_VoidSymbol;
+  }
+
   public static boolean onKey(int keycode, int mask) {
+    if (isVoidKeycode(keycode)) return false;
     boolean b = process_key(keycode, mask);
     Log.info( "b="+b+",keycode="+keycode+",mask="+mask);
     getContexts();

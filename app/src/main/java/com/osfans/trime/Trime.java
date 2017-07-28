@@ -641,19 +641,11 @@ public class Trime extends InputMethodService implements
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)){
-      boolean ret = onRimeKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : 1<<30));
+      boolean ret = onRimeKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : Rime.META_RELEASE_ON));
       if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
       return ret;
     }
-    if (!canCompose) return false;
-    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
-        keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
-        keyCode == KeyEvent.KEYCODE_VOLUME_MUTE ||
-        keyCode == KeyEvent.KEYCODE_HOME ||
-        keyCode == KeyEvent.KEYCODE_MENU ||
-        keyCode == KeyEvent.KEYCODE_CAMERA ||
-        keyCode == KeyEvent.KEYCODE_FOCUS ||
-        keyCode == KeyEvent.KEYCODE_SEARCH) return false;
+    if (!canCompose || Rime.isVoidKeycode(keyCode)) return false;
     return true;
   }
 
@@ -845,7 +837,7 @@ public class Trime extends InputMethodService implements
   }
 
   public void onRelease(int primaryCode) {
-    onRimeKey(Event.getRimeEvent(primaryCode, 1<<30));
+    onRimeKey(Event.getRimeEvent(primaryCode, Rime.META_RELEASE_ON));
   }
 
   public void swipeLeft() {

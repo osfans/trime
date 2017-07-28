@@ -129,10 +129,6 @@ public class Event {
     }
   }
 
-  public int[] getRimeEvent() {
-    return getRimeEvent(code, mask);
-  }
-
   public static int getRimeCode(int code) {
     if (code >= Key.androidKeys.size()) return 0;
     String s = Key.androidKeys.get(code);
@@ -154,16 +150,10 @@ public class Event {
   public static int[] getRimeEvent(int code, int mask) {
     int i = getRimeCode(code);
     int m = 0;
-    if (hasModifier(mask, KeyEvent.META_SHIFT_ON)) {
-      m |= Rime.get_modifier_by_name("Shift");
-    }
-    if (hasModifier(mask, KeyEvent.META_CTRL_ON)) {
-      m |= Rime.get_modifier_by_name("Control");
-    }
-    if (hasModifier(mask, KeyEvent.META_ALT_ON)) {
-      m |= Rime.get_modifier_by_name("Alt");
-    }
-    if (mask == (1<<30)) m |= Rime.get_modifier_by_name("Release");
+    if (hasModifier(mask, KeyEvent.META_SHIFT_ON)) m |= Rime.META_SHIFT_ON;
+    if (hasModifier(mask, KeyEvent.META_CTRL_ON)) m |= Rime.META_CTRL_ON;
+    if (hasModifier(mask, KeyEvent.META_ALT_ON)) m |= Rime.META_ALT_ON;
+    if (mask == Rime.META_RELEASE_ON) m |= Rime.META_RELEASE_ON;
     return new int[] {i, m};
   }
 
