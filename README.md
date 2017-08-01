@@ -18,12 +18,12 @@
 - [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)
 - 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo、默默ㄇㄛˋ
-- [捐贈](https://github.com/osfans/trime/releases)：[yueduz](https://github.com/yueduz)、[xiaoqun2016](https://github.com/xiaoqun2016)、[ipcjs](https://github.com/ipcjs)、Anonymous、啸傲居士、 矛矛、[zcunlin](https://github.com/zcunlin)、北冥有鱼、[biopolyhedron](https://github.com/biopolyhedron)、李進、國林、雷、天使的心跳、幸運超人、小雷先生、yeachdata、忠潤、大熊、天真可愛的滿滿（[谷歌開發人員帳號](https://play.google.com/apps/publish/)）
-- 社區：在[Issues](https://github.com/osfans/trime/issues)、[貼吧](http://tieba.baidu.com/f?kw=rime)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、QQ羣中反饋意見的網友
+- 捐贈：[Releases](https://github.com/osfans/trime/releases)中的“打賞”實時更新
+- 社區：在[Issues](https://github.com/osfans/trime/issues)、[QQ羣480159874](http://shang.qq.com/wpa/qunwpa?idkey=e31ecec8f92699597d9154f890841b3e477f5185902f10400e7c9e670a11202f)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime)、[貼吧](http://tieba.baidu.com/f?kw=rime)中反饋意見的網友
 - 項目：[Rime]、[OpenCC]、[注音倉頡輸入法]等開源項目
 
 ## 沿革/History
-- 最初，輸入法是寫給[泰如拼音](http://tieba.baidu.com/f?kw=%E6%B3%B0%E5%A6%82)（thae5 rv2）的，中文名爲“泰如輸入法”。
+- 最初，輸入法是寫給[泰如拼音](http://taerv.nguyoeh.com/zidian/)（tae5 rv2）的，中文名爲“泰如輸入法”。
 - 然後，添加了吳語等方言碼表，做成了一個輸入法平臺，更名爲“漢字方言輸入法”。
 - 後來，兼容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名爲“[同文輸入法平臺2.x](https://github.com/osfans/trime-legacy)”。寓意音碼形碼同臺，方言官話同文。
 - 之後，藉助JNI技術，享受了[librime](https://github.com/rime/librime)的成果，升級爲“同文輸入法平臺3.x”，簡稱“同文輸入法”。
