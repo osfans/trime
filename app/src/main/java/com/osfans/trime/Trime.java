@@ -655,6 +655,7 @@ public class Trime extends InputMethodService implements
     Log.info("onKeyEvent="+event);
     keyComposing = false;
     int keyCode = event.getKeyCode();
+    boolean ret = true;
     keyComposing = isComposing();
     if (!keyComposing) {
       if (keyCode == KeyEvent.KEYCODE_DEL ||
@@ -678,15 +679,18 @@ public class Trime extends InputMethodService implements
 
     int c = event.getUnicodeChar();
     String s = String.valueOf((char)c);
+    int mask = 0;
     if (Key.androidKeys.contains(s)) { //字母數字
-      onKey(Key.androidKeys.indexOf(s), 0);
+      keyCode = Key.androidKeys.indexOf(s);
     } else if (c > 0x20) { //其他可見字符
       onText(s);
+      return true;
     } else { //空格、回車等
-      onKey(keyCode, event.getMetaState());
+      mask = event.getMetaState();
     }
+    ret = handleKey(keyCode, mask);
     if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
-    return true;
+    return ret;
   }
 
   private IBinder getToken() {
@@ -757,11 +761,11 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  public void onKey(int primaryCode, int mask) { //軟鍵盤
-    if (handleOption(primaryCode)) {
-      Log.info("onOption");
-    } else if (onRimeKey(Event.getRimeEvent(primaryCode, mask))) {
+  public boolean handleKey(int primaryCode, int mask) { //軟鍵盤
+    if (onRimeKey(Event.getRimeEvent(primaryCode, mask))) {
       Log.info("Rime onKey");
+    } else if (handleOption(primaryCode)) {
+      Log.info("onOption");
     } else if (handleAciton(primaryCode, mask)) {
       Log.info("Trime onKey");
     } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, primaryCode)) {
@@ -769,6 +773,13 @@ public class Trime extends InputMethodService implements
     } else if (Event.isPhysicalUpper(primaryCode)) { //大寫字母
       commitText(Event.getCodeText(primaryCode));
     } else {
+      return false;
+    }
+    return true;
+  }
+
+  public void onKey(int primaryCode, int mask) { //軟鍵盤
+    if (!handleKey(primaryCode, mask)) {
       sendDownUpKeyEvents(primaryCode); //系統處理
     }
   }
