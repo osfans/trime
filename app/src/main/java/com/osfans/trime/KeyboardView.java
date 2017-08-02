@@ -1162,7 +1162,9 @@ public class KeyboardView extends View implements View.OnClickListener {
             Key key = popupKey;
             if (key.getClick().repeatable) return false;
             if (key.getLongClick() != null) {
-              mKeyboardActionListener.onEvent(key.getLongClick());
+              Event e = key.getLongClick();
+              mKeyboardActionListener.onEvent(e);
+              releaseKey(e.code);
               return true;
             }
             if (key.isShift() && !key.sendBindings(Key.LONG_CLICK)) {
