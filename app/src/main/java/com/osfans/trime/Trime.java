@@ -680,11 +680,9 @@ public class Trime extends InputMethodService implements
     int c = event.getUnicodeChar();
     String s = String.valueOf((char)c);
     int mask = 0;
-    if (Key.androidKeys.contains(s)) { //字母數字
-      keyCode = Key.androidKeys.indexOf(s);
-    } else if (c > 0x20) { //其他可見字符
-      onText(s);
-      return true;
+    int i = Event.getClickCode(s);
+    if (i > 0) {
+      keyCode = i;
     } else { //空格、回車等
       mask = event.getMetaState();
     }
@@ -761,26 +759,27 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  public boolean handleKey(int primaryCode, int mask) { //軟鍵盤
-    if (onRimeKey(Event.getRimeEvent(primaryCode, mask))) {
+  public boolean handleKey(int keyCode, int mask) { //軟鍵盤
+    if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
       Log.info("Rime onKey");
-    } else if (handleOption(primaryCode)) {
+    } else if (handleOption(keyCode)) {
       Log.info("onOption");
-    } else if (handleAciton(primaryCode, mask)) {
+    } else if (handleAciton(keyCode, mask)) {
       Log.info("Trime onKey");
-    } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, primaryCode)) {
+    } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, keyCode)) {
       Log.info("open category");
-    } else if (Event.isPhysicalUpper(primaryCode)) { //大寫字母
-      commitText(Event.getCodeText(primaryCode));
     } else {
       return false;
     }
     return true;
   }
 
-  public void onKey(int primaryCode, int mask) { //軟鍵盤
-    if (!handleKey(primaryCode, mask)) {
-      sendDownUpKeyEvents(primaryCode); //系統處理
+  public void onKey(int keyCode, int mask) { //軟鍵盤
+    if (handleKey(keyCode, mask)) return;
+    if (keyCode >= Key.symbolStart) { //符號
+      commitText(Event.getClickLabel(keyCode));
+    } else {
+      sendDownUpKeyEvents(keyCode); //系統處理
     }
   }
 
@@ -816,18 +815,18 @@ public class Trime extends InputMethodService implements
     if (b) text = s.substring(0, s.length() - "{Left}".length());
     Rime.onText(text);
     if (!commitText() && !isComposing()) commitEventText(text);
-    if (b) onKey(KeyEvent.KEYCODE_DPAD_LEFT, 0);
+    if (b) sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
     updateComposing();
   }
 
-  public void onPress(int primaryCode) {
+  public void onPress(int keyCode) {
     mEffect.vibrate();
-    mEffect.playSound(primaryCode);
-    mEffect.speakKey(primaryCode);
+    mEffect.playSound(keyCode);
+    mEffect.speakKey(keyCode);
   }
 
-  public void onRelease(int primaryCode) {
-    onRimeKey(Event.getRimeEvent(primaryCode, Rime.META_RELEASE_ON));
+  public void onRelease(int keyCode) {
+    onRimeKey(Event.getRimeEvent(keyCode, Rime.META_RELEASE_ON));
   }
 
   public void swipeLeft() {

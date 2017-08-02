@@ -212,7 +212,8 @@ public class Config {
     for (Object o : androidKeys) {
       Key.androidKeys.add(o.toString());
     }
-    Key.keyUpperA = Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284;
+    Key.symbolStart = Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284;
+    Key.symbols = Rime.config_get_string(themeName, "android_keys/symbols");
     Key.presetKeys = (Map<String, Map>)Rime.config_get_map(themeName, "preset_keys");
     presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
     presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");

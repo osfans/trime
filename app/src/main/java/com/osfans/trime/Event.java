@@ -57,10 +57,10 @@ public class Event {
       sticky = (Boolean)Key.getValue(m, "sticky", false);
       repeatable = (Boolean)Key.getValue(m, "repeatable", false);
       functional = (Boolean)Key.getValue(m, "functional", true);
-    } else if (Key.androidKeys.contains(s)) {
-      code = Key.androidKeys.indexOf(s);
+    } else if ((code = getClickCode(s)) > 0) {
       parseLabel();
     } else {
+      code = 0;
       text = s;
       label = s;
       if (containsSend(s)) {
@@ -125,22 +125,42 @@ public class Event {
     if (c == KeyEvent.KEYCODE_SPACE){
       label = Rime.getSchemaName();
     } else {
-      if (c > 0) label = Key.androidKeys.get(c);
+      if (c > 0) label = getClickLabel(c);
     }
   }
 
+  public static String getClickLabel(int keyCode) {
+    String s = "";
+    if (keyCode < Key.symbolStart) { //字母數字
+      char c = Key.kcm.getDisplayLabel(keyCode);
+      if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
+      s = String.valueOf(c);
+    } else if (keyCode < Key.androidKeys.size()) { //可見符號
+      keyCode -= Key.symbolStart;
+      s = Key.symbols.substring(keyCode, keyCode + 1);
+    }
+    return s;
+  }
+
+  public static int getClickCode(String s) {
+    int keyCode = 0;
+    if (Key.androidKeys.contains(s)) { //字母數字
+      keyCode = Key.androidKeys.indexOf(s);
+    } else if (Key.symbols.contains(s)) { //可見符號
+      keyCode = Key.symbolStart + Key.symbols.indexOf(s);
+    } else if (symbolAliases.containsKey(s)) {
+      keyCode = symbolAliases.get(s);
+    }
+    return keyCode;
+  }
+
   public static int getRimeCode(int code) {
-    if (code >= Key.androidKeys.size()) return 0;
-    String s = Key.androidKeys.get(code);
-    return Rime.get_keycode_by_name(s);
-  }
-
-  public static boolean isPhysicalUpper(int code) {
-    return code >= Key.keyUpperA && code < Key.androidKeys.size();
-  }
-
-  public static String getCodeText(int code) {
-    return isPhysicalUpper(code) ? Key.androidKeys.get(code) : "";
+    int i = 0;
+    if (code >= 0 && code < Key.androidKeys.size()) {
+      String s = Key.androidKeys.get(code);
+      i = Rime.get_keycode_by_name(s);
+    }
+    return i;
   }
 
   public static boolean hasModifier(int mask, int modifier) {
@@ -162,6 +182,28 @@ public class Event {
       put("Shift", KeyEvent.META_SHIFT_ON);
       put("Control", KeyEvent.META_CTRL_ON);
       put("Alt", KeyEvent.META_ALT_ON);
+    }
+  };
+
+  public static Map<String,Integer> symbolAliases = new HashMap<String,Integer>() {
+    {
+      put("#", KeyEvent.KEYCODE_POUND);
+      put("'", KeyEvent.KEYCODE_APOSTROPHE);
+      put("(", KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN);
+      put(")", KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN);
+      put("*", KeyEvent.KEYCODE_STAR);
+      put("+", KeyEvent.KEYCODE_PLUS);
+      put(",", KeyEvent.KEYCODE_COMMA);
+      put("-", KeyEvent.KEYCODE_MINUS);
+      put(".", KeyEvent.KEYCODE_PERIOD);
+      put("/", KeyEvent.KEYCODE_SLASH);
+      put(";", KeyEvent.KEYCODE_SEMICOLON);
+      put("=", KeyEvent.KEYCODE_EQUALS);
+      put("@", KeyEvent.KEYCODE_AT);
+      put("\\", KeyEvent.KEYCODE_BACKSLASH);
+      put("[", KeyEvent.KEYCODE_LEFT_BRACKET);
+      put("`", KeyEvent.KEYCODE_GRAVE);
+      put("]", KeyEvent.KEYCODE_RIGHT_BRACKET);
     }
   };
 }

@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 
 import android.view.KeyEvent;
+import android.view.KeyCharacterMap;
 import android.util.Log;
 import android.os.Build;
 
@@ -65,7 +66,9 @@ public class Key {
 
   public static List<String> androidKeys;
   public static Map<String, Map> presetKeys;
-  public static int keyUpperA;
+  public static int symbolStart;
+  public static String symbols;
+  public static KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
 
   /**
    * Create an empty key with no attributes.

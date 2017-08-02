@@ -667,7 +667,7 @@ preset_color_schemes:
 android_keys:
   name: [VoidSymbol, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    asterisk, numbersign, Up, Down, Left, Right, CENTER,
+    asterisk, numbersign, Up, Down, Left, Right, KP_Begin,
     VOLUME_UP, VOLUME_DOWN, POWER, CAMERA, Clear,
     a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
     comma, period, Alt_L, Alt_R, Shift_L, Shift_R, Tab, space,
@@ -708,7 +708,9 @@ android_keys:
     MEDIA_SKIP_FORWARD, MEDIA_SKIP_BACKWARD, MEDIA_STEP_FORWARD, MEDIA_STEP_BACKWARD,
     SOFT_SLEEP, CUT, COPY, PASTE,
     SYSTEM_NAVIGATION_UP, SYSTEM_NAVIGATION_DOWN, SYSTEM_NAVIGATION_LEFT, SYSTEM_NAVIGATION_RIGHT,
-    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
+    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+    exclam, quotedbl, dollar, percent, ampersand, colon, less, greater, question, asciicircum, underscore, braceleft, bar, braceright, asciitilde]
+  symbols: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!"$%&:<>?^_{|}~'
   when:
     ascii: 西文標籤
     paging: 翻頁標籤
