@@ -125,16 +125,20 @@ public class Event {
     if (c == KeyEvent.KEYCODE_SPACE){
       label = Rime.getSchemaName();
     } else {
-      if (c > 0) label = getClickLabel(c);
+      if (c > 0) label = getDisplayLabel(c);
     }
   }
 
-  public static String getClickLabel(int keyCode) {
+  public static String getDisplayLabel(int keyCode) {
     String s = "";
     if (keyCode < Key.symbolStart) { //字母數字
-      char c = Key.kcm.getDisplayLabel(keyCode);
-      if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
-      s = String.valueOf(c);
+      if (Key.kcm.isPrintingKey(keyCode)) {
+        char c = Key.kcm.getDisplayLabel(keyCode);
+        if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
+        s = String.valueOf(c);
+      } else {
+        s = Key.androidKeys.get(keyCode);
+      }
     } else if (keyCode < Key.androidKeys.size()) { //可見符號
       keyCode -= Key.symbolStart;
       s = Key.symbols.substring(keyCode, keyCode + 1);

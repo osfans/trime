@@ -797,7 +797,7 @@ public class Trime extends InputMethodService implements
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
     if (keyCode >= Key.symbolStart) { //符號
-      commitText(Event.getClickLabel(keyCode));
+      commitText(Event.getDisplayLabel(keyCode));
     } else {
       sendDownUpKeyEvents(keyCode); //系統處理
     }
