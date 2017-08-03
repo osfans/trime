@@ -763,7 +763,7 @@ preset_keys:
   VOLUME_UP: {label: 音量+, send: VOLUME_UP}
   VOLUME_MUTE: {label: 靜音, send: VOLUME_MUTE}
   # 編輯
-  Shift_L: {label: Shift, send: Shift_L}
+  Shift_L: {label: Shift, send: Shift_L, shift_lock: ascii_long}
   Return: {label: Enter, send: Return}
   Hide: {label: 隱藏, send: BACK}
   BackSpace: {label: 退格, repeatable: true, send: BackSpace}

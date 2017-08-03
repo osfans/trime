@@ -277,6 +277,7 @@ public class Keyboard {
    * @return Shift鍵狀態是否改變
    */
   public boolean setShifted(boolean on, boolean shifted) {
+    on = on & shifted;
     if (mShiftKey != null) mShiftKey.on = on;
     return setModifier(KeyEvent.META_SHIFT_ON, on || shifted);
   }

@@ -34,7 +34,7 @@ public class Event {
   int code = 0, mask = 0;
   String text, label, preview;
   List<String> states;
-  String command, option, select, toggle;
+  String command, option, select, toggle, shift_lock;
   public boolean functional, repeatable, sticky;
 
   public Event(Keyboard keyboard, String s) {
@@ -47,6 +47,7 @@ public class Event {
       toggle = Function.getString(m, "toggle");
       label = Function.getString(m, "label");
       preview = Function.getString(m, "preview");
+      shift_lock = Function.getString(m, "shift_lock");
       int[] sends = parseSend(Function.getString(m, "send"));
       code = sends[0];
       mask = sends[1];
