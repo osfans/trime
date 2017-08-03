@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.PopupWindow;
@@ -794,13 +795,33 @@ public class Trime extends InputMethodService implements
     return true;
   }
 
+  public void sendDownUpKeyEvents(int keyCode, int mask) {
+    InputConnection ic = getCurrentInputConnection();
+    if (ic == null) return;
+    long eventTime = SystemClock.uptimeMillis();
+    KeyEvent down = new KeyEvent(eventTime, eventTime,
+            KeyEvent.ACTION_DOWN, keyCode, 0, mask);
+    ic.sendKeyEvent(down);
+    eventTime = SystemClock.uptimeMillis();
+    KeyEvent up = new KeyEvent(eventTime, SystemClock.uptimeMillis(),
+            KeyEvent.ACTION_UP, keyCode, 0, mask);
+    ic.sendKeyEvent(up);
+  }
+
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
     if (keyCode >= Key.symbolStart) { //符號
       commitText(Event.getDisplayLabel(keyCode));
-    } else {
-      sendDownUpKeyEvents(keyCode); //系統處理
+      return;
     }
+    if (mKeyboardView.isShifted() || mask > 0) {
+      if (keyCode == KeyEvent.KEYCODE_MOVE_HOME || keyCode == KeyEvent.KEYCODE_MOVE_END
+         || (keyCode >= KeyEvent.KEYCODE_DPAD_UP && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT)) {
+           sendDownUpKeyEvents(keyCode, KeyEvent.META_SHIFT_ON);
+           return;
+         }
+    }
+    sendDownUpKeyEvents(keyCode); //系統處理
   }
 
   public void commitEventText(CharSequence text) {
