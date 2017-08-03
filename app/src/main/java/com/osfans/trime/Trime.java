@@ -68,6 +68,7 @@ public class Trime extends InputMethodService implements
 
   private int orientation;
   private boolean canCompose;
+  private boolean enterAsLineBreak;
   private int inlinePreedit; //嵌入模式
   private WinPos winPos; //候選窗口彈出位置
   private String movable; //候選窗口是否可移動
@@ -440,6 +441,7 @@ public class Trime extends InputMethodService implements
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
     canCompose = false;
+    enterAsLineBreak = false;
     mTempAsciiMode = false;
     int inputType = attribute.inputType;
     int inputClass = inputType & InputType.TYPE_MASK_CLASS;
@@ -453,6 +455,10 @@ public class Trime extends InputMethodService implements
         keyboard = "number";
         break;
       case InputType.TYPE_CLASS_TEXT:
+        if (variation == InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE) {
+          // Make enter-key as line-breaks for messaging.
+          enterAsLineBreak = true;
+        }
         if (variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
          || variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
          || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
@@ -612,6 +618,19 @@ public class Trime extends InputMethodService implements
     return false; 
   }
 
+  /**
+   * 如果爲{@link KeyEvent#KEYCODE_BACK Back鍵}，則隱藏鍵盤
+   * @param keyCode {@link KeyEvent#getKeyCode() 鍵碼}
+   * @return 是否處理了Back鍵事件
+   * */
+  private boolean handleBack(int keyCode) {
+    if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+      requestHideSelf(0);
+      return true;
+    }
+    return false;
+  }
+
   private boolean onRimeKey(int[] event) {
     updateRimeOption();
     boolean ret = Rime.onKey(event);
@@ -762,9 +781,10 @@ public class Trime extends InputMethodService implements
   public boolean handleKey(int keyCode, int mask) { //軟鍵盤
     if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
       Log.info("Rime onKey");
-    } else if (handleOption(keyCode)) {
-      Log.info("onOption");
-    } else if (handleAciton(keyCode, mask)) {
+    } else if (handleAciton(keyCode, mask)
+      || handleOption(keyCode)
+      || handleEnter(keyCode)
+      || handleBack(keyCode)) {
       Log.info("Trime onKey");
     } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, keyCode)) {
       Log.info("open category");
@@ -976,6 +996,24 @@ public class Trime extends InputMethodService implements
       }
       mOptionsDialog = builder.create();
       showDialog(mOptionsDialog);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 如果爲{@link KeyEvent#KEYCODE_ENTER 回車鍵}，則換行
+   * 
+   * @param keyCode {@link KeyEvent#getKeyCode() 鍵碼}
+   * @return 是否處理了回車事件
+   * */
+  private boolean handleEnter(int keyCode) { //回車
+    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+      if (enterAsLineBreak) {
+        commitText("\n");
+      } else {
+        sendKeyChar('\n');
+      }
       return true;
     }
     return false;
