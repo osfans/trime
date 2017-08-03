@@ -818,7 +818,7 @@ public class Trime extends InputMethodService implements
     if (mKeyboardView.isShifted() || mask > 0) {
       if (keyCode == KeyEvent.KEYCODE_MOVE_HOME || keyCode == KeyEvent.KEYCODE_MOVE_END
          || (keyCode >= KeyEvent.KEYCODE_DPAD_UP && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT)) {
-           sendDownUpKeyEvents(keyCode, KeyEvent.META_SHIFT_ON);
+           sendDownUpKeyEvents(keyCode, mask | (mKeyboardView.isShifted() ? KeyEvent.META_SHIFT_ON : 0));
            return;
          }
     }
