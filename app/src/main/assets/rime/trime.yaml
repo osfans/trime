@@ -737,6 +737,7 @@ android_keys:
     states: 狀態標籤
     repeatable: 連續按鍵
     functional: 功能鍵
+    shift_lock: Shift鎖定 #ascii_long: 英文長按中文單按鎖定, long: 長按鎖定, click: 單按鎖定
   action:
     command: 命令
     option: 參數

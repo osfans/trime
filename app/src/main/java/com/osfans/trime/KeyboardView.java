@@ -880,7 +880,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
             if (key.isShift() && !key.sendBindings(type)) {
-               setShifted(false, !isShifted());
+               setShifted(key.isShiftLock(), !isShifted());
             } else {
                 int code = key.getCode(type);
                 //TextEntryState.keyPressedAt(key, x, y);

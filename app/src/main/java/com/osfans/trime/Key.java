@@ -60,6 +60,7 @@ public class Key {
 
   public int x, y;
   public boolean pressed, on;
+  public String shift_lock;
 
   public String popupCharacters;
   public int popupResId;
@@ -110,7 +111,10 @@ public class Key {
     hint = Function.getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     else if(composing == null && has_menu == null && paging == null) send_bindings = false;
-    if (isShift()) mKeyboard.mShiftKey = this;
+    if (isShift()) {
+      mKeyboard.mShiftKey = this;
+      shift_lock = mk.containsKey("shift_lock") ? (String)mk.get("shift_lock") : "ascii_long";
+    }
     key_text_size = getPixel(mk, "key_text_size");
     symbol_text_size = getPixel(mk, "symbol_text_size");
     key_text_color = getColor(mk, "key_text_color");
@@ -311,6 +315,16 @@ public class Key {
   public boolean isShift() {
     int c = getCode();
     return (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT);
+  }
+
+  public boolean isShiftLock() {
+    switch (shift_lock) {
+      case "long":
+        return false;
+      case "click":
+        return true;
+    }
+    return !Rime.isAsciiMode();
   }
 
   public boolean sendBindings(int type) {
