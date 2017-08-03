@@ -28,19 +28,18 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.*;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.Gravity;
-import android.view.ViewGroup.LayoutParams;
-import android.view.LayoutInflater;
-import android.widget.PopupWindow;
-import android.widget.LinearLayout;
-import android.widget.FrameLayout;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Handler;
+import android.view.Gravity;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.PopupWindow;
+import android.widget.LinearLayout;
+import android.view.LayoutInflater;
+import android.widget.FrameLayout;
 import android.os.Build.VERSION_CODES;
 import android.os.Build.VERSION;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Drawable;
@@ -598,7 +597,17 @@ public class Trime extends InputMethodService implements
         }
         if (code == KeyEvent.KEYCODE_Y)
           return ic.performContextMenuAction(android.R.id.redo);
+        if (code == KeyEvent.KEYCODE_Z)
+          return ic.performContextMenuAction(android.R.id.undo);
       }
+      if (code == KeyEvent.KEYCODE_A)
+        return ic.performContextMenuAction(android.R.id.selectAll);
+      if (code == KeyEvent.KEYCODE_X)
+        return ic.performContextMenuAction(android.R.id.cut);
+      if (code == KeyEvent.KEYCODE_C)
+        return ic.performContextMenuAction(android.R.id.copy);
+      if (code == KeyEvent.KEYCODE_V)
+        return ic.performContextMenuAction(android.R.id.paste);
     }
     return false; 
   }
@@ -663,6 +672,8 @@ public class Trime extends InputMethodService implements
             && event.isCtrlPressed()
             && event.getRepeatCount() == 0
             && !KeyEvent.isModifierKey(keyCode)) {
+      if (KeyEvent.KEYCODE_SPACE == keyCode)
+        return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
       if (handleAciton(keyCode, event.getMetaState())) return true;
     }
 
@@ -743,7 +754,7 @@ public class Trime extends InputMethodService implements
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
         showColorDialog();
       } else {
-        onKey(event.code, event.mask | (mKeyboardView.isShifted() ? KeyEvent.META_SHIFT_ON : 0));
+        onKey(event.code, event.mask);
       }
     }
   }
@@ -763,24 +774,12 @@ public class Trime extends InputMethodService implements
     return true;
   }
 
-  public void sendDownUpKeyEvents(int keyCode, int mask) {
-    InputConnection ic = getCurrentInputConnection();
-    if (ic == null) return;
-    long eventTime = SystemClock.uptimeMillis();
-    KeyEvent down = new KeyEvent(eventTime, eventTime,
-            KeyEvent.ACTION_DOWN, keyCode, 0, mask);
-    KeyEvent up = new KeyEvent(eventTime, SystemClock.uptimeMillis(),
-            KeyEvent.ACTION_UP, keyCode, 0, mask);
-    ic.sendKeyEvent(down);
-    ic.sendKeyEvent(up);
-  }
-
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
     if (keyCode >= Key.symbolStart) { //符號
       commitText(Event.getClickLabel(keyCode));
     } else {
-      sendDownUpKeyEvents(keyCode, mask); //系統處理
+      sendDownUpKeyEvents(keyCode); //系統處理
     }
   }
 
