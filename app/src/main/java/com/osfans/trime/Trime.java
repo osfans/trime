@@ -641,6 +641,7 @@ public class Trime extends InputMethodService implements
 
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
+    if (keyCode >= Key.symbolStart) return false; //只處理安卓標準按鍵
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)){
       boolean ret = onRimeKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : Rime.META_RELEASE_ON));
       if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
