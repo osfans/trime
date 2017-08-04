@@ -55,6 +55,10 @@
     <Preference android:key="pref_deploy" android:order="16"
         android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/>
 
+    <PreferenceScreen android:key="pref_other" android:order="17" android:title="@string/pref_other">
+        <SwitchPreference android:key="pref_notification_icon" android:title="@string/pref_notification_icon" />
+    </PreferenceScreen>
+
     <PreferenceScreen android:key="pref_help" android:order="32" android:title="@string/pref_help">
         <Preference android:key="pref_wiki" android:title="@string/pref_wiki">
             <intent android:action="android.intent.action.VIEW"

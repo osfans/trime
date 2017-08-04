@@ -483,4 +483,8 @@ public class Config {
     if (getInlinePreedit() == 0 && wp == WinPos.RIGHT) wp = WinPos.LEFT;
     return wp;
   }
+
+  public boolean isShowStatusIcon() {
+    return mPref.getBoolean("pref_notification_icon", false);
+  }
 }

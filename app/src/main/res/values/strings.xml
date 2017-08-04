@@ -99,4 +99,7 @@
     <string name="other_ime">Other IMEs</string>
 
     <string name="pref_ui">Night Mode</string>
+
+    <string name="pref_other">Others</string>
+    <string name="pref_notification_icon">Show icon in notification bar</string>
 </resources>

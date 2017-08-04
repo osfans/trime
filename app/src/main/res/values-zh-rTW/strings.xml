@@ -96,4 +96,7 @@
     <string name="other_ime">其他輸入法</string>
 
     <string name="pref_ui">夜間</string>
+
+    <string name="pref_other">其他</string>
+    <string name="pref_notification_icon">顯示通知欄圖標</string>
 </resources>

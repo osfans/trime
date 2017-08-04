@@ -77,7 +77,6 @@ public class Trime extends InputMethodService implements
   private int candSpacing; //候選窗與邊緣間距
   private boolean cursorUpdated = false; //光標是否移動
   private int min_length;
-  private boolean display_tray_icon;
   private boolean mTempAsciiMode; //臨時中英文狀態
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
@@ -186,7 +185,6 @@ public class Trime extends InputMethodService implements
     movable = mConfig.getString("layout/movable");
     candSpacing = mConfig.getPixel("layout/spacing");
     min_length = mConfig.getInt("layout/min_length");
-    display_tray_icon = mConfig.getBoolean("display_tray_icon");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     auto_caps = mConfig.getString("auto_caps");
   }
@@ -484,7 +482,7 @@ public class Trime extends InputMethodService implements
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤進入文本框時顯示候選欄
-    if (display_tray_icon) showStatusIcon(R.drawable.status); //狀態欄圖標
+    if (mConfig.isShowStatusIcon()) showStatusIcon(R.drawable.status); //狀態欄圖標
   }
 
   @Override

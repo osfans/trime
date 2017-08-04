@@ -27,7 +27,6 @@ style:
   comment_on_top: true #编码提示在上方或右侧
   comment_text_size: 12 #编码提示字号
   destroy_on_quit: false #离开时清理内存
-  display_tray_icon: false #状态栏图标
   hanb_font: hanb.ttf #扩充字体
   horizontal: true #水平模式
   horizontal_gap: 2 #键水平间距

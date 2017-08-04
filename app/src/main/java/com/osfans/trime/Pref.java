@@ -60,7 +60,7 @@ public class Pref extends PreferenceActivity
     SharedPreferences prefs = Function.getPref(this);
     boolean is_dark = prefs.getBoolean("pref_ui", false);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-      setTheme(is_dark ? 0x01030224 : 0x01030237);
+      setTheme(is_dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light);
     } else {
       setTheme(is_dark ? android.R.style.Theme_Holo : android.R.style.Theme_Holo_Light);
     }
@@ -121,6 +121,13 @@ public class Pref extends PreferenceActivity
       case "speak_key":
       case "speak_commit":
         if (trime!= null) trime.resetEffect();
+        break;
+      case "pref_notification_icon": //通知欄圖標
+        value = prefs.getBoolean(key, false);
+        if (trime!= null) {
+          if (value) trime.showStatusIcon(R.drawable.status);
+          else trime.hideStatusIcon();
+        }
         break;
     }
   }

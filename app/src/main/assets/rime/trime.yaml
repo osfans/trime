@@ -20,7 +20,6 @@ style:
   comment_on_top: true #編碼提示在上方或右側
   comment_text_size: 12 #編碼提示字號
   destroy_on_quit: false #離開時清理記憶體
-  display_tray_icon: false #狀態列圖示
   hanb_font: hanb.ttf #擴充字型
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
