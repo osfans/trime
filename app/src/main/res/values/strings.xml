@@ -67,6 +67,7 @@
     <string name="key_vibrate_duration_unit">ms</string>
     <string name="speak_key">Voice on keypress</string>
     <string name="speak_commit">Voice on commit</string>
+    <string name="longpress_timeout">Key long press delay</string>
 
 <!--
     <string name="pref_function">Functions</string>

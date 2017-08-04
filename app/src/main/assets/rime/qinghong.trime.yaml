@@ -67,15 +67,11 @@ style:
   latin_font: latin.ttf #西文本体
   latin_locale: en_US #西文语言
   locale: zh_CN #缺省语言 zh_TW,zh_CN,zh_HK,""
-  longpress_timeout: 150 #按键超过800毫秒即为长按
-  multitap_interval: 400 #800毫秒内快速按两次键
   preview_font: latin.ttf #按键提示字体
   preview_height: 56 #按键提示高度
   preview_offset: -32 #按键提示纵向偏移
   preview_text_size: 40 #按键提示字号
   proximity_correction: true #按键纠错
-  repeat_interval: 50 #空白键、删除键等自动重复间隔：50毫秒即1秒20次
-  repeat_start_delay: 400 #按键超过400毫秒后开始重复按键
   reset_ascii_mode: false #显示键盘时重置为中文状态
   round_corner: 0 #按键圆角半径
   shadow_radius: 0.0 #按键阴影半径

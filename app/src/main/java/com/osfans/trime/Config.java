@@ -491,4 +491,8 @@ public class Config {
   public boolean isDestroyOnQuit() {
     return mPref.getBoolean("pref_destroy_on_quit", false);
   }
+
+  public int getLongTimeout() {
+    return mPref.getInt("longpress_timeout", 400);
+  }
 }

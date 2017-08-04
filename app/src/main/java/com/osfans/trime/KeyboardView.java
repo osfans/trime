@@ -342,10 +342,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPaintSymbol.setTextSize(mSymbolSize);
         mPreviewText.setTypeface(config.getFont("preview_font"));
 
-        REPEAT_INTERVAL = config.getInt("repeat_interval");
-        REPEAT_START_DELAY = config.getInt("repeat_start_delay");
-        LONGPRESS_TIMEOUT = config.getInt("longpress_timeout");
-        MULTITAP_INTERVAL = config.getInt("multitap_interval");
+        REPEAT_INTERVAL = 50;
+        REPEAT_START_DELAY = config.getLongTimeout();
+        LONGPRESS_TIMEOUT = config.getLongTimeout();
+        MULTITAP_INTERVAL = config.getLongTimeout();
         invalidateAllKeys();
     }
 

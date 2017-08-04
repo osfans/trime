@@ -297,6 +297,13 @@ public class Trime extends InputMethodService implements
       mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
   }
 
+  public void resetKeyboard() {
+    if (mKeyboardView != null) {
+      mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
+      mKeyboardView.reset(); //實體鍵盤無軟鍵盤
+    }
+  }
+
   /**
    * 重置鍵盤、候選條、狀態欄等
    * !!注意，如果其中調用Rime.setOption，切換方案會卡住
@@ -313,10 +320,7 @@ public class Trime extends InputMethodService implements
       mComposition.reset();
     }
     hideComposition();
-    if (mKeyboardView != null) {
-      mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
-      mKeyboardView.reset(); //實體鍵盤無軟鍵盤
-    }
+    resetKeyboard();
     resetEffect();
   }
 

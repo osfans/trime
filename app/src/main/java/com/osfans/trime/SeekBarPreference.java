@@ -35,6 +35,7 @@ public class SeekBarPreference extends Preference
 
     private int mProgress;
     private int mMax;
+    private int mMin = 0;
     private boolean mTrackingTouch;
 
     public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -72,6 +73,7 @@ public class SeekBarPreference extends Preference
         String unit = "%";
         switch (getKey()) {
         case "key_vibrate_duration":
+        case "longpress_timeout":
             unit = getContext().getString(R.string.key_vibrate_duration_unit);
             break;
         }
@@ -102,6 +104,11 @@ public class SeekBarPreference extends Preference
     }
 
     public void setMax(int max) {
+        switch (getKey()) {
+        case "longpress_timeout":
+            mMin = 100;
+            break;
+        }
         if (max != mMax) {
             mMax = max;
             notifyChanged();
@@ -116,8 +123,8 @@ public class SeekBarPreference extends Preference
         if (progress > mMax) {
             progress = mMax;
         }
-        if (progress < 0) {
-            progress = 0;
+        if (progress < mMin) {
+            progress = mMin;
         }
         if (progress != mProgress) {
             mProgress = progress;

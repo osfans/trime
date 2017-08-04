@@ -64,6 +64,7 @@
     <string name="key_vibrate_duration_unit">毫秒</string>
     <string name="speak_key">按鍵時朗讀字符</string>
     <string name="speak_commit">上屏時朗讀字符</string>
+    <string name="longpress_timeout">長按按鍵的延遲時間</string>
 
 <!--
     <string name="pref_function">功能</string>

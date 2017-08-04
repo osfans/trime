@@ -44,6 +44,13 @@
             android:defaultValue="10" />
         <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
         <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
+        <com.osfans.trime.SeekBarPreference
+            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:key="longpress_timeout"
+            android:title="@string/longpress_timeout"
+            android:summary="400ms"
+            android:max="1000"
+            android:defaultValue="400" />
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_input" android:order="8" android:title="@string/pref_input">

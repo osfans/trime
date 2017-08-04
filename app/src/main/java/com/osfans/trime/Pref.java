@@ -122,6 +122,9 @@ public class Pref extends PreferenceActivity
       case "speak_commit":
         if (trime!= null) trime.resetEffect();
         break;
+      case "longpress_timeout":
+        if (trime!= null) trime.resetKeyboard();
+        break;
       case "pref_notification_icon": //通知欄圖標
         value = prefs.getBoolean(key, false);
         if (trime!= null) {
