@@ -2,7 +2,7 @@ mainDir=app/src/main
 resDir=$(mainDir)/res
 jniDir=$(mainDir)/jni
 
-.PHONY: all clean build debug release install icon opencc-data translate ndk android
+.PHONY: all clean build debug release install icon status opencc-data translate ndk android
 
 all: release
 
@@ -30,10 +30,11 @@ icon: icon.svg
 	inkscape -z -e $(resDir)/drawable-xhdpi/icon.png -w 96 -h 96 $<
 	inkscape -z -e $(resDir)/drawable-hdpi/icon.png -w 72 -h 72 $<
 	inkscape -z -e $(resDir)/drawable-mdpi/icon.png -w 48 -h 48 $<
-	# just copy the already converted icon to status
-	yes | cp $(resDir)/drawable-xhdpi/icon.png $(resDir)/drawable-xxxhdpi/status.png
-	yes | cp $(resDir)/drawable-hdpi/icon.png $(resDir)/drawable-xxhdpi/status.png
-	yes | cp $(resDir)/drawable-mdpi/icon.png $(resDir)/drawable-xhdpi/status.png
+
+status: status.svg
+	inkscape -z -e $(resDir)/drawable-xxxhdpi/status.png -w 96 -h 96 $<
+	inkscape -z -e $(resDir)/drawable-xxhdpi/status.png -w 72 -h 72 $<
+	inkscape -z -e $(resDir)/drawable-xhdpi/status.png -w 48 -h 48 $<
 	inkscape -z -e $(resDir)/drawable-hdpi/status.png -w 36 -h 36 $<
 	inkscape -z -e $(resDir)/drawable-mdpi/status.png -w 24 -h 24 $<
 
