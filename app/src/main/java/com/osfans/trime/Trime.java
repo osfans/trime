@@ -833,12 +833,12 @@ public class Trime extends InputMethodService implements
       sendKeyDown(ic, KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON);
     }
     if (Event.hasModifier(mask, KeyEvent.META_ALT_ON)) {
-      sendKeyDown(ic, KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
+      sendKeyDown(ic, KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
     }
     sendKeyDown(ic, keyCode, mask);
     sendKeyUp(ic, keyCode, mask);
     if (Event.hasModifier(mask, KeyEvent.META_ALT_ON)) {
-      sendKeyUp(ic, KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
+      sendKeyUp(ic, KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
     }
     if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
       sendKeyUp(ic, KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON);
