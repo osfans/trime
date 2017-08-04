@@ -85,7 +85,7 @@ public class Trime extends InputMethodService implements
   private static String soft_cursor_key = "soft_cursor"; //軟光標
   private static String horizontal_key = "horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
-  private boolean keyComposing; //實體鍵盤編輯狀態
+  private boolean keyUpNeeded; //RIME是否需要處理keyUp事件
   private boolean mNeedUpdateRimeOption = true;
   private String lastCommittedText;
 
@@ -661,7 +661,7 @@ public class Trime extends InputMethodService implements
   @Override
   public boolean onKeyUp(int keyCode, KeyEvent event) {
     Log.info("onKeyUp="+event);
-    if (composeEvent(event) && keyComposing) {
+    if (composeEvent(event) && keyUpNeeded) {
       onRelease(keyCode);
       return true;
     }
@@ -674,11 +674,10 @@ public class Trime extends InputMethodService implements
    * */
   private boolean onKeyEvent(KeyEvent event) {
     Log.info("onKeyEvent="+event);
-    keyComposing = false;
     int keyCode = event.getKeyCode();
     boolean ret = true;
-    keyComposing = isComposing();
-    if (!keyComposing) {
+    keyUpNeeded = isComposing();
+    if (!isComposing()) {
       if (keyCode == KeyEvent.KEYCODE_DEL ||
           keyCode == KeyEvent.KEYCODE_ENTER ||
           keyCode == KeyEvent.KEYCODE_ESCAPE ||
@@ -781,7 +780,9 @@ public class Trime extends InputMethodService implements
   }
 
   public boolean handleKey(int keyCode, int mask) { //軟鍵盤
+    keyUpNeeded = false;
     if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
+      keyUpNeeded = true;
       Log.info("Rime onKey");
     } else if (handleAciton(keyCode, mask)
       || handleOption(keyCode)
@@ -791,6 +792,7 @@ public class Trime extends InputMethodService implements
     } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && Function.openCategory(this, keyCode)) {
       Log.info("open category");
     } else {
+      keyUpNeeded = true;
       return false;
     }
     return true;
@@ -853,9 +855,11 @@ public class Trime extends InputMethodService implements
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
     if (keyCode >= Key.symbolStart) { //符號
+      keyUpNeeded = false;
       commitText(Event.getDisplayLabel(keyCode));
       return;
     }
+    keyUpNeeded = false;
     sendDownUpKeyEvents(keyCode, mask);
   }
 
@@ -893,6 +897,7 @@ public class Trime extends InputMethodService implements
     if (!commitText() && !isComposing()) commitEventText(text);
     if (b) sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
     updateComposing();
+    keyUpNeeded = false;
   }
 
   public void onPress(int keyCode) {
@@ -902,7 +907,9 @@ public class Trime extends InputMethodService implements
   }
 
   public void onRelease(int keyCode) {
-    onRimeKey(Event.getRimeEvent(keyCode, Rime.META_RELEASE_ON));
+    if (keyUpNeeded) {
+      onRimeKey(Event.getRimeEvent(keyCode, Rime.META_RELEASE_ON));
+    }
   }
 
   public void swipeLeft() {
