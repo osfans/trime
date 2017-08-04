@@ -827,6 +827,7 @@ public class Trime extends InputMethodService implements
     ic.clearMetaKeyStates(states);
     if (mKeyboardView != null && mKeyboardView.isShifted()) {
       if (keyCode == KeyEvent.KEYCODE_MOVE_HOME || keyCode == KeyEvent.KEYCODE_MOVE_END
+         || keyCode == KeyEvent.KEYCODE_PAGE_UP || keyCode == KeyEvent.KEYCODE_PAGE_DOWN
          || (keyCode >= KeyEvent.KEYCODE_DPAD_UP && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT)) {
         mask |= KeyEvent.META_SHIFT_ON;
       }
