@@ -802,8 +802,9 @@ preset_keys:
   Charset_switch: {toggle: extended_charset, send: Mode_switch, states: [ 常用, 增廣 ]}
   Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
   # trime設定
-  IME_switch: {label: 下一輸入法, send: LANGUAGE_SWITCH, select: .next}
-  IME_last: {label: 上一輸入法, send: LANGUAGE_SWITCH, select: .last}
+  IME_switch: {label: 🌐, send: LANGUAGE_SWITCH} #彈出對話框選擇輸入法
+  IME_last: {label: 上一輸入法, send: LANGUAGE_SWITCH, select: .last} #直接切換到上一輸入法
+  IME_next: {label: 下一輸入法, send: LANGUAGE_SWITCH, select: .next} #直接切換到下一輸入法
   Keyboard_symbols: {label: 符號, send: Eisu_toggle, select: symbols}
   Keyboard_number: {label: 數字, send: Eisu_toggle, select: number}
   Keyboard_letter: {label: 字母, send: Eisu_toggle, select: default}

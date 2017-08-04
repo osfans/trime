@@ -744,8 +744,10 @@ public class Trime extends InputMethodService implements
         InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         if (event.select.contentEquals(".next") && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           imm.switchToNextInputMethod(imeToken, false);
-        } else {
+        } else if (!Function.isEmpty(event.select)) {
           imm.switchToLastInputMethod(imeToken);
+        } else {
+          ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
         String arg = String.format(event.option, getActiveText(1), getActiveText(2), getActiveText(3), getActiveText(4));
