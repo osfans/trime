@@ -796,16 +796,18 @@ public class Trime extends InputMethodService implements
     return true;
   }
 
+  private void sendKey(InputConnection ic, int key, int meta, int action) {
+    long now = System.currentTimeMillis();
+    if (ic != null) ic.sendKeyEvent(new KeyEvent(
+      now, now, action , key, 0, meta));
+  }
+
   private void sendKeyDown(InputConnection ic, int key, int meta) {
-      long now = System.currentTimeMillis();
-      if (ic != null) ic.sendKeyEvent(new KeyEvent(
-              now, now, KeyEvent.ACTION_DOWN, key, 0, meta));
+    sendKey(ic, key, meta, KeyEvent.ACTION_DOWN);
   }
 
   private void sendKeyUp(InputConnection ic, int key, int meta) {
-      long now = System.currentTimeMillis();
-      if (ic != null) ic.sendKeyEvent(new KeyEvent(
-              now, now, KeyEvent.ACTION_UP, key, 0, meta));
+    sendKey(ic, key, meta, KeyEvent.ACTION_UP);
   }
 
   public void sendDownUpKeyEvents(int keyCode, int mask) {
