@@ -487,4 +487,8 @@ public class Config {
   public boolean isShowStatusIcon() {
     return mPref.getBoolean("pref_notification_icon", false);
   }
+
+  public boolean isDestroyOnQuit() {
+    return mPref.getBoolean("pref_destroy_on_quit", false);
+  }
 }

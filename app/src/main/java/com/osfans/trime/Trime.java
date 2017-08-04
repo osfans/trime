@@ -331,7 +331,7 @@ public class Trime extends InputMethodService implements
   public void onDestroy() {
     super.onDestroy();
     self = null;
-    if (mConfig.getBoolean("destroy_on_quit")) {
+    if (mConfig.isDestroyOnQuit()) {
       Rime.destroy();
       mConfig.destroy();
       mConfig = null;

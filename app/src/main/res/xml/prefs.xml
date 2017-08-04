@@ -57,6 +57,7 @@
 
     <PreferenceScreen android:key="pref_other" android:order="17" android:title="@string/pref_other">
         <SwitchPreference android:key="pref_notification_icon" android:title="@string/pref_notification_icon" />
+        <SwitchPreference android:key="pref_destroy_on_quit" android:title="@string/pref_destroy_on_quit" />
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_help" android:order="32" android:title="@string/pref_help">

@@ -19,7 +19,6 @@ style:
   comment_height: 12 #編碼提示區高度
   comment_on_top: true #編碼提示在上方或右側
   comment_text_size: 12 #編碼提示字號
-  destroy_on_quit: false #離開時清理記憶體
   hanb_font: hanb.ttf #擴充字型
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
