@@ -61,9 +61,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.69999999"
-     inkscape:cx="-184.94285"
-     inkscape:cy="145.73945"
+     inkscape:zoom="1.979899"
+     inkscape:cx="-73.393031"
+     inkscape:cy="44.144836"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -93,20 +93,32 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-188.5714,-232.3622)">
+     transform="translate(-188.5714,-232.3622)"
+     style="display:inline">
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:180px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter3371)"
-       x="214.05357"
-       y="337.23721"
+       x="210.76671"
+       y="341.47156"
        id="text3344"
        inkscape:export-xdpi="24"
        inkscape:export-ydpi="24"
        inkscape:export-filename="res/drawable-xxhdpi/status.png"><tspan
          sodipodi:role="line"
          id="tspan3346"
-         x="214.05357"
-         y="337.23721"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.99999237px;font-family:'文泉驛微米黑';-inkscape-font-specification:'文泉驛微米黑';fill:#ffffff">ㄓ</tspan></text>
+         x="210.76671"
+         y="522.37158"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.99999237px;font-family:'文泉驛微米黑';-inkscape-font-specification:'文泉驛微米黑';fill:#ffffff" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:99.99999237px;line-height:23.43749809px;font-family:'文泉驛微米黑';-inkscape-font-specification:'文泉驛微米黑, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.93749994px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="210.76672"
+       y="341.47156"
+       id="text4492"><tspan
+         sodipodi:role="line"
+         id="tspan4490"
+         x="210.76672"
+         y="341.47156"
+         style="fill:#ffffff;stroke-width:0.93749994px">ㄓ</tspan></text>
   </g>
 </svg>
