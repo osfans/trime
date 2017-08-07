@@ -77,7 +77,13 @@ public class SeekBarPreference extends Preference
         switch (getKey()) {
         case "longpress_timeout":
             progress = 10 * progress + 100;
+            unit = getContext().getString(R.string.key_vibrate_duration_unit);
+            break;
         case "key_vibrate_duration":
+            unit = getContext().getString(R.string.key_vibrate_duration_unit);
+            break;
+        case "repeat_interval":
+            progress = 10 * progress + 10;
             unit = getContext().getString(R.string.key_vibrate_duration_unit);
             break;
         }

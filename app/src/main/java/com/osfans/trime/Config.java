@@ -497,4 +497,10 @@ public class Config {
     if (progress > 60) progress = 60;
     return progress * 10 + 100;
   }
+
+  public int getRepeatInterval() {
+    int progress = mPref.getInt("repeat_interval", 4);
+    if (progress > 9) progress = 9;
+    return progress * 10 + 10;
+  }
 }

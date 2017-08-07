@@ -49,6 +49,12 @@
             android:title="@string/longpress_timeout"
             android:max="60"
             android:defaultValue="20" />
+        <com.osfans.trime.SeekBarPreference
+            android:layout="@layout/preference_widget_seekbar"
+            android:key="repeat_interval"
+            android:title="@string/repeat_interval"
+            android:max="9"
+            android:defaultValue="4" />
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_input" android:order="8" android:title="@string/pref_input">
