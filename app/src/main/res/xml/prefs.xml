@@ -55,6 +55,7 @@
             android:title="@string/repeat_interval"
             android:max="9"
             android:defaultValue="4" />
+        <SwitchPreference android:key="show_switches" android:title="@string/show_switches" android:defaultValue="true" />
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_input" android:order="8" android:title="@string/pref_input">

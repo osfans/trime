@@ -218,6 +218,7 @@ public class Config {
     Key.presetKeys = (Map<String, Map>)Rime.config_get_map(themeName, "preset_keys");
     presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
     presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");
+    Rime.setShowSwitches(getShowSwitches());
     reset();
   }
 
@@ -502,5 +503,9 @@ public class Config {
     int progress = mPref.getInt("repeat_interval", 4);
     if (progress > 9) progress = 9;
     return progress * 10 + 10;
+  }
+
+  public boolean getShowSwitches() {
+    return mPref.getBoolean("show_switches", true);
   }
 }

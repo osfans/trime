@@ -132,6 +132,10 @@ public class Pref extends PreferenceActivity
           else trime.hideStatusIcon();
         }
         break;
+      case "show_switches": //候選欄顯示狀態
+        value = prefs.getBoolean(key, false);
+        Rime.setShowSwitches(value);
+        break;
     }
   }
 

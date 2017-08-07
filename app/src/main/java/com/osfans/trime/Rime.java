@@ -217,6 +217,11 @@ public class Rime
   public static int META_ALT_ON = get_modifier_by_name("Alt");
   public static int META_RELEASE_ON = get_modifier_by_name("Release");
   private static int XK_VoidSymbol = 0xffffff;
+  private static boolean showSwitches = true;
+
+  public static void setShowSwitches(boolean show) {
+    showSwitches = show;
+  }
 
   public static boolean hasMenu() {
     return isComposing() && mContext.menu.num_candidates != 0;
@@ -333,7 +338,7 @@ public class Rime
   }
 
   public static RimeCandidate[] getCandidates() {
-    if (!isComposing()) return mSchema.getCandidates();
+    if (!isComposing() && showSwitches) return mSchema.getCandidates();
     return mContext.getCandidates();
   }
 

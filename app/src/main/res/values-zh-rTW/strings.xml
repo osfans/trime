@@ -66,6 +66,7 @@
     <string name="speak_commit">上屏時朗讀字符</string>
     <string name="longpress_timeout">長按按鍵的延遲時間</string>
     <string name="repeat_interval">重複按鍵的重複間隔</string>
+    <string name="show_switches">在候選欄中顯示狀態</string>
 
 <!--
     <string name="pref_function">功能</string>

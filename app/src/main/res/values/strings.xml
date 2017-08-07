@@ -69,7 +69,7 @@
     <string name="speak_commit">Voice on commit</string>
     <string name="longpress_timeout">Key long press delay</string>
     <string name="repeat_interval">Key repeat interval</string>
-
+    <string name="show_switches">Show switches in candidate bar</string>
 
 <!--
     <string name="pref_function">Functions</string>
