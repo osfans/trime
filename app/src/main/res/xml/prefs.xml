@@ -48,9 +48,9 @@
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="longpress_timeout"
             android:title="@string/longpress_timeout"
-            android:summary="400ms"
-            android:max="1000"
-            android:defaultValue="400" />
+            android:summary="300ms"
+            android:max="60"
+            android:defaultValue="20" />
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_input" android:order="8" android:title="@string/pref_input">

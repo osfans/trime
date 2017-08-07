@@ -493,6 +493,8 @@ public class Config {
   }
 
   public int getLongTimeout() {
-    return mPref.getInt("longpress_timeout", 400);
+    int progress = mPref.getInt("longpress_timeout", 20);
+    if (progress > 60) progress = 60;
+    return progress * 10 + 100;
   }
 }
