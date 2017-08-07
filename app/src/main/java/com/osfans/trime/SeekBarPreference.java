@@ -23,9 +23,11 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.preference.*;
+import android.util.Log;
 
 /**
  * @hide
@@ -36,6 +38,7 @@ public class SeekBarPreference extends Preference
     private int mProgress;
     private int mMax;
     private boolean mTrackingTouch;
+    private TextView mValue;
 
     public SeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -65,12 +68,12 @@ public class SeekBarPreference extends Preference
         seekBar.setMax(mMax);
         seekBar.setProgress(mProgress);
         seekBar.setEnabled(isEnabled());
+        mValue = (TextView) view.findViewById(R.id.value);
+        setValue();
     }
 
-    @Override
-    public CharSequence getSummary() {
+    public CharSequence getValue(int progress) {
         String unit = "%";
-        int progress = getProgress();
         switch (getKey()) {
         case "longpress_timeout":
             progress = 10 * progress + 100;
@@ -115,6 +118,14 @@ public class SeekBarPreference extends Preference
         setProgress(progress, true);
     }
 
+    public void setValue(int progress) {
+        if (mValue != null) mValue.setText(getValue(progress));
+    }
+
+    public void setValue() {
+        setValue(mProgress);
+    }
+
     private void setProgress(int progress, boolean notifyChanged) {
         if (progress > mMax) {
             progress = mMax;
@@ -128,7 +139,7 @@ public class SeekBarPreference extends Preference
             if (notifyChanged) {
                 notifyChanged();
             }
-            setSummary(getSummary());
+            setValue();
         }
     }
 
@@ -157,6 +168,7 @@ public class SeekBarPreference extends Preference
         if (fromUser && !mTrackingTouch) {
             syncProgress(seekBar);
         }
+        setValue(progress);
     }
 
     @Override

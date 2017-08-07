@@ -29,26 +29,24 @@
         <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
         <SwitchPreference android:key="key_sound" android:title="@string/key_sound"/>
         <com.osfans.trime.SeekBarPreference
-            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:layout="@layout/preference_widget_seekbar"
             android:key="key_sound_volume"
             android:title="@string/key_sound_volume"
             android:max="100"
             android:defaultValue="100" />
         <SwitchPreference android:key="key_vibrate" android:title="@string/key_vibrate"/>
         <com.osfans.trime.SeekBarPreference
-            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:layout="@layout/preference_widget_seekbar"
             android:key="key_vibrate_duration"
             android:title="@string/key_vibrate_duration"
-            android:summary="100%"
             android:max="100"
             android:defaultValue="10" />
         <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
         <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
         <com.osfans.trime.SeekBarPreference
-            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:layout="@layout/preference_widget_seekbar"
             android:key="longpress_timeout"
             android:title="@string/longpress_timeout"
-            android:summary="300ms"
             android:max="60"
             android:defaultValue="20" />
     </PreferenceScreen>
