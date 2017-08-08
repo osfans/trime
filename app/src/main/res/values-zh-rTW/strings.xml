@@ -76,6 +76,8 @@
         <item>輸入碼</item>
         <item>無</item>
     </string-array>
+    <string name="soft_cursor">編碼區使用插入符號(^)</string>
+
 <!--
     <string name="pref_function">功能</string>
     <string name="pref_maintenance">維護</string>

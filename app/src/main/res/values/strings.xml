@@ -85,6 +85,8 @@
         <item>Input</item>
         <item>None</item>
     </string-array>
+    <string name="soft_cursor">Use soft cursor(^) in composition</string>
+
 <!--
     <string name="pref_function">Functions</string>
     <string name="pref_maintenance">Maintain</string>

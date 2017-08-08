@@ -515,4 +515,8 @@ public class Config {
   public boolean getShowWindow() {
     return mPref.getBoolean("show_window", true);
   }
+
+  public boolean getSoftCursor() {
+    return mPref.getBoolean("soft_cursor", true);
+  }
 }

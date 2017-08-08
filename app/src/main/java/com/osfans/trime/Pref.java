@@ -131,6 +131,7 @@ public class Pref extends PreferenceActivity
         if (trime!= null) trime.resetCandidate();
         break;
       case "inline_preedit":
+      case "soft_cursor":
         if (trime!= null) trime.loadConfig();
         break;
       case "pref_notification_icon": //通知欄圖標

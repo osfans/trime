@@ -190,11 +190,12 @@ public class Trime extends InputMethodService implements
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     auto_caps = mConfig.getString("auto_caps");
     mShowWindow = mConfig.getShowWindow();
+    mNeedUpdateRimeOption = true;
   }
 
   private boolean updateRimeOption() {
     if (mNeedUpdateRimeOption) {
-      Rime.setOption(soft_cursor_key, mConfig.getBoolean(soft_cursor_key)); //軟光標
+      Rime.setOption(soft_cursor_key, mConfig.getSoftCursor()); //軟光標
       Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
       mNeedUpdateRimeOption = false;
     }

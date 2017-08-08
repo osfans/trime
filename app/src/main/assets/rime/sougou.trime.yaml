@@ -74,7 +74,6 @@ style:
   reset_ascii_mode: false #显示键盘时重置为中文状态
   round_corner: 12 #按键圆角半径
   shadow_radius: 0.0 #按键阴影半径
-  soft_cursor: true #编码区软光标
   speech_opencc_config: none #语音输入简繁转换
   symbol_font: symbol.ttf #符号字体
   symbol_text_size: 10 #符号字号
