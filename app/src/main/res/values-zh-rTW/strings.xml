@@ -59,7 +59,7 @@
     <string name="pref_keyboard">鍵盤</string>
     <string name="key_sound">按鍵聲音</string>
     <string name="key_sound_volume">按鍵音量</string>
-    <string name="key_vibrate">按鍵時震動</string>
+    <string name="key_vibrate">按鍵時振動</string>
     <string name="key_vibrate_duration">按鍵振動強度</string>
     <string name="key_vibrate_duration_unit">毫秒</string>
     <string name="speak_key">按鍵時朗讀字符</string>
@@ -94,7 +94,7 @@
     <string name="themes_progress">正在應用主題…</string>
     <string name="schemas_progress">正在加載方案…</string>
 
-    <string name="set_ime">整體設定</string>
+    <string name="set_ime">設定</string>
     <string name="no_schemas">請在/sdcard/rime中放入essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
 
