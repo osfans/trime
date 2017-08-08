@@ -1165,6 +1165,7 @@ public class KeyboardView extends View implements View.OnClickListener {
               Event e = key.getLongClick();
               mKeyboardActionListener.onEvent(e);
               releaseKey(e.code);
+              resetShifted();
               return true;
             }
             if (key.isShift() && !key.sendBindings(Key.LONG_CLICK)) {
