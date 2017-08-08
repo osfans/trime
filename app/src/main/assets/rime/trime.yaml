@@ -22,7 +22,6 @@ style:
   hanb_font: hanb.ttf #擴充字型
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
-  inline_preedit: preview #嵌入模式：preview|composition|input|none
   layout: #懸浮窗口設置
     position: fixed #位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要>=Android5.0)
     min_length: 5 #最小詞長

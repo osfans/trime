@@ -130,6 +130,9 @@ public class Pref extends PreferenceActivity
       case "show_window":
         if (trime!= null) trime.resetCandidate();
         break;
+      case "inline_preedit":
+        if (trime!= null) trime.loadConfig();
+        break;
       case "pref_notification_icon": //通知欄圖標
         value = prefs.getBoolean(key, false);
         if (trime!= null) {

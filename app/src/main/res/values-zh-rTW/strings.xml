@@ -69,7 +69,13 @@
     <string name="show_switches">在候選欄中顯示狀態</string>
     <string name="show_preview">按鍵時彈出顯示字符</string>
     <string name="show_window">顯示懸浮窗口</string>
-
+    <string name="inline_preedit">嵌入式編輯模式</string>
+    <string-array name="inline_entries">
+        <item>首選</item>
+        <item>編碼</item>
+        <item>輸入碼</item>
+        <item>無</item>
+    </string-array>
 <!--
     <string name="pref_function">功能</string>
     <string name="pref_maintenance">維護</string>

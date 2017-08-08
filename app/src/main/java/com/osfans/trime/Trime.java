@@ -181,7 +181,7 @@ public class Trime extends InputMethodService implements
     }
   }
 
-  private void loadConfig() {
+  public void loadConfig() {
     inlinePreedit = mConfig.getInlinePreedit();
     winPos = mConfig.getWinPos();
     movable = mConfig.getString("layout/movable");

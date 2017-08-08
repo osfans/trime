@@ -465,8 +465,7 @@ public class Config {
   }
 
   public int getInlinePreedit() {
-    if (getString("inline_code").contentEquals("true")) return INLINE_INPUT;
-    switch (getString("inline_preedit")) {
+    switch (mPref.getString("inline_preedit", "preview")) {
         case "preview":
         case "preedit":
         case "true":

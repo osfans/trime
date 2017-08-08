@@ -72,7 +72,19 @@
     <string name="show_switches">Show switches in candidate bar</string>
     <string name="show_preview">Popup on keypress</string>
     <string name="show_window">Show floating window when composing</string>
-
+    <string name="inline_preedit">Composing text in editor</string>
+    <string-array name="inline_values" translatable="false">
+        <item>preview</item>
+        <item>composition</item>
+        <item>input</item>
+        <item>none</item>
+    </string-array>
+    <string-array name="inline_entries">
+        <item>Preview</item>
+        <item>Composition</item>
+        <item>Input</item>
+        <item>None</item>
+    </string-array>
 <!--
     <string name="pref_function">Functions</string>
     <string name="pref_maintenance">Maintain</string>
