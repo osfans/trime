@@ -71,6 +71,7 @@ public class Trime extends InputMethodService implements
   private boolean canCompose;
   private boolean enterAsLineBreak;
   private int inlinePreedit; //嵌入模式
+  private boolean mShowWindow = true; //顯示懸浮窗口
   private WinPos winPos; //候選窗口彈出位置
   private String movable; //候選窗口是否可移動
   private int winX, winY; //候選窗座標
@@ -124,6 +125,7 @@ public class Trime extends InputMethodService implements
 
     public void run() {
       if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
+      if (!mShowWindow) return;
       int x, y;
       if (isWinFixed() || !cursorUpdated) {
         //setCandidatesViewShown(true);
@@ -187,6 +189,7 @@ public class Trime extends InputMethodService implements
     min_length = mConfig.getInt("layout/min_length");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     auto_caps = mConfig.getString("auto_caps");
+    mShowWindow = mConfig.getShowWindow();
   }
 
   private boolean updateRimeOption() {
@@ -304,6 +307,17 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  public void resetCandidate() {
+    if (mCandidateContainer != null) {
+      loadBackground();
+      mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
+      mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
+      mCandidate.reset();
+      mShowWindow = mConfig.getShowWindow();
+      mComposition.setVisibility(mShowWindow ? View.VISIBLE : View.GONE);
+    }
+  }
+
   /**
    * 重置鍵盤、候選條、狀態欄等
    * !!注意，如果其中調用Rime.setOption，切換方案會卡住
@@ -312,13 +326,7 @@ public class Trime extends InputMethodService implements
     mConfig.reset();
     loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
-    if (mCandidateContainer != null) {
-      loadBackground();
-      mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
-      mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
-      mCandidate.reset();
-      mComposition.reset();
-    }
+    resetCandidate();
     hideComposition();
     resetKeyboard();
     resetEffect();
@@ -992,9 +1000,13 @@ public class Trime extends InputMethodService implements
     }
     if (ic != null && !isWinFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
-      int start_num = mComposition.setWindow(min_length);
-      mCandidate.setText(start_num);
-      if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
+      if (mShowWindow) {
+        int start_num = mComposition.setWindow(min_length);
+        mCandidate.setText(start_num);
+        if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
+      } else {
+        mCandidate.setText(0);
+      }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateComposingKeys();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤打字時顯示候選欄

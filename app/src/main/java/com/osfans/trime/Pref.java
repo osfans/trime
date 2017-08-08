@@ -124,7 +124,11 @@ public class Pref extends PreferenceActivity
         break;
       case "longpress_timeout":
       case "repeat_interval":
+      case "show_preview":
         if (trime!= null) trime.resetKeyboard();
+        break;
+      case "show_window":
+        if (trime!= null) trime.resetCandidate();
         break;
       case "pref_notification_icon": //通知欄圖標
         value = prefs.getBoolean(key, false);

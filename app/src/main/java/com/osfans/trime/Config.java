@@ -508,4 +508,12 @@ public class Config {
   public boolean getShowSwitches() {
     return mPref.getBoolean("show_switches", true);
   }
+
+  public boolean getShowPreview() {
+    return mPref.getBoolean("show_preview", false);
+  }
+
+  public boolean getShowWindow() {
+    return mPref.getBoolean("show_window", true);
+  }
 }

@@ -224,8 +224,6 @@ public class Composition extends TextView {
     margin_x = config.getPixel("layout/margin_x");
     margin_y = config.getPixel("layout/margin_y");
     setPadding(margin_x, margin_y, margin_x, margin_y);
-    boolean show = config.getBoolean("show_window");
-    setVisibility(show ? View.VISIBLE : View.GONE);
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
     movable = config.getString("layout/movable");

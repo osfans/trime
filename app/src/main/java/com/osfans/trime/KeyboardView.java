@@ -334,7 +334,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         mPreviewTextSizeLarge = config.getInt("preview_text_size");
         mPreviewText.setTextSize(mPreviewTextSizeLarge);
-        mShowPreview = config.getBoolean("show_preview");
+        mShowPreview = config.getShowPreview();
 
         mPaint.setTypeface(config.getFont("key_font"));
         mPaintSymbol.setTypeface(config.getFont("symbol_font"));

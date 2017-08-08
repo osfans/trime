@@ -68,8 +68,6 @@ style:
   reset_ascii_mode: false #顯示鍵盤時重置爲中文狀態
   round_corner: 8 #按鍵圓角半徑
   shadow_radius: 0.0 #按鍵陰影半徑
-  show_preview: false #按鍵提示
-  show_window: true #顯示浮動窗口
   soft_cursor: true #編碼區軟游標
   speech_opencc_config: s2t.json #語音輸入簡繁轉換
   symbol_font: symbol.ttf #符號字型
