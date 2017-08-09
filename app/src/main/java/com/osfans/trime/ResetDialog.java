@@ -17,12 +17,9 @@
 package com.osfans.trime;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Context;
-import android.util.Log;
+import android.content.DialogInterface;
 import android.widget.Toast;
-
-import java.util.Arrays;
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
 public class ResetDialog {

@@ -17,24 +17,16 @@
 package com.osfans.trime;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.graphics.Typeface;
-
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.LinearLayout;
-import android.util.Log;
-import android.util.TypedValue;
-
-import java.io.File;
-import java.util.Map;
 
 /** 顯示候選字詞 */
 public class Candidate extends View {

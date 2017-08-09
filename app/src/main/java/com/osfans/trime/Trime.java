@@ -16,37 +16,36 @@
 
 package com.osfans.trime;
 
-import android.content.res.Configuration;
-import android.content.ContentValues;
-import android.content.DialogInterface;
-import android.inputmethodservice.InputMethodService;
-import android.text.InputType;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.*;
-import android.view.Window;
-import android.view.WindowManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.view.Gravity;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.PopupWindow;
-import android.widget.LinearLayout;
-import android.view.LayoutInflater;
-import android.widget.FrameLayout;
-import android.os.Build.VERSION_CODES;
-import android.os.Build.VERSION;
-import android.os.IBinder;
+import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.RectF;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.inputmethodservice.InputMethodService;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.os.Handler;
+import android.os.IBinder;
+import android.text.InputType;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 
-import java.util.logging.Logger;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService implements 

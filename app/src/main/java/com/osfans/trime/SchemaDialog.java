@@ -16,26 +16,20 @@
 
 package com.osfans.trime;
 
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.view.Window;
+import android.view.WindowManager;
 
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /** 顯示輸入法方案列表 */
 public class SchemaDialog extends AsyncTask{

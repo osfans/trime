@@ -16,16 +16,16 @@
 
 package com.osfans.trime;
 
-import java.util.ArrayList;
-
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /** {@link RecognitionListener 語音輸入} */
 public class Speech implements RecognitionListener {

@@ -16,27 +16,16 @@
 
 package com.osfans.trime;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
-import android.util.Log;
-import android.util.TypedValue;
-import android.util.Xml;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.StringTokenizer;
 
 /** 從YAML中加載鍵盤配置，包含多個{@link Key 按鍵}。 */
 public class Keyboard {

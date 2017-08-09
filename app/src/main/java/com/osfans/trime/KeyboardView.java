@@ -16,33 +16,21 @@
 
 package com.osfans.trime;
 
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
-import android.util.Log;
-import android.view.KeyEvent;
-
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.graphics.Paint.Align;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
-
-//import android.inputmethodservice.Keyboard.Key;
-//import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
-//import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -50,21 +38,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
-//import android.view.accessibility.AccessibilityEvent;
-//import android.view.accessibility.AccessibilityManager;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import android.os.Build.VERSION_CODES;
-import android.os.Build.VERSION;
-
-//import com.android.internal.R;
-
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.reflect.Method;
 
 /** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
 public class KeyboardView extends View implements View.OnClickListener {

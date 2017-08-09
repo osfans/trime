@@ -18,18 +18,11 @@ package com.osfans.trime;
 
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-
-import android.view.KeyEvent;
 import android.view.KeyCharacterMap;
-import android.util.Log;
-import android.os.Build;
+import android.view.KeyEvent;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 /** {@link Keyboard 鍵盤}中的各個按鍵，包含單擊、長按、滑動等多種{@link Event 事件} */
 public class Key {

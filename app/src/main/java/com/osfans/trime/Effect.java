@@ -18,11 +18,10 @@ package com.osfans.trime;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import android.media.AudioManager;
 import android.os.Vibrator;
-import android.view.KeyEvent;
 import android.speech.tts.TextToSpeech;
+import android.view.KeyEvent;
 
 import java.util.Locale;
 

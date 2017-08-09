@@ -16,35 +16,26 @@
 
 package com.osfans.trime;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.ListPreference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
-import android.preference.SwitchPreference;
-import android.content.SharedPreferences;
-
+import android.provider.Settings;
 import android.view.View;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.util.Log;
-import android.content.Intent;
-import android.provider.Settings;
-import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodInfo;
-import android.Manifest;
-import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.os.Build.VERSION_CODES;
-import android.os.Build.VERSION;
-import android.annotation.TargetApi;
 
 /** 配置輸入法 */
 public class Pref extends PreferenceActivity

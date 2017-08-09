@@ -15,14 +15,14 @@
  */
 
 package com.osfans.trime;
-import java.util.logging.Logger;
-import java.util.List;
+
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /** Rime與OpenCC的Java實現
  * @see <a href="https://github.com/rime/librime">Rime</a>

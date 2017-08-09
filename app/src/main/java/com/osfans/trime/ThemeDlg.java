@@ -17,12 +17,11 @@
 package com.osfans.trime;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.util.Log;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.app.ProgressDialog;
 import android.view.Window;
 import android.view.WindowManager;
 

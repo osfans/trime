@@ -17,9 +17,8 @@
 package com.osfans.trime;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Context;
-import android.util.Log;
+import android.content.DialogInterface;
 
 import java.util.Arrays;
 

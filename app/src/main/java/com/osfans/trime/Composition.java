@@ -16,31 +16,28 @@
 
 package com.osfans.trime;
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.MotionEvent;
-import android.view.KeyEvent;
-import android.widget.TextView;
-import android.widget.TextView.BufferType;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.Typeface;
-
-import android.util.Log;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spannable;
-import android.text.style.*;
-import android.text.Layout;
-import android.text.TextPaint;
 import android.annotation.TargetApi;
-import android.os.Parcel;
-import android.text.method.LinkMovementMethod;
-import android.os.Build.VERSION_CODES;
+import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.text.Layout;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.AlignmentSpan;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.TextView;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
 public class Composition extends TextView {

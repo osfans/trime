@@ -16,26 +16,25 @@
 
 package com.osfans.trime;
 
+import android.annotation.TargetApi;
+import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ComponentName;
-import android.util.SparseArray;
-import android.view.KeyEvent;
-import android.os.Build;
-import android.annotation.TargetApi;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
-import android.app.SearchManager;
 import android.net.Uri;
+import android.os.Build;
+import android.preference.PreferenceManager;
+import android.util.SparseArray;
+import android.view.KeyEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.List;
-import java.lang.Exception;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {

@@ -16,9 +16,9 @@
 
 package com.osfans.trime;
 
-import java.util.List;
-
 import android.content.Context;
+
+import java.util.List;
 
 /** 管理多個{@link Keyboard 鍵盤} */
 public class KeyboardSwitch {
