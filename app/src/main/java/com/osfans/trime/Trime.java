@@ -33,6 +33,7 @@ import android.app.Dialog;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.Gravity;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.LinearLayout;
@@ -417,7 +418,7 @@ public class Trime extends InputMethodService implements
   @Override
   public View onCreateInputView() {
     mKeyboardView = (KeyboardView) getLayoutInflater().inflate(
-        R.layout.input, null);
+        R.layout.input, (ViewGroup)null);
     mKeyboardView.setOnKeyboardActionListener(this);
     mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
     return mKeyboardView;
@@ -427,7 +428,7 @@ public class Trime extends InputMethodService implements
   public View onCreateCandidatesView() {
     LayoutInflater inflater = getLayoutInflater();
     mCompositionContainer = (LinearLayout) inflater.inflate(
-            R.layout.composition_container, null);
+            R.layout.composition_container, (ViewGroup)null);
     hideComposition();
     mFloatingWindow = new PopupWindow(this);
     mFloatingWindow.setClippingEnabled(false);
@@ -435,7 +436,7 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setContentView(mCompositionContainer);
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
-    mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
+    mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, (ViewGroup)null);
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
     mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
