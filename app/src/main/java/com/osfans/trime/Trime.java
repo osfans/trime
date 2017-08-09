@@ -35,6 +35,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
@@ -418,7 +419,7 @@ public class Trime extends InputMethodService implements
   @Override
   public View onCreateInputView() {
     mKeyboardView = (KeyboardView) getLayoutInflater().inflate(
-        R.layout.input, null);
+        R.layout.input, (ViewGroup)null);
     mKeyboardView.setOnKeyboardActionListener(this);
     mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
     return mKeyboardView;
@@ -428,7 +429,7 @@ public class Trime extends InputMethodService implements
   public View onCreateCandidatesView() {
     LayoutInflater inflater = getLayoutInflater();
     mCompositionContainer = (LinearLayout) inflater.inflate(
-            R.layout.composition_container, null);
+            R.layout.composition_container, (ViewGroup)null);
     hideComposition();
     mFloatingWindow = new PopupWindow(this);
     mFloatingWindow.setClippingEnabled(false);
@@ -436,7 +437,7 @@ public class Trime extends InputMethodService implements
     mFloatingWindow.setContentView(mCompositionContainer);
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
-    mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, null);
+    mCandidateContainer = (FrameLayout) inflater.inflate(R.layout.candidate_container, (ViewGroup)null);
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
     mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
@@ -653,6 +654,7 @@ public class Trime extends InputMethodService implements
 
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
+    if (keyCode == KeyEvent.KEYCODE_MENU) return false; //不處理Menu鍵
     if (keyCode >= Key.symbolStart) return false; //只處理安卓標準按鍵
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)){
       boolean ret = onRimeKey(Event.getRimeEvent(keyCode, event.getAction() == KeyEvent.ACTION_DOWN ? 0 : Rime.META_RELEASE_ON));
@@ -704,8 +706,6 @@ public class Trime extends InputMethodService implements
             && event.isCtrlPressed()
             && event.getRepeatCount() == 0
             && !KeyEvent.isModifierKey(keyCode)) {
-      if (KeyEvent.KEYCODE_SPACE == keyCode)
-        return handleOption(KeyEvent.KEYCODE_MENU); //切換輸入法
       if (handleAciton(keyCode, event.getMetaState())) return true;
     }
 

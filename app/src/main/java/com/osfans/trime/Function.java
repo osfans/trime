@@ -26,12 +26,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.icu.util.Calendar;
+import android.icu.util.ULocale;
 import android.net.Uri;
-import android.os.Build;
+import android.os.Build.*;
 import android.preference.PreferenceManager;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 
+import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -58,7 +61,7 @@ public class Function {
             210, "android.intent.category.APP_CALCULATOR");
   }
 
-  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+  @TargetApi(VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
   public static boolean openCategory(Context context, int keyCode) {
     String category = sApplicationLaunchKeyCategories.get(keyCode);
     if (category != null) {
@@ -125,12 +128,41 @@ public class Function {
     context.startActivity(intent);
   }
 
+  private static String getDate(String option) {
+    String s = "";
+    String locale = "";
+    if (option.contains("@")) {
+      String[] ss = option.split(" ", 2);
+      if (ss.length == 2 && ss[0].contains("@")) {
+        locale = ss[0];
+        option = ss[1];
+      } else if (ss.length == 1){
+        locale = ss[0];
+        option = "";
+      }
+    }
+    if (VERSION.SDK_INT >= VERSION_CODES.N && !isEmpty(locale)) {
+      ULocale ul = new ULocale(locale);
+      Calendar cc = Calendar.getInstance(ul);
+      android.icu.text.DateFormat df;
+      if (isEmpty(option)) {
+        df = android.icu.text.DateFormat.getDateInstance(android.icu.text.DateFormat.LONG, ul);
+      } else {
+        df = new android.icu.text.SimpleDateFormat(option, ul);
+      }
+      s = df.format(cc, new StringBuffer(256), new FieldPosition(0)).toString();
+    } else {
+      s = new SimpleDateFormat(option, Locale.getDefault()).format(new Date()); //時間
+    }
+    return s;
+  }
+
   public static String handle(Context context, String command, String option) {
     String s = null;
     if (command == null) return s;
     switch (command) {
       case "date":
-        s = new SimpleDateFormat(option, Locale.getDefault()).format(new Date()); //時間
+        s = getDate(option);
         break;
       case "run":
         startIntent(context, option); //啓動程序

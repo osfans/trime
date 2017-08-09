@@ -259,7 +259,6 @@ public class SeekBarPreference extends Preference
             super(superState);
         }
 
-        @SuppressWarnings("unused")
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {

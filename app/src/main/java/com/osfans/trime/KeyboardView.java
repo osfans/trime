@@ -39,10 +39,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -243,28 +244,37 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     Method getStateDrawableIndex, getStateDrawable;
 
-    Handler mHandler = new Handler() {
+    private static class MyHandler extends Handler {
+        private final WeakReference<KeyboardView> mKeyboardView;
+
+        public MyHandler(KeyboardView view) {
+          mKeyboardView = new WeakReference<KeyboardView>(view);
+        }
+
         @Override
         public void handleMessage(Message msg) {
+            KeyboardView view = mKeyboardView.get();
             switch (msg.what) {
                 case MSG_SHOW_PREVIEW:
-                    showKey(msg.arg1, msg.arg2);
+                    view.showKey(msg.arg1, msg.arg2);
                     break;
                 case MSG_REMOVE_PREVIEW:
-                    mPreviewText.setVisibility(INVISIBLE);
+                    view.mPreviewText.setVisibility(INVISIBLE);
                     break;
                 case MSG_REPEAT:
-                    if (repeatKey()) {
+                    if (view.repeatKey()) {
                         Message repeat = Message.obtain(this, MSG_REPEAT);
                         sendMessageDelayed(repeat, REPEAT_INTERVAL);
                     }
                     break;
                 case MSG_LONGPRESS:
-                    openPopupIfRequired((MotionEvent) msg.obj);
+                    view.openPopupIfRequired((MotionEvent) msg.obj);
                     break;
             }
         }
-    };
+    }
+
+    private final MyHandler mHandler = new MyHandler(this);
 
     public void setShowHint(boolean value) {
         mShowHint = value;
@@ -344,7 +354,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         LayoutInflater inflate =
                 (LayoutInflater) context
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mPreviewText = (TextView) inflate.inflate(R.layout.keyboard_key_preview, null);
+        mPreviewText = (TextView) inflate.inflate(R.layout.keyboard_key_preview, (ViewGroup)null);
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setTextAlign(Align.CENTER);
@@ -942,7 +952,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         int popupWidth = Math.max(mPreviewText.getMeasuredWidth(), key.width 
                 + mPreviewText.getPaddingLeft() + mPreviewText.getPaddingRight());
         final int popupHeight = mPreviewHeight;
-        LayoutParams lp = mPreviewText.getLayoutParams();
+        ViewGroup.LayoutParams lp = mPreviewText.getLayoutParams();
         if (lp != null) {
             lp.width = popupWidth;
             lp.height = popupHeight;

@@ -814,6 +814,7 @@ preset_keys:
   Hint_switch: {toggle: _hide_key_hint, send: Mode_switch, states: [ 有助記, 無助記]}
   # trime命令
   Date: {label: 日期, send: function, command: date, option: "yyyy-MM-dd"}
+  ChineseDate: {label: 農曆, send: function, command: date, option: "zh_CN@calendar=chinese"} #農曆等日期(>=Android 7.0)：date 語言@calendar=曆法 格式。具體參見https://developer.android.com/reference/android/icu/util/Calendar.html
   Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"} #時間： date 格式
   TrimeApp: {label: 同文, send: function, command: run, option: "com.osfans.trime"} #運行程序: run 包名
   TrimeCmp: {label: 同文組件, send: function, command: run, option: "com.osfans.trime/.Pref"} #運行程序指定組件: run 包名/組件名

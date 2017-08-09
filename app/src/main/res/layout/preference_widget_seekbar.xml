@@ -30,7 +30,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_gravity="center"
-        android:singleLine="true" />
+        android:maxLines="1" />
 
     <SeekBar
         android:id="@+id/seekbar"
