@@ -236,7 +236,7 @@ public class Composition extends TextView {
   private Object getAlign(Map m) {
     Layout.Alignment i = Layout.Alignment.ALIGN_NORMAL;
     if (m.containsKey("align")) {
-      String align = Function.getString(m, "align");
+      String align = Config.getString(m, "align");
       switch (align) {
         case "left":
         case "normal":
@@ -258,7 +258,7 @@ public class Composition extends TextView {
     Rime.RimeComposition r = Rime.getComposition();
     String s = r.getText();
     int start, end;
-    String sep = Function.getString(m, "start");
+    String sep = Config.getString(m, "start");
     if (!Function.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -274,18 +274,14 @@ public class Composition extends TextView {
     ss.setSpan(new CompositionSpan(), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && m.containsKey("letter_spacing")) {
-      Object o = m.get("letter_spacing");
-      double size = 1d;
-      if (o instanceof Integer) size = ((Integer)o).doubleValue();
-      else if (o instanceof Float) size = ((Float)o).doubleValue();
-      else if (o instanceof Double) size = ((Double)o).doubleValue();
-      ss.setSpan(new LetterSpacingSpan((float)size), start, end, span);
+      Float size = Config.getFloat(m, "letter_spacing");
+      if (size != null && size != 0f) ss.setSpan(new LetterSpacingSpan(size), start, end, span);
     }
     start = composition_pos[0] + r.getStart();
     end = composition_pos[0] + r.getEnd();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
-    sep = Function.getString(m, "end");
+    sep = Config.getString(m, "end");
     if (!Function.isEmpty(sep))ss.append(sep);
   }
 
@@ -294,12 +290,12 @@ public class Composition extends TextView {
     int start_num = 0;
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
     if (candidates == null) return start_num;
-    String sep = Function.getString(m, "start");
+    String sep = Config.getString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
-    String label_format = Function.getString(m, "label");
-    String candidate_format = Function.getString(m, "candidate");
-    String comment_format = Function.getString(m, "comment");
-    String line = Function.getString(m, "sep");
+    String label_format = Config.getString(m, "label");
+    String candidate_format = Config.getString(m, "candidate");
+    String comment_format = Config.getString(m, "comment");
+    String line = Config.getString(m, "sep");
     int last_cand_length = 0;
     int line_length = 0;
     String[] labels = Rime.getSelectLabels();
@@ -364,24 +360,24 @@ public class Composition extends TextView {
       candidate_num++;
     }
     if (start_num == 0 && candidate_num == i + 1) start_num = candidate_num;
-    sep = Function.getString(m, "end");
+    sep = Config.getString(m, "end");
     if (!Function.isEmpty(sep)) ss.append(sep);
     return start_num;
   }
 
   private void appendButton(Map m) {
     if (m.containsKey("when")) {
-      String when = Function.getString(m, "when");
+      String when = Config.getString(m, "when");
       if (when.contentEquals("paging") && !Rime.isPaging()) return;
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     String label;
-    Event e = new Event(null, Function.getString(m, "click"));
-    if (m.containsKey("label")) label = Function.getString(m, "label");
+    Event e = new Event(null, Config.getString(m, "click"));
+    if (m.containsKey("label")) label = Config.getString(m, "label");
     else label = e.getLabel();
     int start, end;
     String sep = null;
-    if (m.containsKey("start")) sep = Function.getString(m, "start");
+    if (m.containsKey("start")) sep = Config.getString(m, "start");
     if (!Function.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -394,14 +390,14 @@ public class Composition extends TextView {
     ss.setSpan(getAlign(m), start, end, span);
     ss.setSpan(new EventSpan(e), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
-    sep = Function.getString(m, "end");
+    sep = Config.getString(m, "end");
     if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
   private void appendMove(Map m) {
-    String s = Function.getString(m, "move");
+    String s = Config.getString(m, "move");
     int start, end;
-    String sep = Function.getString(m, "start");
+    String sep = Config.getString(m, "start");
     if (!Function.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -416,7 +412,7 @@ public class Composition extends TextView {
     move_pos[1] = end;
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
-    sep = Function.getString(m, "end");
+    sep = Config.getString(m, "end");
     if (!Function.isEmpty(sep))ss.append(sep);
   }
 

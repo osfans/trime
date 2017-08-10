@@ -323,6 +323,86 @@ public class Config {
     self = null;
   }
 
+  public static int getPixel(Float f) {
+    if (f == null) return 0;
+    return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, f, Resources.getSystem().getDisplayMetrics());
+  }
+
+  public int getPixel(String key) {
+    return getPixel(getFloat(key));
+  }
+
+  public static Integer getPixel(Map m, String k, Object defaultValue) {
+    Object o = getValue(m, k, defaultValue);
+    if (o instanceof Integer) return getPixel(((Integer)o).floatValue());
+    if (o instanceof Float) return getPixel((Float)o);
+    if (o instanceof Double) return getPixel(((Double)o).floatValue());
+    return null;
+  }
+
+  public static Integer getPixel(Map m, String k) {
+    return getPixel(m, k, null);
+  }
+
+  public static Integer getColor(Map m, String k){
+    Integer color = null;
+    if (m.containsKey(k)) {
+      Object o = m.get(k);
+      if (o instanceof Integer) color = (Integer) o;
+      else {
+        color =  get().getCurrentColor(o.toString());
+      }
+    }
+    return color;
+  }
+
+  public static Drawable getColorDrawable(Map m, String k){
+    Integer color = null;
+    if (m.containsKey(k)) {
+      Object o = m.get(k);
+      if (o instanceof Integer) {
+        color = (Integer) o;
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(color);
+        return gd;
+      } else if (o instanceof String){
+        Config config = get();
+        Drawable d = config.getCurrentColorDrawable(o.toString());
+        if (d == null) d = config.drawableObject(o);
+        return d;
+      }
+    }
+    return null;
+  }
+
+  public static Object getValue(Map m, String k, Object o) {
+    return m.containsKey(k) ? m.get(k) : o;
+  }
+
+  public static Float getFloat(Map m, String k) {
+    Object o = getValue(m, k, null);
+    if (o instanceof Integer) return ((Integer)o).floatValue();
+    if (o instanceof Float) return ((Float)o);
+    if (o instanceof Double) return ((Double)o).floatValue();
+    return null;
+  }
+
+  public static double getDouble(Map m, String k, Object i) {
+    Object o = getValue(m, k, i);
+    if (o instanceof Integer) return ((Integer)o).doubleValue();
+    else if (o instanceof Float) return ((Float)o).doubleValue();
+    else if (o instanceof Double) return ((Double)o).doubleValue();
+    return 0f;
+  }
+
+  public static String getString(Map m, String k) {
+    if (m.containsKey(k)) {
+      Object o = m.get(k);
+      if (o != null) return o.toString();
+    }
+    return "";
+  }
+
   public boolean getBoolean(String key) {
     Object o = getValue(key);
     return o == null ? true : (Boolean)o;
@@ -343,14 +423,6 @@ public class Config {
 
   public int getInt(String key) {
     return (int)getDouble(key);
-  }
-
-  public static int getPixel(float f) {
-    return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, f, Resources.getSystem().getDisplayMetrics());
-  }
-
-  public int getPixel(String key) {
-    return getPixel(getFloat(key));
   }
 
   public String getString(String key) {

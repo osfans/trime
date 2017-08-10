@@ -82,82 +82,38 @@ public class Key {
     String s;
     for (int i = 0; i < EVENT_NUM; i++) {
       String eventType = eventTypes[i];
-      s = Function.getString(mk, eventType);
+      s = Config.getString(mk, eventType);
       if (s.length() > 0) events[i] = new Event(mKeyboard, s);
     }
-    s = Function.getString(mk, "composing");
+    s = Config.getString(mk, "composing");
     if (s.length() > 0) {
       composing = new Event(mKeyboard, s);
     }
-    s = Function.getString(mk, "has_menu");
+    s = Config.getString(mk, "has_menu");
     if (s.length() > 0) {
       has_menu = new Event(mKeyboard, s);
     }
-    s = Function.getString(mk, "paging");
+    s = Config.getString(mk, "paging");
     if (s.length() > 0) {
       paging = new Event(mKeyboard, s);
     }
     if (composing != null || has_menu != null || paging != null) mKeyboard.mComposingKeys.add(this);
-    s = Function.getString(mk, "ascii");
+    s = Config.getString(mk, "ascii");
     if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
-    label = Function.getString(mk, "label");
-    hint = Function.getString(mk, "hint");
+    label = Config.getString(mk, "label");
+    hint = Config.getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean)mk.get("send_bindings");
     else if(composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.mShiftKey = this;
-    key_text_size = getPixel(mk, "key_text_size");
-    symbol_text_size = getPixel(mk, "symbol_text_size");
-    key_text_color = getColor(mk, "key_text_color");
-    hilited_key_text_color = getColor(mk, "hilited_key_text_color");
-    key_back_color = getColorDrawable(mk, "key_back_color");
-    hilited_key_back_color = getColorDrawable(mk, "hilited_key_back_color");
-    key_symbol_color = getColor(mk, "key_symbol_color");
-    hilited_key_symbol_color = getColor(mk, "hilited_key_symbol_color");
-    round_corner = getFloat(mk, "round_corner");
-  }
-
-  public static Integer getPixel(Map<String,Object> mk, String k) {
-    Object o = getValue(mk, k, null);
-    if (o instanceof Integer) return Config.getPixel(((Integer)o).floatValue());
-    return null;
-  }
-
-  public static Integer getPixel(Map<String,Object> mk, String k, int defaultValue) {
-    Object o = getValue(mk, k, defaultValue);
-    if (o instanceof Integer) return Config.getPixel(((Integer)o).floatValue());
-    return defaultValue;
-  }
-
-  private Integer getColor(Map<String,Object> mk, String k){
-    Config config = Config.get();
-    Integer color = null;
-    if (mk.containsKey(k)) {
-      Object o = mk.get(k);
-      if (o instanceof Integer) color = (Integer) o;
-      else {
-        color = config.getCurrentColor(o.toString());
-      }
-    }
-    return color;
-  }
-
-  public static Drawable getColorDrawable(Map<String,Object> mk, String k){
-    Config config = Config.get();
-    Integer color = null;
-    if (mk.containsKey(k)) {
-      Object o = mk.get(k);
-      if (o instanceof Integer) {
-        color = (Integer) o;
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(color);
-        return gd;
-      } else if (o instanceof String){
-        Drawable d = config.getCurrentColorDrawable(o.toString());
-        if (d == null) d = config.drawableObject(o);
-        return d;
-      }
-    }
-    return null;
+    key_text_size = Config.getPixel(mk, "key_text_size");
+    symbol_text_size = Config.getPixel(mk, "symbol_text_size");
+    key_text_color = Config.getColor(mk, "key_text_color");
+    hilited_key_text_color = Config.getColor(mk, "hilited_key_text_color");
+    key_back_color = Config.getColorDrawable(mk, "key_back_color");
+    hilited_key_back_color = Config.getColorDrawable(mk, "hilited_key_back_color");
+    key_symbol_color = Config.getColor(mk, "key_symbol_color");
+    hilited_key_symbol_color = Config.getColor(mk, "hilited_key_symbol_color");
+    round_corner = Config.getFloat(mk, "round_corner");
   }
 
   public final static int[] KEY_STATE_NORMAL_ON = { 
@@ -328,26 +284,6 @@ public class Key {
       if (composing != null && Rime.isComposing()) return true;
     }
     return false;
-  }
-
-  public static Object getValue(Map m, String k, Object o) {
-    return m.containsKey(k) ? m.get(k) : o;
-  }
-
-  public static Float getFloat(Map m, String k) {
-    Object o = getValue(m, k, null);
-    if (o instanceof Integer) return ((Integer)o).floatValue();
-    else if (o instanceof Float) return ((Float)o);
-    else if (o instanceof Double) return ((Double)o).floatValue();
-    return null;
-  }
-
-  public static double getDouble(Map m, String k, Object i) {
-    Object o = getValue(m, k, i);
-    if (o instanceof Integer) return ((Integer)o).doubleValue();
-    else if (o instanceof Float) return ((Float)o).doubleValue();
-    else if (o instanceof Double) return ((Double)o).doubleValue();
-    return 0f;
   }
 
   public Event getEvent() {

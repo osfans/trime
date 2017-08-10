@@ -39,23 +39,23 @@ public class Event {
     mKeyboard = keyboard;
     if (Key.presetKeys.containsKey(s)) {
       Map m = Key.presetKeys.get(s);
-      command = Function.getString(m, "command");
-      option = Function.getString(m, "option");
-      select = Function.getString(m, "select");
-      toggle = Function.getString(m, "toggle");
-      label = Function.getString(m, "label");
-      preview = Function.getString(m, "preview");
-      shift_lock = Function.getString(m, "shift_lock");
-      int[] sends = parseSend(Function.getString(m, "send"));
+      command = Config.getString(m, "command");
+      option = Config.getString(m, "option");
+      select = Config.getString(m, "select");
+      toggle = Config.getString(m, "toggle");
+      label = Config.getString(m, "label");
+      preview = Config.getString(m, "preview");
+      shift_lock = Config.getString(m, "shift_lock");
+      int[] sends = parseSend(Config.getString(m, "send"));
       code = sends[0];
       mask = sends[1];
       parseLabel();
-      text = Function.getString(m, "text");
+      text = Config.getString(m, "text");
       if (code == 0 && Function.isEmpty(text)) text = s;
       if (m.containsKey("states")) states = (List<String>)m.get("states");
-      sticky = (Boolean)Key.getValue(m, "sticky", false);
-      repeatable = (Boolean)Key.getValue(m, "repeatable", false);
-      functional = (Boolean)Key.getValue(m, "functional", true);
+      sticky = (Boolean)Config.getValue(m, "sticky", false);
+      repeatable = (Boolean)Config.getValue(m, "repeatable", false);
+      functional = (Boolean)Config.getValue(m, "functional", true);
     } else if ((code = getClickCode(s)) > 0) {
       parseLabel();
     } else {

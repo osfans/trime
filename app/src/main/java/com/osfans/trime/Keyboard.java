@@ -331,22 +331,21 @@ public class Keyboard {
   public Keyboard(Context context, String name) {
     this(context);
     Map<String,Object> m = Config.get().getKeyboard(name);
-    mLabelTransform = (String)Key.getValue(m, "label_transform", "none");
-    mAsciiMode = (Integer)Key.getValue(m, "ascii_mode", 1);
-    int columns = (Integer)Key.getValue(m, "columns", 20);
-    int defaultWidth = (int)(Key.getDouble(m, "width", 0) * mDisplayWidth / 100);
+    mLabelTransform = (String)Config.getValue(m, "label_transform", "none");
+    mAsciiMode = (Integer)Config.getValue(m, "ascii_mode", 1);
+    int columns = (Integer)Config.getValue(m, "columns", 20);
+    int defaultWidth = (int)(Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
-    double height = Key.getDouble(m, "height", 0);
-    int defaultHeight = mDefaultHeight;
-    if (height > 0) defaultHeight = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, (float)height, Resources.getSystem().getDisplayMetrics());
+    int height = Config.getPixel(m, "height", 0);
+    int defaultHeight = (height > 0) ? height : mDefaultHeight;
     int rowHeight = defaultHeight;
     List<Map<String,Object>> lm = (List<Map<String,Object>>)m.get("keys");
 
-    if (m.containsKey("horizontal_gap")) mDefaultHorizontalGap = Key.getPixel(m, "horizontal_gap");
-    if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Key.getPixel(m, "vertical_gap");
-    if (m.containsKey("round_corner")) mRoundCorner = Key.getFloat(m, "round_corner");
+    if (m.containsKey("horizontal_gap")) mDefaultHorizontalGap = Config.getPixel(m, "horizontal_gap");
+    if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Config.getPixel(m, "vertical_gap");
+    if (m.containsKey("round_corner")) mRoundCorner = Config.getFloat(m, "round_corner");
     if (m.containsKey("keyboard_back_color")) {
-      Drawable background = Key.getColorDrawable(m, "keyboard_back_color");
+      Drawable background = Config.getColorDrawable(m, "keyboard_back_color");
       if (background != null) mBackground = background;
     }
     int x = mDefaultHorizontalGap/2;
@@ -355,17 +354,17 @@ public class Keyboard {
     int column = 0;
     mTotalWidth = 0;
     int key_text_offset_x, key_text_offset_y, key_symbol_offset_x, key_symbol_offset_y, key_hint_offset_x, key_hint_offset_y;
-    key_text_offset_x = Key.getPixel(m, "key_text_offset_x", 0);
-    key_text_offset_y = Key.getPixel(m, "key_text_offset_y", 0);
-    key_symbol_offset_x = Key.getPixel(m, "key_symbol_offset_x", 0);
-    key_symbol_offset_y = Key.getPixel(m, "key_symbol_offset_y", 0);
-    key_hint_offset_x = Key.getPixel(m, "key_hint_offset_x", 0);
-    key_hint_offset_y = Key.getPixel(m, "key_hint_offset_y", 0);
+    key_text_offset_x = Config.getPixel(m, "key_text_offset_x", 0);
+    key_text_offset_y = Config.getPixel(m, "key_text_offset_y", 0);
+    key_symbol_offset_x = Config.getPixel(m, "key_symbol_offset_x", 0);
+    key_symbol_offset_y = Config.getPixel(m, "key_symbol_offset_y", 0);
+    key_hint_offset_x = Config.getPixel(m, "key_hint_offset_x", 0);
+    key_hint_offset_y = Config.getPixel(m, "key_hint_offset_y", 0);
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String,Object> mk: lm) {
       int gap = mDefaultHorizontalGap;
-      int w = (int)(Key.getDouble(mk, "width", 0) * mDisplayWidth / 100);
+      int w = (int)(Config.getDouble(mk, "width", 0) * mDisplayWidth / 100);
       if (w == 0 && mk.containsKey("click")) w = defaultWidth;
       w -= gap;
       if (column >= maxColumns || x + w > mDisplayWidth) {
@@ -376,12 +375,8 @@ public class Keyboard {
         if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
       }
       if (column == 0) {
-        double heightK = Key.getDouble(mk, "height", 0);
-        if (heightK > 0) {
-          rowHeight = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, (float)heightK, Resources.getSystem().getDisplayMetrics());
-        } else {
-          rowHeight = defaultHeight;
-        }
+        int heightK = Config.getPixel(mk, "height", 0);
+        rowHeight = (heightK > 0) ? heightK : defaultHeight;
       }
       if (!mk.containsKey("click")){ //無按鍵事件
         x += w + gap;
@@ -389,12 +384,12 @@ public class Keyboard {
       }
 
       final Key key = new Key(this, mk);
-      key.key_text_offset_x = Key.getPixel(mk, "key_text_offset_x", key_text_offset_x);
-      key.key_text_offset_y = Key.getPixel(mk, "key_text_offset_y", key_text_offset_y);
-      key.key_symbol_offset_x = Key.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x);
-      key.key_symbol_offset_y = Key.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y);
-      key.key_hint_offset_x = Key.getPixel(mk, "key_hint_offset_x", key_hint_offset_x);
-      key.key_hint_offset_y = Key.getPixel(mk, "key_hint_offset_y", key_hint_offset_y);
+      key.key_text_offset_x = Config.getPixel(mk, "key_text_offset_x", key_text_offset_x);
+      key.key_text_offset_y = Config.getPixel(mk, "key_text_offset_y", key_text_offset_y);
+      key.key_symbol_offset_x = Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x);
+      key.key_symbol_offset_y = Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y);
+      key.key_hint_offset_x = Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x);
+      key.key_hint_offset_y = Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y);
 
       key.x = x;
       key.y = y;
