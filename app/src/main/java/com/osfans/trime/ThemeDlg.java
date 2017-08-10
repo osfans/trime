@@ -85,7 +85,7 @@ public class ThemeDlg extends AsyncTask{
     for (int i = 0; i < nameArray.length; i++) {
       String themeName = themeMap.get(nameArray[i]);
       if (themeName == null) {
-        names[i] = mContext.getString(R.string.pref_themes_name_custom);
+        names[i] = mContext.getString(R.string.pref_themes_name_custom) + "(" + nameArray[i] + ")";
       } else {
         names[i] = themeName;
       }
