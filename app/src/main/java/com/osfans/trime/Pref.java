@@ -84,8 +84,9 @@ public class Pref extends PreferenceActivity
     pref.setSelectable(isQQ);
   }
 
+  @Override
   public void onSharedPreferenceChanged(SharedPreferences prefs,
-          String key) {
+                                        String key) {
     Trime trime = Trime.getService();
     boolean value;
     switch (key) {

@@ -46,6 +46,7 @@ public class SchemaDialog extends AsyncTask{
   AlertDialog mDialog;
 
   public class SortByName implements Comparator<Map<String,String>>{
+    @Override
     public int compare(Map<String,String> m1, Map<String,String> m2) {
       String s1 = m1.get("schema_id");
       String s2 = m2.get("schema_id");
@@ -134,12 +135,14 @@ public class SchemaDialog extends AsyncTask{
       builder.setMessage(R.string.no_schemas);
     } else {
       builder.setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id, boolean isChecked) {
           checkedSchemaItems[id] = isChecked;
         }
       });
       builder.setNegativeButton(android.R.string.cancel, null);
       builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           mProgressDialog.setMessage(mContext.getString(R.string.deploy_progress));
           mProgressDialog.show();
@@ -172,9 +175,11 @@ public class SchemaDialog extends AsyncTask{
     mDialog.show();
   }
 
+  @Override
   protected void onPreExecute() {
   }
 
+  @Override
   protected String doInBackground(Object... o) {
     initSchema();
     return "ok";
@@ -183,6 +188,7 @@ public class SchemaDialog extends AsyncTask{
   protected void onProgressUpdate(Object o) {
   }
 
+  @Override
   protected void onPostExecute(Object o) {
     mProgressDialog.dismiss();
     showDialog();

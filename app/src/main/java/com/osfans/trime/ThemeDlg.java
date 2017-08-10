@@ -101,11 +101,13 @@ public class ThemeDlg extends AsyncTask{
       .setCancelable(true)
       .setNegativeButton(android.R.string.cancel, null)
       .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           execute();
         }
       })
       .setSingleChoiceItems(names, checked, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           checked = id;
         }
@@ -121,10 +123,12 @@ public class ThemeDlg extends AsyncTask{
     mDialog.show();
   }
 
+  @Override
   protected void onPreExecute() {
     mProgressDialog.show();
   }
 
+  @Override
   protected String doInBackground(Object... o) {
     selectTheme();
     return "ok";
@@ -133,6 +137,7 @@ public class ThemeDlg extends AsyncTask{
   protected void onProgressUpdate(Object o) {
   }
 
+  @Override
   protected void onPostExecute(Object o) {
     mProgressDialog.dismiss();
     Trime trime = Trime.getService();
