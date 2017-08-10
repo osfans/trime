@@ -54,6 +54,11 @@
     <string name="pref_select_summary">Select TRIME</string>
     <string name="pref_themes">Themes</string>
     <string name="pref_themes_summary">Select Desired Theme</string>
+    <string name="pref_themes_name_qinghong">Green and Red</string>
+    <string name="pref_themes_name_sougou">Sou Gou</string>
+    <string name="pref_themes_name_tongwenfeng">Trime Style</string>
+    <string name="pref_themes_name_trime">Default</string>
+    <string name="pref_themes_name_custom">Custom Theme</string>
     <string name="pref_schemas">Schemas</string>
     <string name="pref_schemas_summary">Select Installed Schema</string>
     <string name="pref_colors">Colors</string>

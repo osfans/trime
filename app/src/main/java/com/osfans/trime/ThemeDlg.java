@@ -28,6 +28,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /** 顯示配色方案列表 */
 public class ThemeDlg extends AsyncTask{
@@ -72,7 +74,23 @@ public class ThemeDlg extends AsyncTask{
     if (keys == null) return;
     Arrays.sort(keys);
     checked = Arrays.binarySearch(keys, theme);
-    names = config.getThemeNames(keys);
+
+    Map<String, String> themeMap = new HashMap<String, String>();
+    themeMap.put("qinghong", mContext.getString(R.string.pref_themes_name_qinghong));
+    themeMap.put("sougou", mContext.getString(R.string.pref_themes_name_sougou));
+    themeMap.put("tongwenfeng", mContext.getString(R.string.pref_themes_name_tongwenfeng));
+    themeMap.put("trime", mContext.getString(R.string.pref_themes_name_trime));
+    String[] nameArray = config.getThemeNames(keys);
+    names = new String[nameArray.length];
+    for (int i = 0; i < nameArray.length; i++) {
+      String themeName = themeMap.get(nameArray[i]);
+      if (themeName == null) {
+        names[i] = mContext.getString(R.string.pref_themes_name_custom);
+      } else {
+        names[i] = themeName;
+      }
+    }
+
     showDialog();
     initProgressDialog();
   }
