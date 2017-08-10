@@ -52,11 +52,13 @@ public class ColorDialog {
       .setCancelable(true)
       .setNegativeButton(android.R.string.cancel, null)
       .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           selectColor();
         }
       })
       .setSingleChoiceItems(colorNames, checkedColor, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           checkedColor = id;
         }

@@ -70,6 +70,7 @@ public class Effect {
     isSpeakKey = pref.getBoolean("speak_key", false);
     if (mTTS == null && (isSpeakCommit || isSpeakKey)) {
       mTTS = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+        @Override
         public void onInit(int status) {
           //初始化結果
         }

@@ -56,11 +56,13 @@ public class ResetDialog {
       .setCancelable(true)
       .setNegativeButton(android.R.string.cancel, null)
       .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           select();
         }
       })
       .setMultiChoiceItems(items, checked, new DialogInterface.OnMultiChoiceClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id, boolean isChecked) {
           checked[id] = isChecked;
         }

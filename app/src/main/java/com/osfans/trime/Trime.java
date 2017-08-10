@@ -125,6 +125,7 @@ public class Trime extends InputMethodService implements
       removeCallbacks(this);
     }
 
+    @Override
     public void run() {
       if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
       if (!mShowWindow) return;
@@ -735,6 +736,7 @@ public class Trime extends InputMethodService implements
       return window.getAttributes().token;
   }
 
+  @Override
   public void onEvent(Event event) {
     String s = event.getText();
     if (!Function.isEmpty(s)) {
@@ -867,6 +869,7 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  @Override
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
     if (keyCode >= Key.symbolStart) { //符號
@@ -902,6 +905,7 @@ public class Trime extends InputMethodService implements
     }
   }
 
+  @Override
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText="+text);
     mEffect.speakKey(text);
@@ -915,35 +919,42 @@ public class Trime extends InputMethodService implements
     keyUpNeeded = false;
   }
 
+  @Override
   public void onPress(int keyCode) {
     mEffect.vibrate();
     mEffect.playSound(keyCode);
     mEffect.speakKey(keyCode);
   }
 
+  @Override
   public void onRelease(int keyCode) {
     if (keyUpNeeded) {
       onRimeKey(Event.getRimeEvent(keyCode, Rime.META_RELEASE_ON));
     }
   }
 
+  @Override
   public void swipeLeft() {
     // no-op
   }
 
+  @Override
   public void swipeRight() {
     // no-op
   }
 
+  @Override
   public void swipeUp() {
     // no-op
   }
 
   /** 在鍵盤視圖中從上往下滑動，隱藏鍵盤 */
+  @Override
   public void swipeDown() {
     //requestHideSelf(0);
   }
 
+  @Override
   public void onPickCandidate(int i) {
     // Commit the picked candidate and suggest its following words.
     if (!isComposing()) {
@@ -1048,12 +1059,14 @@ public class Trime extends InputMethodService implements
       .setIcon(R.drawable.icon)
       .setCancelable(true)
       .setNegativeButton(R.string.other_ime, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           di.dismiss();
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         }
       })
       .setPositiveButton(R.string.set_ime, new DialogInterface.OnClickListener() {
+        @Override
         public void onClick(DialogInterface di, int id) {
           Function.showPrefDialog(Trime.this); //全局設置
           di.dismiss();
@@ -1062,6 +1075,7 @@ public class Trime extends InputMethodService implements
       if (Rime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
       else {
         builder.setNeutralButton(R.string.pref_schemas, new DialogInterface.OnClickListener() {
+          @Override
           public void onClick(DialogInterface di, int id) {
             showSchemaDialog(); //部署方案
             di.dismiss();
@@ -1069,6 +1083,7 @@ public class Trime extends InputMethodService implements
         });
         builder.setSingleChoiceItems(Rime.getSchemaNames(), Rime.getSchemaIndex(),
           new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface di, int id) {
               di.dismiss();
               Rime.selectSchema(id); //切換方案

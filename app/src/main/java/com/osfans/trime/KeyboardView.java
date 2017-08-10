@@ -619,6 +619,7 @@ public class KeyboardView extends View implements View.OnClickListener {
      * 關閉彈出鍵盤
      * @param v 鍵盤視圖
      */
+    @Override
     public void onClick(View v) {
         dismissPopupKeyboard();
     }
@@ -1091,27 +1092,36 @@ public class KeyboardView extends View implements View.OnClickListener {
                         android.R.id.closeButton);
                 if (closeButton != null) closeButton.setOnClickListener(this);
                 mMiniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
+                    @Override
                     public void onEvent(Event event) {
                         mKeyboardActionListener.onEvent(event);
                         dismissPopupKeyboard();
                     }
+                    @Override
                     public void onKey(int primaryCode, int mask) {
                         mKeyboardActionListener.onKey(primaryCode, mask);
                         dismissPopupKeyboard();
                     }
                     
+                    @Override
                     public void onText(CharSequence text) {
                         mKeyboardActionListener.onText(text);
                         dismissPopupKeyboard();
                     }
                     
+                    @Override
                     public void swipeLeft() { }
+                    @Override
                     public void swipeRight() { }
+                    @Override
                     public void swipeUp() { }
+                    @Override
                     public void swipeDown() { }
+                    @Override
                     public void onPress(int primaryCode) {
                         mKeyboardActionListener.onPress(primaryCode);
                     }
+                    @Override
                     public void onRelease(int primaryCode) {
                         mKeyboardActionListener.onRelease(primaryCode);
                     }
