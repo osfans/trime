@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -32,19 +32,19 @@ public class IntentReceiver extends BroadcastReceiver {
   public void onReceive(Context ctx, Intent intent) {
 
     String command = intent.getAction();
-    
-    Log.d(TAG,"Receive Command = " + command);
+
+    Log.d(TAG, "Receive Command = " + command);
     //防止为空，虽然很少,但是可能会出现
     //http://stackoverflow.com/questions/15048883/intent-getaction-is-returning-null
-    if(command == null) return;
+    if (command == null) return;
 
-    switch(command){
-    case COMMAND_DEPLOY:
-      Function.deploy();
-      break;
-    default:
-      if (command.contentEquals(intent.ACTION_SHUTDOWN)) Rime.destroy();
-      break;
+    switch (command) {
+      case COMMAND_DEPLOY:
+        Function.deploy();
+        break;
+      default:
+        if (command.contentEquals(intent.ACTION_SHUTDOWN)) Rime.destroy();
+        break;
     }
   }
 }

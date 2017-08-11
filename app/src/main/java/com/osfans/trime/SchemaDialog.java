@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -26,7 +26,6 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.view.Window;
 import android.view.WindowManager;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,20 +33,20 @@ import java.util.List;
 import java.util.Map;
 
 /** 顯示輸入法方案列表 */
-public class SchemaDialog extends AsyncTask{
+public class SchemaDialog extends AsyncTask {
   boolean[] checkedSchemaItems;
   String[] schemaItems;
-  List<Map<String,String>> schemas;
-  List<Map<String,String>> selected_schemas;
+  List<Map<String, String>> schemas;
+  List<Map<String, String>> selected_schemas;
   String[] schemaNames;
   Context mContext;
   IBinder mToken;
   ProgressDialog mProgressDialog;
   AlertDialog mDialog;
 
-  public class SortByName implements Comparator<Map<String,String>>{
+  public class SortByName implements Comparator<Map<String, String>> {
     @Override
-    public int compare(Map<String,String> m1, Map<String,String> m2) {
+    public int compare(Map<String, String> m1, Map<String, String> m2) {
       String s1 = m1.get("schema_id");
       String s2 = m2.get("schema_id");
       return s1.compareTo(s2);
@@ -57,7 +56,7 @@ public class SchemaDialog extends AsyncTask{
   private void selectSchema() {
     List<String> checkedIds = new ArrayList<String>();
     int i = 0;
-    for (boolean b: checkedSchemaItems) {
+    for (boolean b : checkedSchemaItems) {
       if (b) checkedIds.add(schemaItems[i]);
       i++;
     }
@@ -113,11 +112,11 @@ public class SchemaDialog extends AsyncTask{
     schemaItems = new String[n];
     int i = 0;
     if (selected_schemas.size() > 0) {
-      for (Map<String,String> m: selected_schemas) {
+      for (Map<String, String> m : selected_schemas) {
         selected_Ids.add(m.get("schema_id"));
       }
     }
-    for (Map<String,String> m: schemas) {
+    for (Map<String, String> m : schemas) {
       schemaNames[i] = m.get("name");
       schema_id = m.get("schema_id");
       schemaItems[i] = schema_id;
@@ -127,41 +126,47 @@ public class SchemaDialog extends AsyncTask{
   }
 
   public void showDialog() {
-    AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
-      .setTitle(R.string.pref_schemas)
-      .setCancelable(true)
-      .setPositiveButton(android.R.string.ok, null);
+    AlertDialog.Builder builder =
+        new AlertDialog.Builder(mContext)
+            .setTitle(R.string.pref_schemas)
+            .setCancelable(true)
+            .setPositiveButton(android.R.string.ok, null);
     if (schemas == null || schemas.size() == 0) {
       builder.setMessage(R.string.no_schemas);
     } else {
-      builder.setMultiChoiceItems(schemaNames, checkedSchemaItems, new DialogInterface.OnMultiChoiceClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id, boolean isChecked) {
-          checkedSchemaItems[id] = isChecked;
-        }
-      });
-      builder.setNegativeButton(android.R.string.cancel, null);
-      builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id) {
-          mProgressDialog.setMessage(mContext.getString(R.string.deploy_progress));
-          mProgressDialog.show();
-          new Thread(new Runnable(){
+      builder.setMultiChoiceItems(
+          schemaNames,
+          checkedSchemaItems,
+          new DialogInterface.OnMultiChoiceClickListener() {
             @Override
-            public void run() {
-              try{
-                selectSchema();
-              }
-              catch(Exception e){
-              }
-              finally{
-                mProgressDialog.dismiss();
-                System.exit(0); //清理內存
-              }
+            public void onClick(DialogInterface di, int id, boolean isChecked) {
+              checkedSchemaItems[id] = isChecked;
             }
-          }).start();
-        }
-      });
+          });
+      builder.setNegativeButton(android.R.string.cancel, null);
+      builder.setPositiveButton(
+          android.R.string.ok,
+          new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface di, int id) {
+              mProgressDialog.setMessage(mContext.getString(R.string.deploy_progress));
+              mProgressDialog.show();
+              new Thread(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          try {
+                            selectSchema();
+                          } catch (Exception e) {
+                          } finally {
+                            mProgressDialog.dismiss();
+                            System.exit(0); //清理內存
+                          }
+                        }
+                      })
+                  .start();
+            }
+          });
     }
     mDialog = builder.create();
     if (mToken != null) {
@@ -176,8 +181,7 @@ public class SchemaDialog extends AsyncTask{
   }
 
   @Override
-  protected void onPreExecute() {
-  }
+  protected void onPreExecute() {}
 
   @Override
   protected String doInBackground(Object... o) {
@@ -185,8 +189,7 @@ public class SchemaDialog extends AsyncTask{
     return "ok";
   }
 
-  protected void onProgressUpdate(Object o) {
-  }
+  protected void onProgressUpdate(Object o) {}
 
   @Override
   protected void onPostExecute(Object o) {

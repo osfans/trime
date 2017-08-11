@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -26,7 +26,6 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 
 /** {@link RecognitionListener 語音輸入} */
@@ -125,36 +124,36 @@ public class Speech implements RecognitionListener {
   public static String getErrorText(int errorCode) {
     String message;
     switch (errorCode) {
-    case SpeechRecognizer.ERROR_AUDIO:
-    message = "錄音錯誤";
-    break;
-    case SpeechRecognizer.ERROR_CLIENT:
-    message = "客戶端錯誤";
-    break;
-    case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-    message = "權限不足";
-    break;
-    case SpeechRecognizer.ERROR_NETWORK:
-    message = "網絡錯誤";
-    break;
-    case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-    message = "網絡超時";
-    break;
-    case SpeechRecognizer.ERROR_NO_MATCH:
-    message = "未能識別";
-    break;
-    case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-    message = "識別服務忙";
-    break;
-    case SpeechRecognizer.ERROR_SERVER:
-    message = "服務器錯誤";
-    break;
-    case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-    message = "無語音輸入";
-    break;
-    default:
-    message = "未知錯誤";
-    break;
+      case SpeechRecognizer.ERROR_AUDIO:
+        message = "錄音錯誤";
+        break;
+      case SpeechRecognizer.ERROR_CLIENT:
+        message = "客戶端錯誤";
+        break;
+      case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+        message = "權限不足";
+        break;
+      case SpeechRecognizer.ERROR_NETWORK:
+        message = "網絡錯誤";
+        break;
+      case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+        message = "網絡超時";
+        break;
+      case SpeechRecognizer.ERROR_NO_MATCH:
+        message = "未能識別";
+        break;
+      case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+        message = "識別服務忙";
+        break;
+      case SpeechRecognizer.ERROR_SERVER:
+        message = "服務器錯誤";
+        break;
+      case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+        message = "無語音輸入";
+        break;
+      default:
+        message = "未知錯誤";
+        break;
     }
     return message;
   }

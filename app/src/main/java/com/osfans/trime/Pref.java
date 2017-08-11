@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -41,7 +41,7 @@ import android.webkit.WebViewClient;
 
 /** 配置輸入法 */
 public class Pref extends PreferenceActivity
-                  implements SharedPreferences.OnSharedPreferenceChangeListener {
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
   private ProgressDialog mProgressDialog;
@@ -68,7 +68,9 @@ public class Pref extends PreferenceActivity
     String version = Function.getVersion(this);
     pref.setSummary(version);
     String commit = version.replaceAll("^(.*-g)(.+)(-.*)$", "$2");
-    pref.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/osfans/trime/commits/"+commit)));
+    pref.setIntent(
+        new Intent(
+            Intent.ACTION_VIEW, Uri.parse("https://github.com/osfans/trime/commits/" + commit)));
     pref = findPreference("pref_enable");
     if (isEnabled()) getPreferenceScreen().removePreference(pref);
     mProgressDialog = new ProgressDialog(this);
@@ -85,52 +87,51 @@ public class Pref extends PreferenceActivity
   }
 
   @Override
-  public void onSharedPreferenceChanged(SharedPreferences prefs,
-                                        String key) {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
     Trime trime = Trime.getService();
     boolean value;
     switch (key) {
       case "key_sound":
-        if (trime!= null) trime.resetEffect();
+        if (trime != null) trime.resetEffect();
         value = prefs.getBoolean(key, false);
         mKeySoundVolumePref.setEnabled(value);
         break;
       case "key_vibrate":
-        if (trime!= null) trime.resetEffect();
+        if (trime != null) trime.resetEffect();
         value = prefs.getBoolean(key, false);
         mKeyVibrateDurationPref.setEnabled(value);
         break;
       case "key_sound_volume":
-        if (trime!= null) {
+        if (trime != null) {
           trime.resetEffect();
           trime.soundEffect();
         }
         break;
       case "key_vibrate_duration":
-        if (trime!= null) {
+        if (trime != null) {
           trime.resetEffect();
           trime.vibrateEffect();
         }
         break;
       case "speak_key":
       case "speak_commit":
-        if (trime!= null) trime.resetEffect();
+        if (trime != null) trime.resetEffect();
         break;
       case "longpress_timeout":
       case "repeat_interval":
       case "show_preview":
-        if (trime!= null) trime.resetKeyboard();
+        if (trime != null) trime.resetKeyboard();
         break;
       case "show_window":
-        if (trime!= null) trime.resetCandidate();
+        if (trime != null) trime.resetCandidate();
         break;
       case "inline_preedit":
       case "soft_cursor":
-        if (trime!= null) trime.loadConfig();
+        if (trime != null) trime.loadConfig();
         break;
       case "pref_notification_icon": //通知欄圖標
         value = prefs.getBoolean(key, false);
-        if (trime!= null) {
+        if (trime != null) {
           if (value) trime.showStatusIcon(R.drawable.status);
           else trime.hideStatusIcon();
         }
@@ -145,39 +146,36 @@ public class Pref extends PreferenceActivity
   @Override
   protected void onResume() {
     super.onResume();
-    getPreferenceScreen().getSharedPreferences()
-            .registerOnSharedPreferenceChangeListener(this);
+    getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
   }
 
   @Override
   protected void onPause() {
     super.onPause();
-    getPreferenceScreen().getSharedPreferences()
-            .unregisterOnSharedPreferenceChangeListener(this);
+    getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
   }
 
   private void showLicenseDialog() {
     View licenseView = View.inflate(this, R.layout.licensing, null);
     WebView webView = (WebView) licenseView.findViewById(R.id.license_view);
-    webView.setWebViewClient(new WebViewClient() {
-      @Override
-      public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        // Disable all links open from this web view.
-        return true;
-      }
-    });
+    webView.setWebViewClient(
+        new WebViewClient() {
+          @Override
+          public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            // Disable all links open from this web view.
+            return true;
+          }
+        });
     webView.loadUrl(licenseUrl);
 
-    new AlertDialog.Builder(this)
-      .setTitle(R.string.ime_name)
-      .setView(licenseView)
-      .show();
+    new AlertDialog.Builder(this).setTitle(R.string.ime_name).setView(licenseView).show();
   }
 
   public boolean isEnabled() {
     boolean enabled = false;
-    for(InputMethodInfo i: ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).getEnabledInputMethodList()) {
-      if(getPackageName().contentEquals(i.getPackageName())) {
+    for (InputMethodInfo i :
+        ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).getEnabledInputMethodList()) {
+      if (getPackageName().contentEquals(i.getPackageName())) {
         enabled = true;
         break;
       }
@@ -187,8 +185,13 @@ public class Pref extends PreferenceActivity
 
   @TargetApi(VERSION_CODES.M)
   public void requestPermission() {
-    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-      requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
+      requestPermissions(
+          new String[] {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+          },
+          0);
     }
   }
 
@@ -225,38 +228,38 @@ public class Pref extends PreferenceActivity
       case "pref_deploy": //部署
         mProgressDialog.setMessage(getString(R.string.deploy_progress));
         mProgressDialog.show();
-        new Thread(new Runnable(){
-          @Override
-          public void run() {
-            try{
-              Function.deploy();
-            }
-            catch(Exception e){
-            }
-            finally{
-              mProgressDialog.dismiss();
-              System.exit(0); //清理內存
-            }
-          }
-        }).start();
+        new Thread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    try {
+                      Function.deploy();
+                    } catch (Exception e) {
+                    } finally {
+                      mProgressDialog.dismiss();
+                      System.exit(0); //清理內存
+                    }
+                  }
+                })
+            .start();
         return true;
       case "pref_sync": //同步
         mProgressDialog.setMessage(getString(R.string.sync_progress));
         mProgressDialog.show();
-        new Thread(new Runnable(){
-          @Override
-          public void run() {
-            try{
-              Function.sync();
-            }
-            catch(Exception e){
-            }
-            finally{
-              mProgressDialog.dismiss();
-              System.exit(0); //清理內存
-            }
-          }
-        }).start();
+        new Thread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    try {
+                      Function.sync();
+                    } catch (Exception e) {
+                    } finally {
+                      mProgressDialog.dismiss();
+                      System.exit(0); //清理內存
+                    }
+                  }
+                })
+            .start();
         return true;
       case "pref_reset": //回廠
         new ResetDialog(this).show();

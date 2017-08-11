@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -26,13 +26,12 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.view.Window;
 import android.view.WindowManager;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /** 顯示配色方案列表 */
-public class ThemeDlg extends AsyncTask{
+public class ThemeDlg extends AsyncTask {
   String[] keys;
   String[] names;
   int checked;
@@ -42,7 +41,7 @@ public class ThemeDlg extends AsyncTask{
   IBinder mToken;
 
   public void selectTheme() {
-    String theme = keys[checked].replace(".yaml","");
+    String theme = keys[checked].replace(".yaml", "");
     Config config = Config.get();
     config.setTheme(theme);
   }
@@ -69,7 +68,7 @@ public class ThemeDlg extends AsyncTask{
     mContext = context;
     mToken = token;
     Config config = Config.get(context);
-    String theme = config.getTheme()+".yaml";
+    String theme = config.getTheme() + ".yaml";
     keys = config.getThemeKeys();
     if (keys == null) return;
     Arrays.sort(keys);
@@ -96,22 +95,29 @@ public class ThemeDlg extends AsyncTask{
   }
 
   public void showDialog() {
-    mDialog = new AlertDialog.Builder(mContext)
-      .setTitle(R.string.pref_themes)
-      .setCancelable(true)
-      .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id) {
-          execute();
-        }
-      })
-      .setSingleChoiceItems(names, checked, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id) {
-          checked = id;
-        }
-      }).create();
+    mDialog =
+        new AlertDialog.Builder(mContext)
+            .setTitle(R.string.pref_themes)
+            .setCancelable(true)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(
+                android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface di, int id) {
+                    execute();
+                  }
+                })
+            .setSingleChoiceItems(
+                names,
+                checked,
+                new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface di, int id) {
+                    checked = id;
+                  }
+                })
+            .create();
     if (mToken != null) {
       Window window = mDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();
@@ -134,8 +140,7 @@ public class ThemeDlg extends AsyncTask{
     return "ok";
   }
 
-  protected void onProgressUpdate(Object o) {
-  }
+  protected void onProgressUpdate(Object o) {}
 
   @Override
   protected void onPostExecute(Object o) {

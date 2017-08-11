@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -41,4 +41,3 @@ public enum WinPos {
     return FIXED;
   }
 }
-

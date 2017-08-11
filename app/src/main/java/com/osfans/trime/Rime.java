@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
  *
@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-/** Rime與OpenCC的Java實現
- * @see <a href="https://github.com/rime/librime">Rime</a>
- * <a href="https://github.com/BYVoid/OpenCC">OpenCC</a>
+/**
+ * Rime與OpenCC的Java實現
+ *
+ * @see <a href="https://github.com/rime/librime">Rime</a> <a
+ *     href="https://github.com/BYVoid/OpenCC">OpenCC</a>
  */
-public class Rime
-{
+public class Rime {
   /** Rime編碼區 */
   public static class RimeComposition {
     int length;
@@ -82,8 +83,7 @@ public class Rime
     String text;
   }
 
-  /** Rime環境，包括
-   * {@link RimeComposition 編碼區} 、{@link RimeMenu 候選區}*/
+  /** Rime環境，包括 {@link RimeComposition 編碼區} 、{@link RimeMenu 候選區} */
   public static class RimeContext {
     int data_size;
     // v0.9
@@ -130,16 +130,16 @@ public class Rime
       Object o;
       o = schema_get_value(schema_id, "schema");
       if (o == null || !(o instanceof Map)) return;
-      schema = (Map<String, Object>)o;
+      schema = (Map<String, Object>) o;
       o = schema_get_value(schema_id, "switches");
       if (o == null || !(o instanceof List)) return;
-      switches = (List<Map<String, Object>>)o;
+      switches = (List<Map<String, Object>>) o;
       check(); //檢查不在選單中顯示的選項
     }
 
     public void check() {
       if (switches.isEmpty()) return;
-      for (Iterator it = switches.iterator(); it.hasNext();) {
+      for (Iterator it = switches.iterator(); it.hasNext(); ) {
         Map<String, Object> o = (Map<String, Object>) it.next();
         if (!o.containsKey("states")) it.remove();
       }
@@ -149,13 +149,14 @@ public class Rime
       if (switches.isEmpty()) return null;
       RimeCandidate[] candidates = new RimeCandidate[switches.size()];
       int i = 0;
-      for (Map<String, Object> o: switches) {
+      for (Map<String, Object> o : switches) {
         candidates[i] = new RimeCandidate();
-        List states = (List)o.get("states");
-        Integer value = (Integer)o.get("value");
+        List states = (List) o.get("states");
+        Integer value = (Integer) o.get("value");
         if (value == null) value = 0;
         candidates[i].text = states.get(value).toString();
-        candidates[i].comment = o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
+        candidates[i].comment =
+            o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
         i++;
       }
       return candidates;
@@ -164,9 +165,9 @@ public class Rime
     public void getValue() {
       if (switches.isEmpty()) return; //無方案
       for (int j = 0; j < switches.size(); j++) {
-        Map<String, Object> o =  switches.get(j);
+        Map<String, Object> o = switches.get(j);
         if (o.containsKey("options")) {
-          List<String> options = (List<String>)o.get("options");
+          List<String> options = (List<String>) o.get("options");
           for (int i = 0; i < options.size(); i++) {
             String s = options.get(i);
             if (Rime.get_option(s)) {
@@ -183,11 +184,11 @@ public class Rime
 
     public void toggleOption(int i) {
       if (switches.isEmpty()) return;
-      Map<String, Object> o =  switches.get(i);
-      Integer value = (Integer)o.get("value");
+      Map<String, Object> o = switches.get(i);
+      Integer value = (Integer) o.get("value");
       if (value == null) value = 0;
       if (o.containsKey("options")) {
-        List<String> options = (List<String>)o.get("options");
+        List<String> options = (List<String>) o.get("options");
         Rime.setOption(options.get(value), false);
         value = (value + 1) % options.size();
         Rime.setOption(options.get(value), true);
@@ -287,7 +288,7 @@ public class Rime
     set_notification_handler();
     if (!find_session()) {
       if (create_session() == 0) {
-        Log.severe( "Error creating rime session");
+        Log.severe("Error creating rime session");
         return;
       }
     }
@@ -321,7 +322,7 @@ public class Rime
   public static boolean onKey(int keycode, int mask) {
     if (isVoidKeycode(keycode)) return false;
     boolean b = process_key(keycode, mask);
-    Log.info( "b="+b+",keycode="+keycode+",mask="+mask);
+    Log.info("b=" + b + ",keycode=" + keycode + ",mask=" + mask);
     getContexts();
     return b;
   }
@@ -332,9 +333,9 @@ public class Rime
   }
 
   public static boolean onText(CharSequence text) {
-    if(text == null || text.length() == 0) return false;
-    boolean b = simulate_key_sequence(text.toString().replace("{}","{braceleft}{braceright}"));
-    Log.info( "b="+b+",input="+text);
+    if (text == null || text.length() == 0) return false;
+    boolean b = simulate_key_sequence(text.toString().replace("{}", "{braceleft}{braceright}"));
+    Log.info("b=" + b + ",input=" + text);
     getContexts();
     return b;
   }
@@ -351,7 +352,7 @@ public class Rime
       int n = mContext.size();
       String[] labels = new String[n];
       for (int i = 0; i < n; i++) {
-        labels[i] = String.valueOf((i + 1)% 10);
+        labels[i] = String.valueOf((i + 1) % 10);
       }
       return labels;
     }
@@ -420,8 +421,8 @@ public class Rime
     int n = mSchemaList.size();
     String[] names = new String[n];
     int i = 0;
-    for (Object o: mSchemaList) {
-      Map<String, String> m = (Map<String, String>)o;
+    for (Object o : mSchemaList) {
+      Map<String, String> m = (Map<String, String>) o;
       names[i++] = m.get("name");
     }
     return names;
@@ -430,10 +431,10 @@ public class Rime
   public static int getSchemaIndex() {
     String schema_id = getSchemaId();
     int i = 0;
-    for (Object o: mSchemaList) {
-        Map<String, String> m = (Map<String, String>)o;
-        if (m.get("schema_id").contentEquals(schema_id)) return i;
-        i++;
+    for (Object o : mSchemaList) {
+      Map<String, String> m = (Map<String, String>) o;
+      if (m.get("schema_id").contentEquals(schema_id)) return i;
+      i++;
     }
     return 0;
   }
@@ -452,13 +453,13 @@ public class Rime
     int n = mSchemaList.size();
     if (id < 0 || id >= n) return false;
     String schema_id = getSchemaId();
-    Map<String, String> m = (Map<String, String>)mSchemaList.get(id);
+    Map<String, String> m = (Map<String, String>) mSchemaList.get(id);
     String target = m.get("schema_id");
     if (target.contentEquals(schema_id)) return false;
     return selectSchema(target);
   }
 
-  public static Rime get(boolean full_check){
+  public static Rime get(boolean full_check) {
     if (self == null) {
       if (full_check) Config.deployOpencc();
       self = new Rime(full_check);
@@ -466,7 +467,7 @@ public class Rime
     return self;
   }
 
-  public static Rime get(){
+  public static Rime get() {
     return get(false);
   }
 
@@ -528,100 +529,154 @@ public class Rime
   }
 
   // init
-  public static native final void setup();
-  public static native final void set_notification_handler();
+  public static final native void setup();
+
+  public static final native void set_notification_handler();
 
   // entry and exit
-  public static native final void initialize();
-  public static native final void finalize1();
-  public static native final boolean start_maintenance(boolean full_check);
-  public static native final boolean is_maintenance_mode();
-  public static native final void join_maintenance_thread();
+  public static final native void initialize();
+
+  public static final native void finalize1();
+
+  public static final native boolean start_maintenance(boolean full_check);
+
+  public static final native boolean is_maintenance_mode();
+
+  public static final native void join_maintenance_thread();
 
   // deployment
-  public static native final void deployer_initialize();
-  public static native final boolean prebuild();
-  public static native final boolean deploy();
-  public static native final boolean deploy_schema(String schema_file);
-  public static native final boolean deploy_config_file(String file_name, String version_key);
-  public static native final boolean sync_user_data();
+  public static final native void deployer_initialize();
+
+  public static final native boolean prebuild();
+
+  public static final native boolean deploy();
+
+  public static final native boolean deploy_schema(String schema_file);
+
+  public static final native boolean deploy_config_file(String file_name, String version_key);
+
+  public static final native boolean sync_user_data();
 
   // session management
-  public static native final int create_session();
-  public static native final boolean find_session();
-  public static native final boolean destroy_session();
-  public static native final void cleanup_stale_sessions();
-  public static native final void cleanup_all_sessions();
+  public static final native int create_session();
+
+  public static final native boolean find_session();
+
+  public static final native boolean destroy_session();
+
+  public static final native void cleanup_stale_sessions();
+
+  public static final native void cleanup_all_sessions();
 
   // input
-  public static native final boolean process_key(int keycode, int mask);
-  public static native final boolean commit_composition();
-  public static native final void clear_composition();
+  public static final native boolean process_key(int keycode, int mask);
+
+  public static final native boolean commit_composition();
+
+  public static final native void clear_composition();
 
   // output
-  public static native final boolean get_commit(RimeCommit commit);
-  public static native final boolean get_context(RimeContext context);
-  public static native final boolean get_status(RimeStatus status);
+  public static final native boolean get_commit(RimeCommit commit);
+
+  public static final native boolean get_context(RimeContext context);
+
+  public static final native boolean get_status(RimeStatus status);
 
   // runtime options
-  public static native final void set_option(String option, boolean value);
-  public static native final boolean get_option(String option);
-  public static native final void set_property(String prop, String value);
-  public static native final String get_property(String prop);
-  public static native final List get_schema_list();
-  public static native final String get_current_schema();
-  public static native final boolean select_schema(String schema_id);
+  public static final native void set_option(String option, boolean value);
+
+  public static final native boolean get_option(String option);
+
+  public static final native void set_property(String prop, String value);
+
+  public static final native String get_property(String prop);
+
+  public static final native List get_schema_list();
+
+  public static final native String get_current_schema();
+
+  public static final native boolean select_schema(String schema_id);
 
   // configuration
-  public static native final Boolean config_get_bool(String name, String key);
-  public static native final boolean config_set_bool(String name, String key, boolean value);
-  public static native final Integer config_get_int(String name, String key);
-  public static native final boolean config_set_int(String name, String key, int value);
-  public static native final Double config_get_double(String name, String key);
-  public static native final boolean config_set_double(String name, String key, double value);
-  public static native final String config_get_string(String name, String key);
-  public static native final boolean config_set_string(String name, String key, String value);
-  public static native final int config_list_size(String name, String key);
-  public static native final List config_get_list(String name, String key);
-  public static native final Map config_get_map(String name, String key);
-  public static native final Object config_get_value(String name, String key);
-  public static native final Object schema_get_value(String name, String key);
+  public static final native Boolean config_get_bool(String name, String key);
+
+  public static final native boolean config_set_bool(String name, String key, boolean value);
+
+  public static final native Integer config_get_int(String name, String key);
+
+  public static final native boolean config_set_int(String name, String key, int value);
+
+  public static final native Double config_get_double(String name, String key);
+
+  public static final native boolean config_set_double(String name, String key, double value);
+
+  public static final native String config_get_string(String name, String key);
+
+  public static final native boolean config_set_string(String name, String key, String value);
+
+  public static final native int config_list_size(String name, String key);
+
+  public static final native List config_get_list(String name, String key);
+
+  public static final native Map config_get_map(String name, String key);
+
+  public static final native Object config_get_value(String name, String key);
+
+  public static final native Object schema_get_value(String name, String key);
 
   // testing
-  public static native final boolean simulate_key_sequence(String key_sequence);
+  public static final native boolean simulate_key_sequence(String key_sequence);
 
-  public static native final String get_input();
-  public static native final int get_caret_pos();
-  public static native final void set_caret_pos(int caret_pos);
-  public static native final boolean select_candidate(int index);
-  public static native final boolean select_candidate_on_current_page(int index);
-  public static native final String get_version();
-  public static native final String get_librime_version();
+  public static final native String get_input();
+
+  public static final native int get_caret_pos();
+
+  public static final native void set_caret_pos(int caret_pos);
+
+  public static final native boolean select_candidate(int index);
+
+  public static final native boolean select_candidate_on_current_page(int index);
+
+  public static final native String get_version();
+
+  public static final native String get_librime_version();
 
   // module
-  public static native final boolean run_task(String task_name);
-  public static native final String get_shared_data_dir();
-  public static native final String get_user_data_dir();
-  public static native final String get_sync_dir();
-  public static native final String get_user_id();
+  public static final native boolean run_task(String task_name);
+
+  public static final native String get_shared_data_dir();
+
+  public static final native String get_user_data_dir();
+
+  public static final native String get_sync_dir();
+
+  public static final native String get_user_id();
 
   // key_table
-  public static native final int get_modifier_by_name(String name);
-  public static native final int get_keycode_by_name(String name);
+  public static final native int get_modifier_by_name(String name);
+
+  public static final native int get_keycode_by_name(String name);
 
   // customize setting
-  public static native final boolean customize_bool(String name, String key, boolean value);
-  public static native final boolean customize_int(String name, String key, int value);
-  public static native final boolean customize_double(String name, String key, double value);
-  public static native final boolean customize_string(String name, String key, String value);
-  public static native final List<Map<String,String>> get_available_schema_list();
-  public static native final List<Map<String,String>> get_selected_schema_list();
-  public static native final boolean select_schemas(String[] schema_id_list);
+  public static final native boolean customize_bool(String name, String key, boolean value);
+
+  public static final native boolean customize_int(String name, String key, int value);
+
+  public static final native boolean customize_double(String name, String key, double value);
+
+  public static final native boolean customize_string(String name, String key, String value);
+
+  public static final native List<Map<String, String>> get_available_schema_list();
+
+  public static final native List<Map<String, String>> get_selected_schema_list();
+
+  public static final native boolean select_schemas(String[] schema_id_list);
 
   // opencc
-  public static native final String get_opencc_version();
-  public static native final String opencc_convert(String line, String name);
-  public static native final void opencc_convert_dictionary(String inputFileName, String outputFileName,
-                       String formatFrom, String formatTo);
+  public static final native String get_opencc_version();
 
+  public static final native String opencc_convert(String line, String name);
+
+  public static final native void opencc_convert_dictionary(
+      String inputFileName, String outputFileName, String formatFrom, String formatTo);
 }
