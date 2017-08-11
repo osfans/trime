@@ -66,7 +66,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
     setValue();
   }
 
-  public CharSequence getValue(int progress) {
+  private CharSequence getValue(int progress) {
     String unit = "%";
     switch (getKey()) {
       case "longpress_timeout":
@@ -106,22 +106,22 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
     return seekBar.onKeyDown(keyCode, event);
   }
 
-  public void setMax(int max) {
+  private void setMax(int max) {
     if (max != mMax) {
       mMax = max;
       notifyChanged();
     }
   }
 
-  public void setProgress(int progress) {
+  private void setProgress(int progress) {
     setProgress(progress, true);
   }
 
-  public void setValue(int progress) {
+  private void setValue(int progress) {
     if (mValue != null) mValue.setText(getValue(progress));
   }
 
-  public void setValue() {
+  private void setValue() {
     setValue(mProgress);
   }
 
@@ -150,7 +150,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
    * Persist the seekBar's progress value if callChangeListener returns true, otherwise set the
    * seekBar's progress to the stored value
    */
-  void syncProgress(SeekBar seekBar) {
+  private void syncProgress(SeekBar seekBar) {
     int progress = seekBar.getProgress();
     if (progress != mProgress) {
       if (callChangeListener(progress)) {

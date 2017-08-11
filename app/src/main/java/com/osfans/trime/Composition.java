@@ -188,7 +188,7 @@ public class Composition extends TextView {
     return super.onTouchEvent(event);
   }
 
-  public void reset() {
+  private void reset() {
     Config config = Config.get();
     components = (List<Map<String, Object>>) config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");

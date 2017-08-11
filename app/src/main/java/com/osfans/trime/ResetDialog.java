@@ -24,15 +24,15 @@ import android.content.DialogInterface;
 import android.widget.Toast;
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
-public class ResetDialog {
+class ResetDialog {
   /** 內置數據列表 */
-  String[] items;
+  private String[] items;
   /** 列表勾選狀態 */
-  boolean[] checked;
+  private boolean[] checked;
   /** 回廠對話框 */
-  AlertDialog dialog;
+  private AlertDialog dialog;
 
-  Context context;
+  private Context context;
 
   /** 回廠選中的數據 */
   private void select() {

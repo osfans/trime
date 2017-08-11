@@ -55,7 +55,7 @@ public class Trime extends InputMethodService
 
   private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
-  protected KeyboardView mKeyboardView; //軟鍵盤
+  private KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
   private Effect mEffect; //音效
@@ -329,7 +329,7 @@ public class Trime extends InputMethodService
   }
 
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
-  public void reset() {
+  private void reset() {
     mConfig.reset();
     loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
@@ -604,7 +604,7 @@ public class Trime extends InputMethodService
     return "";
   }
 
-  public boolean handleAciton(int code, int mask) { //編輯操作
+  private boolean handleAciton(int code, int mask) { //編輯操作
     InputConnection ic = getCurrentInputConnection();
     if (ic == null) return false;
     if (code == KeyEvent.KEYCODE_CLEAR) {
@@ -812,7 +812,7 @@ public class Trime extends InputMethodService
     }
   }
 
-  public boolean handleKey(int keyCode, int mask) { //軟鍵盤
+  private boolean handleKey(int keyCode, int mask) { //軟鍵盤
     keyUpNeeded = false;
     if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
       keyUpNeeded = true;
@@ -845,7 +845,7 @@ public class Trime extends InputMethodService
     sendKey(ic, key, meta, KeyEvent.ACTION_UP);
   }
 
-  public void sendDownUpKeyEvents(int keyCode, int mask) {
+  private void sendDownUpKeyEvents(int keyCode, int mask) {
     InputConnection ic = getCurrentInputConnection();
     if (ic == null) return;
     int states =
@@ -903,7 +903,7 @@ public class Trime extends InputMethodService
     sendDownUpKeyEvents(keyCode, mask);
   }
 
-  public void commitEventText(CharSequence text) {
+  private void commitEventText(CharSequence text) {
     String s = text.toString();
     if (!Event.containsSend(s)) {
       commitText(s);
@@ -992,7 +992,7 @@ public class Trime extends InputMethodService
   }
 
   /** 獲得當前漢字：候選字、選中字、剛上屏字/光標前字/光標前所有字、光標後所有字 */
-  public String getActiveText(int type) {
+  private String getActiveText(int type) {
     if (type == 2) return Rime.RimeGetInput(); //當前編碼
     String s = Rime.getComposingText(); //當前候選
     if (Function.isEmpty(s)) {

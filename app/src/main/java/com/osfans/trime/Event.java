@@ -29,9 +29,15 @@ public class Event {
   private String TAG = "Event";
   private Keyboard mKeyboard;
   int code = 0, mask = 0;
-  String text, label, preview;
-  List<String> states;
-  String command, option, select, toggle, shift_lock;
+  private String text;
+  private String label;
+  private String preview;
+  private List<String> states;
+  String command;
+  String option;
+  String select;
+  private String toggle;
+  String shift_lock;
   public boolean functional, repeatable, sticky;
 
   public Event(Keyboard keyboard, String s) {
@@ -88,7 +94,7 @@ public class Event {
     return sends;
   }
 
-  public String adjustCase(String s) {
+  private String adjustCase(String s) {
     if (Function.isEmpty(s)) return "";
     if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted())
       s = s.toUpperCase(Locale.getDefault());
@@ -164,7 +170,7 @@ public class Event {
     return keyCode;
   }
 
-  public static int getRimeCode(int code) {
+  private static int getRimeCode(int code) {
     int i = 0;
     if (code >= 0 && code < Key.androidKeys.size()) {
       String s = Key.androidKeys.get(code);
@@ -187,7 +193,7 @@ public class Event {
     return new int[] {i, m};
   }
 
-  public static Map<String, Integer> masks =
+  private static Map<String, Integer> masks =
       new HashMap<String, Integer>() {
         {
           put("Shift", KeyEvent.META_SHIFT_ON);
@@ -196,7 +202,7 @@ public class Event {
         }
       };
 
-  public static Map<String, Integer> symbolAliases =
+  private static Map<String, Integer> symbolAliases =
       new HashMap<String, Integer>() {
         {
           put("#", KeyEvent.KEYCODE_POUND);

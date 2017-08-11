@@ -41,9 +41,9 @@ import java.util.List;
 import java.util.Locale;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
-public class Function {
+class Function {
   private static String TAG = Function.class.getSimpleName();
-  static SparseArray<String> sApplicationLaunchKeyCategories;
+  private static SparseArray<String> sApplicationLaunchKeyCategories;
 
   static {
     sApplicationLaunchKeyCategories = new SparseArray<String>();
@@ -73,7 +73,7 @@ public class Function {
     return false;
   }
 
-  public static void startIntent(Context context, String arg) {
+  private static void startIntent(Context context, String arg) {
     Intent intent;
     try {
       if (arg.indexOf(':') >= 0) {
@@ -97,7 +97,7 @@ public class Function {
     }
   }
 
-  public static void startIntent(Context context, String action, String arg) {
+  private static void startIntent(Context context, String action, String arg) {
     action = "android.intent.action." + action.toUpperCase(Locale.getDefault());
     try {
       Intent intent = new Intent(action);

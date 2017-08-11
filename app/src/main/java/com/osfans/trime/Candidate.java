@@ -139,7 +139,7 @@ public class Candidate extends View {
    * @param index 候選項序號（從0開始），{@code -1}表示選擇當前高亮候選項
    * @return 是否成功選字
    */
-  public boolean pickHighlighted(int index) {
+  private boolean pickHighlighted(int index) {
     if ((highlightIndex != -1) && (listener != null)) {
       if (index == -1) index = highlightIndex;
       if (index >= 0) index += start_num;

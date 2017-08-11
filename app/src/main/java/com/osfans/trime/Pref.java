@@ -173,7 +173,7 @@ public class Pref extends PreferenceActivity
     new AlertDialog.Builder(this).setTitle(R.string.ime_name).setView(licenseView).show();
   }
 
-  public boolean isEnabled() {
+  private boolean isEnabled() {
     boolean enabled = false;
     for (InputMethodInfo i :
         ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).getEnabledInputMethodList()) {
@@ -186,7 +186,7 @@ public class Pref extends PreferenceActivity
   }
 
   @TargetApi(VERSION_CODES.M)
-  public void requestPermission() {
+  private void requestPermission() {
     if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         != PackageManager.PERMISSION_GRANTED) {
       requestPermissions(
@@ -197,7 +197,7 @@ public class Pref extends PreferenceActivity
     }
   }
 
-  public void deployOpencc() {
+  private void deployOpencc() {
     boolean b = Config.deployOpencc();
   }
 

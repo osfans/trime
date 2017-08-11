@@ -29,7 +29,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 /** {@link RecognitionListener 語音輸入} */
-public class Speech implements RecognitionListener {
+class Speech implements RecognitionListener {
   private SpeechRecognizer speech = null;
   private Intent recognizerIntent;
   private String TAG = "Speech";
@@ -47,7 +47,7 @@ public class Speech implements RecognitionListener {
     //recognizerIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "開始語音");
   }
 
-  public void alert(String text) {
+  private void alert(String text) {
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
   }
 
@@ -55,11 +55,11 @@ public class Speech implements RecognitionListener {
     speech.startListening(recognizerIntent);
   }
 
-  public void stop() {
+  private void stop() {
     speech.stopListening();
   }
 
-  public void destory() {
+  private void destory() {
     if (speech != null) {
       speech.destroy();
     }
@@ -121,7 +121,7 @@ public class Speech implements RecognitionListener {
     Log.i(TAG, "onRmsChanged: " + rmsdB);
   }
 
-  public static String getErrorText(int errorCode) {
+  private static String getErrorText(int errorCode) {
     String message;
     switch (errorCode) {
       case SpeechRecognizer.ERROR_AUDIO:

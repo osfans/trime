@@ -26,7 +26,7 @@ import android.util.Log;
 /** 接收Intent廣播事件 */
 public class IntentReceiver extends BroadcastReceiver {
   private static final String TAG = "IntentReceiver";
-  public static final String COMMAND_DEPLOY = "com.osfans.trime.deploy";
+  private static final String COMMAND_DEPLOY = "com.osfans.trime.deploy";
 
   @Override
   public void onReceive(Context ctx, Intent intent) {
@@ -43,7 +43,7 @@ public class IntentReceiver extends BroadcastReceiver {
         Function.deploy();
         break;
       default:
-        if (command.contentEquals(intent.ACTION_SHUTDOWN)) Rime.destroy();
+        if (command.contentEquals(Intent.ACTION_SHUTDOWN)) Rime.destroy();
         break;
     }
   }

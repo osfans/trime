@@ -27,28 +27,35 @@ import java.util.Map;
 public class Key {
   private String TAG = "Key";
   private Keyboard mKeyboard;
-  public Event ascii, composing, has_menu, paging;
+  private Event ascii;
+  private Event composing;
+  private Event has_menu;
+  private Event paging;
   private boolean send_bindings = true;
-  public String[] eventTypes =
+  private String[] eventTypes =
       new String[] {
         "click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"
       };
-  public static final int CLICK = 0;
+  private static final int CLICK = 0;
   public static final int LONG_CLICK = 1;
   public static final int SWIPE_LEFT = 2;
   public static final int SWIPE_RIGHT = 3;
   public static final int SWIPE_UP = 4;
   public static final int SWIPE_DOWN = 5;
   public static final int COMBO = 6;
-  public static final int EVENT_NUM = 7;
+  private static final int EVENT_NUM = 7;
   public Event[] events = new Event[EVENT_NUM];
 
   public int width, height, gap, edgeFlags;
   public int row, column;
-  public String label, hint;
-  public Drawable key_back_color, hilited_key_back_color;
-  public Integer key_text_color, key_symbol_color;
-  public Integer hilited_key_text_color, hilited_key_symbol_color;
+  private String label;
+  public String hint;
+  private Drawable key_back_color;
+  private Drawable hilited_key_back_color;
+  private Integer key_text_color;
+  private Integer key_symbol_color;
+  private Integer hilited_key_text_color;
+  private Integer hilited_key_symbol_color;
   public Integer key_text_size, symbol_text_size;
   public Float round_corner;
   public int key_text_offset_x,
@@ -289,7 +296,7 @@ public class Key {
     return false;
   }
 
-  public Event getEvent() {
+  private Event getEvent() {
     if (ascii != null && Rime.isAsciiMode()) return ascii;
     if (paging != null && Rime.isPaging()) return paging;
     if (has_menu != null && Rime.hasMenu()) return has_menu;

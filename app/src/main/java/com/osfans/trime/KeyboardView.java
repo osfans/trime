@@ -241,7 +241,8 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private boolean mShowHint = true;
 
-  Method getStateDrawableIndex, getStateDrawable;
+  private Method getStateDrawableIndex;
+  private Method getStateDrawable;
 
   private static class MyHandler extends Handler {
     private final WeakReference<KeyboardView> mKeyboardView;
@@ -542,7 +543,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     return false;
   }
 
-  public boolean resetShifted() {
+  private boolean resetShifted() {
     if (mKeyboard != null) {
       if (mKeyboard.resetShifted()) {
         // The whole keyboard probably needs to be redrawn
@@ -600,11 +601,11 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   public void setVerticalCorrection(int verticalOffset) {}
 
-  public void setPopupParent(View v) {
+  private void setPopupParent(View v) {
     mPopupParent = v;
   }
 
-  public void setPopupOffset(int x, int y) {
+  private void setPopupOffset(int x, int y) {
     mMiniKeyboardOffsetX = x;
     mMiniKeyboardOffsetY = y;
     if (mPreviewPopup.isShowing()) {
@@ -618,7 +619,7 @@ public class KeyboardView extends View implements View.OnClickListener {
    *
    * @param enabled whether or not the proximity correction is enabled
    */
-  public void setProximityCorrectionEnabled(boolean enabled) {
+  private void setProximityCorrectionEnabled(boolean enabled) {
     mProximityCorrectOn = enabled;
   }
 
@@ -1055,7 +1056,7 @@ public class KeyboardView extends View implements View.OnClickListener {
    * @param keyIndex the index of the key in the attached {@link Keyboard}.
    * @see #invalidateAllKeys
    */
-  public void invalidateKey(int keyIndex) {
+  private void invalidateKey(int keyIndex) {
     if (mKeys == null) return;
     if (keyIndex < 0 || keyIndex >= mKeys.length) {
       return;
@@ -1075,7 +1076,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         key.y + key.height + getPaddingTop());
   }
 
-  public void invalidateKeys(List<Key> keys) {
+  private void invalidateKeys(List<Key> keys) {
     if (keys == null || keys.size() == 0) return;
     for (Key key : keys) {
       mDirtyRect.union(
@@ -1121,7 +1122,7 @@ public class KeyboardView extends View implements View.OnClickListener {
    * @return true if the long press is handled, false otherwise. Subclasses should call the method
    *     on the base class if the subclass doesn't wish to handle the call.
    */
-  protected boolean onLongPress(Key popupKey) {
+  private boolean onLongPress(Key popupKey) {
     int popupKeyboardId = popupKey.popupResId;
 
     if (popupKeyboardId != 0) {
@@ -1463,19 +1464,19 @@ public class KeyboardView extends View implements View.OnClickListener {
     return true;
   }
 
-  protected void swipeRight() {
+  private void swipeRight() {
     mKeyboardActionListener.swipeRight();
   }
 
-  protected void swipeLeft() {
+  private void swipeLeft() {
     mKeyboardActionListener.swipeLeft();
   }
 
-  protected void swipeUp() {
+  private void swipeUp() {
     mKeyboardActionListener.swipeUp();
   }
 
-  protected void swipeDown() {
+  private void swipeDown() {
     mKeyboardActionListener.swipeDown();
   }
 

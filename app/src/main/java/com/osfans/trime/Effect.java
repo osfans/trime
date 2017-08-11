@@ -27,7 +27,7 @@ import android.view.KeyEvent;
 import java.util.Locale;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
-public class Effect {
+class Effect {
   private static final int MAX_VOLUME = 100;
   private int duration = 10;
   private long durationLong;
@@ -107,7 +107,7 @@ public class Effect {
     if (mTTS != null) mTTS.setLanguage(loc);
   }
 
-  public void speak(CharSequence text) {
+  private void speak(CharSequence text) {
     if (text != null && mTTS != null) mTTS.speak(text.toString(), TextToSpeech.QUEUE_FLUSH, null);
   }
 

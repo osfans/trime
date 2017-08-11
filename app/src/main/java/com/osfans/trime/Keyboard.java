@@ -70,7 +70,9 @@ public class Keyboard {
   private int mTotalWidth;
 
   /** List of keys in this keyboard */
-  public List<Key> mKeys, mComposingKeys;
+  private List<Key> mKeys;
+
+  public List<Key> mComposingKeys;
 
   private int mMetaState;
 
@@ -222,7 +224,7 @@ public class Keyboard {
     return mTotalWidth;
   }
 
-  public boolean hasModifier(int modifiers) {
+  private boolean hasModifier(int modifiers) {
     return (mMetaState & modifiers) != 0;
   }
 
@@ -241,7 +243,7 @@ public class Keyboard {
     return mMetaState;
   }
 
-  public boolean setModifier(int mask, boolean value) {
+  private boolean setModifier(int mask, boolean value) {
     boolean b = hasModifier(mask);
     if (b == value) return false;
     if (value) mMetaState |= mask;

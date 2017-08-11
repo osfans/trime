@@ -34,19 +34,19 @@ import java.util.List;
 import java.util.Map;
 
 /** 顯示輸入法方案列表 */
-public class SchemaDialog extends AsyncTask {
-  boolean[] checkedSchemaItems;
-  String[] schemaItems;
-  List<Map<String, String>> schemas;
-  List<Map<String, String>> selected_schemas;
-  String[] schemaNames;
-  Context mContext;
-  IBinder mToken;
-  ProgressDialog mProgressDialog;
-  AlertDialog mDialog;
+class SchemaDialog extends AsyncTask {
+  private boolean[] checkedSchemaItems;
+  private String[] schemaItems;
+  private List<Map<String, String>> schemas;
+  private List<Map<String, String>> selected_schemas;
+  private String[] schemaNames;
+  private Context mContext;
+  private IBinder mToken;
+  private ProgressDialog mProgressDialog;
+  private AlertDialog mDialog;
   private static String TAG = SchemaDialog.class.getSimpleName();
 
-  public class SortByName implements Comparator<Map<String, String>> {
+  private class SortByName implements Comparator<Map<String, String>> {
     @Override
     public int compare(Map<String, String> m1, Map<String, String> m2) {
       String s1 = m1.get("schema_id");
@@ -127,7 +127,7 @@ public class SchemaDialog extends AsyncTask {
     }
   }
 
-  public void showDialog() {
+  private void showDialog() {
     AlertDialog.Builder builder =
         new AlertDialog.Builder(mContext)
             .setTitle(R.string.pref_schemas)

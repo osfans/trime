@@ -54,7 +54,7 @@ public class Config {
 
   // 默认的用户数据路径
   private static final String RIME = "rime";
-  public static final String EXTERNAL_STORAGE_PATH =
+  private static final String EXTERNAL_STORAGE_PATH =
       Environment.getExternalStorageDirectory().getPath();
   private static final String USER_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME).getPath();
   public static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
@@ -83,7 +83,7 @@ public class Config {
     return themeName;
   }
 
-  public static void prepareRime(Context context) {
+  private static void prepareRime(Context context) {
     boolean isExist = new File(USER_DATA_DIR).exists();
     boolean isOverwrite = Function.isDiffVer(context);
     if (isOverwrite) {
@@ -176,7 +176,7 @@ public class Config {
     return true;
   }
 
-  public static boolean copyFile(Context context, String filename, boolean overwrite) {
+  private static boolean copyFile(Context context, String filename, boolean overwrite) {
     AssetManager assetManager = context.getAssets();
     InputStream in = null;
     OutputStream out = null;
@@ -214,7 +214,7 @@ public class Config {
     init();
   }
 
-  public void init() {
+  private void init() {
     String name = Rime.config_get_string(themeName, "config_version");
     if (Function.isEmpty(name)) themeName = defaultName;
     deployConfig();
@@ -270,7 +270,7 @@ public class Config {
     return getValue(s) != null;
   }
 
-  public String getKeyboardName(String name) {
+  private String getKeyboardName(String name) {
     if (name.contentEquals(".default")) {
       if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名
       else {
@@ -330,7 +330,7 @@ public class Config {
     self = null;
   }
 
-  public static int getPixel(Float f) {
+  private static int getPixel(Float f) {
     if (f == null) return 0;
     return (int)
         TypedValue.applyDimension(
@@ -456,7 +456,7 @@ public class Config {
     return o;
   }
 
-  public Integer getCurrentColor(String key) {
+  private Integer getCurrentColor(String key) {
     Object o = getColorObject(key);
     if (o instanceof Integer) return ((Integer) o).intValue();
     if (o instanceof Float || o instanceof Double) return ((Long) o).intValue();
@@ -513,7 +513,7 @@ public class Config {
     return Typeface.DEFAULT;
   }
 
-  public Drawable drawableObject(Object o) {
+  private Drawable drawableObject(Object o) {
     if (o == null) return null;
     Integer color = null;
     if (o instanceof Integer) color = ((Integer) o).intValue();
@@ -536,7 +536,7 @@ public class Config {
     return null;
   }
 
-  public Drawable getCurrentColorDrawable(String key) {
+  private Drawable getCurrentColorDrawable(String key) {
     Object o = getColorObject(key);
     return drawableObject(o);
   }
@@ -594,7 +594,7 @@ public class Config {
     return progress * 10 + 10;
   }
 
-  public boolean getShowSwitches() {
+  private boolean getShowSwitches() {
     return mPref.getBoolean("show_switches", true);
   }
 
