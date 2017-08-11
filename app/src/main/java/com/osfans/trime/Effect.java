@@ -24,12 +24,11 @@ import android.media.AudioManager;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.view.KeyEvent;
-
 import java.util.Locale;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
-  private final static int MAX_VOLUME = 100;
+  private static final int MAX_VOLUME = 100;
   private int duration = 10;
   private long durationLong;
   private int volume = 100;
@@ -54,27 +53,28 @@ public class Effect {
     durationLong = duration * 1L;
     vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
     if (vibrateOn && (vibrator == null)) {
-      vibrator =
-        (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+      vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     volume = pref.getInt("key_sound_volume", volume);
     volumeFloat = (float) (1 - (Math.log(MAX_VOLUME - volume) / Math.log(MAX_VOLUME)));
     soundOn = pref.getBoolean("key_sound", false);
     if (soundOn && (audioManager == null)) {
-      audioManager = 
-        (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+      audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     isSpeakCommit = pref.getBoolean("speak_commit", false);
     isSpeakKey = pref.getBoolean("speak_key", false);
     if (mTTS == null && (isSpeakCommit || isSpeakKey)) {
-      mTTS = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-        @Override
-        public void onInit(int status) {
-          //初始化結果
-        }
-      });
+      mTTS =
+          new TextToSpeech(
+              context,
+              new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                  //初始化結果
+                }
+              });
     }
   }
 
@@ -87,17 +87,17 @@ public class Effect {
       final int sound;
       switch (code) {
         case KeyEvent.KEYCODE_DEL:
-            sound = AudioManager.FX_KEYPRESS_DELETE;
-            break;
+          sound = AudioManager.FX_KEYPRESS_DELETE;
+          break;
         case KeyEvent.KEYCODE_ENTER:
-            sound = AudioManager.FX_KEYPRESS_RETURN;
-            break;
+          sound = AudioManager.FX_KEYPRESS_RETURN;
+          break;
         case KeyEvent.KEYCODE_SPACE:
-            sound = AudioManager.FX_KEYPRESS_SPACEBAR;
-            break;
+          sound = AudioManager.FX_KEYPRESS_SPACEBAR;
+          break;
         default:
-            sound = AudioManager.FX_KEYPRESS_STANDARD;
-            break;
+          sound = AudioManager.FX_KEYPRESS_STANDARD;
+          break;
       }
       audioManager.playSoundEffect(sound, volumeFloat);
     }
@@ -108,7 +108,7 @@ public class Effect {
   }
 
   public void speak(CharSequence text) {
-    if (text!= null && mTTS != null) mTTS.speak(text.toString(), TextToSpeech.QUEUE_FLUSH, null);
+    if (text != null && mTTS != null) mTTS.speak(text.toString(), TextToSpeech.QUEUE_FLUSH, null);
   }
 
   public void speakCommit(CharSequence text) {
@@ -121,15 +121,19 @@ public class Effect {
 
   public void speakKey(int code) {
     if (code <= 0) return;
-    String text = KeyEvent.keyCodeToString(code).replace("KEYCODE_","").replace("_", " ").toLowerCase(Locale.getDefault());
+    String text =
+        KeyEvent.keyCodeToString(code)
+            .replace("KEYCODE_", "")
+            .replace("_", " ")
+            .toLowerCase(Locale.getDefault());
     speakKey(text);
   }
 
   public void destory() {
-     if (mTTS != null) {
-       mTTS.stop();
-       mTTS.shutdown();
-       mTTS = null;
-     }
+    if (mTTS != null) {
+      mTTS.stop();
+      mTTS.shutdown();
+      mTTS = null;
+    }
   }
 }

@@ -31,6 +31,7 @@ public class ResetDialog {
   boolean[] checked;
   /** 回廠對話框 */
   AlertDialog dialog;
+
   Context context;
 
   /** 回廠選中的數據 */
@@ -43,7 +44,9 @@ public class ResetDialog {
         ret = Config.copyFileOrDir(context, "rime/" + items[i], true);
       }
     }
-    Toast.makeText(context, ret ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT).show();
+    Toast.makeText(
+            context, ret ? R.string.reset_success : R.string.reset_failure, Toast.LENGTH_SHORT)
+        .show();
   }
 
   public ResetDialog(Context context) {
@@ -51,27 +54,34 @@ public class ResetDialog {
     items = Config.list(context, "rime");
     if (items == null) return;
     checked = new boolean[items.length];
-    dialog = new AlertDialog.Builder(context)
-      .setTitle(R.string.pref_reset)
-      .setCancelable(true)
-      .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id) {
-          select();
-        }
-      })
-      .setMultiChoiceItems(items, checked, new DialogInterface.OnMultiChoiceClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id, boolean isChecked) {
-          checked[id] = isChecked;
-        }
-      })
-      .create();
+    dialog =
+        new AlertDialog.Builder(context)
+            .setTitle(R.string.pref_reset)
+            .setCancelable(true)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(
+                android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface di, int id) {
+                    select();
+                  }
+                })
+            .setMultiChoiceItems(
+                items,
+                checked,
+                new DialogInterface.OnMultiChoiceClickListener() {
+                  @Override
+                  public void onClick(DialogInterface di, int id, boolean isChecked) {
+                    checked[id] = isChecked;
+                  }
+                })
+            .create();
   }
 
   /**
    * 獲得回廠對話框
+   *
    * @return 回廠對話框對象
    */
   public AlertDialog getDialog() {

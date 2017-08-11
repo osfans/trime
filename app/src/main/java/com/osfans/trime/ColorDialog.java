@@ -21,7 +21,6 @@ package com.osfans.trime;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-
 import java.util.Arrays;
 
 /** 顯示配色方案列表 */
@@ -47,22 +46,29 @@ public class ColorDialog {
     Arrays.sort(colorKeys);
     checkedColor = Arrays.binarySearch(colorKeys, colorScheme);
     colorNames = config.getColorNames(colorKeys);
-    dialog = new AlertDialog.Builder(context)
-      .setTitle(R.string.pref_colors)
-      .setCancelable(true)
-      .setNegativeButton(android.R.string.cancel, null)
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id) {
-          selectColor();
-        }
-      })
-      .setSingleChoiceItems(colorNames, checkedColor, new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface di, int id) {
-          checkedColor = id;
-        }
-      }).create();
+    dialog =
+        new AlertDialog.Builder(context)
+            .setTitle(R.string.pref_colors)
+            .setCancelable(true)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(
+                android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface di, int id) {
+                    selectColor();
+                  }
+                })
+            .setSingleChoiceItems(
+                colorNames,
+                checkedColor,
+                new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface di, int id) {
+                    checkedColor = id;
+                  }
+                })
+            .create();
   }
 
   public AlertDialog getDialog() {

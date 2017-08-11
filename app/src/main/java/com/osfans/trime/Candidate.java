@@ -61,7 +61,7 @@ public class Candidate extends View {
   public void reset() {
     Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
-    ((PaintDrawable)candidateHighlight).setCornerRadius(config.getFloat("layout/round_corner"));
+    ((PaintDrawable) candidateHighlight).setCornerRadius(config.getFloat("layout/round_corner"));
     candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
     candidate_spacing = config.getPixel("candidate_spacing");
     candidate_padding = config.getPixel("candidate_padding");
@@ -77,7 +77,7 @@ public class Candidate extends View {
     comment_height = config.getPixel("comment_height");
 
     tfCandidate = config.getFont("candidate_font");
-    tfLatin= config.getFont("latin_font");
+    tfLatin = config.getFont("latin_font");
     tfHanB = config.getFont("hanb_font");
     tfComment = config.getFont("comment_font");
     tfSymbol = config.getFont("symbol_font");
@@ -114,13 +114,14 @@ public class Candidate extends View {
 
     setWillNotDraw(false);
   }
-  
+
   public void setCandidateListener(CandidateListener listener) {
     this.listener = listener;
   }
 
   /**
    * 刷新候選列表
+   *
    * @param start 候選的起始編號
    */
   public void setText(int start) {
@@ -165,7 +166,7 @@ public class Candidate extends View {
   }
 
   private boolean isHighlighted(int i) {
-    return candidate_use_cursor && i >=0 && i == highlightIndex;
+    return candidate_use_cursor && i >= 0 && i == highlightIndex;
   }
 
   private void drawHighlight(Canvas canvas) {
@@ -181,7 +182,8 @@ public class Candidate extends View {
     return font;
   }
 
-  private void drawText(String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
+  private void drawText(
+      String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
     if (s == null) return;
     int length = s.length();
     if (length == 0) return;
@@ -230,20 +232,21 @@ public class Candidate extends View {
             comment_x = candidateRect[i].centerX();
           } else {
             x -= comment_width / 2;
-            comment_x = candidateRect[i].right -  comment_width / 2;
+            comment_x = candidateRect[i].right - comment_width / 2;
           }
           paintComment.setColor(isHighlighted(i) ? hilited_comment_text_color : comment_text_color);
           drawText(comment, canvas, paintComment, tfComment, comment_x, comment_y);
         }
       }
-      paintCandidate.setColor(isHighlighted(i) ? hilited_candidate_text_color : candidate_text_color);
+      paintCandidate.setColor(
+          isHighlighted(i) ? hilited_candidate_text_color : candidate_text_color);
       drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, x, y);
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
-        candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
-        candidateRect[i].top,
-        candidateRect[i].right + candidate_spacing,
-        candidateRect[i].bottom);
+          candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
+          candidateRect[i].top,
+          candidateRect[i].right + candidate_spacing,
+          candidateRect[i].bottom);
       candidateSeparator.draw(canvas);
       i++;
     }
@@ -254,10 +257,10 @@ public class Candidate extends View {
       x = candidateRect[i].centerX() - measureText(candidate, paintSymbol, tfSymbol) / 2;
       canvas.drawText(candidate, x, y, paintSymbol);
       candidateSeparator.setBounds(
-        candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
-        candidateRect[i].top,
-        candidateRect[i].right + candidate_spacing,
-        candidateRect[i].bottom);
+          candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
+          candidateRect[i].top,
+          candidateRect[i].right + candidate_spacing,
+          candidateRect[i].bottom);
       candidateSeparator.draw(canvas);
       i++;
     }
@@ -285,7 +288,7 @@ public class Candidate extends View {
       candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
       x += candidate_spacing;
     }
-    if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int)getCandidateWidth(-4), bottom);
+    if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int) getCandidateWidth(-4), bottom);
     if (Rime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
     params.width = x;
@@ -328,13 +331,11 @@ public class Candidate extends View {
 
   /**
    * 獲得觸摸處候選項序號
+   *
    * @param x 觸摸點橫座標
    * @param y 觸摸點縱座標
-   * @return
-   * {@code >=0}: 觸摸點 (x, y) 處候選項序號，從0開始編號；
-   * {@code -1}: 觸摸點 (x, y) 處無候選項；
-   * {@code -4}: 觸摸點 (x, y) 處爲{@code Page_Up}；
-   * {@code -5}: 觸摸點 (x, y) 處爲{@code Page_Down}
+   * @return {@code >=0}: 觸摸點 (x, y) 處候選項序號，從0開始編號； {@code -1}: 觸摸點 (x, y) 處無候選項； {@code -4}: 觸摸點
+   *     (x, y) 處爲{@code Page_Up}； {@code -5}: 觸摸點 (x, y) 處爲{@code Page_Down}
    */
   private int getCandidateIndex(int x, int y) {
     Rect r = new Rect();
@@ -423,8 +424,10 @@ public class Candidate extends View {
       String comment = getComment(i);
       if (comment != null) {
         float x2 = measureText(comment, paintComment, tfComment);
-        if (comment_on_top) { if (x2 > x) x = x2; } //提示在上方
-        else x += x2;  //提示在右方
+        if (comment_on_top) {
+          if (x2 > x) x = x2;
+        } //提示在上方
+        else x += x2; //提示在右方
       }
     }
     return x;

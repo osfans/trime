@@ -37,7 +37,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
-
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +53,7 @@ public class Composition extends TextView {
   private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
-  private List<Map<String,Object>> components;
+  private List<Map<String, Object>> components;
   private SpannableStringBuilder ss;
   private int span = 0;
   private String movable;
@@ -65,82 +64,85 @@ public class Composition extends TextView {
   private int candidate_num;
   private boolean all_phrases;
 
-  private class CompositionSpan extends UnderlineSpan{
-      public CompositionSpan() {
-          super();
-      }
-      @Override
-      public void updateDrawState(TextPaint ds) {
-          ds.setTypeface(tfText);
-          ds.setColor(text_color);
-          ds.bgColor = back_color;
-      }
+  private class CompositionSpan extends UnderlineSpan {
+    public CompositionSpan() {
+      super();
+    }
+
+    @Override
+    public void updateDrawState(TextPaint ds) {
+      ds.setTypeface(tfText);
+      ds.setColor(text_color);
+      ds.bgColor = back_color;
+    }
   }
 
-  private class CandidateSpan extends ClickableSpan{
-      int index;
-      Typeface tf;
-      int hi_text, hi_back, text;
-      public CandidateSpan(int i, Typeface _tf, int _hi_text, int _hi_back, int _text) {
-          super();
-          index = i;
-          tf = _tf;
-          hi_text = _hi_text;
-          hi_back = _hi_back;
-          text = _text;
+  private class CandidateSpan extends ClickableSpan {
+    int index;
+    Typeface tf;
+    int hi_text, hi_back, text;
+
+    public CandidateSpan(int i, Typeface _tf, int _hi_text, int _hi_back, int _text) {
+      super();
+      index = i;
+      tf = _tf;
+      hi_text = _hi_text;
+      hi_back = _hi_back;
+      text = _text;
+    }
+
+    @Override
+    public void onClick(View tv) {
+      Trime.getService().onPickCandidate(index);
+    }
+
+    @Override
+    public void updateDrawState(TextPaint ds) {
+      ds.setUnderlineText(false);
+      ds.setTypeface(tf);
+      if (index == highlightIndex) {
+        ds.setColor(hi_text);
+        ds.bgColor = hi_back;
+      } else {
+        ds.setColor(text);
       }
-      @Override
-      public void onClick(View tv) {
-         Trime.getService().onPickCandidate(index);
-      }
-      @Override
-      public void updateDrawState(TextPaint ds) {
-          ds.setUnderlineText(false);
-          ds.setTypeface(tf);
-          if (index == highlightIndex) {
-            ds.setColor(hi_text);
-            ds.bgColor = hi_back;
-          } else {
-            ds.setColor(text);
-          }
-      }
+    }
   }
 
-  private class EventSpan extends ClickableSpan{
-      Event event;
-      public EventSpan(Event e) {
-          super();
-          event = e;
-      }
+  private class EventSpan extends ClickableSpan {
+    Event event;
 
-      @Override
-      public void onClick(View tv) {
-         Trime.getService().onEvent(event);
-      }
-      @Override
-      public void updateDrawState(TextPaint ds) {
-          ds.setUnderlineText(false);
-          ds.setColor(key_text_color);
-          if (key_back_color != null) ds.bgColor = key_back_color;
-      }
+    public EventSpan(Event e) {
+      super();
+      event = e;
+    }
+
+    @Override
+    public void onClick(View tv) {
+      Trime.getService().onEvent(event);
+    }
+
+    @Override
+    public void updateDrawState(TextPaint ds) {
+      ds.setUnderlineText(false);
+      ds.setColor(key_text_color);
+      if (key_back_color != null) ds.bgColor = key_back_color;
+    }
   }
 
   @TargetApi(21)
   public class LetterSpacingSpan extends UnderlineSpan {
-      private float letterSpacing;
+    private float letterSpacing;
 
-      /**
-       * @param letterSpacing 字符間距
-       */
-      public LetterSpacingSpan(float letterSpacing) {
-          this.letterSpacing = letterSpacing;
-      }
+    /** @param letterSpacing 字符間距 */
+    public LetterSpacingSpan(float letterSpacing) {
+      this.letterSpacing = letterSpacing;
+    }
 
-      @Override
-      public void updateDrawState(TextPaint ds) {
-          ds.setLetterSpacing(letterSpacing);
-      }
-
+    @Override
+    public void updateDrawState(TextPaint ds) {
+      ds.setLetterSpacing(letterSpacing);
+    }
   }
 
   public Composition(Context context, AttributeSet attrs) {
@@ -154,13 +156,15 @@ public class Composition extends TextView {
     if (action == MotionEvent.ACTION_UP) {
       int n = getOffsetForPosition(event.getX(), event.getY());
       if (composition_pos[0] <= n && n <= composition_pos[1]) {
-        String s = getText().toString().substring(n, composition_pos[1]).replace(" ", "").replace("‸", "");
+        String s =
+            getText().toString().substring(n, composition_pos[1]).replace(" ", "").replace("‸", "");
         n = Rime.RimeGetInput().length() - s.length(); //從右側定位
         Rime.RimeSetCaretPos(n);
         Trime.getService().updateComposing();
         return true;
       }
-    } else if (!movable.contentEquals("false") && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
+    } else if (!movable.contentEquals("false")
+        && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
       int n = getOffsetForPosition(event.getX(), event.getY());
       if (move_pos[0] <= n && n <= move_pos[1]) {
         if (action == MotionEvent.ACTION_DOWN) {
@@ -168,7 +172,7 @@ public class Composition extends TextView {
             first_move = false;
             int location[] = new int[2];
             getLocationOnScreen(location);
-            mCurrentX =location[0];
+            mCurrentX = location[0];
             mCurrentY = location[1];
           }
           mDx = mCurrentX - event.getRawX();
@@ -184,10 +188,9 @@ public class Composition extends TextView {
     return super.onTouchEvent(event);
   }
 
-
   public void reset() {
     Config config = Config.get();
-    components = (List<Map<String,Object>>)config.getValue("window");
+    components = (List<Map<String, Object>>) config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     show_comment = config.getBoolean("show_comment");
@@ -203,15 +206,15 @@ public class Composition extends TextView {
     hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
     hilited_comment_text_color = config.getColor("hilited_comment_text_color");
     label_color = config.getColor("label_color");
-    
+
     back_color = config.getColor("back_color");
     hilited_back_color = config.getColor("hilited_back_color");
     hilited_candidate_back_color = config.getColor("hilited_candidate_back_color");
-    
+
     key_text_size = config.getPixel("key_text_size");
     key_text_color = config.getColor("key_text_color");
     key_back_color = config.getColor("key_back_color");
-    
+
     float line_spacing_multiplier = config.getFloat("layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;
     setLineSpacing(config.getFloat("layout/line_spacing"), line_spacing_multiplier);
@@ -282,7 +285,7 @@ public class Composition extends TextView {
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
     sep = Config.getString(m, "end");
-    if (!Function.isEmpty(sep))ss.append(sep);
+    if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
   private int appendCandidates(Map m, int length) {
@@ -301,7 +304,7 @@ public class Composition extends TextView {
     String[] labels = Rime.getSelectLabels();
     int i = -1;
     candidate_num = 0;
-    for (Rime.RimeCandidate o: candidates) {
+    for (Rime.RimeCandidate o : candidates) {
       String cand = o.text;
       if (Function.isEmpty(cand)) cand = "";
       i++;
@@ -319,7 +322,7 @@ public class Composition extends TextView {
       if (candidate_num == 0) {
         line_sep = sep;
       } else if ((sticky_lines > 0 && sticky_lines >= i)
-            || (max_length > 0 && line_length + cand.length() > max_length)){
+          || (max_length > 0 && line_length + cand.length() > max_length)) {
         line_sep = "\n";
         line_length = 0;
       } else {
@@ -336,7 +339,16 @@ public class Composition extends TextView {
         start = ss.length();
         ss.append(label);
         end = ss.length();
-        ss.setSpan(new CandidateSpan(i, tfLabel, hilited_candidate_text_color, hilited_candidate_back_color, label_color), start, end, span);
+        ss.setSpan(
+            new CandidateSpan(
+                i,
+                tfLabel,
+                hilited_candidate_text_color,
+                hilited_candidate_back_color,
+                label_color),
+            start,
+            end,
+            span);
         ss.setSpan(new AbsoluteSizeSpan(label_text_size), start, end, span);
       }
       start = ss.length();
@@ -344,7 +356,16 @@ public class Composition extends TextView {
       end = ss.length();
       line_length += cand.length();
       ss.setSpan(getAlign(m), start, end, span);
-      ss.setSpan(new CandidateSpan(i, tfCandidate, hilited_candidate_text_color, hilited_candidate_back_color, candidate_text_color), start, end, span);
+      ss.setSpan(
+          new CandidateSpan(
+              i,
+              tfCandidate,
+              hilited_candidate_text_color,
+              hilited_candidate_back_color,
+              candidate_text_color),
+          start,
+          end,
+          span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
       String comment = o.comment;
       if (show_comment && !Function.isEmpty(comment_format) && !Function.isEmpty(comment)) {
@@ -353,7 +374,16 @@ public class Composition extends TextView {
         ss.append(comment);
         end = ss.length();
         ss.setSpan(getAlign(m), start, end, span);
-        ss.setSpan(new CandidateSpan(i, tfComment, hilited_comment_text_color, hilited_candidate_back_color, comment_text_color), start, end, span);
+        ss.setSpan(
+            new CandidateSpan(
+                i,
+                tfComment,
+                hilited_comment_text_color,
+                hilited_candidate_back_color,
+                comment_text_color),
+            start,
+            end,
+            span);
         ss.setSpan(new AbsoluteSizeSpan(comment_text_size), start, end, span);
         line_length += comment.length();
       }
@@ -413,7 +443,7 @@ public class Composition extends TextView {
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
     sep = Config.getString(m, "end");
-    if (!Function.isEmpty(sep))ss.append(sep);
+    if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
   public int setWindow(int length) {
@@ -425,11 +455,11 @@ public class Composition extends TextView {
     setSingleLine(true); //設置單行
     ss = new SpannableStringBuilder();
     int start_num = 0;
-    for (Map<String,Object> m: components) {
+    for (Map<String, Object> m : components) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) start_num = appendCandidates(m, length);
-      else if (m.containsKey("click"))appendButton(m);
-      else if (m.containsKey("move"))appendMove(m);
+      else if (m.containsKey("click")) appendButton(m);
+      else if (m.containsKey("move")) appendMove(m);
     }
     if (candidate_num > 0 || ss.toString().contains("\n")) setSingleLine(false); //設置單行
     setText(ss);

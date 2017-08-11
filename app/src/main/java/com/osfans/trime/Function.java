@@ -33,7 +33,6 @@ import android.os.Build.*;
 import android.preference.PreferenceManager;
 import android.util.SparseArray;
 import android.view.KeyEvent;
-
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,20 +43,17 @@ import java.util.Locale;
 public class Function {
   private static String TAG = "Function";
   static SparseArray<String> sApplicationLaunchKeyCategories;
+
   static {
     sApplicationLaunchKeyCategories = new SparseArray<String>();
     sApplicationLaunchKeyCategories.append(
-            KeyEvent.KEYCODE_EXPLORER, "android.intent.category.APP_BROWSER");
+        KeyEvent.KEYCODE_EXPLORER, "android.intent.category.APP_BROWSER");
     sApplicationLaunchKeyCategories.append(
-            KeyEvent.KEYCODE_ENVELOPE, "android.intent.category.APP_EMAIL");
-    sApplicationLaunchKeyCategories.append(
-            207, "android.intent.category.APP_CONTACTS");
-    sApplicationLaunchKeyCategories.append(
-            208, "android.intent.category.APP_CALENDAR");
-    sApplicationLaunchKeyCategories.append(
-            209, "android.intent.category.APP_EMAIL");
-    sApplicationLaunchKeyCategories.append(
-            210, "android.intent.category.APP_CALCULATOR");
+        KeyEvent.KEYCODE_ENVELOPE, "android.intent.category.APP_EMAIL");
+    sApplicationLaunchKeyCategories.append(207, "android.intent.category.APP_CONTACTS");
+    sApplicationLaunchKeyCategories.append(208, "android.intent.category.APP_CALENDAR");
+    sApplicationLaunchKeyCategories.append(209, "android.intent.category.APP_EMAIL");
+    sApplicationLaunchKeyCategories.append(210, "android.intent.category.APP_CALCULATOR");
   }
 
   @TargetApi(VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
@@ -67,7 +63,7 @@ public class Function {
       Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       try {
-          context.startActivity(intent);
+        context.startActivity(intent);
       } catch (Exception ex) {
       }
       return true;
@@ -135,7 +131,7 @@ public class Function {
       if (ss.length == 2 && ss[0].contains("@")) {
         locale = ss[0];
         option = ss[1];
-      } else if (ss.length == 1){
+      } else if (ss.length == 1) {
         locale = ss[0];
         option = "";
       }
@@ -205,12 +201,12 @@ public class Function {
     final PackageManager packageManager = context.getPackageManager();
     List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
     if (pinfo != null) {
-        for (int i = 0; i < pinfo.size(); i++) {
-            String pn = pinfo.get(i).packageName;
-            if (pn.equals(app)) {
-                return true;
-            }
+      for (int i = 0; i < pinfo.size(); i++) {
+        String pn = pinfo.get(i).packageName;
+        if (pn.equals(app)) {
+          return true;
         }
+      }
     }
     return false;
   }

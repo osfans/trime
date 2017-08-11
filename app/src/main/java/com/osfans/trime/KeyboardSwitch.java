@@ -19,7 +19,6 @@
 package com.osfans.trime;
 
 import android.content.Context;
-
 import java.util.List;
 
 /** 管理多個{@link Keyboard 鍵盤} */
@@ -43,13 +42,13 @@ public class KeyboardSwitch {
     mKeyboardNames = Config.get().getKeyboardNames();
     int n = mKeyboardNames.size();
     mKeyboards = new Keyboard[n];
-    for (int i = 0; i < n; i++ ) {
+    for (int i = 0; i < n; i++) {
       mKeyboards[i] = new Keyboard(context, mKeyboardNames.get(i));
     }
     setKeyboard(0);
   }
 
-  public void setKeyboard(String name){
+  public void setKeyboard(String name) {
     int i;
     if (name == null || name.contentEquals(".default")) {
       i = 0;
@@ -63,7 +62,7 @@ public class KeyboardSwitch {
     setKeyboard(i);
   }
 
-  public void setKeyboard(int i){
+  public void setKeyboard(int i) {
     if (i < 0 || i >= mKeyboards.length) i = 0;
     lastId = currentId;
     currentId = i;
@@ -81,7 +80,7 @@ public class KeyboardSwitch {
   public Keyboard getCurrentKeyboard() {
     return mKeyboards[currentId];
   }
-  
+
   public boolean getAsciiMode() {
     return getCurrentKeyboard().getAsciiMode();
   }

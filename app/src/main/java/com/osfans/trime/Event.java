@@ -19,7 +19,6 @@
 package com.osfans.trime;
 
 import android.view.KeyEvent;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -52,10 +51,10 @@ public class Event {
       parseLabel();
       text = Config.getString(m, "text");
       if (code == 0 && Function.isEmpty(text)) text = s;
-      if (m.containsKey("states")) states = (List<String>)m.get("states");
-      sticky = (Boolean)Config.getValue(m, "sticky", false);
-      repeatable = (Boolean)Config.getValue(m, "repeatable", false);
-      functional = (Boolean)Config.getValue(m, "functional", true);
+      if (m.containsKey("states")) states = (List<String>) m.get("states");
+      sticky = (Boolean) Config.getValue(m, "sticky", false);
+      repeatable = (Boolean) Config.getValue(m, "repeatable", false);
+      functional = (Boolean) Config.getValue(m, "functional", true);
     } else if ((code = getClickCode(s)) > 0) {
       parseLabel();
     } else {
@@ -74,7 +73,7 @@ public class Event {
     return (!Function.isEmpty(s)) && s.length() > 1 && s.matches(".*\\{.+\\}.*");
   }
 
-  public static int [] parseSend(String s) {
+  public static int[] parseSend(String s) {
     int[] sends = new int[2];
     if (Function.isEmpty(s)) return sends;
     String codes;
@@ -91,8 +90,12 @@ public class Event {
 
   public String adjustCase(String s) {
     if (Function.isEmpty(s)) return "";
-    if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted()) s = s.toUpperCase(Locale.getDefault());
-    else if (s.length() == 1 && mKeyboard != null && !Rime.isAsciiMode() && mKeyboard.isLabelUppercase()) s = s.toUpperCase(Locale.getDefault());
+    if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted())
+      s = s.toUpperCase(Locale.getDefault());
+    else if (s.length() == 1
+        && mKeyboard != null
+        && !Rime.isAsciiMode()
+        && mKeyboard.isLabelUppercase()) s = s.toUpperCase(Locale.getDefault());
     return s;
   }
 
@@ -104,7 +107,11 @@ public class Event {
   public String getText() {
     String s = "";
     if (!Function.isEmpty(text)) s = text;
-    else if (mKeyboard != null && mKeyboard.isShifted() && mask == 0 && code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z) s = label;
+    else if (mKeyboard != null
+        && mKeyboard.isShifted()
+        && mask == 0
+        && code >= KeyEvent.KEYCODE_A
+        && code <= KeyEvent.KEYCODE_Z) s = label;
     return adjustCase(s);
   }
 
@@ -121,7 +128,7 @@ public class Event {
   private void parseLabel() {
     if (!Function.isEmpty(label)) return;
     int c = code;
-    if (c == KeyEvent.KEYCODE_SPACE){
+    if (c == KeyEvent.KEYCODE_SPACE) {
       label = Rime.getSchemaName();
     } else {
       if (c > 0) label = getDisplayLabel(c);
@@ -180,33 +187,35 @@ public class Event {
     return new int[] {i, m};
   }
 
-  public static Map<String,Integer> masks = new HashMap<String,Integer>() {
-    {
-      put("Shift", KeyEvent.META_SHIFT_ON);
-      put("Control", KeyEvent.META_CTRL_ON);
-      put("Alt", KeyEvent.META_ALT_ON);
-    }
-  };
+  public static Map<String, Integer> masks =
+      new HashMap<String, Integer>() {
+        {
+          put("Shift", KeyEvent.META_SHIFT_ON);
+          put("Control", KeyEvent.META_CTRL_ON);
+          put("Alt", KeyEvent.META_ALT_ON);
+        }
+      };
 
-  public static Map<String,Integer> symbolAliases = new HashMap<String,Integer>() {
-    {
-      put("#", KeyEvent.KEYCODE_POUND);
-      put("'", KeyEvent.KEYCODE_APOSTROPHE);
-      put("(", KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN);
-      put(")", KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN);
-      put("*", KeyEvent.KEYCODE_STAR);
-      put("+", KeyEvent.KEYCODE_PLUS);
-      put(",", KeyEvent.KEYCODE_COMMA);
-      put("-", KeyEvent.KEYCODE_MINUS);
-      put(".", KeyEvent.KEYCODE_PERIOD);
-      put("/", KeyEvent.KEYCODE_SLASH);
-      put(";", KeyEvent.KEYCODE_SEMICOLON);
-      put("=", KeyEvent.KEYCODE_EQUALS);
-      put("@", KeyEvent.KEYCODE_AT);
-      put("\\", KeyEvent.KEYCODE_BACKSLASH);
-      put("[", KeyEvent.KEYCODE_LEFT_BRACKET);
-      put("`", KeyEvent.KEYCODE_GRAVE);
-      put("]", KeyEvent.KEYCODE_RIGHT_BRACKET);
-    }
-  };
+  public static Map<String, Integer> symbolAliases =
+      new HashMap<String, Integer>() {
+        {
+          put("#", KeyEvent.KEYCODE_POUND);
+          put("'", KeyEvent.KEYCODE_APOSTROPHE);
+          put("(", KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN);
+          put(")", KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN);
+          put("*", KeyEvent.KEYCODE_STAR);
+          put("+", KeyEvent.KEYCODE_PLUS);
+          put(",", KeyEvent.KEYCODE_COMMA);
+          put("-", KeyEvent.KEYCODE_MINUS);
+          put(".", KeyEvent.KEYCODE_PERIOD);
+          put("/", KeyEvent.KEYCODE_SLASH);
+          put(";", KeyEvent.KEYCODE_SEMICOLON);
+          put("=", KeyEvent.KEYCODE_EQUALS);
+          put("@", KeyEvent.KEYCODE_AT);
+          put("\\", KeyEvent.KEYCODE_BACKSLASH);
+          put("[", KeyEvent.KEYCODE_LEFT_BRACKET);
+          put("`", KeyEvent.KEYCODE_GRAVE);
+          put("]", KeyEvent.KEYCODE_RIGHT_BRACKET);
+        }
+      };
 }

@@ -41,4 +41,3 @@ public enum WinPos {
     return FIXED;
   }
 }
-

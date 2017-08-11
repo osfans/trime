@@ -30,7 +30,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -44,14 +43,14 @@ import java.util.Map;
 /** 解析YAML配置文件 */
 public class Config {
   public static String SDCARD = "/sdcard/";
-  public final static int INLINE_NONE = 0;
-  public final static int INLINE_PREVIEW = 1;
-  public final static int INLINE_COMPOSITION = 2;
-  public final static int INLINE_INPUT = 3;
+  public static final int INLINE_NONE = 0;
+  public static final int INLINE_PREVIEW = 1;
+  public static final int INLINE_COMPOSITION = 2;
+  public static final int INLINE_INPUT = 3;
 
-  public final static int CAND_POS_LEFT = 0;
-  public final static int CAND_POS_RIGHT = 1;
-  public final static int CAND_POS_FIXED = 2;
+  public static final int CAND_POS_LEFT = 0;
+  public static final int CAND_POS_RIGHT = 1;
+  public static final int CAND_POS_FIXED = 2;
 
   private Map<String, Object> mStyle, mDefaultStyle;
   private static String defaultName = "trime";
@@ -65,7 +64,7 @@ public class Config {
   private static Config self = null;
   private SharedPreferences mPref;
 
-  private Map<String,String> fallbackColors;
+  private Map<String, String> fallbackColors;
   private Map presetColorSchemes, presetKeyboards;
 
   public Config(Context context) {
@@ -98,12 +97,13 @@ public class Config {
 
   public static String[] getThemeKeys() {
     File d = new File(USER_DATA_DIR);
-    FilenameFilter trimeFilter = new FilenameFilter(){
-      @Override
-      public boolean accept(File dir, String filename) {
-        return filename.endsWith("trime.yaml");
-      }
-    };
+    FilenameFilter trimeFilter =
+        new FilenameFilter() {
+          @Override
+          public boolean accept(File dir, String filename) {
+            return filename.endsWith("trime.yaml");
+          }
+        };
     return d.list(trimeFilter);
   }
 
@@ -112,7 +112,7 @@ public class Config {
     int n = keys.length;
     String[] names = new String[n];
     for (int i = 0; i < n; i++) {
-      String k = keys[i].replace(".trime.yaml","").replace(".yaml","");
+      String k = keys[i].replace(".trime.yaml", "").replace(".yaml", "");
       names[i] = k;
     }
     return names;
@@ -121,13 +121,14 @@ public class Config {
   public static boolean deployOpencc() {
     File d = new File(OPENCC_DATA_DIR);
     if (d.exists()) {
-      FilenameFilter txtFilter = new FilenameFilter(){
-        @Override
-        public boolean accept(File dir, String filename) {
-          return filename.endsWith(".txt");
-        }
-      };
-      for (String txtName: d.list(txtFilter)) {
+      FilenameFilter txtFilter =
+          new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+              return filename.endsWith(".txt");
+            }
+          };
+      for (String txtName : d.list(txtFilter)) {
         txtName = OPENCC_DATA_DIR + txtName;
         String ocdName = txtName.replace(".txt", ".ocd");
         Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd");
@@ -181,7 +182,7 @@ public class Config {
       byte[] buffer = new byte[BLK_SIZE];
       int read;
       while ((read = in.read(buffer)) != -1) {
-          out.write(buffer, 0, read);
+        out.write(buffer, 0, read);
       }
       in.close();
       in = null;
@@ -196,7 +197,7 @@ public class Config {
   }
 
   private void deployConfig() {
-    Rime.deploy_config_file(themeName + ".yaml" , "config_version");
+    Rime.deploy_config_file(themeName + ".yaml", "config_version");
   }
 
   public void setTheme(String theme) {
@@ -211,8 +212,8 @@ public class Config {
     String name = Rime.config_get_string(themeName, "config_version");
     if (Function.isEmpty(name)) themeName = defaultName;
     deployConfig();
-    mDefaultStyle = (Map<String,Object>)Rime.config_get_map(themeName, "style");
-    fallbackColors = (Map<String,String>)Rime.config_get_map(themeName, "fallback_colors");
+    mDefaultStyle = (Map<String, Object>) Rime.config_get_map(themeName, "style");
+    fallbackColors = (Map<String, String>) Rime.config_get_map(themeName, "fallback_colors");
     List androidKeys = Rime.config_get_list(themeName, "android_keys/name");
     Key.androidKeys = new ArrayList<String>(androidKeys.size());
     for (Object o : androidKeys) {
@@ -221,7 +222,7 @@ public class Config {
     Key.symbolStart = Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284;
     Key.symbols = Rime.config_get_string(themeName, "android_keys/symbols");
     if (Function.isEmpty(Key.symbols)) Key.symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~";
-    Key.presetKeys = (Map<String, Map>)Rime.config_get_map(themeName, "preset_keys");
+    Key.presetKeys = (Map<String, Map>) Rime.config_get_map(themeName, "preset_keys");
     presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
     presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");
     Rime.setShowSwitches(getShowSwitches());
@@ -230,17 +231,17 @@ public class Config {
 
   public void reset() {
     schema_id = Rime.getSchemaId();
-    mStyle = (Map<String,Object>)Rime.schema_get_value(schema_id, "style");
+    mStyle = (Map<String, Object>) Rime.schema_get_value(schema_id, "style");
   }
 
   private Object _getValue(String k1, String k2) {
     Map<String, Object> m;
     if (mStyle != null && mStyle.containsKey(k1)) {
-      m = (Map<String, Object>)mStyle.get(k1);
+      m = (Map<String, Object>) mStyle.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
     if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) {
-      m = (Map<String, Object>)mDefaultStyle.get(k1);
+      m = (Map<String, Object>) mDefaultStyle.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
     return null;
@@ -255,7 +256,7 @@ public class Config {
   public Object getValue(String s) {
     String[] ss = s.split("/");
     if (ss.length == 1) return _getValue(ss[0]);
-    else if(ss.length == 2) return _getValue(ss[0], ss[1]);
+    else if (ss.length == 2) return _getValue(ss[0], ss[1]);
     return null;
   }
 
@@ -283,7 +284,7 @@ public class Config {
       }
     }
     if (!presetKeyboards.containsKey(name)) name = "default";
-    Map<String, Object> m = (Map<String, Object>)presetKeyboards.get(name);
+    Map<String, Object> m = (Map<String, Object>) presetKeyboards.get(name);
     if (m.containsKey("import_preset")) {
       name = m.get("import_preset").toString();
     }
@@ -291,9 +292,9 @@ public class Config {
   }
 
   public List<String> getKeyboardNames() {
-    List<String> names = (List<String>)getValue("keyboards");
+    List<String> names = (List<String>) getValue("keyboards");
     List<String> keyboards = new ArrayList<String>();
-    for (String s: names) {
+    for (String s : names) {
       s = getKeyboardName(s);
       if (!keyboards.contains(s)) keyboards.add(s);
     }
@@ -302,7 +303,7 @@ public class Config {
 
   public Map<String, Object> getKeyboard(String name) {
     if (!presetKeyboards.containsKey(name)) name = "default";
-    return (Map<String, Object>)presetKeyboards.get(name);
+    return (Map<String, Object>) presetKeyboards.get(name);
   }
 
   public static Config get() {
@@ -325,7 +326,9 @@ public class Config {
 
   public static int getPixel(Float f) {
     if (f == null) return 0;
-    return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, f, Resources.getSystem().getDisplayMetrics());
+    return (int)
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP, f, Resources.getSystem().getDisplayMetrics());
   }
 
   public int getPixel(String key) {
@@ -334,9 +337,9 @@ public class Config {
 
   public static Integer getPixel(Map m, String k, Object defaultValue) {
     Object o = getValue(m, k, defaultValue);
-    if (o instanceof Integer) return getPixel(((Integer)o).floatValue());
-    if (o instanceof Float) return getPixel((Float)o);
-    if (o instanceof Double) return getPixel(((Double)o).floatValue());
+    if (o instanceof Integer) return getPixel(((Integer) o).floatValue());
+    if (o instanceof Float) return getPixel((Float) o);
+    if (o instanceof Double) return getPixel(((Double) o).floatValue());
     return null;
   }
 
@@ -344,19 +347,19 @@ public class Config {
     return getPixel(m, k, null);
   }
 
-  public static Integer getColor(Map m, String k){
+  public static Integer getColor(Map m, String k) {
     Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
       if (o instanceof Integer) color = (Integer) o;
       else {
-        color =  get().getCurrentColor(o.toString());
+        color = get().getCurrentColor(o.toString());
       }
     }
     return color;
   }
 
-  public static Drawable getColorDrawable(Map m, String k){
+  public static Drawable getColorDrawable(Map m, String k) {
     Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
@@ -365,7 +368,7 @@ public class Config {
         GradientDrawable gd = new GradientDrawable();
         gd.setColor(color);
         return gd;
-      } else if (o instanceof String){
+      } else if (o instanceof String) {
         Config config = get();
         Drawable d = config.getCurrentColorDrawable(o.toString());
         if (d == null) d = config.drawableObject(o);
@@ -381,17 +384,17 @@ public class Config {
 
   public static Float getFloat(Map m, String k) {
     Object o = getValue(m, k, null);
-    if (o instanceof Integer) return ((Integer)o).floatValue();
-    if (o instanceof Float) return ((Float)o);
-    if (o instanceof Double) return ((Double)o).floatValue();
+    if (o instanceof Integer) return ((Integer) o).floatValue();
+    if (o instanceof Float) return ((Float) o);
+    if (o instanceof Double) return ((Double) o).floatValue();
     return null;
   }
 
   public static double getDouble(Map m, String k, Object i) {
     Object o = getValue(m, k, i);
-    if (o instanceof Integer) return ((Integer)o).doubleValue();
-    else if (o instanceof Float) return ((Float)o).doubleValue();
-    else if (o instanceof Double) return ((Double)o).doubleValue();
+    if (o instanceof Integer) return ((Integer) o).doubleValue();
+    else if (o instanceof Float) return ((Float) o).doubleValue();
+    else if (o instanceof Double) return ((Double) o).doubleValue();
     return 0f;
   }
 
@@ -405,24 +408,24 @@ public class Config {
 
   public boolean getBoolean(String key) {
     Object o = getValue(key);
-    return o == null ? true : (Boolean)o;
+    return o == null ? true : (Boolean) o;
   }
 
   public double getDouble(String key) {
     Object o = getValue(key);
     double size = 0;
-    if (o instanceof Integer) size = ((Integer)o).doubleValue();
-    else if (o instanceof Float) size = ((Float)o).doubleValue();
-    else if (o instanceof Double) size = ((Double)o).doubleValue();
+    if (o instanceof Integer) size = ((Integer) o).doubleValue();
+    else if (o instanceof Float) size = ((Float) o).doubleValue();
+    else if (o instanceof Double) size = ((Double) o).doubleValue();
     return size;
   }
 
   public float getFloat(String key) {
-    return (float)getDouble(key);
+    return (float) getDouble(key);
   }
 
   public int getInt(String key) {
-    return (int)getDouble(key);
+    return (int) getDouble(key);
   }
 
   public String getString(String key) {
@@ -432,10 +435,10 @@ public class Config {
 
   private Object getColorObject(String key) {
     String scheme = getColorScheme();
-    Map map = (Map<String, Object>)presetColorSchemes.get(scheme);
+    Map map = (Map<String, Object>) presetColorSchemes.get(scheme);
     if (map == null) {
       scheme = getString("color_scheme");
-      map = (Map<String, Object>)presetColorSchemes.get(scheme);
+      map = (Map<String, Object>) presetColorSchemes.get(scheme);
       setColor(scheme);
     }
     Object o = map.get(key);
@@ -449,19 +452,20 @@ public class Config {
 
   public Integer getCurrentColor(String key) {
     Object o = getColorObject(key);
-    if (o instanceof Integer) return ((Integer)o).intValue();
-    if (o instanceof Float || o instanceof Double) return ((Long)o).intValue();
+    if (o instanceof Integer) return ((Integer) o).intValue();
+    if (o instanceof Float || o instanceof Double) return ((Long) o).intValue();
     return null;
   }
 
   public Integer getColor(String key) {
     Object o = getColorObject(key);
     if (o == null) {
-      o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
+      o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
     }
 
-    if (o instanceof Integer) return ((Integer)o).intValue();
-    if (o instanceof Float || o instanceof Double || o instanceof Long) return ((Long)o).intValue();
+    if (o instanceof Integer) return ((Integer) o).intValue();
+    if (o instanceof Float || o instanceof Double || o instanceof Long)
+      return ((Long) o).intValue();
     return null;
   }
 
@@ -488,17 +492,17 @@ public class Config {
     int n = keys.length;
     String[] names = new String[n];
     for (int i = 0; i < n; i++) {
-      Map<String, Object> m = (Map<String, Object>)presetColorSchemes.get(keys[i]);
+      Map<String, Object> m = (Map<String, Object>) presetColorSchemes.get(keys[i]);
       names[i] = m.get("name").toString();
     }
     return names;
   }
 
-  public Typeface getFont(String key){
+  public Typeface getFont(String key) {
     String name = getString(key);
     if (name != null) {
       File f = new File(USER_DATA_DIR + "/fonts", name);
-      if(f.exists()) return Typeface.createFromFile(f);
+      if (f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
   }
@@ -506,8 +510,9 @@ public class Config {
   public Drawable drawableObject(Object o) {
     if (o == null) return null;
     Integer color = null;
-    if (o instanceof Integer) color = ((Integer)o).intValue();
-    else if (o instanceof Float || o instanceof Double || o instanceof Long) color = ((Long)o).intValue();
+    if (o instanceof Integer) color = ((Integer) o).intValue();
+    else if (o instanceof Float || o instanceof Double || o instanceof Long)
+      color = ((Long) o).intValue();
     else if (o instanceof String) {
       String name = o.toString();
       name = USER_DATA_DIR + "/backgrounds/" + name;
@@ -532,26 +537,26 @@ public class Config {
   public Drawable getColorDrawable(String key) {
     Object o = getColorObject(key);
     if (o == null) {
-      o = ((Map<String, Object>)presetColorSchemes.get("default")).get(key);
+      o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
     }
     return drawableObject(o);
   }
 
-  public Drawable getDrawable(String key){
+  public Drawable getDrawable(String key) {
     Object o = getValue(key);
     return drawableObject(o);
   }
 
   public int getInlinePreedit() {
     switch (mPref.getString("inline_preedit", "preview")) {
-        case "preview":
-        case "preedit":
-        case "true":
-          return INLINE_PREVIEW;
-        case "composition":
-          return INLINE_COMPOSITION;
-        case "input":
-          return INLINE_INPUT;
+      case "preview":
+      case "preedit":
+      case "true":
+        return INLINE_PREVIEW;
+      case "composition":
+        return INLINE_COMPOSITION;
+      case "input":
+        return INLINE_INPUT;
     }
     return INLINE_NONE;
   }
