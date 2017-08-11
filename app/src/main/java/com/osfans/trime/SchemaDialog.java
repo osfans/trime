@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class SchemaDialog extends AsyncTask {
   IBinder mToken;
   ProgressDialog mProgressDialog;
   AlertDialog mDialog;
+  private static String TAG = SchemaDialog.class.getSimpleName();
 
   public class SortByName implements Comparator<Map<String, String>> {
     @Override
@@ -157,7 +159,8 @@ public class SchemaDialog extends AsyncTask {
                         public void run() {
                           try {
                             selectSchema();
-                          } catch (Exception e) {
+                          } catch (Exception ex) {
+                            Log.e(TAG, "Select Schema" + ex);
                           } finally {
                             mProgressDialog.dismiss();
                             System.exit(0); //清理內存

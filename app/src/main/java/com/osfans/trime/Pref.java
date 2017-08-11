@@ -33,6 +33,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -44,6 +45,7 @@ public class Pref extends PreferenceActivity
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
   private final String licenseUrl = "file:///android_asset/licensing.html";
+  private static String TAG = Pref.class.getSimpleName();
   private ProgressDialog mProgressDialog;
   private Preference mKeySoundVolumePref, mKeyVibrateDurationPref;
 
@@ -234,7 +236,8 @@ public class Pref extends PreferenceActivity
                   public void run() {
                     try {
                       Function.deploy();
-                    } catch (Exception e) {
+                    } catch (Exception ex) {
+                      Log.e(TAG, "Deploy Exception" + ex);
                     } finally {
                       mProgressDialog.dismiss();
                       System.exit(0); //清理內存
@@ -252,7 +255,8 @@ public class Pref extends PreferenceActivity
                   public void run() {
                     try {
                       Function.sync();
-                    } catch (Exception e) {
+                    } catch (Exception ex) {
+                      Log.e(TAG, "Sync Exception" + ex);
                     } finally {
                       mProgressDialog.dismiss();
                       System.exit(0); //清理內存

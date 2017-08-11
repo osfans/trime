@@ -33,6 +33,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -109,6 +110,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   private static final boolean DEBUG = false;
   private static final int NOT_A_KEY = -1;
   private static final int[] LONG_PRESSABLE_STATE_SET = {android.R.attr.state_long_pressable};
+  private static String TAG = KeyboardView.class.getSimpleName();
 
   private Keyboard mKeyboard;
   private int mCurrentKeyIndex = NOT_A_KEY;
@@ -353,6 +355,7 @@ public class KeyboardView extends View implements View.OnClickListener {
           StateListDrawable.class.getMethod("getStateDrawableIndex", int[].class);
       getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
     } catch (Exception ex) {
+      Log.e(TAG, "Get Drawable Exception" + ex);
     }
 
     LayoutInflater inflate =
@@ -746,6 +749,7 @@ public class KeyboardView extends View implements View.OnClickListener {
           int index = (int) getStateDrawableIndex.invoke(mKeyBackColor, drawableState);
           keyBackground = (Drawable) getStateDrawable.invoke(mKeyBackColor, index);
         } catch (Exception ex) {
+          Log.e(TAG, "Get Drawable Exception" + ex);
         }
       }
       if (keyBackground instanceof GradientDrawable) {

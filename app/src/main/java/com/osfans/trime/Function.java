@@ -31,6 +31,7 @@ import android.icu.util.ULocale;
 import android.net.Uri;
 import android.os.Build.*;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import java.text.FieldPosition;
@@ -41,7 +42,7 @@ import java.util.Locale;
 
 /** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
 public class Function {
-  private static String TAG = "Function";
+  private static String TAG = Function.class.getSimpleName();
   static SparseArray<String> sApplicationLaunchKeyCategories;
 
   static {
@@ -65,6 +66,7 @@ public class Function {
       try {
         context.startActivity(intent);
       } catch (Exception ex) {
+        Log.e(TAG, "Start Activity Exception" + ex);
       }
       return true;
     }
@@ -91,6 +93,7 @@ public class Function {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
     } catch (Exception ex) {
+      Log.e(TAG, "Start Activity Exception" + ex);
     }
   }
 
@@ -114,6 +117,7 @@ public class Function {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
     } catch (Exception ex) {
+      Log.e(TAG, "Start Activity Exception" + ex);
     }
   }
 
