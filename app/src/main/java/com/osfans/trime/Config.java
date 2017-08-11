@@ -27,6 +27,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
@@ -42,7 +43,6 @@ import java.util.Map;
 
 /** 解析YAML配置文件 */
 public class Config {
-  public static String SDCARD = "/sdcard/";
   public static final int INLINE_NONE = 0;
   public static final int INLINE_PREVIEW = 1;
   public static final int INLINE_COMPOSITION = 2;
@@ -52,14 +52,19 @@ public class Config {
   public static final int CAND_POS_RIGHT = 1;
   public static final int CAND_POS_FIXED = 2;
 
+  // 默认的用户数据路径
+  private static final String RIME = "rime";
+  public static final String EXTERNAL_STORAGE_PATH =
+      Environment.getExternalStorageDirectory().getPath();
+  private static final String USER_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME).getPath();
+  public static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
+
   private Map<String, Object> mStyle, mDefaultStyle;
   private static String defaultName = "trime";
   private static String defaultFile = "trime.yaml";
   private String themeName;
   private String schema_id;
-  private static String RIME = "rime";
-  private static String USER_DATA_DIR = SDCARD + RIME;
-  public static String OPENCC_DATA_DIR = USER_DATA_DIR + "/opencc/";
+
   private static int BLK_SIZE = 1024;
   private static Config self = null;
   private SharedPreferences mPref;
@@ -84,11 +89,12 @@ public class Config {
     if (isOverwrite) {
       copyFileOrDir(context, RIME, true);
     } else if (isExist) {
-      copyFileOrDir(context, RIME + "/" + defaultFile, false);
+      String path = new File(RIME, defaultFile).getPath();
+      copyFileOrDir(context, path, false);
     } else {
       copyFileOrDir(context, RIME, false);
     }
-    while (!new File(USER_DATA_DIR + "/" + defaultFile).exists()) {
+    while (!new File(USER_DATA_DIR, defaultFile).exists()) {
       SystemClock.sleep(3000);
       copyFileOrDir(context, RIME, isOverwrite);
     }
@@ -129,7 +135,7 @@ public class Config {
             }
           };
       for (String txtName : d.list(txtFilter)) {
-        txtName = OPENCC_DATA_DIR + txtName;
+        txtName = new File(OPENCC_DATA_DIR, txtName).getPath();
         String ocdName = txtName.replace(".txt", ".ocd");
         Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd");
       }
@@ -156,11 +162,11 @@ public class Config {
       if (assets.length == 0) {
         copyFile(context, path, overwrite);
       } else {
-        String fullPath = SDCARD + path;
-        File dir = new File(fullPath);
+        File dir = new File(EXTERNAL_STORAGE_PATH, path);
         if (!dir.exists()) dir.mkdir();
         for (int i = 0; i < assets.length; ++i) {
-          copyFileOrDir(context, path + "/" + assets[i], overwrite);
+          String assetPath = new File(path, assets[i]).getPath();
+          copyFileOrDir(context, assetPath, overwrite);
         }
       }
     } catch (IOException ex) {
@@ -176,7 +182,7 @@ public class Config {
     OutputStream out = null;
     try {
       in = assetManager.open(filename);
-      String newFileName = SDCARD + filename;
+      String newFileName = new File(EXTERNAL_STORAGE_PATH, filename).getPath();
       if (new File(newFileName).exists() && !overwrite) return true;
       out = new FileOutputStream(newFileName);
       byte[] buffer = new byte[BLK_SIZE];
@@ -501,7 +507,7 @@ public class Config {
   public Typeface getFont(String key) {
     String name = getString(key);
     if (name != null) {
-      File f = new File(USER_DATA_DIR + "/fonts", name);
+      File f = new File(USER_DATA_DIR, "fonts" + name);
       if (f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
@@ -515,7 +521,8 @@ public class Config {
       color = ((Long) o).intValue();
     else if (o instanceof String) {
       String name = o.toString();
-      name = USER_DATA_DIR + "/backgrounds/" + name;
+      File nameDirectory = new File(USER_DATA_DIR, "backgrounds");
+      name = new File(nameDirectory, name).getPath();
       File f = new File(name);
       if (f.exists()) {
         return new BitmapDrawable(BitmapFactory.decodeFile(name));
