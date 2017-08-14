@@ -121,22 +121,19 @@ public class KeyboardView extends View implements View.OnClickListener {
   private int key_symbol_color, hilited_key_symbol_color;
   private int mSymbolSize;
   private Paint mPaintSymbol;
-  private float mShadowRadius, mRoundCorner;
+  private float mShadowRadius;
   private int mShadowColor;
   private float mBackgroundDimAmount;
   private Drawable mBackground;
 
   private TextView mPreviewText;
   private PopupWindow mPreviewPopup;
-  private int mPreviewTextSizeLarge;
   private int mPreviewOffset;
   private int mPreviewHeight;
   // Working variable
   private final int[] mCoordinates = new int[2];
 
   private PopupWindow mPopupKeyboard;
-  private View mMiniKeyboardContainer;
-  private KeyboardView mMiniKeyboard;
   private boolean mMiniKeyboardOnScreen;
   private View mPopupParent;
   private int mMiniKeyboardOffsetX;
@@ -159,11 +156,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   private int mVerticalCorrection;
   private int mProximityThreshold;
 
-  private boolean mPreviewCentered = false;
   private boolean mShowPreview = true;
-  private boolean mShowTouchPoints = true;
-  private int mPopupPreviewX;
-  private int mPopupPreviewY;
 
   private int mLastX;
   private int mLastY;
@@ -186,8 +179,6 @@ public class KeyboardView extends View implements View.OnClickListener {
   private long mCurrentKeyTime;
   private int[] mKeyIndices = new int[12];
   private GestureDetector mGestureDetector;
-  private int mPopupX;
-  private int mPopupY;
   private int mRepeatKeyIndex = NOT_A_KEY;
   private int mPopupLayout;
   private boolean mAbortKey;
@@ -213,9 +204,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   // For multi-tap
   private int mLastSentIndex;
-  private int mTapCount;
   private long mLastTapTime;
-  private boolean mInMultiTap;
   private static int MULTITAP_INTERVAL = 800; // milliseconds
   private StringBuilder mPreviewLabel = new StringBuilder(1);
 
@@ -297,7 +286,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     mBackgroundDimAmount = config.getFloat("background_dim_amount");
     mShadowRadius = config.getFloat("shadow_radius");
-    mRoundCorner = config.getFloat("round_corner");
+    float mRoundCorner = config.getFloat("round_corner");
 
     mKeyBackColor = new StateListDrawable();
     mKeyBackColor.addState(
@@ -331,7 +320,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       background.setCornerRadius(mRoundCorner);
       mPreviewText.setBackgroundDrawable(background);
     }
-    mPreviewTextSizeLarge = config.getInt("preview_text_size");
+    int mPreviewTextSizeLarge = config.getInt("preview_text_size");
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
     mShowPreview = config.getShowPreview();
 
@@ -829,6 +818,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
     }
 
+    boolean mShowTouchPoints = true;
     if (DEBUG && mShowTouchPoints) {
       paint.setAlpha(128);
       paint.setColor(0xFFFF0000);
@@ -992,6 +982,9 @@ public class KeyboardView extends View implements View.OnClickListener {
       lp.width = popupWidth;
       lp.height = popupHeight;
     }
+    int mPopupPreviewY;
+    int mPopupPreviewX;
+    boolean mPreviewCentered = false;
     if (!mPreviewCentered) {
       mPopupPreviewX = key.x - mPreviewText.getPaddingLeft() + getPaddingLeft();
       mPopupPreviewY = key.y - popupHeight + mPreviewOffset;
@@ -1126,7 +1119,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     int popupKeyboardId = popupKey.popupResId;
 
     if (popupKeyboardId != 0) {
-      mMiniKeyboardContainer = mMiniKeyboardCache.get(popupKey);
+      View mMiniKeyboardContainer = mMiniKeyboardCache.get(popupKey);
+      KeyboardView mMiniKeyboard;
       if (mMiniKeyboardContainer == null) {
         LayoutInflater inflater =
             (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -1198,8 +1192,8 @@ public class KeyboardView extends View implements View.OnClickListener {
             (KeyboardView) mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
       }
       getLocationInWindow(mCoordinates);
-      mPopupX = popupKey.x + getPaddingLeft();
-      mPopupY = popupKey.y + getPaddingTop();
+      int mPopupX = popupKey.x + getPaddingLeft();
+      int mPopupY = popupKey.y + getPaddingTop();
       mPopupX = mPopupX + popupKey.width - mMiniKeyboardContainer.getMeasuredWidth();
       mPopupY = mPopupY - mMiniKeyboardContainer.getMeasuredHeight();
       final int x = mPopupX + mMiniKeyboardContainer.getPaddingRight() + mCoordinates[0];
@@ -1522,9 +1516,9 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private void resetMultiTap() {
     mLastSentIndex = NOT_A_KEY;
-    mTapCount = 0;
+    int mTapCount = 0;
     mLastTapTime = -1;
-    mInMultiTap = false;
+    boolean mInMultiTap = false;
   }
 
   private void checkMultiTap(long eventTime, int keyIndex) {

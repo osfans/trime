@@ -38,12 +38,10 @@ class SchemaDialog extends AsyncTask {
   private boolean[] checkedSchemaItems;
   private String[] schemaItems;
   private List<Map<String, String>> schemas;
-  private List<Map<String, String>> selected_schemas;
   private String[] schemaNames;
   private Context mContext;
   private IBinder mToken;
   private ProgressDialog mProgressDialog;
-  private AlertDialog mDialog;
   private static String TAG = SchemaDialog.class.getSimpleName();
 
   private class SortByName implements Comparator<Map<String, String>> {
@@ -105,7 +103,7 @@ class SchemaDialog extends AsyncTask {
       return;
     }
     Collections.sort(schemas, new SortByName());
-    selected_schemas = Rime.get_selected_schema_list();
+    List<Map<String, String>> selected_schemas = Rime.get_selected_schema_list();
     List<String> selected_Ids = new ArrayList<String>();
     int n = schemas.size();
     schemaNames = new String[n];
@@ -171,7 +169,7 @@ class SchemaDialog extends AsyncTask {
             }
           });
     }
-    mDialog = builder.create();
+    AlertDialog mDialog = builder.create();
     if (mToken != null) {
       Window window = mDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();

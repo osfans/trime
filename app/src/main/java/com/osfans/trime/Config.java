@@ -53,12 +53,9 @@ public class Config {
   private static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
 
   private Map<String, Object> mStyle, mDefaultStyle;
-  private static String defaultName = "trime";
-  private static String defaultFile = "trime.yaml";
   private String themeName;
   private String schema_id;
 
-  private static int BLK_SIZE = 1024;
   private static Config self = null;
   private SharedPreferences mPref;
 
@@ -83,6 +80,7 @@ public class Config {
   private static void prepareRime(Context context) {
     boolean isExist = new File(USER_DATA_DIR).exists();
     boolean isOverwrite = Function.isDiffVer(context);
+    String defaultFile = "trime.yaml";
     if (isOverwrite) {
       copyFileOrDir(context, RIME, true);
     } else if (isExist) {
@@ -182,6 +180,7 @@ public class Config {
       String newFileName = new File(EXTERNAL_STORAGE_PATH, filename).getPath();
       if (new File(newFileName).exists() && !overwrite) return true;
       out = new FileOutputStream(newFileName);
+      int BLK_SIZE = 1024;
       byte[] buffer = new byte[BLK_SIZE];
       int read;
       while ((read = in.read(buffer)) != -1) {
@@ -213,6 +212,7 @@ public class Config {
 
   private void init() {
     String name = Rime.config_get_string(themeName, "config_version");
+    String defaultName = "trime";
     if (Function.isEmpty(name)) themeName = defaultName;
     deployConfig();
     mDefaultStyle = (Map<String, Object>) Rime.config_get_map(themeName, "style");

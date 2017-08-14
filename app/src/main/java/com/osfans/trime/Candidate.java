@@ -52,7 +52,6 @@ public class Candidate extends View {
   private Typeface tfCandidate, tfSymbol, tfComment, tfHanB, tfLatin;
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
-  private int candidate_text_size, comment_text_size;
   private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
   private boolean show_comment = true, comment_on_top, candidate_use_cursor;
 
@@ -71,8 +70,8 @@ public class Candidate extends View {
     hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
     hilited_comment_text_color = config.getColor("hilited_comment_text_color");
 
-    candidate_text_size = config.getPixel("candidate_text_size");
-    comment_text_size = config.getPixel("comment_text_size");
+    int candidate_text_size = config.getPixel("candidate_text_size");
+    int comment_text_size = config.getPixel("comment_text_size");
     candidate_view_height = config.getPixel("candidate_view_height");
     comment_height = config.getPixel("comment_height");
 

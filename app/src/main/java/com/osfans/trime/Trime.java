@@ -54,7 +54,6 @@ import java.util.logging.Logger;
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
-
   private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
   private KeyboardView mKeyboardView; //軟鍵盤
@@ -85,8 +84,6 @@ public class Trime extends InputMethodService
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
   private String auto_caps; //句首自動大寫
-  private static String soft_cursor_key = "soft_cursor"; //軟光標
-  private static String horizontal_key = "horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
   private boolean keyUpNeeded; //RIME是否需要處理keyUp事件
   private boolean mNeedUpdateRimeOption = true;
@@ -204,7 +201,9 @@ public class Trime extends InputMethodService
 
   private boolean updateRimeOption() {
     if (mNeedUpdateRimeOption) {
+      String soft_cursor_key = "soft_cursor";
       Rime.setOption(soft_cursor_key, mConfig.getSoftCursor()); //軟光標
+      String horizontal_key = "horizontal";
       Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
       mNeedUpdateRimeOption = false;
     }

@@ -35,7 +35,6 @@ class ThemeDlg extends AsyncTask {
   private String[] keys;
   private String[] names;
   private int checked;
-  private AlertDialog mDialog;
   private ProgressDialog mProgressDialog;
   private Context mContext;
   private IBinder mToken;
@@ -95,7 +94,7 @@ class ThemeDlg extends AsyncTask {
   }
 
   private void showDialog() {
-    mDialog =
+    AlertDialog mDialog =
         new AlertDialog.Builder(mContext)
             .setTitle(R.string.pref_themes)
             .setCancelable(true)

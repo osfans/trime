@@ -44,7 +44,6 @@ import android.webkit.WebViewClient;
 public class Pref extends PreferenceActivity
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-  private final String licenseUrl = "file:///android_asset/licensing.html";
   private static String TAG = Pref.class.getSimpleName();
   private ProgressDialog mProgressDialog;
   private Preference mKeySoundVolumePref, mKeyVibrateDurationPref;
@@ -168,6 +167,7 @@ public class Pref extends PreferenceActivity
             return true;
           }
         });
+    String licenseUrl = "file:///android_asset/licensing.html";
     webView.loadUrl(licenseUrl);
 
     new AlertDialog.Builder(this).setTitle(R.string.ime_name).setView(licenseView).show();

@@ -32,10 +32,6 @@ public class Key {
   private Event has_menu;
   private Event paging;
   private boolean send_bindings = true;
-  private String[] eventTypes =
-      new String[] {
-        "click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"
-      };
   private static final int CLICK = 0;
   public static final int LONG_CLICK = 1;
   public static final int SWIPE_LEFT = 2;
@@ -95,6 +91,10 @@ public class Key {
     this(parent);
     String s;
     for (int i = 0; i < EVENT_NUM; i++) {
+      String[] eventTypes =
+          new String[] {
+            "click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"
+          };
       String eventType = eventTypes[i];
       s = Config.getString(mk, eventType);
       if (s.length() > 0) events[i] = new Event(mKeyboard, s);

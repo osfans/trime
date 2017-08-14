@@ -219,7 +219,6 @@ public class Rime {
   public static int META_CTRL_ON = get_modifier_by_name("Control");
   public static int META_ALT_ON = get_modifier_by_name("Alt");
   public static int META_RELEASE_ON = get_modifier_by_name("Release");
-  private static int XK_VoidSymbol = 0xffffff;
   private static boolean showSwitches = true;
 
   public static void setShowSwitches(boolean show) {
@@ -316,6 +315,7 @@ public class Rime {
   }
 
   public static boolean isVoidKeycode(int keycode) {
+    int XK_VoidSymbol = 0xffffff;
     return keycode <= 0 || keycode == XK_VoidSymbol;
   }
 

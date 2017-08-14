@@ -26,7 +26,6 @@ import java.util.Arrays;
 /** 顯示配色方案列表 */
 class ColorDialog {
   private String[] colorKeys;
-  private String[] colorNames;
   private int checkedColor;
   private AlertDialog dialog;
 
@@ -45,7 +44,7 @@ class ColorDialog {
     if (colorKeys == null) return;
     Arrays.sort(colorKeys);
     checkedColor = Arrays.binarySearch(colorKeys, colorScheme);
-    colorNames = config.getColorNames(colorKeys);
+    String[] colorNames = config.getColorNames(colorKeys);
     dialog =
         new AlertDialog.Builder(context)
             .setTitle(R.string.pref_colors)

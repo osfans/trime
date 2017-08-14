@@ -79,9 +79,6 @@ public class Keyboard {
   /** Width of the screen available to fit the keyboard */
   private int mDisplayWidth;
 
-  /** Height of the screen */
-  private int mDisplayHeight;
-
   /** Keyboard mode, or zero, if none. */
   private int mAsciiMode;
 
@@ -107,7 +104,8 @@ public class Keyboard {
   public Keyboard(Context context) {
     DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
-    mDisplayHeight = dm.heightPixels;
+    /* Height of the screen */
+    int mDisplayHeight = dm.heightPixels;
     //Log.v(TAG, "keyboard's display metrics:" + dm);
 
     Config config = Config.get();
