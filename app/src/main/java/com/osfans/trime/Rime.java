@@ -57,13 +57,13 @@ public class Rime {
       if (length == 0) return 0;
       return new String(bytes, 0, sel_end).length();
     }
-  };
+  }
 
   /** Rime候選項 */
   public static class RimeCandidate {
     String text;
     String comment;
-  };
+  }
 
   /** Rime候選區，包含多個{@link RimeCandidate 候選項} */
   public static class RimeMenu {
@@ -74,7 +74,7 @@ public class Rime {
     int num_candidates;
     RimeCandidate[] candidates;
     String select_keys;
-  };
+  }
 
   /** Rime上屏的字符串 */
   public static class RimeCommit {
@@ -101,7 +101,7 @@ public class Rime {
     public RimeCandidate[] getCandidates() {
       return size() == 0 ? null : menu.candidates;
     }
-  };
+  }
 
   /** Rime狀態 */
   public static class RimeStatus {
@@ -116,7 +116,7 @@ public class Rime {
     boolean is_simplified;
     boolean is_traditional;
     boolean is_ascii_punct;
-  };
+  }
 
   /** Rime方案 */
   public static class RimeSchema {
@@ -199,7 +199,7 @@ public class Rime {
       o.put("value", value);
       switches.set(i, o);
     }
-  };
+  }
 
   private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());

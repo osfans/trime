@@ -34,7 +34,7 @@ import android.view.ViewGroup.LayoutParams;
 public class Candidate extends View {
 
   /** 處理候選條選字事件 */
-  public static interface CandidateListener {
+  public interface CandidateListener {
     void onPickCandidate(int index);
   }
 
