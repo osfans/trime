@@ -72,9 +72,7 @@ public class Trime extends InputMethodService
   private int orientation;
   private boolean canCompose;
   private boolean enterAsLineBreak;
-  private InlineModeType inlinePreedit; //嵌入模式
   private boolean mShowWindow = true; //顯示懸浮窗口
-  private WindowsPositionType winPos; //候選窗口彈出位置
   private String movable; //候選窗口是否可移動
   private int winX, winY; //候選窗座標
   private int candSpacing; //候選窗與邊緣間距
@@ -88,6 +86,9 @@ public class Trime extends InputMethodService
   private boolean keyUpNeeded; //RIME是否需要處理keyUp事件
   private boolean mNeedUpdateRimeOption = true;
   private String lastCommittedText;
+
+  private WindowsPositionType winPos; //候選窗口彈出位置
+  private InlineModeType inlinePreedit; //嵌入模式
 
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
@@ -753,13 +754,13 @@ public class Trime extends InputMethodService
     String s = event.getText();
     if (!Function.isEmpty(s)) {
       onText(s);
-    } else if (event.code > 0) {
-      int code = event.code;
+    } else if (event.getCode() > 0) {
+      int code = event.getCode();
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
         Rime.toggleOption(event.getToggle());
         commitText();
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
-        mKeyboardSwitch.setKeyboard(event.select);
+        mKeyboardSwitch.setKeyboard(event.getSelect());
         //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
         mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); //切換到西文鍵盤時不保存狀態
         updateAsciiMode();
@@ -768,9 +769,10 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { //切換輸入法
         IBinder imeToken = getToken();
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (event.select.contentEquals(".next") && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+        if (event.getSelect().contentEquals(".next")
+            && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           imm.switchToNextInputMethod(imeToken, false);
-        } else if (!Function.isEmpty(event.select)) {
+        } else if (!Function.isEmpty(event.getSelect())) {
           imm.switchToLastInputMethod(imeToken);
         } else {
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
@@ -778,12 +780,12 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
         String arg =
             String.format(
-                event.option,
+                event.getOption(),
                 getActiveText(1),
                 getActiveText(2),
                 getActiveText(3),
                 getActiveText(4));
-        s = Function.handle(this, event.command, arg);
+        s = Function.handle(this, event.getCommand(), arg);
         if (s != null) {
           commitText(s);
           updateComposing();
@@ -791,7 +793,7 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
         new Speech(this).start();
       } else if (code == KeyEvent.KEYCODE_SETTINGS) { //設定
-        switch (event.option) {
+        switch (event.getOption()) {
           case "theme":
             showThemeDialog();
             break;
@@ -808,7 +810,7 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
         showColorDialog();
       } else {
-        onKey(event.code, event.mask);
+        onKey(event.getCode(), event.getMask());
       }
     }
   }

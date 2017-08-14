@@ -28,17 +28,21 @@ import java.util.Map;
 public class Event {
   private String TAG = "Event";
   private Keyboard mKeyboard;
-  int code = 0, mask = 0;
+  private int code = 0;
+  private int mask = 0;
   private String text;
   private String label;
   private String preview;
   private List<String> states;
-  String command;
-  String option;
-  String select;
+  private String command;
+  private String option;
+  private String select;
   private String toggle;
-  String shift_lock;
-  public boolean functional, repeatable, sticky;
+
+  private String shiftLock;
+  private boolean functional;
+  private boolean repeatable;
+  private boolean sticky;
 
   public Event(Keyboard keyboard, String s) {
     mKeyboard = keyboard;
@@ -50,7 +54,7 @@ public class Event {
       toggle = Config.getString(m, "toggle");
       label = Config.getString(m, "label");
       preview = Config.getString(m, "preview");
-      shift_lock = Config.getString(m, "shift_lock");
+      shiftLock = Config.getString(m, "shift_lock");
       int[] sends = parseSend(Config.getString(m, "send"));
       code = sends[0];
       mask = sends[1];
@@ -73,6 +77,42 @@ public class Event {
         if (s.contains("{}")) label = label.replace("[]", "{}");
       }
     }
+  }
+
+  public int getCode() {
+    return code;
+  }
+
+  public int getMask() {
+    return mask;
+  }
+
+  public String getCommand() {
+    return command;
+  }
+
+  public String getOption() {
+    return option;
+  }
+
+  public String getSelect() {
+    return select;
+  }
+
+  public boolean isFunctional() {
+    return functional;
+  }
+
+  public boolean isRepeatable() {
+    return repeatable;
+  }
+
+  public boolean isSticky() {
+    return sticky;
+  }
+
+  public String getShiftLock() {
+    return shiftLock;
   }
 
   public static boolean containsSend(String s) {

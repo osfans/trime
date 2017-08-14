@@ -197,7 +197,7 @@ public class Key {
    */
   public void onReleased(boolean inside) {
     pressed = !pressed;
-    if (getClick().sticky) on = !on;
+    if (getClick().isSticky()) on = !on;
   }
 
   /**
@@ -253,7 +253,7 @@ public class Key {
         states = KEY_STATE_NORMAL_ON;
       }
     } else {
-      if (getClick().sticky || getClick().functional) {
+      if (getClick().isSticky() || getClick().isFunctional()) {
         if (pressed) {
           states = KEY_STATE_PRESSED_OFF;
         } else {
@@ -274,7 +274,7 @@ public class Key {
   }
 
   public boolean isShiftLock() {
-    switch (getClick().shift_lock) {
+    switch (getClick().getShiftLock()) {
       case "long":
         return false;
       case "click":
@@ -326,11 +326,11 @@ public class Key {
   }
 
   public int getCode() {
-    return getClick().code;
+    return getClick().getCode();
   }
 
   public int getCode(int type) {
-    return getEvent(type).code;
+    return getEvent(type).getCode();
   }
 
   public String getLabel() {
