@@ -43,6 +43,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import com.osfans.trime.enums.KeyEventType;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -405,7 +406,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 if (velocityX > mSwipeThreshold && absY < absX && deltaX > travelX) {
                   if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_RIGHT;
+                    type = KeyEventType.SWIPE_RIGHT.ordinal();
                   } else {
                     swipeRight();
                     return true;
@@ -413,7 +414,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
                   if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_LEFT;
+                    type = KeyEventType.SWIPE_LEFT.ordinal();
                   } else {
                     swipeLeft();
                     return true;
@@ -421,7 +422,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
                   if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_UP;
+                    type = KeyEventType.SWIPE_UP.ordinal();
                   } else {
                     swipeUp();
                     return true;
@@ -429,7 +430,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
                   if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_DOWN;
+                    type = KeyEventType.SWIPE_DOWN.ordinal();
                   } else {
                     swipeDown();
                     return true;
@@ -1097,7 +1098,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       return false;
     }
     showPreview(NOT_A_KEY);
-    showPreview(mCurrentKey, Key.LONG_CLICK);
+    showPreview(mCurrentKey, KeyEventType.LONG_CLICK.ordinal());
     Key popupKey = mKeys[mCurrentKey];
     boolean result = onLongPress(popupKey);
     if (result) {
@@ -1218,7 +1219,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         resetShifted();
         return true;
       }
-      if (key.isShift() && !key.sendBindings(Key.LONG_CLICK)) {
+      if (key.isShift() && !key.sendBindings(KeyEventType.LONG_CLICK.ordinal())) {
         setShifted(!key.on, !key.on);
         return true;
       }
@@ -1434,7 +1435,7 @@ public class KeyboardView extends View implements View.OnClickListener {
               touchX,
               touchY,
               eventTime,
-              (mOldPointerCount > 1 || mComboMode) ? Key.COMBO : 0);
+              (mOldPointerCount > 1 || mComboMode) ? KeyEventType.COMBO.ordinal() : 0);
         }
         invalidateKey(keyIndex);
         mRepeatKeyIndex = NOT_A_KEY;

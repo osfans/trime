@@ -20,6 +20,7 @@ package com.osfans.trime;
 import android.graphics.drawable.Drawable;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import com.osfans.trime.enums.KeyEventType;
 import java.util.List;
 import java.util.Map;
 
@@ -32,14 +33,7 @@ public class Key {
   private Event has_menu;
   private Event paging;
   private boolean send_bindings = true;
-  private static final int CLICK = 0;
-  public static final int LONG_CLICK = 1;
-  public static final int SWIPE_LEFT = 2;
-  public static final int SWIPE_RIGHT = 3;
-  public static final int SWIPE_UP = 4;
-  public static final int SWIPE_DOWN = 5;
-  public static final int COMBO = 6;
-  private static final int EVENT_NUM = 7;
+  private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
 
   public int width, height, gap, edgeFlags;
@@ -305,11 +299,11 @@ public class Key {
   }
 
   public Event getClick() {
-    return events[CLICK];
+    return events[KeyEventType.CLICK.ordinal()];
   }
 
   public Event getLongClick() {
-    return events[LONG_CLICK];
+    return events[KeyEventType.LONG_CLICK.ordinal()];
   }
 
   public Event getEvent(int i) {
@@ -341,7 +335,7 @@ public class Key {
   }
 
   public String getPreviewText(int type) {
-    if (type == CLICK) return getEvent().getPreviewText();
+    if (type == KeyEventType.CLICK.ordinal()) return getEvent().getPreviewText();
     return getEvent(type).getPreviewText();
   }
 
