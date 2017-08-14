@@ -31,6 +31,8 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
+import com.osfans.trime.enums.InlineModeType;
+import com.osfans.trime.enums.WindowsPositionType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -43,21 +45,12 @@ import java.util.Map;
 
 /** 解析YAML配置文件 */
 public class Config {
-  public static final int INLINE_NONE = 0;
-  public static final int INLINE_PREVIEW = 1;
-  public static final int INLINE_COMPOSITION = 2;
-  public static final int INLINE_INPUT = 3;
-
-  public static final int CAND_POS_LEFT = 0;
-  public static final int CAND_POS_RIGHT = 1;
-  public static final int CAND_POS_FIXED = 2;
-
   // 默认的用户数据路径
   private static final String RIME = "rime";
   private static final String EXTERNAL_STORAGE_PATH =
       Environment.getExternalStorageDirectory().getPath();
   private static final String USER_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME).getPath();
-  public static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
+  private static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
 
   private Map<String, Object> mStyle, mDefaultStyle;
   private static String defaultName = "trime";
@@ -81,6 +74,10 @@ public class Config {
 
   public String getTheme() {
     return themeName;
+  }
+
+  public static String getOpenccDataDir() {
+    return OPENCC_DATA_DIR;
   }
 
   private static void prepareRime(Context context) {
@@ -554,23 +551,24 @@ public class Config {
     return drawableObject(o);
   }
 
-  public int getInlinePreedit() {
+  public InlineModeType getInlinePreedit() {
     switch (mPref.getString("inline_preedit", "preview")) {
       case "preview":
       case "preedit":
       case "true":
-        return INLINE_PREVIEW;
+        return InlineModeType.INLINE_PREVIEW;
       case "composition":
-        return INLINE_COMPOSITION;
+        return InlineModeType.INLINE_COMPOSITION;
       case "input":
-        return INLINE_INPUT;
+        return InlineModeType.INLINE_INPUT;
     }
-    return INLINE_NONE;
+    return InlineModeType.INLINE_NONE;
   }
 
-  public WinPos getWinPos() {
-    WinPos wp = WinPos.fromString(getString("layout/position"));
-    if (getInlinePreedit() == 0 && wp == WinPos.RIGHT) wp = WinPos.LEFT;
+  public WindowsPositionType getWinPos() {
+    WindowsPositionType wp = WindowsPositionType.fromString(getString("layout/position"));
+    if (getInlinePreedit() == InlineModeType.INLINE_PREVIEW && wp == WindowsPositionType.RIGHT)
+      wp = WindowsPositionType.LEFT;
     return wp;
   }
 

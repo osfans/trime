@@ -50,7 +50,7 @@ public class Composition extends TextView {
   private Typeface tfText, tfLabel, tfCandidate, tfComment;
   private int composition_pos[] = new int[2];
   private int max_length, sticky_lines;
-  private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
+  private int max_entries = Candidate.getMaxCandidateCount();
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
   private List<Map<String, Object>> components;

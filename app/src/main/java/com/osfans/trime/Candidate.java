@@ -38,7 +38,7 @@ public class Candidate extends View {
     void onPickCandidate(int index);
   }
 
-  public static final int MAX_CANDIDATE_COUNT = 20;
+  private static final int MAX_CANDIDATE_COUNT = 20;
   private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
   private CandidateListener listener;
@@ -113,6 +113,10 @@ public class Candidate extends View {
     reset();
 
     setWillNotDraw(false);
+  }
+
+  public static int getMaxCandidateCount() {
+    return MAX_CANDIDATE_COUNT;
   }
 
   public void setCandidateListener(CandidateListener listener) {

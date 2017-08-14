@@ -46,6 +46,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import com.osfans.trime.enums.InlineModeType;
+import com.osfans.trime.enums.WindowsPositionType;
 import java.util.Locale;
 import java.util.logging.Logger;
 
@@ -71,9 +73,9 @@ public class Trime extends InputMethodService
   private int orientation;
   private boolean canCompose;
   private boolean enterAsLineBreak;
-  private int inlinePreedit; //嵌入模式
+  private InlineModeType inlinePreedit; //嵌入模式
   private boolean mShowWindow = true; //顯示懸浮窗口
-  private WinPos winPos; //候選窗口彈出位置
+  private WindowsPositionType winPos; //候選窗口彈出位置
   private String movable; //候選窗口是否可移動
   private int winX, winY; //候選窗座標
   private int candSpacing; //候選窗與邊緣間距
@@ -92,15 +94,15 @@ public class Trime extends InputMethodService
 
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
-        || (winPos != WinPos.LEFT
-            && winPos != WinPos.RIGHT
-            && winPos != WinPos.LEFT_UP
-            && winPos != WinPos.RIGHT_UP);
+        || (winPos != WindowsPositionType.LEFT
+            && winPos != WindowsPositionType.RIGHT
+            && winPos != WindowsPositionType.LEFT_UP
+            && winPos != WindowsPositionType.RIGHT_UP);
   }
 
   public void updateWindow(int offsetX, int offsetY) {
     int location[] = new int[2];
-    winPos = WinPos.DRAG;
+    winPos = WindowsPositionType.DRAG;
     mCandidateContainer.getLocationOnScreen(location);
     winX = offsetX;
     winY = offsetY - location[1];
@@ -170,8 +172,8 @@ public class Trime extends InputMethodService
         } else if (x < 0) x = 0;
         y = (int) mPopupRectF.bottom - mParentLocation[1] + candSpacing;
         if (y + mFloatingWindow.getHeight() > 0
-            || winPos == WinPos.LEFT_UP
-            || winPos == WinPos.RIGHT_UP) {
+            || winPos == WindowsPositionType.LEFT_UP
+            || winPos == WindowsPositionType.RIGHT_UP) {
           y =
               (int) mPopupRectF.top
                   - mParentLocation[1]
@@ -376,7 +378,7 @@ public class Trime extends InputMethodService
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       int i = cursorAnchorInfo.getComposingTextStart();
-      if ((winPos == WinPos.LEFT || winPos == WinPos.LEFT_UP) && i >= 0) {
+      if ((winPos == WindowsPositionType.LEFT || winPos == WindowsPositionType.LEFT_UP) && i >= 0) {
         mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
       } else {
         mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
@@ -1011,16 +1013,16 @@ public class Trime extends InputMethodService
   /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
     InputConnection ic = getCurrentInputConnection();
-    if (inlinePreedit != Config.INLINE_NONE) { //嵌入模式
+    if (inlinePreedit != InlineModeType.INLINE_NONE) { //嵌入模式
       String s = null;
       switch (inlinePreedit) {
-        case Config.INLINE_PREVIEW:
+        case INLINE_PREVIEW:
           s = Rime.getComposingText();
           break;
-        case Config.INLINE_COMPOSITION:
+        case INLINE_COMPOSITION:
           s = Rime.getCompositionText();
           break;
-        case Config.INLINE_INPUT:
+        case INLINE_INPUT:
           s = Rime.RimeGetInput();
           break;
       }

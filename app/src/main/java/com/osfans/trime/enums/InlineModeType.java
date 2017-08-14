@@ -16,28 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.enums;
 
-public enum WinPos {
-  LEFT,
-  LEFT_UP,
-  RIGHT,
-  RIGHT_UP,
-  DRAG,
-  FIXED,
-  BOTTOM_LEFT,
-  BOTTOM_RIGHT,
-  TOP_LEFT,
-  TOP_RIGHT;
-
-  public static WinPos fromString(String text) {
-    if (text != null) {
-      for (WinPos b : WinPos.values()) {
-        if (text.equalsIgnoreCase(b.toString())) {
-          return b;
-        }
-      }
-    }
-    return FIXED;
-  }
+/** 嵌入模式枚举 */
+public enum InlineModeType {
+  INLINE_NONE,
+  INLINE_PREVIEW,
+  INLINE_COMPOSITION,
+  INLINE_INPUT
 }
