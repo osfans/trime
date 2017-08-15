@@ -128,14 +128,15 @@ public class Key {
     if (s.length() > 0) {
       paging = new Event(mKeyboard, s);
     }
-    if (composing != null || has_menu != null || paging != null) mKeyboard.mComposingKeys.add(this);
+    if (composing != null || has_menu != null || paging != null)
+      mKeyboard.getmComposingKeys().add(this);
     s = Config.getString(mk, "ascii");
     if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = Config.getString(mk, "label");
     hint = Config.getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean) mk.get("send_bindings");
     else if (composing == null && has_menu == null && paging == null) send_bindings = false;
-    if (isShift()) mKeyboard.mShiftKey = this;
+    if (isShift()) mKeyboard.setmShiftKey(this);
     key_text_size = Config.getPixel(mk, "key_text_size");
     symbol_text_size = Config.getPixel(mk, "symbol_text_size");
     key_text_color = Config.getColor(mk, "key_text_color");

@@ -28,74 +28,55 @@ import java.util.Map;
 
 /** 從YAML中加載鍵盤配置，包含多個{@link Key 按鍵}。 */
 public class Keyboard {
-
-  static final String TAG = "Keyboard";
-
   public static final int EDGE_LEFT = 0x01;
   public static final int EDGE_RIGHT = 0x02;
   public static final int EDGE_TOP = 0x04;
   public static final int EDGE_BOTTOM = 0x08;
-
+  private static final int GRID_WIDTH = 10;
+  private static final int GRID_HEIGHT = 5;
+  private static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
+  private static final String TAG = Keyboard.class.getSimpleName();
+  /** Number of key widths from current touch point to search for nearest keys. */
+  public static float SEARCH_DISTANCE = 1.4f;
   /** 按鍵默認水平間距 */
   private int mDefaultHorizontalGap;
-
   /** 默認鍵寬 */
   private int mDefaultWidth;
-
   /** 默認鍵高 */
   private int mDefaultHeight;
-
   /** 默認行距 */
   private int mDefaultVerticalGap;
-
   /** 默認按鍵圓角半徑 */
   private float mRoundCorner;
-
   /** 鍵盤背景 */
   private Drawable mBackground;
-
   /** 鍵盤的Shift鍵是否按住 */
   private boolean mShifted;
-
   /** 鍵盤的Shift鍵 */
-  public Key mShiftKey;
-
+  private Key mShiftKey;
   /** Total height of the keyboard, including the padding and keys */
   private int mTotalHeight;
-
   /**
    * Total width of the keyboard, including left side gaps and keys, but not any gaps on the right
    * side.
    */
   private int mTotalWidth;
-
   /** List of keys in this keyboard */
   private List<Key> mKeys;
 
-  public List<Key> mComposingKeys;
-
+  private List<Key> mComposingKeys;
   private int mMetaState;
-
   /** Width of the screen available to fit the keyboard */
   private int mDisplayWidth;
-
   /** Keyboard mode, or zero, if none. */
   private int mAsciiMode;
 
-  private String mLabelTransform;
-
   // Variables for pre-computing nearest keys.
-
-  private static final int GRID_WIDTH = 10;
-  private static final int GRID_HEIGHT = 5;
-  private static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
+  private String mLabelTransform;
   private int mCellWidth;
   private int mCellHeight;
   private int[][] mGridNeighbors;
   private int mProximityThreshold;
-  /** Number of key widths from current touch point to search for nearest keys. */
-  public static float SEARCH_DISTANCE = 1.4f;
-
   /**
    * Creates a keyboard from the given xml key layout file.
    *
@@ -121,10 +102,11 @@ public class Keyboard {
     mKeys = new ArrayList<Key>();
     mComposingKeys = new ArrayList<Key>();
   }
-
   /**
    * Creates a blank keyboard from the given resource file and populates it with the specified
    * characters in left-to-right, top-to-bottom fashion, using the specified number of columns.
+   *
+   * <p>
    *
    * <p>If the specified number of columns is -1, then the keyboard will fit as many keys as
    * possible in each row.
@@ -167,6 +149,112 @@ public class Keyboard {
       }
     }
     mTotalHeight = y + mDefaultHeight;
+  }
+
+  public Keyboard(Context context, String name) {
+    this(context);
+    Map<String, Object> m = Config.get().getKeyboard(name);
+    mLabelTransform = (String) Config.getValue(m, "label_transform", "none");
+    mAsciiMode = (Integer) Config.getValue(m, "ascii_mode", 1);
+    int columns = (Integer) Config.getValue(m, "columns", 20);
+    int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
+    if (defaultWidth == 0) defaultWidth = mDefaultWidth;
+    int height = Config.getPixel(m, "height", 0);
+    int defaultHeight = (height > 0) ? height : mDefaultHeight;
+    int rowHeight = defaultHeight;
+    List<Map<String, Object>> lm = (List<Map<String, Object>>) m.get("keys");
+
+    if (m.containsKey("horizontal_gap"))
+      mDefaultHorizontalGap = Config.getPixel(m, "horizontal_gap");
+    if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Config.getPixel(m, "vertical_gap");
+    if (m.containsKey("round_corner")) mRoundCorner = Config.getFloat(m, "round_corner");
+    if (m.containsKey("keyboard_back_color")) {
+      Drawable background = Config.getColorDrawable(m, "keyboard_back_color");
+      if (background != null) mBackground = background;
+    }
+    int x = mDefaultHorizontalGap / 2;
+    int y = mDefaultVerticalGap;
+    int row = 0;
+    int column = 0;
+    mTotalWidth = 0;
+    int key_text_offset_x,
+        key_text_offset_y,
+        key_symbol_offset_x,
+        key_symbol_offset_y,
+        key_hint_offset_x,
+        key_hint_offset_y;
+    key_text_offset_x = Config.getPixel(m, "key_text_offset_x", 0);
+    key_text_offset_y = Config.getPixel(m, "key_text_offset_y", 0);
+    key_symbol_offset_x = Config.getPixel(m, "key_symbol_offset_x", 0);
+    key_symbol_offset_y = Config.getPixel(m, "key_symbol_offset_y", 0);
+    key_hint_offset_x = Config.getPixel(m, "key_hint_offset_x", 0);
+    key_hint_offset_y = Config.getPixel(m, "key_hint_offset_y", 0);
+
+    final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
+    for (Map<String, Object> mk : lm) {
+      int gap = mDefaultHorizontalGap;
+      int w = (int) (Config.getDouble(mk, "width", 0) * mDisplayWidth / 100);
+      if (w == 0 && mk.containsKey("click")) w = defaultWidth;
+      w -= gap;
+      if (column >= maxColumns || x + w > mDisplayWidth) {
+        x = gap / 2;
+        y += mDefaultVerticalGap + rowHeight;
+        column = 0;
+        row++;
+        if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
+      }
+      if (column == 0) {
+        int heightK = Config.getPixel(mk, "height", 0);
+        rowHeight = (heightK > 0) ? heightK : defaultHeight;
+      }
+      if (!mk.containsKey("click")) { //無按鍵事件
+        x += w + gap;
+        continue; //縮進
+      }
+
+      final Key key = new Key(this, mk);
+      key.setKey_text_offset_x(Config.getPixel(mk, "key_text_offset_x", key_text_offset_x));
+      key.setKey_text_offset_y(Config.getPixel(mk, "key_text_offset_y", key_text_offset_y));
+      key.setKey_symbol_offset_x(Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x));
+      key.setKey_symbol_offset_y(Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y));
+      key.setKey_hint_offset_x(Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x));
+      key.setKey_hint_offset_y(Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y));
+
+      key.setX(x);
+      key.setY(y);
+      int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
+      //右側不留白
+      key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w);
+      key.setHeight(rowHeight);
+      key.setGap(gap);
+      key.setRow(row);
+      key.setColumn(column);
+      column++;
+      x += key.getWidth() + key.getGap();
+      mKeys.add(key);
+      if (x > mTotalWidth) {
+        mTotalWidth = x;
+      }
+    }
+    if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
+    mTotalHeight = y + rowHeight + mDefaultVerticalGap;
+    for (Key key : mKeys) {
+      if (key.getColumn() == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
+      if (key.getRow() == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
+      if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
+    }
+  }
+
+  public Key getmShiftKey() {
+    return mShiftKey;
+  }
+
+  public void setmShiftKey(Key mShiftKey) {
+    this.mShiftKey = mShiftKey;
+  }
+
+  public List<Key> getmComposingKeys() {
+    return mComposingKeys;
   }
 
   public List<Key> getKeys() {
@@ -328,100 +416,6 @@ public class Keyboard {
       }
     }
     return new int[0];
-  }
-
-  public Keyboard(Context context, String name) {
-    this(context);
-    Map<String, Object> m = Config.get().getKeyboard(name);
-    mLabelTransform = (String) Config.getValue(m, "label_transform", "none");
-    mAsciiMode = (Integer) Config.getValue(m, "ascii_mode", 1);
-    int columns = (Integer) Config.getValue(m, "columns", 20);
-    int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
-    if (defaultWidth == 0) defaultWidth = mDefaultWidth;
-    int height = Config.getPixel(m, "height", 0);
-    int defaultHeight = (height > 0) ? height : mDefaultHeight;
-    int rowHeight = defaultHeight;
-    List<Map<String, Object>> lm = (List<Map<String, Object>>) m.get("keys");
-
-    if (m.containsKey("horizontal_gap"))
-      mDefaultHorizontalGap = Config.getPixel(m, "horizontal_gap");
-    if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Config.getPixel(m, "vertical_gap");
-    if (m.containsKey("round_corner")) mRoundCorner = Config.getFloat(m, "round_corner");
-    if (m.containsKey("keyboard_back_color")) {
-      Drawable background = Config.getColorDrawable(m, "keyboard_back_color");
-      if (background != null) mBackground = background;
-    }
-    int x = mDefaultHorizontalGap / 2;
-    int y = mDefaultVerticalGap;
-    int row = 0;
-    int column = 0;
-    mTotalWidth = 0;
-    int key_text_offset_x,
-        key_text_offset_y,
-        key_symbol_offset_x,
-        key_symbol_offset_y,
-        key_hint_offset_x,
-        key_hint_offset_y;
-    key_text_offset_x = Config.getPixel(m, "key_text_offset_x", 0);
-    key_text_offset_y = Config.getPixel(m, "key_text_offset_y", 0);
-    key_symbol_offset_x = Config.getPixel(m, "key_symbol_offset_x", 0);
-    key_symbol_offset_y = Config.getPixel(m, "key_symbol_offset_y", 0);
-    key_hint_offset_x = Config.getPixel(m, "key_hint_offset_x", 0);
-    key_hint_offset_y = Config.getPixel(m, "key_hint_offset_y", 0);
-
-    final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
-    for (Map<String, Object> mk : lm) {
-      int gap = mDefaultHorizontalGap;
-      int w = (int) (Config.getDouble(mk, "width", 0) * mDisplayWidth / 100);
-      if (w == 0 && mk.containsKey("click")) w = defaultWidth;
-      w -= gap;
-      if (column >= maxColumns || x + w > mDisplayWidth) {
-        x = gap / 2;
-        y += mDefaultVerticalGap + rowHeight;
-        column = 0;
-        row++;
-        if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
-      }
-      if (column == 0) {
-        int heightK = Config.getPixel(mk, "height", 0);
-        rowHeight = (heightK > 0) ? heightK : defaultHeight;
-      }
-      if (!mk.containsKey("click")) { //無按鍵事件
-        x += w + gap;
-        continue; //縮進
-      }
-
-      final Key key = new Key(this, mk);
-      key.setKey_text_offset_x(Config.getPixel(mk, "key_text_offset_x", key_text_offset_x));
-      key.setKey_text_offset_y(Config.getPixel(mk, "key_text_offset_y", key_text_offset_y));
-      key.setKey_symbol_offset_x(Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x));
-      key.setKey_symbol_offset_y(Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y));
-      key.setKey_hint_offset_x(Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x));
-      key.setKey_hint_offset_y(Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y));
-
-      key.setX(x);
-      key.setY(y);
-      int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
-      //右側不留白
-      key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w);
-      key.setHeight(rowHeight);
-      key.setGap(gap);
-      key.setRow(row);
-      key.setColumn(column);
-      column++;
-      x += key.getWidth() + key.getGap();
-      mKeys.add(key);
-      if (x > mTotalWidth) {
-        mTotalWidth = x;
-      }
-    }
-    if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
-    mTotalHeight = y + rowHeight + mDefaultVerticalGap;
-    for (Key key : mKeys) {
-      if (key.getColumn() == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
-      if (key.getRow() == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
-      if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
-    }
   }
 
   public boolean getAsciiMode() {

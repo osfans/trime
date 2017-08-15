@@ -564,7 +564,8 @@ public class KeyboardView extends View implements View.OnClickListener {
    * @return true 如果大寫
    */
   public boolean isCapsOn() {
-    if (mKeyboard != null && mKeyboard.mShiftKey != null) return mKeyboard.mShiftKey.isOn();
+    if (mKeyboard != null && mKeyboard.getmShiftKey() != null)
+      return mKeyboard.getmShiftKey().isOn();
     return false;
   }
 
