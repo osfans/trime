@@ -664,7 +664,7 @@ public class Trime extends InputMethodService
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_MENU) return false; //不處理Menu鍵
-    if (keyCode >= Key.symbolStart) return false; //只處理安卓標準按鍵
+    if (keyCode >= Key.getSymbolStart()) return false; //只處理安卓標準按鍵
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)) {
       boolean ret =
           onRimeKey(
@@ -897,7 +897,7 @@ public class Trime extends InputMethodService
   @Override
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
-    if (keyCode >= Key.symbolStart) { //符號
+    if (keyCode >= Key.getSymbolStart()) { //符號
       keyUpNeeded = false;
       commitText(Event.getDisplayLabel(keyCode));
       return;

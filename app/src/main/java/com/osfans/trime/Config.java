@@ -222,9 +222,10 @@ public class Config {
     for (Object o : androidKeys) {
       Key.androidKeys.add(o.toString());
     }
-    Key.symbolStart = Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284;
-    Key.symbols = Rime.config_get_string(themeName, "android_keys/symbols");
-    if (Function.isEmpty(Key.symbols)) Key.symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~";
+    Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
+    Key.setSymbols(Rime.config_get_string(themeName, "android_keys/symbols"));
+    if (Function.isEmpty(Key.getSymbols()))
+      Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
     Key.presetKeys = (Map<String, Map>) Rime.config_get_map(themeName, "preset_keys");
     presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
     presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");

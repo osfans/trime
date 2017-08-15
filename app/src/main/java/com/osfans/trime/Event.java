@@ -183,17 +183,17 @@ public class Event {
 
   public static String getDisplayLabel(int keyCode) {
     String s = "";
-    if (keyCode < Key.symbolStart) { //字母數字
-      if (Key.kcm.isPrintingKey(keyCode)) {
-        char c = Key.kcm.getDisplayLabel(keyCode);
+    if (keyCode < Key.getSymbolStart()) { //字母數字
+      if (Key.getKcm().isPrintingKey(keyCode)) {
+        char c = Key.getKcm().getDisplayLabel(keyCode);
         if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
         s = String.valueOf(c);
       } else {
         s = Key.androidKeys.get(keyCode);
       }
     } else if (keyCode < Key.androidKeys.size()) { //可見符號
-      keyCode -= Key.symbolStart;
-      s = Key.symbols.substring(keyCode, keyCode + 1);
+      keyCode -= Key.getSymbolStart();
+      s = Key.getSymbols().substring(keyCode, keyCode + 1);
     }
     return s;
   }
@@ -202,8 +202,8 @@ public class Event {
     int keyCode = 0;
     if (Key.androidKeys.contains(s)) { //字母數字
       keyCode = Key.androidKeys.indexOf(s);
-    } else if (Key.symbols.contains(s)) { //可見符號
-      keyCode = Key.symbolStart + Key.symbols.indexOf(s);
+    } else if (Key.getSymbols().contains(s)) { //可見符號
+      keyCode = Key.getSymbolStart() + Key.getSymbols().indexOf(s);
     } else if (symbolAliases.containsKey(s)) {
       keyCode = symbolAliases.get(s);
     }
