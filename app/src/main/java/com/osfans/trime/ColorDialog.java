@@ -24,13 +24,12 @@ import android.content.DialogInterface;
 import java.util.Arrays;
 
 /** 顯示配色方案列表 */
-public class ColorDialog {
-  String[] colorKeys;
-  String[] colorNames;
-  int checkedColor;
-  AlertDialog dialog;
+class ColorDialog {
+  private String[] colorKeys;
+  private int checkedColor;
+  private AlertDialog dialog;
 
-  public void selectColor() {
+  private void selectColor() {
     String color = colorKeys[checkedColor];
     Config config = Config.get();
     config.setColor(color);
@@ -45,7 +44,7 @@ public class ColorDialog {
     if (colorKeys == null) return;
     Arrays.sort(colorKeys);
     checkedColor = Arrays.binarySearch(colorKeys, colorScheme);
-    colorNames = config.getColorNames(colorKeys);
+    String[] colorNames = config.getColorNames(colorKeys);
     dialog =
         new AlertDialog.Builder(context)
             .setTitle(R.string.pref_colors)

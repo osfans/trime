@@ -46,16 +46,17 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import com.osfans.trime.enums.InlineModeType;
+import com.osfans.trime.enums.WindowsPositionType;
 import java.util.Locale;
 import java.util.logging.Logger;
 
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
-
   private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
-  protected KeyboardView mKeyboardView; //軟鍵盤
+  private KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
   private Effect mEffect; //音效
@@ -71,9 +72,7 @@ public class Trime extends InputMethodService
   private int orientation;
   private boolean canCompose;
   private boolean enterAsLineBreak;
-  private int inlinePreedit; //嵌入模式
   private boolean mShowWindow = true; //顯示懸浮窗口
-  private WinPos winPos; //候選窗口彈出位置
   private String movable; //候選窗口是否可移動
   private int winX, winY; //候選窗座標
   private int candSpacing; //候選窗與邊緣間距
@@ -83,24 +82,25 @@ public class Trime extends InputMethodService
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
   private String auto_caps; //句首自動大寫
-  private static String soft_cursor_key = "soft_cursor"; //軟光標
-  private static String horizontal_key = "horizontal"; //水平模式，左、右方向鍵選中前一個、後一個候選字，上、下方向鍵翻頁
   private Locale[] locales = new Locale[2];
   private boolean keyUpNeeded; //RIME是否需要處理keyUp事件
   private boolean mNeedUpdateRimeOption = true;
   private String lastCommittedText;
 
+  private WindowsPositionType winPos; //候選窗口彈出位置
+  private InlineModeType inlinePreedit; //嵌入模式
+
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
-        || (winPos != WinPos.LEFT
-            && winPos != WinPos.RIGHT
-            && winPos != WinPos.LEFT_UP
-            && winPos != WinPos.RIGHT_UP);
+        || (winPos != WindowsPositionType.LEFT
+            && winPos != WindowsPositionType.RIGHT
+            && winPos != WindowsPositionType.LEFT_UP
+            && winPos != WindowsPositionType.RIGHT_UP);
   }
 
   public void updateWindow(int offsetX, int offsetY) {
     int location[] = new int[2];
-    winPos = WinPos.DRAG;
+    winPos = WindowsPositionType.DRAG;
     mCandidateContainer.getLocationOnScreen(location);
     winX = offsetX;
     winY = offsetY - location[1];
@@ -170,8 +170,8 @@ public class Trime extends InputMethodService
         } else if (x < 0) x = 0;
         y = (int) mPopupRectF.bottom - mParentLocation[1] + candSpacing;
         if (y + mFloatingWindow.getHeight() > 0
-            || winPos == WinPos.LEFT_UP
-            || winPos == WinPos.RIGHT_UP) {
+            || winPos == WindowsPositionType.LEFT_UP
+            || winPos == WindowsPositionType.RIGHT_UP) {
           y =
               (int) mPopupRectF.top
                   - mParentLocation[1]
@@ -202,7 +202,9 @@ public class Trime extends InputMethodService
 
   private boolean updateRimeOption() {
     if (mNeedUpdateRimeOption) {
+      String soft_cursor_key = "soft_cursor";
       Rime.setOption(soft_cursor_key, mConfig.getSoftCursor()); //軟光標
+      String horizontal_key = "horizontal";
       Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
       mNeedUpdateRimeOption = false;
     }
@@ -329,7 +331,7 @@ public class Trime extends InputMethodService
   }
 
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
-  public void reset() {
+  private void reset() {
     mConfig.reset();
     loadConfig();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
@@ -376,7 +378,7 @@ public class Trime extends InputMethodService
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       int i = cursorAnchorInfo.getComposingTextStart();
-      if ((winPos == WinPos.LEFT || winPos == WinPos.LEFT_UP) && i >= 0) {
+      if ((winPos == WindowsPositionType.LEFT || winPos == WindowsPositionType.LEFT_UP) && i >= 0) {
         mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
       } else {
         mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
@@ -604,7 +606,7 @@ public class Trime extends InputMethodService
     return "";
   }
 
-  public boolean handleAciton(int code, int mask) { //編輯操作
+  private boolean handleAciton(int code, int mask) { //編輯操作
     InputConnection ic = getCurrentInputConnection();
     if (ic == null) return false;
     if (code == KeyEvent.KEYCODE_CLEAR) {
@@ -662,7 +664,7 @@ public class Trime extends InputMethodService
   private boolean composeEvent(KeyEvent event) {
     int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_MENU) return false; //不處理Menu鍵
-    if (keyCode >= Key.symbolStart) return false; //只處理安卓標準按鍵
+    if (keyCode >= Key.getSymbolStart()) return false; //只處理安卓標準按鍵
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)) {
       boolean ret =
           onRimeKey(
@@ -752,13 +754,13 @@ public class Trime extends InputMethodService
     String s = event.getText();
     if (!Function.isEmpty(s)) {
       onText(s);
-    } else if (event.code > 0) {
-      int code = event.code;
+    } else if (event.getCode() > 0) {
+      int code = event.getCode();
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
         Rime.toggleOption(event.getToggle());
         commitText();
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
-        mKeyboardSwitch.setKeyboard(event.select);
+        mKeyboardSwitch.setKeyboard(event.getSelect());
         //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
         mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); //切換到西文鍵盤時不保存狀態
         updateAsciiMode();
@@ -767,9 +769,10 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { //切換輸入法
         IBinder imeToken = getToken();
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (event.select.contentEquals(".next") && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+        if (event.getSelect().contentEquals(".next")
+            && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           imm.switchToNextInputMethod(imeToken, false);
-        } else if (!Function.isEmpty(event.select)) {
+        } else if (!Function.isEmpty(event.getSelect())) {
           imm.switchToLastInputMethod(imeToken);
         } else {
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
@@ -777,12 +780,12 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
         String arg =
             String.format(
-                event.option,
+                event.getOption(),
                 getActiveText(1),
                 getActiveText(2),
                 getActiveText(3),
                 getActiveText(4));
-        s = Function.handle(this, event.command, arg);
+        s = Function.handle(this, event.getCommand(), arg);
         if (s != null) {
           commitText(s);
           updateComposing();
@@ -790,7 +793,7 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
         new Speech(this).start();
       } else if (code == KeyEvent.KEYCODE_SETTINGS) { //設定
-        switch (event.option) {
+        switch (event.getOption()) {
           case "theme":
             showThemeDialog();
             break;
@@ -807,12 +810,12 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
         showColorDialog();
       } else {
-        onKey(event.code, event.mask);
+        onKey(event.getCode(), event.getMask());
       }
     }
   }
 
-  public boolean handleKey(int keyCode, int mask) { //軟鍵盤
+  private boolean handleKey(int keyCode, int mask) { //軟鍵盤
     keyUpNeeded = false;
     if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
       keyUpNeeded = true;
@@ -845,7 +848,7 @@ public class Trime extends InputMethodService
     sendKey(ic, key, meta, KeyEvent.ACTION_UP);
   }
 
-  public void sendDownUpKeyEvents(int keyCode, int mask) {
+  private void sendDownUpKeyEvents(int keyCode, int mask) {
     InputConnection ic = getCurrentInputConnection();
     if (ic == null) return;
     int states =
@@ -894,7 +897,7 @@ public class Trime extends InputMethodService
   @Override
   public void onKey(int keyCode, int mask) { //軟鍵盤
     if (handleKey(keyCode, mask)) return;
-    if (keyCode >= Key.symbolStart) { //符號
+    if (keyCode >= Key.getSymbolStart()) { //符號
       keyUpNeeded = false;
       commitText(Event.getDisplayLabel(keyCode));
       return;
@@ -903,7 +906,7 @@ public class Trime extends InputMethodService
     sendDownUpKeyEvents(keyCode, mask);
   }
 
-  public void commitEventText(CharSequence text) {
+  private void commitEventText(CharSequence text) {
     String s = text.toString();
     if (!Event.containsSend(s)) {
       commitText(s);
@@ -992,7 +995,7 @@ public class Trime extends InputMethodService
   }
 
   /** 獲得當前漢字：候選字、選中字、剛上屏字/光標前字/光標前所有字、光標後所有字 */
-  public String getActiveText(int type) {
+  private String getActiveText(int type) {
     if (type == 2) return Rime.RimeGetInput(); //當前編碼
     String s = Rime.getComposingText(); //當前候選
     if (Function.isEmpty(s)) {
@@ -1011,16 +1014,16 @@ public class Trime extends InputMethodService
   /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
     InputConnection ic = getCurrentInputConnection();
-    if (inlinePreedit != Config.INLINE_NONE) { //嵌入模式
+    if (inlinePreedit != InlineModeType.INLINE_NONE) { //嵌入模式
       String s = null;
       switch (inlinePreedit) {
-        case Config.INLINE_PREVIEW:
+        case INLINE_PREVIEW:
           s = Rime.getComposingText();
           break;
-        case Config.INLINE_COMPOSITION:
+        case INLINE_COMPOSITION:
           s = Rime.getCompositionText();
           break;
-        case Config.INLINE_INPUT:
+        case INLINE_INPUT:
           s = Rime.RimeGetInput();
           break;
       }

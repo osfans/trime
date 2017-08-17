@@ -28,75 +28,55 @@ import java.util.Map;
 
 /** 從YAML中加載鍵盤配置，包含多個{@link Key 按鍵}。 */
 public class Keyboard {
-
-  static final String TAG = "Keyboard";
-
   public static final int EDGE_LEFT = 0x01;
   public static final int EDGE_RIGHT = 0x02;
   public static final int EDGE_TOP = 0x04;
   public static final int EDGE_BOTTOM = 0x08;
-
+  private static final int GRID_WIDTH = 10;
+  private static final int GRID_HEIGHT = 5;
+  private static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
+  private static final String TAG = Keyboard.class.getSimpleName();
+  /** Number of key widths from current touch point to search for nearest keys. */
+  public static float SEARCH_DISTANCE = 1.4f;
   /** 按鍵默認水平間距 */
   private int mDefaultHorizontalGap;
-
   /** 默認鍵寬 */
   private int mDefaultWidth;
-
   /** 默認鍵高 */
   private int mDefaultHeight;
-
   /** 默認行距 */
   private int mDefaultVerticalGap;
-
   /** 默認按鍵圓角半徑 */
   private float mRoundCorner;
-
   /** 鍵盤背景 */
   private Drawable mBackground;
-
   /** 鍵盤的Shift鍵是否按住 */
   private boolean mShifted;
-
   /** 鍵盤的Shift鍵 */
-  public Key mShiftKey;
-
+  private Key mShiftKey;
   /** Total height of the keyboard, including the padding and keys */
   private int mTotalHeight;
-
   /**
    * Total width of the keyboard, including left side gaps and keys, but not any gaps on the right
    * side.
    */
   private int mTotalWidth;
-
   /** List of keys in this keyboard */
-  public List<Key> mKeys, mComposingKeys;
+  private List<Key> mKeys;
 
+  private List<Key> mComposingKeys;
   private int mMetaState;
-
   /** Width of the screen available to fit the keyboard */
   private int mDisplayWidth;
-
-  /** Height of the screen */
-  private int mDisplayHeight;
-
   /** Keyboard mode, or zero, if none. */
   private int mAsciiMode;
 
-  private String mLabelTransform;
-
   // Variables for pre-computing nearest keys.
-
-  private static final int GRID_WIDTH = 10;
-  private static final int GRID_HEIGHT = 5;
-  private static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
+  private String mLabelTransform;
   private int mCellWidth;
   private int mCellHeight;
   private int[][] mGridNeighbors;
   private int mProximityThreshold;
-  /** Number of key widths from current touch point to search for nearest keys. */
-  public static float SEARCH_DISTANCE = 1.4f;
-
   /**
    * Creates a keyboard from the given xml key layout file.
    *
@@ -105,7 +85,8 @@ public class Keyboard {
   public Keyboard(Context context) {
     DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
-    mDisplayHeight = dm.heightPixels;
+    /* Height of the screen */
+    int mDisplayHeight = dm.heightPixels;
     //Log.v(TAG, "keyboard's display metrics:" + dm);
 
     Config config = Config.get();
@@ -121,10 +102,11 @@ public class Keyboard {
     mKeys = new ArrayList<Key>();
     mComposingKeys = new ArrayList<Key>();
   }
-
   /**
    * Creates a blank keyboard from the given resource file and populates it with the specified
    * characters in left-to-right, top-to-bottom fashion, using the specified number of columns.
+   *
+   * <p>
    *
    * <p>If the specified number of columns is -1, then the keyboard will fit as many keys as
    * possible in each row.
@@ -153,181 +135,20 @@ public class Keyboard {
         column = 0;
       }
       final Key key = new Key(this);
-      key.x = x;
-      key.y = y;
-      key.width = mDefaultWidth;
-      key.height = mDefaultHeight;
-      key.gap = mDefaultHorizontalGap;
+      key.setX(x);
+      key.setY(y);
+      key.setWidth(mDefaultWidth);
+      key.setHeight(mDefaultHeight);
+      key.setGap(mDefaultHorizontalGap);
       key.events[0] = new Event(this, String.valueOf(c));
       column++;
-      x += key.width + key.gap;
+      x += key.getWidth() + key.getGap();
       mKeys.add(key);
       if (x > mTotalWidth) {
         mTotalWidth = x;
       }
     }
     mTotalHeight = y + mDefaultHeight;
-  }
-
-  public List<Key> getKeys() {
-    return mKeys;
-  }
-
-  public List<Key> getComposingKeys() {
-    return mComposingKeys;
-  }
-
-  protected int getHorizontalGap() {
-    return mDefaultHorizontalGap;
-  }
-
-  protected void setHorizontalGap(int gap) {
-    mDefaultHorizontalGap = gap;
-  }
-
-  protected int getVerticalGap() {
-    return mDefaultVerticalGap;
-  }
-
-  protected void setVerticalGap(int gap) {
-    mDefaultVerticalGap = gap;
-  }
-
-  protected int getKeyHeight() {
-    return mDefaultHeight;
-  }
-
-  protected void setKeyHeight(int height) {
-    mDefaultHeight = height;
-  }
-
-  protected int getKeyWidth() {
-    return mDefaultWidth;
-  }
-
-  protected void setKeyWidth(int width) {
-    mDefaultWidth = width;
-  }
-
-  /**
-   * Returns the total height of the keyboard
-   *
-   * @return the total height of the keyboard
-   */
-  public int getHeight() {
-    return mTotalHeight;
-  }
-
-  public int getMinWidth() {
-    return mTotalWidth;
-  }
-
-  public boolean hasModifier(int modifiers) {
-    return (mMetaState & modifiers) != 0;
-  }
-
-  public boolean hasModifier() {
-    return mMetaState != 0;
-  }
-
-  public boolean toggleModifier(int mask) {
-    boolean value = !hasModifier(mask);
-    if (value) mMetaState |= mask;
-    else mMetaState &= ~mask;
-    return value;
-  }
-
-  public int getModifer() {
-    return mMetaState;
-  }
-
-  public boolean setModifier(int mask, boolean value) {
-    boolean b = hasModifier(mask);
-    if (b == value) return false;
-    if (value) mMetaState |= mask;
-    else mMetaState &= ~mask;
-    return true;
-  }
-
-  public boolean isAlted() {
-    return hasModifier(KeyEvent.META_ALT_ON);
-  }
-
-  public boolean isShifted() {
-    return hasModifier(KeyEvent.META_SHIFT_ON);
-  }
-
-  public boolean isCtrled() {
-    return hasModifier(KeyEvent.META_CTRL_ON);
-  }
-
-  /**
-   * 設定鍵盤的Shift鍵狀態
-   *
-   * @param on 是否保持Shift按下狀態
-   * @param shifted 是否按下Shift
-   * @return Shift鍵狀態是否改變
-   */
-  public boolean setShifted(boolean on, boolean shifted) {
-    on = on & shifted;
-    if (mShiftKey != null) mShiftKey.on = on;
-    return setModifier(KeyEvent.META_SHIFT_ON, on || shifted);
-  }
-
-  public boolean resetShifted() {
-    if (mShiftKey != null && !mShiftKey.on) return setModifier(KeyEvent.META_SHIFT_ON, false);
-    return false;
-  }
-
-  private void computeNearestNeighbors() {
-    // Round-up so we don't have any pixels outside the grid
-    mCellWidth = (getMinWidth() + GRID_WIDTH - 1) / GRID_WIDTH;
-    mCellHeight = (getHeight() + GRID_HEIGHT - 1) / GRID_HEIGHT;
-    mGridNeighbors = new int[GRID_SIZE][];
-    int[] indices = new int[mKeys.size()];
-    final int gridWidth = GRID_WIDTH * mCellWidth;
-    final int gridHeight = GRID_HEIGHT * mCellHeight;
-    for (int x = 0; x < gridWidth; x += mCellWidth) {
-      for (int y = 0; y < gridHeight; y += mCellHeight) {
-        int count = 0;
-        for (int i = 0; i < mKeys.size(); i++) {
-          final Key key = mKeys.get(i);
-          if (key.squaredDistanceFrom(x, y) < mProximityThreshold
-              || key.squaredDistanceFrom(x + mCellWidth - 1, y) < mProximityThreshold
-              || key.squaredDistanceFrom(x + mCellWidth - 1, y + mCellHeight - 1)
-                  < mProximityThreshold
-              || key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold
-              || key.isInside(x, y)
-              || key.isInside(x + mCellWidth - 1, y)
-              || key.isInside(x + mCellWidth - 1, y + mCellHeight - 1)
-              || key.isInside(x, y + mCellHeight - 1)) {
-            indices[count++] = i;
-          }
-        }
-        int[] cell = new int[count];
-        System.arraycopy(indices, 0, cell, 0, count);
-        mGridNeighbors[(y / mCellHeight) * GRID_WIDTH + (x / mCellWidth)] = cell;
-      }
-    }
-  }
-
-  /**
-   * Returns the indices of the keys that are closest to the given point.
-   *
-   * @param x the x-coordinate of the point
-   * @param y the y-coordinate of the point
-   * @return the array of integer indices for the nearest keys to the given point. If the given
-   *     point is out of range, then an array of size zero is returned.
-   */
-  public int[] getNearestKeys(int x, int y) {
-    if (mGridNeighbors == null) computeNearestNeighbors();
-    if (x >= 0 && x < getMinWidth() && y >= 0 && y < getHeight()) {
-      int index = (y / mCellHeight) * GRID_WIDTH + (x / mCellWidth);
-      if (index < GRID_SIZE) {
-        return mGridNeighbors[index];
-      }
-    }
-    return new int[0];
   }
 
   public Keyboard(Context context, String name) {
@@ -392,23 +213,24 @@ public class Keyboard {
       }
 
       final Key key = new Key(this, mk);
-      key.key_text_offset_x = Config.getPixel(mk, "key_text_offset_x", key_text_offset_x);
-      key.key_text_offset_y = Config.getPixel(mk, "key_text_offset_y", key_text_offset_y);
-      key.key_symbol_offset_x = Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x);
-      key.key_symbol_offset_y = Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y);
-      key.key_hint_offset_x = Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x);
-      key.key_hint_offset_y = Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y);
+      key.setKey_text_offset_x(Config.getPixel(mk, "key_text_offset_x", key_text_offset_x));
+      key.setKey_text_offset_y(Config.getPixel(mk, "key_text_offset_y", key_text_offset_y));
+      key.setKey_symbol_offset_x(Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x));
+      key.setKey_symbol_offset_y(Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y));
+      key.setKey_hint_offset_x(Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x));
+      key.setKey_hint_offset_y(Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y));
 
-      key.x = x;
-      key.y = y;
+      key.setX(x);
+      key.setY(y);
       int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
-      key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w; //右側不留白
-      key.height = rowHeight;
-      key.gap = gap;
-      key.row = row;
-      key.column = column;
+      //右側不留白
+      key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w);
+      key.setHeight(rowHeight);
+      key.setGap(gap);
+      key.setRow(row);
+      key.setColumn(column);
       column++;
-      x += key.width + key.gap;
+      x += key.getWidth() + key.getGap();
       mKeys.add(key);
       if (x > mTotalWidth) {
         mTotalWidth = x;
@@ -417,10 +239,183 @@ public class Keyboard {
     if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
     mTotalHeight = y + rowHeight + mDefaultVerticalGap;
     for (Key key : mKeys) {
-      if (key.column == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
-      if (key.row == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
-      if (key.row == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
+      if (key.getColumn() == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
+      if (key.getRow() == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
+      if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
     }
+  }
+
+  public Key getmShiftKey() {
+    return mShiftKey;
+  }
+
+  public void setmShiftKey(Key mShiftKey) {
+    this.mShiftKey = mShiftKey;
+  }
+
+  public List<Key> getmComposingKeys() {
+    return mComposingKeys;
+  }
+
+  public List<Key> getKeys() {
+    return mKeys;
+  }
+
+  public List<Key> getComposingKeys() {
+    return mComposingKeys;
+  }
+
+  protected int getHorizontalGap() {
+    return mDefaultHorizontalGap;
+  }
+
+  protected void setHorizontalGap(int gap) {
+    mDefaultHorizontalGap = gap;
+  }
+
+  protected int getVerticalGap() {
+    return mDefaultVerticalGap;
+  }
+
+  protected void setVerticalGap(int gap) {
+    mDefaultVerticalGap = gap;
+  }
+
+  protected int getKeyHeight() {
+    return mDefaultHeight;
+  }
+
+  protected void setKeyHeight(int height) {
+    mDefaultHeight = height;
+  }
+
+  protected int getKeyWidth() {
+    return mDefaultWidth;
+  }
+
+  protected void setKeyWidth(int width) {
+    mDefaultWidth = width;
+  }
+
+  /**
+   * Returns the total height of the keyboard
+   *
+   * @return the total height of the keyboard
+   */
+  public int getHeight() {
+    return mTotalHeight;
+  }
+
+  public int getMinWidth() {
+    return mTotalWidth;
+  }
+
+  private boolean hasModifier(int modifiers) {
+    return (mMetaState & modifiers) != 0;
+  }
+
+  public boolean hasModifier() {
+    return mMetaState != 0;
+  }
+
+  public boolean toggleModifier(int mask) {
+    boolean value = !hasModifier(mask);
+    if (value) mMetaState |= mask;
+    else mMetaState &= ~mask;
+    return value;
+  }
+
+  public int getModifer() {
+    return mMetaState;
+  }
+
+  private boolean setModifier(int mask, boolean value) {
+    boolean b = hasModifier(mask);
+    if (b == value) return false;
+    if (value) mMetaState |= mask;
+    else mMetaState &= ~mask;
+    return true;
+  }
+
+  public boolean isAlted() {
+    return hasModifier(KeyEvent.META_ALT_ON);
+  }
+
+  public boolean isShifted() {
+    return hasModifier(KeyEvent.META_SHIFT_ON);
+  }
+
+  public boolean isCtrled() {
+    return hasModifier(KeyEvent.META_CTRL_ON);
+  }
+
+  /**
+   * 設定鍵盤的Shift鍵狀態
+   *
+   * @param on 是否保持Shift按下狀態
+   * @param shifted 是否按下Shift
+   * @return Shift鍵狀態是否改變
+   */
+  public boolean setShifted(boolean on, boolean shifted) {
+    on = on & shifted;
+    if (mShiftKey != null) mShiftKey.setOn(on);
+    return setModifier(KeyEvent.META_SHIFT_ON, on || shifted);
+  }
+
+  public boolean resetShifted() {
+    if (mShiftKey != null && !mShiftKey.isOn()) return setModifier(KeyEvent.META_SHIFT_ON, false);
+    return false;
+  }
+
+  private void computeNearestNeighbors() {
+    // Round-up so we don't have any pixels outside the grid
+    mCellWidth = (getMinWidth() + GRID_WIDTH - 1) / GRID_WIDTH;
+    mCellHeight = (getHeight() + GRID_HEIGHT - 1) / GRID_HEIGHT;
+    mGridNeighbors = new int[GRID_SIZE][];
+    int[] indices = new int[mKeys.size()];
+    final int gridWidth = GRID_WIDTH * mCellWidth;
+    final int gridHeight = GRID_HEIGHT * mCellHeight;
+    for (int x = 0; x < gridWidth; x += mCellWidth) {
+      for (int y = 0; y < gridHeight; y += mCellHeight) {
+        int count = 0;
+        for (int i = 0; i < mKeys.size(); i++) {
+          final Key key = mKeys.get(i);
+          if (key.squaredDistanceFrom(x, y) < mProximityThreshold
+              || key.squaredDistanceFrom(x + mCellWidth - 1, y) < mProximityThreshold
+              || key.squaredDistanceFrom(x + mCellWidth - 1, y + mCellHeight - 1)
+                  < mProximityThreshold
+              || key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold
+              || key.isInside(x, y)
+              || key.isInside(x + mCellWidth - 1, y)
+              || key.isInside(x + mCellWidth - 1, y + mCellHeight - 1)
+              || key.isInside(x, y + mCellHeight - 1)) {
+            indices[count++] = i;
+          }
+        }
+        int[] cell = new int[count];
+        System.arraycopy(indices, 0, cell, 0, count);
+        mGridNeighbors[(y / mCellHeight) * GRID_WIDTH + (x / mCellWidth)] = cell;
+      }
+    }
+  }
+
+  /**
+   * Returns the indices of the keys that are closest to the given point.
+   *
+   * @param x the x-coordinate of the point
+   * @param y the y-coordinate of the point
+   * @return the array of integer indices for the nearest keys to the given point. If the given
+   *     point is out of range, then an array of size zero is returned.
+   */
+  public int[] getNearestKeys(int x, int y) {
+    if (mGridNeighbors == null) computeNearestNeighbors();
+    if (x >= 0 && x < getMinWidth() && y >= 0 && y < getHeight()) {
+      int index = (y / mCellHeight) * GRID_WIDTH + (x / mCellWidth);
+      if (index < GRID_SIZE) {
+        return mGridNeighbors[index];
+      }
+    }
+    return new int[0];
   }
 
   public boolean getAsciiMode() {

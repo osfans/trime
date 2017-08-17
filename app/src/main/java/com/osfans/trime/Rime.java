@@ -57,13 +57,13 @@ public class Rime {
       if (length == 0) return 0;
       return new String(bytes, 0, sel_end).length();
     }
-  };
+  }
 
   /** Rime候選項 */
   public static class RimeCandidate {
     String text;
     String comment;
-  };
+  }
 
   /** Rime候選區，包含多個{@link RimeCandidate 候選項} */
   public static class RimeMenu {
@@ -74,7 +74,7 @@ public class Rime {
     int num_candidates;
     RimeCandidate[] candidates;
     String select_keys;
-  };
+  }
 
   /** Rime上屏的字符串 */
   public static class RimeCommit {
@@ -101,7 +101,7 @@ public class Rime {
     public RimeCandidate[] getCandidates() {
       return size() == 0 ? null : menu.candidates;
     }
-  };
+  }
 
   /** Rime狀態 */
   public static class RimeStatus {
@@ -116,7 +116,7 @@ public class Rime {
     boolean is_simplified;
     boolean is_traditional;
     boolean is_ascii_punct;
-  };
+  }
 
   /** Rime方案 */
   public static class RimeSchema {
@@ -199,7 +199,7 @@ public class Rime {
       o.put("value", value);
       switches.set(i, o);
     }
-  };
+  }
 
   private static Rime self;
   private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
@@ -219,7 +219,6 @@ public class Rime {
   public static int META_CTRL_ON = get_modifier_by_name("Control");
   public static int META_ALT_ON = get_modifier_by_name("Alt");
   public static int META_RELEASE_ON = get_modifier_by_name("Release");
-  private static int XK_VoidSymbol = 0xffffff;
   private static boolean showSwitches = true;
 
   public static void setShowSwitches(boolean show) {
@@ -265,24 +264,24 @@ public class Rime {
     return mContext.commit_text_preview;
   }
 
-  public Rime(boolean full_check) {
+  private Rime(boolean full_check) {
     init(full_check);
     self = this;
   }
 
-  public static void initSchema() {
+  private static void initSchema() {
     mSchemaList = get_schema_list();
     String schema_id = getSchemaId();
     mSchema = new RimeSchema(schema_id);
     getStatus();
   }
 
-  public static boolean getStatus() {
+  private static boolean getStatus() {
     mSchema.getValue();
     return get_status(mStatus);
   }
 
-  public static void init(boolean full_check) {
+  private static void init(boolean full_check) {
     initialize();
     check(full_check);
     set_notification_handler();
@@ -309,17 +308,18 @@ public class Rime {
     return get_commit(mCommit);
   }
 
-  public static boolean getContexts() {
+  private static boolean getContexts() {
     boolean b = get_context(mContext);
     getStatus();
     return b;
   }
 
   public static boolean isVoidKeycode(int keycode) {
+    int XK_VoidSymbol = 0xffffff;
     return keycode <= 0 || keycode == XK_VoidSymbol;
   }
 
-  public static boolean onKey(int keycode, int mask) {
+  private static boolean onKey(int keycode, int mask) {
     if (isVoidKeycode(keycode)) return false;
     boolean b = process_key(keycode, mask);
     Log.info("b=" + b + ",keycode=" + keycode + ",mask=" + mask);
@@ -409,7 +409,7 @@ public class Rime {
     return get_current_schema();
   }
 
-  public static boolean isEmpty(String s) {
+  private static boolean isEmpty(String s) {
     return s.contentEquals(".default"); //無方案
   }
 
@@ -443,7 +443,7 @@ public class Rime {
     return mStatus.schema_name;
   }
 
-  public static boolean selectSchema(String schema_id) {
+  private static boolean selectSchema(String schema_id) {
     boolean b = select_schema(schema_id);
     getContexts();
     return b;
@@ -510,7 +510,7 @@ public class Rime {
 
   public static String openccConvert(String line, String name) {
     if (name != null) {
-      File f = new File(Config.OPENCC_DATA_DIR, name);
+      File f = new File(Config.getOpenccDataDir(), name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;
@@ -529,154 +529,154 @@ public class Rime {
   }
 
   // init
-  public static final native void setup();
+  public static native void setup();
 
-  public static final native void set_notification_handler();
+  public static native void set_notification_handler();
 
   // entry and exit
-  public static final native void initialize();
+  public static native void initialize();
 
-  public static final native void finalize1();
+  public static native void finalize1();
 
-  public static final native boolean start_maintenance(boolean full_check);
+  public static native boolean start_maintenance(boolean full_check);
 
-  public static final native boolean is_maintenance_mode();
+  public static native boolean is_maintenance_mode();
 
-  public static final native void join_maintenance_thread();
+  public static native void join_maintenance_thread();
 
   // deployment
-  public static final native void deployer_initialize();
+  public static native void deployer_initialize();
 
-  public static final native boolean prebuild();
+  public static native boolean prebuild();
 
-  public static final native boolean deploy();
+  public static native boolean deploy();
 
-  public static final native boolean deploy_schema(String schema_file);
+  public static native boolean deploy_schema(String schema_file);
 
-  public static final native boolean deploy_config_file(String file_name, String version_key);
+  public static native boolean deploy_config_file(String file_name, String version_key);
 
-  public static final native boolean sync_user_data();
+  public static native boolean sync_user_data();
 
   // session management
-  public static final native int create_session();
+  public static native int create_session();
 
-  public static final native boolean find_session();
+  public static native boolean find_session();
 
-  public static final native boolean destroy_session();
+  public static native boolean destroy_session();
 
-  public static final native void cleanup_stale_sessions();
+  public static native void cleanup_stale_sessions();
 
-  public static final native void cleanup_all_sessions();
+  public static native void cleanup_all_sessions();
 
   // input
-  public static final native boolean process_key(int keycode, int mask);
+  public static native boolean process_key(int keycode, int mask);
 
-  public static final native boolean commit_composition();
+  public static native boolean commit_composition();
 
-  public static final native void clear_composition();
+  public static native void clear_composition();
 
   // output
-  public static final native boolean get_commit(RimeCommit commit);
+  public static native boolean get_commit(RimeCommit commit);
 
-  public static final native boolean get_context(RimeContext context);
+  public static native boolean get_context(RimeContext context);
 
-  public static final native boolean get_status(RimeStatus status);
+  public static native boolean get_status(RimeStatus status);
 
   // runtime options
-  public static final native void set_option(String option, boolean value);
+  public static native void set_option(String option, boolean value);
 
-  public static final native boolean get_option(String option);
+  public static native boolean get_option(String option);
 
-  public static final native void set_property(String prop, String value);
+  public static native void set_property(String prop, String value);
 
-  public static final native String get_property(String prop);
+  public static native String get_property(String prop);
 
-  public static final native List get_schema_list();
+  public static native List get_schema_list();
 
-  public static final native String get_current_schema();
+  public static native String get_current_schema();
 
-  public static final native boolean select_schema(String schema_id);
+  public static native boolean select_schema(String schema_id);
 
   // configuration
-  public static final native Boolean config_get_bool(String name, String key);
+  public static native Boolean config_get_bool(String name, String key);
 
-  public static final native boolean config_set_bool(String name, String key, boolean value);
+  public static native boolean config_set_bool(String name, String key, boolean value);
 
-  public static final native Integer config_get_int(String name, String key);
+  public static native Integer config_get_int(String name, String key);
 
-  public static final native boolean config_set_int(String name, String key, int value);
+  public static native boolean config_set_int(String name, String key, int value);
 
-  public static final native Double config_get_double(String name, String key);
+  public static native Double config_get_double(String name, String key);
 
-  public static final native boolean config_set_double(String name, String key, double value);
+  public static native boolean config_set_double(String name, String key, double value);
 
-  public static final native String config_get_string(String name, String key);
+  public static native String config_get_string(String name, String key);
 
-  public static final native boolean config_set_string(String name, String key, String value);
+  public static native boolean config_set_string(String name, String key, String value);
 
-  public static final native int config_list_size(String name, String key);
+  public static native int config_list_size(String name, String key);
 
-  public static final native List config_get_list(String name, String key);
+  public static native List config_get_list(String name, String key);
 
-  public static final native Map config_get_map(String name, String key);
+  public static native Map config_get_map(String name, String key);
 
-  public static final native Object config_get_value(String name, String key);
+  public static native Object config_get_value(String name, String key);
 
-  public static final native Object schema_get_value(String name, String key);
+  public static native Object schema_get_value(String name, String key);
 
   // testing
-  public static final native boolean simulate_key_sequence(String key_sequence);
+  public static native boolean simulate_key_sequence(String key_sequence);
 
-  public static final native String get_input();
+  public static native String get_input();
 
-  public static final native int get_caret_pos();
+  public static native int get_caret_pos();
 
-  public static final native void set_caret_pos(int caret_pos);
+  public static native void set_caret_pos(int caret_pos);
 
-  public static final native boolean select_candidate(int index);
+  public static native boolean select_candidate(int index);
 
-  public static final native boolean select_candidate_on_current_page(int index);
+  public static native boolean select_candidate_on_current_page(int index);
 
-  public static final native String get_version();
+  public static native String get_version();
 
-  public static final native String get_librime_version();
+  public static native String get_librime_version();
 
   // module
-  public static final native boolean run_task(String task_name);
+  public static native boolean run_task(String task_name);
 
-  public static final native String get_shared_data_dir();
+  public static native String get_shared_data_dir();
 
-  public static final native String get_user_data_dir();
+  public static native String get_user_data_dir();
 
-  public static final native String get_sync_dir();
+  public static native String get_sync_dir();
 
-  public static final native String get_user_id();
+  public static native String get_user_id();
 
   // key_table
-  public static final native int get_modifier_by_name(String name);
+  public static native int get_modifier_by_name(String name);
 
-  public static final native int get_keycode_by_name(String name);
+  public static native int get_keycode_by_name(String name);
 
   // customize setting
-  public static final native boolean customize_bool(String name, String key, boolean value);
+  public static native boolean customize_bool(String name, String key, boolean value);
 
-  public static final native boolean customize_int(String name, String key, int value);
+  public static native boolean customize_int(String name, String key, int value);
 
-  public static final native boolean customize_double(String name, String key, double value);
+  public static native boolean customize_double(String name, String key, double value);
 
-  public static final native boolean customize_string(String name, String key, String value);
+  public static native boolean customize_string(String name, String key, String value);
 
-  public static final native List<Map<String, String>> get_available_schema_list();
+  public static native List<Map<String, String>> get_available_schema_list();
 
-  public static final native List<Map<String, String>> get_selected_schema_list();
+  public static native List<Map<String, String>> get_selected_schema_list();
 
-  public static final native boolean select_schemas(String[] schema_id_list);
+  public static native boolean select_schemas(String[] schema_id_list);
 
   // opencc
-  public static final native String get_opencc_version();
+  public static native String get_opencc_version();
 
-  public static final native String opencc_convert(String line, String name);
+  public static native String opencc_convert(String line, String name);
 
-  public static final native void opencc_convert_dictionary(
+  public static native void opencc_convert_dictionary(
       String inputFileName, String outputFileName, String formatFrom, String formatTo);
 }

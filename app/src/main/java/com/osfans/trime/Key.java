@@ -20,54 +20,75 @@ package com.osfans.trime;
 import android.graphics.drawable.Drawable;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import com.osfans.trime.enums.KeyEventType;
 import java.util.List;
 import java.util.Map;
 
 /** {@link Keyboard 鍵盤}中的各個按鍵，包含單擊、長按、滑動等多種{@link Event 事件} */
 public class Key {
-  private String TAG = "Key";
-  private Keyboard mKeyboard;
-  public Event ascii, composing, has_menu, paging;
-  private boolean send_bindings = true;
-  public String[] eventTypes =
-      new String[] {
-        "click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"
+  public static final int[] KEY_STATE_NORMAL_ON = {
+    android.R.attr.state_checkable, android.R.attr.state_checked
+  };
+  public static final int[] KEY_STATE_PRESSED_ON = {
+    android.R.attr.state_pressed, android.R.attr.state_checkable, android.R.attr.state_checked
+  };
+  public static final int[] KEY_STATE_NORMAL_OFF = {android.R.attr.state_checkable};
+  public static final int[] KEY_STATE_PRESSED_OFF = {
+    android.R.attr.state_pressed, android.R.attr.state_checkable
+  };
+  public static final int[] KEY_STATE_NORMAL = {};
+  public static final int[] KEY_STATE_PRESSED = {android.R.attr.state_pressed};
+  public static final int[][] KEY_STATES =
+      new int[][] {
+        KEY_STATE_PRESSED_ON,
+        KEY_STATE_PRESSED_OFF,
+        KEY_STATE_NORMAL_ON,
+        KEY_STATE_NORMAL_OFF,
+        KEY_STATE_PRESSED,
+        KEY_STATE_NORMAL
       };
-  public static final int CLICK = 0;
-  public static final int LONG_CLICK = 1;
-  public static final int SWIPE_LEFT = 2;
-  public static final int SWIPE_RIGHT = 3;
-  public static final int SWIPE_UP = 4;
-  public static final int SWIPE_DOWN = 5;
-  public static final int COMBO = 6;
-  public static final int EVENT_NUM = 7;
-  public Event[] events = new Event[EVENT_NUM];
-
-  public int width, height, gap, edgeFlags;
-  public int row, column;
-  public String label, hint;
-  public Drawable key_back_color, hilited_key_back_color;
-  public Integer key_text_color, key_symbol_color;
-  public Integer hilited_key_text_color, hilited_key_symbol_color;
-  public Integer key_text_size, symbol_text_size;
-  public Float round_corner;
-  public int key_text_offset_x,
-      key_text_offset_y,
-      key_symbol_offset_x,
-      key_symbol_offset_y,
-      key_hint_offset_x,
-      key_hint_offset_y;
-  public int x, y;
-  public boolean pressed, on;
-
-  public String popupCharacters;
-  public int popupResId;
-
   public static List<String> androidKeys;
   public static Map<String, Map> presetKeys;
-  public static int symbolStart;
-  public static String symbols;
-  public static KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+  private static final int EVENT_NUM = KeyEventType.values().length;
+  public Event[] events = new Event[EVENT_NUM];
+  public int edgeFlags;
+  private static int symbolStart;
+  private static String symbols;
+  private static KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+  private Keyboard mKeyboard;
+  private Event ascii;
+  private Event composing;
+  private Event has_menu;
+  private Event paging;
+  private boolean send_bindings = true;
+  private int width;
+  private int height;
+  private int gap;
+  private int row;
+  private int column;
+  private String label;
+  private String hint;
+  private Drawable key_back_color;
+  private Drawable hilited_key_back_color;
+  private Integer key_text_color;
+  private Integer key_symbol_color;
+  private Integer hilited_key_text_color;
+  private Integer hilited_key_symbol_color;
+  private Integer key_text_size;
+  private Integer symbol_text_size;
+  private Float round_corner;
+  private int key_text_offset_x;
+  private int key_text_offset_y;
+  private int key_symbol_offset_x;
+  private int key_symbol_offset_y;
+  private int key_hint_offset_x;
+  private int key_hint_offset_y;
+  private int x;
+  private int y;
+  private boolean pressed;
+  private boolean on;
+  private String popupCharacters;
+  private int popupResId;
 
   /**
    * Create an empty key with no attributes.
@@ -77,7 +98,6 @@ public class Key {
   public Key(Keyboard parent) {
     mKeyboard = parent;
   }
-
   /**
    * Create an empty key with no attributes.
    *
@@ -88,6 +108,10 @@ public class Key {
     this(parent);
     String s;
     for (int i = 0; i < EVENT_NUM; i++) {
+      String[] eventTypes =
+          new String[] {
+            "click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"
+          };
       String eventType = eventTypes[i];
       s = Config.getString(mk, eventType);
       if (s.length() > 0) events[i] = new Event(mKeyboard, s);
@@ -104,14 +128,15 @@ public class Key {
     if (s.length() > 0) {
       paging = new Event(mKeyboard, s);
     }
-    if (composing != null || has_menu != null || paging != null) mKeyboard.mComposingKeys.add(this);
+    if (composing != null || has_menu != null || paging != null)
+      mKeyboard.getmComposingKeys().add(this);
     s = Config.getString(mk, "ascii");
     if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = Config.getString(mk, "label");
     hint = Config.getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = (Boolean) mk.get("send_bindings");
     else if (composing == null && has_menu == null && paging == null) send_bindings = false;
-    if (isShift()) mKeyboard.mShiftKey = this;
+    if (isShift()) mKeyboard.setmShiftKey(this);
     key_text_size = Config.getPixel(mk, "key_text_size");
     symbol_text_size = Config.getPixel(mk, "symbol_text_size");
     key_text_color = Config.getColor(mk, "key_text_color");
@@ -123,33 +148,181 @@ public class Key {
     round_corner = Config.getFloat(mk, "round_corner");
   }
 
-  public static final int[] KEY_STATE_NORMAL_ON = {
-    android.R.attr.state_checkable, android.R.attr.state_checked
-  };
+  public static List<String> getAndroidKeys() {
+    return androidKeys;
+  }
 
-  public static final int[] KEY_STATE_PRESSED_ON = {
-    android.R.attr.state_pressed, android.R.attr.state_checkable, android.R.attr.state_checked
-  };
+  public static Map<String, Map> getPresetKeys() {
+    return presetKeys;
+  }
 
-  public static final int[] KEY_STATE_NORMAL_OFF = {android.R.attr.state_checkable};
+  public static int getSymbolStart() {
+    return symbolStart;
+  }
 
-  public static final int[] KEY_STATE_PRESSED_OFF = {
-    android.R.attr.state_pressed, android.R.attr.state_checkable
-  };
+  public static void setSymbolStart(int symbolStart) {
+    Key.symbolStart = symbolStart;
+  }
 
-  public static final int[] KEY_STATE_NORMAL = {};
+  public static String getSymbols() {
+    return symbols;
+  }
 
-  public static final int[] KEY_STATE_PRESSED = {android.R.attr.state_pressed};
+  public static void setSymbols(String symbols) {
+    Key.symbols = symbols;
+  }
 
-  public static final int[][] KEY_STATES =
-      new int[][] {
-        KEY_STATE_PRESSED_ON,
-        KEY_STATE_PRESSED_OFF,
-        KEY_STATE_NORMAL_ON,
-        KEY_STATE_NORMAL_OFF,
-        KEY_STATE_PRESSED,
-        KEY_STATE_NORMAL
-      };
+  public static KeyCharacterMap getKcm() {
+    return kcm;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  public void setWidth(int width) {
+    this.width = width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public void setHeight(int height) {
+    this.height = height;
+  }
+
+  public int getGap() {
+    return gap;
+  }
+
+  public void setGap(int gap) {
+    this.gap = gap;
+  }
+
+  public int getEdgeFlags() {
+    return edgeFlags;
+  }
+
+  public void setEdgeFlags(int edgeFlags) {
+    this.edgeFlags = edgeFlags;
+  }
+
+  public int getRow() {
+    return row;
+  }
+
+  public void setRow(int row) {
+    this.row = row;
+  }
+
+  public int getColumn() {
+    return column;
+  }
+
+  public void setColumn(int column) {
+    this.column = column;
+  }
+
+  public String getHint() {
+    return hint;
+  }
+
+  public Integer getKey_text_size() {
+    return key_text_size;
+  }
+
+  public Integer getSymbol_text_size() {
+    return symbol_text_size;
+  }
+
+  public Float getRound_corner() {
+    return round_corner;
+  }
+
+  public int getX() {
+    return x;
+  }
+
+  public void setX(int x) {
+    this.x = x;
+  }
+
+  public int getY() {
+    return y;
+  }
+
+  public void setY(int y) {
+    this.y = y;
+  }
+
+  public boolean isPressed() {
+    return pressed;
+  }
+
+  public boolean isOn() {
+    return on;
+  }
+
+  public void setOn(boolean on) {
+    this.on = on;
+  }
+
+  public String getPopupCharacters() {
+    return popupCharacters;
+  }
+
+  public int getPopupResId() {
+    return popupResId;
+  }
+
+  public int getKey_text_offset_x() {
+    return key_text_offset_x;
+  }
+
+  public void setKey_text_offset_x(int key_text_offset_x) {
+    this.key_text_offset_x = key_text_offset_x;
+  }
+
+  public int getKey_text_offset_y() {
+    return key_text_offset_y;
+  }
+
+  public void setKey_text_offset_y(int key_text_offset_y) {
+    this.key_text_offset_y = key_text_offset_y;
+  }
+
+  public int getKey_symbol_offset_x() {
+    return key_symbol_offset_x;
+  }
+
+  public void setKey_symbol_offset_x(int key_symbol_offset_x) {
+    this.key_symbol_offset_x = key_symbol_offset_x;
+  }
+
+  public int getKey_symbol_offset_y() {
+    return key_symbol_offset_y;
+  }
+
+  public void setKey_symbol_offset_y(int key_symbol_offset_y) {
+    this.key_symbol_offset_y = key_symbol_offset_y;
+  }
+
+  public int getKey_hint_offset_x() {
+    return key_hint_offset_x;
+  }
+
+  public void setKey_hint_offset_x(int key_hint_offset_x) {
+    this.key_hint_offset_x = key_hint_offset_x;
+  }
+
+  public int getKey_hint_offset_y() {
+    return key_hint_offset_y;
+  }
+
+  public void setKey_hint_offset_y(int key_hint_offset_y) {
+    this.key_hint_offset_y = key_hint_offset_y;
+  }
 
   private boolean isNormal(int[] drawableState) {
     return (drawableState == KEY_STATE_NORMAL
@@ -190,7 +363,7 @@ public class Key {
    */
   public void onReleased(boolean inside) {
     pressed = !pressed;
-    if (getClick().sticky) on = !on;
+    if (getClick().isSticky()) on = !on;
   }
 
   /**
@@ -246,7 +419,7 @@ public class Key {
         states = KEY_STATE_NORMAL_ON;
       }
     } else {
-      if (getClick().sticky || getClick().functional) {
+      if (getClick().isSticky() || getClick().isFunctional()) {
         if (pressed) {
           states = KEY_STATE_PRESSED_OFF;
         } else {
@@ -267,7 +440,7 @@ public class Key {
   }
 
   public boolean isShiftLock() {
-    switch (getClick().shift_lock) {
+    switch (getClick().getShiftLock()) {
       case "long":
         return false;
       case "click":
@@ -289,7 +462,7 @@ public class Key {
     return false;
   }
 
-  public Event getEvent() {
+  private Event getEvent() {
     if (ascii != null && Rime.isAsciiMode()) return ascii;
     if (paging != null && Rime.isPaging()) return paging;
     if (has_menu != null && Rime.hasMenu()) return has_menu;
@@ -298,11 +471,11 @@ public class Key {
   }
 
   public Event getClick() {
-    return events[CLICK];
+    return events[KeyEventType.CLICK.ordinal()];
   }
 
   public Event getLongClick() {
-    return events[LONG_CLICK];
+    return events[KeyEventType.LONG_CLICK.ordinal()];
   }
 
   public Event getEvent(int i) {
@@ -319,11 +492,11 @@ public class Key {
   }
 
   public int getCode() {
-    return getClick().code;
+    return getClick().getCode();
   }
 
   public int getCode(int type) {
-    return getEvent(type).code;
+    return getEvent(type).getCode();
   }
 
   public String getLabel() {
@@ -334,7 +507,7 @@ public class Key {
   }
 
   public String getPreviewText(int type) {
-    if (type == CLICK) return getEvent().getPreviewText();
+    if (type == KeyEventType.CLICK.ordinal()) return getEvent().getPreviewText();
     return getEvent(type).getPreviewText();
   }
 

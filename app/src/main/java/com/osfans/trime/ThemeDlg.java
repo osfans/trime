@@ -31,16 +31,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** 顯示配色方案列表 */
-public class ThemeDlg extends AsyncTask {
-  String[] keys;
-  String[] names;
-  int checked;
-  AlertDialog mDialog;
-  ProgressDialog mProgressDialog;
-  Context mContext;
-  IBinder mToken;
+class ThemeDlg extends AsyncTask {
+  private String[] keys;
+  private String[] names;
+  private int checked;
+  private ProgressDialog mProgressDialog;
+  private Context mContext;
+  private IBinder mToken;
 
-  public void selectTheme() {
+  private void selectTheme() {
     String theme = keys[checked].replace(".yaml", "");
     Config config = Config.get();
     config.setTheme(theme);
@@ -69,7 +68,7 @@ public class ThemeDlg extends AsyncTask {
     mToken = token;
     Config config = Config.get(context);
     String theme = config.getTheme() + ".yaml";
-    keys = config.getThemeKeys();
+    keys = Config.getThemeKeys();
     if (keys == null) return;
     Arrays.sort(keys);
     checked = Arrays.binarySearch(keys, theme);
@@ -79,7 +78,7 @@ public class ThemeDlg extends AsyncTask {
     themeMap.put("sougou", mContext.getString(R.string.pref_themes_name_sougou));
     themeMap.put("tongwenfeng", mContext.getString(R.string.pref_themes_name_tongwenfeng));
     themeMap.put("trime", mContext.getString(R.string.pref_themes_name_trime));
-    String[] nameArray = config.getThemeNames(keys);
+    String[] nameArray = Config.getThemeNames(keys);
     names = new String[nameArray.length];
     for (int i = 0; i < nameArray.length; i++) {
       String themeName = themeMap.get(nameArray[i]);
@@ -94,8 +93,8 @@ public class ThemeDlg extends AsyncTask {
     initProgressDialog();
   }
 
-  public void showDialog() {
-    mDialog =
+  private void showDialog() {
+    AlertDialog mDialog =
         new AlertDialog.Builder(mContext)
             .setTitle(R.string.pref_themes)
             .setCancelable(true)

@@ -27,9 +27,12 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
+import com.osfans.trime.enums.InlineModeType;
+import com.osfans.trime.enums.WindowsPositionType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -42,25 +45,17 @@ import java.util.Map;
 
 /** 解析YAML配置文件 */
 public class Config {
-  public static String SDCARD = "/sdcard/";
-  public static final int INLINE_NONE = 0;
-  public static final int INLINE_PREVIEW = 1;
-  public static final int INLINE_COMPOSITION = 2;
-  public static final int INLINE_INPUT = 3;
-
-  public static final int CAND_POS_LEFT = 0;
-  public static final int CAND_POS_RIGHT = 1;
-  public static final int CAND_POS_FIXED = 2;
+  // 默认的用户数据路径
+  private static final String RIME = "rime";
+  private static final String EXTERNAL_STORAGE_PATH =
+      Environment.getExternalStorageDirectory().getPath();
+  private static final String USER_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME).getPath();
+  private static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
 
   private Map<String, Object> mStyle, mDefaultStyle;
-  private static String defaultName = "trime";
-  private static String defaultFile = "trime.yaml";
   private String themeName;
   private String schema_id;
-  private static String RIME = "rime";
-  private static String USER_DATA_DIR = SDCARD + RIME;
-  public static String OPENCC_DATA_DIR = USER_DATA_DIR + "/opencc/";
-  private static int BLK_SIZE = 1024;
+
   private static Config self = null;
   private SharedPreferences mPref;
 
@@ -78,17 +73,23 @@ public class Config {
     return themeName;
   }
 
-  public static void prepareRime(Context context) {
+  public static String getOpenccDataDir() {
+    return OPENCC_DATA_DIR;
+  }
+
+  private static void prepareRime(Context context) {
     boolean isExist = new File(USER_DATA_DIR).exists();
     boolean isOverwrite = Function.isDiffVer(context);
+    String defaultFile = "trime.yaml";
     if (isOverwrite) {
       copyFileOrDir(context, RIME, true);
     } else if (isExist) {
-      copyFileOrDir(context, RIME + "/" + defaultFile, false);
+      String path = new File(RIME, defaultFile).getPath();
+      copyFileOrDir(context, path, false);
     } else {
       copyFileOrDir(context, RIME, false);
     }
-    while (!new File(USER_DATA_DIR + "/" + defaultFile).exists()) {
+    while (!new File(USER_DATA_DIR, defaultFile).exists()) {
       SystemClock.sleep(3000);
       copyFileOrDir(context, RIME, isOverwrite);
     }
@@ -129,7 +130,7 @@ public class Config {
             }
           };
       for (String txtName : d.list(txtFilter)) {
-        txtName = OPENCC_DATA_DIR + txtName;
+        txtName = new File(OPENCC_DATA_DIR, txtName).getPath();
         String ocdName = txtName.replace(".txt", ".ocd");
         Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd");
       }
@@ -156,11 +157,11 @@ public class Config {
       if (assets.length == 0) {
         copyFile(context, path, overwrite);
       } else {
-        String fullPath = SDCARD + path;
-        File dir = new File(fullPath);
+        File dir = new File(EXTERNAL_STORAGE_PATH, path);
         if (!dir.exists()) dir.mkdir();
         for (int i = 0; i < assets.length; ++i) {
-          copyFileOrDir(context, path + "/" + assets[i], overwrite);
+          String assetPath = new File(path, assets[i]).getPath();
+          copyFileOrDir(context, assetPath, overwrite);
         }
       }
     } catch (IOException ex) {
@@ -170,15 +171,16 @@ public class Config {
     return true;
   }
 
-  public static boolean copyFile(Context context, String filename, boolean overwrite) {
+  private static boolean copyFile(Context context, String filename, boolean overwrite) {
     AssetManager assetManager = context.getAssets();
     InputStream in = null;
     OutputStream out = null;
     try {
       in = assetManager.open(filename);
-      String newFileName = SDCARD + filename;
+      String newFileName = new File(EXTERNAL_STORAGE_PATH, filename).getPath();
       if (new File(newFileName).exists() && !overwrite) return true;
       out = new FileOutputStream(newFileName);
+      int BLK_SIZE = 1024;
       byte[] buffer = new byte[BLK_SIZE];
       int read;
       while ((read = in.read(buffer)) != -1) {
@@ -208,8 +210,9 @@ public class Config {
     init();
   }
 
-  public void init() {
+  private void init() {
     String name = Rime.config_get_string(themeName, "config_version");
+    String defaultName = "trime";
     if (Function.isEmpty(name)) themeName = defaultName;
     deployConfig();
     mDefaultStyle = (Map<String, Object>) Rime.config_get_map(themeName, "style");
@@ -219,9 +222,10 @@ public class Config {
     for (Object o : androidKeys) {
       Key.androidKeys.add(o.toString());
     }
-    Key.symbolStart = Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284;
-    Key.symbols = Rime.config_get_string(themeName, "android_keys/symbols");
-    if (Function.isEmpty(Key.symbols)) Key.symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~";
+    Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
+    Key.setSymbols(Rime.config_get_string(themeName, "android_keys/symbols"));
+    if (Function.isEmpty(Key.getSymbols()))
+      Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
     Key.presetKeys = (Map<String, Map>) Rime.config_get_map(themeName, "preset_keys");
     presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
     presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");
@@ -264,7 +268,7 @@ public class Config {
     return getValue(s) != null;
   }
 
-  public String getKeyboardName(String name) {
+  private String getKeyboardName(String name) {
     if (name.contentEquals(".default")) {
       if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名
       else {
@@ -324,7 +328,7 @@ public class Config {
     self = null;
   }
 
-  public static int getPixel(Float f) {
+  private static int getPixel(Float f) {
     if (f == null) return 0;
     return (int)
         TypedValue.applyDimension(
@@ -450,7 +454,7 @@ public class Config {
     return o;
   }
 
-  public Integer getCurrentColor(String key) {
+  private Integer getCurrentColor(String key) {
     Object o = getColorObject(key);
     if (o instanceof Integer) return ((Integer) o).intValue();
     if (o instanceof Float || o instanceof Double) return ((Long) o).intValue();
@@ -501,13 +505,13 @@ public class Config {
   public Typeface getFont(String key) {
     String name = getString(key);
     if (name != null) {
-      File f = new File(USER_DATA_DIR + "/fonts", name);
+      File f = new File(USER_DATA_DIR, "fonts" + name);
       if (f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
   }
 
-  public Drawable drawableObject(Object o) {
+  private Drawable drawableObject(Object o) {
     if (o == null) return null;
     Integer color = null;
     if (o instanceof Integer) color = ((Integer) o).intValue();
@@ -515,7 +519,8 @@ public class Config {
       color = ((Long) o).intValue();
     else if (o instanceof String) {
       String name = o.toString();
-      name = USER_DATA_DIR + "/backgrounds/" + name;
+      File nameDirectory = new File(USER_DATA_DIR, "backgrounds");
+      name = new File(nameDirectory, name).getPath();
       File f = new File(name);
       if (f.exists()) {
         return new BitmapDrawable(BitmapFactory.decodeFile(name));
@@ -529,7 +534,7 @@ public class Config {
     return null;
   }
 
-  public Drawable getCurrentColorDrawable(String key) {
+  private Drawable getCurrentColorDrawable(String key) {
     Object o = getColorObject(key);
     return drawableObject(o);
   }
@@ -547,23 +552,24 @@ public class Config {
     return drawableObject(o);
   }
 
-  public int getInlinePreedit() {
+  public InlineModeType getInlinePreedit() {
     switch (mPref.getString("inline_preedit", "preview")) {
       case "preview":
       case "preedit":
       case "true":
-        return INLINE_PREVIEW;
+        return InlineModeType.INLINE_PREVIEW;
       case "composition":
-        return INLINE_COMPOSITION;
+        return InlineModeType.INLINE_COMPOSITION;
       case "input":
-        return INLINE_INPUT;
+        return InlineModeType.INLINE_INPUT;
     }
-    return INLINE_NONE;
+    return InlineModeType.INLINE_NONE;
   }
 
-  public WinPos getWinPos() {
-    WinPos wp = WinPos.fromString(getString("layout/position"));
-    if (getInlinePreedit() == 0 && wp == WinPos.RIGHT) wp = WinPos.LEFT;
+  public WindowsPositionType getWinPos() {
+    WindowsPositionType wp = WindowsPositionType.fromString(getString("layout/position"));
+    if (getInlinePreedit() == InlineModeType.INLINE_PREVIEW && wp == WindowsPositionType.RIGHT)
+      wp = WindowsPositionType.LEFT;
     return wp;
   }
 
@@ -587,7 +593,7 @@ public class Config {
     return progress * 10 + 10;
   }
 
-  public boolean getShowSwitches() {
+  private boolean getShowSwitches() {
     return mPref.getBoolean("show_switches", true);
   }
 

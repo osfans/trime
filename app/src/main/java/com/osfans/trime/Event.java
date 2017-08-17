@@ -28,11 +28,21 @@ import java.util.Map;
 public class Event {
   private String TAG = "Event";
   private Keyboard mKeyboard;
-  int code = 0, mask = 0;
-  String text, label, preview;
-  List<String> states;
-  String command, option, select, toggle, shift_lock;
-  public boolean functional, repeatable, sticky;
+  private int code = 0;
+  private int mask = 0;
+  private String text;
+  private String label;
+  private String preview;
+  private List<String> states;
+  private String command;
+  private String option;
+  private String select;
+  private String toggle;
+
+  private String shiftLock;
+  private boolean functional;
+  private boolean repeatable;
+  private boolean sticky;
 
   public Event(Keyboard keyboard, String s) {
     mKeyboard = keyboard;
@@ -44,7 +54,7 @@ public class Event {
       toggle = Config.getString(m, "toggle");
       label = Config.getString(m, "label");
       preview = Config.getString(m, "preview");
-      shift_lock = Config.getString(m, "shift_lock");
+      shiftLock = Config.getString(m, "shift_lock");
       int[] sends = parseSend(Config.getString(m, "send"));
       code = sends[0];
       mask = sends[1];
@@ -69,6 +79,42 @@ public class Event {
     }
   }
 
+  public int getCode() {
+    return code;
+  }
+
+  public int getMask() {
+    return mask;
+  }
+
+  public String getCommand() {
+    return command;
+  }
+
+  public String getOption() {
+    return option;
+  }
+
+  public String getSelect() {
+    return select;
+  }
+
+  public boolean isFunctional() {
+    return functional;
+  }
+
+  public boolean isRepeatable() {
+    return repeatable;
+  }
+
+  public boolean isSticky() {
+    return sticky;
+  }
+
+  public String getShiftLock() {
+    return shiftLock;
+  }
+
   public static boolean containsSend(String s) {
     return (!Function.isEmpty(s)) && s.length() > 1 && s.matches(".*\\{.+\\}.*");
   }
@@ -88,7 +134,7 @@ public class Event {
     return sends;
   }
 
-  public String adjustCase(String s) {
+  private String adjustCase(String s) {
     if (Function.isEmpty(s)) return "";
     if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted())
       s = s.toUpperCase(Locale.getDefault());
@@ -137,17 +183,17 @@ public class Event {
 
   public static String getDisplayLabel(int keyCode) {
     String s = "";
-    if (keyCode < Key.symbolStart) { //字母數字
-      if (Key.kcm.isPrintingKey(keyCode)) {
-        char c = Key.kcm.getDisplayLabel(keyCode);
+    if (keyCode < Key.getSymbolStart()) { //字母數字
+      if (Key.getKcm().isPrintingKey(keyCode)) {
+        char c = Key.getKcm().getDisplayLabel(keyCode);
         if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
         s = String.valueOf(c);
       } else {
         s = Key.androidKeys.get(keyCode);
       }
     } else if (keyCode < Key.androidKeys.size()) { //可見符號
-      keyCode -= Key.symbolStart;
-      s = Key.symbols.substring(keyCode, keyCode + 1);
+      keyCode -= Key.getSymbolStart();
+      s = Key.getSymbols().substring(keyCode, keyCode + 1);
     }
     return s;
   }
@@ -156,15 +202,15 @@ public class Event {
     int keyCode = 0;
     if (Key.androidKeys.contains(s)) { //字母數字
       keyCode = Key.androidKeys.indexOf(s);
-    } else if (Key.symbols.contains(s)) { //可見符號
-      keyCode = Key.symbolStart + Key.symbols.indexOf(s);
+    } else if (Key.getSymbols().contains(s)) { //可見符號
+      keyCode = Key.getSymbolStart() + Key.getSymbols().indexOf(s);
     } else if (symbolAliases.containsKey(s)) {
       keyCode = symbolAliases.get(s);
     }
     return keyCode;
   }
 
-  public static int getRimeCode(int code) {
+  private static int getRimeCode(int code) {
     int i = 0;
     if (code >= 0 && code < Key.androidKeys.size()) {
       String s = Key.androidKeys.get(code);
@@ -187,7 +233,7 @@ public class Event {
     return new int[] {i, m};
   }
 
-  public static Map<String, Integer> masks =
+  private static Map<String, Integer> masks =
       new HashMap<String, Integer>() {
         {
           put("Shift", KeyEvent.META_SHIFT_ON);
@@ -196,7 +242,7 @@ public class Event {
         }
       };
 
-  public static Map<String, Integer> symbolAliases =
+  private static Map<String, Integer> symbolAliases =
       new HashMap<String, Integer>() {
         {
           put("#", KeyEvent.KEYCODE_POUND);

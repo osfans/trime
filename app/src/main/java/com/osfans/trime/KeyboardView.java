@@ -33,6 +33,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,6 +43,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import com.osfans.trime.enums.KeyEventType;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -109,6 +111,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   private static final boolean DEBUG = false;
   private static final int NOT_A_KEY = -1;
   private static final int[] LONG_PRESSABLE_STATE_SET = {android.R.attr.state_long_pressable};
+  private static String TAG = KeyboardView.class.getSimpleName();
 
   private Keyboard mKeyboard;
   private int mCurrentKeyIndex = NOT_A_KEY;
@@ -119,22 +122,19 @@ public class KeyboardView extends View implements View.OnClickListener {
   private int key_symbol_color, hilited_key_symbol_color;
   private int mSymbolSize;
   private Paint mPaintSymbol;
-  private float mShadowRadius, mRoundCorner;
+  private float mShadowRadius;
   private int mShadowColor;
   private float mBackgroundDimAmount;
   private Drawable mBackground;
 
   private TextView mPreviewText;
   private PopupWindow mPreviewPopup;
-  private int mPreviewTextSizeLarge;
   private int mPreviewOffset;
   private int mPreviewHeight;
   // Working variable
   private final int[] mCoordinates = new int[2];
 
   private PopupWindow mPopupKeyboard;
-  private View mMiniKeyboardContainer;
-  private KeyboardView mMiniKeyboard;
   private boolean mMiniKeyboardOnScreen;
   private View mPopupParent;
   private int mMiniKeyboardOffsetX;
@@ -157,11 +157,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   private int mVerticalCorrection;
   private int mProximityThreshold;
 
-  private boolean mPreviewCentered = false;
   private boolean mShowPreview = true;
-  private boolean mShowTouchPoints = true;
-  private int mPopupPreviewX;
-  private int mPopupPreviewY;
 
   private int mLastX;
   private int mLastY;
@@ -184,8 +180,6 @@ public class KeyboardView extends View implements View.OnClickListener {
   private long mCurrentKeyTime;
   private int[] mKeyIndices = new int[12];
   private GestureDetector mGestureDetector;
-  private int mPopupX;
-  private int mPopupY;
   private int mRepeatKeyIndex = NOT_A_KEY;
   private int mPopupLayout;
   private boolean mAbortKey;
@@ -211,9 +205,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   // For multi-tap
   private int mLastSentIndex;
-  private int mTapCount;
   private long mLastTapTime;
-  private boolean mInMultiTap;
   private static int MULTITAP_INTERVAL = 800; // milliseconds
   private StringBuilder mPreviewLabel = new StringBuilder(1);
 
@@ -239,7 +231,8 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private boolean mShowHint = true;
 
-  Method getStateDrawableIndex, getStateDrawable;
+  private Method getStateDrawableIndex;
+  private Method getStateDrawable;
 
   private static class MyHandler extends Handler {
     private final WeakReference<KeyboardView> mKeyboardView;
@@ -294,7 +287,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     mBackgroundDimAmount = config.getFloat("background_dim_amount");
     mShadowRadius = config.getFloat("shadow_radius");
-    mRoundCorner = config.getFloat("round_corner");
+    float mRoundCorner = config.getFloat("round_corner");
 
     mKeyBackColor = new StateListDrawable();
     mKeyBackColor.addState(
@@ -328,7 +321,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       background.setCornerRadius(mRoundCorner);
       mPreviewText.setBackgroundDrawable(background);
     }
-    mPreviewTextSizeLarge = config.getInt("preview_text_size");
+    int mPreviewTextSizeLarge = config.getInt("preview_text_size");
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
     mShowPreview = config.getShowPreview();
 
@@ -353,6 +346,7 @@ public class KeyboardView extends View implements View.OnClickListener {
           StateListDrawable.class.getMethod("getStateDrawableIndex", int[].class);
       getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
     } catch (Exception ex) {
+      Log.e(TAG, "Get Drawable Exception" + ex);
     }
 
     LayoutInflater inflate =
@@ -412,7 +406,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 if (velocityX > mSwipeThreshold && absY < absX && deltaX > travelX) {
                   if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_RIGHT;
+                    type = KeyEventType.SWIPE_RIGHT.ordinal();
                   } else {
                     swipeRight();
                     return true;
@@ -420,7 +414,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
                   if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_LEFT;
+                    type = KeyEventType.SWIPE_LEFT.ordinal();
                   } else {
                     swipeLeft();
                     return true;
@@ -428,7 +422,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
                   if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_UP;
+                    type = KeyEventType.SWIPE_UP.ordinal();
                   } else {
                     swipeUp();
                     return true;
@@ -436,7 +430,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
                   if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                     sendDownKey = true;
-                    type = Key.SWIPE_DOWN;
+                    type = KeyEventType.SWIPE_DOWN.ordinal();
                   } else {
                     swipeDown();
                     return true;
@@ -539,7 +533,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     return false;
   }
 
-  public boolean resetShifted() {
+  private boolean resetShifted() {
     if (mKeyboard != null) {
       if (mKeyboard.resetShifted()) {
         // The whole keyboard probably needs to be redrawn
@@ -570,7 +564,8 @@ public class KeyboardView extends View implements View.OnClickListener {
    * @return true 如果大寫
    */
   public boolean isCapsOn() {
-    if (mKeyboard != null && mKeyboard.mShiftKey != null) return mKeyboard.mShiftKey.on;
+    if (mKeyboard != null && mKeyboard.getmShiftKey() != null)
+      return mKeyboard.getmShiftKey().isOn();
     return false;
   }
 
@@ -597,11 +592,11 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   public void setVerticalCorrection(int verticalOffset) {}
 
-  public void setPopupParent(View v) {
+  private void setPopupParent(View v) {
     mPopupParent = v;
   }
 
-  public void setPopupOffset(int x, int y) {
+  private void setPopupOffset(int x, int y) {
     mMiniKeyboardOffsetX = x;
     mMiniKeyboardOffsetY = y;
     if (mPreviewPopup.isShowing()) {
@@ -615,7 +610,7 @@ public class KeyboardView extends View implements View.OnClickListener {
    *
    * @param enabled whether or not the proximity correction is enabled
    */
-  public void setProximityCorrectionEnabled(boolean enabled) {
+  private void setProximityCorrectionEnabled(boolean enabled) {
     mProximityCorrectOn = enabled;
   }
 
@@ -666,7 +661,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     int dimensionSum = 0;
     for (int i = 0; i < length; i++) {
       Key key = keys[i];
-      dimensionSum += Math.min(key.width, key.height) + key.gap;
+      dimensionSum += Math.min(key.getWidth(), key.getHeight()) + key.getGap();
     }
     if (dimensionSum < 0 || length == 0) return;
     mProximityThreshold = (int) (dimensionSum * Keyboard.SEARCH_DISTANCE / length);
@@ -723,10 +718,10 @@ public class KeyboardView extends View implements View.OnClickListener {
     boolean drawSingleKey = false;
     if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
       // Is clipRegion completely contained within the invalidated key?
-      if (invalidKey.x + kbdPaddingLeft - 1 <= clipRegion.left
-          && invalidKey.y + kbdPaddingTop - 1 <= clipRegion.top
-          && invalidKey.x + invalidKey.width + kbdPaddingLeft + 1 >= clipRegion.right
-          && invalidKey.y + invalidKey.height + kbdPaddingTop + 1 >= clipRegion.bottom) {
+      if (invalidKey.getX() + kbdPaddingLeft - 1 <= clipRegion.left
+          && invalidKey.getY() + kbdPaddingTop - 1 <= clipRegion.top
+          && invalidKey.getX() + invalidKey.getWidth() + kbdPaddingLeft + 1 >= clipRegion.right
+          && invalidKey.getY() + invalidKey.getHeight() + kbdPaddingTop + 1 >= clipRegion.bottom) {
         drawSingleKey = true;
       }
     }
@@ -746,36 +741,37 @@ public class KeyboardView extends View implements View.OnClickListener {
           int index = (int) getStateDrawableIndex.invoke(mKeyBackColor, drawableState);
           keyBackground = (Drawable) getStateDrawable.invoke(mKeyBackColor, index);
         } catch (Exception ex) {
+          Log.e(TAG, "Get Drawable Exception" + ex);
         }
       }
       if (keyBackground instanceof GradientDrawable) {
         ((GradientDrawable) keyBackground)
             .setCornerRadius(
-                key.round_corner != null ? key.round_corner : mKeyboard.getRoundCorner());
+                key.getRound_corner() != null ? key.getRound_corner() : mKeyboard.getRoundCorner());
       }
       Integer color = key.getTextColorForState(drawableState);
       mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
       color = key.getSymbolColorForState(drawableState);
       mPaintSymbol.setColor(
-          color != null ? color : (key.pressed ? hilited_key_symbol_color : key_symbol_color));
+          color != null ? color : (key.isPressed() ? hilited_key_symbol_color : key_symbol_color));
 
       // Switch the character to uppercase if shift is pressed
       String label = key.getLabel();
-      String hint = key.hint;
-      int left = (key.width - padding.left - padding.right) / 2 + padding.left;
+      String hint = key.getHint();
+      int left = (key.getWidth() - padding.left - padding.right) / 2 + padding.left;
       int top = padding.top;
 
       final Rect bounds = keyBackground.getBounds();
-      if (key.width != bounds.right || key.height != bounds.bottom) {
-        keyBackground.setBounds(0, 0, key.width, key.height);
+      if (key.getWidth() != bounds.right || key.getHeight() != bounds.bottom) {
+        keyBackground.setBounds(0, 0, key.getWidth(), key.getHeight());
       }
-      canvas.translate(key.x + kbdPaddingLeft, key.y + kbdPaddingTop);
+      canvas.translate(key.getX() + kbdPaddingLeft, key.getY() + kbdPaddingTop);
       keyBackground.draw(canvas);
 
       if (!Function.isEmpty(label)) {
         // For characters, use large font. For labels like "Done", use small font.
-        if (key.key_text_size != null) {
-          paint.setTextSize(key.key_text_size);
+        if (key.getKey_text_size() != null) {
+          paint.setTextSize(key.getKey_text_size());
         } else {
           paint.setTextSize(label.length() > 1 ? mLabelTextSize : mKeyTextSize);
         }
@@ -784,21 +780,21 @@ public class KeyboardView extends View implements View.OnClickListener {
         // Draw the text
         canvas.drawText(
             label,
-            left + key.key_text_offset_x,
-            (key.height - padding.top - padding.bottom) / 2
+            left + key.getKey_text_offset_x(),
+            (key.getHeight() - padding.top - padding.bottom) / 2
                 + (paint.getTextSize() - paint.descent()) / 2
                 + top
-                + key.key_text_offset_y,
+                + key.getKey_text_offset_y(),
             paint);
         if (mShowHint) {
           if (key.getLongClick() != null) {
             mPaintSymbol.setTextSize(
-                key.symbol_text_size != null ? key.symbol_text_size : mSymbolSize);
+                key.getSymbol_text_size() != null ? key.getSymbol_text_size() : mSymbolSize);
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
                 key.getSymbolLabel(),
-                left + key.key_symbol_offset_x,
-                symbolBase + key.key_symbol_offset_y,
+                left + key.getKey_symbol_offset_x(),
+                symbolBase + key.getKey_symbol_offset_y(),
                 mPaintSymbol);
           }
 
@@ -806,8 +802,8 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
                 hint,
-                left + key.key_hint_offset_x,
-                key.height + hintBase + key.key_hint_offset_y,
+                left + key.getKey_hint_offset_x(),
+                key.getHeight() + hintBase + key.getKey_hint_offset_y(),
                 mPaintSymbol);
           }
         }
@@ -815,7 +811,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         // Turn off drop shadow
         paint.setShadowLayer(0, 0, 0, 0);
       }
-      canvas.translate(-key.x - kbdPaddingLeft, -key.y - kbdPaddingTop);
+      canvas.translate(-key.getX() - kbdPaddingLeft, -key.getY() - kbdPaddingTop);
     }
     mInvalidatedKey = null;
     // Overlay a dark rectangle to dim the keyboard
@@ -824,6 +820,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
     }
 
+    boolean mShowTouchPoints = true;
     if (DEBUG && mShowTouchPoints) {
       paint.setAlpha(128);
       paint.setColor(0xFFFF0000);
@@ -980,16 +977,19 @@ public class KeyboardView extends View implements View.OnClickListener {
     int popupWidth =
         Math.max(
             mPreviewText.getMeasuredWidth(),
-            key.width + mPreviewText.getPaddingLeft() + mPreviewText.getPaddingRight());
+            key.getWidth() + mPreviewText.getPaddingLeft() + mPreviewText.getPaddingRight());
     final int popupHeight = mPreviewHeight;
     ViewGroup.LayoutParams lp = mPreviewText.getLayoutParams();
     if (lp != null) {
       lp.width = popupWidth;
       lp.height = popupHeight;
     }
+    int mPopupPreviewY;
+    int mPopupPreviewX;
+    boolean mPreviewCentered = false;
     if (!mPreviewCentered) {
-      mPopupPreviewX = key.x - mPreviewText.getPaddingLeft() + getPaddingLeft();
-      mPopupPreviewY = key.y - popupHeight + mPreviewOffset;
+      mPopupPreviewX = key.getX() - mPreviewText.getPaddingLeft() + getPaddingLeft();
+      mPopupPreviewY = key.getY() - popupHeight + mPreviewOffset;
     } else {
       // TODO: Fix this if centering is brought back
       mPopupPreviewX = 160 - mPreviewText.getMeasuredWidth() / 2;
@@ -1003,7 +1003,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     // Set the preview background state
     mPreviewText
         .getBackground()
-        .setState(key.popupResId != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
+        .setState(key.getPopupResId() != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
     mPopupPreviewX += mCoordinates[0];
     mPopupPreviewY += mCoordinates[1];
 
@@ -1012,10 +1012,10 @@ public class KeyboardView extends View implements View.OnClickListener {
     if (mPopupPreviewY + mCoordinates[1] < 0) {
       // If the key you're pressing is on the left side of the keyboard, show the popup on
       // the right, offset by enough to see at least one key to the left/right.
-      if (key.x + key.width <= getWidth() / 2) {
-        mPopupPreviewX += (int) (key.width * 2.5);
+      if (key.getX() + key.getWidth() <= getWidth() / 2) {
+        mPopupPreviewX += (int) (key.getWidth() * 2.5);
       } else {
-        mPopupPreviewX -= (int) (key.width * 2.5);
+        mPopupPreviewX -= (int) (key.getWidth() * 2.5);
       }
       mPopupPreviewY += popupHeight;
     }
@@ -1051,7 +1051,7 @@ public class KeyboardView extends View implements View.OnClickListener {
    * @param keyIndex the index of the key in the attached {@link Keyboard}.
    * @see #invalidateAllKeys
    */
-  public void invalidateKey(int keyIndex) {
+  private void invalidateKey(int keyIndex) {
     if (mKeys == null) return;
     if (keyIndex < 0 || keyIndex >= mKeys.length) {
       return;
@@ -1059,26 +1059,26 @@ public class KeyboardView extends View implements View.OnClickListener {
     final Key key = mKeys[keyIndex];
     mInvalidatedKey = key;
     mDirtyRect.union(
-        key.x + getPaddingLeft(),
-        key.y + getPaddingTop(),
-        key.x + key.width + getPaddingLeft(),
-        key.y + key.height + getPaddingTop());
+        key.getX() + getPaddingLeft(),
+        key.getY() + getPaddingTop(),
+        key.getX() + key.getWidth() + getPaddingLeft(),
+        key.getY() + key.getHeight() + getPaddingTop());
     onBufferDraw();
     invalidate(
-        key.x + getPaddingLeft(),
-        key.y + getPaddingTop(),
-        key.x + key.width + getPaddingLeft(),
-        key.y + key.height + getPaddingTop());
+        key.getX() + getPaddingLeft(),
+        key.getY() + getPaddingTop(),
+        key.getX() + key.getWidth() + getPaddingLeft(),
+        key.getY() + key.getHeight() + getPaddingTop());
   }
 
-  public void invalidateKeys(List<Key> keys) {
+  private void invalidateKeys(List<Key> keys) {
     if (keys == null || keys.size() == 0) return;
     for (Key key : keys) {
       mDirtyRect.union(
-          key.x + getPaddingLeft(),
-          key.y + getPaddingTop(),
-          key.x + key.width + getPaddingLeft(),
-          key.y + key.height + getPaddingTop());
+          key.getX() + getPaddingLeft(),
+          key.getY() + getPaddingTop(),
+          key.getX() + key.getWidth() + getPaddingLeft(),
+          key.getY() + key.getHeight() + getPaddingTop());
     }
     onBufferDraw();
     invalidate();
@@ -1099,7 +1099,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       return false;
     }
     showPreview(NOT_A_KEY);
-    showPreview(mCurrentKey, Key.LONG_CLICK);
+    showPreview(mCurrentKey, KeyEventType.LONG_CLICK.ordinal());
     Key popupKey = mKeys[mCurrentKey];
     boolean result = onLongPress(popupKey);
     if (result) {
@@ -1117,11 +1117,12 @@ public class KeyboardView extends View implements View.OnClickListener {
    * @return true if the long press is handled, false otherwise. Subclasses should call the method
    *     on the base class if the subclass doesn't wish to handle the call.
    */
-  protected boolean onLongPress(Key popupKey) {
-    int popupKeyboardId = popupKey.popupResId;
+  private boolean onLongPress(Key popupKey) {
+    int popupKeyboardId = popupKey.getPopupResId();
 
     if (popupKeyboardId != 0) {
-      mMiniKeyboardContainer = mMiniKeyboardCache.get(popupKey);
+      View mMiniKeyboardContainer = mMiniKeyboardCache.get(popupKey);
+      KeyboardView mMiniKeyboard;
       if (mMiniKeyboardContainer == null) {
         LayoutInflater inflater =
             (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -1174,10 +1175,13 @@ public class KeyboardView extends View implements View.OnClickListener {
             });
         //mInputView.setSuggest(mSuggest);
         Keyboard keyboard;
-        if (popupKey.popupCharacters != null) {
+        if (popupKey.getPopupCharacters() != null) {
           keyboard =
               new Keyboard(
-                  getContext(), popupKey.popupCharacters, -1, getPaddingLeft() + getPaddingRight());
+                  getContext(),
+                  popupKey.getPopupCharacters(),
+                  -1,
+                  getPaddingLeft() + getPaddingRight());
         } else {
           keyboard = new Keyboard(getContext());
         }
@@ -1193,9 +1197,9 @@ public class KeyboardView extends View implements View.OnClickListener {
             (KeyboardView) mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
       }
       getLocationInWindow(mCoordinates);
-      mPopupX = popupKey.x + getPaddingLeft();
-      mPopupY = popupKey.y + getPaddingTop();
-      mPopupX = mPopupX + popupKey.width - mMiniKeyboardContainer.getMeasuredWidth();
+      int mPopupX = popupKey.getX() + getPaddingLeft();
+      int mPopupY = popupKey.getY() + getPaddingTop();
+      mPopupX = mPopupX + popupKey.getWidth() - mMiniKeyboardContainer.getMeasuredWidth();
       mPopupY = mPopupY - mMiniKeyboardContainer.getMeasuredHeight();
       final int x = mPopupX + mMiniKeyboardContainer.getPaddingRight() + mCoordinates[0];
       final int y = mPopupY + mMiniKeyboardContainer.getPaddingBottom() + mCoordinates[1];
@@ -1211,16 +1215,16 @@ public class KeyboardView extends View implements View.OnClickListener {
       return true;
     } else {
       Key key = popupKey;
-      if (key.getClick().repeatable) return false;
+      if (key.getClick().isRepeatable()) return false;
       if (key.getLongClick() != null) {
         Event e = key.getLongClick();
         mKeyboardActionListener.onEvent(e);
-        releaseKey(e.code);
+        releaseKey(e.getCode());
         resetShifted();
         return true;
       }
-      if (key.isShift() && !key.sendBindings(Key.LONG_CLICK)) {
-        setShifted(!key.on, !key.on);
+      if (key.isShift() && !key.sendBindings(KeyEventType.LONG_CLICK.ordinal())) {
+        setShifted(!key.isOn(), !key.isOn());
         return true;
       }
     }
@@ -1355,7 +1359,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (action == MotionEvent.ACTION_POINTER_DOWN) break; //並擊鬆開前的虛擬按鍵事件
         checkMultiTap(eventTime, keyIndex);
         mKeyboardActionListener.onPress(keyIndex != NOT_A_KEY ? mKeys[keyIndex].getCode() : 0);
-        if (mCurrentKey >= 0 && mKeys[mCurrentKey].getClick().repeatable) {
+        if (mCurrentKey >= 0 && mKeys[mCurrentKey].getClick().isRepeatable()) {
           mRepeatKeyIndex = mCurrentKey;
           Message msg = mHandler.obtainMessage(MSG_REPEAT);
           mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);
@@ -1435,7 +1439,7 @@ public class KeyboardView extends View implements View.OnClickListener {
               touchX,
               touchY,
               eventTime,
-              (mOldPointerCount > 1 || mComboMode) ? Key.COMBO : 0);
+              (mOldPointerCount > 1 || mComboMode) ? KeyEventType.COMBO.ordinal() : 0);
         }
         invalidateKey(keyIndex);
         mRepeatKeyIndex = NOT_A_KEY;
@@ -1455,23 +1459,23 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private boolean repeatKey() {
     Key key = mKeys[mRepeatKeyIndex];
-    detectAndSendKey(mCurrentKey, key.x, key.y, mLastTapTime);
+    detectAndSendKey(mCurrentKey, key.getX(), key.getY(), mLastTapTime);
     return true;
   }
 
-  protected void swipeRight() {
+  private void swipeRight() {
     mKeyboardActionListener.swipeRight();
   }
 
-  protected void swipeLeft() {
+  private void swipeLeft() {
     mKeyboardActionListener.swipeLeft();
   }
 
-  protected void swipeUp() {
+  private void swipeUp() {
     mKeyboardActionListener.swipeUp();
   }
 
-  protected void swipeDown() {
+  private void swipeDown() {
     mKeyboardActionListener.swipeDown();
   }
 
@@ -1517,9 +1521,9 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private void resetMultiTap() {
     mLastSentIndex = NOT_A_KEY;
-    mTapCount = 0;
+    int mTapCount = 0;
     mLastTapTime = -1;
-    mInMultiTap = false;
+    boolean mInMultiTap = false;
   }
 
   private void checkMultiTap(long eventTime, int keyIndex) {

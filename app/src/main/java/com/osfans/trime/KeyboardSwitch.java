@@ -22,7 +22,7 @@ import android.content.Context;
 import java.util.List;
 
 /** 管理多個{@link Keyboard 鍵盤} */
-public class KeyboardSwitch {
+class KeyboardSwitch {
 
   private final Context context;
 
@@ -62,7 +62,7 @@ public class KeyboardSwitch {
     setKeyboard(i);
   }
 
-  public void setKeyboard(int i) {
+  private void setKeyboard(int i) {
     if (i < 0 || i >= mKeyboards.length) i = 0;
     lastId = currentId;
     currentId = i;

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import java.util.ArrayList;
@@ -33,18 +34,17 @@ import java.util.List;
 import java.util.Map;
 
 /** 顯示輸入法方案列表 */
-public class SchemaDialog extends AsyncTask {
-  boolean[] checkedSchemaItems;
-  String[] schemaItems;
-  List<Map<String, String>> schemas;
-  List<Map<String, String>> selected_schemas;
-  String[] schemaNames;
-  Context mContext;
-  IBinder mToken;
-  ProgressDialog mProgressDialog;
-  AlertDialog mDialog;
+class SchemaDialog extends AsyncTask {
+  private boolean[] checkedSchemaItems;
+  private String[] schemaItems;
+  private List<Map<String, String>> schemas;
+  private String[] schemaNames;
+  private Context mContext;
+  private IBinder mToken;
+  private ProgressDialog mProgressDialog;
+  private static String TAG = SchemaDialog.class.getSimpleName();
 
-  public class SortByName implements Comparator<Map<String, String>> {
+  private class SortByName implements Comparator<Map<String, String>> {
     @Override
     public int compare(Map<String, String> m1, Map<String, String> m2) {
       String s1 = m1.get("schema_id");
@@ -103,7 +103,7 @@ public class SchemaDialog extends AsyncTask {
       return;
     }
     Collections.sort(schemas, new SortByName());
-    selected_schemas = Rime.get_selected_schema_list();
+    List<Map<String, String>> selected_schemas = Rime.get_selected_schema_list();
     List<String> selected_Ids = new ArrayList<String>();
     int n = schemas.size();
     schemaNames = new String[n];
@@ -125,7 +125,7 @@ public class SchemaDialog extends AsyncTask {
     }
   }
 
-  public void showDialog() {
+  private void showDialog() {
     AlertDialog.Builder builder =
         new AlertDialog.Builder(mContext)
             .setTitle(R.string.pref_schemas)
@@ -157,7 +157,8 @@ public class SchemaDialog extends AsyncTask {
                         public void run() {
                           try {
                             selectSchema();
-                          } catch (Exception e) {
+                          } catch (Exception ex) {
+                            Log.e(TAG, "Select Schema" + ex);
                           } finally {
                             mProgressDialog.dismiss();
                             System.exit(0); //清理內存
@@ -168,7 +169,7 @@ public class SchemaDialog extends AsyncTask {
             }
           });
     }
-    mDialog = builder.create();
+    AlertDialog mDialog = builder.create();
     if (mToken != null) {
       Window window = mDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();

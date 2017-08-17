@@ -33,6 +33,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -43,7 +44,7 @@ import android.webkit.WebViewClient;
 public class Pref extends PreferenceActivity
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-  private final String licenseUrl = "file:///android_asset/licensing.html";
+  private static String TAG = Pref.class.getSimpleName();
   private ProgressDialog mProgressDialog;
   private Preference mKeySoundVolumePref, mKeyVibrateDurationPref;
 
@@ -166,12 +167,13 @@ public class Pref extends PreferenceActivity
             return true;
           }
         });
+    String licenseUrl = "file:///android_asset/licensing.html";
     webView.loadUrl(licenseUrl);
 
     new AlertDialog.Builder(this).setTitle(R.string.ime_name).setView(licenseView).show();
   }
 
-  public boolean isEnabled() {
+  private boolean isEnabled() {
     boolean enabled = false;
     for (InputMethodInfo i :
         ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).getEnabledInputMethodList()) {
@@ -184,7 +186,7 @@ public class Pref extends PreferenceActivity
   }
 
   @TargetApi(VERSION_CODES.M)
-  public void requestPermission() {
+  private void requestPermission() {
     if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         != PackageManager.PERMISSION_GRANTED) {
       requestPermissions(
@@ -195,7 +197,7 @@ public class Pref extends PreferenceActivity
     }
   }
 
-  public void deployOpencc() {
+  private void deployOpencc() {
     boolean b = Config.deployOpencc();
   }
 
@@ -234,7 +236,8 @@ public class Pref extends PreferenceActivity
                   public void run() {
                     try {
                       Function.deploy();
-                    } catch (Exception e) {
+                    } catch (Exception ex) {
+                      Log.e(TAG, "Deploy Exception" + ex);
                     } finally {
                       mProgressDialog.dismiss();
                       System.exit(0); //清理內存
@@ -252,7 +255,8 @@ public class Pref extends PreferenceActivity
                   public void run() {
                     try {
                       Function.sync();
-                    } catch (Exception e) {
+                    } catch (Exception ex) {
+                      Log.e(TAG, "Sync Exception" + ex);
                     } finally {
                       mProgressDialog.dismiss();
                       System.exit(0); //清理內存

@@ -50,7 +50,7 @@ public class Composition extends TextView {
   private Typeface tfText, tfLabel, tfCandidate, tfComment;
   private int composition_pos[] = new int[2];
   private int max_length, sticky_lines;
-  private int max_entries = Candidate.MAX_CANDIDATE_COUNT;
+  private int max_entries = Candidate.getMaxCandidateCount();
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
   private List<Map<String, Object>> components;
@@ -188,7 +188,7 @@ public class Composition extends TextView {
     return super.onTouchEvent(event);
   }
 
-  public void reset() {
+  private void reset() {
     Config config = Config.get();
     components = (List<Map<String, Object>>) config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
