@@ -3,10 +3,11 @@ cmake_minimum_required (VERSION 3.3)
 
 # options
 option(BUILD_TEST "Build and run tests" OFF)
-option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ENABLE_LOGGING "Enable logging with google-glog library" ON)
 option(BOOST_USE_SIGNALS2 "Boost use signals2 instead of signals" ON)
 option(LEVELDB_USE_SNAPPY "Leveldb use snappy" ON)
+option(OPENCC_BUILD_SHARED_LIBS "Build shared libraries for opencc" ON)
 
 # includes
 include_directories(
@@ -22,7 +23,7 @@ include_directories(
   )
 
 # flags
-add_definitions(-w -DOpencc_BUILT_AS_STATIC)
+add_definitions(-w)
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 if(UNIX)
   add_definitions(-fPIC)
@@ -30,6 +31,10 @@ elseif(WIN32)
   set(STATIC_FLAGS "-static-libstdc++ -static-libgcc -static")
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${STATIC_FLAGS}")
+endif()
+
+if (NOT OPENCC_BUILD_SHARED_LIBS)
+  add_definitions(-DOpencc_BUILT_AS_STATIC)
 endif()
 
 # snappy
@@ -205,16 +210,22 @@ set(OPENCC_SOURCES
   OpenCC/src/UTF8StringSlice.cpp
   OpenCC/src/UTF8Util.cpp
   )
-add_library(opencc-static STATIC ${OPENCC_SOURCES})
-target_include_directories(opencc-static BEFORE PRIVATE
+
+if(OPENCC_BUILD_SHARED_LIBS)
+  add_library(opencc ${OPENCC_SOURCES})
+else(OPENCC_BUILD_SHARED_LIBS)
+  add_library(opencc STATIC ${OPENCC_SOURCES})
+endif()
+
+target_include_directories(opencc BEFORE PRIVATE
   OpenCC/deps/darts-clone
   OpenCC/deps/rapidjson-0.11
   OpenCC/deps/tclap-1.2.1
   )
-target_compile_definitions(opencc-static PRIVATE VERSION="1.0.5")
+target_compile_definitions(opencc PRIVATE VERSION="1.0.5")
 if(ANDROID)
 elseif(UNIX)
-target_compile_definitions(opencc-static PRIVATE PKGDATADIR="/usr/share/opencc")
+target_compile_definitions(opencc PRIVATE PKGDATADIR="/usr/share/opencc")
 endif()
 
 set(
@@ -253,22 +264,22 @@ foreach(head ${LIBOPENCC_HEADERS})
 endforeach(head)
 
 # opencc tools
-add_executable(opencc OpenCC/src/tools/CommandLine.cpp)
-target_link_libraries(opencc opencc-static ${STATIC_FLAGS})
-target_include_directories(opencc BEFORE PRIVATE
+add_executable(opencc_tool OpenCC/src/tools/CommandLine.cpp)
+target_link_libraries(opencc_tool opencc ${STATIC_FLAGS})
+target_include_directories(opencc_tool BEFORE PRIVATE
   OpenCC/src
   OpenCC/deps/tclap-1.2.1
   )
 ## opencc_dict
 add_executable(opencc_dict OpenCC/src/tools/DictConverter.cpp)
-target_link_libraries(opencc_dict opencc-static ${STATIC_FLAGS})
+target_link_libraries(opencc_dict opencc ${STATIC_FLAGS})
 target_include_directories(opencc_dict BEFORE PRIVATE
   OpenCC/src
   OpenCC/deps/tclap-1.2.1
   )
 ## opencc_phrase_extract
 add_executable(opencc_phrase_extract OpenCC/src/tools/PhraseExtract.cpp)
-target_link_libraries(opencc_phrase_extract opencc-static ${STATIC_FLAGS})
+target_link_libraries(opencc_phrase_extract opencc ${STATIC_FLAGS})
 target_include_directories(opencc_phrase_extract BEFORE PRIVATE
   OpenCC/src
   OpenCC/deps/tclap-1.2.1
@@ -280,7 +291,7 @@ find_package (Threads)
 file(GLOB_RECURSE RIME_SOURCES librime/src/*.cc)
 add_library(rime SHARED ${RIME_SOURCES})
 target_link_libraries(rime
-  opencc-static
+  opencc
   yaml-cpp-static
   marisa-static
   miniglog-static
@@ -311,7 +322,7 @@ endforeach(tool)
 if(UNIX)
 file(GLOB RIME_JNI_SOURCES librime_jni/*.cc)
 add_library(rime_jni SHARED ${RIME_JNI_SOURCES})
-target_link_libraries(rime_jni rime)
+target_link_libraries(rime_jni rime opencc)
 execute_process(
   COMMAND git --git-dir ${CMAKE_CURRENT_LIST_DIR}/OpenCC/.git describe --tags
   OUTPUT_VARIABLE OPENCC_VERSION
