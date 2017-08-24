@@ -120,4 +120,7 @@
     <string name="pref_themes_name_sougou">搜狗</string>
     <string name="pref_themes_name_qinghong">青紅</string>
     <string name="pref_themes_name_custom">自定義</string>
+
+    <string name="shared_data_dir">共享資料夾</string>
+    <string name="user_data_dir">使用者資料夾</string>
 </resources>

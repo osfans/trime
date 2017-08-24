@@ -129,4 +129,7 @@
     <string name="pref_other">Others</string>
     <string name="pref_notification_icon">Show icon in notification bar</string>
     <string name="pref_destroy_on_quit">Free memory on quit</string>
+
+    <string name="shared_data_dir">Shared data directory</string>
+    <string name="user_data_dir">User data directory</string>
 </resources>

@@ -65,6 +65,8 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:key="pref_input" android:order="8" android:title="@string/pref_input">
+        <EditTextPreference android:key="shared_data_dir" android:title="@string/shared_data_dir"/>
+        <EditTextPreference android:key="user_data_dir" android:title="@string/user_data_dir"/>
         <Preference android:key="pref_schemas" android:title="@string/pref_schemas" android:summary="@string/pref_schemas_summary"/>
         <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
         <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
