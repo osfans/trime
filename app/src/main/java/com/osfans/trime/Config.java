@@ -27,7 +27,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
@@ -46,12 +45,9 @@ import java.util.Map;
 /** 解析YAML配置文件 */
 public class Config {
   // 默认的用户数据路径
-  private static final String RIME_DATA = "rime-data";
   private static final String RIME = "rime";
-  private static final String EXTERNAL_STORAGE_PATH =
-      Environment.getExternalStorageDirectory().getPath();
-  private static final String USER_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME).getPath();
-  private static final String SHARED_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME_DATA).getPath();
+  private static String userDataDir;
+  private static String sharedDataDir;
 
   private Map<String, Object> mStyle, mDefaultStyle;
   private String themeName;
@@ -66,6 +62,8 @@ public class Config {
   public Config(Context context) {
     self = this;
     mPref = Function.getPref(context);
+    userDataDir = context.getString(R.string.default_user_data_dir);
+    sharedDataDir = context.getString(R.string.default_shared_data_dir);
     themeName = mPref.getString("pref_selected_theme", "trime");
     prepareRime(context);
     init();
@@ -76,15 +74,11 @@ public class Config {
   }
 
   public String getSharedDataDir() {
-    String name = mPref.getString("shared_data_dir", SHARED_DATA_DIR);
-    if (new File(name).exists()) return name;
-    return SHARED_DATA_DIR;
+    return mPref.getString("shared_data_dir", sharedDataDir);
   }
 
   public String getUserDataDir() {
-    String name = mPref.getString("user_data_dir", USER_DATA_DIR);
-    if (new File(name).exists()) return name;
-    return USER_DATA_DIR;
+    return mPref.getString("user_data_dir", userDataDir);
   }
 
   public String getResDataDir(String sub) {

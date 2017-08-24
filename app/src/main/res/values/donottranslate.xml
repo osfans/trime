@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (C) 2015-present, osfans
+ * waxaca@163.com https://github.com/osfans
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+-->
+
+<resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
+    <string name="pref_rime_qq_newbie_summary">480159874</string>
+    <string name="pref_rime_qq_summary">77608640</string>
+    <string name="pref_licensing_summary">GPLv3</string>
+    <string-array name="inline_values">
+        <item>preview</item>
+        <item>composition</item>
+        <item>input</item>
+        <item>none</item>
+    </string-array>
+
+    <string name="default_shared_data_dir">/sdcard/rime</string>
+    <string name="default_user_data_dir">/sdcard/rime</string>
+</resources>

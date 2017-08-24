@@ -28,9 +28,7 @@
     <string name="pref_wiki">Wiki</string>
     <string name="pref_issues">Report Issues</string>
     <string name="pref_rime_qq_newbie">Trime QQ Group</string>
-    <string name="pref_rime_qq_newbie_summary" translatable="false">480159874</string>
     <string name="pref_rime_qq">Rime QQ Group</string>
-    <string name="pref_rime_qq_summary" translatable="false">77608640</string>
     <string name="pref_market">Google Play</string>
     <string name="pref_coolmarket">Cool Market</string>
 
@@ -42,7 +40,6 @@
     <string name="pref_opencc_ver">OpenCC Version</string>
     <string name="pref_changelog">Change Log</string>
     <string name="pref_licensing">License</string>
-    <string name="pref_licensing_summary" translatable="false">GPLv3</string>
     <string name="pref_credits">Credits</string>
     <string name="pref_pime">Win10 PRIME Platform</string>
     <string name="pref_privacy">Privacy Policy</string>
@@ -80,12 +77,6 @@
     <string name="show_preview">Popup on keypress</string>
     <string name="show_window">Show floating window when composing</string>
     <string name="inline_preedit">Composing text in editor</string>
-    <string-array name="inline_values" translatable="false">
-        <item>preview</item>
-        <item>composition</item>
-        <item>input</item>
-        <item>none</item>
-    </string-array>
     <string-array name="inline_entries">
         <item>Preview</item>
         <item>Composition</item>
