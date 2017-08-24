@@ -74,8 +74,6 @@ class ThemeDlg extends AsyncTask {
     checked = Arrays.binarySearch(keys, theme);
 
     Map<String, String> themeMap = new HashMap<String, String>();
-    themeMap.put("qinghong", mContext.getString(R.string.pref_themes_name_qinghong));
-    themeMap.put("sougou", mContext.getString(R.string.pref_themes_name_sougou));
     themeMap.put("tongwenfeng", mContext.getString(R.string.pref_themes_name_tongwenfeng));
     themeMap.put("trime", mContext.getString(R.string.pref_themes_name_trime));
     String[] nameArray = Config.getThemeNames(keys);
