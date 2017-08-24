@@ -283,7 +283,7 @@ public class Rime {
   }
 
   private static void init(boolean full_check) {
-    initialize();
+    initialize(Config.get().getSharedDataDir(), Config.get().getUserDataDir());
     check(full_check);
     set_notification_handler();
     if (!find_session()) {
@@ -511,7 +511,7 @@ public class Rime {
 
   public static String openccConvert(String line, String name) {
     if (name != null) {
-      File f = new File(Config.getOpenccDataDir(), name);
+      File f = new File(Config.get().getResDataDir("opencc"), name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;
@@ -530,12 +530,12 @@ public class Rime {
   }
 
   // init
-  public static native void setup();
+  public static native void setup(String shared_data_dir, String user_data_dir);
 
   public static native void set_notification_handler();
 
   // entry and exit
-  public static native void initialize();
+  public static native void initialize(String shared_data_dir, String user_data_dir);
 
   public static native void finalize1();
 
@@ -546,7 +546,7 @@ public class Rime {
   public static native void join_maintenance_thread();
 
   // deployment
-  public static native void deployer_initialize();
+  public static native void deployer_initialize(String shared_data_dir, String user_data_dir);
 
   public static native boolean prebuild();
 

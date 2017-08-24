@@ -32,21 +32,25 @@ void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
   RimeSetNotificationHandler(&on_message, env);
 }
 
-void setup(JNIEnv */*env*/, jobject /*thiz*/) {
+void init_traits(JNIEnv *env, jstring shared_data_dir, jstring user_data_dir, void (*func)(RimeTraits *)) {
   RIME_STRUCT(RimeTraits, traits);
-  traits.shared_data_dir = SHARED_DATA_DIR;
-  traits.user_data_dir = USER_DATA_DIR;
+  const char* p_shared_data_dir = shared_data_dir == NULL ? NULL : env->GetStringUTFChars(shared_data_dir, NULL);
+  const char* p_user_data_dir = user_data_dir == NULL ? NULL : env->GetStringUTFChars(user_data_dir, NULL);
+  traits.shared_data_dir = p_shared_data_dir;
+  traits.user_data_dir = p_user_data_dir;
   traits.app_name = APP_NAME;
-  RimeSetup(&traits);
+  func(&traits);
+  env->ReleaseStringUTFChars(shared_data_dir, p_shared_data_dir);
+  env->ReleaseStringUTFChars(user_data_dir, p_user_data_dir);
+}
+
+void setup(JNIEnv *env, jobject /*thiz*/, jstring shared_data_dir, jstring user_data_dir) {
+  init_traits(env, shared_data_dir, user_data_dir, RimeSetup);
 }
 
 // entry and exit
-void initialize(JNIEnv *env, jobject thiz) {
-  RIME_STRUCT(RimeTraits, traits);
-  traits.shared_data_dir = SHARED_DATA_DIR;
-  traits.user_data_dir = USER_DATA_DIR;
-  traits.app_name = APP_NAME;
-  RimeInitialize(&traits);
+void initialize(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir) {
+  init_traits(env, shared_data_dir, user_data_dir, RimeInitialize);
 }
 
 void finalize(JNIEnv *env, jobject thiz) {
@@ -67,12 +71,8 @@ void join_maintenance_thread(JNIEnv *env, jobject thiz) {
 }
 
 // deployment
-void deployer_initialize(JNIEnv *env, jobject thiz) {
-  RIME_STRUCT(RimeTraits, traits);
-  traits.shared_data_dir = SHARED_DATA_DIR;
-  traits.user_data_dir = USER_DATA_DIR;
-  traits.app_name = APP_NAME;
-  RimeDeployerInitialize(&traits);
+void deployer_initialize(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir) {
+  init_traits(env, shared_data_dir, user_data_dir, RimeDeployerInitialize);
 }
 
 jboolean prebuild(JNIEnv *env, jobject thiz) {

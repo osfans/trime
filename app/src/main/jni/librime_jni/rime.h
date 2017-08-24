@@ -9,28 +9,20 @@
 #define CLASSNAME "com/osfans/trime/Rime"
 #endif
 
-#ifndef SHARED_DATA_DIR
-#define SHARED_DATA_DIR "/data/data/com.osfans.trime/rime"
-#endif
-
-#ifndef USER_DATA_DIR
-#define USER_DATA_DIR "/sdcard/rime"
-#endif
-
 #ifndef APP_NAME
 #define APP_NAME "Rime-JNI"
 #endif
 
-void setup(JNIEnv *env, jobject thiz);
+void setup(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir);
 void set_notification_handler(JNIEnv *env, jobject thiz);
 // entry and exit
-void initialize(JNIEnv *env, jobject thiz);
+void initialize(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir);
 void finalize(JNIEnv *env, jobject thiz);
 jboolean start_maintenance(JNIEnv *env, jobject thiz, jboolean full_check);
 jboolean is_maintenance_mode(JNIEnv *env, jobject thiz);
 void join_maintenance_thread(JNIEnv *env, jobject thiz);
 // deployment
-void deployer_initialize(JNIEnv *env, jobject thiz);
+void deployer_initialize(JNIEnv *env, jobject thiz, jstring shared_data_dir, jstring user_data_dir);
 jboolean prebuild(JNIEnv *env, jobject thiz);
 jboolean deploy(JNIEnv *env, jobject thiz);
 jboolean deploy_schema(JNIEnv *env, jobject thiz, jstring schema_file);

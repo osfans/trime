@@ -4,7 +4,6 @@
 // customize settings
 
 static RimeLeversApi* get_levers() {
-  setup(NULL, NULL);
   return (RimeLeversApi*)(RimeFindModule("levers")->get_api());
 }
 

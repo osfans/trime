@@ -229,7 +229,6 @@ public class Trime extends InputMethodService
     self = this;
 
     mEffect = new Effect(this);
-    //Config.prepareRime(this);
     mConfig = Config.get(this);
     mNeedUpdateRimeOption = true;
     loadConfig();

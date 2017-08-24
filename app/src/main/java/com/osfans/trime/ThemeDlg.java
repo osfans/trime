@@ -68,7 +68,7 @@ class ThemeDlg extends AsyncTask {
     mToken = token;
     Config config = Config.get(context);
     String theme = config.getTheme() + ".yaml";
-    keys = Config.getThemeKeys();
+    keys = Config.getThemeKeys(true);
     if (keys == null) return;
     Arrays.sort(keys);
     checked = Arrays.binarySearch(keys, theme);

@@ -46,11 +46,12 @@ import java.util.Map;
 /** 解析YAML配置文件 */
 public class Config {
   // 默认的用户数据路径
+  private static final String RIME_DATA = "rime-data";
   private static final String RIME = "rime";
   private static final String EXTERNAL_STORAGE_PATH =
       Environment.getExternalStorageDirectory().getPath();
   private static final String USER_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME).getPath();
-  private static final String OPENCC_DATA_DIR = new File(USER_DATA_DIR, "opencc").getPath();
+  private static final String SHARED_DATA_DIR = new File(EXTERNAL_STORAGE_PATH, RIME_DATA).getPath();
 
   private Map<String, Object> mStyle, mDefaultStyle;
   private String themeName;
@@ -66,6 +67,7 @@ public class Config {
     self = this;
     mPref = Function.getPref(context);
     themeName = mPref.getString("pref_selected_theme", "trime");
+    prepareRime(context);
     init();
   }
 
@@ -73,12 +75,26 @@ public class Config {
     return themeName;
   }
 
-  public static String getOpenccDataDir() {
-    return OPENCC_DATA_DIR;
+  public String getSharedDataDir() {
+    String name = mPref.getString("shared_data_dir", SHARED_DATA_DIR);
+    if (new File(name).exists()) return name;
+    return SHARED_DATA_DIR;
   }
 
-  private static void prepareRime(Context context) {
-    boolean isExist = new File(USER_DATA_DIR).exists();
+  public String getUserDataDir() {
+    String name = mPref.getString("user_data_dir", USER_DATA_DIR);
+    if (new File(name).exists()) return name;
+    return USER_DATA_DIR;
+  }
+
+  public String getResDataDir(String sub) {
+    String name = new File(getSharedDataDir(), sub).getPath();
+    if (new File(name).exists()) return name;
+    return new File(getUserDataDir(), sub).getPath();
+  }
+
+  private void prepareRime(Context context) {
+    boolean isExist = new File(getSharedDataDir()).exists();
     boolean isOverwrite = Function.isDiffVer(context);
     String defaultFile = "trime.yaml";
     if (isOverwrite) {
@@ -89,15 +105,15 @@ public class Config {
     } else {
       copyFileOrDir(context, RIME, false);
     }
-    while (!new File(USER_DATA_DIR, defaultFile).exists()) {
+    while (!new File(getSharedDataDir(), defaultFile).exists()) {
       SystemClock.sleep(3000);
       copyFileOrDir(context, RIME, isOverwrite);
     }
     Rime.get(!isExist); //覆蓋時不強制部署
   }
 
-  public static String[] getThemeKeys() {
-    File d = new File(USER_DATA_DIR);
+  public static String[] getThemeKeys(boolean isUser) {
+    File d = new File(isUser ? get().getUserDataDir() : get().getSharedDataDir());
     FilenameFilter trimeFilter =
         new FilenameFilter() {
           @Override
@@ -120,7 +136,8 @@ public class Config {
   }
 
   public static boolean deployOpencc() {
-    File d = new File(OPENCC_DATA_DIR);
+    String dataDir = get().getResDataDir("opencc");
+    File d = new File(dataDir);
     if (d.exists()) {
       FilenameFilter txtFilter =
           new FilenameFilter() {
@@ -130,7 +147,7 @@ public class Config {
             }
           };
       for (String txtName : d.list(txtFilter)) {
-        txtName = new File(OPENCC_DATA_DIR, txtName).getPath();
+        txtName = new File(dataDir, txtName).getPath();
         String ocdName = txtName.replace(".txt", ".ocd");
         Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd");
       }
@@ -149,7 +166,7 @@ public class Config {
     return assets;
   }
 
-  public static boolean copyFileOrDir(Context context, String path, boolean overwrite) {
+  public boolean copyFileOrDir(Context context, String path, boolean overwrite) {
     AssetManager assetManager = context.getAssets();
     String assets[] = null;
     try {
@@ -157,7 +174,7 @@ public class Config {
       if (assets.length == 0) {
         copyFile(context, path, overwrite);
       } else {
-        File dir = new File(EXTERNAL_STORAGE_PATH, path);
+        File dir = new File(getSharedDataDir(), path.length() >= 5 ? path.substring(5) : "");
         if (!dir.exists()) dir.mkdir();
         for (int i = 0; i < assets.length; ++i) {
           String assetPath = new File(path, assets[i]).getPath();
@@ -171,13 +188,13 @@ public class Config {
     return true;
   }
 
-  private static boolean copyFile(Context context, String filename, boolean overwrite) {
+  private boolean copyFile(Context context, String filename, boolean overwrite) {
     AssetManager assetManager = context.getAssets();
     InputStream in = null;
     OutputStream out = null;
     try {
       in = assetManager.open(filename);
-      String newFileName = new File(EXTERNAL_STORAGE_PATH, filename).getPath();
+      String newFileName = new File(filename.endsWith(".bin") ? getUserDataDir() : getSharedDataDir(), filename.length() >= 5 ? filename.substring(5) : "").getPath();
       if (new File(newFileName).exists() && !overwrite) return true;
       out = new FileOutputStream(newFileName);
       int BLK_SIZE = 1024;
@@ -198,8 +215,9 @@ public class Config {
     return true;
   }
 
-  private void deployConfig() {
-    Rime.deploy_config_file(themeName + ".yaml", "config_version");
+  private void deployTheme() {
+    String[] configs = get().getThemeKeys(false);
+    for (String config: configs) Rime.deploy_config_file(config, "config_version");
   }
 
   public void setTheme(String theme) {
@@ -214,7 +232,7 @@ public class Config {
     String name = Rime.config_get_string(themeName, "config_version");
     String defaultName = "trime";
     if (Function.isEmpty(name)) themeName = defaultName;
-    deployConfig();
+    deployTheme();
     mDefaultStyle = (Map<String, Object>) Rime.config_get_map(themeName, "style");
     fallbackColors = (Map<String, String>) Rime.config_get_map(themeName, "fallback_colors");
     List androidKeys = Rime.config_get_list(themeName, "android_keys/name");
@@ -315,10 +333,7 @@ public class Config {
   }
 
   public static Config get(Context context) {
-    if (self == null) {
-      prepareRime(context);
-      self = new Config(context);
-    }
+    if (self == null) self = new Config(context);
     return self;
   }
 
@@ -481,7 +496,7 @@ public class Config {
     SharedPreferences.Editor edit = mPref.edit();
     edit.putString("pref_selected_color_scheme", color);
     edit.apply();
-    deployConfig();
+    deployTheme();
   }
 
   public String[] getColorKeys() {
@@ -505,7 +520,7 @@ public class Config {
   public Typeface getFont(String key) {
     String name = getString(key);
     if (name != null) {
-      File f = new File(USER_DATA_DIR, "fonts" + name);
+      File f = new File(getResDataDir("fonts"), name);
       if (f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
@@ -519,7 +534,7 @@ public class Config {
       color = ((Long) o).intValue();
     else if (o instanceof String) {
       String name = o.toString();
-      File nameDirectory = new File(USER_DATA_DIR, "backgrounds");
+      String nameDirectory = getResDataDir("backgrounds");
       name = new File(nameDirectory, name).getPath();
       File f = new File(name);
       if (f.exists()) {

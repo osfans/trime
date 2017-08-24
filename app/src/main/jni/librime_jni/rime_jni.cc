@@ -29,7 +29,7 @@ static const JNINativeMethod sMethods[] = {
     // init
     {
         const_cast<char *>("setup"),
-        const_cast<char *>("()V"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)V"),
         reinterpret_cast<void *>(setup)
     },
     {
@@ -40,7 +40,7 @@ static const JNINativeMethod sMethods[] = {
     // entry and exit
     {
         const_cast<char *>("initialize"),
-        const_cast<char *>("()V"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)V"),
         reinterpret_cast<void *>(initialize)
     },
     {
@@ -66,7 +66,7 @@ static const JNINativeMethod sMethods[] = {
     // deployment
     {
         const_cast<char *>("deployer_initialize"),
-        const_cast<char *>("()V"),
+        const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;)V"),
         reinterpret_cast<void *>(deployer_initialize)
     },
     {
