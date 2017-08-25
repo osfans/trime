@@ -649,29 +649,7 @@ jobject _get_value(JNIEnv *env, RimeConfig* config, const char* key) {
   jclass jc;
   jmethodID init;
   Bool b_value;
-  if (RimeConfigGetBool(config, key, &b_value)) {
-    jc = env->FindClass("java/lang/Boolean");
-    init = env->GetMethodID(jc, "<init>", "(Z)V");
-    ret = (jobject)env->NewObject(jc, init, b_value);
-    env->DeleteLocalRef(jc);
-    return ret;
-  }
-  int i_value;
-  if (RimeConfigGetInt(config, key, &i_value)) {
-    jc = env->FindClass("java/lang/Integer");
-    init = env->GetMethodID(jc, "<init>", "(I)V");
-    ret = (jobject)env->NewObject(jc, init, i_value);
-    env->DeleteLocalRef(jc);
-    return ret;
-  }
-  double d_value;
-  if (RimeConfigGetDouble(config, key, &d_value)) {
-    jc = env->FindClass("java/lang/Double");
-    init = env->GetMethodID(jc, "<init>", "(D)V");
-    ret = (jobject)env->NewObject(jc, init, d_value);
-    env->DeleteLocalRef(jc);
-    return ret;
-  }
+
   const char *value = RimeConfigGetCString(config, key);
   if (value != NULL) return newJstring(env, value);
   ret = _get_list(env, config, key);

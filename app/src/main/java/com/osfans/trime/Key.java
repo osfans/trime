@@ -134,7 +134,7 @@ public class Key {
     if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = Config.getString(mk, "label");
     hint = Config.getString(mk, "hint");
-    if (mk.containsKey("send_bindings")) send_bindings = (Boolean) mk.get("send_bindings");
+    if (mk.containsKey("send_bindings")) send_bindings = Config.getBoolean(mk, "send_bindings");
     else if (composing == null && has_menu == null && paging == null) send_bindings = false;
     if (isShift()) mKeyboard.setmShiftKey(this);
     key_text_size = Config.getPixel(mk, "key_text_size");

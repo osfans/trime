@@ -24,6 +24,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -348,12 +349,10 @@ public class Config {
     return getPixel(getFloat(key));
   }
 
-  public static Integer getPixel(Map m, String k, Object defaultValue) {
-    Object o = getValue(m, k, defaultValue);
-    if (o instanceof Integer) return getPixel(((Integer) o).floatValue());
-    if (o instanceof Float) return getPixel((Float) o);
-    if (o instanceof Double) return getPixel(((Double) o).floatValue());
-    return null;
+  public static Integer getPixel(Map m, String k, Object s) {
+    Object o = getValue(m, k, s);
+    if (o == null) return null;
+    return getPixel(Float.valueOf(o.toString()));
   }
 
   public static Integer getPixel(Map m, String k) {
@@ -364,26 +363,26 @@ public class Config {
     Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
-      if (o instanceof Integer) color = (Integer) o;
+      String s = o.toString();
+      if (s.startsWith("0")) color = parseColor(s);
       else {
-        color = get().getCurrentColor(o.toString());
+        color = get().getCurrentColor(s);
       }
     }
     return color;
   }
 
   public static Drawable getColorDrawable(Map m, String k) {
-    Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
-      if (o instanceof Integer) {
-        color = (Integer) o;
+      String s = o.toString();
+      if (s.startsWith("0")) {
         GradientDrawable gd = new GradientDrawable();
-        gd.setColor(color);
+        gd.setColor(parseColor(s));
         return gd;
-      } else if (o instanceof String) {
+      } else {
         Config config = get();
-        Drawable d = config.getCurrentColorDrawable(o.toString());
+        Drawable d = config.getCurrentColorDrawable(s);
         if (d == null) d = config.drawableObject(o);
         return d;
       }
@@ -395,55 +394,72 @@ public class Config {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
-  public static Float getFloat(Map m, String k) {
-    Object o = getValue(m, k, null);
-    if (o instanceof Integer) return ((Integer) o).floatValue();
-    if (o instanceof Float) return ((Float) o);
-    if (o instanceof Double) return ((Double) o).floatValue();
-    return null;
+  public static Integer getInt(Map m, String k, Object s) {
+    Object o = getValue(m, k, s);
+    if (o == null) return null;
+    return Long.decode(o.toString()).intValue();
   }
 
-  public static double getDouble(Map m, String k, Object i) {
-    Object o = getValue(m, k, i);
-    if (o instanceof Integer) return ((Integer) o).doubleValue();
-    else if (o instanceof Float) return ((Float) o).doubleValue();
-    else if (o instanceof Double) return ((Double) o).doubleValue();
-    return 0f;
+  public static Float getFloat(Map m, String k) {
+    Object o = getValue(m, k, null);
+    if (o == null) return null;
+    return Float.valueOf(o.toString());
+  }
+
+  public static Double getDouble(Map m, String k, Object s) {
+    Object o = getValue(m, k, s);
+    if (o == null) return null;
+    return Double.valueOf(o.toString());
+  }
+
+  public static String getString(Map m, String k, Object s) {
+    Object o = getValue(m, k, s);
+    if (o == null) return null;
+    return o.toString();
   }
 
   public static String getString(Map m, String k) {
-    if (m.containsKey(k)) {
-      Object o = m.get(k);
-      if (o != null) return o.toString();
-    }
-    return "";
+    return getString(m, k, "");
+  }
+
+  public static Boolean getBoolean(Map m, String k, Object s) {
+    Object o = getValue(m, k, s);
+    if (o == null) return null;
+    return Boolean.valueOf(o.toString());
+  }
+
+  public static Boolean getBoolean(Map m, String k) {
+    return getBoolean(m, k, true);
   }
 
   public boolean getBoolean(String key) {
     Object o = getValue(key);
-    return o == null ? true : (Boolean) o;
+    if (o == null) return true;
+    return Boolean.valueOf(o.toString());
   }
 
   public double getDouble(String key) {
     Object o = getValue(key);
-    double size = 0;
-    if (o instanceof Integer) size = ((Integer) o).doubleValue();
-    else if (o instanceof Float) size = ((Float) o).doubleValue();
-    else if (o instanceof Double) size = ((Double) o).doubleValue();
-    return size;
+    if (o == null) return 0d;
+    return Double.valueOf(o.toString());
   }
 
   public float getFloat(String key) {
-    return (float) getDouble(key);
+    Object o = getValue(key);
+    if (o == null) return 0f;
+    return Float.valueOf(o.toString());
   }
 
   public int getInt(String key) {
-    return (int) getDouble(key);
+    Object o = getValue(key);
+    if (o == null) return 0;
+    return Long.decode(o.toString()).intValue();
   }
 
   public String getString(String key) {
     Object o = getValue(key);
-    return (o == null) ? "" : o.toString();
+    if (o == null) return "";
+    return o.toString();
   }
 
   private Object getColorObject(String key) {
@@ -463,11 +479,15 @@ public class Config {
     return o;
   }
 
-  private Integer getCurrentColor(String key) {
+
+  private static int parseColor(String s) {
+    return Color.parseColor(s.replace("0x", "#"));
+  }
+
+  public Integer getCurrentColor(String key) {
     Object o = getColorObject(key);
-    if (o instanceof Integer) return ((Integer) o).intValue();
-    if (o instanceof Float || o instanceof Double) return ((Long) o).intValue();
-    return null;
+    if (o == null) return null;
+    return parseColor(o.toString());
   }
 
   public Integer getColor(String key) {
@@ -475,11 +495,8 @@ public class Config {
     if (o == null) {
       o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
     }
-
-    if (o instanceof Integer) return ((Integer) o).intValue();
-    if (o instanceof Float || o instanceof Double || o instanceof Long)
-      return ((Long) o).intValue();
-    return null;
+    if (o == null) return null;
+    return parseColor(o.toString());
   }
 
   public String getColorScheme() {
@@ -523,11 +540,9 @@ public class Config {
   private Drawable drawableObject(Object o) {
     if (o == null) return null;
     Integer color = null;
-    if (o instanceof Integer) color = ((Integer) o).intValue();
-    else if (o instanceof Float || o instanceof Double || o instanceof Long)
-      color = ((Long) o).intValue();
-    else if (o instanceof String) {
-      String name = o.toString();
+    String name = o.toString();
+    if (name.startsWith("0")) color = parseColor(name);
+    else {
       String nameDirectory = getResDataDir("backgrounds");
       name = new File(nameDirectory, name).getPath();
       File f = new File(name);

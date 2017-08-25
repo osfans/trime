@@ -62,9 +62,9 @@ public class Event {
       text = Config.getString(m, "text");
       if (code == 0 && Function.isEmpty(text)) text = s;
       if (m.containsKey("states")) states = (List<String>) m.get("states");
-      sticky = (Boolean) Config.getValue(m, "sticky", false);
-      repeatable = (Boolean) Config.getValue(m, "repeatable", false);
-      functional = (Boolean) Config.getValue(m, "functional", true);
+      sticky = Config.getBoolean(m, "sticky", false);
+      repeatable = Config.getBoolean(m, "repeatable", false);
+      functional = Config.getBoolean(m, "functional", true);
     } else if ((code = getClickCode(s)) > 0) {
       parseLabel();
     } else {

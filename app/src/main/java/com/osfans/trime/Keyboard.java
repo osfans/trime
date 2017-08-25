@@ -154,9 +154,9 @@ public class Keyboard {
   public Keyboard(Context context, String name) {
     this(context);
     Map<String, Object> m = Config.get().getKeyboard(name);
-    mLabelTransform = (String) Config.getValue(m, "label_transform", "none");
-    mAsciiMode = (Integer) Config.getValue(m, "ascii_mode", 1);
-    int columns = (Integer) Config.getValue(m, "columns", 20);
+    mLabelTransform = Config.getString(m, "label_transform", "none");
+    mAsciiMode = Config.getInt(m, "ascii_mode", 1);
+    int columns = Config.getInt(m, "columns", 20);
     int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
     int height = Config.getPixel(m, "height", 0);
