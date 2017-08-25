@@ -114,20 +114,14 @@ public class Key {
           };
       String eventType = eventTypes[i];
       s = Config.getString(mk, eventType);
-      if (s.length() > 0) events[i] = new Event(mKeyboard, s);
+      if (!Function.isEmpty(s)) events[i] = new Event(mKeyboard, s);
     }
     s = Config.getString(mk, "composing");
-    if (s.length() > 0) {
-      composing = new Event(mKeyboard, s);
-    }
+    if (!Function.isEmpty(s)) composing = new Event(mKeyboard, s);
     s = Config.getString(mk, "has_menu");
-    if (s.length() > 0) {
-      has_menu = new Event(mKeyboard, s);
-    }
+    if (!Function.isEmpty(s)) has_menu = new Event(mKeyboard, s);
     s = Config.getString(mk, "paging");
-    if (s.length() > 0) {
-      paging = new Event(mKeyboard, s);
-    }
+    if (!Function.isEmpty(s)) paging = new Event(mKeyboard, s);
     if (composing != null || has_menu != null || paging != null)
       mKeyboard.getmComposingKeys().add(this);
     s = Config.getString(mk, "ascii");
