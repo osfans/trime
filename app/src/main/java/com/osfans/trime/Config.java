@@ -364,10 +364,8 @@ public class Config {
     if (m.containsKey(k)) {
       Object o = m.get(k);
       String s = o.toString();
-      if (s.startsWith("0")) color = parseColor(s);
-      else {
-        color = get().getCurrentColor(s);
-      }
+      color = parseColor(s);
+      if (color == null) color = get().getCurrentColor(s);
     }
     return color;
   }
@@ -376,9 +374,10 @@ public class Config {
     if (m.containsKey(k)) {
       Object o = m.get(k);
       String s = o.toString();
-      if (s.startsWith("0")) {
+      Integer color = parseColor(s);
+      if (color != null) {
         GradientDrawable gd = new GradientDrawable();
-        gd.setColor(parseColor(s));
+        gd.setColor(color);
         return gd;
       } else {
         Config config = get();
@@ -414,7 +413,7 @@ public class Config {
 
   public static String getString(Map m, String k, Object s) {
     Object o = getValue(m, k, s);
-    if (o == null) return null;
+    if (o == null) return "";
     return o.toString();
   }
 
@@ -479,15 +478,12 @@ public class Config {
     return o;
   }
 
-
-  private static int parseColor(String s) {
-    int color;
+  private static Integer parseColor(String s) {
+    Integer color = null;
     try {
       color = Color.parseColor(s.replace("0x", "#"));
     } catch (Exception e) {
       Log.e("Color", "unknown color " + s);
-      color = Long.decode(s).intValue();
-      if (s.length() == 8 && s.startsWith("0")) color |= 0xff000000; //默認不透明
     }
     return color;
   }
@@ -547,21 +543,19 @@ public class Config {
 
   private Drawable drawableObject(Object o) {
     if (o == null) return null;
-    Integer color = null;
     String name = o.toString();
-    if (name.startsWith("0")) color = parseColor(name);
-    else {
+    Integer color = parseColor(name);
+    if (color != null) {
+      GradientDrawable gd = new GradientDrawable();
+      gd.setColor(color);
+      return gd;
+    } else {
       String nameDirectory = getResDataDir("backgrounds");
       name = new File(nameDirectory, name).getPath();
       File f = new File(name);
       if (f.exists()) {
         return new BitmapDrawable(BitmapFactory.decodeFile(name));
       }
-    }
-    if (color != null) {
-      GradientDrawable gd = new GradientDrawable();
-      gd.setColor(color);
-      return gd;
     }
     return null;
   }
