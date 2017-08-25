@@ -481,7 +481,15 @@ public class Config {
 
 
   private static int parseColor(String s) {
-    return Color.parseColor(s.replace("0x", "#"));
+    int color;
+    try {
+      color = Color.parseColor(s.replace("0x", "#"));
+    } catch (Exception e) {
+      Log.e("Color", "unknown color " + s);
+      color = Long.decode(s).intValue();
+      if (s.length() == 8 && s.startsWith("0")) color |= 0xff000000; //默認不透明
+    }
+    return color;
   }
 
   public Integer getCurrentColor(String key) {
