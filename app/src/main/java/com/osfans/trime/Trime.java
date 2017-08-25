@@ -326,6 +326,7 @@ public class Trime extends InputMethodService
       mCandidate.reset();
       mShowWindow = mConfig.getShowWindow();
       mComposition.setVisibility(mShowWindow ? View.VISIBLE : View.GONE);
+      mComposition.reset();
     }
   }
 

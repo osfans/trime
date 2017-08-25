@@ -507,7 +507,7 @@ public class Config {
     SharedPreferences.Editor edit = mPref.edit();
     edit.putString("pref_selected_color_scheme", color);
     edit.apply();
-    deployTheme();
+    //deployTheme();
   }
 
   public String[] getColorKeys() {
