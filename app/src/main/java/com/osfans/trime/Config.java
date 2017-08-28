@@ -229,6 +229,7 @@ public class Config {
   }
 
   private void init() {
+    Rime.deploy_config_file(themeName, "config_version");
     Map<String, Object> m = Rime.config_get_map(themeName, "");
     if (m == null) {
       themeName = defaultName;
