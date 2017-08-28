@@ -54,6 +54,7 @@ public class Config {
 
   private Map<String, Object> mStyle, mDefaultStyle;
   private String themeName;
+  private static String defaultName = "trime";
   private String schema_id;
 
   private static Config self = null;
@@ -214,6 +215,7 @@ public class Config {
   }
 
   private void deployTheme() {
+    if (getUserDataDir().contentEquals(getSharedDataDir())) return; //相同文件夾不部署主題
     String[] configs = get().getThemeKeys(false);
     for (String config: configs) Rime.deploy_config_file(config, "config_version");
   }
@@ -228,12 +230,13 @@ public class Config {
 
   private void init() {
     Map<String, Object> m = Rime.config_get_map(themeName, "");
-    String name = getString(m, "config_version");
-    String defaultName = "trime";
-    if (Function.isEmpty(name)) themeName = defaultName;
+    if (m == null) {
+      themeName = defaultName;
+      m = Rime.config_get_map(themeName, "");
+    }
+    Map mk = (Map<String, Object>) m.get("android_keys");
     mDefaultStyle = (Map<String, Object>) m.get("style");
     fallbackColors = (Map<String, String>) m.get("fallback_colors");
-    Map mk = (Map<String, Object>) m.get("android_keys");
     Key.androidKeys = (List<String>) mk.get("name");
     Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
     Key.setSymbols((String) mk.get("symbols"));
