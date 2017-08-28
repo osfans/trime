@@ -41,12 +41,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /** 解析YAML配置文件 */
 public class Config {
   // 默认的用户数据路径
   private static final String RIME = "rime";
+  private static final String TAG = "Config";
   private static String userDataDir;
   private static String sharedDataDir;
 
@@ -156,7 +158,7 @@ public class Config {
     try {
       assets = assetManager.list(path);
     } catch (IOException ex) {
-      Log.e("Config", "I/O Exception", ex);
+      Log.e(TAG, "I/O Exception", ex);
     }
     return assets;
   }
@@ -177,7 +179,7 @@ public class Config {
         }
       }
     } catch (IOException ex) {
-      Log.e("Config", "I/O Exception", ex);
+      Log.e(TAG, "I/O Exception", ex);
       return false;
     }
     return true;
@@ -204,7 +206,7 @@ public class Config {
       out.close();
       out = null;
     } catch (Exception e) {
-      Log.e("Config", e.getMessage());
+      Log.e(TAG, e.getMessage());
       return false;
     }
     return true;
@@ -480,10 +482,16 @@ public class Config {
 
   private static Integer parseColor(String s) {
     Integer color = null;
+    if (s.contains(".")) return color; //picture name
     try {
+      s = s.toLowerCase(Locale.getDefault());
+      if (s.startsWith("0x")) {
+        if (s.length() < 8) s = "#"+String.format("%06x", Long.decode(s.substring(2)));
+        else if (s.length() == 9) s = "#0" + s.substring(2);
+      }
       color = Color.parseColor(s.replace("0x", "#"));
     } catch (Exception e) {
-      Log.e("Color", "unknown color " + s);
+      //Log.e(TAG, "unknown color " + s);
     }
     return color;
   }
