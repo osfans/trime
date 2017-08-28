@@ -69,6 +69,7 @@ public class Config {
     sharedDataDir = context.getString(R.string.default_shared_data_dir);
     themeName = mPref.getString("pref_selected_theme", "trime");
     prepareRime(context);
+    deployTheme();
     init();
   }
 
@@ -226,24 +227,21 @@ public class Config {
   }
 
   private void init() {
-    String name = Rime.config_get_string(themeName, "config_version");
+    Map<String, Object> m = Rime.config_get_map(themeName, "");
+    String name = getString(m, "config_version");
     String defaultName = "trime";
     if (Function.isEmpty(name)) themeName = defaultName;
-    deployTheme();
-    mDefaultStyle = (Map<String, Object>) Rime.config_get_map(themeName, "style");
-    fallbackColors = (Map<String, String>) Rime.config_get_map(themeName, "fallback_colors");
-    List androidKeys = Rime.config_get_list(themeName, "android_keys/name");
-    Key.androidKeys = new ArrayList<String>(androidKeys.size());
-    for (Object o : androidKeys) {
-      Key.androidKeys.add(o.toString());
-    }
+    mDefaultStyle = (Map<String, Object>) m.get("style");
+    fallbackColors = (Map<String, String>) m.get("fallback_colors");
+    Map mk = (Map<String, Object>) m.get("android_keys");
+    Key.androidKeys = (List<String>) mk.get("name");
     Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
-    Key.setSymbols(Rime.config_get_string(themeName, "android_keys/symbols"));
+    Key.setSymbols((String) mk.get("symbols"));
     if (Function.isEmpty(Key.getSymbols()))
       Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
-    Key.presetKeys = (Map<String, Map>) Rime.config_get_map(themeName, "preset_keys");
-    presetColorSchemes = Rime.config_get_map(themeName, "preset_color_schemes");
-    presetKeyboards = Rime.config_get_map(themeName, "preset_keyboards");
+    Key.presetKeys = (Map<String, Map>) m.get("preset_keys");
+    presetColorSchemes = (Map<String, Object>) m.get("preset_color_schemes");
+    presetKeyboards = (Map<String, Object>) m.get("preset_keyboards");
     Rime.setShowSwitches(getShowSwitches());
     reset();
   }
