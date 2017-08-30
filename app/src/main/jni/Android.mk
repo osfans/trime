@@ -16,7 +16,7 @@
 ROOT_PATH := $(call my-dir)
 include jni/opencc.mk #1.0.5
 include jni/yaml-cpp.mk #0.5.3
-include jni/snappy.mk #1.1.4
+include jni/snappy.mk #1.1.7
 include jni/leveldb.mk #1.20
 include jni/marisa.mk #0.2.5
 include jni/boost.mk #1.64.0
