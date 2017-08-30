@@ -467,12 +467,11 @@ public class Config {
 
   private Object getColorObject(String key) {
     String scheme = getColorScheme();
+    if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); //主題中指定的配色
+    if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; //主題中的default配色
     Map map = (Map<String, Object>) presetColorSchemes.get(scheme);
-    if (map == null) {
-      scheme = getString("color_scheme");
-      map = (Map<String, Object>) presetColorSchemes.get(scheme);
-      setColor(scheme);
-    }
+    if (map == null) return null;
+    setColor(scheme);
     Object o = map.get(key);
     String fallbackKey = key;
     while (o == null && fallbackColors.containsKey(fallbackKey)) {

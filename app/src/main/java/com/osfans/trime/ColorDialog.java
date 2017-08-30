@@ -30,6 +30,7 @@ class ColorDialog {
   private AlertDialog dialog;
 
   private void selectColor() {
+    if (checkedColor < 0 || checkedColor >= colorKeys.length) return;
     String color = colorKeys[checkedColor];
     Config config = Config.get();
     config.setColor(color);
