@@ -487,7 +487,8 @@ public class Config {
     try {
       s = s.toLowerCase(Locale.getDefault());
       if (s.startsWith("0x")) {
-        if (s.length() < 8) s = "#"+String.format("%06x", Long.decode(s.substring(2)));
+        if (s.length() == 3 || s.length() == 4) s = String.format("#%02x000000", Long.decode(s.substring(2))); //0xAA
+        else if (s.length() < 8) s = String.format("#%06x", Long.decode(s.substring(2)));
         else if (s.length() == 9) s = "#0" + s.substring(2);
       }
       color = Color.parseColor(s.replace("0x", "#"));
