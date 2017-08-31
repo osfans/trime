@@ -273,6 +273,13 @@ public class Trime extends InputMethodService
       case "_hide_key_hint":
         if (mKeyboardView != null) mKeyboardView.setShowHint(!value);
         break;
+      default:
+        if (option.startsWith("_keyboard_") && option.length() > 10 && value && mKeyboardSwitch != null) {
+          String keyboard = option.substring(10);
+          mKeyboardSwitch.setKeyboard(keyboard);
+          mTempAsciiMode = mKeyboardSwitch.getAsciiMode();
+          bindKeyboardToInputView();
+        }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
   }
