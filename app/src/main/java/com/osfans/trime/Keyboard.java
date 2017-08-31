@@ -77,6 +77,9 @@ public class Keyboard {
   private int mCellHeight;
   private int[][] mGridNeighbors;
   private int mProximityThreshold;
+
+  private boolean mLock; //切換程序時記憶鍵盤
+
   /**
    * Creates a keyboard from the given xml key layout file.
    *
@@ -156,6 +159,7 @@ public class Keyboard {
     Map<String, Object> m = Config.get().getKeyboard(name);
     mLabelTransform = Config.getString(m, "label_transform", "none");
     mAsciiMode = Config.getInt(m, "ascii_mode", 1);
+    mLock = Config.getBoolean(m, "lock", false);
     int columns = Config.getInt(m, "columns", 20);
     int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
@@ -424,6 +428,10 @@ public class Keyboard {
 
   public boolean isLabelUppercase() {
     return mLabelTransform.contentEquals("uppercase");
+  }
+
+  public boolean isLock() {
+    return mLock;
   }
 
   public float getRoundCorner() {

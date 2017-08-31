@@ -834,6 +834,7 @@ preset_keyboards:
     ascii_mode: 0
     width: 10
     height: 44
+    lock: true #切換程序時記憶鍵盤
     keys:
     - {click: '1', long_click: '!'}
     - {click: '2', long_click: '@'}
@@ -889,6 +890,7 @@ preset_keyboards:
     width: 10
     height: 44
     label_transform: uppercase #uppercase|none 中文模式下的字母標籤自動大寫
+    lock: true
     keys:
     - {click: '1', long_click: '!'}
     - {click: '2', long_click: '@'}
@@ -943,6 +945,7 @@ preset_keyboards:
     ascii_mode: 0
     width: 10
     height: 55
+    lock: true
     keys:
     - {click: 'q', long_click: '!', swipe_up: 1}
     - {click: 'w', long_click: '@', swipe_up: 2}
@@ -988,6 +991,7 @@ preset_keyboards:
     ascii_mode: 0
     width: 10
     height: 55
+    lock: true
     key_symbol_offset_x: 0
     key_symbol_offset_y: 0
     key_text_offset_x: 0

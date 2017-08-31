@@ -49,8 +49,10 @@ class KeyboardSwitch {
   }
 
   public void setKeyboard(String name) {
-    int i;
-    if (name == null || name.contentEquals(".default")) {
+    int i = currentId < 0 ? 0 : currentId;
+    if (name == null) {
+      if (!mKeyboards[i].isLock()) i = 0; //不記憶鍵盤時使用默認鍵盤
+    } else if (name.contentEquals(".default")) {
       i = 0;
     } else if (name.contentEquals(".prior")) { //前一個
       i = currentId - 1;
