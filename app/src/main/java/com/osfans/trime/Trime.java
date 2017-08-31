@@ -515,7 +515,7 @@ public class Trime extends InputMethodService
     if (reset_ascii_mode) mAsciiMode = false;
     // Select a keyboard based on the input type of the editing field.
     mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
-    mKeyboardSwitch.setKeyboard(keyboard); //設定默認鍵盤
+    if (!restarting || !Function.isEmpty(keyboard)) mKeyboardSwitch.setKeyboard(keyboard); //切換程序或鍵盤時設定鍵盤
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤進入文本框時顯示候選欄
