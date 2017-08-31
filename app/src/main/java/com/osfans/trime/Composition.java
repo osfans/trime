@@ -188,12 +188,15 @@ public class Composition extends TextView {
     return super.onTouchEvent(event);
   }
 
+  public void setShowComment(boolean value) {
+    show_comment = value;
+  }
+
   public void reset() {
     Config config = Config.get();
     components = (List<Map<String, Object>>) config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
-    show_comment = config.getBoolean("show_comment");
     text_size = config.getPixel("text_size");
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");

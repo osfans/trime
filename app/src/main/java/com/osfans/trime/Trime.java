@@ -263,7 +263,7 @@ public class Trime extends InputMethodService
         mEffect.setLanguage(locales[value ? 1 : 0]);
         break;
       case "_hide_comment":
-        if (mCandidateContainer != null) mCandidate.setShowComment(!value);
+        setShowComment(!value);
         break;
       case "_hide_candidate":
         if (mCandidateContainer != null)
@@ -321,7 +321,7 @@ public class Trime extends InputMethodService
   public void resetCandidate() {
     if (mCandidateContainer != null) {
       loadBackground();
-      mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
+      setShowComment(!Rime.getOption("_hide_comment"));
       mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset();
       mShowWindow = mConfig.getShowWindow();
@@ -433,6 +433,11 @@ public class Trime extends InputMethodService
     return mKeyboardView;
   }
 
+  void setShowComment(boolean show_comment) {
+    if (mCandidateContainer != null) mCandidate.setShowComment(show_comment);
+    mComposition.setShowComment(show_comment);
+  }
+
   @Override
   public View onCreateCandidatesView() {
     LayoutInflater inflater = getLayoutInflater();
@@ -449,7 +454,7 @@ public class Trime extends InputMethodService
         (FrameLayout) inflater.inflate(R.layout.candidate_container, (ViewGroup) null);
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
-    mCandidate.setShowComment(!Rime.getOption("_hide_comment"));
+    setShowComment(!Rime.getOption("_hide_comment"));
     mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
     loadBackground();
     return mCandidateContainer;
