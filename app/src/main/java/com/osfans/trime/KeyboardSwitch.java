@@ -56,11 +56,11 @@ class KeyboardSwitch {
       i = 0;
     } else if (name.contentEquals(".prior")) { //前一個
       i = currentId - 1;
-      if (i < 0) i = mKeyboards.length - 1;
+    } else if (name.contentEquals(".next")) { //下一個
+      i = currentId + 1;
     } else {
       i = mKeyboardNames.indexOf(name); //指定鍵盤
     }
-    if (i < 0) i = currentId + 1; //默認下一個
     setKeyboard(i);
   }
 
