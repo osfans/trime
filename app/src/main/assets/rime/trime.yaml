@@ -53,7 +53,7 @@ style:
   key_long_text_size: 14 #長標籤字號
   key_text_size: 22 #鍵字號
   key_width: 10.0 #鍵寬，佔螢幕寬的百分比
-  keyboards: [.default, default, symbols, number] #鍵盤配置
+  keyboards: [.default, letter, number, symbols] #鍵盤配置：自動鍵盤、字母、數字、符號
   label_text_size: 22 #標籤字號
   label_font: label.ttf #編標籤字型
   latin_font: latin.ttf #西文字型
@@ -980,6 +980,8 @@ preset_keyboards:
     - {click: space, width: 40}
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
+  letter:
+    __include: /preset_keyboards/default
   qwerty:
     name: 預設26鍵
     author: "osfans <waxaca@163.com>"
@@ -1272,7 +1274,7 @@ preset_keyboards:
     - {click: "'", long_click: "?"}
     - {click: Return, long_click: CommitComment, width: 25.5}
   scj6:
-    import_preset: cangjie5
+    __include: /preset_keyboards/cangjie5
   stroke:
     name: 五筆畫鍵盤
     author: 皛筱晓小笨鱼

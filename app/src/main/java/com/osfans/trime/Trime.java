@@ -494,6 +494,7 @@ public class Trime extends InputMethodService
             || variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
             || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) {
           mTempAsciiMode = true;
+          keyboard = "letter";
         } else {
           canCompose = true;
         }
