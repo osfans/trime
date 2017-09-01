@@ -53,7 +53,7 @@ class KeyboardSwitch {
     int i = 0;
     if (isValidId(currentId)) i = currentId;
     if (Function.isEmpty(name)) {
-      if (!mKeyboards[i].isLock()) i = 0; //不記憶鍵盤時使用默認鍵盤
+      if (!mKeyboards[i].isLock()) i = lastLockId; //不記憶鍵盤時使用默認鍵盤
     } else if (name.contentEquals(".default")) {
       i = 0;
     } else if (name.contentEquals(".prior")) { //前一個
