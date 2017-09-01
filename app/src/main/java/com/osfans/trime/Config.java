@@ -306,6 +306,9 @@ public class Config {
     }
     if (!presetKeyboards.containsKey(name)) name = "default";
     Map<String, Object> m = (Map<String, Object>) presetKeyboards.get(name);
+    if (m.containsKey("import_preset")) {
+      name = m.get("import_preset").toString();
+    }
     return name;
   }
 
