@@ -49,8 +49,13 @@ class KeyboardSwitch {
   }
 
   public void setKeyboard(String name) {
-    int i = currentId < 0 ? 0 : currentId;
-    if (name == null) {
+    int i = 0;
+    if (isValidId(currentId)) i = currentId;
+    if (name != null && name.contentEquals(".ascii")) { //英文鍵盤
+      String asciiKeyboard = mKeyboards[i].getAsciiKeyboard();
+      if (!Function.isEmpty(asciiKeyboard)) name = asciiKeyboard;
+    }
+    if (Function.isEmpty(name)) {
       if (!mKeyboards[i].isLock()) i = 0; //不記憶鍵盤時使用默認鍵盤
     } else if (name.contentEquals(".default")) {
       i = 0;
@@ -64,8 +69,12 @@ class KeyboardSwitch {
     setKeyboard(i);
   }
 
+  private boolean isValidId(int i) {
+    return i >= 0 && i < mKeyboards.length;
+  }
+
   private void setKeyboard(int i) {
-    if (i < 0 || i >= mKeyboards.length) i = 0;
+    if (!isValidId(i)) i = 0;
     lastId = currentId;
     currentId = i;
   }

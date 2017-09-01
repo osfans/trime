@@ -79,6 +79,7 @@ public class Keyboard {
   private int mProximityThreshold;
 
   private boolean mLock; //切換程序時記憶鍵盤
+  private String mAsciiKeyboard; //英文鍵盤
 
   /**
    * Creates a keyboard from the given xml key layout file.
@@ -159,6 +160,7 @@ public class Keyboard {
     Map<String, Object> m = Config.get().getKeyboard(name);
     mLabelTransform = Config.getString(m, "label_transform", "none");
     mAsciiMode = Config.getInt(m, "ascii_mode", 1);
+    if (mAsciiMode == 0) mAsciiKeyboard = Config.getString(m, "ascii_keyboard");
     mLock = Config.getBoolean(m, "lock", false);
     int columns = Config.getInt(m, "columns", 20);
     int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
@@ -424,6 +426,10 @@ public class Keyboard {
 
   public boolean getAsciiMode() {
     return mAsciiMode != 0;
+  }
+
+  public String getAsciiKeyboard() {
+    return mAsciiKeyboard;
   }
 
   public boolean isLabelUppercase() {
