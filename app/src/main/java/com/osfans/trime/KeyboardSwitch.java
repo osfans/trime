@@ -28,13 +28,14 @@ class KeyboardSwitch {
 
   private Keyboard[] mKeyboards;
   private List<String> mKeyboardNames;
-  private int currentId, lastId;
+  private int currentId, lastId, lastLockId;
   private int currentDisplayWidth;
 
   public KeyboardSwitch(Context context) {
     this.context = context;
     currentId = -1;
     lastId = 0;
+    lastLockId = 0;
     reset();
   }
 
@@ -63,6 +64,10 @@ class KeyboardSwitch {
       i = currentId - 1;
     } else if (name.contentEquals(".next")) { //下一個
       i = currentId + 1;
+    } else if (name.contentEquals(".last")) { //最近一個
+      i = lastId;
+    } else if (name.contentEquals(".last_lock")) { //最近一個Lock鍵盤
+      i = lastLockId;
     } else {
       i = mKeyboardNames.indexOf(name); //指定鍵盤
     }
@@ -76,6 +81,9 @@ class KeyboardSwitch {
   private void setKeyboard(int i) {
     if (!isValidId(i)) i = 0;
     lastId = currentId;
+    if (isValidId(lastId)) {
+      if (mKeyboards[lastId].isLock()) lastLockId = lastId;
+    }
     currentId = i;
   }
 
