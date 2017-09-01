@@ -279,6 +279,9 @@ public class Trime extends InputMethodService
           mKeyboardSwitch.setKeyboard(keyboard);
           mTempAsciiMode = mKeyboardSwitch.getAsciiMode();
           bindKeyboardToInputView();
+        } else if (option.startsWith("_key_") && option.length() > 5 && value) {
+          String key = option.substring(5);
+          onEvent(new Event(null, key));
         }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();

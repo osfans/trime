@@ -324,11 +324,11 @@ public class Candidate extends View {
         break;
       case MotionEvent.ACTION_UP:
         if (updateHighlight(x, y)) {
+          performClick();
           pickHighlighted(-1);
         }
         break;
     }
-    performClick();
     return true;
   }
 
