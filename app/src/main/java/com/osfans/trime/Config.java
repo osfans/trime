@@ -229,25 +229,30 @@ public class Config {
   }
 
   private void init() {
-    Rime.deploy_config_file(themeName + ".yaml", "config_version");
-    Map<String, Object> m = Rime.config_get_map(themeName, "");
-    if (m == null) {
-      themeName = defaultName;
-      m = Rime.config_get_map(themeName, "");
+    try {
+      Rime.deploy_config_file(themeName + ".yaml", "config_version");
+      Map<String, Object> m = Rime.config_get_map(themeName, "");
+      if (m == null) {
+        themeName = defaultName;
+        m = Rime.config_get_map(themeName, "");
+      }
+      Map mk = (Map<String, Object>) m.get("android_keys");
+      mDefaultStyle = (Map<String, Object>) m.get("style");
+      fallbackColors = (Map<String, String>) m.get("fallback_colors");
+      Key.androidKeys = (List<String>) mk.get("name");
+      Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
+      Key.setSymbols((String) mk.get("symbols"));
+      if (Function.isEmpty(Key.getSymbols()))
+        Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
+      Key.presetKeys = (Map<String, Map>) m.get("preset_keys");
+      presetColorSchemes = (Map<String, Object>) m.get("preset_color_schemes");
+      presetKeyboards = (Map<String, Object>) m.get("preset_keyboards");
+      Rime.setShowSwitches(getShowSwitches());
+      reset();
+    } catch (Exception e) {
+      Log.e(TAG, e.getMessage());
+      setTheme(defaultName);
     }
-    Map mk = (Map<String, Object>) m.get("android_keys");
-    mDefaultStyle = (Map<String, Object>) m.get("style");
-    fallbackColors = (Map<String, String>) m.get("fallback_colors");
-    Key.androidKeys = (List<String>) mk.get("name");
-    Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
-    Key.setSymbols((String) mk.get("symbols"));
-    if (Function.isEmpty(Key.getSymbols()))
-      Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
-    Key.presetKeys = (Map<String, Map>) m.get("preset_keys");
-    presetColorSchemes = (Map<String, Object>) m.get("preset_color_schemes");
-    presetKeyboards = (Map<String, Object>) m.get("preset_keyboards");
-    Rime.setShowSwitches(getShowSwitches());
-    reset();
   }
 
   public void reset() {
