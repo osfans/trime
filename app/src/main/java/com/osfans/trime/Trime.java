@@ -922,41 +922,23 @@ public class Trime extends InputMethodService
     sendDownUpKeyEvents(keyCode, mask);
   }
 
-  private void commitEventText(CharSequence text) {
-    String s = text.toString();
-    if (!Event.containsSend(s)) {
-      commitText(s);
-      return;
-    } else {
-      int i = 0, n = s.length(), start = 0, end = 0;
-      start = s.indexOf("{", i);
-      end = s.indexOf("}", start);
-      while (start >= 0 && end > start) {
-        commitText(s.substring(i, start));
-        if (start + 1 == end) commitText("{}");
-        else {
-          int[] sends = Event.parseSend(s.substring(start + 1, end));
-          if (sends[0] + sends[1] > 0) onKey(sends[0], sends[1]);
-        }
-        i = end + 1;
-        start = s.indexOf("{", i);
-        end = s.indexOf("}", start);
-      }
-      if (i < n) commitText(s.substring(i, n));
-    }
-  }
-
   @Override
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText=" + text);
     mEffect.speakKey(text);
     String s = text.toString();
-    boolean b = s.endsWith("{Left}"); //用於前臺左移光標
-    if (b) text = s.substring(0, s.length() - "{Left}".length());
-    Rime.onText(text);
-    if (!commitText() && !isComposing()) commitEventText(text);
-    if (b) sendDownUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
-    updateComposing();
+    String s1 = s.replaceAll("(\\{[^{}]+\\})+?$", "");
+    if (!Function.isEmpty(s1)) { //直接發送文本
+      Rime.onText(s1);
+      if (!commitText() && !isComposing()) commitText(s1);
+      updateComposing();
+    }
+    if (!s.contentEquals(s1)) { //分別發送按鍵
+      String keys = s.substring(s1.length() + 1, s.length() - 1);
+      for (String key: keys.split("\\}\\{")) {
+        onEvent(new Event(null, key));
+      }
+    }
     keyUpNeeded = false;
   }
 
