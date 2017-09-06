@@ -405,7 +405,7 @@ public class Composition extends TextView {
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     String label;
-    Event e = new Event(null, Config.getString(m, "click"));
+    Event e = new Event(Config.getString(m, "click"));
     if (m.containsKey("label")) label = Config.getString(m, "label");
     else label = e.getLabel();
     int start, end;

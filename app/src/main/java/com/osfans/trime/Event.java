@@ -79,6 +79,10 @@ public class Event {
     }
   }
 
+  public Event(String s) {
+    this(null, s);
+  }
+
   public int getCode() {
     return code;
   }

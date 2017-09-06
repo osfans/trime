@@ -281,7 +281,7 @@ public class Trime extends InputMethodService
           bindKeyboardToInputView();
         } else if (option.startsWith("_key_") && option.length() > 5 && value) {
           String key = option.substring(5);
-          onEvent(new Event(null, key));
+          onEvent(new Event(key));
         }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
@@ -936,7 +936,7 @@ public class Trime extends InputMethodService
     if (!s.contentEquals(s1)) { //分別發送按鍵
       String keys = s.substring(s1.length() + 1, s.length() - 1);
       for (String key: keys.split("\\}\\{")) {
-        onEvent(new Event(null, key));
+        onEvent(new Event(key));
       }
     }
     keyUpNeeded = false;
