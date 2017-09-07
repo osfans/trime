@@ -115,6 +115,7 @@ public class Key {
       String eventType = eventTypes[i];
       s = Config.getString(mk, eventType);
       if (!Function.isEmpty(s)) events[i] = new Event(mKeyboard, s);
+      else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
     }
     s = Config.getString(mk, "composing");
     if (!Function.isEmpty(s)) composing = new Event(mKeyboard, s);

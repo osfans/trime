@@ -195,7 +195,9 @@ public class Event {
 
   public static int getClickCode(String s) {
     int keyCode = 0;
-    if (Key.androidKeys.contains(s)) { //字母數字
+    if (Function.isEmpty(s)) { //空鍵
+      keyCode = 0;
+    } else if (Key.androidKeys.contains(s)) { //字母數字
       keyCode = Key.androidKeys.indexOf(s);
     } else if (Key.getSymbols().contains(s)) { //可見符號
       keyCode = Key.getSymbolStart() + Key.getSymbols().indexOf(s);
