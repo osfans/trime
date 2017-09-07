@@ -936,7 +936,7 @@ public class Trime extends InputMethodService
     if (!s.contentEquals(s1)) { //分別發送按鍵
       String keys = s.substring(s1.length() + 1, s.length() - 1);
       for (String key: keys.split("\\}\\{")) {
-        onEvent(new Event(key));
+        onEvent(new Event("{" + key + "}"));
       }
     }
     keyUpNeeded = false;

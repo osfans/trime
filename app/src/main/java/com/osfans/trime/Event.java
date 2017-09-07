@@ -46,6 +46,15 @@ public class Event {
 
   public Event(Keyboard keyboard, String s) {
     mKeyboard = keyboard;
+    if (s.matches("\\{[^\\{\\}]+\\}")) { //{send|key}
+      label = s.substring(1, s.length() -1);
+      int[] sends = parseSend(label); //send
+      code = sends[0];
+      mask = sends[1];
+      if (code >= 0) return;
+      s = label; //key
+      label = null;
+    }
     if (Key.presetKeys.containsKey(s)) {
       Map m = Key.presetKeys.get(s);
       command = Config.getString(m, "command");
