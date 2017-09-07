@@ -21,7 +21,7 @@
 	url = https://github.com/osfans/miniglog.git
 [submodule "app/src/main/jni/librime"]
 	path = app/src/main/jni/librime
-	url = https://github.com/rime/librime.git
+	url = https://github.com/yueduz/librime
 [submodule "app/src/main/jni/libiconv"]
 	path = app/src/main/jni/libiconv
 	url = https://github.com/osfans/libiconv-gnu.git
