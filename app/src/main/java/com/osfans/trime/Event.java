@@ -69,12 +69,12 @@ public class Event {
       mask = sends[1];
       parseLabel();
       text = Config.getString(m, "text");
-      if (code == 0 && Function.isEmpty(text)) text = s;
+      if (code < 0 && Function.isEmpty(text)) text = s;
       if (m.containsKey("states")) states = (List<String>) m.get("states");
       sticky = Config.getBoolean(m, "sticky", false);
       repeatable = Config.getBoolean(m, "repeatable", false);
       functional = Config.getBoolean(m, "functional", true);
-    } else if ((code = getClickCode(s)) > 0) {
+    } else if ((code = getClickCode(s)) >= 0) {
       parseLabel();
     } else {
       code = 0;
@@ -203,7 +203,7 @@ public class Event {
   }
 
   public static int getClickCode(String s) {
-    int keyCode = 0;
+    int keyCode = -1;
     if (Function.isEmpty(s)) { //空鍵
       keyCode = 0;
     } else if (Key.androidKeys.contains(s)) { //字母數字
