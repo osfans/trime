@@ -70,12 +70,7 @@ public class Event {
     } else {
       code = 0;
       text = s;
-      label = s;
-      if (containsSend(s)) {
-        if (s.contains("{}")) label = s.replace("{}", "[]");
-        label = label.replaceAll("\\{.+?\\}", "");
-        if (s.contains("{}")) label = label.replace("[]", "{}");
-      }
+      label = s.replaceAll("\\{[^\\{\\}]+?\\}", "");
     }
   }
 
@@ -117,10 +112,6 @@ public class Event {
 
   public String getShiftLock() {
     return shiftLock;
-  }
-
-  public static boolean containsSend(String s) {
-    return (!Function.isEmpty(s)) && s.length() > 1 && s.matches(".*\\{.+\\}.*");
   }
 
   public static int[] parseSend(String s) {
