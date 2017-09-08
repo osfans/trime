@@ -209,6 +209,7 @@ public class Rime {
   private static RimeStatus mStatus = new RimeStatus();
   private static RimeSchema mSchema;
   private static List mSchemaList;
+  private static boolean mOnMessage;
 
   static {
     System.loadLibrary("opencc");
@@ -283,6 +284,7 @@ public class Rime {
   }
 
   private static void init(boolean full_check) {
+    mOnMessage = false;
     initialize(Config.get().getSharedDataDir(), Config.get().getUserDataDir());
     check(full_check);
     set_notification_handler();
@@ -382,6 +384,7 @@ public class Rime {
   }
 
   public static void setOption(String option, boolean value) {
+    if (mOnMessage) return;
     set_option(option, value);
   }
 
@@ -399,6 +402,7 @@ public class Rime {
   }
 
   public static void setProperty(String prop, String value) {
+    if (mOnMessage) return;
     set_property(prop, value);
   }
 
@@ -487,6 +491,7 @@ public class Rime {
   }
 
   public static void onMessage(String message_type, String message_value) {
+    mOnMessage = true;
     Log.info(String.format("message: [%s] %s", message_type, message_value));
     Trime trime = Trime.getService();
     switch (message_type) {
@@ -507,6 +512,7 @@ public class Rime {
         }
         break;
     }
+    mOnMessage = false;
   }
 
   public static String openccConvert(String line, String name) {
