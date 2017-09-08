@@ -983,6 +983,7 @@ public class Trime extends InputMethodService
   @Override
   public void onPickCandidate(int i) {
     // Commit the picked candidate and suggest its following words.
+    onPress(0);
     if (!isComposing()) {
       if (i >= 0) {
         Rime.toggleOption(i);

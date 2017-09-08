@@ -119,6 +119,7 @@ public class Composition extends TextView {
 
     @Override
     public void onClick(View tv) {
+      Trime.getService().onPress(event.getCode());
       Trime.getService().onEvent(event);
     }
 
