@@ -50,6 +50,8 @@ import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
 import java.util.Locale;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
@@ -923,17 +925,23 @@ public class Trime extends InputMethodService
     Log.info("onText=" + text);
     mEffect.speakKey(text);
     String s = text.toString();
-    String s1 = s.replaceAll("(\\{[^{}]+\\})+?$", "");
-    if (!Function.isEmpty(s1)) { //直接發送文本
-      Rime.onText(s1);
-      if (!commitText() && !isComposing()) commitText(s1);
-      updateComposing();
-    }
-    if (!s.contentEquals(s1)) { //分別發送按鍵
-      String keys = s.substring(s1.length() + 1, s.length() - 1);
-      for (String key: keys.split("\\}\\{")) {
-        onEvent(new Event("{" + key + "}"));
+    String t;
+    Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
+    Pattern pText = Pattern.compile("^([^{}]+).*$");
+    Matcher m;
+    while (s.length() > 0) {
+      m = p.matcher(s);
+      if (m.matches()) {
+        t = m.group(1);
+        onEvent(new Event(t));
+      } else {
+        m = pText.matcher(s);
+        t = m.matches() ? m.group(1) : s.substring(0, 1);
+        Rime.onText(t);
+        if (!commitText() && !isComposing()) commitText(t);
+        updateComposing();
       }
+      s = s.substring(t.length());
     }
     keyUpNeeded = false;
   }
