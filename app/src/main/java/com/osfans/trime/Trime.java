@@ -628,13 +628,6 @@ public class Trime extends InputMethodService
   private boolean handleAciton(int code, int mask) { //編輯操作
     InputConnection ic = getCurrentInputConnection();
     if (ic == null) return false;
-    if (code == KeyEvent.KEYCODE_CLEAR) {
-      ic.beginBatchEdit();
-      ic.performContextMenuAction(android.R.id.selectAll);
-      ic.performContextMenuAction(android.R.id.cut);
-      ic.endBatchEdit();
-      return true;
-    }
     if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
       // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
