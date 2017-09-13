@@ -1023,11 +1023,10 @@ public class KeyboardView extends View implements View.OnClickListener {
     if (previewPopup.isShowing()) {
       //previewPopup.update(mPopupPreviewX, mPopupPreviewY, popupWidth, popupHeight);
       previewPopup.dismiss(); //禁止窗口動畫
-    } else {
-      previewPopup.setWidth(popupWidth);
-      previewPopup.setHeight(popupHeight);
-      previewPopup.showAtLocation(mPopupParent, Gravity.NO_GRAVITY, mPopupPreviewX, mPopupPreviewY);
     }
+    previewPopup.setWidth(popupWidth);
+    previewPopup.setHeight(popupHeight);
+    previewPopup.showAtLocation(mPopupParent, Gravity.NO_GRAVITY, mPopupPreviewX, mPopupPreviewY);
     mPreviewText.setVisibility(VISIBLE);
   }
 
