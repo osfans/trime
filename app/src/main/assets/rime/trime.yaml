@@ -885,6 +885,10 @@ preset_keyboards:
     - {click: "'", long_click: '"'}
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
+  letter:
+    __include: /preset_keyboards/default
+    ascii_mode: 1
+    lock: false
   qwerty0:
     name: 預設36鍵
     author: "osfans <waxaca@163.com>"
@@ -985,15 +989,6 @@ preset_keyboards:
     - {click: space, width: 40}
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
-  letter:
-    name: 預設40鍵
-    author: "osfans <waxaca@163.com>"
-    ascii_mode: 1
-    width: 10
-    height: 44
-    lock: false #切換程序時記憶鍵盤
-    keys:
-      __include: /preset_keyboards/default/keys
   qwerty:
     name: 預設26鍵
     author: "osfans <waxaca@163.com>"
