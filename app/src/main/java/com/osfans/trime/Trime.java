@@ -927,19 +927,19 @@ public class Trime extends InputMethodService
     String s = text.toString();
     String t;
     Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
-    Pattern pText = Pattern.compile("^([^{}]+).*$");
+    Pattern pText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
     Matcher m;
     while (s.length() > 0) {
-      m = p.matcher(s);
-      if (m.matches()) {
-        t = m.group(1);
-        onEvent(new Event(t));
-      } else {
-        m = pText.matcher(s);
-        t = m.matches() ? m.group(1) : s.substring(0, 1);
+      m = pText.matcher(s);
+      if (m.matches()){
+        t =  m.group(1);
         Rime.onText(t);
         if (!commitText() && !isComposing()) commitText(t);
         updateComposing();
+      } else {
+        m = p.matcher(s);
+        t = m.matches() ? m.group(1) : s.substring(0, 1);
+        onEvent(new Event(t));
       }
       s = s.substring(t.length());
     }
