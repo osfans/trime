@@ -516,7 +516,7 @@ public class Rime {
   }
 
   public static String openccConvert(String line, String name) {
-    if (name != null) {
+    if (name != null && name.length() > 0) {
       File f = new File(Config.get().getResDataDir("opencc"), name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }

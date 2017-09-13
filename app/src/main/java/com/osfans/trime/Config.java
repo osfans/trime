@@ -643,7 +643,7 @@ public class Config {
   }
 
   public boolean getShowWindow() {
-    return mPref.getBoolean("show_window", true);
+    return mPref.getBoolean("show_window", true) && hasKey("window");
   }
 
   public boolean getSoftCursor() {
