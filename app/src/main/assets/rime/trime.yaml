@@ -130,7 +130,7 @@ preset_color_schemes:
     hilited_on_key_text_color: 0x000000 #標明按鍵打開狀態文字
     hilited_text_color: 0x23948e #標明編碼
     key_back_color: 0xeceff1 #按鍵背景
-    key_border_color: 0xeceff1 #按鍵邊框
+    #key_border_color: 0xeceff1 #按鍵邊框
     key_symbol_color: 0x5f6b73 #按鍵符號
     key_text_color: 0x37474f #按鍵文字
     keyboard_back_color: 0xffffff #鍵盤背景
@@ -141,7 +141,7 @@ preset_color_schemes:
     on_key_text_color: 0x37474f #按鍵打開狀態文字
     preview_back_color: 0x55bfbfbf #按鍵提示背景
     preview_text_color: 0x23948e #按鍵提示文字
-    shadow_color: 0x000000 #陰影
+    shadow_color: 0x000000 #按鍵文字陰影
     text_color: 0x5a676e #編碼
     text_back_color: 0xcce4e7e9 #編碼區背景
 
