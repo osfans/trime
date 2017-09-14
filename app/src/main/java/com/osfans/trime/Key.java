@@ -473,6 +473,10 @@ public class Key {
     return events[KeyEventType.LONG_CLICK.ordinal()];
   }
 
+  public boolean hasEvent(int i) {
+    return events[i] != null;
+  }
+
   public Event getEvent(int i) {
     Event e = null;
     if (i > 0 && i <= EVENT_NUM) e = events[i];

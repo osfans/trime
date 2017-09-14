@@ -901,6 +901,8 @@ public class KeyboardView extends View implements View.OnClickListener {
       final Key key = mKeys[index];
       if (key.isShift() && !key.sendBindings(type)) {
         setShifted(key.isShiftLock(), !isShifted());
+      } else if (key.getClick().isRepeatable() && !key.hasEvent(type)) {
+        mRepeatKeyIndex = NOT_A_KEY;
       } else {
         int code = key.getCode(type);
         //TextEntryState.keyPressedAt(key, x, y);
