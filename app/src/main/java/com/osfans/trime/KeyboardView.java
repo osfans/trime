@@ -332,7 +332,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     mPreviewText.setTypeface(config.getFont("preview_font"));
 
     REPEAT_INTERVAL = config.getRepeatInterval();
-    REPEAT_START_DELAY = config.getLongTimeout();
+    REPEAT_START_DELAY = config.getLongTimeout() + 1;
     LONGPRESS_TIMEOUT = config.getLongTimeout();
     MULTITAP_INTERVAL = config.getLongTimeout();
     invalidateAllKeys();
@@ -901,9 +901,11 @@ public class KeyboardView extends View implements View.OnClickListener {
       final Key key = mKeys[index];
       if (key.isShift() && !key.sendBindings(type)) {
         setShifted(key.isShiftLock(), !isShifted());
-      } else if (key.getClick().isRepeatable() && !key.hasEvent(type)) {
-        mRepeatKeyIndex = NOT_A_KEY;
       } else {
+        if (key.getClick().isRepeatable()) {
+          if (type > 0) mAbortKey = true;
+          if (!key.hasEvent(type)) return;
+        }
         int code = key.getCode(type);
         //TextEntryState.keyPressedAt(key, x, y);
         int[] codes = new int[MAX_NEARBY_KEYS];
@@ -1217,8 +1219,9 @@ public class KeyboardView extends View implements View.OnClickListener {
       return true;
     } else {
       Key key = popupKey;
-      if (key.getClick().isRepeatable()) return false;
       if (key.getLongClick() != null) {
+        removeMessages();
+        mAbortKey = true;
         Event e = key.getLongClick();
         mKeyboardActionListener.onEvent(e);
         releaseKey(e.getCode());
@@ -1365,7 +1368,6 @@ public class KeyboardView extends View implements View.OnClickListener {
           mRepeatKeyIndex = mCurrentKey;
           Message msg = mHandler.obtainMessage(MSG_REPEAT);
           mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);
-          repeatKey();
           // Delivering the key could have caused an abort
           if (mAbortKey) {
             mRepeatKeyIndex = NOT_A_KEY;
@@ -1435,6 +1437,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         showPreview(NOT_A_KEY);
         Arrays.fill(mKeyIndices, NOT_A_KEY);
         // If we're not on a repeating key (which sends on a DOWN event)
+        if (mRepeatKeyIndex != NOT_A_KEY && !mAbortKey) repeatKey();
         if (mRepeatKeyIndex == NOT_A_KEY && !mMiniKeyboardOnScreen && !mAbortKey) {
           detectAndSendKey(
               mCurrentKey,

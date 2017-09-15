@@ -1032,7 +1032,7 @@ preset_keyboards:
     - {click: 'b', long_click: Time, swipe_up: Date}
     - {click: 'n', long_click: '"'}
     - {click: 'm', long_click: "'"}
-    - {click: BackSpace, width: 15}
+    - {click: BackSpace, swipe_left: Escape, width: 15}
     - {click: Mode_switch, long_click: Menu, width: 15}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: ',', long_click: '<'}
