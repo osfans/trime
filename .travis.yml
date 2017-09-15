@@ -1,7 +1,8 @@
 language: android
 before_install:
   - if [ ! -d ./android-ndk-r10e ];then wget http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin ; sudo chmod a+x android-ndk-r10e-linux-x86_64.bin ; ./android-ndk-r10e-linux-x86_64.bin > /dev/null ; fi
-  - ./android-configure ./android-ndk-r10e
+  - export ANDROID_NDK=/opt/DevTools/android-ndk-r10e
+  - export PATH=$ANDROID_NDK:$PATH
 script:
   - git fetch origin --tags
   - make debug
