@@ -1002,6 +1002,8 @@ preset_keyboards:
     key_text_offset_y: 0
     key_hint_offset_x: 0
     key_hint_offset_y: 0
+    key_press_offset_x: 2
+    key_press_offset_y: 2
     keys:
     - {click: 'q', long_click: '!', swipe_up: 1}
     - {click: 'w', long_click: '@', swipe_up: 2}

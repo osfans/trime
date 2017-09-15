@@ -83,6 +83,8 @@ public class Key {
   private int key_symbol_offset_y;
   private int key_hint_offset_x;
   private int key_hint_offset_y;
+  private int key_press_offset_x;
+  private int key_press_offset_y;
   private int x;
   private int y;
   private boolean pressed;
@@ -272,7 +274,7 @@ public class Key {
   }
 
   public int getKey_text_offset_x() {
-    return key_text_offset_x;
+    return key_text_offset_x + getKey_offset_x();
   }
 
   public void setKey_text_offset_x(int key_text_offset_x) {
@@ -280,7 +282,7 @@ public class Key {
   }
 
   public int getKey_text_offset_y() {
-    return key_text_offset_y;
+    return key_text_offset_y + getKey_offset_y();
   }
 
   public void setKey_text_offset_y(int key_text_offset_y) {
@@ -288,7 +290,7 @@ public class Key {
   }
 
   public int getKey_symbol_offset_x() {
-    return key_symbol_offset_x;
+    return key_symbol_offset_x + getKey_offset_x();
   }
 
   public void setKey_symbol_offset_x(int key_symbol_offset_x) {
@@ -296,7 +298,7 @@ public class Key {
   }
 
   public int getKey_symbol_offset_y() {
-    return key_symbol_offset_y;
+    return key_symbol_offset_y + getKey_offset_y();
   }
 
   public void setKey_symbol_offset_y(int key_symbol_offset_y) {
@@ -304,7 +306,7 @@ public class Key {
   }
 
   public int getKey_hint_offset_x() {
-    return key_hint_offset_x;
+    return key_hint_offset_x + getKey_offset_x();
   }
 
   public void setKey_hint_offset_x(int key_hint_offset_x) {
@@ -312,11 +314,27 @@ public class Key {
   }
 
   public int getKey_hint_offset_y() {
-    return key_hint_offset_y;
+    return key_hint_offset_y + getKey_offset_y();
   }
 
   public void setKey_hint_offset_y(int key_hint_offset_y) {
     this.key_hint_offset_y = key_hint_offset_y;
+  }
+
+  public void setKey_press_offset_x(int key_press_offset_x) {
+    this.key_press_offset_x = key_press_offset_x;
+  }
+
+  public void setKey_press_offset_y(int key_press_offset_y) {
+    this.key_press_offset_y = key_press_offset_y;
+  }
+
+  public int getKey_offset_x() {
+    return pressed ? key_press_offset_x : 0;
+  }
+
+  public int getKey_offset_y() {
+    return pressed ? key_press_offset_y : 0;
   }
 
   private boolean isNormal(int[] drawableState) {

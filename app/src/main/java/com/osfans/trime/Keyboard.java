@@ -188,13 +188,17 @@ public class Keyboard {
         key_symbol_offset_x,
         key_symbol_offset_y,
         key_hint_offset_x,
-        key_hint_offset_y;
+        key_hint_offset_y,
+        key_press_offset_x,
+        key_press_offset_y;
     key_text_offset_x = Config.getPixel(m, "key_text_offset_x", 0);
     key_text_offset_y = Config.getPixel(m, "key_text_offset_y", 0);
     key_symbol_offset_x = Config.getPixel(m, "key_symbol_offset_x", 0);
     key_symbol_offset_y = Config.getPixel(m, "key_symbol_offset_y", 0);
     key_hint_offset_x = Config.getPixel(m, "key_hint_offset_x", 0);
     key_hint_offset_y = Config.getPixel(m, "key_hint_offset_y", 0);
+    key_press_offset_x = Config.getInt(m, "key_press_offset_x", 0);
+    key_press_offset_y = Config.getInt(m, "key_press_offset_y", 0);
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String, Object> mk : lm) {
@@ -225,6 +229,8 @@ public class Keyboard {
       key.setKey_symbol_offset_y(Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y));
       key.setKey_hint_offset_x(Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x));
       key.setKey_hint_offset_y(Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y));
+      key.setKey_press_offset_x(Config.getInt(mk, "key_press_offset_x", key_press_offset_x));
+      key.setKey_press_offset_y(Config.getInt(mk, "key_press_offset_y", key_press_offset_y));
 
       key.setX(x);
       key.setY(y);
