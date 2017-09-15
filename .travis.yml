@@ -1,7 +1,7 @@
 language: android
 
 before_install:
-  RUN wget -q http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && \\
+  wget -q http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && \\
      chmod a+x android-ndk-r10e-linux-x86_64.bin                                && \\
     ./android-ndk-r10e-linux-x86_64.bin -o/usr/local                           && \\
     rm android-ndk-r10e-linux-x86_64.bin
