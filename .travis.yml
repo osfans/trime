@@ -1,16 +1,9 @@
 language: android
-
 before_install:
-  wget -q http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && \\
-     chmod a+x android-ndk-r10e-linux-x86_64.bin                                && \\
-    ./android-ndk-r10e-linux-x86_64.bin -o/usr/local                           && \\
-    rm android-ndk-r10e-linux-x86_64.bin
-
-
-  NDK_HOME /usr/local/android-ndk-r10e
-  PATH $PATH:$NDK_HOME
-
-
+  - wget http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin
+  - sudo chmod a+x android-ndk-r10e-linux-x86_64.bin
+  - ./android-ndk-r10e-linux-x86_64.bin > /dev/null
+  - ./android-configure ./android-ndk-r10e
 script:
   - git fetch origin --tags
   - make debug
@@ -18,11 +11,14 @@ git:
   submodules: false
 jdk:
     - oraclejdk8
-
+licenses:
+    - 'android-sdk-preview-license-.+'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
 android:
   components:
     - tools # to get the new `repository-11.xml`
     - tools # to install Android SDK tools 25.1.x (x = 6 right now)
     - platform-tools
     - build-tools-25.0.3
-    - android-25
+- android-25
