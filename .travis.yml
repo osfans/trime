@@ -22,4 +22,4 @@ android:
     - tools # to install Android SDK tools 25.1.x (x = 6 right now)
     - platform-tools
     - build-tools-25.0.3
-- android-25
+    - android-25 
