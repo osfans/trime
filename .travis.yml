@@ -7,8 +7,8 @@ before_install:
     rm android-ndk-r10e-linux-x86_64.bin
 
 
-  ENV NDK_HOME /usr/local/android-ndk-r10e
-  ENV PATH $PATH:$NDK_HOME
+  NDK_HOME /usr/local/android-ndk-r10e
+  PATH $PATH:$NDK_HOME
 
 
 script:
