@@ -53,6 +53,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.osfans.trime.deploy" />
+                <action android:name="com.osfans.trime.sync" />
             </intent-filter>
         </receiver>
     </application>

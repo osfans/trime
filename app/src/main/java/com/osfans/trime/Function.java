@@ -166,6 +166,9 @@ class Function {
       case "run":
         startIntent(context, option); //啓動程序
         break;
+      case "broadcast":
+        context.sendBroadcast(new Intent(option)); //廣播
+        break;
       default:
         startIntent(context, command, option); //其他intent
         break;

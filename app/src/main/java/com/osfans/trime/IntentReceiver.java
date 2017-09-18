@@ -27,6 +27,7 @@ import android.util.Log;
 public class IntentReceiver extends BroadcastReceiver {
   private static final String TAG = "IntentReceiver";
   private static final String COMMAND_DEPLOY = "com.osfans.trime.deploy";
+  private static final String COMMAND_SYNC = "com.osfans.trime.sync";
 
   @Override
   public void onReceive(Context ctx, Intent intent) {
@@ -41,6 +42,10 @@ public class IntentReceiver extends BroadcastReceiver {
     switch (command) {
       case COMMAND_DEPLOY:
         Function.deploy();
+        System.exit(0);
+        break;
+      case COMMAND_SYNC:
+        Function.sync();
         break;
       default:
         if (command.contentEquals(Intent.ACTION_SHUTDOWN)) Rime.destroy();
