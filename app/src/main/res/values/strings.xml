@@ -58,7 +58,7 @@
     <string name="pref_colors">Colors</string>
     <string name="pref_colors_summary">Select Desired Color for Keyboard</string>
     <string name="pref_reset">Reset</string>
-    <string name="pref_reset_summary">Use Default Settings to Replace the contents in /sdcard/rime</string>
+    <string name="pref_reset_summary">Use Default Settings to Replace the contents in shared directory</string>
 
     <string name="pref_keyboard">Keyboard</string>
     <string name="key_sound">Sound on keypress</string>
@@ -87,7 +87,7 @@
     <string name="pref_maintenance">Maintain</string>
     <string name="pref_maintenance_summary">Automatically Maintain Input Schemas</string>
     <string name="pref_deploy_opencc">Deploy OpenCC</string>
-    <string name="pref_deploy_opencc_summary">Must Deploy after Modifying txt files in/sdcard/rime/opencc</string>
+    <string name="pref_deploy_opencc_summary">Must Deploy after Modifying txt files in opencc of shared directory</string>
     <string name="deploy_success">Job Done!</string>
     <string name="deploy_failure">Job Failed!</string>
     <string name="sync_success">Synchronized</string>
@@ -98,7 +98,7 @@
     <string name="pref_deploy">Deploy</string>
     <string name="pref_deploy_summary">Gotta Deploy after Modifying Settings </string>
     <string name="pref_sync">Synchronize</string>
-    <string name="pref_sync_summary">Synchronize User Dictionary in /sdcard/rime/sync</string>
+    <string name="pref_sync_summary">Synchronize User Dictionary to sync directory</string>
 
     <string name="reset_success">Reset Succeeded!</string>
     <string name="reset_failure">Reset Failed!</string>
@@ -109,7 +109,7 @@
     <string name="schemas_progress">Loading schemas…</string>
 
     <string name="set_ime">Preferences</string>
-    <string name="no_schemas">Put essay.txt, default.yaml, symbols.yaml and Schemas into /sdcard/rime!</string>
+    <string name="no_schemas">Put default.yaml and schema files into user directory!</string>
     <string name="other_ime">Other IMEs</string>
 
     <string name="pref_ui">Night Mode</string>
@@ -118,6 +118,6 @@
     <string name="pref_notification_icon">Show icon in notification bar</string>
     <string name="pref_destroy_on_quit">Free memory on quit</string>
 
-    <string name="shared_data_dir">Shared data directory</string>
-    <string name="user_data_dir">User data directory</string>
+    <string name="shared_data_dir">Shared directory</string>
+    <string name="user_data_dir">User directory</string>
 </resources>

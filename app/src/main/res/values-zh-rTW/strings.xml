@@ -56,7 +56,7 @@
     <string name="pref_colors">配色</string>
     <string name="pref_colors_summary">選取想要的鍵盤配色</string>
     <string name="pref_reset">回廠</string>
-    <string name="pref_reset_summary">使用預設設定覆蓋/sdcard/rime下同名檔案</string>
+    <string name="pref_reset_summary">使用預設設定覆蓋共享資料夾下同名檔案</string>
 
     <string name="pref_keyboard">鍵盤</string>
     <string name="key_sound">按鍵聲音</string>
@@ -85,7 +85,7 @@
     <string name="pref_maintenance">維護</string>
     <string name="pref_maintenance_summary">自動維護輸入法方案</string>
     <string name="pref_deploy_opencc">部署OpenCC</string>
-    <string name="pref_deploy_opencc_summary">修改/sdcard/rime/opencc下的txt後需再次部署</string>
+    <string name="pref_deploy_opencc_summary">修改共享資料夾opencc下的txt後需再次部署</string>
     <string name="deploy_success">部署成功</string>
     <string name="deploy_failure">部署失敗</string>
     <string name="sync_success">同步成功</string>
@@ -96,7 +96,7 @@
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
     <string name="pref_sync">同步</string>
-    <string name="pref_sync_summary">與/sdcard/rime/sync資料夾同步使用者字典</string>
+    <string name="pref_sync_summary">同步使用者字典至sync資料夾</string>
 
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>
@@ -107,7 +107,7 @@
     <string name="schemas_progress">正在加載方案…</string>
 
     <string name="set_ime">設定</string>
-    <string name="no_schemas">請在/sdcard/rime中放入essay.txt、default.yaml、symbols.yaml、輸入法方案！</string>
+    <string name="no_schemas">請在使用者資料夾中放入default.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
 
     <string name="pref_ui">夜間</string>
