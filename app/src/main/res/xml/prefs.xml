@@ -131,7 +131,7 @@
         </Preference>
         <Preference android:key="pref_donate" android:title="@string/pref_donate" android:summary="@string/pref_donate_summary">
             <intent android:action="android.intent.action.VIEW"
-            android:data="https://qr.alipay.com/a6x09868encanwom40txs3c" />
+            android:data="https://qr.alipay.com/tsx03439zwna78hloqtm6bc" />
         </Preference>
         <Preference android:key="pref_credits" android:title="@string/pref_credits">
             <intent android:action="android.intent.action.VIEW"
