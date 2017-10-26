@@ -18,6 +18,7 @@ buildscript {
 
     repositories {
         jcenter()
+        google()
     }
 
     /**
@@ -27,7 +28,7 @@ buildscript {
      */
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
 
