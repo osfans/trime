@@ -28,7 +28,6 @@ build/
 /*/build/
 app/.externalNativeBuild/
 app/src/main/libs/
-app/src/main/jni/include/
 
 # Local configuration file (sdk path, etc)
 local.properties

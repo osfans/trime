@@ -19,7 +19,7 @@ include_directories(
   libiconv/include
   leveldb/include
   snappy
-  include
+  ${CMAKE_BINARY_DIR}/include
   )
 
 # flags
@@ -95,7 +95,7 @@ set(SNAPPY_MINOR 1)
 set(SNAPPY_PATCHLEVEL 7)
 configure_file(
   "${CMAKE_CURRENT_LIST_DIR}/snappy/snappy-stubs-public.h.in"
-  "${CMAKE_CURRENT_LIST_DIR}/include/snappy-stubs-public.h"
+  "${CMAKE_BINARY_DIR}/include/snappy-stubs-public.h"
   )
 
 # marisa
@@ -151,7 +151,7 @@ foreach(head ${BOOST_HEADERS})
   string(REGEX REPLACE "^.*include/boost/" "" headout ${head})
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/${head}
-    ${CMAKE_CURRENT_LIST_DIR}/include/boost/${headout} COPYONLY)
+    ${CMAKE_BINARY_DIR}/include/boost/${headout} COPYONLY)
 endforeach(head)
 
 # leveldb
@@ -228,7 +228,7 @@ set(GLOG_SOURCES miniglog/miniglog/logging.cc)
 add_library(miniglog-static STATIC ${GLOG_SOURCES})
 configure_file(
   "${CMAKE_CURRENT_LIST_DIR}/miniglog/miniglog/logging.h"
-  "${CMAKE_CURRENT_LIST_DIR}/include/glog/logging.h"
+  "${CMAKE_BINARY_DIR}/include/glog/logging.h"
   COPYONLY)
 
 # opencc
@@ -301,7 +301,7 @@ set(
 foreach(head ${LIBOPENCC_HEADERS})
   configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/OpenCC/src/${head}"
-    "${CMAKE_CURRENT_LIST_DIR}/include/opencc/${head}"
+    "${CMAKE_BINARY_DIR}/include/opencc/${head}"
     COPYONLY)
 endforeach(head)
 
