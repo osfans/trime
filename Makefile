@@ -9,16 +9,15 @@ all: release
 clean:
 	gradle clean
 
-debug:
-	gradle assembleDebug
-
 build:
 	gradle build
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
 release: opencc-data $(TRANSLATE)
-release:
 	gradle assembleRelease
+
+debug:
+	./gradlew assembleDebug
 
 install: release
 	gradle installRelease
