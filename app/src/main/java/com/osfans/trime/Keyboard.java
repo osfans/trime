@@ -162,7 +162,7 @@ public class Keyboard {
     mAsciiMode = Config.getInt(m, "ascii_mode", 1);
     if (mAsciiMode == 0) mAsciiKeyboard = Config.getString(m, "ascii_keyboard");
     mLock = Config.getBoolean(m, "lock", false);
-    int columns = Config.getInt(m, "columns", 20);
+    int columns = Config.getInt(m, "columns", 30);
     int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
     int height = Config.getPixel(m, "height", 0);

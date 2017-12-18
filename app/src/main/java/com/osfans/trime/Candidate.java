@@ -38,7 +38,7 @@ public class Candidate extends View {
     void onPickCandidate(int index);
   }
 
-  private static final int MAX_CANDIDATE_COUNT = 20;
+  private static final int MAX_CANDIDATE_COUNT = 30;
   private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
   private CandidateListener listener;
@@ -55,7 +55,7 @@ public class Candidate extends View {
   private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
   private boolean show_comment = true, comment_on_top, candidate_use_cursor;
 
-  private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT];
+  private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset() {
     Config config = Config.get();

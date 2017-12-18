@@ -995,6 +995,7 @@ preset_keyboards:
     name: 預設26鍵
     author: "osfans <waxaca@163.com>"
     ascii_mode: 0
+    columns: 10 #鍵盤列數，超過則自動換行，默認30列
     width: 10
     height: 55
     lock: true
