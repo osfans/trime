@@ -12,5 +12,5 @@ install:
     - echo y | sdkmanager 'ndk-bundle'
     - echo y | sdkmanager 'cmake;3.6.4111459'
     - echo y | sdkmanager 'platform-tools'
-    - echo y | sdkmanager 'build-tools;28.0.0-rc1'
-    - echo y | sdkmanager 'platforms;android-P'
+    - echo y | sdkmanager 'build-tools;27.0.3'
+    - echo y | sdkmanager 'platforms;android-27'
