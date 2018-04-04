@@ -5,8 +5,8 @@ def tag = tagCmd.execute().text.trim()
 def date = new Date().format('yyyyMMdd').toInteger()
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 'android-P'
+    buildToolsVersion "28.0.0-rc1"
 
     defaultConfig {
         applicationId "com.osfans.trime"
