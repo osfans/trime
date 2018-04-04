@@ -221,6 +221,7 @@ endif()
 #add_subdirectory(yaml-cpp)
 file(GLOB YAML-CPP_SOURCES yaml-cpp/src/*.cpp)
 add_library(yaml-cpp-static STATIC ${YAML-CPP_SOURCES})
+add_definitions(-DYAML_CPP_NO_CONTRIB)
 
 # miniglog
 #add_subdirectory(miniglog)
@@ -343,7 +344,7 @@ target_link_libraries(rime
   )
 target_compile_definitions(rime PRIVATE
   RIME_BUILD_SHARED_LIBS
-  RIME_VERSION="1.2.9"
+  RIME_VERSION="1.3.1"
   RIME_ENABLE_LOGGING
   RIME_EXPORTS
 )
