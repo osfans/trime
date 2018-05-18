@@ -26,7 +26,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -701,10 +700,12 @@ public class KeyboardView extends View implements View.OnClickListener {
       invalidateAllKeys();
       mKeyboardChanged = false;
     }
-    final Canvas canvas = mCanvas;
-    canvas.clipRect(mDirtyRect, Op.REPLACE);
 
     if (mKeyboard == null) return;
+
+    mCanvas.save();
+    final Canvas canvas = mCanvas;
+    canvas.clipRect(mDirtyRect);
 
     final Paint paint = mPaint;
     Drawable keyBackground;
@@ -831,7 +832,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       paint.setColor(0xFF00FF00);
       canvas.drawCircle((mStartX + mLastX) / 2, (mStartY + mLastY) / 2, 2, paint);
     }
-
+    mCanvas.restore();
     mDrawPending = false;
     mDirtyRect.setEmpty();
   }
