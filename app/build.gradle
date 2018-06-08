@@ -5,13 +5,13 @@ def tag = tagCmd.execute().text.trim()
 def date = new Date().format('yyyyMMdd').toInteger()
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.0"
 
     defaultConfig {
         applicationId "com.osfans.trime"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode date
         versionName "$tag-$date"
         setProperty("archivesBaseName", "trime-$date")
