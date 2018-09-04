@@ -21,7 +21,7 @@
 
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
     <!-- Input Method Platform Tittle  -->
-    <string name="ime_name">TRIME</string>
+    <string name="ime_name">Trime</string>
 
     <!-- Preference settings -->
     <string name="pref_help">Help</string>
