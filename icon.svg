@@ -42,8 +42,8 @@
          result="blur"
          id="feGaussianBlur3377" />
       <feOffset
-         dx="6"
-         dy="6"
+         dx="0"
+         dy="0"
          result="offset"
          id="feOffset3379" />
       <feComposite
@@ -104,7 +104,7 @@
        inkscape:export-filename="res/drawable-xxhdpi/icon.png"
        inkscape:export-xdpi="24"
        inkscape:export-ydpi="24"
-       ry="15" />
+       ry="72" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:180px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter3371)"
