@@ -335,8 +335,14 @@ public class Rime {
     return false;
   }
 
-  public static boolean onText(CharSequence text) {
+  public static boolean isValidText(CharSequence text) {
     if (text == null || text.length() == 0) return false;
+    int ch = text.toString().codePointAt(0);
+    return ch >= 0x20 && ch < 0x80;
+  }
+
+  public static boolean onText(CharSequence text) {
+    if (!isValidText(text)) return false;
     boolean b = simulate_key_sequence(text.toString().replace("{}", "{braceleft}{braceright}"));
     Log.info("b=" + b + ",input=" + text);
     getContexts();
