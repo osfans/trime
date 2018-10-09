@@ -131,8 +131,10 @@ recognizer:
     url: "^(www[.]|https?:|ftp:|mailto:).*$|^[a-z]+[.].+$"
 
 ascii_composer:
+  good_old_caps_lock: true
   switch_key:
     Shift_L: inline_ascii
     Shift_R: commit_text
+    Caps_Lock: commit_text
     Control_L: noop
     Control_R: noop
