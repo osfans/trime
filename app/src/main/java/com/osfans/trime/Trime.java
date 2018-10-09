@@ -929,6 +929,10 @@ public class Trime extends InputMethodService
     Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
     Pattern pText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
     Matcher m;
+    if (isComposing()) {
+      Rime.commitComposition();
+      commitText();
+    }
     while (s.length() > 0) {
       m = pText.matcher(s);
       if (m.matches()){
