@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.osfans.trime"
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 28
         versionCode date
         versionName "$tag-$date"
