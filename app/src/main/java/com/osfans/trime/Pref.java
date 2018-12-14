@@ -195,6 +195,11 @@ public class Pref extends PreferenceActivity
           },
           0);
     }
+    if (!Settings.canDrawOverlays(this)) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+        //startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
+        startActivity(intent);
+    }
   }
 
   private void deployOpencc() {
