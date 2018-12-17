@@ -77,7 +77,7 @@ class SchemaDialog extends AsyncTask {
       Window window = mProgressDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();
       lp.token = mToken;
-      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      lp.type = Trime.getDialogType();
       window.setAttributes(lp);
       window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
@@ -174,7 +174,7 @@ class SchemaDialog extends AsyncTask {
       Window window = mDialog.getWindow();
       WindowManager.LayoutParams lp = window.getAttributes();
       lp.token = mToken;
-      lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+      lp.type = Trime.getDialogType();
       window.setAttributes(lp);
       window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }

@@ -1054,15 +1054,19 @@ public class Trime extends InputMethodService
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤打字時顯示候選欄
   }
 
+  public static int getDialogType() {
+    int dialogType = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+    if (VERSION.SDK_INT >= VERSION_CODES.O) {
+      dialogType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; //Android P中AlertDialog要顯示在最上層
+    }
+    return dialogType;
+  }
+
   private void showDialog(AlertDialog dialog) {
     Window window = dialog.getWindow();
     WindowManager.LayoutParams lp = window.getAttributes();
     if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
-    if (VERSION.SDK_INT >= VERSION_CODES.O) {
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; //Android P中AlertDialog要顯示在最上層
-    } else {
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-    }
+    lp.type = getDialogType();
     window.setAttributes(lp);
     window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     dialog.show();
