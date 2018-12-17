@@ -101,12 +101,25 @@ public class Trime extends InputMethodService
   }
 
   public void updateWindow(int offsetX, int offsetY) {
-    int location[] = new int[2];
     winPos = WindowsPositionType.DRAG;
-    mCandidateContainer.getLocationOnScreen(location);
     winX = offsetX;
-    winY = offsetY - location[1];
+    winY = offsetY;
     mFloatingWindow.update(winX, winY, -1, -1, true);
+  }
+
+  public static int getStatusBarHeight() {
+    int result = 0;
+    int resourceId = self.getResources().getIdentifier("status_bar_height", "dimen", "android");
+    if (resourceId > 0) {
+      result = self.getResources().getDimensionPixelSize(resourceId);
+    }
+    return result;
+  }
+
+  public static int[] getLocationOnScreen(View v) {
+    final int[] position = new int[2];
+    v.getLocationOnScreen(position);
+    return position;
   }
 
   private class PopupTimer extends Handler implements Runnable {
@@ -132,22 +145,20 @@ public class Trime extends InputMethodService
     public void run() {
       if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
       if (!mShowWindow) return;
-      int x, y;
+      int x = 0, y = 0;
+      mParentLocation = getLocationOnScreen(mCandidateContainer);
       if (isWinFixed() || !cursorUpdated) {
         //setCandidatesViewShown(true);
         switch (winPos) {
           case TOP_RIGHT:
-            mCandidateContainer.getLocationOnScreen(mParentLocation);
             x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
-            y = -mParentLocation[1] + candSpacing;
+            y = candSpacing;
             break;
           case TOP_LEFT:
-            mCandidateContainer.getLocationOnScreen(mParentLocation);
             x = 0;
-            y = -mParentLocation[1] + candSpacing;
+            y = candSpacing;
             break;
           case BOTTOM_RIGHT:
-            mCandidateContainer.getLocationInWindow(mParentLocation);
             x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
             y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
             break;
@@ -158,30 +169,32 @@ public class Trime extends InputMethodService
           case FIXED:
           case BOTTOM_LEFT:
           default:
-            mCandidateContainer.getLocationInWindow(mParentLocation);
             x = mParentLocation[0];
             y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
             break;
         }
       } else {
         //setCandidatesViewShown(false);
-        mCandidateContainer.getLocationOnScreen(mParentLocation);
         x = (int) mPopupRectF.left;
+        if (winPos == WindowsPositionType.RIGHT
+            || winPos == WindowsPositionType.RIGHT_UP) {
+          x = (int) mPopupRectF.right;
+        }
         if (x > mCandidateContainer.getWidth() - mFloatingWindow.getWidth()) {
           x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
-        } else if (x < 0) x = 0;
-        y = (int) mPopupRectF.bottom - mParentLocation[1] + candSpacing;
-        if (y + mFloatingWindow.getHeight() > 0
-            || winPos == WindowsPositionType.LEFT_UP
+        }
+        y = (int) mPopupRectF.bottom + candSpacing;
+        if (winPos == WindowsPositionType.LEFT_UP
             || winPos == WindowsPositionType.RIGHT_UP) {
           y =
               (int) mPopupRectF.top
-                  - mParentLocation[1]
                   - mFloatingWindow.getHeight()
                   - candSpacing;
-          if (y < -mParentLocation[1]) y = -mParentLocation[1];
         }
       }
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+      y -= getStatusBarHeight(); //不包含狀態欄
       if (!mFloatingWindow.isShowing()) {
         mFloatingWindow.showAtLocation(mCandidateContainer, Gravity.START | Gravity.TOP, x, y);
       } else {
@@ -459,10 +472,10 @@ public class Trime extends InputMethodService
     mCompositionContainer =
         (LinearLayout) inflater.inflate(R.layout.composition_container, (ViewGroup) null);
     hideComposition();
-    mFloatingWindow = new PopupWindow(this);
+    mFloatingWindow = new PopupWindow(mCompositionContainer);
     mFloatingWindow.setClippingEnabled(false);
     mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-    mFloatingWindow.setContentView(mCompositionContainer);
+    mFloatingWindow.setWindowLayoutType(getDialogType());
     mComposition = (Composition) mCompositionContainer.getChildAt(0);
 
     mCandidateContainer =

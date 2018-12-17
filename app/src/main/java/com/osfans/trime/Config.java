@@ -608,10 +608,7 @@ public class Config {
   }
 
   public WindowsPositionType getWinPos() {
-    WindowsPositionType wp = WindowsPositionType.fromString(getString("layout/position"));
-    if (getInlinePreedit() == InlineModeType.INLINE_PREVIEW && wp == WindowsPositionType.RIGHT)
-      wp = WindowsPositionType.LEFT;
-    return wp;
+    return WindowsPositionType.fromString(getString("layout/position"));
   }
 
   public boolean isShowStatusIcon() {

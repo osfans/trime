@@ -171,8 +171,7 @@ public class Composition extends TextView {
         if (action == MotionEvent.ACTION_DOWN) {
           if (first_move || movable.contentEquals("once")) {
             first_move = false;
-            int location[] = new int[2];
-            getLocationOnScreen(location);
+            int location[] = Trime.getLocationOnScreen(this);
             mCurrentX = location[0];
             mCurrentY = location[1];
           }
