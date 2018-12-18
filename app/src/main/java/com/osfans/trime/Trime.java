@@ -171,7 +171,7 @@ public class Trime extends InputMethodService
           case FIXED:
           case BOTTOM_LEFT:
           default:
-            x = mParentLocation[0];
+            x = 0;
             y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
             break;
         }
@@ -196,8 +196,8 @@ public class Trime extends InputMethodService
         x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
       }
       if (y < 0) y = 0;
-      if (y > mParentLocation[1] - mFloatingWindow.getHeight()) {
-        y = mParentLocation[1] - mFloatingWindow.getHeight();
+      if (y > mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing) { //candSpacing爲負時，可覆蓋部分鍵盤
+        y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
       }
       y -= getStatusBarHeight(); //不包含狀態欄
       if (!mFloatingWindow.isShowing()) {
