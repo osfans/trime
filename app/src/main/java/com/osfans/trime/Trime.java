@@ -182,9 +182,6 @@ public class Trime extends InputMethodService
             || winPos == WindowsPositionType.RIGHT_UP) {
           x = (int) mPopupRectF.right;
         }
-        if (x > mCandidateContainer.getWidth() - mFloatingWindow.getWidth()) {
-          x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
-        }
         y = (int) mPopupRectF.bottom + candSpacing;
         if (winPos == WindowsPositionType.LEFT_UP
             || winPos == WindowsPositionType.RIGHT_UP) {
@@ -195,7 +192,13 @@ public class Trime extends InputMethodService
         }
       }
       if (x < 0) x = 0;
+      if (x > mCandidateContainer.getWidth() - mFloatingWindow.getWidth()) {
+        x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
+      }
       if (y < 0) y = 0;
+      if (y > mParentLocation[1] - mFloatingWindow.getHeight()) {
+        y = mParentLocation[1] - mFloatingWindow.getHeight();
+      }
       y -= getStatusBarHeight(); //不包含狀態欄
       if (!mFloatingWindow.isShowing()) {
         mFloatingWindow.showAtLocation(mCandidateContainer, Gravity.START | Gravity.TOP, x, y);
