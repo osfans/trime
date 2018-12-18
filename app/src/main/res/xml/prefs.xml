@@ -111,6 +111,8 @@
 
     <PreferenceScreen android:key="pref_about" android:order="64" android:title="@string/pref_about">
         <Preference android:key="pref_changelog" android:title="@string/pref_changelog">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/osfans/trime" />
         </Preference>
         <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver">
             <intent android:action="android.intent.action.VIEW"

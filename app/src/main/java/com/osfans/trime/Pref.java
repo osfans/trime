@@ -48,6 +48,24 @@ public class Pref extends PreferenceActivity
   private ProgressDialog mProgressDialog;
   private Preference mKeySoundVolumePref, mKeyVibrateDurationPref;
 
+  private String getCommit(String version) {
+    String commit;
+    if (version.contains("-g")) {
+      commit = version.replaceAll("^(.*-g)([0-9a-f]+)(.*)$", "$2");
+    } else {
+      commit = version.replaceAll("^([^-]*)(-.*)$", "$1");
+    }
+    return commit;
+  }
+
+  private void setVersion(Preference pref, String version) {
+    String commit = getCommit(version);
+    pref.setSummary(version);
+    Intent intent = pref.getIntent();
+    intent.setData(Uri.withAppendedPath(intent.getData(), "commits/"+commit));
+    pref.setIntent(intent);
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) requestPermission();
@@ -61,17 +79,21 @@ public class Pref extends PreferenceActivity
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.prefs);
 
-    Preference pref = findPreference("pref_librime_ver");
-    pref.setSummary(Rime.get_librime_version());
-    pref = findPreference("pref_opencc_ver");
-    pref.setSummary(Rime.get_opencc_version());
+    Preference pref;
+    String version;
+
     pref = findPreference("pref_changelog");
-    String version = Function.getVersion(this);
-    pref.setSummary(version);
-    String commit = version.replaceAll("^(.*-g)(.+)(-.*)$", "$2");
-    pref.setIntent(
-        new Intent(
-            Intent.ACTION_VIEW, Uri.parse("https://github.com/osfans/trime/commits/" + commit)));
+    version = Function.getVersion(this);
+    setVersion(pref, version);
+
+    pref = findPreference("pref_librime_ver");
+    version = Rime.get_librime_version();
+    setVersion(pref, version);
+
+    pref = findPreference("pref_opencc_ver");
+    version = Rime.get_opencc_version();
+    setVersion(pref, version);
+
     pref = findPreference("pref_enable");
     if (isEnabled()) getPreferenceScreen().removePreference(pref);
     mProgressDialog = new ProgressDialog(this);
