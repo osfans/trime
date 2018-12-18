@@ -21,6 +21,7 @@ package com.osfans.trime;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 
 /** 接收Intent廣播事件 */
@@ -47,9 +48,21 @@ public class IntentReceiver extends BroadcastReceiver {
       case COMMAND_SYNC:
         Function.sync();
         break;
+      case Intent.ACTION_SHUTDOWN:
+        Rime.destroy();
+        break;
       default:
-        if (command.contentEquals(Intent.ACTION_SHUTDOWN)) Rime.destroy();
         break;
     }
+  }
+
+  public void registerReceiver(Context context) {
+    context.registerReceiver(this, new IntentFilter(COMMAND_DEPLOY));
+    context.registerReceiver(this, new IntentFilter(COMMAND_SYNC));
+    context.registerReceiver(this, new IntentFilter(Intent.ACTION_SHUTDOWN));
+  }
+
+  public void unregisterReceiver(Context context) {
+    context.unregisterReceiver(this);
   }
 }

@@ -47,16 +47,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <receiver android:name="IntentReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
-                <category android:name="android.intent.category.HOME" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.osfans.trime.deploy" />
-                <action android:name="com.osfans.trime.sync" />
-            </intent-filter>
-        </receiver>
     </application>
 </manifest>

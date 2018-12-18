@@ -92,6 +92,8 @@ public class Trime extends InputMethodService
   private WindowsPositionType winPos; //候選窗口彈出位置
   private InlineModeType inlinePreedit; //嵌入模式
 
+  private IntentReceiver mIntentReceiver;
+
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
         || (winPos != WindowsPositionType.LEFT
@@ -242,6 +244,8 @@ public class Trime extends InputMethodService
   public void onCreate() {
     super.onCreate();
     self = this;
+    mIntentReceiver = new IntentReceiver();
+    mIntentReceiver.registerReceiver(this);
 
     mEffect = new Effect(this);
     mConfig = Config.get(this);
@@ -379,6 +383,7 @@ public class Trime extends InputMethodService
   @Override
   public void onDestroy() {
     super.onDestroy();
+    mIntentReceiver.unregisterReceiver(this);
     self = null;
     if (mConfig.isDestroyOnQuit()) {
       Rime.destroy();
