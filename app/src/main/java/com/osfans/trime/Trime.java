@@ -621,6 +621,7 @@ public class Trime extends InputMethodService
       lastCommittedText = text.toString();
     }
     if (!isComposing()) Rime.commitComposition(); //自動上屏
+    ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask()); //黑莓刪除鍵清空文本框問題
   }
 
   /**
