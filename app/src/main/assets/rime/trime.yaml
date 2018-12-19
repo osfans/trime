@@ -829,6 +829,7 @@ preset_keys:
   Zdic: {label: 漢典, send: function, command: run, option: "http://www.zdic.net/sousuo/?q=%1$s"} #搜索網頁: %s或者%1$s爲當前字符
   Zdic2: {label: 漢典, send: function, command: run, option: "http://www.zdic.net/sousuo/?q=%2$s"} #搜索網頁: %2$s爲當前輸入的編碼
   WebSearch: {label: 搜索網頁, send: function, command: web_search, option: "%4$s"} #搜索，其他view、dial、edit、search等intent，參考安卓的intent文檔：https://developer.android.com/reference/android/content/Intent.html
+  Share: {label: 分享, send: function, command: send, option: "%s"} #分享指定文本: %s或者%1$s爲當前字符
   Deploy: {label: 部署, send: function, command: broadcast, option: "com.osfans.trime.deploy"}
   Sync: {label: 同步, send: function, command: broadcast, option: "com.osfans.trime.sync"}
 

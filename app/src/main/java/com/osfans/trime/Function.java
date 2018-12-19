@@ -110,6 +110,10 @@ class Function {
           }
           intent.putExtra(SearchManager.QUERY, arg);
           break;
+        case Intent.ACTION_SEND: //分享文本
+          intent.setType("text/plain");
+          intent.putExtra(Intent.EXTRA_TEXT, arg);
+          break;
         default:
           if (!isEmpty(arg)) intent.setData(Uri.parse(arg));
           break;
