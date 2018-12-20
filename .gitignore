@@ -12,8 +12,6 @@
 bin/
 gen/
 obj/
-app/src/main/assets/rime/opencc/
-app/src/main/res/values-zh-rCN/
 
 # Eclipse Generate files
 .classpath      
