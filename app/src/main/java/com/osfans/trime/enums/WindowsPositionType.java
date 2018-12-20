@@ -18,6 +18,9 @@
 
 package com.osfans.trime.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum WindowsPositionType {
   LEFT,
   LEFT_UP,
@@ -30,14 +33,21 @@ public enum WindowsPositionType {
   TOP_LEFT,
   TOP_RIGHT;
 
-  public static WindowsPositionType fromString(String text) {
-    if (text != null) {
-      for (WindowsPositionType b : WindowsPositionType.values()) {
-        if (text.equalsIgnoreCase(b.toString())) {
-          return b;
-        }
-      }
+  private static final Map<String, WindowsPositionType> convertMap =
+      new HashMap<String, WindowsPositionType>(WindowsPositionType.values().length);
+
+  static {
+    for (WindowsPositionType type : WindowsPositionType.values()) {
+      convertMap.put(type.toString(), type);
     }
-    return FIXED;
+  }
+
+  public static WindowsPositionType fromString(String code) {
+    WindowsPositionType type = convertMap.get(code);
+    if (null == type) {
+      return FIXED;
+    } else {
+      return type;
+    }
   }
 }
