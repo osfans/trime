@@ -13,7 +13,7 @@ build:
 	gradle build
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
-release: opencc-data $(TRANSLATE)
+release: opencc-data
 	gradle assembleRelease
 
 debug:
