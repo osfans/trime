@@ -18,11 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 -->
-
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 輸入法平臺名稱  -->
     <string name="ime_name">同文輸入法</string>
-
     <!-- Preference settings -->
     <string name="pref_help">求助</string>
     <string name="pref_wiki">維基教程</string>
@@ -31,10 +29,8 @@
     <string name="pref_rime_qq">中州韻QQ羣</string>
     <string name="pref_market">谷歌市場</string>
     <string name="pref_coolmarket">酷安市場</string>
-
     <string name="pref_donate">捐贈</string>
     <string name="pref_donate_summary">自願用支付寶捐助同文和PRIME的開發</string>
-
     <string name="pref_about">關於</string>
     <string name="pref_librime_ver">RIME版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>
@@ -43,11 +39,10 @@
     <string name="pref_credits">鳴謝</string>
     <string name="pref_pime">Win10 PRIME輸入法平臺</string>
     <string name="pref_privacy">隱私權政策</string>
-
     <string name="pref_input">輸入</string>
     <string name="pref_enable">啓用</string>
     <string name="pref_enable_summary">啓用同文輸入法平臺</string>
-    <string name="pref_select">選取</string>
+    <string name="pref_select">選取軟鍵盤</string>
     <string name="pref_select_summary">選取同文輸入法平臺</string>
     <string name="pref_themes">主題</string>
     <string name="pref_themes_summary">選取想要的主題</string>
@@ -57,7 +52,6 @@
     <string name="pref_colors_summary">選取想要的鍵盤配色</string>
     <string name="pref_reset">回廠</string>
     <string name="pref_reset_summary">使用預設設定覆蓋共享資料夾下同名檔案</string>
-
     <string name="pref_keyboard">鍵盤</string>
     <string name="key_sound">按鍵聲音</string>
     <string name="key_sound_volume">按鍵音量</string>
@@ -79,45 +73,25 @@
         <item>無</item>
     </string-array>
     <string name="soft_cursor">編碼區使用插入符號(^)</string>
-
-<!--
-    <string name="pref_function">功能</string>
-    <string name="pref_maintenance">維護</string>
-    <string name="pref_maintenance_summary">自動維護輸入法方案</string>
-    <string name="pref_deploy_opencc">部署OpenCC</string>
-    <string name="pref_deploy_opencc_summary">修改共享資料夾opencc下的txt後需再次部署</string>
-    <string name="deploy_success">部署成功</string>
-    <string name="deploy_failure">部署失敗</string>
-    <string name="sync_success">同步成功</string>
-    <string name="sync_failure">同步失敗</string>
-    <string name="colors_progress">正在應用配色…</string>
-    <string name="switch_progress">正在切換方案…</string>
--->
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
     <string name="pref_sync">同步</string>
     <string name="pref_sync_summary">同步使用者字典至sync資料夾</string>
-
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>
-
     <string name="deploy_progress">正在部署…</string>
     <string name="sync_progress">正在同步…</string>
     <string name="themes_progress">正在應用主題…</string>
     <string name="schemas_progress">正在加載方案…</string>
-
     <string name="set_ime">設定</string>
     <string name="no_schemas">請在使用者資料夾中放入default.yaml、輸入法方案！</string>
     <string name="other_ime">其他輸入法</string>
-
-    <string name="pref_ui">夜間</string>
-
-    <string name="pref_other">其他</string>
+    <string name="pref_ui">夜間模式</string>
+    <string name="pref_other">其他設置</string>
     <string name="pref_notification_icon">顯示通知欄圖標</string>
     <string name="pref_destroy_on_quit">離開時清理記憶體</string>
     <string name="pref_themes_name_tongwenfeng">同文風</string>
     <string name="pref_themes_name_trime">默認</string>
-
     <string name="shared_data_dir">共享資料夾</string>
     <string name="user_data_dir">使用者資料夾</string>
 </resources>

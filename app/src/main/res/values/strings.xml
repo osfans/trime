@@ -18,11 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 -->
-
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
     <!-- Input Method Platform Tittle  -->
     <string name="ime_name">Trime</string>
-
     <!-- Preference settings -->
     <string name="pref_help">Help</string>
     <string name="pref_wiki">Wiki</string>
@@ -31,10 +29,8 @@
     <string name="pref_rime_qq">Rime QQ Group</string>
     <string name="pref_market">Google Play</string>
     <string name="pref_coolmarket">Cool Market</string>
-
     <string name="pref_donate">Donate</string>
     <string name="pref_donate_summary">Use Alipay to support TRIME and PRIME</string>
-
     <string name="pref_about">About</string>
     <string name="pref_librime_ver">RIME Version</string>
     <string name="pref_opencc_ver">OpenCC Version</string>
@@ -43,7 +39,6 @@
     <string name="pref_credits">Credits</string>
     <string name="pref_pime">Win10 PRIME Platform</string>
     <string name="pref_privacy">Privacy Policy</string>
-
     <string name="pref_input">Input</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
@@ -59,7 +54,6 @@
     <string name="pref_colors_summary">Select Desired Color for Keyboard</string>
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in shared directory</string>
-
     <string name="pref_keyboard">Keyboard</string>
     <string name="key_sound">Sound on keypress</string>
     <string name="key_sound_volume">Volume on keypress</string>
@@ -81,43 +75,23 @@
         <item>None</item>
     </string-array>
     <string name="soft_cursor">Use soft cursor(^) in composition</string>
-
-<!--
-    <string name="pref_function">Functions</string>
-    <string name="pref_maintenance">Maintain</string>
-    <string name="pref_maintenance_summary">Automatically Maintain Input Schemas</string>
-    <string name="pref_deploy_opencc">Deploy OpenCC</string>
-    <string name="pref_deploy_opencc_summary">Must Deploy after Modifying txt files in opencc of shared directory</string>
-    <string name="deploy_success">Job Done!</string>
-    <string name="deploy_failure">Job Failed!</string>
-    <string name="sync_success">Synchronized</string>
-    <string name="sync_failure">Not Synchronized</string>
-    <string name="colors_progress">Applying color…</string>
-    <string name="switch_progress">Switching progress…</string>
--->
     <string name="pref_deploy">Deploy</string>
     <string name="pref_deploy_summary">Gotta Deploy after Modifying Settings </string>
     <string name="pref_sync">Synchronize</string>
     <string name="pref_sync_summary">Synchronize User Dictionary to sync directory</string>
-
     <string name="reset_success">Reset Succeeded!</string>
     <string name="reset_failure">Reset Failed!</string>
-
     <string name="deploy_progress">Deploying…</string>
     <string name="sync_progress">Syncing…</string>
     <string name="themes_progress">Applying theme…</string>
     <string name="schemas_progress">Loading schemas…</string>
-
     <string name="set_ime">Preferences</string>
     <string name="no_schemas">Put default.yaml and schema files into user directory!</string>
     <string name="other_ime">Other IMEs</string>
-
     <string name="pref_ui">Night Mode</string>
-
     <string name="pref_other">Others</string>
     <string name="pref_notification_icon">Show icon in notification bar</string>
     <string name="pref_destroy_on_quit">Free memory on quit</string>
-
     <string name="shared_data_dir">Shared directory</string>
     <string name="user_data_dir">User directory</string>
 </resources>

@@ -18,46 +18,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 -->
-
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 输入法平台名称  -->
     <string name="ime_name">同文输入法</string>
-
-    <!-- Preference settings -->
-    <string name="pref_help">求助</string>
+    <string name="pref_help">寻求帮助</string>
     <string name="pref_wiki">维基教程</string>
     <string name="pref_issues">问题反馈</string>
     <string name="pref_rime_qq_newbie">同文QQ群</string>
     <string name="pref_rime_qq">中州韵QQ群</string>
     <string name="pref_market">谷歌市场</string>
     <string name="pref_coolmarket">酷安市场</string>
-
     <string name="pref_donate">捐赠</string>
-    <string name="pref_donate_summary">自愿用支付宝捐助同文和PRIME的开发</string>
-
+    <string name="pref_donate_summary">使用支付宝捐助同文和PRIME的开发</string>
     <string name="pref_about">关于</string>
     <string name="pref_librime_ver">RIME版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_changelog">更新日志</string>
     <string name="pref_licensing">许可证</string>
     <string name="pref_credits">鸣谢</string>
-    <string name="pref_pime">Win10 PRIME输入法平台</string>
-    <string name="pref_privacy">隐私权政策</string>
-
+    <string name="pref_pime">微软平台PRIME输入法</string>
+    <string name="pref_privacy">隐私策略</string>
     <string name="pref_input">输入</string>
     <string name="pref_enable">启用</string>
-    <string name="pref_enable_summary">启用同文输入法平台</string>
-    <string name="pref_select">选取</string>
-    <string name="pref_select_summary">选取同文输入法平台</string>
+    <string name="pref_enable_summary">启用同文输入法</string>
+    <string name="pref_select">选取软键盘</string>
+    <string name="pref_select_summary">选取同文输入法</string>
     <string name="pref_themes">主题</string>
-    <string name="pref_themes_summary">选取想要的主题</string>
+    <string name="pref_themes_summary">选取主题</string>
     <string name="pref_schemas">方案</string>
-    <string name="pref_schemas_summary">从已安装的方案中选择要使用的方案</string>
+    <string name="pref_schemas_summary">从已安装的方案中选择方案</string>
     <string name="pref_colors">配色</string>
-    <string name="pref_colors_summary">选取想要的键盘配色</string>
-    <string name="pref_reset">回厂</string>
-    <string name="pref_reset_summary">使用缺省设置覆盖共享文件夹下同名文件</string>
-
+    <string name="pref_colors_summary">选取键盘配色</string>
+    <string name="pref_reset">恢复默认设置</string>
+    <string name="pref_reset_summary">使用默认设置覆盖共享文件夹下同名文件</string>
     <string name="pref_keyboard">键盘</string>
     <string name="key_sound">按键声音</string>
     <string name="key_sound_volume">按键音量</string>
@@ -79,45 +72,25 @@
         <item>无</item>
     </string-array>
     <string name="soft_cursor">编码区使用插入符号(^)</string>
-
-<!--
-    <string name="pref_function">功能</string>
-    <string name="pref_maintenance">维护</string>
-    <string name="pref_maintenance_summary">自动维护输入法方案</string>
-    <string name="pref_deploy_opencc">部署OpenCC</string>
-    <string name="pref_deploy_opencc_summary">修改共享文件夹opencc下的txt后需再次部署</string>
-    <string name="deploy_success">部署成功</string>
-    <string name="deploy_failure">部署失败</string>
-    <string name="sync_success">同步成功</string>
-    <string name="sync_failure">同步失败</string>
-    <string name="colors_progress">正在应用配色…</string>
-    <string name="switch_progress">正在切换方案…</string>
--->
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改设置后需要再次部署同文输入法平台</string>
     <string name="pref_sync">同步</string>
     <string name="pref_sync_summary">同步用户字典至sync文件夹</string>
-
-    <string name="reset_success">回厂成功</string>
-    <string name="reset_failure">回厂失败</string>
-
+    <string name="reset_success">重置成功</string>
+    <string name="reset_failure">重置失败</string>
     <string name="deploy_progress">正在部署…</string>
     <string name="sync_progress">正在同步…</string>
     <string name="themes_progress">正在应用主题…</string>
     <string name="schemas_progress">正在加载方案…</string>
-
     <string name="set_ime">设置</string>
     <string name="no_schemas">请在用户文件夹中放入default.yaml、输入法方案！</string>
     <string name="other_ime">其他输入法</string>
-
-    <string name="pref_ui">夜间</string>
-
-    <string name="pref_other">其他</string>
+    <string name="pref_ui">夜间模式</string>
+    <string name="pref_other">其他设置</string>
     <string name="pref_notification_icon">显示通知栏图标</string>
-    <string name="pref_destroy_on_quit">离开时清理内存</string>
+    <string name="pref_destroy_on_quit">退出时清除缓存</string>
     <string name="pref_themes_name_tongwenfeng">同文风</string>
     <string name="pref_themes_name_trime">默认</string>
-
     <string name="shared_data_dir">共享文件夹</string>
     <string name="user_data_dir">用户文件夹</string>
 </resources>
