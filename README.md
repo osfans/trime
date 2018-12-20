@@ -8,7 +8,7 @@
 
 源於開源的[注音倉頡輸入法]前端，
 基於著名的[Rime]輸入法框架，
-使用JNI的C語言和安卓的java語言書寫，
+使用JNI的C語言和安卓的Java語言書寫，
 旨在保護漢語各地方言母語，
 音碼形碼通用的輸入法平臺。
 
@@ -84,19 +84,16 @@ The following guide is for the specific platform prebuild setting:
    export ANDROID_NDK="your_android_ndk"
    export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_NDK
   ```
-## 第三方庫/3rd Party Library
+## 第三方庫/Third Party Library
+- [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)
+- [darts-clone](https://github.com/s-yata/darts-clone) (New BSD License)
+- [LevelDB](https://github.com/google/leveldb) (New BSD License)
+- [libiconv](https://www.gnu.org/software/libiconv/) (LGPL License)
+- [marisa-trie](https://github.com/s-yata/marisa-trie) (BSD License)
 - [minilog](http://ceres-solver.org/) (New BSD License)
 - [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
-- [RIME](http://rime.im) (BSD License)
- - [Boost C++ Libraries](http://www.boost.org/) (Boost Software License)
-   - [libiconv](http://www.gnu.org/software/libiconv/) (LGPL License)
- - [darts-clone](https://code.google.com/p/darts-clone/) (New BSD License)
- - [marisa-trie](https://code.google.com/p/marisa-trie/) (BSD License)
- - [UTF8-CPP](http://utfcpp.sourceforge.net/) (Boost Software License)
- - [yaml-cpp](https://code.google.com/p/yaml-cpp/) (MIT License)
- - [LevelDB](https://github.com/google/leveldb) (New BSD License)
-   - [snappy](https://google.github.io/snappy/)(BSD License)
- 
-[注音倉頡輸入法]: https://code.google.com/p/android-traditional-chinese-ime/
-[Rime]: http://rime.im
-[OpenCC]: https://github.com/BYVoid/OpenCC
+- [RIME](https://rime.im) (BSD License)
+- [snappy](https://github.com/google/snappy)(BSD License)
+- [UTF8-CPP](http://utfcpp.sourceforge.net/) (Boost Software License)
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp) (MIT License)
+- [注音倉頡輸入法](https://code.google.com/p/android-traditional-chinese-ime/) (Apache License 2.0)
