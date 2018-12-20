@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 def tagCmd = 'git describe develop --tags'
 def tag = tagCmd.execute().text.trim()
-def date = new Date().format('yyyyMMdd').toInteger()
+def ver = 20181219
 
 android {
     compileSdkVersion 28
@@ -11,9 +11,8 @@ android {
         applicationId "com.osfans.trime"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode date
-        versionName "$tag-$date"
-        setProperty("archivesBaseName", "trime-$date")
+        versionCode ver
+        versionName "$tag"
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a"
         }
