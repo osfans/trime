@@ -64,7 +64,9 @@ public class Event {
       label = Config.getString(m, "label");
       preview = Config.getString(m, "preview");
       shiftLock = Config.getString(m, "shift_lock");
-      int[] sends = parseSend(Config.getString(m, "send"));
+      String send = Config.getString(m, "send");
+      if (Function.isEmpty(send) && !Function.isEmpty(command)) send = "function"; //command默認發function
+      int[] sends = parseSend(send);
       code = sends[0];
       mask = sends[1];
       parseLabel();
