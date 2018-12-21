@@ -1,12 +1,15 @@
 language: android
 script:
 - git fetch origin --tags
-- "./gradlew assembleDebug"
+- "./gradlew assembleRelease"
 git:
   submodules: true
 jdk:
 - oraclejdk8
 before_install:
+- openssl aes-256-cbc -K $encrypted_26e1bb6b6b4a_key -iv $encrypted_26e1bb6b6b4a_iv
+  -in keystore.tar.enc -out keystore.tar -d
+- tar xvf keystore.tar
 - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin
 install:
 - echo y | sdkmanager 'ndk-bundle'
@@ -14,15 +17,10 @@ install:
 - echo y | sdkmanager 'platform-tools'
 - echo y | sdkmanager 'build-tools;28.0.3'
 - echo y | sdkmanager 'platforms;android-28'
-before_deploy:
-- git config --local user.name "$GIT_NAME"
-- git config --local user.email "$GIT_EMAIL"
-- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-- git tag $TRAVIS_TAG
 deploy:
   provider: pages
   skip-cleanup: true
-  github-token: $GITHUB_TOKEN
+  github-token: "$GITHUB_TOKEN"
   keep-history: true
   local-dir: app/build/outputs/apk/
   on:
