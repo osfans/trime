@@ -1,7 +1,12 @@
 apply plugin: 'com.android.application'
 
-def tagCmd = 'git describe develop --tags'
+def tagCmd = 'git describe --tags'
 def tag = tagCmd.execute().text.trim()
+if (tag.contains('g')) { //add date for daily build
+    def dateCmd = 'git show -s --format=%cd --date=format:-%Y%m%d'
+    def date = dateCmd.execute().text.trim()
+    tag = tag + date
+}
 
 android {
     compileSdkVersion 28
