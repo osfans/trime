@@ -17,7 +17,7 @@ release: opencc-data $(TRANSLATE)
 	gradle assembleRelease
 
 debug:
-	./gradlew assembleDebug
+	gradle assembleDebug
 
 install: release
 	gradle installRelease

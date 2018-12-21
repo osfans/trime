@@ -1,16 +1,32 @@
 language: android
 script:
-    - git fetch origin --tags
-    - make debug
+- git fetch origin --tags
+- "./gradlew assembleDebug"
 git:
-    submodules: true
+  submodules: true
 jdk:
-    - oraclejdk8
+- oraclejdk8
 before_install:
-    - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin
+- export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin
 install:
-    - echo y | sdkmanager 'ndk-bundle'
-    - echo y | sdkmanager 'cmake;3.6.4111459'
-    - echo y | sdkmanager 'platform-tools'
-    - echo y | sdkmanager 'build-tools;28.0.3'
-    - echo y | sdkmanager 'platforms;android-28'
+- echo y | sdkmanager 'ndk-bundle'
+- echo y | sdkmanager 'cmake;3.6.4111459'
+- echo y | sdkmanager 'platform-tools'
+- echo y | sdkmanager 'build-tools;28.0.3'
+- echo y | sdkmanager 'platforms;android-28'
+before_deploy:
+- git config --local user.name "$GIT_NAME"
+- git config --local user.email "$GIT_EMAIL"
+- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+- git tag $TRAVIS_TAG
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  local-dir: app/build/outputs/apk/
+  on:
+    branch: develop
+env:
+  global:
+  - secure: 44HmwFFIKEmqnAOemuh8mIIbvglb3CZN+I+GsN7CGWn5Pvocg2sULj7sv33NDL6+5012bt3RoT9YgoTf2ERNR2W0bMVYw/0O5qdAnPiLD/v3SaoDv7qW3G9snKPBhdK72eODVxys66EY0oloJiBKQ/QnDr+HUiGpUuZlOaVLXBN9rcNlinM+4nMMSmaEOInhCwYrNI+NwOhoBVx+YNgaSqWBzHNYO7P2iWZfHbh9LmavpVynzp2gQp3VwoX9VrCrnfjLdRy+F0/TsWjiQ/PIbRJo2/Kl8SY93ve1SUfoJoLVTatX9ZG3a2+955+1SKBElI0mlKoMHDj0yy0F9zwUJY0rhbXnjp1EFyFgnRhCiaOKtXQp2+CKjig6V2kXRzxGzXKJ6aEZi8I3I6LKMgasXDgJgyzWmZjI30zBjA/lbWvmlLOkJswxFvQn972hPvhaE3P40OELrEu5uZiCJItkb4rWD2CPMkdz6R5mqbLa6Zn8RthfUyYuD8jh24lasp0wo9a3ARAhaZZnrxIS2p4QFugXzjsp28u4fA8pQDcKcHEZU0/fgun6gKKKkgq/DiIlheWiVO5Y7cnIiSKMYYkqlxiKpP2EbY5nE7yKwXANC+lvNQVBlk1mTP6POD5qeyAj75SeVc52VLAmvvVMKWZHD29KWW3f7JmIOTgrXHcSSck=
