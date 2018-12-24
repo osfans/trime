@@ -1,16 +1,23 @@
-# 同文安卓輸入法平臺/Trime/android-rime
+# 同文安卓輸入法平臺/Trime: Rime IME for Android
 [![自動編譯](https://travis-ci.org/osfans/trime.svg?branch=develop)](https://travis-ci.org/osfans/trime)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![GitHub release](https://img.shields.io/github/release/osfans/trime.svg)](https://github.com/osfans/trime/releases)
 
-[<img alt='Google Play立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='酷安' src='http://image.coolapk.com/apk_logo/2016/0108/12202_1452248424_4592.png' height='80px'/>](http://www.coolapk.com/apk/com.osfans.trime)
-
+## 關於/About
 源於開源的[注音倉頡輸入法]前端，
 基於著名的[Rime]輸入法框架，
 使用JNI的C語言和安卓的Java語言書寫，
 旨在保護漢語各地方言母語，
 音碼形碼通用的輸入法平臺。
+
+## 下載/Download
+- 穩定版<br>
+[<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
+[<img alt='Google Play立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
+[<img alt='酷安' src='https://www.coolapk.com/static/img/icon.png'
+height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
+- 測試版
+[點擊下載](https://github.com/osfans/trime/tree/gh-pages)
 
 ## 鳴謝/Credits
 - 開發：[osfans](https://github.com/osfans)
