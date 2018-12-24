@@ -19,6 +19,7 @@
 package com.osfans.trime.enums;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public enum WindowsPositionType {
@@ -43,7 +44,7 @@ public enum WindowsPositionType {
   }
 
   public static WindowsPositionType fromString(String code) {
-    WindowsPositionType type = convertMap.get(code);
+    WindowsPositionType type = convertMap.get(code.toUpperCase(Locale.getDefault()));
     if (null == type) {
       return FIXED;
     } else {
