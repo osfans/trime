@@ -17,11 +17,13 @@ install:
 - echo y | sdkmanager 'platform-tools'
 - echo y | sdkmanager 'build-tools;28.0.3'
 - echo y | sdkmanager 'platforms;android-28'
+before_deploy:
+- echo -e "# 同文最新測試版\n## $(git describe --tags)-$(date +%Y%m%d)\n## [點擊下載](release/app-release.apk)\n$(git log $(git describe --tags HEAD^ --abbrev=0).. --format="* %h %s")" > app/build/outputs/apk/README.md
 deploy:
   provider: pages
   skip-cleanup: true
   github-token: "$GITHUB_TOKEN"
-  keep-history: true
+  keep-history: false
   local-dir: app/build/outputs/apk/
   on:
     branch: develop
