@@ -302,7 +302,7 @@ void set_option(JNIEnv *env, jobject thiz, jstring option, jboolean value) {
   RimeConfig config = {0};
   bool b;
   if (is_save_option(s)) {
-    b = RimeConfigOpen("user", &config);
+    b = RimeUserConfigOpen("user", &config);
     if (b) {
       std::string str("var/option/");
       str += option_name;
@@ -355,7 +355,7 @@ jstring get_current_schema(JNIEnv *env, jobject thiz) {
 jboolean select_schema(JNIEnv *env, jobject thiz, jstring schema_id) {
   const char* s = schema_id == NULL ? NULL : env->GetStringUTFChars(schema_id, NULL);
   RimeConfig config = {0};
-  Bool b = RimeConfigOpen("user", &config);
+  Bool b = RimeUserConfigOpen("user", &config);
   if (b) {
     b = RimeConfigSetString(&config, "var/previously_selected_schema", s);
     std::string str(s);
