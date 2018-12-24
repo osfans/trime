@@ -20,7 +20,8 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
-    <string name="pref_rime_qq_newbie_summary">480159874</string>
+    <string name="pref_trime_qq_summary">480159874</string>
+    <string name="pref_trime_qq2_summary">458845988</string>
     <string name="pref_rime_qq_summary">77608640</string>
     <string name="pref_licensing_summary">GPLv3</string>
     <string-array name="inline_values">

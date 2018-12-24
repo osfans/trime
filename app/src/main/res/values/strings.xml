@@ -25,7 +25,8 @@
     <string name="pref_help">Help</string>
     <string name="pref_wiki">Wiki</string>
     <string name="pref_issues">Report Issues</string>
-    <string name="pref_rime_qq_newbie">Trime QQ Group</string>
+    <string name="pref_trime_qq">Trime QQ Group</string>
+    <string name="pref_trime_qq2">Trime QQ Group 2</string>
     <string name="pref_rime_qq">Rime QQ Group</string>
     <string name="pref_market">Google Play</string>
     <string name="pref_coolmarket">Cool Market</string>

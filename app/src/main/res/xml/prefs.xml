@@ -97,10 +97,15 @@
             <intent android:action="android.intent.action.VIEW"
                     android:data="http://www.coolapk.com/apk/com.osfans.trime" />
         </Preference>
-        <Preference android:key="pref_trime_qq" android:title="@string/pref_rime_qq_newbie"
-                    android:summary="@string/pref_rime_qq_newbie_summary">
+        <Preference android:key="pref_trime_qq" android:title="@string/pref_trime_qq"
+                    android:summary="@string/pref_trime_qq_summary">
             <intent android:action="android.intent.action.VIEW"
                     android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3Deynn0JQFzeJMgNewySPcEckXVZlJVkan" />
+        </Preference>
+        <Preference android:key="pref_trime_qq2" android:title="@string/pref_trime_qq2"
+                    android:summary="@string/pref_trime_qq2_summary">
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D46XegYX4TQW366gVRKAUhTgtFYmYw7G3" />
         </Preference>
         <Preference android:key="pref_rime_qq" android:title="@string/pref_rime_qq"
                     android:summary="@string/pref_rime_qq_summary">

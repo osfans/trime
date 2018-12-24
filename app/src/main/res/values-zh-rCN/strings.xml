@@ -24,7 +24,8 @@
     <string name="pref_help">寻求帮助</string>
     <string name="pref_wiki">维基教程</string>
     <string name="pref_issues">问题反馈</string>
-    <string name="pref_rime_qq_newbie">同文QQ群</string>
+    <string name="pref_trime_qq">同文QQ群</string>
+    <string name="pref_trime_qq2">同文QQ群2</string>
     <string name="pref_rime_qq">中州韵QQ群</string>
     <string name="pref_market">谷歌市场</string>
     <string name="pref_coolmarket">酷安市场</string>
