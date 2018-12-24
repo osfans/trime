@@ -1,13 +1,5 @@
 apply plugin: 'com.android.application'
 
-def tagCmd = 'git describe --tags'
-def tag = tagCmd.execute().text.trim()
-if (tag.contains('g')) { //add date for daily build
-    def dateCmd = 'git show -s --format=%cd --date=format:-%Y%m%d'
-    def date = dateCmd.execute().text.trim()
-    tag = tag + date
-}
-
 android {
     compileSdkVersion 28
 
@@ -15,8 +7,8 @@ android {
         applicationId "com.osfans.trime"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 20181220
-        versionName "$tag"
+        versionCode 20181224
+        versionName "3.1.2"
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a"
         }
