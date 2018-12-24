@@ -83,7 +83,7 @@ public class Pref extends PreferenceActivity
     String version;
 
     pref = findPreference("pref_changelog");
-    version = Function.getVersion(this);
+    version = Rime.get_trime_version();
     setVersion(pref, version);
 
     pref = findPreference("pref_librime_ver");

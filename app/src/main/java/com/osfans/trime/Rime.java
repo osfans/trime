@@ -686,4 +686,6 @@ public class Rime {
 
   public static native void opencc_convert_dictionary(
       String inputFileName, String outputFileName, String formatFrom, String formatTo);
+
+  public static native String get_trime_version();
 }

@@ -366,6 +366,13 @@ if(UNIX)
 file(GLOB RIME_JNI_SOURCES librime_jni/*.cc)
 add_library(rime_jni SHARED ${RIME_JNI_SOURCES})
 target_link_libraries(rime_jni rime opencc)
+string(TIMESTAMP TODAY "%Y%m%d")
+execute_process(
+  COMMAND git --git-dir ${CMAKE_CURRENT_LIST_DIR}/../../../../.git describe --tags
+  OUTPUT_VARIABLE TRIME_VERSION
+  )
+string(STRIP ${TRIME_VERSION} TRIME_VERSION)
+set(TRIME_VERSION "${TRIME_VERSION}-${TODAY}")
 execute_process(
   COMMAND git --git-dir ${CMAKE_CURRENT_LIST_DIR}/OpenCC/.git describe --tags
   OUTPUT_VARIABLE OPENCC_VERSION
@@ -380,6 +387,7 @@ set(LIBRIME_VERSION "${LIBRIME_VERSION}-${ANDROID_ABI}")
 MESSAGE(${LIBRIME_VERSION})
 target_compile_definitions(rime_jni PRIVATE
   CLASSNAME="com/osfans/trime/Rime"
+  TRIME_VERSION="${TRIME_VERSION}"
   OPENCC_VERSION="${OPENCC_VERSION}"
   LIBRIME_VERSION="${LIBRIME_VERSION}"
   )

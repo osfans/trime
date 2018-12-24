@@ -25,6 +25,10 @@ jstring newJstring(JNIEnv* env, const char* pat)
   return ret;
 }
 
+jstring get_trime_version(JNIEnv *env, jobject thiz) {
+  return newJstring(env, TRIME_VERSION);
+}
+
 static const JNINativeMethod sMethods[] = {
     // init
     {
@@ -383,6 +387,11 @@ static const JNINativeMethod sMethods[] = {
         const_cast<char *>("opencc_convert_dictionary"),
         const_cast<char *>("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"),
         reinterpret_cast<void *>(opencc_convert_dictionary)
+    },
+    {
+        const_cast<char *>("get_trime_version"),
+        const_cast<char *>("()Ljava/lang/String;"),
+        reinterpret_cast<void *>(get_trime_version)
     },
 };
 
