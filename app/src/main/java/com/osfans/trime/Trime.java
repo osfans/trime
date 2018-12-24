@@ -1078,7 +1078,7 @@ public class Trime extends InputMethodService
 
   public static int getDialogType() {
     int dialogType = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-    if (VERSION.SDK_INT >= VERSION_CODES.O) {
+    if (VERSION.SDK_INT >= VERSION_CODES.P) {
       dialogType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; //Android P中AlertDialog要顯示在最上層
     }
     return dialogType;

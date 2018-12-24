@@ -224,10 +224,12 @@ public class Pref extends PreferenceActivity
           },
           0);
     }
-    if (!Settings.canDrawOverlays(this)) {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-        //startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
-        startActivity(intent);
+    if (VERSION.SDK_INT >= VERSION_CODES.P) { //僅Android P需要此權限在最上層顯示懸浮窗、對話框
+      if (!Settings.canDrawOverlays(this)) {
+          Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+          //startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
+          startActivity(intent);
+      }
     }
   }
 
