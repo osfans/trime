@@ -102,11 +102,18 @@ public class Pref extends PreferenceActivity
     mKeyVibrateDurationPref = findPreference("key_vibrate_duration");
     mKeySoundVolumePref.setEnabled(prefs.getBoolean("key_sound", false));
     mKeyVibrateDurationPref.setEnabled(prefs.getBoolean("key_vibrate", false));
-    boolean isQQ = Function.isAppAvailable(this, "com.tencent.mobileqq");
+    boolean isQQInstalled = Function.isAppAvailable(this, "com.tencent.mobileqq")
+                         || Function.isAppAvailable(this, "com.tencent.mobileqqi")
+                         || Function.isAppAvailable(this, "com.tencent.qq.kddi")
+                         || Function.isAppAvailable(this, "com.tencent.minihd.qq")
+                         || Function.isAppAvailable(this, "com.tencent.qqlite")
+                         || Function.isAppAvailable(this, "com.tencent.tim");
     pref = findPreference("pref_trime_qq");
-    pref.setSelectable(isQQ);
+    pref.setSelectable(isQQInstalled);
+    pref = findPreference("pref_trime_qq2");
+    pref.setSelectable(isQQInstalled);
     pref = findPreference("pref_rime_qq");
-    pref.setSelectable(isQQ);
+    pref.setSelectable(isQQInstalled);
   }
 
   @Override
