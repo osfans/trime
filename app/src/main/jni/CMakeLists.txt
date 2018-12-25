@@ -23,6 +23,7 @@ include_directories(
   )
 
 # flags
+set(CMAKE_BUILD_TYPE release)
 add_definitions(-w)
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 if(UNIX)
