@@ -44,6 +44,7 @@ set(SNAPPY_SOURCES
   snappy/snappy-sinksource.cc
   )
 add_library(snappy-static STATIC ${SNAPPY_SOURCES})
+target_include_directories(snappy-static BEFORE PRIVATE ${CMAKE_BINARY_DIR}/include/snappy)
 
 MESSAGE("Configuring snappy ...")
 include(CheckIncludeFile)
@@ -75,7 +76,7 @@ check_symbol_exists("sysconf" "unistd.h" HAVE_FUNC_SYSCONF)
 
 configure_file(
   "${CMAKE_CURRENT_LIST_DIR}/snappy/cmake/config.h.in"
-  "${CMAKE_CURRENT_LIST_DIR}/snappy/config.h"
+  "${CMAKE_BINARY_DIR}/include/snappy/config.h"
 )
 
 set(HAVE_STDINT_H_01  ${HAVE_STDINT_H})
