@@ -18,12 +18,13 @@ install:
 - echo y | sdkmanager 'build-tools;28.0.3'
 - echo y | sdkmanager 'platforms;android-28'
 before_deploy:
-- ln -s app-release.apk app/build/outputs/apk/release/trime-$(date +%Y%m%d)-test.apk
+- export DATE=$(date +%Y%m%d)
+- mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/trime-$DATE-test.apk
 - |
   cat > app/build/outputs/apk/README.md <<EOF
 # 同文最新測試版  
-**文件名：** [trime-$(date +%Y%m%d)-test.apk :paperclip:](release/trime-$(date +%Y%m%d)-test.apk)  
-**版本：** [$(git describe --tags)-$(date +%Y%m%d)](https://github.com/osfans/trime/commits/$(git rev-parse HEAD))  
+**文件名：** [trime-$DATE-test.apk 點擊下載](release/trime-$DATE-test.apk)  
+**版本：** [$(git describe --tags)-$DATE](https://github.com/osfans/trime/commits/$(git rev-parse HEAD))  
 **RIME版本：** [$(git --git-dir=app/src/main/jni/librime/.git describe --tags)](https://github.com/rime/librime/commits/$(git --git-dir=app/src/main/jni/librime/.git rev-parse HEAD))  
 **OpenCC版本：** [$(git --git-dir=app/src/main/jni/OpenCC/.git describe --tags)](https://github.com/BYVoid/OpenCC/commits/$(git --git-dir=app/src/main/jni/OpenCC/.git rev-parse HEAD))  
 **類型：** 測試版  
