@@ -19,11 +19,13 @@ install:
 - echo y | sdkmanager 'platforms;android-28'
 before_deploy:
 - export DATE=$(date +%Y%m%d)
+- export SHA256=$(sha256sum app/build/outputs/apk/release/app-release.apk)
 - mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/trime-$DATE-test.apk
 - |
   cat > app/build/outputs/apk/README.md <<EOF
 # 同文最新測試版  
 **文件名：** [trime-$DATE-test.apk 點擊下載](release/trime-$DATE-test.apk)  
+**SHA256：** $SHA256
 **版本：** [$(git describe --tags)-$DATE](https://github.com/osfans/trime/commits/$(git rev-parse HEAD))  
 **RIME版本：** [$(git --git-dir=app/src/main/jni/librime/.git describe --tags)](https://github.com/rime/librime/commits/$(git --git-dir=app/src/main/jni/librime/.git rev-parse HEAD))  
 **OpenCC版本：** [$(git --git-dir=app/src/main/jni/OpenCC/.git describe --tags)](https://github.com/BYVoid/OpenCC/commits/$(git --git-dir=app/src/main/jni/OpenCC/.git rev-parse HEAD))  
