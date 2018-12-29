@@ -612,7 +612,7 @@ public class Trime extends InputMethodService
    *
    * @param text 要上屏的字符串
    */
-  public void commitText(CharSequence text) {
+  public void commitText(CharSequence text, boolean isRime) {
     if (text == null) return;
     mEffect.speakCommit(text);
     InputConnection ic = getCurrentInputConnection();
@@ -620,8 +620,12 @@ public class Trime extends InputMethodService
       ic.commitText(text, 1);
       lastCommittedText = text.toString();
     }
-    if (!isComposing()) Rime.commitComposition(); //自動上屏
+    if (isRime && !isComposing()) Rime.commitComposition(); //自動上屏
     ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask()); //黑莓刪除鍵清空文本框問題
+  }
+
+  public void commitText(CharSequence text) {
+    commitText(text, true);
   }
 
   /**
@@ -787,10 +791,17 @@ public class Trime extends InputMethodService
 
   @Override
   public void onEvent(Event event) {
+    String commit = event.getCommit();
+    if (!Function.isEmpty(commit)) {
+      commitText(commit, false); //直接上屏，不發送給Rime
+      return;
+    }
     String s = event.getText();
     if (!Function.isEmpty(s)) {
       onText(s);
-    } else if (event.getCode() > 0) {
+      return;
+    }
+    if (event.getCode() > 0) {
       int code = event.getCode();
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
         Rime.toggleOption(event.getToggle());

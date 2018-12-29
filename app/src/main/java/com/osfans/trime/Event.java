@@ -38,6 +38,7 @@ public class Event {
   private String option;
   private String select;
   private String toggle;
+  private String commit;
 
   private String shiftLock;
   private boolean functional;
@@ -64,6 +65,7 @@ public class Event {
       label = Config.getString(m, "label");
       preview = Config.getString(m, "preview");
       shiftLock = Config.getString(m, "shift_lock");
+      commit = Config.getString(m, "commit");
       String send = Config.getString(m, "send");
       if (Function.isEmpty(send) && !Function.isEmpty(command)) send = "function"; //command默認發function
       int[] sends = parseSend(send);
@@ -175,6 +177,10 @@ public class Event {
   public String getToggle() {
     if (!Function.isEmpty(toggle)) return toggle;
     return "ascii_mode";
+  }
+
+  public String getCommit() {
+    return commit;
   }
 
   private void parseLabel() {
