@@ -13,7 +13,7 @@ before_install:
 - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin
 install:
 - echo y | sdkmanager 'ndk-bundle'
-- echo y | sdkmanager 'cmake;3.6.4111459'
+- echo y | sdkmanager 'cmake;3.10.2.4988404'
 - echo y | sdkmanager 'platform-tools'
 - echo y | sdkmanager 'build-tools;28.0.3'
 - echo y | sdkmanager 'platforms;android-28'
