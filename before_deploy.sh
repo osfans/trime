@@ -17,5 +17,5 @@ cat > $DIR/README.md <<EOF
 **更新於：** $(date +%Y年%m月%d日)  
 
 ## 更新內容
-$(git log $(git describe --tags HEAD^ --abbrev=0).. --format="* %s [%h](https://github.com/osfans/trime/commit/%H)"|sort -r)
+$(git log --no-merges $(git describe --tags HEAD^ --abbrev=0).. --format="* %s [%h](https://github.com/osfans/trime/commit/%H)"|sort -r)
 EOF
