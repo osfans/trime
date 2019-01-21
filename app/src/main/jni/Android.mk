@@ -21,6 +21,6 @@ include jni/leveldb.mk #1.20
 include jni/marisa.mk #0.2.5
 include jni/boost.mk #1.69.0
 include jni/libiconv.mk #1.15
-include jni/librime.mk #1.3.2
+include jni/librime.mk #1.4.0
 include jni/librime_jni.mk
 include jni/miniglog.mk

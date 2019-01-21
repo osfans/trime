@@ -346,7 +346,7 @@ target_link_libraries(rime
   )
 target_compile_definitions(rime PRIVATE
   RIME_BUILD_SHARED_LIBS
-  RIME_VERSION="1.3.2"
+  RIME_VERSION="1.4.0"
   RIME_ENABLE_LOGGING
   RIME_EXPORTS
 )
