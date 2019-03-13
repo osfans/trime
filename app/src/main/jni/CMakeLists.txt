@@ -349,7 +349,8 @@ target_compile_definitions(rime PRIVATE
   RIME_VERSION="1.4.0"
   RIME_ENABLE_LOGGING
   RIME_EXPORTS
-)
+  RIME_EXTRA_MODULES=""
+  )
 if(ANDROID)
   target_link_libraries(rime log atomic)
 elseif(WIN32)
