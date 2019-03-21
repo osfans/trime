@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -230,7 +231,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private boolean mShowHint = true;
 
-  private Method getStateDrawableIndex;
+  private Method findStateDrawableIndex;
   private Method getStateDrawable;
 
   private static class MyHandler extends Handler {
@@ -341,11 +342,13 @@ public class KeyboardView extends View implements View.OnClickListener {
     super(context, attrs);
 
     try {
-      getStateDrawableIndex =
-          StateListDrawable.class.getMethod("getStateDrawableIndex", int[].class);
+      findStateDrawableIndex =
+          StateListDrawable.class.getMethod(
+              Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT > Build.VERSION_CODES.P?  "findStateDrawableIndex" : "getStateDrawableIndex",
+              int[].class);
       getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
     } catch (Exception ex) {
-      Log.e(TAG, "Get Drawable Exception" + ex);
+      Log.e(TAG, "Get Drawable Exception: " + ex);
     }
 
     LayoutInflater inflate =
@@ -739,7 +742,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       keyBackground = key.getBackColorForState(drawableState);
       if (keyBackground == null) {
         try {
-          int index = (int) getStateDrawableIndex.invoke(mKeyBackColor, drawableState);
+          int index = (int) findStateDrawableIndex.invoke(mKeyBackColor, drawableState);
           keyBackground = (Drawable) getStateDrawable.invoke(mKeyBackColor, index);
         } catch (Exception ex) {
           Log.e(TAG, "Get Drawable Exception" + ex);
