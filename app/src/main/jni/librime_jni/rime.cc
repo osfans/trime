@@ -39,6 +39,7 @@ void init_traits(JNIEnv *env, jstring shared_data_dir, jstring user_data_dir, vo
   traits.shared_data_dir = p_shared_data_dir;
   traits.user_data_dir = p_user_data_dir;
   traits.app_name = APP_NAME;
+  RimeSetupLogging(APP_NAME);
   func(&traits);
   env->ReleaseStringUTFChars(shared_data_dir, p_shared_data_dir);
   env->ReleaseStringUTFChars(user_data_dir, p_user_data_dir);

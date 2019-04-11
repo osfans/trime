@@ -4,10 +4,10 @@ public class Test {
   private static Logger Log = Logger.getLogger(Test.class.getName());
 
   public static void main (String args[]) {
-    Rime r = new Rime(); 
-    Log.info("version=" + r.get_version());
-    r.onText("test");
-    Log.info(r.getCommitText());
+    Rime r = Rime.get(false);
+    Log.info("version1=" + r.get_version());
+    r.onText("adb");
+    //Log.info(r.getCommitText());
     r.destroy();
   }
 }
