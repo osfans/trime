@@ -1,0 +1,13 @@
+name: "琨／Kuon"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff3eb370
+border_color: 0xff3eb370
+label_color: 0xffffffff
+hilited_text_color: 0xff3eb370
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xff3eb370
+hilited_comment_text_color: 0xff3eb370
+hilited_candidate_back_color: 0xffffffff

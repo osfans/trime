@@ -1,0 +1,9 @@
+name: 孤寺／Lost Temple
+author: 佛振 <chen.sst@gmail.com>, based on ir_black
+text_color: 0xfff6f3e8
+back_color: 0xff444444
+border_color: 0xff444444
+hilited_text_color: 0xffcae682
+hilited_back_color: 0xff222222
+hilited_candidate_text_color: 0xff000000
+hilited_candidate_back_color: 0xffcae682

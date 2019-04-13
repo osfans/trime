@@ -1,0 +1,13 @@
+name: "安卓／Android"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff1c7399
+border_color: 0xff1c7399
+label_color: 0xff3588c1
+hilited_text_color: 0xffa8c450
+hilited_back_color: 0xff1c7399
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xffa8c450

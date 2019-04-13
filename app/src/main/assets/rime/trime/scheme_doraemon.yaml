@@ -1,0 +1,13 @@
+name: "銅鑼衛門／Doraemon"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffe50012
+back_color: 0xffffffff
+border_color: 0xff009fe8
+label_color: 0xff009fe8
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xffe50012
+candidate_text_color: 0xff009fe8
+comment_text_color: 0xff009fe8
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff009fe8

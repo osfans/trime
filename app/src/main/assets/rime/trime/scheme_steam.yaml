@@ -1,0 +1,13 @@
+name: "Steam"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xff528ccd
+back_color: 0xff171614
+border_color: 0xff383635
+label_color: 0xffffffff
+hilited_text_color: 0xffd1cfc9
+hilited_back_color: 0xff171614
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffa9a7a7
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffa9a7a7
+hilited_candidate_back_color: 0xff314259

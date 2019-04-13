@@ -1,0 +1,11 @@
+name: 青天／Azure
+author: 佛振 <chen.sst@gmail.com>
+text_color: 0xffcae8ff
+candidate_text_color: 0xffeef8ff
+back_color: 0xff014e8b
+border_color: 0xff014e8b
+hilited_text_color: 0xffeef8ff
+hilited_back_color: 0xff014e8b
+hilited_candidate_text_color: 0xfffffe7f
+hilited_candidate_back_color: 0xff015ea9
+comment_text_color: 0xff6496c6

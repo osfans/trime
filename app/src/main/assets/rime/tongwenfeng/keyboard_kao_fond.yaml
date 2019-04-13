@@ -1,0 +1,38 @@
+name: 颜文字键盘-喜欢
+author: "llx"
+ascii_mode: 1
+width: 25
+height: *jpgd2
+keys:
+  - {click: "QwQ", key_text_size: "14"}
+  - {click: "(●—●)", key_text_size: "14"}
+  - {click: "(๑• . •๑)", key_text_size: "14"}
+  - {click: "ヾ(≧O≦)〃嗷~", key_text_size: "12"}
+  - {click: "罒ω罒", key_text_size: "14"}
+  - {click: "(｡ì _ í｡)", key_text_size: "14"}
+  - {click: "(๑•ี_เ•ี๑)", key_text_size: "14"}
+  - {click: "ㄟ(≧◇≦)ㄏ", key_text_size: "14"}
+  - {click: "(*/ω＼*)", key_text_size: "14"}
+  - {click: "●▽●", key_text_size: "14"}
+  - {click: "٩(๑òωó๑)۶", key_text_size: "14"}
+  - {click: "✺◟(∗❛ัᴗ❛ั∗)◞✺", key_text_size: "12"}
+  - {click: "( σ'ω')σ", key_text_size: "14"}
+  - {click: "♡＾▽＾♡", key_text_size: "14"}
+  - {click: "(๑•̀ㅂ•́)و✧", key_text_size: "14"}
+  - {click: "(ง •̀_•́)ง", key_text_size: "14"}
+  - {click: "(｡･ω･｡)ﾉ♡", key_text_size: "14"}
+  - {click: "(☆_☆)", key_text_size: "14"}
+  - {click: "(๑°3°๑)", key_text_size: "14"}
+  - {click: "_(•̀ω•́ 」∠)_", key_text_size: "14"}
+  - {click: "♪～(´ε｀　)", key_text_size: "14"}
+  - {click: "～(^з^)-☆", key_text_size: "14"}
+  - {click: "(´∀｀)♡", key_text_size: "14"}
+  - {click: "ლ(´ڡ`ლ)", key_text_size: "14"}
+  - {click: Keyboard_default, height: *jpgd3, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoh, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaof, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoa, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoi, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaos, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaom, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}

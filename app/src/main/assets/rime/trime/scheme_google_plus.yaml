@@ -1,0 +1,13 @@
+name: "Google+"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffc8c9ca
+back_color: 0xffffffff
+border_color: 0xffdd4b39
+label_color: 0xffc8c9ca
+hilited_text_color: 0xffdd4b39
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xffdd4b39
+comment_text_color: 0xffc8c9ca
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xffdd4b39

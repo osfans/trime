@@ -1,0 +1,13 @@
+name: "澳門／Macau"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffd900
+back_color: 0xff00a381
+border_color: 0xff00a381
+label_color: 0xffffffff
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xffffd900
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffd900
+hilited_comment_text_color: 0xffffd900
+hilited_candidate_back_color: 0xffffffff

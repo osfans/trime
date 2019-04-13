@@ -1,0 +1,119 @@
+# 键盘高度
+height:
+  1: &jpgd1 30 # 表情键盘
+  2: &jpgd2 24 # 颜文字键盘1
+  3: &jpgd3 24 # 颜文字键盘2
+  4: &jpgd4 48 # 主键盘
+  5: &jpgd5 39.5 # 符号键盘
+  6: &hgap 4 # 键盘横缝大小
+  7: &sgap 8 # 键盘竖缝大小
+
+# 键盘高度
+round_corner:
+  1: &round1 12 # 按键圆角半径
+  2: &round2 0 # 候选窗口圆角
+  3: &round3 12 # 回车键圆角
+
+# 界面风格、功能开关
+style:
+  auto_caps: false #自動句首大寫:true|false|ascii
+  background_dim_amount: 0.5
+  candidate_font: han.ttf  #候选字体
+  candidate_padding: 5  #候选项内边距
+  candidate_spacing: 0.5  #候选间距
+  candidate_text_size: 18  #候选字号
+  candidate_use_cursor: true #高亮候选项
+  candidate_view_height: 28 #候选区高度
+  color_scheme: default #配色方案
+  comment_font: comment.ttf #编码提示字体
+  comment_height: 14 #编码提示区高度
+  comment_on_top: true #编码提示在上方或右侧
+  comment_text_size: 12 #编码提示字号
+  hanb_font: hanb.ttf #扩充字体
+  horizontal: true #水平模式
+  horizontal_gap: *hgap #键水平间距
+  layout:
+    position: fixed #候选窗口位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要Android5.0以上)
+    min_length: 4 #候选窗口最小词长
+    max_length: 14 #超过字数则换行
+    sticky_lines: 1 #固顶行数
+    max_entries: 5 #候选窗口最大词条数
+    border: 0 #候选窗口边框宽度
+    max_width: 360 #最大宽度，超过则自动换行
+    max_height: 300 #最大高度
+    min_width: 0 #最小宽度
+    min_height: 50 #最小高度
+    margin_x: 5 #水平边距
+    margin_y: 5 #竖直边距
+    line_spacing: 0 #候选词的行间距(px)
+    line_spacing_multiplier: 1.2 #候选词的行间距(倍数)
+    spacing: 1 #与预编辑或边缘的距离
+    round_corner: *round2 #候选窗口圆角
+    alpha: 0xff #透明度(0-255)
+    elevation: 0 #阴影(>=Android5.0)
+    background: background.png #颜色或者backgrounds目录下的图片文档名
+    movable: false #是否可移动窗口，或仅移动一次 true|false|once
+    all_phrases: false #显示所有长词
+  window: #悬浮窗口组件
+    # - {start: "", move: 'ㄓ ', end: ""}
+    - {start: "", composition: "%s", end: "", letter_spacing: 0.12} #letter_spacing需要Android5.0
+    - {start: "\n", label: "%s.", candidate: "%s", comment: "%s", end: "", sep: "☁️️"}
+  key_font: symbol.ttf #键盘字体
+  key_height: *jpgd4 #键高
+  key_long_text_size: 18 #长标签字号
+  key_text_size: 24 #键字号
+  key_width: 10.0 #键宽，占屏幕宽的百分比
+  keyboards: [.default, letter, default, number, symbols, edit, move, bqrw1, bqrw2, bqrw3, bqrw4, bqrw5, bqqt1, bqqt2, bqqt3, bqqt4, bqqz1, bqqz2, bqqz3, bqqz4, bqqz5, bqpt1, bqpt2, bqhd1, bqhd2, bqhc1, bqhc2, bqlx1, bqlx2, bqlx3, bqlx4, bqlx5, bqkj1, bqkj2, bqkj3, bqkj4, bqfh1, bqfh2, bqfh3, bqfh4, kao_fond, kao_sad, kao_mad, kao_astonished, kao_impotent, kao_happy, numberb] #键盘配置
+  label_text_size: 22 #标签字号
+  label_font: label.ttf #编标签字体
+  latin_font: latin.ttf #西文本体
+  latin_locale: en_US #西文语言
+  locale: zh_CN #缺省语言 zh_TW,zh_CN,zh_HK,""
+  preview_font: latin.ttf #按键提示字体
+  preview_height: 56 #按键提示高度
+  preview_offset: -32 #按键提示纵向偏移
+  preview_text_size: 40 #按键提示字号
+  proximity_correction: true #按键纠错
+  reset_ascii_mode: false #显示键盘时重置为中文状态
+  round_corner: *round1 #按键圆角半径
+  shadow_radius: 0.0 #按键阴影半径
+  speech_opencc_config: none #语音输入简繁转换
+  symbol_font: symbol.ttf #符号字体
+  symbol_text_size: 10 #符号字号
+  text_font: latin.ttf #编码字体
+  #text_height: 32 #编码区高度
+  text_size: 14 #编码区字号
+  vertical_correction: -5
+  vertical_gap: *sgap #键盘行距
+
+fallback_colors:
+  candidate_text_color: text_color
+  comment_text_color: candidate_text_color
+  border_color: back_color
+  candidate_separator_color: border_color
+  hilited_text_color: text_color
+  hilited_back_color: back_color
+  hilited_candidate_text_color: hilited_text_color
+  hilited_candidate_back_color: hilited_back_color
+  hilited_comment_text_color: comment_text_color
+  text_back_color: back_color
+  hilited_key_back_color: hilited_candidate_back_color
+  hilited_key_text_color: hilited_candidate_text_color
+  hilited_key_symbol_color: hilited_comment_text_color
+  hilited_off_key_back_color: hilited_key_back_color
+  hilited_on_key_back_color: hilited_key_back_color
+  hilited_off_key_text_color: hilited_key_text_color
+  hilited_on_key_text_color: hilited_key_text_color
+  key_back_color: back_color
+  key_border_color: border_color
+  key_text_color: candidate_text_color
+  key_symbol_color: comment_text_color
+  keyboard_back_color: border_color
+  label_color: candidate_text_color
+  off_key_back_color: key_back_color
+  off_key_text_color: key_text_color
+  on_key_back_color: hilited_key_back_color
+  on_key_text_color: hilited_key_text_color
+  preview_back_color: key_text_color
+  preview_text_color: key_back_color
+  shadow_color: border_color

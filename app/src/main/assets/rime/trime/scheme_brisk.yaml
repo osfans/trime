@@ -1,0 +1,10 @@
+name: "輕盈／Brisk"
+author: "skoj <skoj@qq.com>"
+text_color: 0xffdc3822
+back_color: 0xffffffff
+border_color: 0xff333333
+hilited_text_color: 0xffdc3822
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xff575757
+hilited_candidate_text_color: 0xffdc3822
+hilited_candidate_back_color: 0xffffffff

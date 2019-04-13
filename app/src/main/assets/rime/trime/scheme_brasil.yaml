@@ -1,0 +1,13 @@
+name: "笆悉／Brasil"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff119355
+border_color: 0xff119355
+label_color: 0xffffffff
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xff17367d
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xfff7c716

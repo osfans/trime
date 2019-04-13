@@ -1,0 +1,13 @@
+name: "斯蓋普／Skype"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff00adef
+border_color: 0xff00adef
+label_color: 0xffffffff
+hilited_text_color: 0xff00adef
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xff00adef
+hilited_comment_text_color: 0xff00adef
+hilited_candidate_back_color: 0xffffffff

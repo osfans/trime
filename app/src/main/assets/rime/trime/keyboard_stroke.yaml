@@ -1,0 +1,22 @@
+name: 五筆畫鍵盤
+author: 皛筱晓小笨鱼
+ascii_mode: 0
+width: 20
+height: 75
+keys:
+  - { click: "?", long_click: "!" }
+  - { click: h, label: "一" }
+  - { click: s, label: "丨" }
+  - { click: p, label: "丿" }
+  - { click: BackSpace, long_click: Escape }
+  - { click: ";", long_click: ":" }
+  - { click: n, label: "丶" }
+  - { click: z, label: "乙" }
+  - { click: "'", label: "詞組" }
+  - { click: ",", long_click: "." }
+  - { click: Hide, width: 10 }
+  - { click: "/", long_click: "^", width: 10 }
+  - { click: Keyboard_symbols, long_click: Keyboard_number, width: 10 }
+  - { click: space, width: 40 }
+  - { click: Keyboard_letter, long_click: Menu, width: 10 }
+  - { click: Return, long_click: CommitComment, width: 20 }

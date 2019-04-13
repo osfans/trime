@@ -1,0 +1,9 @@
+name: 碧水／Aqua
+author: 佛振 <chen.sst@gmail.com>
+text_color: 0xff000000
+back_color: 0xffeeeeec
+border_color: 0xffe0e0e0
+hilited_text_color: 0xff000000
+hilited_back_color: 0xffd4d4d4
+hilited_candidate_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff0a3afa

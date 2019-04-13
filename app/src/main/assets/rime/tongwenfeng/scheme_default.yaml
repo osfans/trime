@@ -1,0 +1,56 @@
+# 颜色
+colors:
+  1: &color1 0xff000000
+  2: &color2 0xffffffff
+  3: &color3 0xffe1e3e7
+  4: &color4 0xffacb2c2
+  5: &color5 0xff131313
+  6: &color6 0xff3266a0
+  7: &color7 0x00
+  8: &color8 0xff838383
+name: "标准配色！"  #方案名称
+author: 风花絮 #作者信息
+back_color: *color2 #候选区背景状态栏
+candidate_separator_color: *color2 #候选分割背景
+candidate_text_color: *color1 #候选文本
+comment_text_color: *color3 #提示
+hilited_back_color: *color2 #高亮编码背景
+hilited_candidate_back_color: *color2 #高亮候选背景
+hilited_candidate_text_color: *color6 #高亮候选文本
+hilited_comment_text_color: *color1 #高亮提示
+hilited_key_back_color: *color6 #高亮按键背景
+hilited_key_symbol_color: *color2 #高亮按键符号
+hilited_key_text_color: *color1 #高亮按键文本
+hilited_off_key_back_color: *color2 #高亮按键关闭状态背景
+hilited_off_key_text_color: *color1 #高亮按键关闭状态文本
+hilited_text_color: *color1 #高亮编码
+key_back_color: *color2 #按键背景
+key_symbol_color: *color8 #按键符号
+key_text_color: *color1 #按键文本
+keyboard_back_color: *color3 #键盘背景
+label_color: *color6 #标签
+off_key_back_color: *color4  #按键关闭状态背景
+off_key_text_color: *color8 #按键关闭状态文本
+preview_back_color: *color4 #按键提示背景
+preview_text_color: *color6 #按键提示文本
+text_color: *color6 #编码
+text_back_color: *color2 #编码区背景
+bkg: *color2 #空格键背景色
+tkg: *color1 #空格键文字颜色
+benter: *color6 #回车键背景色
+tenter: *color2 #回车键文字颜色
+bgn: *color4 #功能键背景色
+tgn: *color2 #功能键文字颜色
+bbs: *color4 #退格键背景色
+tbs: *color2 #退格键文字颜色
+baoe: *color2 #aoeiu背景色
+taoe: *color6 #aoeiu文字颜色
+bh1: *color2 #第一行背景色
+th1: *color1 #第一行文字颜色
+bh2: *color2 #第二行背景色
+th2: *color1 #第二行文字颜色
+bh3: *color2 #第三行背景色
+th3: *color1 #第三行文字颜色
+bh4: *color2 #第四行背景色
+th4: *color1 #第四行文字颜色
+

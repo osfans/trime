@@ -1,0 +1,255 @@
+# 安卓
+BRIGHTNESS_DOWN: {label: 亮度-, send: BRIGHTNESS_DOWN}
+BRIGHTNESS_UP: {label: 亮度+, send: BRIGHTNESS_UP}
+CALCULATOR: {label: 计算机, send: CALCULATOR}
+CALENDAR: {label: 日历, send: CALENDAR}
+CONTACTS: {label: 电话簿, send: CONTACTS}
+ENVELOPE: {label: 信箱, send: ENVELOPE}
+EXPLORER: {label: 浏览器, send: EXPLORER}
+MUSIC: {label: 音乐, send: MUSIC}
+POWER: {label: 电源, send: POWER}
+SEARCH: {label: 搜寻, send: Find}
+SLEEP: {label: 休眠, send: SLEEP}
+VOICE_ASSIST: {label: 语音, functional: true, send: VOICE_ASSIST}
+VOLUME_DOWN: {label: 音量-, send: VOLUME_DOWN}
+VOLUME_UP: {label: 音量+, send: VOLUME_UP}
+VOLUME_MUTE: {label: 静音, send: VOLUME_MUTE}
+# 编辑
+Shift_L: {label: Shift, preview: '⇪', functional: false, send: Shift_L}
+Return: {label: Enter, preview: '↩', functional: false, send: Return}
+Hide: {label: 隐藏, send: BACK}
+BackSpace: {label: 退格, preview: '⇦', repeatable: true, functional: false, send: BackSpace}
+space: {repeatable: false, preview: ' ', functional: false, label: '_______', send: space}
+space1: {repeatable: false, label: '空格', functional: false, send: space}
+Clear: {label: 全清, send: Clear}
+Escape: {label: 取消, functional: false, send: Escape}
+Home: {label: 行首, send: Home, functional: false}
+Insert: {label: 插入, send: Insert}
+Delete: {label: 删除, send: Delete, functional: false}
+End: {label: 行尾, send: End, functional: false}
+Page_Up: {label: 上页, send: Page_Up, functional: false}
+Page_Down: {label: 下页, send: Page_Down, functional: false}
+Left: {label: '←', send: Left, repeatable: true, functional: false}
+Down: {label: '↓', send: Down, functional: false}
+Up: {label: '↑', send: Up, functional: false}
+Right: {label: '→', send: Right, repeatable: true, functional: false}
+select_all: {label: 全选, functional: false, send: Control+a}
+cut: {label: 剪切, functional: false, send: Control+x}
+copy: {label: 复制, functional: false, send: Control+c}
+paste: {label: 粘贴, functional: false, send: Control+v}
+paste_text: {label: 貼上文本, send: Control+Shift+Alt+v} #>=Android 6.0
+share_text: {label: 分享文本, send: Control+Alt+s} #>=Android 6.0
+redo: {label: 重做, functional: false, send: Control+y} #>=Android 6.0
+undo: {label: 撤銷, functional: false, send: Control+z} #>=Android 6.0
+delimiter: {label: 分词, text: ''''}
+x1: {text: '{Home}{Right}{Right}', label: 单字, functional: false}
+x2: {text: '{Home}{Right}{Right}{Right}{Right}', label: 二字, functional: false}
+x3: {text: '{Home}{Right}{Right}{Right}{Right}{Right}{Right}', label: 三字, functional: false}
+x4: {text: '{Home}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}', label: 四字, functional: false}
+# x1: {text: '{Home}{Right}{Right}', label: 单字, functional: false}
+# rime组合键
+F4: {label: 方案菜单, send: F4}
+BackToPreviousSyllable: {label: 删音节, send: Control+BackSpace}
+CommitRawInput: {label: 编码, send: Control+Return}
+CommitScriptText: {label: 编码, send: Shift+Return}
+CommitComment: {label: 编码, send: Control+Shift+Return}
+DeleteCandidate: {label: 删词, send: Control+Delete, functional: false}
+# rime状态
+Mode_switch: {toggle: ascii_mode, functional: false, send: Mode_switch, states: [ 中文, 西文 ]}
+Zenkaku_Hankaku: {toggle: full_shape, send: Mode_switch, states: [ 半角, 全角 ]}
+Henkan: {toggle: simplification, send: Mode_switch, states: [ 汉字, 汉字 ]}
+Charset_switch: {toggle: extended_charset, send: Mode_switch, states: [ 常用, 增广 ]}
+Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
+# trime设置
+IME_switch: {label: 🌐, send: LANGUAGE_SWITCH} #彈出對話框選擇輸入法
+IME_last: {label: 上一输入法, send: LANGUAGE_SWITCH, select: .last} #直接切換到上一輸入法
+IME_next: {label: 下一输入法, send: LANGUAGE_SWITCH, select: .next} #直接切換到下一輸入法
+Keyboard_letter: {label: 字母, functional: true, send: Eisu_toggle, select: default}
+Keyboard_default: {label: 返回, functional: false, send: Eisu_toggle, select: .default}
+Keyboard_switch: {label: 键盘, functional: true, send: Eisu_toggle, select: .next}
+Keyboard_number: {label: 123, functional: false, send: Eisu_toggle, select: number}
+Keyboard_numberb: {label: 123, functional: false, send: Eisu_toggle, select: numberb}
+Keyboard_symbols: {label: 更多, functional: false, send: Eisu_toggle, select: symbols}
+Keyboard_move: {label: ❖, functional: true, send: Eisu_toggle, select: move}
+Keyboard_next: {label: 后退, functional: false, send: Eisu_toggle, select: .next}
+Keyboard_last: {label: 后退, functional: false, send: Eisu_toggle, select: .last}
+Keyboard_last_lock: {label: 返回, send: Eisu_toggle, select: .last_lock} #直接切換到下一键盘
+Schema_switch: {label: 下一方案, functional: false, send: Control+Shift+1}
+Schema_Eng: {label: En, functional: true, send: Control+Shift+0}
+Theme_settings: {label: 主题, send: SETTINGS, option: "theme"}
+Color_switch: {label: 配色, functional: false, send: PROG_RED}
+Help: {label: 说明, send: Help}
+Info: {label: 关于, send: INFO}
+Menu: {label: 菜单, functional: false, send: Menu}
+Settings: {label: 设置, functional: false, send: SETTINGS}
+# trime命令
+Date: {label: 日期, send: function, command: date, option: " yyyy-MM-dd "}
+Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"} #時間： date 格式
+TrimeApp: {label: 同文, send: function, command: run, option: "com.osfans.trime"} #運行程序: run 包名
+TrimeCmp: {label: 同文組件, send: function, command: run, option: "com.osfans.trime/.Pref"} #運行程序指定組件: run 包名/組件名
+Homepage: {label: 同文主頁, send: function, command: run, option: "https://github.com/osfans/trime"} #查看網頁: run 網址
+Wiki: {label: 維基, send: function, command: run, option: "https://zh.wikipedia.org/wiki/%s"} #搜索網頁: %s或者%1$s爲當前字符
+Google: {label: 谷歌, send: function, command: run, option: "https://www.google.com/search?q=%s"} #搜索網頁: %s或者%1$s爲當前字符
+MoeDict: {label: 萌典, send: function, command: run, option: "https://www.moedict.tw/%3$s"} #搜索網頁: %3$s爲光標前字符
+Baidu: {label: 百度搜索, send: function, command: run, option: "https://www.baidu.com/s?wd=%4$s"} #搜索網頁: %4s爲光標前所有字符
+Zdic: {label: 漢典, send: function, command: run, option: "http://www.zdic.net/sousuo/?q=%1$s"} #搜索網頁: %s或者%1$s爲當前字符
+Zdic2: {label: 漢典, send: function, command: run, option: "http://www.zdic.net/sousuo/?q=%2$s"} #搜索網頁: %2$s爲當前輸入的編碼
+WebSearch: {label: 搜索網頁, send: function, command: web_search, option: "%4$s"} #搜索，其他view、dial、edit、search等intent，參考安卓的intent文檔：https://developer.android.com/reference/android/content/Intent.html
+
+Left1: {label: '⇦', send: Control+Left, repeatable: true, functional: false}
+Right1: {label: '⇨', send: Control+Right, repeatable: true, functional: false}
+Shift_L2: {label: 选择, preview: '⇪', functional: false, send: Shift_L}
+
+# 22自定义功能键
+Keyboard_fbjzj: {label: 助记, functional: false, send: Eisu_toggle, select: fbjzj}
+Keyboard_fbj: {label: 風, functional: false, send: Eisu_toggle, select: fbj}
+Keyboard_defaulten: {label: EN, functional: false, send: Eisu_toggle, select: letter}
+Schema_switchen1: {label: EN, send: Control+Shift+5, functional: true}
+Schema_switchen: {label: EN, send: Control+Shift+5, functional: false}
+Schema_switchcn: {label: 中文, send: Control+Shift+6, functional: false}
+Keyboard_v2: {label: "✾", functional: false, send: v}
+Keyboard_r2: {label: "❀", functional: false, send: r}
+Keyboard_fc: {label: "'分词", send: apostrophe, functional: false}
+Control_L: {label: "退格", send: Control_L, functional: false}
+
+# aoeiu功能键
+Keyboard_a: {label: "A", functional: false, send: asciicircum, key_text_color: bct0}
+Keyboard_u: {label: "U", functional: false, send: exclam, key_text_color: bct0}
+Keyboard_i: {label: "I", functional: false, send: question, key_text_color: bct0}
+Keyboard_o: {label: "O", functional: false, send: comma, key_text_color: bct0}
+Keyboard_e: {label: "E", functional: false, send: period, key_text_color: bct0}
+
+Keyboard_u2: {label: "丨", text: '""{Left}'}
+Keyboard_a2: {label: "一", send: 0}
+Keyboard_i2: {label: "丿", text: "''{Left}"}
+Keyboard_o2: {label: "丶", send: 9}
+Keyboard_e2: {label: "ㄥ", text: "{}{Left}"}
+Keyboard_k: {label: "一", send: A}
+Keyboard_v: {label: "丨", send: U}
+Keyboard_h: {label: "丿", send: I}
+Keyboard_r: {label: "丶", send: O}
+Keyboard_e0: {label: "ㄥ", send: E}
+
+Keyboard_a3: {label: "……", functional: false, send: asciicircum}
+
+ # 表情键自定义
+Keyboard_bqfh: {label: ⌘, functional: true, send: Eisu_toggle, select: bqfh1}
+Keyboard_bqrw: {label: ⌘, functional: false, send: Eisu_toggle, select: bqfh1}
+Keyboard_bqrw1: {label: '🙂', functional: false, send: Eisu_toggle, select: bqrw1}
+Keyboard_bqrw2: {label: 人物2,functional: false, send: Eisu_toggle, select: bqrw2}
+Keyboard_bqrw3: {label: 人物3, functional: false, send: Eisu_toggle, select: bqrw3}
+Keyboard_bqrw4: {label: 人物4, functional: false, send: Eisu_toggle, select: bqrw4}
+Keyboard_bqrw5: {label: 人物5, functional: false, send: Eisu_toggle, select: bqrw5}
+Keyboard_bqrw6: {label: 人物6, functional: false, send: Eisu_toggle, select: bqrw6}
+Keyboard_bqrw7: {label: 人物7, functional: false, send: Eisu_toggle, select: bqrw7}
+Keyboard_bqrw8: {label: 人物8, functional: false, send: Eisu_toggle, select: bqrw8}
+
+Keyboard_bqqt1: {label: '🔶', functional: false, send: Eisu_toggle, select: bqqt1}
+Keyboard_bqqt2: {label: 其它1, functional: false, send: Eisu_toggle, select: bqqt2}
+Keyboard_bqqt3: {label: 其它1, functional: false, send: Eisu_toggle, select: bqqt3}
+Keyboard_bqqt4: {label: 其它1, functional: false, send: Eisu_toggle, select: bqqt4}
+
+Keyboard_bqqz1: {label: '🇨🇳', functional: false, send: Eisu_toggle, select: bqqz1}
+Keyboard_bqqz2: {label: 旗帜1, functional: false, send: Eisu_toggle, select: bqqz2}
+Keyboard_bqqz3: {label: 旗帜1, functional: false, send: Eisu_toggle, select: bqqz3}
+Keyboard_bqqz4: {label: 旗帜1, functional: false, send: Eisu_toggle, select: bqqz4}
+Keyboard_bqqz5: {label: 旗帜1, functional: false, send: Eisu_toggle, select: bqqz5}
+Keyboard_bqqz6: {label: 旗帜1, functional: false, send: Eisu_toggle, select: bqqz6}
+
+Keyboard_bqpt1: {label: '🎂', functional: false, send: Eisu_toggle, select: bqpt1}
+Keyboard_bqpt2: {label: 聚会2, functional: false, send: Eisu_toggle, select: bqpt2}
+
+Keyboard_bqhd1: {label: '🎉', functional: false, send: Eisu_toggle, select: bqhd1}
+Keyboard_bqhd2: {label: 活动2, functional: false, send: Eisu_toggle, select: bqhd2}
+
+Keyboard_bqhc1: {label: '🌼', functional: false, send: Eisu_toggle, select: bqhc1}
+Keyboard_bqhc2: {label: 花草2, functional: false, send: Eisu_toggle, select: bqhc2}
+Keyboard_bqhc3: {label: 花草2, functional: false, send: Eisu_toggle, select: bqhc3}
+
+Keyboard_bqlx1: {label: '🚖', functional: false, send: Eisu_toggle, select: bqlx1}
+Keyboard_bqlx2: {label: 旅行2, functional: false, send: Eisu_toggle, select: bqlx2}
+Keyboard_bqlx3: {label: 旅行3, functional: false, send: Eisu_toggle, select: bqlx3}
+Keyboard_bqlx4: {label: 旅行4, functional: false, send: Eisu_toggle, select: bqlx4}
+Keyboard_bqlx5: {label: 旅行5, functional: false, send: Eisu_toggle, select: bqlx5}
+Keyboard_bqlx6: {label: 旅行6, functional: false, send: Eisu_toggle, select: bqlx6}
+
+Keyboard_bqkj1: {label: '🔌', functional: false, send: Eisu_toggle, select: bqkj1}
+Keyboard_bqkj2: {label: 科技2, functional: false, send: Eisu_toggle, select: bqkj2}
+Keyboard_bqkj3: {label: 科技3, functional: false, send: Eisu_toggle, select: bqkj3}
+Keyboard_bqkj4: {label: 科技4, functional: false, send: Eisu_toggle, select: bqkj4}
+Keyboard_bqkj5: {label: 科技5, functional: false, send: Eisu_toggle, select: bqkj5}
+
+Keyboard_bqfh1: {label: "#!?", functional: false, send: Eisu_toggle, select: bqfh1}
+Keyboard_bqfh2: {label: "上页", functional: false, send: Eisu_toggle, select: bqfh2, key_text_size: "14"}
+Keyboard_bqfh3: {label: "上页", functional: false, send: Eisu_toggle, select: bqfh3, key_text_size: "14"}
+Keyboard_bqfh4: {label: "下页", functional: false, send: Eisu_toggle, select: bqfh4, key_text_size: "14"}
+
+Keyboard_bqsy1: {label: "中文", functional: false, send: Eisu_toggle, select: bqfh1, key_text_size: "14"}
+Keyboard_bqsy2: {label: "英文", functional: false, send: Eisu_toggle, select: bqfh3, key_text_size: "14"}
+Keyboard_bqsy3: {label: "表情", functional: false, send: Eisu_toggle, select: bqrw1, key_text_size: "14"}
+Keyboard_bqsy4: {label: "颜文", functional: false, send: Eisu_toggle, select: kao_happy, key_text_size: "14"}
+
+#颜文字键盘
+Keyboard_kao: {label: ^_^, functional: false, send: Eisu_toggle, select: kao_happy}
+Keyboard_kaoh: {label: 开心, functional: false, send: Eisu_toggle, select: kao_happy}
+Keyboard_kaof: {label: 喜欢, functional: false, send: Eisu_toggle, select: kao_fond}
+Keyboard_kaos: {label: 伤心, functional: false, send: Eisu_toggle, select: kao_sad}
+Keyboard_kaom: {label: 生气, functional: false, send: Eisu_toggle, select: kao_mad}
+Keyboard_kaoa: {label: 惊讶, functional: false, send: Eisu_toggle, select: kao_astonished}
+Keyboard_kaoi: {label: 无奈, functional: false, send: Eisu_toggle, select: kao_impotent}
+
+Zcj: {label: 单字, functional: false, text: "{Home}{Right}{Right}"}
+Tab: {label: 字词, send: Tab}
+Tab1: {label: Tab, functional: false, send: Tab}
+space_R: {label: "風二十二键", functional: false, send: Eisu_toggle, select: letter}
+space_R1: {label: "EN", functional: false, send: Eisu_toggle, select: letter}
+space_R2: {label: "中", functional: false, send: Eisu_toggle, select: fbj}
+#符号
+符号: {text: '{Escape}/fh', label: 符号, functional: false}
+电脑: {text: '{Escape}/dn', label: 电脑, functional: false}
+象棋: {text: '{Escape}/xq', label: 象棋, functional: false}
+麻将: {text: '{Escape}/mj', label: 麻将, functional: false}
+骰子: {text: '{Escape}/sz', label: 骰子, functional: false}
+扑克: {text: '{Escape}/pk', label: 扑克, functional: false}
+天气: {text: '{Escape}/tq', label: 天气, functional: false}
+音乐: {text: '{Escape}/yy', label: 音乐, functional: false}
+八卦: {text: '{Escape}/bg', label: 八卦, functional: false}
+易经: {text: '{Escape}/lssg', label: 易经, functional: false}
+天体: {text: '{Escape}/tt', label: 天体, functional: false}
+星座: {text: '{Escape}/xz', label: 星座, functional: false}
+星号: {text: '{Escape}/xh', label: 星号, functional: false}
+方块: {text: '{Escape}/fk', label: 方块, functional: false}
+几何: {text: '{Escape}/jh', label: 几何, functional: false}
+箭头: {text: '{Escape}/jt', label: 箭头, functional: false}
+数学: {text: '{Escape}/sx', label: 数学, functional: false}
+上标: {text: '{Escape}/sb', label: 上标, functional: false}
+下标: {text: '{Escape}/xb', label: 下标, functional: false}
+单位: {text: '{Escape}/dw', label: 单位, functional: false}
+货币: {text: '{Escape}/hb', label: 货币, functional: false}
+拼音: {text: '{Escape}/py', label: 拼音, functional: false}
+注音: {text: '{Escape}/zy', label: 注音, functional: false}
+假名: {text: '{Escape}/jm', label: 假名, functional: false}
+片假名: {text: '{Escape}/pjm', label: 片假名, functional: false}
+韩文: {text: '{Escape}/hw', label: 韩文, functional: false}
+希腊: {text: '{Escape}/xl', label: 希腊, functional: false}
+希腊大写: {text: '{Escape}/xld', label: 大写, functional: false}
+罗马: {text: '{Escape}/lm', label: 罗马, functional: false}
+罗马大写: {text: '{Escape}/lmd', label: 大写, functional: false}
+俄语: {text: '{Escape}/ey', label: 俄语, functional: false}
+俄语大写: {text: '{Escape}/eyd', label: 大写, functional: false}
+表情: {text: '{Escape}/bq', label: 😁}
+一: {text: '{Escape}/1', label: 1}
+二: {text: '{Escape}/2', label: 2}
+三: {text: '{Escape}/3', label: 3}
+四: {text: '{Escape}/4', label: 4}
+五: {text: '{Escape}/5', label: 5}
+六: {text: '{Escape}/6', label: 6}
+七: {text: '{Escape}/7', label: 7}
+八: {text: '{Escape}/8', label: 8}
+九: {text: '{Escape}/9', label: 9}
+零: {text: '{Escape}/0', label: 0}
+十: {text: '{Escape}/10', label: 10}
+分数: {text: '{Escape}/fs', label: 分数, functional: false}
+标点: {text: '{Escape}/bd', label: 标点, functional: false}
+偏旁: {text: '{Escape}/pp', label: 偏旁, functional: false}
+竖标点: {text: '{Escape}/bdz', label: 竖标, functional: false}

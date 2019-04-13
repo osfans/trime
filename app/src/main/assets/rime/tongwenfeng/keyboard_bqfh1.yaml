@@ -1,0 +1,63 @@
+author: "风花絮"
+name: 表情键1
+ascii_mode: 0
+width: 10
+height: *jpgd1
+keys:
+  - {click: '，', height: 26}
+  - {click: '。'}
+  - {click: '？'}
+  - {click: '！'}
+  - {click: '：'}
+  - {click: '、'}
+  - {click: '……'}
+  - {click: '；'}
+  - {label: '更多', click: Keyboard_symbols, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '下页', click: Keyboard_bqfh2, key_text_size: "14"}
+  - {click: '+'}
+  - {click: '-'}
+  - {click: '='}
+  - {click: '·'}
+  - {click: '｀'}
+  - {click: '#'}
+  - {click: '￥'}
+  - {click: '%'}
+  - {click: 'ˉ'}
+  - {click: '——'}
+
+  - {click: '“”{Left}'}
+  - {click: "‘’{Left}"}
+  - {click: 'ˆˇ{Left}'}
+  - {click: '（）{Left}'}
+  - {click: '〈〉{Left}'}
+  - {click: '‹›{Left}'}
+  - {click: '｛｝{Left}'}
+  - {click: '『』{Left}'}
+  - {click: '〖〗{Left}'}
+  - {click: '［］{Left}'}
+  - {click: '《》{Left}'}
+  - {click: '〔〕{Left}'}
+  - {click: '{}{Left}'}
+  - {click: '「」{Left}'}
+  - {click: '【】{Left}'}
+  - {click: '～'}
+  - {click: '@{Return}'}
+  - {click: '*{Return}'}
+  - {click: '&{Return}'}
+  - {click: '﹏'}
+  - {click: '﹋'}
+  - {click: '﹌'}
+  - {click: '︴'}
+  - {click: '々'}
+  - {click: '﹤'}
+  - {click: '｜'}
+  - {click: '‖'}
+  - {click: '‐'}
+  - {click: '￣'}
+  - {click: '¯'}
+  - {click: Keyboard_default, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '中文', click: Keyboard_bqsy1, width: 16.5, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '英文', click: Keyboard_bqsy2, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '表情', click: Keyboard_bqsy3, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '颜文', click: Keyboard_bqsy4, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}

@@ -1,0 +1,13 @@
+name: "藍精靈／Smurfs"
+author: "skoj <skoj@qq.com>"
+text_color: 0xffffffff
+back_color: 0xff1778bf
+border_color: 0xffe0edf5
+label_color: 0xff1778bf
+hilited_text_color: 0xff6dbcdb
+hilited_back_color: 0xff1778bf
+candidate_text_color: 0xfff6f6f6
+comment_text_color: 0xfff6f6f6
+hilited_candidate_text_color: 0xfff6f6f6
+hilited_comment_text_color: 0xfff6f6f6
+hilited_candidate_back_color: 0xff6dbcdb

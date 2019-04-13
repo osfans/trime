@@ -1,0 +1,38 @@
+name: 颜文字键盘-生气
+author: "llx"
+ascii_mode: 1
+width: 25
+height: *jpgd2
+keys:
+  - {click: "╰（‵□′）╯", key_text_size: "14"}
+  - {click: "(*￣︿￣)", key_text_size: "14"}
+  - {click: ">o<", key_text_size: "14"}
+  - {click: "(-`ェ´-怒)", key_text_size: "14"}
+  - {click: "ヽ(‘⌒´メ)ノ", key_text_size: "14"}
+  - {click: "(*｀Ω´*)v", key_text_size: "14"}
+  - {click: "(｡•ˇ‸ˇ•｡)", key_text_size: "14"}
+  - {click: "(怒｀Д´怒)", key_text_size: "14"}
+  - {click: "٩(๑`^´๑)۶", key_text_size: "14"}
+  - {click: "(;｀O´)o", key_text_size: "14"}
+  - {click: "╰_╯", key_text_size: "14"}
+  - {click: "(#｀皿´)<怒怒怒!!!", key_text_size: "10"}
+  - {click: "<(｀^´)>", key_text_size: "14"}
+  - {click: "（｀Δ´）！", key_text_size: "14"}
+  - {click: "ψ(｀∇´)ψ", key_text_size: "14"}
+  - {click: "(；′⌒`)", key_text_size: "14"}
+  - {click: "s(・｀ヘ´・;)ゞ", key_text_size: "12"}
+  - {click: "(▼皿▼#)", key_text_size: "14"}
+  - {click: "￣へ￣", key_text_size: "14"}
+  - {click: "←_←", key_text_size: "14"}
+  - {click: "（╯‵□′）╯︵┴─┴", key_text_size: "9"}
+  - {click: "（▼へ▼メ）", key_text_size: "14"}
+  - {click: "☄ฺ(◣д◢)☄ฺ", key_text_size: "14"}
+  - {click: "→_→", key_text_size: "14"}
+  - {click: Keyboard_default, height: *jpgd3, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoh, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaof, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoa, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoi, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaos, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaom, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: BackSpace, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}

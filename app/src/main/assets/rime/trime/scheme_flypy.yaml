@@ -1,0 +1,17 @@
+# description: |
+#   小鶴飛揚：白底藍字，紅色標明。
+#   根據小鶴雙拼官網圖片製作
+#   http://www.flypy.com/images/mr.png
+name: "小鶴飛揚／flypy"
+author: "Pal.lxk <Pal.lxk@gmail.com>"
+text_color: 0xff000000
+back_color: 0xffffffff
+border_color: 0xffc6c6c6
+label_color: 0xff0080ff
+hilited_text_color: 0xff0080ff
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xff0080ff
+comment_text_color: 0xff0080ff
+hilited_candidate_text_color: 0xffb00000
+hilited_comment_text_color: 0xffb00000
+hilited_candidate_back_color: 0xffffffff

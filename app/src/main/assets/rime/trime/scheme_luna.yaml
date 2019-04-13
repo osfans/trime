@@ -1,0 +1,9 @@
+name: 明月／Luna
+author: 佛振 <chen.sst@gmail.com>
+text_color: 0xff000000
+back_color: 0xffffffff
+border_color: 0xffcccccc
+hilited_text_color: 0xff000000
+hilited_back_color: 0xffffff7f
+hilited_candidate_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff000000

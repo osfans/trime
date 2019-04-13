@@ -1,0 +1,13 @@
+name: "Wii"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xff595757
+back_color: 0xffefefef
+border_color: 0xffefefef
+label_color: 0xffc8c9ca
+hilited_text_color: 0xff33ccff
+hilited_back_color: 0xffefefef
+candidate_text_color: 0xff595757
+comment_text_color: 0xffc8c9ca
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff33ccff

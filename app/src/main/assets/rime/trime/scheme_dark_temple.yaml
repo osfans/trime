@@ -1,0 +1,11 @@
+name: 暗堂／Dark Temple
+author: 佛振 <chen.sst@gmail.com>, based on ir_black
+text_color: 0xffdaf692
+candidate_text_color: 0xffe6e3d8
+back_color: 0xff222222
+border_color: 0xff222222
+hilited_text_color: 0xff9acfff
+hilited_back_color: 0xff222222
+hilited_candidate_text_color: 0xffdaf692
+hilited_candidate_back_color: 0xff333333
+comment_text_color: 0xffff6c60

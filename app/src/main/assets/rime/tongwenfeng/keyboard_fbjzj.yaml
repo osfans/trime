@@ -1,0 +1,40 @@
+name: 风22并击助记
+ascii_mode: 0
+width: 15
+# height: 48
+keys:
+  # 第一行
+  - {label: 'Zh', long_click: 1, click: 'z', hint: 'iang uai',  width: 15.5, key_back_color: bh1, key_text_color: th1}
+  - {label: 'Sh', long_click: 2, click: 's', hint: 'en', width: 12.5, key_back_color: bh1, key_text_color: th1}
+  - {label: 'Ch', long_click: 3, click: 'c', hint: 'eng ie', width: 12, key_back_color: bh1, key_text_color: th1}
+  - {click: Keyboard_a, long_click: Keyboard_a2, composing: 'a', ascii: 'a', hint: 'a ia', swipe_up: IME_last, swipe_right: space_R, width: 20, key_back_color: baoe, key_text_color: taoe}
+  - {label: 'ZF', click: 'f', long_click: select_all, hint: 'er ang', swipe_up: h, width: 12, key_back_color: bh1, key_text_color: th1}
+  - {label: 'SW', long_click: Menu, click: 'w', hint: 'an', swipe_up: '*', width: 12.5, key_back_color: bh1, key_text_color: th1}
+  - {label: 'CM', long_click: DeleteCandidate, click: 'm', hint: 'v uan', swipe_up: 偏旁, swipe_right: 偏旁, swipe_down: Hide, width: 15.5, key_back_color: bh1, key_text_color: th1}
+  # 第二行
+  - {label: 'L', long_click: 4, click: 'l', hint: 'ai ue', width: 15.5, key_back_color: bh2, key_text_color: th2}
+  - {label: 'D', long_click: 5, click: 'd', hint: 'uo', width: 11.5, key_back_color: bh2, key_text_color: th2}
+  - {label: 'Y', long_click: 6, click: 'y', hint: 'in ing', width: 11.5, key_back_color: bh2, key_text_color: th2}
+  - {click: Keyboard_u, long_click: Keyboard_u2, composing: 'u', ascii: 'u', hint: 'u', width: 11.5, key_back_color: baoe, key_text_color: taoe}
+  - {click: Keyboard_i, long_click: Keyboard_i2, composing: 'i', ascii: 'i', hint: 'i', width: 11.5, key_back_color: baoe, key_text_color: taoe}
+  - {label: 'NH', long_click: copy, click: 'n', hint: 'ao', width: 11.5, key_back_color: bh2, key_text_color: th2}
+  - {label: 'J', long_click: paste, click: 'j', hint: 'ou', width: 11.5, key_back_color: bh2, key_text_color: th2}
+  - {label: 'TR', click: 't', long_click: Color_switch, hint: 'ong iong', swipe_up: CommitComment, width: 15.5, key_back_color: bh2, key_text_color: th2}
+  # 第三行
+  - {label: 'PK', long_click: 7, click: 'p', hint: 'ei un', width: 15.5, key_back_color: bh3, key_text_color: th3}
+  - {label: 'Q~', long_click: 8, click: 'q', hint: 'ian', width: 11.5, key_back_color: bh3, key_text_color: th3}
+  - {click: Keyboard_o, long_click: Keyboard_o2, composing: 'o', ascii: 'o', hint: 'uang', width: 11.5, key_back_color: baoe, key_text_color: taoe}
+  - {label: 'G', click: 'g', long_click: "[]{Left}", hint: 'ui', width: 11.5, key_back_color: bh3, key_text_color: th3}
+  - {label: 'B', click: 'b', long_click: "(){Left}", hint: 'iu ua', width: 11.5, key_back_color: bh3, key_text_color: th3}
+  - {click: Keyboard_e, long_click: Keyboard_e2, composing: 'e', ascii: 'e', hint: 'e', swipe_up: Schema_switchen, width: 11.5, key_back_color: baoe, key_text_color: taoe}
+  - {label: 'X', click: 'x', long_click: cut, hint: 'iao', width: 11.5, key_back_color: bh3, key_text_color: th3}
+  - {label: "⌫", click: BackSpace, width: 15.5, key_text_size: "25", key_back_color: bbs, key_text_color: tbs}
+  # 第四行
+  - {label: "'分词", click: Keyboard_number, long_click: Keyboard_fbj, composing: Keyboard_fc, ascii: '.', width: 15.5, key_back_color: bgn, key_text_color: tgn}
+  - {label: '一', click: Keyboard_bqrw, long_click: Theme_settings, composing: Keyboard_k, ascii: 'k', combo: k, width: 11.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+  - {label: '✾', click: Keyboard_v2, long_click: VOICE_ASSIST, composing: Keyboard_v, ascii: 'v', width: 11.5, key_back_color: bh4, key_text_color: th4}
+  - {label: '______', click: space1, long_click: space_R, swipe_up: Keyboard_defaulten, round_corner: *round1, width: 23, key_back_color: bkg, key_text_color: tkg}
+  - {label: '丿', click: Keyboard_r2, long_click: Tab, composing: Keyboard_h, ascii: 'h', combo: h, width: 11.5, key_back_color: bh4, key_text_color: th4}
+  - {label: '丶', click: space_R1, long_click: Zcj, composing: Keyboard_r, ascii: 'r', combo: r, width: 11.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+  - {label: 'Enter', long_click: Return, click: Return, swipe_up: Escape, composing: Keyboard_e0, width: 15.5, round_corner: *round3, key_back_color: benter, key_text_color: tenter}
+

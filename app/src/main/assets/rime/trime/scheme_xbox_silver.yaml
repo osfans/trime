@@ -1,0 +1,13 @@
+name: "銀色叉盒／Xbox Silver"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xff8dc21f
+back_color: 0xffeeeeef
+border_color: 0xffeeeeef
+label_color: 0xffb5f05b
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xffb5f05b
+candidate_text_color: 0xff8dc21f
+comment_text_color: 0xff8dc21f
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff288c44

@@ -1,0 +1,13 @@
+name: "DOTA 2"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff100f12
+border_color: 0xff100f12
+label_color: 0xff8f755c
+hilited_text_color: 0xffdd4118
+hilited_back_color: 0xff100f12
+candidate_text_color: 0xff8f755c
+comment_text_color: 0xff8f755c
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xffdd4118

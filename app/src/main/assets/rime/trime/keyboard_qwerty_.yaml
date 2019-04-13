@@ -1,0 +1,43 @@
+name: 預設30鍵
+author: "osfans <waxaca@163.com>"
+ascii_mode: 0
+width: 10
+height: 55
+lock: true
+keys:
+  - { click: "q", long_click: "!", swipe_up: 1 }
+  - { click: "w", long_click: "@", swipe_up: 2 }
+  - { click: "e", long_click: "#", swipe_up: 3 }
+  - { click: "r", long_click: "$", swipe_up: 4 }
+  - { click: "t", long_click: "%", swipe_up: 5 }
+  - { click: "y", long_click: "^", swipe_up: 6 }
+  - { click: "u", long_click: "&", swipe_up: 7 }
+  - { click: "i", long_click: "*", swipe_up: 8 }
+  - { click: "o", long_click: "(", swipe_up: 9 }
+  - { click: "p", long_click: ")", swipe_up: 0 }
+  - { click: "a", long_click: select_all, swipe_left: Left, swipe_right: Right, swipe_up: Up, swipe_down: Down }
+  - { click: "s", long_click: "~", swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down }
+  - { click: "d", long_click: "-", swipe_down: "_" }
+  - { click: "f", long_click: "+", swipe_down: "=" }
+  - { click: "g", long_click: '\', swipe_down: "|" }
+  - { click: "h", long_click: "[]{Left}", swipe_left: "[", swipe_right: "]" }
+  - { click: "j", long_click: "{}{Left}", swipe_left: "{", swipe_right: "}" }
+  - { click: "k", long_click: '"' }
+  - { click: "l", long_click: "'" }
+  - { click: ";", long_click: ":" }
+  - { click: "z", long_click: "`" }
+  - { click: "x", long_click: cut }
+  - { click: "c", long_click: copy }
+  - { click: "v", long_click: paste }
+  - { click: "b", long_click: Time, swipe_up: Date }
+  - { click: "n", long_click: Insert }
+  - { click: "m", long_click: Delete }
+  - { click: ",", long_click: "<" }
+  - { click: ".", long_click: ">" }
+  - { click: "/", long_click: "?" }
+  - { click: Shift_L }
+  - { click: Keyboard_symbols, long_click: Keyboard_number }
+  - { click: Mode_switch, long_click: Menu }
+  - { click: space, width: 40 }
+  - { click: BackSpace, width: 15 }
+  - { click: Return, long_click: CommitComment, width: 15 }

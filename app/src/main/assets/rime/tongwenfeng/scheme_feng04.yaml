@@ -1,0 +1,12 @@
+author: "风花絮"
+back_color: 0xff7896AA
+border_color: 0xff7896AA
+candidate_text_color: 0xffFFFFFF
+comment_text_color: 0xff969696
+hilited_back_color: 0xff5289A7
+hilited_candidate_back_color: 0xff7896AA
+hilited_candidate_text_color: 0xffFFFF80
+hilited_text_color: 0xff969696
+key_back_color: 0xff5289A7
+name: "往事回忆"
+text_color: 0xffFFFFFF

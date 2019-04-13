@@ -1,0 +1,62 @@
+author: "风花絮"
+name: 表情键2
+ascii_mode: 0
+width: 10
+height: *jpgd1
+keys:
+  - {label: '🙂', click: Keyboard_bqrw1, height: 26, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🌼', click: Keyboard_bqhc1, key_back_color: benter, key_text_color: tenter}
+  - {label: '🎂', click: Keyboard_bqpt1, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🚖', click: Keyboard_bqlx1, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🎉', click: Keyboard_bqhd1, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🔌', click: Keyboard_bqkj1, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🔶', click: Keyboard_bqqt1, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🇨🇳', click: Keyboard_bqqz1, key_back_color: bgn, key_text_color: tgn}
+  - {label: '上页', click: Keyboard_bqhc1, key_text_size: "14"}
+  - {label: '下页', click: Keyboard_bqhc3, key_text_size: "14"}
+  - {click: '🦃'}
+  - {click: '🐔'}
+  - {click: '🐓'}
+  - {click: '🐣'}
+  - {click: '🐤'}
+  - {click: '🐥'}
+  - {click: '🐦'}
+  - {click: '🐧'}
+  - {click: '🕊'}
+  - {click: '🐸'}
+  - {click: '🐊'}
+  - {click: '🐢'}
+  - {click: '🐍'}
+  - {click: '🐲'}
+  - {click: '🐉'}
+  - {click: '🐳'}
+  - {click: '🐋'}
+  - {click: '🐬'}
+  - {click: '🐟'}
+  - {click: '🐠'}
+  - {click: '🐡'}
+  - {click: '🐙'}
+  - {click: '🐚'}
+  - {click: '🦀'}
+  - {click: '🐌'}
+  - {click: '🐛'}
+  - {click: '🐜'}
+  - {click: '🐝'}
+  - {click: '🐞'}
+  - {click: '🕷'}
+  - {click: '🕸'}
+  - {click: '🦂'}
+  - {click: '💐'}
+  - {click: '🌸'}
+  - {click: '💮'}
+  - {click: '🏵'}
+  - {click: '🌹'}
+  - {click: '🌺'}
+  - {click: '🌻'}
+  - {click: '🌼'}
+  - {click: Keyboard_default, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '中文', click: Keyboard_bqsy1, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '英文', click: Keyboard_bqsy2, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '表情', click: Keyboard_bqsy3, width: 16.5, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '颜文', click: Keyboard_bqsy4, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}

@@ -1,0 +1,13 @@
+name: "埃斯巴尼亞／España"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xffc30d23
+border_color: 0xffc30d23
+label_color: 0xffffffff
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xfff7b52c
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xfff7b52c

@@ -1,0 +1,13 @@
+name: "致青春／So Young"
+author: "五磅兔 <zcunlin@foxmail.com>"
+text_color: 0xffd33682
+back_color: 0xfffdf6e3
+border_color: 0xffeee8d5
+label_color: 0xff93a1a1
+candidate_text_color: 0xff657b83
+comment_text_color: 0xff268bd2
+hilited_text_color: 0xff839496
+hilited_back_color: 0xffeee8d5
+hilited_candidate_text_color: 0xffeee8d5
+hilited_comment_text_color: 0xffeee8d5
+hilited_candidate_back_color: 0xff2aa198

@@ -1,0 +1,38 @@
+name: 颜文字键盘-伤心
+author: "llx"
+ascii_mode: 1
+width: 25
+height: *jpgd2
+keys:
+  - {click: "(＞﹏＜)", key_text_size: "14"}
+  - {click: "T_T", key_text_size: "14"}
+  - {click: "⊙︿⊙", key_text_size: "14"}
+  - {click: "〒▽〒", key_text_size: "14"}
+  - {click: "⊙﹏⊙", key_text_size: "14"}
+  - {click: "π_π", key_text_size: "14"}
+  - {click: "(｡•́︿•̀｡)", key_text_size: "14"}
+  - {click: "(ToT)/~~~", key_text_size: "14"}
+  - {click: "╯﹏╰", key_text_size: "14"}
+  - {click: "ಥ_ಥ", key_text_size: "14"}
+  - {click: "(╥╯^╰╥)", key_text_size: "14"}
+  - {click: "(〃′o`)", key_text_size: "14"}
+  - {click: "●﹏●", key_text_size: "14"}
+  - {click: "( •̥́ ˍ •̀ू )", key_text_size: "14"}
+  - {click: "(つд⊂)", key_text_size: "14"}
+  - {click: "心塞(´-ωก`)", key_text_size: "14"}
+  - {click: "(╥﹏╥)", key_text_size: "14"}
+  - {click: "┭┮﹏┭┮", key_text_size: "14"}
+  - {click: "（；´д｀）ゞ", key_text_size: "14"}
+  - {click: "(´;︵;`)", key_text_size: "14"}
+  - {click: "(。﹏。)", key_text_size: "14"}
+  - {click: "┗( T﹏T )┛", key_text_size: "14"}
+  - {click: "QAQ", key_text_size: "14"}
+  - {click: "ヘ(_ _ヘ)", key_text_size: "14"}
+  - {click: Keyboard_default, height: *jpgd3, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoh, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaof, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoa, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoi, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaos, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaom, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}

@@ -1,0 +1,55 @@
+name: 註音鍵盤
+author: "皛筱晓小笨鱼"
+ascii_mode: 0
+ascii_keyboard: letter
+width: 10
+height: 44
+keys:
+  - { label: "ㄅ", long_click: "!", click: "1" }
+  - { label: "ㄉ", long_click: "@", click: "2" }
+  - { label: "ˇ", long_click: "#", click: "3" }
+  - { label: "ˋ", long_click: "$", click: "4" }
+  - { label: "ㄓ", long_click: "%", click: "5" }
+  - { label: "ˊ", long_click: "^", click: "6" }
+  - { label: "˙", long_click: "&", click: "7" }
+  - { label: "ㄚ", long_click: "*", click: "8" }
+  - { label: "ㄞ", long_click: "(", click: "9" }
+  - { label: "ㄢ", long_click: ")", click: "0" }
+  - { label: "ㄆ", long_click: "_", click: q }
+  - { label: "ㄊ", long_click: "-", click: w }
+  - { label: "ㄍ", long_click: "+", click: e }
+  - { label: "ㄐ", long_click: "=", click: r }
+  - { label: "ㄔ", long_click: "|", click: t }
+  - { label: "ㄗ", long_click: '\', click: y }
+  - { label: "ㄧ", long_click: "[", click: u }
+  - { label: "ㄛ", long_click: "]", click: i }
+  - { label: "ㄟ", long_click: "{", click: o }
+  - { label: "ㄣ", long_click: "}", click: p }
+  - { label: "ㄇ", long_click: "`", click: a }
+  - { label: "ㄋ", long_click: Up, click: s }
+  - { label: "ㄎ", long_click: "~", click: d }
+  - { label: "ㄑ", long_click: "!", click: f }
+  - { label: "ㄕ", click: g, long_click: select_all }
+  - { label: "ㄘ", click: h, long_click: Home }
+  - { label: "ㄨ", click: j, long_click: End }
+  - { label: "ㄜ", click: k, long_click: Page_Up }
+  - { label: "ㄠ", click: l, long_click: Page_Down }
+  - { label: "ㄤ", long_click: ":", click: ";" }
+  - { label: "ㄈ", click: z, long_click: Left }
+  - { label: "ㄌ", click: x, long_click: Down }
+  - { label: "ㄏ", click: c, long_click: Right }
+  - { label: "ㄒ", click: v, long_click: cut }
+  - { label: "ㄖ", click: b, long_click: copy }
+  - { label: "ㄙ", click: n, long_click: paste }
+  - { label: "ㄩ", click: m, long_click: Insert }
+  - { label: "ㄝ", long_click: "<", click: "," }
+  - { label: "ㄡ", long_click: ">", click: "." }
+  - { label: "ㄥ", long_click: "?", click: "/" }
+  - { click: Shift_L, label: 換檔, send_bindings: false }
+  - { click: Mode_switch, long_click: Menu }
+  - { click: Keyboard_symbols, long_click: Keyboard_number }
+  - { click: space, width: 30 }
+  - { label: "ㄦ", long_click: '"', click: "-" }
+  - { long_click: "。", click: "，" }
+  - { click: BackSpace, long_click: Escape, width: 10 }
+  - { click: Return, long_click: CommitComment, width: 10 }

@@ -1,0 +1,10 @@
+name: 星際我爭霸／StarCraft
+author: Contralisk <contralisk@gmail.com>, original artwork by Blizzard Entertainment
+text_color: 0xff88aacc
+candidate_text_color: 0xff55bb30
+back_color: 0xff000000
+border_color: 0xffa01010
+hilited_text_color: 0xff96cbfe
+hilited_back_color: 0xff000000
+hilited_candidate_text_color: 0xffa8ff60
+hilited_candidate_back_color: 0xff000000

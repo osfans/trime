@@ -1,0 +1,13 @@
+name: "星際爭霸Ⅱ／StarCraft Ⅱ"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff0a1929
+border_color: 0xff464b53
+label_color: 0xffffffff
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xff0a1017
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff1eadef

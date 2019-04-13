@@ -1,0 +1,43 @@
+name: 倉頡五代鍵盤
+author: "皛筱晓小笨鱼"
+ascii_mode: 0
+width: 10
+height: 55
+keys:
+  - { label: "手", long_click: "_", click: q }
+  - { label: "田", long_click: "-", click: w }
+  - { label: "水", long_click: "+", click: e }
+  - { label: "口", long_click: "=", click: r }
+  - { label: "廿", long_click: "|", click: t }
+  - { label: "卜", long_click: '\', click: y }
+  - { label: "山", long_click: "[", click: u }
+  - { label: "戈", long_click: "]", click: i }
+  - { label: "人", long_click: "{", click: o }
+  - { label: "心", long_click: "}", click: p }
+  - { long_click: ":", click: ";" }
+  - { label: "日", long_click: "`", click: a }
+  - { label: "尸", long_click: Up, click: s }
+  - { label: "木", long_click: "~", click: d }
+  - { label: "火", long_click: "!", click: f }
+  - { label: "土", long_click: "@", click: g }
+  - { label: "竹", long_click: "#", click: h }
+  - { label: "十", long_click: "$", click: j }
+  - { label: "大", long_click: "%", click: k }
+  - { label: "中", long_click: "^", click: l }
+  - { long_click: "?", click: "/" }
+  - { label: "符", click: z, long_click: Left }
+  - { label: "難", click: x, long_click: Down }
+  - { label: "金", click: c, long_click: Right }
+  - { label: "女", long_click: "&", click: v }
+  - { label: "月", long_click: "*", click: b }
+  - { label: "弓", long_click: "(", click: n }
+  - { label: "一", long_click: ")", click: m }
+  - { long_click: "<", click: "," }
+  - { click: BackSpace, long_click: Escape, width: 10 }
+  - { click: Hide }
+  - { click: Shift_L, send_bindings: false }
+  - { click: Keyboard_symbols, long_click: Keyboard_number }
+  - { click: space, width: 40 }
+  - { click: Mode_switch, long_click: Menu }
+  - { long_click: ">", click: "." }
+  - { click: Return, long_click: CommitComment, width: 10 }

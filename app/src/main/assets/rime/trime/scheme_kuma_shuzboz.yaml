@@ -1,0 +1,13 @@
+name: "熊出沒／Kuma Shuzboz"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xff000000
+back_color: 0xfff8b62d
+border_color: 0xfff8b62d
+label_color: 0xffffffff
+hilited_text_color: 0xfff8b62d
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff000000

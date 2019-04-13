@@ -1,0 +1,10 @@
+name: "清風／Cool Breeze"
+author: "skoj <skoj@qq.com>"
+text_color: 0xffFF0000
+back_color: 0xffFBFBFF
+border_color: 0xffAAAAFF
+hilited_text_color: 0xffCE0000
+hilited_back_color: 0xffFBFBFF
+candidate_text_color: 0xff009100
+hilited_candidate_text_color: 0xff3A006F
+hilited_candidate_back_color: 0xffACD6FF

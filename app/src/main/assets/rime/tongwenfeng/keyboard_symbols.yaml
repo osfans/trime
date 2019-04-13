@@ -1,0 +1,53 @@
+#符号键盘之二
+author: "暖暖"
+name: 各种符号
+width: 12
+height: *jpgd5
+ascii_mode: 0
+keys:
+  - {label: '🙂', click: Keyboard_bqrw1, height: 26, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🌼', click: Keyboard_bqhc1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🎂', click: Keyboard_bqpt1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🚖', click: Keyboard_bqlx1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🎉', click: Keyboard_bqhd1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🔌', click: Keyboard_bqkj1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🔶', click: Keyboard_bqqt1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '🇨🇳', click: Keyboard_bqqz1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '#!?', click: Keyboard_bqfh1, width: 10, key_back_color: bgn, key_text_color: tgn}
+  - {label: '更多', click: Keyboard_symbols, width: 10, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+
+  - {click: 符号, long_click: 一, key_text_size: "16"}
+  - {click: 电脑, long_click: 二, key_text_size: "16"}
+  - {click: 天气, long_click: 三, key_text_size: "16"}
+  - {click: 音乐, long_click: 四, key_text_size: "16"}
+  - {click: 单位, long_click: 五, key_text_size: "16"}
+  - {click: 数学, long_click: 分数, key_text_size: "18", symbol_text_size: '8'}
+  - {click: 八卦, long_click: 易经, key_text_size: "18", symbol_text_size: '8'}
+  - {click: space1, width: 16, key_back_color: bgn, key_text_color: tgn}
+
+  - {click: 星号, long_click: 六, key_text_size: "16"}
+  - {click: 方块, long_click: 七, key_text_size: "16"}
+  - {click: 几何, long_click: 八, key_text_size: "16"}
+  - {click: 箭头, long_click: 九, key_text_size: "16"}
+  - {click: 货币, long_click: 十, key_text_size: "16"}
+  - {click: 下标, long_click: 上标, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 天体, long_click: 星座, key_text_size: "16", symbol_text_size: '8'}
+  - {label: '123', click: Keyboard_number, long_click: Schema_switchen, composing: Page_Up, width: 16, key_back_color: bgn, key_text_color: tgn}
+
+  - {click: 标点, long_click: 零, key_text_size: "16"}
+  - {click: 拼音, long_click: 竖标点, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 注音, long_click: 偏旁, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 韩文, long_click: 表情, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 假名, long_click: 片假名, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 麻将, long_click: 骰子, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 象棋, long_click: 扑克, key_text_size: "16", symbol_text_size: '8'}
+  - {click: BackSpace, composing: Escape, width: 16, key_back_color: bbs, key_text_color: tbs}
+
+  - {click: Keyboard_default, composing: Page_Down, width: 16, key_back_color: bgn, key_text_color: tgn}
+  - {click: '备用', composing: Left, width: 16, key_back_color: bgn, key_text_color: tgn}
+  - {click: 希腊, long_click: 希腊大写, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 罗马, long_click: 罗马大写, key_text_size: "16", symbol_text_size: '8'}
+  - {click: 俄语, long_click: 俄语大写, key_text_size: "16", symbol_text_size: '8'}
+  - {click: '备用', composing: Right, width: 16, key_back_color: bgn, key_text_color: tgn}
+  - {click: Return, long_click: Menu, width: 16, key_back_color: benter, key_text_color: tenter}
+

@@ -1,0 +1,9 @@
+name: 墨池／Ink
+author: 佛振 <chen.sst@gmail.com>
+text_color: 0xff000000
+back_color: 0xffffffff
+border_color: 0xff000000
+hilited_text_color: 0xff000000
+hilited_back_color: 0xffdddddd
+hilited_candidate_text_color: 0xffffffff
+hilited_candidate_back_color: 0xff000000

@@ -1,0 +1,14 @@
+author: "风花絮"
+back_color: 0xff000000
+border_color: 0xff000000
+candidate_text_color: 0xffFFFFFF
+comment_text_color: 0xffFFFFFF
+hilited_back_color: 0xff000000
+hilited_candidate_back_color: 0xff000000
+hilited_candidate_text_color: 0xffFEF94D
+hilited_text_color: 0xffFFFFFF
+key_back_color: 0xffFEF94D
+name: "黄黑"
+text_color: 0xff000000
+key_text_color: 0xff000000 #按键文本
+key_symbol_color: 0xff000000 #按键符号

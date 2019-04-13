@@ -1,0 +1,36 @@
+name: 颜文字键盘-惊讶
+author: "llx"
+ascii_mode: 1
+width: 25
+height: *jpgd2
+keys:
+  - {click: "⊙_⊙", key_text_size: "14"}
+  - {click: "d(ŐдŐ๑)", key_text_size: "14"}
+  - {click: "Σ( ° △ °|||)︴", key_text_size: "14"}
+  - {click: "(((φ(◎ロ◎;)φ)))", key_text_size: "10"}
+  - {click: "⊙▽⊙", key_text_size: "14"}
+  - {click: "(๑ŐдŐ)b", key_text_size: "14"}
+  - {click: "╭(°A°`)╮", key_text_size: "14"}
+  - {click: "(๑òᆺó๑)", key_text_size: "14"}
+  - {click: "⊙ω⊙", key_text_size: "14"}
+  - {click: "Σ(っ °Д °;)っ", key_text_size: "14"}
+  - {click: " (ﾟДﾟ≡ﾟдﾟ)!?", key_text_size: "14"}
+  - {click: "( *・ω・)✄╰ひ╯", key_text_size: "10"}
+  - {click: "(⊙x⊙;)", key_text_size: "14"}
+  - {click: "┌(。Д。)┐", key_text_size: "14"}
+  - {click: "(°ー°〃)", key_text_size: "14"}
+  - {click: "备用", key_text_size: "14"}
+  - {click: "︽⊙_⊙︽", key_text_size: "14"}
+  - {click: "!!!∑(°Д°ノ)ノ", key_text_size: "14"}
+  - {click: "(๑ŐдŐ)b☆d(ŐдŐ๑)", width: 50, key_text_size: "14"}
+  - {click: "Σ⊙▃⊙川", key_text_size: "14"}
+  - {click: "ヽ(*。>Д<)o゜", key_text_size: "14"}
+  - {click: "━((*′д｀)爻(′д｀*))━!!!!", width: 50, key_text_size: "14"}
+  - {click: Keyboard_default, height: *jpgd3, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoh, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaof, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoa, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoi, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaos, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaom, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}

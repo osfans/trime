@@ -1,0 +1,45 @@
+author: "风花絮"
+name: 表情键3
+ascii_mode: 1
+width: 20
+height: *jpgd1
+keys:
+  - {click: ',', height: 26}
+  - {click: '.'}
+  - {click: '?'}
+  - {click: '!'}
+  - {label: '更多', click: Keyboard_symbols, width: 20, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {click: ':'}
+  - {click: '/'}
+  - {click: '@'}
+  - {click: ';'}
+  - {click: '…'}
+
+  - {click: '"'}
+  - {click: "'"}
+  - {click: '~'}
+  - {click: '*'}
+  - {click: '&'}
+
+  - {click: '^'}
+  - {click: '$'}
+  - {click: '\'}
+  - {click: '|'}
+  - {click: '#'}
+
+  - {click: '(){Left}', width: 10}
+  - {click: '<>{Left}', width: 10}
+  - {click: '{}{Left}', width: 10}
+  - {click: '[]{Left}', width: 10}
+  - {click: '`', width: 10}
+  - {click: '%', width: 10}
+  - {click: '+', width: 10}
+  - {click: '-', width: 10}
+  - {click: '=', width: 20}
+
+  - {click: Keyboard_default, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '中文', click: Keyboard_bqsy1, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '英文', click: Keyboard_bqsy2, width: 16.5, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '表情', click: Keyboard_bqsy3, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '颜文', click: Keyboard_bqsy4, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}

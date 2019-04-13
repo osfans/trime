@@ -1,0 +1,14 @@
+author: "风花絮"
+back_color: 0xff599852
+border_color: 0xff599852
+candidate_text_color: 0xffffffff
+comment_text_color: 0xff969696
+hilited_back_color: 0xff599852
+hilited_candidate_back_color: 0xff599852
+hilited_candidate_text_color: 0xfff5a54b
+hilited_text_color: 0xffffffff
+key_back_color: 0xffffffff
+name: "一叶清荷"
+off_key_text_color: 0xfff5a54b
+text_color: 0xff6aa052
+key_text_color: 0xff599852 #按键文本

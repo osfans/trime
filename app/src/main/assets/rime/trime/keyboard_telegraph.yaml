@@ -1,0 +1,28 @@
+name: 電碼
+author: 熊貓阿Bo
+ascii_mode: 0
+width: 20
+keys:
+  - { click: "@" }
+  - { click: "7" }
+  - { click: "8" }
+  - { click: "9" }
+  - { click: "、" }
+  - { click: "!", label: "！" }
+  - { click: "4" }
+  - { click: "5" }
+  - { click: "6" }
+  - { click: ";", label: "；" }
+  - { click: "?", label: "？" }
+  - { click: "1" }
+  - { click: "2" }
+  - { click: "3" }
+  - { click: ",", label: "，" }
+  - { click: '"', label: "“”{Left}" }
+  - { click: ":", label: "：" }
+  - { click: "0" }
+  - { click: ".", label: "。" }
+  - { click: BackSpace }
+  - { click: Keyboard_letter, long_click: Menu }
+  - { click: space, width: 60 }
+  - { click: Return }

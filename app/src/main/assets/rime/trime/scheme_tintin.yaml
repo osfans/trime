@@ -1,0 +1,13 @@
+name: "丁丁／ Tintin"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xff0095d9
+border_color: 0xff0095d9
+label_color: 0xffffffff
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_text_color: 0xff91d8f7
+hilited_back_color: 0xff0095d9
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xfff16421

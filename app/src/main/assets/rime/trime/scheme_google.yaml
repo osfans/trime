@@ -1,0 +1,10 @@
+name: 谷歌／Google
+author: skoj <skoj@qq.com>
+text_color: 0xff666666
+candidate_text_color: 0xff000000
+back_color: 0xffFFFFFF
+border_color: 0xffE2E2E2
+hilited_text_color: 0xff000000
+hilited_back_color: 0xffFFFFFF
+hilited_candidate_text_color: 0xffFFFFFF
+hilited_candidate_back_color: 0xff3975CE

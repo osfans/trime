@@ -1,0 +1,30 @@
+name: 預設數字
+author: "osfans <waxaca@163.com>"
+width: 20
+height: 44
+keys:
+  - { click: "+" }
+  - { click: "1" }
+  - { click: "2" }
+  - { click: "3" }
+  - { click: "#" }
+  - { click: "-" }
+  - { click: "4" }
+  - { click: "5" }
+  - { click: "6" }
+  - { click: "%" }
+  - { click: "*" }
+  - { click: "7" }
+  - { click: "8" }
+  - { click: "9" }
+  - { click: ":" }
+  - { click: "/" }
+  - { click: "±" }
+  - { click: "0" }
+  - { click: "." }
+  - { click: "," }
+  - { click: "=" }
+  - { click: Keyboard_default, long_click: Keyboard_symbols }
+  - { click: space }
+  - { click: BackSpace }
+  - { click: Return }

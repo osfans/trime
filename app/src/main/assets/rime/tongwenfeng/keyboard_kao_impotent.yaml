@@ -1,0 +1,39 @@
+name: 颜文字键盘-无奈
+author: "llx"
+ascii_mode: 1
+width: 25
+height: *jpgd2
+keys:
+  - {click: "=_=", key_text_size: "14"}
+  - {click: "╮(╯_╰)╭", key_text_size: "14"}
+  - {click: "（︶︿︶）", key_text_size: "14"}
+  - {click: "_(:з」∠)_", key_text_size: "14"}
+  - {click: "@_@", key_text_size: "14"}
+  - {click: "╮(╯▽╰)╭", key_text_size: "14"}
+  - {click: "(＠￣ー￣＠)", key_text_size: "14"}
+  - {click: "_(:3」∠❀)_", key_text_size: "14"}
+  - {click: "눈_눈", key_text_size: "14"}
+  - {click: "╭(╯ε╰)╮", key_text_size: "14"}
+  - {click: "(ー_ー)!!", key_text_size: "14"}
+  - {click: "_(:D)∠)_", key_text_size: "14"}
+  - {click: "o_O", key_text_size: "14"}
+  - {click: "╭(╯^╰)╮", key_text_size: "14"}
+  - {click: "(；一_一)", key_text_size: "14"}
+  - {click: "´_>`", key_text_size: "14"}
+  - {click: "-_-#", key_text_size: "14"}
+  - {click: "┑(￣Д ￣)┍", key_text_size: "14"}
+  - {click: "≡￣﹏￣≡", key_text_size: "14"}
+  - {click: "○|￣|_", key_text_size: "14"}
+  - {click: "-_-||", key_text_size: "14"}
+  - {click: "ㄟ( ▔, ▔ )ㄏ", key_text_size: "14"}
+  - {click: "( ＿ ＿)ノ｜壁", key_text_size: "14"}
+  - {click: "▄█▀█●", key_text_size: "14"}
+  - {click: Keyboard_default, height: *jpgd3, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoh, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaof, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoa, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoi, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaos, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaom, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+

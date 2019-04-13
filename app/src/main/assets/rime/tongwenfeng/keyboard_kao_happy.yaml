@@ -1,0 +1,37 @@
+name: 颜文字键盘-开心
+author: "llx"
+ascii_mode: 1
+width: 25
+height: *jpgd2
+keys:
+  - {click: "^_^", key_text_size: "14"}
+  - {click: "^ω^", key_text_size: "14"}
+  - {click: "^o^", key_text_size: "14"}
+  - {click: "~\\(≧▽≦)/~", key_text_size: "14"}
+  - {click: "*^_^*", key_text_size: "14"}
+  - {click: "↖(^ω^)↗", key_text_size: "14"}
+  - {click: "(^o^)／", key_text_size: "14"}
+  - {click: "(=^▽^=)", key_text_size: "14"}
+  - {click: "=^_^=", key_text_size: "14"}
+  - {click: "(*^ω^*)", key_text_size: "14"}
+  - {click: "٩(๑^o^๑)۶", key_text_size: "14"}
+  - {click: "o(￣▽￣)o", key_text_size: "14"}
+  - {click: "Y(^_^)Y", key_text_size: "14"}
+  - {click: "٩( 'ω' )و", key_text_size: "14"}
+  - {click: "╰(*´︶`*)╯", key_text_size: "14"}
+  - {click: "*罒▽罒*", key_text_size: "14"}
+  - {click: "ヾ ^_^♪", key_text_size: "14"}
+  - {click: "=￣ω￣=", key_text_size: "14"}
+  - {click: "︿(￣︶￣)︿", key_text_size: "14"}
+  - {click: "(´▽｀)ノ♪", key_text_size: "14"}
+  - {click: "乁( ˙ ω˙乁)", key_text_size: "14"}
+  - {click: "✧*｡٩(ˊωˋ*)و✧*｡", key_text_size: "10"}
+  - {click: "～(￣▽￣～)(～￣▽￣)～", width: 50, key_text_size: "14"}
+  - {click: Keyboard_default, height: *jpgd3, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaoh, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}
+  - {click: Keyboard_kaof, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoa, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaoi, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaos, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_kaom, width: 12.5, key_text_size: "16", key_back_color: bgn, key_text_color: tgn}
+  - {click: BackSpace, width: 12.5, key_text_size: "16", key_back_color: benter, key_text_color: tenter}

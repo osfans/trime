@@ -1,0 +1,13 @@
+name: "胡蘿菔／Gholabok"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xffffffff
+back_color: 0xffe83929
+border_color: 0xffe83929
+label_color: 0xffffffff
+hilited_text_color: 0xffffffff
+hilited_back_color: 0xff007b43
+candidate_text_color: 0xffffffff
+comment_text_color: 0xffffffff
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xffed6d3d

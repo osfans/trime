@@ -1,0 +1,33 @@
+ascii_mode: 1
+author: flypy.com
+name: "编辑键盘"
+width: 20.25
+height: *jpgd5
+keys:
+  - {click: select_all}
+  - {click: Left1}
+  - {click: Up}
+  - {click: Right1}
+  - {click: space1, key_back_color: gnb, key_text_color: gnt, width: 19}
+  - {click: cut}
+  - {click: Left}
+  - {click: Shift_L2}
+  - {click: Right}
+  - {click: Keyboard_number, key_back_color: gnb, key_text_color: gnt, width: 19}
+  - {click: copy}
+  - {click: Home}
+  - {click: Down}
+  - {click: End}
+  - {click: BackSpace, key_back_color: gnb, key_text_color: gnt, width: 19}
+  - {click: paste}
+  - {click: undo}
+  - {click: Tab1}
+  - {click: redo}
+  - {click: Return, key_back_color: gnb, key_text_color: gnt, width: 19}
+  - {click: Keyboard_default, height: 26.5, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+  - {label: '中文', click: Keyboard_bqsy1, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '英文', click: Keyboard_bqsy2, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '表情', click: Keyboard_bqsy3, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {label: '颜文', click: Keyboard_bqsy4, width: 16.5, key_text_size: "14", key_back_color: bgn, key_text_color: tgn}
+  - {click: Keyboard_last, width: 17, key_text_size: "14", key_back_color: benter, key_text_color: tenter}
+

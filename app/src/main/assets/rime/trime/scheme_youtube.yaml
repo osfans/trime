@@ -1,0 +1,13 @@
+name: "YouTube"
+author: "Patricivs <ipatrickmac@me.com>"
+text_color: 0xff000000
+back_color: 0xffdedede
+border_color: 0xffdedede
+label_color: 0xff000000
+hilited_text_color: 0xffc30d23
+hilited_back_color: 0xffffffff
+candidate_text_color: 0xff000000
+comment_text_color: 0xff000000
+hilited_candidate_text_color: 0xffffffff
+hilited_comment_text_color: 0xffffffff
+hilited_candidate_back_color: 0xffc30d23
