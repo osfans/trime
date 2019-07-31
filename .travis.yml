@@ -1,11 +1,12 @@
 language: android
+dist: trusty
 script:
 - git fetch origin --tags
 - "./gradlew assembleRelease"
 git:
   submodules: true
 jdk:
-- oraclejdk8
+- openjdk9
 before_install:
 - openssl aes-256-cbc -K $encrypted_26e1bb6b6b4a_key -iv $encrypted_26e1bb6b6b4a_iv
   -in keystore.tar.enc -out keystore.tar -d
