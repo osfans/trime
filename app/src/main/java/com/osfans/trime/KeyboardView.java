@@ -344,7 +344,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     try {
       findStateDrawableIndex =
           StateListDrawable.class.getMethod(
-              Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT > Build.VERSION_CODES.P?  "findStateDrawableIndex" : "getStateDrawableIndex",
+              Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT >= Build.VERSION_CODES.Q ?  "findStateDrawableIndex" : "getStateDrawableIndex",
               int[].class);
       getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
     } catch (Exception ex) {
