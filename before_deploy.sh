@@ -6,6 +6,7 @@ FILE=$(ls */*.apk)
 APKNAME=$(basename $FILE)
 SHA256=$(sha256sum $FILE | head -c 64)
 popd
+echo "theme: jekyll-theme-cayman" > $DIR/_config.yml
 cat > $DIR/README.md <<EOF
 # 同文最新測試版  
 **文件名：** $APKNAME [點擊下載]($FILE)  
@@ -16,6 +17,6 @@ cat > $DIR/README.md <<EOF
 **類型：** 測試版  
 **更新於：** $(date +%Y年%m月%d日)  
 
-## 更新內容
-$(git log --no-merges $(git describe --tags HEAD^ --abbrev=0).. --format="* %s [%h](https://github.com/osfans/trime/commit/%H)"|sort -r)
+## 更新日志
+$(git log --no-merges $(git describe --tags HEAD^ --abbrev=0).. --format="* %s [%h](https://github.com/osfans/trime/commit/%H)")
 EOF
