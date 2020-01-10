@@ -330,11 +330,15 @@ target_include_directories(opencc_phrase_extract BEFORE PRIVATE
   OpenCC/deps/tclap-1.2.1
   )
 
+# rime plugins
+set(rime_extra_modules "")
+unset(rime_plugins_sources)
+
 # rime
 #add_subdirectory(librime)
 find_package (Threads)
 file(GLOB_RECURSE RIME_SOURCES librime/src/*.cc)
-add_library(rime SHARED ${RIME_SOURCES})
+add_library(rime SHARED ${RIME_SOURCES} ${rime_plugins_sources})
 target_link_libraries(rime
   opencc
   yaml-cpp-static
@@ -349,7 +353,7 @@ target_compile_definitions(rime PRIVATE
   RIME_VERSION="1.5.3"
   RIME_ENABLE_LOGGING
   RIME_EXPORTS
-  RIME_EXTRA_MODULES=""
+  RIME_EXTRA_MODULES=${rime_extra_modules}
   )
 if(ANDROID)
   target_link_libraries(rime log atomic)
