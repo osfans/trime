@@ -334,6 +334,16 @@ target_include_directories(opencc_phrase_extract BEFORE PRIVATE
 set(rime_extra_modules "")
 unset(rime_plugins_sources)
 
+## librime-lua
+include_directories(librime-lua-deps/lua5.3)
+set(rime_extra_modules "${rime_extra_modules},Q(lua)")
+file(GLOB_RECURSE rime_plugin_sources
+  librime-lua/src/*.cc
+  librime-lua/src/*.c
+  librime-lua-deps/*.cc
+  librime-lua-deps/*.c)
+set(rime_plugins_sources ${rime_plugins_sources} ${rime_plugin_sources})
+
 # rime
 #add_subdirectory(librime)
 find_package (Threads)
