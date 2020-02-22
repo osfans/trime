@@ -47,6 +47,13 @@
             android:title="@string/key_vibrate_duration"
             android:max="100"
             android:defaultValue="10" />
+        <com.osfans.trime.SeekBarPreference
+            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:key="key_vibrate_amplitude"
+            android:title="@string/key_vibrate_amplitude"
+            android:max="255"
+            android:defaultValue="0"/>
+<!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
         <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
         <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
         <com.osfans.trime.SeekBarPreference

@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -46,7 +47,7 @@ public class Pref extends PreferenceActivity
 
   private static String TAG = Pref.class.getSimpleName();
   private ProgressDialog mProgressDialog;
-  private Preference mKeySoundVolumePref, mKeyVibrateDurationPref;
+  private Preference mKeySoundVolumePref, mKeyVibrateDurationPref,mKeyVibrateAmplitudePref;
 
   private String getCommit(String version) {
     String commit;
@@ -100,8 +101,15 @@ public class Pref extends PreferenceActivity
     mProgressDialog.setCancelable(false);
     mKeySoundVolumePref = findPreference("key_sound_volume");
     mKeyVibrateDurationPref = findPreference("key_vibrate_duration");
+    mKeyVibrateAmplitudePref = findPreference("key_vibrate_amplitude");
     mKeySoundVolumePref.setEnabled(prefs.getBoolean("key_sound", false));
     mKeyVibrateDurationPref.setEnabled(prefs.getBoolean("key_vibrate", false));
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        mKeyVibrateAmplitudePref.setEnabled(prefs.getBoolean("key_vibrate", false));
+    }
+    else {
+        mKeyVibrateAmplitudePref.setEnabled(false);
+    }
     boolean isQQInstalled = Function.isAppAvailable(this, "com.tencent.mobileqq")
                          || Function.isAppAvailable(this, "com.tencent.mobileqqi")
                          || Function.isAppAvailable(this, "com.tencent.qq.kddi")
@@ -129,7 +137,9 @@ public class Pref extends PreferenceActivity
       case "key_vibrate":
         if (trime != null) trime.resetEffect();
         value = prefs.getBoolean(key, false);
+        boolean isapi26andabove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
         mKeyVibrateDurationPref.setEnabled(value);
+        mKeyVibrateAmplitudePref.setEnabled(isapi26andabove && value);
         break;
       case "key_sound_volume":
         if (trime != null) {
@@ -138,6 +148,7 @@ public class Pref extends PreferenceActivity
         }
         break;
       case "key_vibrate_duration":
+      case "key_vibrate_amplitude":
         if (trime != null) {
           trime.resetEffect();
           trime.vibrateEffect();
