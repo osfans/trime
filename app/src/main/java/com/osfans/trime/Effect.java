@@ -57,11 +57,13 @@ class Effect {
     durationLong = duration * 1L;
     amplitude = pref.getInt("key_vibrate_amplitude",amplitude);
     vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
-    if (vibrateOn && (vibrator == null)) {
-      vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-    }
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      vibrationeffect = VibrationEffect.createOneShot(durationLong, (amplitude == 0) ? VibrationEffect.DEFAULT_AMPLITUDE : amplitude);
+    if(vibrateOn) {
+      if  (vibrator == null) {
+        vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrationeffect = VibrationEffect.createOneShot(durationLong, (amplitude == 0) ? VibrationEffect.DEFAULT_AMPLITUDE : amplitude);
+        }
     }
 
     volume = pref.getInt("key_sound_volume", volume);
