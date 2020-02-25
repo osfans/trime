@@ -21,6 +21,9 @@ height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 - 測試版
 [點擊下載](https://github.com/osfans/trime/tree/gh-pages)
 
+- 配置文件
+[Rimerc](https://github.com/Bambooin/rimerc)
+
 ## 鳴謝/Credits
 - 開發：[osfans](https://github.com/osfans)
 - 貢獻：[boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)、[senchi96](https://github.com/senchi96)、[heiher](https://github.com/heiher)
