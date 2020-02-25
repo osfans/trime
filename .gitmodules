@@ -25,3 +25,13 @@
 [submodule "app/src/main/jni/libiconv"]
 	path = app/src/main/jni/libiconv
 	url = https://github.com/osfans/libiconv-gnu.git
+[submodule "app/src/main/jni/librime-lua"]
+	path = app/src/main/jni/librime-lua
+	url = https://github.com/hchunhui/librime-lua
+[submodule "app/src/main/jni/librime-lua-deps"]
+	path = app/src/main/jni/librime-lua-deps
+	url = https://github.com/hchunhui/librime-lua
+	branch = thirdparty
+[submodule "app/src/main/jni/librime-octagram"]
+	path = app/src/main/jni/librime-octagram
+	url = https://github.com/lotem/librime-octagram.git
