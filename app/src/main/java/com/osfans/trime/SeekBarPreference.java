@@ -80,6 +80,9 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
         progress = 10 * progress + 10;
         unit = getContext().getString(R.string.key_vibrate_duration_unit);
         break;
+      case "key_vibrate_amplitude":
+        unit ="";
+        break;
     }
     return progress + unit;
   }

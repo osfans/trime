@@ -25,12 +25,16 @@ import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.view.KeyEvent;
 import java.util.Locale;
+import android.os.VibrationEffect;
+import android.os.Build;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
 class Effect {
   private static final int MAX_VOLUME = 101; //100%音量時只響一下，暫從100改成101
   private int duration = 10;
   private long durationLong;
+  private VibrationEffect vibrationeffect;
+  private int amplitude = -1;
   private int volume = 100;
   private float volumeFloat;
 
@@ -51,9 +55,15 @@ class Effect {
     SharedPreferences pref = Function.getPref(context);
     duration = pref.getInt("key_vibrate_duration", duration);
     durationLong = duration * 1L;
+    amplitude = pref.getInt("key_vibrate_amplitude",amplitude);
     vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
-    if (vibrateOn && (vibrator == null)) {
-      vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if(vibrateOn) {
+      if  (vibrator == null) {
+        vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrationeffect = VibrationEffect.createOneShot(durationLong, (amplitude == 0) ? VibrationEffect.DEFAULT_AMPLITUDE : amplitude);
+        }
     }
 
     volume = pref.getInt("key_sound_volume", volume);
@@ -79,7 +89,12 @@ class Effect {
   }
 
   public void vibrate() {
-    if (vibrateOn && (vibrator != null)) vibrator.vibrate(durationLong);
+    if (vibrateOn && (vibrator != null)) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && (vibrationeffect != null))
+        vibrator.vibrate(vibrationeffect);
+      else
+        vibrator.vibrate(durationLong);// deprecated in api level 26
+    }
   }
 
   public void playSound(final int code) {
