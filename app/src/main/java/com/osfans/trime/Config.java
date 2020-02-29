@@ -78,6 +78,10 @@ public class Config {
     return themeName;
   }
 
+  public boolean getSyncBackground(){
+    return mPref.getBoolean("pref_sync_bg",false);
+  }
+
   public String getSharedDataDir() {
     return mPref.getString("shared_data_dir", sharedDataDir);
   }

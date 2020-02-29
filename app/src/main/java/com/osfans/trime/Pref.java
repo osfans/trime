@@ -22,6 +22,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +42,10 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import org.ocpsoft.prettytime.PrettyTime;
+
+import java.util.Date;
 
 /** 配置輸入法 */
 public class Pref extends PreferenceActivity
@@ -65,6 +71,33 @@ public class Pref extends PreferenceActivity
     Intent intent = pref.getIntent();
     intent.setData(Uri.withAppendedPath(intent.getData(), "commits/"+commit));
     pref.setIntent(intent);
+  }
+
+  private void setBackgroundSyncSummary(Context context) { //设置后台同步的summary文字
+    SwitchPreference sp = ((SwitchPreference)findPreference("pref_sync_bg"));
+    if(context==null){ //当前没有 Trime 服务
+      if(sp.isChecked()){
+        sp.setSummaryOn(R.string.pref_sync_bg_never);
+      }else {
+        sp.setSummaryOff(R.string.pref_sync_bg_tip);
+      }
+    }else {
+      String summary = context.getString(R.string.pref_sync_bg_tip);
+
+      if (sp.isChecked()) { // 后台同步功能开启
+        boolean success = Function.getPref(context).getBoolean("last_sync_status", false); // 上次同步状态
+        summary = success ? context.getString(R.string.pref_sync_bg_success) : context.getString(R.string.pref_sync_bg_failure);
+        long time = Function.getPref(context).getLong("last_sync_time", 0); // 上次同步时间
+        if (time == 0) {
+          summary = context.getString(R.string.pref_sync_bg_tip);
+        } else {
+          summary = String.format(summary, new PrettyTime().format(new Date(time))); //使用PrettyTime包展示相对时间
+        }
+        sp.setSummaryOn(summary);
+      }else {
+        sp.setSummaryOff(summary);
+      }
+    }
   }
 
   @Override
@@ -188,6 +221,7 @@ public class Pref extends PreferenceActivity
   protected void onResume() {
     super.onResume();
     getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+    setBackgroundSyncSummary(Trime.getService());
   }
 
   @Override
@@ -311,6 +345,10 @@ public class Pref extends PreferenceActivity
                   }
                 })
             .start();
+        return true;
+      case "pref_input":
+      case "pref_sync_bg": //后台同步
+        setBackgroundSyncSummary(Trime.getService());
         return true;
       case "pref_reset": //回廠
         new ResetDialog(this).show();

@@ -30,6 +30,8 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -93,6 +95,25 @@ public class Trime extends InputMethodService
   private InlineModeType inlinePreedit; //嵌入模式
 
   private IntentReceiver mIntentReceiver;
+  static private Handler syncBackgroundHandler=new  Handler(new Handler.Callback() {
+    @Override
+    public boolean handleMessage(@NonNull Message msg) {
+      if(!((Trime)msg.obj).isShowInputRequested()){ //若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
+        Function.syncBackground((Trime)msg.obj);
+      }
+      return false;
+    }
+  });
+
+  @Override
+  public void onWindowHidden(){
+    boolean sync_bg = mConfig.getSyncBackground();
+    if(sync_bg){
+      Message msg = new Message();
+      msg.obj = this;
+      syncBackgroundHandler.sendMessageDelayed(msg,5000); // 输入面板隐藏5秒后，开始后台同步
+    }
+  }
 
   private boolean isWinFixed() {
     return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP

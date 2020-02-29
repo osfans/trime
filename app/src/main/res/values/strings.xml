@@ -96,4 +96,9 @@
     <string name="pref_destroy_on_quit">Free memory on quit</string>
     <string name="shared_data_dir">Shared directory</string>
     <string name="user_data_dir">User directory</string>
+    <string name="pref_sync_bg">Synchronize background</string>
+    <string name="pref_sync_bg_success">Last background synchronized successfully at %s</string>
+    <string name="pref_sync_bg_failure">Last background synchronized failed at %s</string>
+    <string name="pref_sync_bg_never">Never synchronized background</string>
+    <string name="pref_sync_bg_tip">Click to enable</string>
 </resources>
