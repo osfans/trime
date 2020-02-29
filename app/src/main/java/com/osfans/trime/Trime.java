@@ -31,7 +31,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -97,7 +96,7 @@ public class Trime extends InputMethodService
   private IntentReceiver mIntentReceiver;
   static private Handler syncBackgroundHandler=new  Handler(new Handler.Callback() {
     @Override
-    public boolean handleMessage(@NonNull Message msg) {
+    public boolean handleMessage(Message msg) {
       if(!((Trime)msg.obj).isShowInputRequested()){ //若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
         Function.syncBackground((Trime)msg.obj);
       }
