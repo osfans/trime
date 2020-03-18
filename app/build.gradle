@@ -55,3 +55,6 @@ android {
     ndkVersion "21.0.6113669"
 }
 
+dependencies {
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
+}

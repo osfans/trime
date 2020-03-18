@@ -96,4 +96,9 @@
     <string name="pref_themes_name_trime">默認</string>
     <string name="shared_data_dir">共享資料夾</string>
     <string name="user_data_dir">使用者資料夾</string>
+    <string name="pref_sync_bg">後台同步</string>
+    <string name="pref_sync_bg_success">上次同步於 %s，成功</string>
+    <string name="pref_sync_bg_failure">上次同步於 %s，失敗</string>
+    <string name="pref_sync_bg_never">後台同步未運行</string>
+    <string name="pref_sync_bg_tip">點擊以啟用後台同步</string>
 </resources>

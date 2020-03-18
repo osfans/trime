@@ -200,6 +200,14 @@ class Function {
     Rime.syncUserData();
   }
 
+  public static void syncBackground(Context ctx){
+    boolean success = Rime.syncUserData();
+    getPref(ctx).edit() //记录同步时间和状态
+            .putLong("last_sync_time",new Date().getTime())
+            .putBoolean("last_sync_status",success)
+            .apply();
+  }
+
   public static String getVersion(Context context) {
     try {
       return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
