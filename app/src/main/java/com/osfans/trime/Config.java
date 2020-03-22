@@ -101,16 +101,16 @@ public class Config {
     boolean isOverwrite = Function.isDiffVer(context);
     String defaultFile = "trime.yaml";
     if (isOverwrite) {
-      copyFileOrDir(context, RIME, true);
+      copyFileOrDir(context, "", true);
     } else if (isExist) {
-      String path = new File(RIME, defaultFile).getPath();
+      String path = new File("", defaultFile).getPath();
       copyFileOrDir(context, path, false);
     } else {
-      copyFileOrDir(context, RIME, false);
+      copyFileOrDir(context, "", false);
     }
     while (!new File(getSharedDataDir(), defaultFile).exists()) {
       SystemClock.sleep(3000);
-      copyFileOrDir(context, RIME, isOverwrite);
+      copyFileOrDir(context, "", isOverwrite);
     }
     Rime.get(!isExist); //覆蓋時不強制部署
   }
@@ -177,7 +177,7 @@ public class Config {
       if (assets.length == 0) {
         copyFile(context, path, overwrite);
       } else {
-        File dir = new File(getSharedDataDir(), path.length() >= 5 ? path.substring(5) : "");
+        File dir = new File(getSharedDataDir(), path);
         if (!dir.exists()) dir.mkdir();
         for (int i = 0; i < assets.length; ++i) {
           String assetPath = new File(path, assets[i]).getPath();
