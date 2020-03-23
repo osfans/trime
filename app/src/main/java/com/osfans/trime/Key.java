@@ -17,6 +17,7 @@
  */
 package com.osfans.trime;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -106,7 +107,7 @@ public class Key {
    * @param parent 按鍵所在的{@link Keyboard 鍵盤}
    * @param mk 從YAML中解析得到的Map
    */
-  public Key(Keyboard parent, Map<String, Object> mk) {
+  public Key(Context context, Keyboard parent, Map<String, Object> mk) {
     this(parent);
     String s;
     for (int i = 0; i < EVENT_NUM; i++) {
@@ -136,12 +137,12 @@ public class Key {
     if (isShift()) mKeyboard.setmShiftKey(this);
     key_text_size = Config.getPixel(mk, "key_text_size");
     symbol_text_size = Config.getPixel(mk, "symbol_text_size");
-    key_text_color = Config.getColor(mk, "key_text_color");
-    hilited_key_text_color = Config.getColor(mk, "hilited_key_text_color");
-    key_back_color = Config.getColorDrawable(mk, "key_back_color");
-    hilited_key_back_color = Config.getColorDrawable(mk, "hilited_key_back_color");
-    key_symbol_color = Config.getColor(mk, "key_symbol_color");
-    hilited_key_symbol_color = Config.getColor(mk, "hilited_key_symbol_color");
+    key_text_color = Config.getColor(context, mk, "key_text_color");
+    hilited_key_text_color = Config.getColor(context, mk, "hilited_key_text_color");
+    key_back_color = Config.getColorDrawable(context, mk, "key_back_color");
+    hilited_key_back_color = Config.getColorDrawable(context, mk, "hilited_key_back_color");
+    key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
+    hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
     round_corner = Config.getFloat(mk, "round_corner");
   }
 

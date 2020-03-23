@@ -42,11 +42,11 @@ public class IntentReceiver extends BroadcastReceiver {
 
     switch (command) {
       case COMMAND_DEPLOY:
-        Function.deploy();
+        Function.deploy(ctx);
         System.exit(0);
         break;
       case COMMAND_SYNC:
-        Function.sync();
+        Function.sync(ctx);
         break;
       case Intent.ACTION_SHUTDOWN:
         Rime.destroy();

@@ -333,7 +333,7 @@ public class Trime extends InputMethodService
   }
 
   public void invalidate() {
-    Rime.get();
+    Rime.get(this);
     if (mConfig != null) mConfig.destroy();
     mConfig = new Config(this);
     reset();
@@ -369,7 +369,7 @@ public class Trime extends InputMethodService
   public void resetKeyboard() {
     if (mKeyboardView != null) {
       mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
-      mKeyboardView.reset(); //實體鍵盤無軟鍵盤
+      mKeyboardView.reset(this); //實體鍵盤無軟鍵盤
     }
   }
 
@@ -378,10 +378,10 @@ public class Trime extends InputMethodService
       loadBackground();
       setShowComment(!Rime.getOption("_hide_comment"));
       mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
-      mCandidate.reset();
+      mCandidate.reset(this);
       mShowWindow = mConfig.getShowWindow();
       mComposition.setVisibility(mShowWindow ? View.VISIBLE : View.GONE);
-      mComposition.reset();
+      mComposition.reset(this);
     }
   }
 
@@ -389,7 +389,7 @@ public class Trime extends InputMethodService
   private void reset() {
     mConfig.reset();
     loadConfig();
-    if (mKeyboardSwitch != null) mKeyboardSwitch.reset();
+    if (mKeyboardSwitch != null) mKeyboardSwitch.reset(this);
     resetCandidate();
     hideComposition();
     resetKeyboard();
@@ -562,7 +562,7 @@ public class Trime extends InputMethodService
         if (canCompose) break;
         return;
     }
-    Rime.get();
+    Rime.get(this);
     if (reset_ascii_mode) mAsciiMode = false;
     // Select a keyboard based on the input type of the editing field.
     mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤

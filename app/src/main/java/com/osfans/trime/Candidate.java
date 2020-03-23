@@ -57,8 +57,8 @@ public class Candidate extends View {
 
   private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT + 2];
 
-  public void reset() {
-    Config config = Config.get();
+  public void reset(Context context) {
+    Config config = Config.get(context);
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
     ((PaintDrawable) candidateHighlight).setCornerRadius(config.getFloat("layout/round_corner"));
     candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
@@ -109,7 +109,7 @@ public class Candidate extends View {
     paintComment.setAntiAlias(true);
     paintComment.setStrokeWidth(0);
 
-    reset();
+    reset(context);
 
     setWillNotDraw(false);
   }

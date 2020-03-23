@@ -53,7 +53,7 @@ class SchemaDialog extends AsyncTask {
     }
   }
 
-  private void selectSchema() {
+  private void selectSchema(Context context) {
     List<String> checkedIds = new ArrayList<String>();
     int i = 0;
     for (boolean b : checkedSchemaItems) {
@@ -65,7 +65,7 @@ class SchemaDialog extends AsyncTask {
       String[] schema_id_list = new String[n];
       checkedIds.toArray(schema_id_list);
       Rime.select_schemas(schema_id_list);
-      Function.deploy();
+      Function.deploy(context);
     }
   }
 
@@ -156,7 +156,7 @@ class SchemaDialog extends AsyncTask {
                         @Override
                         public void run() {
                           try {
-                            selectSchema();
+                            selectSchema(mContext);
                           } catch (Exception ex) {
                             Log.e(TAG, "Select Schema" + ex);
                           } finally {

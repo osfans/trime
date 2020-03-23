@@ -189,19 +189,19 @@ class Function {
     System.exit(0); //清理內存
   }
 
-  public static void deploy() {
+  public static void deploy(Context context) {
     Rime.destroy();
-    Rime.get(true);
+    Rime.get(context, true);
     //Trime trime = Trime.getService();
     //if (trime != null) trime.invalidate();
   }
 
-  public static void sync() {
-    Rime.syncUserData();
+  public static void sync(Context context) {
+    Rime.syncUserData(context);
   }
 
   public static void syncBackground(Context ctx){
-    boolean success = Rime.syncUserData();
+    boolean success = Rime.syncUserData(ctx);
     getPref(ctx).edit() //记录同步时间和状态
             .putLong("last_sync_time",new Date().getTime())
             .putBoolean("last_sync_status",success)

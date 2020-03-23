@@ -36,11 +36,11 @@ class KeyboardSwitch {
     currentId = -1;
     lastId = 0;
     lastLockId = 0;
-    reset();
+    reset(context);
   }
 
-  public void reset() {
-    mKeyboardNames = Config.get().getKeyboardNames();
+  public void reset(Context context) {
+    mKeyboardNames = Config.get(context).getKeyboardNames();
     int n = mKeyboardNames.size();
     mKeyboards = new Keyboard[n];
     for (int i = 0; i < n; i++) {
@@ -92,7 +92,7 @@ class KeyboardSwitch {
     }
 
     currentDisplayWidth = displayWidth;
-    reset();
+    reset(context);
   }
 
   public Keyboard getCurrentKeyboard() {

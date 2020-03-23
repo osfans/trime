@@ -29,16 +29,16 @@ class ColorDialog {
   private int checkedColor;
   private AlertDialog dialog;
 
-  private void selectColor() {
+  private void selectColor(Context context) {
     if (checkedColor < 0 || checkedColor >= colorKeys.length) return;
     String color = colorKeys[checkedColor];
-    Config config = Config.get();
+    Config config = Config.get(context);
     config.setColor(color);
     Trime trime = Trime.getService();
     if (trime != null) trime.initKeyboard(); //實時生效
   }
 
-  public ColorDialog(Context context) {
+  public ColorDialog(final Context context) {
     Config config = Config.get(context);
     String colorScheme = config.getColorScheme();
     colorKeys = config.getColorKeys();
@@ -56,7 +56,7 @@ class ColorDialog {
                 new DialogInterface.OnClickListener() {
                   @Override
                   public void onClick(DialogInterface di, int id) {
-                    selectColor();
+                    selectColor(context);
                   }
                 })
             .setSingleChoiceItems(

@@ -93,7 +93,7 @@ public class Keyboard {
     int mDisplayHeight = dm.heightPixels;
     //Log.v(TAG, "keyboard's display metrics:" + dm);
 
-    Config config = Config.get();
+    Config config = Config.get(context);
     mDefaultHorizontalGap = config.getPixel("horizontal_gap");
     mDefaultVerticalGap = config.getPixel("vertical_gap");
     mDefaultWidth = (int) (mDisplayWidth * config.getDouble("key_width") / 100);
@@ -157,7 +157,7 @@ public class Keyboard {
 
   public Keyboard(Context context, String name) {
     this(context);
-    Map<String, Object> m = Config.get().getKeyboard(name);
+    Map<String, Object> m = Config.get(context).getKeyboard(name);
     mLabelTransform = Config.getString(m, "label_transform", "none");
     mAsciiMode = Config.getInt(m, "ascii_mode", 1);
     if (mAsciiMode == 0) mAsciiKeyboard = Config.getString(m, "ascii_keyboard");
@@ -175,7 +175,7 @@ public class Keyboard {
     if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Config.getPixel(m, "vertical_gap");
     if (m.containsKey("round_corner")) mRoundCorner = Config.getFloat(m, "round_corner");
     if (m.containsKey("keyboard_back_color")) {
-      Drawable background = Config.getColorDrawable(m, "keyboard_back_color");
+      Drawable background = Config.getColorDrawable(context, m, "keyboard_back_color");
       if (background != null) mBackground = background;
     }
     int x = mDefaultHorizontalGap / 2;
@@ -222,7 +222,7 @@ public class Keyboard {
         continue; //縮進
       }
 
-      final Key key = new Key(this, mk);
+      final Key key = new Key(context, this, mk);
       key.setKey_text_offset_x(Config.getPixel(mk, "key_text_offset_x", key_text_offset_x));
       key.setKey_text_offset_y(Config.getPixel(mk, "key_text_offset_y", key_text_offset_y));
       key.setKey_symbol_offset_x(Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x));

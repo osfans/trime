@@ -148,7 +148,7 @@ public class Composition extends TextView {
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
-    reset();
+    reset(context);
   }
 
   @Override
@@ -192,8 +192,8 @@ public class Composition extends TextView {
     show_comment = value;
   }
 
-  public void reset() {
-    Config config = Config.get();
+  public void reset(Context context) {
+    Config config = Config.get(context);
     components = (List<Map<String, Object>>) config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");

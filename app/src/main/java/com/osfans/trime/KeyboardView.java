@@ -270,8 +270,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     mShowHint = value;
   }
 
-  public void reset() {
-    Config config = Config.get();
+  public void reset(Context context) {
+    Config config = Config.get(context);
     key_symbol_color = config.getColor("key_symbol_color");
     hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
     mShadowColor = config.getColor("shadow_color");
@@ -360,7 +360,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     mPaintSymbol = new Paint();
     mPaintSymbol.setAntiAlias(true);
     mPaintSymbol.setTextAlign(Align.CENTER);
-    reset();
+    reset(context);
 
     mPreviewPopup = new PopupWindow(context);
     mPreviewPopup.setContentView(mPreviewText);

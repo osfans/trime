@@ -18,6 +18,7 @@
 
 package com.osfans.trime;
 
+import android.content.Context;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -266,8 +267,8 @@ public class Rime {
     return mContext.commit_text_preview;
   }
 
-  private Rime(boolean full_check) {
-    init(full_check);
+  public Rime(Context context, boolean full_check) {
+    init(context, full_check);
     self = this;
   }
 
@@ -283,10 +284,13 @@ public class Rime {
     return get_status(mStatus);
   }
 
-  private static void init(boolean full_check) {
+  private static void init(Context context, boolean full_check) {
     mOnMessage = false;
-    Trime trime = Trime.getService();
-    initialize(Config.get(trime).getSharedDataDir(), Config.get(trime).getUserDataDir());
+
+    // Initialize librime APIs
+    setup(Config.get(context).getSharedDataDir(), Config.get(context).getUserDataDir());
+    initialize(Config.get(context).getSharedDataDir(), Config.get(context).getUserDataDir());
+    
     check(full_check);
     set_notification_handler();
     if (!find_session()) {
@@ -471,16 +475,16 @@ public class Rime {
     return selectSchema(target);
   }
 
-  public static Rime get(boolean full_check) {
+  public static Rime get(Context context, boolean full_check) {
     if (self == null) {
-      if (full_check) Config.deployOpencc();
-      self = new Rime(full_check);
+      if (full_check) Config.deployOpencc(context);
+      self = new Rime(context, full_check);
     }
     return self;
   }
 
-  public static Rime get() {
-    return get(false);
+  public static Rime get(Context context) {
+    return get(context, false);
   }
 
   public static String RimeGetInput() {
@@ -533,13 +537,16 @@ public class Rime {
 
   public static void check(boolean full_check) {
     start_maintenance(full_check);
-    if (is_maintenance_mode()) join_maintenance_thread();
-  }
+    // if (start_maintenance(full_check) && is_maintenance_mode())
+    // {
+    //   join_maintenance_thread();
+    // }
+}
 
-  public static boolean syncUserData() {
+  public static boolean syncUserData(Context context) {
     boolean b = sync_user_data();
     destroy();
-    get(true);
+    get(context, true);
     return b;
   }
 

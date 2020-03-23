@@ -70,7 +70,7 @@ public class Config {
     sharedDataDir = context.getString(R.string.default_shared_data_dir);
     themeName = mPref.getString("pref_selected_theme", "trime");
     prepareRime(context);
-    deployTheme();
+    deployTheme(context);
     init();
   }
 
@@ -112,11 +112,11 @@ public class Config {
       SystemClock.sleep(3000);
       copyFileOrDir(context, "", isOverwrite);
     }
-    Rime.get(!isExist); //覆蓋時不強制部署
+    Rime.get(context, !isExist); //覆蓋時不強制部署
   }
 
-  public static String[] getThemeKeys(boolean isUser) {
-    File d = new File(isUser ? get().getUserDataDir() : get().getSharedDataDir());
+  public static String[] getThemeKeys(Context context, boolean isUser) {
+    File d = new File(isUser ? get(context).getUserDataDir() : get(context).getSharedDataDir());
     FilenameFilter trimeFilter =
         new FilenameFilter() {
           @Override
@@ -138,8 +138,8 @@ public class Config {
     return names;
   }
 
-  public static boolean deployOpencc() {
-    String dataDir = self.getResDataDir("opencc");
+  public static boolean deployOpencc(Context context) {
+    String dataDir = get(context).getResDataDir("opencc");
     File d = new File(dataDir);
     if (d.exists()) {
       FilenameFilter txtFilter =
@@ -218,9 +218,9 @@ public class Config {
     return true;
   }
 
-  private void deployTheme() {
+  private void deployTheme(Context context) {
     if (getUserDataDir().contentEquals(getSharedDataDir())) return; //相同文件夾不部署主題
-    String[] configs = get().getThemeKeys(false);
+    String[] configs = get(context).getThemeKeys(context, false);
     for (String config: configs) Rime.deploy_config_file(config, "config_version");
   }
 
@@ -336,13 +336,6 @@ public class Config {
     return (Map<String, Object>) presetKeyboards.get(name);
   }
 
-  public static Config get() {
-    if (self == null) {
-      Trime trime = Trime.getService();
-      self = new Config(trime);
-    }
-    return self;
-  }
 
   public static Config get(Context context) {
     if (self == null) self = new Config(context);
@@ -376,18 +369,28 @@ public class Config {
     return getPixel(m, k, null);
   }
 
-  public static Integer getColor(Map m, String k) {
+  public static Integer getColor(Context context, Map m, String k) {
     Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
       String s = o.toString();
       color = parseColor(s);
-      if (color == null) color = get().getCurrentColor(s);
+      if (color == null)
+        color = get(context).getCurrentColor(s);
     }
     return color;
   }
 
-  public static Drawable getColorDrawable(Map m, String k) {
+  public Integer getColor(String key) {
+    Object o = getColorObject(key);
+    if (o == null) {
+      o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
+    }
+    if (o == null) return null;
+    return parseColor(o.toString());
+  }
+
+  public static Drawable getColorDrawable(Context context, Map m, String k) {
     if (m.containsKey(k)) {
       Object o = m.get(k);
       String s = o.toString();
@@ -397,7 +400,7 @@ public class Config {
         gd.setColor(color);
         return gd;
       } else {
-        Config config = get();
+        Config config = get(context);
         Drawable d = config.getCurrentColorDrawable(s);
         if (d == null) d = config.drawableObject(o);
         return d;
@@ -517,14 +520,7 @@ public class Config {
     return parseColor(o.toString());
   }
 
-  public Integer getColor(String key) {
-    Object o = getColorObject(key);
-    if (o == null) {
-      o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
-    }
-    if (o == null) return null;
-    return parseColor(o.toString());
-  }
+  
 
   public String getColorScheme() {
     return mPref.getString("pref_selected_color_scheme", "default");
