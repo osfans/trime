@@ -524,7 +524,8 @@ public class Rime {
 
   public static String openccConvert(String line, String name) {
     if (name != null && name.length() > 0) {
-      File f = new File(Config.get().getResDataDir("opencc"), name);
+      Trime trime = Trime.getService();
+      File f = new File(Config.get(trime).getResDataDir("opencc"), name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;

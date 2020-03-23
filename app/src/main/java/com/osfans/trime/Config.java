@@ -139,7 +139,7 @@ public class Config {
   }
 
   public static boolean deployOpencc() {
-    String dataDir = get().getResDataDir("opencc");
+    String dataDir = self.getResDataDir("opencc");
     File d = new File(dataDir);
     if (d.exists()) {
       FilenameFilter txtFilter =
@@ -337,6 +337,10 @@ public class Config {
   }
 
   public static Config get() {
+    if (self == null) {
+      Trime trime = Trime.getService();
+      self = new Config(trime);
+    }
     return self;
   }
 
