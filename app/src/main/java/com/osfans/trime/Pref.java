@@ -279,7 +279,7 @@ public class Pref extends PreferenceActivity
   }
 
   private void deployOpencc() {
-    boolean b = Config.deployOpencc();
+    boolean b = Config.get().deployOpencc();
   }
 
   @Override

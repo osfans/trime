@@ -472,7 +472,7 @@ public class Rime {
 
   public static Rime get(boolean full_check) {
     if (self == null) {
-      if (full_check) Config.deployOpencc();
+      if (full_check) Config.get().deployOpencc();
       self = new Rime(full_check);
     }
     return self;
