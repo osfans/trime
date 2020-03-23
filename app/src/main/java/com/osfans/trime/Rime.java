@@ -285,7 +285,8 @@ public class Rime {
 
   private static void init(boolean full_check) {
     mOnMessage = false;
-    initialize(Config.get().getSharedDataDir(), Config.get().getUserDataDir());
+    Trime trime = Trime.getService();
+    initialize(Config.get(trime).getSharedDataDir(), Config.get(trime).getUserDataDir());
     check(full_check);
     set_notification_handler();
     if (!find_session()) {
@@ -472,7 +473,7 @@ public class Rime {
 
   public static Rime get(boolean full_check) {
     if (self == null) {
-      if (full_check) Config.deployOpencc();
+      if (full_check) Config.get().deployOpencc();
       self = new Rime(full_check);
     }
     return self;
