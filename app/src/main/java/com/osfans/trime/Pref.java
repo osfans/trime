@@ -81,7 +81,7 @@ public class Pref extends PreferenceActivity
       }else {
         sp.setSummaryOff(R.string.pref_sync_bg_tip);
       }
-    }else {
+    } else {
       String summary = context.getString(R.string.pref_sync_bg_tip);
 
       if (sp.isChecked()) { // 后台同步功能开启
@@ -221,7 +221,7 @@ public class Pref extends PreferenceActivity
   protected void onResume() {
     super.onResume();
     getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-    setBackgroundSyncSummary(Trime.getService());
+    setBackgroundSyncSummary(this);
   }
 
   @Override
@@ -348,7 +348,7 @@ public class Pref extends PreferenceActivity
         return true;
       case "pref_input":
       case "pref_sync_bg": //后台同步
-        setBackgroundSyncSummary(Trime.getService());
+        setBackgroundSyncSummary(this);
         return true;
       case "pref_reset": //回廠
         new ResetDialog(this).show();
