@@ -417,6 +417,8 @@ public class Trime extends InputMethodService
   }
 
   public static Trime getService() {
+    if (self == null)
+      self = new Trime();
     return self;
   }
 
