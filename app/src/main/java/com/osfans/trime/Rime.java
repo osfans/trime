@@ -473,7 +473,7 @@ public class Rime {
 
   public static Rime get(boolean full_check) {
     if (self == null) {
-      if (full_check) Config.get().deployOpencc();
+      if (full_check) Config.deployOpencc();
       self = new Rime(full_check);
     }
     return self;
@@ -539,7 +539,7 @@ public class Rime {
   public static boolean syncUserData() {
     boolean b = sync_user_data();
     destroy();
-    get();
+    get(true);
     return b;
   }
 
