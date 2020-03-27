@@ -101,12 +101,12 @@ public class Config {
     boolean isOverwrite = Function.isDiffVer(context);
     String defaultFile = "trime.yaml";
     if (isOverwrite) {
-      copyFileOrDir(context, "", true);
+      copyFileOrDir(context, RIME, true);
     } else if (isExist) {
-      String path = new File("", defaultFile).getPath();
+      String path = new File(RIME, defaultFile).getPath();
       copyFileOrDir(context, path, false);
     } else {
-      copyFileOrDir(context, "", false);
+      copyFileOrDir(context, RIME, false);
     }
     while (!new File(getSharedDataDir(), defaultFile).exists()) {
       SystemClock.sleep(3000);
@@ -175,8 +175,10 @@ public class Config {
     try {
       assets = assetManager.list(path);
       if (assets.length == 0) {
-        copyFile(context, path, overwrite);
+        // Files
+        copyFile(context, path, overwrite); 
       } else {
+        // Dirs
         File dir = new File(getSharedDataDir(), path);
         if (!dir.exists()) dir.mkdir();
         for (int i = 0; i < assets.length; ++i) {
@@ -261,7 +263,8 @@ public class Config {
 
   public void reset() {
     schema_id = Rime.getSchemaId();
-    mStyle = (Map<String, Object>) Rime.schema_get_value(schema_id, "style");
+    if (schema_id != null)
+      mStyle = (Map<String, Object>) Rime.schema_get_value(schema_id, "style");
   }
 
   private Object _getValue(String k1, String k2) {
