@@ -278,14 +278,15 @@ public class Pref extends PreferenceActivity
     }
   }
 
-  private void deployOpencc() {
-    boolean b = Config.get().deployOpencc();
+  private void deployOpencc(Context context) {
+    boolean b = Config.get(context).deployOpencc(context);
   }
 
   @Override
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
     boolean b;
     String key = preference.getKey();
+    final Pref self = this;
     switch (key) {
       case "pref_enable": //啓用
         if (!isEnabled()) startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
@@ -294,19 +295,19 @@ public class Pref extends PreferenceActivity
         ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         return true;
       case "pref_themes": //主題
-        new ThemeDlg(this);
+        new ThemeDlg(self);
         return true;
       case "pref_colors": //配色
-        new ColorDialog(this).show();
+        new ColorDialog(self).show();
         return true;
       case "pref_schemas": //方案
-        new SchemaDialog(this);
+        new SchemaDialog(self);
         return true;
       case "pref_maintenance": //維護
         Function.check();
         return true;
       case "pref_deploy_opencc": //部署OpenCC
-        deployOpencc();
+        deployOpencc(self);
         return true;
       case "pref_deploy": //部署
         mProgressDialog.setMessage(getString(R.string.deploy_progress));
@@ -316,7 +317,7 @@ public class Pref extends PreferenceActivity
                   @Override
                   public void run() {
                     try {
-                      Function.deploy();
+                      Function.deploy(self);
                     } catch (Exception ex) {
                       Log.e(TAG, "Deploy Exception" + ex);
                     } finally {
@@ -335,7 +336,7 @@ public class Pref extends PreferenceActivity
                   @Override
                   public void run() {
                     try {
-                      Function.sync();
+                      Function.sync(self);
                     } catch (Exception ex) {
                       Log.e(TAG, "Sync Exception" + ex);
                     } finally {
@@ -348,17 +349,17 @@ public class Pref extends PreferenceActivity
         return true;
       case "pref_input":
       case "pref_sync_bg": //后台同步
-        setBackgroundSyncSummary(this);
+        setBackgroundSyncSummary(self);
         return true;
       case "pref_reset": //回廠
-        new ResetDialog(this).show();
+        new ResetDialog(self).show();
         return true;
       case "pref_licensing": //許可協議
         showLicenseDialog();
         return true;
       case "pref_ui": //色調
         finish();
-        Function.showPrefDialog(this);
+        Function.showPrefDialog(self);
         return true;
     }
     return false;

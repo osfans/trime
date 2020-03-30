@@ -12,6 +12,7 @@
 bin/
 gen/
 obj/
+app/.cxx/*
 
 # Eclipse Generate files
 .classpath      
@@ -44,3 +45,6 @@ libs/*
 
 # Android Studio
 .idea/*
+
+# VS Code
+.vscode/*
