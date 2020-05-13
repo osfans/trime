@@ -108,7 +108,7 @@
         <Preference android:key="pref_trime_qq" android:title="@string/pref_trime_qq"
                     android:summary="@string/pref_trime_qq_summary">
             <intent android:action="android.intent.action.VIEW"
-                    android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3Deynn0JQFzeJMgNewySPcEckXVZlJVkan" />
+                    android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DzifdI0iaEYjATwYkvVzP1cjsUEWSa9Ha" />
         </Preference>
         <Preference android:key="pref_trime_qq2" android:title="@string/pref_trime_qq2"
                     android:summary="@string/pref_trime_qq2_summary">
