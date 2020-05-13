@@ -31,7 +31,7 @@ height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 - 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）
 - 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo、默默ㄇㄛˋ
 - 捐贈：[Releases](https://github.com/osfans/trime/releases)中的“打賞”實時更新
-- 社區：在[Issues](https://github.com/osfans/trime/issues)、[QQ羣480159874](http://shang.qq.com/wpa/qunwpa?idkey=e31ecec8f92699597d9154f890841b3e477f5185902f10400e7c9e670a11202f)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime)、[貼吧](http://tieba.baidu.com/f?kw=rime)中反饋意見的網友
+- 社區：在[Issues](https://github.com/osfans/trime/issues)、[QQ羣811142286](https://shang.qq.com/wpa/qunwpa?idkey=d68b19daf218e0f0feacc3533493e44bf9cd79f4895f9b598aa1f9079910af27)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime)、[貼吧](http://tieba.baidu.com/f?kw=rime)中反饋意見的網友
 - 項目：[RIME]、[OpenCC]、[注音倉頡輸入法]等開源項目
 
 ## 沿革/History
