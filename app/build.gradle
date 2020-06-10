@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "com.osfans.trime"
@@ -52,7 +52,7 @@ android {
             version "3.10.2"
         }
     }
-    ndkVersion "21.0.6113669"
+    ndkVersion "21.3.6528147"
 }
 
 dependencies {
