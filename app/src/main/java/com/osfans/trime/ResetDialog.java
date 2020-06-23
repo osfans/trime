@@ -41,7 +41,7 @@ class ResetDialog {
     int n = items.length;
     for (int i = 0; i < n; i++) {
       if (checked[i]) {
-        ret = Config.get(context).copyFileOrDir(context, "rime" + "/" + items[i], true);
+        ret = Config.get(context).copyFileOrDir(context, items[i], true);
       }
     }
     Toast.makeText(
