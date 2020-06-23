@@ -163,8 +163,8 @@ public class Config {
     String assets[] = null;
     try {
       assets = assetManager.list(path);
-    } catch (IOException ex) {
-      Log.e(TAG, "I/O Exception", ex);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return assets;
   }
@@ -186,8 +186,8 @@ public class Config {
           copyFileOrDir(context, assetPath, overwrite);
         }
       }
-    } catch (IOException ex) {
-      Log.e(TAG, "I/O Exception", ex);
+    } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
     return true;
@@ -214,7 +214,7 @@ public class Config {
       out.close();
       out = null;
     } catch (Exception e) {
-      Log.e(TAG, e.getMessage());
+      e.printStackTrace();
       return false;
     }
     return true;
@@ -256,7 +256,7 @@ public class Config {
       Rime.setShowSwitches(getShowSwitches());
       reset();
     } catch (Exception e) {
-      Log.e(TAG, e.getMessage());
+      e.printStackTrace();
       setTheme(defaultName);
     }
   }
