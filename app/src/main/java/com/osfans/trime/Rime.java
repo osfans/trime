@@ -536,11 +536,10 @@ public class Rime {
   }
 
   public static void check(boolean full_check) {
-    start_maintenance(full_check);
-    // if (start_maintenance(full_check) && is_maintenance_mode())
-    // {
-    //   join_maintenance_thread();
-    // }
+    if (start_maintenance(full_check) && is_maintenance_mode())
+    {
+       join_maintenance_thread();
+    }
 }
 
   public static boolean syncUserData(Context context) {
