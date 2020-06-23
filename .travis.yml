@@ -13,11 +13,7 @@ before_install:
 - tar xvf keystore.tar
 - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin
 install:
-- echo y | sdkmanager 'ndk-bundle'
 - echo y | sdkmanager 'cmake;3.10.2.4988404'
-- echo y | sdkmanager 'platform-tools'
-- echo y | sdkmanager 'build-tools;29.0.3'
-- echo y | sdkmanager 'platforms;android-29'
 before_deploy:
 - ./before_deploy.sh
 deploy:
