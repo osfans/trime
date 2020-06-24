@@ -9,7 +9,7 @@ popd
 echo "theme: jekyll-theme-cayman" > $DIR/_config.yml
 cat > $DIR/README.md <<EOF
 # 同文最新測試版  
-**文件名：** $APKNAME [點擊下載]($FILE)  
+**文件名：** $APKNAME [點擊下載](https://github.com/osfans/trime/raw/gh-pages/release/app-release.apk)  
 **SHA256：** $SHA256  
 **Trime版本：** [$(git describe --tags)-$(date +%Y%m%d)](https://github.com/osfans/trime/commits/$(git rev-parse HEAD))  
 **RIME版本：** [$(git --git-dir=app/src/main/jni/librime/.git describe --tags)](https://github.com/rime/librime/commits/$(git --git-dir=app/src/main/jni/librime/.git rev-parse HEAD))  
