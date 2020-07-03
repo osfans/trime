@@ -68,7 +68,7 @@ make release
 The following guide is for the specific platform prebuild setting:
 - [Arch Linux](https://www.archlinux.org/)
   ```bash
-   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle
+   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle clang
    make release
   ```
 
@@ -86,7 +86,7 @@ The following guide is for the specific platform prebuild setting:
   [Homebrew mirror](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git) of it if your network is slow.
 
   ```bash
-   brew install automake cmake opencc boost python gradle doxygen
+   brew install automake cmake opencc boost python gradle doxygen clang
   ```
 
   Set the path environment in ~/.bashrc if you use bash like this
