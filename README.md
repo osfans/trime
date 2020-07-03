@@ -16,7 +16,7 @@
 - 穩定版<br>
 [<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
 [<img alt='Google Play立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='酷安' src='https://www.coolapk.com/static/img/icon.png'
+[<img alt='酷安' src='https://static.coolapk.com/images/header-logo.png'
 height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 - 測試版
 [點擊下載](https://github.com/osfans/trime/tree/gh-pages)
