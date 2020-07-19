@@ -99,6 +99,7 @@ public class Trime extends InputMethodService
     public boolean handleMessage(Message msg) {
       if(!((Trime)msg.obj).isShowInputRequested()){ //若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
         Function.syncBackground((Trime)msg.obj);
+        ((Trime)msg.obj).loadConfig();
       }
       return false;
     }
