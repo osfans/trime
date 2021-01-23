@@ -963,7 +963,7 @@ preset_keyboards:
       - {click: 6}
       - {label: EN, click: Keyboard_defaulten, key_back_color: bgn, key_text_color: tgn}
 
-      - {click: '(){Left}{Keyboard_default}', long_click: '@', key_back_color: bgn, key_text_color: tgn}
+      - {click: '(){Left}', long_click: '@', key_back_color: bgn, key_text_color: tgn}
       - {click: '*', long_click: '±', key_back_color: bgn, key_text_color: tgn}
       - {click: 7, long_click: select_all}
       - {click: 8, long_click: copy}
