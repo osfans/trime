@@ -878,8 +878,8 @@ preset_keyboards:
       - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
-      - {click: v, long_click: paste, swipe_down: "\\", key_back_color: bh3, key_text_color: th3}
-      - {click: b, long_click: ";", key_back_color: bh3, key_text_color: th3}
+      - {click: v, long_click: paste_clip, swipe_down: paste, key_back_color: bh3, key_text_color: th3}
+      - {click: b, long_click: ";", swipe_down: "\\", key_back_color: bh3, key_text_color: th3}
       - {click: n, long_click: ":", key_back_color: bh3, key_text_color: th3}
       - {click: m, long_click: '?', swipe_down: "|", key_back_color: bh3, key_text_color: th3}
       - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
@@ -927,8 +927,8 @@ preset_keyboards:
       - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
-      - {click: v, long_click: paste, swipe_down: "\\", key_back_color: bh3, key_text_color: th3}
-      - {click: b, long_click: ";", key_back_color: bh3, key_text_color: th3}
+      - {click: v, long_click: paste_clip, swipe_down: paste, key_back_color: bh3, key_text_color: th3}
+      - {click: b, long_click: ";", swipe_down: "\\", key_back_color: bh3, key_text_color: th3}
       - {click: n, long_click: ":", key_back_color: bh3, key_text_color: th3}
       - {click: m, long_click: '?', swipe_down: "|", key_back_color: bh3, key_text_color: th3}
       - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
@@ -967,7 +967,7 @@ preset_keyboards:
       - {click: '*', long_click: '±', key_back_color: bgn, key_text_color: tgn}
       - {click: 7, long_click: select_all}
       - {click: 8, long_click: copy}
-      - {click: 9, long_click: paste}
+      - {click: 9, long_click: paste_clip, swipe_down: paste}
       - {click: BackSpace, key_back_color: bbs, key_text_color: tbs}
 
       - {click: Keyboard_default, long_click: ':', key_back_color: bgn, key_text_color: 'tgn'}
@@ -3773,6 +3773,7 @@ preset_keys:
   cut: {label: 剪切, functional: false, send: Control+x}
   copy: {label: 复制, functional: false, send: Control+c}
   paste: {label: 粘贴, functional: false, send: Control+v}
+  paste_clip: {label: 剪贴板, send: function, command: clipboard}
   paste_text: {label: 貼上文本, send: Control+Shift+Alt+v} #>=Android 6.0
   share_text: {label: 分享文本, send: Control+Alt+s} #>=Android 6.0
   redo: {label: 重做, functional: false, send: Control+y} #>=Android 6.0
