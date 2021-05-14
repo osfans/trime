@@ -164,7 +164,14 @@ class Function {
 
   private static String getClipboard(Context context) {
     ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+    ClipData primaryClip = clipboard.getPrimaryClip();
+    if (primaryClip == null) {
+      return "";
+    }
+    ClipData.Item item = primaryClip.getItemAt(0);
+    if (item == null) {
+      return "";
+    }
     CharSequence pasteData = item.getText();
     if (pasteData != null) {
       return pasteData.toString();
