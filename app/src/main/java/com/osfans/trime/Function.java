@@ -21,6 +21,8 @@ package com.osfans.trime;
 import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.ComponentName;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -160,6 +162,17 @@ class Function {
     return s;
   }
 
+  private static String getClipboard(Context context) {
+    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+    CharSequence pasteData = item.getText();
+    if (pasteData != null) {
+      return pasteData.toString();
+    } else {
+      return "";
+    }
+  }
+
   public static String handle(Context context, String command, String option) {
     String s = null;
     if (command == null) return s;
@@ -172,6 +185,9 @@ class Function {
         break;
       case "broadcast":
         context.sendBroadcast(new Intent(option)); //廣播
+        break;
+      case "clipboard":
+        s = getClipboard(context);
         break;
       default:
         startIntent(context, command, option); //其他intent
