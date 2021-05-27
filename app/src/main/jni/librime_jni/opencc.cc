@@ -1,8 +1,10 @@
+#include <string>
 #include "opencc.h"
 #include <opencc/Common.hpp>
 #include <opencc/SimpleConverter.hpp>
 #include <opencc/DictConverter.hpp>
 using namespace opencc;
+using std::string;
 
 // opencc
 
