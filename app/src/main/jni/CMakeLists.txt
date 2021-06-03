@@ -366,26 +366,26 @@ if(NOT CapnProto_FOUND)
     endif()
   endif()
 endif()
-set(CAPNP_INCLUDE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/librime/thirdparty/src/capnproto/c++/src)
-include("librime/thirdparty/src/capnproto/c++/cmake/CapnProtoMacros.cmake")
+set(CAPNP_INCLUDE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/capnproto/c++/src)
+include("capnproto/c++/cmake/CapnProtoMacros.cmake")
 
 set(kj_sources_lite
-  librime/thirdparty/src/capnproto/c++/src/kj/array.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/common.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/debug.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/exception.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/io.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/memory.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/mutex.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/string.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/hash.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/table.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/thread.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/main.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/arena.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/test-helpers.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/units.c++
-  librime/thirdparty/src/capnproto/c++/src/kj/encoding.c++
+  capnproto/c++/src/kj/array.c++
+  capnproto/c++/src/kj/common.c++
+  capnproto/c++/src/kj/debug.c++
+  capnproto/c++/src/kj/exception.c++
+  capnproto/c++/src/kj/io.c++
+  capnproto/c++/src/kj/memory.c++
+  capnproto/c++/src/kj/mutex.c++
+  capnproto/c++/src/kj/string.c++
+  capnproto/c++/src/kj/hash.c++
+  capnproto/c++/src/kj/table.c++
+  capnproto/c++/src/kj/thread.c++
+  capnproto/c++/src/kj/main.c++
+  capnproto/c++/src/kj/arena.c++
+  capnproto/c++/src/kj/test-helpers.c++
+  capnproto/c++/src/kj/units.c++
+  capnproto/c++/src/kj/encoding.c++
 )
 add_library(kj-static STATIC ${kj_sources_lite})
 target_compile_features(kj-static PUBLIC cxx_generic_lambdas)
@@ -393,17 +393,17 @@ target_compile_definitions(kj-static PUBLIC -DCAPNP_LITE)
 set_target_properties(kj-static PROPERTIES VERSION "0.8.0")
 
 set(capnp_sources_lite
-  librime/thirdparty/src/capnproto/c++/src/capnp/c++.capnp.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/blob.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/arena.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/layout.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/list.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/any.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/message.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/schema.capnp.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/stream.capnp.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/serialize.c++
-  librime/thirdparty/src/capnproto/c++/src/capnp/serialize-packed.c++
+  capnproto/c++/src/capnp/c++.capnp.c++
+  capnproto/c++/src/capnp/blob.c++
+  capnproto/c++/src/capnp/arena.c++
+  capnproto/c++/src/capnp/layout.c++
+  capnproto/c++/src/capnp/list.c++
+  capnproto/c++/src/capnp/any.c++
+  capnproto/c++/src/capnp/message.c++
+  capnproto/c++/src/capnp/schema.capnp.c++
+  capnproto/c++/src/capnp/stream.capnp.c++
+  capnproto/c++/src/capnp/serialize.c++
+  capnproto/c++/src/capnp/serialize-packed.c++
 )
 add_library(capnp-static STATIC ${capnp_sources_lite})
 target_link_libraries(capnp-static PUBLIC kj-static)

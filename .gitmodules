@@ -35,3 +35,6 @@
 [submodule "app/src/main/jni/librime-octagram"]
 	path = app/src/main/jni/librime-octagram
 	url = https://github.com/lotem/librime-octagram.git
+[submodule "app/src/main/jni/capnproto"]
+	path = app/src/main/jni/capnproto
+	url = https://github.com/lotem/capnproto.git
