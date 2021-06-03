@@ -1,10 +1,10 @@
 {
-  "name": "Traditional Chinese to Simplified Chinese",
+  "name": "Traditional Chinese (Hong Kong variant) to Traditional Chinese",
   "segmentation": {
     "type": "mmseg",
     "dict": {
       "type": "ocd2",
-      "file": "TSPhrases.ocd2"
+      "file": "HKVariantsRevPhrases.ocd2"
     }
   },
   "conversion_chain": [{
@@ -12,11 +12,11 @@
       "type": "group",
       "dicts": [{
         "type": "ocd2",
-        "file": "TSPhrases.ocd2"
+        "file": "HKVariantsRevPhrases.ocd2"
       }, {
         "type": "ocd2",
-        "file": "TSCharacters.ocd2"
-      }]
+        "file": "HKVariantsRev.ocd2"
+      }] 
     }
   }]
 }
