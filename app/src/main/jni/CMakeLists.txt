@@ -138,7 +138,7 @@ file(GLOB BOOST_SOURCES
   boost/libs/locale/src/encoding/codepage.cpp
   )
 if(BOOST_USE_SIGNALS2)
-  add_definitions(-DBOOST_SIGNALS2)
+  set(RIME_BOOST_SIGNALS2 1)
 else(BOOST_USE_SIGNALS2)
   add_definitions(-DBOOST_SIGNALS_NO_DEPRECATION_WARNING)
   file(GLOB BOOST_SIGNAL_SOURCES boost/libs/signals/src/*.cpp)
@@ -339,6 +339,79 @@ target_include_directories(opencc_phrase_extract BEFORE PRIVATE
   OpenCC/deps/tclap-1.2.2
   )
 
+# capnproto
+find_package(CapnProto CONFIG QUIET)
+if(NOT CapnProto_FOUND)
+  # No working installation of Cap'n Proto found, so fall back to searching the environment.
+  #
+  # We search for the external capnp compiler binaries via $CAPNP, $CAPNPC_CXX, and
+  # find_program(). find_program() will use various paths in its search, among them
+  # ${CMAKE_PREFIX_PATH}/bin and $PATH.
+
+  if(NOT CAPNP_EXECUTABLE)
+    if(DEFINED ENV{CAPNP})
+      set(CAPNP_EXECUTABLE "$ENV{CAPNP}")
+    else()
+      find_program(CAPNP_EXECUTABLE capnp)
+    endif()
+  endif()
+
+  if(NOT CAPNPC_CXX_EXECUTABLE)
+    if(DEFINED ENV{CAPNPC_CXX})
+      set(CAPNPC_CXX_EXECUTABLE "$ENV{CAPNPC_CXX}")
+    else()
+      # Also search in the same directory that `capnp` was found in
+      get_filename_component(capnp_dir "${CAPNP_EXECUTABLE}" DIRECTORY)
+      find_program(CAPNPC_CXX_EXECUTABLE capnpc-c++ HINTS "${capnp_dir}")
+    endif()
+  endif()
+endif()
+set(CAPNP_INCLUDE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/librime/thirdparty/src/capnproto/c++/src)
+include("librime/thirdparty/src/capnproto/c++/cmake/CapnProtoMacros.cmake")
+
+set(kj_sources_lite
+  librime/thirdparty/src/capnproto/c++/src/kj/array.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/common.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/debug.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/exception.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/io.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/memory.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/mutex.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/string.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/hash.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/table.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/thread.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/main.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/arena.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/test-helpers.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/units.c++
+  librime/thirdparty/src/capnproto/c++/src/kj/encoding.c++
+)
+add_library(kj-static STATIC ${kj_sources_lite})
+target_compile_features(kj-static PUBLIC cxx_generic_lambdas)
+target_compile_definitions(kj-static PUBLIC -DCAPNP_LITE)
+set_target_properties(kj-static PROPERTIES VERSION "0.8.0")
+
+set(capnp_sources_lite
+  librime/thirdparty/src/capnproto/c++/src/capnp/c++.capnp.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/blob.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/arena.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/layout.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/list.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/any.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/message.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/schema.capnp.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/stream.capnp.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/serialize.c++
+  librime/thirdparty/src/capnproto/c++/src/capnp/serialize-packed.c++
+)
+add_library(capnp-static STATIC ${capnp_sources_lite})
+target_link_libraries(capnp-static PUBLIC kj-static)
+target_include_directories(kj-static INTERFACE
+  ${CAPNP_INCLUDE_DIRECTORY}
+  )
+set_target_properties(capnp-static PROPERTIES VERSION "0.8.0")
+
 # rime plugins
 set(rime_extra_modules "")
 unset(rime_plugins_sources)
@@ -358,10 +431,22 @@ set(rime_extra_modules "${rime_extra_modules},Q(grammar)")
 file(GLOB_RECURSE rime_plugin_sources librime-octagram/src/*.cc)
 set(rime_plugins_sources ${rime_plugins_sources} ${rime_plugin_sources})
 
+# rime proto
+capnp_generate_cpp(
+  CAPNP_SRCS
+  CAPNP_HDRS
+  librime/proto/rime_proto.capnp
+)
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/librime/proto")
+
+#set(rime_proto_objs $<TARGET_OBJECTS:rime-proto-objs> PARENT_SCOPE)
+
 # rime
 #add_subdirectory(librime)
 find_package (Threads)
 file(GLOB_RECURSE RIME_SOURCES librime/src/*.cc)
+set(RIME_SOURCES ${RIME_SOURCES} ${CAPNP_SRCS})
+configure_file("librime/src/rime/build_config.h.in" "${CMAKE_BINARY_DIR}/include/rime/build_config.h")
 add_library(rime SHARED ${RIME_SOURCES} ${rime_plugins_sources})
 target_link_libraries(rime
   opencc
@@ -370,12 +455,13 @@ target_link_libraries(rime
   miniglog-static
   leveldb-static
   boost-static
+  capnp-static
   ${CMAKE_THREAD_LIBS_INIT}
   )
 target_compile_definitions(rime PRIVATE
   RIME_BUILD_SHARED_LIBS
   RIME_VERSION="1.5.3"
-  RIME_ENABLE_LOGGING
+  #RIME_ENABLE_LOGGING # TODO: Update minilog
   RIME_EXPORTS
   RIME_EXTRA_MODULES=${rime_extra_modules}
   )
