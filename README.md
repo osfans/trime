@@ -68,7 +68,7 @@ make release
 The following guide is for the specific platform prebuild setting:
 - [Arch Linux](https://www.archlinux.org/)
   ```bash
-   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle clang
+   yaourt -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle clang capnproto
    make release
   ```
 
@@ -86,7 +86,7 @@ The following guide is for the specific platform prebuild setting:
   [Homebrew mirror](https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git) of it if your network is slow.
 
   ```bash
-   brew install automake cmake opencc boost python gradle doxygen clang
+   brew install automake cmake opencc boost python gradle doxygen clang capnp
   ```
 
   Set the path environment in ~/.bashrc if you use bash like this
@@ -98,6 +98,7 @@ The following guide is for the specific platform prebuild setting:
   ```
 ## 第三方庫/Third Party Library
 - [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)
+- [Cap'n Proto](https://capnproto.org/) (MIT License)
 - [darts-clone](https://github.com/s-yata/darts-clone) (New BSD License)
 - [LevelDB](https://github.com/google/leveldb) (New BSD License)
 - [libiconv](https://www.gnu.org/software/libiconv/) (LGPL License)
