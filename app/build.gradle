@@ -7,8 +7,8 @@ android {
         applicationId "com.osfans.trime"
         minSdkVersion 14
         targetSdkVersion 29
-        versionCode 20181226
-        versionName "3.1.3"
+        versionCode 20210604
+        versionName "3.2.0"
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a"
         }
