@@ -151,8 +151,8 @@ public class Config {
           };
       for (String txtName : d.list(txtFilter)) {
         txtName = new File(dataDir, txtName).getPath();
-        String ocdName = txtName.replace(".txt", ".ocd");
-        Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd");
+        String ocdName = txtName.replace(".txt", ".ocd2");
+        Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd2");
       }
     }
     return true;
