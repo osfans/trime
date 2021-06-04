@@ -8,6 +8,7 @@ git:
 jdk:
 - openjdk8
 before_install:
+- sudo apt-get -y install capnproto
 - openssl aes-256-cbc -K $encrypted_26e1bb6b6b4a_key -iv $encrypted_26e1bb6b6b4a_iv
   -in keystore.tar.enc -out keystore.tar -d
 - tar xvf keystore.tar
