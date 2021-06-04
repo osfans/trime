@@ -7,20 +7,20 @@ jniDir=$(mainDir)/jni
 all: release
 
 clean:
-	gradle clean
+	./gradlew clean
 
 build:
-	gradle build
+	./gradlew build
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
 release: opencc-data
-	gradle assembleRelease
+	./gradlew assembleRelease
 
 debug:
-	gradle assembleDebug
+	./gradlew assembleDebug
 
 install: release
-	gradle installRelease
+	./gradlew installRelease
 
 icon: icon.svg
 	@echo "updating the icons"
