@@ -11,11 +11,9 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Install package and setup keystore
+      - name: Install dependency
         run: |
           sudo apt-get -y install capnproto cmake
-          openssl aes-256-cbc -K $encrypted_26e1bb6b6b4a_key -iv $encrypted_26e1bb6b6b4a_iv -in keystore.tar.enc -out keystore.tar -d
-          tar xvf keystore.tar
 
       - name: Set up adoptJDK 8
         uses: actions/setup-java@v2
