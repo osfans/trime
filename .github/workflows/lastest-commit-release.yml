@@ -8,7 +8,8 @@ jobs:
     steps:
       - name: checkout last commit
         uses: actions/checkout@v2
-        submodules: 'recursive'
+        with:
+          submodules: 'recursive'
 
       - name: Install package and setup keystore
         run: |
