@@ -1,19 +1,17 @@
-name: lastest commit release
+name: Lastest commit release
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      secure: 44HmwFFIKEmqnAOemuh8mIIbvglb3CZN+I+GsN7CGWn5Pvocg2sULj7sv33NDL6+5012bt3RoT9YgoTf2ERNR2W0bMVYw/0O5qdAnPiLD/v3SaoDv7qW3G9snKPBhdK72eODVxys66EY0oloJiBKQ/QnDr+HUiGpUuZlOaVLXBN9rcNlinM+4nMMSmaEOInhCwYrNI+NwOhoBVx+YNgaSqWBzHNYO7P2iWZfHbh9LmavpVynzp2gQp3VwoX9VrCrnfjLdRy+F0/TsWjiQ/PIbRJo2/Kl8SY93ve1SUfoJoLVTatX9ZG3a2+955+1SKBElI0mlKoMHDj0yy0F9zwUJY0rhbXnjp1EFyFgnRhCiaOKtXQp2+CKjig6V2kXRzxGzXKJ6aEZi8I3I6LKMgasXDgJgyzWmZjI30zBjA/lbWvmlLOkJswxFvQn972hPvhaE3P40OELrEu5uZiCJItkb4rWD2CPMkdz6R5mqbLa6Zn8RthfUyYuD8jh24lasp0wo9a3ARAhaZZnrxIS2p4QFugXzjsp28u4fA8pQDcKcHEZU0/fgun6gKKKkgq/DiIlheWiVO5Y7cnIiSKMYYkqlxiKpP2EbY5nE7yKwXANC+lvNQVBlk1mTP6POD5qeyAj75SeVc52VLAmvvVMKWZHD29KWW3f7JmIOTgrXHcSSck=
     steps:
-      - name: checkout last commit
+      - name: Checkout last commit
         uses: actions/checkout@v2
         with:
           submodules: 'recursive'
 
       - name: Install dependency
         run: |
-          sudo apt-get -y install capnproto cmake
+          sudo apt-get -y install capnproto
 
       - name: Set up adoptJDK 8
         uses: actions/setup-java@v2
@@ -24,5 +22,5 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: build trime
-        run: ./gradlew assembledebug
+      - name: Build trime
+        run: ./gradlew assembleDebug
