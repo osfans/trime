@@ -1,4 +1,4 @@
-name: Pull requset ci
+name: Pull request ci
 on: [pull_request]
 jobs:
   build:
