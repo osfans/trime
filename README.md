@@ -1,5 +1,5 @@
 # 同文安卓輸入法平臺/Trime: Rime IME for Android
-[![自動編譯](https://travis-ci.org/osfans/trime.svg?branch=develop)](https://travis-ci.org/osfans/trime)
+![build](https://github.com/osfans/trime/actions/workflows/lastest-commit-release.yml/badge.svg?branch=develop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![GitHub release](https://img.shields.io/github/release/osfans/trime.svg)](https://github.com/osfans/trime/releases)
 [![F-Droid release](https://img.shields.io/f-droid/v/com.osfans.trime.svg)](https://f-droid.org/packages/com.osfans.trime)
