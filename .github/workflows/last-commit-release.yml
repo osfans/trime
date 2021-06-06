@@ -1,4 +1,4 @@
-name: Lastest commit release
+name: Last commit release
 on: [push]
 jobs:
   build:
