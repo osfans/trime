@@ -1,0 +1,32 @@
+name: Pull requset ci
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout last commit
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Install dependency
+        run: |
+          curl -O https://capnproto.org/capnproto-c++-0.8.0.tar.gz
+          tar zxf capnproto-c++-0.8.0.tar.gz
+          cd capnproto-c++-0.8.0
+          ./configure
+          make -j4 check
+          sudo make install
+
+      - name: Set up adoptJDK 8
+        uses: actions/setup-java@v2
+        with:
+          distribution: "adopt"
+          java-version: 8
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build Trime
+        run: make debug
