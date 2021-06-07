@@ -196,8 +196,6 @@ set(LEVELDB_SOURCES
   leveldb/util/options.cc
   leveldb/util/status.cc
   leveldb/util/env_posix.cc
-  leveldb/port/port_posix.cc
-  leveldb/port/port_posix_sse.cc
   )
 set(LEVELDB_FLAGS _REENTRANT NDEBUG LEVELDB_PLATFORM_POSIX LEVELDB_ATOMIC_PRESENT)
 if(ANDROID)
