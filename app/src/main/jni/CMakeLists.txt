@@ -429,6 +429,11 @@ set(rime_extra_modules "${rime_extra_modules},Q(grammar)")
 file(GLOB_RECURSE rime_plugin_sources librime-octagram/src/*.cc)
 set(rime_plugins_sources ${rime_plugins_sources} ${rime_plugin_sources})
 
+## librime-charcode
+set(rime_extra_modules "${rime_extra_modules},Q(charcode)")
+file(GLOB_RECURSE rime_plugin_sources librime-charcode/src/*.cc)
+set(rime_plugins_sources ${rime_plugins_sources} ${rime_plugin_sources})
+
 # rime proto
 capnp_generate_cpp(
   CAPNP_SRCS

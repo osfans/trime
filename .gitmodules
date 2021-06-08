@@ -38,3 +38,6 @@
 [submodule "app/src/main/jni/capnproto"]
 	path = app/src/main/jni/capnproto
 	url = https://github.com/lotem/capnproto.git
+[submodule "app/src/main/jni/librime-charcode"]
+	path = app/src/main/jni/librime-charcode
+	url = https://github.com/rime/librime-charcode
