@@ -12,13 +12,9 @@ jobs:
 
       - name: Install dependency
         run: |
-          curl -O https://capnproto.org/capnproto-c++-0.8.0.tar.gz
-          tar zxf capnproto-c++-0.8.0.tar.gz
-          cd capnproto-c++-0.8.0
-          ./configure
-          make -j4 check
-          sudo make install
-          sudo apt-get -y install opencc inkscape
+          sudo add-apt-repository 'deb http://deb.debian.org/debian experimental main'
+          sudo apt update
+          sudo apt-get -y install opencc inkscape capnproto
 
       - name: Set up adoptJDK 8
         uses: actions/setup-java@v2
