@@ -4,21 +4,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependency
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+          sudo add-apt-repository 'deb http://deb.debian.org/debian experimental main'
+          sudo apt update
+          sudo apt-get -t experimental -y install capnproto=0.8.0-1
+
       - name: Checkout last commit
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           submodules: 'recursive'
-
-      - name: Install dependency
-        run: |
-          curl -O https://capnproto.org/capnproto-c++-0.8.0.tar.gz
-          tar zxf capnproto-c++-0.8.0.tar.gz
-          cd capnproto-c++-0.8.0
-          ./configure
-          make -j4 check
-          sudo make install
-
+      
       - name: Set up adoptJDK 8
         uses: actions/setup-java@v2
         with:
