@@ -9,8 +9,9 @@ jobs:
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
           sudo add-apt-repository 'deb http://deb.debian.org/debian experimental main'
-          sudo apt -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true update
-          sudo apt-get -o APT::Get::AllowUnauthenticated=true -y install opencc inkscape capnproto
+          sudo apt update
+          sudo apt-get -t experimental -y install capnproto
+          sudo apt-get -y install opencc inkscape
 
       - name: Checkout last commit
         uses: actions/checkout@v2
