@@ -463,7 +463,7 @@ target_link_libraries(rime
   )
 target_compile_definitions(rime PRIVATE
   RIME_BUILD_SHARED_LIBS
-  RIME_VERSION="1.5.3"
+  RIME_VERSION="1.7.3"
   #RIME_ENABLE_LOGGING # TODO: Update minilog
   RIME_EXPORTS
   RIME_EXTRA_MODULES=${rime_extra_modules}
