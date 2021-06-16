@@ -3,7 +3,6 @@ package com.osfans.trime.settings.components
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
-import android.os.IBinder
 import com.osfans.trime.Config
 import com.osfans.trime.R
 import com.osfans.trime.Trime
@@ -65,7 +64,7 @@ class ThemePickerDialog(private val context: Context): CoroutineScope {
     }
 
     private fun setTheme() { config.theme = themeKeys[checkedId]?.replace("yaml", "") }
-
+    /** 调用该方法显示对话框 **/
     fun show() = pickerDialog.show()
 
     private fun execute() = launch {
