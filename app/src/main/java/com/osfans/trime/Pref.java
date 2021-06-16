@@ -43,6 +43,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.osfans.trime.settings.components.ColorDialog;
+import com.osfans.trime.settings.components.ResetDialog;
+import com.osfans.trime.settings.components.SchemaDialog;
+import com.osfans.trime.settings.components.ThemeDlg;
+
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.Date;

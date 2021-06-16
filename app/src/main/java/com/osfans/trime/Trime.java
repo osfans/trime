@@ -49,6 +49,10 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
+import com.osfans.trime.settings.components.ColorDialog;
+import com.osfans.trime.settings.components.SchemaDialog;
+import com.osfans.trime.settings.components.ThemeDlg;
+
 import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;

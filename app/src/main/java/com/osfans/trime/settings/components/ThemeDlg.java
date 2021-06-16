@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.settings.components;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -26,12 +26,17 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.osfans.trime.Config;
+import com.osfans.trime.R;
+import com.osfans.trime.Trime;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /** 顯示配色方案列表 */
-class ThemeDlg extends AsyncTask {
+public class ThemeDlg extends AsyncTask {
   private String[] keys;
   private String[] names;
   private int checked;

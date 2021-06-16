@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.settings.components;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -27,6 +27,12 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.osfans.trime.Function;
+import com.osfans.trime.R;
+import com.osfans.trime.Rime;
+import com.osfans.trime.Trime;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 /** 顯示輸入法方案列表 */
-class SchemaDialog extends AsyncTask {
+public class SchemaDialog extends AsyncTask {
   private boolean[] checkedSchemaItems;
   private String[] schemaItems;
   private List<Map<String, String>> schemas;
