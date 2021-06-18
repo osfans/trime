@@ -50,11 +50,8 @@ import android.widget.PopupWindow;
 
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
-import com.osfans.trime.settings.components.ColorDialog;
 import com.osfans.trime.settings.components.ColorPickerDialog;
-import com.osfans.trime.settings.components.SchemaDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
-import com.osfans.trime.settings.components.ThemeDlg;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 
 import java.util.Locale;
