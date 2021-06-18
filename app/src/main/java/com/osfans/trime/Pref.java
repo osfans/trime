@@ -43,6 +43,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.osfans.trime.settings.components.ColorPickerDialog;
+import com.osfans.trime.settings.components.ResetAssetsDialog;
+import com.osfans.trime.settings.components.SchemaPickerDialog;
+import com.osfans.trime.settings.components.ThemePickerDialog;
+
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.Date;
@@ -295,13 +300,13 @@ public class Pref extends PreferenceActivity
         ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
         return true;
       case "pref_themes": //主題
-        new ThemeDlg(self);
+        new ThemePickerDialog(self).show();
         return true;
       case "pref_colors": //配色
-        new ColorDialog(self).show();
+        new ColorPickerDialog(self).show();
         return true;
       case "pref_schemas": //方案
-        new SchemaDialog(self);
+        new SchemaPickerDialog(self).show();
         return true;
       case "pref_maintenance": //維護
         Function.check();
@@ -352,7 +357,7 @@ public class Pref extends PreferenceActivity
         setBackgroundSyncSummary(self);
         return true;
       case "pref_reset": //回廠
-        new ResetDialog(self).show();
+        new ResetAssetsDialog(self).show();
         return true;
       case "pref_licensing": //許可協議
         showLicenseDialog();
