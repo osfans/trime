@@ -1050,6 +1050,61 @@ preset_keyboards:
     - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
     - {click: Return, long_click: CommitComment, width: 15}
+  us_intl:
+    name: 美式國際
+    author: "Terry Tsang <archerindigo@gmail.com>"
+    ascii_mode: 1
+    width: 10
+    height: 44
+    lock: true
+    keys:
+    - {click: '1', long_click: '!', swipe_up: '¡', swipe_down: '¹'}
+    - {click: '2', long_click: '@', swipe_up: '²'}
+    - {click: '3', long_click: '#', swipe_up: '³'}
+    - {click: '4', long_click: '$', swipe_up: '¤', swipe_down: '£'}
+    - {click: '5', long_click: '%', swipe_up: '€'}
+    - {click: '6', long_click: '^', swipe_up: '¼'}
+    - {click: '7', long_click: '&', swipe_up: '½'}
+    - {click: '8', long_click: '*', swipe_up: '¾'}
+    - {click: '9', long_click: '(){Left}', swipe_left: '(', swipe_right: ')', swipe_up: '‘'}
+    - {click: '0', long_click: '-', swipe_down: '_', swipe_up: '’', swipe_left: '¥'}
+    - {click: 'q', long_click: '~', swipe_up: 'ä'}
+    - {click: 'w', long_click: '+', swipe_up: 'å'}
+    - {click: 'e', long_click: '=', swipe_up: 'é'}
+    - {click: 'r', long_click: '×', swipe_up: '®'}
+    - {click: 't', long_click: '÷', swipe_up: 'þ'}
+    - {click: 'y', long_click: '«»{Left}', swipe_left: '«', swipe_right: '»', swipe_up: 'ü'}
+    - {click: 'u', long_click: '[]{Left}', swipe_left: '[', swipe_right: ']', swipe_up: 'ú'}
+    - {click: 'i', long_click: '{}{Left}', swipe_left: '{', swipe_right: '}', swipe_up: 'í'}
+    - {click: 'o', long_click: '\', swipe_up: 'ó'}
+    - {click: 'p', long_click: '|', swipe_up: 'ö', swipe_down: '¬', swipe_left: '¦'}
+    - {click: 'a', long_click: '`', swipe_up: 'á'}
+    - {click: 's', swipe_up: 'ß', swipe_down: '§'}
+    - {click: 'd', swipe_up: 'ð'}
+    - {click: 'f', long_click: Left, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'g', long_click: Up, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'h', long_click: Down, swipe_left: Home, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'j', long_click: Right, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'k'}
+    - {click: 'l', swipe_up: 'ø'}
+    - {click: ';', long_click: ':', swipe_up: '¶', swipe_down: '°'}
+    - {click: 'z', long_click: select_all, swipe_up: 'æ'}
+    - {click: 'x', long_click: cut}
+    - {click: 'c', long_click: copy, swipe_up: '©', swipe_down: '¢'}
+    - {click: 'v', long_click: paste}
+    - {click: 'b', long_click: Insert}
+    - {click: 'n', long_click: undo, swipe_up: 'ñ'}
+    - {click: 'm', long_click: redo, swipe_up: 'µ'}
+    - {click: ',', long_click: '<', swipe_up: 'ç'}
+    - {click: '.', long_click: '>'}
+    - {click: '/', long_click: '?', swipe_up: '¿'}
+    - {click: Shift_L}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
+    - {click: Mode_switch, long_click: Menu}
+    - {click: space, long_click: VOICE_ASSIST, width: 30}
+    - {click: "'", long_click: '"'}
+    - {click: BackSpace, swipe_right: Delete, swipe_left: Escape, width: 15}
+    - {click: Return, long_click: CommitComment, width: 15}
   number:
     name: 預設數字
     author: "osfans <waxaca@163.com>"
@@ -1390,3 +1445,58 @@ preset_keyboards:
     - {click: ".", long_click: '"'}
     - {click: '\', long_click: '.', composing: 'ˋ', send_bindings: false}  #四聲
     - {click: Return, long_click: CommitComment}
+  array30:
+    name: 行列30配美式國際
+    author: "Terry Tsang <archerindigo@gmail.com>"
+    ascii_mode: 1
+    width: 10
+    height: 44
+    lock: true
+    keys:
+    - {click: '1', long_click: '!', swipe_up: '¡', swipe_down: '¹'}
+    - {click: '2', long_click: '@', swipe_up: '²'}
+    - {click: '3', long_click: '#', swipe_up: '³'}
+    - {click: '4', long_click: '$', swipe_up: '¤', swipe_down: '£'}
+    - {click: '5', long_click: '%', swipe_up: '€'}
+    - {click: '6', long_click: '^', swipe_up: '¼'}
+    - {click: '7', long_click: '&', swipe_up: '½'}
+    - {click: '8', long_click: '*', swipe_up: '¾'}
+    - {click: '9', long_click: '(){Left}', swipe_left: '(', swipe_right: ')', swipe_up: '‘'}
+    - {click: '0', long_click: '-', swipe_down: '_', swipe_up: '’', swipe_left: '¥'}
+    - {click: 'q', label: "1^", long_click: '~', swipe_up: 'ä'}
+    - {click: 'w', label: "2^", long_click: '+', swipe_up: 'å'}
+    - {click: 'e', label: "3^", long_click: '=', swipe_up: 'é'}
+    - {click: 'r', label: "4^", long_click: '×', swipe_up: '®'}
+    - {click: 't', label: "5^", long_click: '÷', swipe_up: 'þ'}
+    - {click: 'y', label: "6^", long_click: '«»{Left}', swipe_left: '«', swipe_right: '»', swipe_up: 'ü'}
+    - {click: 'u', label: "7^", long_click: '[]{Left}', swipe_left: '[', swipe_right: ']', swipe_up: 'ú'}
+    - {click: 'i', label: "8^", long_click: '{}{Left}', swipe_left: '{', swipe_right: '}', swipe_up: 'í'}
+    - {click: 'o', label: "9^", long_click: '\', swipe_up: 'ó'}
+    - {click: 'p', label: "0^", long_click: '|', swipe_up: 'ö', swipe_down: '¬', swipe_left: '¦'}
+    - {click: 'a', label: "1-", long_click: '`', swipe_up: 'á'}
+    - {click: 's', label: "2-", swipe_up: 'ß', swipe_down: '§'}
+    - {click: 'd', label: "3-", swipe_up: 'ð'}
+    - {click: 'f', label: "4-", long_click: Left, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'g', label: "5-", long_click: Up, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'h', label: "6-", long_click: Down, swipe_left: Home, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'j', label: "7-", long_click: Right, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'k', label: "8-"}
+    - {click: 'l', label: "9-", swipe_up: 'ø'}
+    - {click: ';', label: "0-", long_click: ':', swipe_up: '¶', swipe_down: '°'}
+    - {click: 'z', label: "1v", long_click: select_all, swipe_up: 'æ'}
+    - {click: 'x', label: "2v", long_click: cut}
+    - {click: 'c', label: "3v", long_click: copy, swipe_up: '©', swipe_down: '¢'}
+    - {click: 'v', label: "4v", long_click: paste}
+    - {click: 'b', label: "5v", long_click: Insert}
+    - {click: 'n', label: "6v", long_click: undo, swipe_up: 'ñ'}
+    - {click: 'm', label: "7v", long_click: redo, swipe_up: 'µ'}
+    - {click: ',', label: "8v", long_click: '<', swipe_up: 'ç'}
+    - {click: '.', label: "9v", long_click: '>'}
+    - {click: '/', label: "0v", long_click: '?', swipe_up: '¿'}
+    - {click: Shift_L}
+    - {click: Keyboard_symbols, long_click: Keyboard_number}
+    - {click: Mode_switch, long_click: Menu}
+    - {click: space, long_click: VOICE_ASSIST, width: 30}
+    - {click: "'", long_click: '"'}
+    - {click: BackSpace, swipe_right: Delete, swipe_left: Escape, width: 15}
+    - {click: Return, long_click: CommitComment, width: 15}
