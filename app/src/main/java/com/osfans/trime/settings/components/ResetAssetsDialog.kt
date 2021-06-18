@@ -16,8 +16,7 @@ class ResetAssetsDialog(private val context: Context) {
     private var checkedStatus: BooleanArray = BooleanArray(assetItems.size)
 
     /** 回廠對話框 */
-    var resetDialog: AlertDialog
-        private set
+    val resetDialog: AlertDialog
 
     init {
         resetDialog = AlertDialog.Builder(context).apply {

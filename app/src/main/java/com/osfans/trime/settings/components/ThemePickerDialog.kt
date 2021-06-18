@@ -19,11 +19,10 @@ class ThemePickerDialog(private val context: Context): CoroutineScope {
     private val themeKeys: Array<String?>
     private val themeNames: Array<String?>
     private var checkedId: Int = 0
-    private val pickerDialog: AlertDialog
+    val pickerDialog: AlertDialog
     @Suppress("DEPRECATION")
     private val progressDialog: ProgressDialog
 
-    //constructor(context: Context): this(context, null)
     init {
         val themeFile = config.theme + ".yaml"
         themeKeys = Config.getThemeKeys(context, true)
@@ -63,7 +62,7 @@ class ThemePickerDialog(private val context: Context): CoroutineScope {
         }
     }
 
-    private fun setTheme() { config.theme = themeKeys[checkedId]?.replace("yaml", "") }
+    private fun setTheme() { config.theme = themeKeys[checkedId]?.replace(".yaml", "") }
     /** 调用该方法显示对话框 **/
     fun show() = pickerDialog.show()
 

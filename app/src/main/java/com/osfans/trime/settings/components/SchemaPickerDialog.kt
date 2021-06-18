@@ -18,10 +18,9 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
 
     private lateinit var schemaItems: Array<String?>
     private lateinit var checkedStatus: BooleanArray
-    private var schemaMapList: List<Map<String?, String?>> = Rime.get_available_schema_list()
+    private var schemaMapList: List<Map<String?, String?>>? = Rime.get_available_schema_list()
     private lateinit var schemaNames: Array<String?>
-    var pickerDialogBuilder: AlertDialog.Builder
-        private set
+    val pickerDialogBuilder: AlertDialog.Builder
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog
 
@@ -43,6 +42,7 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
         pickerDialogBuilder = AlertDialog.Builder(context).apply {
             setTitle(R.string.pref_schemas)
             setCancelable(true)
+            setPositiveButton(android.R.string.ok, null);
         }
         if (schemaMapList.isNullOrEmpty()) {
             pickerDialogBuilder.setMessage(R.string.no_schemas)
@@ -80,10 +80,10 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
 
     private fun initSchemas() {
         if (schemaMapList.isNullOrEmpty()) return
-        schemaMapList.sortedWith(SortByName())
+        schemaMapList!!.sortedWith(SortByName())
         val selectedSchemas = Rime.get_selected_schema_list()
         val selectedIds = ArrayList<String>()
-        schemaMapList.size.let {
+        schemaMapList!!.size.let {
             schemaNames = arrayOfNulls(it)
             checkedStatus = BooleanArray(it)
             schemaItems = arrayOfNulls(it)
@@ -94,7 +94,7 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
                 m["schema_id"]?.let { selectedIds.add(it) }
             }
         }
-        for ((i, m) in schemaMapList.withIndex()) {
+        for ((i, m) in schemaMapList!!.withIndex()) {
             schemaNames[i] = m["name"]
             m["schema_id"].let { // schema_id
                 schemaItems[i] = it

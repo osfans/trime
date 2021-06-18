@@ -15,8 +15,7 @@ class ColorPickerDialog(
     val config: Config = Config.get(context)
     private var colorKeys: Array<String>
     private var checkedColor: Int = 0
-    var pickerDialog: AlertDialog
-        private set // 设定方法不向外开放
+    val pickerDialog: AlertDialog
 
     init {
         val colorScheme = config.colorScheme

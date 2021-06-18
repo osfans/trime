@@ -47,11 +47,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
 import com.osfans.trime.settings.components.ColorDialog;
+import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaDialog;
+import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemeDlg;
+import com.osfans.trime.settings.components.ThemePickerDialog;
 
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -1137,20 +1141,22 @@ public class Trime extends InputMethodService
     dialog.show();
   }
 
-  /** 彈出{@link ColorDialog 配色對話框} */
+  /** 彈出{@link ColorPickerDialog 配色對話框} */
   private void showColorDialog() {
-    AlertDialog dialog = new ColorDialog(this).getDialog();
-    showDialog(dialog);
+      AlertDialog dialog = new ColorPickerDialog(this).getPickerDialog();
+      showDialog(dialog);
   }
 
-  /** 彈出{@link SchemaDialog 輸入法方案對話框} */
+  /** 彈出{@link SchemaPickerDialog 輸入法方案對話框} */
   private void showSchemaDialog() {
-    new SchemaDialog(this, mCandidateContainer.getWindowToken());
+      AlertDialog dialog = new SchemaPickerDialog(this).getPickerDialogBuilder().create();
+      showDialog(dialog);
   }
 
-  /** 彈出{@link ThemeDlg 配色對話框} */
+  /** 彈出{@link ThemePickerDialog 主題對話框} */
   private void showThemeDialog() {
-    new ThemeDlg(this, mCandidateContainer.getWindowToken());
+      AlertDialog dialog = new ThemePickerDialog(this).getPickerDialog();
+      showDialog(dialog);
   }
 
   private boolean handleOption(int keyCode) {
