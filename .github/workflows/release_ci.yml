@@ -1,0 +1,64 @@
+name: Create release
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependency
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+          sudo add-apt-repository 'deb http://deb.debian.org/debian experimental main'
+          sudo apt update
+          sudo apt-get -t experimental -y install capnproto=0.8.0-1
+          sudo apt-get -y install opencc inkscape
+
+      - name: Checkout last commit
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Setup adopt JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: "adopt"
+          java-version: 11
+          # will restore cache of dependencies and wrappers
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Setup keystore
+        run: |
+          echo "set up keystore for release"
+          echo "need help!!"
+          
+      - name: Spotless code style check
+        run: make spotless
+
+      - name: Build Trime
+        run: make debug
+        
+      - name: Build changelog
+        id: release_log
+        run: |
+          log=$(./script/changelog.sh)
+          # multiline
+          log="${log//'%'/'%25'}"
+          log="${log//$'\n'/'%0A'}"
+          log="${log//$'\r'/'%0D'}"
+
+          echo "::set-output name=changelog::$log"
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "app/build/outputs/apk/debug/app-debug.apk"
+          body: |
+            ${{ steps.release_log.outputs.changelog }}
+          token: ${{ secrets.GITHUB_TOKEN }}
