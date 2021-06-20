@@ -1146,14 +1146,12 @@ public class Trime extends InputMethodService
 
   /** 彈出{@link SchemaPickerDialog 輸入法方案對話框} */
   private void showSchemaDialog() {
-      AlertDialog dialog = new SchemaPickerDialog(this).getPickerDialogBuilder().create();
-      showDialog(dialog);
+      new SchemaPickerDialog(this, mCandidateContainer.getWindowToken()).show();
   }
 
   /** 彈出{@link ThemePickerDialog 主題對話框} */
   private void showThemeDialog() {
-      AlertDialog dialog = new ThemePickerDialog(this).getPickerDialog();
-      showDialog(dialog);
+      new ThemePickerDialog(this, mCandidateContainer.getWindowToken()).show();
   }
 
   private boolean handleOption(int keyCode) {
