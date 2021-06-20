@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="pref_keyboard" android:title="@string/pref_keyboard">
+    <Preference android:key="pref_themes" android:title="@string/pref_themes" android:summary="@string/pref_themes_summary"/>
+    <Preference android:key="pref_colors" android:title="@string/pref_colors" android:summary="@string/pref_colors_summary"/>
+    <ListPreference android:key="inline_preedit" android:title="@string/inline_preedit" android:entries="@array/inline_entries" android:entryValues="@array/inline_values" android:defaultValue="preview"/>
+    <SwitchPreference android:key="soft_cursor" android:title="@string/soft_cursor" android:defaultValue="true"/>
+    <SwitchPreference android:key="show_window" android:title="@string/show_window" android:defaultValue="true"/>
+    <SwitchPreference android:key="show_preview" android:title="@string/show_preview" android:defaultValue="false"/>
+    <SwitchPreference android:key="key_sound" android:title="@string/key_sound"/>
+    <SeekBarPreference
+        android:widgetLayout="@layout/preference_widget_seekbar"
+        android:key="key_sound_volume"
+        android:title="@string/key_sound_volume"
+        android:max="100"
+        android:defaultValue="100" />
+    <SwitchPreference android:key="key_vibrate" android:title="@string/key_vibrate"/>
+    <SeekBarPreference
+        android:widgetLayout="@layout/preference_widget_seekbar"
+        android:key="key_vibrate_duration"
+        android:title="@string/key_vibrate_duration"
+        android:max="100"
+        android:defaultValue="10" />
+    <SeekBarPreference
+        android:widgetLayout="@layout/preference_widget_seekbar"
+        android:key="key_vibrate_amplitude"
+        android:title="@string/key_vibrate_amplitude"
+        android:max="255"
+        android:defaultValue="0"/>
+    <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
+    <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
+    <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
+    <SeekBarPreference
+        android:widgetLayout="@layout/preference_widget_seekbar"
+        android:key="longpress_timeout"
+        android:title="@string/longpress_timeout"
+        android:max="60"
+        android:defaultValue="20" />
+    <SeekBarPreference
+        android:widgetLayout="@layout/preference_widget_seekbar"
+        android:key="repeat_interval"
+        android:title="@string/repeat_interval"
+        android:max="9"
+        android:defaultValue="4" />
+    <SwitchPreference android:key="show_switches" android:title="@string/show_switches" android:defaultValue="true" />
+</PreferenceScreen>
