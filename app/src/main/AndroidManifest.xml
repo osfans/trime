@@ -31,7 +31,8 @@
     <application android:label="@string/ime_name"
                  android:icon="@drawable/icon"
                  android:requestLegacyExternalStorage="true"
-                 android:allowBackup="false" >
+                 android:allowBackup="false"
+                 android:theme="@style/PreferenceTheme">
 
         <service android:name="Trime" android:label="@string/ime_name"
                 android:permission="android.permission.BIND_INPUT_METHOD">
@@ -40,8 +41,16 @@
             </intent-filter>
             <meta-data android:name="android.view.im" android:resource="@xml/method" />
         </service>
-
+        <!--
         <activity android:name="Pref" android:label="@string/ime_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> -->
+
+        <activity android:name=".settings.PrefMainActivity" android:label="@string/ime_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT" />
