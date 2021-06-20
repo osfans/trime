@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 本色彩方案取自 Rime 官网（https://rime.im） -->
+    <color name="colorPrimary">#3F4144</color> <!-- 浅主题色 -->
+    <color name="colorPrimaryDark">#37393D</color> <!-- 深主题色 -->
+    <color name="colorAccent">#009BD1</color>  <!-- 浅强调色 -->
+    <color name="colorAccentDark">#1976D2</color> <!-- 深强调色 -->
+    <color name="toolbarForegroundColor">#FFFFFF</color>  <!-- 工具栏前景色 -->
+</resources>
