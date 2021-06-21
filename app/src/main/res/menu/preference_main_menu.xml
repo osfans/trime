@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/preference__menu_deploy"
+        android:title="@string/pref_deploy"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/preference__menu_help"
+        android:title="@string/pref_help" />
+    <item android:id="@+id/preference__menu_about"
+        android:title="@string/pref_about" />
+</menu>
