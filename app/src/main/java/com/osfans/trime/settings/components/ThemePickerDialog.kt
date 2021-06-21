@@ -3,6 +3,8 @@ package com.osfans.trime.settings.components
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
+import android.os.IBinder
+import android.view.WindowManager
 import com.osfans.trime.Config
 import com.osfans.trime.R
 import com.osfans.trime.Trime
@@ -10,7 +12,9 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 /** 顯示配色方案列表 */
-class ThemePickerDialog(private val context: Context): CoroutineScope {
+class ThemePickerDialog(
+    private val context: Context,
+    private val token: IBinder?): CoroutineScope {
     private val job = Job()
     override val coroutineContext : CoroutineContext
         get() = Dispatchers.Main + job
@@ -23,6 +27,7 @@ class ThemePickerDialog(private val context: Context): CoroutineScope {
     @Suppress("DEPRECATION")
     private val progressDialog: ProgressDialog
 
+    constructor(context: Context): this(context, null)
     init {
         val themeFile = config.theme + ".yaml"
         themeKeys = Config.getThemeKeys(context, true)
@@ -62,9 +67,26 @@ class ThemePickerDialog(private val context: Context): CoroutineScope {
         }
     }
 
+    private fun appendDialogParams(dialog: AlertDialog) {
+        val window = dialog.window
+        val lp = window?.attributes
+        lp?.let {
+            it.token = token
+            it.type = Trime.getDialogType()
+        }
+        window?.let {
+            it.attributes = lp
+            it.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        }
+    }
+
     private fun setTheme() { config.theme = themeKeys[checkedId]?.replace(".yaml", "") }
+
     /** 调用该方法显示对话框 **/
-    fun show() = pickerDialog.show()
+    fun show() {
+        if (token != null) appendDialogParams(pickerDialog)
+        pickerDialog.show()
+    }
 
     private fun execute() = launch {
         onPreExecute()
@@ -72,7 +94,10 @@ class ThemePickerDialog(private val context: Context): CoroutineScope {
         onPostExecute()
     }
 
-    private fun onPreExecute() = progressDialog.show()
+    private fun onPreExecute() {
+        if (token != null) appendDialogParams(progressDialog)
+        progressDialog.show()
+    }
 
     private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
         setTheme()

@@ -31,7 +31,7 @@
     <application android:label="@string/ime_name"
                  android:icon="@drawable/icon"
                  android:requestLegacyExternalStorage="true"
-                 android:allowBackup="false"
+                 android:allowBackup="true"
                  android:theme="@style/PreferenceTheme">
 
         <service android:name="Trime" android:label="@string/ime_name"

@@ -3,15 +3,20 @@ package com.osfans.trime.settings.components
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
+import android.os.IBinder
 import android.util.Log
+import android.view.WindowManager
+import com.osfans.trime.*
 import com.osfans.trime.Function
-import com.osfans.trime.R
-import com.osfans.trime.Rime
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-class SchemaPickerDialog(private val context: Context): CoroutineScope {
+
+class SchemaPickerDialog(
+    private val context: Context,
+    private val token: IBinder?): CoroutineScope {
+
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -20,7 +25,7 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
     private lateinit var checkedStatus: BooleanArray
     private var schemaMapList: List<Map<String?, String?>>? = Rime.get_available_schema_list()
     private lateinit var schemaNames: Array<String?>
-    val pickerDialogBuilder: AlertDialog.Builder
+    var pickerDialogBuilder: AlertDialog.Builder? = null
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog
 
@@ -38,16 +43,25 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
         }
     }
 
+    constructor(context: Context): this(context, null)
     init {
+        @Suppress("DEPRECATION")
+        progressDialog = ProgressDialog(context).apply {
+            setMessage(context.getString(R.string.schemas_progress))
+            setCancelable(false)
+        }
+    }
+
+    private fun showPickerDialog() {
         pickerDialogBuilder = AlertDialog.Builder(context).apply {
             setTitle(R.string.pref_schemas)
             setCancelable(true)
             setPositiveButton(android.R.string.ok, null);
         }
         if (schemaMapList.isNullOrEmpty()) {
-            pickerDialogBuilder.setMessage(R.string.no_schemas)
+            pickerDialogBuilder!!.setMessage(R.string.no_schemas)
         } else {
-            pickerDialogBuilder.apply {
+            pickerDialogBuilder!!.apply {
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     @Suppress("DEPRECATION")
@@ -71,10 +85,21 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
 
             }
         }
-        @Suppress("DEPRECATION")
-        progressDialog = ProgressDialog(context).apply {
-            setMessage(context.getString(R.string.schemas_progress))
-            setCancelable(false)
+        val pickerDialog = pickerDialogBuilder!!.create()
+        if (token != null) appendDialogParams(pickerDialog)
+        pickerDialog.show()
+    }
+
+    private fun appendDialogParams(dialog: AlertDialog) {
+        val window = dialog.window
+        val lp = window?.attributes
+        lp?.let {
+            it.token = token
+            it.type = Trime.getDialogType()
+        }
+        window?.let {
+            it.attributes = lp
+            it.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
         }
     }
 
@@ -124,7 +149,10 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
         onPostExecute()
     }
 
-    private fun onPreExecute() = progressDialog.show()
+    private fun onPreExecute() {
+        if (token != null) appendDialogParams(progressDialog)
+        progressDialog.show()
+    }
 
     private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
         initSchemas()
@@ -134,6 +162,6 @@ class SchemaPickerDialog(private val context: Context): CoroutineScope {
 
     private fun onPostExecute() {
         progressDialog.dismiss()
-        pickerDialogBuilder.create().show()
+        showPickerDialog()
     }
 }
