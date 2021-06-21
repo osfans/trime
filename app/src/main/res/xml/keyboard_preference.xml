@@ -13,20 +13,23 @@
         android:key="key_sound_volume"
         android:title="@string/key_sound_volume"
         android:max="100"
-        android:defaultValue="100" />
+        android:defaultValue="100"
+        android:dependency="key_sound"/>
     <SwitchPreference android:key="key_vibrate" android:title="@string/key_vibrate"/>
     <SeekBarPreference
         android:widgetLayout="@layout/preference_widget_seekbar"
         android:key="key_vibrate_duration"
         android:title="@string/key_vibrate_duration"
         android:max="100"
-        android:defaultValue="10" />
+        android:defaultValue="10"
+        android:dependency="key_vibrate"/>
     <SeekBarPreference
         android:widgetLayout="@layout/preference_widget_seekbar"
         android:key="key_vibrate_amplitude"
         android:title="@string/key_vibrate_amplitude"
         android:max="255"
-        android:defaultValue="0"/>
+        android:defaultValue="0"
+        android:dependency="key_vibrate"/>
     <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
     <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
     <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
