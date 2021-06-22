@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference
+        android:defaultValue="auto"
+        app:entries="@array/pref__settings_theme__entries"
+        app:entryValues="@array/pref__settings_theme__values"
+        app:key="pref__settings_theme"
+        app:title="@string/pref_ui"
+        app:useSimpleSummaryProvider="true" />
+
     <SwitchPreference android:key="pref_notification_icon" android:title="@string/pref_notification_icon" />
     <SwitchPreference android:key="pref_destroy_on_quit" android:title="@string/pref_destroy_on_quit" />
 </PreferenceScreen>

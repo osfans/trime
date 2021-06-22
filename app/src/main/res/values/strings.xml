@@ -76,6 +76,11 @@
         <item>Input</item>
         <item>None</item>
     </string-array>
+    <string-array name="pref__settings_theme__entries" >
+        <item name="auto">System Default</item>
+        <item name="light">Light</item>
+        <item name="dark">Dark</item>
+    </string-array>
     <string name="soft_cursor">Use soft cursor(^) in composition</string>
     <string name="pref_deploy">Deploy</string>
     <string name="pref_deploy_summary">Gotta Deploy after Modifying Settings </string>

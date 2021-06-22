@@ -22,10 +22,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/ime_name">
 
-    <SwitchPreference android:key="pref_ui"
+    <!-- <SwitchPreference android:key="pref_ui"
         android:order="1"
         android:title="@string/pref_ui"
-        android:persistent="true" />
+        android:persistent="true" /> -->
 
     <Preference
         android:key="pref_enable"

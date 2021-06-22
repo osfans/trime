@@ -30,6 +30,12 @@
         <item>input</item>
         <item>none</item>
     </string-array>
+    <string-array name="pref__settings_theme__values">
+        <item>auto</item>
+        <item>light</item>
+        <item>default</item>
+    </string-array>
+
 
     <string name="default_shared_data_dir">/sdcard/rime</string>
     <string name="default_user_data_dir">/sdcard/rime</string>

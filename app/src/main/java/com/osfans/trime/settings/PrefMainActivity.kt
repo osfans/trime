@@ -3,6 +3,7 @@ package com.osfans.trime.settings
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -10,10 +11,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.osfans.trime.Function
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
@@ -29,11 +32,20 @@ class PrefMainActivity: AppCompatActivity(),
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
+    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(this)
 
     lateinit var binding: PrefActivityBinding
     lateinit var imeManager: InputMethodManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val mode = when (prefs.getString("pref__settings_theme", "auto")) {
+            "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
+
         super.onCreate(savedInstanceState)
         binding = PrefActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
