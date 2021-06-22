@@ -57,5 +57,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".settings.HelpActivity"
+            android:label="@string/pref_help" />
+
+        <activity android:name=".settings.AboutActivity"
+            android:label="@string/pref_about" />
     </application>
 </manifest>
