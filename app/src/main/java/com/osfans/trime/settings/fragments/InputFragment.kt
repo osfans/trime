@@ -39,6 +39,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
                 true
             }
             "pref_sync" -> {
+                @Suppress("DEPRECATION")
                 val progressDialog = ProgressDialog(context).apply {
                     setMessage(getString(R.string.sync_progress))
                     show()

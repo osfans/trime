@@ -34,7 +34,7 @@
 
     <SeekBar
         android:id="@+id/seekbar"
-        android:minWidth="100dip"
+        android:minWidth="180dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:focusable="false"

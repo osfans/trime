@@ -73,6 +73,11 @@
         <item>输入码</item>
         <item>无</item>
     </string-array>
+    <string-array name="settings_theme__entries" >
+        <item name="auto">系统默认</item>
+        <item name="light">亮色</item>
+        <item name="dark">暗色</item>
+    </string-array>
     <string name="soft_cursor">编码区使用插入符号(^)</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改设置后需要再次部署同文输入法平台</string>
@@ -100,4 +105,12 @@
     <string name="pref_sync_bg_failure">上次同步于 %s，失败</string>
     <string name="pref_sync_bg_never">后台同步未运行</string>
     <string name="pref_sync_bg_tip">点击以开启后台同步</string>
+    <string name="pref_help__general_channel">常规渠道</string>
+    <string name="pref_help__marketplace">应用市场</string>
+    <string name="pref_help__user_community">用户社区</string>
+    <string name="pref_keyboard__appearance">外观</string>
+    <string name="pref_keyboard__function">功能</string>
+    <string name="pref_keyboard__effect">效果</string>
+    <string name="pref__draw_overlays_tip_title">显示在其他应用上方</string>
+    <string name="pref__draw_overlays_tip_message">要正确显示候选栏，或从键盘开启各项菜单，您需要授予同文输入法“显示在其他应用上方”的权限。点击“确定”前往设置页，或“取消”以稍后手动设置。</string>
 </resources>

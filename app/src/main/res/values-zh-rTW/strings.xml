@@ -74,6 +74,11 @@
         <item>輸入碼</item>
         <item>無</item>
     </string-array>
+    <string-array name="settings_theme__entries" >
+        <item name="auto">系統預設</item>
+        <item name="light">亮色</item>
+        <item name="dark">暗色</item>
+    </string-array>
     <string name="soft_cursor">編碼區使用插入符號(^)</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
@@ -101,4 +106,12 @@
     <string name="pref_sync_bg_failure">上次同步於 %s，失敗</string>
     <string name="pref_sync_bg_never">後台同步未運行</string>
     <string name="pref_sync_bg_tip">點擊以啟用後台同步</string>
+    <string name="pref_help__general_channel">常規渠道</string>
+    <string name="pref_help__marketplace">應用市場</string>
+    <string name="pref_help__user_community">使用者社群</string>
+    <string name="pref_keyboard__appearance">外觀</string>
+    <string name="pref_keyboard__function">功能</string>
+    <string name="pref_keyboard__effect">效果</string>
+    <string name="pref__draw_overlays_tip_title">顯示在其他應用上方</string>
+    <string name="pref__draw_overlays_tip_message">要正確顯示候選欄，或從鍵盤開啟各項選單，您需要授予同文輸入法“顯示在其他應用上方”的許可權。點選“確定”前往設定頁，或“取消”以稍後手動設定。</string>
 </resources>

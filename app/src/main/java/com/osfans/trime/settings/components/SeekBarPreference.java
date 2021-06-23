@@ -16,19 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.settings.components;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.preference.Preference;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
+
+import com.osfans.trime.R;
 
 /** @hide */
 public class SeekBarPreference extends Preference implements OnSeekBarChangeListener {
@@ -47,13 +51,25 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
   }
 
   public SeekBarPreference(Context context, AttributeSet attrs) {
-    this(context, attrs, android.R.attr.preferenceStyle);
+    this(context, attrs, R.attr.preferenceStyle);
   }
 
   public SeekBarPreference(Context context) {
     this(context, null);
   }
 
+  @Override
+  public void onBindViewHolder(PreferenceViewHolder holder) {
+    super.onBindViewHolder(holder);
+    SeekBar seekBar = (SeekBar) holder.findViewById(R.id.seekbar);
+    seekBar.setOnSeekBarChangeListener(this);
+    seekBar.setMax(mMax);
+    seekBar.setProgress(mProgress);
+    seekBar.setEnabled(isEnabled());
+    mValue = (TextView) holder.findViewById(R.id.value);
+    setValue();
+  }
+  /*
   @Override
   protected void onBindView(View view) {
     super.onBindView(view);
@@ -64,7 +80,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
     seekBar.setEnabled(isEnabled());
     mValue = (TextView) view.findViewById(R.id.value);
     setValue();
-  }
+  } */
 
   private CharSequence getValue(int progress) {
     String unit = "%";

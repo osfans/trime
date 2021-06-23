@@ -76,7 +76,7 @@
         <item>Input</item>
         <item>None</item>
     </string-array>
-    <string-array name="pref__settings_theme__entries" >
+    <string-array name="settings_theme__entries" >
         <item name="auto">System Default</item>
         <item name="light">Light</item>
         <item name="dark">Dark</item>
@@ -112,4 +112,6 @@
     <string name="pref_keyboard__appearance">Appearance</string>
     <string name="pref_keyboard__function">Function</string>
     <string name="pref_keyboard__effect">Effect</string>
+    <string name="pref__draw_overlays_tip_title">Display Over Other Apps</string>
+    <string name="pref__draw_overlays_tip_message">To display the candidate bar properly, or to open menus from the keyboard, you need to grant Trime permission to \"Display over other apps\". Click OK to go to the settings page, or cancel to set it manually later.</string>
 </resources>

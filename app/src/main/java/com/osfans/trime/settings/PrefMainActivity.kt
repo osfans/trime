@@ -1,15 +1,21 @@
 package com.osfans.trime.settings
 
+import android.Manifest
+import android.annotation.TargetApi
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -67,6 +73,7 @@ class PrefMainActivity: AppCompatActivity(),
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        requestPermission()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -149,6 +156,39 @@ class PrefMainActivity: AppCompatActivity(),
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    @TargetApi(VERSION_CODES.M)
+    private fun requestPermission() {
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ),
+                0
+            )
+        }
+        if (VERSION.SDK_INT >= VERSION_CODES.P) { //僅Android P需要此權限在最上層顯示懸浮窗、對話框
+            if (!Settings.canDrawOverlays(this)) { // 事先说明需要权限的理由
+                AlertDialog.Builder(this).apply {
+                    setTitle(R.string.pref__draw_overlays_tip_title)
+                    setCancelable(true)
+                    setMessage(R.string.pref__draw_overlays_tip_message)
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                        //startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
+                        startActivity(intent)
+                    }
+                    setNegativeButton(android.R.string.cancel, null)
+                }.create().show()
+            }
         }
     }
 

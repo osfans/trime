@@ -20,5 +20,5 @@
 -->
 
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-        android:settingsActivity="com.osfans.trime.Pref"
+        android:settingsActivity="com.osfans.trime.settings.PrefMainActivity"
 />
