@@ -1,10 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:key="pref_input" android:title="@string/pref_input">
-    <EditTextPreference android:key="shared_data_dir" android:title="@string/shared_data_dir" android:defaultValue="@string/default_shared_data_dir" />
-    <EditTextPreference android:key="user_data_dir" android:title="@string/user_data_dir" android:defaultValue="@string/default_user_data_dir"/>
-    <Preference android:key="pref_schemas" android:title="@string/pref_schemas" android:summary="@string/pref_schemas_summary"/>
-    <Preference android:key="pref_sync" android:title="@string/pref_sync" android:summary="@string/pref_sync_summary"/>
-    <SwitchPreference android:key="pref_sync_bg" android:title="@string/pref_sync_bg" android:summary="@string/pref_sync_bg_tip" android:persistent="true" />
-    <Preference android:key="pref_reset" android:title="@string/pref_reset" android:summary="@string/pref_reset_summary"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="pref_input"
+    android:title="@string/pref_input">
+
+    <EditTextPreference android:key="shared_data_dir"
+        app:iconSpaceReserved="false"
+        android:title="@string/shared_data_dir"
+        android:defaultValue="@string/default_shared_data_dir"
+        app:useSimpleSummaryProvider="true"/>
+
+    <EditTextPreference android:key="user_data_dir"
+        app:iconSpaceReserved="false"
+        android:title="@string/user_data_dir"
+        android:defaultValue="@string/default_user_data_dir"
+        app:useSimpleSummaryProvider="true"/>
+
+    <Preference android:key="pref_schemas"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_schemas"
+        android:summary="@string/pref_schemas_summary"/>
+
+    <Preference android:key="pref_sync"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_sync"
+        android:summary="@string/pref_sync_summary"/>
+
+    <SwitchPreference android:key="pref_sync_bg"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_sync_bg"
+        android:summary="@string/pref_sync_bg_tip"
+        android:persistent="true" />
+
+    <Preference android:key="pref_reset"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_reset"
+        android:summary="@string/pref_reset_summary"/>
 </PreferenceScreen>

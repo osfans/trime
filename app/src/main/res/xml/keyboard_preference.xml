@@ -3,36 +3,67 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="pref_keyboard"
     android:title="@string/pref_keyboard">
-    <PreferenceCategory app:title="@string/pref_keyboard__appearance" app:key="pref_keyboard__appearance" >
+    <PreferenceCategory app:iconSpaceReserved="false"
+        app:title="@string/pref_keyboard__appearance"
+        app:key="pref_keyboard__appearance" >
         <Preference android:key="pref_themes"
+            app:iconSpaceReserved="false"
             android:title="@string/pref_themes"
             android:summary="@string/pref_themes_summary" />
         <Preference android:key="pref_colors"
+            app:iconSpaceReserved="false"
             android:title="@string/pref_colors"
             android:summary="@string/pref_colors_summary" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/pref_keyboard__function" app:key="pref_keyboard__function" >
-        <ListPreference android:key="inline_preedit" android:title="@string/inline_preedit" android:entries="@array/inline_entries" android:entryValues="@array/inline_values" android:defaultValue="preview"/>
-        <SwitchPreference android:key="soft_cursor" android:title="@string/soft_cursor" android:defaultValue="true"/>
-        <SwitchPreference android:key="show_window" android:title="@string/show_window" android:defaultValue="true"/>
-        <SwitchPreference android:key="show_preview" android:title="@string/show_preview" android:defaultValue="false"/>
-        <SwitchPreference android:key="show_switches" android:title="@string/show_switches" android:defaultValue="true" />
+    <PreferenceCategory app:iconSpaceReserved="false"
+        app:title="@string/pref_keyboard__function"
+        app:key="pref_keyboard__function" >
+        <ListPreference android:key="inline_preedit"
+            app:iconSpaceReserved="false"
+            android:title="@string/inline_preedit"
+            android:entries="@array/inline_entries"
+            android:entryValues="@array/inline_values"
+            android:defaultValue="preview"/>
+        <SwitchPreference android:key="soft_cursor"
+            app:iconSpaceReserved="false"
+            android:title="@string/soft_cursor"
+            android:defaultValue="true"/>
+        <SwitchPreference android:key="show_window"
+            app:iconSpaceReserved="false"
+            android:title="@string/show_window"
+            android:defaultValue="true"/>
+        <SwitchPreference android:key="show_preview"
+            app:iconSpaceReserved="false"
+            android:title="@string/show_preview"
+            android:defaultValue="false"/>
+        <SwitchPreference android:key="show_switches"
+            app:iconSpaceReserved="false"
+            android:title="@string/show_switches"
+            android:defaultValue="true" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/pref_keyboard__effect" app:key="pref_keyboard__effect" >
-        <SwitchPreference android:key="key_sound" android:title="@string/key_sound"/>
+    <PreferenceCategory app:iconSpaceReserved="false"
+        app:title="@string/pref_keyboard__effect"
+        app:key="pref_keyboard__effect" >
+        <SwitchPreference android:key="key_sound"
+            app:iconSpaceReserved="false"
+            android:title="@string/key_sound"/>
         <com.osfans.trime.settings.components.SeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="key_sound_volume"
+            app:iconSpaceReserved="false"
             android:title="@string/key_sound_volume"
             android:max="100"
             android:defaultValue="100"
             android:dependency="key_sound"/>
-        <SwitchPreference android:key="key_vibrate" android:title="@string/key_vibrate"/>
+        <SwitchPreference android:key="key_vibrate"
+            app:iconSpaceReserved="false"
+            android:title="@string/key_vibrate"/>
         <com.osfans.trime.settings.components.SeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="key_vibrate_duration"
+            app:iconSpaceReserved="false"
             android:title="@string/key_vibrate_duration"
             android:max="100"
             android:defaultValue="10"
@@ -40,22 +71,29 @@
         <com.osfans.trime.settings.components.SeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="key_vibrate_amplitude"
+            app:iconSpaceReserved="false"
             android:title="@string/key_vibrate_amplitude"
             android:max="255"
             android:defaultValue="0"
             android:dependency="key_vibrate"/>
         <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
-        <SwitchPreference android:key="speak_key" android:title="@string/speak_key"/>
-        <SwitchPreference android:key="speak_commit" android:title="@string/speak_commit"/>
+        <SwitchPreference android:key="speak_key"
+            app:iconSpaceReserved="false"
+            android:title="@string/speak_key"/>
+        <SwitchPreference android:key="speak_commit"
+            app:iconSpaceReserved="false"
+            android:title="@string/speak_commit"/>
         <com.osfans.trime.settings.components.SeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="longpress_timeout"
+            app:iconSpaceReserved="false"
             android:title="@string/longpress_timeout"
             android:max="60"
             android:defaultValue="20" />
         <com.osfans.trime.settings.components.SeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="repeat_interval"
+            app:iconSpaceReserved="false"
             android:title="@string/repeat_interval"
             android:max="9"
             android:defaultValue="4" />

@@ -1,31 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference android:key="pref_changelog" android:title="@string/pref_changelog">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference android:key="pref_changelog" android:title="@string/pref_changelog"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/osfans/trime" />
     </Preference>
-    <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver">
+    <Preference android:key="pref_librime_ver" android:title="@string/pref_librime_ver"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/rime/librime" />
     </Preference>
-    <Preference android:key="pref_opencc_ver" android:title="@string/pref_opencc_ver">
+    <Preference android:key="pref_opencc_ver" android:title="@string/pref_opencc_ver"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/BYVoid/OpenCC" />
     </Preference>
-    <Preference android:key="pref_licensing" android:title="@string/pref_licensing" android:summary="@string/pref_licensing_summary"/>
-    <Preference android:key="pref_pravcy" android:title="@string/pref_privacy">
+    <Preference android:key="pref_licensing" android:title="@string/pref_licensing" android:summary="@string/pref_licensing_summary"
+        app:iconSpaceReserved="false"/>
+    <Preference android:key="pref_pravcy" android:title="@string/pref_privacy"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/osfans/trime/blob/develop/PRIVACY.md" />
     </Preference>
-    <Preference android:key="pref_pime" android:title="@string/pref_pime">
+    <Preference android:key="pref_pime" android:title="@string/pref_pime"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/osfans/PIME/releases" />
     </Preference>
-    <Preference android:key="pref_donate" android:title="@string/pref_donate" android:summary="@string/pref_donate_summary">
+    <Preference android:key="pref_donate" android:title="@string/pref_donate" android:summary="@string/pref_donate_summary"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://qr.alipay.com/tsx03439zwna78hloqtm6bc" />
     </Preference>
-    <Preference android:key="pref_credits" android:title="@string/pref_credits">
+    <Preference android:key="pref_credits" android:title="@string/pref_credits"
+        app:iconSpaceReserved="false">
         <intent android:action="android.intent.action.VIEW"
             android:data="https://github.com/osfans/trime/releases" />
     </Preference>
