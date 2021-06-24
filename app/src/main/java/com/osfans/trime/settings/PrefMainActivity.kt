@@ -44,13 +44,13 @@ class PrefMainActivity: AppCompatActivity(),
     lateinit var imeManager: InputMethodManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val mode = when (prefs.getString("pref__settings_theme", "auto")) {
+        val uiMode = when (prefs.getString("pref__settings_theme", "auto")) {
             "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             "light" -> AppCompatDelegate.MODE_NIGHT_NO
             "dark" -> AppCompatDelegate.MODE_NIGHT_YES
             else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
         }
-        AppCompatDelegate.setDefaultNightMode(mode)
+        AppCompatDelegate.setDefaultNightMode(uiMode)
 
         super.onCreate(savedInstanceState)
         binding = PrefActivityBinding.inflate(layoutInflater)

@@ -33,7 +33,7 @@
     <string-array name="settings_theme__values">
         <item>auto</item>
         <item>light</item>
-        <item>default</item>
+        <item>dark</item>
     </string-array>
 
 
