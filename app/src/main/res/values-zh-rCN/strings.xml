@@ -39,7 +39,7 @@
     <string name="pref_credits">鸣谢</string>
     <string name="pref_pime">微软平台PRIME输入法</string>
     <string name="pref_privacy">隐私策略</string>
-    <string name="pref_input">输入</string>
+    <string name="pref_input">输入配置</string>
     <string name="pref_enable">启用</string>
     <string name="pref_enable_summary">启用同文输入法</string>
     <string name="pref_select">选取软键盘</string>
@@ -52,7 +52,7 @@
     <string name="pref_colors_summary">选取键盘配色</string>
     <string name="pref_reset">恢复默认设置</string>
     <string name="pref_reset_summary">使用默认设置覆盖共享文件夹下同名文件</string>
-    <string name="pref_keyboard">键盘</string>
+    <string name="pref_keyboard">偏好设置</string>
     <string name="key_sound">按键声音</string>
     <string name="key_sound_volume">按键音量</string>
     <string name="key_vibrate">按键时振动</string>
@@ -108,9 +108,9 @@
     <string name="pref_help__general_channel">常规渠道</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
-    <string name="pref_keyboard__appearance">外观</string>
-    <string name="pref_keyboard__function">功能</string>
-    <string name="pref_keyboard__effect">效果</string>
+    <string name="pref_keyboard__effect">按键效果</string>
     <string name="pref__draw_overlays_tip_title">显示在其他应用上方</string>
     <string name="pref__draw_overlays_tip_message">要正确显示候选栏，或从键盘开启各项菜单，您需要授予同文输入法“显示在其他应用上方”的权限。点击“确定”前往设置页，或“取消”以稍后手动设置。</string>
+    <string name="pref_keyboard_appearance">键盘外观</string>
+    <string name="pref_keyboard__function">视图</string>
 </resources>

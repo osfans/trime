@@ -16,11 +16,6 @@
         android:defaultValue="@string/default_user_data_dir"
         app:useSimpleSummaryProvider="true"/>
 
-    <Preference android:key="pref_schemas"
-        app:iconSpaceReserved="false"
-        android:title="@string/pref_schemas"
-        android:summary="@string/pref_schemas_summary"/>
-
     <Preference android:key="pref_sync"
         app:iconSpaceReserved="false"
         android:title="@string/pref_sync"

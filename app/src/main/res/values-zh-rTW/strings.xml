@@ -40,7 +40,7 @@
     <string name="pref_credits">鳴謝</string>
     <string name="pref_pime">Win10 PRIME輸入法平臺</string>
     <string name="pref_privacy">隱私權政策</string>
-    <string name="pref_input">輸入</string>
+    <string name="pref_input">輸入配置</string>
     <string name="pref_enable">啓用</string>
     <string name="pref_enable_summary">啓用同文輸入法平臺</string>
     <string name="pref_select">選取軟鍵盤</string>
@@ -53,7 +53,7 @@
     <string name="pref_colors_summary">選取想要的鍵盤配色</string>
     <string name="pref_reset">回廠</string>
     <string name="pref_reset_summary">使用預設設定覆蓋共享資料夾下同名檔案</string>
-    <string name="pref_keyboard">鍵盤</string>
+    <string name="pref_keyboard">偏好設定</string>
     <string name="key_sound">按鍵聲音</string>
     <string name="key_sound_volume">按鍵音量</string>
     <string name="key_vibrate">按鍵時振動</string>
@@ -109,9 +109,9 @@
     <string name="pref_help__general_channel">常規渠道</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
-    <string name="pref_keyboard__appearance">外觀</string>
-    <string name="pref_keyboard__function">功能</string>
-    <string name="pref_keyboard__effect">效果</string>
+    <string name="pref_keyboard__function">檢視</string>
+    <string name="pref_keyboard__effect">按键效果</string>
     <string name="pref__draw_overlays_tip_title">顯示在其他應用上方</string>
     <string name="pref__draw_overlays_tip_message">要正確顯示候選欄，或從鍵盤開啟各項選單，您需要授予同文輸入法“顯示在其他應用上方”的許可權。點選“確定”前往設定頁，或“取消”以稍後手動設定。</string>
+    <string name="pref_keyboard_appearance">鍵盤外觀</string>
 </resources>

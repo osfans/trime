@@ -3,18 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="pref_keyboard"
     android:title="@string/pref_keyboard">
-    <PreferenceCategory app:iconSpaceReserved="false"
-        app:title="@string/pref_keyboard__appearance"
-        app:key="pref_keyboard__appearance" >
-        <Preference android:key="pref_themes"
-            app:iconSpaceReserved="false"
-            android:title="@string/pref_themes"
-            android:summary="@string/pref_themes_summary" />
-        <Preference android:key="pref_colors"
-            app:iconSpaceReserved="false"
-            android:title="@string/pref_colors"
-            android:summary="@string/pref_colors_summary" />
-    </PreferenceCategory>
 
     <PreferenceCategory app:iconSpaceReserved="false"
         app:title="@string/pref_keyboard__function"
@@ -24,7 +12,8 @@
             android:title="@string/inline_preedit"
             android:entries="@array/inline_entries"
             android:entryValues="@array/inline_values"
-            android:defaultValue="preview"/>
+            android:defaultValue="preview"
+            app:useSimpleSummaryProvider="true"/>
         <SwitchPreference android:key="soft_cursor"
             app:iconSpaceReserved="false"
             android:title="@string/soft_cursor"

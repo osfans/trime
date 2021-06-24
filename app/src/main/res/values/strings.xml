@@ -40,7 +40,7 @@
     <string name="pref_credits">Credits</string>
     <string name="pref_pime">Win10 PRIME Platform</string>
     <string name="pref_privacy">Privacy Policy</string>
-    <string name="pref_input">Input</string>
+    <string name="pref_input">Input Setup</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
     <string name="pref_select">Change Keyboard</string>
@@ -55,7 +55,7 @@
     <string name="pref_colors_summary">Select Desired Color for Keyboard</string>
     <string name="pref_reset">Reset</string>
     <string name="pref_reset_summary">Use Default Settings to Replace the contents in shared directory</string>
-    <string name="pref_keyboard">Keyboard</string>
+    <string name="pref_keyboard">Preferences</string>
     <string name="key_sound">Sound on keypress</string>
     <string name="key_sound_volume">Volume on keypress</string>
     <string name="key_vibrate">Vibrate on keypress</string>
@@ -109,9 +109,9 @@
     <string name="pref_help__general_channel">General Channel</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
-    <string name="pref_keyboard__appearance">Appearance</string>
-    <string name="pref_keyboard__function">Function</string>
-    <string name="pref_keyboard__effect">Effect</string>
+    <string name="pref_keyboard__function">View</string>
+    <string name="pref_keyboard__effect">Keypress Effect</string>
     <string name="pref__draw_overlays_tip_title">Display Over Other Apps</string>
     <string name="pref__draw_overlays_tip_message">To display the candidate bar properly, or to open menus from the keyboard, you need to grant Trime permission to \"Display over other apps\". Click OK to go to the settings page, or cancel to set it manually later.</string>
+    <string name="pref_keyboard_appearance">Appearance</string>
 </resources>

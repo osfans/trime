@@ -20,6 +20,7 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:title="@string/ime_name">
 
     <!-- <SwitchPreference android:key="pref_ui"
@@ -38,10 +39,20 @@
         android:title="@string/pref_select"
         android:summary="@string/pref_select_summary"/>
 
-    <Preference android:key="pref_keyboard"
+    <Preference android:key="pref_schemas"
         android:order="4"
+        android:title="@string/pref_schemas"
+        android:summary="@string/pref_schemas_summary"/>
+
+    <Preference android:key="pref_keyboard"
+        android:order="5"
         android:title="@string/pref_keyboard"
         android:fragment="com.osfans.trime.settings.fragments.KeyboardFragment"/>
+
+    <Preference android:key="pref_keyboard_appearance"
+        android:order="6"
+        android:title="@string/pref_keyboard_appearance"
+        android:fragment="com.osfans.trime.settings.fragments.AppearanceFragment"/>
 
     <Preference android:key="pref_input"
         android:order="8"

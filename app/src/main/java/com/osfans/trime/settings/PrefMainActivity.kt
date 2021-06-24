@@ -26,6 +26,7 @@ import androidx.preference.PreferenceManager
 import com.osfans.trime.Function
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
+import com.osfans.trime.settings.components.SchemaPickerDialog
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
@@ -214,6 +215,10 @@ class PrefMainActivity: AppCompatActivity(),
                 }
                 "pref_select" -> { //切換
                     (activity as PrefMainActivity).imeManager.showInputMethodPicker()
+                    true
+                }
+                "pref_schemas" -> {
+                    SchemaPickerDialog(requireContext()).show()
                     true
                 }
                 else -> super.onPreferenceTreeClick(preference)

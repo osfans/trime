@@ -3,6 +3,8 @@ package com.osfans.trime.settings.fragments
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.Menu
+import androidx.core.view.forEach
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.Pref
 import com.osfans.trime.R
@@ -13,6 +15,13 @@ class OtherFragment: PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
+
+        setHasOptionsMenu(true)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.forEach { item -> item.isVisible = false}
+        super.onPrepareOptionsMenu(menu)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

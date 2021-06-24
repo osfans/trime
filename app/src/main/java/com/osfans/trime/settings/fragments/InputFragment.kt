@@ -4,6 +4,8 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import androidx.core.view.forEach
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -30,14 +32,17 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.input_preference)
+
+        setHasOptionsMenu(true)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.forEach { item -> item.isVisible = false}
+        super.onPrepareOptionsMenu(menu)
     }
 
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
-            "pref_schemas" -> {
-                SchemaPickerDialog(requireContext()).show()
-                true
-            }
             "pref_sync" -> {
                 @Suppress("DEPRECATION")
                 val progressDialog = ProgressDialog(context).apply {
