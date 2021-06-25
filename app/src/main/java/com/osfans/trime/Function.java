@@ -36,6 +36,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
+
+import com.osfans.trime.settings.PrefMainActivity;
+
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -128,7 +131,7 @@ public class Function {
   }
 
   public static void showPrefDialog(Context context) {
-    Intent intent = new Intent(context, Pref.class);
+    Intent intent = new Intent(context, PrefMainActivity.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
     context.startActivity(intent);
   }

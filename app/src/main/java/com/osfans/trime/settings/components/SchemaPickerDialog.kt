@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.WindowManager
 import com.osfans.trime.*
 import com.osfans.trime.Function
+import com.osfans.trime.ime.core.Trime
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess

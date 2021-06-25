@@ -22,7 +22,7 @@ import android.content.Context;
 import java.util.List;
 
 /** 管理多個{@link Keyboard 鍵盤} */
-class KeyboardSwitch {
+public class KeyboardSwitch {
 
   private final Context context;
 

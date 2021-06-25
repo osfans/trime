@@ -237,7 +237,7 @@ class PrefMainActivity: AppCompatActivity(),
     }
 
     companion object {
-        private const val IME_ID: String = "com.osfans.trime/.Trime"
+        private const val IME_ID: String = "com.osfans.trime/.TrimeImeService"
 
         fun checkIfImeIsEnabled(context: Context): Boolean {
             val activeImeIds = Settings.Secure.getString(

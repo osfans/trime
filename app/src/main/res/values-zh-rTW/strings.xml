@@ -114,4 +114,7 @@
     <string name="pref__draw_overlays_tip_title">顯示在其他應用上方</string>
     <string name="pref__draw_overlays_tip_message">要正確顯示候選欄，或從鍵盤開啟各項選單，您需要授予同文輸入法“顯示在其他應用上方”的許可權。點選“確定”前往設定頁，或“取消”以稍後手動設定。</string>
     <string name="pref_keyboard_appearance">鍵盤外觀</string>
+    <string name="pref__others__show_app_icon_tips_on">此選項僅對部分 ROM 有效</string>
+    <string name="pref__others__show_app_icon">在啟動器中顯示圖示</string>
+    <string name="pref__others__show_app_icon_tips_off">在某些 ROM 中，您仍會看到圖示顯示，並可能在>點選它後轉到系統的應用資訊頁</string>
 </resources>

@@ -37,6 +37,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+
+import com.osfans.trime.ime.core.Trime;
+
 import java.util.List;
 import java.util.Map;
 

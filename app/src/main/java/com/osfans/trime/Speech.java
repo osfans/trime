@@ -26,10 +26,13 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.osfans.trime.ime.core.Trime;
+
 import java.util.ArrayList;
 
 /** {@link RecognitionListener 語音輸入} */
-class Speech implements RecognitionListener {
+public class Speech implements RecognitionListener {
   private SpeechRecognizer speech = null;
   private Intent recognizerIntent;
   private String TAG = "Speech";

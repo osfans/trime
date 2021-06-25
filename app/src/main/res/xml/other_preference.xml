@@ -10,6 +10,13 @@
         app:title="@string/pref_ui"
         app:useSimpleSummaryProvider="true" />
 
+    <SwitchPreferenceCompat app:key="pref__others__show_app_icon"
+        android:defaultValue="true"
+        app:iconSpaceReserved="false"
+        app:title="@string/pref__others__show_app_icon"
+        app:summaryOn="@string/pref__others__show_app_icon_tips_on"
+        app:summaryOff="@string/pref__others__show_app_icon_tips_off"/>
+
     <SwitchPreference android:key="pref_notification_icon"
         app:iconSpaceReserved="false"
         android:title="@string/pref_notification_icon" />

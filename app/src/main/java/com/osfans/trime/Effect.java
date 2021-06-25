@@ -29,7 +29,7 @@ import android.os.VibrationEffect;
 import android.os.Build;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
-class Effect {
+public class Effect {
   private static final int MAX_VOLUME = 101; //100%音量時只響一下，暫從100改成101
   private int duration = 10;
   private long durationLong;

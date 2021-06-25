@@ -4,13 +4,10 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import androidx.core.view.forEach
-import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.Rime
-import com.osfans.trime.Trime
-import com.osfans.trime.settings.components.ColorPickerDialog
-import com.osfans.trime.settings.components.ThemePickerDialog
+import com.osfans.trime.ime.core.Trime
 
 class KeyboardFragment: PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {

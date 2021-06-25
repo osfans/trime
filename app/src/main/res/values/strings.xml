@@ -114,4 +114,7 @@
     <string name="pref__draw_overlays_tip_title">Display Over Other Apps</string>
     <string name="pref__draw_overlays_tip_message">To display the candidate bar properly, or to open menus from the keyboard, you need to grant Trime permission to \"Display over other apps\". Click OK to go to the settings page, or cancel to set it manually later.</string>
     <string name="pref_keyboard_appearance">Appearance</string>
+    <string name="pref__others__show_app_icon">Show app icon in launcher</string>
+    <string name="pref__others__show_app_icon_tips_on">This option is only available on some ROMs</string>
+    <string name="pref__others__show_app_icon_tips_off">In some ROMs, you will still see this icon in the launcher and may go to the system\'s app information page after tapping it</string>
 </resources>

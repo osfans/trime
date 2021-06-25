@@ -4,7 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import com.osfans.trime.Config
 import com.osfans.trime.R
-import com.osfans.trime.Trime
+import com.osfans.trime.ime.core.Trime
 
 /** 顯示配色方案列表
  *  Show Color Scheme List

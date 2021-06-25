@@ -19,6 +19,9 @@
 package com.osfans.trime;
 
 import android.content.Context;
+
+import com.osfans.trime.ime.core.Trime;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;

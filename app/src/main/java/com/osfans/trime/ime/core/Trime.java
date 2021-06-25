@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.ime.core;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -48,6 +48,20 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
+import com.osfans.trime.Candidate;
+import com.osfans.trime.Composition;
+import com.osfans.trime.Config;
+import com.osfans.trime.Effect;
+import com.osfans.trime.Event;
+import com.osfans.trime.Function;
+import com.osfans.trime.IntentReceiver;
+import com.osfans.trime.Key;
+import com.osfans.trime.Keyboard;
+import com.osfans.trime.KeyboardSwitch;
+import com.osfans.trime.KeyboardView;
+import com.osfans.trime.R;
+import com.osfans.trime.Rime;
+import com.osfans.trime.Speech;
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
 import com.osfans.trime.settings.components.ColorPickerDialog;

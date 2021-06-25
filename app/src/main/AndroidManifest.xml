@@ -34,7 +34,7 @@
                  android:allowBackup="true"
                  android:theme="@style/PreferenceTheme">
 
-        <service android:name="Trime" android:label="@string/ime_name"
+        <service android:name=".TrimeImeService" android:label="@string/ime_name"
                 android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
@@ -50,13 +50,23 @@
             </intent-filter>
         </activity> -->
 
-        <activity android:name=".settings.PrefMainActivity" android:label="@string/ime_name">
+        <!-- Settings activity -->
+        <activity android:name=".settings.PrefMainActivity"
+            android:label="@string/ime_name"
+            android:launchMode="singleTask"/>
+
+        <!-- Using an activity alias to disable/enable the app icon in the launcher -->
+        <activity-alias
+            android:name="com.osfans.trime.PrefLauncherAlias"
+            android:label="@string/ime_name"
+            android:launchMode="singleTask"
+            android:targetActivity=".settings.PrefMainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <activity android:name=".settings.HelpActivity"
             android:label="@string/pref_help" />

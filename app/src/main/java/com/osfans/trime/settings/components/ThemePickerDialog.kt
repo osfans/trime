@@ -7,7 +7,7 @@ import android.os.IBinder
 import android.view.WindowManager
 import com.osfans.trime.Config
 import com.osfans.trime.R
-import com.osfans.trime.Trime
+import com.osfans.trime.ime.core.Trime
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
