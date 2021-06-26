@@ -69,7 +69,9 @@ class SchemaPickerDialog(
                     @Suppress("DEPRECATION")
                     progressDialog = ProgressDialog(context).apply {
                         setMessage(R.string.deploy_progress)
-                        show()
+                    }.also {
+                        appendDialogParams(it)
+                        it.show()
                     }
                     launch {
                         try {
