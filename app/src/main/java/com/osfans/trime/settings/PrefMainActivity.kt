@@ -27,6 +27,8 @@ import com.osfans.trime.Function
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.util.AppVersionUtils
+import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
@@ -137,7 +139,7 @@ class PrefMainActivity: AppCompatActivity(),
                 launch {
                     Runnable {
                         try {
-                            Function.deploy(this@PrefMainActivity)
+                            RimeUtils.deploy(this@PrefMainActivity)
                         } catch (ex: Exception) {
                             Log.e(FRAGMENT_TAG, "Deploy Exception: $ex")
                         } finally {
@@ -253,6 +255,7 @@ class PrefMainActivity: AppCompatActivity(),
                 Settings.Secure.DEFAULT_INPUT_METHOD
             ) ?: "(none)"
             return selectedImeIds == IME_ID
+
         }
     }
 }

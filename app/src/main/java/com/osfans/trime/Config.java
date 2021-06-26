@@ -23,20 +23,21 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.TypedValue;
+
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
+import com.osfans.trime.util.AppVersionUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class Config {
 
   private void prepareRime(Context context) {
     boolean isExist = new File(getSharedDataDir()).exists();
-    boolean isOverwrite = Function.isDiffVer(context);
+    boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(context);
     String defaultFile = "trime.yaml";
     if (isOverwrite) {
       copyFileOrDir(context, "", true);

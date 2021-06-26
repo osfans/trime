@@ -9,6 +9,7 @@ import android.view.WindowManager
 import com.osfans.trime.*
 import com.osfans.trime.Function
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
@@ -138,7 +139,7 @@ class SchemaPickerDialog(
             val schemaIdList = arrayOfNulls<String>(checkedIds.size)
             checkedIds.toArray(schemaIdList)
             Rime.select_schemas(schemaIdList)
-            Function.deploy(context)
+            RimeUtils.deploy(context)
         }
     }
     /** 调用该方法显示对话框 **/

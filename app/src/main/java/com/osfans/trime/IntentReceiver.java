@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.osfans.trime.util.RimeUtils;
+
 /** 接收Intent廣播事件 */
 public class IntentReceiver extends BroadcastReceiver {
   private static final String TAG = "IntentReceiver";
@@ -42,11 +44,11 @@ public class IntentReceiver extends BroadcastReceiver {
 
     switch (command) {
       case COMMAND_DEPLOY:
-        Function.deploy(ctx);
+        RimeUtils.INSTANCE.deploy(ctx);
         System.exit(0);
         break;
       case COMMAND_SYNC:
-        Function.sync(ctx);
+        RimeUtils.INSTANCE.sync(ctx);
         break;
       case Intent.ACTION_SHUTDOWN:
         Rime.destroy();

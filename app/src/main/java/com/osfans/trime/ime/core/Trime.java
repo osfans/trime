@@ -67,6 +67,9 @@ import com.osfans.trime.enums.WindowsPositionType;
 import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
+import com.osfans.trime.util.LocaleUtils;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -297,7 +300,16 @@ public class Trime extends InputMethodService
     resetEffect();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
-    String s;
+    @Nullable String s;
+    s = mConfig.getString("locale");
+    if (Function.isEmpty(s)) s = "";
+    locales[0] = LocaleUtils.INSTANCE.stringToLocale(s);
+
+    s = mConfig.getString("latin_locale");
+    if (Function.isEmpty(s)) s = "en";
+    locales[1] = LocaleUtils.INSTANCE.stringToLocale(s);
+    if (locales[1].equals(new Locale("en"))) locales[0] = Locale.ENGLISH;
+    /*
     String[] ss;
     s = mConfig.getString("locale");
     if (Function.isEmpty(s)) s = "";
@@ -311,7 +323,7 @@ public class Trime extends InputMethodService
     if (ss.length == 1) locales[1] = new Locale(ss[0]);
     else if (ss.length == 2) locales[1] = new Locale(ss[0], ss[1]);
     else if (ss.length == 3) locales[1] = new Locale(ss[0], ss[1], ss[2]);
-    else locales[0] = Locale.ENGLISH;
+    else locales[0] = Locale.ENGLISH; */
 
     orientation = getResources().getConfiguration().orientation;
     // Use the following line to debug IME service.

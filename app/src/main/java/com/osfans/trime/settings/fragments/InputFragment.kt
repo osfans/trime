@@ -14,6 +14,7 @@ import com.osfans.trime.Function
 import com.osfans.trime.R
 import com.osfans.trime.settings.components.ResetAssetsDialog
 import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,7 +53,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
                 launch {
                     Runnable {
                         try {
-                            Function.sync(requireContext())
+                            RimeUtils.sync(requireContext())
                         } catch (ex: Exception) {
                             Log.e("InputFragment", "Sync Exception: $ex")
                         } finally {
