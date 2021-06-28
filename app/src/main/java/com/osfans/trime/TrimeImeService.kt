@@ -9,6 +9,6 @@ import com.osfans.trime.ime.core.Trime
  * using this extension here makes sure it won't change ever again for the system.
  *
  * Important: DO NOT PUT ANY LOGIC INTO THIS CLASS. Make the necessary changes
- *  within the FlorisBoard class instead.
+ *  within the Trime class instead.
  */
 class TrimeImeService: Trime()
