@@ -68,7 +68,7 @@ class SchemaPickerDialog(
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     @Suppress("DEPRECATION")
                     progressDialog = ProgressDialog(context).apply {
-                        setMessage(R.string.deploy_progress)
+                        setMessage(context.getString(R.string.deploy_progress))
                     }.also {
                         appendDialogParams(it)
                         it.show()
