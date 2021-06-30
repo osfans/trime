@@ -38,32 +38,41 @@
         <SwitchPreference android:key="key_sound"
             app:iconSpaceReserved="false"
             android:title="@string/key_sound"/>
-        <com.osfans.trime.settings.components.SeekBarPreference
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="key_sound_volume"
             app:iconSpaceReserved="false"
             android:title="@string/key_sound_volume"
-            android:max="100"
+            app:min="0"
+            app:max="100"
+            app:seekBarIncrement="1"
             android:defaultValue="100"
+            app:unit="%"
             android:dependency="key_sound"/>
         <SwitchPreference android:key="key_vibrate"
             app:iconSpaceReserved="false"
             android:title="@string/key_vibrate"/>
-        <com.osfans.trime.settings.components.SeekBarPreference
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="key_vibrate_duration"
             app:iconSpaceReserved="false"
             android:title="@string/key_vibrate_duration"
-            android:max="100"
+            app:min="0"
+            app:max="100"
+            app:seekBarIncrement="1"
             android:defaultValue="10"
+            app:unit="@string/key_vibrate_duration_unit"
             android:dependency="key_vibrate"/>
-        <com.osfans.trime.settings.components.SeekBarPreference
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="key_vibrate_amplitude"
             app:iconSpaceReserved="false"
             android:title="@string/key_vibrate_amplitude"
-            android:max="255"
+            app:min="0"
+            app:max="255"
+            app:seekBarIncrement="1"
             android:defaultValue="0"
+            app:unit=""
             android:dependency="key_vibrate"/>
         <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
         <SwitchPreference android:key="speak_key"
@@ -72,20 +81,26 @@
         <SwitchPreference android:key="speak_commit"
             app:iconSpaceReserved="false"
             android:title="@string/speak_commit"/>
-        <com.osfans.trime.settings.components.SeekBarPreference
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="longpress_timeout"
             app:iconSpaceReserved="false"
             android:title="@string/longpress_timeout"
-            android:max="60"
-            android:defaultValue="20" />
-        <com.osfans.trime.settings.components.SeekBarPreference
+            app:min="10"
+            app:max="60"
+            app:seekBarIncrement="10"
+            android:defaultValue="20"
+            app:unit="@string/key_vibrate_duration_unit"/>
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
             android:widgetLayout="@layout/preference_widget_seekbar"
             android:key="repeat_interval"
             app:iconSpaceReserved="false"
             android:title="@string/repeat_interval"
-            android:max="9"
-            android:defaultValue="4" />
+            app:min="10"
+            app:max="90"
+            app:seekBarIncrement="10"
+            android:defaultValue="40"
+            app:unit="@string/key_vibrate_duration_unit"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -117,4 +117,5 @@
     <string name="pref__others__show_app_icon_tips_on">此選項僅對部分 ROM 有效</string>
     <string name="pref__others__show_app_icon">在啟動器中顯示圖示</string>
     <string name="pref__others__show_app_icon_tips_off">在某些 ROM 中，您仍會看到圖示顯示，並可能在>點選它後轉到系統的應用資訊頁</string>
+    <string name="pref__default">預設</string>
 </resources>

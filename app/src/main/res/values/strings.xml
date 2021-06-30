@@ -117,4 +117,5 @@
     <string name="pref__others__show_app_icon">Show app icon in launcher</string>
     <string name="pref__others__show_app_icon_tips_on">This option is only available on some ROMs</string>
     <string name="pref__others__show_app_icon_tips_off">In some ROMs, you will still see this icon in the launcher and may go to the system\'s app information page after tapping it</string>
+    <string name="pref__default">Default</string>
 </resources>
