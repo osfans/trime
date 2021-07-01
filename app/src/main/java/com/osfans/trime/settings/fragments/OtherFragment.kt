@@ -7,7 +7,9 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.forEach
+import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
@@ -19,6 +21,16 @@ class OtherFragment: PreferenceFragmentCompat(),
     private val prefs get() = PreferenceManager.getDefaultSharedPreferences(context)
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
+        findPreference<ListPreference>("pref__settings_theme")?.setOnPreferenceChangeListener { _, newValue ->
+            val uiMode = when (newValue) {
+                "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                "light" -> AppCompatDelegate.MODE_NIGHT_NO
+                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
+            }
+            AppCompatDelegate.setDefaultNightMode(uiMode)
+            true
+        }
 
         setHasOptionsMenu(true)
     }
@@ -35,12 +47,6 @@ class OtherFragment: PreferenceFragmentCompat(),
                 if (sharedPreferences?.getBoolean(key, false) == true) {
                     trime?.showStatusIcon(R.drawable.status)
                 } else { trime.hideStatusIcon() }
-            }
-            "pref__settings_theme" -> {
-                (activity as PrefMainActivity).finish()
-                val intent = Intent(context, PrefMainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
-                requireContext().startActivity(intent)
             }
         }
     }
