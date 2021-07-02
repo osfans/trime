@@ -14,19 +14,19 @@
             android:entryValues="@array/inline_values"
             android:defaultValue="preview"
             app:useSimpleSummaryProvider="true"/>
-        <SwitchPreference android:key="soft_cursor"
+        <SwitchPreferenceCompat android:key="soft_cursor"
             app:iconSpaceReserved="false"
             android:title="@string/soft_cursor"
             android:defaultValue="true"/>
-        <SwitchPreference android:key="show_window"
+        <SwitchPreferenceCompat android:key="show_window"
             app:iconSpaceReserved="false"
             android:title="@string/show_window"
             android:defaultValue="true"/>
-        <SwitchPreference android:key="show_preview"
+        <SwitchPreferenceCompat android:key="show_preview"
             app:iconSpaceReserved="false"
             android:title="@string/show_preview"
             android:defaultValue="false"/>
-        <SwitchPreference android:key="show_switches"
+        <SwitchPreferenceCompat android:key="show_switches"
             app:iconSpaceReserved="false"
             android:title="@string/show_switches"
             android:defaultValue="true" />
@@ -35,7 +35,7 @@
     <PreferenceCategory app:iconSpaceReserved="false"
         app:title="@string/pref_keyboard__effect"
         app:key="pref_keyboard__effect" >
-        <SwitchPreference android:key="key_sound"
+        <SwitchPreferenceCompat android:key="key_sound"
             app:iconSpaceReserved="false"
             android:title="@string/key_sound"/>
         <com.osfans.trime.settings.components.DialogSeekBarPreference
@@ -49,7 +49,7 @@
             android:defaultValue="100"
             app:unit="%"
             android:dependency="key_sound"/>
-        <SwitchPreference android:key="key_vibrate"
+        <SwitchPreferenceCompat android:key="key_vibrate"
             app:iconSpaceReserved="false"
             android:title="@string/key_vibrate"/>
         <com.osfans.trime.settings.components.DialogSeekBarPreference
@@ -75,10 +75,10 @@
             app:unit=""
             android:dependency="key_vibrate"/>
         <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
-        <SwitchPreference android:key="speak_key"
+        <SwitchPreferenceCompat android:key="speak_key"
             app:iconSpaceReserved="false"
             android:title="@string/speak_key"/>
-        <SwitchPreference android:key="speak_commit"
+        <SwitchPreferenceCompat android:key="speak_commit"
             app:iconSpaceReserved="false"
             android:title="@string/speak_commit"/>
         <com.osfans.trime.settings.components.DialogSeekBarPreference

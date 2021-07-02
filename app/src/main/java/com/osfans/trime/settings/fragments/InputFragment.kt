@@ -9,11 +9,9 @@ import androidx.core.view.forEach
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
-import androidx.preference.SwitchPreference
-import com.osfans.trime.Function
+import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
 import com.osfans.trime.settings.components.ResetAssetsDialog
-import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +80,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
     }
 
     private fun setBackgroundSyncSummary(context: Context?) {
-        val syncBgPref = findPreference<SwitchPreference>("pref_sync_bg")
+        val syncBgPref = findPreference<SwitchPreferenceCompat>("pref_sync_bg")
         if (context == null) {
             if (syncBgPref?.isChecked == true) {
                 syncBgPref.setSummaryOn(R.string.pref_sync_bg_never)

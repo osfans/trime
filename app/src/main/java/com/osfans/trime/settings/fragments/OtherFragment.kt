@@ -2,7 +2,6 @@ package com.osfans.trime.settings.fragments
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -14,7 +13,6 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.settings.PrefMainActivity
 
 class OtherFragment: PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {

@@ -45,7 +45,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/** 實現打開指定程序、打開{@link Pref 輸入法全局設置}對話框等功能 */
+/** 實現打開指定程序、打開{@link PrefMainActivity 輸入法全局設置}對話框等功能 */
 public class Function {
   private static String TAG = Function.class.getSimpleName();
   private static SparseArray<String> sApplicationLaunchKeyCategories;

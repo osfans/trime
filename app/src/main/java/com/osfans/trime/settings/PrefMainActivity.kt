@@ -23,11 +23,9 @@ import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
-import com.osfans.trime.Function
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.settings.components.SchemaPickerDialog
-import com.osfans.trime.util.AppVersionUtils
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -132,6 +130,7 @@ class PrefMainActivity: AppCompatActivity(),
                 true
             }
             R.id.preference__menu_deploy -> {
+                @Suppress("DEPRECATION")
                 val progressDialog = ProgressDialog(this).apply {
                     setMessage(getString(R.string.deploy_progress))
                     show()

@@ -3,7 +3,6 @@ package com.osfans.trime.settings.fragments
 import android.os.Bundle
 import android.view.Menu
 import androidx.core.view.forEach
-import androidx.core.view.forEachIndexed
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R

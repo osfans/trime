@@ -34,7 +34,7 @@
         android:layout_gravity="center"
         android:maxLines="1" />
 
-    <SeekBar
+    <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

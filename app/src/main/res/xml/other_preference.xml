@@ -17,10 +17,10 @@
         app:summaryOn="@string/pref__others__show_app_icon_tips_on"
         app:summaryOff="@string/pref__others__show_app_icon_tips_off"/>
 
-    <SwitchPreference android:key="pref_notification_icon"
+    <SwitchPreferenceCompat android:key="pref_notification_icon"
         app:iconSpaceReserved="false"
         android:title="@string/pref_notification_icon" />
-    <SwitchPreference android:key="pref_destroy_on_quit"
+    <SwitchPreferenceCompat android:key="pref_destroy_on_quit"
         app:iconSpaceReserved="false"
         android:title="@string/pref_destroy_on_quit" />
 </PreferenceScreen>
