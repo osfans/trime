@@ -1187,7 +1187,7 @@ public class Trime extends InputMethodService
       AlertDialog.Builder builder =
           new AlertDialog.Builder(this)
               .setTitle(R.string.ime_name)
-              .setIcon(R.drawable.icon)
+              .setIcon(R.mipmap.ic_app_icon_round)
               .setCancelable(true)
               .setNegativeButton(
                   R.string.other_ime,
