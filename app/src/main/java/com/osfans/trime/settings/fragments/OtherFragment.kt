@@ -43,7 +43,7 @@ class OtherFragment: PreferenceFragmentCompat(),
         when (key) {
             "pref_notification_icon" -> {
                 if (sharedPreferences?.getBoolean(key, false) == true) {
-                    trime?.showStatusIcon(R.drawable.status)
+                    trime?.showStatusIcon(R.drawable.ic_status)
                 } else { trime.hideStatusIcon() }
             }
         }
