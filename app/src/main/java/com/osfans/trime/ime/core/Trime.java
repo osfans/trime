@@ -603,7 +603,7 @@ public class Trime extends InputMethodService
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤進入文本框時顯示候選欄
-    if (mConfig.isShowStatusIcon()) showStatusIcon(R.drawable.status); //狀態欄圖標
+    if (mConfig.isShowStatusIcon()) showStatusIcon(R.drawable.ic_status); //狀態欄圖標
   }
 
   @Override
