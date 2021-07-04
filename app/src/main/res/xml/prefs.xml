@@ -42,21 +42,25 @@
     <Preference android:key="pref_schemas"
         android:order="4"
         android:title="@string/pref_schemas"
+        app:icon="@drawable/ic_pref_schema"
         android:summary="@string/pref_schemas_summary"/>
 
     <Preference android:key="pref_keyboard"
         android:order="5"
         android:title="@string/pref_keyboard"
+        app:icon="@drawable/ic_pref_keyboard_preference"
         android:fragment="com.osfans.trime.settings.fragments.KeyboardFragment"/>
 
     <Preference android:key="pref_keyboard_appearance"
         android:order="6"
         android:title="@string/pref_keyboard_appearance"
+        app:icon="@drawable/ic_pref_theme_color"
         android:fragment="com.osfans.trime.settings.fragments.AppearanceFragment"/>
 
     <Preference android:key="pref_input"
         android:order="8"
         android:title="@string/pref_input"
+        app:icon="@drawable/ic_pref_input_config"
         android:fragment="com.osfans.trime.settings.fragments.InputFragment"/>
 
     <!-- <Preference android:key="pref_deploy" android:order="16"
@@ -65,6 +69,7 @@
     <Preference android:key="pref_other"
         android:order="17"
         android:title="@string/pref_other"
+        app:icon="@drawable/ic_pref_other"
         android:fragment="com.osfans.trime.settings.fragments.OtherFragment"/>
 
     <!-- <PreferenceScreen android:key="pref_help" android:order="32" android:title="@string/pref_help">

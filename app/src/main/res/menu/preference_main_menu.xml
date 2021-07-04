@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/preference__menu_deploy"
         android:title="@string/pref_deploy"
+        android:icon="@drawable/ic_action_deploy"
         app:showAsAction="ifRoom" />
     <item android:id="@+id/preference__menu_help"
         android:title="@string/pref_help" />
