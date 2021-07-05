@@ -6,4 +6,6 @@
     <color name="colorAccent">#009BD1</color>  <!-- 浅强调色 -->
     <color name="colorAccentDark">#1976D2</color> <!-- 深强调色 -->
     <color name="toolbarForegroundColor">#FFFFFF</color>  <!-- 工具栏前景色 -->
+    
+    <color name="windowBackground">#FAFAFA</color>
 </resources>
