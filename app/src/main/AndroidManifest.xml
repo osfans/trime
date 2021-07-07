@@ -29,6 +29,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application android:label="@string/ime_name"
+                 android:name=".TrimeApplication"
                  android:icon="@mipmap/ic_app_icon"
                  android:roundIcon="@mipmap/ic_app_icon_round"
                  android:requestLegacyExternalStorage="true"
