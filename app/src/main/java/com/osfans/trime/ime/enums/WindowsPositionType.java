@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime.enums;
+package com.osfans.trime.ime.enums;
 
 import java.util.HashMap;
 import java.util.Locale;

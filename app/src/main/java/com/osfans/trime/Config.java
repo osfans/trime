@@ -31,8 +31,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.SystemClock;
 import android.util.TypedValue;
 
-import com.osfans.trime.enums.InlineModeType;
-import com.osfans.trime.enums.WindowsPositionType;
+import com.osfans.trime.ime.enums.InlineModeType;
+import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.util.AppVersionUtils;
 
 import java.io.File;

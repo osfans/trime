@@ -21,7 +21,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import com.osfans.trime.enums.KeyEventType;
+import com.osfans.trime.ime.enums.KeyEventType;
 import java.util.List;
 import java.util.Map;
 

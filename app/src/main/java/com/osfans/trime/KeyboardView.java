@@ -43,7 +43,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import com.osfans.trime.enums.KeyEventType;
+import com.osfans.trime.ime.enums.KeyEventType;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
