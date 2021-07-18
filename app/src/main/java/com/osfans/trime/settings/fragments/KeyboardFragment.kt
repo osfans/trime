@@ -7,10 +7,12 @@ import androidx.core.view.forEach
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.Rime
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 
 class KeyboardFragment: PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
+    private val prefs get() = Preferences.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.keyboard_preference)
 
@@ -56,7 +58,7 @@ class KeyboardFragment: PreferenceFragmentCompat(),
                 trime?.loadConfig()
             }
             "show_switches" -> {
-                sharedPreferences?.getBoolean(key, false)?.let { Rime.setShowSwitches(it) }
+                prefs.keyboard.switchesEnabled.let { Rime.setShowSwitches(it) }
             }
         }
     }

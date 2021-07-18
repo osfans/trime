@@ -7,29 +7,16 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.view.KeyEvent
-import androidx.preference.PreferenceManager
 import java.util.*
 import kotlin.math.ln
 
 /** Manages the effects like sound, vibration, speech and so on. */
 class Effects(private val context: Context) {
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    private val prefs = Preferences.defaultInstance()
 
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
     private var tts: TextToSpeech? = null
-
-    companion object {
-        const val VIBRATION_ENABLED =      "key_vibrate"
-        const val VIBRATION_DURATION =     "key_vibrate_duration"
-        const val VIBRATION_AMPLITUDE =    "key_vibrate_amplitude"
-
-        const val SOUND_ENABLED =    "key_sound"
-        const val SOUND_VOLUME =     "key_sound_volume"
-
-        const val SPEAK_KEY_ENABLED =       "speak_key"
-        const val SPEAK_COMMIT_ENABLED =    "speak_commit"
-    }
 
     init {
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -39,8 +26,8 @@ class Effects(private val context: Context) {
 
     /** Creates the TTS **/
     fun onCreateTTS() {
-        if (prefs.getBoolean(SPEAK_KEY_ENABLED, false)
-            || prefs.getBoolean(SPEAK_COMMIT_ENABLED, false)) {
+        if (prefs.keyboard.isSpeakKey
+            || prefs.keyboard.isSpeakCommit) {
             tts = TextToSpeech(context) { } // 初始化結果
         }
     }
@@ -60,9 +47,9 @@ class Effects(private val context: Context) {
      * TODO("Haptic Feedback")
      */
     fun keyPressVibrate() {
-        if (prefs.getBoolean(VIBRATION_ENABLED, false)) {
-            val vibrationDuration = prefs.getInt(VIBRATION_DURATION, 10).toLong()
-            var vibrationAmplitude = prefs.getInt(VIBRATION_AMPLITUDE, -1)
+        if (prefs.keyboard.vibrationEnabled) {
+            val vibrationDuration = prefs.keyboard.vibrationDuration.toLong()
+            var vibrationAmplitude = prefs.keyboard.vibrationAmplitude
 
             if (vibrationAmplitude == -1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrationAmplitude = VibrationEffect.DEFAULT_AMPLITUDE
@@ -87,8 +74,8 @@ class Effects(private val context: Context) {
      * Makes a key press sound if the user has this feature enabled in the preferences.
      */
     fun keyPressSound(keyCode: Int) {
-        if (prefs.getBoolean(SOUND_ENABLED, false)) {
-            val soundVolume = prefs.getInt(SOUND_VOLUME, 100)
+        if (prefs.keyboard.soundEnabled) {
+            val soundVolume = prefs.keyboard.soundVolume
             val effect = when (keyCode) {
                 KeyEvent.KEYCODE_DEL -> AudioManager.FX_KEYPRESS_DELETE
                 KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN
@@ -128,15 +115,15 @@ class Effects(private val context: Context) {
      */
     private inline fun <reified T> speakInternal(content: T) {
         val text = when {
-            0 is T && prefs.getBoolean(SPEAK_KEY_ENABLED, false) -> {
+            0 is T && prefs.keyboard.isSpeakKey -> {
                 if (content as Int <= 0) return
                 KeyEvent.keyCodeToString(content as Int)
                     .replace("KEYCODE_","")
                     .replace("_"," ")
                     .lowercase(Locale.getDefault())
             }
-            "" is T && (prefs.getBoolean(SPEAK_KEY_ENABLED, false)
-                    || prefs.getBoolean(SPEAK_COMMIT_ENABLED,false)) -> {
+            "" is T && (prefs.keyboard.isSpeakKey
+                    || prefs.keyboard.isSpeakCommit) -> {
                 content as String
             }
             else -> null

@@ -22,9 +22,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
+import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
@@ -39,13 +40,15 @@ class PrefMainActivity: AppCompatActivity(),
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
-    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(this)
+    private val prefs get() = Preferences.defaultInstance()
 
     lateinit var binding: PrefActivityBinding
     lateinit var imeManager: InputMethodManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val uiMode = when (prefs.getString("pref__settings_theme", "auto")) {
+        prefs.initDefaultPreferences()
+        prefs.sync()
+        val uiMode = when (prefs.other.uiMode) {
             "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             "light" -> AppCompatDelegate.MODE_NIGHT_NO
             "dark" -> AppCompatDelegate.MODE_NIGHT_YES
@@ -55,6 +58,7 @@ class PrefMainActivity: AppCompatActivity(),
 
         super.onCreate(savedInstanceState)
         binding = PrefActivityBinding.inflate(layoutInflater)
+        BarUtils.setNavBarColor(this, resources.getColor(R.color.windowBackground))
         setContentView(binding.root)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
