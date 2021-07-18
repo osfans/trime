@@ -103,7 +103,7 @@ class Preferences(
             return instance
         }
 
-        fun default(): Preferences {
+        fun defaultInstance(): Preferences {
             return defaultInstance
                 ?: throw UninitializedPropertyAccessException("""
                     Default preferences not initialized! Make sure to call initDefault()
@@ -247,12 +247,17 @@ class Preferences(
             private set
     }
 
+
     class Other(private val prefs: Preferences) {
         companion object {
             const val UI_MODE = "pref__settings_theme"
+            const val SHOW_APP_ICON = "pref__others__show_app_icon"
         }
         var uiMode: String
             get() =  prefs.getPref(UI_MODE, "auto")
             set(v) = prefs.setPref(UI_MODE, v)
+        var showAppIcon: Boolean
+            get() =  prefs.getPref(SHOW_APP_ICON, true)
+            set(v) = prefs.setPref(SHOW_APP_ICON, v)
     }
 }

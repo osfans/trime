@@ -10,13 +10,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.forEach
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.osfans.trime.R
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 
 class OtherFragment: PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(context)
+    private val prefs get() = Preferences.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
         findPreference<ListPreference>("pref__settings_theme")?.setOnPreferenceChangeListener { _, newValue ->
@@ -62,7 +62,7 @@ class OtherFragment: PreferenceFragmentCompat(),
 
     private fun updateLauncherIconStatus() {
         // Set LauncherAlias enabled/disabled state just before destroying/pausing this activity
-        if (prefs.getBoolean("pref__others__show_app_icon", true)) {
+        if (prefs.other.showAppIcon) {
             showAppIcon(requireContext())
         } else {
             hideAppIcon(requireContext())
