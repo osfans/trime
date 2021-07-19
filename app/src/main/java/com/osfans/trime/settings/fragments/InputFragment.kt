@@ -8,9 +8,9 @@ import android.view.Menu
 import androidx.core.view.forEach
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.ResetAssetsDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +27,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(requireContext())
+    private val prefs get() = Preferences.defaultInstance()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.input_preference)
@@ -90,8 +90,8 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
         } else {
             var summary: String
             if (syncBgPref?.isChecked == true) {
-                val lastResult = prefs.getBoolean("last_sync_status", false)
-                val lastTime = prefs.getLong("last_sync_time", 0)
+                val lastResult = prefs.input.lastSyncStatus
+                val lastTime = prefs.input.lastSyncTime
                 summary = if (lastResult) {
                     context.getString(R.string.pref_sync_bg_success)
                 } else {

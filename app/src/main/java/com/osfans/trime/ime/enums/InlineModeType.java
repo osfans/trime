@@ -16,15 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime.enums;
+package com.osfans.trime.ime.enums;
 
-/** 按键事件枚举 */
-public enum KeyEventType {
-  CLICK,
-  LONG_CLICK,
-  SWIPE_LEFT,
-  SWIPE_RIGHT,
-  SWIPE_UP,
-  SWIPE_DOWN,
-  COMBO
+/** 嵌入模式枚举 */
+public enum InlineModeType {
+  INLINE_NONE,
+  INLINE_PREVIEW,
+  INLINE_COMPOSITION,
+  INLINE_INPUT
 }

@@ -7,9 +7,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import android.view.WindowManager
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.osfans.trime.*
-import com.osfans.trime.Function
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.PrefMainActivity
 import com.osfans.trime.util.RimeUtils

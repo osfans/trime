@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,7 +52,6 @@ import android.widget.PopupWindow;
 import com.osfans.trime.Candidate;
 import com.osfans.trime.Composition;
 import com.osfans.trime.Config;
-import com.osfans.trime.Effect;
 import com.osfans.trime.Event;
 import com.osfans.trime.Function;
 import com.osfans.trime.IntentReceiver;
@@ -62,8 +62,8 @@ import com.osfans.trime.KeyboardView;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
 import com.osfans.trime.Speech;
-import com.osfans.trime.enums.InlineModeType;
-import com.osfans.trime.enums.WindowsPositionType;
+import com.osfans.trime.ime.enums.InlineModeType;
+import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
@@ -84,7 +84,7 @@ public class Trime extends InputMethodService
   private KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
-  private Effect mEffect; //音效
+  private Effects mEffect; //音效
   private Candidate mCandidate; //候選
   private Composition mComposition; //編碼
   private LinearLayout mCompositionContainer;
@@ -171,7 +171,7 @@ public class Trime extends InputMethodService
     private int mParentLocation[] = new int[2];
 
     void postShowFloatingWindow() {
-      if (Function.isEmpty(Rime.getCompositionText())) {
+      if (TextUtils.isEmpty(Rime.getCompositionText())) {
         hideComposition();
         return;
       }
@@ -275,15 +275,15 @@ public class Trime extends InputMethodService
   }
 
   public void resetEffect() {
-    if (mEffect != null) mEffect.reset();
+    //if (mEffect != null) mEffect.reset();
   }
 
   public void vibrateEffect() {
-    if (mEffect != null) mEffect.vibrate();
+    if (mEffect != null) mEffect.keyPressVibrate();
   }
 
   public void soundEffect() {
-    if (mEffect != null) mEffect.playSound(0);
+    if (mEffect != null) mEffect.keyPressSound(0);
   }
 
   @Override
@@ -293,21 +293,21 @@ public class Trime extends InputMethodService
     mIntentReceiver = new IntentReceiver();
     mIntentReceiver.registerReceiver(this);
 
-    mEffect = new Effect(this);
+    mEffect = new Effects(this);
     mConfig = Config.get(this);
     mNeedUpdateRimeOption = true;
     loadConfig();
-    resetEffect();
+    //resetEffect();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
     @Nullable String s;
     s = mConfig.getString("locale");
-    if (Function.isEmpty(s)) s = "";
+    if (TextUtils.isEmpty(s)) s = "";
     locales[0] = LocaleUtils.INSTANCE.stringToLocale(s);
     if (locales[0].equals(new Locale(s))) locales[0] = Locale.getDefault();
 
     s = mConfig.getString("latin_locale");
-    if (Function.isEmpty(s)) s = "en_US";
+    if (TextUtils.isEmpty(s)) s = "en_US";
     locales[1] = LocaleUtils.INSTANCE.stringToLocale(s);
     if (locales[1].equals(new Locale(s))) locales[0] = Locale.ENGLISH;
     /*
@@ -335,7 +335,7 @@ public class Trime extends InputMethodService
     switch (option) {
       case "ascii_mode":
         if (!mTempAsciiMode) mAsciiMode = value; //切換中西文時保存狀態
-        mEffect.setLanguage(locales[value ? 1 : 0]);
+        mEffect.setTtsLanguage(locales[value ? 1 : 0]);
         break;
       case "_hide_comment":
         setShowComment(!value);
@@ -426,7 +426,7 @@ public class Trime extends InputMethodService
     resetCandidate();
     hideComposition();
     resetKeyboard();
-    resetEffect();
+    //resetEffect();
   }
 
   public void initKeyboard() {
@@ -643,7 +643,7 @@ public class Trime extends InputMethodService
 
   //句首自動大小寫
   private void updateCursorCapsToInputView() {
-    if (auto_caps.contentEquals("false") || Function.isEmpty(auto_caps)) return;
+    if (auto_caps.contentEquals("false") || TextUtils.isEmpty(auto_caps)) return;
     if ((auto_caps.contentEquals("true") || Rime.isAsciiMode())
         && (mKeyboardView != null && !mKeyboardView.isCapsOn())) {
       InputConnection ic = getCurrentInputConnection();
@@ -669,7 +669,7 @@ public class Trime extends InputMethodService
    */
   public void commitText(CharSequence text, boolean isRime) {
     if (text == null) return;
-    mEffect.speakCommit(text);
+    mEffect.speak(text);
     InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
       ic.commitText(text, 1);
@@ -847,12 +847,12 @@ public class Trime extends InputMethodService
   @Override
   public void onEvent(Event event) {
     String commit = event.getCommit();
-    if (!Function.isEmpty(commit)) {
+    if (!TextUtils.isEmpty(commit)) {
       commitText(commit, false); //直接上屏，不發送給Rime
       return;
     }
     String s = event.getText();
-    if (!Function.isEmpty(s)) {
+    if (!TextUtils.isEmpty(s)) {
       onText(s);
       return;
     }
@@ -874,7 +874,7 @@ public class Trime extends InputMethodService
         if (event.getSelect().contentEquals(".next")
             && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           imm.switchToNextInputMethod(imeToken, false);
-        } else if (!Function.isEmpty(event.getSelect())) {
+        } else if (!TextUtils.isEmpty(event.getSelect())) {
           imm.switchToLastInputMethod(imeToken);
         } else {
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
@@ -1011,7 +1011,7 @@ public class Trime extends InputMethodService
   @Override
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText=" + text);
-    mEffect.speakKey(text);
+    mEffect.speak(text);
     String s = text.toString();
     String t;
     Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
@@ -1041,9 +1041,9 @@ public class Trime extends InputMethodService
 
   @Override
   public void onPress(int keyCode) {
-    mEffect.vibrate();
-    mEffect.playSound(keyCode);
-    mEffect.speakKey(keyCode);
+    mEffect.keyPressVibrate();
+    mEffect.keyPressSound(keyCode);
+    mEffect.speak(keyCode);
   }
 
   @Override
@@ -1094,14 +1094,14 @@ public class Trime extends InputMethodService
   private String getActiveText(int type) {
     if (type == 2) return Rime.RimeGetInput(); //當前編碼
     String s = Rime.getComposingText(); //當前候選
-    if (Function.isEmpty(s)) {
+    if (TextUtils.isEmpty(s)) {
       InputConnection ic = getCurrentInputConnection();
       CharSequence cs = ic.getSelectedText(0); //選中字
-      if (type == 1 && Function.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
-      if (Function.isEmpty(cs)) {
+      if (type == 1 && TextUtils.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
+      if (TextUtils.isEmpty(cs)) {
         cs = ic.getTextBeforeCursor(type == 4 ? 1024 : 1, 0); //光標前字
       }
-      if (Function.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
+      if (TextUtils.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
       if (cs != null) s = cs.toString();
     }
     return s;
@@ -1126,7 +1126,7 @@ public class Trime extends InputMethodService
       if (s == null) s = "";
       if (ic != null) {
         CharSequence cs = ic.getSelectedText(0);
-        if (cs == null || !Function.isEmpty(s)) {
+        if (cs == null || !TextUtils.isEmpty(s)) {
           // 無選中文本或編碼不爲空時更新編輯區
           ic.setComposingText(s, 1);
         }

@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -229,7 +230,7 @@ public class Candidate extends View {
       x = candidateRect[i].centerX();
       if (show_comment) {
         comment = getComment(i);
-        if (!Function.isEmpty(comment)) {
+        if (!TextUtils.isEmpty(comment)) {
           comment_width = measureText(comment, paintComment, tfComment);
           if (comment_on_top) {
             comment_x = candidateRect[i].centerX();
