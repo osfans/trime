@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -170,7 +171,7 @@ public class Trime extends InputMethodService
     private int mParentLocation[] = new int[2];
 
     void postShowFloatingWindow() {
-      if (Function.isEmpty(Rime.getCompositionText())) {
+      if (TextUtils.isEmpty(Rime.getCompositionText())) {
         hideComposition();
         return;
       }
@@ -301,12 +302,12 @@ public class Trime extends InputMethodService
 
     @Nullable String s;
     s = mConfig.getString("locale");
-    if (Function.isEmpty(s)) s = "";
+    if (TextUtils.isEmpty(s)) s = "";
     locales[0] = LocaleUtils.INSTANCE.stringToLocale(s);
     if (locales[0].equals(new Locale(s))) locales[0] = Locale.getDefault();
 
     s = mConfig.getString("latin_locale");
-    if (Function.isEmpty(s)) s = "en_US";
+    if (TextUtils.isEmpty(s)) s = "en_US";
     locales[1] = LocaleUtils.INSTANCE.stringToLocale(s);
     if (locales[1].equals(new Locale(s))) locales[0] = Locale.ENGLISH;
     /*
@@ -642,7 +643,7 @@ public class Trime extends InputMethodService
 
   //句首自動大小寫
   private void updateCursorCapsToInputView() {
-    if (auto_caps.contentEquals("false") || Function.isEmpty(auto_caps)) return;
+    if (auto_caps.contentEquals("false") || TextUtils.isEmpty(auto_caps)) return;
     if ((auto_caps.contentEquals("true") || Rime.isAsciiMode())
         && (mKeyboardView != null && !mKeyboardView.isCapsOn())) {
       InputConnection ic = getCurrentInputConnection();
@@ -846,12 +847,12 @@ public class Trime extends InputMethodService
   @Override
   public void onEvent(Event event) {
     String commit = event.getCommit();
-    if (!Function.isEmpty(commit)) {
+    if (!TextUtils.isEmpty(commit)) {
       commitText(commit, false); //直接上屏，不發送給Rime
       return;
     }
     String s = event.getText();
-    if (!Function.isEmpty(s)) {
+    if (!TextUtils.isEmpty(s)) {
       onText(s);
       return;
     }
@@ -873,7 +874,7 @@ public class Trime extends InputMethodService
         if (event.getSelect().contentEquals(".next")
             && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
           imm.switchToNextInputMethod(imeToken, false);
-        } else if (!Function.isEmpty(event.getSelect())) {
+        } else if (!TextUtils.isEmpty(event.getSelect())) {
           imm.switchToLastInputMethod(imeToken);
         } else {
           ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
@@ -1093,14 +1094,14 @@ public class Trime extends InputMethodService
   private String getActiveText(int type) {
     if (type == 2) return Rime.RimeGetInput(); //當前編碼
     String s = Rime.getComposingText(); //當前候選
-    if (Function.isEmpty(s)) {
+    if (TextUtils.isEmpty(s)) {
       InputConnection ic = getCurrentInputConnection();
       CharSequence cs = ic.getSelectedText(0); //選中字
-      if (type == 1 && Function.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
-      if (Function.isEmpty(cs)) {
+      if (type == 1 && TextUtils.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
+      if (TextUtils.isEmpty(cs)) {
         cs = ic.getTextBeforeCursor(type == 4 ? 1024 : 1, 0); //光標前字
       }
-      if (Function.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
+      if (TextUtils.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
       if (cs != null) s = cs.toString();
     }
     return s;
@@ -1125,7 +1126,7 @@ public class Trime extends InputMethodService
       if (s == null) s = "";
       if (ic != null) {
         CharSequence cs = ic.getSelectedText(0);
-        if (cs == null || !Function.isEmpty(s)) {
+        if (cs == null || !TextUtils.isEmpty(s)) {
           // 無選中文本或編碼不爲空時更新編輯區
           ic.setComposingText(s, 1);
         }

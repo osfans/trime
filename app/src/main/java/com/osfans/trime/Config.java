@@ -29,7 +29,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.TypedValue;
+
+import androidx.preference.PreferenceManager;
 
 import com.osfans.trime.ime.enums.InlineModeType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
@@ -66,7 +69,7 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    mPref = Function.getPref(context);
+    mPref = PreferenceManager.getDefaultSharedPreferences(context);
     userDataDir = context.getString(R.string.default_user_data_dir);
     sharedDataDir = context.getString(R.string.default_shared_data_dir);
     themeName = mPref.getString("pref_selected_theme", "trime");
@@ -251,7 +254,7 @@ public class Config {
       Key.androidKeys = (List<String>) mk.get("name");
       Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
       Key.setSymbols((String) mk.get("symbols"));
-      if (Function.isEmpty(Key.getSymbols()))
+      if (TextUtils.isEmpty(Key.getSymbols()))
         Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
       Key.presetKeys = (Map<String, Map>) m.get("preset_keys");
       presetColorSchemes = (Map<String, Object>) m.get("preset_color_schemes");
