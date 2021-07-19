@@ -13,6 +13,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.Rime
 import com.osfans.trime.databinding.AboutActivityBinding
+import com.osfans.trime.util.AppVersionUtils.libVersion
 
 class AboutActivity: AppCompatActivity() {
     lateinit var binding: AboutActivityBinding
@@ -70,18 +71,9 @@ class AboutActivity: AppCompatActivity() {
     class AboutFragment: PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.about_preference, rootKey)
-            val changelogPreference: Preference? = findPreference("pref_changelog")
-            if (changelogPreference != null) {
-                setVersion(changelogPreference, Rime.get_trime_version())
-            }
-            val librimeVerPreference: Preference? = findPreference("pref_librime_ver")
-            if (librimeVerPreference != null) {
-                setVersion(librimeVerPreference, Rime.get_librime_version())
-            }
-            val openccVerPreference: Preference? = findPreference("pref_opencc_ver")
-            if (openccVerPreference != null) {
-                setVersion(openccVerPreference, Rime.get_opencc_version())
-            }
+            findPreference<Preference>("pref_changelog")?.libVersion = Rime.get_trime_version()
+            findPreference<Preference>("pref_librime_ver")?.libVersion = Rime.get_librime_version()
+            findPreference<Preference>("pref_opencc_ver")?.libVersion = Rime.get_opencc_version()
         }
 
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
@@ -98,22 +90,6 @@ class AboutActivity: AppCompatActivity() {
                 }
                 else -> super.onPreferenceTreeClick(preference)
             }
-        }
-
-        private fun getCommit(versionCode: String): String {
-            return if (versionCode.contains("-g")) {
-                versionCode.replace("^(.*-g)([0-9a-f]+)(.*)$".toRegex(), "$2")
-            } else {
-                versionCode.replace("^([^-]*)(-.*)$".toRegex(), "$1")
-            }
-        }
-
-        private fun setVersion(pref: Preference, versionCode: String) {
-            val commit = getCommit(versionCode)
-            pref.summary = versionCode
-            val intent = pref.intent
-            intent.data = Uri.withAppendedPath(intent.data, "commits/$commit")
-            pref.intent = intent
         }
     }
 }

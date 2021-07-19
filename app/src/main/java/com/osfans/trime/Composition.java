@@ -26,6 +26,7 @@ import android.os.Build.VERSION_CODES;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
@@ -268,7 +269,7 @@ public class Composition extends TextView {
     String s = r.getText();
     int start, end;
     String sep = Config.getString(m, "start");
-    if (!Function.isEmpty(sep)) {
+    if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
       end = ss.length();
@@ -291,7 +292,7 @@ public class Composition extends TextView {
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
     sep = Config.getString(m, "end");
-    if (!Function.isEmpty(sep)) ss.append(sep);
+    if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
   private int appendCandidates(Map m, int length) {
@@ -312,7 +313,7 @@ public class Composition extends TextView {
     candidate_num = 0;
     for (Rime.RimeCandidate o : candidates) {
       String cand = o.text;
-      if (Function.isEmpty(cand)) cand = "";
+      if (TextUtils.isEmpty(cand)) cand = "";
       i++;
       if (candidate_num >= max_entries) {
         if (start_num == 0 && candidate_num == i) start_num = candidate_num;
@@ -334,13 +335,13 @@ public class Composition extends TextView {
       } else {
         line_sep = line;
       }
-      if (!Function.isEmpty(line_sep)) {
+      if (!TextUtils.isEmpty(line_sep)) {
         start = ss.length();
         ss.append(line_sep);
         end = ss.length();
         ss.setSpan(getAlign(m), start, end, span);
       }
-      if (!Function.isEmpty(label_format) && labels != null) {
+      if (!TextUtils.isEmpty(label_format) && labels != null) {
         String label = String.format(label_format, labels[i]);
         start = ss.length();
         ss.append(label);
@@ -374,7 +375,7 @@ public class Composition extends TextView {
           span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
       String comment = o.comment;
-      if (show_comment && !Function.isEmpty(comment_format) && !Function.isEmpty(comment)) {
+      if (show_comment && !TextUtils.isEmpty(comment_format) && !TextUtils.isEmpty(comment)) {
         comment = String.format(comment_format, comment);
         start = ss.length();
         ss.append(comment);
@@ -397,7 +398,7 @@ public class Composition extends TextView {
     }
     if (start_num == 0 && candidate_num == i + 1) start_num = candidate_num;
     sep = Config.getString(m, "end");
-    if (!Function.isEmpty(sep)) ss.append(sep);
+    if (!TextUtils.isEmpty(sep)) ss.append(sep);
     return start_num;
   }
 
@@ -414,7 +415,7 @@ public class Composition extends TextView {
     int start, end;
     String sep = null;
     if (m.containsKey("start")) sep = Config.getString(m, "start");
-    if (!Function.isEmpty(sep)) {
+    if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
       end = ss.length();
@@ -427,14 +428,14 @@ public class Composition extends TextView {
     ss.setSpan(new EventSpan(e), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     sep = Config.getString(m, "end");
-    if (!Function.isEmpty(sep)) ss.append(sep);
+    if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
   private void appendMove(Map m) {
     String s = Config.getString(m, "move");
     int start, end;
     String sep = Config.getString(m, "start");
-    if (!Function.isEmpty(sep)) {
+    if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
       end = ss.length();
@@ -449,7 +450,7 @@ public class Composition extends TextView {
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
     sep = Config.getString(m, "end");
-    if (!Function.isEmpty(sep)) ss.append(sep);
+    if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
   public int setWindow(int length) {
@@ -457,7 +458,7 @@ public class Composition extends TextView {
     Rime.RimeComposition r = Rime.getComposition();
     if (r == null) return 0;
     String s = r.getText();
-    if (Function.isEmpty(s)) return 0;
+    if (TextUtils.isEmpty(s)) return 0;
     setSingleLine(true); //設置單行
     ss = new SpannableStringBuilder();
     int start_num = 0;

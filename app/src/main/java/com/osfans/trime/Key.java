@@ -19,9 +19,12 @@ package com.osfans.trime;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+
 import com.osfans.trime.ime.enums.KeyEventType;
+
 import java.util.List;
 import java.util.Map;
 
@@ -117,19 +120,19 @@ public class Key {
           };
       String eventType = eventTypes[i];
       s = Config.getString(mk, eventType);
-      if (!Function.isEmpty(s)) events[i] = new Event(mKeyboard, s);
+      if (!TextUtils.isEmpty(s)) events[i] = new Event(mKeyboard, s);
       else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
     }
     s = Config.getString(mk, "composing");
-    if (!Function.isEmpty(s)) composing = new Event(mKeyboard, s);
+    if (!TextUtils.isEmpty(s)) composing = new Event(mKeyboard, s);
     s = Config.getString(mk, "has_menu");
-    if (!Function.isEmpty(s)) has_menu = new Event(mKeyboard, s);
+    if (!TextUtils.isEmpty(s)) has_menu = new Event(mKeyboard, s);
     s = Config.getString(mk, "paging");
-    if (!Function.isEmpty(s)) paging = new Event(mKeyboard, s);
+    if (!TextUtils.isEmpty(s)) paging = new Event(mKeyboard, s);
     if (composing != null || has_menu != null || paging != null)
       mKeyboard.getmComposingKeys().add(this);
     s = Config.getString(mk, "ascii");
-    if (!Function.isEmpty(s)) ascii = new Event(mKeyboard, s);
+    if (!TextUtils.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = Config.getString(mk, "label");
     hint = Config.getString(mk, "hint");
     if (mk.containsKey("send_bindings")) send_bindings = Config.getBoolean(mk, "send_bindings");
@@ -519,7 +522,7 @@ public class Key {
 
   public String getLabel() {
     Event event = getEvent();
-    if (!Function.isEmpty(label) && event == getClick() && (ascii == null && !Rime.isAsciiMode()))
+    if (!TextUtils.isEmpty(label) && event == getClick() && (ascii == null && !Rime.isAsciiMode()))
       return label; //中文狀態顯示標籤
     return event.getLabel();
   }
