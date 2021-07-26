@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.setup;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -32,10 +32,12 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.TypedValue;
 
-import androidx.preference.PreferenceManager;
-
+import com.osfans.trime.R;
+import com.osfans.trime.Rime;
+import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.InlineModeType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
+import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.AppVersionUtils;
 
 import java.io.File;
@@ -63,16 +65,16 @@ public class Config {
 
   private static Config self = null;
   private SharedPreferences mPref;
+  private static final Preferences prefs = Preferences.Companion.defaultInstance();
 
   private Map<String, String> fallbackColors;
   private Map presetColorSchemes, presetKeyboards;
 
   public Config(Context context) {
     self = this;
-    mPref = PreferenceManager.getDefaultSharedPreferences(context);
     userDataDir = context.getString(R.string.default_user_data_dir);
     sharedDataDir = context.getString(R.string.default_shared_data_dir);
-    themeName = mPref.getString("pref_selected_theme", "trime");
+    themeName = prefs.getAppearance().getSelectedTheme();
     prepareRime(context);
     deployTheme(context);
     init();
@@ -95,13 +97,13 @@ public class Config {
   }
 
   public String getResDataDir(String sub) {
-    String name = new File(getSharedDataDir(), sub).getPath();
+    String name = new File(prefs.getInput().getSharedDataDir(), sub).getPath();
     if (new File(name).exists()) return name;
-    return new File(getUserDataDir(), sub).getPath();
+    return new File(prefs.getInput().getUserDataDir(), sub).getPath();
   }
 
   private void prepareRime(Context context) {
-    boolean isExist = new File(getSharedDataDir()).exists();
+    boolean isExist = new File(prefs.getInput().getSharedDataDir()).exists();
     boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(context);
     String defaultFile = "trime.yaml";
     if (isOverwrite) {
@@ -120,7 +122,7 @@ public class Config {
   }
 
   public static String[] getThemeKeys(Context context, boolean isUser) {
-    File d = new File(isUser ? get(context).getUserDataDir() : get(context).getSharedDataDir());
+    File d = new File(isUser ? prefs.getInput().getUserDataDir() : prefs.getInput().getSharedDataDir());
     FilenameFilter trimeFilter =
         new FilenameFilter() {
           @Override
@@ -234,9 +236,7 @@ public class Config {
 
   public void setTheme(String theme) {
     themeName = theme;
-    SharedPreferences.Editor edit = mPref.edit();
-    edit.putString("pref_selected_theme", themeName);
-    edit.apply();
+    prefs.getAppearance().setSelectedTheme(theme);
     init();
   }
 
@@ -263,7 +263,7 @@ public class Config {
       reset();
     } catch (Exception e) {
       e.printStackTrace();
-      setTheme(defaultName);
+      prefs.getAppearance().setSelectedTheme(defaultName);
     }
   }
 

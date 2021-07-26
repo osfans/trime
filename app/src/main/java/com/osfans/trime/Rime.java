@@ -21,6 +21,7 @@ package com.osfans.trime;
 import android.content.Context;
 
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.setup.Config;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,8 +66,8 @@ public class Rime {
 
   /** Rime候選項 */
   public static class RimeCandidate {
-    String text;
-    String comment;
+    public String text;
+    public String comment;
   }
 
   /** Rime候選區，包含多個{@link RimeCandidate 候選項} */
