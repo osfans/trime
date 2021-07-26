@@ -5,7 +5,7 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        applicationId "com.osfans.trime"
+        applicationId "com.iflytek.inputmethod.miui"
         minSdkVersion 14
         targetSdkVersion 29
         versionCode 20210604
@@ -51,13 +51,20 @@ android {
         viewBinding = true
     }
 
-    externalNativeBuild {
-        cmake {
-            path "src/main/jni/CMakeLists.txt"
-            version "3.18.1"
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
         }
     }
-    ndkVersion "22.1.7171670"
+
+
+//    externalNativeBuild {
+//        cmake {
+//            path "src/main/jni/CMakeLists.txt"
+//            version "3.18.1"
+//        }
+//    }
+//    ndkVersion "22.1.7171670"
 }
 
 dependencies {
