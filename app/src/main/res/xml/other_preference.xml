@@ -23,4 +23,20 @@
     <SwitchPreferenceCompat android:key="pref_destroy_on_quit"
         app:iconSpaceReserved="false"
         android:title="@string/pref_destroy_on_quit" />
+
+    <Preference android:key="pref_clipboard_manager"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_clipboard_manager"
+        android:summary="@string/pref_clipboard_manager_summary"/>
+
+    <EditTextPreference android:key="pref_clipboard_compare"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_clipboard_compare"
+        android:defaultValue=""
+        app:useSimpleSummaryProvider="true"/>
+    <EditTextPreference android:key="pref_clipboard_output"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_clipboard_output"
+        android:defaultValue=""
+        app:useSimpleSummaryProvider="true"/>
 </PreferenceScreen>

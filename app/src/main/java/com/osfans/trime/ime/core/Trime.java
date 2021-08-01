@@ -20,7 +20,14 @@ package com.osfans.trime.ime.core;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -68,6 +75,7 @@ import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.util.LocaleUtils;
+import com.osfans.trime.xScrollView;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +96,8 @@ public class Trime extends InputMethodService
   private Candidate mCandidate; //候選
   private Composition mComposition; //編碼
   private LinearLayout mCompositionContainer;
-  private FrameLayout mCandidateContainer;
+  private xScrollView mCandidateContainer;
+  private LinearLayout mInputRoot;
   private PopupWindow mFloatingWindow;
   private PopupTimer mFloatingWindowTimer = new PopupTimer();
   private RectF mPopupRectF = new RectF();
@@ -329,6 +338,7 @@ public class Trime extends InputMethodService
     orientation = getResources().getConfiguration().orientation;
     // Use the following line to debug IME service.
     //android.os.Debug.waitForDebugger();
+    clipBoardMonitor();
   }
 
   public void onOptionChanged(String option, boolean value) {
@@ -378,26 +388,63 @@ public class Trime extends InputMethodService
     mFloatingWindowTimer.cancelShowing();
   }
 
-  private void loadBackground() {
-    GradientDrawable gd = new GradientDrawable();
-    gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
-    gd.setCornerRadius(mConfig.getFloat("layout/round_corner"));
-    Drawable d = mConfig.getDrawable("layout/background");
-    if (d == null) {
-      gd.setColor(mConfig.getColor("text_back_color"));
-      d = gd;
+    private void loadBackground() {
+
+      if (//self.getResources().getConfiguration().orientation
+              orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        int padding = mConfig.getPixel("keyboard_padding_landscape");
+//        mKeyboardView.setPadding(
+//                padding, mKeyboardView.getPaddingTop()
+//                , padding, mKeyboardView.getPaddingBottom());
+//        mInputRoot.findViewById(R.id.spacer_left).setMinimumWidth(padding);
+//        mInputRoot.findViewById(R.id.spacer_right).setMinimumWidth(padding);
+
+        View view =  mInputRoot.findViewById(R.id.spacer_left);
+        LayoutParams layoutParams = view.getLayoutParams();
+        layoutParams.width = padding;
+        view.setLayoutParams(layoutParams);
+
+        view =  mInputRoot.findViewById(R.id.spacer_right);
+        layoutParams = view.getLayoutParams();
+        layoutParams.width = padding;
+        view.setLayoutParams(layoutParams);
+
+      } else {
+        mKeyboardView.setPadding(
+                mKeyboardView.getPaddingLeft(), mKeyboardView.getPaddingTop()
+                , mKeyboardView.getPaddingRight(), mConfig.getPixel("keyboard_padding_portrait"));
+      }
+
+      GradientDrawable gd = new GradientDrawable();
+        gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
+        gd.setCornerRadius(mConfig.getFloat("layout/round_corner"));
+        Drawable d = mConfig.getDrawable("layout/background");
+        if (d == null) {
+            gd.setColor(mConfig.getColor("text_back_color"));
+            d = gd;
+        }
+        if (mConfig.hasKey("layout/alpha")) {
+            int alpha = mConfig.getInt("layout/alpha");
+            if (alpha <= 0) alpha = 0;
+            else if (alpha >= 255) alpha = 255;
+            d.setAlpha(alpha);
+        }
+        mFloatingWindow.setBackgroundDrawable(d);
+        if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
+            mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
+
+        Drawable d2 = mConfig.getDrawable("candidate_background");
+        if (d2 == null) {
+            mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
+        } else
+            mCandidateContainer.setBackgroundDrawable(d2);
+
+      Drawable d3 = mConfig.getDrawable("root_background");
+      if (d3 == null) {
+        mInputRoot.setBackgroundColor(mConfig.getColor("root_background"));
+      } else
+        mInputRoot.setBackgroundDrawable(d3);
     }
-    if (mConfig.hasKey("layout/alpha")) {
-      int alpha = mConfig.getInt("layout/alpha");
-      if (alpha <= 0) alpha = 0;
-      else if (alpha >= 255) alpha = 255;
-      d.setAlpha(alpha);
-    }
-    mFloatingWindow.setBackgroundDrawable(d);
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
-      mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
-    mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
-  }
 
   public void resetKeyboard() {
     if (mKeyboardView != null) {
@@ -518,37 +565,55 @@ public class Trime extends InputMethodService
 
   @Override
   public View onCreateInputView() {
-    mKeyboardView = (KeyboardView) getLayoutInflater().inflate(R.layout.input, (ViewGroup) null);
+//  初始化键盘布局
+    LayoutInflater inflater = getLayoutInflater();
+    mInputRoot = (LinearLayout)  inflater.inflate(R.layout.input_root, (ViewGroup) null);
+    mKeyboardView = mInputRoot.findViewById(R.id.keyboard);
     mKeyboardView.setOnKeyboardActionListener(this);
     mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
-    return mKeyboardView;
+
+//  初始化候选栏
+    mCandidateContainer = mInputRoot.findViewById(R.id.scroll);
+    mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
+    mCandidate.setCandidateListener(this);
+
+    mCandidateContainer.setPageStr(new Runnable() {
+              @Override
+              public void run() {
+                handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
+              }
+            }
+            , new Runnable() {
+              @Override
+              public void run() {
+                handleKey(KeyEvent.KEYCODE_PAGE_UP, 0);
+
+              }
+            });
+
+//  候选词悬浮窗的容器
+    mCompositionContainer = (LinearLayout) inflater.inflate(R.layout.composition_container, (ViewGroup) null);
+    hideComposition();
+    mFloatingWindow = new PopupWindow(mCompositionContainer);
+    mFloatingWindow.setClippingEnabled(false);
+    mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+
+    mComposition = (Composition) mCompositionContainer.getChildAt(0);
+
+    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        mFloatingWindow.setWindowLayoutType(getDialogType());
+    }
+
+    setShowComment(!Rime.getOption("_hide_comment"));
+    mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
+    loadBackground();
+
+    return mInputRoot;
   }
 
   void setShowComment(boolean show_comment) {
     if (mCandidateContainer != null) mCandidate.setShowComment(show_comment);
     mComposition.setShowComment(show_comment);
-  }
-
-  @Override
-  public View onCreateCandidatesView() {
-    LayoutInflater inflater = getLayoutInflater();
-    mCompositionContainer =
-        (LinearLayout) inflater.inflate(R.layout.composition_container, (ViewGroup) null);
-    hideComposition();
-    mFloatingWindow = new PopupWindow(mCompositionContainer);
-    mFloatingWindow.setClippingEnabled(false);
-    mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-    mFloatingWindow.setWindowLayoutType(getDialogType());
-    mComposition = (Composition) mCompositionContainer.getChildAt(0);
-
-    mCandidateContainer =
-        (FrameLayout) inflater.inflate(R.layout.candidate_container, (ViewGroup) null);
-    mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
-    mCandidate.setCandidateListener(this);
-    setShowComment(!Rime.getOption("_hide_comment"));
-    mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
-    loadBackground();
-    return mCandidateContainer;
   }
 
   /**
@@ -597,8 +662,13 @@ public class Trime extends InputMethodService
     }
     Rime.get(this);
     if (reset_ascii_mode) mAsciiMode = false;
+    int padding = 0;
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      padding = mConfig.getPixel("keyboard_padding_landscape");
+    }
+    mKeyboardSwitch.init(getMaxWidth() - padding * 2); //橫豎屏切換時重置鍵盤
+
     // Select a keyboard based on the input type of the editing field.
-    mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
     mKeyboardSwitch.setKeyboard(keyboard);
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
@@ -1264,5 +1334,79 @@ public class Trime extends InputMethodService
   /** 更新Rime的中西文狀態 */
   private void updateAsciiMode() {
     Rime.setOption("ascii_mode", mTempAsciiMode || mAsciiMode);
+  }
+
+
+
+  private String ClipBoardString="";
+
+  private static String StringReplacer(String str,String[] rules){
+    if(str==null)
+      return "";
+
+    String s = str;
+    for(String rule:rules){
+      s = s.replaceAll(rule,"");
+      if(s.length()<1)
+        return "";
+    }
+    return s;
+  }
+
+  private static boolean StringNotMatch(String str,String[] rules){
+    if(str==null)
+      return false;
+
+    if(str.length()<1)
+      return false;
+
+    String s = str;
+    for(String rule:rules){
+      if(s.matches(rule))
+        return false;
+    }
+    return true;
+  }
+  /**
+   *desc：此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
+   * ClipBoardCompare 比较规则。每次通知剪贴板管理器，都会保存ClipBoardCompare处理过的string。如果两次处理过的内容不变，则不通知。
+   * ClipBoardOut     输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
+   */
+  private void clipBoardMonitor(){
+
+    final ClipboardManager clipBoard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+    clipBoard.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
+      @Override
+      public void onPrimaryClipChanged() {
+
+        if(mConfig.hasClipBoardManager()) {
+          String[] ClipBoardManager = mConfig.getClipBoardManager();
+
+          ClipData clipData = clipBoard.getPrimaryClip();
+          ClipData.Item item = clipData.getItemAt(0);
+
+          String text = item.getText().toString();
+
+          String text2 = StringReplacer(text, mConfig.getClipBoardCompare());
+          if(text2.length()<1 || text2.equals(ClipBoardString) )
+            return;
+
+          if(StringNotMatch(text, mConfig.getClipBoardOutput()))
+            {
+              ClipBoardString = text;
+
+              Intent intent = new Intent(Intent.ACTION_SEND);
+              intent.setType("text/plain");
+              intent.putExtra(Intent.EXTRA_TEXT, text);
+              intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+//              intent.setComponent(new ComponentName("com.fooview.android.fooview", "com.fooview.android.fooview.FooClipboardProxy"));
+              intent.setComponent(new ComponentName(ClipBoardManager[0],ClipBoardManager[1]));
+
+              self.startActivity(intent);
+            }
+          }
+        }
+    });
   }
 }

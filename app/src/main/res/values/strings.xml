@@ -118,4 +118,9 @@
     <string name="pref__others__show_app_icon_tips_on">This option is only available on some ROMs</string>
     <string name="pref__others__show_app_icon_tips_off">In some ROMs, you will still see this icon in the launcher and may go to the system\'s app information page after tapping it</string>
     <string name="pref__default">Default</string>
+    <string name="pref_clipboard_manager">Clipboard Manager</string>
+    <string name="pref_clipboard_compare">Clipboard Compare Rules</string>
+    <string name="pref_clipboard_output">Clipboard Output Rules</string>
+    <string name="pref_clipboard_manager_summary">Send clipboard text to the selected App when the Clipboard is modified.</string>
+    <string name="show_switche_arrow">Show arrow for candidate switch</string>
 </resources>

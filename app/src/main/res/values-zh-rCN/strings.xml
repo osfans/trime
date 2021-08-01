@@ -117,4 +117,9 @@
     <string name="pref__others__show_app_icon_tips_on">此选项仅对部分 ROM 有效</string>
     <string name="pref__others__show_app_icon_tips_off">在某些 ROM 中，您仍会看到图标显示，并可能在点击它后转到系统的应用信息页</string>
     <string name="pref__default">默认</string>
+    <string name="pref_clipboard_manager">剪贴板管理器</string>
+    <string name="pref_clipboard_compare">剪贴板去重规则(每行为一条正则表达式)</string>
+    <string name="pref_clipboard_output">剪贴板过滤规则(每行为一条正则表达式)</string>
+    <string name="pref_clipboard_manager_summary">剪贴板内容变化时，自动发送剪贴板内容给选定的应用</string>
+    <string name="show_switche_arrow">在候选栏中显示状态时带箭头符号</string>
 </resources>

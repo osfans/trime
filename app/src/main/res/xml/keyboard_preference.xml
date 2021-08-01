@@ -30,6 +30,10 @@
             app:iconSpaceReserved="false"
             android:title="@string/show_switches"
             android:defaultValue="true" />
+        <SwitchPreferenceCompat android:key="show_switche_arrow"
+            app:iconSpaceReserved="false"
+            android:title="@string/show_switche_arrow"
+            android:defaultValue="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:iconSpaceReserved="false"

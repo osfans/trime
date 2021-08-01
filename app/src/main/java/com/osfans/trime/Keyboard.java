@@ -19,6 +19,7 @@
 package com.osfans.trime;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -80,6 +81,7 @@ public class Keyboard {
 
   private boolean mLock; //切換程序時記憶鍵盤
   private String mAsciiKeyboard; //英文鍵盤
+  private boolean land=false; //橫屏模式下，键盘左右两侧到屏幕边缘的距离
 
   /**
    * Creates a keyboard from the given xml key layout file.
@@ -87,17 +89,27 @@ public class Keyboard {
    * @param context the application or service context
    */
   public Keyboard(Context context) {
+
+    land =  ( context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) ;
+
+    Config config = Config.get(context);
+
     DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
+    if(land)
+      mDisplayWidth = mDisplayWidth -  config.getPixel("keyboard_padding_landscape")*2;
     /* Height of the screen */
     int mDisplayHeight = dm.heightPixels;
     //Log.v(TAG, "keyboard's display metrics:" + dm);
 
-    Config config = Config.get(context);
     mDefaultHorizontalGap = config.getPixel("horizontal_gap");
     mDefaultVerticalGap = config.getPixel("vertical_gap");
     mDefaultWidth = (int) (mDisplayWidth * config.getDouble("key_width") / 100);
+
     mDefaultHeight = config.getPixel("key_height");
+    if(land)
+      mDefaultHeight = config.getPixel("key_height_land",mDefaultHeight);
+
     mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
     mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
     mRoundCorner = config.getFloat("round_corner");

@@ -22,12 +22,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.NinePatch;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.NinePatchDrawable;
 import android.os.SystemClock;
 import android.util.TypedValue;
 
@@ -64,6 +68,8 @@ public class Config {
   private Map<String, String> fallbackColors;
   private Map presetColorSchemes, presetKeyboards;
 
+  private String[] ClipBoardCompare,ClipBoardOutput,ClipBoardManager;
+
   public Config(Context context) {
     self = this;
     mPref = Function.getPref(context);
@@ -73,6 +79,54 @@ public class Config {
     prepareRime(context);
     deployTheme(context);
     init();
+    prepareCLipBoardRule();
+  }
+
+  private void prepareCLipBoardRule(){
+    ClipBoardCompare = mPref.getString("pref_clipboard_compare", "").trim().split("\n");
+    ClipBoardOutput =  mPref.getString("pref_clipboard_output", "").trim().split("\n");
+    ClipBoardManager =  mPref.getString("pref_clipboard_manager", "").trim().split(",");
+  }
+
+  public String[] getClipBoardCompare(){ return ClipBoardCompare;}
+
+  public String[] getClipBoardOutput(){ return ClipBoardOutput;}
+
+  public String[] getClipBoardManager(){ return ClipBoardManager; }
+
+  public boolean hasClipBoardManager(){
+    if(ClipBoardManager.length==2){
+      if(ClipBoardManager[0].length()>0 && ClipBoardManager[1].length()>0)
+        return true;
+    }
+    return false;
+  }
+
+  public void setClipBoardManager(String str) {
+    SharedPreferences.Editor edit = mPref.edit();
+    edit.putString("pref_clipboard_manager", str);
+    edit.apply();
+    prepareCLipBoardRule();
+  }
+
+  public void setClipBoardCompare(String str) {
+    String s = str.replaceAll("\\s*\n\\s*","\n").trim();
+    ClipBoardCompare = s.split("\n");
+
+    SharedPreferences.Editor edit = mPref.edit();
+    edit.putString("pref_clipboard_compare", s);
+    edit.apply();
+
+    System.out.println("setClipBoardCompare "+s);
+  }
+
+  public void setClipBoardOutput(String str) {
+    String s = str.replaceAll("\\s*\n\\s*","\n").trim();
+    ClipBoardOutput = s.split("\n");
+
+    SharedPreferences.Editor edit = mPref.edit();
+    edit.putString("pref_clipboard_output", s);
+    edit.apply();
   }
 
   public String getTheme() {
@@ -257,6 +311,7 @@ public class Config {
       presetColorSchemes = (Map<String, Object>) m.get("preset_color_schemes");
       presetKeyboards = (Map<String, Object>) m.get("preset_keyboards");
       Rime.setShowSwitches(getShowSwitches());
+      Rime.setShowSwitchArrow(getShowSwitchArrow());
       reset();
     } catch (Exception e) {
       e.printStackTrace();
@@ -283,16 +338,42 @@ public class Config {
     return null;
   }
 
+
+  private Object _getValue(String k1, String k2,Object defaultValue) {
+    Map<String, Object> m;
+    if (mStyle != null && mStyle.containsKey(k1)) {
+      m = (Map<String, Object>) mStyle.get(k1);
+      if (m != null && m.containsKey(k2)) return m.get(k2);
+    }
+    if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) {
+      m = (Map<String, Object>) mDefaultStyle.get(k1);
+      if (m != null && m.containsKey(k2)) return m.get(k2);
+    }
+    return defaultValue;
+  }
+
   private Object _getValue(String k1) {
     if (mStyle != null && mStyle.containsKey(k1)) return mStyle.get(k1);
     if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) return mDefaultStyle.get(k1);
     return null;
   }
 
+  private Object _getValue(String k1,Object defaultValue) {
+    if (mStyle != null && mStyle.containsKey(k1)) return mStyle.get(k1);
+    return defaultValue;
+  }
+
   public Object getValue(String s) {
     String[] ss = s.split("/");
     if (ss.length == 1) return _getValue(ss[0]);
     else if (ss.length == 2) return _getValue(ss[0], ss[1]);
+    return null;
+  }
+
+  public Object getValue(String s,Object defaultValue) {
+    String[] ss = s.split("/");
+    if (ss.length == 1) return _getValue(ss[0],defaultValue);
+    else if (ss.length == 2) return _getValue(ss[0], ss[1],defaultValue);
     return null;
   }
 
@@ -363,6 +444,14 @@ public class Config {
 
   public int getPixel(String key) {
     return getPixel(getFloat(key));
+  }
+
+
+  public int getPixel(String key,int defaultValue) {
+    float v = getFloat(key,Float.MAX_VALUE);
+    if(v==Float.MAX_VALUE)
+      return defaultValue;
+    return getPixel(v);
   }
 
   public static Integer getPixel(Map m, String k, Object s) {
@@ -475,6 +564,12 @@ public class Config {
     return Float.valueOf(o.toString());
   }
 
+  public float getFloat(String key,float defaultValue) {
+    Object o = getValue(key,defaultValue);
+    if (o == null) return defaultValue;
+    return Float.valueOf(o.toString());
+  }
+
   public int getInt(String key) {
     Object o = getValue(key);
     if (o == null) return 0;
@@ -579,6 +674,16 @@ public class Config {
       name = new File(nameDirectory, name).getPath();
       File f = new File(name);
       if (f.exists()) {
+        if(name.contains(".9.png")){
+          Bitmap bitmap= BitmapFactory.decodeFile(name);
+          byte[] chunk = bitmap.getNinePatchChunk();
+          // 如果.9.png没有经过第一步，那么chunk就是null, 只能按照普通方式加载
+          if(NinePatch.isNinePatchChunk(chunk)) {
+            return new NinePatchDrawable(bitmap, chunk, new Rect(), null);
+          }else{
+            System.out.println("drawableObject() chunk null, file="+name);
+          }
+        }
         return new BitmapDrawable(BitmapFactory.decodeFile(name));
       }
     }
@@ -643,6 +748,10 @@ public class Config {
 
   private boolean getShowSwitches() {
     return mPref.getBoolean("show_switches", true);
+  }
+
+  private boolean getShowSwitchArrow(){
+    return mPref.getBoolean("show_switche_arrow", true);
   }
 
   public boolean getShowPreview() {

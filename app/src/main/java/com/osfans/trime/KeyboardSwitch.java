@@ -95,6 +95,16 @@ public class KeyboardSwitch {
     reset(context);
   }
 
+  private boolean land;
+  public void init(int displayWidth,boolean isLand) {
+    if ((currentId >= 0) && (displayWidth == currentDisplayWidth)) {
+      return;
+    }
+    land = isLand;
+    currentDisplayWidth = displayWidth;
+    reset(context);
+  }
+
   public Keyboard getCurrentKeyboard() {
     return mKeyboards[currentId];
   }

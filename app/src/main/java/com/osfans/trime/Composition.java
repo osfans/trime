@@ -228,10 +228,12 @@ public class Composition extends TextView {
     setMinHeight(config.getPixel("layout/min_height"));
     setMaxWidth(config.getPixel("layout/max_width"));
     setMaxHeight(config.getPixel("layout/max_height"));
-    int margin_x, margin_y;
+    int margin_x, margin_y, margin_bottom;
     margin_x = config.getPixel("layout/margin_x");
     margin_y = config.getPixel("layout/margin_y");
-    setPadding(margin_x, margin_y, margin_x, margin_y);
+    margin_bottom = config.getPixel("layout/margin_bottom",margin_y);
+    System.out.println("Composition setPadding=" + margin_x+", "+margin_y+", "+margin_bottom);
+    setPadding(margin_x, margin_y, margin_x, margin_bottom);
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
     movable = config.getString("layout/movable");
