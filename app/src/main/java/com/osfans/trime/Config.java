@@ -116,8 +116,6 @@ public class Config {
     SharedPreferences.Editor edit = mPref.edit();
     edit.putString("pref_clipboard_compare", s);
     edit.apply();
-
-    System.out.println("setClipBoardCompare "+s);
   }
 
   public void setClipBoardOutput(String str) {
@@ -687,11 +685,8 @@ public class Config {
           Bitmap bitmap= BitmapFactory.decodeFile(name);
           byte[] chunk = bitmap.getNinePatchChunk();
           // 如果.9.png没有经过第一步，那么chunk就是null, 只能按照普通方式加载
-          if(NinePatch.isNinePatchChunk(chunk)) {
+          if(NinePatch.isNinePatchChunk(chunk))
             return new NinePatchDrawable(bitmap, chunk, new Rect(), null);
-          }else{
-            System.out.println("drawableObject() chunk null, file="+name);
-          }
         }
         return new BitmapDrawable(BitmapFactory.decodeFile(name));
       }

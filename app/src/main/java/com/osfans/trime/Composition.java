@@ -232,7 +232,6 @@ public class Composition extends TextView {
     margin_x = config.getPixel("layout/margin_x");
     margin_y = config.getPixel("layout/margin_y");
     margin_bottom = config.getPixel("layout/margin_bottom",margin_y);
-    System.out.println("Composition setPadding=" + margin_x+", "+margin_y+", "+margin_bottom);
     setPadding(margin_x, margin_y, margin_x, margin_bottom);
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");

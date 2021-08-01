@@ -134,7 +134,7 @@ public class xScrollView extends HorizontalScrollView {
                     // When the scroll to the top or the most when it will not scroll, then move the layout.
                     isNeedMove();
 
-//                System.out.println("MotionEvent "+isMoveing+" d="+deltaX+" left="+left+" LR="+inner.getLeft()+", "+inner.getRight()+" scrollX="+this.getScrollX());
+//                Log.i("MotionEvent "+isMoveing," d="+deltaX+" left="+left+" LR="+inner.getLeft()+", "+inner.getRight()+" scrollX="+this.getScrollX());
 
                     if (isMoveing) {
                         // Initialize the head rectangle
