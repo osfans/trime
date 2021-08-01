@@ -485,6 +485,15 @@ public class Config {
     return parseColor(o.toString());
   }
 
+  public Integer getColor(String key,Integer defaultValue) {
+    Object o = getColorObject(key);
+    if (o == null) {
+      o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
+    }
+    if (o == null) return defaultValue;
+    return parseColor(o.toString());
+  }
+
   public static Drawable getColorDrawable(Context context, Map m, String k) {
     if (m.containsKey(k)) {
       Object o = m.get(k);

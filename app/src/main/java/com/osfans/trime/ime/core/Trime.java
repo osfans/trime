@@ -83,6 +83,7 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static android.graphics.Color.parseColor;
 
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
@@ -435,13 +436,13 @@ public class Trime extends InputMethodService
 
         Drawable d2 = mConfig.getDrawable("candidate_background");
         if (d2 == null) {
-            mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color"));
+            mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color",parseColor("#00ffffff")));
         } else
             mCandidateContainer.setBackgroundDrawable(d2);
 
       Drawable d3 = mConfig.getDrawable("root_background");
       if (d3 == null) {
-        mInputRoot.setBackgroundColor(mConfig.getColor("root_background"));
+        mInputRoot.setBackgroundColor(mConfig.getColor("root_background",parseColor("#00ffffff")));
       } else
         mInputRoot.setBackgroundDrawable(d3);
     }
