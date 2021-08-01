@@ -1155,8 +1155,9 @@ public class Trime extends InputMethodService
       }
     } else if (i == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, 0);
     else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
-    else if (Rime.selectCandidate(i)) {
-      commitText();
+    else // if (Rime.selectCandidate(i))
+    {
+      handleKey(KeyEvent.KEYCODE_1+i,0);
     }
   }
 
