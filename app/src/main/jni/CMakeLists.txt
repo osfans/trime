@@ -415,13 +415,13 @@ set(rime_extra_modules "")
 unset(rime_plugins_sources)
 
 ## librime-lua
-include_directories(librime-lua-deps/lua5.3)
+include_directories(librime-lua-deps/lua5.4)
 set(rime_extra_modules "${rime_extra_modules},Q(lua)")
 file(GLOB_RECURSE rime_plugin_sources
   librime-lua/src/*.cc
   librime-lua/src/*.c
-  librime-lua-deps/*.cc
-  librime-lua-deps/*.c)
+  librime-lua-deps/lua5.4/*.cc
+  librime-lua-deps/lua5.4/*.c)
 set(rime_plugins_sources ${rime_plugins_sources} ${rime_plugin_sources})
 
 ## librime-octagram
