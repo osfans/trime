@@ -125,19 +125,16 @@ class OtherFragment: PreferenceFragmentCompat(),
     /** 顯示輸入法可以分享剪贴板给哪些App */
     class ClipBoardManagerDialog(private val context: Context, val value: String) {
         private val config = Config.get(context)
-        /** 內置數據列表 */
 
         /** 回廠對話框 */
         val resetDialog: AlertDialog
 
         init {
-//            var list: ArrayList<String> = ArrayList<String>();
             var values: ArrayList<String> = ArrayList<String>();
 
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, "Trime test")
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             val packageManager = context.packageManager
             val resolveInfos = packageManager.queryIntentActivities(intent, 0)
 
@@ -146,7 +143,6 @@ class OtherFragment: PreferenceFragmentCompat(),
             for (i in resolveInfos.indices) {
                 values.add(resolveInfos[i].activityInfo.packageName + "," + resolveInfos[i].activityInfo.name);
                 items[i] = resolveInfos[i].loadLabel(packageManager) as String?;
-//                println("res=" + resolveInfos[i].loadLabel(packageManager) + resolveInfos[i].activityInfo)
             }
             val builder: AlertDialog.Builder = AlertDialog.Builder(context)
             builder.setTitle(R.string.pref_clipboard_manager)
