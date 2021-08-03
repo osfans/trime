@@ -1205,7 +1205,7 @@ public class Trime extends InputMethodService
     if (mCandidateContainer != null) {
       if (mShowWindow) {
         int start_num = mComposition.setWindow(min_length,min_check);
-        mCandidate.setText(start_num);
+        mCandidate.setText(start_num - 1);
         if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
       } else {
         mCandidate.setText(0);
