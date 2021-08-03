@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="settings__configuration_title"
+    android:title="@string/settings__configuration_title">
+
+    <EditTextPreference android:key="conf__shared_data_dir"
+        app:iconSpaceReserved="false"
+        android:title="@string/conf__shared_data_dir_title"
+        app:useSimpleSummaryProvider="true"/>
+
+    <EditTextPreference android:key="conf__user_data_dir"
+        app:iconSpaceReserved="false"
+        android:title="@string/conf__user_data_dir_title"
+        android:defaultValue="@string/conf__default_user_data_dir"
+        app:useSimpleSummaryProvider="true"/>
+
+    <Preference android:key="conf__synchronize"
+        app:iconSpaceReserved="false"
+        android:title="@string/conf__synchronize_title"
+        android:summary="@string/conf__synchronize_summary"/>
+
+    <SwitchPreferenceCompat android:key="conf__synchronize_background"
+        app:iconSpaceReserved="false"
+        android:title="@string/conf__synchronize_background_title"
+        android:summary="@string/conf__synchronize_background_summary"
+        android:persistent="true" />
+
+    <Preference android:key="conf__reset"
+        app:iconSpaceReserved="false"
+        android:title="@string/conf__reset_title"
+        android:summary="@string/conf__reset_summary"/>
+</PreferenceScreen>

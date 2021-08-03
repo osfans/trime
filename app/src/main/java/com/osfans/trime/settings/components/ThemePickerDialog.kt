@@ -51,7 +51,7 @@ class ThemePickerDialog(
         }
         // Init picker
         pickerDialog = AlertDialog.Builder(context).apply {
-            setTitle(R.string.pref_themes)
+            setTitle(R.string.looks__selected_theme_title)
             setCancelable(true)
             setNegativeButton(android.R.string.cancel, null)
             setPositiveButton(android.R.string.ok) { _, _ -> execute() }

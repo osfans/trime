@@ -30,7 +30,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
     private val prefs get() = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.input_preference)
+        addPreferencesFromResource(R.xml.conf_preference)
 
         setHasOptionsMenu(true)
     }
@@ -85,26 +85,26 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
             if (syncBgPref?.isChecked == true) {
                 syncBgPref.setSummaryOn(R.string.pref_sync_bg_never)
             } else {
-                syncBgPref?.setSummaryOff(R.string.pref_sync_bg_tip)
+                syncBgPref?.setSummaryOff(R.string.conf__synchronize_background_summary)
             }
         } else {
             var summary: String
             if (syncBgPref?.isChecked == true) {
-                val lastResult = prefs.getBoolean("last_sync_status", false)
-                val lastTime = prefs.getLong("last_sync_time", 0)
+                val lastResult = prefs.getBoolean("conf__last_sync_status", false)
+                val lastTime = prefs.getLong("conf__last_sync_time", 0)
                 summary = if (lastResult) {
                     context.getString(R.string.pref_sync_bg_success)
                 } else {
                     context.getString(R.string.pref_sync_bg_failure)
                 }
                 summary = if (lastTime == 0L) {
-                    context.getString(R.string.pref_sync_bg_tip)
+                    context.getString(R.string.conf__synchronize_background_summary)
                 } else {
                     summary.format(PrettyTime().format(Date(lastTime)))
                 }
                 syncBgPref.summaryOn = summary
             } else {
-                syncBgPref?.setSummaryOff(R.string.pref_sync_bg_tip)
+                syncBgPref?.setSummaryOff(R.string.conf__synchronize_background_summary)
             }
         }
     }

@@ -4,39 +4,40 @@
     <ListPreference
         android:defaultValue="auto"
         app:iconSpaceReserved="false"
-        app:entries="@array/settings_theme__entries"
-        app:entryValues="@array/settings_theme__values"
-        app:key="pref__settings_theme"
-        app:title="@string/pref_ui"
+        app:entries="@array/other__ui_mode_entries"
+        app:entryValues="@array/other__ui_mode_values"
+        app:key="other__ui_mode"
+        app:title="@string/other__ui_mode_title"
         app:useSimpleSummaryProvider="true" />
 
-    <SwitchPreferenceCompat app:key="pref__others__show_app_icon"
+    <SwitchPreferenceCompat app:key="other__show_app_icon"
         android:defaultValue="true"
         app:iconSpaceReserved="false"
-        app:title="@string/pref__others__show_app_icon"
-        app:summaryOn="@string/pref__others__show_app_icon_tips_on"
-        app:summaryOff="@string/pref__others__show_app_icon_tips_off"/>
+        app:title="@string/other__show_app_icon_title"
+        app:summaryOn="@string/other__show_app_icon_on_summary"
+        app:summaryOff="@string/other__show_app_icon_off_summary"/>
 
-    <SwitchPreferenceCompat android:key="pref_notification_icon"
+    <SwitchPreferenceCompat android:key="other__show_status_bar_icon"
         app:iconSpaceReserved="false"
-        android:title="@string/pref_notification_icon" />
-    <SwitchPreferenceCompat android:key="pref_destroy_on_quit"
-        app:iconSpaceReserved="false"
-        android:title="@string/pref_destroy_on_quit" />
+        android:title="@string/other__show_status_bar_icon_title" />
 
-    <Preference android:key="pref_clipboard_manager"
+    <SwitchPreferenceCompat android:key="other__destroy_on_quit"
         app:iconSpaceReserved="false"
-        android:title="@string/pref_clipboard_manager"
-        android:summary="@string/pref_clipboard_manager_summary"/>
+        android:title="@string/other__destroy_on_quit_title" />
 
-    <EditTextPreference android:key="pref_clipboard_compare"
+    <Preference android:key="other__clipboard_manager"
         app:iconSpaceReserved="false"
-        android:title="@string/pref_clipboard_compare"
+        android:title="@string/other__clipboard_manager_title"
+        android:summary="@string/other__clipboard_manager_summary"/>
+
+    <EditTextPreference android:key="other__clipboard_compare"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__clipboard_compare_title"
         android:defaultValue=""
         app:useSimpleSummaryProvider="true"/>
-    <EditTextPreference android:key="pref_clipboard_output"
+    <EditTextPreference android:key="other__clipboard_output"
         app:iconSpaceReserved="false"
-        android:title="@string/pref_clipboard_output"
+        android:title="@string/other__clipboard_output_title"
         android:defaultValue=""
         app:useSimpleSummaryProvider="true"/>
 </PreferenceScreen>

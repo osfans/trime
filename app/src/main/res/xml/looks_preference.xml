@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference android:key="looks__selected_theme"
+        app:iconSpaceReserved="false"
+        android:title="@string/looks__selected_theme_title"
+        android:summary="@string/looks__selected_theme_summary" />
+    <Preference android:key="looks__selected_color"
+        app:iconSpaceReserved="false"
+        android:title="@string/looks__selected_color_title"
+        android:summary="@string/looks__selected_color_summary" />
+</PreferenceScreen>

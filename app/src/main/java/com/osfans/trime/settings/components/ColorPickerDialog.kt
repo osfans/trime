@@ -25,7 +25,7 @@ class ColorPickerDialog(
         checkedColor = colorKeys.binarySearch(colorScheme)
 
         pickerDialog = AlertDialog.Builder(context).apply {
-            setTitle(R.string.pref_colors)
+            setTitle(R.string.looks__selected_color_title)
             setCancelable(true)
             setNegativeButton(android.R.string.cancel, null)
             setPositiveButton(android.R.string.ok) { _, _ ->

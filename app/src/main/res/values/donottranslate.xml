@@ -24,13 +24,13 @@
     <string name="pref_trime_qq2_summary" translatable="false">458845988</string>
     <string name="pref_rime_qq_summary" translatable="false">77608640</string>
     <string name="pref_licensing_summary" translatable="false">GPLv3</string>
-    <string-array name="inline_values">
+    <string-array name="keyboard__inline_values">
         <item>preview</item>
         <item>composition</item>
         <item>input</item>
         <item>none</item>
     </string-array>
-    <string-array name="settings_theme__values">
+    <string-array name="other__ui_mode_values">
         <item>auto</item>
         <item>light</item>
         <item>dark</item>
@@ -38,5 +38,5 @@
 
 
     <string name="default_shared_data_dir" translatable="false">/sdcard/rime</string>
-    <string name="default_user_data_dir" translatable="false">/sdcard/rime</string>
+    <string name="conf__default_user_data_dir" translatable="false">/sdcard/rime</string>
 </resources>

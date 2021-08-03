@@ -2,7 +2,6 @@ package com.osfans.trime.ime.core
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Environment
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
@@ -22,8 +21,8 @@ class Preferences(
     private val cacheString: HashMap<String, String> = hashMapOf()
 
     val keyboard = Keyboard(this)
-    val appearance = Appearance(this)
-    val input = Configuration(this)
+    val looks = Looks(this)
+    val conf = Configuration(this)
     val other = Other(this)
 
     /**
@@ -119,8 +118,8 @@ class Preferences(
     fun initDefaultPreferences() {
         applicationContext.get()?.let { context ->
             PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
-            PreferenceManager.setDefaultValues(context, R.xml.appearance_preference, true)
-            PreferenceManager.setDefaultValues(context, R.xml.input_preference, true)
+            PreferenceManager.setDefaultValues(context, R.xml.looks_preference, true)
+            PreferenceManager.setDefaultValues(context, R.xml.conf_preference, true)
             PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
         }
     }
@@ -139,24 +138,24 @@ class Preferences(
      */
     class Keyboard(private val prefs: Preferences) {
         companion object {
-            const val INLINE_PREEDIT_MODE =      "inline_preedit"
-            const val SOFT_CURSOR_ENABLED =      "soft_cursor"
-            const val FLOATING_WINDOW_ENABLED =  "show_window"
-            const val POPUP_KEY_PRESS_ENABLED =  "show_preview"
-            const val SWITCHES_ENABLED =         "show_switches"
+            const val INLINE_PREEDIT_MODE =      "keyboard__inline_preedit"
+            const val SOFT_CURSOR_ENABLED =      "keyboard__soft_cursor"
+            const val FLOATING_WINDOW_ENABLED =  "keyboard__show_window"
+            const val POPUP_KEY_PRESS_ENABLED =  "keyboard__show_key_popup"
+            const val SWITCHES_ENABLED =         "keyboard__show_switches"
 
-            const val SOUND_ENABLED =          "key_sound"
-            const val SOUND_VOLUME =           "key_sound_volume"
+            const val SOUND_ENABLED =          "keyboard__key_sound"
+            const val SOUND_VOLUME =           "keyboard__key_sound_volume"
 
-            const val VIBRATION_ENABLED =      "key_vibrate"
-            const val VIBRATION_DURATION =     "key_vibrate_duration"
-            const val VIBRATION_AMPLITUDE =    "key_vibrate_amplitude"
+            const val VIBRATION_ENABLED =      "keyboard__key_vibration"
+            const val VIBRATION_DURATION =     "keyboard__key_vibration_duration"
+            const val VIBRATION_AMPLITUDE =    "keyboard__key_vibration_amplitude"
 
-            const val SPEAK_KEY_ENABLED =      "speak_key"
-            const val SPEAK_COMMIT_ENABLED =   "speak_commit"
+            const val SPEAK_KEY_PRESS_ENABLED =      "keyboard__speak_key_press"
+            const val SPEAK_COMMIT_ENABLED =         "keyboard__speak_commit"
 
-            const val LONG_PRESS_TIMEOUT =     "longpress_timeout"
-            const val REPEAT_INTERVAL =        "repeat_interval"
+            const val LONG_PRESS_TIMEOUT =     "keyboard__key_long_press_timeout"
+            const val REPEAT_INTERVAL =        "keyboard__key_repeat_interval"
         }
         var inlinePreedit: String = ""
             get() =  prefs.getPref(INLINE_PREEDIT_MODE, "preview")
@@ -195,8 +194,8 @@ class Preferences(
             get() = prefs.getPref(REPEAT_INTERVAL, 40)
             private set
         var isSpeakKey: Boolean
-            get() =  prefs.getPref(SPEAK_KEY_ENABLED, false)
-            set(v) = prefs.setPref(SPEAK_KEY_ENABLED, v)
+            get() =  prefs.getPref(SPEAK_KEY_PRESS_ENABLED, false)
+            set(v) = prefs.setPref(SPEAK_KEY_PRESS_ENABLED, v)
         var isSpeakCommit: Boolean
             get() =  prefs.getPref(SPEAK_COMMIT_ENABLED, false)
             set(v) = prefs.setPref(SPEAK_COMMIT_ENABLED, v)
@@ -205,10 +204,10 @@ class Preferences(
     /**
      *  Wrapper class of keyboard appearance preferences.
      */
-    class Appearance(private val prefs: Preferences) {
+    class Looks(private val prefs: Preferences) {
         companion object {
-            const val SELECTED_THEME = "pref_selected_theme"
-            const val SELECTED_COLOR = "pref_selected_color_scheme"
+            const val SELECTED_THEME = "looks__selected_theme"
+            const val SELECTED_COLOR = "looks__selected_color_scheme"
         }
         var selectedTheme: String
             get() =  prefs.getPref(SELECTED_THEME, "trime")
@@ -223,28 +222,28 @@ class Preferences(
      */
     class Configuration(private val prefs: Preferences) {
         companion object {
-            const val SHARED_DATA_DIR =            "shared_data_dir"
-            const val USER_DATA_DIR =              "user_data_dir"
-            const val SYNC_BACKGROUND_ENABLED =    "pref_sync_bg"
-            const val LAST_SYNC_STATUS =           "last_sync_status"
-            const val LAST_SYNC_TIME =             "last_sync_time"
+            const val SHARED_DATA_DIR =            "conf__shared_data_dir"
+            const val USER_DATA_DIR =              "conf__user_data_dir"
+            const val SYNC_BACKGROUND_ENABLED =    "conf__sync_background"
+            const val LAST_SYNC_STATUS =           "conf__last_sync_status"
+            const val LAST_SYNC_TIME =             "conf__last_sync_time"
             val SDCARD_PATH_PREFIX: String = PathUtils.getExternalStoragePath()
         }
         var sharedDataDir: String
-            get() =  prefs.getPref(SHARED_DATA_DIR, "$SDCARD_PATH_PREFIX/rime")
+            get()  = prefs.getPref(SHARED_DATA_DIR, "$SDCARD_PATH_PREFIX/rime")
             set(v) = prefs.setPref(SHARED_DATA_DIR, v)
         var userDataDir: String
-            get() =  prefs.getPref(USER_DATA_DIR, "$SDCARD_PATH_PREFIX/rime")
+            get()  = prefs.getPref(USER_DATA_DIR, "$SDCARD_PATH_PREFIX/rime")
             set(v) = prefs.setPref(USER_DATA_DIR, v)
         var syncBackgroundEnabled: Boolean
-            get() = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)
+            get()  = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)
             set(v) = prefs.setPref(SYNC_BACKGROUND_ENABLED, v)
-        var lastSyncStatus: Boolean = false
-            get() = prefs.getPref(LAST_SYNC_STATUS, false)
-            private set
-        var lastSyncTime: Long = 0
-            get() = prefs.getPref(LAST_SYNC_TIME, 0).toLong()
-            private set
+        var lastSyncStatus: Boolean
+            get()  = prefs.getPref(LAST_SYNC_STATUS, false)
+            set(v) = prefs.setPref(LAST_SYNC_STATUS, v)
+        var lastSyncTime: Long
+            get()  = prefs.getPref(LAST_SYNC_TIME, 0).toLong()
+            set(v) = prefs.setPref(LAST_SYNC_TIME, v)
     }
 
     /**
@@ -252,10 +251,13 @@ class Preferences(
      */
     class Other(private val prefs: Preferences) {
         companion object {
-            const val UI_MODE = "pref__settings_theme"
-            const val SHOW_APP_ICON = "pref__others__show_app_icon"
-            const val SHOW_STATUS_BAR_ICON = "pref_notification_icon"
-            const val DESTROY_ON_QUIT = "pref_destroy_on_quit"
+            const val UI_MODE =                  "other__ui_mode"
+            const val SHOW_APP_ICON =            "other__show_app_icon"
+            const val SHOW_STATUS_BAR_ICON =     "other__show_status_bar_icon"
+            const val DESTROY_ON_QUIT =          "other__destroy_on_quit"
+            const val CLIPBOARD_COMPARE_RULES =  "other__clipboard_compare"
+            const val CLIPBOARD_OUTPUT_RULES =   "other__clipboard_output"
+            const val CLIPBOARD_MANAGER_RULES =  "other__clipboard_manager"
         }
         var uiMode: String
             get() =  prefs.getPref(UI_MODE, "auto")
@@ -269,5 +271,14 @@ class Preferences(
         var destroyOnQuit: Boolean = false
             get() = prefs.getPref(DESTROY_ON_QUIT, false)
             private set
+        var clipboardCompareRules: String
+            get()  = prefs.getPref(CLIPBOARD_COMPARE_RULES, "")
+            set(v) = prefs.setPref(CLIPBOARD_COMPARE_RULES, v)
+        var clipboardOutputRules: String
+            get() = prefs.getPref(CLIPBOARD_OUTPUT_RULES, "")
+            set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v)
+        var clipboardManagerRules: String
+            get()  = prefs.getPref(CLIPBOARD_MANAGER_RULES, "")
+            set(v) = prefs.setPref(CLIPBOARD_MANAGER_RULES, "")
     }
 }

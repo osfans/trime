@@ -73,9 +73,9 @@ public class Config {
   public Config(Context context) {
     self = this;
     mPref = Function.getPref(context);
-    userDataDir = context.getString(R.string.default_user_data_dir);
+    userDataDir = context.getString(R.string.conf__default_user_data_dir);
     sharedDataDir = context.getString(R.string.default_shared_data_dir);
-    themeName = mPref.getString("pref_selected_theme", "trime");
+    themeName = mPref.getString("looks__selected_theme", "trime");
     prepareRime(context);
     deployTheme(context);
     init();
@@ -83,9 +83,9 @@ public class Config {
   }
 
   private void prepareCLipBoardRule(){
-    ClipBoardCompare = mPref.getString("pref_clipboard_compare", "").trim().split("\n");
-    ClipBoardOutput =  mPref.getString("pref_clipboard_output", "").trim().split("\n");
-    ClipBoardManager =  mPref.getString("pref_clipboard_manager", "").trim().split(",");
+    ClipBoardCompare = mPref.getString("other__clipboard_compare", "").trim().split("\n");
+    ClipBoardOutput =  mPref.getString("other__clipboard_output", "").trim().split("\n");
+    ClipBoardManager =  mPref.getString("other__clipboard_manager", "").trim().split(",");
   }
 
   public String[] getClipBoardCompare(){ return ClipBoardCompare;}
@@ -104,7 +104,7 @@ public class Config {
 
   public void setClipBoardManager(String str) {
     SharedPreferences.Editor edit = mPref.edit();
-    edit.putString("pref_clipboard_manager", str);
+    edit.putString("other__clipboard_manager", str);
     edit.apply();
     prepareCLipBoardRule();
   }
@@ -114,7 +114,7 @@ public class Config {
     ClipBoardCompare = s.split("\n");
 
     SharedPreferences.Editor edit = mPref.edit();
-    edit.putString("pref_clipboard_compare", s);
+    edit.putString("other__clipboard_compare", s);
     edit.apply();
   }
 
@@ -123,7 +123,7 @@ public class Config {
     ClipBoardOutput = s.split("\n");
 
     SharedPreferences.Editor edit = mPref.edit();
-    edit.putString("pref_clipboard_output", s);
+    edit.putString("other__clipboard_output", s);
     edit.apply();
   }
 
@@ -132,15 +132,15 @@ public class Config {
   }
 
   public boolean getSyncBackground(){
-    return mPref.getBoolean("pref_sync_bg",false);
+    return mPref.getBoolean("conf__synchronize_background",false);
   }
 
   public String getSharedDataDir() {
-    return mPref.getString("shared_data_dir", sharedDataDir);
+    return mPref.getString("conf__shared_data_dir", sharedDataDir);
   }
 
   public String getUserDataDir() {
-    return mPref.getString("user_data_dir", userDataDir);
+    return mPref.getString("conf__user_data_dir", userDataDir);
   }
 
   public String getResDataDir(String sub) {
@@ -631,12 +631,12 @@ public class Config {
   
 
   public String getColorScheme() {
-    return mPref.getString("pref_selected_color_scheme", "default");
+    return mPref.getString("looks__selected_color", "default");
   }
 
   public void setColor(String color) {
     SharedPreferences.Editor edit = mPref.edit();
-    edit.putString("pref_selected_color_scheme", color);
+    edit.putString("looks_selected_color", color);
     edit.apply();
     //deployTheme();
   }
@@ -713,7 +713,7 @@ public class Config {
   }
 
   public InlineModeType getInlinePreedit() {
-    switch (mPref.getString("inline_preedit", "preview")) {
+    switch (mPref.getString("keyboard__inline_preedit", "preview")) {
       case "preview":
       case "preedit":
       case "true":
@@ -731,42 +731,42 @@ public class Config {
   }
 
   public boolean isShowStatusIcon() {
-    return mPref.getBoolean("pref_notification_icon", false);
+    return mPref.getBoolean("other__show_status_bar_icon", false);
   }
 
   public boolean isDestroyOnQuit() {
-    return mPref.getBoolean("pref_destroy_on_quit", false);
+    return mPref.getBoolean("other__destroy_on_quit", false);
   }
 
   public int getLongTimeout() {
-    int progress = mPref.getInt("longpress_timeout", 20);
+    int progress = mPref.getInt("keyboard__key_long_press_timeout", 20);
     if (progress > 60) progress = 60;
     return progress * 10 + 100;
   }
 
   public int getRepeatInterval() {
-    int progress = mPref.getInt("repeat_interval", 4);
+    int progress = mPref.getInt("keyboard__key_repeat_interval", 4);
     if (progress > 9) progress = 9;
     return progress * 10 + 10;
   }
 
   private boolean getShowSwitches() {
-    return mPref.getBoolean("show_switches", true);
+    return mPref.getBoolean("keyboard__show_switches", true);
   }
 
   private boolean getShowSwitchArrow(){
-    return mPref.getBoolean("show_switche_arrow", true);
+    return mPref.getBoolean("keyboard__show_switch_arrow", true);
   }
 
   public boolean getShowPreview() {
-    return mPref.getBoolean("show_preview", false);
+    return mPref.getBoolean("keyboard__show_key_popup", false);
   }
 
   public boolean getShowWindow() {
-    return mPref.getBoolean("show_window", true) && hasKey("window");
+    return mPref.getBoolean("keyboard__show_window", true) && hasKey("window");
   }
 
   public boolean getSoftCursor() {
-    return mPref.getBoolean("soft_cursor", true);
+    return mPref.getBoolean("keyboard__soft_cursor", true);
   }
 }

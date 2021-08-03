@@ -21,12 +21,13 @@ package com.osfans.trime;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.os.Build;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.view.KeyEvent;
+
 import java.util.Locale;
-import android.os.VibrationEffect;
-import android.os.Build;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
 public class Effect {
@@ -53,10 +54,10 @@ public class Effect {
 
   public void reset() {
     SharedPreferences pref = Function.getPref(context);
-    duration = pref.getInt("key_vibrate_duration", duration);
+    duration = pref.getInt("keyboard__key_vibrate_duration", duration);
     durationLong = duration * 1L;
-    amplitude = pref.getInt("key_vibrate_amplitude",amplitude);
-    vibrateOn = pref.getBoolean("key_vibrate", false) && (duration > 0);
+    amplitude = pref.getInt("keyboard__key_vibrate_amplitude",amplitude);
+    vibrateOn = pref.getBoolean("keyboard__key_vibration", false) && (duration > 0);
     if(vibrateOn) {
       if  (vibrator == null) {
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -66,15 +67,15 @@ public class Effect {
         }
     }
 
-    volume = pref.getInt("key_sound_volume", volume);
+    volume = pref.getInt("keyboard__key_sound_volume", volume);
     volumeFloat = (float) (1 - (Math.log(MAX_VOLUME - volume) / Math.log(MAX_VOLUME)));
-    soundOn = pref.getBoolean("key_sound", false);
+    soundOn = pref.getBoolean("keyboard__key_sound", false);
     if (soundOn && (audioManager == null)) {
       audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
-    isSpeakCommit = pref.getBoolean("speak_commit", false);
-    isSpeakKey = pref.getBoolean("speak_key", false);
+    isSpeakCommit = pref.getBoolean("keyboard__speak_commit", false);
+    isSpeakKey = pref.getBoolean("keyboard__speak_key", false);
     if (mTTS == null && (isSpeakCommit || isSpeakKey)) {
       mTTS =
           new TextToSpeech(

@@ -92,7 +92,7 @@ class OtherFragment: PreferenceFragmentCompat(),
 
     private fun updateLauncherIconStatus() {
         // Set LauncherAlias enabled/disabled state just before destroying/pausing this activity
-        if (prefs.getBoolean("pref__others__show_app_icon", true)) {
+        if (prefs.getBoolean("other__show_app_icon", true)) {
             showAppIcon(requireContext())
         } else {
             hideAppIcon(requireContext())
@@ -145,7 +145,7 @@ class OtherFragment: PreferenceFragmentCompat(),
                 items[i] = resolveInfos[i].loadLabel(packageManager) as String?;
             }
             val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-            builder.setTitle(R.string.pref_clipboard_manager)
+            builder.setTitle(R.string.other__clipboard_manager_title)
 
             var value0: Int = values.indexOf(value);
             if (value0 < 0)

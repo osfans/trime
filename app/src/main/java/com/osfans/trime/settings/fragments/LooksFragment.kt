@@ -9,9 +9,9 @@ import com.osfans.trime.R
 import com.osfans.trime.settings.components.ColorPickerDialog
 import com.osfans.trime.settings.components.ThemePickerDialog
 
-class AppearanceFragment: PreferenceFragmentCompat() {
+class LooksFragment: PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.appearance_preference)
+        addPreferencesFromResource(R.xml.looks_preference)
 
         setHasOptionsMenu(true)
     }
@@ -23,11 +23,11 @@ class AppearanceFragment: PreferenceFragmentCompat() {
 
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
-            "pref_themes" -> {
+            "looks__selected_theme" -> {
                 ThemePickerDialog(requireContext()).show()
                 true
             }
-            "pref_colors" -> {
+            "looks__selected_color" -> {
                 ColorPickerDialog(requireContext()).show()
                 true
             }

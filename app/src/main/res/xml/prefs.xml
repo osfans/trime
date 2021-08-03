@@ -47,7 +47,7 @@
 
     <Preference android:key="pref_keyboard"
         android:order="5"
-        android:title="@string/pref_keyboard"
+        android:title="@string/settings__keyboard_preferences_title"
         app:icon="@drawable/ic_pref_keyboard_preference"
         android:fragment="com.osfans.trime.settings.fragments.KeyboardFragment"/>
 
@@ -55,11 +55,11 @@
         android:order="6"
         android:title="@string/pref_keyboard_appearance"
         app:icon="@drawable/ic_pref_theme_color"
-        android:fragment="com.osfans.trime.settings.fragments.AppearanceFragment"/>
+        android:fragment="com.osfans.trime.settings.fragments.LooksFragment"/>
 
     <Preference android:key="pref_input"
         android:order="8"
-        android:title="@string/pref_input"
+        android:title="@string/settings__configuration_title"
         app:icon="@drawable/ic_pref_input_config"
         android:fragment="com.osfans.trime.settings.fragments.InputFragment"/>
 

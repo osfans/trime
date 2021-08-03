@@ -20,7 +20,7 @@ class ResetAssetsDialog(private val context: Context) {
 
     init {
         resetDialog = AlertDialog.Builder(context).apply {
-            setTitle(R.string.pref_reset)
+            setTitle(R.string.conf__reset_title)
             setCancelable(true)
             setNegativeButton(android.R.string.cancel, null)
             setPositiveButton(android.R.string.ok) { _, _ ->
