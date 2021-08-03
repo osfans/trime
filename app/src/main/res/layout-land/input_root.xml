@@ -9,7 +9,7 @@
         android:layout_width="10dp"
         android:layout_height="match_parent" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -18,6 +18,7 @@
 
         <com.osfans.trime.xScrollView
             android:id="@+id/scroll"
+            android:scrollbars="none"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fillViewport="true">

@@ -8,6 +8,8 @@ author: osfans #作者資訊
 style:
   auto_caps: false #自動句首大寫:true|false|ascii
   background_dim_amount: 0.5
+  #root_background: #ddeeeeee # 整个键盘区+候选栏的背景图/色
+  #candidate_background: #eeeeeeee #候选栏的背景图/色
   candidate_font: han.ttf #候選字型
   candidate_padding: 5 #候選項內邊距
   candidate_spacing: 0.5 #候選間距
@@ -22,12 +24,16 @@ style:
   hanb_font: hanb.ttf #擴充字型
   horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
+  keyboard_padding: 0 #竖屏模式下，屏幕左右两侧与键盘的距离（曲面屏减少误触）
+  keyboard_padding_landscape: 40 #横屏模式下，屏幕左右两侧与键盘的距离（避免横屏UI变形）
+  keyboard_padding_portrait: 20 #竖屏模式下，屏幕下边缘与键盘的距离（避免误触发全面屏手势）
   layout: #懸浮窗口設置
     position: fixed #位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要>=Android5.0)
     min_length: 5 #最小詞長
     max_length: 10 #超過字數則換行
     sticky_lines: 0 #固頂行數
     max_entries: 1 #最大詞條數
+    min_check: 3 #只要前n个候选词有长度大于等于min_length的词，就会把长度符合以及之前的词全部加到悬浮窗内。
     all_phrases: false #所有滿足條件的詞語都顯示在窗口
     border: 2 #邊框寬度
     max_width: 230 #最大寬度，超過則自動換行
@@ -36,6 +42,7 @@ style:
     min_height: 0 #最小高度
     margin_x: 5 #水平邊距
     margin_y: 5 #豎直邊距
+    margin_bottom: 0 #底部边距 （用于适配特定背景图）
     line_spacing: 0 #候选詞的行間距(px)
     line_spacing_multiplier: 1.2 #候选詞的行間距(倍數)
     spacing: 1 #與預編輯或邊緣的距離
