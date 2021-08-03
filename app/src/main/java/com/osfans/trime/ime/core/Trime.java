@@ -112,7 +112,8 @@ public class Trime extends InputMethodService
   private int winX, winY; //候選窗座標
   private int candSpacing; //候選窗與邊緣間距
   private boolean cursorUpdated = false; //光標是否移動
-  private int min_length;
+  private int min_length; //上悬浮窗的候选词的最小词长
+  private int min_check; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
   private boolean mTempAsciiMode; //臨時中英文狀態
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
@@ -267,6 +268,7 @@ public class Trime extends InputMethodService
     movable = mConfig.getString("layout/movable");
     candSpacing = mConfig.getPixel("layout/spacing");
     min_length = mConfig.getInt("layout/min_length");
+    min_check = mConfig.getInt("layout/min_check");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     auto_caps = mConfig.getString("auto_caps");
     mShowWindow = mConfig.getShowWindow();
@@ -391,25 +393,27 @@ public class Trime extends InputMethodService
 
     private void loadBackground() {
 
-      if (
-        orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        int padding = mConfig.getPixel("keyboard_padding_landscape");
 
-        View view = mInputRoot.findViewById(R.id.spacer_left);
-        LayoutParams layoutParams = view.getLayoutParams();
-        layoutParams.width = padding;
-        view.setLayoutParams(layoutParams);
+      int padding = mConfig.getPixel("keyboard_padding");
 
-        view = mInputRoot.findViewById(R.id.spacer_right);
-        layoutParams = view.getLayoutParams();
-        layoutParams.width = padding;
-        view.setLayoutParams(layoutParams);
-
+      if ( orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        padding = mConfig.getPixel("keyboard_padding_landscape");
       } else {
         mKeyboardView.setPadding(
                 mKeyboardView.getPaddingLeft(), mKeyboardView.getPaddingTop()
                 , mKeyboardView.getPaddingRight(), mConfig.getPixel("keyboard_padding_portrait"));
       }
+
+      View spacer = mInputRoot.findViewById(R.id.spacer_left);
+      LayoutParams layoutParams = spacer.getLayoutParams();
+      layoutParams.width = padding;
+      spacer.setLayoutParams(layoutParams);
+
+      spacer = mInputRoot.findViewById(R.id.spacer_right);
+      layoutParams = spacer.getLayoutParams();
+      layoutParams.width = padding;
+      spacer.setLayoutParams(layoutParams);
+
 
       GradientDrawable gd = new GradientDrawable();
         gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
@@ -658,11 +662,8 @@ public class Trime extends InputMethodService
     }
     Rime.get(this);
     if (reset_ascii_mode) mAsciiMode = false;
-    int padding = 0;
-    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      padding = mConfig.getPixel("keyboard_padding_landscape");
-    }
-    mKeyboardSwitch.init(getMaxWidth() - padding * 2); //橫豎屏切換時重置鍵盤
+
+    mKeyboardSwitch.init(getMaxWidth()); //橫豎屏切換時重置鍵盤
 
     // Select a keyboard based on the input type of the editing field.
     mKeyboardSwitch.setKeyboard(keyboard);
@@ -1203,7 +1204,7 @@ public class Trime extends InputMethodService
       cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
       if (mShowWindow) {
-        int start_num = mComposition.setWindow(min_length);
+        int start_num = mComposition.setWindow(min_length,min_check);
         mCandidate.setText(start_num);
         if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
       } else {

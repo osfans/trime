@@ -98,6 +98,8 @@ public class Keyboard {
     mDisplayWidth = dm.widthPixels;
     if(land)
       mDisplayWidth = mDisplayWidth -  config.getPixel("keyboard_padding_landscape")*2;
+    else
+      mDisplayWidth = mDisplayWidth -  config.getPixel("keyboard_padding")*2;
     /* Height of the screen */
     int mDisplayHeight = dm.heightPixels;
     //Log.v(TAG, "keyboard's display metrics:" + dm);

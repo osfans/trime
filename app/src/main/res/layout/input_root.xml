@@ -6,6 +6,7 @@
 
     <com.osfans.trime.xScrollView
         android:id="@+id/scroll"
+        android:scrollbars="none"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fillViewport="true">
@@ -20,9 +21,21 @@
         </LinearLayout>
     </com.osfans.trime.xScrollView>
 
-    <com.osfans.trime.KeyboardView
-        android:id="@+id/keyboard"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        android:orientation="horizontal">
+        <View
+            android:id="@+id/spacer_left"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <com.osfans.trime.KeyboardView
+            android:id="@+id/keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <View
+            android:id="@+id/spacer_right"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </LinearLayout>

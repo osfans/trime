@@ -34,6 +34,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -44,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
-public class Composition extends TextView {
+public class Composition extends androidx.appcompat.widget.AppCompatTextView {
   private int key_text_size, text_size, label_text_size, candidate_text_size, comment_text_size;
   private int key_text_color, text_color, label_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
@@ -295,18 +296,61 @@ public class Composition extends TextView {
     if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
-  private int appendCandidates(Map m, int length) {
-    int start, end;
+  /**
+   * 计算悬浮窗显示候选词后，候选栏从第几个候选词开始展示
+   * 注意当all_phrases==true时，悬浮窗显示的候选词数量和候选栏从第几个开始，是不一致的
+   * @param m 格式化配置，不重要
+   * @param min_length 候选词长度大于设定，才会显示到悬浮窗中
+   * @param min_check 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
+   * @return
+   */
+  private int calc_start_num(Map m, int min_length, int min_check) {
     int start_num = 0;
+    candidate_num = 0;
+
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
     if (candidates == null) return start_num;
+    highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
+
+
+    if(min_check>max_entries)
+      min_check = max_entries;
+    int j=min_check-1;
+    if(j<0)
+      j=0;
+    for(;j>=0;j--){
+      String cand = candidates[j].text;
+      if(cand.length()>=min_length)
+        break;
+    }
+
+    if(j>=0){
+      for(;j<max_entries;j++){
+        String cand = candidates[j].text;
+        if(cand.length()<min_length){
+          start_num = j;
+          break;
+        }
+      }
+    }
+    return start_num;
+  }
+
+
+//  生成悬浮窗内的文本
+  private void appendCandidates(Map m, int length,int end_num) {
+    Log.d("Composition","appendCandidates() length="+length);
+    int start, end;
+
+    Rime.RimeCandidate[] candidates = Rime.getCandidates();
+    if (candidates == null) return;
     String sep = Config.getString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
     String label_format = Config.getString(m, "label");
     String candidate_format = Config.getString(m, "candidate");
     String comment_format = Config.getString(m, "comment");
     String line = Config.getString(m, "sep");
-    int last_cand_length = 0;
+
     int line_length = 0;
     String[] labels = Rime.getSelectLabels();
     int i = -1;
@@ -315,14 +359,14 @@ public class Composition extends TextView {
       String cand = o.text;
       if (Function.isEmpty(cand)) cand = "";
       i++;
-      if (candidate_num >= max_entries) {
-        if (start_num == 0 && candidate_num == i) start_num = candidate_num;
+      if (candidate_num >= max_entries)
         break;
-      }
-      if (cand.length() < length) {
-        if (start_num == 0 && candidate_num == i) start_num = candidate_num;
-        if (all_phrases) continue;
-        else break;
+
+      if (!all_phrases && candidate_num>end_num)
+        break;
+
+      if (all_phrases && cand.length() < length) {
+        continue;
       }
       cand = String.format(candidate_format, cand);
       String line_sep;
@@ -396,10 +440,8 @@ public class Composition extends TextView {
       }
       candidate_num++;
     }
-    if (start_num == 0 && candidate_num == i + 1) start_num = candidate_num;
     sep = Config.getString(m, "end");
     if (!Function.isEmpty(sep)) ss.append(sep);
-    return start_num;
   }
 
   private void appendButton(Map m) {
@@ -453,7 +495,7 @@ public class Composition extends TextView {
     if (!Function.isEmpty(sep)) ss.append(sep);
   }
 
-  public int setWindow(int length) {
+  public int setWindow(int length,int min_check) {
     if (getVisibility() != View.VISIBLE) return 0;
     Rime.RimeComposition r = Rime.getComposition();
     if (r == null) return 0;
@@ -464,7 +506,11 @@ public class Composition extends TextView {
     int start_num = 0;
     for (Map<String, Object> m : components) {
       if (m.containsKey("composition")) appendComposition(m);
-      else if (m.containsKey("candidate")) start_num = appendCandidates(m, length);
+      else if (m.containsKey("candidate")) {
+        start_num = calc_start_num(m,length,min_check);
+        Log.d("setWindow()","start_num="+start_num+" min_check="+min_check);
+        appendCandidates(m, length,start_num);
+      }
       else if (m.containsKey("click")) appendButton(m);
       else if (m.containsKey("move")) appendMove(m);
     }
