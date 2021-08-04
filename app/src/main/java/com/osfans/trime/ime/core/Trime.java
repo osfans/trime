@@ -260,7 +260,7 @@ public class Trime extends InputMethodService
   }
 
   public void loadConfig() {
-    inlinePreedit = mConfig.getInlinePreedit();
+    inlinePreedit = getPrefs().getKeyboard().getInlinePreedit();
     winPos = mConfig.getWinPos();
     movable = mConfig.getString("layout/movable");
     candSpacing = mConfig.getPixel("layout/spacing");

@@ -19,7 +19,6 @@
 package com.osfans.trime;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -35,7 +34,6 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.os.SystemClock;
 import android.util.TypedValue;
 
-import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.util.AppVersionUtils;
@@ -62,7 +60,6 @@ public class Config {
   private String schema_id;
 
   private static Config self = null;
-  private SharedPreferences mPref;
 
   private Map<String, String> fallbackColors;
   private Map presetColorSchemes, presetKeyboards;
@@ -73,7 +70,6 @@ public class Config {
 
   public Config(Context context) {
     self = this;
-    mPref = Function.getPref(context);
     themeName = getPrefs().getLooks().getSelectedTheme();
     prepareRime(context);
     deployTheme(context);
@@ -684,20 +680,6 @@ public class Config {
   public Drawable getDrawable(String key) {
     Object o = getValue(key);
     return drawableObject(o);
-  }
-
-  public InlineModeType getInlinePreedit() {
-    switch (getPrefs().getKeyboard().getInlinePreedit()) {
-      case "preview":
-      case "preedit":
-      case "true":
-        return InlineModeType.INLINE_PREVIEW;
-      case "composition":
-        return InlineModeType.INLINE_COMPOSITION;
-      case "input":
-        return InlineModeType.INLINE_INPUT;
-    }
-    return InlineModeType.INLINE_NONE;
   }
 
   public WindowsPositionType getWinPos() {

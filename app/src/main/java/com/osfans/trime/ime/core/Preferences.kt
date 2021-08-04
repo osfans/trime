@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
+import com.osfans.trime.enums.InlineModeType
 import java.lang.ref.WeakReference
 
 /**
@@ -158,9 +159,9 @@ class Preferences(
             const val LONG_PRESS_TIMEOUT =     "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL =        "keyboard__key_repeat_interval"
         }
-        var inlinePreedit: String = ""
-            get() =  prefs.getPref(INLINE_PREEDIT_MODE, "preview")
-            private set
+        var inlinePreedit: InlineModeType
+            get()  = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
+            set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
         var softCursorEnabled: Boolean = false
             get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)
             private set

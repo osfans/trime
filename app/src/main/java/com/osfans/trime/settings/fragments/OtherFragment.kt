@@ -44,7 +44,7 @@ class OtherFragment: PreferenceFragmentCompat(),
     }
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
-            "conf__clipboard_manager" -> {
+            "other__clipboard_manager" -> {
                 PreferenceManager.getDefaultSharedPreferences(context).getString("pref_clipboard_manager", "")
                     ?.let {
                         ClipBoardManagerDialog(requireContext(),
@@ -59,20 +59,20 @@ class OtherFragment: PreferenceFragmentCompat(),
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val trime = Trime.getService()
         when (key) {
-            "conf__show_status_bar_icon" -> {
+            "other__show_status_bar_icon" -> {
                 if (sharedPreferences?.getBoolean(key, false) == true) {
                     trime?.showStatusIcon(R.drawable.ic_status)
                 } else { trime.hideStatusIcon() }
             }
 
-            "conf__clipboard_compare" -> {
+            "other__clipboard_compare" -> {
                 Config.get(context).setClipBoardCompare(
                     sharedPreferences?.getString(key, "")
 
                 )
             }
 
-            "conf__clipboard_output" -> {
+            "other__clipboard_output" -> {
                 Config.get(context).setClipBoardOutput(
                     sharedPreferences?.getString(key, "")
                 )

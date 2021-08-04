@@ -20,9 +20,9 @@ package com.osfans.trime;
 
 import android.annotation.TargetApi;
 import android.app.SearchManager;
-import android.content.ComponentName;
-import android.content.ClipboardManager;
 import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,12 +31,14 @@ import android.content.pm.PackageManager;
 import android.icu.util.Calendar;
 import android.icu.util.ULocale;
 import android.net.Uri;
-import android.os.Build.*;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 
+import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.settings.PrefMainActivity;
 
 import java.text.FieldPosition;
@@ -227,11 +229,9 @@ public class Function {
   }
 
   public static void syncBackground(Context ctx){
-    boolean success = Rime.syncUserData(ctx);
-    getPref(ctx).edit() //记录同步时间和状态
-            .putLong("last_sync_time",new Date().getTime())
-            .putBoolean("last_sync_status",success)
-            .apply();
+    final Preferences prefs = Preferences.Companion.defaultInstance();
+    prefs.getConf().setLastSyncTime(new Date().getTime());
+    prefs.getConf().setLastSyncStatus(Rime.syncUserData(ctx));
   }
 
   public static String getVersion(Context context) {
@@ -242,6 +242,16 @@ public class Function {
     }
   }
 
+  /**
+   * Check if the app is installed.
+   *
+   * @param context the parent context
+   * @param app the app package name
+   * @return if the app is installed
+   *
+   * @deprecated use {@link com.blankj.utilcode.util.AppUtils#isAppInstalled(String)} instead.
+   */
+  @Deprecated
   public static boolean isAppAvailable(Context context, String app) {
     final PackageManager packageManager = context.getPackageManager();
     List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
@@ -256,6 +266,15 @@ public class Function {
     return false;
   }
 
+  /**
+   * Get the default shared preferences.
+   * @param context the parent context
+   * @return the default shared preferences
+   *
+   * @deprecated Use {@link com.osfans.trime.ime.core.Preferences} to organize
+   * shared preferences.
+   */
+  @Deprecated
   public static SharedPreferences getPref(Context context) {
     return PreferenceManager.getDefaultSharedPreferences(context);
   }

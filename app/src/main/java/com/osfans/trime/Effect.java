@@ -19,7 +19,6 @@
 package com.osfans.trime;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.VibrationEffect;
@@ -57,7 +56,6 @@ public class Effect {
   }
 
   public void reset() {
-    SharedPreferences pref = Function.getPref(context);
     duration = getPrefs().getKeyboard().getVibrationDuration();
     durationLong = duration * 1L;
     amplitude = getPrefs().getKeyboard().getVibrationAmplitude();

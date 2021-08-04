@@ -15,13 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.osfans.trime.enums
 
-package com.osfans.trime.enums;
+/** 嵌入模式枚举  */
+enum class InlineModeType {
+    INLINE_NONE, INLINE_PREVIEW, INLINE_COMPOSITION, INLINE_INPUT;
 
-/** 嵌入模式枚举 */
-public enum InlineModeType {
-  INLINE_NONE,
-  INLINE_PREVIEW,
-  INLINE_COMPOSITION,
-  INLINE_INPUT
+    companion object {
+        fun fromString(string: String): InlineModeType {
+            return when (string) {
+                "preview", "preedit", "true" -> INLINE_PREVIEW
+                "composition" -> INLINE_COMPOSITION
+                "input" -> INLINE_INPUT
+                else -> INLINE_NONE
+            }
+        }
+    }
 }
