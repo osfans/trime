@@ -69,7 +69,7 @@ class PrefMainActivity: AppCompatActivity(),
         }
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {
-                setTitle(R.string.ime_name)
+                setTitle(R.string.trime_app_name)
             }
         }
 

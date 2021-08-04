@@ -23,11 +23,8 @@ import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -51,7 +48,6 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
@@ -1253,7 +1249,7 @@ public class Trime extends InputMethodService
       if (mOptionsDialog != null && mOptionsDialog.isShowing()) return true; //對話框單例
       AlertDialog.Builder builder =
           new AlertDialog.Builder(this)
-              .setTitle(R.string.ime_name)
+              .setTitle(R.string.trime_app_name)
               .setIcon(R.mipmap.ic_app_icon_round)
               .setCancelable(true)
               .setNegativeButton(

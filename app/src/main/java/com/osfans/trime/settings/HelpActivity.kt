@@ -26,7 +26,7 @@ class HelpActivity: AppCompatActivity() {
         }
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {
-                setTitle(R.string.pref_help)
+                setTitle(R.string.settings__help_title)
             }
         }
 

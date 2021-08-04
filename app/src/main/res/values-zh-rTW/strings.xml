@@ -20,9 +20,9 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 輸入法平臺名稱  -->
-    <string name="ime_name">同文輸入法</string>
+    <string name="trime_app_name">同文輸入法</string>
     <!-- Preference settings -->
-    <string name="pref_help">求助</string>
+    <string name="settings__help_title">求助</string>
     <string name="pref_wiki">維基教程</string>
     <string name="pref_issues">問題反饋</string>
     <string name="pref_trime_qq">同文QQ羣</string>
@@ -32,7 +32,7 @@
     <string name="pref_coolmarket">酷安市場</string>
     <string name="pref_donate">捐贈</string>
     <string name="pref_donate_summary">自願用支付寶捐助同文和PRIME的開發</string>
-    <string name="pref_about">關於</string>
+    <string name="settings__about_title">關於</string>
     <string name="pref_librime_ver">RIME版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_changelog">更新日誌</string>

@@ -28,14 +28,16 @@
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <application android:label="@string/ime_name"
-                 android:icon="@mipmap/ic_app_icon"
-                 android:roundIcon="@mipmap/ic_app_icon_round"
-                 android:requestLegacyExternalStorage="true"
-                 android:allowBackup="true"
-                 android:theme="@style/PreferenceTheme">
+    <application
+        android:name="com.osfans.trime.TrimeApplication"
+        android:label="@string/trime_app_name"
+        android:icon="@mipmap/ic_app_icon"
+        android:roundIcon="@mipmap/ic_app_icon_round"
+        android:requestLegacyExternalStorage="true"
+        android:allowBackup="true"
+        android:theme="@style/PreferenceTheme">
 
-        <service android:name=".TrimeImeService" android:label="@string/ime_name"
+        <service android:name=".TrimeImeService" android:label="@string/trime_app_name"
                 android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
@@ -53,13 +55,13 @@
 
         <!-- Settings activity -->
         <activity android:name=".settings.PrefMainActivity"
-            android:label="@string/ime_name"
+            android:label="@string/trime_app_name"
             android:launchMode="singleTask"/>
 
         <!-- Using an activity alias to disable/enable the app icon in the launcher -->
         <activity-alias
             android:name="com.osfans.trime.PrefLauncherAlias"
-            android:label="@string/ime_name"
+            android:label="@string/trime_app_name"
             android:launchMode="singleTask"
             android:targetActivity=".settings.PrefMainActivity" >
             <intent-filter>
@@ -70,9 +72,9 @@
         </activity-alias>
 
         <activity android:name=".settings.HelpActivity"
-            android:label="@string/pref_help" />
+            android:label="@string/settings__help_title" />
 
         <activity android:name=".settings.AboutActivity"
-            android:label="@string/pref_about" />
+            android:label="@string/settings__about_title" />
     </application>
 </manifest>

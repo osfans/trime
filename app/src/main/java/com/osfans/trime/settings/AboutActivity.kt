@@ -31,7 +31,7 @@ class AboutActivity: AppCompatActivity() {
         }
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {
-                setTitle(R.string.pref_about)
+                setTitle(R.string.settings__about_title)
             }
         }
 

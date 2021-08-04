@@ -21,7 +21,7 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:title="@string/ime_name">
+    android:title="@string/trime_app_name">
 
     <!-- <SwitchPreference android:key="pref_ui"
         android:order="1"

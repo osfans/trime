@@ -20,8 +20,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 输入法平台名称  -->
-    <string name="ime_name">同文输入法</string>
-    <string name="pref_help">寻求帮助</string>
+    <string name="trime_app_name">同文输入法</string>
+    <string name="settings__help_title">寻求帮助</string>
     <string name="pref_wiki">维基教程</string>
     <string name="pref_issues">问题反馈</string>
     <string name="pref_trime_qq">同文QQ群</string>
@@ -31,7 +31,7 @@
     <string name="pref_coolmarket">酷安市场</string>
     <string name="pref_donate">捐赠</string>
     <string name="pref_donate_summary">使用支付宝捐助同文和PRIME的开发</string>
-    <string name="pref_about">关于</string>
+    <string name="settings__about_title">关于</string>
     <string name="pref_librime_ver">RIME版本</string>
     <string name="pref_opencc_ver">OpenCC版本</string>
     <string name="pref_changelog">更新日志</string>
