@@ -8,9 +8,9 @@ import android.view.Menu
 import androidx.core.view.forEach
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.ResetAssetsDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
@@ -22,12 +22,12 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
+class ConfFragment: PreferenceFragmentCompat(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(requireContext())
+    private val prefs get() = Preferences.defaultInstance()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.conf_preference)
@@ -42,7 +42,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
 
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
-            "pref_sync" -> {
+            "conf__synchronize" -> {
                 @Suppress("DEPRECATION")
                 val progressDialog = ProgressDialog(context).apply {
                     setMessage(getString(R.string.sync_progress))
@@ -53,7 +53,7 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
                         try {
                             RimeUtils.sync(requireContext())
                         } catch (ex: Exception) {
-                            Log.e("InputFragment", "Sync Exception: $ex")
+                            Log.e("ConfFragment", "Sync Exception: $ex")
                         } finally {
                             progressDialog.dismiss()
                             exitProcess(0)
@@ -62,11 +62,11 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
                 }
                 true
             }
-            "pref_sync_bg" -> {
+            "conf__synchronize_background" -> {
                 setBackgroundSyncSummary(context)
                 true
             }
-            "pref_reset" -> {
+            "conf__reset" -> {
                 ResetAssetsDialog(requireContext()).show()
                 true
             }
@@ -90,8 +90,8 @@ class InputFragment: PreferenceFragmentCompat(), CoroutineScope {
         } else {
             var summary: String
             if (syncBgPref?.isChecked == true) {
-                val lastResult = prefs.getBoolean("conf__last_sync_status", false)
-                val lastTime = prefs.getLong("conf__last_sync_time", 0)
+                val lastResult = prefs.conf.lastSyncStatus
+                val lastTime = prefs.conf.lastSyncTime
                 summary = if (lastResult) {
                     context.getString(R.string.pref_sync_bg_success)
                 } else {

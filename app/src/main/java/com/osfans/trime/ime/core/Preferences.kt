@@ -143,6 +143,7 @@ class Preferences(
             const val FLOATING_WINDOW_ENABLED =  "keyboard__show_window"
             const val POPUP_KEY_PRESS_ENABLED =  "keyboard__show_key_popup"
             const val SWITCHES_ENABLED =         "keyboard__show_switches"
+            const val SWITCH_ARROW_ENABLED =     "keyboard__show_switch_arrow"
 
             const val SOUND_ENABLED =          "keyboard__key_sound"
             const val SOUND_VOLUME =           "keyboard__key_sound_volume"
@@ -172,6 +173,9 @@ class Preferences(
         var switchesEnabled: Boolean = false
             get() = prefs.getPref(SWITCHES_ENABLED, true)
             private set
+        var switchArrowEnabled: Boolean = false
+            get() = prefs.getPref(SWITCH_ARROW_ENABLED, true)
+            private set
         var soundEnabled: Boolean = false
             get() = prefs.getPref(SOUND_ENABLED, false)
             private set
@@ -191,7 +195,7 @@ class Preferences(
             get() = prefs.getPref(LONG_PRESS_TIMEOUT, 20)
             private set
         var repeatInterval: Int = 0
-            get() = prefs.getPref(REPEAT_INTERVAL, 40)
+            get() = prefs.getPref(REPEAT_INTERVAL, 4)
             private set
         var isSpeakKey: Boolean
             get() =  prefs.getPref(SPEAK_KEY_PRESS_ENABLED, false)

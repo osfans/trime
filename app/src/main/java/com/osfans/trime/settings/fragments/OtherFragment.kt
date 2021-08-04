@@ -16,14 +16,15 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.osfans.trime.Config
 import com.osfans.trime.R
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 
 class OtherFragment: PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(context)
+    private val prefs get() = Preferences.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
-        findPreference<ListPreference>("pref__settings_theme")?.setOnPreferenceChangeListener { _, newValue ->
+        findPreference<ListPreference>("other__ui_mode")?.setOnPreferenceChangeListener { _, newValue ->
             val uiMode = when (newValue) {
                 "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 "light" -> AppCompatDelegate.MODE_NIGHT_NO
@@ -43,7 +44,7 @@ class OtherFragment: PreferenceFragmentCompat(),
     }
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
-            "pref_clipboard_manager" -> {
+            "conf__clipboard_manager" -> {
                 PreferenceManager.getDefaultSharedPreferences(context).getString("pref_clipboard_manager", "")
                     ?.let {
                         ClipBoardManagerDialog(requireContext(),
@@ -58,20 +59,20 @@ class OtherFragment: PreferenceFragmentCompat(),
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val trime = Trime.getService()
         when (key) {
-            "pref_notification_icon" -> {
+            "conf__show_status_bar_icon" -> {
                 if (sharedPreferences?.getBoolean(key, false) == true) {
                     trime?.showStatusIcon(R.drawable.ic_status)
                 } else { trime.hideStatusIcon() }
             }
 
-            "pref_clipboard_compare" -> {
+            "conf__clipboard_compare" -> {
                 Config.get(context).setClipBoardCompare(
                     sharedPreferences?.getString(key, "")
 
                 )
             }
 
-            "pref_clipboard_output" -> {
+            "conf__clipboard_output" -> {
                 Config.get(context).setClipBoardOutput(
                     sharedPreferences?.getString(key, "")
                 )
@@ -92,7 +93,7 @@ class OtherFragment: PreferenceFragmentCompat(),
 
     private fun updateLauncherIconStatus() {
         // Set LauncherAlias enabled/disabled state just before destroying/pausing this activity
-        if (prefs.getBoolean("other__show_app_icon", true)) {
+        if (prefs.other.showAppIcon) {
             showAppIcon(requireContext())
         } else {
             hideAppIcon(requireContext())

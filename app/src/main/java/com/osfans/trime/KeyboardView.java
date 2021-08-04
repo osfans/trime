@@ -44,6 +44,8 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import com.osfans.trime.enums.KeyEventType;
+import com.osfans.trime.ime.core.Preferences;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -234,6 +236,8 @@ public class KeyboardView extends View implements View.OnClickListener {
   private Method findStateDrawableIndex;
   private Method getStateDrawable;
 
+  private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); }
+
   private static class MyHandler extends Handler {
     private final WeakReference<KeyboardView> mKeyboardView;
 
@@ -323,7 +327,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
     int mPreviewTextSizeLarge = config.getInt("preview_text_size");
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
-    mShowPreview = config.getShowPreview();
+    mShowPreview = getPrefs().getKeyboard().getPopupKeyPressEnabled();
 
     mPaint.setTypeface(config.getFont("key_font"));
     mPaintSymbol.setTypeface(config.getFont("symbol_font"));

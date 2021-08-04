@@ -61,7 +61,7 @@
         android:order="8"
         android:title="@string/settings__configuration_title"
         app:icon="@drawable/ic_pref_input_config"
-        android:fragment="com.osfans.trime.settings.fragments.InputFragment"/>
+        android:fragment="com.osfans.trime.settings.fragments.ConfFragment"/>
 
     <!-- <Preference android:key="pref_deploy" android:order="16"
         android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/> -->

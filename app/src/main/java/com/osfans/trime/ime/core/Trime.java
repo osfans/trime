@@ -18,6 +18,8 @@
 
 package com.osfans.trime.ime.core;
 
+import static android.graphics.Color.parseColor;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
@@ -79,13 +81,13 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static android.graphics.Color.parseColor;
 
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
   private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
+  private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); }
   private KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
@@ -135,7 +137,7 @@ public class Trime extends InputMethodService
 
   @Override
   public void onWindowHidden(){
-    boolean sync_bg = mConfig.getSyncBackground();
+    boolean sync_bg = getPrefs().getConf().getSyncBackgroundEnabled();
     if(sync_bg){
       Message msg = new Message();
       msg.obj = this;
@@ -265,14 +267,15 @@ public class Trime extends InputMethodService
     min_length = mConfig.getInt("layout/min_length");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     auto_caps = mConfig.getString("auto_caps");
-    mShowWindow = mConfig.getShowWindow();
+    mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled()
+            && mConfig.hasKey("window");
     mNeedUpdateRimeOption = true;
   }
 
   private boolean updateRimeOption() {
     if (mNeedUpdateRimeOption) {
       String soft_cursor_key = "soft_cursor";
-      Rime.setOption(soft_cursor_key, mConfig.getSoftCursor()); //軟光標
+      Rime.setOption(soft_cursor_key, getPrefs().getKeyboard().getSoftCursorEnabled()); //軟光標
       String horizontal_key = "horizontal";
       Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
       mNeedUpdateRimeOption = false;
@@ -451,7 +454,8 @@ public class Trime extends InputMethodService
       setShowComment(!Rime.getOption("_hide_comment"));
       mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset(this);
-      mShowWindow = mConfig.getShowWindow();
+      mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled()
+              && mConfig.hasKey("window");
       mComposition.setVisibility(mShowWindow ? View.VISIBLE : View.GONE);
       mComposition.reset(this);
     }
@@ -480,7 +484,7 @@ public class Trime extends InputMethodService
     super.onDestroy();
     mIntentReceiver.unregisterReceiver(this);
     self = null;
-    if (mConfig.isDestroyOnQuit()) {
+    if (getPrefs().getOther().getDestroyOnQuit()) {
       Rime.destroy();
       mConfig.destroy();
       mConfig = null;
@@ -665,7 +669,7 @@ public class Trime extends InputMethodService
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); //實體鍵盤進入文本框時顯示候選欄
-    if (mConfig.isShowStatusIcon()) showStatusIcon(R.drawable.ic_status); //狀態欄圖標
+    if (getPrefs().getOther().getShowStatusBarIcon()) showStatusIcon(R.drawable.ic_status); //狀態欄圖標
   }
 
   @Override

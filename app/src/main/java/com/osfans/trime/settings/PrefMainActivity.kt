@@ -25,6 +25,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
@@ -39,13 +40,14 @@ class PrefMainActivity: AppCompatActivity(),
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
-    private val prefs get() = PreferenceManager.getDefaultSharedPreferences(this)
+    private val prefs get() = Preferences.defaultInstance()
 
     lateinit var binding: PrefActivityBinding
     lateinit var imeManager: InputMethodManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val uiMode = when (prefs.getString("other__ui_mode", "auto")) {
+        prefs.sync()
+        val uiMode = when (prefs.other.uiMode) {
             "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             "light" -> AppCompatDelegate.MODE_NIGHT_NO
             "dark" -> AppCompatDelegate.MODE_NIGHT_YES

@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import com.osfans.trime.Config
 import com.osfans.trime.R
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 
 /** 顯示配色方案列表
@@ -13,12 +14,13 @@ class ColorPickerDialog(
     context: Context
 ) {
     val config: Config = Config.get(context)
+    private val prefs get() = Preferences.defaultInstance()
     private var colorKeys: Array<String>
     private var checkedColor: Int = 0
     val pickerDialog: AlertDialog
 
     init {
-        val colorScheme = config.colorScheme
+        val colorScheme = prefs.looks.selectedColor
         colorKeys = config.colorKeys
         colorKeys.sort()
         val colorNames = config.getColorNames(colorKeys)
@@ -40,7 +42,7 @@ class ColorPickerDialog(
     private fun selectColor() {
         if (checkedColor < 0 || checkedColor >= colorKeys.size) return
         val colorKey = colorKeys[checkedColor]
-        config.setColor(colorKey)
+        prefs.looks.selectedColor = colorKey
         Trime.getService()?.initKeyboard() // 立刻重初始化键盘生效
     }
 

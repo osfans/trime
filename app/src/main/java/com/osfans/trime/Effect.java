@@ -27,6 +27,8 @@ import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.view.KeyEvent;
 
+import com.osfans.trime.ime.core.Preferences;
+
 import java.util.Locale;
 
 /** 處理按鍵聲音、震動、朗讀等效果 */
@@ -48,34 +50,36 @@ public class Effect {
   private boolean isSpeakCommit, isSpeakKey;
   private TextToSpeech mTTS;
 
+  private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); };
+
   public Effect(Context context) {
     this.context = context;
   }
 
   public void reset() {
     SharedPreferences pref = Function.getPref(context);
-    duration = pref.getInt("keyboard__key_vibrate_duration", duration);
+    duration = getPrefs().getKeyboard().getVibrationDuration();
     durationLong = duration * 1L;
-    amplitude = pref.getInt("keyboard__key_vibrate_amplitude",amplitude);
-    vibrateOn = pref.getBoolean("keyboard__key_vibration", false) && (duration > 0);
-    if(vibrateOn) {
-      if  (vibrator == null) {
+    amplitude = getPrefs().getKeyboard().getVibrationAmplitude();
+    vibrateOn = getPrefs().getKeyboard().getVibrationEnabled() && (duration > 0);
+    if (vibrateOn) {
+      if (vibrator == null) {
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        }
+      }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrationeffect = VibrationEffect.createOneShot(durationLong, (amplitude == 0) ? VibrationEffect.DEFAULT_AMPLITUDE : amplitude);
-        }
+        vibrationeffect = VibrationEffect.createOneShot(durationLong, (amplitude == 0) ? VibrationEffect.DEFAULT_AMPLITUDE : amplitude);
+      }
     }
 
-    volume = pref.getInt("keyboard__key_sound_volume", volume);
+    volume = getPrefs().getKeyboard().getSoundVolume();
     volumeFloat = (float) (1 - (Math.log(MAX_VOLUME - volume) / Math.log(MAX_VOLUME)));
-    soundOn = pref.getBoolean("keyboard__key_sound", false);
+    soundOn = getPrefs().getKeyboard().getSoundEnabled();
     if (soundOn && (audioManager == null)) {
       audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
-    isSpeakCommit = pref.getBoolean("keyboard__speak_commit", false);
-    isSpeakKey = pref.getBoolean("keyboard__speak_key", false);
+    isSpeakCommit = getPrefs().getKeyboard().isSpeakCommit();
+    isSpeakKey = getPrefs().getKeyboard().isSpeakKey();
     if (mTTS == null && (isSpeakCommit || isSpeakKey)) {
       mTTS =
           new TextToSpeech(
