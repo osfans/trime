@@ -43,6 +43,7 @@ style:
     margin_x: 5 #水平邊距
     margin_y: 5 #豎直邊距
     margin_bottom: 0 #底部边距 （用于适配特定背景图）
+    real_margin: 3 #屏幕左右边缘和悬浮窗之间的距离
     line_spacing: 0 #候选詞的行間距(px)
     line_spacing_multiplier: 1.2 #候选詞的行間距(倍數)
     spacing: 1 #與預編輯或邊緣的距離

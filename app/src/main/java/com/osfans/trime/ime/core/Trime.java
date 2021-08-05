@@ -112,6 +112,7 @@ public class Trime extends InputMethodService
   private boolean cursorUpdated = false; //光標是否移動
   private int min_length; //上悬浮窗的候选词的最小词长
   private int min_check; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
+  private int real_margin; // 悬浮窗与屏幕两侧的间距
   private boolean mTempAsciiMode; //臨時中英文狀態
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
@@ -158,6 +159,7 @@ public class Trime extends InputMethodService
     winPos = WindowsPositionType.DRAG;
     winX = offsetX;
     winY = offsetY;
+    android.util.Log.d("updateWindow", "winX="+winX+" winY="+winY);
     mFloatingWindow.update(winX, winY, -1, -1, true);
   }
 
@@ -245,13 +247,20 @@ public class Trime extends InputMethodService
       }
       if (x < 0) x = 0;
       if (x > mCandidateContainer.getWidth() - mFloatingWindow.getWidth()) {
+//        此处存在bug，暂未梳理原有算法的问题，单纯根据真机横屏显示长候选词超出屏幕进行了修复
+//        log： mCandidateContainer.getWidth()=1328  mFloatingWindow.getWidth()= 1874 导致x结果为负，超出屏幕。
         x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
+        if (x < 0) x = 0;
       }
       if (y < 0) y = 0;
       if (y > mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing) { //candSpacing爲負時，可覆蓋部分鍵盤
         y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
       }
       y -= getStatusBarHeight(); //不包含狀態欄
+
+      if(x<real_margin)
+        x=real_margin;
+
       if (!mFloatingWindow.isShowing()) {
         mFloatingWindow.showAtLocation(mCandidateContainer, Gravity.START | Gravity.TOP, x, y);
       } else {
@@ -267,6 +276,7 @@ public class Trime extends InputMethodService
     candSpacing = mConfig.getPixel("layout/spacing");
     min_length = mConfig.getInt("layout/min_length");
     min_check = mConfig.getInt("layout/min_check");
+    real_margin = mConfig.getPixel("layout/real_margin");
     reset_ascii_mode = mConfig.getBoolean("reset_ascii_mode");
     auto_caps = mConfig.getString("auto_caps");
     mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled()

@@ -20,6 +20,7 @@ package com.osfans.trime;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -37,7 +38,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.osfans.trime.ime.core.Trime;
 
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
-public class Composition extends androidx.appcompat.widget.AppCompatTextView {
+public class Composition extends AppCompatTextView {
   private int key_text_size, text_size, label_text_size, candidate_text_size, comment_text_size;
   private int key_text_color, text_color, label_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
@@ -67,6 +68,7 @@ public class Composition extends androidx.appcompat.widget.AppCompatTextView {
   private int mCurrentX, mCurrentY;
   private int candidate_num;
   private boolean all_phrases;
+  private View mInputRoot;
 
   private class CompositionSpan extends UnderlineSpan {
     public CompositionSpan() {
@@ -227,7 +229,15 @@ public class Composition extends androidx.appcompat.widget.AppCompatTextView {
     setLineSpacing(config.getFloat("layout/line_spacing"), line_spacing_multiplier);
     setMinWidth(config.getPixel("layout/min_width"));
     setMinHeight(config.getPixel("layout/min_height"));
-    setMaxWidth(config.getPixel("layout/max_width"));
+
+    int max_width=config.getPixel("layout/max_width");
+    int real_margin=config.getPixel("layout/real_margin");
+    int displayWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+    Log.d("Composition.reset","max_width="+max_width+" displayWidth="+displayWidth);
+    if(max_width>displayWidth)
+      max_width = displayWidth;
+    setMaxWidth(max_width-real_margin*2);
+
     setMaxHeight(config.getPixel("layout/max_height"));
     int margin_x, margin_y, margin_bottom;
     margin_x = config.getPixel("layout/margin_x");
@@ -299,38 +309,33 @@ public class Composition extends androidx.appcompat.widget.AppCompatTextView {
   /**
    * 计算悬浮窗显示候选词后，候选栏从第几个候选词开始展示
    * 注意当all_phrases==true时，悬浮窗显示的候选词数量和候选栏从第几个开始，是不一致的
-   * @param m 格式化配置，不重要
    * @param min_length 候选词长度大于设定，才会显示到悬浮窗中
    * @param min_check 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
    * @return
    */
-  private int calc_start_num(Map m, int min_length, int min_check) {
+  private int calc_start_num(int min_length, int min_check) {
     int start_num = 0;
     candidate_num = 0;
 
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
     if (candidates == null) return start_num;
-    highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
 
-
-    if(min_check>max_entries)
-      min_check = max_entries;
-    int j=min_check-1;
-    if(j<0)
-      j=0;
+    int j=min_check>max_entries?max_entries-1:min_check-1;
+    if(j>=candidates.length)
+      j=candidates.length-1;
     for(;j>=0;j--){
       String cand = candidates[j].text;
       if(cand.length()>=min_length)
         break;
     }
 
-    if(j>=0){
-      for(;j<max_entries;j++){
-        String cand = candidates[j].text;
-        if(cand.length()<min_length){
-          start_num = j;
-          break;
-        }
+    if(j<0)
+      j=0;
+    for(;j<max_entries && j<candidates.length;j++){
+      String cand = candidates[j].text;
+      if(cand.length()<min_length){
+        start_num = j;
+        break;
       }
     }
     return start_num;
@@ -362,7 +367,7 @@ public class Composition extends androidx.appcompat.widget.AppCompatTextView {
       if (candidate_num >= max_entries)
         break;
 
-      if (!all_phrases && candidate_num>end_num)
+      if (!all_phrases && candidate_num>=end_num)
         break;
 
       if (all_phrases && cand.length() < length) {
@@ -507,8 +512,8 @@ public class Composition extends androidx.appcompat.widget.AppCompatTextView {
     for (Map<String, Object> m : components) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
-        start_num = calc_start_num(m,length,min_check);
-        Log.d("setWindow()","start_num="+start_num+" min_check="+min_check);
+        start_num = calc_start_num(length,min_check);
+        Log.d("setWindow()","start_num="+start_num+" min_length="+length+" min_check="+min_check);
         appendCandidates(m, length,start_num);
       }
       else if (m.containsKey("click")) appendButton(m);
