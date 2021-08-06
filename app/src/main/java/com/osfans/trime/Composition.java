@@ -314,11 +314,8 @@ public class Composition extends AppCompatTextView {
    * @return
    */
   private int calc_start_num(int min_length, int min_check) {
-    int start_num = 0;
-    candidate_num = 0;
-
     Rime.RimeCandidate[] candidates = Rime.getCandidates();
-    if (candidates == null) return start_num;
+    if (candidates == null) return 0;
 
     int j=min_check>max_entries?max_entries-1:min_check-1;
     if(j>=candidates.length)
@@ -331,14 +328,14 @@ public class Composition extends AppCompatTextView {
 
     if(j<0)
       j=0;
+
     for(;j<max_entries && j<candidates.length;j++){
       String cand = candidates[j].text;
       if(cand.length()<min_length){
-        start_num = j;
-        break;
+        return j;
       }
     }
-    return start_num;
+    return j;
   }
 
 
