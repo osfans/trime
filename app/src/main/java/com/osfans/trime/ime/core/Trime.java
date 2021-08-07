@@ -61,7 +61,7 @@ import com.osfans.trime.Config;
 import com.osfans.trime.Effect;
 import com.osfans.trime.Event;
 import com.osfans.trime.Function;
-import com.osfans.trime.IntentReceiver;
+import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.Key;
 import com.osfans.trime.Keyboard;
 import com.osfans.trime.KeyboardSwitch;
