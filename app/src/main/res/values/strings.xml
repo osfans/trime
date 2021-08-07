@@ -130,4 +130,14 @@
         <item>always</item>
         <item>never</item>
     </string-array>
+    <string name="speech__error_audio">Error on recording</string>
+    <string name="speech__error_client">Error on client</string>
+    <string name="speech__error_insufficient_permissions">Insufficient permission</string>
+    <string name="speech__error_network">Error on network</string>
+    <string name="speech__error_network_timeout">Network timeout</string>
+    <string name="speech__error_no_match">Unable to recognize</string>
+    <string name="speech__error_recognizer_busy">Recognizer is busy</string>
+    <string name="speech__error_server">Error on server</string>
+    <string name="speech__error_unknown">Unknown error</string>
+    <string name="speech__error_speech_timeout">No voice detected</string>
 </resources>

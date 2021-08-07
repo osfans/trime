@@ -130,4 +130,14 @@
         <item>總是</item>
         <item>從不</item>
     </string-array>
+    <string name="speech__error_audio">錄音錯誤</string>
+    <string name="speech__error_client">客戶端錯誤</string>
+    <string name="speech__error_insufficient_permissions">權限不足</string>
+    <string name="speech__error_network">網路錯誤</string>
+    <string name="speech__error_network_timeout">網路超時</string>
+    <string name="speech__error_no_match">未能識別</string>
+    <string name="speech__error_recognizer_busy">識別服務忙</string>
+    <string name="speech__error_server">伺服器錯誤</string>
+    <string name="speech__error_speech_timeout">無語音輸入</string>
+    <string name="speech__error_unknown">未知錯誤</string>
 </resources>

@@ -68,7 +68,6 @@ import com.osfans.trime.KeyboardSwitch;
 import com.osfans.trime.KeyboardView;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
-import com.osfans.trime.Speech;
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
 import com.osfans.trime.settings.components.ColorPickerDialog;
@@ -972,7 +971,7 @@ public class Trime extends InputMethodService
           updateComposing();
         }
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { //語音輸入
-        new Speech(this).start();
+        new Speech(this).startListening();
       } else if (code == KeyEvent.KEYCODE_SETTINGS) { //設定
         switch (event.getOption()) {
           case "theme":

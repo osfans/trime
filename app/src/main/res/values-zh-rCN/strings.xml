@@ -129,4 +129,14 @@
         <item>总是</item>
         <item>从不</item>
     </string-array>
+    <string name="speech__error_audio">录音错误</string>
+    <string name="speech__error_client">客户端</string>
+    <string name="speech__error_insufficient_permissions">权限不足</string>
+    <string name="speech__error_network">网络错误</string>
+    <string name="speech__error_network_timeout">网络超时</string>
+    <string name="speech__error_no_match">未能识别</string>
+    <string name="speech__error_recognizer_busy">识别服务忙</string>
+    <string name="speech__error_server">服务器错误</string>
+    <string name="speech__error_unknown">未知错误</string>
+    <string name="speech__error_speech_timeout">无语音输入</string>
 </resources>
