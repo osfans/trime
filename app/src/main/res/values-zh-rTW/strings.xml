@@ -123,4 +123,14 @@
     <string name="other__clipboard_output_title">剪貼板過濾規則(每行爲一條正則規則)</string>
     <string name="other__clipboard_manager_summary">剪貼板內容變化時，自動發送剪貼板內容給選定的應用</string>
     <string name="keyboard__show_switche_arrow_title">在候選欄中顯示狀態時帶箭頭符號</string>
+    <string name="speech__error_audio">錄音錯誤</string>
+    <string name="speech__error_client">客戶端錯誤</string>
+    <string name="speech__error_insufficient_permissions">權限不足</string>
+    <string name="speech__error_network">網路錯誤</string>
+    <string name="speech__error_network_timeout">網路超時</string>
+    <string name="speech__error_no_match">未能識別</string>
+    <string name="speech__error_recognizer_busy">識別服務忙</string>
+    <string name="speech__error_server">伺服器錯誤</string>
+    <string name="speech__error_speech_timeout">無語音輸入</string>
+    <string name="speech__error_unknown">未知錯誤</string>
 </resources>

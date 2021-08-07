@@ -122,4 +122,14 @@
     <string name="other__clipboard_output_title">剪贴板过滤规则(每行为一条正则表达式)</string>
     <string name="other__clipboard_manager_summary">剪贴板内容变化时，自动发送剪贴板内容给选定的应用</string>
     <string name="keyboard__show_switche_arrow_title">在候选栏中显示状态时带箭头符号</string>
+    <string name="speech__error_audio">录音错误</string>
+    <string name="speech__error_client">客户端</string>
+    <string name="speech__error_insufficient_permissions">权限不足</string>
+    <string name="speech__error_network">网络错误</string>
+    <string name="speech__error_network_timeout">网络超时</string>
+    <string name="speech__error_no_match">未能识别</string>
+    <string name="speech__error_recognizer_busy">识别服务忙</string>
+    <string name="speech__error_server">服务器错误</string>
+    <string name="speech__error_unknown">未知错误</string>
+    <string name="speech__error_speech_timeout">无语音输入</string>
 </resources>

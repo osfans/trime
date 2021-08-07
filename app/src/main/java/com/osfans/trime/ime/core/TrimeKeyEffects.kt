@@ -82,6 +82,18 @@ class TrimeKeyEffects(
         }
     }
 
+    /** Text to Speech engine's language getter and setter */
+    var ttsLanguage: Locale?
+        get() {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                tts?.voice?.locale
+            } else {
+                @Suppress("DEPRECATION")
+                tts?.language
+            }
+        }
+        set(v) { tts?.language = v }
+
     /**
      * Makes a key press sound if the user has this feature enabled in the preferences.
      */
@@ -141,6 +153,9 @@ class TrimeKeyEffects(
         inputRootBinding = null
         vibrator = null
         audioManager = null
-        tts = null
+        tts?.let {
+            it.stop()
+            destroy()
+        }.also { tts = null }
     }
 }
