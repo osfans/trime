@@ -19,6 +19,9 @@
 package com.osfans.trime;
 
 import android.view.KeyEvent;
+
+import com.osfans.trime.setup.Config;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;

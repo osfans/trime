@@ -19,6 +19,9 @@
 package com.osfans.trime;
 
 import android.content.Context;
+
+import com.osfans.trime.setup.Config;
+
 import java.util.List;
 
 /** 管理多個{@link Keyboard 鍵盤} */
