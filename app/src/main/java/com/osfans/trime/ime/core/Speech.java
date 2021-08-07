@@ -31,7 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.blankj.utilcode.util.ToastUtils;
-import com.osfans.trime.Config;
+import com.osfans.trime.setup.Config;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
 

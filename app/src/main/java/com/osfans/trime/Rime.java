@@ -21,6 +21,7 @@ package com.osfans.trime;
 import android.content.Context;
 
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.setup.Config;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -650,7 +651,7 @@ public class Rime {
 
   public static native List config_get_list(String name, String key);
 
-  public static native Map config_get_map(String name, String key);
+  public static native Map<String, Object> config_get_map(String name, String key);
 
   public static native Object config_get_value(String name, String key);
 

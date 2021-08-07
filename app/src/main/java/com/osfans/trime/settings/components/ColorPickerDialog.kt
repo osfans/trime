@@ -2,7 +2,7 @@ package com.osfans.trime.settings.components
 
 import android.app.AlertDialog
 import android.content.Context
-import com.osfans.trime.Config
+import com.osfans.trime.setup.Config
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime

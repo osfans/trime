@@ -41,6 +41,7 @@ import android.view.View;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.setup.Config;
 
 import java.util.List;
 import java.util.Map;

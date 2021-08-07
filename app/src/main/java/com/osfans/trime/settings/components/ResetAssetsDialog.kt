@@ -3,7 +3,7 @@ package com.osfans.trime.settings.components
 import android.app.AlertDialog
 import android.content.Context
 import android.widget.Toast
-import com.osfans.trime.Config
+import com.osfans.trime.setup.Config
 import com.osfans.trime.R
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */

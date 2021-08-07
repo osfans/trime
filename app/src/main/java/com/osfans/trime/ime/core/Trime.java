@@ -57,7 +57,7 @@ import android.widget.PopupWindow;
 
 import com.osfans.trime.Candidate;
 import com.osfans.trime.Composition;
-import com.osfans.trime.Config;
+import com.osfans.trime.setup.Config;
 import com.osfans.trime.Effect;
 import com.osfans.trime.Event;
 import com.osfans.trime.Function;

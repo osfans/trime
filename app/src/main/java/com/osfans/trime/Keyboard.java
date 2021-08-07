@@ -23,6 +23,9 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
+
+import com.osfans.trime.setup.Config;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
