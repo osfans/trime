@@ -14,6 +14,13 @@
             android:entryValues="@array/keyboard__inline_values"
             android:defaultValue="preview"
             app:useSimpleSummaryProvider="true"/>
+        <ListPreference android:key="keyboard__fullscreen_mode"
+            app:iconSpaceReserved="false"
+            android:title="@string/keyboard__fullscreen_mode_title"
+            android:entries="@array/keyboard__fullscreen_mode_entries"
+            android:entryValues="@array/keyboard__fullscreen_mode_values"
+            android:defaultValue="preview"
+            app:useSimpleSummaryProvider="true"/>
         <SwitchPreferenceCompat android:key="keyboard__soft_cursor"
             app:iconSpaceReserved="false"
             android:title="@string/keyboard__soft_cursor_title"

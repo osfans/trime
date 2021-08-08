@@ -45,7 +45,7 @@ class OtherFragment: PreferenceFragmentCompat(),
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
             "other__clipboard_manager" -> {
-                PreferenceManager.getDefaultSharedPreferences(context).getString("pref_clipboard_manager", "")
+                PreferenceManager.getDefaultSharedPreferences(context).getString(preference?.key, "")
                     ?.let {
                         ClipBoardManagerDialog(requireContext(),
                             it
