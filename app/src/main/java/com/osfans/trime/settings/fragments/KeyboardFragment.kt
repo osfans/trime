@@ -25,37 +25,39 @@ class KeyboardFragment: PreferenceFragmentCompat(),
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val trime = Trime.getService()
         when (key) {
-            "key_sound" -> {
+            "keyboard__key_sound" -> {
                 trime?.resetEffect()
             }
-            "key_vibrate" -> {
+            "keyboard__key_vibration" -> {
                 trime?.resetEffect()
             }
-            "key_sound_volume" -> {
+            "keyboard__key_sound_volume" -> {
                 trime?.let {
                     it.resetEffect()
                     it.soundEffect()
                 }
             }
-            "key_vibrate_duration", "key_vibrate_amplitude" -> {
+            "keyboard__key_vibration_duration", "keyboard__key_vibration_amplitude" -> {
                 trime?.let {
                     it.resetEffect()
                     it.vibrateEffect()
                 }
             }
-            "speak_key", "speak_commit" -> {
+            "keyboard__speak_key_press", "keyboard__speak_commit" -> {
                 trime?.resetEffect()
             }
-            "longpress_timeout", "repeat_interval", "show_preview" -> {
+            "keyboard__key_long_press_timeout",
+            "keyboard__key_repeat_interval",
+            "keyboard__show_key_popup" -> {
                 trime?.resetKeyboard()
             }
-            "show_window" -> {
+            "keyboard__show_window" -> {
                 trime?.resetCandidate()
             }
-            "inline_preedit", "soft_cursor" -> {
+            "keyboard__inline_preedit", "keyboard__soft_cursor" -> {
                 trime?.loadConfig()
             }
-            "show_switches" -> {
+            "keyboard__show_switches" -> {
                 sharedPreferences?.getBoolean(key, false)?.let { Rime.setShowSwitches(it) }
             }
         }
