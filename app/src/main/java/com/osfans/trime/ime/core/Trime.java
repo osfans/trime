@@ -1335,10 +1335,10 @@ public class Trime extends InputMethodService
   @Override
   public void updateFullscreenMode(){
     super.updateFullscreenMode();
-//  to-do  需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
+    //  to-do  需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
     View inputArea = getWindow().findViewById(android.R.id.inputArea);
     int layoutHeight = isFullscreenMode()?
-      LayoutParams.WRAP_CONTENT:LayoutParams.MATCH_PARENT;
+	LayoutParams.WRAP_CONTENT:LayoutParams.MATCH_PARENT;
 
     if(isFullscreenMode()){
       Log.info("isFullScreen");
@@ -1348,6 +1348,14 @@ public class Trime extends InputMethodService
       Log.info("isFullScreen");
       //非全屏模式下，这个颜色似乎不会体现出来。为避免出现问题，填充浅灰色
       inputArea.setBackgroundColor(parseColor("#dddddddd"));
+      WindowManager.LayoutParams.WRAP_CONTENT:WindowManager.LayoutParams.MATCH_PARENT;
+
+    if(isFullscreenMode()){
+      android.util.Log.d("isFullScreen","");
+      inputArea.setBackgroundColor(parseColor("#ff660000"));
+    }else{
+      android.util.Log.d("isFullScreen","");
+      inputArea.setBackgroundColor(parseColor("#ffdddddd"));
     }
 
     updateViewHeight(mInputRoot, layoutHeight);
