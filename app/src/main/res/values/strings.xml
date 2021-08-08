@@ -123,4 +123,11 @@
     <string name="other__clipboard_output_title">Clipboard Output Rules</string>
     <string name="other__clipboard_manager_summary">Send clipboard text to the selected App when the Clipboard is modified.</string>
     <string name="keyboard__show_switche_arrow_title">Show arrow for candidate switch</string>
+    <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
+    <string name="deploy_finish">Deploy finish</string>
+    <string-array name="keyboard__fullscreen_mode_entries">
+        <item>auto</item>
+        <item>always</item>
+        <item>never</item>
+    </string-array>
 </resources>

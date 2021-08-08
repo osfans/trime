@@ -145,7 +145,7 @@ class PrefMainActivity: AppCompatActivity(),
                             Log.e(FRAGMENT_TAG, "Deploy Exception: $ex")
                         } finally {
                             progressDialog.dismiss()
-                            exitProcess(0)
+//                              exitProcess(0)
                         }
                     }.run()
                 }

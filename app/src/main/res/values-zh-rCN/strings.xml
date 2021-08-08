@@ -122,4 +122,11 @@
     <string name="other__clipboard_output_title">剪贴板过滤规则(每行为一条正则表达式)</string>
     <string name="other__clipboard_manager_summary">剪贴板内容变化时，自动发送剪贴板内容给选定的应用</string>
     <string name="keyboard__show_switche_arrow_title">在候选栏中显示状态时带箭头符号</string>
+    <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
+    <string name="deploy_finish">部署完成</string>
+    <string-array name="keyboard__fullscreen_mode_entries">
+        <item>自动</item>
+        <item>总是</item>
+        <item>从不</item>
+    </string-array>
 </resources>

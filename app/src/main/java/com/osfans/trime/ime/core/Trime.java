@@ -50,6 +50,7 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
@@ -390,7 +391,7 @@ public class Trime extends InputMethodService
   public void invalidate() {
     Rime.get(this);
     if (mConfig != null) mConfig.destroy();
-    mConfig = new Config(this);
+    mConfig = Config.get(this);
     reset();
     mNeedUpdateRimeOption = true;
   }
@@ -1345,6 +1346,73 @@ public class Trime extends InputMethodService
   }
 
 
+  @Override
+  public void updateFullscreenMode(){
+    super.updateFullscreenMode();
+//  to-do  需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
+    View inputArea = getWindow().findViewById(android.R.id.inputArea);
+    int layoutHeight = isFullscreenMode()?
+      WindowManager.LayoutParams.WRAP_CONTENT:WindowManager.LayoutParams.MATCH_PARENT;
+
+    if(isFullscreenMode()){
+      android.util.Log.d("isFullScreen","");
+      inputArea.setBackgroundColor(parseColor("#ff660000"));
+    }else{
+      android.util.Log.d("isFullScreen","");
+      inputArea.setBackgroundColor(parseColor("#ffdddddd"));
+    }
+
+    updateViewHeight(mInputRoot, layoutHeight);
+    updateViewHeight(inputArea, layoutHeight);
+    updateLayoutGravity( inputArea, Gravity.BOTTOM);
+  }
+
+  public boolean onEvaluateFullscreenMode() {
+    if(orientation != Configuration.ORIENTATION_LANDSCAPE)
+      return false;
+    switch (mConfig.getFullscreenMode()){
+      case "auto":
+        EditorInfo ei = getCurrentInputEditorInfo();
+        if ( ei != null  && (ei.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0) {
+          return false;
+        }
+      case "always":
+        return true;
+      case "never":
+        return false;
+    }
+    return false;
+  }
+
+  public void updateViewHeight(View view,  int layoutHeight) {
+    if(null == view)
+      return;
+    LayoutParams params = view.getLayoutParams();
+    if (params != null && params.height != layoutHeight){
+      params.height = layoutHeight;
+      view.setLayoutParams(params);
+    }
+  }
+
+  public void updateLayoutGravity(View view, int layoutGravity) {
+    if(null == view)
+      return;
+    LayoutParams params = view.getLayoutParams();
+
+    if (params instanceof LinearLayout.LayoutParams) {
+      LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)params;
+      if (lp.gravity != layoutGravity) {
+        lp.gravity = layoutGravity;
+        view.setLayoutParams(params);
+      }
+    } else if (params instanceof FrameLayout.LayoutParams) {
+      LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)params;
+      if (lp.gravity != layoutGravity) {
+        lp.gravity = layoutGravity;
+        view.setLayoutParams(params);
+      }
+    }
+  }
 
   private String ClipBoardString="";
 

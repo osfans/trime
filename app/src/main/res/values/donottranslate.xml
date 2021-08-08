@@ -35,8 +35,11 @@
         <item>light</item>
         <item>dark</item>
     </string-array>
-
-
+    <string-array name="keyboard__fullscreen_mode_values">
+        <item>auto</item>
+        <item>always</item>
+        <item>never</item>
+    </string-array>
     <string name="default_shared_data_dir" translatable="false">/sdcard/rime</string>
     <string name="conf__default_user_data_dir" translatable="false">/sdcard/rime</string>
 </resources>

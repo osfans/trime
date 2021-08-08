@@ -32,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.osfans.trime.enums.WindowsPositionType;
@@ -115,6 +116,8 @@ public class Config {
 
     getPrefs().getOther().setClipboardOutputRules(s);
   }
+
+  public String getFullscreenMode(){ return getPrefs().getKeyboard().getFullscreenMode();}
 
   public String getTheme() {
     return themeName;
@@ -215,7 +218,7 @@ public class Config {
       assets = assetManager.list(assetPath);
       if (assets.length == 0) {
         // Files
-        copyFile(context, path, overwrite); 
+        copyFile(context, path, overwrite);
       } else {
         // Dirs
         File dir = new File(getSharedDataDir(), path);
@@ -239,8 +242,10 @@ public class Config {
     try {
       String assetPath = new File(RIME, filename).getPath();
       in = assetManager.open(assetPath);
-      String newFileName = new File(filename.endsWith(".bin") ? getUserDataDir() : getSharedDataDir(), filename).getPath();
-      if (new File(newFileName).exists() && !overwrite) return true;
+      File f = new File(getSharedDataDir(), filename);
+      String newFileName = f.getPath();
+      Log.d("copyFile()","from="+assetPath+" to="+newFileName+" overwrite="+overwrite);
+      if (f.exists() && !overwrite) return true;
       out = new FileOutputStream(newFileName);
       int BLK_SIZE = 1024;
       byte[] buffer = new byte[BLK_SIZE];

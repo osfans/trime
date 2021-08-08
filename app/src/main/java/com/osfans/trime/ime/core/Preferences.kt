@@ -145,6 +145,7 @@ class Preferences(
             const val POPUP_KEY_PRESS_ENABLED =  "keyboard__show_key_popup"
             const val SWITCHES_ENABLED =         "keyboard__show_switches"
             const val SWITCH_ARROW_ENABLED =     "keyboard__show_switch_arrow"
+            const val FULLSCREEN_MODE =          "keyboard__fullscreen_mode"
 
             const val SOUND_ENABLED =          "keyboard__key_sound"
             const val SOUND_VOLUME =           "keyboard__key_sound_volume"
@@ -162,6 +163,9 @@ class Preferences(
         var inlinePreedit: InlineModeType
             get()  = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
             set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
+        var fullscreenMode: String
+            get()  = prefs.getPref(FULLSCREEN_MODE, "auto")
+            set(v) = prefs.setPref(FULLSCREEN_MODE, v)
         var softCursorEnabled: Boolean = false
             get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)
             private set
@@ -284,6 +288,6 @@ class Preferences(
             set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v)
         var clipboardManagerRules: String
             get()  = prefs.getPref(CLIPBOARD_MANAGER_RULES, "")
-            set(v) = prefs.setPref(CLIPBOARD_MANAGER_RULES, "")
+            set(v) = prefs.setPref(CLIPBOARD_MANAGER_RULES, v)
     }
 }
