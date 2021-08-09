@@ -1349,13 +1349,16 @@ public class Trime extends InputMethodService
       //非全屏模式下，这个颜色似乎不会体现出来。为避免出现问题，填充浅灰色
       inputArea.setBackgroundColor(parseColor("#dddddddd"));
       WindowManager.LayoutParams.WRAP_CONTENT:WindowManager.LayoutParams.MATCH_PARENT;
+      LayoutParams.WRAP_CONTENT:LayoutParams.MATCH_PARENT;
 
     if(isFullscreenMode()){
-      android.util.Log.d("isFullScreen","");
+      Log.info("isFullScreen");
+      //全屏模式下，当键盘布局包含透明色时，用户能透过键盘看到待输入App的UI，影响全屏体验。故需填色。当前固定填充淡粉色，用于测试。
       inputArea.setBackgroundColor(parseColor("#ff660000"));
     }else{
-      android.util.Log.d("isFullScreen","");
-      inputArea.setBackgroundColor(parseColor("#ffdddddd"));
+      Log.info("isFullScreen");
+      //非全屏模式下，这个颜色似乎不会体现出来。为避免出现问题，填充浅灰色
+      inputArea.setBackgroundColor(parseColor("#dddddddd"));
     }
 
     updateViewHeight(mInputRoot, layoutHeight);
