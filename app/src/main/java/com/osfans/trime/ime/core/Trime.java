@@ -74,7 +74,7 @@ import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.util.LocaleUtils;
-import com.osfans.trime.xScrollView;
+import com.osfans.trime.ime.text.xScrollView;
 
 import org.jetbrains.annotations.Nullable;
 
