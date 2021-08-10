@@ -15,25 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.osfans.trime.enums
+package com.osfans.trime.ime.enums
 
-import java.util.*
-
-enum class WindowsPositionType {
-    LEFT, LEFT_UP, RIGHT, RIGHT_UP, DRAG, FIXED, BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT;
+/** 嵌入模式枚举  */
+enum class InlineModeType {
+    INLINE_NONE, INLINE_PREVIEW, INLINE_COMPOSITION, INLINE_INPUT;
 
     companion object {
-        private val convertMap: HashMap<String, WindowsPositionType> = hashMapOf()
-
-        init {
-            for (type in values()) {
-                convertMap[type.toString()] = type
+        fun fromString(string: String): InlineModeType {
+            return when (string) {
+                "preview", "preedit", "true" -> INLINE_PREVIEW
+                "composition" -> INLINE_COMPOSITION
+                "input" -> INLINE_INPUT
+                else -> INLINE_NONE
             }
-        }
-
-        fun fromString(code: String): WindowsPositionType {
-            val type = convertMap[code.uppercase(Locale.getDefault())]
-            return type ?: FIXED
         }
     }
 }

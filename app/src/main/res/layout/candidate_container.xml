@@ -28,7 +28,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:orientation="horizontal">
-    <com.osfans.trime.Candidate
+    <com.osfans.trime.ime.text.Candidate
         android:id="@+id/candidate"
         android:layout_width="1000dp"
         android:layout_height="120dp"

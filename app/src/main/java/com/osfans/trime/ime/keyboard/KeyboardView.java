@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.ime.keyboard;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -43,7 +43,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import com.osfans.trime.enums.KeyEventType;
+
+import com.osfans.trime.util.Function;
+import com.osfans.trime.R;
+import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.setup.Config;
 
@@ -666,8 +669,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     if (keys == null) return;
     int length = keys.length;
     int dimensionSum = 0;
-    for (int i = 0; i < length; i++) {
-      Key key = keys[i];
+    for (Key key : keys) {
       dimensionSum += Math.min(key.getWidth(), key.getHeight()) + key.getGap();
     }
     if (dimensionSum < 0 || length == 0) return;
@@ -738,8 +740,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     final int keyCount = keys.length;
     final float symbolBase = padding.top - mPaintSymbol.getFontMetrics().top;
     final float hintBase = -padding.bottom - mPaintSymbol.getFontMetrics().bottom;
-    for (int i = 0; i < keyCount; i++) {
-      final Key key = keys[i];
+    for (final Key key : keys) {
       if (drawSingleKey && invalidKey != key) {
         continue;
       }
@@ -755,14 +756,14 @@ public class KeyboardView extends View implements View.OnClickListener {
       }
       if (keyBackground instanceof GradientDrawable) {
         ((GradientDrawable) keyBackground)
-            .setCornerRadius(
-                key.getRound_corner() != null ? key.getRound_corner() : mKeyboard.getRoundCorner());
+                .setCornerRadius(
+                        key.getRound_corner() != null ? key.getRound_corner() : mKeyboard.getRoundCorner());
       }
       Integer color = key.getTextColorForState(drawableState);
       mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
       color = key.getSymbolColorForState(drawableState);
       mPaintSymbol.setColor(
-          color != null ? color : (key.isPressed() ? hilited_key_symbol_color : key_symbol_color));
+              color != null ? color : (key.isPressed() ? hilited_key_symbol_color : key_symbol_color));
 
       // Switch the character to uppercase if shift is pressed
       String label = key.getLabel();
@@ -788,32 +789,32 @@ public class KeyboardView extends View implements View.OnClickListener {
         paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
         // Draw the text
         canvas.drawText(
-            label,
-            left + key.getKey_text_offset_x(),
-            (key.getHeight() - padding.top - padding.bottom) / 2
-                + (paint.getTextSize() - paint.descent()) / 2
-                + top
-                + key.getKey_text_offset_y(),
-            paint);
+                label,
+                left + key.getKey_text_offset_x(),
+                (key.getHeight() - padding.top - padding.bottom) / 2
+                        + (paint.getTextSize() - paint.descent()) / 2
+                        + top
+                        + key.getKey_text_offset_y(),
+                paint);
         if (mShowHint) {
           if (key.getLongClick() != null) {
             mPaintSymbol.setTextSize(
-                key.getSymbol_text_size() != null ? key.getSymbol_text_size() : mSymbolSize);
+                    key.getSymbol_text_size() != null ? key.getSymbol_text_size() : mSymbolSize);
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
-                key.getSymbolLabel(),
-                left + key.getKey_symbol_offset_x(),
-                symbolBase + key.getKey_symbol_offset_y(),
-                mPaintSymbol);
+                    key.getSymbolLabel(),
+                    left + key.getKey_symbol_offset_x(),
+                    symbolBase + key.getKey_symbol_offset_y(),
+                    mPaintSymbol);
           }
 
           if (!Function.isEmpty(hint)) {
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
-                hint,
-                left + key.getKey_hint_offset_x(),
-                key.getHeight() + hintBase + key.getKey_hint_offset_y(),
-                mPaintSymbol);
+                    hint,
+                    left + key.getKey_hint_offset_x(),
+                    key.getHeight() + hintBase + key.getKey_hint_offset_y(),
+                    mPaintSymbol);
           }
         }
 
@@ -1554,9 +1555,9 @@ public class KeyboardView extends View implements View.OnClickListener {
     static final int NUM_PAST = 4;
     static final int LONGEST_PAST_TIME = 200;
 
-    final float mPastX[] = new float[NUM_PAST];
-    final float mPastY[] = new float[NUM_PAST];
-    final long mPastTime[] = new long[NUM_PAST];
+    final float[] mPastX = new float[NUM_PAST];
+    final float[] mPastY = new float[NUM_PAST];
+    final long[] mPastTime = new long[NUM_PAST];
 
     float mYVelocity;
     float mXVelocity;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.ime.text;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -44,6 +44,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
+import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.setup.Config;
 

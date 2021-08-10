@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
-import com.osfans.trime.Keyboard
 import com.osfans.trime.setup.Config
 
 class KeyboardManager(
@@ -45,11 +44,13 @@ class KeyboardManager(
         fun getInstanceOrNull(): KeyboardManager? = instance
     }
 
+    constructor(context: Context): this(context, -1)
     init {
         instance = this
         keyboards = arrayOfNulls(keyboardNames.size)
         for (i in keyboardNames.indices) {
-            keyboards[i] = Keyboard(context, keyboardNames[i])
+            keyboards[i] =
+                Keyboard(context, keyboardNames[i])
         }
         // use default keyboard
         switchToKeyboardInternal(0)
