@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,14 +51,16 @@ public class Candidate extends View {
   private int start_num = 0;
 
   private Drawable candidateHighlight, candidateSeparator;
-  private Paint paintCandidate, paintSymbol, paintComment;
+  private final Paint paintCandidate;
+  private final Paint paintSymbol;
+  private final Paint paintComment;
   private Typeface tfCandidate, tfSymbol, tfComment, tfHanB, tfLatin;
   private int candidate_text_color, hilited_candidate_text_color;
   private int comment_text_color, hilited_comment_text_color;
   private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
   private boolean show_comment = true, comment_on_top, candidate_use_cursor;
 
-  private Rect candidateRect[] = new Rect[MAX_CANDIDATE_COUNT + 2];
+  private final Rect[] candidateRect = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset(Context context) {
     Config config = Config.get(context);
@@ -144,6 +147,7 @@ public class Candidate extends View {
    * @param index 候選項序號（從0開始），{@code -1}表示選擇當前高亮候選項
    * @return 是否成功選字
    */
+  @SuppressWarnings("UnusedReturnValue")
   private boolean pickHighlighted(int index) {
     if ((highlightIndex != -1) && (listener != null)) {
       if (index == -1) index = highlightIndex;
@@ -214,16 +218,16 @@ public class Candidate extends View {
   private void drawCandidates(Canvas canvas) {
     if (candidates == null) return;
 
-    float x = 0;
-    float y = 0;
+    float x;
+    float y;
     int i = 0;
     float comment_x, comment_y;
     float comment_width;
     String candidate, comment;
 
     y = candidateRect[0].centerY() - (paintCandidate.ascent() + paintCandidate.descent()) / 2;
-    if (show_comment && comment_on_top) y += comment_height / 2;
-    comment_y = comment_height / 2 - (paintComment.ascent() + paintComment.descent()) / 2;
+    if (show_comment && comment_on_top) y += comment_height / 2f;
+    comment_y = comment_height / 2f - (paintComment.ascent() + paintComment.descent()) / 2;
     if (show_comment && !comment_on_top) comment_y += candidateRect[0].bottom - comment_height;
 
     while (i < num_candidates) {
@@ -231,7 +235,7 @@ public class Candidate extends View {
       x = candidateRect[i].centerX();
       if (show_comment) {
         comment = getComment(i);
-        if (!Function.isEmpty(comment)) {
+        if (!TextUtils.isEmpty(comment)) {
           comment_width = measureText(comment, paintComment, tfComment);
           if (comment_on_top) {
             comment_x = candidateRect[i].centerX();
@@ -285,7 +289,7 @@ public class Candidate extends View {
   private void updateCandidateWidth() {
     final int top = 0;
     final int bottom = getHeight();
-    int i = 0;
+    int i;
     int x = 0;
     if (Rime.hasLeft()) x += getCandidateWidth(-4) + candidate_spacing;
     getCandNum();
@@ -422,7 +426,7 @@ public class Candidate extends View {
 
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
-    float n = (s == null ? 0 : s.codePointCount(0, s.length()));
+    //float n = (s == null ? 0 : s.codePointCount(0, s.length()));
     float x = 2 * candidate_padding;
     if (s != null) x += measureText(s, paintCandidate, tfCandidate);
     if (i >= 0 && show_comment) {

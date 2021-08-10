@@ -298,7 +298,7 @@ public class Config {
             Key.setSymbols((String) mk.get("symbols"));
             if (TextUtils.isEmpty(Key.getSymbols()))
                 Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
-            Key.presetKeys = (Map<String, Map>) m.get("preset_keys");
+            Key.presetKeys = (Map<String, Map<?, ?>>) m.get("preset_keys");
             presetColorSchemes = (Map<?, ?>) m.get("preset_color_schemes");
             presetKeyboards = (Map<?, ?>) m.get("preset_keyboards");
             Rime.setShowSwitches(getPrefs().getKeyboard().getSwitchesEnabled());

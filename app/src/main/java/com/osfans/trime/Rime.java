@@ -20,6 +20,8 @@ package com.osfans.trime;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.setup.Config;
 
@@ -125,8 +127,7 @@ public class Rime {
 
   /** Rime方案 */
   public static class RimeSchema {
-    private String kRightArrow = "→ ";
-    private String kRadioSelected = " ✓";
+    private final String kRadioSelected = " ✓";
 
     Map<String, Object> schema = new HashMap<String, Object>();
     List<Map<String, Object>> switches = new ArrayList<Map<String, Object>>();
@@ -144,8 +145,8 @@ public class Rime {
 
     public void check() {
       if (switches.isEmpty()) return;
-      for (Iterator it = switches.iterator(); it.hasNext(); ) {
-        Map<String, Object> o = (Map<String, Object>) it.next();
+      for (Iterator<?> it = switches.iterator(); it.hasNext(); ) {
+        Map<?, ?> o = (Map<?, ?>) it.next();
         if (!o.containsKey("states")) it.remove();
       }
     }
@@ -156,11 +157,12 @@ public class Rime {
       int i = 0;
       for (Map<String, Object> o : switches) {
         candidates[i] = new RimeCandidate();
-        List states = (List) o.get("states");
+        final List<?> states = (List<?>) o.get("states");
         Integer value = (Integer) o.get("value");
         if (value == null) value = 0;
         candidates[i].text = states.get(value).toString();
 
+        String kRightArrow = "→ ";
         if (showSwitchArrow)
           candidates[i].comment = o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
         else
@@ -173,11 +175,11 @@ public class Rime {
     public void getValue() {
       if (switches.isEmpty()) return; //無方案
       for (int j = 0; j < switches.size(); j++) {
-        Map<String, Object> o = switches.get(j);
+        final Map<String, Object> o = switches.get(j);
         if (o.containsKey("options")) {
-          List<String> options = (List<String>) o.get("options");
+          List<?> options = (List<?>) o.get("options");
           for (int i = 0; i < options.size(); i++) {
-            String s = options.get(i);
+            final String s = (String) options.get(i);
             if (Rime.get_option(s)) {
               o.put("value", i);
               break;
@@ -210,13 +212,13 @@ public class Rime {
   }
 
   private static Rime self;
-  private static Logger Log = Logger.getLogger(Rime.class.getSimpleName());
+  private static final Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
-  private static RimeCommit mCommit = new RimeCommit();
-  private static RimeContext mContext = new RimeContext();
-  private static RimeStatus mStatus = new RimeStatus();
+  private static final RimeCommit mCommit = new RimeCommit();
+  private static final RimeContext mContext = new RimeContext();
+  private static final RimeStatus mStatus = new RimeStatus();
   private static RimeSchema mSchema;
-  private static List mSchemaList;
+  private static List<?> mSchemaList;
   private static boolean mOnMessage;
 
   static {
@@ -275,7 +277,7 @@ public class Rime {
   }
 
   public static String getComposingText() {
-    if (mContext == null || mContext.commit_text_preview == null) return "";
+    if (mContext.commit_text_preview == null) return "";
     return mContext.commit_text_preview;
   }
 
@@ -291,6 +293,7 @@ public class Rime {
     getStatus();
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   private static boolean getStatus() {
     mSchema.getValue();
     return get_status(mStatus);
@@ -328,6 +331,7 @@ public class Rime {
     return get_commit(mCommit);
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   private static boolean getContexts() {
     boolean b = get_context(mContext);
     getStatus();
@@ -341,8 +345,8 @@ public class Rime {
 
   private static boolean onKey(int keycode, int mask) {
     if (isVoidKeycode(keycode)) return false;
-    boolean b = process_key(keycode, mask);
-    Log.info("b=" + b + ",keycode=" + keycode + ",mask=" + mask);
+    final boolean b = process_key(keycode, mask);
+    Log.info("Key process =" + b + ", keycode = " + keycode + ", mask = " + mask);
     getContexts();
     return b;
   }
@@ -437,7 +441,7 @@ public class Rime {
     return get_current_schema();
   }
 
-  private static boolean isEmpty(String s) {
+  private static boolean isEmpty(@NonNull String s) {
     return s.contentEquals(".default"); //無方案
   }
 
@@ -450,8 +454,8 @@ public class Rime {
     String[] names = new String[n];
     int i = 0;
     for (Object o : mSchemaList) {
-      Map<String, String> m = (Map<String, String>) o;
-      names[i++] = m.get("name");
+      Map<?, ?> m = (Map<?, ?>) o;
+      names[i++] = (String) m.get("name");
     }
     return names;
   }
@@ -460,8 +464,8 @@ public class Rime {
     String schema_id = getSchemaId();
     int i = 0;
     for (Object o : mSchemaList) {
-      Map<String, String> m = (Map<String, String>) o;
-      if (m.get("schema_id").contentEquals(schema_id)) return i;
+      Map<?, ?> m = (Map<?, ?>) o;
+      if (m.get("schema_id").toString().contentEquals(schema_id)) return i;
       i++;
     }
     return 0;
@@ -480,9 +484,9 @@ public class Rime {
   public static boolean selectSchema(int id) {
     int n = mSchemaList.size();
     if (id < 0 || id >= n) return false;
-    String schema_id = getSchemaId();
+    final String schema_id = getSchemaId();
     Map<String, String> m = (Map<String, String>) mSchemaList.get(id);
-    String target = m.get("schema_id");
+    final String target = m.get("schema_id");
     if (target.contentEquals(schema_id)) return false;
     return selectSchema(target);
   }
