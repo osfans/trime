@@ -21,6 +21,7 @@ class Preferences(
     private val cacheInt: HashMap<String, Int> = hashMapOf()
     private val cacheString: HashMap<String, String> = hashMapOf()
 
+    val general = General(this)
     val keyboard = Keyboard(this)
     val looks = Looks(this)
     val conf = Configuration(this)
@@ -132,6 +133,15 @@ class Preferences(
         cacheBoolean.clear()
         cacheInt.clear()
         cacheString.clear()
+    }
+
+    class General(private val prefs: Preferences) {
+        companion object {
+            const val LAST_VERSION_NAME = "general__last_version_name"
+        }
+        var lastVersionName: String
+            get()  = prefs.getPref(LAST_VERSION_NAME, "")
+            set(v) = prefs.setPref(LAST_VERSION_NAME, v)
     }
 
     /**

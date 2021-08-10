@@ -151,7 +151,7 @@ public class Config {
 
     private void prepareRime(Context context) {
         boolean isExist = new File(getSharedDataDir()).exists();
-        boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(context);
+        boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(getPrefs());
         String defaultFile = "trime.yaml";
         if (isOverwrite) {
             copyFileOrDir(context, "", true);

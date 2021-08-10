@@ -208,6 +208,8 @@ public class Function {
     return s;
   }
 
+  /** @deprecated use {@link android.text.TextUtils#isEmpty(CharSequence)} instead.
+   */
   public static boolean isEmpty(CharSequence s) {
     return (s == null) || (s.length() == 0);
   }
