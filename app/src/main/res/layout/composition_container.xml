@@ -19,7 +19,7 @@
  */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/composition_container"
+  android:id="@+id/compositionContainer"
   android:orientation="vertical"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
