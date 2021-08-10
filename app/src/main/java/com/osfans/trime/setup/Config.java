@@ -36,7 +36,9 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.blankj.utilcode.util.ResourceUtils;
 import com.osfans.trime.Key;
 import com.osfans.trime.Rime;
 import com.osfans.trime.enums.WindowsPositionType;
@@ -52,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import kotlin.jvm.Synchronized;
 
@@ -69,15 +72,15 @@ public class Config {
         return self;
     }
 
-    private Map<String, Object> mStyle, mDefaultStyle;
+    private Map<?, ?> mStyle, mDefaultStyle;
     private String themeName;
     private static final String defaultName = "trime";
     private String schema_id;
 
 
 
-    private Map<String, String> fallbackColors;
-    private Map presetColorSchemes, presetKeyboards;
+    private Map<?, ?> fallbackColors;
+    private Map<?, ?> presetColorSchemes, presetKeyboards;
 
     private String[] ClipBoardCompare,ClipBoardOutput,ClipBoardManager;
 
@@ -186,13 +189,14 @@ public class Config {
         return names;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static boolean deployOpencc(Context context) {
         final String dataDir = get(context).getResDataDir("opencc");
         final File d = new File(dataDir);
         if (d.exists()) {
             FilenameFilter txtFilter =
                     (dir, filename) -> filename.endsWith(".txt");
-            for (String txtName : d.list(txtFilter)) {
+            for (String txtName : Objects.requireNonNull(d.list(txtFilter))) {
                 txtName = new File(dataDir, txtName).getPath();
                 String ocdName = txtName.replace(".txt", ".ocd2");
                 Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd2");
@@ -201,7 +205,7 @@ public class Config {
         return true;
     }
 
-    public static String[] list(Context context, String path) {
+    public static String[] list(@NonNull Context context, String path) {
         final AssetManager assetManager = context.getAssets();
         String[] assets = null;
         try {
@@ -212,19 +216,21 @@ public class Config {
         return assets;
     }
 
-    public boolean copyFileOrDir(Context context, String path, boolean overwrite) {
+    public boolean copyFileOrDir(@NonNull Context context, String path, boolean overwrite) {
         final AssetManager assetManager = context.getAssets();
-        final String[] assets;
         try {
             final String assetPath = new File(RIME, path).getPath();
-            assets = assetManager.list(assetPath);
+            final String[] assets = assetManager.list(assetPath);
             if (assets.length == 0) {
                 // Files
-                copyFile(context, path, overwrite);
+                if (overwrite) ResourceUtils.copyFileFromAssets("rime",
+                        path.endsWith(".bin") ? getUserDataDir(): getSharedDataDir());
+                //copyFile(context, path, overwrite);
             } else {
                 // Dirs
                 final File dir = new File(getSharedDataDir(), path);
-                if (!dir.exists()) dir.mkdir();
+                if (!dir.exists()) //noinspection ResultOfMethodCallIgnored
+                    dir.mkdir();
                 for (String asset : assets) {
                     final String subPath = new File(path, asset).getPath();
                     copyFileOrDir(context, subPath, overwrite);
@@ -266,7 +272,7 @@ public class Config {
 
     private void deployTheme(Context context) {
         if (getUserDataDir().contentEquals(getSharedDataDir())) return; //相同文件夾不部署主題
-        final String[] configs = get(context).getThemeKeys(context, false);
+        final String[] configs = getThemeKeys(context, false);
         for (String config: configs) Rime.deploy_config_file(config, "config_version");
     }
 
@@ -284,17 +290,17 @@ public class Config {
                 themeName = defaultName;
                 m = Rime.config_get_map(themeName, "");
             }
-            final Map mk = (Map<String, Object>) m.get("android_keys");
-            mDefaultStyle = (Map<String, Object>) m.get("style");
-            fallbackColors = (Map<String, String>) m.get("fallback_colors");
+            final Map<?, ?> mk = (Map<?, ?>) m.get("android_keys");
+            mDefaultStyle = (Map<?, ?>) m.get("style");
+            fallbackColors = (Map<?, ?>) m.get("fallback_colors");
             Key.androidKeys = (List<String>) mk.get("name");
             Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
             Key.setSymbols((String) mk.get("symbols"));
             if (TextUtils.isEmpty(Key.getSymbols()))
                 Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
             Key.presetKeys = (Map<String, Map>) m.get("preset_keys");
-            presetColorSchemes = (Map<String, Object>) m.get("preset_color_schemes");
-            presetKeyboards = (Map<String, Object>) m.get("preset_keyboards");
+            presetColorSchemes = (Map<?, ?>) m.get("preset_color_schemes");
+            presetKeyboards = (Map<?, ?>) m.get("preset_keyboards");
             Rime.setShowSwitches(getPrefs().getKeyboard().getSwitchesEnabled());
             Rime.setShowSwitchArrow(getPrefs().getKeyboard().getSwitchArrowEnabled());
             reset();
@@ -307,17 +313,18 @@ public class Config {
     public void reset() {
         schema_id = Rime.getSchemaId();
         if (schema_id != null)
-            mStyle = (Map<String, Object>) Rime.schema_get_value(schema_id, "style");
+            mStyle = (Map<?, ?>) Rime.schema_get_value(schema_id, "style");
     }
 
+    @Nullable
     private Object _getValue(String k1, String k2) {
-        Map<String, Object> m;
+        Map<?, ?> m;
         if (mStyle != null && mStyle.containsKey(k1)) {
-            m = (Map<String, Object>) mStyle.get(k1);
+            m = (Map<?, ?>) mStyle.get(k1);
             if (m != null && m.containsKey(k2)) return m.get(k2);
         }
         if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) {
-            m = (Map<String, Object>) mDefaultStyle.get(k1);
+            m = (Map<?, ?>) mDefaultStyle.get(k1);
             if (m != null && m.containsKey(k2)) return m.get(k2);
         }
         return null;
@@ -325,18 +332,19 @@ public class Config {
 
 
     private Object _getValue(String k1, String k2,Object defaultValue) {
-        Map<String, Object> m;
+        Map<?, ?> m;
         if (mStyle != null && mStyle.containsKey(k1)) {
-            m = (Map<String, Object>) mStyle.get(k1);
+            m = (Map<?, ?>) mStyle.get(k1);
             if (m != null && m.containsKey(k2)) return m.get(k2);
         }
         if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) {
-            m = (Map<String, Object>) mDefaultStyle.get(k1);
+            m = (Map<?, ?>) mDefaultStyle.get(k1);
             if (m != null && m.containsKey(k2)) return m.get(k2);
         }
         return defaultValue;
     }
 
+    @Nullable
     private Object _getValue(String k1) {
         if (mStyle != null && mStyle.containsKey(k1)) return mStyle.get(k1);
         if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) return mDefaultStyle.get(k1);
@@ -348,14 +356,14 @@ public class Config {
         return defaultValue;
     }
 
-    public Object getValue(String s) {
+    public Object getValue(@NonNull String s) {
         final String[] ss = s.split("/");
         if (ss.length == 1) return _getValue(ss[0]);
         else if (ss.length == 2) return _getValue(ss[0], ss[1]);
         return null;
     }
 
-    public Object getValue(String s,Object defaultValue) {
+    public Object getValue(@NonNull String s, Object defaultValue) {
         final String[] ss = s.split("/");
         if (ss.length == 1) return _getValue(ss[0],defaultValue);
         else if (ss.length == 2) return _getValue(ss[0], ss[1],defaultValue);
@@ -366,7 +374,7 @@ public class Config {
         return getValue(s) != null;
     }
 
-    private String getKeyboardName(String name) {
+    private String getKeyboardName(@NonNull String name) {
         if (name.contentEquals(".default")) {
             if (presetKeyboards.containsKey(schema_id)) name = schema_id; //匹配方案名
             else {
@@ -386,26 +394,27 @@ public class Config {
             }
         }
         if (!presetKeyboards.containsKey(name)) name = "default";
-        final Map<String, Object> m = (Map<String, Object>) presetKeyboards.get(name);
+        @Nullable final Map<?, ?> m = (Map<?, ?>) presetKeyboards.get(name);
+        assert m != null;
         if (m.containsKey("import_preset")) {
-            name = m.get("import_preset").toString();
+            name = Objects.requireNonNull(m.get("import_preset")).toString();
         }
         return name;
     }
 
     public List<String> getKeyboardNames() {
-        final List<String> names = (List<String>) getValue("keyboards");
+        final List<?> names = (List<?>) getValue("keyboards");
         final List<String> keyboards = new ArrayList<>();
-        for (String s : names) {
-            s = getKeyboardName(s);
-            if (!keyboards.contains(s)) keyboards.add(s);
+        for (Object s : names) {
+            s = getKeyboardName((String) s);
+            if (!keyboards.contains(s)) keyboards.add((String) s);
         }
         return keyboards;
     }
 
-    public Map<String, Object> getKeyboard(String name) {
+    public Map<?, ?> getKeyboard(String name) {
         if (!presetKeyboards.containsKey(name)) name = "default";
-        return (Map<String, Object>) presetKeyboards.get(name);
+        return (Map<?, ?>) presetKeyboards.get(name);
     }
 
     public void destroy() {
@@ -433,20 +442,21 @@ public class Config {
         return getPixel(v);
     }
 
-    public static Integer getPixel(Map m, String k, Object s) {
+    public static Integer getPixel(Map<?, ?> m, String k, Object s) {
         Object o = getValue(m, k, s);
         if (o == null) return null;
         return getPixel(Float.valueOf(o.toString()));
     }
 
-    public static Integer getPixel(Map m, String k) {
+    public static Integer getPixel(Map<?, ?> m, String k) {
         return getPixel(m, k, null);
     }
 
-    public static Integer getColor(Context context, Map m, String k) {
+    public static Integer getColor(Context context, Map<?, ?> m, String k) {
         Integer color = null;
         if (m.containsKey(k)) {
             Object o = m.get(k);
+            assert o != null;
             String s = o.toString();
             color = parseColor(s);
             if (color == null)
@@ -458,7 +468,7 @@ public class Config {
     public Integer getColor(String key) {
         Object o = getColorObject(key);
         if (o == null) {
-            o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
+            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get("default"))).get(key);
         }
         if (o == null) return null;
         return parseColor(o.toString());
@@ -467,17 +477,19 @@ public class Config {
     public Integer getColor(String key,Integer defaultValue) {
         Object o = getColorObject(key);
         if (o == null) {
-            o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
+            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get("default"))).get(key);
         }
         if (o == null) return defaultValue;
         return parseColor(o.toString());
     }
 
-    public static Drawable getColorDrawable(Context context, Map m, String k) {
+    @Nullable
+    public static Drawable getColorDrawable(Context context, @NonNull Map<?, ?> m, String k) {
         if (m.containsKey(k)) {
             final Object o = m.get(k);
+            assert o != null;
             final String s = o.toString();
-            final Integer color = parseColor(s);
+            @Nullable final Integer color = parseColor(s);
             if (color != null) {
                 final GradientDrawable gd = new GradientDrawable();
                 gd.setColor(color);
@@ -492,45 +504,45 @@ public class Config {
         return null;
     }
 
-    public static Object getValue(Map m, String k, Object o) {
+    public static Object getValue(Map<?, ?> m, String k, Object o) {
         return m.containsKey(k) ? m.get(k) : o;
     }
 
-    public static Integer getInt(Map m, String k, Object s) {
+    public static Integer getInt(Map<?, ?> m, String k, Object s) {
         final Object o = getValue(m, k, s);
         if (o == null) return null;
         return Long.decode(o.toString()).intValue();
     }
 
-    public static Float getFloat(Map m, String k) {
+    public static Float getFloat(Map<?, ?> m, String k) {
         final Object o = getValue(m, k, null);
         if (o == null) return null;
         return Float.valueOf(o.toString());
     }
 
-    public static Double getDouble(Map m, String k, Object s) {
+    public static Double getDouble(Map<?, ?> m, String k, Object s) {
         final Object o = getValue(m, k, s);
         if (o == null) return null;
         return Double.valueOf(o.toString());
     }
 
-    public static String getString(Map m, String k, Object s) {
+    public static String getString(Map<?, ?> m, String k, Object s) {
         final Object o = getValue(m, k, s);
         if (o == null) return "";
         return o.toString();
     }
 
-    public static String getString(Map m, String k) {
+    public static String getString(Map<?, ?> m, String k) {
         return getString(m, k, "");
     }
 
-    public static Boolean getBoolean(Map m, String k, Object s) {
+    public static Boolean getBoolean(Map<?, ?> m, String k, Object s) {
         final Object o = getValue(m, k, s);
         if (o == null) return null;
         return Boolean.valueOf(o.toString());
     }
 
-    public static Boolean getBoolean(Map m, String k) {
+    public static Boolean getBoolean(Map<?, ?> m, String k) {
         return getBoolean(m, k, true);
     }
 
@@ -574,13 +586,13 @@ public class Config {
         String scheme = getPrefs().getLooks().getSelectedColor();
         if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); //主題中指定的配色
         if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; //主題中的default配色
-        final Map map = (Map<String, Object>) presetColorSchemes.get(scheme);
+        final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
         if (map == null) return null;
         getPrefs().getLooks().setSelectedColor(scheme);
         Object o = map.get(key);
         String fallbackKey = key;
         while (o == null && fallbackColors.containsKey(fallbackKey)) {
-            fallbackKey = fallbackColors.get(fallbackKey);
+            fallbackKey = (String) fallbackColors.get(fallbackKey);
             o = map.get(fallbackKey);
         }
         return o;
@@ -611,18 +623,20 @@ public class Config {
 
     public String[] getColorKeys() {
         if (presetColorSchemes == null) return null;
-        final String[] keys = new String[presetColorSchemes.size()];
+        final Object[] keys = new String[presetColorSchemes.size()];
         presetColorSchemes.keySet().toArray(keys);
-        return keys;
+        return (String[]) keys;
     }
 
+    @Nullable
     public String[] getColorNames(String[] keys) {
         if (keys == null) return null;
         final int n = keys.length;
         final String[] names = new String[n];
         for (int i = 0; i < n; i++) {
-            final Map<String, Object> m = (Map<String, Object>) presetColorSchemes.get(keys[i]);
-            names[i] = m.get("name").toString();
+            final Map<?, ?> m = (Map<?, ?>) presetColorSchemes.get(keys[i]);
+            assert m != null;
+            names[i] = Objects.requireNonNull(m.get("name")).toString();
         }
         return names;
     }
@@ -670,7 +684,7 @@ public class Config {
     public Drawable getColorDrawable(String key) {
         Object o = getColorObject(key);
         if (o == null) {
-            o = ((Map<String, Object>) presetColorSchemes.get("default")).get(key);
+            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get("default"))).get(key);
         }
         return drawableObject(o);
     }
