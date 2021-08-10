@@ -174,7 +174,7 @@ public class Keyboard {
 
   public Keyboard(Context context, String name) {
     this(context);
-    Map<String, Object> m = Config.get(context).getKeyboard(name);
+    final Map<?, ?> m = Config.get(context).getKeyboard(name);
     mLabelTransform = Config.getString(m, "label_transform", "none");
     mAsciiMode = Config.getInt(m, "ascii_mode", 1);
     if (mAsciiMode == 0) mAsciiKeyboard = Config.getString(m, "ascii_keyboard");
