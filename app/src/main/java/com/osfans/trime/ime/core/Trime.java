@@ -99,7 +99,6 @@ public class Trime extends InputMethodService
   private KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
-  //private Effect mEffect; //音效
   @Nullable private TrimeKeyEffects effectManager = null; //效果管理器
   private Candidate mCandidate; //候選
   private Composition mComposition; //編碼

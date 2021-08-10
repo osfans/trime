@@ -18,7 +18,10 @@
 
 package com.osfans.trime;
 
+import android.text.TextUtils;
 import android.view.KeyEvent;
+
+import androidx.annotation.NonNull;
 
 import com.osfans.trime.setup.Config;
 
@@ -29,14 +32,14 @@ import java.util.Map;
 
 /** {@link Key 按鍵}的各種事件（單擊、長按、滑動等） */
 public class Event {
-  private String TAG = "Event";
-  private Keyboard mKeyboard;
-  private int code = 0;
+  //private String TAG = "Event";
+  private final Keyboard mKeyboard;
+  private int code;
   private int mask = 0;
   private String text;
   private String label;
   private String preview;
-  private List<String> states;
+  private List<?> states;
   private String command;
   private String option;
   private String select;
@@ -48,7 +51,7 @@ public class Event {
   private boolean repeatable;
   private boolean sticky;
 
-  public Event(Keyboard keyboard, String s) {
+  public Event(Keyboard keyboard, @NonNull String s) {
     mKeyboard = keyboard;
     if (s.matches("\\{[^\\{\\}]+\\}")) { //{send|key}
       label = s.substring(1, s.length() -1);
@@ -60,7 +63,7 @@ public class Event {
       label = null;
     }
     if (Key.presetKeys.containsKey(s)) {
-      Map m = Key.presetKeys.get(s);
+      Map<?, ?> m = Key.presetKeys.get(s);
       command = Config.getString(m, "command");
       option = Config.getString(m, "option");
       select = Config.getString(m, "select");
@@ -70,14 +73,14 @@ public class Event {
       shiftLock = Config.getString(m, "shift_lock");
       commit = Config.getString(m, "commit");
       String send = Config.getString(m, "send");
-      if (Function.isEmpty(send) && !Function.isEmpty(command)) send = "function"; //command默認發function
+      if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command)) send = "function"; //command默認發function
       int[] sends = parseSend(send);
       code = sends[0];
       mask = sends[1];
       parseLabel();
       text = Config.getString(m, "text");
-      if (code < 0 && Function.isEmpty(text)) text = s;
-      if (m.containsKey("states")) states = (List<String>) m.get("states");
+      if (code < 0 && TextUtils.isEmpty(text)) text = s;
+      if (m.containsKey("states")) states = (List<?>) m.get("states");
       sticky = Config.getBoolean(m, "sticky", false);
       repeatable = Config.getBoolean(m, "repeatable", false);
       functional = Config.getBoolean(m, "functional", true);
@@ -130,9 +133,10 @@ public class Event {
     return shiftLock;
   }
 
+  @NonNull
   public static int[] parseSend(String s) {
     int[] sends = new int[2];
-    if (Function.isEmpty(s)) return sends;
+    if (TextUtils.isEmpty(s)) return sends;
     String codes;
     if (!s.contains("+")) codes = s;
     else {
@@ -145,8 +149,9 @@ public class Event {
     return sends;
   }
 
+  @NonNull
   private String adjustCase(String s) {
-    if (Function.isEmpty(s)) return "";
+    if (TextUtils.isEmpty(s)) return "";
     if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted())
       s = s.toUpperCase(Locale.getDefault());
     else if (s.length() == 1
@@ -157,13 +162,13 @@ public class Event {
   }
 
   public String getLabel() {
-    if (!Function.isEmpty(toggle)) return states.get(Rime.getOption(toggle) ? 1 : 0);
+    if (!TextUtils.isEmpty(toggle)) return (String) states.get(Rime.getOption(toggle) ? 1 : 0);
     return adjustCase(label);
   }
 
   public String getText() {
     String s = "";
-    if (!Function.isEmpty(text)) s = text;
+    if (!TextUtils.isEmpty(text)) s = text;
     else if (mKeyboard != null
         && mKeyboard.isShifted()
         && mask == 0
@@ -173,12 +178,12 @@ public class Event {
   }
 
   public String getPreviewText() {
-    if (!Function.isEmpty(preview)) return preview;
+    if (!TextUtils.isEmpty(preview)) return preview;
     return getLabel();
   }
 
   public String getToggle() {
-    if (!Function.isEmpty(toggle)) return toggle;
+    if (!TextUtils.isEmpty(toggle)) return toggle;
     return "ascii_mode";
   }
 
@@ -187,7 +192,7 @@ public class Event {
   }
 
   private void parseLabel() {
-    if (!Function.isEmpty(label)) return;
+    if (!TextUtils.isEmpty(label)) return;
     int c = code;
     if (c == KeyEvent.KEYCODE_SPACE) {
       label = Rime.getSchemaName();
@@ -215,7 +220,7 @@ public class Event {
 
   public static int getClickCode(String s) {
     int keyCode = -1;
-    if (Function.isEmpty(s)) { //空鍵
+    if (TextUtils.isEmpty(s)) { //空鍵
       keyCode = 0;
     } else if (Key.androidKeys.contains(s)) { //字母數字
       keyCode = Key.androidKeys.indexOf(s);
@@ -250,7 +255,7 @@ public class Event {
     return new int[] {i, m};
   }
 
-  private static Map<String, Integer> masks =
+  private static final Map<String, Integer> masks =
       new HashMap<String, Integer>() {
         {
           put("Shift", KeyEvent.META_SHIFT_ON);
@@ -259,7 +264,7 @@ public class Event {
         }
       };
 
-  private static Map<String, Integer> symbolAliases =
+  private static final Map<String, Integer> symbolAliases =
       new HashMap<String, Integer>() {
         {
           put("#", KeyEvent.KEYCODE_POUND);
