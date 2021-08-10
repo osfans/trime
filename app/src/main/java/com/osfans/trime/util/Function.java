@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.util;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.ClipData;
@@ -34,10 +35,14 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 
+import androidx.annotation.NonNull;
+
+import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.settings.PrefMainActivity;
 
@@ -49,11 +54,11 @@ import java.util.Locale;
 
 /** 實現打開指定程序、打開{@link PrefMainActivity 輸入法全局設置}對話框等功能 */
 public class Function {
-  private static String TAG = Function.class.getSimpleName();
-  private static SparseArray<String> sApplicationLaunchKeyCategories;
+  private static final String TAG = Function.class.getSimpleName();
+  private static final SparseArray<String> sApplicationLaunchKeyCategories;
 
   static {
-    sApplicationLaunchKeyCategories = new SparseArray<String>();
+    sApplicationLaunchKeyCategories = new SparseArray<>();
     sApplicationLaunchKeyCategories.append(
         KeyEvent.KEYCODE_EXPLORER, "android.intent.category.APP_BROWSER");
     sApplicationLaunchKeyCategories.append(
@@ -122,7 +127,7 @@ public class Function {
           intent.putExtra(Intent.EXTRA_TEXT, arg);
           break;
         default:
-          if (!isEmpty(arg)) intent.setData(Uri.parse(arg));
+          if (!TextUtils.isEmpty(arg)) intent.setData(Uri.parse(arg));
           break;
       }
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -138,8 +143,9 @@ public class Function {
     context.startActivity(intent);
   }
 
+  @SuppressLint("SimpleDateFormat")
   private static String getDate(String option) {
-    String s = "";
+    String s;
     String locale = "";
     if (option.contains("@")) {
       String[] ss = option.split(" ", 2);
@@ -151,11 +157,11 @@ public class Function {
         option = "";
       }
     }
-    if (VERSION.SDK_INT >= VERSION_CODES.N && !isEmpty(locale)) {
+    if (VERSION.SDK_INT >= VERSION_CODES.N && !TextUtils.isEmpty(locale)) {
       ULocale ul = new ULocale(locale);
       Calendar cc = Calendar.getInstance(ul);
       android.icu.text.DateFormat df;
-      if (isEmpty(option)) {
+      if (TextUtils.isEmpty(option)) {
         df = android.icu.text.DateFormat.getDateInstance(android.icu.text.DateFormat.LONG, ul);
       } else {
         df = new android.icu.text.SimpleDateFormat(option, ul);
@@ -167,17 +173,18 @@ public class Function {
     return s;
   }
 
-  private static String getClipboard(Context context) {
-    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-    ClipData primaryClip = clipboard.getPrimaryClip();
+  @NonNull
+  private static String getClipboard(@NonNull Context context) {
+    final ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+    final ClipData primaryClip = clipboard.getPrimaryClip();
     if (primaryClip == null) {
       return "";
     }
-    ClipData.Item item = primaryClip.getItemAt(0);
+    final ClipData.Item item = primaryClip.getItemAt(0);
     if (item == null) {
       return "";
     }
-    CharSequence pasteData = item.getText();
+    final CharSequence pasteData = item.getText();
     if (pasteData != null) {
       return pasteData.toString();
     } else {
@@ -187,7 +194,7 @@ public class Function {
 
   public static String handle(Context context, String command, String option) {
     String s = null;
-    if (command == null) return s;
+    if (command == null) return null;
     switch (command) {
       case "date":
         s = getDate(option);
@@ -279,18 +286,5 @@ public class Function {
   @Deprecated
   public static SharedPreferences getPref(Context context) {
     return PreferenceManager.getDefaultSharedPreferences(context);
-  }
-
-  public static boolean isDiffVer(Context context) {
-    String version = getVersion(context);
-    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-    String pref_ver = pref.getString("version_name", "");
-    boolean isDiff = !version.contentEquals(pref_ver);
-    if (isDiff) {
-      SharedPreferences.Editor edit = pref.edit();
-      edit.putString("version_name", version);
-      edit.apply();
-    }
-    return isDiff;
   }
 }

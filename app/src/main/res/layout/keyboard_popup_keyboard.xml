@@ -25,7 +25,7 @@
         android:orientation="horizontal"
         >
         
-    <com.osfans.trime.KeyboardView
+    <com.osfans.trime.ime.keyboard.KeyboardView
             android:id="@android:id/keyboardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

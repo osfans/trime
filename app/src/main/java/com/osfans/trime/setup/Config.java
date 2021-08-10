@@ -39,9 +39,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.blankj.utilcode.util.ResourceUtils;
-import com.osfans.trime.Key;
+import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.Rime;
-import com.osfans.trime.enums.WindowsPositionType;
+import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.util.AppVersionUtils;
 

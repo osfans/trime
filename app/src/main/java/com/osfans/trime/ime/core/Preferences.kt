@@ -7,7 +7,7 @@ import androidx.core.os.UserManagerCompat
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
-import com.osfans.trime.enums.InlineModeType
+import com.osfans.trime.ime.enums.InlineModeType
 import java.lang.ref.WeakReference
 
 /**

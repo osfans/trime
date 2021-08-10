@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.ime.keyboard;
 
 import android.content.Context;
 
+import com.osfans.trime.util.Function;
 import com.osfans.trime.setup.Config;
 
 import java.util.List;

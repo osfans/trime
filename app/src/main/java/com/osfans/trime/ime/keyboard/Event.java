@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime;
+package com.osfans.trime.ime.keyboard;
 
 import android.text.TextUtils;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 
+import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
 
 import java.util.HashMap;

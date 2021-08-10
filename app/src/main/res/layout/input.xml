@@ -19,7 +19,7 @@
  */
 -->
 
-<com.osfans.trime.KeyboardView
+<com.osfans.trime.ime.keyboard.KeyboardView
         xmlns:android="http://schemas.android.com/apk/res/android"
 
         android:id="@+id/keyboard"
