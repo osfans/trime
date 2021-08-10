@@ -7,6 +7,7 @@ import androidx.core.view.forEach
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.Rime
+import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 
 class KeyboardFragment: PreferenceFragmentCompat(),
@@ -24,27 +25,14 @@ class KeyboardFragment: PreferenceFragmentCompat(),
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val trime = Trime.getService()
+        val prefs = Preferences.defaultInstance()
+        prefs.sync()
         when (key) {
-            "keyboard__key_sound" -> {
-                trime?.resetEffect()
-            }
-            "keyboard__key_vibration" -> {
-                trime?.resetEffect()
-            }
             "keyboard__key_sound_volume" -> {
-                trime?.let {
-                    it.resetEffect()
-                    it.soundEffect()
-                }
+                trime?.keyPressSound()
             }
             "keyboard__key_vibration_duration", "keyboard__key_vibration_amplitude" -> {
-                trime?.let {
-                    it.resetEffect()
-                    it.vibrateEffect()
-                }
-            }
-            "keyboard__speak_key_press", "keyboard__speak_commit" -> {
-                trime?.resetEffect()
+                trime?.keyPressVibrate()
             }
             "keyboard__key_long_press_timeout",
             "keyboard__key_repeat_interval",
@@ -58,7 +46,7 @@ class KeyboardFragment: PreferenceFragmentCompat(),
                 trime?.loadConfig()
             }
             "keyboard__show_switches" -> {
-                sharedPreferences?.getBoolean(key, false)?.let { Rime.setShowSwitches(it) }
+                Rime.setShowSwitches(prefs.keyboard.switchesEnabled)
             }
         }
     }

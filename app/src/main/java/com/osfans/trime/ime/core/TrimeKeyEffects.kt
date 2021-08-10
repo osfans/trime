@@ -17,9 +17,9 @@ import kotlin.math.ln
  * Manage the key press effects, such as vibration, sound, speaking and so on.
  */
 class TrimeKeyEffects(
-    context: Context,
-    val prefs: Preferences = Preferences.defaultInstance()
+    context: Context
 ) {
+    private val prefs: Preferences = Preferences.defaultInstance()
     private var inputRootBinding: InputRootBinding? = null
 
     private var vibrator: Vibrator? = null

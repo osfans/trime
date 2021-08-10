@@ -20,12 +20,13 @@ package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.RectF;
@@ -36,13 +37,14 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
@@ -51,32 +53,37 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.Candidate;
 import com.osfans.trime.Composition;
-import com.osfans.trime.setup.Config;
-import com.osfans.trime.Effect;
 import com.osfans.trime.Event;
 import com.osfans.trime.Function;
-import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.Key;
 import com.osfans.trime.Keyboard;
 import com.osfans.trime.KeyboardSwitch;
 import com.osfans.trime.KeyboardView;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
+import com.osfans.trime.databinding.CompositionContainerBinding;
+import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.enums.InlineModeType;
 import com.osfans.trime.enums.WindowsPositionType;
+import com.osfans.trime.ime.text.xScrollView;
+import com.osfans.trime.settings.PrefMainActivity;
 import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
+import com.osfans.trime.setup.Config;
+import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.LocaleUtils;
-import com.osfans.trime.ime.text.xScrollView;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -86,22 +93,24 @@ import java.util.regex.Pattern;
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
-  private static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
+  private final static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
-  private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); }
+  @NonNull private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); }
   private KeyboardView mKeyboardView; //軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; //配置
-  private Effect mEffect; //音效
+  //private Effect mEffect; //音效
+  @Nullable private TrimeKeyEffects effectManager = null; //效果管理器
   private Candidate mCandidate; //候選
   private Composition mComposition; //編碼
-  private LinearLayout mCompositionContainer;
+  private CompositionContainerBinding compositionContainerBinding;
   private xScrollView mCandidateContainer;
-  private LinearLayout mInputRoot;
+  private InputRootBinding inputRootBinding;
   private PopupWindow mFloatingWindow;
-  private PopupTimer mFloatingWindowTimer = new PopupTimer();
+  private final PopupTimer mFloatingWindowTimer = new PopupTimer();
   private RectF mPopupRectF = new RectF();
   private AlertDialog mOptionsDialog; //對話框
+  @Nullable public InputMethodManager imeManager = null;
 
   private int orientation;
   private boolean canCompose;
@@ -118,7 +127,7 @@ public class Trime extends InputMethodService
   private boolean mAsciiMode; //默認中英文狀態
   private boolean reset_ascii_mode; //重置中英文狀態
   private String auto_caps; //句首自動大寫
-  private Locale[] locales = new Locale[2];
+  private final Locale[] locales = new Locale[2];
   private boolean keyUpNeeded; //RIME是否需要處理keyUp事件
   private boolean mNeedUpdateRimeOption = true;
   private String lastCommittedText;
@@ -126,22 +135,18 @@ public class Trime extends InputMethodService
   private WindowsPositionType winPos; //候選窗口彈出位置
   private InlineModeType inlinePreedit; //嵌入模式
 
-  private IntentReceiver mIntentReceiver;
-  static private Handler syncBackgroundHandler=new  Handler(new Handler.Callback() {
-    @Override
-    public boolean handleMessage(Message msg) {
-      if(!((Trime)msg.obj).isShowInputRequested()){ //若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-        Function.syncBackground((Trime)msg.obj);
-        ((Trime)msg.obj).loadConfig();
-      }
-      return false;
+  @Nullable private IntentReceiver mIntentReceiver = null;
+  private static final Handler syncBackgroundHandler = new Handler(msg -> {
+    if(!((Trime) msg.obj).isShowInputRequested()){ //若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
+      Function.syncBackground((Trime) msg.obj);
+      ((Trime) msg.obj).loadConfig();
     }
+    return false;
   });
 
   @Override
   public void onWindowHidden(){
-    boolean sync_bg = getPrefs().getConf().getSyncBackgroundEnabled();
-    if(sync_bg){
+    if (getPrefs().getConf().getSyncBackgroundEnabled()) {
       Message msg = new Message();
       msg.obj = this;
       syncBackgroundHandler.sendMessageDelayed(msg,5000); // 输入面板隐藏5秒后，开始后台同步
@@ -164,32 +169,24 @@ public class Trime extends InputMethodService
     mFloatingWindow.update(winX, winY, -1, -1, true);
   }
 
-  public static int getStatusBarHeight() {
-    int result = 0;
-    int resourceId = self.getResources().getIdentifier("status_bar_height", "dimen", "android");
-    if (resourceId > 0) {
-      result = self.getResources().getDimensionPixelSize(resourceId);
-    }
-    return result;
-  }
-
-  public static int[] getLocationOnScreen(View v) {
+  @NonNull public static int[] getLocationOnScreen(@NonNull View v) {
     final int[] position = new int[2];
     v.getLocationOnScreen(position);
     return position;
   }
 
+  @SuppressLint("HandlerLeak")
   private class PopupTimer extends Handler implements Runnable {
-    private int mParentLocation[] = new int[2];
+    public PopupTimer() { super(Looper.getMainLooper()); }
 
     void postShowFloatingWindow() {
-      if (Function.isEmpty(Rime.getCompositionText())) {
+      if (TextUtils.isEmpty(Rime.getCompositionText())) {
         hideComposition();
         return;
       }
-      mCompositionContainer.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-      mFloatingWindow.setWidth(mCompositionContainer.getMeasuredWidth());
-      mFloatingWindow.setHeight(mCompositionContainer.getMeasuredHeight());
+      compositionContainerBinding.compositionContainer.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+      mFloatingWindow.setWidth(compositionContainerBinding.compositionContainer.getMeasuredWidth());
+      mFloatingWindow.setHeight(compositionContainerBinding.compositionContainer.getMeasuredHeight());
       post(this);
     }
 
@@ -202,8 +199,8 @@ public class Trime extends InputMethodService
     public void run() {
       if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
       if (!mShowWindow) return;
-      int x = 0, y = 0;
-      mParentLocation = getLocationOnScreen(mCandidateContainer);
+      int x, y;
+      final int[] mParentLocation = getLocationOnScreen(mCandidateContainer);
       if (isWinFixed() || !cursorUpdated) {
         //setCandidatesViewShown(true);
         switch (winPos) {
@@ -257,10 +254,10 @@ public class Trime extends InputMethodService
       if (y > mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing) { //candSpacing爲負時，可覆蓋部分鍵盤
         y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
       }
-      y -= getStatusBarHeight(); //不包含狀態欄
+      y -= BarUtils.getStatusBarHeight(); //不包含狀態欄
 
-      if(x<real_margin)
-        x=real_margin;
+      if (x < real_margin)
+        x = real_margin;
 
       if (!mFloatingWindow.isShowing()) {
         mFloatingWindow.showAtLocation(mCandidateContainer, Gravity.START | Gravity.TOP, x, y);
@@ -285,51 +282,43 @@ public class Trime extends InputMethodService
     mNeedUpdateRimeOption = true;
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   private boolean updateRimeOption() {
-    if (mNeedUpdateRimeOption) {
-      String soft_cursor_key = "soft_cursor";
-      Rime.setOption(soft_cursor_key, getPrefs().getKeyboard().getSoftCursorEnabled()); //軟光標
-      String horizontal_key = "horizontal";
-      Rime.setOption("_" + horizontal_key, mConfig.getBoolean(horizontal_key)); //水平模式
-      mNeedUpdateRimeOption = false;
+    try {
+      if (mNeedUpdateRimeOption) {
+        Rime.setOption("soft_cursor", getPrefs().getKeyboard().getSoftCursorEnabled()); //軟光標
+        Rime.setOption("_horizontal", mConfig.getBoolean("horizontal")); //水平模式
+        mNeedUpdateRimeOption = false;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
     }
     return true;
-  }
-
-  public void resetEffect() {
-    if (mEffect != null) mEffect.reset();
-  }
-
-  public void vibrateEffect() {
-    if (mEffect != null) mEffect.vibrate();
-  }
-
-  public void soundEffect() {
-    if (mEffect != null) mEffect.playSound(0);
   }
 
   @Override
   public void onCreate() {
     super.onCreate();
     self = this;
+    imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    effectManager = new TrimeKeyEffects(this);
     mIntentReceiver = new IntentReceiver();
     mIntentReceiver.registerReceiver(this);
 
-    mEffect = new Effect(this);
     mConfig = Config.get(this);
     mNeedUpdateRimeOption = true;
     loadConfig();
-    resetEffect();
     mKeyboardSwitch = new KeyboardSwitch(this);
 
     @Nullable String s;
     s = mConfig.getString("locale");
-    if (Function.isEmpty(s)) s = "";
+    if (TextUtils.isEmpty(s)) s = "";
     locales[0] = LocaleUtils.INSTANCE.stringToLocale(s);
     if (locales[0].equals(new Locale(s))) locales[0] = Locale.getDefault();
 
     s = mConfig.getString("latin_locale");
-    if (Function.isEmpty(s)) s = "en_US";
+    if (TextUtils.isEmpty(s)) s = "en_US";
     locales[1] = LocaleUtils.INSTANCE.stringToLocale(s);
     if (locales[1].equals(new Locale(s))) locales[0] = Locale.ENGLISH;
     /*
@@ -346,7 +335,7 @@ public class Trime extends InputMethodService
     if (ss.length == 1) locales[1] = new Locale(ss[0]);
     else if (ss.length == 2) locales[1] = new Locale(ss[0], ss[1]);
     else if (ss.length == 3) locales[1] = new Locale(ss[0], ss[1], ss[2]);
-    else locales[0] = Locale.ENGLISH;*/
+    else locales[0] = Locale.ENGLISH; **/
 
     orientation = getResources().getConfiguration().orientation;
     // Use the following line to debug IME service.
@@ -354,11 +343,11 @@ public class Trime extends InputMethodService
     clipBoardMonitor();
   }
 
-  public void onOptionChanged(String option, boolean value) {
+  public void onOptionChanged(@NonNull String option, boolean value) {
     switch (option) {
       case "ascii_mode":
         if (!mTempAsciiMode) mAsciiMode = value; //切換中西文時保存狀態
-        mEffect.setLanguage(locales[value ? 1 : 0]);
+        if (effectManager != null) effectManager.setTtsLanguage(locales[value ? 1 : 0]);
         break;
       case "_hide_comment":
         setShowComment(!value);
@@ -372,15 +361,15 @@ public class Trime extends InputMethodService
         if (mKeyboardView != null) mKeyboardView.setShowHint(!value);
         break;
       default:
-        if (option.startsWith("_keyboard_") && option.length() > 10 && value && mKeyboardSwitch != null) {
-          String keyboard = option.substring(10);
+        if (option.startsWith("_keyboard_") && option.length() > 10 && value && (mKeyboardSwitch != null)) {
+          final String keyboard = option.substring(10);
           mKeyboardSwitch.setKeyboard(keyboard);
           mTempAsciiMode = mKeyboardSwitch.getAsciiMode();
           bindKeyboardToInputView();
         } else if (option.startsWith("_key_") && option.length() > 5 && value) {
           boolean bNeedUpdate = mNeedUpdateRimeOption;
-          if (bNeedUpdate) mNeedUpdateRimeOption = false; //防止在onMessage中setOption
-          String key = option.substring(5);
+          if (bNeedUpdate) mNeedUpdateRimeOption = false; //防止在 onMessage 中 setOption
+          final String key = option.substring(5);
           onEvent(new Event(key));
           if (bNeedUpdate) mNeedUpdateRimeOption = true;
         }
@@ -402,8 +391,6 @@ public class Trime extends InputMethodService
   }
 
     private void loadBackground() {
-
-
       int padding = mConfig.getPixel("keyboard_padding");
 
       if ( orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -414,18 +401,18 @@ public class Trime extends InputMethodService
                 , mKeyboardView.getPaddingRight(), mConfig.getPixel("keyboard_padding_portrait"));
       }
 
-      View spacer = mInputRoot.findViewById(R.id.spacer_left);
+      View spacer = inputRootBinding.spacerLeft;
       LayoutParams layoutParams = spacer.getLayoutParams();
       layoutParams.width = padding;
       spacer.setLayoutParams(layoutParams);
 
-      spacer = mInputRoot.findViewById(R.id.spacer_right);
+      spacer = inputRootBinding.spacerRight;
       layoutParams = spacer.getLayoutParams();
       layoutParams.width = padding;
       spacer.setLayoutParams(layoutParams);
 
 
-      GradientDrawable gd = new GradientDrawable();
+      final GradientDrawable gd = new GradientDrawable();
         gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
         gd.setCornerRadius(mConfig.getFloat("layout/round_corner"));
         Drawable d = mConfig.getDrawable("layout/background");
@@ -443,17 +430,18 @@ public class Trime extends InputMethodService
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
             mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
 
-        Drawable d2 = mConfig.getDrawable("candidate_background");
+        final Drawable d2 = mConfig.getDrawable("candidate_background");
         if (d2 == null) {
             mCandidateContainer.setBackgroundColor(mConfig.getColor("back_color",parseColor("#00ffffff")));
         } else
             mCandidateContainer.setBackgroundDrawable(d2);
 
-      Drawable d3 = mConfig.getDrawable("root_background");
+      final Drawable d3 = mConfig.getDrawable("root_background");
       if (d3 == null) {
-        mInputRoot.setBackgroundColor(mConfig.getColor("root_background",parseColor("#00ffffff")));
-      } else
-        mInputRoot.setBackgroundDrawable(d3);
+        inputRootBinding.inputRoot.setBackgroundColor(mConfig.getColor("root_background", parseColor("#00ffffff")));
+      } else {
+        inputRootBinding.inputRoot.setBackgroundDrawable(d3);
+      }
     }
 
   public void resetKeyboard() {
@@ -484,7 +472,6 @@ public class Trime extends InputMethodService
     resetCandidate();
     hideComposition();
     resetKeyboard();
-    resetEffect();
   }
 
   public void initKeyboard() {
@@ -496,8 +483,12 @@ public class Trime extends InputMethodService
 
   @Override
   public void onDestroy() {
-    super.onDestroy();
-    mIntentReceiver.unregisterReceiver(this);
+    if (mIntentReceiver != null) mIntentReceiver.unregisterReceiver(this);
+    mIntentReceiver = null;
+    if (effectManager != null) effectManager.destroy();
+    effectManager = null;
+    inputRootBinding = null;
+    imeManager = null;
     self = null;
     if (getPrefs().getOther().getDestroyOnQuit()) {
       Rime.destroy();
@@ -505,6 +496,7 @@ public class Trime extends InputMethodService
       mConfig = null;
       System.exit(0); //清理內存
     }
+    super.onDestroy();
   }
 
   public static Trime getService() {
@@ -514,7 +506,7 @@ public class Trime extends InputMethodService
   }
 
   @Override
-  public void onConfigurationChanged(Configuration newConfig) {
+  public void onConfigurationChanged(@NonNull Configuration newConfig) {
     if (orientation != newConfig.orientation) {
       // Clear composing text and candidates for orientation change.
       escape();
@@ -576,40 +568,31 @@ public class Trime extends InputMethodService
 
   @Override
   public View onCreateInputView() {
-//  初始化键盘布局
-    LayoutInflater inflater = getLayoutInflater();
-    mInputRoot = (LinearLayout)  inflater.inflate(R.layout.input_root, (ViewGroup) null);
-    mKeyboardView = mInputRoot.findViewById(R.id.keyboard);
+    // 初始化键盘布局
+    final LayoutInflater inflater = getLayoutInflater();
+    inputRootBinding = InputRootBinding.inflate(inflater);
+    //mInputRoot = (LinearLayout) inflater.inflate(R.layout.input_root, (ViewGroup) null);
+    mKeyboardView = inputRootBinding.keyboard;
     mKeyboardView.setOnKeyboardActionListener(this);
     mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
 
-//  初始化候选栏
-    mCandidateContainer = mInputRoot.findViewById(R.id.scroll);
+    // 初始化候选栏
+    mCandidateContainer = inputRootBinding.scroll;
     mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
 
-    mCandidateContainer.setPageStr(new Runnable() {
-              @Override
-              public void run() {
-                handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
-              }
-            }
-            , new Runnable() {
-              @Override
-              public void run() {
-                handleKey(KeyEvent.KEYCODE_PAGE_UP, 0);
+    mCandidateContainer.setPageStr(() -> handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
+            , () -> handleKey(KeyEvent.KEYCODE_PAGE_UP, 0));
 
-              }
-            });
+    // 候选词悬浮窗的容器
 
-//  候选词悬浮窗的容器
-    mCompositionContainer = (LinearLayout) inflater.inflate(R.layout.composition_container, (ViewGroup) null);
+    compositionContainerBinding = CompositionContainerBinding.inflate(inflater);
     hideComposition();
-    mFloatingWindow = new PopupWindow(mCompositionContainer);
+    mFloatingWindow = new PopupWindow(compositionContainerBinding.compositionContainer);
     mFloatingWindow.setClippingEnabled(false);
     mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
 
-    mComposition = (Composition) mCompositionContainer.getChildAt(0);
+    mComposition = (Composition) compositionContainerBinding.compositionContainer.getChildAt(0);
 
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
         mFloatingWindow.setWindowLayoutType(getDialogType());
@@ -619,7 +602,7 @@ public class Trime extends InputMethodService
     mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
     loadBackground();
 
-    return mInputRoot;
+    return inputRootBinding.inputRoot;
   }
 
   void setShowComment(boolean show_comment) {
@@ -639,9 +622,9 @@ public class Trime extends InputMethodService
     canCompose = false;
     enterAsLineBreak = false;
     mTempAsciiMode = false;
-    int inputType = attribute.inputType;
-    int inputClass = inputType & InputType.TYPE_MASK_CLASS;
-    int variation = inputType & InputType.TYPE_MASK_VARIATION;
+    final int inputType = attribute.inputType;
+    final int inputClass = inputType & InputType.TYPE_MASK_CLASS;
+    final int variation = inputType & InputType.TYPE_MASK_VARIATION;
     String keyboard = null;
     switch (inputClass) {
       case InputType.TYPE_CLASS_NUMBER:
@@ -721,13 +704,13 @@ public class Trime extends InputMethodService
 
   //句首自動大小寫
   private void updateCursorCapsToInputView() {
-    if (auto_caps.contentEquals("false") || Function.isEmpty(auto_caps)) return;
+    if (auto_caps.contentEquals("false") || TextUtils.isEmpty(auto_caps)) return;
     if ((auto_caps.contentEquals("true") || Rime.isAsciiMode())
         && (mKeyboardView != null && !mKeyboardView.isCapsOn())) {
-      InputConnection ic = getCurrentInputConnection();
+      @Nullable final InputConnection ic = getCurrentInputConnection();
       if (ic != null) {
         int caps = 0;
-        EditorInfo ei = getCurrentInputEditorInfo();
+        @Nullable final EditorInfo ei = getCurrentInputEditorInfo();
         if ((ei != null) && (ei.inputType != EditorInfo.TYPE_NULL)) {
           caps = ic.getCursorCapsMode(ei.inputType);
         }
@@ -747,14 +730,15 @@ public class Trime extends InputMethodService
    */
   public void commitText(CharSequence text, boolean isRime) {
     if (text == null) return;
-    mEffect.speakCommit(text);
-    InputConnection ic = getCurrentInputConnection();
+    if (effectManager != null) effectManager.textCommitSpeak(text);
+    //mEffect.speakCommit(text);
+    final @Nullable InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
       ic.commitText(text, 1);
       lastCommittedText = text.toString();
     }
     if (isRime && !isComposing()) Rime.commitComposition(); //自動上屏
-    ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask()); //黑莓刪除鍵清空文本框問題
+    if (ic != null) ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask()); //黑莓刪除鍵清空文本框問題
   }
 
   public void commitText(CharSequence text) {
@@ -762,7 +746,7 @@ public class Trime extends InputMethodService
   }
 
   /**
-   * 從Rime獲得字符串並上屏
+   * 從 Rime 獲得字符串並上屏
    *
    * @return 是否成功上屏
    */
@@ -773,21 +757,26 @@ public class Trime extends InputMethodService
     return r;
   }
 
+  public void keyPressVibrate() { if (effectManager != null) effectManager.keyPressVibrate(); }
+
+  public void keyPressSound() { if (effectManager != null) effectManager.keyPressSound(0); }
+
   /**
    * 獲取光標處的字符
    *
    * @return 光標處的字符
    */
+  /*
   private CharSequence getLastText() {
     InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
       return ic.getTextBeforeCursor(1, 0);
     }
     return "";
-  }
+  } **/
 
-  private boolean handleAciton(int code, int mask) { //編輯操作
-    InputConnection ic = getCurrentInputConnection();
+  private boolean handleAction(int code, int mask) { //編輯操作
+    final @Nullable InputConnection ic = getCurrentInputConnection();
     if (ic == null) return false;
     if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
       // android.R.id. + selectAll, startSelectingText, stopSelectingText, cut, copy, paste, copyUrl, or switchInputMethod
@@ -802,13 +791,17 @@ public class Trime extends InputMethodService
           if (cs == null) ic.performContextMenuAction(android.R.id.selectAll);
           return ic.performContextMenuAction(android.R.id.shareText);
         }
-        if (code == KeyEvent.KEYCODE_Y) return ic.performContextMenuAction(android.R.id.redo);
-        if (code == KeyEvent.KEYCODE_Z) return ic.performContextMenuAction(android.R.id.undo);
+        switch (code) {
+          case KeyEvent.KEYCODE_Y: return ic.performContextMenuAction(android.R.id.redo);
+          case KeyEvent.KEYCODE_Z: return ic.performContextMenuAction(android.R.id.undo);
+        }
       }
-      if (code == KeyEvent.KEYCODE_A) return ic.performContextMenuAction(android.R.id.selectAll);
-      if (code == KeyEvent.KEYCODE_X) return ic.performContextMenuAction(android.R.id.cut);
-      if (code == KeyEvent.KEYCODE_C) return ic.performContextMenuAction(android.R.id.copy);
-      if (code == KeyEvent.KEYCODE_V) return ic.performContextMenuAction(android.R.id.paste);
+      switch (code) {
+        case KeyEvent.KEYCODE_A: return ic.performContextMenuAction(android.R.id.selectAll);
+        case KeyEvent.KEYCODE_X: return ic.performContextMenuAction(android.R.id.cut);
+        case KeyEvent.KEYCODE_C: return ic.performContextMenuAction(android.R.id.copy);
+        case KeyEvent.KEYCODE_V: return ic.performContextMenuAction(android.R.id.paste);
+      }
     }
     return false;
   }
@@ -829,15 +822,15 @@ public class Trime extends InputMethodService
 
   private boolean onRimeKey(int[] event) {
     updateRimeOption();
-    boolean ret = Rime.onKey(event);
+    final boolean ret = Rime.onKey(event);
     commitText();
     return ret;
   }
 
-  private boolean composeEvent(KeyEvent event) {
-    int keyCode = event.getKeyCode();
-    if (keyCode == KeyEvent.KEYCODE_MENU) return false; //不處理Menu鍵
-    if (keyCode >= Key.getSymbolStart()) return false; //只處理安卓標準按鍵
+  private boolean composeEvent(@NonNull KeyEvent event) {
+    final int keyCode = event.getKeyCode();
+    if (keyCode == KeyEvent.KEYCODE_MENU) return false; // 不處理 Menu 鍵
+    if (keyCode >= Key.getSymbolStart()) return false; // 只處理安卓標準按鍵
     if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)) {
       boolean ret =
           onRimeKey(
@@ -846,8 +839,7 @@ public class Trime extends InputMethodService
       if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
       return ret;
     }
-    if (!canCompose || Rime.isVoidKeycode(keyCode)) return false;
-    return true;
+    return canCompose && !Rime.isVoidKeycode(keyCode);
   }
 
   @Override
@@ -873,10 +865,9 @@ public class Trime extends InputMethodService
    * @param event {@link KeyEvent 按鍵事件}
    * @return 是否成功處理
    */
-  private boolean onKeyEvent(KeyEvent event) {
+  private boolean onKeyEvent(@NonNull KeyEvent event) {
     Log.info("onKeyEvent=" + event);
     int keyCode = event.getKeyCode();
-    boolean ret = true;
     keyUpNeeded = isComposing();
     if (!isComposing()) {
       if (keyCode == KeyEvent.KEYCODE_DEL
@@ -893,24 +884,25 @@ public class Trime extends InputMethodService
         && event.isCtrlPressed()
         && event.getRepeatCount() == 0
         && !KeyEvent.isModifierKey(keyCode)) {
-      if (handleAciton(keyCode, event.getMetaState())) return true;
+      if (handleAction(keyCode, event.getMetaState())) return true;
     }
 
-    int c = event.getUnicodeChar();
-    String s = String.valueOf((char) c);
+    final int unicodeChar = event.getUnicodeChar();
+    final String s = String.valueOf((char) unicodeChar);
+    final int i = Event.getClickCode(s);
     int mask = 0;
-    int i = Event.getClickCode(s);
     if (i > 0) {
       keyCode = i;
     } else { //空格、回車等
       mask = event.getMetaState();
     }
-    ret = handleKey(keyCode, mask);
+    final boolean ret = handleKey(keyCode, mask);
     if (isComposing()) setCandidatesViewShown(canCompose); //藍牙鍵盤打字時顯示候選欄
     return ret;
   }
 
-  private IBinder getToken() {
+
+  private @Nullable IBinder getToken() {
     final Dialog dialog = getWindow();
     if (dialog == null) {
       return null;
@@ -923,42 +915,43 @@ public class Trime extends InputMethodService
   }
 
   @Override
-  public void onEvent(Event event) {
-    String commit = event.getCommit();
-    if (!Function.isEmpty(commit)) {
+  public void onEvent(@NonNull Event event) {
+    final String commit = event.getCommit();
+    if (!TextUtils.isEmpty(commit)) {
       commitText(commit, false); //直接上屏，不發送給Rime
       return;
     }
     String s = event.getText();
-    if (!Function.isEmpty(s)) {
+    if (!TextUtils.isEmpty(s)) {
       onText(s);
       return;
     }
     if (event.getCode() > 0) {
-      int code = event.getCode();
+      final int code = event.getCode();
       if (code == KeyEvent.KEYCODE_SWITCH_CHARSET) { //切換狀態
         Rime.toggleOption(event.getToggle());
         commitText();
       } else if (code == KeyEvent.KEYCODE_EISU) { //切換鍵盤
         mKeyboardSwitch.setKeyboard(event.getSelect());
-        //根據鍵盤設定中英文狀態，不能放在Rime.onMessage中做
+        //根據鍵盤設定中英文狀態，不能放在 Rime.onMessage 中做
         mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); //切換到西文鍵盤時不保存狀態
         updateAsciiMode();
         bindKeyboardToInputView();
         updateComposing();
       } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { //切換輸入法
-        IBinder imeToken = getToken();
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (event.getSelect().contentEquals(".next")
-            && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
-          imm.switchToNextInputMethod(imeToken, false);
-        } else if (!Function.isEmpty(event.getSelect())) {
-          imm.switchToLastInputMethod(imeToken);
-        } else {
-          ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
+        final IBinder imeToken = getToken();
+        if (imeManager != null) {
+          if (event.getSelect().contentEquals(".next")
+                  && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+            imeManager.switchToNextInputMethod(imeToken, false);
+          } else if (!TextUtils.isEmpty(event.getSelect())) {
+            imeManager.switchToLastInputMethod(imeToken);
+          } else {
+            imeManager.showInputMethodPicker();
+          }
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { //命令直通車
-        String arg =
+        final String arg =
             String.format(
                 event.getOption(),
                 getActiveText(1),
@@ -984,7 +977,7 @@ public class Trime extends InputMethodService
             showSchemaDialog();
             break;
           default:
-            Function.showPrefDialog(this);
+            launchSettings();
             break;
         }
       } else if (code == KeyEvent.KEYCODE_PROG_RED) { //配色方案
@@ -1000,7 +993,7 @@ public class Trime extends InputMethodService
     if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
       keyUpNeeded = true;
       Log.info("Rime onKey");
-    } else if (handleAciton(keyCode, mask)
+    } else if (handleAction(keyCode, mask)
         || handleOption(keyCode)
         || handleEnter(keyCode)
         || handleBack(keyCode)) {
@@ -1016,7 +1009,7 @@ public class Trime extends InputMethodService
   }
 
   private void sendKey(InputConnection ic, int key, int meta, int action) {
-    long now = System.currentTimeMillis();
+    final long now = System.currentTimeMillis();
     if (ic != null) ic.sendKeyEvent(new KeyEvent(now, now, action, key, 0, meta));
   }
 
@@ -1029,9 +1022,9 @@ public class Trime extends InputMethodService
   }
 
   private void sendDownUpKeyEvents(int keyCode, int mask) {
-    InputConnection ic = getCurrentInputConnection();
+    @Nullable final InputConnection ic = getCurrentInputConnection();
     if (ic == null) return;
-    int states =
+    final int states =
         KeyEvent.META_FUNCTION_ON
             | KeyEvent.META_SHIFT_MASK
             | KeyEvent.META_ALT_MASK
@@ -1089,21 +1082,21 @@ public class Trime extends InputMethodService
   @Override
   public void onText(CharSequence text) { //軟鍵盤
     Log.info("onText=" + text);
-    mEffect.speakKey(text);
-    String s = text.toString();
-    String t;
-    Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
-    Pattern pText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
-    Matcher m;
+    if (effectManager != null) effectManager.keyPressSpeak(text);
+
     //Commit current composition before simulate key sequence
     if (!Rime.isValidText(text) && isComposing()) {
       Rime.commitComposition();
       commitText();
     }
+    String s = text.toString();
+    String t;
+    final Pattern p = Pattern.compile("^(\\{[^{}]+}).*$");
+    final Pattern pText = Pattern.compile("^((\\{Escape})?[^{}]+).*$");
     while (s.length() > 0) {
-      m = pText.matcher(s);
+      Matcher m = pText.matcher(s);
       if (m.matches()){
-        t =  m.group(1);
+        t = m.group(1);
         Rime.onText(t);
         if (!commitText() && !isComposing()) commitText(t);
         updateComposing();
@@ -1112,6 +1105,7 @@ public class Trime extends InputMethodService
         t = m.matches() ? m.group(1) : s.substring(0, 1);
         onEvent(new Event(t));
       }
+      assert t != null;
       s = s.substring(t.length());
     }
     keyUpNeeded = false;
@@ -1119,9 +1113,11 @@ public class Trime extends InputMethodService
 
   @Override
   public void onPress(int keyCode) {
-    mEffect.vibrate();
-    mEffect.playSound(keyCode);
-    mEffect.speakKey(keyCode);
+    if (effectManager != null) {
+      effectManager.keyPressVibrate();
+      effectManager.keyPressSound(keyCode);
+      effectManager.keyPressSpeak(keyCode);
+    }
   }
 
   @Override
@@ -1165,7 +1161,7 @@ public class Trime extends InputMethodService
     else if (i == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
     else // if (Rime.selectCandidate(i))
     {
-      handleKey(KeyEvent.KEYCODE_1+i,0);
+      handleKey(KeyEvent.KEYCODE_1 + i,0);
     }
   }
 
@@ -1173,14 +1169,14 @@ public class Trime extends InputMethodService
   private String getActiveText(int type) {
     if (type == 2) return Rime.RimeGetInput(); //當前編碼
     String s = Rime.getComposingText(); //當前候選
-    if (Function.isEmpty(s)) {
-      InputConnection ic = getCurrentInputConnection();
-      CharSequence cs = ic.getSelectedText(0); //選中字
-      if (type == 1 && Function.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
-      if (Function.isEmpty(cs)) {
+    if (TextUtils.isEmpty(s)) {
+      final @Nullable InputConnection ic = getCurrentInputConnection();
+      @Nullable CharSequence cs = ic != null ? ic.getSelectedText(0) : null; //選中字
+      if (type == 1 && TextUtils.isEmpty(cs)) cs = lastCommittedText; //剛上屏字
+      if (TextUtils.isEmpty(cs) && ic != null) {
         cs = ic.getTextBeforeCursor(type == 4 ? 1024 : 1, 0); //光標前字
       }
-      if (Function.isEmpty(cs)) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
+      if (TextUtils.isEmpty(cs) && ic != null) cs = ic.getTextAfterCursor(1024, 0); //光標後面所有字
       if (cs != null) s = cs.toString();
     }
     return s;
@@ -1188,7 +1184,7 @@ public class Trime extends InputMethodService
 
   /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
-    InputConnection ic = getCurrentInputConnection();
+    final @Nullable InputConnection ic = getCurrentInputConnection();
     if (inlinePreedit != InlineModeType.INLINE_NONE) { //嵌入模式
       String s = null;
       switch (inlinePreedit) {
@@ -1204,18 +1200,17 @@ public class Trime extends InputMethodService
       }
       if (s == null) s = "";
       if (ic != null) {
-        CharSequence cs = ic.getSelectedText(0);
-        if (cs == null || !Function.isEmpty(s)) {
+        @Nullable final CharSequence cs = ic.getSelectedText(0);
+        if (cs == null || !TextUtils.isEmpty(s)) {
           // 無選中文本或編碼不爲空時更新編輯區
           ic.setComposingText(s, 1);
         }
       }
     }
-    if (ic != null && !isWinFixed() && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
-      cursorUpdated = ic.requestCursorUpdates(1);
+    if (ic != null && !isWinFixed()) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateContainer != null) {
       if (mShowWindow) {
-        int start_num = mComposition.setWindow(min_length,min_check);
+        final int start_num = mComposition.setWindow(min_length, min_check);
         mCandidate.setText(start_num);
         if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
       } else {
@@ -1227,16 +1222,16 @@ public class Trime extends InputMethodService
   }
 
   public static int getDialogType() {
-    int dialogType = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
     if (VERSION.SDK_INT >= VERSION_CODES.P) {
-      dialogType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; //Android P中AlertDialog要顯示在最上層
+      return WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; //Android P 中 AlertDialog 要顯示在最上層
+    } else {
+      return WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
     }
-    return dialogType;
   }
 
-  private void showDialog(AlertDialog dialog) {
-    Window window = dialog.getWindow();
-    WindowManager.LayoutParams lp = window.getAttributes();
+  private void showDialog(@NonNull AlertDialog dialog) {
+    final Window window = dialog.getWindow();
+    final WindowManager.LayoutParams lp = window.getAttributes();
     if (mCandidateContainer != null) lp.token = mCandidateContainer.getWindowToken();
     lp.type = getDialogType();
     window.setAttributes(lp);
@@ -1260,6 +1255,18 @@ public class Trime extends InputMethodService
       new ThemePickerDialog(this, mCandidateContainer.getWindowToken()).show();
   }
 
+  /**
+   * Hides the IME and launches {@link PrefMainActivity}.
+   */
+  public void launchSettings() {
+    requestHideSelf(0);
+    final Intent i = new Intent(this, PrefMainActivity.class);
+    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED |
+            Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    getApplicationContext().startActivity(i);
+  }
+
   private boolean handleOption(int keyCode) {
     if (keyCode == KeyEvent.KEYCODE_MENU) {
       if (mOptionsDialog != null && mOptionsDialog.isShowing()) return true; //對話框單例
@@ -1268,47 +1275,28 @@ public class Trime extends InputMethodService
               .setTitle(R.string.trime_app_name)
               .setIcon(R.mipmap.ic_app_icon_round)
               .setCancelable(true)
-              .setNegativeButton(
-                  R.string.other_ime,
-                  new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface di, int id) {
-                      di.dismiss();
-                      ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
-                          .showInputMethodPicker();
-                    }
-                  })
-              .setPositiveButton(
-                  R.string.set_ime,
-                  new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface di, int id) {
-                      Function.showPrefDialog(Trime.this); //全局設置
-                      di.dismiss();
-                    }
-                  });
+              .setNegativeButton(R.string.other_ime, (di, id) -> {
+                        di.dismiss();
+                        if (imeManager != null) imeManager.showInputMethodPicker();
+              })
+              .setPositiveButton(R.string.set_ime, (di, id) -> {
+                        Function.showPrefDialog(Trime.this); //全局設置
+                        di.dismiss();
+              });
       if (Rime.isEmpty()) builder.setMessage(R.string.no_schemas); //提示安裝碼表
       else {
-        builder.setNeutralButton(
-            R.string.pref_schemas,
-            new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface di, int id) {
-                showSchemaDialog(); //部署方案
-                di.dismiss();
-              }
-            });
+        builder.setNeutralButton(R.string.pref_schemas, (di, id) -> {
+                  showSchemaDialog(); //部署方案
+                  di.dismiss();
+        });
         builder.setSingleChoiceItems(
             Rime.getSchemaNames(),
             Rime.getSchemaIndex(),
-            new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface di, int id) {
-                di.dismiss();
-                Rime.selectSchema(id); //切換方案
-                mNeedUpdateRimeOption = true;
-              }
-            });
+                (di, id) -> {
+                  di.dismiss();
+                  Rime.selectSchema(id); //切換方案
+                  mNeedUpdateRimeOption = true;
+                });
       }
       mOptionsDialog = builder.create();
       showDialog(mOptionsDialog);
@@ -1344,7 +1332,6 @@ public class Trime extends InputMethodService
   private void updateAsciiMode() {
     Rime.setOption("ascii_mode", mTempAsciiMode || mAsciiMode);
   }
-
 
   @Override
   public void updateFullscreenMode(){
@@ -1416,73 +1403,63 @@ public class Trime extends InputMethodService
     }
   }
 
-  private String ClipBoardString="";
+  private String ClipBoardString = "";
 
   private static String StringReplacer(String str,String[] rules){
-    if(str==null)
-      return "";
+    if ( str == null) return "";
 
     String s = str;
-    for(String rule:rules){
+    for (String rule: rules) {
       s = s.replaceAll(rule,"");
-      if(s.length()<1)
-        return "";
+      if(s.length() < 1) return "";
     }
     return s;
   }
 
   private static boolean StringNotMatch(String str,String[] rules){
-    if(str==null)
-      return false;
+    if (str == null) return false;
 
-    if(str.length()<1)
-      return false;
+    if (str.length() < 1) return false;
 
-    String s = str;
-    for(String rule:rules){
-      if(s.matches(rule))
-        return false;
+    for (String rule: rules) {
+      if (str.matches(rule)) return false;
     }
     return true;
   }
+
   /**
-   *desc：此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
-   * ClipBoardCompare 比较规则。每次通知剪贴板管理器，都会保存ClipBoardCompare处理过的string。如果两次处理过的内容不变，则不通知。
-   * ClipBoardOut     输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
+   * 此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
+   *
+   * ClipBoardCompare 比较规则。每次通知剪贴板管理器，都会保存 ClipBoardCompare 处理过的 string。如果两次处理过的内容不变，则不通知。
+   * ClipBoardOut 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
    */
-  private void clipBoardMonitor(){
-
+  private void clipBoardMonitor() {
     final ClipboardManager clipBoard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
-    clipBoard.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
-      @Override
-      public void onPrimaryClipChanged() {
+    clipBoard.addPrimaryClipChangedListener(() -> {
+      if (mConfig.hasClipBoardManager()) {
+        final String[] ClipBoardManager = mConfig.getClipBoardManager();
 
-        if(mConfig.hasClipBoardManager()) {
-          String[] ClipBoardManager = mConfig.getClipBoardManager();
+        final ClipData clipData = clipBoard.getPrimaryClip();
+        final ClipData.Item item = clipData.getItemAt(0);
 
-          ClipData clipData = clipBoard.getPrimaryClip();
-          ClipData.Item item = clipData.getItemAt(0);
+        final String text = item.getText().toString();
 
-          String text = item.getText().toString();
+        final String text2 = StringReplacer(text, mConfig.getClipBoardCompare());
+        if (text2.length() < 1 || text2.equals(ClipBoardString) )
+          return;
 
-          String text2 = StringReplacer(text, mConfig.getClipBoardCompare());
-          if(text2.length()<1 || text2.equals(ClipBoardString) )
-            return;
+        if (StringNotMatch(text, mConfig.getClipBoardOutput())) {
+            ClipBoardString = text;
 
-          if(StringNotMatch(text, mConfig.getClipBoardOutput()))
-            {
-              ClipBoardString = text;
+            final Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, text);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setComponent(new ComponentName(ClipBoardManager[0],ClipBoardManager[1]));
 
-              Intent intent = new Intent(Intent.ACTION_SEND);
-              intent.setType("text/plain");
-              intent.putExtra(Intent.EXTRA_TEXT, text);
-              intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-              intent.setComponent(new ComponentName(ClipBoardManager[0],ClipBoardManager[1]));
-
-              self.startActivity(intent);
-            }
+            self.startActivity(intent);
           }
         }
-    });
+      });
   }
 }

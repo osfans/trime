@@ -2,6 +2,8 @@ package com.osfans.trime.ime.core
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
+import androidx.core.os.UserManagerCompat
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
@@ -12,9 +14,13 @@ import java.lang.ref.WeakReference
  * Helper class for an organized access to the shared preferences.
  */
 class Preferences(
-    context: Context,
-    val shared: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    context: Context
 ) {
+    var shared: SharedPreferences = if (!UserManagerCompat.isUserUnlocked(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        context.createDeviceProtectedStorageContext().getSharedPreferences("shared_psfs", Context.MODE_PRIVATE)
+    else
+        PreferenceManager.getDefaultSharedPreferences(context)
+
     private val applicationContext: WeakReference<Context> = WeakReference(context.applicationContext)
 
     private val cacheBoolean: HashMap<String, Boolean> = hashMapOf()
@@ -118,11 +124,15 @@ class Preferences(
      * they have not been initialized yet.
      */
     fun initDefaultPreferences() {
-        applicationContext.get()?.let { context ->
-            PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
-            PreferenceManager.setDefaultValues(context, R.xml.looks_preference, true)
-            PreferenceManager.setDefaultValues(context, R.xml.conf_preference, true)
-            PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
+        try {
+            applicationContext.get()?.let { context ->
+                PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.looks_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.conf_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
+            }
+        } catch (e: Exception) {
+            e.fillInStackTrace()
         }
     }
 
