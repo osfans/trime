@@ -681,7 +681,7 @@ public class Config {
     }
 
     public WindowsPositionType getWinPos() {
-        return WindowsPositionType.fromString(getString("layout/position"));
+        return WindowsPositionType.Companion.fromString(getString("layout/position"));
     }
 
     public int getLongTimeout() {
