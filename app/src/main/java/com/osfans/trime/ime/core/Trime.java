@@ -48,12 +48,10 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManager.*;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -62,20 +60,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.blankj.utilcode.util.BarUtils;
-import com.osfans.trime.ime.text.Candidate;
-import com.osfans.trime.ime.text.Composition;
-import com.osfans.trime.ime.keyboard.Event;
-import com.osfans.trime.util.Function;
-import com.osfans.trime.ime.keyboard.Key;
-import com.osfans.trime.ime.keyboard.Keyboard;
-import com.osfans.trime.ime.keyboard.KeyboardSwitch;
-import com.osfans.trime.ime.keyboard.KeyboardView;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
 import com.osfans.trime.databinding.CompositionContainerBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.enums.InlineModeType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
+import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.ime.keyboard.Key;
+import com.osfans.trime.ime.keyboard.Keyboard;
+import com.osfans.trime.ime.keyboard.KeyboardSwitch;
+import com.osfans.trime.ime.keyboard.KeyboardView;
+import com.osfans.trime.ime.text.Candidate;
+import com.osfans.trime.ime.text.Composition;
 import com.osfans.trime.ime.text.xScrollView;
 import com.osfans.trime.settings.PrefMainActivity;
 import com.osfans.trime.settings.components.ColorPickerDialog;
@@ -83,6 +80,7 @@ import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
+import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
 
 import java.util.Locale;
@@ -1090,8 +1088,8 @@ public class Trime extends InputMethodService
     }
     String s = text.toString();
     String t;
-    final Pattern p = Pattern.compile("^(\\{[^{}]+}).*$");
-    final Pattern pText = Pattern.compile("^((\\{Escape})?[^{}]+).*$");
+    final Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
+    final Pattern pText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
     while (s.length() > 0) {
       Matcher m = pText.matcher(s);
       if (m.matches()){
