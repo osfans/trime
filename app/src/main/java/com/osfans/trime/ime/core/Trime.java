@@ -132,6 +132,10 @@ public class Trime extends InputMethodService
   private WindowsPositionType winPos; //候選窗口彈出位置
   private InlineModeType inlinePreedit; //嵌入模式
 
+  // compile regex once
+  private final static Pattern pattern = Pattern.compile("^(\\{[^{}]+\\}).*$");
+  private final static Pattern patternText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
+
   @Nullable private IntentReceiver mIntentReceiver = null;
   private static final Handler syncBackgroundHandler = new Handler(msg -> {
     if(!((Trime) msg.obj).isShowInputRequested()){ //若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
@@ -1088,17 +1092,15 @@ public class Trime extends InputMethodService
     }
     String s = text.toString();
     String t;
-    final Pattern p = Pattern.compile("^(\\{[^{}]+\\}).*$");
-    final Pattern pText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
     while (s.length() > 0) {
-      Matcher m = pText.matcher(s);
+      Matcher m = patternText.matcher(s);
       if (m.matches()){
         t = m.group(1);
         Rime.onText(t);
         if (!commitText() && !isComposing()) commitText(t);
         updateComposing();
       } else {
-        m = p.matcher(s);
+        m = pattern.matcher(s);
         t = m.matches() ? m.group(1) : s.substring(0, 1);
         onEvent(new Event(t));
       }
