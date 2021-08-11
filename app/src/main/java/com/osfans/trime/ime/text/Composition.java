@@ -30,23 +30,16 @@ import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.AlignmentSpan;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.UnderlineSpan;
+import android.text.style.*;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
-
-import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.setup.Config;
 
 import java.util.List;
@@ -76,6 +69,8 @@ public class Composition extends AppCompatTextView {
   private int candidate_num;
   private boolean all_phrases;
   //private View mInputRoot;
+  // 候选高亮序号颜色
+  private Integer hilitedLabelColor;
 
   private class CompositionSpan extends UnderlineSpan {
     public CompositionSpan() {
@@ -223,6 +218,10 @@ public class Composition extends AppCompatTextView {
     hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
     hilited_comment_text_color = config.getColor("hilited_comment_text_color");
     label_color = config.getColor("label_color");
+    hilitedLabelColor = config.getColor("hilited_label_color");
+    if (hilitedLabelColor == null) {
+      hilitedLabelColor = hilited_candidate_text_color;
+    }
 
     back_color = config.getColor("back_color");
     hilited_back_color = config.getColor("hilited_back_color");
@@ -405,7 +404,7 @@ public class Composition extends AppCompatTextView {
             new CandidateSpan(
                 i,
                 tfLabel,
-                hilited_candidate_text_color,
+                hilitedLabelColor,
                 hilited_candidate_back_color,
                 label_color),
             start,
