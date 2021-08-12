@@ -143,5 +143,6 @@
     <string name="about__app_info">App Information</string>
     <string name="about__open_source_license">Open Source Licenses</string>
     <string name="about__support">Support</string>
-    <string name="about__used_library">Open Source Library We Use</string>
+    <string name="about__used_libraries">Open Source Libraries We Use</string>
+    <string name="about__used_library_dialog_title">Trime | Open Source Libraries</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.osfans.trime.settings
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.webkit.WebView
@@ -88,6 +87,16 @@ class AboutActivity: AppCompatActivity() {
                     webView.loadUrl("file:///android_asset/license/open_source_license.html")
                     AlertDialog.Builder(requireContext())
                         .setTitle(R.string.about__licensing_title)
+                        .setView(webView)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                    true
+                }
+                "about__used_libraries" -> {
+                    val webView = WebView(requireContext())
+                    webView.loadUrl("file:///android_asset/license/library_licenses.html")
+                    AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.about__used_library_dialog_title)
                         .setView(webView)
                         .setPositiveButton(android.R.string.ok, null)
                         .show()

@@ -45,8 +45,8 @@
             app:summary="@string/about__licensing_summary"
             app:iconSpaceReserved="false"/>
 
-        <Preference app:key="about__used_library"
-            app:title="@string/about__used_library"
+        <Preference app:key="about__used_libraries"
+            app:title="@string/about__used_libraries"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
