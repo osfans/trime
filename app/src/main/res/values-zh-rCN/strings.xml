@@ -29,16 +29,16 @@
     <string name="pref_rime_qq">中州韵QQ群</string>
     <string name="pref_market">谷歌市场</string>
     <string name="pref_coolmarket">酷安市场</string>
-    <string name="pref_donate">捐赠</string>
-    <string name="pref_donate_summary">使用支付宝捐助同文和PRIME的开发</string>
+    <string name="about__donation_title">捐赠</string>
+    <string name="about__donation_summary">使用支付宝捐助同文和PRIME的开发</string>
     <string name="settings__about_title">关于</string>
-    <string name="pref_librime_ver">RIME版本</string>
-    <string name="pref_opencc_ver">OpenCC版本</string>
-    <string name="pref_changelog">更新日志</string>
-    <string name="pref_licensing">许可证</string>
+    <string name="about__librime_version">RIME版本</string>
+    <string name="about__opencc_version">OpenCC版本</string>
+    <string name="about__changelog">更新日志</string>
+    <string name="about__licensing_title">许可证</string>
     <string name="pref_credits">鸣谢</string>
-    <string name="pref_pime">微软平台PRIME输入法</string>
-    <string name="pref_privacy">隐私策略</string>
+    <string name="about__product_prime">微软平台PRIME输入法</string>
+    <string name="about__privacy_policy">隐私策略</string>
     <string name="settings__configuration_title">输入配置</string>
     <string name="pref_enable">启用</string>
     <string name="pref_enable_summary">启用同文输入法</string>
@@ -139,4 +139,8 @@
     <string name="speech__error_server">服务器错误</string>
     <string name="speech__error_unknown">未知错误</string>
     <string name="speech__error_speech_timeout">无语音输入</string>
+    <string name="about__app_info">应用信息</string>
+    <string name="about__open_source_license">开源许可</string>
+    <string name="about__support">支持</string>
+    <string name="about__used_library">我们使用的库</string>
 </resources>

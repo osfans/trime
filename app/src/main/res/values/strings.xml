@@ -30,16 +30,16 @@
     <string name="pref_rime_qq">Rime QQ Group</string>
     <string name="pref_market">Google Play</string>
     <string name="pref_coolmarket">Cool Market</string>
-    <string name="pref_donate">Donate</string>
-    <string name="pref_donate_summary">Use Alipay to support TRIME and PRIME</string>
+    <string name="about__donation_title">Donate</string>
+    <string name="about__donation_summary">Use Alipay to support TRIME and PRIME</string>
     <string name="settings__about_title">About</string>
-    <string name="pref_librime_ver">RIME Version</string>
-    <string name="pref_opencc_ver">OpenCC Version</string>
-    <string name="pref_changelog">Change Log</string>
-    <string name="pref_licensing">License</string>
+    <string name="about__librime_version">RIME Version</string>
+    <string name="about__opencc_version">OpenCC Version</string>
+    <string name="about__changelog">Change Log</string>
+    <string name="about__licensing_title">License</string>
     <string name="pref_credits">Credits</string>
-    <string name="pref_pime">Win10 PRIME Platform</string>
-    <string name="pref_privacy">Privacy Policy</string>
+    <string name="about__product_prime">Win10 PRIME Platform</string>
+    <string name="about__privacy_policy">Privacy Policy</string>
     <string name="settings__configuration_title">Configurations</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable TRIME</string>
@@ -140,4 +140,8 @@
     <string name="speech__error_server">Error on server</string>
     <string name="speech__error_unknown">Unknown error</string>
     <string name="speech__error_speech_timeout">No voice detected</string>
+    <string name="about__app_info">App Information</string>
+    <string name="about__open_source_license">Open Source Licenses</string>
+    <string name="about__support">Support</string>
+    <string name="about__used_library">Open Source Library We Use</string>
 </resources>

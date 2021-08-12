@@ -30,16 +30,16 @@
     <string name="pref_rime_qq">中州韻QQ羣</string>
     <string name="pref_market">谷歌市場</string>
     <string name="pref_coolmarket">酷安市場</string>
-    <string name="pref_donate">捐贈</string>
-    <string name="pref_donate_summary">自願用支付寶捐助同文和PRIME的開發</string>
+    <string name="about__donation_title">捐贈</string>
+    <string name="about__donation_summary">自願用支付寶捐助同文和PRIME的開發</string>
     <string name="settings__about_title">關於</string>
-    <string name="pref_librime_ver">RIME版本</string>
-    <string name="pref_opencc_ver">OpenCC版本</string>
-    <string name="pref_changelog">更新日誌</string>
-    <string name="pref_licensing">許可證</string>
+    <string name="about__librime_version">RIME版本</string>
+    <string name="about__opencc_version">OpenCC版本</string>
+    <string name="about__changelog">更新日誌</string>
+    <string name="about__licensing_title">許可證</string>
     <string name="pref_credits">鳴謝</string>
-    <string name="pref_pime">Win10 PRIME輸入法平臺</string>
-    <string name="pref_privacy">隱私權政策</string>
+    <string name="about__product_prime">Win10 PRIME輸入法平臺</string>
+    <string name="about__privacy_policy">隱私權政策</string>
     <string name="settings__configuration_title">輸入配置</string>
     <string name="pref_enable">啓用</string>
     <string name="pref_enable_summary">啓用同文輸入法平臺</string>
@@ -140,4 +140,8 @@
     <string name="speech__error_server">伺服器錯誤</string>
     <string name="speech__error_speech_timeout">無語音輸入</string>
     <string name="speech__error_unknown">未知錯誤</string>
+    <string name="about__app_info">應用資訊</string>
+    <string name="about__open_source_license">開源許可</string>
+    <string name="about__support">支援</string>
+    <string name="about__used_library">我們使用的庫</string>
 </resources>
