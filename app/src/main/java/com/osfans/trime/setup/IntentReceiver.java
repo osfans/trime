@@ -22,13 +22,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.osfans.trime.Rime;
 import com.osfans.trime.util.RimeUtils;
+
+import timber.log.Timber;
 
 /** 接收 Intent 廣播事件 */
 public class IntentReceiver extends BroadcastReceiver {
@@ -40,7 +41,7 @@ public class IntentReceiver extends BroadcastReceiver {
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         final @Nullable String command = intent.getAction();
 
-        Log.d(TAG, "Receive Command = " + command);
+        Timber.d("Receive Command = %s", command);
         //防止为空，虽然很少,但是可能会出现
         //http://stackoverflow.com/questions/15048883/intent-getaction-is-returning-null
         if (command == null) return;

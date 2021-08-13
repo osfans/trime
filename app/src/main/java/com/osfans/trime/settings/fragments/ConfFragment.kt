@@ -3,7 +3,6 @@ package com.osfans.trime.settings.fragments
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import androidx.core.view.forEach
 import androidx.preference.Preference
@@ -18,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ocpsoft.prettytime.PrettyTime
+import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
@@ -53,7 +53,7 @@ class ConfFragment: PreferenceFragmentCompat(), CoroutineScope {
                         try {
                             RimeUtils.sync(requireContext())
                         } catch (ex: Exception) {
-                            Log.e("ConfFragment", "Sync Exception: $ex")
+                            Timber.e(ex, "Sync Exception")
                         } finally {
                             progressDialog.dismiss()
                             exitProcess(0)

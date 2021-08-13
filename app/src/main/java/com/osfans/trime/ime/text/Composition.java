@@ -37,20 +37,21 @@ import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
-import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.setup.Config;
 
 import java.util.List;
 import java.util.Map;
+
+import timber.log.Timber;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
 public class Composition extends AppCompatTextView {
@@ -241,7 +242,7 @@ public class Composition extends AppCompatTextView {
     int max_width=config.getPixel("layout/max_width");
     int real_margin=config.getPixel("layout/real_margin");
     int displayWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-    Log.d("Composition.reset","max_width="+max_width+" displayWidth="+displayWidth);
+    Timber.d("max_width = %s, displayWidth = %s ", max_width, displayWidth);
     if(max_width>displayWidth)
       max_width = displayWidth;
     setMaxWidth(max_width-real_margin*2);
@@ -350,7 +351,7 @@ public class Composition extends AppCompatTextView {
 
   /** 生成悬浮窗内的文本 */
   private void appendCandidates(Map<?, ?> m, int length,int end_num) {
-    Log.d("Composition","appendCandidates() length="+length);
+    Timber.d("appendCandidates(): length = %s", length);
     int start, end;
 
     final Rime.RimeCandidate[] candidates = Rime.getCandidates();
@@ -519,7 +520,7 @@ public class Composition extends AppCompatTextView {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
         start_num = calcStartNum(length,min_check);
-        Log.d("setWindow()","start_num="+start_num+" min_length="+length+" min_check="+min_check);
+        Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, length, min_check);
         appendCandidates(m, length,start_num);
       }
       else if (m.containsKey("click")) appendButton(m);

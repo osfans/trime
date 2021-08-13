@@ -36,7 +36,6 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 
@@ -51,6 +50,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import timber.log.Timber;
 
 /** 實現打開指定程序、打開{@link PrefMainActivity 輸入法全局設置}對話框等功能 */
 public class Function {
@@ -78,7 +79,7 @@ public class Function {
       try {
         context.startActivity(intent);
       } catch (Exception ex) {
-        Log.e(TAG, "Start Activity Exception" + ex);
+        Timber.e(ex, "Start Activity Exception");
       }
       return true;
     }
@@ -105,7 +106,7 @@ public class Function {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
     } catch (Exception ex) {
-      Log.e(TAG, "Start Activity Exception" + ex);
+      Timber.e(ex, "Start Activity Exception");
     }
   }
 
@@ -133,7 +134,7 @@ public class Function {
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
       context.startActivity(intent);
     } catch (Exception ex) {
-      Log.e(TAG, "Start Activity Exception" + ex);
+      Timber.e(ex, "Start Activity Exception");
     }
   }
 

@@ -84,14 +84,14 @@ import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
 
 import java.util.Locale;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
-  private final static Logger Log = Logger.getLogger(Trime.class.getSimpleName());
   private static Trime self;
   @NonNull private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); }
   private KeyboardView mKeyboardView; //軟鍵盤
@@ -166,7 +166,7 @@ public class Trime extends InputMethodService
     winPos = WindowsPositionType.DRAG;
     winX = offsetX;
     winY = offsetY;
-    Log.info("updateWindow: winX="+winX+" winY="+winY);
+    Timber.i("updateWindow: winX = %s, winY = %s", winX, winY);
     mFloatingWindow.update(winX, winY, -1, -1, true);
   }
 
@@ -690,7 +690,7 @@ public class Trime extends InputMethodService
     try {
       hideComposition();
     } catch (Exception e) {
-      Log.info("Fail to show the PopupWindow.");
+      Timber.e(e, "Failed to show the PopupWindow.");
     }
   }
 
@@ -845,14 +845,14 @@ public class Trime extends InputMethodService
 
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
-    Log.info("onKeyDown=" + event);
+    Timber.i("onKeyDown = %s", event);
     if (composeEvent(event) && onKeyEvent(event)) return true;
     return super.onKeyDown(keyCode, event);
   }
 
   @Override
   public boolean onKeyUp(int keyCode, KeyEvent event) {
-    Log.info("onKeyUp=" + event);
+    Timber.i("onKeyUp = %s", event);
     if (composeEvent(event) && keyUpNeeded) {
       onRelease(keyCode);
       return true;
@@ -867,7 +867,7 @@ public class Trime extends InputMethodService
    * @return 是否成功處理
    */
   private boolean onKeyEvent(@NonNull KeyEvent event) {
-    Log.info("onKeyEvent=" + event);
+    Timber.i("onKeyEvent = %s", event);
     int keyCode = event.getKeyCode();
     keyUpNeeded = isComposing();
     if (!isComposing()) {
@@ -993,15 +993,15 @@ public class Trime extends InputMethodService
     keyUpNeeded = false;
     if (onRimeKey(Event.getRimeEvent(keyCode, mask))) {
       keyUpNeeded = true;
-      Log.info("Rime onKey");
+      Timber.i("Rime onKey");
     } else if (handleAction(keyCode, mask)
         || handleOption(keyCode)
         || handleEnter(keyCode)
         || handleBack(keyCode)) {
-      Log.info("Trime onKey");
+      Timber.i("Trime onKey");
     } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1
         && Function.openCategory(this, keyCode)) {
-      Log.info("open category");
+      Timber.i("Open category");
     } else {
       keyUpNeeded = true;
       return false;
@@ -1082,7 +1082,7 @@ public class Trime extends InputMethodService
 
   @Override
   public void onText(CharSequence text) { //軟鍵盤
-    Log.info("onText=" + text);
+    Timber.i("onText = %s", text);
     if (effectManager != null) effectManager.keyPressSpeak(text);
 
     //Commit current composition before simulate key sequence
@@ -1335,17 +1335,17 @@ public class Trime extends InputMethodService
   @Override
   public void updateFullscreenMode(){
     super.updateFullscreenMode();
-    // to-do  需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
+    //TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
     View inputArea = getWindow().findViewById(android.R.id.inputArea);
     int layoutHeight = isFullscreenMode()?
       LayoutParams.WRAP_CONTENT:LayoutParams.MATCH_PARENT;
 
     if(isFullscreenMode()){
-      Log.info("isFullScreen");
+      Timber.i("isFullScreen");
       //全屏模式下，当键盘布局包含透明色时，用户能透过键盘看到待输入App的UI，影响全屏体验。故需填色。当前固定填充淡粉色，用于测试。
       inputArea.setBackgroundColor(parseColor("#ff660000"));
     }else{
-      Log.info("isFullScreen");
+      Timber.i("NotFullScreen");
       //非全屏模式下，这个颜色似乎不会体现出来。为避免出现问题，填充浅灰色
       inputArea.setBackgroundColor(parseColor("#dddddddd"));
     }
