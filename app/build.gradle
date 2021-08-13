@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.osfans.trime"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 29
         versionCode 20210604
         versionName "3.2.0"
