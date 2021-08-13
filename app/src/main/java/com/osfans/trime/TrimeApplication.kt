@@ -12,7 +12,12 @@ import com.osfans.trime.ime.core.Preferences
 class TrimeApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        val prefs = Preferences.initDefault(this)
-        prefs.initDefaultPreferences()
+        try {
+            val prefs = Preferences.initDefault(this)
+            prefs.initDefaultPreferences()
+        } catch (e: Exception) {
+            e.fillInStackTrace()
+            return
+        }
     }
 }
