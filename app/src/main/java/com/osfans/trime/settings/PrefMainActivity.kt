@@ -11,7 +11,6 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
@@ -22,15 +21,14 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
+import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.exitProcess
 
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
 
@@ -142,7 +140,7 @@ class PrefMainActivity: AppCompatActivity(),
                         try {
                             RimeUtils.deploy(this@PrefMainActivity)
                         } catch (ex: Exception) {
-                            Log.e(FRAGMENT_TAG, "Deploy Exception: $ex")
+                            Timber.e(ex, "Deploy Exception")
                         } finally {
                             progressDialog.dismiss()
 //                              exitProcess(0)

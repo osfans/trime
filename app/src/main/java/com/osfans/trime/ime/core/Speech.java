@@ -24,26 +24,26 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.blankj.utilcode.util.ToastUtils;
-import com.osfans.trime.setup.Config;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
+import com.osfans.trime.setup.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import timber.log.Timber;
 
 /** {@link RecognitionListener 語音輸入} */
 public class Speech implements RecognitionListener {
     private final @NonNull Context context;
     private final @Nullable SpeechRecognizer speechRecognizer;
     private final Intent recognizerIntent;
-    private final String TAG = "Speech";
 
     public Speech(@NonNull Context context) {
         this.context = context;
@@ -63,17 +63,17 @@ public class Speech implements RecognitionListener {
 
     @Override
     public void onBeginningOfSpeech() {
-        Log.i(TAG, "onBeginningOfSpeech");
+        Timber.i("onBeginningOfSpeech");
     }
 
     @Override
     public void onBufferReceived(byte[] buffer) {
-        Log.i(TAG, "onBufferReceived: " + Arrays.toString(buffer));
+        Timber.i("onBufferReceived: %s", Arrays.toString(buffer));
     }
 
     @Override
     public void onEndOfSpeech() {
-        Log.i(TAG, "onEndOfSpeech");
+        Timber.i("onEndOfSpeech");
     }
 
     @Override
@@ -88,17 +88,17 @@ public class Speech implements RecognitionListener {
 
     @Override
     public void onEvent(int arg0, Bundle arg1) {
-        Log.i(TAG, "onEvent");
+        Timber.i("onEvent");
     }
 
     @Override
     public void onPartialResults(Bundle arg0) {
-        Log.i(TAG, "onPartialResults");
+        Timber.i("onPartialResults");
     }
 
     @Override
     public void onReadyForSpeech(Bundle arg0) {
-        Log.i(TAG, "onReadyForSpeech");
+        Timber.i("onReadyForSpeech");
         ToastUtils.showShort("請開始說話：");
     }
 
@@ -108,7 +108,7 @@ public class Speech implements RecognitionListener {
             speechRecognizer.stopListening();
             speechRecognizer.destroy();
         }
-        Log.i(TAG, "onResults");
+        Timber.i("onResults");
         @Nullable Trime trime = Trime.getService();
         if (trime == null) return;
         final ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -118,7 +118,7 @@ public class Speech implements RecognitionListener {
 
     @Override
     public void onRmsChanged(float rmsdB) {
-        Log.i(TAG, "onRmsChanged: " + rmsdB);
+        Timber.i("onRmsChanged: %s", rmsdB);
     }
 
     private static @StringRes int getErrorText(int errorCode) {

@@ -33,7 +33,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,11 +43,11 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.osfans.trime.util.Function;
 import com.osfans.trime.R;
-import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.core.Preferences;
+import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.Function;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -56,6 +55,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import timber.log.Timber;
 
 /** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
 public class KeyboardView extends View implements View.OnClickListener {
@@ -117,7 +118,6 @@ public class KeyboardView extends View implements View.OnClickListener {
   private static final boolean DEBUG = false;
   private static final int NOT_A_KEY = -1;
   private static final int[] LONG_PRESSABLE_STATE_SET = {android.R.attr.state_long_pressable};
-  private static String TAG = KeyboardView.class.getSimpleName();
 
   private Keyboard mKeyboard;
   private int mCurrentKeyIndex = NOT_A_KEY;
@@ -356,7 +356,7 @@ public class KeyboardView extends View implements View.OnClickListener {
               int[].class);
       getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
     } catch (Exception ex) {
-      Log.e(TAG, "Get Drawable Exception: " + ex);
+      Timber.e(ex, "Get Drawable Exception");
     }
 
     LayoutInflater inflate =
@@ -751,7 +751,7 @@ public class KeyboardView extends View implements View.OnClickListener {
           int index = (int) findStateDrawableIndex.invoke(mKeyBackColor, drawableState);
           keyBackground = (Drawable) getStateDrawable.invoke(mKeyBackColor, index);
         } catch (Exception ex) {
-          Log.e(TAG, "Get Drawable Exception" + ex);
+          Timber.e(ex, "Get Drawable Exception");
         }
       }
       if (keyBackground instanceof GradientDrawable) {

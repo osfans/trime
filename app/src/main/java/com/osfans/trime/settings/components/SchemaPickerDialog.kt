@@ -5,13 +5,13 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import android.view.WindowManager
 import com.osfans.trime.*
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.PrefMainActivity
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.*
+import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
@@ -33,8 +33,6 @@ class SchemaPickerDialog(
     private var progressDialog: ProgressDialog
 
     companion object {
-        private val CLASS_TAG = SchemaPickerDialog::class.java.simpleName
-
         private class SortByName: Comparator<Map<String?, String?>> {
             override fun compare(o1: Map<String?, String?>, o2: Map<String?, String?>): Int {
                 val s1 = o1["schema_id"]
@@ -59,7 +57,7 @@ class SchemaPickerDialog(
         pickerDialogBuilder = AlertDialog.Builder(context).apply {
             setTitle(R.string.pref_schemas)
             setCancelable(true)
-            setPositiveButton(android.R.string.ok, null);
+            setPositiveButton(android.R.string.ok, null)
         }
         if (schemaMapList.isNullOrEmpty()) {
             pickerDialogBuilder!!.setMessage(R.string.no_schemas)
@@ -78,7 +76,7 @@ class SchemaPickerDialog(
                         try {
                             setSchema()
                         } catch (e: Exception) {
-                            Log.e(CLASS_TAG, "Fail to set schema: $e")
+                            Timber.e(e, "Failed to set schema")
                         } finally {
                             progressDialog.dismiss()
                             val intent = Intent(context, PrefMainActivity::class.java)

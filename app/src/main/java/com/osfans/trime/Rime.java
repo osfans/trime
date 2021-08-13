@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import timber.log.Timber;
+
 /**
  * Rime與OpenCC的Java實現
  *
@@ -346,7 +348,7 @@ public class Rime {
   private static boolean onKey(int keycode, int mask) {
     if (isVoidKeycode(keycode)) return false;
     final boolean b = process_key(keycode, mask);
-    Log.info("Key process =" + b + ", keycode = " + keycode + ", mask = " + mask);
+    Timber.i("process key = %s, keycode = %s, mask = %s", b, keycode, mask);
     getContexts();
     return b;
   }
@@ -365,7 +367,7 @@ public class Rime {
   public static boolean onText(CharSequence text) {
     if (!isValidText(text)) return false;
     boolean b = simulate_key_sequence(text.toString().replace("{}", "{braceleft}{braceright}"));
-    Log.info("b=" + b + ",input=" + text);
+    Timber.i("simulate key sequence = %s, input = %s", b, text);
     getContexts();
     return b;
   }
@@ -519,7 +521,7 @@ public class Rime {
 
   public static void onMessage(String message_type, String message_value) {
     mOnMessage = true;
-    Log.info(String.format("message: [%s] %s", message_type, message_value));
+    Timber.i("message: [%s] %s", message_type, message_value);
     Trime trime = Trime.getService();
     switch (message_type) {
       case "schema":
