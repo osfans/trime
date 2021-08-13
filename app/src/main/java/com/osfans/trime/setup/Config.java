@@ -21,12 +21,7 @@ package com.osfans.trime.setup;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.NinePatch;
-import android.graphics.Rect;
-import android.graphics.Typeface;
+import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -34,29 +29,18 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.TypedValue;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.blankj.utilcode.util.ResourceUtils;
-import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.Rime;
-import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.core.Preferences;
+import com.osfans.trime.ime.enums.WindowsPositionType;
+import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.AppVersionUtils;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-
 import kotlin.jvm.Synchronized;
+
+import java.io.*;
+import java.util.*;
 
 /** 解析 YAML 配置文件 */
 public class Config {
@@ -472,7 +456,7 @@ public class Config {
     public Integer getColor(String key) {
         Object o = getColorObject(key);
         if (o == null) {
-            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get("default"))).get(key);
+            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(getColorSchemeName()))).get(key);
         }
         if (o == null) return null;
         return parseColor(o.toString());
@@ -481,7 +465,7 @@ public class Config {
     public Integer getColor(String key,Integer defaultValue) {
         Object o = getColorObject(key);
         if (o == null) {
-            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get("default"))).get(key);
+            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(getColorSchemeName()))).get(key);
         }
         if (o == null) return defaultValue;
         return parseColor(o.toString());
@@ -587,10 +571,8 @@ public class Config {
     }
 
     private Object getColorObject(String key) {
-        String scheme = getPrefs().getLooks().getSelectedColor();
-        if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); //主題中指定的配色
-        if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; //主題中的default配色
-        final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
+      String scheme = getColorSchemeName();
+      final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
         if (map == null) return null;
         getPrefs().getLooks().setSelectedColor(scheme);
         Object o = map.get(key);
@@ -602,7 +584,22 @@ public class Config {
         return o;
     }
 
-    private static Integer parseColor(String s) {
+  /**
+   * 获取配色方案名<br>
+   * 优先级：设置>color_scheme>default <br>
+   * 避免直接读取 default
+   *
+   * @return java.lang.String 首个已配置的主题方案名
+   * @date 8/13/21
+   */
+  private String getColorSchemeName() {
+    String scheme = getPrefs().getLooks().getSelectedColor();
+    if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); //主題中指定的配色
+    if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; //主題中的default配色
+    return scheme;
+  }
+
+  private static Integer parseColor(String s) {
         Integer color = null;
         if (s.contains(".")) return color; //picture name
         try {
@@ -688,7 +685,7 @@ public class Config {
     public Drawable getColorDrawable(String key) {
         Object o = getColorObject(key);
         if (o == null) {
-            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get("default"))).get(key);
+            o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(getColorSchemeName()))).get(key);
         }
         return drawableObject(o);
     }
