@@ -70,7 +70,7 @@ public class Composition extends AppCompatTextView {
   private boolean all_phrases;
   //private View mInputRoot;
   // 候选高亮序号颜色
-  private Integer hilitedLabelColor;
+  private Integer hilited_label_color;
 
   private class CompositionSpan extends UnderlineSpan {
     public CompositionSpan() {
@@ -218,9 +218,9 @@ public class Composition extends AppCompatTextView {
     hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
     hilited_comment_text_color = config.getColor("hilited_comment_text_color");
     label_color = config.getColor("label_color");
-    hilitedLabelColor = config.getColor("hilited_label_color");
-    if (hilitedLabelColor == null) {
-      hilitedLabelColor = hilited_candidate_text_color;
+    hilited_label_color = config.getColor("hilited_label_color");
+    if (hilited_label_color == null) {
+      hilited_label_color = hilited_candidate_text_color;
     }
 
     back_color = config.getColor("back_color");
@@ -404,7 +404,7 @@ public class Composition extends AppCompatTextView {
             new CandidateSpan(
                 i,
                 tfLabel,
-                hilitedLabelColor,
+                hilited_label_color,
                 hilited_candidate_back_color,
                 label_color),
             start,
