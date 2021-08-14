@@ -21,6 +21,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
@@ -59,6 +60,14 @@ class PrefMainActivity :
 
         super.onCreate(savedInstanceState)
         binding = PrefActivityBinding.inflate(layoutInflater)
+        if (VERSION.SDK_INT >= VERSION_CODES.M) {
+            BarUtils.setNavBarColor(this,
+                getColor(R.color.windowBackground))
+        } else if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+            BarUtils.setNavBarColor(this,
+                @Suppress("DEPRECATION")
+                resources.getColor(R.color.windowBackground))
+        }
         setContentView(binding.root)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)

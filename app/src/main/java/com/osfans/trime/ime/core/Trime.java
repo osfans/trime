@@ -55,8 +55,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
@@ -80,9 +83,11 @@ import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
+
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */
@@ -444,14 +449,14 @@ public class Trime extends InputMethodService
     if (d2 == null) {
       mCandidateContainer.setBackgroundColor(
           mConfig.getColor("back_color", parseColor("#00ffffff")));
-    } else mCandidateContainer.setBackgroundDrawable(d2);
+    } else mCandidateContainer.setBackground(d2);
 
     final Drawable d3 = mConfig.getDrawable("root_background");
     if (d3 == null) {
       inputRootBinding.inputRoot.setBackgroundColor(
           mConfig.getColor("root_background", parseColor("#00ffffff")));
     } else {
-      inputRootBinding.inputRoot.setBackgroundDrawable(d3);
+      inputRootBinding.inputRoot.setBackground(d3);
     }
   }
 
@@ -486,6 +491,7 @@ public class Trime extends InputMethodService
 
   public void initKeyboard() {
     reset();
+    setNavBarColor();
     mNeedUpdateRimeOption = true; // 不能在Rime.onMessage中調用set_option，會卡死
     bindKeyboardToInputView();
     updateComposing(); // 切換主題時刷新候選
@@ -687,6 +693,7 @@ public class Trime extends InputMethodService
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     bindKeyboardToInputView();
+    if (!restarting) setNavBarColor();
     setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
   }
 
@@ -961,8 +968,7 @@ public class Trime extends InputMethodService
       } else if (code == KeyEvent.KEYCODE_LANGUAGE_SWITCH) { // 切換輸入法
         final IBinder imeToken = getToken();
         if (imeManager != null) {
-          if (event.getSelect().contentEquals(".next")
-              && VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+          if (event.getSelect().contentEquals(".next")) {
             imeManager.switchToNextInputMethod(imeToken, false);
           } else if (!TextUtils.isEmpty(event.getSelect())) {
             imeManager.switchToLastInputMethod(imeToken);
@@ -1018,8 +1024,7 @@ public class Trime extends InputMethodService
         || handleEnter(keyCode)
         || handleBack(keyCode)) {
       Timber.i("Trime onKey");
-    } else if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH_MR1
-        && Function.openCategory(this, keyCode)) {
+    } else if (Function.openCategory(this, keyCode)) {
       Timber.i("Open category");
     } else {
       keyUpNeeded = true;
@@ -1301,7 +1306,7 @@ public class Trime extends InputMethodService
               .setPositiveButton(
                   R.string.set_ime,
                   (di, id) -> {
-                    Function.showPrefDialog(Trime.this); // 全局設置
+                    launchSettings(); // 全局設置
                     di.dismiss();
                   });
       if (Rime.isEmpty()) builder.setMessage(R.string.no_schemas); // 提示安裝碼表
@@ -1354,6 +1359,21 @@ public class Trime extends InputMethodService
   /** 更新Rime的中西文狀態 */
   private void updateAsciiMode() {
     Rime.setOption("ascii_mode", mTempAsciiMode || mAsciiMode);
+  }
+
+  private void setNavBarColor() {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      try {
+        final Window window = getWindow().getWindow();
+        @ColorInt final Integer keyboardBackColor =
+                mConfig.getColor("keyboard_back_color");
+        if (keyboardBackColor != null) {
+          BarUtils.setNavBarColor(window, keyboardBackColor);
+        }
+      } catch (Exception e) {
+        Timber.e(e);
+      }
+    }
   }
 
   @Override
