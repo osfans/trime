@@ -20,12 +20,9 @@ package com.osfans.trime.ime.keyboard;
 
 import android.text.TextUtils;
 import android.view.KeyEvent;
-
 import androidx.annotation.NonNull;
-
 import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +30,7 @@ import java.util.Map;
 
 /** {@link Key 按鍵}的各種事件（單擊、長按、滑動等） */
 public class Event {
-  //private String TAG = "Event";
+  // private String TAG = "Event";
   private final Keyboard mKeyboard;
   private int code;
   private int mask = 0;
@@ -54,13 +51,13 @@ public class Event {
 
   public Event(Keyboard keyboard, @NonNull String s) {
     mKeyboard = keyboard;
-    if (s.matches("\\{[^\\{\\}]+\\}")) { //{send|key}
-      label = s.substring(1, s.length() -1);
-      int[] sends = parseSend(label); //send
+    if (s.matches("\\{[^\\{\\}]+\\}")) { // {send|key}
+      label = s.substring(1, s.length() - 1);
+      int[] sends = parseSend(label); // send
       code = sends[0];
       mask = sends[1];
       if (code >= 0) return;
-      s = label; //key
+      s = label; // key
       label = null;
     }
     if (Key.presetKeys.containsKey(s)) {
@@ -74,7 +71,8 @@ public class Event {
       shiftLock = Config.getString(m, "shift_lock");
       commit = Config.getString(m, "commit");
       String send = Config.getString(m, "send");
-      if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command)) send = "function"; //command默認發function
+      if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command))
+        send = "function"; // command默認發function
       int[] sends = parseSend(send);
       code = sends[0];
       mask = sends[1];
@@ -204,7 +202,7 @@ public class Event {
 
   public static String getDisplayLabel(int keyCode) {
     String s = "";
-    if (keyCode < Key.getSymbolStart()) { //字母數字
+    if (keyCode < Key.getSymbolStart()) { // 字母數字
       if (Key.getKcm().isPrintingKey(keyCode)) {
         char c = Key.getKcm().getDisplayLabel(keyCode);
         if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
@@ -212,7 +210,7 @@ public class Event {
       } else {
         s = Key.androidKeys.get(keyCode);
       }
-    } else if (keyCode < Key.androidKeys.size()) { //可見符號
+    } else if (keyCode < Key.androidKeys.size()) { // 可見符號
       keyCode -= Key.getSymbolStart();
       s = Key.getSymbols().substring(keyCode, keyCode + 1);
     }
@@ -221,11 +219,11 @@ public class Event {
 
   public static int getClickCode(String s) {
     int keyCode = -1;
-    if (TextUtils.isEmpty(s)) { //空鍵
+    if (TextUtils.isEmpty(s)) { // 空鍵
       keyCode = 0;
-    } else if (Key.androidKeys.contains(s)) { //字母數字
+    } else if (Key.androidKeys.contains(s)) { // 字母數字
       keyCode = Key.androidKeys.indexOf(s);
-    } else if (Key.getSymbols().contains(s)) { //可見符號
+    } else if (Key.getSymbols().contains(s)) { // 可見符號
       keyCode = Key.getSymbolStart() + Key.getSymbols().indexOf(s);
     } else if (symbolAliases.containsKey(s)) {
       keyCode = symbolAliases.get(s);

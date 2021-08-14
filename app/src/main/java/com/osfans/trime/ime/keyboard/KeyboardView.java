@@ -43,19 +43,16 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
 import com.osfans.trime.R;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.setup.Config;
-
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import timber.log.Timber;
 
 /** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
@@ -226,9 +223,9 @@ public class KeyboardView extends View implements View.OnClickListener {
   /** The canvas for the above mutable keyboard bitmap */
   private Canvas mCanvas;
   /** The accessibility manager for accessibility support */
-  //private AccessibilityManager mAccessibilityManager;
+  // private AccessibilityManager mAccessibilityManager;
   /** The audio manager for accessibility support */
-  //private AudioManager mAudioManager;
+  // private AudioManager mAudioManager;
   /**
    * Whether the requirement of a headset to hear passwords if accessibility is enabled is
    * announced.
@@ -240,7 +237,9 @@ public class KeyboardView extends View implements View.OnClickListener {
   private Method findStateDrawableIndex;
   private Method getStateDrawable;
 
-  private Preferences getPrefs() { return Preferences.Companion.defaultInstance(); }
+  private Preferences getPrefs() {
+    return Preferences.Companion.defaultInstance();
+  }
 
   private static class MyHandler extends Handler {
     private final WeakReference<KeyboardView> mKeyboardView;
@@ -352,7 +351,9 @@ public class KeyboardView extends View implements View.OnClickListener {
     try {
       findStateDrawableIndex =
           StateListDrawable.class.getMethod(
-              Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT >= Build.VERSION_CODES.Q ?  "findStateDrawableIndex" : "getStateDrawableIndex",
+              Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT >= Build.VERSION_CODES.Q
+                  ? "findStateDrawableIndex"
+                  : "getStateDrawableIndex",
               int[].class);
       getStateDrawable = StateListDrawable.class.getMethod("getStateDrawable", int.class);
     } catch (Exception ex) {
@@ -378,10 +379,10 @@ public class KeyboardView extends View implements View.OnClickListener {
     mPopupLayout = R.layout.keyboard_popup_keyboard;
     mPopupKeyboard = new PopupWindow(context);
     mPopupKeyboard.setBackgroundDrawable(null);
-    //mPopupKeyboard.setClippingEnabled(false);
+    // mPopupKeyboard.setClippingEnabled(false);
 
     mPopupParent = this;
-    //mPredicting = true;
+    // mPredicting = true;
 
     mPadding = new Rect(0, 0, 0, 0);
     mMiniKeyboardCache = new HashMap<Key, View>();
@@ -406,8 +407,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                 final float absY = Math.abs(velocityY);
                 float deltaX = me2.getX() - me1.getX();
                 float deltaY = me2.getY() - me1.getY();
-                int travelX = 0; //getWidth() / 2; // Half the keyboard width
-                int travelY = 0; //getHeight() / 2; // Half the keyboard height
+                int travelX = 0; // getWidth() / 2; // Half the keyboard width
+                int travelY = 0; // getHeight() / 2; // Half the keyboard height
                 mSwipeTracker.computeCurrentVelocity(10);
                 final float endingVelocityX = mSwipeTracker.getXVelocity();
                 final float endingVelocityY = mSwipeTracker.getYVelocity();
@@ -681,7 +682,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   public void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
     if (mKeyboard != null) {
-      //mKeyboard.resize(w, h);
+      // mKeyboard.resize(w, h);
     }
     // Release the buffer, if any and it will be reallocated on the next draw
     mBuffer = null;
@@ -756,14 +757,14 @@ public class KeyboardView extends View implements View.OnClickListener {
       }
       if (keyBackground instanceof GradientDrawable) {
         ((GradientDrawable) keyBackground)
-                .setCornerRadius(
-                        key.getRound_corner() != null ? key.getRound_corner() : mKeyboard.getRoundCorner());
+            .setCornerRadius(
+                key.getRound_corner() != null ? key.getRound_corner() : mKeyboard.getRoundCorner());
       }
       Integer color = key.getTextColorForState(drawableState);
       mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
       color = key.getSymbolColorForState(drawableState);
       mPaintSymbol.setColor(
-              color != null ? color : (key.isPressed() ? hilited_key_symbol_color : key_symbol_color));
+          color != null ? color : (key.isPressed() ? hilited_key_symbol_color : key_symbol_color));
 
       // Switch the character to uppercase if shift is pressed
       String label = key.getLabel();
@@ -789,32 +790,32 @@ public class KeyboardView extends View implements View.OnClickListener {
         paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
         // Draw the text
         canvas.drawText(
-                label,
-                left + key.getKey_text_offset_x(),
-                (key.getHeight() - padding.top - padding.bottom) / 2
-                        + (paint.getTextSize() - paint.descent()) / 2
-                        + top
-                        + key.getKey_text_offset_y(),
-                paint);
+            label,
+            left + key.getKey_text_offset_x(),
+            (key.getHeight() - padding.top - padding.bottom) / 2
+                + (paint.getTextSize() - paint.descent()) / 2
+                + top
+                + key.getKey_text_offset_y(),
+            paint);
         if (mShowHint) {
           if (key.getLongClick() != null) {
             mPaintSymbol.setTextSize(
-                    key.getSymbol_text_size() != null ? key.getSymbol_text_size() : mSymbolSize);
+                key.getSymbol_text_size() != null ? key.getSymbol_text_size() : mSymbolSize);
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
-                    key.getSymbolLabel(),
-                    left + key.getKey_symbol_offset_x(),
-                    symbolBase + key.getKey_symbol_offset_y(),
-                    mPaintSymbol);
+                key.getSymbolLabel(),
+                left + key.getKey_symbol_offset_x(),
+                symbolBase + key.getKey_symbol_offset_y(),
+                mPaintSymbol);
           }
 
           if (!TextUtils.isEmpty(hint)) {
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
-                    hint,
-                    left + key.getKey_hint_offset_x(),
-                    key.getHeight() + hintBase + key.getKey_hint_offset_y(),
-                    mPaintSymbol);
+                hint,
+                left + key.getKey_hint_offset_x(),
+                key.getHeight() + hintBase + key.getKey_hint_offset_y(),
+                mPaintSymbol);
           }
         }
 
@@ -917,7 +918,7 @@ public class KeyboardView extends View implements View.OnClickListener {
           if (!key.hasEvent(type)) return;
         }
         int code = key.getCode(type);
-        //TextEntryState.keyPressedAt(key, x, y);
+        // TextEntryState.keyPressedAt(key, x, y);
         int[] codes = new int[MAX_NEARBY_KEYS];
         Arrays.fill(codes, NOT_A_KEY);
         getKeyIndices(x, y, codes);
@@ -1035,8 +1036,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     if (previewPopup.isShowing()) {
-      //previewPopup.update(mPopupPreviewX, mPopupPreviewY, popupWidth, popupHeight);
-      previewPopup.dismiss(); //禁止窗口動畫
+      // previewPopup.update(mPopupPreviewX, mPopupPreviewY, popupWidth, popupHeight);
+      previewPopup.dismiss(); // 禁止窗口動畫
     }
     previewPopup.setWidth(popupWidth);
     previewPopup.setHeight(popupHeight);
@@ -1187,7 +1188,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mKeyboardActionListener.onRelease(primaryCode);
               }
             });
-        //mInputView.setSuggest(mSuggest);
+        // mInputView.setSuggest(mSuggest);
         Keyboard keyboard;
         if (popupKey.getPopupCharacters() != null) {
           keyboard =
@@ -1224,7 +1225,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       mPopupKeyboard.setHeight(mMiniKeyboardContainer.getMeasuredHeight());
       mPopupKeyboard.showAtLocation(this, Gravity.NO_GRAVITY, x, y);
       mMiniKeyboardOnScreen = true;
-      //mMiniKeyboard.onTouchEvent(getTranslatedEvent(me));
+      // mMiniKeyboard.onTouchEvent(getTranslatedEvent(me));
       invalidateAllKeys();
       return true;
     } else {
@@ -1294,7 +1295,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     if (action == MotionEvent.ACTION_POINTER_UP
         || (mOldPointerCount > 1 && action == MotionEvent.ACTION_UP)) {
-      //並擊鬆開前的虛擬按鍵事件
+      // 並擊鬆開前的虛擬按鍵事件
       MotionEvent ev =
           MotionEvent.obtain(
               now,
@@ -1308,7 +1309,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     if (action == MotionEvent.ACTION_POINTER_DOWN) {
-      //並擊中的按鍵事件，需要按鍵提示
+      // 並擊中的按鍵事件，需要按鍵提示
       MotionEvent ev =
           MotionEvent.obtain(
               now, now, MotionEvent.ACTION_DOWN, me.getX(index), me.getY(index), me.getMetaState());
@@ -1371,7 +1372,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mDownKey = keyIndex;
         mDownTime = me.getEventTime();
         mLastMoveTime = mDownTime;
-        if (action == MotionEvent.ACTION_POINTER_DOWN) break; //並擊鬆開前的虛擬按鍵事件
+        if (action == MotionEvent.ACTION_POINTER_DOWN) break; // 並擊鬆開前的虛擬按鍵事件
         checkMultiTap(eventTime, keyIndex);
         mKeyboardActionListener.onPress(keyIndex != NOT_A_KEY ? mKeys[keyIndex].getCode() : 0);
         if (mCurrentKey >= 0 && mKeys[mCurrentKey].getClick().isRepeatable()) {

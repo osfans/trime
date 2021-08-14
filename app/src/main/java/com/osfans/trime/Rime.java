@@ -19,19 +19,15 @@
 package com.osfans.trime;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
-
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.setup.Config;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import timber.log.Timber;
 
 /**
@@ -141,7 +137,7 @@ public class Rime {
       o = schema_get_value(schema_id, "switches");
       if (o == null || !(o instanceof List)) return;
       switches = (List<Map<String, Object>>) o;
-      check(); //檢查不在選單中顯示的選項
+      check(); // 檢查不在選單中顯示的選項
     }
 
     public void check() {
@@ -165,7 +161,8 @@ public class Rime {
 
         String kRightArrow = "→ ";
         if (showSwitchArrow)
-          candidates[i].comment = o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
+          candidates[i].comment =
+              o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
         else
           candidates[i].comment = o.containsKey("options") ? "" : states.get(1 - value).toString();
         i++;
@@ -174,7 +171,7 @@ public class Rime {
     }
 
     public void getValue() {
-      if (switches.isEmpty()) return; //無方案
+      if (switches.isEmpty()) return; // 無方案
       for (int j = 0; j < switches.size(); j++) {
         final Map<String, Object> o = switches.get(j);
         if (o.containsKey("options")) {
@@ -238,7 +235,7 @@ public class Rime {
     showSwitches = show;
   }
 
-  public static void setShowSwitchArrow(boolean show){
+  public static void setShowSwitchArrow(boolean show) {
     showSwitchArrow = show;
   }
 
@@ -305,7 +302,7 @@ public class Rime {
     // Initialize librime APIs
     setup(Config.get(context).getSharedDataDir(), Config.get(context).getUserDataDir());
     initialize(Config.get(context).getSharedDataDir(), Config.get(context).getUserDataDir());
-    
+
     check(full_check);
     set_notification_handler();
     if (!find_session()) {
@@ -442,7 +439,7 @@ public class Rime {
   }
 
   private static boolean isEmpty(@NonNull String s) {
-    return s.contentEquals(".default"); //無方案
+    return s.contentEquals(".default"); // 無方案
   }
 
   public static boolean isEmpty() {
@@ -531,7 +528,7 @@ public class Rime {
         break;
       case "option":
         getStatus();
-        getContexts(); //切換中英文、簡繁體時更新候選
+        getContexts(); // 切換中英文、簡繁體時更新候選
         if (trime != null) {
           boolean value = !message_value.startsWith("!");
           String option = message_value.substring(value ? 0 : 1);
@@ -552,11 +549,10 @@ public class Rime {
   }
 
   public static void check(boolean full_check) {
-    if (start_maintenance(full_check) && is_maintenance_mode())
-    {
-       join_maintenance_thread();
+    if (start_maintenance(full_check) && is_maintenance_mode()) {
+      join_maintenance_thread();
     }
-}
+  }
 
   public static boolean syncUserData(Context context) {
     boolean b = sync_user_data();

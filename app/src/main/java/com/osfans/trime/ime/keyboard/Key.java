@@ -22,11 +22,9 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-
 import com.osfans.trime.Rime;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.setup.Config;
-
 import java.util.List;
 import java.util.Map;
 
@@ -400,9 +398,9 @@ public class Key {
     final boolean topEdge = (edgeFlags & Keyboard.EDGE_TOP) > 0;
     final boolean bottomEdge = (edgeFlags & Keyboard.EDGE_BOTTOM) > 0;
     return (x >= this.x || (leftEdge && x <= this.x + this.width))
-            && (x < this.x + this.width || (rightEdge && x >= this.x))
-            && (y >= this.y || (topEdge && y <= this.y + this.height))
-            && (y < this.y + this.height || (bottomEdge && y >= this.y));
+        && (x < this.x + this.width || (rightEdge && x >= this.x))
+        && (y >= this.y || (topEdge && y <= this.y + this.height))
+        && (y < this.y + this.height || (bottomEdge && y >= this.y));
   }
 
   /**
@@ -426,7 +424,7 @@ public class Key {
    */
   public int[] getCurrentDrawableState() {
     int[] states = KEY_STATE_NORMAL;
-    boolean isShifted = isShift() && mKeyboard.isShifted(); //臨時大寫
+    boolean isShifted = isShift() && mKeyboard.isShifted(); // 臨時大寫
     if (isShifted || on) {
       if (pressed) {
         states = KEY_STATE_PRESSED_ON;
@@ -521,7 +519,7 @@ public class Key {
   public String getLabel() {
     Event event = getEvent();
     if (!TextUtils.isEmpty(label) && event == getClick() && (ascii == null && !Rime.isAsciiMode()))
-      return label; //中文狀態顯示標籤
+      return label; // 中文狀態顯示標籤
     return event.getLabel();
   }
 

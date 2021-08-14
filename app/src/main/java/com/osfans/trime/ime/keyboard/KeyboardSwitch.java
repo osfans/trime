@@ -20,9 +20,7 @@ package com.osfans.trime.ime.keyboard;
 
 import android.content.Context;
 import android.text.TextUtils;
-
 import com.osfans.trime.setup.Config;
-
 import java.util.List;
 
 /** 管理多個{@link Keyboard 鍵盤} */
@@ -57,22 +55,22 @@ public class KeyboardSwitch {
     int i = 0;
     if (isValidId(currentId)) i = currentId;
     if (TextUtils.isEmpty(name)) {
-      if (!mKeyboards[i].isLock()) i = lastLockId; //不記憶鍵盤時使用默認鍵盤
+      if (!mKeyboards[i].isLock()) i = lastLockId; // 不記憶鍵盤時使用默認鍵盤
     } else if (name.contentEquals(".default")) {
       i = 0;
-    } else if (name.contentEquals(".prior")) { //前一個
+    } else if (name.contentEquals(".prior")) { // 前一個
       i = currentId - 1;
-    } else if (name.contentEquals(".next")) { //下一個
+    } else if (name.contentEquals(".next")) { // 下一個
       i = currentId + 1;
-    } else if (name.contentEquals(".last")) { //最近一個
+    } else if (name.contentEquals(".last")) { // 最近一個
       i = lastId;
-    } else if (name.contentEquals(".last_lock")) { //最近一個Lock鍵盤
+    } else if (name.contentEquals(".last_lock")) { // 最近一個Lock鍵盤
       i = lastLockId;
-    } else if (name.contentEquals(".ascii")) { //英文鍵盤
+    } else if (name.contentEquals(".ascii")) { // 英文鍵盤
       String asciiKeyboard = mKeyboards[i].getAsciiKeyboard();
       if (!TextUtils.isEmpty(asciiKeyboard)) i = mKeyboardNames.indexOf(asciiKeyboard);
     } else {
-      i = mKeyboardNames.indexOf(name); //指定鍵盤
+      i = mKeyboardNames.indexOf(name); // 指定鍵盤
     }
     setKeyboard(i);
   }

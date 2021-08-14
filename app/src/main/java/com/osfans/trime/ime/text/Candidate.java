@@ -30,7 +30,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-
 import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
 
@@ -361,7 +360,7 @@ public class Candidate extends View {
       }
     }
 
-    if (Rime.hasLeft()) { //Page Up
+    if (Rime.hasLeft()) { // Page Up
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
@@ -369,7 +368,7 @@ public class Candidate extends View {
       }
     }
 
-    if (Rime.hasRight()) { //Page Down
+    if (Rime.hasRight()) { // Page Down
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
@@ -427,7 +426,7 @@ public class Candidate extends View {
 
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
-    //float n = (s == null ? 0 : s.codePointCount(0, s.length()));
+    // float n = (s == null ? 0 : s.codePointCount(0, s.length()));
     float x = 2 * candidate_padding;
     if (s != null) x += measureText(s, paintCandidate, tfCandidate);
     if (i >= 0 && show_comment) {
@@ -436,8 +435,8 @@ public class Candidate extends View {
         float x2 = measureText(comment, paintComment, tfComment);
         if (comment_on_top) {
           if (x2 > x) x = x2;
-        } //提示在上方
-        else x += x2; //提示在右方
+        } // 提示在上方
+        else x += x2; // 提示在右方
       }
     }
     return x;
