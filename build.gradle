@@ -7,7 +7,7 @@
  */
 
 buildscript {
-    ext.kotlin_version = '1.5.10'
+    ext.kotlin_version = '1.5.20'
 
     /**
      * The repositories block configures the repositories Gradle uses to
