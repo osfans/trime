@@ -1365,8 +1365,7 @@ public class Trime extends InputMethodService
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       try {
         final Window window = getWindow().getWindow();
-        @ColorInt final Integer keyboardBackColor =
-                mConfig.getColor("keyboard_back_color");
+        @ColorInt final Integer keyboardBackColor = mConfig.getColor("keyboard_back_color");
         if (keyboardBackColor != null) {
           BarUtils.setNavBarColor(window, keyboardBackColor);
         }
