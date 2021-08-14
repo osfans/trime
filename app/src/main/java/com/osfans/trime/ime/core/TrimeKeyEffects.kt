@@ -10,7 +10,7 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import com.osfans.trime.databinding.InputRootBinding
-import java.util.*
+import java.util.Locale
 import kotlin.math.ln
 
 /**
@@ -108,7 +108,8 @@ class TrimeKeyEffects(
             }
 
             if (soundVolume > 0) {
-                audioManager!!.playSoundEffect(effect,
+                audioManager!!.playSoundEffect(
+                    effect,
                     (1 - (ln((101.0 - soundVolume)) / ln(101.0))).toFloat()
                 )
             }

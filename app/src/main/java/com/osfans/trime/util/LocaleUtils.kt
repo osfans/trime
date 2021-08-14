@@ -1,6 +1,6 @@
 package com.osfans.trime.util
 
-import java.util.*
+import java.util.Locale
 
 object LocaleUtils {
     private val DELIMITER = """[_-]""".toRegex()

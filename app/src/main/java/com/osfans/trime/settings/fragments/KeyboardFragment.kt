@@ -10,7 +10,8 @@ import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 
-class KeyboardFragment: PreferenceFragmentCompat(),
+class KeyboardFragment :
+    PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.keyboard_preference)
@@ -19,7 +20,7 @@ class KeyboardFragment: PreferenceFragmentCompat(),
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.forEach { item -> item.isVisible = false}
+        menu.forEach { item -> item.isVisible = false }
         super.onPrepareOptionsMenu(menu)
     }
 

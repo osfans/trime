@@ -10,7 +10,7 @@ import timber.log.Timber
  * so you can init a "global" class here, whose methods serve other
  * classes everywhere.
  */
-class TrimeApplication: Application() {
+class TrimeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         try {

@@ -11,4 +11,4 @@ import com.osfans.trime.ime.core.Trime
  * Important: DO NOT PUT ANY LOGIC INTO THIS CLASS. Make the necessary changes
  *  within the Trime class instead.
  */
-class TrimeImeService: Trime()
+class TrimeImeService : Trime()

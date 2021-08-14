@@ -2,10 +2,9 @@ package com.osfans.trime.settings.components
 
 import android.app.AlertDialog
 import android.content.Context
-import android.widget.Toast
 import com.blankj.utilcode.util.ToastUtils
-import com.osfans.trime.setup.Config
 import com.osfans.trime.R
+import com.osfans.trime.setup.Config
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
 class ResetAssetsDialog(private val context: Context) {

@@ -14,7 +14,7 @@ import com.osfans.trime.Rime
 import com.osfans.trime.databinding.AboutActivityBinding
 import com.osfans.trime.util.AppVersionUtils.writeLibraryVersionToSummary
 
-class AboutActivity: AppCompatActivity() {
+class AboutActivity : AppCompatActivity() {
     lateinit var binding: AboutActivityBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +67,7 @@ class AboutActivity: AppCompatActivity() {
         }
     }
 
-    class AboutFragment: PreferenceFragmentCompat() {
+    class AboutFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.about_preference, rootKey)
             findPreference<Preference>("about__changelog")
@@ -81,7 +81,7 @@ class AboutActivity: AppCompatActivity() {
         }
 
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-            return when(preference?.key) {
+            return when (preference?.key) {
                 "about__licensing" -> {
                     val webView = WebView(requireContext())
                     webView.loadUrl("file:///android_asset/license/open_source_license.html")

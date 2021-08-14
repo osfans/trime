@@ -9,7 +9,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.databinding.HelpActivityBinding
 
-class HelpActivity: AppCompatActivity() {
+class HelpActivity : AppCompatActivity() {
     lateinit var binding: HelpActivityBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +62,7 @@ class HelpActivity: AppCompatActivity() {
         }
     }
 
-    class HelpFragment: PreferenceFragmentCompat() {
+    class HelpFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.help_preference, rootKey)
         }

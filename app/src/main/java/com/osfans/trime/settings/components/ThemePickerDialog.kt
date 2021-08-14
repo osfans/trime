@@ -5,18 +5,24 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.os.IBinder
 import android.view.WindowManager
-import com.osfans.trime.setup.Config
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Trime
-import kotlinx.coroutines.*
+import com.osfans.trime.setup.Config
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /** 顯示配色方案列表 */
 class ThemePickerDialog(
     private val context: Context,
-    private val token: IBinder?): CoroutineScope {
+    private val token: IBinder?
+) : CoroutineScope {
     private val job = Job()
-    override val coroutineContext : CoroutineContext
+    override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
     private val config = Config.get(context)
@@ -27,7 +33,7 @@ class ThemePickerDialog(
     @Suppress("DEPRECATION")
     private val progressDialog: ProgressDialog
 
-    constructor(context: Context): this(context, null)
+    constructor(context: Context) : this(context, null)
     init {
         val themeFile = config.theme + ".yaml"
         themeKeys = Config.getThemeKeys(context, true)

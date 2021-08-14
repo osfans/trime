@@ -1,7 +1,6 @@
 package com.osfans.trime.util
 
 import android.content.Context
-import android.widget.Toast
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.Rime

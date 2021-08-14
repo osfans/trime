@@ -6,19 +6,25 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.view.WindowManager
-import com.osfans.trime.*
+import com.osfans.trime.R
+import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.PrefMainActivity
 import com.osfans.trime.util.RimeUtils
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-
 class SchemaPickerDialog(
     private val context: Context,
-    private val token: IBinder?): CoroutineScope {
+    private val token: IBinder?
+) : CoroutineScope {
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -29,11 +35,12 @@ class SchemaPickerDialog(
     private var schemaMapList: List<Map<String?, String?>>? = Rime.get_available_schema_list()
     private lateinit var schemaNames: Array<String?>
     var pickerDialogBuilder: AlertDialog.Builder? = null
+
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog
 
     companion object {
-        private class SortByName: Comparator<Map<String?, String?>> {
+        private class SortByName : Comparator<Map<String?, String?>> {
             override fun compare(o1: Map<String?, String?>, o2: Map<String?, String?>): Int {
                 val s1 = o1["schema_id"]
                 val s2 = o2["schema_id"]
@@ -44,7 +51,8 @@ class SchemaPickerDialog(
         }
     }
 
-    constructor(context: Context): this(context, null)
+    constructor(context: Context) : this(context, null)
+
     init {
         @Suppress("DEPRECATION")
         progressDialog = ProgressDialog(context).apply {
@@ -80,17 +88,19 @@ class SchemaPickerDialog(
                         } finally {
                             progressDialog.dismiss()
                             val intent = Intent(context, PrefMainActivity::class.java)
-                            intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
-                                    or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            intent.flags = (
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                    or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                )
                             context.startActivity(intent)
                             android.os.Process.killProcess(android.os.Process.myPid())
                             exitProcess(0) // 清理内存
                         }
-                    }}
+                    }
+                }
                 setMultiChoiceItems(
                     schemaNames, checkedStatus
                 ) { _, id, isChecked -> checkedStatus[id] = isChecked }
-
             }
         }
         val pickerDialog = pickerDialogBuilder!!.create()
@@ -148,6 +158,7 @@ class SchemaPickerDialog(
             RimeUtils.deploy(context)
         }
     }
+
     /** 调用该方法显示对话框 **/
     fun show() = execute()
 

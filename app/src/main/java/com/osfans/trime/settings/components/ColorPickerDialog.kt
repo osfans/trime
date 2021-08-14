@@ -2,10 +2,10 @@ package com.osfans.trime.settings.components
 
 import android.app.AlertDialog
 import android.content.Context
-import com.osfans.trime.setup.Config
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.setup.Config
 
 /** 顯示配色方案列表
  *  Show Color Scheme List
@@ -35,7 +35,7 @@ class ColorPickerDialog(
             }
             setSingleChoiceItems(
                 colorNames, checkedColor
-            ) {_, id -> checkedColor = id}
+            ) { _, id -> checkedColor = id }
         }.create()
     }
 

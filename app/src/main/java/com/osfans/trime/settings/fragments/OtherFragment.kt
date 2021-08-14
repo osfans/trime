@@ -14,12 +14,13 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
-import com.osfans.trime.setup.Config
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.setup.Config
 
-class OtherFragment: PreferenceFragmentCompat(),
+class OtherFragment :
+    PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     private val prefs get() = Preferences.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -39,7 +40,7 @@ class OtherFragment: PreferenceFragmentCompat(),
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.forEach { item -> item.isVisible = false}
+        menu.forEach { item -> item.isVisible = false }
         super.onPrepareOptionsMenu(menu)
     }
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
@@ -47,7 +48,8 @@ class OtherFragment: PreferenceFragmentCompat(),
             "other__clipboard_manager" -> {
                 PreferenceManager.getDefaultSharedPreferences(context).getString(preference?.key, "")
                     ?.let {
-                        ClipBoardManagerDialog(requireContext(),
+                        ClipBoardManagerDialog(
+                            requireContext(),
                             it
                         ).show()
                     }
@@ -122,7 +124,6 @@ class OtherFragment: PreferenceFragmentCompat(),
         }
     }
 
-
     /** 顯示輸入法可以分享剪贴板给哪些App */
     class ClipBoardManagerDialog(private val context: Context, val value: String) {
         private val config = Config.get(context)
@@ -131,7 +132,7 @@ class OtherFragment: PreferenceFragmentCompat(),
         val resetDialog: AlertDialog
 
         init {
-            var values: ArrayList<String> = ArrayList<String>();
+            var values: ArrayList<String> = ArrayList<String>()
 
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
@@ -142,15 +143,15 @@ class OtherFragment: PreferenceFragmentCompat(),
             val items = arrayOfNulls<String>(resolveInfos.size)
 
             for (i in resolveInfos.indices) {
-                values.add(resolveInfos[i].activityInfo.packageName + "," + resolveInfos[i].activityInfo.name);
-                items[i] = resolveInfos[i].loadLabel(packageManager) as String?;
+                values.add(resolveInfos[i].activityInfo.packageName + "," + resolveInfos[i].activityInfo.name)
+                items[i] = resolveInfos[i].loadLabel(packageManager) as String?
             }
             val builder: AlertDialog.Builder = AlertDialog.Builder(context)
             builder.setTitle(R.string.other__clipboard_manager_title)
 
-            var value0: Int = values.indexOf(value);
+            var value0: Int = values.indexOf(value)
             if (value0 < 0)
-                value0 = 0;
+                value0 = 0
 
             builder.setSingleChoiceItems(
                 items, value0
@@ -161,7 +162,6 @@ class OtherFragment: PreferenceFragmentCompat(),
                 dialog.dismiss()
             }
             resetDialog = builder.create()
-
         }
 
         /** 彈出對話框 */

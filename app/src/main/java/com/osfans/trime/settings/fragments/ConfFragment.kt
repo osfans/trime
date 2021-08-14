@@ -18,11 +18,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ocpsoft.prettytime.PrettyTime
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-class ConfFragment: PreferenceFragmentCompat(), CoroutineScope {
+class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -36,7 +36,7 @@ class ConfFragment: PreferenceFragmentCompat(), CoroutineScope {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.forEach { item -> item.isVisible = false}
+        menu.forEach { item -> item.isVisible = false }
         super.onPrepareOptionsMenu(menu)
     }
 

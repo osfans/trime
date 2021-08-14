@@ -17,7 +17,8 @@
  */
 package com.osfans.trime.ime.enums
 
-import java.util.*
+import java.util.HashMap
+import java.util.Locale
 
 enum class WindowsPositionType {
     LEFT, LEFT_UP, RIGHT, RIGHT_UP, DRAG, FIXED, BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT;

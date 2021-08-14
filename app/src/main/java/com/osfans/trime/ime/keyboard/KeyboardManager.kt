@@ -44,7 +44,7 @@ class KeyboardManager(
         fun getInstanceOrNull(): KeyboardManager? = instance
     }
 
-    constructor(context: Context): this(context, -1)
+    constructor(context: Context) : this(context, -1)
     init {
         instance = this
         keyboards = arrayOfNulls(keyboardNames.size)

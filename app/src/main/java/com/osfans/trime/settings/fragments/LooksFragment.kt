@@ -9,7 +9,7 @@ import com.osfans.trime.R
 import com.osfans.trime.settings.components.ColorPickerDialog
 import com.osfans.trime.settings.components.ThemePickerDialog
 
-class LooksFragment: PreferenceFragmentCompat() {
+class LooksFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.looks_preference)
 
@@ -17,7 +17,7 @@ class LooksFragment: PreferenceFragmentCompat() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.forEach { item -> item.isVisible = false}
+        menu.forEach { item -> item.isVisible = false }
         super.onPrepareOptionsMenu(menu)
     }
 
