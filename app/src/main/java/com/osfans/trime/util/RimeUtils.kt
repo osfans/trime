@@ -2,6 +2,7 @@ package com.osfans.trime.util
 
 import android.content.Context
 import android.widget.Toast
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.Rime
 import kotlin.system.exitProcess
@@ -19,7 +20,9 @@ object RimeUtils {
     fun deploy(context: Context) {
         Rime.destroy()
         Rime.get(context, true)
-        Toast.makeText(context,context.getString(R.string.deploy_finish), Toast.LENGTH_LONG).show();
+        ToastUtils.showLong(
+            R.string.deploy_finish
+        )
     }
 
     fun sync(context: Context) = Rime.syncUserData(context)

@@ -39,17 +39,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.blankj.utilcode.util.ResourceUtils;
-import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.Rime;
-import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.core.Preferences;
+import com.osfans.trime.ime.enums.WindowsPositionType;
+import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.AppVersionUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -57,6 +54,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import kotlin.jvm.Synchronized;
+
 
 /** 解析 YAML 配置文件 */
 public class Config {
@@ -240,33 +238,6 @@ public class Config {
                     copyFileOrDir(context, subPath, overwrite);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean copyFile(Context context, String filename, boolean overwrite) {
-        final AssetManager assetManager = context.getAssets();
-        InputStream in;
-        OutputStream out;
-        try {
-            final String assetPath = new File(RIME, filename).getPath();
-            in = assetManager.open(assetPath);
-            final String newFileName = new File(filename.endsWith(".bin") ? getUserDataDir() : getSharedDataDir(), filename).getPath();
-            if (new File(newFileName).exists() && !overwrite) return true;
-            out = new FileOutputStream(newFileName);
-            final byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            in = null;
-            out.flush();
-            out.close();
-            out = null;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
