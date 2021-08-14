@@ -27,5 +27,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Spotless code style check
+        run: make spotless
+
       - name: Build Trime
         run: make debug
