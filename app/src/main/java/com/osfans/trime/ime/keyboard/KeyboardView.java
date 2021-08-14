@@ -32,6 +32,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -47,7 +48,6 @@ import com.osfans.trime.R;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.setup.Config;
-import com.osfans.trime.util.Function;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -778,7 +778,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       canvas.translate(key.getX() + kbdPaddingLeft, key.getY() + kbdPaddingTop);
       keyBackground.draw(canvas);
 
-      if (!Function.isEmpty(label)) {
+      if (!TextUtils.isEmpty(label)) {
         // For characters, use large font. For labels like "Done", use small font.
         if (key.getKey_text_size() != null) {
           paint.setTextSize(key.getKey_text_size());
@@ -808,7 +808,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     mPaintSymbol);
           }
 
-          if (!Function.isEmpty(hint)) {
+          if (!TextUtils.isEmpty(hint)) {
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
                     hint,

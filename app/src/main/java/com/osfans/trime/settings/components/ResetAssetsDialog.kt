@@ -3,6 +3,7 @@ package com.osfans.trime.settings.components
 import android.app.AlertDialog
 import android.content.Context
 import android.widget.Toast
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.setup.Config
 import com.osfans.trime.R
 
@@ -33,15 +34,15 @@ class ResetAssetsDialog(private val context: Context) {
     }
 
     private fun selectAssets() {
-        var result = true
+        var res = true
         for (i in assetItems.indices) {
-            result = if (checkedStatus[i]) {
+            res = if (checkedStatus[i]) {
                 config.copyFileOrDir(context, assetItems[i], true)
             } else false
         }
-        Toast.makeText(context,
-            if (result) R.string.reset_success else R.string.reset_failure,
-            Toast.LENGTH_SHORT).show()
+        ToastUtils.showShort(
+            if (res) R.string.reset_success else R.string.reset_failure
+        )
     }
 
     /** 彈出對話框 */

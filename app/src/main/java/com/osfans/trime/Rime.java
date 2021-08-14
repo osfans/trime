@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import timber.log.Timber;
 
@@ -214,7 +213,6 @@ public class Rime {
   }
 
   private static Rime self;
-  private static final Logger Log = Logger.getLogger(Rime.class.getSimpleName());
 
   private static final RimeCommit mCommit = new RimeCommit();
   private static final RimeContext mContext = new RimeContext();
@@ -312,7 +310,7 @@ public class Rime {
     set_notification_handler();
     if (!find_session()) {
       if (create_session() == 0) {
-        Log.severe("Error creating rime session");
+        Timber.wtf("Error creating rime session");
         return;
       }
     }
