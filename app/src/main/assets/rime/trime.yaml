@@ -93,6 +93,7 @@ fallback_colors:
   hilited_back_color: back_color
   hilited_candidate_text_color: hilited_text_color
   hilited_candidate_back_color: hilited_back_color
+  hilited_label_color: hilited_candidate_text_color # 高亮候选序号 颜色
   hilited_comment_text_color: comment_text_color
   text_back_color: back_color
   hilited_key_back_color: hilited_candidate_back_color
