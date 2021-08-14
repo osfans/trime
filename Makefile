@@ -2,7 +2,7 @@ mainDir=app/src/main
 resDir=$(mainDir)/res
 jniDir=$(mainDir)/jni
 
-.PHONY: all clean build debug release install opencc-data translate ndk android
+.PHONY: all clean build debug spotless release install opencc-data translate ndk android
 
 all: release
 
@@ -13,8 +13,11 @@ build:
 	./gradlew build
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
-release: opencc-data
+release: opencc-data spotless
 	./gradlew assembleRelease
+
+spotless:
+	./gradlew spotlessCheck
 
 debug:
 	./gradlew assembleDebug
