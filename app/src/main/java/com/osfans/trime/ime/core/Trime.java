@@ -55,11 +55,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
@@ -83,11 +81,9 @@ import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
-
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */

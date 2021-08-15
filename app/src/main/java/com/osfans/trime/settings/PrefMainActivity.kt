@@ -61,12 +61,16 @@ class PrefMainActivity :
         super.onCreate(savedInstanceState)
         binding = PrefActivityBinding.inflate(layoutInflater)
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            BarUtils.setNavBarColor(this,
-                getColor(R.color.windowBackground))
+            BarUtils.setNavBarColor(
+                this,
+                getColor(R.color.windowBackground)
+            )
         } else if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-            BarUtils.setNavBarColor(this,
+            BarUtils.setNavBarColor(
+                this,
                 @Suppress("DEPRECATION")
-                resources.getColor(R.color.windowBackground))
+                resources.getColor(R.color.windowBackground)
+            )
         }
         setContentView(binding.root)
 
