@@ -9,6 +9,7 @@ Fixes #
 
 #### Build tasks success
 Successfully running following tasks on local
+- [ ] no wildcard imports
 - [ ] `./gradlew spotlessCheck`
 - [ ] `./gradlew assembledebug`
 
