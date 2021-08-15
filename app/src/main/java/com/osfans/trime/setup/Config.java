@@ -41,7 +41,11 @@ import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.AppVersionUtils;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -239,25 +243,25 @@ public class Config {
     return true;
   }
 
-  private boolean copyFile(Context context, String filename, boolean overwrite) {
+  private boolean copyFile(Context context, String fileName, boolean overwrite) {
+    if (fileName == null) {
+      return false;
+    }
+    final String targetFileName = new File(getSharedDataDir(), fileName).getPath();
+    if (new File(targetFileName).exists() && !overwrite) {
+      return true;
+    }
+    final String sourceFileName = new File(RIME, fileName).getPath();
     final AssetManager assetManager = context.getAssets();
-    InputStream in;
-    OutputStream out;
-    try {
-      final String assetPath = new File(RIME, filename).getPath();
-      in = assetManager.open(assetPath);
-      final String newFileName = new File(getSharedDataDir(), filename).getPath();
-      if (new File(newFileName).exists() && !overwrite) return true;
-      out = new FileOutputStream(newFileName);
+    try (InputStream in = assetManager.open(sourceFileName);
+        final FileOutputStream out = new FileOutputStream(targetFileName)) {
       final byte[] buffer = new byte[1024];
       int read;
       while ((read = in.read(buffer)) != -1) {
         out.write(buffer, 0, read);
       }
-      in.close();
       out.flush();
-      out.close();
-    } catch (Exception e) {
+    } catch (IOException e) {
       e.printStackTrace();
       return false;
     }
