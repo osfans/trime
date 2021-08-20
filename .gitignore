@@ -48,3 +48,10 @@ libs/*
 
 # VS Code
 .vscode/*
+
+# perf
+*.hprof
+
+# vim
+*.swp
+
