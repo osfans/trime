@@ -19,11 +19,11 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
-      - name: Set up adoptJDK 8
+      - name: Set up adopt JDK
         uses: actions/setup-java@v2
         with:
           distribution: "adopt"
-          java-version: 8
+          java-version: 11
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
