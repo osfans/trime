@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
-      - name: Set up adopt JDK
+      - name: Setup adopt JDK
         uses: actions/setup-java@v2
         with:
           distribution: "adopt"
