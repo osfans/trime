@@ -24,6 +24,8 @@ jobs:
         with:
           distribution: "adopt"
           java-version: 11
+          # will restore cache of dependencies and wrappers
+          cache: 'gradle'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
