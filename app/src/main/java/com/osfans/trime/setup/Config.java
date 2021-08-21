@@ -176,6 +176,15 @@ public class Config {
       SystemClock.sleep(3000);
       copyFileOrDir(context, "", isOverwrite);
     }
+    // 缺失导致获取方案列表为空
+    final String defaultCustom = "default.custom.yaml";
+    if (!new File(getSharedDataDir(), defaultCustom).exists()) {
+      try {
+        new File(getSharedDataDir(), defaultCustom).createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
     Rime.get(context, !isExist); // 覆蓋時不強制部署
   }
 
