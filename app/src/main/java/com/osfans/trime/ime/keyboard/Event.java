@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /** {@link Key 按鍵}的各種事件（單擊、長按、滑動等） */
 public class Event {
@@ -49,9 +50,13 @@ public class Event {
   private boolean repeatable;
   private boolean sticky;
 
+  // {send|key}
+  private static final Pattern sendPattern = Pattern.compile("\\{[^\\{\\}]+\\}");
+  private static final Pattern labelPattern = Pattern.compile("\\{[^\\{\\}]+?\\}");
+
   public Event(Keyboard keyboard, @NonNull String s) {
     mKeyboard = keyboard;
-    if (s.matches("\\{[^\\{\\}]+\\}")) { // {send|key}
+    if (sendPattern.matcher(s).matches()) {
       label = s.substring(1, s.length() - 1);
       int[] sends = parseSend(label); // send
       code = sends[0];
@@ -88,7 +93,7 @@ public class Event {
     } else {
       code = 0;
       text = s;
-      label = s.replaceAll("\\{[^\\{\\}]+?\\}", "");
+      label = labelPattern.matcher(s).replaceAll("");
     }
   }
 
