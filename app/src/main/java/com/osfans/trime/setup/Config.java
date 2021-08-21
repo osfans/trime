@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import kotlin.jvm.Synchronized;
 
 /** 解析 YAML 配置文件 */
@@ -74,6 +75,9 @@ public class Config {
 
   private Map<?, ?> fallbackColors;
   private Map<?, ?> presetColorSchemes, presetKeyboards;
+
+  private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
+
   private String[] ClipBoardCompare, ClipBoardOutput, ClipBoardManager;
 
   @NonNull
@@ -121,14 +125,14 @@ public class Config {
   }
 
   public void setClipBoardCompare(String str) {
-    String s = str.replaceAll("\\s*\n\\s*", "\n").trim();
+    String s = pattern.matcher(str).replaceAll("\n").trim();
     ClipBoardCompare = s.split("\n");
 
     getPrefs().getOther().setClipboardCompareRules(s);
   }
 
   public void setClipBoardOutput(String str) {
-    String s = str.replaceAll("\\s*\n\\s*", "\n").trim();
+    String s = pattern.matcher(str).replaceAll("\n").trim();
     ClipBoardOutput = s.split("\n");
 
     getPrefs().getOther().setClipboardOutputRules(s);
