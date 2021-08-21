@@ -78,7 +78,7 @@ public class Config {
 
   private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
 
-  private String[] ClipBoardCompare, ClipBoardOutput, ClipBoardManager;
+  private String[] clipBoardCompare, clipBoardOutput, clipBoardManager;
 
   @NonNull
   private Preferences getPrefs() {
@@ -95,26 +95,26 @@ public class Config {
   }
 
   private void prepareCLipBoardRule() {
-    ClipBoardCompare = getPrefs().getOther().getClipboardCompareRules().trim().split("\n");
-    ClipBoardOutput = getPrefs().getOther().getClipboardOutputRules().trim().split("\n");
-    ClipBoardManager = getPrefs().getOther().getClipboardManagerRules().trim().split(",");
+    clipBoardCompare = getPrefs().getOther().getClipboardCompareRules().trim().split("\n");
+    clipBoardOutput = getPrefs().getOther().getClipboardOutputRules().trim().split("\n");
+    clipBoardManager = getPrefs().getOther().getClipboardManagerRules().trim().split(",");
   }
 
   public String[] getClipBoardCompare() {
-    return ClipBoardCompare;
+    return clipBoardCompare;
   }
 
   public String[] getClipBoardOutput() {
-    return ClipBoardOutput;
+    return clipBoardOutput;
   }
 
   public String[] getClipBoardManager() {
-    return ClipBoardManager;
+    return clipBoardManager;
   }
 
   public boolean hasClipBoardManager() {
-    if (ClipBoardManager.length == 2) {
-      return ClipBoardManager[0].length() > 0 && ClipBoardManager[1].length() > 0;
+    if (clipBoardManager.length == 2) {
+      return clipBoardManager[0].length() > 0 && clipBoardManager[1].length() > 0;
     }
     return false;
   }
@@ -126,14 +126,14 @@ public class Config {
 
   public void setClipBoardCompare(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
-    ClipBoardCompare = s.split("\n");
+    clipBoardCompare = s.split("\n");
 
     getPrefs().getOther().setClipboardCompareRules(s);
   }
 
   public void setClipBoardOutput(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
-    ClipBoardOutput = s.split("\n");
+    clipBoardOutput = s.split("\n");
 
     getPrefs().getOther().setClipboardOutputRules(s);
   }

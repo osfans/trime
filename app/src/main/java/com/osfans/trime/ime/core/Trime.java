@@ -1438,7 +1438,7 @@ public class Trime extends InputMethodService
 
   private String ClipBoardString = "";
 
-  private static String StringReplacer(String str, String[] rules) {
+  private static String stringReplacer(String str, String[] rules) {
     if (str == null) return "";
 
     String s = str;
@@ -1449,7 +1449,7 @@ public class Trime extends InputMethodService
     return s;
   }
 
-  private static boolean StringNotMatch(String str, String[] rules) {
+  private static boolean stringNotMatch(String str, String[] rules) {
     if (str == null) return false;
 
     if (str.length() < 1) return false;
@@ -1478,10 +1478,10 @@ public class Trime extends InputMethodService
 
             final String text = item.getText().toString();
 
-            final String text2 = StringReplacer(text, mConfig.getClipBoardCompare());
+            final String text2 = stringReplacer(text, mConfig.getClipBoardCompare());
             if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-            if (StringNotMatch(text, mConfig.getClipBoardOutput())) {
+            if (stringNotMatch(text, mConfig.getClipBoardOutput())) {
               ClipBoardString = text;
 
               final Intent intent = new Intent(Intent.ACTION_SEND);
