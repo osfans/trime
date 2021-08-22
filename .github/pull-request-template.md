@@ -11,7 +11,7 @@ Fixes #
 Successfully running following tasks on local
 - [ ] no wildcard imports
 - [ ] `./gradlew spotlessCheck`
-- [ ] `./gradlew assembledebug`
+- [ ] `./gradlew assembleDebug`
 
 #### Code Reviews
 1. Manual build and test pass
