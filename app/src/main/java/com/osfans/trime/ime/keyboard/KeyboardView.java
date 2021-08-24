@@ -124,25 +124,25 @@ public class KeyboardView extends View implements View.OnClickListener {
   private StateListDrawable mKeyBackColor;
   private int key_symbol_color, hilited_key_symbol_color;
   private int mSymbolSize;
-  private Paint mPaintSymbol;
+  private final Paint mPaintSymbol;
   private float mShadowRadius;
   private int mShadowColor;
   private float mBackgroundDimAmount;
   private Drawable mBackground;
 
-  private TextView mPreviewText;
-  private PopupWindow mPreviewPopup;
+  private final TextView mPreviewText;
+  private final PopupWindow mPreviewPopup;
   private int mPreviewOffset;
   private int mPreviewHeight;
   // Working variable
   private final int[] mCoordinates = new int[2];
 
-  private PopupWindow mPopupKeyboard;
+  private final PopupWindow mPopupKeyboard;
   private boolean mMiniKeyboardOnScreen;
   private View mPopupParent;
   private int mMiniKeyboardOffsetX;
   private int mMiniKeyboardOffsetY;
-  private Map<Key, View> mMiniKeyboardCache;
+  private final Map<Key, View> mMiniKeyboardCache;
   private Key[] mKeys;
 
   /** Listener for {@link OnKeyboardActionListener}. */
@@ -169,8 +169,8 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   private boolean mProximityCorrectOn;
 
-  private Paint mPaint;
-  private Rect mPadding;
+  private final Paint mPaint;
+  private final Rect mPadding;
 
   private long mDownTime;
   private long mLastMoveTime;
@@ -181,21 +181,21 @@ public class KeyboardView extends View implements View.OnClickListener {
   private int mDownKey = NOT_A_KEY;
   private long mLastKeyTime;
   private long mCurrentKeyTime;
-  private int[] mKeyIndices = new int[12];
+  private final int[] mKeyIndices = new int[12];
   private GestureDetector mGestureDetector;
   private int mRepeatKeyIndex = NOT_A_KEY;
-  private int mPopupLayout;
+  private final int mPopupLayout;
   private boolean mAbortKey;
   private Key mInvalidatedKey;
-  private Rect mClipRegion = new Rect(0, 0, 0, 0);
+  private final Rect mClipRegion = new Rect(0, 0, 0, 0);
   private boolean mPossiblePoly;
-  private SwipeTracker mSwipeTracker = new SwipeTracker();
-  private int mSwipeThreshold;
-  private boolean mDisambiguateSwipe;
+  private final SwipeTracker mSwipeTracker = new SwipeTracker();
+  private final int mSwipeThreshold;
+  private final boolean mDisambiguateSwipe;
 
   // Variables for dealing with multiple pointers
   private int mOldPointerCount = 1;
-  private int[] mComboCodes = new int[10];
+  private final int[] mComboCodes = new int[10];
   private int mComboCount = 0;
   private boolean mComboMode = false;
 
@@ -203,19 +203,19 @@ public class KeyboardView extends View implements View.OnClickListener {
   private static int REPEAT_START_DELAY = 400;
   private static int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
-  private static int MAX_NEARBY_KEYS = 12;
-  private int[] mDistances = new int[MAX_NEARBY_KEYS];
+  private static final int MAX_NEARBY_KEYS = 12;
+  private final int[] mDistances = new int[MAX_NEARBY_KEYS];
 
   // For multi-tap
   private int mLastSentIndex;
   private long mLastTapTime;
   private static int MULTITAP_INTERVAL = 800; // milliseconds
-  private StringBuilder mPreviewLabel = new StringBuilder(1);
+  private final StringBuilder mPreviewLabel = new StringBuilder(1);
 
   /** Whether the keyboard bitmap needs to be redrawn before it's blitted. * */
   private boolean mDrawPending;
   /** The dirty region in the keyboard bitmap */
-  private Rect mDirtyRect = new Rect();
+  private final Rect mDirtyRect = new Rect();
   /** The keyboard bitmap for faster updates */
   private Bitmap mBuffer;
   /** Notes if the keyboard just changed, so that we could possibly reallocate the mBuffer. */
