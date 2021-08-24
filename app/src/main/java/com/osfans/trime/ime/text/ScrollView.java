@@ -11,7 +11,7 @@ import android.widget.HorizontalScrollView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.Rime;
 
-public class xScrollView extends HorizontalScrollView {
+public class ScrollView extends HorizontalScrollView {
   private View inner;
   private float x;
   private final Rect normal = new Rect();
@@ -25,7 +25,7 @@ public class xScrollView extends HorizontalScrollView {
 
   private Runnable pageDownAction, pageUpAction;
 
-  public xScrollView(Context context, AttributeSet attrs) {
+  public ScrollView(Context context, AttributeSet attrs) {
     super(context, attrs);
   }
 

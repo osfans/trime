@@ -72,7 +72,7 @@ import com.osfans.trime.ime.keyboard.KeyboardSwitch;
 import com.osfans.trime.ime.keyboard.KeyboardView;
 import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
-import com.osfans.trime.ime.text.xScrollView;
+import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.settings.PrefMainActivity;
 import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
@@ -103,7 +103,7 @@ public class Trime extends InputMethodService
   private Candidate mCandidate; // 候選
   private Composition mComposition; // 編碼
   private CompositionContainerBinding compositionContainerBinding;
-  private xScrollView mCandidateContainer;
+  private ScrollView mCandidateContainer;
   private InputRootBinding inputRootBinding;
   private PopupWindow mFloatingWindow;
   private final PopupTimer mFloatingWindowTimer = new PopupTimer();

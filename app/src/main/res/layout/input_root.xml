@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.osfans.trime.ime.text.xScrollView
+    <com.osfans.trime.ime.text.ScrollView
         android:id="@+id/scroll"
         android:scrollbars="none"
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
                 android:layout_width="1000dp"
                 android:layout_height="120dp"/>
         </LinearLayout>
-    </com.osfans.trime.ime.text.xScrollView>
+    </com.osfans.trime.ime.text.ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
