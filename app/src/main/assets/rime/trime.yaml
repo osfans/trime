@@ -1092,7 +1092,7 @@ preset_keyboards:
     - {click: 'd', swipe_up: 'ð'}
     - {click: 'f', long_click: Left, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
     - {click: 'g', long_click: Up, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
-    - {click: 'h', long_click: Down, swipe_left: Home, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'h', long_click: Down, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
     - {click: 'j', long_click: Right, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
     - {click: 'k'}
     - {click: 'l', swipe_up: 'ø'}
@@ -1487,7 +1487,7 @@ preset_keyboards:
     - {click: 'd', label: "3-", swipe_up: 'ð'}
     - {click: 'f', label: "4-", long_click: Left, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
     - {click: 'g', label: "5-", long_click: Up, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
-    - {click: 'h', label: "6-", long_click: Down, swipe_left: Home, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
+    - {click: 'h', label: "6-", long_click: Down, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
     - {click: 'j', label: "7-", long_click: Right, swipe_left: Home, swipe_right: End, swipe_up: Page_Up, swipe_down: Page_Down}
     - {click: 'k', label: "8-"}
     - {click: 'l', label: "9-", swipe_up: 'ø'}
