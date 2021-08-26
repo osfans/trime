@@ -160,7 +160,7 @@ public class Config {
     return new File(getUserDataDir(), sub).getPath();
   }
 
-  private void prepareRime(Context context) {
+  public void prepareRime(Context context) {
     boolean isExist = new File(getSharedDataDir()).exists();
     boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(getPrefs());
     String defaultFile = "trime.yaml";

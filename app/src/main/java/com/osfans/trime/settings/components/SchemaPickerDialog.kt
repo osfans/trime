@@ -10,6 +10,7 @@ import com.osfans.trime.R
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.PrefMainActivity
+import com.osfans.trime.setup.Config
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -122,7 +123,12 @@ class SchemaPickerDialog(
     }
 
     private fun initSchemas() {
-        if (schemaMapList.isNullOrEmpty()) return
+        if (schemaMapList.isNullOrEmpty()) {
+            // 尝试一次配置文件重置 缺失 default.custom.yaml 导致方案为空
+            Config.get(context).prepareRime(context)
+            schemaMapList = Rime.get_available_schema_list()
+            if (schemaMapList.isNullOrEmpty()) return
+        }
         schemaMapList!!.sortedWith(SortByName())
         val selectedSchemas = Rime.get_selected_schema_list()
         val selectedIds = ArrayList<String>()
