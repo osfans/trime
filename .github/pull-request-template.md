@@ -9,16 +9,15 @@ Fixes #
 
 #### Build tasks success
 Successfully running following tasks on local
-- [ ] no wildcard imports
 - [ ] `./gradlew spotlessCheck`
 - [ ] `./gradlew assembleDebug`
 
 #### Code Reviews
-1. Manual build and test pass
-2. GitHub action lint and ci pass
-3. At least one contributor review and vote
-4. Can merge clean without conflicts
-5. PR will be merge by rebase upstream base
+1. No wildcards import
+2. Manual build and test pass
+3. GitHub action ci pass
+4. At least one contributor reviews and votes
+5. Can be merged clean without conflicts
+6. PR will be merged by rebase upstream base
 
 #### Additional Info
-
