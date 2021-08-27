@@ -63,6 +63,9 @@ import com.osfans.trime.R;
 import com.osfans.trime.Rime;
 import com.osfans.trime.databinding.CompositionContainerBinding;
 import com.osfans.trime.databinding.InputRootBinding;
+import com.osfans.trime.ime.SymbolKeyboard.ClipboardDao;
+import com.osfans.trime.ime.SymbolKeyboard.LiquidKeyboard;
+import com.osfans.trime.ime.SymbolKeyboard.TabView;
 import com.osfans.trime.ime.enums.InlineModeType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Event;
@@ -90,6 +93,7 @@ import timber.log.Timber;
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
   private static Trime self;
+  private LiquidKeyboard liquidKeyboard;
 
   @NonNull
   private Preferences getPrefs() {
@@ -104,6 +108,8 @@ public class Trime extends InputMethodService
   private Composition mComposition; // 編碼
   private CompositionContainerBinding compositionContainerBinding;
   private ScrollView mCandidateContainer;
+  private View mainKeyboard,symbleKeyboard;
+  private TabView tabView;
   private InputRootBinding inputRootBinding;
   private PopupWindow mFloatingWindow;
   private final PopupTimer mFloatingWindowTimer = new PopupTimer();
@@ -347,6 +353,8 @@ public class Trime extends InputMethodService
     orientation = getResources().getConfiguration().orientation;
     // Use the following line to debug IME service.
     // android.os.Debug.waitForDebugger();
+
+    liquidKeyboard = new LiquidKeyboard(this);
     clipBoardMonitor();
   }
 
@@ -363,6 +371,9 @@ public class Trime extends InputMethodService
         if (mCandidateContainer != null)
           mCandidate.setVisibility(!value ? View.VISIBLE : View.GONE);
         setCandidatesViewShown(canCompose && !value);
+        break;
+      case "_liquid_keyboard":
+        selectLiquidKeyboard(value?0:-1);
         break;
       case "_hide_key_hint":
         if (mKeyboardView != null) mKeyboardView.setShowHint(!value);
@@ -382,9 +393,33 @@ public class Trime extends InputMethodService
           final String key = option.substring(5);
           onEvent(new Event(key));
           if (bNeedUpdate) mNeedUpdateRimeOption = true;
+        } else if (option.matches("_liquid_keyboard_\\d+")){
+          selectLiquidKeyboard(Integer.parseInt(option.replace("_liquid_keyboard_","")));
         }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
+  }
+
+  public void selectLiquidKeyboard(int tabIndex) {
+    if (symbleKeyboard != null) {
+      if (tabIndex >= 0) {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mainKeyboard.getLayoutParams();
+
+        params.height = mainKeyboard.getHeight();
+        symbleKeyboard.setLayoutParams(params);
+        symbleKeyboard.setVisibility(View.VISIBLE);
+
+        liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
+        liquidKeyboard.calcPadding(mainKeyboard.getWidth());
+        liquidKeyboard.select(tabIndex);
+
+        tabView.updateCandidateWidth();
+        inputRootBinding.scroll2.setBackground(mCandidateContainer.getBackground());
+      } else
+        symbleKeyboard.setVisibility(View.GONE);
+    }
+    if (mainKeyboard != null)
+      mainKeyboard.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
 
   public void invalidate() {
@@ -405,23 +440,20 @@ public class Trime extends InputMethodService
 
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
       padding = mConfig.getPixel("keyboard_padding_landscape");
+      if (padding > 0) {
+        mKeyboardView.setPadding(
+                padding,
+                mKeyboardView.getPaddingTop(),
+                padding,
+                mKeyboardView.getBottom());
+      }
     } else {
       mKeyboardView.setPadding(
-          mKeyboardView.getPaddingLeft(),
-          mKeyboardView.getPaddingTop(),
-          mKeyboardView.getPaddingRight(),
-          mConfig.getPixel("keyboard_padding_portrait"));
+              padding,
+              mKeyboardView.getPaddingTop(),
+              padding,
+              mConfig.getPixel("keyboard_padding_portrait"));
     }
-
-    View spacer = inputRootBinding.spacerLeft;
-    LayoutParams layoutParams = spacer.getLayoutParams();
-    layoutParams.width = padding;
-    spacer.setLayoutParams(layoutParams);
-
-    spacer = inputRootBinding.spacerRight;
-    layoutParams = spacer.getLayoutParams();
-    layoutParams.width = padding;
-    spacer.setLayoutParams(layoutParams);
 
     final GradientDrawable gd = new GradientDrawable();
     gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
@@ -612,6 +644,11 @@ public class Trime extends InputMethodService
 
     setShowComment(!Rime.getOption("_hide_comment"));
     mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
+
+    liquidKeyboard.setView(inputRootBinding.liquidKeyboard );
+    mainKeyboard = inputRootBinding.mainKeyboard;
+    symbleKeyboard = inputRootBinding.symbolKeyboard;
+    tabView = inputRootBinding.tabView;
     loadBackground();
 
     return inputRootBinding.inputRoot;
@@ -1467,32 +1504,35 @@ public class Trime extends InputMethodService
    * ClipBoardOut 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
    */
   private void clipBoardMonitor() {
+    ClipboardDao.get();
     final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
     clipBoard.addPrimaryClipChangedListener(
-        () -> {
-          if (mConfig.hasClipBoardManager()) {
-            final String[] ClipBoardManager = mConfig.getClipBoardManager();
+            () -> {
 
-            final ClipData clipData = clipBoard.getPrimaryClip();
-            final ClipData.Item item = clipData.getItemAt(0);
+              final String[] ClipBoardManager = mConfig.getClipBoardManager();
 
-            final String text = item.getText().toString();
+              final ClipData clipData = clipBoard.getPrimaryClip();
+              final ClipData.Item item = clipData.getItemAt(0);
 
-            final String text2 = stringReplacer(text, mConfig.getClipBoardCompare());
-            if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
+              final String text = item.getText().toString();
 
-            if (stringNotMatch(text, mConfig.getClipBoardOutput())) {
-              ClipBoardString = text;
+              final String text2 = stringReplacer(text, mConfig.getClipBoardCompare());
+              if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-              final Intent intent = new Intent(Intent.ACTION_SEND);
-              intent.setType("text/plain");
-              intent.putExtra(Intent.EXTRA_TEXT, text);
-              intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-              intent.setComponent(new ComponentName(ClipBoardManager[0], ClipBoardManager[1]));
+              if (stringNotMatch(text, mConfig.getClipBoardOutput())) {
+                ClipBoardString = text2;
+                liquidKeyboard.addClipboardData(text);
 
-              self.startActivity(intent);
-            }
-          }
-        });
+                if (mConfig.hasClipBoardManager()) {
+                  final Intent intent = new Intent(Intent.ACTION_SEND);
+                  intent.setType("text/plain");
+                  intent.putExtra(Intent.EXTRA_TEXT, text);
+                  intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                  intent.setComponent(new ComponentName(ClipBoardManager[0], ClipBoardManager[1]));
+
+                  self.startActivity(intent);
+                }
+              }
+            });
   }
 }

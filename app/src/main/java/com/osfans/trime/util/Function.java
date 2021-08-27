@@ -19,7 +19,6 @@
 package com.osfans.trime.util;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -60,7 +59,6 @@ public class Function {
     sApplicationLaunchKeyCategories.append(210, "android.intent.category.APP_CALCULATOR");
   }
 
-  @TargetApi(VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
   public static boolean openCategory(Context context, int keyCode) {
     String category = sApplicationLaunchKeyCategories.get(keyCode);
     if (category != null) {

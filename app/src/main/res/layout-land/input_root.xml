@@ -3,26 +3,23 @@
     android:id="@+id/inputRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:baselineAligned="false">
 
-    <View
-        android:id="@+id/spacer_left"
-        android:layout_width="10dp"
-        android:layout_height="match_parent" />
 
     <LinearLayout
+        android:id="@+id/main_keyboard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_weight="1"
-        >
+        android:orientation="vertical">
 
         <com.osfans.trime.ime.text.ScrollView
             android:id="@+id/scroll"
-            android:scrollbars="none"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fillViewport="true">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -36,15 +33,53 @@
             </LinearLayout>
         </com.osfans.trime.ime.text.ScrollView>
 
-        <com.osfans.trime.ime.keyboard.KeyboardView
-            android:id="@+id/keyboard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <com.osfans.trime.ime.keyboard.KeyboardView
+                android:id="@+id/keyboard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
     </LinearLayout>
 
-    <View
-        android:id="@+id/spacer_right"
-        android:layout_width="10dp"
-        android:layout_height="match_parent" />
+    <LinearLayout
+        android:id="@+id/symbol_keyboard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.osfans.trime.ime.text.ScrollView
+            android:id="@+id/scroll2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.osfans.trime.ime.SymbolKeyboard.TabView
+                    android:id="@+id/tab_view"
+                    android:layout_width="1000dp"
+                    android:layout_height="20dp" />
+            </LinearLayout>
+        </com.osfans.trime.ime.text.ScrollView>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/liquid_keyboard"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

@@ -37,7 +37,9 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.Rime;
+import com.osfans.trime.ime.SymbolKeyboard.TabManager;
 import com.osfans.trime.ime.core.Preferences;
+import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.AppVersionUtils;
@@ -75,6 +77,8 @@ public class Config {
 
   private Map<?, ?> fallbackColors;
   private Map<?, ?> presetColorSchemes, presetKeyboards;
+  private Map<?, ?> liquidKeyboard;
+  private String[] ClipBoardCompare, ClipBoardOutput, ClipBoardManager;
 
   private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
 
@@ -312,6 +316,8 @@ public class Config {
       Key.presetKeys = (Map<String, Map<?, ?>>) m.get("preset_keys");
       presetColorSchemes = (Map<?, ?>) m.get("preset_color_schemes");
       presetKeyboards = (Map<?, ?>) m.get("preset_keyboards");
+      liquidKeyboard = (Map<?, ?>) m.get("liquid_keyboard");
+      initLiquidKeyboard();
       Rime.setShowSwitches(getPrefs().getKeyboard().getSwitchesEnabled());
       Rime.setShowSwitchArrow(getPrefs().getKeyboard().getSwitchArrowEnabled());
       reset();
@@ -421,10 +427,40 @@ public class Config {
     return keyboards;
   }
 
+  public void initLiquidKeyboard() {
+    TabManager.clear();
+    if (liquidKeyboard == null)
+      return;
+    final List<?> names = (List<?>) liquidKeyboard.get("keyboards");
+    if (names == null)
+      return;
+    for (Object s : names) {
+      String name = (String) s;
+      if (liquidKeyboard.containsKey(name)) {
+        Map<?, ?> keyboard = (Map<?, ?>) liquidKeyboard.get(name);
+        if (keyboard != null) {
+          if (keyboard.containsKey("name")) {
+            name = (String) keyboard.get("name");
+          }
+          if (keyboard.containsKey("type")) {
+            TabManager.get().addTab(name
+                    , SymbolKeyboardType.Companion.fromObject(keyboard.get("type"))
+                    , keyboard.get("keys"));
+          }
+        }
+      }
+    }
+  }
+
   public Map<?, ?> getKeyboard(String name) {
     if (!presetKeyboards.containsKey(name)) name = "default";
     return (Map<?, ?>) presetKeyboards.get(name);
   }
+
+  public Map<?, ?> getLiquidKeyboard() {
+    return liquidKeyboard;
+  }
+
 
   public void destroy() {
     if (mDefaultStyle != null) mDefaultStyle.clear();
@@ -612,7 +648,6 @@ public class Config {
    * 避免直接读取 default
    *
    * @return java.lang.String 首个已配置的主题方案名
-   * @date 8/13/21
    */
   private String getColorSchemeName() {
     String scheme = getPrefs().getLooks().getSelectedColor();
@@ -735,4 +770,40 @@ public class Config {
     if (progress > 9) progress = 9;
     return progress * 10 + 10;
   }
+
+    public Drawable getLiquidDrawable(String key, Context context) {
+        if (liquidKeyboard == null)
+            return self.getColorDrawable(key);
+        if (liquidKeyboard.containsKey(key)) {
+            Drawable drawable = Config.getColorDrawable(context, liquidKeyboard, key);
+            if (drawable != null)
+                return drawable;
+        }
+        return self.getColorDrawable(key);
+    }
+
+
+  public int getLiquidPixel(String key) {
+    if (liquidKeyboard != null) {
+      if (liquidKeyboard.containsKey(key)) {
+        Integer value = Config.getPixel(liquidKeyboard, key, 0);
+        if(value!=null)
+        return value;
+      }
+    }
+    return self.getPixel(key);
+  }
+
+
+    public Integer getLiquidColor(String key) {
+
+        if (liquidKeyboard != null) {
+            if (liquidKeyboard.containsKey(key)) {
+                Integer value = parseColor((String) Objects.requireNonNull(liquidKeyboard.get(key)));
+                if (value != null)
+                    return value;
+            }
+        }
+        return self.getColor(key);
+    }
 }

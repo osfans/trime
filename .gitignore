@@ -55,3 +55,4 @@ libs/*
 # vim
 *.swp
 
+/app/release/output-metadata.json
