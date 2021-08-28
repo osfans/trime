@@ -671,7 +671,7 @@ liquid_keyboard:
   single_width: 60    #single类型的按键宽度
   vertical_gap: 5     #纵向按键间隙
   margin_x: 1         #左右按键间隙的1/2
-  keyboards: [emoji, math, ascii, cn, clipboard, list ,ids , exit, jp, table, symbol, pinyin, grease, rusa, korea, lation, yinbiao, unit, test, exit]  #tab列表
+  keyboards: [emoji, math, ascii, cn, clipboard, list ,ids , exit, jp, table, symbol, pinyin, jp, grease, rusa, korea, lation, yinbiao, unit, exit]  #tab列表
   exit:
     name: 返回
     type: NO_KEY
@@ -686,8 +686,9 @@ liquid_keyboard:
     type: SINGLE
     name: 数学
     keys: "≈＝≠≌<>≤≥≡()[]{}-+±×*/÷&∥%‰‱°′″∫∮∯∬∭∰∞∑∧∏∈∵∴⊥∝∨∪•√〒∝∽∈∩∧⊙⌒∥∟∣∂∆∞≌∉∪∨⊕⊿⊥∠∫∬∭"  #tab中的按键列表
-  test:
+  cn:
     type: SINGLE
+    name: 中文
     keys:  #keys列表可以使用多种格式混合书写。
       - ，
       - 。
@@ -695,12 +696,11 @@ liquid_keyboard:
       - ！
       - ：
       - 、
-      - ……
       - “
       - ”
       - ‘
-      - ’
-      - ——
+      - ···
+      - ……
       - { click: "——" }
       - { click: "——", label: "破折号" }
       - （
@@ -735,11 +735,14 @@ liquid_keyboard:
     keys: "āáǎàōóēéěèǒòīíǐìūúǖǘǚǜǔùêüńňㄚㄛㄜㄧㄨㄩㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ"
   grease:
     type: SINGLE
+    name: 希腊
     keys: "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψω"
   rusa:
+    name: 俄语
     type: SINGLE
     keys: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
   lation:
+    name: 拉丁
     type: SINGLE
     keys: "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞŠŸŒàáâãäåæçèéêëìíîïðñòóõôöøùúûüýþšÿœ"
   korea:
@@ -756,7 +759,12 @@ liquid_keyboard:
     keys: ",.?!:;/\\|*-+=^$`'\"^~@#%&()[]{}_"
   ids:
     type: SINGLE
+    name: IDS
     keys: "⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻"
+  jp:
+    type: SINGLE
+    name: 假名
+    keys: "あいうえおかがきぎくぐけげこごさざしじすずせぜそぞただちぢつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろわをんアィイウェエオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロワヲン"
 
 
 

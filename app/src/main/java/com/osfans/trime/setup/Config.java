@@ -429,11 +429,9 @@ public class Config {
 
   public void initLiquidKeyboard() {
     TabManager.clear();
-    if (liquidKeyboard == null)
-      return;
+    if (liquidKeyboard == null) return;
     final List<?> names = (List<?>) liquidKeyboard.get("keyboards");
-    if (names == null)
-      return;
+    if (names == null) return;
     for (Object s : names) {
       String name = (String) s;
       if (liquidKeyboard.containsKey(name)) {
@@ -443,9 +441,11 @@ public class Config {
             name = (String) keyboard.get("name");
           }
           if (keyboard.containsKey("type")) {
-            TabManager.get().addTab(name
-                    , SymbolKeyboardType.Companion.fromObject(keyboard.get("type"))
-                    , keyboard.get("keys"));
+            TabManager.get()
+                .addTab(
+                    name,
+                    SymbolKeyboardType.Companion.fromObject(keyboard.get("type")),
+                    keyboard.get("keys"));
           }
         }
       }
@@ -460,7 +460,6 @@ public class Config {
   public Map<?, ?> getLiquidKeyboard() {
     return liquidKeyboard;
   }
-
 
   public void destroy() {
     if (mDefaultStyle != null) mDefaultStyle.clear();
@@ -771,39 +770,33 @@ public class Config {
     return progress * 10 + 10;
   }
 
-    public Drawable getLiquidDrawable(String key, Context context) {
-        if (liquidKeyboard == null)
-            return self.getColorDrawable(key);
-        if (liquidKeyboard.containsKey(key)) {
-            Drawable drawable = Config.getColorDrawable(context, liquidKeyboard, key);
-            if (drawable != null)
-                return drawable;
-        }
-        return self.getColorDrawable(key);
+  public Drawable getLiquidDrawable(String key, Context context) {
+    if (liquidKeyboard == null) return self.getColorDrawable(key);
+    if (liquidKeyboard.containsKey(key)) {
+      Drawable drawable = Config.getColorDrawable(context, liquidKeyboard, key);
+      if (drawable != null) return drawable;
     }
-
+    return self.getColorDrawable(key);
+  }
 
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
         Integer value = Config.getPixel(liquidKeyboard, key, 0);
-        if(value!=null)
-        return value;
+        if (value != null) return value;
       }
     }
     return self.getPixel(key);
   }
 
+  public Integer getLiquidColor(String key) {
 
-    public Integer getLiquidColor(String key) {
-
-        if (liquidKeyboard != null) {
-            if (liquidKeyboard.containsKey(key)) {
-                Integer value = parseColor((String) Objects.requireNonNull(liquidKeyboard.get(key)));
-                if (value != null)
-                    return value;
-            }
-        }
-        return self.getColor(key);
+    if (liquidKeyboard != null) {
+      if (liquidKeyboard.containsKey(key)) {
+        Integer value = parseColor((String) Objects.requireNonNull(liquidKeyboard.get(key)));
+        if (value != null) return value;
+      }
     }
+    return self.getColor(key);
+  }
 }

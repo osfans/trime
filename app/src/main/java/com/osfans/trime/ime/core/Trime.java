@@ -108,7 +108,7 @@ public class Trime extends InputMethodService
   private Composition mComposition; // 編碼
   private CompositionContainerBinding compositionContainerBinding;
   private ScrollView mCandidateContainer;
-  private View mainKeyboard,symbleKeyboard;
+  private View mainKeyboard, symbleKeyboard;
   private TabView tabView;
   private InputRootBinding inputRootBinding;
   private PopupWindow mFloatingWindow;
@@ -373,7 +373,7 @@ public class Trime extends InputMethodService
         setCandidatesViewShown(canCompose && !value);
         break;
       case "_liquid_keyboard":
-        selectLiquidKeyboard(value?0:-1);
+        selectLiquidKeyboard(value ? 0 : -1);
         break;
       case "_hide_key_hint":
         if (mKeyboardView != null) mKeyboardView.setShowHint(!value);
@@ -393,8 +393,8 @@ public class Trime extends InputMethodService
           final String key = option.substring(5);
           onEvent(new Event(key));
           if (bNeedUpdate) mNeedUpdateRimeOption = true;
-        } else if (option.matches("_liquid_keyboard_\\d+")){
-          selectLiquidKeyboard(Integer.parseInt(option.replace("_liquid_keyboard_","")));
+        } else if (option.matches("_liquid_keyboard_\\d+")) {
+          selectLiquidKeyboard(Integer.parseInt(option.replace("_liquid_keyboard_", "")));
         }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
@@ -403,7 +403,8 @@ public class Trime extends InputMethodService
   public void selectLiquidKeyboard(int tabIndex) {
     if (symbleKeyboard != null) {
       if (tabIndex >= 0) {
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mainKeyboard.getLayoutParams();
+        LinearLayout.LayoutParams params =
+            (LinearLayout.LayoutParams) mainKeyboard.getLayoutParams();
 
         params.height = mainKeyboard.getHeight();
         symbleKeyboard.setLayoutParams(params);
@@ -415,11 +416,9 @@ public class Trime extends InputMethodService
 
         tabView.updateCandidateWidth();
         inputRootBinding.scroll2.setBackground(mCandidateContainer.getBackground());
-      } else
-        symbleKeyboard.setVisibility(View.GONE);
+      } else symbleKeyboard.setVisibility(View.GONE);
     }
-    if (mainKeyboard != null)
-      mainKeyboard.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
+    if (mainKeyboard != null) mainKeyboard.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
 
   public void invalidate() {
@@ -442,17 +441,14 @@ public class Trime extends InputMethodService
       padding = mConfig.getPixel("keyboard_padding_landscape");
       if (padding > 0) {
         mKeyboardView.setPadding(
-                padding,
-                mKeyboardView.getPaddingTop(),
-                padding,
-                mKeyboardView.getBottom());
+            padding, mKeyboardView.getPaddingTop(), padding, mKeyboardView.getBottom());
       }
     } else {
       mKeyboardView.setPadding(
-              padding,
-              mKeyboardView.getPaddingTop(),
-              padding,
-              mConfig.getPixel("keyboard_padding_portrait"));
+          padding,
+          mKeyboardView.getPaddingTop(),
+          padding,
+          mConfig.getPixel("keyboard_padding_portrait"));
     }
 
     final GradientDrawable gd = new GradientDrawable();
@@ -645,7 +641,7 @@ public class Trime extends InputMethodService
     setShowComment(!Rime.getOption("_hide_comment"));
     mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
 
-    liquidKeyboard.setView(inputRootBinding.liquidKeyboard );
+    liquidKeyboard.setView(inputRootBinding.liquidKeyboard);
     mainKeyboard = inputRootBinding.mainKeyboard;
     symbleKeyboard = inputRootBinding.symbolKeyboard;
     tabView = inputRootBinding.tabView;
@@ -1507,32 +1503,31 @@ public class Trime extends InputMethodService
     ClipboardDao.get();
     final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
     clipBoard.addPrimaryClipChangedListener(
-            () -> {
+        () -> {
+          final String[] ClipBoardManager = mConfig.getClipBoardManager();
 
-              final String[] ClipBoardManager = mConfig.getClipBoardManager();
+          final ClipData clipData = clipBoard.getPrimaryClip();
+          final ClipData.Item item = clipData.getItemAt(0);
 
-              final ClipData clipData = clipBoard.getPrimaryClip();
-              final ClipData.Item item = clipData.getItemAt(0);
+          final String text = item.getText().toString();
 
-              final String text = item.getText().toString();
+          final String text2 = stringReplacer(text, mConfig.getClipBoardCompare());
+          if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-              final String text2 = stringReplacer(text, mConfig.getClipBoardCompare());
-              if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
+          if (stringNotMatch(text, mConfig.getClipBoardOutput())) {
+            ClipBoardString = text2;
+            liquidKeyboard.addClipboardData(text);
 
-              if (stringNotMatch(text, mConfig.getClipBoardOutput())) {
-                ClipBoardString = text2;
-                liquidKeyboard.addClipboardData(text);
+            if (mConfig.hasClipBoardManager()) {
+              final Intent intent = new Intent(Intent.ACTION_SEND);
+              intent.setType("text/plain");
+              intent.putExtra(Intent.EXTRA_TEXT, text);
+              intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              intent.setComponent(new ComponentName(ClipBoardManager[0], ClipBoardManager[1]));
 
-                if (mConfig.hasClipBoardManager()) {
-                  final Intent intent = new Intent(Intent.ACTION_SEND);
-                  intent.setType("text/plain");
-                  intent.putExtra(Intent.EXTRA_TEXT, text);
-                  intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                  intent.setComponent(new ComponentName(ClipBoardManager[0], ClipBoardManager[1]));
-
-                  self.startActivity(intent);
-                }
-              }
-            });
+              self.startActivity(intent);
+            }
+          }
+        });
   }
 }

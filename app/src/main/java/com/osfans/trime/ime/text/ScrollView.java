@@ -90,17 +90,15 @@ public class ScrollView extends HorizontalScrollView {
 
         // TODO: 翻页后、手指抬起前，降低滑动速度增加阻尼感
         if (inner.getLeft() > 100 && Rime.hasLeft()) {
-          if (pageUpAction != null)
-            pageUpAction.run();
+          if (pageUpAction != null) pageUpAction.run();
           if (inner.getWidth() > this.getWidth())
             inner.layout(
-                    this.getWidth() - inner.getWidth() - 400,
-                    inner.getTop(),
-                    this.getWidth() - 400,
-                    inner.getBottom());
+                this.getWidth() - inner.getWidth() - 400,
+                inner.getTop(),
+                this.getWidth() - 400,
+                inner.getBottom());
         } else if (inner.getWidth() - inner.getRight() > 100 && Rime.hasRight()) {
-          if (pageDownAction != null)
-            pageDownAction.run();
+          if (pageDownAction != null) pageDownAction.run();
           if (inner.getWidth() > this.getWidth()) {
             inner.layout(400, inner.getTop(), this.getWidth() + 400, inner.getBottom());
           }
@@ -136,7 +134,7 @@ public class ScrollView extends HorizontalScrollView {
 
   /** Retract animation */
   public void animation() {
-    final TranslateAnimation taa = new TranslateAnimation(0, 0, left + 200,  200);
+    final TranslateAnimation taa = new TranslateAnimation(0, 0, left + 200, 200);
     taa.setDuration(200);
     // Turn on moving animation
     final TranslateAnimation ta = new TranslateAnimation(inner.getLeft(), normal.left, 0, 0);
