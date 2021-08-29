@@ -78,11 +78,10 @@ public class Config {
   private Map<?, ?> fallbackColors;
   private Map<?, ?> presetColorSchemes, presetKeyboards;
   private Map<?, ?> liquidKeyboard;
-  private String[] ClipBoardCompare, ClipBoardOutput, ClipBoardManager;
 
   private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
 
-  private String[] clipBoardCompare, clipBoardOutput, clipBoardManager;
+  private String[] clipBoardCompare, clipBoardOutput;
 
   @NonNull
   private Preferences getPrefs() {
@@ -101,7 +100,6 @@ public class Config {
   private void prepareCLipBoardRule() {
     clipBoardCompare = getPrefs().getOther().getClipboardCompareRules().trim().split("\n");
     clipBoardOutput = getPrefs().getOther().getClipboardOutputRules().trim().split("\n");
-    clipBoardManager = getPrefs().getOther().getClipboardManagerRules().trim().split(",");
   }
 
   public String[] getClipBoardCompare() {
@@ -112,20 +110,8 @@ public class Config {
     return clipBoardOutput;
   }
 
-  public String[] getClipBoardManager() {
-    return clipBoardManager;
-  }
-
-  public boolean hasClipBoardManager() {
-    if (clipBoardManager.length == 2) {
-      return clipBoardManager[0].length() > 0 && clipBoardManager[1].length() > 0;
-    }
-    return false;
-  }
-
-  public void setClipBoardManager(String str) {
-    getPrefs().getOther().setClipboardManagerRules(str);
-    prepareCLipBoardRule();
+  public int getClipboardMaxSize() {
+    return Integer.parseInt(getPrefs().getOther().getClipboardManagerRules());
   }
 
   public void setClipBoardCompare(String str) {

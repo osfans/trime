@@ -25,7 +25,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -50,6 +49,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -84,6 +85,7 @@ import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
+import com.osfans.trime.util.StringUitls;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -354,7 +356,7 @@ public class Trime extends InputMethodService
     // Use the following line to debug IME service.
     // android.os.Debug.waitForDebugger();
 
-    liquidKeyboard = new LiquidKeyboard(this);
+    liquidKeyboard = new LiquidKeyboard(this, mConfig.getClipboardMaxSize());
     clipBoardMonitor();
   }
 
@@ -858,6 +860,31 @@ public class Trime extends InputMethodService
           return ic.performContextMenuAction(android.R.id.copy);
         case KeyEvent.KEYCODE_V:
           return ic.performContextMenuAction(android.R.id.paste);
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+          if (getPrefs().getOther().getSelectionSense()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et != null) {
+              int move_to = StringUitls.findNextSection(et.text, et.startOffset + et.selectionEnd);
+              ic.setSelection(move_to, move_to);
+              return true;
+            }
+            break;
+          }
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+          if (getPrefs().getOther().getSelectionSense()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et != null) {
+              int move_to =
+                  StringUitls.findPrevSection(et.text, et.startOffset + et.selectionStart);
+              ic.setSelection(move_to, move_to);
+              return true;
+            }
+            break;
+          }
       }
     }
     return false;
@@ -1471,28 +1498,6 @@ public class Trime extends InputMethodService
 
   private String ClipBoardString = "";
 
-  private static String stringReplacer(String str, String[] rules) {
-    if (str == null) return "";
-
-    String s = str;
-    for (String rule : rules) {
-      s = s.replaceAll(rule, "");
-      if (s.length() < 1) return "";
-    }
-    return s;
-  }
-
-  private static boolean stringNotMatch(String str, String[] rules) {
-    if (str == null) return false;
-
-    if (str.length() < 1) return false;
-
-    for (String rule : rules) {
-      if (str.matches(rule)) return false;
-    }
-    return true;
-  }
-
   /**
    * 此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
    *
@@ -1504,28 +1509,18 @@ public class Trime extends InputMethodService
     final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
     clipBoard.addPrimaryClipChangedListener(
         () -> {
-          final String[] ClipBoardManager = mConfig.getClipBoardManager();
+          if (mConfig.getClipboardMaxSize() != 0) {
+            final ClipData clipData = clipBoard.getPrimaryClip();
+            final ClipData.Item item = clipData.getItemAt(0);
+            if (item == null) return;
+            final String text = item.coerceToText(self).toString();
 
-          final ClipData clipData = clipBoard.getPrimaryClip();
-          final ClipData.Item item = clipData.getItemAt(0);
+            final String text2 = StringUitls.stringReplacer(text, mConfig.getClipBoardCompare());
+            if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-          final String text = item.getText().toString();
-
-          final String text2 = stringReplacer(text, mConfig.getClipBoardCompare());
-          if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
-
-          if (stringNotMatch(text, mConfig.getClipBoardOutput())) {
-            ClipBoardString = text2;
-            liquidKeyboard.addClipboardData(text);
-
-            if (mConfig.hasClipBoardManager()) {
-              final Intent intent = new Intent(Intent.ACTION_SEND);
-              intent.setType("text/plain");
-              intent.putExtra(Intent.EXTRA_TEXT, text);
-              intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-              intent.setComponent(new ComponentName(ClipBoardManager[0], ClipBoardManager[1]));
-
-              self.startActivity(intent);
+            if (StringUitls.stringNotMatch(text, mConfig.getClipBoardOutput())) {
+              ClipBoardString = text2;
+              liquidKeyboard.addClipboardData(text);
             }
           }
         });

@@ -121,7 +121,17 @@
     <string name="other__clipboard_manager_title">Clipboard Manager</string>
     <string name="other__clipboard_compare_title">Clipboard Compare Rules</string>
     <string name="other__clipboard_output_title">Clipboard Output Rules</string>
-    <string name="other__clipboard_manager_summary">Send clipboard text to the selected App when the Clipboard is modified.</string>
+    <string name="other__clipboard_manager_summary">Save how many clipboard items.</string>
+    <string-array name="other__clipboard_manager_entries" >
+        <item name="0">Disable</item>
+        <item name="20">20</item>
+        <item name="50">50</item>
+        <item name="100">100</item>
+        <item name="200">200</item>
+        <item name="500">500</item>
+        <item name="1000">1000</item>
+        <item name="-1">All</item>
+    </string-array>
     <string name="keyboard__show_switche_arrow_title">Show arrow for candidate switch</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
@@ -145,4 +155,5 @@
     <string name="about__support">Support</string>
     <string name="about__used_libraries">Open Source Libraries We Use</string>
     <string name="about__used_library_dialog_title">Trime | Open Source Libraries</string>
+    <string name="other__selection_sense_title">Uset Ctrl+Left/Right to move the cursor</string>
 </resources>

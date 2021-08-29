@@ -120,7 +120,17 @@
     <string name="other__clipboard_manager_title">剪贴板管理器</string>
     <string name="other__clipboard_compare_title">剪贴板去重规则(每行为一条正则表达式)</string>
     <string name="other__clipboard_output_title">剪贴板过滤规则(每行为一条正则表达式)</string>
-    <string name="other__clipboard_manager_summary">剪贴板内容变化时，自动发送剪贴板内容给选定的应用</string>
+    <string name="other__clipboard_manager_summary">保存剪贴板内容的数量</string>
+    <string-array name="other__clipboard_manager_entries" >
+        <item name="0">停用</item>
+        <item name="20">20</item>
+        <item name="50">50</item>
+        <item name="100">100</item>
+        <item name="200">200</item>
+        <item name="500">500</item>
+        <item name="1000">1000</item>
+        <item name="-1">全部</item>
+    </string-array>
     <string name="keyboard__show_switche_arrow_title">在候选栏中显示状态时带箭头符号</string>
     <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
@@ -144,4 +154,5 @@
     <string name="about__support">支持</string>
     <string name="about__used_libraries">我们使用的库</string>
     <string name="about__used_library_dialog_title">同文输入法 | 开源软件库</string>
+    <string name="other__selection_sense_title">用Ctrl+Left/Right快速移动光标</string>
 </resources>

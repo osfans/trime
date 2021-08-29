@@ -25,10 +25,18 @@
         app:iconSpaceReserved="false"
         android:title="@string/other__destroy_on_quit_title" />
 
-    <Preference android:key="other__clipboard_manager"
+    <SwitchPreferenceCompat android:key="other__selection_sense"
         app:iconSpaceReserved="false"
-        android:title="@string/other__clipboard_manager_title"
-        android:summary="@string/other__clipboard_manager_summary"/>
+        android:title="@string/other__selection_sense_title" />
+
+    <ListPreference
+        android:defaultValue="100"
+        app:iconSpaceReserved="false"
+        app:entries="@array/other__clipboard_manager_entries"
+        app:entryValues="@array/other__clipboard_manager_values"
+        app:key="other__clipboard_manager"
+        app:title="@string/other__clipboard_manager_title"
+        app:useSimpleSummaryProvider="true" />
 
     <EditTextPreference android:key="other__clipboard_compare"
         app:iconSpaceReserved="false"

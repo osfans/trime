@@ -66,19 +66,18 @@ public class ClipboardDao {
     db.close();
   }
 
-  public List<SimpleKeyBean> getAllSimpleBean() {
+  public List<SimpleKeyBean> getAllSimpleBean(int size) {
 
     List<SimpleKeyBean> list = new ArrayList<>();
+    if (size == 0) return list;
+
+    String sql = "select text , html , type , time from t_clipboard ORDER BY time DESC";
+    if (size > 0) sql = sql + " limit 0," + size;
+
     helper = new ClipboardSqlHelper(Trime.getService(), "clipboard.db", null, 1);
 
     SQLiteDatabase db = helper.getWritableDatabase();
-
-    Cursor cursor =
-        db.rawQuery(
-            "select text , html , type , time from t_clipboard"
-                //             +   " where del = false"
-                + "  ORDER BY time DESC",
-            null);
+    Cursor cursor = db.rawQuery(sql, null);
     if (cursor != null) {
       while (cursor.moveToNext()) {
         ClipboardBean v = new ClipboardBean(cursor.getString(0));
@@ -87,7 +86,7 @@ public class ClipboardDao {
       cursor.close();
     }
     db.close();
-    Timber.d("getAllSimpleBean() size=%s", list.size());
+    Timber.d("getAllSimpleBean() size=%s limit=%s", list.size(), size);
     return list;
   }
 }

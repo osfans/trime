@@ -286,6 +286,7 @@ class Preferences(
             const val SHOW_APP_ICON = "other__show_app_icon"
             const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
             const val DESTROY_ON_QUIT = "other__destroy_on_quit"
+            const val SELECTION_SENSE = "other__selection_sense"
             const val CLIPBOARD_COMPARE_RULES = "other__clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "other__clipboard_output"
             const val CLIPBOARD_MANAGER_RULES = "other__clipboard_manager"
@@ -296,6 +297,9 @@ class Preferences(
         var showAppIcon: Boolean
             get() = prefs.getPref(SHOW_APP_ICON, true)
             set(v) = prefs.setPref(SHOW_APP_ICON, v)
+        var selectionSense: Boolean
+            get() = prefs.getPref(SELECTION_SENSE, true)
+            set(v) = prefs.setPref(SELECTION_SENSE, v)
         var showStatusBarIcon: Boolean = false
             get() = prefs.getPref(SHOW_STATUS_BAR_ICON, false)
             private set
@@ -309,7 +313,7 @@ class Preferences(
             get() = prefs.getPref(CLIPBOARD_OUTPUT_RULES, "")
             set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v)
         var clipboardManagerRules: String
-            get() = prefs.getPref(CLIPBOARD_MANAGER_RULES, "")
+            get() = prefs.getPref(CLIPBOARD_MANAGER_RULES, "0")
             set(v) = prefs.setPref(CLIPBOARD_MANAGER_RULES, v)
     }
 }

@@ -25,7 +25,7 @@ public class LiquidKeyboard {
   private SimpleAdapter simpleAdapter;
   private List<SimpleKeyBean> clipboardBeanList;
   private List<SimpleKeyBean> simpleKeyBeans;
-  private int margin_x, margin_top, single_width, parent_width;
+  private int margin_x, margin_top, single_width, parent_width, clipboard_max_size;
 
   private int keyHeight;
   private boolean isLand;
@@ -38,10 +38,11 @@ public class LiquidKeyboard {
     isLand = land;
   }
 
-  public LiquidKeyboard(Context context) {
+  public LiquidKeyboard(Context context, int clipboard_max_size) {
     this.context = context;
 
-    clipboardBeanList = ClipboardDao.get().getAllSimpleBean();
+    this.clipboard_max_size = clipboard_max_size;
+    clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
     Timber.d("clipboardBeanList.size=%s", clipboardBeanList.size());
   }
 
@@ -100,6 +101,8 @@ public class LiquidKeyboard {
     if (single_width <= 0) single_width = config.getLiquidPixel("single_width");
     if (single_width <= 0)
       single_width = context.getResources().getDimensionPixelSize(R.dimen.simple_key_single_width);
+
+    clipboard_max_size = config.getClipboardMaxSize();
   }
 
   // 每次点击tab都需要刷新的参数
@@ -171,7 +174,8 @@ public class LiquidKeyboard {
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    clipboardBeanList = ClipboardDao.get().getAllSimpleBean();
+    clipboard_max_size = Config.get(context).getClipboardMaxSize();
+    clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
     mClipboardAdapter = new ClipboardAdapter(context, clipboardBeanList);
 
     mClipboardAdapter.configStyle(margin_x, margin_top);
