@@ -15,6 +15,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
+        android:ellipsize="marquee"
         android:textColor="#333333"
         android:textSize="12sp" />
 

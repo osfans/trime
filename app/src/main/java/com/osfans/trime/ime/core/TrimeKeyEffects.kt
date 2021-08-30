@@ -154,9 +154,10 @@ class TrimeKeyEffects(
         inputRootBinding = null
         vibrator = null
         audioManager = null
-        tts?.let {
-            it.stop()
-            destroy()
-        }.also { tts = null }
+        if (tts != null) {
+            tts?.let {
+                it.stop()
+            }.also { tts = null }
+        }
     }
 }

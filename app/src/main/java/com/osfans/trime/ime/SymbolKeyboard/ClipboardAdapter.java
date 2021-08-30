@@ -44,7 +44,7 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     textColor = config.getLiquidColor("long_text_color");
     if (textColor == null) textColor = config.getLiquidColor("key_text_color");
 
-    textSize = config.getFloat("long_text_size");
+    textSize = config.getFloat("key_long_text_size");
     if (textSize <= 0) textSize = config.getFloat("label_text_size");
 
     textFont = config.getFont("long_text_font");

@@ -12,6 +12,8 @@ import com.osfans.trime.R;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import timber.log.Timber;
@@ -24,11 +26,13 @@ public class LiquidKeyboard {
   private ClipboardAdapter mClipboardAdapter;
   private SimpleAdapter simpleAdapter;
   private List<SimpleKeyBean> clipboardBeanList;
-  private List<SimpleKeyBean> simpleKeyBeans;
+  private List<SimpleKeyBean> simpleKeyBeans, historyBeans;
   private int margin_x, margin_top, single_width, parent_width, clipboard_max_size;
 
   private int keyHeight;
   private boolean isLand;
+  private SymbolKeyboardType keyboardType;
+  private final String historySavePath;
 
   public void setView(RecyclerView view) {
     keyboardView = view;
@@ -44,6 +48,10 @@ public class LiquidKeyboard {
     this.clipboard_max_size = clipboard_max_size;
     clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
     Timber.d("clipboardBeanList.size=%s", clipboardBeanList.size());
+
+    simpleKeyBeans = new ArrayList<>();
+    historySavePath =
+        context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "key_history";
   }
 
   public void addClipboardData(String text) {
@@ -56,11 +64,16 @@ public class LiquidKeyboard {
   public void select(int i) {
     TabTag tag = TabManager.getTag(i);
     calcPadding(tag.type);
-    if (tag.type == SymbolKeyboardType.CLIPBOARD) {
-      TabManager.get().select(i);
-      initClipboardData();
-    } else {
-      initFixData(i);
+    keyboardType = tag.type;
+    switch (keyboardType) {
+      case CLIPBOARD:
+        TabManager.get().select(i);
+        initClipboardData();
+        break;
+      case HISTORY:
+        TabManager.get().select(i);
+      default:
+        initFixData(i);
     }
   }
 
@@ -120,6 +133,8 @@ public class LiquidKeyboard {
 
     Timber.d("set_keyboard_padding=%s / %s", padding, parentView.getWidth());
     if (padding > 0) parentView.setPadding(padding, 0, padding, 0);
+
+    historyBeans = SimpleKeyDao.getSymbolKeyHistory(historySavePath);
   }
 
   public void initFixData(int i) {
@@ -138,7 +153,16 @@ public class LiquidKeyboard {
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
     // 设置适配器
-    simpleKeyBeans = TabManager.get().select(i);
+
+    if (keyboardType == SymbolKeyboardType.HISTORY) {
+      simpleKeyBeans.clear();
+      simpleKeyBeans.addAll(historyBeans);
+    } else {
+      simpleKeyBeans.clear();
+      simpleKeyBeans.addAll(TabManager.get().select(i));
+    }
+
+    Timber.d("Tab.select(%s) beans.size=%s", i, simpleKeyBeans.size());
     simpleAdapter = new SimpleAdapter(context, simpleKeyBeans);
 
     simpleAdapter.configStyle(single_width, keyHeight, margin_x, margin_top);
@@ -154,7 +178,13 @@ public class LiquidKeyboard {
         (view, position) -> {
           InputConnection ic = Trime.getService().getCurrentInputConnection();
           if (ic != null) {
-            ic.commitText(simpleKeyBeans.get(position).getText(), 1);
+            SimpleKeyBean bean = simpleKeyBeans.get(position);
+            ic.commitText(bean.getText(), 1);
+
+            if (keyboardType != SymbolKeyboardType.HISTORY) {
+              historyBeans.add(0, bean);
+              SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans);
+            }
           }
         });
   }

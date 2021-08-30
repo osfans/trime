@@ -9,9 +9,8 @@
 
     <LinearLayout
         android:id="@+id/main_keyboard"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="vertical">
 
         <com.osfans.trime.ime.text.ScrollView
@@ -42,9 +41,8 @@
 
     <LinearLayout
         android:id="@+id/symbol_keyboard"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="vertical"
         android:visibility="gone">
 
@@ -70,14 +68,14 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/liquid_keyboard"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="match_parent"/>
 
         </LinearLayout>
     </LinearLayout>
