@@ -20,4 +20,9 @@ Successfully running following tasks on local
 5. Can be merged clean without conflicts
 6. PR will be merged by rebase upstream base
 
+#### Daily build for review
+Fetch artifact after login
+
+https://github.com/osfans/trime/actions
+
 #### Additional Info

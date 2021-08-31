@@ -19,7 +19,7 @@
 [<img alt='酷安' src='https://static.coolapk.com/images/header-logo.png'
 height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 - 測試版
-[點擊下載](https://github.com/osfans/trime/tree/gh-pages)
+[點擊下載](https://github.com/osfans/trime/actions)
 
 - 配置文件
 [rimerc](https://github.com/Bambooin/rimerc)
