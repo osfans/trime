@@ -35,3 +35,11 @@ jobs:
 
       - name: Build Trime
         run: make debug
+
+      - name: Upload Trime artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: trime-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          # keep 360 days
+          retention-days: 360
