@@ -1,14 +1,14 @@
 package com.osfans.trime.util;
 
 public class StringUitls {
-  private static String sectionDivider = ",.?!~:，。：～？！…\t\r\n\\/";
+  private static final String sectionDivider = ",.?!~:，。：～？！…\t\r\n\\/";
 
   public static int findNextSection(CharSequence str, int start) {
     if (str != null) {
       int i = Math.max(0, start);
       if (i < str.length()) {
         char c = str.charAt(i);
-        boolean judge = sectionDivider.indexOf(c) < 0 ? true : false;
+        boolean judge = sectionDivider.indexOf(c) < 0;
         for (; i < str.length(); i++) {
           c = str.charAt(i);
           if (sectionDivider.indexOf(c) < 0) judge = true;
@@ -18,7 +18,7 @@ public class StringUitls {
         }
       }
     }
-    return str.length();
+    return 0;
   }
 
   public static int findPrevSection(CharSequence str, int start) {
@@ -26,7 +26,7 @@ public class StringUitls {
       int i = Math.min(start, str.length()) - 1;
       if (i >= 0) {
         char c = str.charAt(i);
-        boolean judge = sectionDivider.indexOf(c) < 0 ? true : false;
+        boolean judge = sectionDivider.indexOf(c) < 0;
         for (; i >= 0; i--) {
           c = str.charAt(i);
           if (sectionDivider.indexOf(c) < 0) judge = true;
