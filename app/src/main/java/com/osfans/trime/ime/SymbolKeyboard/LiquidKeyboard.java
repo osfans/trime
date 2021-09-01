@@ -26,7 +26,8 @@ public class LiquidKeyboard {
   private ClipboardAdapter mClipboardAdapter;
   private SimpleAdapter simpleAdapter;
   private List<SimpleKeyBean> clipboardBeanList;
-  private List<SimpleKeyBean> simpleKeyBeans, historyBeans;
+  private final List<SimpleKeyBean> simpleKeyBeans;
+  private List<SimpleKeyBean> historyBeans;
   private int margin_x, margin_top, single_width, parent_width, clipboard_max_size;
 
   private int keyHeight;

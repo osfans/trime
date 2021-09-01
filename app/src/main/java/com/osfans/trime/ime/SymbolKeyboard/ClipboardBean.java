@@ -3,7 +3,7 @@ package com.osfans.trime.ime.SymbolKeyboard;
 public class ClipboardBean extends SimpleKeyBean {
   private long time;
   private String text;
-  private String html;
+  private final String html;
   private int type;
 
   public long getTime() {

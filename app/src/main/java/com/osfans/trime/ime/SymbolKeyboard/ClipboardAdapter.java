@@ -19,7 +19,7 @@ import java.util.List;
 
 public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
-  private List<SimpleKeyBean> list;
+  private final List<SimpleKeyBean> list;
   private int keyMarginX, keyMarginTop;
   private Integer textColor;
   private float textSize;
