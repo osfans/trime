@@ -1,6 +1,6 @@
 package com.osfans.trime.util;
 
-public class StringUitls {
+public class StringUtils {
   private static final String sectionDivider = ",.?!~:，。：～？！…\t\r\n\\/";
 
   public static int findNextSection(CharSequence str, int start) {
