@@ -26,6 +26,7 @@ import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.util.ImeUtils
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -214,10 +215,10 @@ class PrefMainActivity :
     class PrefFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.prefs, rootKey)
-            if (checkIfImeIsEnabled(requireContext())) {
+            if (ImeUtils.checkIfImeIsEnabled(requireContext())) {
                 findPreference<Preference>("pref_enable")?.isVisible = false
             }
-            if (checkIfImeIsSelected(requireContext())) {
+            if (ImeUtils.checkIfImeIsSelected(requireContext())) {
                 findPreference<Preference>("pref_select")?.isVisible = false
             }
         }
@@ -245,32 +246,12 @@ class PrefMainActivity :
 
         override fun onResume() { // 如果同文已被启用/选用，则隐藏设置项
             super.onResume()
-            if (checkIfImeIsEnabled(requireContext())) {
+            if (ImeUtils.checkIfImeIsEnabled(requireContext())) {
                 findPreference<Preference>("pref_enable")?.isVisible = false
             }
-            if (checkIfImeIsSelected(requireContext())) {
+            if (ImeUtils.checkIfImeIsSelected(requireContext())) {
                 findPreference<Preference>("pref_select")?.isVisible = false
             }
-        }
-    }
-
-    companion object {
-        private const val IME_ID: String = "com.osfans.trime/.TrimeImeService"
-
-        fun checkIfImeIsEnabled(context: Context): Boolean {
-            val activeImeIds = Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.ENABLED_INPUT_METHODS
-            ) ?: "(none)"
-            return activeImeIds.split(":").contains(IME_ID)
-        }
-
-        fun checkIfImeIsSelected(context: Context): Boolean {
-            val selectedImeIds = Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.DEFAULT_INPUT_METHOD
-            ) ?: "(none)"
-            return selectedImeIds == IME_ID
         }
     }
 }
