@@ -1,10 +1,9 @@
 package com.osfans.trime.util;
 
-import static android.view.KeyEvent.*;
-
 import android.view.KeyEvent;
 
-public class StringUitls {
+public class StringUtils {
+
   private static final String sectionDivider = ",.?!~:，。：～？！…\t\r\n\\/";
 
   public static int findNextSection(CharSequence str, int start) {

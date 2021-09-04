@@ -85,7 +85,7 @@ import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
-import com.osfans.trime.util.StringUitls;
+import com.osfans.trime.util.StringUtils;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -866,7 +866,7 @@ public class Trime extends InputMethodService
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
-              int move_to = StringUitls.findNextSection(et.text, et.startOffset + et.selectionEnd);
+              int move_to = StringUtils.findNextSection(et.text, et.startOffset + et.selectionEnd);
               ic.setSelection(move_to, move_to);
               return true;
             }
@@ -879,7 +879,7 @@ public class Trime extends InputMethodService
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
               int move_to =
-                  StringUitls.findPrevSection(et.text, et.startOffset + et.selectionStart);
+                  StringUtils.findPrevSection(et.text, et.startOffset + et.selectionStart);
               ic.setSelection(move_to, move_to);
               return true;
             }
@@ -1529,10 +1529,10 @@ public class Trime extends InputMethodService
             if (item == null) return;
             final String text = item.coerceToText(self).toString();
 
-            final String text2 = StringUitls.stringReplacer(text, mConfig.getClipBoardCompare());
+            final String text2 = StringUtils.stringReplacer(text, mConfig.getClipBoardCompare());
             if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-            if (StringUitls.stringNotMatch(text, mConfig.getClipBoardOutput())) {
+            if (StringUtils.stringNotMatch(text, mConfig.getClipBoardOutput())) {
               ClipBoardString = text2;
               liquidKeyboard.addClipboardData(text);
             }
