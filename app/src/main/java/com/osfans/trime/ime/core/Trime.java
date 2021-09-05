@@ -414,11 +414,9 @@ public class Trime extends InputMethodService
   public void selectLiquidKeyboard(int tabIndex) {
     if (symbleKeyboard != null) {
       if (tabIndex >= 0) {
-        LinearLayout.LayoutParams params =
-            (LinearLayout.LayoutParams) mainKeyboard.getLayoutParams();
-
-        params.height = mainKeyboard.getHeight();
-        symbleKeyboard.setLayoutParams(params);
+        LinearLayout.LayoutParams param =
+            (LinearLayout.LayoutParams) symbleKeyboard.getLayoutParams();
+        param.height = mainKeyboard.getHeight();
         symbleKeyboard.setVisibility(View.VISIBLE);
 
         liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
