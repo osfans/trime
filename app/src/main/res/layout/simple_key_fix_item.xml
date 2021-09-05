@@ -6,7 +6,6 @@
     android:layout_marginLeft="@dimen/simple_key_margin_x"
     android:layout_marginTop="6dp"
     android:layout_marginRight="@dimen/simple_key_margin_x"
-    android:background="@drawable/bg_simple_key_item"
     android:orientation="vertical">
 
     <TextView

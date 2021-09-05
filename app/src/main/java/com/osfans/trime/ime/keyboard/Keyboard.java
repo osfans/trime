@@ -101,8 +101,8 @@ public class Keyboard {
 
     final DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
-    if (land) mDisplayWidth = mDisplayWidth - config.getPixel("keyboard_padding_landscape") * 2;
-    else mDisplayWidth = mDisplayWidth - config.getPixel("keyboard_padding") * 2;
+    int[] keyboardPadding = config.getKeyboardPadding(land);
+    mDisplayWidth = mDisplayWidth - keyboardPadding[0] - keyboardPadding[1];
     /* Height of the screen */
     // final int mDisplayHeight = dm.heightPixels;
     // Log.v(TAG, "keyboard's display metrics:" + dm);
@@ -189,10 +189,10 @@ public class Keyboard {
     mDefaultHorizontalGap = YamlUtils.INSTANCE.getPixel(m, "horizontal_gap", 3);
     mDefaultVerticalGap = YamlUtils.INSTANCE.getPixel(m, "vertical_gap", 5);
     mRoundCorner = YamlUtils.INSTANCE.getFloat(m, "round_corner", 5);
-    if (m.containsKey("keyboard_back_color")) {
-      Drawable background = Config.getColorDrawable(context, m, "keyboard_back_color");
-      if (background != null) mBackground = background;
-    }
+    
+    Drawable background = config.getColorDrawable(context, m, "keyboard_back_color");
+    if (background != null) mBackground = background;
+
     int x = mDefaultHorizontalGap / 2;
     int y = mDefaultVerticalGap;
     int row = 0;

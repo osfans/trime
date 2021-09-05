@@ -523,7 +523,6 @@ public class Rime {
         initSchema();
         if (trime != null) {
           trime.initKeyboard();
-          trime.updateComposing();
         }
         break;
       case "option":
