@@ -6,7 +6,6 @@
     android:layout_marginLeft="2dp"
     android:layout_marginTop="6dp"
     android:layout_marginRight="2dp"
-    android:background="@drawable/bg_simple_key_item"
     android:orientation="vertical"
     android:padding="5dp">
 

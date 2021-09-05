@@ -1,6 +1,7 @@
 package com.osfans.trime.ime.SymbolKeyboard;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.inputmethod.InputConnection;
 import android.widget.LinearLayout;
 import androidx.recyclerview.widget.RecyclerView;
@@ -103,7 +104,9 @@ public class LiquidKeyboard {
 
     // 初次显示布局，需要刷新背景
     parentView = (LinearLayout) keyboardView.getParent();
-    parentView.setBackground(config.getLiquidDrawable("keyboard_back_color", context));
+    Drawable keyboardBackground =
+        config.getDrawable("liquid_keyboard_background", null, null, null, null);
+    if (keyboardBackground != null) parentView.setBackground(keyboardBackground);
 
     keyHeight = config.getLiquidPixel("key_height_land");
     if (!isLand || keyHeight <= 0) keyHeight = config.getLiquidPixel("key_height");
@@ -123,18 +126,16 @@ public class LiquidKeyboard {
   private void calcPadding(SymbolKeyboardType type) {
 
     Config config = Config.get(context);
-    int padding = config.getPixel("keyboard_padding");
+    int[] padding = config.getKeyboardPadding();
 
     if (type == SymbolKeyboardType.SINGLE) {
-      padding =
+      padding[0] =
           (parentView.getWidth() > 0 ? parentView.getWidth() : parent_width)
               % (single_width + margin_x * 2)
               / 2;
+      padding[1] = padding[0];
     }
-
-    Timber.d("set_keyboard_padding=%s / %s", padding, parentView.getWidth());
-    if (padding > 0) parentView.setPadding(padding, 0, padding, 0);
-
+    parentView.setPadding(padding[0], 0, padding[1], padding[2]);
     historyBeans = SimpleKeyDao.getSymbolKeyHistory(historySavePath);
   }
 

@@ -1,5 +1,9 @@
 package com.osfans.trime.util;
 
+import static android.view.KeyEvent.*;
+
+import android.view.KeyEvent;
+
 public class StringUitls {
   private static final String sectionDivider = ",.?!~:，。：～？！…\t\r\n\\/";
 
@@ -59,5 +63,76 @@ public class StringUitls {
       if (str.matches(rule)) return false;
     }
     return true;
+  }
+
+  // 考虑到可能存在魔改机型的keycode有差异，而KeyEvent.keyCodeToString(keyCode)无法从keyCode获得按键字符，故重写这个从keyCode获取Char的方法。
+  public static String toCharString(int keyCode) {
+
+    switch (keyCode) {
+      case KEYCODE_TAB:
+        return "\t";
+      case KEYCODE_SPACE:
+        return " ";
+      case KEYCODE_PLUS:
+        return "+";
+      case KEYCODE_MINUS:
+        return "-";
+      case KEYCODE_STAR:
+        return "*";
+      case KEYCODE_SLASH:
+        return "/";
+      case KEYCODE_EQUALS:
+        return "=";
+      case KEYCODE_AT:
+        return "@";
+      case KEYCODE_POUND:
+        return "#";
+      case KEYCODE_APOSTROPHE:
+        return "'";
+      case KEYCODE_BACKSLASH:
+        return "\\";
+      case KEYCODE_COMMA:
+        return ",";
+      case KEYCODE_PERIOD:
+        return ".";
+      case KEYCODE_LEFT_BRACKET:
+        return "[";
+      case KEYCODE_RIGHT_BRACKET:
+        return "]";
+      case KEYCODE_SEMICOLON:
+        return ";";
+      case KEYCODE_GRAVE:
+        return "`";
+      case KEYCODE_NUMPAD_ADD:
+        return "+";
+      case KEYCODE_NUMPAD_SUBTRACT:
+        return "-";
+      case KEYCODE_NUMPAD_MULTIPLY:
+        return "*";
+      case KEYCODE_NUMPAD_DIVIDE:
+        return "/";
+      case KEYCODE_NUMPAD_EQUALS:
+        return "=";
+      case KEYCODE_NUMPAD_COMMA:
+        return ",";
+      case KEYCODE_NUMPAD_DOT:
+        return ".";
+      case KEYCODE_NUMPAD_LEFT_PAREN:
+        return "(";
+      case KEYCODE_NUMPAD_RIGHT_PAREN:
+        return ")";
+    }
+
+    int c = 0;
+    if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+      c = '0' + keyCode - KeyEvent.KEYCODE_0;
+    } else if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
+      c = '0' + keyCode - KeyEvent.KEYCODE_NUMPAD_0;
+    } else if (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) {
+      c = 'a' + keyCode - KeyEvent.KEYCODE_A;
+    }
+
+    if (c > 0) return Character.toString((char) c);
+    return "";
   }
 }

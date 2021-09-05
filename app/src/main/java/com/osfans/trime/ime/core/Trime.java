@@ -28,9 +28,9 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -141,6 +141,7 @@ public class Trime extends InputMethodService
 
   private WindowsPositionType winPos; // 候選窗口彈出位置
   private InlineModeType inlinePreedit; // 嵌入模式
+  private int one_hand_mode = 0; // 单手键盘模式
 
   // compile regex once
   private static final Pattern pattern = Pattern.compile("^(\\{[^{}]+\\}).*$");
@@ -371,7 +372,7 @@ public class Trime extends InputMethodService
         break;
       case "_hide_candidate":
         if (mCandidateContainer != null)
-          mCandidate.setVisibility(!value ? View.VISIBLE : View.GONE);
+          mCandidateContainer.setVisibility(!value ? View.VISIBLE : View.GONE);
         setCandidatesViewShown(canCompose && !value);
         break;
       case "_liquid_keyboard":
@@ -397,6 +398,14 @@ public class Trime extends InputMethodService
           if (bNeedUpdate) mNeedUpdateRimeOption = true;
         } else if (option.matches("_liquid_keyboard_\\d+")) {
           selectLiquidKeyboard(Integer.parseInt(option.replace("_liquid_keyboard_", "")));
+        } else if (option.startsWith("_one_hand_mode")) {
+          char c = option.charAt(option.length() - 1);
+          if (c == '1' && value) one_hand_mode = 1;
+          else if (c == '2' && value) one_hand_mode = 2;
+          else if (c == '3') one_hand_mode = value ? 1 : 2;
+          else one_hand_mode = 0;
+          loadBackground();
+          initKeyboard();
         }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
@@ -437,53 +446,42 @@ public class Trime extends InputMethodService
   }
 
   private void loadBackground() {
-    int padding = mConfig.getPixel("keyboard_padding");
+    int[] padding =
+        mConfig.getKeyboardPadding(
+            one_hand_mode, orientation == Configuration.ORIENTATION_LANDSCAPE);
+    Timber.i("padding= %s %s %s", padding[0], padding[1], padding[2]);
+    mKeyboardView.setPadding(padding[0], 0, padding[1], padding[2]);
 
-    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      padding = mConfig.getPixel("keyboard_padding_landscape");
-      if (padding > 0) {
-        mKeyboardView.setPadding(
-            padding, mKeyboardView.getPaddingTop(), padding, mKeyboardView.getBottom());
-      }
-    } else {
-      mKeyboardView.setPadding(
-          padding,
-          mKeyboardView.getPaddingTop(),
-          padding,
-          mConfig.getPixel("keyboard_padding_portrait"));
-    }
-
-    final GradientDrawable gd = new GradientDrawable();
-    gd.setStroke(mConfig.getPixel("layout/border"), mConfig.getColor("border_color"));
-    gd.setCornerRadius(mConfig.getFloat("layout/round_corner"));
-    Drawable d = mConfig.getDrawable("layout/background");
-    if (d == null) {
-      gd.setColor(mConfig.getColor("text_back_color"));
-      d = gd;
-    }
-    if (mConfig.hasKey("layout/alpha")) {
-      int alpha = mConfig.getInt("layout/alpha");
-      if (alpha <= 0) alpha = 0;
-      else if (alpha >= 255) alpha = 255;
-      d.setAlpha(alpha);
-    }
-    mFloatingWindow.setBackgroundDrawable(d);
+    final Drawable d =
+        mConfig.getDrawable(
+            "text_back_color",
+            "layout/border",
+            "border_color",
+            "layout/round_corner",
+            "layout/alpha");
+    if (d != null) mFloatingWindow.setBackgroundDrawable(d);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
       mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
 
-    final Drawable d2 = mConfig.getDrawable("candidate_background");
-    if (d2 == null) {
-      mCandidateContainer.setBackgroundColor(
-          mConfig.getColor("back_color", parseColor("#00ffffff")));
-    } else mCandidateContainer.setBackground(d2);
+    final Drawable d2 =
+        mConfig.getDrawable(
+            "candidate_background",
+            "candidate_border",
+            "candidate_border_color",
+            "candidate_border_round",
+            null);
 
-    final Drawable d3 = mConfig.getDrawable("root_background");
-    if (d3 == null) {
-      inputRootBinding.inputRoot.setBackgroundColor(
-          mConfig.getColor("root_background", parseColor("#00ffffff")));
-    } else {
+    if (d2 != null) mCandidateContainer.setBackground(d2);
+
+    final Drawable d3 = mConfig.getDrawable_("root_background");
+    if (d3 != null) {
       inputRootBinding.inputRoot.setBackground(d3);
+    } else {
+      // 避免因为键盘整体透明而造成的异常
+      inputRootBinding.inputRoot.setBackgroundColor(Color.WHITE);
     }
+
+    tabView.reset(self);
   }
 
   public void resetKeyboard() {
@@ -497,7 +495,8 @@ public class Trime extends InputMethodService
     if (mCandidateContainer != null) {
       loadBackground();
       setShowComment(!Rime.getOption("_hide_comment"));
-      mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
+      mCandidateContainer.setVisibility(
+          !Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset(this);
       mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled() && mConfig.hasKey("window");
       mComposition.setVisibility(mShowWindow ? View.VISIBLE : View.GONE);
@@ -517,9 +516,11 @@ public class Trime extends InputMethodService
 
   public void initKeyboard() {
     reset();
+    mConfig.initCurrentColors();
     setNavBarColor();
     mNeedUpdateRimeOption = true; // 不能在Rime.onMessage中調用set_option，會卡死
     bindKeyboardToInputView();
+    loadBackground();
     updateComposing(); // 切換主題時刷新候選
   }
 
@@ -619,7 +620,7 @@ public class Trime extends InputMethodService
 
     // 初始化候选栏
     mCandidateContainer = inputRootBinding.scroll;
-    mCandidate = (Candidate) mCandidateContainer.findViewById(R.id.candidate);
+    mCandidate = mCandidateContainer.findViewById(R.id.candidate);
     mCandidate.setCandidateListener(this);
 
     mCandidateContainer.setPageStr(
@@ -641,7 +642,8 @@ public class Trime extends InputMethodService
     }
 
     setShowComment(!Rime.getOption("_hide_comment"));
-    mCandidate.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
+    mCandidateContainer.setVisibility(
+        !Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
 
     liquidKeyboard.setView(inputRootBinding.liquidKeyboard);
     mainKeyboard = inputRootBinding.mainKeyboard;
@@ -744,7 +746,7 @@ public class Trime extends InputMethodService
   private void bindKeyboardToInputView() {
     if (mKeyboardView != null) {
       // Bind the selected keyboard to the input view.
-      Keyboard sk = (Keyboard) mKeyboardSwitch.getCurrentKeyboard();
+      Keyboard sk = mKeyboardSwitch.getCurrentKeyboard();
       mKeyboardView.setKeyboard(sk);
       updateCursorCapsToInputView();
     }
@@ -1134,8 +1136,22 @@ public class Trime extends InputMethodService
     if (Event.hasModifier(mask, KeyEvent.META_ALT_ON)) {
       sendKeyDown(ic, KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
     }
-    sendKeyDown(ic, keyCode, mask);
-    sendKeyUp(ic, keyCode, mask);
+
+    boolean send_key_down_up = true;
+    if (mask == 0 && mAsciiMode) {
+      // 使用ASCII键盘输入英文字符时，直接上屏，跳过复杂的调用，从表面上解决issue #301 知乎输入英语后输入法失去焦点的问题
+      String keyText = StringUitls.toCharString(keyCode);
+      if (keyText.length() > 0) {
+        ic.commitText(keyText, 1);
+        send_key_down_up = false;
+      }
+    }
+
+    if (send_key_down_up) {
+      sendKeyDown(ic, keyCode, mask);
+      sendKeyUp(ic, keyCode, mask);
+    }
+
     if (Event.hasModifier(mask, KeyEvent.META_ALT_ON)) {
       sendKeyUp(ic, KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
     }
@@ -1421,7 +1437,7 @@ public class Trime extends InputMethodService
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       try {
         final Window window = getWindow().getWindow();
-        @ColorInt final Integer keyboardBackColor = mConfig.getColor("keyboard_back_color");
+        @ColorInt final Integer keyboardBackColor = mConfig.getCurrentColor_("back_color");
         if (keyboardBackColor != null) {
           BarUtils.setNavBarColor(window, keyboardBackColor);
         }
@@ -1488,7 +1504,7 @@ public class Trime extends InputMethodService
         view.setLayoutParams(params);
       }
     } else if (params instanceof FrameLayout.LayoutParams) {
-      LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) params;
+      FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) params;
       if (lp.gravity != layoutGravity) {
         lp.gravity = layoutGravity;
         view.setLayoutParams(params);

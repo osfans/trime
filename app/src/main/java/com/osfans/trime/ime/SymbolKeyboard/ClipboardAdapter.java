@@ -3,6 +3,7 @@ package com.osfans.trime.ime.SymbolKeyboard;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +25,7 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   private Integer textColor;
   private float textSize;
   private Typeface textFont;
+  private Drawable background;
 
   public ClipboardAdapter(Context context, List<SimpleKeyBean> itemlist) {
     myContext = context;
@@ -46,6 +48,10 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     textSize = config.getFloat("key_long_text_size");
     if (textSize <= 0) textSize = config.getFloat("label_text_size");
+
+    background =
+        config.getDrawable(
+            "long_text_back_color", "key_border", "key_long_text_border", "round_corner", null);
 
     textFont = config.getFont("long_text_font");
   }
@@ -101,6 +107,8 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         // copy SimpleAdapter会造成高度始终为3行无法自适应的效果。
 
       }
+
+      if (background != null) itemViewHold.listItemLayout.setBackground(background);
 
       // 如果设置了回调，则设置点击事件
       if (mOnItemClickLitener != null) {

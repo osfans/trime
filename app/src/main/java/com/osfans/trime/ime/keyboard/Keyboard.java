@@ -100,8 +100,8 @@ public class Keyboard {
 
     final DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
-    if (land) mDisplayWidth = mDisplayWidth - config.getPixel("keyboard_padding_landscape") * 2;
-    else mDisplayWidth = mDisplayWidth - config.getPixel("keyboard_padding") * 2;
+    int[] keyboardPadding = config.getKeyboardPadding(land);
+    mDisplayWidth = mDisplayWidth - keyboardPadding[0] - keyboardPadding[1];
     /* Height of the screen */
     // final int mDisplayHeight = dm.heightPixels;
     // Log.v(TAG, "keyboard's display metrics:" + dm);
@@ -172,7 +172,8 @@ public class Keyboard {
 
   public Keyboard(Context context, String name) {
     this(context);
-    final Map<?, ?> m = Config.get(context).getKeyboard(name);
+    Config config = Config.get(context);
+    final Map<?, ?> m = config.getKeyboard(name);
     mLabelTransform = Config.getString(m, "label_transform", "none");
     mAsciiMode = Config.getInt(m, "ascii_mode", 1);
     if (mAsciiMode == 0) mAsciiKeyboard = Config.getString(m, "ascii_keyboard");
@@ -189,10 +190,10 @@ public class Keyboard {
       mDefaultHorizontalGap = Config.getPixel(m, "horizontal_gap");
     if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Config.getPixel(m, "vertical_gap");
     if (m.containsKey("round_corner")) mRoundCorner = Config.getFloat(m, "round_corner");
-    if (m.containsKey("keyboard_back_color")) {
-      Drawable background = Config.getColorDrawable(context, m, "keyboard_back_color");
-      if (background != null) mBackground = background;
-    }
+
+    Drawable background = config.getDrawable(m, "keyboard_back_color");
+    if (background != null) mBackground = background;
+
     int x = mDefaultHorizontalGap / 2;
     int y = mDefaultVerticalGap;
     int row = 0;

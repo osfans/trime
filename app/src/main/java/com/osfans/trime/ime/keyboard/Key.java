@@ -113,6 +113,7 @@ public class Key {
   public Key(Context context, Keyboard parent, Map<String, Object> mk) {
     this(parent);
     String s;
+    Config config = Config.get(context);
     for (int i = 0; i < EVENT_NUM; i++) {
       String[] eventTypes =
           new String[] {
@@ -142,8 +143,8 @@ public class Key {
     symbol_text_size = Config.getPixel(mk, "symbol_text_size");
     key_text_color = Config.getColor(context, mk, "key_text_color");
     hilited_key_text_color = Config.getColor(context, mk, "hilited_key_text_color");
-    key_back_color = Config.getColorDrawable(context, mk, "key_back_color");
-    hilited_key_back_color = Config.getColorDrawable(context, mk, "hilited_key_back_color");
+    key_back_color = config.getDrawable(mk, "key_back_color");
+    hilited_key_back_color = config.getDrawable(mk, "hilited_key_back_color");
     key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
     hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
     round_corner = Config.getFloat(mk, "round_corner");

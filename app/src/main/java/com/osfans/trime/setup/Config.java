@@ -27,7 +27,6 @@ import android.graphics.Color;
 import android.graphics.NinePatch;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
@@ -49,12 +48,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import kotlin.jvm.Synchronized;
+import timber.log.Timber;
 
 /** 解析 YAML 配置文件 */
 public class Config {
@@ -246,14 +247,11 @@ public class Config {
     return true;
   }
 
-  private boolean copyFile(Context context, String fileName, boolean overwrite) {
-    if (fileName == null) {
-      return false;
-    }
+  private void copyFile(Context context, String fileName, boolean overwrite) {
+    if (fileName == null) return;
+
     final String targetFileName = new File(getSharedDataDir(), fileName).getPath();
-    if (new File(targetFileName).exists() && !overwrite) {
-      return true;
-    }
+    if (new File(targetFileName).exists() && !overwrite) return;
     final String sourceFileName = new File(RIME, fileName).getPath();
     final AssetManager assetManager = context.getAssets();
     try (InputStream in = assetManager.open(sourceFileName);
@@ -266,9 +264,7 @@ public class Config {
       out.flush();
     } catch (IOException e) {
       e.printStackTrace();
-      return false;
     }
-    return true;
   }
 
   private void deployTheme(Context context) {
@@ -301,6 +297,7 @@ public class Config {
         Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
       Key.presetKeys = (Map<String, Map<?, ?>>) m.get("preset_keys");
       presetColorSchemes = (Map<?, ?>) m.get("preset_color_schemes");
+      initCurrentColors();
       presetKeyboards = (Map<?, ?>) m.get("preset_keyboards");
       liquidKeyboard = (Map<?, ?>) m.get("liquid_keyboard");
       initLiquidKeyboard();
@@ -453,6 +450,53 @@ public class Config {
     self = null;
   }
 
+  private int[] keyboardPadding;
+
+  public int[] getKeyboardPadding() {
+    return keyboardPadding;
+  }
+
+  public int[] getKeyboardPadding(boolean land_mode) {
+    return getKeyboardPadding(one_hand_mode, land_mode);
+  }
+
+  private int one_hand_mode;
+
+  public int[] getKeyboardPadding(int one_hand_mode, boolean land_mode) {
+    keyboardPadding = new int[3];
+    this.one_hand_mode = one_hand_mode;
+    if (land_mode) {
+      keyboardPadding[0] = getPixel("keyboard_padding_land");
+      keyboardPadding[1] = keyboardPadding[0];
+      keyboardPadding[2] = getPixel("keyboard_padding_land_bottom");
+    } else {
+      switch (one_hand_mode) {
+        case 0:
+          // 普通键盘 预留，目前未实装
+          keyboardPadding[0] = getPixel("keyboard_padding");
+          keyboardPadding[1] = keyboardPadding[0];
+          keyboardPadding[2] = getPixel("keyboard_padding_bottom");
+          break;
+        case 1:
+          // 左手键盘
+          keyboardPadding[0] = getPixel("keyboard_padding_left");
+          keyboardPadding[1] = getPixel("keyboard_padding_right");
+          keyboardPadding[2] = getPixel("keyboard_padding_bottom");
+          break;
+        case 2:
+          // 右手键盘
+          keyboardPadding[1] = getPixel("keyboard_padding_left");
+          keyboardPadding[0] = getPixel("keyboard_padding_right");
+          keyboardPadding[2] = getPixel("keyboard_padding_bottom");
+          break;
+      }
+    }
+    Timber.d(
+        "update KeyboardPadding: %s %s %s one_hand_mode=%s",
+        keyboardPadding[0], keyboardPadding[1], keyboardPadding[2], one_hand_mode);
+    return keyboardPadding;
+  }
+
   private static int getPixel(Float f) {
     if (f == null) return 0;
     return (int)
@@ -503,34 +547,12 @@ public class Config {
     return parseColor(o.toString());
   }
 
-  public Integer getColor(String key, Integer defaultValue) {
-    Object o = getColorObject(key);
-    if (o == null) {
-      o =
-          ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(getColorSchemeName())))
-              .get(key);
-    }
-    if (o == null) return defaultValue;
-    return parseColor(o.toString());
-  }
-
-  @Nullable
-  public static Drawable getColorDrawable(Context context, @NonNull Map<?, ?> m, String k) {
+  // API 2.0
+  public Drawable getDrawable(@NonNull Map<?, ?> m, String k) {
     if (m.containsKey(k)) {
       final Object o = m.get(k);
-      assert o != null;
-      final String s = o.toString();
-      @Nullable final Integer color = parseColor(s);
-      if (color != null) {
-        final GradientDrawable gd = new GradientDrawable();
-        gd.setColor(color);
-        return gd;
-      } else {
-        final Config config = get(context);
-        Drawable d = config.getCurrentColorDrawable(s);
-        if (d == null) d = config.drawableObject(o);
-        return d;
-      }
+      Timber.d("getColorDrawable()" + k + " " + o);
+      return drawableObject(o);
     }
     return null;
   }
@@ -613,6 +635,7 @@ public class Config {
     return o.toString();
   }
 
+  //  获取当前配色方案的key的value，或者从fallback获取值。
   private Object getColorObject(String key) {
     String scheme = getColorSchemeName();
     final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
@@ -694,19 +717,47 @@ public class Config {
     return Typeface.DEFAULT;
   }
 
+  //  返回drawable。参数可以是颜色或者图片。如果参数缺失，返回null
   private Drawable drawableObject(Object o) {
     if (o == null) return null;
     String name = o.toString();
-    final Integer color = parseColor(name);
+    Integer color = parseColor(name);
+    if (color == null) {
+      if (curcentColors.containsKey(name)) {
+        o = curcentColors.get(name);
+        if (o instanceof Integer) color = (Integer) o;
+      }
+    }
     if (color != null) {
       final GradientDrawable gd = new GradientDrawable();
       gd.setColor(color);
       return gd;
-    } else {
-      final String nameDirectory = getResDataDir("backgrounds");
-      name = new File(nameDirectory, name).getPath();
-      final File f = new File(name);
+    }
+    return drawableBitmapObject(name);
+  }
+
+  //  返回图片的drawable。如果参数缺失、非图片，返回null
+  private Drawable drawableBitmapObject(Object o) {
+    if (o == null) return null;
+    if (o instanceof String) {
+      String name = (String) o;
+      String nameDirectory = getResDataDir("backgrounds" + File.separator + backgroundFolder);
+      File f = new File(nameDirectory, name);
+
+      if (!f.exists()) {
+        nameDirectory = getResDataDir("backgrounds");
+        f = new File(nameDirectory, name);
+      }
+
+      if (!f.exists()) {
+        if (curcentColors.containsKey(name)) {
+          o = curcentColors.get(name);
+          if (o instanceof String) f = new File((String) o);
+        }
+      }
+
       if (f.exists()) {
+        name = f.getPath();
         if (name.contains(".9.png")) {
           final Bitmap bitmap = BitmapFactory.decodeFile(name);
           final byte[] chunk = bitmap.getNinePatchChunk();
@@ -714,29 +765,14 @@ public class Config {
           if (NinePatch.isNinePatchChunk(chunk))
             return new NinePatchDrawable(bitmap, chunk, new Rect(), null);
         }
-        return new BitmapDrawable(BitmapFactory.decodeFile(name));
+        return Drawable.createFromPath(name);
       }
     }
     return null;
   }
 
-  private Drawable getCurrentColorDrawable(String key) {
-    final Object o = getColorObject(key);
-    return drawableObject(o);
-  }
-
   public Drawable getColorDrawable(String key) {
-    Object o = getColorObject(key);
-    if (o == null) {
-      o =
-          ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(getColorSchemeName())))
-              .get(key);
-    }
-    return drawableObject(o);
-  }
-
-  public Drawable getDrawable(String key) {
-    final Object o = getValue(key);
+    final Object o = getColorObject(key);
     return drawableObject(o);
   }
 
@@ -756,15 +792,6 @@ public class Config {
     return progress * 10 + 10;
   }
 
-  public Drawable getLiquidDrawable(String key, Context context) {
-    if (liquidKeyboard == null) return self.getColorDrawable(key);
-    if (liquidKeyboard.containsKey(key)) {
-      Drawable drawable = Config.getColorDrawable(context, liquidKeyboard, key);
-      if (drawable != null) return drawable;
-    }
-    return self.getColorDrawable(key);
-  }
-
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
@@ -772,7 +799,7 @@ public class Config {
         if (value != null) return value;
       }
     }
-    return self.getPixel(key);
+    return getPixel(key);
   }
 
   public Integer getLiquidColor(String key) {
@@ -783,6 +810,174 @@ public class Config {
         if (value != null) return value;
       }
     }
-    return self.getColor(key);
+    return getColor(key);
+  }
+
+  // 获取当前色彩 Config 2.0
+  public Integer getCurrentColor_(String key) {
+    Object o = curcentColors.get(key);
+    return (Integer) o;
+  }
+
+  // 获取当前背景图路径 Config 2.0
+  public String getCurrentImage(String key) {
+    Object o = curcentColors.get(key);
+    if (o instanceof String) return (String) o;
+    return "";
+  }
+
+  //  返回drawable。  Config 2.0
+  //  参数可以是颜色或者图片。如果参数缺失，返回null
+  public Drawable getDrawable_(String key) {
+    if (key == null) return null;
+    Object o = curcentColors.get(key);
+    if (o instanceof Integer) {
+      Integer color = (Integer) o;
+      final GradientDrawable gd = new GradientDrawable();
+      gd.setColor(color);
+      return gd;
+    } else if (o instanceof String) return getDrawableBitmap_(key);
+
+    return null;
+  }
+
+  //  返回图片或背景的drawable,支持null参数。 Config 2.0
+  public Drawable getDrawable(
+      String key, String borderKey, String borderColorKey, String roundCornerKey, String alphaKey) {
+    if (key == null) return null;
+    Drawable drawable = getDrawableBitmap_(key);
+    if (drawable != null) {
+      if (alphaKey != null) {
+        if (hasKey(alphaKey)) {
+          int alpha = getInt("layout/alpha");
+          if (alpha <= 0) alpha = 0;
+          else if (alpha >= 255) alpha = 255;
+          drawable.setAlpha(alpha);
+        }
+      }
+      return drawable;
+    }
+
+    GradientDrawable gd = new GradientDrawable();
+    Object o = curcentColors.get(key);
+    if (!(o instanceof Integer)) return null;
+    gd.setColor((int) o);
+
+    if (borderColorKey != null && borderKey != null) {
+      int border = getPixel(borderKey);
+      Object borderColor = curcentColors.get(borderColorKey);
+      if (borderColor instanceof Integer && border > 0) {
+        gd.setStroke(border, getCurrentColor_(borderColorKey));
+        if (roundCornerKey != null) gd.setCornerRadius(getFloat(roundCornerKey));
+      }
+    }
+
+    if (alphaKey != null) {
+      if (hasKey(alphaKey)) {
+        int alpha = getInt("layout/alpha");
+        if (alpha <= 0) alpha = 0;
+        else if (alpha >= 255) alpha = 255;
+        gd.setAlpha(alpha);
+      }
+    }
+
+    return gd;
+  }
+
+  //  返回图片的drawable。 Config 2.0
+  //  如果参数缺失、非图片，返回null. 在genCurrentColors()中已经验证存在文件，因此不需要重新验证。
+  public Drawable getDrawableBitmap_(String key) {
+    if (key == null) return null;
+
+    Object o = curcentColors.get(key);
+    if (o instanceof String) {
+      String path = (String) o;
+      if (path.contains(".9.png")) {
+        final Bitmap bitmap = BitmapFactory.decodeFile(path);
+        final byte[] chunk = bitmap.getNinePatchChunk();
+        if (NinePatch.isNinePatchChunk(chunk))
+          return new NinePatchDrawable(bitmap, chunk, new Rect(), null);
+      }
+      return Drawable.createFromPath(path);
+    }
+    return null;
+  }
+
+  // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
+  private final Map<String, Object> curcentColors = new HashMap<>();
+  private String backgroundFolder;
+  // 初始化当前配色 Config 2.0
+  public void initCurrentColors() {
+    curcentColors.clear();
+    String scheme = getColorSchemeName();
+    backgroundFolder = getString("background_folder");
+    Timber.d(
+        "initCurrentColors() scheme=%s themeName=%s schema_id=%s", scheme, themeName, schema_id);
+    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
+    if (map == null) {
+      Timber.i("no scheme %s", scheme);
+      return;
+    }
+    getPrefs().getLooks().setSelectedColor(scheme);
+
+    for (Map.Entry<?, ?> entry : map.entrySet()) {
+      Object value = getColorRealValue(entry.getValue());
+      if (value != null) curcentColors.put(entry.getKey().toString(), value);
+    }
+
+    for (Map.Entry<?, ?> entry : fallbackColors.entrySet()) {
+      String key = entry.getKey().toString();
+      if (!curcentColors.containsKey(key)) {
+        Object o = map.get(key);
+        String fallbackKey = key;
+        while (o == null && fallbackColors.containsKey(fallbackKey)) {
+          fallbackKey = (String) fallbackColors.get(fallbackKey);
+          o = map.get(fallbackKey);
+        }
+        if (o != null) {
+          Object value = getColorRealValue(o);
+          if (value != null) {
+            curcentColors.put(key, value);
+            curcentColors.put(fallbackKey, value);
+          }
+        }
+      }
+    }
+  }
+
+  // 获取参数的真实value，Config 2.0
+  // 如果是色彩返回int，如果是背景图返回path string，如果处理失败返回null
+  private Object getColorRealValue(Object object) {
+    if (object == null) return null;
+    if (object instanceof Integer) {
+      return object;
+    }
+    String s = object.toString();
+    if (!s.matches(".*[.\\\\/].*")) {
+      try {
+        s = s.toLowerCase(Locale.getDefault());
+        if (s.startsWith("0x")) {
+          if (s.length() == 3 || s.length() == 4)
+            s = String.format("#%02x000000", Long.decode(s.substring(2))); // 0xAA
+          else if (s.length() < 8) s = String.format("#%06x", Long.decode(s.substring(2)));
+          else if (s.length() == 9) s = "#0" + s.substring(2);
+        }
+        if (s.matches("(0x|#)?[a-f0-9]+")) return Color.parseColor(s.replace("0x", "#"));
+      } catch (Exception e) {
+        Timber.e("getColorRealValue() unknown color, %s", s);
+        e.printStackTrace();
+      }
+    }
+
+    String nameDirectory = getResDataDir("backgrounds" + File.separator + backgroundFolder);
+    File f = new File(nameDirectory, s);
+
+    if (!f.exists()) {
+      nameDirectory = getResDataDir("backgrounds");
+      f = new File(nameDirectory, s);
+    }
+
+    if (f.exists()) return f.getPath();
+    return null;
   }
 }

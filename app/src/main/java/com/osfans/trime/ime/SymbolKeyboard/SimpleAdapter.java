@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,11 +21,10 @@ import timber.log.Timber;
 public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
   private final List<SimpleKeyBean> list;
-  private int keyWidth, keyHeight, keyMarginX, keyMarginTop, borderWidth;
-  private Integer borderColor, backColor, backColor2, textColor;
-  private float textSize, roundCorner;
+  private int keyWidth, keyHeight, keyMarginX, keyMarginTop;
+  private Integer textColor;
+  private float textSize;
   private Drawable background, background2;
-  private GradientDrawable drawable;
   private Typeface textFont;
 
   public SimpleAdapter(Context context, List<SimpleKeyBean> itemlist) {
@@ -43,19 +41,22 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     Timber.d("configStyle keyHeight=%s", keyHegith);
 
-    //  边框尺寸、圆角、字号直接读取主题通用参数。配色优先读取liquidKeyboard专用参数。
+    //  边框尺寸、圆角、字号直接读取主题通用参数。
     Config config = Config.get(myContext);
     textColor = config.getLiquidColor("key_text_color");
     textSize = config.getFloat("label_text_size");
     //  点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
-    background = config.getLiquidDrawable("key_back_color", myContext);
-    if (background == null) {
-      backColor = config.getLiquidColor("key_back_color");
-      borderColor = config.getLiquidColor("key_border_color");
-      borderWidth = config.getPixel("border_width");
-      roundCorner = config.getFloat("round_corner");
-      backColor2 = config.getLiquidColor("hilited_key_back_color");
-    } else background2 = config.getLiquidDrawable("hilited_key_back_color", myContext);
+    background =
+        config.getDrawable(
+            "key_back_color", "key_border", "key_border_color", "round_corner", null);
+
+    background2 =
+        config.getDrawable(
+            "hilited_key_back_color",
+            "key_border",
+            "hilited_key_border_color",
+            "round_corner",
+            null);
 
     textFont = config.getFont("key_font");
   }
@@ -114,16 +115,9 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         flexboxLp.setMargins(marginX, marginTop, marginX, flexboxLp.getMarginBottom());
 
-        if (background == null) {
-          if (drawable == null) {
-            drawable = (GradientDrawable) itemViewHold.listItemLayout.getBackground();
-            if (borderWidth >= 0 && borderColor != null)
-              drawable.setStroke(borderWidth, borderColor);
-            if (backColor != null) drawable.setColor(backColor);
-            if (roundCorner >= 0) drawable.setCornerRadius(roundCorner);
-          }
-
-        } else itemViewHold.listItemLayout.setBackground(background);
+        if (background != null) {
+          itemViewHold.listItemLayout.setBackground(background);
+        }
       }
 
       if (mOnItemClickLitener != null) {
@@ -138,20 +132,11 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
       itemViewHold.listItemLayout.setOnTouchListener(
           (view, motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-              if (drawable == null) {
-                if (background2 != null) itemViewHold.listItemLayout.setBackground(background2);
-              } else if (backColor2 != null) {
-                drawable.setColor(backColor2);
-                itemViewHold.listItemLayout.setBackground(drawable);
-              }
+              if (background2 != null) itemViewHold.listItemLayout.setBackground(background2);
             } else {
               if (motionEvent.getAction() == MotionEvent.ACTION_UP
                   || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                if (drawable == null) itemViewHold.listItemLayout.setBackground(background);
-                else if (backColor != null) {
-                  drawable.setColor(backColor);
-                  itemViewHold.listItemLayout.setBackground(drawable);
-                }
+                if (background != null) itemViewHold.listItemLayout.setBackground(background);
               }
             }
             return false;
