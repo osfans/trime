@@ -135,7 +135,7 @@ public class LiquidKeyboard {
               / 2;
       padding[1] = padding[0];
     }
-    parentView.setPadding(padding[0], 0, padding[1], padding[2]);
+    parentView.setPadding(padding[0], 0, padding[1], 0);
     historyBeans = SimpleKeyDao.getSymbolKeyHistory(historySavePath);
   }
 
