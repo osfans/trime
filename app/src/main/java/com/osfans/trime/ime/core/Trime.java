@@ -83,8 +83,8 @@ import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
-import com.osfans.trime.util.Function;
 import com.osfans.trime.util.LocaleUtils;
+import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -152,7 +152,7 @@ public class Trime extends InputMethodService
       new Handler(
           msg -> {
             if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-              Function.syncBackground((Trime) msg.obj);
+              ShortcutUtils.INSTANCE.syncInBackground((Trime) msg.obj);
               ((Trime) msg.obj).loadConfig();
             }
             return false;
@@ -1040,7 +1040,7 @@ public class Trime extends InputMethodService
                 getActiveText(2),
                 getActiveText(3),
                 getActiveText(4));
-        s = Function.handle(this, event.getCommand(), arg);
+        s = (String) ShortcutUtils.INSTANCE.call(this, event.getCommand(), arg);
         if (s != null) {
           commitText(s);
           updateComposing();
@@ -1080,7 +1080,7 @@ public class Trime extends InputMethodService
         || handleEnter(keyCode)
         || handleBack(keyCode)) {
       Timber.i("Trime onKey");
-    } else if (Function.openCategory(this, keyCode)) {
+    } else if (ShortcutUtils.INSTANCE.openCategory(keyCode)) {
       Timber.i("Open category");
     } else {
       keyUpNeeded = true;
