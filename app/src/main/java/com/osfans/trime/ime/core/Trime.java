@@ -506,6 +506,7 @@ public class Trime extends InputMethodService
   private void reset() {
     mConfig.reset();
     loadConfig();
+    mConfig.initCurrentColors();
     if (mKeyboardSwitch != null) mKeyboardSwitch.reset(this);
     resetCandidate();
     hideComposition();
@@ -514,7 +515,6 @@ public class Trime extends InputMethodService
 
   public void initKeyboard() {
     reset();
-    mConfig.initCurrentColors();
     setNavBarColor();
     mNeedUpdateRimeOption = true; // 不能在Rime.onMessage中調用set_option，會卡死
     bindKeyboardToInputView();
