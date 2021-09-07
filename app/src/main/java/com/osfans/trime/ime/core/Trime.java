@@ -862,12 +862,12 @@ public class Trime extends InputMethodService
           return ic.performContextMenuAction(android.R.id.paste);
         case KeyEvent.KEYCODE_DPAD_RIGHT:
           if (getPrefs().getOther().getSelectionSense()) {
-            ExtractedTextRequest etr = new ExtractedTextRequest();
+            final ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
-            ExtractedText et = ic.getExtractedText(etr, 0);
+            final ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
-              int move_to = StringUtils.findNextSection(et.text, et.startOffset + et.selectionEnd);
-              ic.setSelection(move_to, move_to);
+              int nextPosition = StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
+              ic.setSelection(nextPosition, nextPosition);
               return true;
             }
             break;
@@ -878,9 +878,9 @@ public class Trime extends InputMethodService
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
-              int move_to =
-                  StringUtils.findPrevSection(et.text, et.startOffset + et.selectionStart);
-              ic.setSelection(move_to, move_to);
+              int prevSection =
+                  StringUtils.INSTANCE.findPrevSection(et.text, et.startOffset + et.selectionStart);
+              ic.setSelection(prevSection, prevSection);
               return true;
             }
             break;
@@ -1529,10 +1529,10 @@ public class Trime extends InputMethodService
             if (item == null) return;
             final String text = item.coerceToText(self).toString();
 
-            final String text2 = StringUtils.stringReplacer(text, mConfig.getClipBoardCompare());
+            final String text2 = StringUtils.INSTANCE.replace(text, mConfig.getClipBoardCompare());
             if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-            if (StringUtils.stringNotMatch(text, mConfig.getClipBoardOutput())) {
+            if (StringUtils.INSTANCE.mismatch(text, mConfig.getClipBoardOutput())) {
               ClipBoardString = text2;
               liquidKeyboard.addClipboardData(text);
             }
