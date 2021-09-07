@@ -45,6 +45,7 @@ import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.YamlUtils;
 import java.util.List;
 import java.util.Map;
 import timber.log.Timber;
@@ -285,7 +286,7 @@ public class Composition extends AppCompatTextView {
     return new AlignmentSpan.Standard(i);
   }
 
-  private void appendComposition(Map<?, ?> m) {
+  private void appendComposition(Map<String, ?> m) {
     final Rime.RimeComposition r = Rime.getComposition();
     assert r != null;
     final String s = r.getText();
@@ -306,8 +307,8 @@ public class Composition extends AppCompatTextView {
     ss.setSpan(new CompositionSpan(), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && m.containsKey("letter_spacing")) {
-      Float size = Config.getFloat(m, "letter_spacing");
-      if (size != null && size != 0f) ss.setSpan(new LetterSpacingSpan(size), start, end, span);
+      final float size = YamlUtils.INSTANCE.getFloat(m, "letter_spacing", 0);
+      if (size != 0f) ss.setSpan(new LetterSpacingSpan(size), start, end, span);
     }
     start = composition_pos[0] + r.getStart();
     end = composition_pos[0] + r.getEnd();
@@ -507,7 +508,7 @@ public class Composition extends AppCompatTextView {
     setSingleLine(true); // 設置單行
     ss = new SpannableStringBuilder();
     int start_num = 0;
-    for (Map<?, ?> m : components) {
+    for (Map<String, ?> m : components) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
         start_num = calcStartNum(length, min_check);

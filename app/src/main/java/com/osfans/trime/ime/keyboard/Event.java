@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.YamlUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,16 +67,16 @@ public class Event {
       label = null;
     }
     if (Key.presetKeys.containsKey(s)) {
-      Map<?, ?> m = Key.presetKeys.get(s);
-      command = Config.getString(m, "command");
-      option = Config.getString(m, "option");
-      select = Config.getString(m, "select");
-      toggle = Config.getString(m, "toggle");
-      label = Config.getString(m, "label");
-      preview = Config.getString(m, "preview");
-      shiftLock = Config.getString(m, "shift_lock");
-      commit = Config.getString(m, "commit");
-      String send = Config.getString(m, "send");
+      Map<String, ?> m = Key.presetKeys.get(s);
+      command = YamlUtils.INSTANCE.getString(m, "command", "");
+      option = YamlUtils.INSTANCE.getString(m, "option", "");
+      select = YamlUtils.INSTANCE.getString(m, "select", "");
+      toggle = YamlUtils.INSTANCE.getString(m, "toggle", "");
+      label = YamlUtils.INSTANCE.getString(m, "label", "");
+      preview = YamlUtils.INSTANCE.getString(m, "preview", "");
+      shiftLock = YamlUtils.INSTANCE.getString(m, "shift_lock", "");
+      commit = YamlUtils.INSTANCE.getString(m, "commit", "");
+      String send = YamlUtils.INSTANCE.getString(m, "send", "");
       if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command))
         send = "function"; // command默認發function
       int[] sends = parseSend(send);
@@ -85,9 +86,9 @@ public class Event {
       text = Config.getString(m, "text");
       if (code < 0 && TextUtils.isEmpty(text)) text = s;
       if (m.containsKey("states")) states = (List<?>) m.get("states");
-      sticky = Config.getBoolean(m, "sticky", false);
-      repeatable = Config.getBoolean(m, "repeatable", false);
-      functional = Config.getBoolean(m, "functional", true);
+      sticky = YamlUtils.INSTANCE.getBoolean(m, "sticky", false);
+      repeatable = YamlUtils.INSTANCE.getBoolean(m, "repeatable", false);
+      functional = YamlUtils.INSTANCE.getBoolean(m, "functional", true);
     } else if ((code = getClickCode(s)) >= 0) {
       parseLabel();
     } else {
