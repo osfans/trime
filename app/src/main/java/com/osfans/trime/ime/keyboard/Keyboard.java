@@ -23,8 +23,12 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
+
 import androidx.annotation.NonNull;
+
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.YamlUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -172,46 +176,37 @@ public class Keyboard {
 
   public Keyboard(Context context, String name) {
     this(context);
-    Config config = Config.get(context);
-    final Map<?, ?> m = config.getKeyboard(name);
-    mLabelTransform = Config.getString(m, "label_transform", "none");
-    mAsciiMode = Config.getInt(m, "ascii_mode", 1);
-    if (mAsciiMode == 0) mAsciiKeyboard = Config.getString(m, "ascii_keyboard");
-    mLock = Config.getBoolean(m, "lock", false);
-    int columns = Config.getInt(m, "columns", 30);
-    int defaultWidth = (int) (Config.getDouble(m, "width", 0) * mDisplayWidth / 100);
+    final Map<String, ?> m = Config.get(context).getKeyboard(name);
+    mLabelTransform = YamlUtils.INSTANCE.getString(m, "label_transform", "none");
+    mAsciiMode = YamlUtils.INSTANCE.getInt(m, "ascii_mode", 1);
+    if (mAsciiMode == 0) mAsciiKeyboard = YamlUtils.INSTANCE.getString(m, "ascii_keyboard", "");
+    mLock = YamlUtils.INSTANCE.getBoolean(m, "lock", false);
+    int columns = YamlUtils.INSTANCE.getInt(m, "columns", 30);
+    int defaultWidth = (int) (YamlUtils.INSTANCE.getDouble(m, "width", 0d) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
-    int height = Config.getPixel(m, "height", 0);
+    int height = YamlUtils.INSTANCE.getPixel(m, "height", 0);
     int defaultHeight = (height > 0) ? height : mDefaultHeight;
     int rowHeight = defaultHeight;
     List<Map<String, Object>> lm = (List<Map<String, Object>>) m.get("keys");
 
-    if (m.containsKey("horizontal_gap"))
-      mDefaultHorizontalGap = Config.getPixel(m, "horizontal_gap");
-    if (m.containsKey("vertical_gap")) mDefaultVerticalGap = Config.getPixel(m, "vertical_gap");
-    if (m.containsKey("round_corner")) mRoundCorner = Config.getFloat(m, "round_corner");
 
-    Drawable background = config.getDrawable(m, "keyboard_back_color");
-    if (background != null) mBackground = background;
-
+    mDefaultHorizontalGap = YamlUtils.INSTANCE.getPixel(m, "horizontal_gap", 3);
+    mDefaultVerticalGap = YamlUtils.INSTANCE.getPixel(m, "vertical_gap", 5);
+    mRoundCorner = YamlUtils.INSTANCE.getFloat(m, "round_corner", 5);
+    if (m.containsKey("keyboard_back_color")) {
+      Drawable background = Config.getColorDrawable(context, m, "keyboard_back_color");
+      if (background != null) mBackground = background;
+    }
     int x = mDefaultHorizontalGap / 2;
     int y = mDefaultVerticalGap;
     int row = 0;
     int column = 0;
     mTotalWidth = 0;
-    final int key_text_offset_x = Config.getPixel(m, "key_text_offset_x", 0);
-    final int key_text_offset_y = Config.getPixel(m, "key_text_offset_y", 0);
-    final int key_symbol_offset_x = Config.getPixel(m, "key_symbol_offset_x", 0);
-    final int key_symbol_offset_y = Config.getPixel(m, "key_symbol_offset_y", 0);
-    final int key_hint_offset_x = Config.getPixel(m, "key_hint_offset_x", 0);
-    final int key_hint_offset_y = Config.getPixel(m, "key_hint_offset_y", 0);
-    final int key_press_offset_x = Config.getInt(m, "key_press_offset_x", 0);
-    final int key_press_offset_y = Config.getInt(m, "key_press_offset_y", 0);
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
     for (Map<String, Object> mk : lm) {
       int gap = mDefaultHorizontalGap;
-      int w = (int) (Config.getDouble(mk, "width", 0) * mDisplayWidth / 100);
+      int w = (int) (YamlUtils.INSTANCE.getDouble(mk, "width", 0) * mDisplayWidth / 100);
       if (w == 0 && mk.containsKey("click")) w = defaultWidth;
       w -= gap;
       if (column >= maxColumns || x + w > mDisplayWidth) {
@@ -222,7 +217,7 @@ public class Keyboard {
         if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
       }
       if (column == 0) {
-        int heightK = Config.getPixel(mk, "height", 0);
+        int heightK = YamlUtils.INSTANCE.getPixel(mk, "height", 0);
         rowHeight = (heightK > 0) ? heightK : defaultHeight;
       }
       if (!mk.containsKey("click")) { // 無按鍵事件
@@ -231,14 +226,14 @@ public class Keyboard {
       }
 
       final Key key = new Key(context, this, mk);
-      key.setKey_text_offset_x(Config.getPixel(mk, "key_text_offset_x", key_text_offset_x));
-      key.setKey_text_offset_y(Config.getPixel(mk, "key_text_offset_y", key_text_offset_y));
-      key.setKey_symbol_offset_x(Config.getPixel(mk, "key_symbol_offset_x", key_symbol_offset_x));
-      key.setKey_symbol_offset_y(Config.getPixel(mk, "key_symbol_offset_y", key_symbol_offset_y));
-      key.setKey_hint_offset_x(Config.getPixel(mk, "key_hint_offset_x", key_hint_offset_x));
-      key.setKey_hint_offset_y(Config.getPixel(mk, "key_hint_offset_y", key_hint_offset_y));
-      key.setKey_press_offset_x(Config.getInt(mk, "key_press_offset_x", key_press_offset_x));
-      key.setKey_press_offset_y(Config.getInt(mk, "key_press_offset_y", key_press_offset_y));
+      key.setKey_text_offset_x(YamlUtils.INSTANCE.getPixel(mk, "key_text_offset_x", 0));
+      key.setKey_text_offset_y(YamlUtils.INSTANCE.getPixel(mk, "key_text_offset_y", 0));
+      key.setKey_symbol_offset_x(YamlUtils.INSTANCE.getPixel(mk, "key_symbol_offset_x", 0));
+      key.setKey_symbol_offset_y(YamlUtils.INSTANCE.getPixel(mk, "key_symbol_offset_y", 0));
+      key.setKey_hint_offset_x(YamlUtils.INSTANCE.getPixel(mk, "key_hint_offset_x", 0));
+      key.setKey_hint_offset_y(YamlUtils.INSTANCE.getPixel(mk, "key_hint_offset_y", 0));
+      key.setKey_press_offset_x(YamlUtils.INSTANCE.getInt(mk, "key_press_offset_x", 2));
+      key.setKey_press_offset_y(YamlUtils.INSTANCE.getInt(mk, "key_press_offset_y", 2));
 
       key.setX(x);
       key.setY(y);

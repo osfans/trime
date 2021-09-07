@@ -13,6 +13,8 @@ import com.osfans.trime.R;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.YamlUtils;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,13 +86,13 @@ public class LiquidKeyboard {
 
     Config config = Config.get(context);
     parent_width = width;
-    final Map<?, ?> liquid_config = config.getLiquidKeyboard();
+    final Map<String, ?> liquid_config = config.getLiquidKeyboard();
 
     // liquid_keyboard/margin_x定义了每个键左右两边的间隙，也就是说相邻两个键间隙是x2，而horizontal_gap定义的是spacer，使用时需要/2
     if (liquid_config != null) {
       if (liquid_config.containsKey("margin_x")) {
-        Object o = Config.getPixel(liquid_config, "margin_x", 0);
-        margin_x = o == null ? 0 : (int) o;
+        Object o = YamlUtils.INSTANCE.getPixel(liquid_config, "margin_x", 0);
+        margin_x = (int) o;
       }
     }
 

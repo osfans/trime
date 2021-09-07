@@ -42,6 +42,7 @@ import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.AppVersionUtils;
+import com.osfans.trime.util.YamlUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -77,8 +78,8 @@ public class Config {
   private String schema_id;
 
   private Map<?, ?> fallbackColors;
-  private Map<?, ?> presetColorSchemes, presetKeyboards;
-  private Map<?, ?> liquidKeyboard;
+  private Map<String, ?> presetColorSchemes, presetKeyboards;
+  private Map<String, ?> liquidKeyboard;
 
   private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
 
@@ -282,10 +283,10 @@ public class Config {
   private void init() {
     try {
       Rime.deploy_config_file(themeName + ".yaml", "config_version");
-      Map<String, Object> m = Rime.config_get_map(themeName, "");
+      Map<String, ?> m = YamlUtils.INSTANCE.loadMap(themeName, "");
       if (m == null) {
         themeName = defaultName;
-        m = Rime.config_get_map(themeName, "");
+        m = YamlUtils.INSTANCE.loadMap(themeName, "");
       }
       final Map<?, ?> mk = (Map<?, ?>) m.get("android_keys");
       mDefaultStyle = (Map<?, ?>) m.get("style");
@@ -295,11 +296,10 @@ public class Config {
       Key.setSymbols((String) mk.get("symbols"));
       if (TextUtils.isEmpty(Key.getSymbols()))
         Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
-      Key.presetKeys = (Map<String, Map<?, ?>>) m.get("preset_keys");
-      presetColorSchemes = (Map<?, ?>) m.get("preset_color_schemes");
-      initCurrentColors();
-      presetKeyboards = (Map<?, ?>) m.get("preset_keyboards");
-      liquidKeyboard = (Map<?, ?>) m.get("liquid_keyboard");
+      Key.presetKeys = (Map<String, Map<String, ?>>) m.get("preset_keys");
+      presetColorSchemes = (Map<String, ?>) m.get("preset_color_schemes");
+      presetKeyboards = (Map<String, ?>) m.get("preset_keyboards");
+      liquidKeyboard = (Map<String, ?>) m.get("liquid_keyboard");
       initLiquidKeyboard();
       Rime.setShowSwitches(getPrefs().getKeyboard().getSwitchesEnabled());
       Rime.setShowSwitchArrow(getPrefs().getKeyboard().getSwitchArrowEnabled());
@@ -435,12 +435,12 @@ public class Config {
     }
   }
 
-  public Map<?, ?> getKeyboard(String name) {
+  public Map<String, ?> getKeyboard(String name) {
     if (!presetKeyboards.containsKey(name)) name = "default";
-    return (Map<?, ?>) presetKeyboards.get(name);
+    return (Map<String, ?>) presetKeyboards.get(name);
   }
 
-  public Map<?, ?> getLiquidKeyboard() {
+  public Map<String, ?> getLiquidKeyboard() {
     return liquidKeyboard;
   }
 
@@ -561,24 +561,6 @@ public class Config {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
-  public static Integer getInt(Map<?, ?> m, String k, Object s) {
-    final Object o = getValue(m, k, s);
-    if (o == null) return null;
-    return Long.decode(o.toString()).intValue();
-  }
-
-  public static Float getFloat(Map<?, ?> m, String k) {
-    final Object o = getValue(m, k, null);
-    if (o == null) return null;
-    return Float.valueOf(o.toString());
-  }
-
-  public static Double getDouble(Map<?, ?> m, String k, Object s) {
-    final Object o = getValue(m, k, s);
-    if (o == null) return null;
-    return Double.valueOf(o.toString());
-  }
-
   public static String getString(Map<?, ?> m, String k, Object s) {
     final Object o = getValue(m, k, s);
     if (o == null) return "";
@@ -587,16 +569,6 @@ public class Config {
 
   public static String getString(Map<?, ?> m, String k) {
     return getString(m, k, "");
-  }
-
-  public static Boolean getBoolean(Map<?, ?> m, String k, Object s) {
-    final Object o = getValue(m, k, s);
-    if (o == null) return null;
-    return Boolean.valueOf(o.toString());
-  }
-
-  public static Boolean getBoolean(Map<?, ?> m, String k) {
-    return getBoolean(m, k, true);
   }
 
   public boolean getBoolean(String key) {
@@ -795,8 +767,7 @@ public class Config {
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
-        Integer value = Config.getPixel(liquidKeyboard, key, 0);
-        if (value != null) return value;
+        return YamlUtils.INSTANCE.getPixel(liquidKeyboard, key, 0);
       }
     }
     return getPixel(key);

@@ -25,6 +25,7 @@ import android.view.KeyEvent;
 import com.osfans.trime.Rime;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.YamlUtils;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ public class Key {
         KEY_STATE_NORMAL
       };
   public static List<String> androidKeys;
-  public static Map<String, Map<?, ?>> presetKeys;
+  public static Map<String, Map<String, ?>> presetKeys;
   private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
   public int edgeFlags;
@@ -124,37 +125,40 @@ public class Key {
       if (!TextUtils.isEmpty(s)) events[i] = new Event(mKeyboard, s);
       else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
     }
-    s = Config.getString(mk, "composing");
+    s = YamlUtils.INSTANCE.getString(mk, "composing", "");
     if (!TextUtils.isEmpty(s)) composing = new Event(mKeyboard, s);
-    s = Config.getString(mk, "has_menu");
+    s = YamlUtils.INSTANCE.getString(mk, "has_menu", "");
     if (!TextUtils.isEmpty(s)) has_menu = new Event(mKeyboard, s);
-    s = Config.getString(mk, "paging");
+    s = YamlUtils.INSTANCE.getString(mk, "paging", "");
     if (!TextUtils.isEmpty(s)) paging = new Event(mKeyboard, s);
     if (composing != null || has_menu != null || paging != null)
       mKeyboard.getmComposingKeys().add(this);
-    s = Config.getString(mk, "ascii");
+    s = YamlUtils.INSTANCE.getString(mk, "ascii", "");
     if (!TextUtils.isEmpty(s)) ascii = new Event(mKeyboard, s);
-    label = Config.getString(mk, "label");
-    hint = Config.getString(mk, "hint");
-    if (mk.containsKey("send_bindings")) send_bindings = Config.getBoolean(mk, "send_bindings");
-    else if (composing == null && has_menu == null && paging == null) send_bindings = false;
+    label = YamlUtils.INSTANCE.getString(mk, "label", "");
+    hint = YamlUtils.INSTANCE.getString(mk, "hint", "");
+    if (mk.containsKey("send_bindings")) {
+      send_bindings = YamlUtils.INSTANCE.getBoolean(mk, "send_bindings", true);
+    } else if (composing == null && has_menu == null && paging == null) {
+      send_bindings = false;
+    }
     if (isShift()) mKeyboard.setmShiftKey(this);
-    key_text_size = Config.getPixel(mk, "key_text_size");
-    symbol_text_size = Config.getPixel(mk, "symbol_text_size");
+    key_text_size = YamlUtils.INSTANCE.getPixel(mk, "key_text_size", 22);
+    symbol_text_size = YamlUtils.INSTANCE.getPixel(mk, "symbol_text_size", 10);
     key_text_color = Config.getColor(context, mk, "key_text_color");
     hilited_key_text_color = Config.getColor(context, mk, "hilited_key_text_color");
     key_back_color = config.getDrawable(mk, "key_back_color");
     hilited_key_back_color = config.getDrawable(mk, "hilited_key_back_color");
     key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
     hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
-    round_corner = Config.getFloat(mk, "round_corner");
+    round_corner = YamlUtils.INSTANCE.getFloat(mk, "round_corner", 5);
   }
 
   public static List<String> getAndroidKeys() {
     return androidKeys;
   }
 
-  public static Map<String, Map<?, ?>> getPresetKeys() {
+  public static Map<String, Map<String, ?>> getPresetKeys() {
     return presetKeys;
   }
 
