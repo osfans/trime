@@ -866,7 +866,8 @@ public class Trime extends InputMethodService
             etr.token = 0;
             final ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
-              int nextPosition = StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
+              int nextPosition =
+                  StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
               ic.setSelection(nextPosition, nextPosition);
               return true;
             }
