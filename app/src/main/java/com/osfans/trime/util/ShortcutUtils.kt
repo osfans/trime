@@ -18,7 +18,8 @@ import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Preferences
 import java.text.FieldPosition
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * Implementation to open/call specified application/function
@@ -97,7 +98,7 @@ object ShortcutUtils {
             val df = if (option.isEmpty()) {
                 DateFormat.getDateInstance(DateFormat.LONG, ul)
             } else {
-                android.icu.text.SimpleDateFormat(option, Locale(locale))
+                android.icu.text.SimpleDateFormat(option, ul.toLocale())
             }
             df.format(cc, StringBuffer(256), FieldPosition(0)).toString()
         } else {
