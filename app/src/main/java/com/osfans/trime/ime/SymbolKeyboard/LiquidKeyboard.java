@@ -14,7 +14,6 @@ import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.YamlUtils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

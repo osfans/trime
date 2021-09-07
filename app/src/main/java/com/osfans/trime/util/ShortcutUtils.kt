@@ -49,8 +49,10 @@ object ShortcutUtils {
             }
             else -> IntentUtils.getLaunchAppIntent(arg)
         }
-        intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
-                or Intent.FLAG_ACTIVITY_NO_HISTORY)
+        intent.flags = (
+            Intent.FLAG_ACTIVITY_NEW_TASK
+                or Intent.FLAG_ACTIVITY_NO_HISTORY
+            )
         ActivityUtils.startActivity(intent)
     }
 
@@ -59,7 +61,7 @@ object ShortcutUtils {
         var intent = Intent(act)
         when (act) {
             // Search or open link
-                // Note that web_search cannot directly open link
+            // Note that web_search cannot directly open link
             Intent.ACTION_WEB_SEARCH, Intent.ACTION_SEARCH -> {
                 if (arg.startsWith("http")) {
                     startIntent(arg)
@@ -109,8 +111,7 @@ object ShortcutUtils {
     private fun pasteFromClipboard(context: Context): CharSequence {
         val systemClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val systemPrimaryClip = systemClipboardManager.primaryClip
-        return if (systemPrimaryClip?.getItemAt(0)?.text == null) {""}
-               else systemPrimaryClip.getItemAt(0)?.text!!
+        return if (systemPrimaryClip?.getItemAt(0)?.text == null) { "" } else systemPrimaryClip.getItemAt(0)?.text!!
     }
 
     fun syncInBackground(context: Context) {

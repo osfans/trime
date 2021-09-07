@@ -3,7 +3,6 @@ package com.osfans.trime.settings
 import android.Manifest
 import android.annotation.TargetApi
 import android.app.ProgressDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri

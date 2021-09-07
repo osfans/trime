@@ -25,10 +25,10 @@ enum class SymbolKeyboardType {
     LONG,
 
     //  需要展开显示的多行内容（不省略内容）
-    MULT_LINE,
+    MULTI_LINE,
 
     //  成对显示的符号。当光标选中一段文字时，点击此分类的符号，用成对符号包裹选中内容。当光标未选择文本时，插入一对符号并移动光标到符号内侧。
-    PAIR, ;
+    PAIR;
 
     companion object {
         private val convertMap: HashMap<String, SymbolKeyboardType> = hashMapOf()
