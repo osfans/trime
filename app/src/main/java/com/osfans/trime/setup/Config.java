@@ -698,8 +698,8 @@ public class Config {
     String name = o.toString();
     Integer color = parseColor(name);
     if (color == null) {
-      if (curcentColors.containsKey(name)) {
-        o = curcentColors.get(name);
+      if (currentColors.containsKey(name)) {
+        o = currentColors.get(name);
         if (o instanceof Integer) color = (Integer) o;
       }
     }
@@ -725,8 +725,8 @@ public class Config {
       }
 
       if (!f.exists()) {
-        if (curcentColors.containsKey(name)) {
-          o = curcentColors.get(name);
+        if (currentColors.containsKey(name)) {
+          o = currentColors.get(name);
           if (o instanceof String) f = new File((String) o);
         }
       }
@@ -789,13 +789,13 @@ public class Config {
 
   // 获取当前色彩 Config 2.0
   public Integer getCurrentColor_(String key) {
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     return (Integer) o;
   }
 
   // 获取当前背景图路径 Config 2.0
   public String getCurrentImage(String key) {
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (o instanceof String) return (String) o;
     return "";
   }
@@ -804,7 +804,7 @@ public class Config {
   //  参数可以是颜色或者图片。如果参数缺失，返回null
   public Drawable getDrawable_(String key) {
     if (key == null) return null;
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (o instanceof Integer) {
       Integer color = (Integer) o;
       final GradientDrawable gd = new GradientDrawable();
@@ -833,13 +833,13 @@ public class Config {
     }
 
     GradientDrawable gd = new GradientDrawable();
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (!(o instanceof Integer)) return null;
     gd.setColor((int) o);
 
     if (borderColorKey != null && borderKey != null) {
       int border = getPixel(borderKey);
-      Object borderColor = curcentColors.get(borderColorKey);
+      Object borderColor = currentColors.get(borderColorKey);
       if (borderColor instanceof Integer && border > 0) {
         gd.setStroke(border, getCurrentColor_(borderColorKey));
         if (roundCornerKey != null) gd.setCornerRadius(getFloat(roundCornerKey));
@@ -863,7 +863,7 @@ public class Config {
   public Drawable getDrawableBitmap_(String key) {
     if (key == null) return null;
 
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (o instanceof String) {
       String path = (String) o;
       if (path.contains(".9.png")) {
@@ -878,11 +878,11 @@ public class Config {
   }
 
   // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
-  private final Map<String, Object> curcentColors = new HashMap<>();
+  private final Map<String, Object> currentColors = new HashMap<>();
   private String backgroundFolder;
   // 初始化当前配色 Config 2.0
   public void initCurrentColors() {
-    curcentColors.clear();
+    currentColors.clear();
     String scheme = getColorSchemeName();
     backgroundFolder = getString("background_folder");
     Timber.d(
@@ -896,12 +896,12 @@ public class Config {
 
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       Object value = getColorRealValue(entry.getValue());
-      if (value != null) curcentColors.put(entry.getKey().toString(), value);
+      if (value != null) currentColors.put(entry.getKey().toString(), value);
     }
 
     for (Map.Entry<?, ?> entry : fallbackColors.entrySet()) {
       String key = entry.getKey().toString();
-      if (!curcentColors.containsKey(key)) {
+      if (!currentColors.containsKey(key)) {
         Object o = map.get(key);
         String fallbackKey = key;
         while (o == null && fallbackColors.containsKey(fallbackKey)) {
@@ -911,8 +911,8 @@ public class Config {
         if (o != null) {
           Object value = getColorRealValue(o);
           if (value != null) {
-            curcentColors.put(key, value);
-            curcentColors.put(fallbackKey, value);
+            currentColors.put(key, value);
+            currentColors.put(fallbackKey, value);
           }
         }
       }
