@@ -151,8 +151,9 @@ public class Trime extends InputMethodService
   private static final Handler syncBackgroundHandler =
       new Handler(
           msg -> {
-            if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-              ShortcutUtils.INSTANCE.syncInBackground((Trime) msg.obj);
+            if (!((Trime) msg.obj).isShowInputRequested()) {
+              // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
+              ShortcutUtils.syncInBackground((Trime) msg.obj);
               ((Trime) msg.obj).loadConfig();
             }
             return false;
@@ -1041,7 +1042,7 @@ public class Trime extends InputMethodService
                 getActiveText(2),
                 getActiveText(3),
                 getActiveText(4));
-        s = (String) ShortcutUtils.INSTANCE.call(this, event.getCommand(), arg);
+        s = (String) ShortcutUtils.call(event.getCommand(), arg);
         if (s != null) {
           commitText(s);
           updateComposing();
@@ -1081,7 +1082,7 @@ public class Trime extends InputMethodService
         || handleEnter(keyCode)
         || handleBack(keyCode)) {
       Timber.i("Trime onKey");
-    } else if (ShortcutUtils.INSTANCE.openCategory(keyCode)) {
+    } else if (ShortcutUtils.openCategory(keyCode)) {
       Timber.i("Open category");
     } else {
       keyUpNeeded = true;

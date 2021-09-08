@@ -8,6 +8,7 @@ import android.content.Intent
 import android.icu.text.DateFormat
 import android.icu.util.Calendar
 import android.icu.util.ULocale
+import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.os.Build
 import android.util.SparseArray
@@ -16,6 +17,7 @@ import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.ime.core.Trime
 import java.text.FieldPosition
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -25,10 +27,13 @@ import java.util.Locale
  * Implementation to open/call specified application/function
  */
 object ShortcutUtils {
-    fun call(context: Context, command: String, option: String): Any? {
+
+    @JvmStatic
+    fun call(command: String, option: String): Any? {
+        val ims = Trime.getService()
         when (command) {
-            "broadcast" -> context.sendBroadcast(Intent(option))
-            "clipboard" -> return pasteFromClipboard(context)
+            "broadcast" -> ims.sendBroadcast(Intent(option))
+            "clipboard" -> return pasteFromClipboard(ims)
             "date" -> return getDate(option)
             "run" -> startIntent(option)
             else -> startIntent(command, option)
@@ -108,18 +113,21 @@ object ShortcutUtils {
         }
     }
 
-    private fun pasteFromClipboard(context: Context): CharSequence {
-        val systemClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val systemPrimaryClip = systemClipboardManager.primaryClip
-        return if (systemPrimaryClip?.getItemAt(0)?.text == null) { "" } else systemPrimaryClip.getItemAt(0)?.text!!
+    private fun pasteFromClipboard(ims: InputMethodService): CharSequence {
+        val systemClipboardManager = ims.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        val systemPrimaryClip = systemClipboardManager?.primaryClip
+        return if (systemPrimaryClip?.getItemAt(0)?.text == null) { "" }
+               else systemPrimaryClip.getItemAt(0)?.text!!
     }
 
+    @JvmStatic
     fun syncInBackground(context: Context) {
         val prefs = Preferences.defaultInstance()
         prefs.conf.lastSyncTime = Date().time
         prefs.conf.lastSyncStatus = Rime.syncUserData(context)
     }
 
+    @JvmStatic
     fun openCategory(keyCode: Int): Boolean {
         val category = applicationLaunchKeyCategories[keyCode]
         return if (category != null) {
