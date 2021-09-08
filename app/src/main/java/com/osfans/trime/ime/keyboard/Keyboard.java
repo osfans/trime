@@ -187,9 +187,11 @@ public class Keyboard {
     int rowHeight = defaultHeight;
     List<Map<String, Object>> lm = (List<Map<String, Object>>) m.get("keys");
 
-    mDefaultHorizontalGap = YamlUtils.INSTANCE.getPixel(m, "horizontal_gap", 3);
-    mDefaultVerticalGap = YamlUtils.INSTANCE.getPixel(m, "vertical_gap", 5);
-    mRoundCorner = YamlUtils.INSTANCE.getFloat(m, "round_corner", 5);
+    mDefaultHorizontalGap =
+        YamlUtils.INSTANCE.getPixel(m, "horizontal_gap", config.getPixel("horizontal_gap"));
+    mDefaultVerticalGap =
+        YamlUtils.INSTANCE.getPixel(m, "vertical_gap", config.getPixel("vertical_gap"));
+    mRoundCorner = YamlUtils.INSTANCE.getFloat(m, "round_corner", config.getFloat("round_corner"));
 
     Drawable background = config.getDrawable(m, "keyboard_back_color");
     if (background != null) mBackground = background;
