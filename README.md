@@ -83,7 +83,7 @@ make release
 #### macOS
 
 1. 推薦通過 Android Studio 或手動安裝 Android [SDK](https://developer.android.com/studio/index.html) 和 [NDK](https://developer.android.com/ndk/index.html)。
-2. 安裝 [Homebrew](http://brew.sh/)（如果網速過慢，可設置 [Homebrew 鏡像](https://mirrors.ustc.edu.cn/help/brew.git.html)，然後執行：
+2. 安裝 [Homebrew](http://brew.sh/)（如果網速過慢，可設置 [Homebrew 鏡像](https://mirrors.ustc.edu.cn/help/brew.git.html)），然後執行：
 
   ```bash
    brew install automake cmake opencc boost python gradle doxygen clang capnp
