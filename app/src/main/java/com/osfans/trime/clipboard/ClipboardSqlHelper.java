@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.clipboard;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

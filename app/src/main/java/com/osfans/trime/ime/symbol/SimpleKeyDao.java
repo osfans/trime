@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.ime.symbol;
 
 import java.io.File;
 import java.io.FileInputStream;

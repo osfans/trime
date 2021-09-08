@@ -1,9 +1,10 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.clipboard;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.util.ArrayList;
 import java.util.List;
 import timber.log.Timber;

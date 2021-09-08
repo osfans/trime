@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.ime.symbol;
 
 import androidx.annotation.NonNull;
 import java.io.Serializable;

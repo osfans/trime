@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.clipboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.osfans.trime.R;
+import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import com.osfans.trime.setup.Config;
 import java.util.List;
 

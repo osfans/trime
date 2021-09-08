@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <com.osfans.trime.ime.SymbolKeyboard.TabView
+                <com.osfans.trime.ime.symbol.TabView
                     android:id="@+id/tab_view"
                     android:layout_width="1000dp"
                     android:layout_height="20dp" />

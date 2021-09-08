@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.ime.symbol;
 
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;

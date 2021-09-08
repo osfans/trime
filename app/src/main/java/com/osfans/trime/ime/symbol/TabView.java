@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.ime.symbol;
 
 import android.content.Context;
 import android.graphics.Canvas;

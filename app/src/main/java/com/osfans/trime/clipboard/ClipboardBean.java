@@ -1,4 +1,6 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.clipboard;
+
+import com.osfans.trime.ime.symbol.SimpleKeyBean;
 
 public class ClipboardBean extends SimpleKeyBean {
   private long time;

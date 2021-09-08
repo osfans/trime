@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.SymbolKeyboard;
+package com.osfans.trime.ime.symbol;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -10,6 +10,9 @@ import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.osfans.trime.R;
+import com.osfans.trime.clipboard.ClipboardAdapter;
+import com.osfans.trime.clipboard.ClipboardBean;
+import com.osfans.trime.clipboard.ClipboardDao;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
