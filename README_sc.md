@@ -15,7 +15,7 @@
 - 稳定版 <br>
 [<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
 [<img alt='Google Play 立即下载' src='https://play.google.com/intl/en_us/badges/images/generic/zh-cn_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='酷安' src='https://static.coolapk.com/images/header-logo.png' height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
+[<img alt='酷安' src='https://static.coolapk.com/images/header-logo.png' height='60px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
 - 测试版 [点击下载](https://github.com/osfans/trime/actions)
 
@@ -39,7 +39,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 - 后来，兼容了五笔、两笔等形码，在太空卫士、征羽的建议下，更名为“[同文输入法平台 2.x](https://github.com/osfans/trime-legacy)”。寓意音码形码同台，方言官话同文。
 - 之后，借助 JNI 技术，享受了 [librime](https://github.com/rime/librime) 的成果，升级为“同文输入法平台 3.x”，简称“同文输入法”。
 
-现在欢迎你前来[贡献](https://github.com/osfans/trime/pulls) ～！
+现在欢迎你前来[贡献](https://github.com/osfans/trime/pulls) ～！:tada:
 
 ## 编译
 

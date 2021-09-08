@@ -15,7 +15,7 @@
 - 穩定版 <br>
 [<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
 [<img alt='Google Play 立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='酷安' src='https://static.coolapk.com/images/header-logo.png' height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
+[<img alt='酷安' src='https://static.coolapk.com/images/header-logo.png' height='60px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
 - 測試版 [點擊下載](https://github.com/osfans/trime/actions)
 
@@ -38,7 +38,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMethod 的縮寫:
 - 後來，兼容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名爲“[同文輸入法平臺 2.x](https://github.com/osfans/trime-legacy)”。寓意音碼形碼同臺，方言官話同文。
 - 之後，藉助 JNI 技術，享受了 [librime](https://github.com/rime/librime) 的成果，升級爲“同文輸入法平臺 3.x”，簡稱“同文輸入法”。
 
-現在歡迎你前來[貢獻](https://github.com/osfans/trime/pulls) ～！
+現在歡迎你前來[貢獻](https://github.com/osfans/trime/pulls) ～！:tada:
 
 ## 編譯
 
@@ -54,7 +54,7 @@ cd $trime_folder
 make debug
 ```
 
-或者要爲應用簽名以釋放更新，請創建一個名爲 `gradle.properties` 的檔案，包含以下內容，註明[簽名資訊](https://developer.android.com/studio/publish/app-signing.html)：
+或者要爲應用簽名以釋放更新，請創立一個名爲 `gradle.properties` 的檔案，包含以下內容，註明[簽名資訊](https://developer.android.com/studio/publish/app-signing.html)：
 
 ```bash
 storePassword=myStorePassword

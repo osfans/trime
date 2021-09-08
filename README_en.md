@@ -1,5 +1,6 @@
 # TRIME
 Rime IME for Android
+
 ![build](https://github.com/osfans/trime/actions/workflows/last-commit-release.yml/badge.svg?branch=develop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![GitHub release](https://img.shields.io/github/release/osfans/trime.svg)](https://github.com/osfans/trime/releases)
@@ -17,7 +18,7 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME]�
 - Stable Version <br>
 [<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
 [<img alt='Google Play Download Now' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='Coolapk' src='https://static.coolapk.com/images/header-logo.png' height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
+[<img alt='Coolapk' src='https://static.coolapk.com/images/header-logo.png' height='60px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
 - Beta Version [Download here](https://github.com/osfans/trime/actions)
 
@@ -26,7 +27,7 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME]�
 ## Thanks to...
 - Developer: [osfans](https://github.com/osfans)
 - Contributors: [boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)、[senchi96](https://github.com/senchi96)、[heiher](https://github.com/heiher)、[abay](https://github.com/a342191555)、[iovxw](https://github.com/iovxw)、[huyz-git](https://github.com/huyz-git)、[tumuyan](https://github.com/tumuyan)、[WhiredPlanck](https://github.com/WhiredPlanck)...
-- [Wiki Editors](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)...
+- [Wiki Editors](https://github.com/osfans/trime/wiki): [xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)...
 - Translators: 天真可爱的满满 (Chinese Traditional), 点解 (English) ...
 - Keyboard Makers: 天真可爱的满满、皛筱晓小笨鱼、吴琛11、熊猫阿Bo、默默ㄇㄛˋ...
 - Donation: See QR Code in [Releases](https://github.com/osfans/trime/releases)
@@ -34,7 +35,7 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME]�
 - Projects: [RIME]、[OpenCC]、[Android Traditional Chinese IME] and so on.
 
 ## Development History
-TRIME is the abbreviation of Tongwen RIME or ThaeRv Input Method.
+TRIME is the abbreviation of *Tongwen RIME* or *ThaeRv Input Method*.
 
 From the beginning, TRIME was written for TaeRv Pinyin, and named *TaeRv Input Method (泰如输入法)*.
 
@@ -44,7 +45,7 @@ Later, it supports Wubi and Liangbi and other shape-based input method, we brand
 
 TRIME now upgrade to 3.0, enjoying the advantages of [librime](https://github.com/rime/librime) with Java Native Interface, referring to as *Tongwen Input Method (同文输入法)*.
 
-You're welcome to [contribute](https://github.com/osfans/trime/pulls) ~ !
+You're welcome to [contribute](https://github.com/osfans/trime/pulls) ~ ! :tada:
 
 ## How to build
 
