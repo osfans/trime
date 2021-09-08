@@ -867,7 +867,7 @@ public class Trime extends InputMethodService
             final ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
               int nextPosition =
-                  StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
+                  StringUtils.findNextSection(et.text, et.startOffset + et.selectionEnd);
               ic.setSelection(nextPosition, nextPosition);
               return true;
             }
@@ -880,7 +880,7 @@ public class Trime extends InputMethodService
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
               int prevSection =
-                  StringUtils.INSTANCE.findPrevSection(et.text, et.startOffset + et.selectionStart);
+                  StringUtils.findPrevSection(et.text, et.startOffset + et.selectionStart);
               ic.setSelection(prevSection, prevSection);
               return true;
             }
@@ -1139,7 +1139,7 @@ public class Trime extends InputMethodService
     boolean send_key_down_up = true;
     if (mask == 0 && mAsciiMode) {
       // 使用ASCII键盘输入英文字符时，直接上屏，跳过复杂的调用，从表面上解决issue #301 知乎输入英语后输入法失去焦点的问题
-      String keyText = StringUitls.toCharString(keyCode);
+      String keyText = StringUtils.toCharString(keyCode);
       if (keyText.length() > 0) {
         ic.commitText(keyText, 1);
         send_key_down_up = false;
@@ -1530,10 +1530,10 @@ public class Trime extends InputMethodService
             if (item == null) return;
             final String text = item.coerceToText(self).toString();
 
-            final String text2 = StringUtils.INSTANCE.replace(text, mConfig.getClipBoardCompare());
+            final String text2 = StringUtils.replace(text, mConfig.getClipBoardCompare());
             if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-            if (StringUtils.INSTANCE.mismatch(text, mConfig.getClipBoardOutput())) {
+            if (StringUtils.mismatch(text, mConfig.getClipBoardOutput())) {
               ClipBoardString = text2;
               liquidKeyboard.addClipboardData(text);
             }
