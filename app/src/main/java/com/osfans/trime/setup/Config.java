@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Preferences;
+import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
@@ -96,6 +97,8 @@ public class Config {
     prepareRime(context);
     deployTheme(context);
     init();
+    // 初始时，悬浮背景为空
+    Trime.getService().initKeyboard();
     prepareCLipBoardRule();
   }
 
