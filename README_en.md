@@ -11,7 +11,7 @@ Rime IME for Android
 
 ## About
 
-Trime is originally a frontend of open-source [Android Traditional Chinese IME]，based on [RIME] input method framework and written in Java/Kotlin with JNI. It is designed to protect the native language of various local dialects of Chinese and is a universal shape-based and phonetic-based input method platform.
+Trime is originally a frontend of open-source [Android Traditional Chinese IME], based on [RIME] input method framework and written in Java/Kotlin with JNI. It is designed to protect the native language of various local dialects of Chinese and is a universal shape-based and phonetic-based input method platform.
 
 ## Download
 
@@ -30,7 +30,7 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME]�
 - [Wiki Editors](https://github.com/osfans/trime/wiki): [xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)...
 - Translators: 天真可爱的满满 (Chinese Traditional), 点解 (English) ...
 - Keyboard Makers: 天真可爱的满满、皛筱晓小笨鱼、吴琛11、熊猫阿Bo、默默ㄇㄛˋ...
-- Donation: See QR Code in [Releases](https://github.com/osfans/trime/releases)
+- Donations: See QR Code in [Releases](https://github.com/osfans/trime/releases)
 - Community: [Issues](https://github.com/osfans/trime/issues), [QQ Group（811142286）](https://jq.qq.com/?_wv=1027&k=AXdR80HN), [QQ Group（458845988）](https://jq.qq.com/?_wv=1027&k=n6xT4G3q), [Coolapk](http://www.coolapk.com/apk/com.osfans.trime), [Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime) and [Tieba](http://tieba.baidu.com/f?kw=rime)
 - Projects: [RIME]、[OpenCC]、[Android Traditional Chinese IME] and so on.
 
@@ -39,9 +39,9 @@ TRIME is the abbreviation of *Tongwen RIME* or *ThaeRv Input Method*.
 
 From the beginning, TRIME was written for TaeRv Pinyin, and named *TaeRv Input Method (泰如输入法)*.
 
-Then, we created an input method platform with some code tables, such as Wu dialect (吴语). We renamed it to *Chinese Character Dialect Input Method （汉字方言输入法)*.
+Then, we created an input method platform with some code tables, such as Wu dialect (吴语). We renamed it to *Chinese Character Dialect Input Method (汉字方言输入法)*.
 
-Later, it supports Wubi and Liangbi and other shape-based input method, we branded it [*Tongwen Input Method Platform 2.0 （同文输入法平台 2.0)*](https://github.com/osfans/trime-legacy), which implies that the phonetic-based and shape-based input method on one platform, while dialects and Mandrain share one kind of characters.
+Later, it supports Wubi and Liangbi and other shape-based input method, we branded it [*Tongwen Input Method Platform 2.0 (同文输入法平台 2.0)*](https://github.com/osfans/trime-legacy), which implies that the phonetic-based and shape-based input method on one platform, while dialects and Mandrain share one kind of characters.
 
 TRIME now upgrade to 3.0, enjoying the advantages of [librime](https://github.com/rime/librime) with Java Native Interface, referring to as *Tongwen Input Method (同文输入法)*.
 
@@ -72,7 +72,7 @@ keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
-the run:
+then run:
 
 ```bash
 cd $trime_folder
