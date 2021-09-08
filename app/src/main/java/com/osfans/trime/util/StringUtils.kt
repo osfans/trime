@@ -1,5 +1,6 @@
 package com.osfans.trime.util
 
+import android.view.KeyEvent
 import kotlin.math.max
 import kotlin.math.min
 
@@ -55,5 +56,46 @@ object StringUtils {
             if (this.matches(r.toRegex())) return false
         }
         return true
+    }
+
+    // 考虑到可能存在魔改机型的keycode有差异，而KeyEvent.keyCodeToString(keyCode)无法从keyCode获得按键字符，故重写这个从keyCode获取Char的方法。
+    fun toCharString(keyCode: Int): String? {
+        when (keyCode) {
+            KeyEvent.KEYCODE_TAB -> return "\t"
+            KeyEvent.KEYCODE_SPACE -> return " "
+            KeyEvent.KEYCODE_PLUS -> return "+"
+            KeyEvent.KEYCODE_MINUS -> return "-"
+            KeyEvent.KEYCODE_STAR -> return "*"
+            KeyEvent.KEYCODE_SLASH -> return "/"
+            KeyEvent.KEYCODE_EQUALS -> return "="
+            KeyEvent.KEYCODE_AT -> return "@"
+            KeyEvent.KEYCODE_POUND -> return "#"
+            KeyEvent.KEYCODE_APOSTROPHE -> return "'"
+            KeyEvent.KEYCODE_BACKSLASH -> return "\\"
+            KeyEvent.KEYCODE_COMMA -> return ","
+            KeyEvent.KEYCODE_PERIOD -> return "."
+            KeyEvent.KEYCODE_LEFT_BRACKET -> return "["
+            KeyEvent.KEYCODE_RIGHT_BRACKET -> return "]"
+            KeyEvent.KEYCODE_SEMICOLON -> return ";"
+            KeyEvent.KEYCODE_GRAVE -> return "`"
+            KeyEvent.KEYCODE_NUMPAD_ADD -> return "+"
+            KeyEvent.KEYCODE_NUMPAD_SUBTRACT -> return "-"
+            KeyEvent.KEYCODE_NUMPAD_MULTIPLY -> return "*"
+            KeyEvent.KEYCODE_NUMPAD_DIVIDE -> return "/"
+            KeyEvent.KEYCODE_NUMPAD_EQUALS -> return "="
+            KeyEvent.KEYCODE_NUMPAD_COMMA -> return ","
+            KeyEvent.KEYCODE_NUMPAD_DOT -> return "."
+            KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN -> return "("
+            KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN -> return ")"
+        }
+        var c = 0
+        if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+            c = '0'.code + keyCode - KeyEvent.KEYCODE_0
+        } else if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
+            c = '0'.code + keyCode - KeyEvent.KEYCODE_NUMPAD_0
+        } else if (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) {
+            c = 'a'.code + keyCode - KeyEvent.KEYCODE_A
+        }
+        return if (c > 0) c.toChar().toString() else ""
     }
 }

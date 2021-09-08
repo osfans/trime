@@ -173,7 +173,8 @@ public class Keyboard {
 
   public Keyboard(Context context, String name) {
     this(context);
-    final Map<String, ?> m = Config.get(context).getKeyboard(name);
+    Config config = Config.get(context);
+    final Map<String, ?> m = config.getKeyboard(name);
     mLabelTransform = YamlUtils.INSTANCE.getString(m, "label_transform", "none");
     mAsciiMode = YamlUtils.INSTANCE.getInt(m, "ascii_mode", 1);
     if (mAsciiMode == 0) mAsciiKeyboard = YamlUtils.INSTANCE.getString(m, "ascii_keyboard", "");
@@ -186,14 +187,13 @@ public class Keyboard {
     int rowHeight = defaultHeight;
     List<Map<String, Object>> lm = (List<Map<String, Object>>) m.get("keys");
 
-
     mDefaultHorizontalGap = YamlUtils.INSTANCE.getPixel(m, "horizontal_gap", 3);
     mDefaultVerticalGap = YamlUtils.INSTANCE.getPixel(m, "vertical_gap", 5);
     mRoundCorner = YamlUtils.INSTANCE.getFloat(m, "round_corner", 5);
-    if (m.containsKey("keyboard_back_color")) {
-      Drawable background = Config.getColorDrawable(context, m, "keyboard_back_color");
-      if (background != null) mBackground = background;
-    }
+
+    Drawable background = config.getDrawable(m, "keyboard_back_color");
+    if (background != null) mBackground = background;
+
     int x = mDefaultHorizontalGap / 2;
     int y = mDefaultVerticalGap;
     int row = 0;

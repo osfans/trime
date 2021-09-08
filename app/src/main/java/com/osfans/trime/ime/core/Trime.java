@@ -1139,7 +1139,7 @@ public class Trime extends InputMethodService
     boolean send_key_down_up = true;
     if (mask == 0 && mAsciiMode) {
       // 使用ASCII键盘输入英文字符时，直接上屏，跳过复杂的调用，从表面上解决issue #301 知乎输入英语后输入法失去焦点的问题
-      String keyText = StringUitls.toCharString(keyCode);
+      String keyText = StringUtils.INSTANCE.toCharString(keyCode);
       if (keyText.length() > 0) {
         ic.commitText(keyText, 1);
         send_key_down_up = false;
