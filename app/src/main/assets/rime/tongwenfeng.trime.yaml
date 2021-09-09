@@ -12,8 +12,8 @@ height:
   3: &jpgd3 24 #颜文字键盘2
   4: &jpgd4 48 #主键盘
   5: &jpgd5 39.5 #符号键盘
-  6: &hgap 4 #键盘横缝大小
-  7: &sgap 8 #键盘竖缝大小
+  6: &hgap 1 #键盘列野距
+  7: &sgap 2 #键盘行距
 
 #键盘高度
 round_corner:

@@ -315,6 +315,7 @@ public class Trime extends InputMethodService
 
   @Override
   public void onCreate() {
+    Timber.i("onCreate");
     super.onCreate();
     self = this;
     imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -517,6 +518,9 @@ public class Trime extends InputMethodService
     reset();
     setNavBarColor();
     mNeedUpdateRimeOption = true; // 不能在Rime.onMessage中調用set_option，會卡死
+    if (mKeyboardView == null) {
+      initKeyboardView();
+    }
     bindKeyboardToInputView();
     loadBackground();
     updateComposing(); // 切換主題時刷新候選
@@ -608,10 +612,19 @@ public class Trime extends InputMethodService
 
   @Override
   public View onCreateInputView() {
+    Timber.i("onCreateInputView");
     // 初始化键盘布局
+    initKeyboardView();
+    loadBackground();
+
+    return inputRootBinding.inputRoot;
+  }
+
+  private void initKeyboardView() {
     final LayoutInflater inflater = getLayoutInflater();
     inputRootBinding = InputRootBinding.inflate(inflater);
     // mInputRoot = (LinearLayout) inflater.inflate(R.layout.input_root, (ViewGroup) null);
+
     mKeyboardView = inputRootBinding.keyboard;
     mKeyboardView.setOnKeyboardActionListener(this);
     mKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
@@ -647,9 +660,6 @@ public class Trime extends InputMethodService
     mainKeyboard = inputRootBinding.mainKeyboard;
     symbleKeyboard = inputRootBinding.symbolKeyboard;
     tabView = inputRootBinding.tabView;
-    loadBackground();
-
-    return inputRootBinding.inputRoot;
   }
 
   void setShowComment(boolean show_comment) {
@@ -665,6 +675,7 @@ public class Trime extends InputMethodService
    */
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
+    Timber.i("onStartInput");
     super.onStartInput(attribute, restarting);
     canCompose = false;
     enterAsLineBreak = false;
@@ -704,6 +715,7 @@ public class Trime extends InputMethodService
     Rime.get(this);
     if (reset_ascii_mode) mAsciiMode = false;
 
+    initKeyboard();
     mKeyboardSwitch.init(getMaxWidth()); // 橫豎屏切換時重置鍵盤
 
     // Select a keyboard based on the input type of the editing field.
