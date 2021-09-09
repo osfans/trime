@@ -5,7 +5,8 @@
 [![F-Droid release](https://img.shields.io/f-droid/v/com.osfans.trime.svg)](https://f-droid.org/packages/com.osfans.trime)
 [![Latest build](https://img.shields.io/github/last-commit/osfans/trime.svg)](http://osfans.github.io/trime/)
 
-[简体中文](https://github.com/osfans/trime/blob/develop/README_sc.md) [English](https://github.com/osfans/trime/blob/develop/README_en.md)
+
+[English](README.md)·[简体中文](README_sc.md)·[繁體中文](README_tc.md)
 
 ## 關於
 
