@@ -9,6 +9,7 @@ Fixes #
 
 #### Build tasks success
 Successfully running following tasks on local
+- [ ] [CONTRIBUTING](CONTRIBUTING.md)
 - [ ] `./gradlew spotlessCheck`
 - [ ] `./gradlew assembleDebug`
 
