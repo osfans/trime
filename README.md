@@ -45,7 +45,7 @@ Later, it supports Wubi and Liangbi and other shape-based input method, we brand
 
 TRIME now upgrade to 3.0, enjoying the advantages of [librime](https://github.com/rime/librime) with Java Native Interface, referring to as *Tongwen Input Method (同文输入法)*.
 
-You're welcome to [contribute](https://github.com/osfans/trime/pulls) ~ ! :tada:
+You're welcome to [contribute](CONTRIBUTING.md) ~ ! :tada:
 
 ## Build
 

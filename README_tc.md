@@ -38,7 +38,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMethod 的縮寫:
 - 後來，兼容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名爲“[同文輸入法平臺 2.x](https://github.com/osfans/trime-legacy)”。寓意音碼形碼同臺，方言官話同文。
 - 之後，藉助 JNI 技術，享受了 [librime](https://github.com/rime/librime) 的成果，升級爲“同文輸入法平臺 3.x”，簡稱“同文輸入法”。
 
-現在歡迎你前來[貢獻](https://github.com/osfans/trime/pulls) ～！:tada:
+現在歡迎你前來[貢獻](CONTRIBUTING.md) ～！:tada:
 
 ## 編譯
 
