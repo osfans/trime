@@ -7,7 +7,7 @@ Rime IME for Android
 [![F-Droid release](https://img.shields.io/f-droid/v/com.osfans.trime.svg)](https://f-droid.org/packages/com.osfans.trime)
 [![Latest build](https://img.shields.io/github/last-commit/osfans/trime.svg)](http://osfans.github.io/trime/)
 
-[English](README.md)·[简体中文](README_sc.md)·[繁體中文](README_tc.md)
+[English](README.md) | [简体中文](README_sc.md) | [繁體中文](README_tc.md)
 
 ## About
 
@@ -20,11 +20,11 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME],
 [<img alt='Google Play Download Now' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
 [<img alt='Coolapk' src='https://static.coolapk.com/static/web/v8/img/icon.png' height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
-- Daily Build Channel [Download here](https://github.com/osfans/trime/actions)
+- Canary Channel [Download](https://github.com/osfans/trime/actions)
 
 - Configurations [rimerc](https://github.com/Bambooin/rimerc)
 
-## Thanks to...
+## Acknowledgments
 - Developer: [osfans](https://github.com/osfans)
 - Contributors: [boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)、[senchi96](https://github.com/senchi96)、[heiher](https://github.com/heiher)、[abay](https://github.com/a342191555)、[iovxw](https://github.com/iovxw)、[huyz-git](https://github.com/huyz-git)、[tumuyan](https://github.com/tumuyan)、[WhiredPlanck](https://github.com/WhiredPlanck)...
 - [Wiki Editors](https://github.com/osfans/trime/wiki): [xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)...
@@ -34,7 +34,7 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME],
 - Community: [Issues](https://github.com/osfans/trime/issues), [QQ Group（811142286）](https://jq.qq.com/?_wv=1027&k=AXdR80HN), [QQ Group（458845988）](https://jq.qq.com/?_wv=1027&k=n6xT4G3q), [Coolapk](http://www.coolapk.com/apk/com.osfans.trime), [Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime) and [Tieba](http://tieba.baidu.com/f?kw=rime)
 - Projects: [RIME]、[OpenCC]、[Android Traditional Chinese IME] and so on.
 
-## Development History
+## History
 TRIME is the abbreviation of *Tongwen RIME* or *ThaeRv Input Method*.
 
 From the beginning, TRIME was written for TaeRv Pinyin, and named *TaeRv Input Method (泰如输入法)*.
@@ -47,7 +47,7 @@ TRIME now upgrade to 3.0, enjoying the advantages of [librime](https://github.co
 
 You're welcome to [contribute](https://github.com/osfans/trime/pulls) ~ ! :tada:
 
-## How to build
+## Build
 
 1. Clone this project, please **pay attention** that it would take a while for large-size `boost` submodule. And make sure that you have enough available disk space to hold the source code (about 1.5 GB).
 
@@ -79,7 +79,7 @@ cd $trime_folder
 make release
 ```
 
-### Pre-build on Specified Platform
+### Guides
 #### [Arch Linux](https://www.archlinux.org/)
 
   ```bash
