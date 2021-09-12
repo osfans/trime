@@ -920,6 +920,8 @@ preset_keys:
   Henkan: {toggle: simplification, send: Mode_switch, states: [ 漢字, 汉字 ]}
   Charset_switch: {toggle: extended_charset, send: Mode_switch, states: [ 常用, 增廣 ]}
   Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
+  handwriting: {toggle: _handwriting, send: Mode_switch, states: [ 手写, 手写 ] }
+  handwriting1: {toggle: _handwriting, send: Mode_switch, states: [ 写, 写 ] }
   # trime設定
   IME_switch: {label: 🌐, send: LANGUAGE_SWITCH} #彈出對話框選擇輸入法
   IME_last: {label: 上一輸入法, send: LANGUAGE_SWITCH, select: .last} #直接切換到上一輸入法
@@ -1017,7 +1019,7 @@ preset_keyboards:
     - {click: Shift_L}
     - {click: Keyboard_symbols, long_click: Keyboard_number}
     - {click: Mode_switch, long_click: Menu}
-    - {click: space, width: 30}
+    - {click: space, swipe_up: handwriting,  width: 30}
     - {click: "'", long_click: '"'}
     - {click: BackSpace, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}

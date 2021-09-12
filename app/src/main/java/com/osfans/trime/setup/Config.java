@@ -472,7 +472,7 @@ public class Config {
     } else {
       switch (one_hand_mode) {
         case 0:
-          // 普通键盘 预留，目前未实装
+          // 普通键盘
           keyboardPadding[0] = getPixel("keyboard_padding");
           keyboardPadding[1] = keyboardPadding[0];
           keyboardPadding[2] = getPixel("keyboard_padding_bottom");

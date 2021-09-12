@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.Rime;
+import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.util.RimeUtils;
 import timber.log.Timber;
 
@@ -33,6 +34,7 @@ public class IntentReceiver extends BroadcastReceiver {
   private static final String TAG = "IntentReceiver";
   private static final String COMMAND_DEPLOY = "com.osfans.trime.deploy";
   private static final String COMMAND_SYNC = "com.osfans.trime.sync";
+  private static final String COMMAND_COMMIT = "com.osfans.trime.commit";
 
   @Override
   public void onReceive(@NonNull Context context, @NonNull Intent intent) {
@@ -54,6 +56,14 @@ public class IntentReceiver extends BroadcastReceiver {
       case Intent.ACTION_SHUTDOWN:
         Rime.destroy();
         break;
+      case COMMAND_COMMIT:
+        String ext_app = intent.getStringExtra("ext_app");
+        //      TO-DO  使用反射 mSenderPackageName 的方式获取intent包名，
+        //      intent.getComponent().getPackageName(); intent.getPackageName()无法获得包名
+        String text = intent.getStringExtra("text");
+        Timber.d("COMMAND_COMMIT %s", text);
+        Trime.getService().extAppCommit(text, ext_app);
+        break;
       default:
         break;
     }
@@ -63,6 +73,7 @@ public class IntentReceiver extends BroadcastReceiver {
     context.registerReceiver(this, new IntentFilter(COMMAND_DEPLOY));
     context.registerReceiver(this, new IntentFilter(COMMAND_SYNC));
     context.registerReceiver(this, new IntentFilter(Intent.ACTION_SHUTDOWN));
+    context.registerReceiver(this, new IntentFilter(COMMAND_COMMIT));
   }
 
   public void unregisterReceiver(@NonNull Context context) {
