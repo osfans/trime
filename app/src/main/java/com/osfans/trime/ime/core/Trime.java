@@ -25,6 +25,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -32,6 +33,7 @@ import android.graphics.Color;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
@@ -83,6 +85,7 @@ import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
+import com.osfans.trime.setup.Rsa;
 import com.osfans.trime.util.LocaleUtils;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
@@ -96,6 +99,7 @@ public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
   private static Trime self;
   private LiquidKeyboard liquidKeyboard;
+  private Rsa rsa;
 
   @NonNull
   private Preferences getPrefs() {
@@ -381,6 +385,9 @@ public class Trime extends InputMethodService
       case "_hide_key_hint":
         if (mKeyboardView != null) mKeyboardView.setShowHint(!value);
         break;
+      case "_handwriting":
+        handwriting(true);
+        break;
       default:
         if (option.startsWith("_keyboard_")
             && option.length() > 10
@@ -409,6 +416,27 @@ public class Trime extends InputMethodService
         }
     }
     if (mKeyboardView != null) mKeyboardView.invalidateAllKeys();
+  }
+
+  private void handwriting(boolean open) {
+    Intent intent = new Intent();
+    intent.setComponent(
+        new ComponentName("com.example.input", "com.example.softwaretest.HWService"));
+
+    if (mainKeyboard != null && open) {
+      rsa = new Rsa();
+      intent.putExtra("key", rsa.getPrivateKey());
+      intent.putExtra("height", mainKeyboard.getHeight());
+      intent.putExtra("back_color", mConfig.getCurrentColor_("back_color"));
+      intent.putExtra("text_color", mConfig.getCurrentColor_("text_color"));
+      intent.putExtra("candidate_text_color", mConfig.getCurrentColor_("candidate_text_color"));
+    } else {
+      rsa = null;
+      intent.putExtra("height", -1);
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent);
+    else startService(intent);
   }
 
   public void selectLiquidKeyboard(int tabIndex) {
@@ -537,6 +565,7 @@ public class Trime extends InputMethodService
       mConfig = null;
       System.exit(0); // 清理內存
     }
+    if (rsa != null) handwriting(false);
     super.onDestroy();
   }
 
@@ -733,6 +762,7 @@ public class Trime extends InputMethodService
     super.onFinishInputView(finishingInput);
     // Dismiss any pop-ups when the input-view is being finished and hidden.
     mKeyboardView.closing();
+    if (rsa != null) handwriting(false);
     escape();
     try {
       hideComposition();
@@ -803,6 +833,32 @@ public class Trime extends InputMethodService
     if (r) commitText(Rime.getCommitText());
     updateComposing();
     return r;
+  }
+
+  /**
+   * 外部App发送加密字符串并上屏
+   *
+   * @param text 使用base64编码的rsa加密字符串
+   * @param ext_app 外部App包名
+   */
+  public void extAppCommit(String text, String ext_app) {
+    //  外部手写输入App的包名，暂未实现选择器
+    String ext_app1 = "com.example.input";
+    Timber.d("text=%s, this.ext_app=%s, ext_app=%s", text, ext_app1, ext_app);
+    if (text == null || !ext_app1.equals(ext_app)) return;
+    text = rsa.publicDecode(text);
+    if (text.length() < 1) return;
+    if (text.equals("keycode:KEYCODE_FORWARD_DEL")) {
+      Timber.d("backspace");
+      sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL, 0);
+      return;
+    }
+    if (effectManager != null) effectManager.textCommitSpeak(text);
+    final @Nullable InputConnection ic = getCurrentInputConnection();
+    if (ic != null) {
+      ic.commitText(text, 1);
+      lastCommittedText = text;
+    }
   }
 
   public void keyPressVibrate() {
@@ -1526,6 +1582,7 @@ public class Trime extends InputMethodService
         () -> {
           if (mConfig.getClipboardMaxSize() != 0) {
             final ClipData clipData = clipBoard.getPrimaryClip();
+            if (clipData == null) return;
             final ClipData.Item item = clipData.getItemAt(0);
             if (item == null) return;
             final String text = item.coerceToText(self).toString();
