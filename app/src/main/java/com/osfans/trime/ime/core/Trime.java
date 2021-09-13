@@ -425,7 +425,7 @@ public class Trime extends InputMethodService
 
     if (mainKeyboard != null && open) {
       rsa = new Rsa();
-      intent.putExtra("key", rsa.getPrivateKey());
+      intent.putExtra("key", rsa.getPublicKey());
       intent.putExtra("height", mainKeyboard.getHeight());
       intent.putExtra("back_color", mConfig.getCurrentColor_("back_color"));
       intent.putExtra("text_color", mConfig.getCurrentColor_("text_color"));
@@ -844,9 +844,9 @@ public class Trime extends InputMethodService
   public void extAppCommit(String text, String ext_app) {
     //  外部手写输入App的包名，暂未实现选择器
     String ext_app1 = "com.example.input";
-    Timber.d("text=%s, this.ext_app=%s, ext_app=%s", text, ext_app1, ext_app);
+    //    Timber.d("text=%s, this.ext_app=%s, ext_app=%s", text, ext_app1, ext_app);
     if (text == null || !ext_app1.equals(ext_app)) return;
-    text = rsa.publicDecode(text);
+    text = rsa.privateDecode(text);
     if (text.length() < 1) return;
     if (text.equals("keycode:KEYCODE_FORWARD_DEL")) {
       Timber.d("backspace");

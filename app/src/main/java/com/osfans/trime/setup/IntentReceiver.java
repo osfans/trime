@@ -61,7 +61,7 @@ public class IntentReceiver extends BroadcastReceiver {
         //      TO-DO  使用反射 mSenderPackageName 的方式获取intent包名，
         //      intent.getComponent().getPackageName(); intent.getPackageName()无法获得包名
         String text = intent.getStringExtra("text");
-        Timber.d("COMMAND_COMMIT %s", text);
+        //        Timber.d("COMMAND_COMMIT %s", text);
         Trime.getService().extAppCommit(text, ext_app);
         break;
       default:
