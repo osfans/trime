@@ -43,6 +43,7 @@ public class ClipboardBean extends SimpleKeyBean {
     this.html = "";
   }
 
+  @SuppressWarnings("unused")
   public ClipboardBean(String text, String html) {
     this.text = text;
     this.time = System.currentTimeMillis();
@@ -50,6 +51,7 @@ public class ClipboardBean extends SimpleKeyBean {
     this.html = html;
   }
 
+  @SuppressWarnings("unused")
   public ClipboardBean(String text, String html, int type, long time) {
     this.text = text;
     this.time = time;

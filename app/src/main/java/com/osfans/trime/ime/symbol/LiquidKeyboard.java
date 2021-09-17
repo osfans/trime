@@ -220,7 +220,7 @@ public class LiquidKeyboard {
     // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
     keyboardView.setSelected(true);
 
-    mClipboardAdapter.setOnItemClickLitener(
+    mClipboardAdapter.setOnItemClickListener(
         (view, position) -> {
           InputConnection ic = Trime.getService().getCurrentInputConnection();
           if (ic != null) {
