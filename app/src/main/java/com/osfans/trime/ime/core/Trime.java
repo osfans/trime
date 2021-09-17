@@ -427,6 +427,9 @@ public class Trime extends InputMethodService
       rsa = new Rsa();
       intent.putExtra("key", rsa.getPublicKey());
       intent.putExtra("height", mainKeyboard.getHeight());
+      if (mCandidateContainer.getHeight() > 0)
+        intent.putExtra("candidate_view_height", mCandidateContainer.getHeight());
+      else intent.putExtra("candidate_view_height", mConfig.getPixel("candidate_view_height"));
       intent.putExtra("back_color", mConfig.getCurrentColor_("back_color"));
       intent.putExtra("text_color", mConfig.getCurrentColor_("text_color"));
       intent.putExtra("candidate_text_color", mConfig.getCurrentColor_("candidate_text_color"));

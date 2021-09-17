@@ -551,7 +551,7 @@ public class Config {
   public Drawable getDrawable(@NonNull Map<?, ?> m, String k) {
     if (m.containsKey(k)) {
       final Object o = m.get(k);
-      Timber.d("getColorDrawable()" + k + " " + o);
+      // Timber.d("getColorDrawable()" + k + " " + o);
       return drawableObject(o);
     }
     return null;
