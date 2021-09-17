@@ -1,5 +1,7 @@
 package com.osfans.trime.ime.symbol;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,7 +13,8 @@ import java.util.List;
 
 public class SimpleKeyDao {
 
-  public static List<SimpleKeyBean> SimpleKeyboard(String string) {
+  @NonNull
+  public static List<SimpleKeyBean> SimpleKeyboard(@NonNull String string) {
     String[] strings = string.split("\n+");
     List<SimpleKeyBean> list = new ArrayList<>();
     for (String str : strings) {
@@ -22,7 +25,8 @@ public class SimpleKeyDao {
     return list;
   }
 
-  public static List<SimpleKeyBean> Single(String string) {
+  @NonNull
+  public static List<SimpleKeyBean> Single(@NonNull String string) {
     List<SimpleKeyBean> list = new ArrayList<>();
 
     char h = 0;
@@ -37,6 +41,7 @@ public class SimpleKeyDao {
     return list;
   }
 
+  @NonNull
   public static List<SimpleKeyBean> getSymbolKeyHistory(String path) {
     List<SimpleKeyBean> list = new ArrayList<>();
 
@@ -66,7 +71,7 @@ public class SimpleKeyDao {
     return list;
   }
 
-  public static void saveSymbolKeyHistory(String path, List<SimpleKeyBean> list) {
+  public static void saveSymbolKeyHistory(String path, @NonNull List<SimpleKeyBean> list) {
     ObjectOutputStream fos = null;
     List<String> text_list = new ArrayList<>();
     List<SimpleKeyBean> cache = new ArrayList<>();

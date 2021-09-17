@@ -180,7 +180,7 @@ public class LiquidKeyboard {
     keyboardView.setSelected(true);
 
     // 列表适配器的点击监听事件
-    simpleAdapter.setOnItemClickLitener(
+    simpleAdapter.setOnItemClickListener(
         (view, position) -> {
           InputConnection ic = Trime.getService().getCurrentInputConnection();
           if (ic != null) {
