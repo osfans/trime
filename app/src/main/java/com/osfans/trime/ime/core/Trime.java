@@ -56,9 +56,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
@@ -68,11 +70,11 @@ import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.enums.InlineModeType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
-import com.osfans.trime.ime.keyboard.KeyboardSwitch;
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
-import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
 import com.osfans.trime.ime.symbol.TabView;
 import com.osfans.trime.ime.text.Candidate;
@@ -87,9 +89,11 @@ import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.LocaleUtils;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
+
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */
@@ -104,7 +108,7 @@ public class Trime extends InputMethodService
   }
 
   private KeyboardView mKeyboardView; // 軟鍵盤
-  private KeyboardSwitch mKeyboardSwitch;
+  private KeyboardSwitcher keyboardSwitcher;
   private Config mConfig; // 配置
   @Nullable private InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private Candidate mCandidate; // 候選
@@ -326,7 +330,7 @@ public class Trime extends InputMethodService
     mConfig = Config.get(this);
     mNeedUpdateRimeOption = true;
     loadConfig();
-    mKeyboardSwitch = new KeyboardSwitch(this);
+    keyboardSwitcher = new KeyboardSwitcher();
 
     @Nullable String s;
     s = mConfig.getString("locale");
@@ -386,10 +390,10 @@ public class Trime extends InputMethodService
         if (option.startsWith("_keyboard_")
             && option.length() > 10
             && value
-            && (mKeyboardSwitch != null)) {
+            && (keyboardSwitcher != null)) {
           final String keyboard = option.substring(10);
-          mKeyboardSwitch.setKeyboard(keyboard);
-          mTempAsciiMode = mKeyboardSwitch.getAsciiMode();
+          keyboardSwitcher.switchToKeyboard(keyboard);
+          mTempAsciiMode = keyboardSwitcher.getAsciiMode();
           bindKeyboardToInputView();
         } else if (option.startsWith("_key_") && option.length() > 5 && value) {
           boolean bNeedUpdate = mNeedUpdateRimeOption;
@@ -508,7 +512,7 @@ public class Trime extends InputMethodService
     mConfig.reset();
     loadConfig();
     mConfig.initCurrentColors();
-    if (mKeyboardSwitch != null) mKeyboardSwitch.reset(this);
+    if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
     resetCandidate();
     hideComposition();
     resetKeyboard();
@@ -705,10 +709,10 @@ public class Trime extends InputMethodService
     Rime.get(this);
     if (reset_ascii_mode) mAsciiMode = false;
 
-    mKeyboardSwitch.init(getMaxWidth()); // 橫豎屏切換時重置鍵盤
+    keyboardSwitcher.resize(getMaxWidth()); // 橫豎屏切換時重置鍵盤
 
     // Select a keyboard based on the input type of the editing field.
-    mKeyboardSwitch.setKeyboard(keyboard);
+    keyboardSwitcher.switchToKeyboard(keyboard);
     updateAsciiMode();
     canCompose = canCompose && !Rime.isEmpty();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); // 實體鍵盤進入文本框時顯示候選欄
@@ -745,7 +749,7 @@ public class Trime extends InputMethodService
   private void bindKeyboardToInputView() {
     if (mKeyboardView != null) {
       // Bind the selected keyboard to the input view.
-      Keyboard sk = mKeyboardSwitch.getCurrentKeyboard();
+      Keyboard sk = keyboardSwitcher.getCurrentKeyboard();
       mKeyboardView.setKeyboard(sk);
       updateCursorCapsToInputView();
     }
@@ -1017,9 +1021,9 @@ public class Trime extends InputMethodService
         Rime.toggleOption(event.getToggle());
         commitText();
       } else if (code == KeyEvent.KEYCODE_EISU) { // 切換鍵盤
-        mKeyboardSwitch.setKeyboard(event.getSelect());
+        keyboardSwitcher.switchToKeyboard(event.getSelect());
         // 根據鍵盤設定中英文狀態，不能放在 Rime.onMessage 中做
-        mTempAsciiMode = mKeyboardSwitch.getAsciiMode(); // 切換到西文鍵盤時不保存狀態
+        mTempAsciiMode = keyboardSwitcher.getAsciiMode(); // 切換到西文鍵盤時不保存狀態
         updateAsciiMode();
         bindKeyboardToInputView();
         updateComposing();
