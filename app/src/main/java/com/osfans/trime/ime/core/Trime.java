@@ -115,7 +115,7 @@ public class Trime extends InputMethodService
   private Composition mComposition; // 編碼
   private CompositionContainerBinding compositionContainerBinding;
   private ScrollView mCandidateContainer;
-  private View mainKeyboard, symbleKeyboard;
+  private View mainKeyboard, symbolKeyboard;
   private TabView tabView;
   private InputRootBinding inputRootBinding;
   private PopupWindow mFloatingWindow;
@@ -417,12 +417,12 @@ public class Trime extends InputMethodService
   }
 
   public void selectLiquidKeyboard(int tabIndex) {
-    if (symbleKeyboard != null) {
+    if (symbolKeyboard != null) {
       if (tabIndex >= 0) {
         LinearLayout.LayoutParams param =
-            (LinearLayout.LayoutParams) symbleKeyboard.getLayoutParams();
+            (LinearLayout.LayoutParams) symbolKeyboard.getLayoutParams();
         param.height = mainKeyboard.getHeight();
-        symbleKeyboard.setVisibility(View.VISIBLE);
+        symbolKeyboard.setVisibility(View.VISIBLE);
 
         liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
         liquidKeyboard.calcPadding(mainKeyboard.getWidth());
@@ -430,7 +430,7 @@ public class Trime extends InputMethodService
 
         tabView.updateCandidateWidth();
         inputRootBinding.scroll2.setBackground(mCandidateContainer.getBackground());
-      } else symbleKeyboard.setVisibility(View.GONE);
+      } else symbolKeyboard.setVisibility(View.GONE);
     }
     if (mainKeyboard != null) mainKeyboard.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
@@ -650,7 +650,7 @@ public class Trime extends InputMethodService
 
     liquidKeyboard.setView(inputRootBinding.liquidKeyboard);
     mainKeyboard = inputRootBinding.mainKeyboard;
-    symbleKeyboard = inputRootBinding.symbolKeyboard;
+    symbolKeyboard = inputRootBinding.symbolKeyboard;
     tabView = inputRootBinding.tabView;
     loadBackground();
 
@@ -784,7 +784,6 @@ public class Trime extends InputMethodService
   public void commitText(CharSequence text, boolean isRime) {
     if (text == null) return;
     if (inputFeedbackManager != null) inputFeedbackManager.textCommitSpeak(text);
-    // mEffect.speakCommit(text);
     final @Nullable InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
       ic.commitText(text, 1);
