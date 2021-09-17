@@ -72,6 +72,7 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitch;
 import com.osfans.trime.ime.keyboard.KeyboardView;
+import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
 import com.osfans.trime.ime.symbol.TabView;
 import com.osfans.trime.ime.text.Candidate;
@@ -105,7 +106,7 @@ public class Trime extends InputMethodService
   private KeyboardView mKeyboardView; // 軟鍵盤
   private KeyboardSwitch mKeyboardSwitch;
   private Config mConfig; // 配置
-  @Nullable private TrimeKeyEffects effectManager = null; // 效果管理器
+  @Nullable private InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private Candidate mCandidate; // 候選
   private Composition mComposition; // 編碼
   private CompositionContainerBinding compositionContainerBinding;
@@ -318,7 +319,7 @@ public class Trime extends InputMethodService
     super.onCreate();
     self = this;
     imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    effectManager = new TrimeKeyEffects(this);
+    inputFeedbackManager = new InputFeedbackManager(this);
     mIntentReceiver = new IntentReceiver();
     mIntentReceiver.registerReceiver(this);
 
@@ -365,7 +366,7 @@ public class Trime extends InputMethodService
     switch (option) {
       case "ascii_mode":
         if (!mTempAsciiMode) mAsciiMode = value; // 切換中西文時保存狀態
-        if (effectManager != null) effectManager.setTtsLanguage(locales[value ? 1 : 0]);
+        if (inputFeedbackManager != null) inputFeedbackManager.setTtsLanguage(locales[value ? 1 : 0]);
         break;
       case "_hide_comment":
         setShowComment(!value);
@@ -526,8 +527,8 @@ public class Trime extends InputMethodService
   public void onDestroy() {
     if (mIntentReceiver != null) mIntentReceiver.unregisterReceiver(this);
     mIntentReceiver = null;
-    if (effectManager != null) effectManager.destroy();
-    effectManager = null;
+    if (inputFeedbackManager != null) inputFeedbackManager.destroy();
+    inputFeedbackManager = null;
     inputRootBinding = null;
     imeManager = null;
     self = null;
@@ -778,7 +779,7 @@ public class Trime extends InputMethodService
    */
   public void commitText(CharSequence text, boolean isRime) {
     if (text == null) return;
-    if (effectManager != null) effectManager.textCommitSpeak(text);
+    if (inputFeedbackManager != null) inputFeedbackManager.textCommitSpeak(text);
     // mEffect.speakCommit(text);
     final @Nullable InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
@@ -806,11 +807,11 @@ public class Trime extends InputMethodService
   }
 
   public void keyPressVibrate() {
-    if (effectManager != null) effectManager.keyPressVibrate();
+    if (inputFeedbackManager != null) inputFeedbackManager.keyPressVibrate();
   }
 
   public void keyPressSound() {
-    if (effectManager != null) effectManager.keyPressSound(0);
+    if (inputFeedbackManager != null) inputFeedbackManager.keyPressSound(0);
   }
 
   /**
@@ -1178,7 +1179,7 @@ public class Trime extends InputMethodService
   @Override
   public void onText(CharSequence text) { // 軟鍵盤
     Timber.i("onText = %s", text);
-    if (effectManager != null) effectManager.keyPressSpeak(text);
+    if (inputFeedbackManager != null) inputFeedbackManager.keyPressSpeak(text);
 
     // Commit current composition before simulate key sequence
     if (!Rime.isValidText(text) && isComposing()) {
@@ -1207,10 +1208,10 @@ public class Trime extends InputMethodService
 
   @Override
   public void onPress(int keyCode) {
-    if (effectManager != null) {
-      effectManager.keyPressVibrate();
-      effectManager.keyPressSound(keyCode);
-      effectManager.keyPressSpeak(keyCode);
+    if (inputFeedbackManager != null) {
+      inputFeedbackManager.keyPressVibrate();
+      inputFeedbackManager.keyPressSound(keyCode);
+      inputFeedbackManager.keyPressSpeak(keyCode);
     }
   }
 

@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.core
+package com.osfans.trime.ime.keyboard
 
 import android.content.Context
 import android.media.AudioManager
@@ -10,13 +10,14 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import com.osfans.trime.databinding.InputRootBinding
+import com.osfans.trime.ime.core.Preferences
 import java.util.Locale
 import kotlin.math.ln
 
 /**
  * Manage the key press effects, such as vibration, sound, speaking and so on.
  */
-class TrimeKeyEffects(
+class InputFeedbackManager(
     context: Context
 ) {
     private val prefs: Preferences = Preferences.defaultInstance()
