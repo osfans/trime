@@ -130,10 +130,6 @@ public class Config {
     getPrefs().getOther().setClipboardOutputRules(s);
   }
 
-  public String getFullscreenMode() {
-    return getPrefs().getKeyboard().getFullscreenMode();
-  }
-
   public String getTheme() {
     return themeName;
   }

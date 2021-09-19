@@ -3,9 +3,7 @@ package com.osfans.trime.clipboard;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import androidx.annotation.NonNull;
-
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.util.ArrayList;
@@ -38,7 +36,7 @@ public class ClipboardDao {
     db.close();
   }
 
-  /** 删除文字相同的剪贴板记录，插入新记录 **/
+  /** 删除文字相同的剪贴板记录，插入新记录 * */
   public void add(@NonNull ClipboardBean clipboardBean) {
     helper = new ClipboardSqlHelper(Trime.getService(), "clipboard.db", null, 1);
     SQLiteDatabase db = helper.getWritableDatabase();

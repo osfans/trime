@@ -136,9 +136,9 @@
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
     <string-array name="keyboard__fullscreen_mode_entries">
-        <item>auto</item>
-        <item>always</item>
-        <item>never</item>
+        <item>auto_show</item>
+        <item>always_show</item>
+        <item>never_show</item>
     </string-array>
     <string name="speech__error_audio">Error on recording</string>
     <string name="speech__error_client">Error on client</string>

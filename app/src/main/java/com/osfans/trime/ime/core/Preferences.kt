@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
 import com.osfans.trime.ime.enums.InlineModeType
+import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import java.lang.ref.WeakReference
 
 /**
@@ -185,8 +186,8 @@ class Preferences(
         var inlinePreedit: InlineModeType
             get() = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
             set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
-        var fullscreenMode: String
-            get() = prefs.getPref(FULLSCREEN_MODE, "auto")
+        var fullscreenMode: LandscapeInputUIMode
+            get() = LandscapeInputUIMode.fromString(prefs.getPref(FULLSCREEN_MODE, "auto_show"))
             set(v) = prefs.setPref(FULLSCREEN_MODE, v)
         var softCursorEnabled: Boolean = false
             get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)

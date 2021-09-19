@@ -145,7 +145,7 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
   }
 
-  /** 添加 OnItemClickListener 回调 **/
+  /** 添加 OnItemClickListener 回调 * */
   public interface OnItemClickListener {
     void onItemClick(View view, int position);
   }

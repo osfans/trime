@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.symbol;
 
 import androidx.annotation.NonNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
