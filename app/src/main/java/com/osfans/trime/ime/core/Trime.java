@@ -72,6 +72,7 @@ import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
+import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.ime.symbol.TabView;
 import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
@@ -383,7 +384,7 @@ public class Trime extends InputMethodService
         setCandidatesViewShown(canCompose && !value);
         break;
       case "_liquid_keyboard":
-        selectLiquidKeyboard(value ? 0 : -1);
+        selectLiquidKeyboard(0);
         break;
       case "_hide_key_hint":
         if (mainKeyboardView != null) mainKeyboardView.setShowHint(!value);
@@ -403,8 +404,6 @@ public class Trime extends InputMethodService
           final String key = option.substring(5);
           onEvent(new Event(key));
           if (bNeedUpdate) mNeedUpdateRimeOption = true;
-        } else if (option.matches("_liquid_keyboard_\\d+")) {
-          selectLiquidKeyboard(Integer.parseInt(option.replace("_liquid_keyboard_", "")));
         } else if (option.startsWith("_one_hand_mode")) {
           char c = option.charAt(option.length() - 1);
           if (c == '1' && value) oneHandMode = 1;
@@ -443,6 +442,12 @@ public class Trime extends InputMethodService
     }
     if (mainInputView != null)
       mainInputView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
+  }
+
+  // 按键需要通过tab name来打开liquidKeyboard的指定tab
+  public void selectLiquidKeyboard(String name) {
+    if (name.matches("\\d+")) selectLiquidKeyboard(Integer.parseInt(name));
+    else selectLiquidKeyboard(TabManager.getTagIndex(name));
   }
 
   public void invalidate() {
@@ -1038,6 +1043,8 @@ public class Trime extends InputMethodService
           }
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { // 命令直通車
+
+        final String command = event.getCommand();
         final String arg =
             String.format(
                 event.getOption(),
@@ -1045,10 +1052,14 @@ public class Trime extends InputMethodService
                 getActiveText(2),
                 getActiveText(3),
                 getActiveText(4));
-        s = (String) ShortcutUtils.INSTANCE.call(this, event.getCommand(), arg);
-        if (s != null) {
-          commitText(s);
-          updateComposing();
+        if (command.equals("liquid_keyboard")) {
+          selectLiquidKeyboard(arg);
+        } else {
+          s = (String) ShortcutUtils.INSTANCE.call(this, command, arg);
+          if (s != null) {
+            commitText(s);
+            updateComposing();
+          }
         }
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { // 語音輸入
         new Speech(this).startListening();

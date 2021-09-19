@@ -29,7 +29,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import com.osfans.trime.Rime;
+import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
 import timber.log.Timber;
@@ -256,7 +256,7 @@ public class TabView extends View {
           if (tag.type == SymbolKeyboardType.NO_KEY) {
             switch (tag.command) {
               case EXIT:
-                Rime.toggleOption("_liquid_keyboard");
+                Trime.getService().selectLiquidKeyboard(-1);
                 break;
 
                 // TODO liquidKeyboard中除返回按钮外，其他按键均未实装
@@ -269,7 +269,7 @@ public class TabView extends View {
           } else if (System.currentTimeMillis() - time0 < 500) {
             highlightIndex = i;
             invalidate();
-            Rime.toggleOption("_liquid_keyboard_" + i);
+            Trime.getService().selectLiquidKeyboard(i);
           }
           Timber.d("index=" + i + " length=" + candidates.length);
         }

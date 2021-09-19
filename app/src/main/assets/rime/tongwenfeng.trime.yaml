@@ -1001,8 +1001,8 @@ preset_keyboards:
       - {click: Keyboard_bqrw, long_click: Theme_settings, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
       - {click: ',', label: '，', long_click: '<>{Left}', key_back_color: bh4, key_text_color: th4}
       - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
-      - {click: '.', label: '。', long_click: Keyboard_kao, key_back_color: bh4, key_text_color: th4}
-      - {click: space_R2, long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
+      - {click: '.', label: '。', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
+      - {click: handwriting1, long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
       - {click: Return, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
 
   letter:
@@ -3886,7 +3886,7 @@ preset_keys:
   cut: {label: 剪切, functional: false, send: Control+x}
   copy: {label: 复制, functional: false, send: Control+c}
   paste: {label: 粘贴, functional: false, send: Control+v}
-  paste_clip: {label: 剪贴板, send: function, command: clipboard}
+  paste_clip: {label: 粘贴, send: function, command: clipboard}
   paste_text: {label: 貼上文本, send: Control+Shift+Alt+v} #>=Android 6.0
   share_text: {label: 分享文本, send: Control+Alt+s} #>=Android 6.0
   redo: {label: 重做, functional: false, send: Control+y} #>=Android 6.0
@@ -3910,7 +3910,10 @@ preset_keys:
   Henkan: {toggle: simplification, send: Mode_switch, states: [ 汉字, 汉字 ]}
   Charset_switch: {toggle: extended_charset, send: Mode_switch, states: [ 常用, 增广 ]}
   Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
-  liquid_keyboard_switch: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 普通 ] }
+  liquid_keyboard_switch: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 更多 ] }
+  liquid_keyboard_clipboard: {label: 剪贴板, send: function, command: liquid_keyboard, option: "剪贴"}
+  handwriting: {toggle: _handwriting, send: Mode_switch, states: [ 手写, 手写 ] }
+  handwriting1: {toggle: _handwriting, send: Mode_switch, states: [ 写, 写 ] }
   # trime设置
   IME_switch: {label: 🌐, send: LANGUAGE_SWITCH} #彈出對話框選擇輸入法
   IME_last: {label: 上一输入法, send: LANGUAGE_SWITCH, select: .last} #直接切換到上一輸入法

@@ -16,6 +16,7 @@ import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.ime.core.Trime
 import java.text.FieldPosition
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,6 +32,7 @@ object ShortcutUtils {
             "clipboard" -> return pasteFromClipboard(context)
             "date" -> return getDate(option)
             "run" -> startIntent(option)
+            "liquid_keyboard" -> Trime.getService().selectLiquidKeyboard(option)
             else -> startIntent(command, option)
         }
         return null

@@ -930,7 +930,7 @@ preset_keys:
   Keyboard_default: {label: 返回, send: Eisu_toggle, select: .default}
   Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
   Schema_switch: {label: 下一方案, send: Control+Shift+1}
-  liquid_keyboard_switch: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 普通 ] }
+  liquid_keyboard_switch: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 更多 ] }
   one_hand_switch_1: {toggle: _one_hand_mode_1, send: Mode_switch, states: [ 左手, 普通 ]}
   one_hand_switch_2: {toggle: _one_hand_mode_2, send: Mode_switch, states: [ 右手, 普通 ]}
   one_hand_switch_3: {toggle: _one_hand_mode_3, send: Mode_switch, states: [ 左手, 右手 ]}
