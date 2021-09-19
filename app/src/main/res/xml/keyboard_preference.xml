@@ -107,10 +107,10 @@
             android:key="keyboard__key_repeat_interval"
             app:iconSpaceReserved="false"
             android:title="@string/keyboard__key_repeat_interval_title"
-            app:min="1"
-            app:max="9"
+            app:min="10"
+            app:max="100"
             app:seekBarIncrement="10"
-            android:defaultValue="4"
+            android:defaultValue="40"
             app:unit="@string/unit__time_ms"/>
     </PreferenceCategory>
 
