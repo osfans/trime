@@ -123,6 +123,14 @@ public class TabView extends View {
     }
   }
 
+  public int getHightlightLeft() {
+    return candidateRect[highlightIndex].left;
+  }
+
+  public int getHightlightRight() {
+    return candidateRect[highlightIndex].right;
+  }
+
   private Typeface getFont(int codepoint, Typeface font) {
     if (tfHanB != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint)) return tfHanB;
     if (tfLatin != Typeface.DEFAULT && codepoint < 0x2e80) return tfLatin;

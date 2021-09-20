@@ -114,7 +114,7 @@ public class Trime extends InputMethodService
   private Candidate mCandidate; // 候選
   private Composition mComposition; // 編碼
   private CompositionRootBinding compositionRootBinding = null;
-  private ScrollView mCandidateRoot;
+  private ScrollView mCandidateRoot, mTabRoot;
   private TabView tabView;
   private InputRootBinding inputRootBinding = null;
   private AlertDialog mOptionsDialog; // 對話框
@@ -436,7 +436,8 @@ public class Trime extends InputMethodService
 
         tabView.updateCandidateWidth();
         if (inputRootBinding != null) {
-          inputRootBinding.symbol.symbolInput.setBackground(mCandidateRoot.getBackground());
+          mTabRoot.setBackground(mCandidateRoot.getBackground());
+          mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
         }
       } else symbolInputView.setVisibility(View.GONE);
     }
@@ -651,6 +652,7 @@ public class Trime extends InputMethodService
 
     // 初始化候选栏
     mCandidateRoot = inputRootBinding.main.candidateView.getRoot();
+    mTabRoot = inputRootBinding.symbol.tabView.getRoot();
     mCandidate = inputRootBinding.main.candidateView.candidates;
     mCandidate.setCandidateListener(this);
     mCandidateRoot.setPageStr(
@@ -1329,6 +1331,8 @@ public class Trime extends InputMethodService
       } else {
         mCandidate.setText(0);
       }
+      // 刷新候选词后，如果候选词超出屏幕宽度，滚动候选栏
+      mTabRoot.move(mCandidate.getHightlightLeft(), mCandidate.getHightlightRight());
     }
     if (mainKeyboardView != null) mainKeyboardView.invalidateComposingKeys();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); // 實體鍵盤打字時顯示候選欄
