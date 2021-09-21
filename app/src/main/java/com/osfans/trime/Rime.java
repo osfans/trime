@@ -19,9 +19,11 @@
 package com.osfans.trime;
 
 import android.content.Context;
+import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.DataUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -279,7 +281,7 @@ public class Rime {
   }
 
   public Rime(Context context, boolean full_check) {
-    init(context, full_check);
+    init(full_check);
     self = this;
   }
 
@@ -296,12 +298,15 @@ public class Rime {
     return get_status(mStatus);
   }
 
-  private static void init(Context context, boolean full_check) {
+  private static void init(boolean full_check) {
     mOnMessage = false;
 
+    final String sharedDataDir = DataUtils.getSharedDataDir();
+    final String userDataDir = DataUtils.getUserDataDir();
+
     // Initialize librime APIs
-    setup(Config.get(context).getSharedDataDir(), Config.get(context).getUserDataDir());
-    initialize(Config.get(context).getSharedDataDir(), Config.get(context).getUserDataDir());
+    setup(sharedDataDir, userDataDir);
+    initialize(sharedDataDir, userDataDir);
 
     check(full_check);
     set_notification_handler();
@@ -490,7 +495,7 @@ public class Rime {
 
   public static Rime get(Context context, boolean full_check) {
     if (self == null) {
-      if (full_check) Config.deployOpencc(context);
+      if (full_check) Config.deployOpencc();
       self = new Rime(context, full_check);
     }
     return self;
@@ -517,31 +522,26 @@ public class Rime {
   public static void onMessage(String message_type, String message_value) {
     mOnMessage = true;
     Timber.i("message: [%s] %s", message_type, message_value);
-    Trime trime = Trime.getService();
+    final Trime trime = Trime.getService();
     switch (message_type) {
       case "schema":
         initSchema();
-        if (trime != null) {
-          trime.initKeyboard();
-        }
+        trime.initKeyboard();
         break;
       case "option":
         getStatus();
         getContexts(); // 切換中英文、簡繁體時更新候選
-        if (trime != null) {
-          boolean value = !message_value.startsWith("!");
-          String option = message_value.substring(value ? 0 : 1);
-          trime.onOptionChanged(option, value);
-        }
+        final boolean value = !message_value.startsWith("!");
+        final String option = message_value.substring(value ? 0 : 1);
+        trime.onOptionChanged(option, value);
         break;
     }
     mOnMessage = false;
   }
 
   public static String openccConvert(String line, String name) {
-    if (name != null && name.length() > 0) {
-      Trime trime = Trime.getService();
-      File f = new File(Config.get(trime).getResDataDir("opencc"), name);
+    if (!TextUtils.isEmpty(name)) {
+      final File f = new File(DataUtils.getAssetsDir("opencc"), name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;

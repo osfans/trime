@@ -232,14 +232,22 @@ public class Keyboard {
       final int defaultKeyPressOffsetY = YamlUtils.INSTANCE.getInt(m, "key_press_offset_y", 0);
 
       final Key key = new Key(context, this, mk);
-      key.setKey_text_offset_x(YamlUtils.INSTANCE.getPixel(mk, "key_text_offset_x", defaultKeyTextOffsetX));
-      key.setKey_text_offset_y(YamlUtils.INSTANCE.getPixel(mk, "key_text_offset_y", defaultKeyTextOffsetY));
-      key.setKey_symbol_offset_x(YamlUtils.INSTANCE.getPixel(mk, "key_symbol_offset_x", defaultKeySymbolOffsetX));
-      key.setKey_symbol_offset_y(YamlUtils.INSTANCE.getPixel(mk, "key_symbol_offset_y", defaultKeySymbolOffsetY));
-      key.setKey_hint_offset_x(YamlUtils.INSTANCE.getPixel(mk, "key_hint_offset_x", defaultKeyHintOffsetX));
-      key.setKey_hint_offset_y(YamlUtils.INSTANCE.getPixel(mk, "key_hint_offset_y", defaultKeyHintOffsetY));
-      key.setKey_press_offset_x(YamlUtils.INSTANCE.getInt(mk, "key_press_offset_x", defaultKeyPressOffsetX));
-      key.setKey_press_offset_y(YamlUtils.INSTANCE.getInt(mk, "key_press_offset_y", defaultKeyPressOffsetY));
+      key.setKey_text_offset_x(
+          YamlUtils.INSTANCE.getPixel(mk, "key_text_offset_x", defaultKeyTextOffsetX));
+      key.setKey_text_offset_y(
+          YamlUtils.INSTANCE.getPixel(mk, "key_text_offset_y", defaultKeyTextOffsetY));
+      key.setKey_symbol_offset_x(
+          YamlUtils.INSTANCE.getPixel(mk, "key_symbol_offset_x", defaultKeySymbolOffsetX));
+      key.setKey_symbol_offset_y(
+          YamlUtils.INSTANCE.getPixel(mk, "key_symbol_offset_y", defaultKeySymbolOffsetY));
+      key.setKey_hint_offset_x(
+          YamlUtils.INSTANCE.getPixel(mk, "key_hint_offset_x", defaultKeyHintOffsetX));
+      key.setKey_hint_offset_y(
+          YamlUtils.INSTANCE.getPixel(mk, "key_hint_offset_y", defaultKeyHintOffsetY));
+      key.setKey_press_offset_x(
+          YamlUtils.INSTANCE.getInt(mk, "key_press_offset_x", defaultKeyPressOffsetX));
+      key.setKey_press_offset_y(
+          YamlUtils.INSTANCE.getInt(mk, "key_press_offset_y", defaultKeyPressOffsetY));
 
       key.setX(x);
       key.setY(y);

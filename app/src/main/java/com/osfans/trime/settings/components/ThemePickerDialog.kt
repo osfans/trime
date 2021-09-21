@@ -36,7 +36,7 @@ class ThemePickerDialog(
     constructor(context: Context) : this(context, null)
     init {
         val themeFile = config.theme + ".yaml"
-        themeKeys = Config.getThemeKeys(context, true)
+        themeKeys = Config.getThemeKeys(true)
         themeKeys.sort()
         checkedId = themeKeys.binarySearch(themeFile)
 
@@ -113,6 +113,6 @@ class ThemePickerDialog(
 
     private fun onPostExecute() {
         progressDialog.dismiss()
-        Trime.getService()?.initKeyboard() // 實時生效
+        Trime.getService().initKeyboard() // 實時生效
     }
 }
