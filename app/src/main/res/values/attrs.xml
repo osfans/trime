@@ -5,6 +5,8 @@
         <attr name="max" format="integer" />
         <attr name="seekBarIncrement" format="integer" />
         <attr name="android:defaultValue" format="integer" />
+        <attr name="systemDefaultValue" format="integer" />
+        <attr name="systemDefaultValueText" format="string" />
         <attr name="unit" format="string" />
     </declare-styleable>
 </resources>

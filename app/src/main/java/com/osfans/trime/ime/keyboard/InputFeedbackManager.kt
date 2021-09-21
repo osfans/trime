@@ -1,6 +1,7 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
+import android.inputmethodservice.InputMethodService
 import android.media.AudioManager
 import android.os.Build
 import android.os.VibrationEffect
@@ -8,8 +9,6 @@ import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
-import android.view.LayoutInflater
-import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.core.Preferences
 import java.util.Locale
 import kotlin.math.ln
@@ -18,10 +17,9 @@ import kotlin.math.ln
  * Manage the key press effects, such as vibration, sound, speaking and so on.
  */
 class InputFeedbackManager(
-    context: Context
+    private val ims: InputMethodService
 ) {
     private val prefs: Preferences = Preferences.defaultInstance()
-    private var inputRootBinding: InputRootBinding? = null
 
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
@@ -29,10 +27,9 @@ class InputFeedbackManager(
 
     init {
         try {
-            inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(context))
-            vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-            audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-            tts = TextToSpeech(context) { }
+            vibrator = ims.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            audioManager = ims.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            tts = TextToSpeech(ims) { }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -43,27 +40,19 @@ class InputFeedbackManager(
      */
     fun keyPressVibrate() {
         if (prefs.keyboard.vibrationEnabled) {
-            var vibrationDuration = prefs.keyboard.vibrationDuration.toLong()
+            val vibrationDuration = prefs.keyboard.vibrationDuration.toLong()
             var vibrationAmplitude = prefs.keyboard.vibrationAmplitude
 
-            val hapticsPerformed = if (vibrationDuration <0 && vibrationAmplitude < 0) {
-                inputRootBinding?.keyboard?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            val hapticsPerformed = if (vibrationDuration < 0) {
+                ims.window?.window?.decorView?.performHapticFeedback(
+                    HapticFeedbackConstants.KEYBOARD_TAP,
+                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
             } else {
                 false
             }
 
             if (hapticsPerformed == true) {
                 return
-            }
-
-            if (vibrationDuration == -1L) {
-                vibrationDuration = 36
-            }
-
-            if (vibrationAmplitude == -1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrationAmplitude = VibrationEffect.DEFAULT_AMPLITUDE
-            } else if (vibrationAmplitude == -1) {
-                vibrationAmplitude = 36
             }
 
             if (vibrationAmplitude > 0) {
@@ -152,13 +141,10 @@ class InputFeedbackManager(
     }
 
     fun destroy() {
-        inputRootBinding = null
         vibrator = null
         audioManager = null
         if (tts != null) {
-            tts?.let {
-                it.stop()
-            }.also { tts = null }
+            tts?.stop().also { tts = null }
         }
     }
 }
