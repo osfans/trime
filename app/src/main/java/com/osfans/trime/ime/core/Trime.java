@@ -20,7 +20,6 @@ package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -114,9 +113,6 @@ public class Trime extends InputMethodService
   private View mainKeyboard, symbolKeyboard;
   private TabView tabView;
   private InputRootBinding uiBinding;
-  private PopupWindow mFloatingWindow;
-  private final PopupTimer mFloatingWindowTimer = new PopupTimer();
-  private RectF mPopupRectF = new RectF();
   private AlertDialog mOptionsDialog; // 對話框
   @Nullable public InputMethodManager imeManager = null;
   @Nullable private InputFeedbackManager inputFeedbackManager = null; // 效果管理器
@@ -149,6 +145,83 @@ public class Trime extends InputMethodService
   // compile regex once
   private static final Pattern pattern = Pattern.compile("^(\\{[^{}]+\\}).*$");
   private static final Pattern patternText = Pattern.compile("^((\\{Escape\\})?[^{}]+).*$");
+
+  private PopupWindow mPopupWindow;
+  private RectF mPopupRectF = new RectF();
+  private final Handler mPopupHandler = new Handler(Looper.getMainLooper());
+  private final Runnable mPopupTimer =
+      new Runnable() {
+        @Override
+        public void run() {
+          if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
+          if (!mShowWindow) return;
+          int x, y;
+          final int[] mParentLocation = ViewUtils.getLocationOnScreen(mCandidateContainer);
+          final int xRight = mCandidateContainer.getWidth() - mPopupWindow.getWidth();
+          final int yRight = mParentLocation[1] - mPopupWindow.getHeight() - candSpacing;
+          if (isWinFixed() || !cursorUpdated) {
+            // setCandidatesViewShown(true);
+            switch (winPos) {
+              case TOP_RIGHT:
+                x = xRight;
+                y = candSpacing;
+                break;
+              case TOP_LEFT:
+                x = 0;
+                y = candSpacing;
+                break;
+              case BOTTOM_RIGHT:
+                x = xRight;
+                y = yRight;
+                break;
+              case DRAG:
+                x = winX;
+                y = winY;
+                break;
+              case FIXED:
+              case BOTTOM_LEFT:
+              default:
+                x = 0;
+                y = yRight;
+                break;
+            }
+          } else {
+            // setCandidatesViewShown(false);
+            if (winPos == WindowsPositionType.RIGHT || winPos == WindowsPositionType.RIGHT_UP) {
+              // 此处存在bug，暂未梳理原有算法的问题，单纯根据真机横屏显示长候选词超出屏幕进行了修复
+              // log： mCandidateContainer.getWidth()=1328  mFloatingWindow.getWidth()= 1874
+              // 导致x结果为负，超出屏幕。
+              x = Math.max(0, Math.min(xRight, (int) mPopupRectF.right));
+            } else {
+              x = Math.max(0, Math.min(xRight, (int) mPopupRectF.left));
+            }
+
+            if (winPos == WindowsPositionType.LEFT_UP || winPos == WindowsPositionType.RIGHT_UP) {
+              y = Math.max(0, Math.min(yRight, (int) mPopupRectF.top - mPopupWindow.getHeight() - candSpacing));
+            } else {
+              // candSpacing 爲負時，可覆蓋部分鍵盤
+              y = Math.max(0, Math.min(yRight, (int) mPopupRectF.bottom + candSpacing));
+            }
+          }
+          y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
+
+          if (x < realPopupMargin) x = realPopupMargin;
+
+          if (!mPopupWindow.isShowing()) {
+            mPopupWindow.showAtLocation(mCandidateContainer, Gravity.START | Gravity.TOP, x, y);
+          } else {
+            mPopupWindow.update(x, y, mPopupWindow.getWidth(), mPopupWindow.getHeight());
+          }
+        }
+      };
+
+  public Trime() {
+    try {
+      self = this;
+    } catch (Exception e) {
+      e.fillInStackTrace();
+    }
+  }
 
   @Synchronized
   @NonNull
@@ -189,7 +262,7 @@ public class Trime extends InputMethodService
     winX = offsetX;
     winY = offsetY;
     Timber.i("updateWindow: winX = %s, winY = %s", winX, winY);
-    mFloatingWindow.update(winX, winY, -1, -1, true);
+    mPopupWindow.update(winX, winY, -1, -1, true);
   }
 
   public void loadConfig() {
@@ -364,13 +437,30 @@ public class Trime extends InputMethodService
     mNeedUpdateRimeOption = true;
   }
 
-  private void hideComposition() {
-    if (movable.contentEquals("once")) winPos = mConfig.getWinPos();
-    mFloatingWindowTimer.cancelShowing();
+  private void hideCompositionView() {
+    if (movable.contentEquals("once")) {
+      winPos = mConfig.getWinPos();
+    }
+    if (mPopupWindow != null && mPopupWindow.isShowing()) {
+      mPopupWindow.dismiss();
+      mPopupHandler.removeCallbacks(mPopupTimer);
+    }
+  }
+
+  private void showCompositionView() {
+    if (TextUtils.isEmpty(Rime.getCompositionText())) {
+      hideCompositionView();
+      return;
+    }
+    compositionContainerBinding.compositionContainer.measure(
+        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    mPopupWindow.setWidth(compositionContainerBinding.compositionContainer.getMeasuredWidth());
+    mPopupWindow.setHeight(compositionContainerBinding.compositionContainer.getMeasuredHeight());
+    mPopupHandler.post(mPopupTimer);
   }
 
   private void loadBackground() {
-    int[] padding =
+    final int[] padding =
         mConfig.getKeyboardPadding(oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE);
     Timber.i("padding= %s %s %s", padding[0], padding[1], padding[2]);
     mKeyboardView.setPadding(padding[0], 0, padding[1], padding[2]);
@@ -382,9 +472,9 @@ public class Trime extends InputMethodService
             "border_color",
             "layout/round_corner",
             "layout/alpha");
-    if (d != null) mFloatingWindow.setBackgroundDrawable(d);
+    if (d != null) mPopupWindow.setBackgroundDrawable(d);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
-      mFloatingWindow.setElevation(mConfig.getPixel("layout/elevation"));
+      mPopupWindow.setElevation(mConfig.getPixel("layout/elevation"));
 
     final Drawable d2 =
         mConfig.getDrawable(
@@ -434,7 +524,7 @@ public class Trime extends InputMethodService
     mConfig.initCurrentColors();
     if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
     resetCandidate();
-    hideComposition();
+    hideCompositionView();
     resetKeyboard();
   }
 
@@ -489,7 +579,7 @@ public class Trime extends InputMethodService
       }
       cursorAnchorInfo.getMatrix().mapRect(mPopupRectF);
       if (mCandidateContainer != null) {
-        mFloatingWindowTimer.postShowFloatingWindow();
+        showCompositionView();
       }
     }
   }
@@ -546,15 +636,15 @@ public class Trime extends InputMethodService
     // 候选词悬浮窗的容器
 
     compositionContainerBinding = CompositionContainerBinding.inflate(LayoutInflater.from(this));
-    hideComposition();
-    mFloatingWindow = new PopupWindow(compositionContainerBinding.compositionContainer);
-    mFloatingWindow.setClippingEnabled(false);
-    mFloatingWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+    hideCompositionView();
+    mPopupWindow = new PopupWindow(compositionContainerBinding.compositionContainer);
+    mPopupWindow.setClippingEnabled(false);
+    mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
 
     mComposition = (Composition) compositionContainerBinding.compositionContainer.getChildAt(0);
 
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      mFloatingWindow.setWindowLayoutType(getDialogType());
+      mPopupWindow.setWindowLayoutType(getDialogType());
     }
 
     setShowComment(!Rime.getOption("_hide_comment"));
@@ -653,7 +743,7 @@ public class Trime extends InputMethodService
     mKeyboardView.closing();
     escape();
     try {
-      hideComposition();
+      hideCompositionView();
     } catch (Exception e) {
       Timber.e(e, "Failed to show the PopupWindow.");
     }
@@ -1205,7 +1295,7 @@ public class Trime extends InputMethodService
       if (mShowWindow) {
         final int start_num = mComposition.setWindow(minPopupSize, minPopupCheckSize);
         mCandidate.setText(start_num);
-        if (isWinFixed() || !cursorUpdated) mFloatingWindowTimer.postShowFloatingWindow();
+        if (isWinFixed() || !cursorUpdated) showCompositionView();
       } else {
         mCandidate.setText(0);
       }
@@ -1420,108 +1510,14 @@ public class Trime extends InputMethodService
             if (item == null) return;
             final String text = item.coerceToText(self).toString();
 
-            final String text2 = StringUtils.INSTANCE.replace(text, mConfig.getClipBoardCompare());
+            final String text2 = StringUtils.replace(text, mConfig.getClipBoardCompare());
             if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-            if (StringUtils.INSTANCE.mismatch(text, mConfig.getClipBoardOutput())) {
+            if (StringUtils.mismatch(text, mConfig.getClipBoardOutput())) {
               ClipBoardString = text2;
               liquidKeyboard.addClipboardData(text);
             }
           }
         });
-  }
-
-  @SuppressLint("HandlerLeak")
-  private class PopupTimer extends Handler implements Runnable {
-    public PopupTimer() {
-      super(Looper.getMainLooper());
-    }
-
-    void postShowFloatingWindow() {
-      if (TextUtils.isEmpty(Rime.getCompositionText())) {
-        hideComposition();
-        return;
-      }
-      compositionContainerBinding.compositionContainer.measure(
-          LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-      mFloatingWindow.setWidth(compositionContainerBinding.compositionContainer.getMeasuredWidth());
-      mFloatingWindow.setHeight(
-          compositionContainerBinding.compositionContainer.getMeasuredHeight());
-      post(this);
-    }
-
-    void cancelShowing() {
-      if (null != mFloatingWindow && mFloatingWindow.isShowing()) mFloatingWindow.dismiss();
-      removeCallbacks(this);
-    }
-
-    @Override
-    public void run() {
-      if (mCandidateContainer == null || mCandidateContainer.getWindowToken() == null) return;
-      if (!mShowWindow) return;
-      int x, y;
-      final int[] mParentLocation = ViewUtils.INSTANCE.getLocationOnScreen(mCandidateContainer);
-      if (isWinFixed() || !cursorUpdated) {
-        // setCandidatesViewShown(true);
-        switch (winPos) {
-          case TOP_RIGHT:
-            x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
-            y = candSpacing;
-            break;
-          case TOP_LEFT:
-            x = 0;
-            y = candSpacing;
-            break;
-          case BOTTOM_RIGHT:
-            x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
-            y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
-            break;
-          case DRAG:
-            x = winX;
-            y = winY;
-            break;
-          case FIXED:
-          case BOTTOM_LEFT:
-          default:
-            x = 0;
-            y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
-            break;
-        }
-      } else {
-        // setCandidatesViewShown(false);
-        x = (int) mPopupRectF.left;
-        if (winPos == WindowsPositionType.RIGHT || winPos == WindowsPositionType.RIGHT_UP) {
-          x = (int) mPopupRectF.right;
-        }
-        y = (int) mPopupRectF.bottom + candSpacing;
-        if (winPos == WindowsPositionType.LEFT_UP || winPos == WindowsPositionType.RIGHT_UP) {
-          y = (int) mPopupRectF.top - mFloatingWindow.getHeight() - candSpacing;
-        }
-      }
-      if (x < 0) x = 0;
-      if (x > mCandidateContainer.getWidth() - mFloatingWindow.getWidth()) {
-        //        此处存在bug，暂未梳理原有算法的问题，单纯根据真机横屏显示长候选词超出屏幕进行了修复
-        //        log： mCandidateContainer.getWidth()=1328  mFloatingWindow.getWidth()= 1874
-        // 导致x结果为负，超出屏幕。
-        x = mCandidateContainer.getWidth() - mFloatingWindow.getWidth();
-        if (x < 0) x = 0;
-      }
-      if (y < 0) y = 0;
-      if (y
-          > mParentLocation[1]
-              - mFloatingWindow.getHeight()
-              - candSpacing) { // candSpacing爲負時，可覆蓋部分鍵盤
-        y = mParentLocation[1] - mFloatingWindow.getHeight() - candSpacing;
-      }
-      y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
-
-      if (x < realPopupMargin) x = realPopupMargin;
-
-      if (!mFloatingWindow.isShowing()) {
-        mFloatingWindow.showAtLocation(mCandidateContainer, Gravity.START | Gravity.TOP, x, y);
-      } else {
-        mFloatingWindow.update(x, y, mFloatingWindow.getWidth(), mFloatingWindow.getHeight());
-      }
-    }
   }
 }
