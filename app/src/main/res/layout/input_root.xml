@@ -6,11 +6,17 @@
     android:orientation="horizontal"
     android:baselineAligned="false">
 
-    <LinearLayout
+    <include android:id="@+id/main" layout="@layout/main_input_layout" />
+
+    <include android:id="@+id/symbol" layout="@layout/symbol_input_layout" />
+
+    <!-- <LinearLayout
         android:id="@+id/main_keyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <include android:id="@+id/candidateView" layout="@layout/candidate_container" />
 
         <com.osfans.trime.ime.text.ScrollView
             android:id="@+id/scroll"
@@ -19,7 +25,7 @@
             android:fillViewport="true"
             android:scrollbars="none">
 
-            <LinearLayout
+             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -28,15 +34,13 @@
                     android:id="@+id/candidate"
                     android:layout_width="1000dp"
                     android:layout_height="120dp" />
-            </LinearLayout>
+             </LinearLayout>
         </com.osfans.trime.ime.text.ScrollView>
 
-            <com.osfans.trime.ime.keyboard.KeyboardView
-                android:id="@+id/keyboard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-
+        <com.osfans.trime.ime.keyboard.KeyboardView
+            android:id="@+id/keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
@@ -77,7 +81,5 @@
                 android:layout_height="match_parent"/>
 
         </LinearLayout>
-
-
-    </LinearLayout>
+    </LinearLayout> -->
 </LinearLayout>

@@ -6,8 +6,10 @@
     android:orientation="horizontal"
     android:baselineAligned="false">
 
+    <include android:id="@+id/main" layout="@layout/main_input_layout" />
 
-    <LinearLayout
+    <include android:id="@+id/symbol" layout="@layout/symbol_input_layout" />
+    <!-- <LinearLayout
         android:id="@+id/main_keyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,6 +80,6 @@
                 android:layout_height="match_parent"/>
 
         </LinearLayout>
-    </LinearLayout>
+    </LinearLayout> -->
 
 </LinearLayout>
