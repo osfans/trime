@@ -53,10 +53,11 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
+
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
@@ -103,30 +104,25 @@ public class Trime extends InputMethodService
     return Preferences.Companion.defaultInstance();
   }
 
+  /** 输入法配置 */
   @NonNull
   private Config getImeConfig() { return Config.get(this); }
 
-  @NonNull
-  private WindowsPositionType getWinPos() {
-    return WindowsPositionType.fromString(getImeConfig().getString("layout/position"));
-  }
-
-  private KeyboardView mainKeyboardView; // 軟鍵盤
-  private RecyclerView symbolKeyboardView; // 符号键盘
-  private KeyboardSwitcher keyboardSwitcher;
-  private Config mConfig; // 配置
+  private KeyboardView mainKeyboardView; // 主軟鍵盤
+  private KeyboardSwitcher keyboardSwitcher; // 键盘切换器
 
   private Candidate mCandidate; // 候選
   private Composition mComposition; // 編碼
-  private CompositionRootBinding compositionRootBinding;
+  private CompositionRootBinding compositionRootBinding = null;
   private ScrollView mCandidateRoot;
+  private View mainInputView, symbolInputView;
   private TabView tabView;
-  @Nullable private InputRootBinding inputRootBinding = null;
+  private InputRootBinding inputRootBinding = null;
   private AlertDialog mOptionsDialog; // 對話框
-  @Nullable public InputMethodManager imeManager = null;
-  @Nullable private InputFeedbackManager inputFeedbackManager = null; // 效果管理器
-  @Nullable private IntentReceiver mIntentReceiver = null;
-  
+  public InputMethodManager imeManager = null;
+  private InputFeedbackManager inputFeedbackManager = null; // 效果管理器
+  private IntentReceiver mIntentReceiver = null;
+
   private boolean canCompose;
   private boolean enterAsLineBreak;
   private boolean mShowWindow = true; // 顯示懸浮窗口
@@ -251,7 +247,7 @@ public class Trime extends InputMethodService
   @Override
   public void onWindowHidden() {
     if (getPrefs().getConf().getSyncBackgroundEnabled()) {
-      Message msg = new Message();
+      final Message msg = new Message();
       msg.obj = this;
       syncBackgroundHandler.sendMessageDelayed(msg, 5000); // 输入面板隐藏5秒后，开始后台同步
     }
@@ -265,7 +261,7 @@ public class Trime extends InputMethodService
             && winPos != WindowsPositionType.RIGHT_UP);
   }
 
-  public void updateWindow(int offsetX, int offsetY) {
+  public void updateWindow(final int offsetX, final int offsetY) {
     winPos = WindowsPositionType.DRAG;
     winX = offsetX;
     winY = offsetY;
@@ -274,16 +270,17 @@ public class Trime extends InputMethodService
   }
 
   public void loadConfig() {
+    final Config imeConfig = getImeConfig();
     inlinePreedit = getPrefs().getKeyboard().getInlinePreedit();
-    winPos = mConfig.getWinPos();
-    movable = mConfig.getString("layout/movable");
-    candSpacing = mConfig.getPixel("layout/spacing");
-    minPopupSize = mConfig.getInt("layout/min_length");
-    minPopupCheckSize = mConfig.getInt("layout/min_check");
-    realPopupMargin = mConfig.getPixel("layout/real_margin");
-    resetAsciiMode = mConfig.getBoolean("reset_ascii_mode");
-    autoCaps = mConfig.getString("auto_caps");
-    mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled() && mConfig.hasKey("window");
+    winPos = imeConfig.getWinPos();
+    movable = imeConfig.getString("layout/movable");
+    candSpacing = imeConfig.getPixel("layout/spacing");
+    minPopupSize = imeConfig.getInt("layout/min_length");
+    minPopupCheckSize = imeConfig.getInt("layout/min_check");
+    realPopupMargin = imeConfig.getPixel("layout/real_margin");
+    resetAsciiMode = imeConfig.getBoolean("reset_ascii_mode");
+    autoCaps = imeConfig.getString("auto_caps");
+    mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled() && imeConfig.hasKey("window");
     mNeedUpdateRimeOption = true;
   }
 
@@ -292,7 +289,7 @@ public class Trime extends InputMethodService
     try {
       if (mNeedUpdateRimeOption) {
         Rime.setOption("soft_cursor", getPrefs().getKeyboard().getSoftCursorEnabled()); // 軟光標
-        Rime.setOption("_horizontal", mConfig.getBoolean("horizontal")); // 水平模式
+        Rime.setOption("_horizontal", getImeConfig().getBoolean("horizontal")); // 水平模式
         mNeedUpdateRimeOption = false;
       }
     } catch (Exception e) {
@@ -311,24 +308,23 @@ public class Trime extends InputMethodService
       //  and lead to a crash loop
       try {
         Timber.i("onCreate");
-        self = this;
         imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputFeedbackManager = new InputFeedbackManager(this);
         mIntentReceiver = new IntentReceiver();
         mIntentReceiver.registerReceiver(this);
 
-        mConfig = Config.get(this);
+        final Config imeConfig = getImeConfig();
         mNeedUpdateRimeOption = true;
         loadConfig();
         keyboardSwitcher = new KeyboardSwitcher();
 
         @Nullable String s;
-        s = mConfig.getString("locale");
+        s = imeConfig.getString("locale");
         if (TextUtils.isEmpty(s)) s = "";
         locales[0] = LocaleUtils.INSTANCE.stringToLocale(s);
         if (locales[0].equals(new Locale(s))) locales[0] = Locale.getDefault();
 
-        s = mConfig.getString("latin_locale");
+        s = imeConfig.getString("latin_locale");
         if (TextUtils.isEmpty(s)) s = "en_US";
         locales[1] = LocaleUtils.INSTANCE.stringToLocale(s);
         if (locales[1].equals(new Locale(s))) locales[0] = Locale.ENGLISH;
@@ -347,10 +343,11 @@ public class Trime extends InputMethodService
         else if (ss.length == 2) locales[1] = new Locale(ss[0], ss[1]);
         else if (ss.length == 3) locales[1] = new Locale(ss[0], ss[1], ss[2]);
         else locales[0] = Locale.ENGLISH; **/
+
         // Use the following line to debug IME service.
         // android.os.Debug.waitForDebugger();
 
-        liquidKeyboard = new LiquidKeyboard(this, mConfig.getClipboardMaxSize());
+        liquidKeyboard = new LiquidKeyboard(this, imeConfig.getClipboardMaxSize());
         clipBoardMonitor();
       } catch (Exception e) {
         super.onCreate();
@@ -363,7 +360,7 @@ public class Trime extends InputMethodService
     }
   }
 
-  public void onOptionChanged(@NonNull String option, boolean value) {
+  public void onOptionChanged(@NonNull final String option, final boolean value) {
     switch (option) {
       case "ascii_mode":
         if (!mTempAsciiMode) mAsciiMode = value; // 切換中西文時保存狀態
@@ -414,41 +411,38 @@ public class Trime extends InputMethodService
     if (mainKeyboardView != null) mainKeyboardView.invalidateAllKeys();
   }
 
-  public void selectLiquidKeyboard(int tabIndex) {
-    if (symbolKeyboardView != null) {
+  public void selectLiquidKeyboard(final int tabIndex) {
+    if (symbolInputView != null) {
       if (tabIndex >= 0) {
-        LinearLayout.LayoutParams param =
-            (LinearLayout.LayoutParams) symbolKeyboardView.getLayoutParams();
-        param.height = mainKeyboardView.getHeight();
-        symbolKeyboardView.setVisibility(View.VISIBLE);
+        final LinearLayout.LayoutParams param =
+            (LinearLayout.LayoutParams) symbolInputView.getLayoutParams();
+        param.height = mainInputView.getHeight();
+        symbolInputView.setVisibility(View.VISIBLE);
 
-        final Configuration config = getResources().getConfiguration();
-        if (config != null) {
-          liquidKeyboard.setLand(config.orientation == Configuration.ORIENTATION_LANDSCAPE);
-        }
-        liquidKeyboard.calcPadding(mainKeyboardView.getWidth());
+        final int orientation = getResources().getConfiguration().orientation;
+        liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
+        liquidKeyboard.calcPadding(mainInputView.getWidth());
         liquidKeyboard.select(tabIndex);
 
         tabView.updateCandidateWidth();
         if (inputRootBinding != null) {
           inputRootBinding.symbol.symbolInput.setBackground(mCandidateRoot.getBackground());
         }
-      } else symbolKeyboardView.setVisibility(View.GONE);
+      } else symbolInputView.setVisibility(View.GONE);
     }
-    if (mainKeyboardView != null) mainKeyboardView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
+    if (mainInputView != null) mainInputView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
 
   public void invalidate() {
     Rime.get(this);
-    if (mConfig != null) mConfig.destroy();
-    mConfig = Config.get(this);
+    getImeConfig().destroy();
     reset();
     mNeedUpdateRimeOption = true;
   }
 
   private void hideCompositionView() {
     if (movable.contentEquals("once")) {
-      winPos = mConfig.getWinPos();
+      winPos = getImeConfig().getWinPos();
     }
     if (mPopupWindow != null && mPopupWindow.isShowing()) {
       mPopupWindow.dismiss();
@@ -469,14 +463,16 @@ public class Trime extends InputMethodService
   }
 
   private void loadBackground() {
-    final Configuration config = getResources().getConfiguration();
+    final Config imeConfig = getImeConfig();
+    final int orientation = getResources().getConfiguration().orientation;
     final int[] padding =
-        mConfig.getKeyboardPadding(oneHandMode, config.orientation == Configuration.ORIENTATION_LANDSCAPE);
+        imeConfig.getKeyboardPadding(
+                oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE);
     Timber.i("padding= %s %s %s", padding[0], padding[1], padding[2]);
     mainKeyboardView.setPadding(padding[0], 0, padding[1], padding[2]);
 
     final Drawable d =
-        mConfig.getDrawable(
+        imeConfig.getDrawable(
             "text_back_color",
             "layout/border",
             "border_color",
@@ -484,10 +480,10 @@ public class Trime extends InputMethodService
             "layout/alpha");
     if (d != null) mPopupWindow.setBackgroundDrawable(d);
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
-      mPopupWindow.setElevation(mConfig.getPixel("layout/elevation"));
+      mPopupWindow.setElevation(imeConfig.getPixel("layout/elevation"));
 
     final Drawable d2 =
-        mConfig.getDrawable(
+        imeConfig.getDrawable(
             "candidate_background",
             "candidate_border",
             "candidate_border_color",
@@ -496,17 +492,15 @@ public class Trime extends InputMethodService
 
     if (d2 != null) mCandidateRoot.setBackground(d2);
 
-    final Drawable d3 = mConfig.getDrawable_("root_background");
+    final Drawable d3 = imeConfig.getDrawable_("root_background");
     if (d3 != null) {
-      assert inputRootBinding != null;
       inputRootBinding.inputRoot.setBackground(d3);
     } else {
       // 避免因为键盘整体透明而造成的异常
-      assert inputRootBinding != null;
       inputRootBinding.inputRoot.setBackgroundColor(Color.WHITE);
     }
 
-    tabView.reset(self);
+    tabView.reset(this);
   }
 
   public void resetKeyboard() {
@@ -523,7 +517,7 @@ public class Trime extends InputMethodService
       mCandidateRoot.setVisibility(
           !Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset(this);
-      mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled() && mConfig.hasKey("window");
+      mShowWindow = getPrefs().getKeyboard().getFloatingWindowEnabled() && getImeConfig().hasKey("window");
       mComposition.setVisibility(mShowWindow ? View.VISIBLE : View.GONE);
       mComposition.reset(this);
     }
@@ -531,9 +525,9 @@ public class Trime extends InputMethodService
 
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
   private void reset() {
-    mConfig.reset();
+    getImeConfig().reset();
     loadConfig();
-    mConfig.initCurrentColors();
+    getImeConfig().initCurrentColors();
     if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
     resetCandidate();
     hideCompositionView();
@@ -560,8 +554,7 @@ public class Trime extends InputMethodService
     self = null;
     if (getPrefs().getOther().getDestroyOnQuit()) {
       Rime.destroy();
-      mConfig.destroy();
-      mConfig = null;
+      getImeConfig().destroy();
       System.exit(0); // 清理內存
     }
     super.onDestroy();
@@ -583,7 +576,7 @@ public class Trime extends InputMethodService
   @Override
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-      int i = cursorAnchorInfo.getComposingTextStart();
+      final int i = cursorAnchorInfo.getComposingTextStart();
       if ((winPos == WindowsPositionType.LEFT || winPos == WindowsPositionType.LEFT_UP) && i >= 0) {
         mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
       } else {
@@ -601,18 +594,15 @@ public class Trime extends InputMethodService
 
   @Override
   public void onUpdateSelection(
-      int oldSelStart,
-      int oldSelEnd,
-      int newSelStart,
-      int newSelEnd,
-      int candidatesStart,
-      int candidatesEnd) {
+      int oldSelStart, int oldSelEnd,
+      int newSelStart, int newSelEnd,
+      int candidatesStart, int candidatesEnd) {
     super.onUpdateSelection(
         oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
     if ((candidatesEnd != -1) && ((newSelStart != candidatesEnd) || (newSelEnd != candidatesEnd))) {
       // 移動光標時，更新候選區
       if ((newSelEnd < candidatesEnd) && (newSelEnd >= candidatesStart)) {
-        int n = newSelEnd - candidatesStart;
+        final int n = newSelEnd - candidatesStart;
         Rime.RimeSetCaretPos(n);
         updateComposing();
       }
@@ -641,12 +631,11 @@ public class Trime extends InputMethodService
 
     // 初始化候选栏
     mCandidateRoot = inputRootBinding.main.candidateView.getRoot();
-    mCandidateRoot.setPageStr(
-            () -> handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0),
-            () -> handleKey(KeyEvent.KEYCODE_PAGE_UP, 0));
-
     mCandidate = inputRootBinding.main.candidateView.candidates;
     mCandidate.setCandidateListener(this);
+    mCandidateRoot.setPageStr(
+        () -> handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0),
+        () -> handleKey(KeyEvent.KEYCODE_PAGE_UP, 0));
 
     // 候选词悬浮窗的容器
     compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
@@ -666,7 +655,8 @@ public class Trime extends InputMethodService
         !Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
 
     liquidKeyboard.setView(inputRootBinding.symbol.liquidKeyboardView);
-    symbolKeyboardView = inputRootBinding.symbol.liquidKeyboardView;
+    mainInputView = inputRootBinding.main.mainInput;
+    symbolInputView = inputRootBinding.symbol.symbolInput;
     tabView = inputRootBinding.symbol.tabView.tab;
     loadBackground();
 
@@ -873,7 +863,7 @@ public class Trime extends InputMethodService
             final ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
               int nextPosition =
-                  StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
+                  StringUtils.findNextSection(et.text, et.startOffset + et.selectionEnd);
               ic.setSelection(nextPosition, nextPosition);
               return true;
             }
@@ -881,12 +871,12 @@ public class Trime extends InputMethodService
           }
         case KeyEvent.KEYCODE_DPAD_LEFT:
           if (getPrefs().getOther().getSelectionSense()) {
-            ExtractedTextRequest etr = new ExtractedTextRequest();
+            final ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
               int prevSection =
-                  StringUtils.INSTANCE.findPrevSection(et.text, et.startOffset + et.selectionStart);
+                  StringUtils.findPrevSection(et.text, et.startOffset + et.selectionStart);
               ic.setSelection(prevSection, prevSection);
               return true;
             }
@@ -1116,32 +1106,33 @@ public class Trime extends InputMethodService
             | KeyEvent.META_META_MASK
             | KeyEvent.META_SYM_ON;
     ic.clearMetaKeyStates(states);
+    int newMask = mask;
     if (mainKeyboardView != null && mainKeyboardView.isShifted()) {
       if (keyCode == KeyEvent.KEYCODE_MOVE_HOME
           || keyCode == KeyEvent.KEYCODE_MOVE_END
           || keyCode == KeyEvent.KEYCODE_PAGE_UP
           || keyCode == KeyEvent.KEYCODE_PAGE_DOWN
           || (keyCode >= KeyEvent.KEYCODE_DPAD_UP && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT)) {
-        mask |= KeyEvent.META_SHIFT_ON;
+        newMask |= KeyEvent.META_SHIFT_ON;
       }
     }
 
-    if (Event.hasModifier(mask, KeyEvent.META_SHIFT_ON)) {
+    if (Event.hasModifier(newMask, KeyEvent.META_SHIFT_ON)) {
       sendKeyDown(
           ic, KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.META_SHIFT_ON | KeyEvent.META_SHIFT_LEFT_ON);
     }
-    if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
+    if (Event.hasModifier(newMask, KeyEvent.META_CTRL_ON)) {
       sendKeyDown(
           ic, KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON);
     }
-    if (Event.hasModifier(mask, KeyEvent.META_ALT_ON)) {
+    if (Event.hasModifier(newMask, KeyEvent.META_ALT_ON)) {
       sendKeyDown(ic, KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_ALT_ON | KeyEvent.META_ALT_LEFT_ON);
     }
 
     boolean sendKeyDownUp = true;
     if (mask == 0 && mAsciiMode) {
       // 使用ASCII键盘输入英文字符时，直接上屏，跳过复杂的调用，从表面上解决issue #301 知乎输入英语后输入法失去焦点的问题
-      String keyText = StringUtils.INSTANCE.toCharString(keyCode);
+     final String keyText = StringUtils.toCharString(keyCode);
       if (keyText.length() > 0) {
         ic.commitText(keyText, 1);
         sendKeyDownUp = false;
@@ -1282,7 +1273,7 @@ public class Trime extends InputMethodService
   public void updateComposing() {
     final @Nullable InputConnection ic = getCurrentInputConnection();
     if (inlinePreedit != InlineModeType.INLINE_NONE) { // 嵌入模式
-      String s = null;
+      String s = "";
       switch (inlinePreedit) {
         case INLINE_PREVIEW:
           s = Rime.getComposingText();
@@ -1294,7 +1285,6 @@ public class Trime extends InputMethodService
           s = Rime.RimeGetInput();
           break;
       }
-      if (s == null) s = "";
       if (ic != null) {
         @Nullable final CharSequence cs = ic.getSelectedText(0);
         if (cs == null || !TextUtils.isEmpty(s)) {
@@ -1306,8 +1296,8 @@ public class Trime extends InputMethodService
     if (ic != null && !isWinFixed()) cursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateRoot != null) {
       if (mShowWindow) {
-        final int start_num = mComposition.setWindow(minPopupSize, minPopupCheckSize);
-        mCandidate.setText(start_num);
+        final int startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize);
+        mCandidate.setText(startNum);
         if (isWinFixed() || !cursorUpdated) showCompositionView();
       } else {
         mCandidate.setText(0);
@@ -1438,7 +1428,7 @@ public class Trime extends InputMethodService
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       try {
         final Window window = getWindow().getWindow();
-        @ColorInt final Integer keyboardBackColor = mConfig.getCurrentColor_("back_color");
+        @ColorInt final Integer keyboardBackColor = getImeConfig().getCurrentColor_("back_color");
         if (keyboardBackColor != null) {
           BarUtils.setNavBarColor(window, keyboardBackColor);
         }
@@ -1454,17 +1444,18 @@ public class Trime extends InputMethodService
     if (config != null) {
       if (config.orientation != Configuration.ORIENTATION_LANDSCAPE) {
         return false;
-      }
-      switch (getPrefs().getKeyboard().getFullscreenMode()) {
-        case AUTO_SHOW:
-          EditorInfo ei = getCurrentInputEditorInfo();
-          if (ei != null && (ei.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0) {
+      } else {
+        switch (getPrefs().getKeyboard().getFullscreenMode()) {
+          case AUTO_SHOW:
+            final EditorInfo ei = getCurrentInputEditorInfo();
+            if (ei != null && (ei.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0) {
+              return false;
+            }
+          case ALWAYS_SHOW:
+            return true;
+          case NEVER_SHOW:
             return false;
-          }
-        case ALWAYS_SHOW:
-          return true;
-        case NEVER_SHOW:
-          return false;
+        }
       }
     }
     return false;
@@ -1480,31 +1471,27 @@ public class Trime extends InputMethodService
   private void updateSoftInputWindowLayoutParameters() {
     final Window w = getWindow().getWindow();
     if (w == null) return;
-    final LinearLayout inputRoot = inputRootBinding != null
-            ? inputRootBinding.inputRoot : null;
-    if (inputRoot != null) {
-      final int layoutHeight =
-          isFullscreenMode()
-              ? WindowManager.LayoutParams.WRAP_CONTENT
-              : WindowManager.LayoutParams.MATCH_PARENT;
-      final View inputArea = w.findViewById(android.R.id.inputArea);
-      // TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
-      if (isFullscreenMode()) {
-        Timber.i("isFullscreenMode");
-        /* In Fullscreen mode, when layout contains transparent color,
-         * the background under input area will disturb users' typing,
-         * so set the input area as light pink */
-        inputArea.setBackgroundColor(parseColor("#ff660000"));
-      } else {
-        Timber.i("NotFullscreenMode");
-        /* Otherwise, set it as light gray to avoid potential issue */
-        inputArea.setBackgroundColor(parseColor("#dddddddd"));
-      }
-
-      ViewUtils.INSTANCE.updateLayoutHeightOf(inputArea, layoutHeight);
-      ViewUtils.INSTANCE.updateLayoutGravityOf(inputArea, Gravity.BOTTOM);
-      ViewUtils.INSTANCE.updateLayoutHeightOf(inputRoot, layoutHeight);
+    final int layoutHeight =
+        isFullscreenMode()
+            ? WindowManager.LayoutParams.WRAP_CONTENT
+            : WindowManager.LayoutParams.MATCH_PARENT;
+    final View inputArea = w.findViewById(android.R.id.inputArea);
+    // TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
+    if (isFullscreenMode()) {
+      Timber.i("isFullscreenMode");
+      /* In Fullscreen mode, when layout contains transparent color,
+       * the background under input area will disturb users' typing,
+       * so set the input area as light pink */
+      inputArea.setBackgroundColor(parseColor("#ff660000"));
+    } else {
+      Timber.i("NotFullscreenMode");
+      /* Otherwise, set it as light gray to avoid potential issue */
+      inputArea.setBackgroundColor(parseColor("#dddddddd"));
     }
+
+    ViewUtils.updateLayoutHeightOf(inputArea, layoutHeight);
+    ViewUtils.updateLayoutGravityOf(inputArea, Gravity.BOTTOM);
+    ViewUtils.updateLayoutHeightOf(inputRootBinding.inputRoot, layoutHeight);
   }
 
   private String ClipBoardString = "";
@@ -1518,18 +1505,19 @@ public class Trime extends InputMethodService
   private void clipBoardMonitor() {
     ClipboardDao.get();
     final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+    final Config imeConfig = getImeConfig();
     clipBoard.addPrimaryClipChangedListener(
         () -> {
-          if (mConfig.getClipboardMaxSize() != 0) {
+          if (imeConfig.getClipboardMaxSize() != 0) {
             final ClipData clipData = clipBoard.getPrimaryClip();
             final ClipData.Item item = clipData.getItemAt(0);
             if (item == null) return;
             final String text = item.coerceToText(self).toString();
 
-            final String text2 = StringUtils.replace(text, mConfig.getClipBoardCompare());
+            final String text2 = StringUtils.replace(text, imeConfig.getClipBoardCompare());
             if (text2.length() < 1 || text2.equals(ClipBoardString)) return;
 
-            if (StringUtils.mismatch(text, mConfig.getClipBoardOutput())) {
+            if (StringUtils.mismatch(text, imeConfig.getClipBoardOutput())) {
               ClipBoardString = text2;
               liquidKeyboard.addClipboardData(text);
             }

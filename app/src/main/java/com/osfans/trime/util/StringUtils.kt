@@ -7,6 +7,7 @@ import kotlin.math.min
 object StringUtils {
     private const val SECTION_DIVIDER = ",.?!~:，。：～？！…\t\r\n\\/"
 
+    @JvmStatic
     fun CharSequence.findNextSection(start: Int): Int {
         if (this.isNotEmpty()) {
             if (max(0, start) < this.length) {
@@ -24,6 +25,7 @@ object StringUtils {
         return 0
     }
 
+    @JvmStatic
     fun CharSequence.findPrevSection(start: Int): Int {
         if (this.isNotEmpty()) {
             if (min(start, this.length) - 1 >= 0) {
@@ -41,6 +43,7 @@ object StringUtils {
         return 0
     }
 
+    @JvmStatic
     fun String.replace(rules: Array<String>): String {
         var s = this
         for (r in rules) {
@@ -50,6 +53,7 @@ object StringUtils {
         return s
     }
 
+    @JvmStatic
     fun String.mismatch(rules: Array<String>): Boolean {
         if (this.isEmpty()) return false
         for (r in rules) {
@@ -59,7 +63,8 @@ object StringUtils {
     }
 
     // 考虑到可能存在魔改机型的keycode有差异，而KeyEvent.keyCodeToString(keyCode)无法从keyCode获得按键字符，故重写这个从keyCode获取Char的方法。
-    fun toCharString(keyCode: Int): String? {
+    @JvmStatic
+    fun toCharString(keyCode: Int): String {
         when (keyCode) {
             KeyEvent.KEYCODE_TAB -> return "\t"
             KeyEvent.KEYCODE_SPACE -> return " "

@@ -20,6 +20,7 @@ import android.widget.LinearLayout
  *  https://android.googlesource.com/platform/packages/inputmethods/LatinIME/+/refs/heads/master/java/src/com/android/inputmethod/latin/utils/ViewLayoutUtils.java
  */
 object ViewUtils {
+    @JvmStatic
     fun updateLayoutHeightOf(window: Window, layoutHeight: Int) {
         val params = window.attributes
         if (params != null && params.height != layoutHeight) {
@@ -28,6 +29,7 @@ object ViewUtils {
         }
     }
 
+    @JvmStatic
     fun updateLayoutHeightOf(view: View, layoutHeight: Int) {
         val params = view.layoutParams
         if (params != null && params.height != layoutHeight) {
@@ -36,6 +38,7 @@ object ViewUtils {
         }
     }
 
+    @JvmStatic
     fun updateLayoutGravityOf(view: View, layoutGravity: Int) {
         val lp = view.layoutParams
         if (lp is LinearLayout.LayoutParams) {
@@ -56,6 +59,7 @@ object ViewUtils {
         }
     }
 
+    @JvmStatic
     fun getLocationOnScreen(view: View): IntArray {
         val outLocation: IntArray = intArrayOf(0, 0)
         view.getLocationOnScreen(outLocation)
