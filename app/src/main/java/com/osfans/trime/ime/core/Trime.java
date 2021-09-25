@@ -115,7 +115,6 @@ public class Trime extends InputMethodService
   private Composition mComposition; // 編碼
   private CompositionRootBinding compositionRootBinding = null;
   private ScrollView mCandidateRoot;
-  private View mainInputView, symbolInputView;
   private TabView tabView;
   private InputRootBinding inputRootBinding = null;
   private AlertDialog mOptionsDialog; // 對話框
@@ -412,6 +411,10 @@ public class Trime extends InputMethodService
   }
 
   public void selectLiquidKeyboard(final int tabIndex) {
+    final LinearLayout symbolInputView =
+            inputRootBinding != null ? inputRootBinding.symbol.symbolInput : null;
+    final LinearLayout mainInputView =
+            inputRootBinding != null ? inputRootBinding.main.mainInput : null;
     if (symbolInputView != null) {
       if (tabIndex >= 0) {
         final LinearLayout.LayoutParams param =
@@ -655,8 +658,6 @@ public class Trime extends InputMethodService
         !Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
 
     liquidKeyboard.setView(inputRootBinding.symbol.liquidKeyboardView);
-    mainInputView = inputRootBinding.main.mainInput;
-    symbolInputView = inputRootBinding.symbol.symbolInput;
     tabView = inputRootBinding.symbol.tabView.tab;
     loadBackground();
 
@@ -1471,27 +1472,31 @@ public class Trime extends InputMethodService
   private void updateSoftInputWindowLayoutParameters() {
     final Window w = getWindow().getWindow();
     if (w == null) return;
-    final int layoutHeight =
-        isFullscreenMode()
-            ? WindowManager.LayoutParams.WRAP_CONTENT
-            : WindowManager.LayoutParams.MATCH_PARENT;
-    final View inputArea = w.findViewById(android.R.id.inputArea);
-    // TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
-    if (isFullscreenMode()) {
-      Timber.i("isFullscreenMode");
-      /* In Fullscreen mode, when layout contains transparent color,
-       * the background under input area will disturb users' typing,
-       * so set the input area as light pink */
-      inputArea.setBackgroundColor(parseColor("#ff660000"));
-    } else {
-      Timber.i("NotFullscreenMode");
-      /* Otherwise, set it as light gray to avoid potential issue */
-      inputArea.setBackgroundColor(parseColor("#dddddddd"));
-    }
+    final LinearLayout inputRoot =
+            inputRootBinding != null ? inputRootBinding.inputRoot : null;
+    if (inputRoot != null) {
+      final int layoutHeight =
+              isFullscreenMode()
+                      ? WindowManager.LayoutParams.WRAP_CONTENT
+                      : WindowManager.LayoutParams.MATCH_PARENT;
+      final View inputArea = w.findViewById(android.R.id.inputArea);
+      // TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
+      if (isFullscreenMode()) {
+        Timber.i("isFullscreenMode");
+        /* In Fullscreen mode, when layout contains transparent color,
+         * the background under input area will disturb users' typing,
+         * so set the input area as light pink */
+        inputArea.setBackgroundColor(parseColor("#ff660000"));
+      } else {
+        Timber.i("NotFullscreenMode");
+        /* Otherwise, set it as light gray to avoid potential issue */
+        inputArea.setBackgroundColor(parseColor("#dddddddd"));
+      }
 
-    ViewUtils.updateLayoutHeightOf(inputArea, layoutHeight);
-    ViewUtils.updateLayoutGravityOf(inputArea, Gravity.BOTTOM);
-    ViewUtils.updateLayoutHeightOf(inputRootBinding.inputRoot, layoutHeight);
+      ViewUtils.updateLayoutHeightOf(inputArea, layoutHeight);
+      ViewUtils.updateLayoutGravityOf(inputArea, Gravity.BOTTOM);
+      ViewUtils.updateLayoutHeightOf(inputRoot, layoutHeight);
+    }
   }
 
   private String ClipBoardString = "";
