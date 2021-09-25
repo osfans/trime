@@ -98,19 +98,7 @@ public class KeyboardView extends View implements View.OnClickListener {
      *
      * @param text the sequence of characters to be displayed.
      */
-    void onText(CharSequence text);
-
-    /** Called when the user quickly moves the finger from right to left. */
-    void swipeLeft();
-
-    /** Called when the user quickly moves the finger from left to right. */
-    void swipeRight();
-
-    /** Called when the user quickly moves the finger from up to down. */
-    void swipeDown();
-
-    /** Called when the user quickly moves the finger from down to up. */
-    void swipeUp();
+    void onText(final CharSequence text);
   }
 
   private static final boolean DEBUG = false;
@@ -419,7 +407,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_RIGHT.ordinal();
                   } else {
-                    swipeRight();
                     return true;
                   }
                 } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
@@ -427,7 +414,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_LEFT.ordinal();
                   } else {
-                    swipeLeft();
                     return true;
                   }
                 } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
@@ -435,7 +421,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_UP.ordinal();
                   } else {
-                    swipeUp();
                     return true;
                   }
                 } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
@@ -443,7 +428,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_DOWN.ordinal();
                   } else {
-                    swipeDown();
                     return true;
                   }
                 }
@@ -1166,18 +1150,6 @@ public class KeyboardView extends View implements View.OnClickListener {
               }
 
               @Override
-              public void swipeLeft() {}
-
-              @Override
-              public void swipeRight() {}
-
-              @Override
-              public void swipeUp() {}
-
-              @Override
-              public void swipeDown() {}
-
-              @Override
               public void onPress(final int primaryCode) {
                 mKeyboardActionListener.onPress(primaryCode);
               }
@@ -1475,22 +1447,6 @@ public class KeyboardView extends View implements View.OnClickListener {
     final Key key = mKeys[mRepeatKeyIndex];
     detectAndSendKey(mCurrentKey, key.getX(), key.getY(), mLastTapTime);
     return true;
-  }
-
-  private void swipeRight() {
-    mKeyboardActionListener.swipeRight();
-  }
-
-  private void swipeLeft() {
-    mKeyboardActionListener.swipeLeft();
-  }
-
-  private void swipeUp() {
-    mKeyboardActionListener.swipeUp();
-  }
-
-  private void swipeDown() {
-    mKeyboardActionListener.swipeDown();
   }
 
   public void closing() {

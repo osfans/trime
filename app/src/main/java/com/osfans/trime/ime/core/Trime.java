@@ -53,11 +53,9 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
@@ -96,7 +94,7 @@ import timber.log.Timber;
 /** {@link InputMethodService 輸入法}主程序 */
 public class Trime extends InputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.CandidateListener {
-  @Nullable private static Trime self = null;
+  private static Trime self = null;
   private LiquidKeyboard liquidKeyboard;
 
   @NonNull
@@ -359,7 +357,7 @@ public class Trime extends InputMethodService
     }
   }
 
-  public void onOptionChanged(@NonNull final String option, final boolean value) {
+  public void onOptionChanged(@NonNull String option, boolean value) {
     switch (option) {
       case "ascii_mode":
         if (!mTempAsciiMode) mAsciiMode = value; // 切換中西文時保存狀態
@@ -1213,27 +1211,6 @@ public class Trime extends InputMethodService
     if (keyUpNeeded) {
       onRimeKey(Event.getRimeEvent(keyCode, Rime.META_RELEASE_ON));
     }
-  }
-
-  @Override
-  public void swipeLeft() {
-    // no-op
-  }
-
-  @Override
-  public void swipeRight() {
-    // no-op
-  }
-
-  @Override
-  public void swipeUp() {
-    // no-op
-  }
-
-  /** 在鍵盤視圖中從上往下滑動，隱藏鍵盤 */
-  @Override
-  public void swipeDown() {
-    // requestHideSelf(0);
   }
 
   @Override
