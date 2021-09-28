@@ -3,6 +3,7 @@ package com.osfans.trime.settings.components
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
+import android.os.Build
 import android.os.IBinder
 import android.view.WindowManager
 import com.osfans.trime.R
@@ -78,7 +79,11 @@ class ThemePickerDialog(
         val lp = window?.attributes
         lp?.let {
             it.token = token
-            it.type = Trime.getDialogType()
+            it.type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            }
         }
         window?.let {
             it.attributes = lp

@@ -16,12 +16,13 @@ import java.lang.ref.WeakReference
  *  https://android.googlesource.com/platform/packages/inputmethods/LatinIME/+/refs/heads/master/java/src/com/android/inputmethod/latin/utils/LeakGuardHandlerHelper.java
  */
 open class LeakGuardHandlerWrapper<T>(
-    ownerInstance: T, looper: Looper?
-): Handler(looper!!) {
+    ownerInstance: T,
+    looper: Looper?
+) : Handler(looper!!) {
     private val ownerInstanceRef: WeakReference<T> = WeakReference(ownerInstance)
 
     @Suppress("unused")
-    constructor(ownerInstance: T): this(ownerInstance, Looper.myLooper())
+    constructor(ownerInstance: T) : this(ownerInstance, Looper.myLooper())
 
     @Synchronized
     fun getOwnerInstance(): T {

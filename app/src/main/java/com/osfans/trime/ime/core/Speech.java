@@ -37,8 +37,8 @@ import timber.log.Timber;
 
 /** {@link RecognitionListener 語音輸入} */
 public class Speech implements RecognitionListener {
-  private final @NonNull Context context;
-  private final @Nullable SpeechRecognizer speechRecognizer;
+  private final Context context;
+  private final SpeechRecognizer speechRecognizer;
   private final Intent recognizerIntent;
 
   public Speech(@NonNull Context context) {

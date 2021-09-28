@@ -666,7 +666,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   public void onSizeChanged(final int w, final int h, final int oldw, final int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
     // if (mKeyboard != null) {
-      // mKeyboard.resize(w, h);
+    // mKeyboard.resize(w, h);
     // }
     // Release the buffer, if any and it will be reallocated on the next draw
     mBuffer = null;
@@ -847,7 +847,7 @@ public class KeyboardView extends View implements View.OnClickListener {
       }
 
       if ((mProximityCorrectOn && (dist = key.squaredDistanceFrom(x, y)) < mProximityThreshold)
-              || isInside) {
+          || isInside) {
         // Find insertion point
         final int nCodes = 1;
         if (dist < closestKeyDist) {
@@ -1125,8 +1125,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         final LayoutInflater inflater =
             (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mMiniKeyboardContainer = inflater.inflate(mPopupLayout, null);
-        mMiniKeyboard =
-                mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
+        mMiniKeyboard = mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
         final View closeButton = mMiniKeyboardContainer.findViewById(android.R.id.closeButton);
         if (closeButton != null) closeButton.setOnClickListener(this);
         mMiniKeyboard.setOnKeyboardActionListener(
@@ -1179,8 +1178,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
         mMiniKeyboardCache.put(popupKey, mMiniKeyboardContainer);
       } else {
-        mMiniKeyboard =
-                mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
+        mMiniKeyboard = mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
       }
       getLocationInWindow(mCoordinates);
       int mPopupX = popupKey.getX() + getPaddingLeft();
