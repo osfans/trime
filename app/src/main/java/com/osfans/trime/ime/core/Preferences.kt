@@ -180,6 +180,7 @@ class Preferences(
             const val SPEAK_KEY_PRESS_ENABLED = "keyboard__speak_key_press"
             const val SPEAK_COMMIT_ENABLED = "keyboard__speak_commit"
 
+            const val SWIPE_TRAVEL = "keyboard__key_swipe_travel"
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
         }
@@ -218,6 +219,9 @@ class Preferences(
             private set
         var vibrationAmplitude: Int = 0
             get() = prefs.getPref(VIBRATION_AMPLITUDE, -1)
+            private set
+        var swipeTravel: Int = 0
+            get() = prefs.getPref(SWIPE_TRAVEL, 80)
             private set
         var longPressTimeout: Int = 0
             get() = prefs.getPref(LONG_PRESS_TIMEOUT, 20)
