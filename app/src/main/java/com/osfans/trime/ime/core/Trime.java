@@ -430,12 +430,13 @@ public class Trime extends InputMethodService
     intent.setComponent(
         new ComponentName("com.example.input", "com.example.softwaretest.HWService"));
 
-    if (mainKeyboard != null && open) {
+    if (mainKeyboardView != null && open) {
       rsa = new Rsa();
+      final Config mConfig = getImeConfig();
       intent.putExtra("key", rsa.getPublicKey());
-      intent.putExtra("height", mainKeyboard.getHeight());
-      if (mCandidateContainer.getHeight() > 0)
-        intent.putExtra("candidate_view_height", mCandidateContainer.getHeight());
+      intent.putExtra("height", inputRootBinding.inputRoot.getHeight());
+      if (mCandidateRoot.getHeight() > 0)
+        intent.putExtra("candidate_view_height", mCandidateRoot.getHeight());
       else intent.putExtra("candidate_view_height", mConfig.getPixel("candidate_view_height"));
       intent.putExtra("hand_writing_color", mConfig.getCurrentColor_("hand_writing_color"));
       intent.putExtra("back_color", mConfig.getCurrentColor_("back_color"));
@@ -449,7 +450,6 @@ public class Trime extends InputMethodService
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent);
     else startService(intent);
   }
-
 
   public void selectLiquidKeyboard(final int tabIndex) {
     final LinearLayout symbolInputView =
@@ -877,10 +877,10 @@ public class Trime extends InputMethodService
     if (text.length() < 1) return;
     if (text.equals("keycode:KEYCODE_FORWARD_DEL")) {
       Timber.d("backspace");
-      sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL, 0);
+      sendDownUpKeyEvent(KeyEvent.KEYCODE_DEL, 0);
       return;
     }
-    if (effectManager != null) effectManager.textCommitSpeak(text);
+    if (inputFeedbackManager != null) inputFeedbackManager.textCommitSpeak(text);
     final @Nullable InputConnection ic = getCurrentInputConnection();
     if (ic != null) {
       ic.commitText(text, 1);
