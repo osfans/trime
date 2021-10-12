@@ -10,9 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.osfans.trime.R;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
@@ -42,7 +42,7 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     this.keyMarginX = keyMarginX;
     this.keyMarginTop = keyMarginTop;
 
-    //  边框尺寸、圆角、字号直接读取主题通用参数。配色优先读取liquidKeyboard专用参数。
+    //  边框尺寸、圆角、字号直接读取主题通用参数。配色优先读取 liquidKeyboard 专用参数。
     Config config = Config.get(myContext);
     textColor = config.getLiquidColor("long_text_color");
     if (textColor == null) textColor = config.getLiquidColor("key_text_color");
@@ -105,18 +105,18 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         flexboxLp.setMargins(marginX, marginTop, marginX, flexboxLp.getMarginBottom());
 
         // TODO 设置剪贴板列表样式
-        // copy SimpleAdapter会造成高度始终为3行无法自适应的效果。
+        // copy SimpleAdapter 会造成高度始终为 3 行无法自适应的效果。
 
       }
 
       if (background != null) itemViewHold.listItemLayout.setBackground(background);
 
       // 如果设置了回调，则设置点击事件
-      if (mOnItemClickLitener != null) {
+      if (mOnItemClickListener != null) {
         itemViewHold.listItemLayout.setOnClickListener(
             view -> {
               int position = itemViewHold.getLayoutPosition();
-              mOnItemClickLitener.onItemClick(itemViewHold.listItemLayout, position);
+              mOnItemClickListener.onItemClick(itemViewHold.listItemLayout, position);
             });
       }
 
@@ -124,8 +124,8 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
           view -> {
             int position = itemViewHold.getLayoutPosition();
             //  TODO 长按删除、编辑剪贴板
-            //  当文本较长时，目前样式只缩略显示为3行，长按时tosat消息可以预览全文，略有用处。
-            Toast.makeText(myContext, list.get(position).getText(), Toast.LENGTH_SHORT).show();
+            //  当文本较长时，目前样式只缩略显示为 3 行，长按时 toast 消息可以预览全文，略有用处。
+            ToastUtils.showShort(list.get(position).getText());
             return true;
           });
 
@@ -145,14 +145,14 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
   }
 
-  /*=====================添加OnItemClickListener回调================================*/
-  public interface OnItemClickLitener {
+  /** 添加 OnItemClickListener 回调 * */
+  public interface OnItemClickListener {
     void onItemClick(View view, int position);
   }
 
-  private ClipboardAdapter.OnItemClickLitener mOnItemClickLitener;
+  private OnItemClickListener mOnItemClickListener;
 
-  public void setOnItemClickLitener(ClipboardAdapter.OnItemClickLitener mOnItemClickLitener) {
-    this.mOnItemClickLitener = mOnItemClickLitener;
+  public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+    this.mOnItemClickListener = mOnItemClickListener;
   }
 }

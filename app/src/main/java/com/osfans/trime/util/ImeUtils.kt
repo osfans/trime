@@ -2,6 +2,7 @@ package com.osfans.trime.util
 
 import android.content.Context
 import android.provider.Settings
+import timber.log.Timber
 
 object ImeUtils {
     private const val IME_ID: String = "com.osfans.trime/.TrimeImeService"
@@ -11,6 +12,7 @@ object ImeUtils {
             context.contentResolver,
             Settings.Secure.ENABLED_INPUT_METHODS
         ) ?: "(none)"
+        Timber.i("List of active IMEs: $activeImeIds")
         return activeImeIds.split(":").contains(IME_ID)
     }
 
@@ -19,6 +21,7 @@ object ImeUtils {
             context.contentResolver,
             Settings.Secure.DEFAULT_INPUT_METHOD
         ) ?: "(none)"
+        Timber.i("Selected IME: $selectedImeIds")
         return selectedImeIds == IME_ID
     }
 }

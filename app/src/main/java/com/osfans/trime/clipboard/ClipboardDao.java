@@ -3,6 +3,7 @@ package com.osfans.trime.clipboard;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import androidx.annotation.NonNull;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.util.ArrayList;
@@ -21,8 +22,7 @@ public class ClipboardDao {
 
   public ClipboardDao() {}
 
-  public void insert(ClipboardBean clipboardBean) {
-
+  public void insert(@NonNull ClipboardBean clipboardBean) {
     helper = new ClipboardSqlHelper(Trime.getService(), "clipboard.db", null, 1);
     SQLiteDatabase db = helper.getWritableDatabase();
     db.execSQL(
@@ -36,8 +36,8 @@ public class ClipboardDao {
     db.close();
   }
 
-  //  删除文字相同的剪贴板记录，插入新记录
-  public void add(ClipboardBean clipboardBean) {
+  /** 删除文字相同的剪贴板记录，插入新记录 * */
+  public void add(@NonNull ClipboardBean clipboardBean) {
     helper = new ClipboardSqlHelper(Trime.getService(), "clipboard.db", null, 1);
     SQLiteDatabase db = helper.getWritableDatabase();
     db.delete("t_clipboard", "text=?", new String[] {clipboardBean.getText()});
@@ -52,8 +52,7 @@ public class ClipboardDao {
     db.close();
   }
 
-  public void update(ClipboardBean clipboardBean) {
-
+  public void update(@NonNull ClipboardBean clipboardBean) {
     helper = new ClipboardSqlHelper(Trime.getService(), "clipboard.db", null, 1);
     SQLiteDatabase db = helper.getWritableDatabase();
     db.execSQL(

@@ -42,6 +42,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import com.osfans.trime.Rime;
+import com.osfans.trime.common.ViewUtils;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.setup.Config;
@@ -106,7 +107,7 @@ public class Composition extends AppCompatTextView {
 
     @Override
     public void onClick(View tv) {
-      Trime.getService().onPickCandidate(index);
+      Trime.getService().onCandidatePressed(index);
     }
 
     @Override
@@ -185,7 +186,7 @@ public class Composition extends AppCompatTextView {
         if (action == MotionEvent.ACTION_DOWN) {
           if (first_move || movable.contentEquals("once")) {
             first_move = false;
-            int[] location = Trime.getLocationOnScreen(this);
+            int[] location = ViewUtils.getLocationOnScreen(this);
             mCurrentX = location[0];
             mCurrentY = location[1];
           }

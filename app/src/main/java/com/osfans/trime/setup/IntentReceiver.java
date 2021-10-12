@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import com.osfans.trime.Rime;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.util.RimeUtils;
@@ -38,7 +37,7 @@ public class IntentReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-    final @Nullable String command = intent.getAction();
+    final String command = intent.getAction();
 
     Timber.d("Receive Command = %s", command);
     // 防止为空，虽然很少,但是可能会出现

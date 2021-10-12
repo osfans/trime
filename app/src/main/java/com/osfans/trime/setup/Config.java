@@ -42,6 +42,7 @@ import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.AppVersionUtils;
+import com.osfans.trime.util.DataUtils;
 import com.osfans.trime.util.YamlUtils;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,6 +66,10 @@ public class Config {
   // private static final String TAG = "Config";
 
   private static Config self = null;
+  private static AssetManager assetManager = null;
+
+  private final String sharedDataDir = DataUtils.getSharedDataDir();
+  private final String userDataDir = DataUtils.getUserDataDir();
 
   @Synchronized
   public static Config get(Context context) {
@@ -90,11 +95,12 @@ public class Config {
     return Preferences.Companion.defaultInstance();
   }
 
-  public Config(Context context) {
+  public Config(@NonNull Context context) {
     self = this;
+    assetManager = context.getAssets();
     themeName = getPrefs().getLooks().getSelectedTheme();
     prepareRime(context);
-    deployTheme(context);
+    deployTheme();
     init();
     prepareCLipBoardRule();
   }
@@ -130,49 +136,31 @@ public class Config {
     getPrefs().getOther().setClipboardOutputRules(s);
   }
 
-  public String getFullscreenMode() {
-    return getPrefs().getKeyboard().getFullscreenMode();
-  }
-
   public String getTheme() {
     return themeName;
   }
 
-  public String getSharedDataDir() {
-    return getPrefs().getConf().getSharedDataDir();
-  }
-
-  public String getUserDataDir() {
-    return getPrefs().getConf().getUserDataDir();
-  }
-
-  public String getResDataDir(String sub) {
-    String name = new File(getSharedDataDir(), sub).getPath();
-    if (new File(name).exists()) return name;
-    return new File(getUserDataDir(), sub).getPath();
-  }
-
   public void prepareRime(Context context) {
-    boolean isExist = new File(getSharedDataDir()).exists();
+    boolean isExist = new File(sharedDataDir).exists();
     boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(getPrefs());
     String defaultFile = "trime.yaml";
     if (isOverwrite) {
-      copyFileOrDir(context, "", true);
+      copyFileOrDir("", true);
     } else if (isExist) {
       String path = new File("", defaultFile).getPath();
-      copyFileOrDir(context, path, false);
+      copyFileOrDir(path, false);
     } else {
-      copyFileOrDir(context, "", false);
+      copyFileOrDir("", false);
     }
-    while (!new File(getSharedDataDir(), defaultFile).exists()) {
+    while (!new File(sharedDataDir, defaultFile).exists()) {
       SystemClock.sleep(3000);
-      copyFileOrDir(context, "", isOverwrite);
+      copyFileOrDir("", isOverwrite);
     }
     // 缺失导致获取方案列表为空
     final String defaultCustom = "default.custom.yaml";
-    if (!new File(getSharedDataDir(), defaultCustom).exists()) {
+    if (!new File(sharedDataDir, defaultCustom).exists()) {
       try {
-        new File(getSharedDataDir(), defaultCustom).createNewFile();
+        new File(sharedDataDir, defaultCustom).createNewFile();
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -180,8 +168,8 @@ public class Config {
     Rime.get(context, !isExist); // 覆蓋時不強制部署
   }
 
-  public static String[] getThemeKeys(Context context, boolean isUser) {
-    File d = new File(isUser ? get(context).getUserDataDir() : get(context).getSharedDataDir());
+  public static String[] getThemeKeys(boolean isUser) {
+    File d = new File(isUser ? DataUtils.getUserDataDir() : DataUtils.getSharedDataDir());
     FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith("trime.yaml");
     return d.list(trimeFilter);
   }
@@ -198,11 +186,11 @@ public class Config {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public static boolean deployOpencc(Context context) {
-    final String dataDir = get(context).getResDataDir("opencc");
+  public static boolean deployOpencc() {
+    final String dataDir = DataUtils.getAssetsDir("opencc");
     final File d = new File(dataDir);
     if (d.exists()) {
-      FilenameFilter txtFilter = (dir, filename) -> filename.endsWith(".txt");
+      final FilenameFilter txtFilter = (dir, filename) -> filename.endsWith(".txt");
       for (String txtName : Objects.requireNonNull(d.list(txtFilter))) {
         txtName = new File(dataDir, txtName).getPath();
         String ocdName = txtName.replace(".txt", ".ocd2");
@@ -212,33 +200,21 @@ public class Config {
     return true;
   }
 
-  public static String[] list(@NonNull Context context, String path) {
-    final AssetManager assetManager = context.getAssets();
-    String[] assets = null;
-    try {
-      assets = assetManager.list(path);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return assets;
-  }
-
-  public boolean copyFileOrDir(@NonNull Context context, String path, boolean overwrite) {
-    final AssetManager assetManager = context.getAssets();
+  public boolean copyFileOrDir(String path, boolean overwrite) {
     try {
       final String assetPath = new File(RIME, path).getPath();
       final String[] assets = assetManager.list(assetPath);
       if (assets.length == 0) {
         // Files
-        copyFile(context, path, overwrite);
+        copyFile(path, overwrite);
       } else {
         // Dirs
-        final File dir = new File(getSharedDataDir(), path);
+        final File dir = new File(sharedDataDir, path);
         if (!dir.exists()) // noinspection ResultOfMethodCallIgnored
         dir.mkdir();
         for (String asset : assets) {
           final String subPath = new File(path, asset).getPath();
-          copyFileOrDir(context, subPath, overwrite);
+          copyFileOrDir(subPath, overwrite);
         }
       }
     } catch (Exception e) {
@@ -248,13 +224,12 @@ public class Config {
     return true;
   }
 
-  private void copyFile(Context context, String fileName, boolean overwrite) {
+  private void copyFile(String fileName, boolean overwrite) {
     if (fileName == null) return;
 
-    final String targetFileName = new File(getSharedDataDir(), fileName).getPath();
+    final String targetFileName = new File(sharedDataDir, fileName).getPath();
     if (new File(targetFileName).exists() && !overwrite) return;
     final String sourceFileName = new File(RIME, fileName).getPath();
-    final AssetManager assetManager = context.getAssets();
     try (InputStream in = assetManager.open(sourceFileName);
         final FileOutputStream out = new FileOutputStream(targetFileName)) {
       final byte[] buffer = new byte[1024];
@@ -268,9 +243,9 @@ public class Config {
     }
   }
 
-  private void deployTheme(Context context) {
-    if (getUserDataDir().contentEquals(getSharedDataDir())) return; // 相同文件夾不部署主題
-    final String[] configs = getThemeKeys(context, false);
+  private void deployTheme() {
+    if (userDataDir.contentEquals(sharedDataDir)) return; // 相同文件夾不部署主題
+    final String[] configs = getThemeKeys(false);
     for (String config : configs) Rime.deploy_config_file(config, "config_version");
   }
 
@@ -524,7 +499,7 @@ public class Config {
     return getPixel(m, k, null);
   }
 
-  public static Integer getColor(Context context, Map<?, ?> m, String k) {
+  public static Integer getColor(Context context, @NonNull Map<?, ?> m, String k) {
     Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
@@ -557,16 +532,18 @@ public class Config {
     return null;
   }
 
-  public static Object getValue(Map<?, ?> m, String k, Object o) {
+  public static Object getValue(@NonNull Map<?, ?> m, String k, Object o) {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
+  @NonNull
   public static String getString(Map<?, ?> m, String k, Object s) {
     final Object o = getValue(m, k, s);
     if (o == null) return "";
     return o.toString();
   }
 
+  @NonNull
   public static String getString(Map<?, ?> m, String k) {
     return getString(m, k, "");
   }
@@ -608,6 +585,7 @@ public class Config {
   }
 
   //  获取当前配色方案的key的value，或者从fallback获取值。
+  @Nullable
   private Object getColorObject(String key) {
     String scheme = getColorSchemeName();
     final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
@@ -683,7 +661,7 @@ public class Config {
   public Typeface getFont(String key) {
     final String name = getString(key);
     if (name != null) {
-      final File f = new File(getResDataDir("fonts"), name);
+      final File f = new File(DataUtils.getAssetsDir("fonts"), name);
       if (f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
@@ -713,11 +691,12 @@ public class Config {
     if (o == null) return null;
     if (o instanceof String) {
       String name = (String) o;
-      String nameDirectory = getResDataDir("backgrounds" + File.separator + backgroundFolder);
+      String nameDirectory =
+          DataUtils.getAssetsDir("backgrounds" + File.separator + backgroundFolder);
       File f = new File(nameDirectory, name);
 
       if (!f.exists()) {
-        nameDirectory = getResDataDir("backgrounds");
+        nameDirectory = DataUtils.getAssetsDir("backgrounds");
         f = new File(nameDirectory, name);
       }
 
@@ -774,7 +753,6 @@ public class Config {
   }
 
   public Integer getLiquidColor(String key) {
-
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
         Integer value = parseColor((String) Objects.requireNonNull(liquidKeyboard.get(key)));
@@ -940,11 +918,12 @@ public class Config {
       }
     }
 
-    String nameDirectory = getResDataDir("backgrounds" + File.separator + backgroundFolder);
+    String nameDirectory =
+        DataUtils.getAssetsDir("backgrounds" + File.separator + backgroundFolder);
     File f = new File(nameDirectory, s);
 
     if (!f.exists()) {
-      nameDirectory = getResDataDir("backgrounds");
+      nameDirectory = DataUtils.getAssetsDir("backgrounds");
       f = new File(nameDirectory, s);
     }
 

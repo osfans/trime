@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
 import com.osfans.trime.ime.enums.InlineModeType
+import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import java.lang.ref.WeakReference
 
 /**
@@ -179,14 +180,15 @@ class Preferences(
             const val SPEAK_KEY_PRESS_ENABLED = "keyboard__speak_key_press"
             const val SPEAK_COMMIT_ENABLED = "keyboard__speak_commit"
 
+            const val SWIPE_TRAVEL = "keyboard__key_swipe_travel"
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
         }
         var inlinePreedit: InlineModeType
             get() = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
             set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
-        var fullscreenMode: String
-            get() = prefs.getPref(FULLSCREEN_MODE, "auto")
+        var fullscreenMode: LandscapeInputUIMode
+            get() = LandscapeInputUIMode.fromString(prefs.getPref(FULLSCREEN_MODE, "auto_show"))
             set(v) = prefs.setPref(FULLSCREEN_MODE, v)
         var softCursorEnabled: Boolean = false
             get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)
@@ -217,6 +219,9 @@ class Preferences(
             private set
         var vibrationAmplitude: Int = 0
             get() = prefs.getPref(VIBRATION_AMPLITUDE, -1)
+            private set
+        var swipeTravel: Int = 0
+            get() = prefs.getPref(SWIPE_TRAVEL, 80)
             private set
         var longPressTimeout: Int = 0
             get() = prefs.getPref(LONG_PRESS_TIMEOUT, 20)

@@ -1,3 +1,4 @@
+/* This file has been adapted from florisboard */
 package com.osfans.trime.settings.components
 
 import android.content.Context
@@ -28,6 +29,8 @@ import com.osfans.trime.databinding.PreferenceWidgetSeekbarBinding
  */
 class DialogSeekBarPreference : Preference {
     private var defaultValue: Int = 0
+    private var systemDefaultValue: Int = -1
+    private var systemDefaultValueText: String? = null
     private var min: Int = 0
     private var max: Int = 100
     private var step: Int = 1
@@ -45,6 +48,8 @@ class DialogSeekBarPreference : Preference {
                 step = 1
             }
             defaultValue = getInt(R.styleable.DialogSeekBarPreferenceAttrs_android_defaultValue, defaultValue)
+            systemDefaultValue = getInt(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValue, min - 1)
+            systemDefaultValueText = getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText)
             unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: unit
             recycle()
         }
@@ -65,10 +70,16 @@ class DialogSeekBarPreference : Preference {
 
     /**
      * Generates the text for the given [value] and adds the defined [unit] at the end.
+     * If [systemDefaultValueText] is not null this method tries to match the given [value] with
+     * [systemDefaultValue] and returns [systemDefaultValueText] upon matching.
      */
     private fun getTextForValue(value: Any): String {
-        return if (value !is Int) {
+        if (value !is Int) {
             "??$unit"
+        }
+        val systemDefValText = systemDefaultValueText
+        return if (value == systemDefaultValue && systemDefValText != null) {
+            systemDefValText
         } else {
             value.toString() + unit
         }

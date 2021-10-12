@@ -4,11 +4,11 @@ import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.view.WindowManager
 import com.osfans.trime.R
 import com.osfans.trime.Rime
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.PrefMainActivity
 import com.osfans.trime.setup.Config
 import com.osfans.trime.util.RimeUtils
@@ -114,7 +114,11 @@ class SchemaPickerDialog(
         val lp = window?.attributes
         lp?.let {
             it.token = token
-            it.type = Trime.getDialogType()
+            it.type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            }
         }
         window?.let {
             it.attributes = lp

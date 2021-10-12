@@ -197,7 +197,7 @@ public class TabView extends View {
     int i;
     int x = 0;
 
-    candidates = TabManager.get().getTabCanditates();
+    candidates = TabManager.get().getTabCandidates();
     highlightIndex = TabManager.get().getSelected();
     num_candidates = candidates.length;
 

@@ -32,14 +32,14 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     list = itemlist;
   }
 
-  public void configStyle(int keyWidth, int keyHegith, int keyMarginX, int keyMarginTop) {
+  public void configStyle(int keyWidth, int keyHeight, int keyMarginX, int keyMarginTop) {
     // 由于按键宽度、横向间距会影响键盘左右两侧到屏幕边缘的距离，而前者需要提前计算，故adapter直接接收参数，不重新读取设置
-    this.keyHeight = keyHegith;
+    this.keyHeight = keyHeight;
     this.keyWidth = keyWidth;
     this.keyMarginX = keyMarginX;
     this.keyMarginTop = keyMarginTop;
 
-    Timber.d("configStyle keyHeight=%s", keyHegith);
+    Timber.d("configStyle keyHeight = %s", keyHeight);
 
     //  边框尺寸、圆角、字号直接读取主题通用参数。
     Config config = Config.get(myContext);
@@ -120,11 +120,11 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
       }
 
-      if (mOnItemClickLitener != null) {
+      if (mOnItemClickListener != null) {
         itemViewHold.listItemLayout.setOnClickListener(
             view -> {
               int position = itemViewHold.getLayoutPosition(); // 在增加数据或者减少数据时候，position和index就不一样了
-              mOnItemClickLitener.onItemClick(itemViewHold.listItemLayout, position);
+              mOnItemClickListener.onItemClick(itemViewHold.listItemLayout, position);
             });
       }
 
@@ -145,13 +145,13 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
   }
 
   /*=====================添加OnItemClickListener回调================================*/
-  public interface OnItemClickLitener {
+  public interface OnItemClickListener {
     void onItemClick(View view, int position);
   }
 
-  private OnItemClickLitener mOnItemClickLitener;
+  private OnItemClickListener mOnItemClickListener;
 
-  public void setOnItemClickLitener(OnItemClickLitener mOnItemClickLitener) {
-    this.mOnItemClickLitener = mOnItemClickLitener;
+  public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+    this.mOnItemClickListener = mOnItemClickListener;
   }
 }

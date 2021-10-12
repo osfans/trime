@@ -7,13 +7,13 @@ import com.osfans.trime.R
 import com.osfans.trime.setup.Config
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
-class ResetAssetsDialog(private val context: Context) {
+class ResetAssetsDialog(context: Context) {
     private val config = Config.get(context)
     /** 內置數據列表 */
-    private var assetItems: Array<String?> = Config.list(context, "rime")
+    private var assetItems: Array<String>? = context.assets.list("rime")
 
     /** 列表勾選狀態 */
-    private var checkedStatus: BooleanArray = BooleanArray(assetItems.size)
+    private var checkedStatus: BooleanArray = BooleanArray(assetItems!!.size)
 
     /** 回廠對話框 */
     val resetDialog: AlertDialog
@@ -34,9 +34,9 @@ class ResetAssetsDialog(private val context: Context) {
 
     private fun selectAssets() {
         var res = true
-        for (i in assetItems.indices) {
+        for (i in assetItems?.indices!!) {
             res = if (checkedStatus[i]) {
-                config.copyFileOrDir(context, assetItems[i], true)
+                config.copyFileOrDir(assetItems!![i], true)
             } else false
         }
         ToastUtils.showShort(

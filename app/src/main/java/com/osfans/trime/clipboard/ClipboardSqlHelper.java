@@ -3,6 +3,7 @@ package com.osfans.trime.clipboard;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import androidx.annotation.NonNull;
 import timber.log.Timber;
 
 public class ClipboardSqlHelper extends SQLiteOpenHelper {
@@ -23,7 +24,7 @@ public class ClipboardSqlHelper extends SQLiteOpenHelper {
   }
 
   @Override
-  public void onCreate(SQLiteDatabase db) {
+  public void onCreate(@NonNull SQLiteDatabase db) {
     Timber.i("create db");
     db.execSQL(CREATE_STUDENT);
   }

@@ -33,6 +33,6 @@ public class SimpleKeyBean implements Serializable {
   @NonNull
   @Override
   public String toString() {
-    return "SimpleKeyBean{" + "text='" + text + '\'' + ", label='" + label + '\'' + '}';
+    return "SimpleKeyBean {" + "text='" + text + '\'' + ", label='" + label + '\'' + '}';
   }
 }

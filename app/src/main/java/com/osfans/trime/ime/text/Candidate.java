@@ -37,28 +37,28 @@ import com.osfans.trime.setup.Config;
 public class Candidate extends View {
 
   /** 處理候選條選字事件 */
-  public interface CandidateListener {
-    void onPickCandidate(int index);
+  public interface EventListener {
+    void onCandidatePressed(int index);
   }
 
   private static final int MAX_CANDIDATE_COUNT = 30;
   private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
-  private CandidateListener listener;
+  private EventListener listener;
   private int highlightIndex;
   private Rime.RimeCandidate[] candidates;
   private int num_candidates;
   private int start_num = 0;
 
   private Drawable candidateHighlight, candidateSeparator;
-  private final Paint paintCandidate;
-  private final Paint paintSymbol;
-  private final Paint paintComment;
-  private Typeface tfCandidate, tfSymbol, tfComment, tfHanB, tfLatin;
-  private int candidate_text_color, hilited_candidate_text_color;
-  private int comment_text_color, hilited_comment_text_color;
-  private int candidate_view_height, comment_height, candidate_spacing, candidate_padding;
-  private boolean show_comment = true, comment_on_top, candidate_use_cursor;
+  private final Paint candidatePaint;
+  private final Paint symbolPaint;
+  private final Paint commentPaint;
+  private Typeface candidateTypeface, symbolTypeface, commentTypeface, hanBTypeface, latinTypeface;
+  private int candidateTextColor, hilitedCandidateTextColor;
+  private int commentTextColor, hilitedCommentTextColor;
+  private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
+  private boolean shouldShowComment = true, isCommentOnTop, candidateUseCursor;
 
   private final Rect[] candidateRect = new Rect[MAX_CANDIDATE_COUNT + 2];
 
@@ -67,52 +67,52 @@ public class Candidate extends View {
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
     ((PaintDrawable) candidateHighlight).setCornerRadius(config.getFloat("layout/round_corner"));
     candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
-    candidate_spacing = config.getPixel("candidate_spacing");
-    candidate_padding = config.getPixel("candidate_padding");
+    candidateSpacing = config.getPixel("candidate_spacing");
+    candidatePadding = config.getPixel("candidate_padding");
 
-    candidate_text_color = config.getColor("candidate_text_color");
-    comment_text_color = config.getColor("comment_text_color");
-    hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
-    hilited_comment_text_color = config.getColor("hilited_comment_text_color");
+    candidateTextColor = config.getColor("candidate_text_color");
+    commentTextColor = config.getColor("comment_text_color");
+    hilitedCandidateTextColor = config.getColor("hilited_candidate_text_color");
+    hilitedCommentTextColor = config.getColor("hilited_comment_text_color");
 
     int candidate_text_size = config.getPixel("candidate_text_size");
     int comment_text_size = config.getPixel("comment_text_size");
-    candidate_view_height = config.getPixel("candidate_view_height");
-    comment_height = config.getPixel("comment_height");
+    candidateViewHeight = config.getPixel("candidate_view_height");
+    commentHeight = config.getPixel("comment_height");
 
-    tfCandidate = config.getFont("candidate_font");
-    tfLatin = config.getFont("latin_font");
-    tfHanB = config.getFont("hanb_font");
-    tfComment = config.getFont("comment_font");
-    tfSymbol = config.getFont("symbol_font");
+    candidateTypeface = config.getFont("candidate_font");
+    latinTypeface = config.getFont("latin_font");
+    hanBTypeface = config.getFont("hanb_font");
+    commentTypeface = config.getFont("comment_font");
+    symbolTypeface = config.getFont("symbol_font");
 
-    paintCandidate.setTextSize(candidate_text_size);
-    paintCandidate.setTypeface(tfCandidate);
-    paintSymbol.setTextSize(candidate_text_size);
-    paintSymbol.setTypeface(tfSymbol);
-    paintComment.setTextSize(comment_text_size);
-    paintComment.setTypeface(tfComment);
+    candidatePaint.setTextSize(candidate_text_size);
+    candidatePaint.setTypeface(candidateTypeface);
+    symbolPaint.setTextSize(candidate_text_size);
+    symbolPaint.setTypeface(symbolTypeface);
+    commentPaint.setTextSize(comment_text_size);
+    commentPaint.setTypeface(commentTypeface);
 
-    comment_on_top = config.getBoolean("comment_on_top");
-    candidate_use_cursor = config.getBoolean("candidate_use_cursor");
+    isCommentOnTop = config.getBoolean("comment_on_top");
+    candidateUseCursor = config.getBoolean("candidate_use_cursor");
     invalidate();
   }
 
   public void setShowComment(boolean value) {
-    show_comment = value;
+    shouldShowComment = value;
   }
 
   public Candidate(Context context, AttributeSet attrs) {
     super(context, attrs);
-    paintCandidate = new Paint();
-    paintCandidate.setAntiAlias(true);
-    paintCandidate.setStrokeWidth(0);
-    paintSymbol = new Paint();
-    paintSymbol.setAntiAlias(true);
-    paintSymbol.setStrokeWidth(0);
-    paintComment = new Paint();
-    paintComment.setAntiAlias(true);
-    paintComment.setStrokeWidth(0);
+    candidatePaint = new Paint();
+    candidatePaint.setAntiAlias(true);
+    candidatePaint.setStrokeWidth(0);
+    symbolPaint = new Paint();
+    symbolPaint.setAntiAlias(true);
+    symbolPaint.setStrokeWidth(0);
+    commentPaint = new Paint();
+    commentPaint.setAntiAlias(true);
+    commentPaint.setStrokeWidth(0);
 
     reset(context);
 
@@ -123,7 +123,7 @@ public class Candidate extends View {
     return MAX_CANDIDATE_COUNT;
   }
 
-  public void setCandidateListener(CandidateListener listener) {
+  public void setCandidateListener(EventListener listener) {
     this.listener = listener;
   }
 
@@ -152,7 +152,7 @@ public class Candidate extends View {
     if ((highlightIndex != -1) && (listener != null)) {
       if (index == -1) index = highlightIndex;
       if (index >= 0) index += start_num;
-      listener.onPickCandidate(index);
+      listener.onCandidatePressed(index);
       return true;
     }
     return false;
@@ -175,7 +175,7 @@ public class Candidate extends View {
   }
 
   private boolean isHighlighted(int i) {
-    return candidate_use_cursor && i >= 0 && i == highlightIndex;
+    return candidateUseCursor && i >= 0 && i == highlightIndex;
   }
 
   private void drawHighlight(Canvas canvas) {
@@ -186,8 +186,9 @@ public class Candidate extends View {
   }
 
   private Typeface getFont(int codepoint, Typeface font) {
-    if (tfHanB != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint)) return tfHanB;
-    if (tfLatin != Typeface.DEFAULT && codepoint < 0x2e80) return tfLatin;
+    if (hanBTypeface != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint))
+      return hanBTypeface;
+    if (latinTypeface != Typeface.DEFAULT && codepoint < 0x2e80) return latinTypeface;
     return font;
   }
 
@@ -198,7 +199,8 @@ public class Candidate extends View {
     if (length == 0) return;
     int points = s.codePointCount(0, length);
     float x = center - measureText(s, paint, font) / 2;
-    if (tfLatin != Typeface.DEFAULT || (tfHanB != Typeface.DEFAULT && length > points)) {
+    if (latinTypeface != Typeface.DEFAULT
+        || (hanBTypeface != Typeface.DEFAULT && length > points)) {
       int offset = 0;
       while (offset < length) {
         int codepoint = s.codePointAt(offset);
@@ -218,43 +220,43 @@ public class Candidate extends View {
   private void drawCandidates(Canvas canvas) {
     if (candidates == null) return;
 
-    float x;
-    float y;
+    float candidateX;
+
+    float commentX, commentY;
+    float commentWidth;
+    String candidate;
+
+    float candidateY =
+        candidateRect[0].centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
+    if (shouldShowComment && isCommentOnTop) candidateY += commentHeight / 2f;
+    commentY = commentHeight / 2f - (commentPaint.ascent() + commentPaint.descent()) / 2;
+    if (shouldShowComment && !isCommentOnTop) commentY += candidateRect[0].bottom - commentHeight;
+
     int i = 0;
-    float comment_x, comment_y;
-    float comment_width;
-    String candidate, comment;
-
-    y = candidateRect[0].centerY() - (paintCandidate.ascent() + paintCandidate.descent()) / 2;
-    if (show_comment && comment_on_top) y += comment_height / 2f;
-    comment_y = comment_height / 2f - (paintComment.ascent() + paintComment.descent()) / 2;
-    if (show_comment && !comment_on_top) comment_y += candidateRect[0].bottom - comment_height;
-
     while (i < num_candidates) {
       // Calculate a position where the text could be centered in the rectangle.
-      x = candidateRect[i].centerX();
-      if (show_comment) {
-        comment = getComment(i);
+      candidateX = candidateRect[i].centerX();
+      if (shouldShowComment) {
+        final String comment = getComment(i);
         if (!TextUtils.isEmpty(comment)) {
-          comment_width = measureText(comment, paintComment, tfComment);
-          if (comment_on_top) {
-            comment_x = candidateRect[i].centerX();
+          commentWidth = measureText(comment, commentPaint, commentTypeface);
+          if (isCommentOnTop) {
+            commentX = candidateRect[i].centerX();
           } else {
-            x -= comment_width / 2;
-            comment_x = candidateRect[i].right - comment_width / 2;
+            candidateX -= commentWidth / 2;
+            commentX = candidateRect[i].right - commentWidth / 2;
           }
-          paintComment.setColor(isHighlighted(i) ? hilited_comment_text_color : comment_text_color);
-          drawText(comment, canvas, paintComment, tfComment, comment_x, comment_y);
+          commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
+          drawText(comment, canvas, commentPaint, commentTypeface, commentX, commentY);
         }
       }
-      paintCandidate.setColor(
-          isHighlighted(i) ? hilited_candidate_text_color : candidate_text_color);
-      drawText(getCandidate(i), canvas, paintCandidate, tfCandidate, x, y);
+      candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
+      drawText(getCandidate(i), canvas, candidatePaint, candidateTypeface, candidateX, candidateY);
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
           candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
           candidateRect[i].top,
-          candidateRect[i].right + candidate_spacing,
+          candidateRect[i].right + candidateSpacing,
           candidateRect[i].bottom);
       candidateSeparator.draw(canvas);
       i++;
@@ -262,13 +264,14 @@ public class Candidate extends View {
     for (int j = -4; j >= -5; j--) { // -4: left, -5: right
       candidate = getCandidate(j);
       if (candidate == null) continue;
-      paintSymbol.setColor(isHighlighted(i) ? hilited_comment_text_color : comment_text_color);
-      x = candidateRect[i].centerX() - measureText(candidate, paintSymbol, tfSymbol) / 2;
-      canvas.drawText(candidate, x, y, paintSymbol);
+      symbolPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
+      candidateX =
+          candidateRect[i].centerX() - measureText(candidate, symbolPaint, symbolTypeface) / 2;
+      canvas.drawText(candidate, candidateX, candidateY, symbolPaint);
       candidateSeparator.setBounds(
           candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
           candidateRect[i].top,
-          candidateRect[i].right + candidate_spacing,
+          candidateRect[i].right + candidateSpacing,
           candidateRect[i].bottom);
       candidateSeparator.draw(canvas);
       i++;
@@ -291,18 +294,18 @@ public class Candidate extends View {
     final int bottom = getHeight();
     int i;
     int x = 0;
-    if (Rime.hasLeft()) x += getCandidateWidth(-4) + candidate_spacing;
+    if (Rime.hasLeft()) x += getCandidateWidth(-4) + candidateSpacing;
     getCandNum();
     for (i = 0; i < num_candidates; i++) {
       candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
-      x += candidate_spacing;
+      x += candidateSpacing;
     }
     if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int) getCandidateWidth(-4), bottom);
     if (Rime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
     LayoutParams params = getLayoutParams();
     params.width = x;
-    params.height = candidate_view_height;
-    if (show_comment && comment_on_top) params.height += comment_height;
+    params.height = candidateViewHeight;
+    if (shouldShowComment && isCommentOnTop) params.height += commentHeight;
     setLayoutParams(params);
   }
 
@@ -406,7 +409,8 @@ public class Candidate extends View {
     int length = s.length();
     if (length == 0) return x;
     int points = s.codePointCount(0, length);
-    if (tfLatin != Typeface.DEFAULT || (tfHanB != Typeface.DEFAULT && length > points)) {
+    if (latinTypeface != Typeface.DEFAULT
+        || (hanBTypeface != Typeface.DEFAULT && length > points)) {
       int offset = 0;
       while (offset < length) {
         int codepoint = s.codePointAt(offset);
@@ -427,13 +431,13 @@ public class Candidate extends View {
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
     // float n = (s == null ? 0 : s.codePointCount(0, s.length()));
-    float x = 2 * candidate_padding;
-    if (s != null) x += measureText(s, paintCandidate, tfCandidate);
-    if (i >= 0 && show_comment) {
+    float x = 2 * candidatePadding;
+    if (s != null) x += measureText(s, candidatePaint, candidateTypeface);
+    if (i >= 0 && shouldShowComment) {
       String comment = getComment(i);
       if (comment != null) {
-        float x2 = measureText(comment, paintComment, tfComment);
-        if (comment_on_top) {
+        float x2 = measureText(comment, commentPaint, commentTypeface);
+        if (isCommentOnTop) {
           if (x2 > x) x = x2;
         } // 提示在上方
         else x += x2; // 提示在右方

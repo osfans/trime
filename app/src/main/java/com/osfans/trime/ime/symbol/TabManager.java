@@ -1,5 +1,6 @@
 package com.osfans.trime.ime.symbol;
 
+import androidx.annotation.NonNull;
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class TabManager {
     keyboard = new ArrayList<>();
   }
 
-  public void addTab(String name, SymbolKeyboardType type, List<SimpleKeyBean> keyBeans) {
+  public void addTab(@NonNull String name, SymbolKeyboardType type, List<SimpleKeyBean> keyBeans) {
     if (name.trim().length() < 1) return;
 
     if (SymbolKeyboardType.Companion.needKeys(type)) {
@@ -111,15 +112,15 @@ public class TabManager {
     return selected;
   }
 
-  public TabTag[] getTabCanditates() {
-    boolean add_exit = true;
+  public TabTag[] getTabCandidates() {
+    boolean addExit = true;
     for (TabTag tag : tabTags) {
       if (tag.command == KeyCommandType.EXIT) {
-        add_exit = false;
+        addExit = false;
         break;
       }
     }
-    if (add_exit) {
+    if (addExit) {
       tabTags.add(tagExit);
       keyboards.add(notKeyboard);
     }

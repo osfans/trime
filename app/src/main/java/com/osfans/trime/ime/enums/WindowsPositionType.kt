@@ -32,6 +32,7 @@ enum class WindowsPositionType {
             }
         }
 
+        @JvmStatic
         fun fromString(code: String): WindowsPositionType {
             val type = convertMap[code.uppercase(Locale.getDefault())]
             return type ?: FIXED

@@ -44,7 +44,7 @@ buildscript {
  */
 
 plugins {
-    id "com.diffplug.spotless" version "5.14.2"
+    id "com.diffplug.spotless" version "5.15.0"
 }
 
 allprojects {
@@ -59,7 +59,7 @@ spotless {
         importOrder()
         removeUnusedImports()
         target 'app/src/main/java/com/osfans/trime/**/*.java'
-        googleJavaFormat('1.7')
+        googleJavaFormat('1.11.0')
     }
     kotlin {
         target 'app/src/main/java/com/osfans/trime/**/*.kt'
