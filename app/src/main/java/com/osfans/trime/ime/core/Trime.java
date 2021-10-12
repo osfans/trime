@@ -437,6 +437,7 @@ public class Trime extends InputMethodService
       if (mCandidateContainer.getHeight() > 0)
         intent.putExtra("candidate_view_height", mCandidateContainer.getHeight());
       else intent.putExtra("candidate_view_height", mConfig.getPixel("candidate_view_height"));
+      intent.putExtra("hand_writing_color", mConfig.getCurrentColor_("hand_writing_color"));
       intent.putExtra("back_color", mConfig.getCurrentColor_("back_color"));
       intent.putExtra("text_color", mConfig.getCurrentColor_("text_color"));
       intent.putExtra("candidate_text_color", mConfig.getCurrentColor_("candidate_text_color"));

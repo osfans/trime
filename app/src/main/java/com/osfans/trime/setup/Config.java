@@ -891,6 +891,8 @@ public class Config {
           }
         }
       }
+
+      // Timber.d("initCurrentColors() %s = %s", key, curcentColors.get(key));
     }
   }
 
