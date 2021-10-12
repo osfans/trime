@@ -74,6 +74,7 @@ import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
+import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.ime.symbol.TabView;
 import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
@@ -117,7 +118,7 @@ public class Trime extends InputMethodService
   private Candidate mCandidate; // 候選
   private Composition mComposition; // 編碼
   private CompositionRootBinding compositionRootBinding = null;
-  private ScrollView mCandidateRoot;
+  private ScrollView mCandidateRoot, mTabRoot;
   private TabView tabView;
   private InputRootBinding inputRootBinding = null;
   private AlertDialog mOptionsDialog; // 對話框
@@ -387,7 +388,7 @@ public class Trime extends InputMethodService
         setCandidatesViewShown(canCompose && !value);
         break;
       case "_liquid_keyboard":
-        selectLiquidKeyboard(value ? 0 : -1);
+        selectLiquidKeyboard(0);
         break;
       case "_hide_key_hint":
         if (mainKeyboardView != null) mainKeyboardView.setShowHint(!value);
@@ -410,8 +411,6 @@ public class Trime extends InputMethodService
           final String key = option.substring(5);
           onEvent(new Event(key));
           if (bNeedUpdate) mNeedUpdateRimeOption = true;
-        } else if (option.matches("_liquid_keyboard_\\d+")) {
-          selectLiquidKeyboard(Integer.parseInt(option.replace("_liquid_keyboard_", "")));
         } else if (option.startsWith("_one_hand_mode")) {
           char c = option.charAt(option.length() - 1);
           if (c == '1' && value) oneHandMode = 1;
@@ -470,12 +469,19 @@ public class Trime extends InputMethodService
 
         tabView.updateCandidateWidth();
         if (inputRootBinding != null) {
-          inputRootBinding.symbol.symbolInput.setBackground(mCandidateRoot.getBackground());
+          mTabRoot.setBackground(mCandidateRoot.getBackground());
+          mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
         }
       } else symbolInputView.setVisibility(View.GONE);
     }
     if (mainInputView != null)
       mainInputView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
+  }
+
+  // 按键需要通过tab name来打开liquidKeyboard的指定tab
+  public void selectLiquidKeyboard(String name) {
+    if (name.matches("\\d+")) selectLiquidKeyboard(Integer.parseInt(name));
+    else selectLiquidKeyboard(TabManager.getTagIndex(name));
   }
 
   public void invalidate() {
@@ -680,6 +686,7 @@ public class Trime extends InputMethodService
 
     // 初始化候选栏
     mCandidateRoot = inputRootBinding.main.candidateView.getRoot();
+    mTabRoot = inputRootBinding.symbol.tabView.getRoot();
     mCandidate = inputRootBinding.main.candidateView.candidates;
     mCandidate.setCandidateListener(this);
     mCandidateRoot.setPageStr(
@@ -1099,6 +1106,8 @@ public class Trime extends InputMethodService
           }
         }
       } else if (code == KeyEvent.KEYCODE_FUNCTION) { // 命令直通車
+
+        final String command = event.getCommand();
         final String arg =
             String.format(
                 event.getOption(),
@@ -1106,10 +1115,14 @@ public class Trime extends InputMethodService
                 getActiveText(2),
                 getActiveText(3),
                 getActiveText(4));
-        s = (String) ShortcutUtils.INSTANCE.call(this, event.getCommand(), arg);
-        if (s != null) {
-          commitText(s);
-          updateComposing();
+        if (command.equals("liquid_keyboard")) {
+          selectLiquidKeyboard(arg);
+        } else {
+          s = (String) ShortcutUtils.INSTANCE.call(this, command, arg);
+          if (s != null) {
+            commitText(s);
+            updateComposing();
+          }
         }
       } else if (code == KeyEvent.KEYCODE_VOICE_ASSIST) { // 語音輸入
         new Speech(this).startListening();
@@ -1318,8 +1331,13 @@ public class Trime extends InputMethodService
       }
     } else if (index == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, 0);
     else if (index == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
-    else // if (Rime.selectCandidate(index))
-    {
+    else if (getPrefs().getOther().getClickCandidateAndCommit() || index > 9) {
+      if (Rime.selectCandidate(index)) {
+        commitText();
+      }
+    } else if (index == 9) {
+      handleKey(KeyEvent.KEYCODE_0, 0);
+    } else {
       handleKey(KeyEvent.KEYCODE_1 + index, 0);
     }
   }
@@ -1374,6 +1392,8 @@ public class Trime extends InputMethodService
       } else {
         mCandidate.setText(0);
       }
+      // 刷新候选词后，如果候选词超出屏幕宽度，滚动候选栏
+      mTabRoot.move(mCandidate.getHightlightLeft(), mCandidate.getHightlightRight());
     }
     if (mainKeyboardView != null) mainKeyboardView.invalidateComposingKeys();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); // 實體鍵盤打字時顯示候選欄

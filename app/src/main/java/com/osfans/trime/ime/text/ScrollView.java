@@ -10,6 +10,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.HorizontalScrollView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.Rime;
+import timber.log.Timber;
 
 public class ScrollView extends HorizontalScrollView {
   private View inner;
@@ -92,15 +93,11 @@ public class ScrollView extends HorizontalScrollView {
         if (inner.getLeft() > 100 && Rime.hasLeft()) {
           if (pageUpAction != null) pageUpAction.run();
           if (inner.getWidth() > this.getWidth())
-            inner.layout(
-                this.getWidth() - inner.getWidth() - 400,
-                inner.getTop(),
-                this.getWidth() - 400,
-                inner.getBottom());
+            scrollTo(this.getWidth() - inner.getWidth() + 400, 0);
         } else if (inner.getWidth() - inner.getRight() > 100 && Rime.hasRight()) {
           if (pageDownAction != null) pageDownAction.run();
           if (inner.getWidth() > this.getWidth()) {
-            inner.layout(400, inner.getTop(), this.getWidth() + 400, inner.getBottom());
+            scrollTo(-400, 0);
           }
         } else {
           // When the scroll to the top or the most when it will not scroll, then move the layout.
@@ -156,6 +153,15 @@ public class ScrollView extends HorizontalScrollView {
   public void isNeedMove() {
     if (getScrollY() == 0) {
       isMoving = true;
+    }
+  }
+
+  public void move(int left, int right) {
+    Timber.i("ScroolView move(%s %s), scroll=%s", left, right, getScrollX());
+    if (right > getScrollX() + getWidth()) {
+      scrollTo(right - getWidth(), 0);
+    } else if (left < getScrollX()) {
+      scrollTo(left, 0);
     }
   }
 }

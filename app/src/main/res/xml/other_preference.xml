@@ -29,6 +29,10 @@
         app:iconSpaceReserved="false"
         android:title="@string/other__selection_sense_title" />
 
+    <SwitchPreferenceCompat android:key="other__click_candidate_and_commit"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__click_candidate_and_commit" />
+
     <ListPreference
         android:defaultValue="100"
         app:iconSpaceReserved="false"

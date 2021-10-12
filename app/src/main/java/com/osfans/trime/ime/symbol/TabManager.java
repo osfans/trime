@@ -29,6 +29,17 @@ public class TabManager {
     return self.tabTags.get(i);
   }
 
+  public static int getTagIndex(String name) {
+    if (name == null || name.length() < 1) return 0;
+    for (int i = 0; i < self.tabTags.size(); i++) {
+      TabTag tag = self.tabTags.get(i);
+      if (tag.text.equals(name)) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
   private TabManager() {
     selected = 0;
     tabTags = new ArrayList<>();

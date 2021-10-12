@@ -185,6 +185,18 @@ public class Candidate extends View {
     }
   }
 
+  public int getHightlightLeft() {
+    if (highlightIndex < candidateRect.length && highlightIndex >= 0)
+      return candidateRect[highlightIndex].left;
+    return 0;
+  }
+
+  public int getHightlightRight() {
+    if (highlightIndex < candidateRect.length && highlightIndex >= 0)
+      return candidateRect[highlightIndex].right;
+    return 0;
+  }
+
   private Typeface getFont(int codepoint, Typeface font) {
     if (hanBTypeface != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint))
       return hanBTypeface;

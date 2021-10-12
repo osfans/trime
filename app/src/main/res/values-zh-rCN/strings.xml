@@ -157,4 +157,5 @@
     <string name="other__selection_sense_title">用 Ctrl+Left/Right 快速移动光标</string>
     <string name="pref__system_default">系统默认</string>
     <string name="keyboard__key_swipe_travel_title">触发滑动手势的最短距离</string>
+    <string name="other__click_candidate_and_commit">点击候选词时直接上屏</string>
 </resources>
