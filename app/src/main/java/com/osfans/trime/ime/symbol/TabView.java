@@ -25,17 +25,16 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.PaintDrawable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-
 import androidx.annotation.NonNull;
-
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.GraphicUtils;
+
 import timber.log.Timber;
 
 // 这是滑动键盘顶部的view，展示了键盘布局的多个标签。
@@ -47,13 +46,12 @@ public class TabView extends View {
 
   private int highlightIndex;
   private TabTag[] tabTags;
+  private final GraphicUtils graphicUtils;
 
   private PaintDrawable candidateHighlight;
   private final Paint separatorPaint;
   private final Paint candidatePaint;
   private Typeface candidateFont;
-  private Typeface hanBFont;
-  private Typeface latinFont;
   private int candidateTextColor, hilitedCandidateTextColor;
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private final boolean shouldShowComment = true;
@@ -81,8 +79,6 @@ public class TabView extends View {
     candidateViewHeight = config.getPixel("candidate_view_height");
 
     candidateFont = config.getFont("candidate_font");
-    latinFont = config.getFont("latin_font");
-    hanBFont = config.getFont("hanb_font");
 
     candidatePaint.setTextSize(candidateTextSize);
     candidatePaint.setTypeface(candidateFont);
@@ -101,6 +97,7 @@ public class TabView extends View {
     separatorPaint = new Paint();
     separatorPaint.setColor(Color.BLACK);
 
+    graphicUtils = new GraphicUtils(context);
     reset(context);
 
     setWillNotDraw(false);
@@ -125,34 +122,6 @@ public class TabView extends View {
     return tabGeometries[highlightIndex].right;
   }
 
-  private Typeface getFont(int codepoint, Typeface font) {
-    if (hanBFont != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint)) return hanBFont;
-    if (latinFont != Typeface.DEFAULT && codepoint < 0x2e80) return latinFont;
-    return font;
-  }
-
-  private void drawText(
-      String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
-    if (TextUtils.isEmpty(s)) return;
-    int codePoints = s.codePointCount(0, s.length());
-    float x = center - measureText(s, paint, font) / 2;
-    if (latinFont != Typeface.DEFAULT || (hanBFont != Typeface.DEFAULT && s.length() > codePoints)) {
-      int offset = 0;
-      while (offset < s.length()) {
-        int codePoint = s.codePointAt(offset);
-        int charCount = Character.charCount(codePoint);
-        int end = offset + charCount;
-        paint.setTypeface(getFont(codePoint, font));
-        canvas.drawText(s, offset, end, x, y, paint);
-        x += paint.measureText(s, offset, end);
-        offset = end;
-      }
-    } else {
-      paint.setTypeface(font);
-      canvas.drawText(s, x, y, paint);
-    }
-  }
-
   private void drawCandidates(Canvas canvas) {
     if (tabTags == null) return;
 
@@ -166,7 +135,7 @@ public class TabView extends View {
 
       candidatePaint.setColor(
           isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
-      drawText(getTabText(i), canvas, candidatePaint, candidateFont, x, y);
+      graphicUtils.drawText(canvas, getTabText(i), x, y,candidatePaint, candidateFont);
       // Draw the separator at the right edge of each candidate.
       canvas.drawRect(
               tabGeometries[i].right - candidateSpacing,
@@ -298,30 +267,8 @@ public class TabView extends View {
     return "-1";
   }
 
-  private float measureText(String s, Paint paint, Typeface font) {
-    if (TextUtils.isEmpty(s)) return 0;
-    float x = 0;
-    int codePoints = s.codePointCount(0, s.length());
-    if (latinFont != Typeface.DEFAULT || (hanBFont != Typeface.DEFAULT && s.length() > codePoints)) {
-      int offset = 0;
-      while (offset < s.length()) {
-        int codepoint = s.codePointAt(offset);
-        int charCount = Character.charCount(codepoint);
-        int end = offset + charCount;
-        paint.setTypeface(getFont(codepoint, font));
-        x += paint.measureText(s, offset, end);
-        offset = end;
-      }
-      paint.setTypeface(font);
-    } else {
-      paint.setTypeface(font);
-      x += paint.measureText(s);
-    }
-    return x;
-  }
-
   private float getTabWidth(int i) {
     String s = getTabText(i);
-    return s != null ? 2 * candidatePadding + measureText(s, candidatePaint, candidateFont) : 2 * candidatePadding;
+    return s != null ? 2 * candidatePadding + graphicUtils.measureText(candidatePaint, s, candidateFont) : 2 * candidatePadding;
   }
 }
