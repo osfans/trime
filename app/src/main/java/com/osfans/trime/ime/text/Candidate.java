@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
+import com.osfans.trime.util.GraphicUtils;
 
 /** 顯示候選字詞 */
 public class Candidate extends View {
@@ -45,6 +46,7 @@ public class Candidate extends View {
   private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
   private EventListener listener;
+  private GraphicUtils graphicUtils;
   private int highlightIndex;
   private Rime.RimeCandidate[] candidates;
   private int num_candidates;
@@ -113,6 +115,8 @@ public class Candidate extends View {
     commentPaint = new Paint();
     commentPaint.setAntiAlias(true);
     commentPaint.setStrokeWidth(0);
+
+    graphicUtils = new GraphicUtils(context);
 
     reset(context);
 
@@ -197,38 +201,6 @@ public class Candidate extends View {
     return 0;
   }
 
-  private Typeface getFont(int codepoint, Typeface font) {
-    if (hanBTypeface != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codepoint))
-      return hanBTypeface;
-    if (latinTypeface != Typeface.DEFAULT && codepoint < 0x2e80) return latinTypeface;
-    return font;
-  }
-
-  private void drawText(
-      String s, Canvas canvas, Paint paint, Typeface font, float center, float y) {
-    if (s == null) return;
-    int length = s.length();
-    if (length == 0) return;
-    int points = s.codePointCount(0, length);
-    float x = center - measureText(s, paint, font) / 2;
-    if (latinTypeface != Typeface.DEFAULT
-        || (hanBTypeface != Typeface.DEFAULT && length > points)) {
-      int offset = 0;
-      while (offset < length) {
-        int codepoint = s.codePointAt(offset);
-        int charCount = Character.charCount(codepoint);
-        int end = offset + charCount;
-        paint.setTypeface(getFont(codepoint, font));
-        canvas.drawText(s, offset, end, x, y, paint);
-        x += paint.measureText(s, offset, end);
-        offset = end;
-      }
-    } else {
-      paint.setTypeface(font);
-      canvas.drawText(s, x, y, paint);
-    }
-  }
-
   private void drawCandidates(Canvas canvas) {
     if (candidates == null) return;
 
@@ -251,7 +223,7 @@ public class Candidate extends View {
       if (shouldShowComment) {
         final String comment = getComment(i);
         if (!TextUtils.isEmpty(comment)) {
-          commentWidth = measureText(comment, commentPaint, commentTypeface);
+          commentWidth = graphicUtils.measureText(commentPaint, comment, commentTypeface);
           if (isCommentOnTop) {
             commentX = candidateRect[i].centerX();
           } else {
@@ -259,11 +231,11 @@ public class Candidate extends View {
             commentX = candidateRect[i].right - commentWidth / 2;
           }
           commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
-          drawText(comment, canvas, commentPaint, commentTypeface, commentX, commentY);
+          graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentTypeface);
         }
       }
       candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
-      drawText(getCandidate(i), canvas, candidatePaint, candidateTypeface, candidateX, candidateY);
+      graphicUtils.drawText(canvas, getCandidate(i), candidateX, candidateY, candidatePaint, candidateTypeface);
       // Draw the separator at the right edge of each candidate.
       candidateSeparator.setBounds(
           candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -278,7 +250,7 @@ public class Candidate extends View {
       if (candidate == null) continue;
       symbolPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
       candidateX =
-          candidateRect[i].centerX() - measureText(candidate, symbolPaint, symbolTypeface) / 2;
+          candidateRect[i].centerX() - graphicUtils.measureText(symbolPaint, candidate, symbolTypeface) / 2;
       canvas.drawText(candidate, candidateX, candidateY, symbolPaint);
       candidateSeparator.setBounds(
           candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
@@ -415,40 +387,15 @@ public class Candidate extends View {
     return s;
   }
 
-  private float measureText(String s, Paint paint, Typeface font) {
-    float x = 0;
-    if (s == null) return x;
-    int length = s.length();
-    if (length == 0) return x;
-    int points = s.codePointCount(0, length);
-    if (latinTypeface != Typeface.DEFAULT
-        || (hanBTypeface != Typeface.DEFAULT && length > points)) {
-      int offset = 0;
-      while (offset < length) {
-        int codepoint = s.codePointAt(offset);
-        int charCount = Character.charCount(codepoint);
-        int end = offset + charCount;
-        paint.setTypeface(getFont(codepoint, font));
-        x += paint.measureText(s, offset, end);
-        offset = end;
-      }
-      paint.setTypeface(font);
-    } else {
-      paint.setTypeface(font);
-      x += paint.measureText(s);
-    }
-    return x;
-  }
-
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
     // float n = (s == null ? 0 : s.codePointCount(0, s.length()));
     float x = 2 * candidatePadding;
-    if (s != null) x += measureText(s, candidatePaint, candidateTypeface);
+    if (s != null) x += graphicUtils.measureText(candidatePaint, s, candidateTypeface);
     if (i >= 0 && shouldShowComment) {
       String comment = getComment(i);
       if (comment != null) {
-        float x2 = measureText(comment, commentPaint, commentTypeface);
+        float x2 = graphicUtils.measureText(commentPaint, comment, commentTypeface);
         if (isCommentOnTop) {
           if (x2 > x) x = x2;
         } // 提示在上方
