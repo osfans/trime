@@ -20,16 +20,19 @@ package com.osfans.trime.ime.text;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+
+import androidx.annotation.NonNull;
+
 import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.GraphicUtils;
@@ -46,17 +49,18 @@ public class Candidate extends View {
   private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
   private EventListener listener;
-  private GraphicUtils graphicUtils;
+  private final GraphicUtils graphicUtils;
   private int highlightIndex;
   private Rime.RimeCandidate[] candidates;
-  private int num_candidates;
-  private int start_num = 0;
+  private int numCandidates;
+  private int startNum = 0;
 
-  private Drawable candidateHighlight, candidateSeparator;
+  private PaintDrawable candidateHighlight;
+  private final Paint separatorPaint;
   private final Paint candidatePaint;
   private final Paint symbolPaint;
   private final Paint commentPaint;
-  private Typeface candidateTypeface, symbolTypeface, commentTypeface, hanBTypeface, latinTypeface;
+  private Typeface candidateFont, symbolFont, commentFont;
   private int candidateTextColor, hilitedCandidateTextColor;
   private int commentTextColor, hilitedCommentTextColor;
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
@@ -67,8 +71,8 @@ public class Candidate extends View {
   public void reset(Context context) {
     Config config = Config.get(context);
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
-    ((PaintDrawable) candidateHighlight).setCornerRadius(config.getFloat("layout/round_corner"));
-    candidateSeparator = new PaintDrawable(config.getColor("candidate_separator_color"));
+    candidateHighlight.setCornerRadius(config.getFloat("layout/round_corner"));
+    separatorPaint.setColor(config.getColor("candidate_separator_color"));
     candidateSpacing = config.getPixel("candidate_spacing");
     candidatePadding = config.getPixel("candidate_padding");
 
@@ -82,18 +86,16 @@ public class Candidate extends View {
     candidateViewHeight = config.getPixel("candidate_view_height");
     commentHeight = config.getPixel("comment_height");
 
-    candidateTypeface = config.getFont("candidate_font");
-    latinTypeface = config.getFont("latin_font");
-    hanBTypeface = config.getFont("hanb_font");
-    commentTypeface = config.getFont("comment_font");
-    symbolTypeface = config.getFont("symbol_font");
+    candidateFont = config.getFont("candidate_font");
+    commentFont = config.getFont("comment_font");
+    symbolFont = config.getFont("symbol_font");
 
     candidatePaint.setTextSize(candidate_text_size);
-    candidatePaint.setTypeface(candidateTypeface);
+    candidatePaint.setTypeface(candidateFont);
     symbolPaint.setTextSize(candidate_text_size);
-    symbolPaint.setTypeface(symbolTypeface);
+    symbolPaint.setTypeface(symbolFont);
     commentPaint.setTextSize(comment_text_size);
-    commentPaint.setTypeface(commentTypeface);
+    commentPaint.setTypeface(commentFont);
 
     isCommentOnTop = config.getBoolean("comment_on_top");
     candidateUseCursor = config.getBoolean("candidate_use_cursor");
@@ -116,6 +118,9 @@ public class Candidate extends View {
     commentPaint.setAntiAlias(true);
     commentPaint.setStrokeWidth(0);
 
+    separatorPaint = new Paint();
+    separatorPaint.setColor(Color.BLACK);
+
     graphicUtils = new GraphicUtils(context);
 
     reset(context);
@@ -137,10 +142,10 @@ public class Candidate extends View {
    * @param start 候選的起始編號
    */
   public void setText(int start) {
-    start_num = start;
+    startNum = start;
     removeHighlight();
     updateCandidateWidth();
-    if (getCandNum() > 0) {
+    if (updateCandidates() > 0) {
       invalidate();
     }
   }
@@ -155,7 +160,7 @@ public class Candidate extends View {
   private boolean pickHighlighted(int index) {
     if ((highlightIndex != -1) && (listener != null)) {
       if (index == -1) index = highlightIndex;
-      if (index >= 0) index += start_num;
+      if (index >= 0) index += startNum;
       listener.onCandidatePressed(index);
       return true;
     }
@@ -217,13 +222,13 @@ public class Candidate extends View {
     if (shouldShowComment && !isCommentOnTop) commentY += candidateRect[0].bottom - commentHeight;
 
     int i = 0;
-    while (i < num_candidates) {
+    while (i < numCandidates) {
       // Calculate a position where the text could be centered in the rectangle.
       candidateX = candidateRect[i].centerX();
       if (shouldShowComment) {
         final String comment = getComment(i);
         if (!TextUtils.isEmpty(comment)) {
-          commentWidth = graphicUtils.measureText(commentPaint, comment, commentTypeface);
+          commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
           if (isCommentOnTop) {
             commentX = candidateRect[i].centerX();
           } else {
@@ -231,18 +236,19 @@ public class Candidate extends View {
             commentX = candidateRect[i].right - commentWidth / 2;
           }
           commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
-          graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentTypeface);
+          graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
         }
       }
       candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
-      graphicUtils.drawText(canvas, getCandidate(i), candidateX, candidateY, candidatePaint, candidateTypeface);
+      graphicUtils.drawText(canvas, getCandidate(i), candidateX, candidateY, candidatePaint, candidateFont);
       // Draw the separator at the right edge of each candidate.
-      candidateSeparator.setBounds(
-          candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
-          candidateRect[i].top,
-          candidateRect[i].right + candidateSpacing,
-          candidateRect[i].bottom);
-      candidateSeparator.draw(canvas);
+      canvas.drawRect(
+              candidateRect[i].right - candidateSpacing,
+              candidateRect[i].top,
+              candidateRect[i].right + candidateSpacing,
+              candidateRect[i].bottom,
+              separatorPaint
+      );
       i++;
     }
     for (int j = -4; j >= -5; j--) { // -4: left, -5: right
@@ -250,14 +256,15 @@ public class Candidate extends View {
       if (candidate == null) continue;
       symbolPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
       candidateX =
-          candidateRect[i].centerX() - graphicUtils.measureText(symbolPaint, candidate, symbolTypeface) / 2;
+          candidateRect[i].centerX() - graphicUtils.measureText(symbolPaint, candidate, symbolFont) / 2;
       canvas.drawText(candidate, candidateX, candidateY, symbolPaint);
-      candidateSeparator.setBounds(
-          candidateRect[i].right - candidateSeparator.getIntrinsicWidth(),
-          candidateRect[i].top,
-          candidateRect[i].right + candidateSpacing,
-          candidateRect[i].bottom);
-      candidateSeparator.draw(canvas);
+      canvas.drawRect(
+              candidateRect[i].right - candidateSpacing,
+              candidateRect[i].top,
+              candidateRect[i].right + candidateSpacing,
+              candidateRect[i].bottom,
+              separatorPaint
+      );
       i++;
     }
   }
@@ -274,18 +281,16 @@ public class Candidate extends View {
   }
 
   private void updateCandidateWidth() {
-    final int top = 0;
-    final int bottom = getHeight();
     int i;
     int x = 0;
     if (Rime.hasLeft()) x += getCandidateWidth(-4) + candidateSpacing;
-    getCandNum();
-    for (i = 0; i < num_candidates; i++) {
-      candidateRect[i] = new Rect(x, top, x += getCandidateWidth(i), bottom);
+    updateCandidates();
+    for (i = 0; i < numCandidates; i++) {
+      candidateRect[i] = new Rect(x, 0, x += getCandidateWidth(i), getHeight());
       x += candidateSpacing;
     }
-    if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, top, (int) getCandidateWidth(-4), bottom);
-    if (Rime.hasRight()) candidateRect[i++] = new Rect(x, top, x += getCandidateWidth(-5), bottom);
+    if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, 0, (int) getCandidateWidth(-4), getHeight());
+    if (Rime.hasRight()) candidateRect[i++] = new Rect(x, 0, x += getCandidateWidth(-5), getHeight());
     LayoutParams params = getLayoutParams();
     params.width = x;
     params.height = candidateViewHeight;
@@ -305,12 +310,11 @@ public class Candidate extends View {
   }
 
   @Override
-  public boolean onTouchEvent(MotionEvent me) {
-    int action = me.getAction();
+  public boolean onTouchEvent(@NonNull MotionEvent me) {
     int x = (int) me.getX();
     int y = (int) me.getY();
 
-    switch (action) {
+    switch (me.getActionMasked()) {
       case MotionEvent.ACTION_DOWN:
       case MotionEvent.ACTION_MOVE:
         updateHighlight(x, y);
@@ -337,13 +341,13 @@ public class Candidate extends View {
     Rect r = new Rect();
 
     int j = 0;
-    for (int i = 0; i < num_candidates; i++) {
+    for (int i = 0; i < numCandidates; i++) {
       // Enlarge the rectangle to be more responsive to user clicks.
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
       if (r.contains(x, y)) {
         // Returns -1 if there is no candidate in the hitting rectangle.
-        return (i < num_candidates) ? i : -1;
+        return (i < numCandidates) ? i : -1;
       }
     }
 
@@ -366,16 +370,16 @@ public class Candidate extends View {
     return -1;
   }
 
-  private int getCandNum() {
+  private int updateCandidates() {
     candidates = Rime.getCandidates();
-    highlightIndex = Rime.getCandHighlightIndex() - start_num;
-    num_candidates = candidates == null ? 0 : candidates.length - start_num;
-    return num_candidates;
+    highlightIndex = Rime.getCandHighlightIndex() - startNum;
+    numCandidates = candidates == null ? 0 : candidates.length - startNum;
+    return numCandidates;
   }
 
   private String getCandidate(int i) {
     String s = null;
-    if (candidates != null && i >= 0) s = candidates[i + start_num].text;
+    if (candidates != null && i >= 0) s = candidates[i + startNum].text;
     else if (i == -4 && Rime.hasLeft()) s = "◀";
     else if (i == -5 && Rime.hasRight()) s = "▶";
     return s;
@@ -383,25 +387,25 @@ public class Candidate extends View {
 
   private String getComment(int i) {
     String s = null;
-    if (candidates != null && i >= 0) s = candidates[i + start_num].comment;
+    if (candidates != null && i >= 0) s = candidates[i + startNum].comment;
     return s;
   }
 
   private float getCandidateWidth(int i) {
     String s = getCandidate(i);
     // float n = (s == null ? 0 : s.codePointCount(0, s.length()));
-    float x = 2 * candidatePadding;
-    if (s != null) x += graphicUtils.measureText(candidatePaint, s, candidateTypeface);
+    float candidateWidth = 2 * candidatePadding;
+    if (s != null) candidateWidth += graphicUtils.measureText(candidatePaint, s, candidateFont);
     if (i >= 0 && shouldShowComment) {
       String comment = getComment(i);
       if (comment != null) {
-        float x2 = graphicUtils.measureText(commentPaint, comment, commentTypeface);
+        float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
         if (isCommentOnTop) {
-          if (x2 > x) x = x2;
+          if (commentWidth > candidateWidth) candidateWidth = commentWidth;
         } // 提示在上方
-        else x += x2; // 提示在右方
+        else candidateWidth += commentWidth; // 提示在右方
       }
     }
-    return x;
+    return candidateWidth;
   }
 }
