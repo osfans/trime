@@ -1285,9 +1285,7 @@ public class Trime extends InputMethodService
         Rime.toggleOption(index);
         updateComposing();
       }
-    } else if (index == -4) onKey(KeyEvent.KEYCODE_PAGE_UP, 0);
-    else if (index == -5) onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
-    else if (getPrefs().getOther().getClickCandidateAndCommit() || index > 9) {
+    } else if (getPrefs().getOther().getClickCandidateAndCommit() || index > 9) {
       if (Rime.selectCandidate(index)) {
         commitText();
       }
@@ -1295,6 +1293,16 @@ public class Trime extends InputMethodService
       handleKey(KeyEvent.KEYCODE_0, 0);
     } else {
       handleKey(KeyEvent.KEYCODE_1 + index, 0);
+    }
+  }
+
+  @Override
+  public void onCandidateSymbolPressed(@NonNull String arrow) {
+    switch (arrow) {
+      case Candidate.PAGE_UP_BUTTON:
+        onKey(KeyEvent.KEYCODE_PAGE_UP, 0);
+      case Candidate.PAGE_DOWN_BUTTON:
+        onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0);
     }
   }
 
@@ -1350,7 +1358,7 @@ public class Trime extends InputMethodService
         mCandidate.setText(0);
       }
       // 刷新候选词后，如果候选词超出屏幕宽度，滚动候选栏
-      mTabRoot.move(mCandidate.getHightlightLeft(), mCandidate.getHightlightRight());
+      mTabRoot.move(mCandidate.getHighlightLeft(), mCandidate.getHighlightRight());
     }
     if (mainKeyboardView != null) mainKeyboardView.invalidateComposingKeys();
     if (!onEvaluateInputViewShown()) setCandidatesViewShown(canCompose); // 實體鍵盤打字時顯示候選欄

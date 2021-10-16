@@ -35,8 +35,9 @@ class GraphicUtils(
         if (text.isEmpty()) return 0.0f
         val codePoints = text.codePointCount(0, text.length)
         var x = 0.0f
-        if (latinFont != Typeface.DEFAULT
-            || (hanBFont != Typeface.DEFAULT && text.length > codePoints)) {
+        if (latinFont != Typeface.DEFAULT ||
+            (hanBFont != Typeface.DEFAULT && text.length > codePoints)
+        ) {
             var offset = 0
             while (offset < text.length) {
                 val codePoint = text.codePointAt(offset)
@@ -57,8 +58,9 @@ class GraphicUtils(
         if (text.isEmpty()) return
         val codePoints = text.codePointCount(0, text.length)
         var x = centerX - paint.measureText(text, font) / 2
-        if (latinFont != Typeface.DEFAULT
-            || (hanBFont != Typeface.DEFAULT && text.length > codePoints)) {
+        if (latinFont != Typeface.DEFAULT ||
+            (hanBFont != Typeface.DEFAULT && text.length > codePoints)
+        ) {
             var offset = 0
             while (offset < text.length) {
                 val codePoint = text.codePointAt(offset)
