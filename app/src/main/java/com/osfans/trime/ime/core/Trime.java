@@ -71,6 +71,7 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
+import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.ime.symbol.TabView;
@@ -92,7 +93,7 @@ import kotlin.jvm.Synchronized;
 import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */
-public class Trime extends InputMethodService
+public class Trime extends LifecycleInputMethodService
     implements KeyboardView.OnKeyboardActionListener, Candidate.EventListener {
   private static Trime self = null;
   private LiquidKeyboard liquidKeyboard;
