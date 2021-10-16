@@ -33,7 +33,7 @@ android {
         }
     }
 
-    def propsFile = rootProject.file('gradle.properties') //store release config in gradle.properties
+    def propsFile = rootProject.file('keystore.properties') //store release config in keystore.properties
     def configName = 'release'
 
     if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
