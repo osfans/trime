@@ -42,22 +42,35 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+
 import com.osfans.trime.R;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.KeyEventType;
+import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.CoroutineScope;
 import timber.log.Timber;
 
 /** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
-public class KeyboardView extends View implements View.OnClickListener {
+public class KeyboardView extends View implements View.OnClickListener, CoroutineScope {
+
+  @NonNull
+  @Override
+  public CoroutineContext getCoroutineContext() {
+    return CoroutineScopeJava.getMainScopeJava().getCoroutineContext();
+  }
 
   /** 處理按鍵、觸摸等輸入事件 */
   public interface OnKeyboardActionListener {
@@ -342,7 +355,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     try {
       findStateDrawableIndex =
           StateListDrawable.class.getMethod(
-              Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT >= Build.VERSION_CODES.Q
+              Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                   ? "findStateDrawableIndex"
                   : "getStateDrawableIndex",
               int[].class);
@@ -426,8 +439,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 } else if ((deltaY > travel || velocityY > mSwipeThreshold) && absX < absY) {
                   if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                     Timber.d(
-                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold="
-                            + mSwipeThreshold,
+                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%s", mSwipeThreshold,
                         deltaY,
                         velocityY,
                         endingVelocityY,
