@@ -63,7 +63,7 @@ cd $trime_folder
 make debug
 ```
 
-Or if you want to sign for the app to release, create a `gradle.properties` contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
+Or if you want to sign for the app to release, create a `keystore.properties` contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
 
 ```bash
 storePassword=myStorePassword

@@ -55,7 +55,7 @@ cd $trime_folder
 make debug
 ```
 
-或者要为应用签名以释放更新，请创建一个名为 `gradle.properties` 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html)：
+或者要为应用签名以释放更新，请创建一个名为 `keystore.properties` 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html)：
 
 ```bash
 storePassword=myStorePassword
