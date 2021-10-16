@@ -18,6 +18,7 @@
 
 package com.osfans.trime.ime.text;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -30,12 +31,13 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-
 import androidx.annotation.NonNull;
-
+import androidx.annotation.Nullable;
 import com.osfans.trime.Rime;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.GraphicUtils;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /** 顯示候選字詞 */
 public class Candidate extends View {
@@ -43,15 +45,20 @@ public class Candidate extends View {
   /** 處理候選條選字事件 */
   public interface EventListener {
     void onCandidatePressed(int index);
+    void onCandidateSymbolPressed(String arrow);
   }
 
   private static final int MAX_CANDIDATE_COUNT = 30;
-  private static final int CANDIDATE_TOUCH_OFFSET = -12;
+  public static final String PAGE_UP_BUTTON = "◀";
+  public static final String PAGE_DOWN_BUTTON = "▶";
+  // private static final int CANDIDATE_TOUCH_OFFSET = -12;
 
-  private EventListener listener;
+  private WeakReference<EventListener> listener = new WeakReference<>(null);
   private final GraphicUtils graphicUtils;
-  private int highlightIndex;
+  private int highlightIndex = -1;
   private Rime.RimeCandidate[] candidates;
+  private final ArrayList<ComputedCandidate> computedCandidates =
+      new ArrayList<>(MAX_CANDIDATE_COUNT);
   private int numCandidates;
   private int startNum = 0;
 
@@ -65,8 +72,6 @@ public class Candidate extends View {
   private int commentTextColor, hilitedCommentTextColor;
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private boolean shouldShowComment = true, isCommentOnTop, candidateUseCursor;
-
-  private final Rect[] candidateRect = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset(Context context) {
     Config config = Config.get(context);
@@ -132,8 +137,8 @@ public class Candidate extends View {
     return MAX_CANDIDATE_COUNT;
   }
 
-  public void setCandidateListener(EventListener listener) {
-    this.listener = listener;
+  public void setCandidateListener(@Nullable EventListener listener) {
+    this.listener = new WeakReference<>(listener);
   }
 
   /**
@@ -156,25 +161,21 @@ public class Candidate extends View {
    * @param index 候選項序號（從0開始），{@code -1}表示選擇當前高亮候選項
    * @return 是否成功選字
    */
-  @SuppressWarnings("UnusedReturnValue")
-  private boolean pickHighlighted(int index) {
-    if ((highlightIndex != -1) && (listener != null)) {
-      if (index == -1) index = highlightIndex;
-      if (index >= 0) index += startNum;
-      listener.onCandidatePressed(index);
-      return true;
+  private void onCandidateClick(int index) {
+    ComputedCandidate candidate = computedCandidates.get(index);
+    if (candidate != null) {
+      if (candidate instanceof ComputedCandidate.Word) {
+        if (listener.get() != null) {
+          listener.get().onCandidatePressed(index + startNum);
+        }
+      }
+      if (candidate instanceof ComputedCandidate.Symbol) {
+        String arrow = ((ComputedCandidate.Symbol) candidate).getArrow();
+        if (listener.get() != null) {
+          listener.get().onCandidateSymbolPressed(arrow);
+        }
+      }
     }
-    return false;
-  }
-
-  private boolean updateHighlight(int x, int y) {
-    int index = getCandidateIndex(x, y);
-    if (index != -1) {
-      highlightIndex = index;
-      invalidate();
-      return true;
-    }
-    return false;
   }
 
   private void removeHighlight() {
@@ -184,117 +185,142 @@ public class Candidate extends View {
   }
 
   private boolean isHighlighted(int i) {
-    return candidateUseCursor && i >= 0 && i == highlightIndex;
+    return candidateUseCursor && i == highlightIndex;
   }
 
-  private void drawHighlight(Canvas canvas) {
-    if (isHighlighted(highlightIndex)) {
-      candidateHighlight.setBounds(candidateRect[highlightIndex]);
-      candidateHighlight.draw(canvas);
-    }
-  }
-
-  public int getHightlightLeft() {
-    if (highlightIndex < candidateRect.length && highlightIndex >= 0)
-      return candidateRect[highlightIndex].left;
+  public int getHighlightLeft() {
+    if (highlightIndex < computedCandidates.size() && highlightIndex >= 0)
+      return computedCandidates.get(highlightIndex).getGeometry().left;
     return 0;
   }
 
-  public int getHightlightRight() {
-    if (highlightIndex < candidateRect.length && highlightIndex >= 0)
-      return candidateRect[highlightIndex].right;
+  public int getHighlightRight() {
+    if (highlightIndex < computedCandidates.size() && highlightIndex >= 0)
+      return computedCandidates.get(highlightIndex).getGeometry().right;
     return 0;
-  }
-
-  private void drawCandidates(Canvas canvas) {
-    if (candidates == null) return;
-
-    float candidateX;
-
-    float commentX, commentY;
-    float commentWidth;
-    String candidate;
-
-    float candidateY =
-        candidateRect[0].centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
-    if (shouldShowComment && isCommentOnTop) candidateY += commentHeight / 2f;
-    commentY = commentHeight / 2f - (commentPaint.ascent() + commentPaint.descent()) / 2;
-    if (shouldShowComment && !isCommentOnTop) commentY += candidateRect[0].bottom - commentHeight;
-
-    int i = 0;
-    while (i < numCandidates) {
-      // Calculate a position where the text could be centered in the rectangle.
-      candidateX = candidateRect[i].centerX();
-      if (shouldShowComment) {
-        final String comment = getComment(i);
-        if (!TextUtils.isEmpty(comment)) {
-          commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
-          if (isCommentOnTop) {
-            commentX = candidateRect[i].centerX();
-          } else {
-            candidateX -= commentWidth / 2;
-            commentX = candidateRect[i].right - commentWidth / 2;
-          }
-          commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
-          graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
-        }
-      }
-      candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
-      graphicUtils.drawText(canvas, getCandidate(i), candidateX, candidateY, candidatePaint, candidateFont);
-      // Draw the separator at the right edge of each candidate.
-      canvas.drawRect(
-              candidateRect[i].right - candidateSpacing,
-              candidateRect[i].top,
-              candidateRect[i].right + candidateSpacing,
-              candidateRect[i].bottom,
-              separatorPaint
-      );
-      i++;
-    }
-    for (int j = -4; j >= -5; j--) { // -4: left, -5: right
-      candidate = getCandidate(j);
-      if (candidate == null) continue;
-      symbolPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
-      candidateX =
-          candidateRect[i].centerX() - graphicUtils.measureText(symbolPaint, candidate, symbolFont) / 2;
-      canvas.drawText(candidate, candidateX, candidateY, symbolPaint);
-      canvas.drawRect(
-              candidateRect[i].right - candidateSpacing,
-              candidateRect[i].top,
-              candidateRect[i].right + candidateSpacing,
-              candidateRect[i].bottom,
-              separatorPaint
-      );
-      i++;
-    }
   }
 
   @Override
   protected void onDraw(Canvas canvas) {
-    if (canvas == null) {
-      return;
-    }
+    if (canvas == null) return;
+    if (candidates == null) return;
     super.onDraw(canvas);
 
-    drawHighlight(canvas);
-    drawCandidates(canvas);
+    for (ComputedCandidate computedCandidate : computedCandidates) {
+      int i = computedCandidates.indexOf(computedCandidate);
+      // Draw highlight
+      if (candidateUseCursor && i == highlightIndex) {
+        candidateHighlight.setBounds(computedCandidates.get(i).getGeometry());
+        candidateHighlight.draw(canvas);
+      }
+      // Draw candidates
+      if (computedCandidate instanceof ComputedCandidate.Word) {
+        float wordX = computedCandidate.getGeometry().centerX();
+        float wordY =
+            computedCandidates.get(0).getGeometry().centerY()
+                - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
+        if (shouldShowComment) {
+          String comment = ((ComputedCandidate.Word) computedCandidate).getComment();
+          if (comment != null && !comment.isEmpty()) {
+            float commentX = computedCandidate.getGeometry().centerX();
+            float commentY =
+                commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2;
+            wordY += commentHeight / 2.0f;
+            if (!isCommentOnTop) {
+              float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
+              commentX = computedCandidate.getGeometry().right - commentWidth / 2;
+              commentY += computedCandidates.get(0).getGeometry().bottom - commentHeight;
+              wordX -= commentWidth / 2.0f;
+              wordY -= commentHeight / 2.0f;
+            }
+            commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
+            graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
+          }
+        }
+        String word = ((ComputedCandidate.Word) computedCandidate).getWord();
+        candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
+        graphicUtils.drawText(canvas, word, wordX, wordY, candidatePaint, candidateFont);
+      } else if (computedCandidate instanceof ComputedCandidate.Symbol) {
+        // Draw page up / down buttons
+        String arrow = ((ComputedCandidate.Symbol) computedCandidate).getArrow();
+        float arrowX =
+            computedCandidate.getGeometry().centerX()
+                - graphicUtils.measureText(symbolPaint, arrow, symbolFont) / 2;
+        float arrowY =
+            computedCandidates.get(0).getGeometry().centerY()
+                - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
+        symbolPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
+        canvas.drawText(arrow, arrowX, arrowY, symbolPaint);
+      }
+      // Draw separators
+      if (i + 1 < computedCandidates.size()) {
+        canvas.drawRect(
+            computedCandidate.getGeometry().right - candidateSpacing,
+            computedCandidate.getGeometry().height() * 0.2f,
+            computedCandidate.getGeometry().right + candidateSpacing,
+            computedCandidate.getGeometry().height() * 0.8f,
+            separatorPaint);
+      }
+    }
   }
 
   private void updateCandidateWidth() {
-    int i;
-    int x = 0;
-    if (Rime.hasLeft()) x += getCandidateWidth(-4) + candidateSpacing;
+    computedCandidates.clear();
     updateCandidates();
-    for (i = 0; i < numCandidates; i++) {
-      candidateRect[i] = new Rect(x, 0, x += getCandidateWidth(i), getHeight());
-      x += candidateSpacing;
+    int x =
+        (!Rime.hasLeft())
+            ? 0
+            : (int)
+                (2 * candidatePadding
+                    + graphicUtils.measureText(symbolPaint, PAGE_UP_BUTTON, symbolFont)
+                    + candidateSpacing);
+    for (int i = 0; i < numCandidates; i++) {
+      int n = i + startNum;
+      float candidateWidth =
+          graphicUtils.measureText(candidatePaint, candidates[n].text, candidateFont)
+              + 2 * candidatePadding;
+      if (shouldShowComment) {
+        String comment = candidates[n].comment;
+        if (!TextUtils.isEmpty(comment)) {
+          float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
+          candidateWidth =
+              isCommentOnTop
+                  ? Math.max(candidateWidth, commentWidth)
+                  : candidateWidth + commentWidth;
+        }
+      }
+      computedCandidates.add(
+          new ComputedCandidate.Word(
+              candidates[n].text,
+              candidates[n].comment,
+              new Rect(x, 0, (int) (x + candidateWidth), getMeasuredHeight())));
+      x += candidateWidth + candidateSpacing;
     }
-    if (Rime.hasLeft()) candidateRect[i++] = new Rect(0, 0, (int) getCandidateWidth(-4), getHeight());
-    if (Rime.hasRight()) candidateRect[i++] = new Rect(x, 0, x += getCandidateWidth(-5), getHeight());
+    if (Rime.hasLeft()) {
+      float right =
+          candidateSpacing
+              + graphicUtils.measureText(symbolPaint, PAGE_UP_BUTTON, symbolFont)
+              + 2 * candidatePadding;
+      computedCandidates.add(
+          new ComputedCandidate.Symbol(
+              PAGE_UP_BUTTON, new Rect(0, 0, (int) right, getMeasuredHeight())));
+    }
+    if (Rime.hasRight()) {
+      float right =
+          candidateSpacing
+              + graphicUtils.measureText(symbolPaint, PAGE_DOWN_BUTTON, symbolFont)
+              + 2 * candidatePadding;
+      computedCandidates.add(
+          new ComputedCandidate.Symbol(
+              PAGE_DOWN_BUTTON, new Rect(x, 0, (int) ((int) x + right), getMeasuredHeight())));
+      x += (int) right;
+    }
     LayoutParams params = getLayoutParams();
     params.width = x;
-    params.height = candidateViewHeight;
-    if (shouldShowComment && isCommentOnTop) params.height += commentHeight;
+    params.height =
+        (shouldShowComment && isCommentOnTop)
+            ? candidateViewHeight + commentHeight
+            : candidateViewHeight;
     setLayoutParams(params);
   }
 
@@ -304,11 +330,7 @@ public class Candidate extends View {
     updateCandidateWidth();
   }
 
-  @Override
-  public boolean performClick() {
-    return super.performClick();
-  }
-
+  @SuppressLint("ClickableViewAccessibility")
   @Override
   public boolean onTouchEvent(@NonNull MotionEvent me) {
     int x = (int) me.getX();
@@ -317,13 +339,19 @@ public class Candidate extends View {
     switch (me.getActionMasked()) {
       case MotionEvent.ACTION_DOWN:
       case MotionEvent.ACTION_MOVE:
-        updateHighlight(x, y);
+        setPressed(true);
+        highlightIndex = getCandidateIndex(x, y);
+        invalidate();
         break;
+        // updateHighlight(x, y);
       case MotionEvent.ACTION_UP:
-        if (updateHighlight(x, y)) {
-          performClick();
-          pickHighlighted(-1);
+      case MotionEvent.ACTION_CANCEL:
+        setPressed(false);
+        if (me.getActionMasked() == MotionEvent.ACTION_UP) {
+          onCandidateClick(highlightIndex);
         }
+        highlightIndex = -1;
+        invalidate();
         break;
     }
     return true;
@@ -338,36 +366,20 @@ public class Candidate extends View {
    *     (x, y) 處爲{@code Page_Up}； {@code -5}: 觸摸點 (x, y) 處爲{@code Page_Down}
    */
   private int getCandidateIndex(int x, int y) {
-    Rect r = new Rect();
-
-    int j = 0;
-    for (int i = 0; i < numCandidates; i++) {
-      // Enlarge the rectangle to be more responsive to user clicks.
+    // Rect r = new Rect();
+    int retIndex = -1;
+    for (ComputedCandidate computedCandidate : computedCandidates) {
+      /*
+       Enlarge the rectangle to be more responsive to user clicks.
       r.set(candidateRect[j++]);
       r.inset(0, CANDIDATE_TOUCH_OFFSET);
-      if (r.contains(x, y)) {
-        // Returns -1 if there is no candidate in the hitting rectangle.
-        return (i < numCandidates) ? i : -1;
+      */
+      if (computedCandidate.getGeometry().contains(x, y)) {
+        retIndex = computedCandidates.indexOf(computedCandidate);
+        break;
       }
     }
-
-    if (Rime.hasLeft()) { // Page Up
-      r.set(candidateRect[j++]);
-      r.inset(0, CANDIDATE_TOUCH_OFFSET);
-      if (r.contains(x, y)) {
-        return -4;
-      }
-    }
-
-    if (Rime.hasRight()) { // Page Down
-      r.set(candidateRect[j++]);
-      r.inset(0, CANDIDATE_TOUCH_OFFSET);
-      if (r.contains(x, y)) {
-        return -5;
-      }
-    }
-
-    return -1;
+    return retIndex;
   }
 
   private int updateCandidates() {
@@ -375,37 +387,5 @@ public class Candidate extends View {
     highlightIndex = Rime.getCandHighlightIndex() - startNum;
     numCandidates = candidates == null ? 0 : candidates.length - startNum;
     return numCandidates;
-  }
-
-  private String getCandidate(int i) {
-    String s = null;
-    if (candidates != null && i >= 0) s = candidates[i + startNum].text;
-    else if (i == -4 && Rime.hasLeft()) s = "◀";
-    else if (i == -5 && Rime.hasRight()) s = "▶";
-    return s;
-  }
-
-  private String getComment(int i) {
-    String s = null;
-    if (candidates != null && i >= 0) s = candidates[i + startNum].comment;
-    return s;
-  }
-
-  private float getCandidateWidth(int i) {
-    String s = getCandidate(i);
-    // float n = (s == null ? 0 : s.codePointCount(0, s.length()));
-    float candidateWidth = 2 * candidatePadding;
-    if (s != null) candidateWidth += graphicUtils.measureText(candidatePaint, s, candidateFont);
-    if (i >= 0 && shouldShowComment) {
-      String comment = getComment(i);
-      if (comment != null) {
-        float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
-        if (isCommentOnTop) {
-          if (commentWidth > candidateWidth) candidateWidth = commentWidth;
-        } // 提示在上方
-        else candidateWidth += commentWidth; // 提示在右方
-      }
-    }
-    return candidateWidth;
   }
 }
