@@ -26,7 +26,7 @@ import java.util.Locale
  * Implementation to open/call specified application/function
  */
 object ShortcutUtils {
-    fun call(context: Context, command: String, option: String): Any? {
+    fun call(context: Context, command: String, option: String): CharSequence? {
         when (command) {
             "broadcast" -> context.sendBroadcast(Intent(option))
             "clipboard" -> return pasteFromClipboard(context)

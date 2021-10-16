@@ -1016,7 +1016,7 @@ public class Trime extends InputMethodService
       commitText(commit, false); // 直接上屏，不發送給Rime
       return;
     }
-    String s = event.getText();
+    CharSequence s = event.getText();
     if (!TextUtils.isEmpty(s)) {
       onText(s);
       return;
@@ -1057,7 +1057,7 @@ public class Trime extends InputMethodService
         if (command.equals("liquid_keyboard")) {
           selectLiquidKeyboard(arg);
         } else {
-          s = (String) ShortcutUtils.INSTANCE.call(this, command, arg);
+          s = ShortcutUtils.INSTANCE.call(this, command, arg);
           if (s != null) {
             commitText(s);
             updateComposing();
