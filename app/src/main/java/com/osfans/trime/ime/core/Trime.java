@@ -481,36 +481,41 @@ public class Trime extends InputMethodService
   }
 
   private void loadBackground() {
-    final Config imeConfig = getImeConfig();
+    final Config mConfig = getImeConfig();
     final int orientation = getResources().getConfiguration().orientation;
-    final int[] padding =
-        imeConfig.getKeyboardPadding(
-            oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE);
+
+    if (mPopupWindow != null) {
+      final Drawable d =
+          mConfig.getDrawable(
+              "text_back_color",
+              "layout/border",
+              "border_color",
+              "layout/round_corner",
+              "layout/alpha");
+      if (d != null) mPopupWindow.setBackgroundDrawable(d);
+      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
+        mPopupWindow.setElevation(mConfig.getPixel("layout/elevation"));
+    }
+
+    if (mCandidateRoot != null) {
+      final Drawable d2 =
+          mConfig.getDrawable(
+              "candidate_background",
+              "candidate_border",
+              "candidate_border_color",
+              "candidate_border_round",
+              null);
+      if (d2 != null) mCandidateRoot.setBackground(d2);
+    }
+
+    if (inputRootBinding == null) return;
+
+    int[] padding =
+        mConfig.getKeyboardPadding(oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE);
     Timber.i("padding= %s %s %s", padding[0], padding[1], padding[2]);
     mainKeyboardView.setPadding(padding[0], 0, padding[1], padding[2]);
 
-    final Drawable d =
-        imeConfig.getDrawable(
-            "text_back_color",
-            "layout/border",
-            "border_color",
-            "layout/round_corner",
-            "layout/alpha");
-    if (d != null) mPopupWindow.setBackgroundDrawable(d);
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
-      mPopupWindow.setElevation(imeConfig.getPixel("layout/elevation"));
-
-    final Drawable d2 =
-        imeConfig.getDrawable(
-            "candidate_background",
-            "candidate_border",
-            "candidate_border_color",
-            "candidate_border_round",
-            null);
-
-    if (d2 != null) mCandidateRoot.setBackground(d2);
-
-    final Drawable d3 = imeConfig.getDrawable_("root_background");
+    final Drawable d3 = mConfig.getDrawable_("root_background");
     if (d3 != null) {
       inputRootBinding.inputRoot.setBackground(d3);
     } else {
@@ -518,7 +523,7 @@ public class Trime extends InputMethodService
       inputRootBinding.inputRoot.setBackgroundColor(Color.WHITE);
     }
 
-    tabView.reset(this);
+    tabView.reset(self);
   }
 
   public void resetKeyboard() {
@@ -543,6 +548,7 @@ public class Trime extends InputMethodService
 
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
   private void reset() {
+    if (inputRootBinding == null) return;
     getImeConfig().reset();
     loadConfig();
     getImeConfig().initCurrentColors();
@@ -1302,7 +1308,8 @@ public class Trime extends InputMethodService
 
   /** 更新Rime的中西文狀態、編輯區文本 */
   public void updateComposing() {
-    final @Nullable InputConnection ic = getCurrentInputConnection();
+    final InputConnection ic = getCurrentInputConnection();
+    if (ic == null) return;
     if (inlinePreedit != InlineModeType.INLINE_NONE) { // 嵌入模式
       String s = "";
       switch (inlinePreedit) {
