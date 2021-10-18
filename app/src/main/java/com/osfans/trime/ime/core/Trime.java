@@ -677,6 +677,8 @@ public class Trime extends InputMethodService
 
     liquidKeyboard.setView(inputRootBinding.symbol.liquidKeyboardView);
     tabView = inputRootBinding.symbol.tabView.tab;
+
+    getImeConfig().initCurrentColors();
     loadBackground();
 
     return inputRootBinding.inputRoot;
