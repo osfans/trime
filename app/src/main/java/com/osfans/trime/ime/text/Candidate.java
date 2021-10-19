@@ -128,7 +128,7 @@ public class Candidate extends View {
 
     graphicUtils = new GraphicUtils(context);
 
-    reset(context);
+    // reset(context);
 
     setWillNotDraw(false);
   }
