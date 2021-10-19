@@ -947,8 +947,6 @@ public class Trime extends LifecycleInputMethodService {
 
   public boolean handleKey(int keyEventCode, int metaState) { // 軟鍵盤
     textInputManager.setNeedSendUpRimeKey(false);
-    textInputManager.handleMenu(keyEventCode);
-    textInputManager.handleEditorAction(keyEventCode, metaState);
     if (onRimeKey(Event.getRimeEvent(keyEventCode, metaState))) {
       textInputManager.setNeedSendUpRimeKey(true);
       Timber.i("Rime onKey");
@@ -957,6 +955,8 @@ public class Trime extends LifecycleInputMethodService {
     } else if (ShortcutUtils.INSTANCE.openCategory(keyEventCode)) {
       Timber.i("Open category");
     } else {
+      textInputManager.handleMenu(keyEventCode);
+      textInputManager.handleEditorAction(keyEventCode, metaState);
       textInputManager.setNeedSendUpRimeKey(true);
       return false;
     }
@@ -1041,7 +1041,7 @@ public class Trime extends LifecycleInputMethodService {
 
   public void showOptionsDialog() {
     final androidx.appcompat.app.AlertDialog.Builder dialogBuilder =
-        new androidx.appcompat.app.AlertDialog.Builder(this, R.style.PreferenceTheme);
+        new androidx.appcompat.app.AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog);
     dialogBuilder
         .setTitle(R.string.trime_app_name)
         .setIcon(R.mipmap.ic_app_icon)
