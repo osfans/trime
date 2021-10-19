@@ -159,4 +159,5 @@
     <string name="pref__system_default">系統預設</string>
     <string name="keyboard__key_swipe_travel_title">觸發滑動手勢的最短距離</string>
     <string name="other__click_candidate_and_commit">點擊候選詞時直接上屏</string>
+    <string name="trime_app_slogan">擊響中文之韻</string>
 </resources>
