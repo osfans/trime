@@ -18,10 +18,10 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
       
-      - name: Setup adopt JDK
+      - name: Setup Java
         uses: actions/setup-java@v2
         with:
-          distribution: "adopt"
+          distribution: "temurin"
           java-version: 11
           # will restore cache of dependencies and wrappers
           cache: 'gradle'
