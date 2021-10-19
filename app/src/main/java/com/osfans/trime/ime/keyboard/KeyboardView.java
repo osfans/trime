@@ -42,9 +42,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
 import com.osfans.trime.R;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.core.Preferences;
@@ -52,13 +50,11 @@ import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import kotlin.coroutines.CoroutineContext;
 import kotlinx.coroutines.CoroutineScope;
 import timber.log.Timber;
@@ -371,7 +367,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPaintSymbol = new Paint();
     mPaintSymbol.setAntiAlias(true);
     mPaintSymbol.setTextAlign(Align.CENTER);
-    reset(context);
+    // reset(context);
 
     mPreviewPopup = new PopupWindow(context);
     mPreviewPopup.setContentView(mPreviewText);
@@ -439,11 +435,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 } else if ((deltaY > travel || velocityY > mSwipeThreshold) && absX < absY) {
                   if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                     Timber.d(
-                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%s", mSwipeThreshold,
-                        deltaY,
-                        velocityY,
-                        endingVelocityY,
-                        travel);
+                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%s",
+                        mSwipeThreshold, deltaY, velocityY, endingVelocityY, travel);
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_DOWN.ordinal();
                   } else {
