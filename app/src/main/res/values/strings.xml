@@ -159,4 +159,5 @@
     <string name="pref__system_default">System Default</string>
     <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
     <string name="other__click_candidate_and_commit">Click candidate and commit directly</string>
+    <string name="trime_app_slogan">TRimes with Your Keystrokes</string>
 </resources>

@@ -20,5 +20,13 @@
 -->
 
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-        android:settingsActivity="com.osfans.trime.settings.PrefMainActivity"
-/>
+    android:settingsActivity="com.osfans.trime.settings.PrefMainActivity">
+
+    <!-- Add default system subtype so we can properly set the icon and label -->
+    <subtype android:label="@string/trime_app_slogan"
+        android:name="@string/trime_app_name"
+        android:icon="@mipmap/ic_app_icon"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="AsciiCapable" />
+
+</input-method>
