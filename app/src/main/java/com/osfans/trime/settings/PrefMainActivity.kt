@@ -214,10 +214,10 @@ class PrefMainActivity :
     class PrefFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.prefs, rootKey)
-            if (ImeUtils.checkIfImeIsEnabled(requireContext())) {
+            if (InputMethodUtils.checkIsTrimeEnabled(requireContext())) {
                 findPreference<Preference>("pref_enable")?.isVisible = false
             }
-            if (ImeUtils.checkIfImeIsSelected(requireContext())) {
+            if (InputMethodUtils.checkisTrimeSelected(requireContext())) {
                 findPreference<Preference>("pref_select")?.isVisible = false
             }
         }
@@ -225,15 +225,11 @@ class PrefMainActivity :
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
                 "pref_enable" -> { // 啓用
-                    val intent = Intent()
-                    intent.action = Settings.ACTION_INPUT_METHOD_SETTINGS
-                    intent.addCategory(Intent.CATEGORY_DEFAULT)
-                    startActivity(intent)
+                    InputMethodUtils.showImeEnablerActivity(requireContext())
                     true
                 }
                 "pref_select" -> { // 切換
-                    (activity as PrefMainActivity).imeManager.showInputMethodPicker()
-                    true
+                    InputMethodUtils.showImePicker(requireContext())
                 }
                 "pref_schemas" -> {
                     SchemaPickerDialog(requireContext()).show()
@@ -245,10 +241,10 @@ class PrefMainActivity :
 
         override fun onResume() { // 如果同文已被启用/选用，则隐藏设置项
             super.onResume()
-            if (ImeUtils.checkIfImeIsEnabled(requireContext())) {
+            if (InputMethodUtils.checkIsTrimeEnabled(requireContext())) {
                 findPreference<Preference>("pref_enable")?.isVisible = false
             }
-            if (ImeUtils.checkIfImeIsSelected(requireContext())) {
+            if (InputMethodUtils.checkisTrimeSelected(requireContext())) {
                 findPreference<Preference>("pref_select")?.isVisible = false
             }
         }
