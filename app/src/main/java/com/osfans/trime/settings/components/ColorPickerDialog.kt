@@ -6,6 +6,7 @@ import com.osfans.trime.R
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.setup.Config
+import timber.log.Timber
 
 /** 顯示配色方案列表
  *  Show Color Scheme List
@@ -40,10 +41,13 @@ class ColorPickerDialog(
     }
 
     private fun selectColor() {
+        Timber.i("select")
         if (checkedColor < 0 || checkedColor >= colorKeys.size) return
         val colorKey = colorKeys[checkedColor]
         prefs.looks.selectedColor = colorKey
+        Timber.i("initKeyboard")
         Trime.getService()?.initKeyboard() // 立刻重初始化键盘生效
+        Timber.i("done")
     }
 
     /** 调用该方法显示对话框 **/
