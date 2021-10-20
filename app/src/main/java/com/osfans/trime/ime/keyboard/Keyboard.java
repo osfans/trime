@@ -101,7 +101,7 @@ public class Keyboard {
 
     final DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
-    int[] keyboardPadding = config.getKeyboardPadding(land);
+    int[] keyboardPadding = config.getKeyboardPadding();
     mDisplayWidth = mDisplayWidth - keyboardPadding[0] - keyboardPadding[1];
     /* Height of the screen */
     // final int mDisplayHeight = dm.heightPixels;
