@@ -20,7 +20,6 @@ package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -53,6 +52,7 @@ import android.widget.PopupWindow;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.Rime;
@@ -1016,7 +1016,7 @@ public class Trime extends LifecycleInputMethodService {
   private void showDialog(@NonNull Dialog dialog) {
     final Window window = dialog.getWindow();
     final WindowManager.LayoutParams lp = window.getAttributes();
-    lp.token = getWindow().getWindow().getAttributes().token;
+    lp.token = getWindow().getWindow().getDecorView().getWindowToken();
     lp.type = dialogType;
     window.setAttributes(lp);
     window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
@@ -1025,18 +1025,17 @@ public class Trime extends LifecycleInputMethodService {
 
   /** 彈出{@link ColorPickerDialog 配色對話框} */
   public void showColorDialog() {
-    AlertDialog dialog = new ColorPickerDialog(this).getPickerDialog();
-    showDialog(dialog);
+    new ColorPickerDialog(this).show();
   }
 
   /** 彈出{@link SchemaPickerDialog 輸入法方案對話框} */
   public void showSchemaDialog() {
-    new SchemaPickerDialog(this, mCandidateRoot.getWindowToken()).show();
+    new SchemaPickerDialog(this).show();
   }
 
   /** 彈出{@link ThemePickerDialog 主題對話框} */
   public void showThemeDialog() {
-    new ThemePickerDialog(this, mCandidateRoot.getWindowToken()).show();
+    new ThemePickerDialog(this).show();
   }
 
   /** Hides the IME and launches {@link PrefMainActivity}. */
@@ -1051,8 +1050,8 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void showOptionsDialog() {
-    final androidx.appcompat.app.AlertDialog.Builder dialogBuilder =
-        new androidx.appcompat.app.AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog);
+    final AlertDialog.Builder dialogBuilder =
+        new AlertDialog.Builder(this, R.style.AlertDialogTheme);
     dialogBuilder
         .setTitle(R.string.trime_app_name)
         .setIcon(R.mipmap.ic_app_icon)
