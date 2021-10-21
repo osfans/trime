@@ -410,7 +410,11 @@ public class Trime extends InputMethodService
           else if (c == '2' && value) oneHandMode = 2;
           else if (c == '3') oneHandMode = value ? 1 : 2;
           else oneHandMode = 0;
-          initKeyboard();
+
+          loadBackground();
+          if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
+          resetKeyboard();
+          bindKeyboardToInputView();
         }
     }
     if (mainKeyboardView != null) mainKeyboardView.invalidateAllKeys();
