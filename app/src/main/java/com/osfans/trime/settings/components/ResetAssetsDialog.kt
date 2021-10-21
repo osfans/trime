@@ -1,9 +1,12 @@
 package com.osfans.trime.settings.components
 
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
+import android.os.Build
+import android.view.WindowManager
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
+import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.setup.Config
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
@@ -45,5 +48,16 @@ class ResetAssetsDialog(context: Context) {
     }
 
     /** 彈出對話框 */
-    fun show() = resetDialog.show()
+    fun show() {
+        resetDialog.window?.let { window ->
+            window.attributes.token = Trime.getServiceOrNull()?.window?.window?.decorView?.windowToken
+            window.attributes.type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            }
+            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        }
+        resetDialog.show()
+    }
 }
