@@ -22,27 +22,24 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.R
+import com.osfans.trime.common.InputMethodUtils
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
-import com.osfans.trime.util.ImeUtils
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.coroutines.CoroutineContext
 
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
 
 class PrefMainActivity :
     AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
-    CoroutineScope {
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+    CoroutineScope by MainScope() {
     private val prefs get() = Preferences.defaultInstance()
 
     lateinit var binding: PrefActivityBinding
@@ -153,16 +150,16 @@ class PrefMainActivity :
                     show()
                 }
                 launch {
-                    Runnable {
+                    withContext(Dispatchers.IO) {
                         try {
                             RimeUtils.deploy(this@PrefMainActivity)
                         } catch (ex: Exception) {
                             Timber.e(ex, "Deploy Exception")
                         } finally {
                             progressDialog.dismiss()
-//                              exitProcess(0)
+                            // exitProcess(0)
                         }
-                    }.run()
+                    }
                 }
                 true
             }
