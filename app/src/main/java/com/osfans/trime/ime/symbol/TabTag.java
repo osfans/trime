@@ -4,7 +4,6 @@ package com.osfans.trime.ime.symbol;
 // 为了公用候选栏的皮肤参数以及外观，保持了和普通键盘布局相似的代码。此类相当于原键盘布局的Rime.RimeCandidate
 
 import android.graphics.Rect;
-
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 

@@ -28,10 +28,10 @@ import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"

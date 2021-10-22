@@ -34,9 +34,7 @@ import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.GraphicUtils;
-
 import java.util.ArrayList;
-
 import timber.log.Timber;
 
 // 这是滑动键盘顶部的view，展示了键盘布局的多个标签。
@@ -128,44 +126,48 @@ public class TabView extends View {
       candidateHighlight.draw(canvas);
     }
     // Draw tab text
-    float tabY = (shouldShowComment && isCommentOnTop)
-            ? tabTags.get(0).geometry.centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f
+    float tabY =
+        /* (shouldShowComment && isCommentOnTop)
+        ? tabTags.get(0).geometry.centerY()
+            - (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f
             + commentHeight / 2.0f
-            : tabTags.get(0).geometry.centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f;
+        : */ tabTags.get(0).geometry.centerY()
+            - (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f;
 
-    for (TabTag computedTab: tabTags) {
+    for (TabTag computedTab : tabTags) {
       int i = tabTags.indexOf(computedTab);
       // Calculate a position where the text could be centered in the rectangle.
       float tabX = computedTab.geometry.centerX();
 
-      candidatePaint.setColor(
-              isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
+      candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
       graphicUtils.drawText(canvas, computedTab.text, tabX, tabY, candidatePaint, candidateFont);
       // Draw the separator at the right edge of each candidate.
       canvas.drawRect(
-              computedTab.geometry.right - candidateSpacing,
-              computedTab.geometry.top,
-              computedTab.geometry.right + candidateSpacing,
-              computedTab.geometry.bottom,
-              separatorPaint
-      );
+          computedTab.geometry.right - candidateSpacing,
+          computedTab.geometry.top,
+          computedTab.geometry.right + candidateSpacing,
+          computedTab.geometry.bottom,
+          separatorPaint);
     }
   }
 
-  public void updateCandidateWidth() {
+  public void updateTabWidth() {
     tabTags = TabManager.get().getTabCandidates();
     highlightIndex = TabManager.get().getSelected();
 
     int x = 0;
-    for (TabTag computedTab: tabTags) {
+    for (TabTag computedTab : tabTags) {
       int i = tabTags.indexOf(computedTab);
-      computedTab.geometry = new Rect(x, 0, x += getTabWidth(i), getHeight());
-      x += candidateSpacing;
+      computedTab.geometry = new Rect(x, 0, (int) (x + getTabWidth(i)), getHeight());
+      x += +getTabWidth(i) + candidateSpacing;
     }
     LayoutParams params = getLayoutParams();
     Timber.i("update, from Height=" + params.height + " width=" + params.width);
     params.width = x;
-    params.height = (shouldShowComment && isCommentOnTop) ? candidateViewHeight + commentHeight : candidateViewHeight;
+    params.height =
+        (shouldShowComment && isCommentOnTop)
+            ? candidateViewHeight + commentHeight
+            : candidateViewHeight;
     Timber.i("update, to Height=" + candidateViewHeight + " width=" + x);
     setLayoutParams(params);
     params = getLayoutParams();
@@ -176,7 +178,7 @@ public class TabView extends View {
   @Override
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
-    updateCandidateWidth();
+    updateTabWidth();
     Timber.i("onSizeChanged() w=" + w + ", Height=" + oldh + "=>" + h);
   }
 
@@ -240,9 +242,9 @@ public class TabView extends View {
    * @return {@code >=0}: 觸摸點 (x, y) 處候選項序號，從0開始編號； {@code -1}: 觸摸點 (x, y) 處無候選項；
    */
   private int getTabIndex(int x, int y) {
-    //Rect r = new Rect();
+    // Rect r = new Rect();
     int retIndex = -1; // Returns -1 if there is no tab in the hitting rectangle.
-    for (TabTag computedTab: tabTags) {
+    for (TabTag computedTab : tabTags) {
       /* Enlarge the rectangle to be more responsive to user clicks.
       // r.set(tabGeometries[j++]);
       //r.inset(0, CANDIDATE_TOUCH_OFFSET); */
@@ -255,6 +257,8 @@ public class TabView extends View {
 
   private float getTabWidth(int i) {
     String s = tabTags.get(i).text;
-    return s != null ? 2 * candidatePadding + graphicUtils.measureText(candidatePaint, s, candidateFont) : 2 * candidatePadding;
+    return s != null
+        ? 2 * candidatePadding + graphicUtils.measureText(candidatePaint, s, candidateFont)
+        : 2 * candidatePadding;
   }
 }

@@ -45,6 +45,7 @@ public class Candidate extends View {
   /** 處理候選條選字事件 */
   public interface EventListener {
     void onCandidatePressed(int index);
+
     void onCandidateSymbolPressed(String arrow);
   }
 
