@@ -44,8 +44,7 @@ class TextInputManager private constructor() :
     CoroutineScope by MainScope(),
     Trime.EventListener,
     KeyboardView.OnKeyboardActionListener,
-    Candidate.EventListener
-{
+    Candidate.EventListener {
     private val trime get() = Trime.getService()
     private val prefs get() = Preferences.defaultInstance()
     private val activeEditorInstance: EditorInstance
@@ -243,8 +242,8 @@ class TextInputManager private constructor() :
             }
             "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
             "_hide_key_hint" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowHint(!value)
-            else -> if (option.startsWith("_keyboard_")
-                && option.length > 10 && value
+            else -> if (option.startsWith("_keyboard_") &&
+                option.length > 10 && value
             ) {
                 val keyboard = option.substring(10)
                 keyboardSwitcher.switchToKeyboard(keyboard)

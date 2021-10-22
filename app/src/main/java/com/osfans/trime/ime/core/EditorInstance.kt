@@ -10,7 +10,6 @@ import android.view.inputmethod.InputConnection
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.text.TextInputManager
-import timber.log.Timber
 
 class EditorInstance(private val ims: InputMethodService) {
 

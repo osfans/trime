@@ -1,12 +1,12 @@
 package com.osfans.trime.settings.components
 
-import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.view.WindowManager
+import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Trime
@@ -14,11 +14,11 @@ import com.osfans.trime.settings.PrefMainActivity
 import com.osfans.trime.setup.Config
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.delay
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess

@@ -1,21 +1,20 @@
 package com.osfans.trime.settings.components
 
-import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
+import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.setup.Config
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** 顯示配色方案列表 */
 class ThemePickerDialog(

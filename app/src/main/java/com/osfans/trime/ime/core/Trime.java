@@ -227,14 +227,14 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private static final Handler syncBackgroundHandler =
-          new Handler(
-                  msg -> {
-                    if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-                      ShortcutUtils.INSTANCE.syncInBackground((Trime) msg.obj);
-                      ((Trime) msg.obj).loadConfig();
-                    }
-                    return false;
-                  });
+      new Handler(
+          msg -> {
+            if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
+              ShortcutUtils.INSTANCE.syncInBackground((Trime) msg.obj);
+              ((Trime) msg.obj).loadConfig();
+            }
+            return false;
+          });
 
   public Trime() {
     try {
@@ -258,7 +258,7 @@ public class Trime extends LifecycleInputMethodService {
 
     updateComposing();
 
-    for (EventListener listener : (List<EventListener>) eventListeners) {
+    for (EventListener listener : eventListeners) {
       if (listener != null) listener.onWindowShown();
     }
   }
@@ -280,7 +280,7 @@ public class Trime extends LifecycleInputMethodService {
       syncBackgroundHandler.sendMessageDelayed(msg, 5000); // 输入面板隐藏5秒后，开始后台同步
     }
 
-    for (EventListener listener : (List<EventListener>) eventListeners) {
+    for (EventListener listener : eventListeners) {
       if (listener != null) listener.onWindowHidden();
     }
   }
@@ -380,7 +380,7 @@ public class Trime extends LifecycleInputMethodService {
         liquidKeyboard.calcPadding(mainInputView.getWidth());
         liquidKeyboard.select(tabIndex);
 
-        tabView.updateCandidateWidth();
+        tabView.updateTabWidth();
         if (inputRootBinding != null) {
           mTabRoot.setBackground(mCandidateRoot.getBackground());
           mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
@@ -408,6 +408,7 @@ public class Trime extends LifecycleInputMethodService {
     if (isPopupWindowMovable.equals("once")) {
       popupWindowPos = getImeConfig().getWinPos();
     }
+
     if (mPopupWindow != null && mPopupWindow.isShowing()) {
       mPopupWindow.dismiss();
       mPopupHandler.removeCallbacks(mPopupTimer);
@@ -420,13 +421,13 @@ public class Trime extends LifecycleInputMethodService {
       return;
     }
     compositionRootBinding.compositionRoot.measure(
-        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     mPopupWindow.setWidth(compositionRootBinding.compositionRoot.getMeasuredWidth());
     mPopupWindow.setHeight(compositionRootBinding.compositionRoot.getMeasuredHeight());
     mPopupHandler.post(mPopupTimer);
   }
 
-  private void loadBackground() {
+  public void loadBackground() {
     final Config mConfig = getImeConfig();
     final int orientation = getResources().getConfiguration().orientation;
 
@@ -533,7 +534,7 @@ public class Trime extends LifecycleInputMethodService {
       getImeConfig().destroy();
       System.exit(0); // 清理內存
     }
-    for (EventListener listener : (List<EventListener>) eventListeners) {
+    for (EventListener listener : eventListeners) {
       if (listener != null) listener.onDestroy();
     }
     eventListeners.clear();
@@ -603,7 +604,7 @@ public class Trime extends LifecycleInputMethodService {
       performEscape();
     }
     // Update the caps-lock status for the current cursor position.
-    updateCursorCapsToInputView();
+    dispatchCapsStateToInputView();
   }
 
   @Override
@@ -648,7 +649,7 @@ public class Trime extends LifecycleInputMethodService {
     return inputRootBinding.inputRoot;
   }
 
-  void setShowComment(boolean show_comment) {
+  public void setShowComment(boolean show_comment) {
     // if (mCandidateRoot != null) mCandidate.setShowComment(show_comment);
     mComposition.setShowComment(show_comment);
   }
@@ -656,7 +657,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
-    for (EventListener listener : (List<EventListener>) eventListeners) {
+    for (EventListener listener : eventListeners) {
       if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
     }
     if (getPrefs().getOther().getShowStatusBarIcon()) {
@@ -685,24 +686,18 @@ public class Trime extends LifecycleInputMethodService {
       // Bind the selected keyboard to the input view.
       Keyboard sk = keyboardSwitcher.getCurrentKeyboard();
       mainKeyboardView.setKeyboard(sk);
-      updateCursorCapsToInputView();
+      dispatchCapsStateToInputView();
     }
   }
 
-  // 句首自動大小寫
-  private void updateCursorCapsToInputView() {
-    if (autoCaps.contentEquals("false") || TextUtils.isEmpty(autoCaps)) return;
-    if ((autoCaps.contentEquals("true") || Rime.isAsciiMode())
+  /**
+   * Dispatches cursor caps info to input view in order to implement auto caps lock at the start of
+   * a sentence.
+   */
+  private void dispatchCapsStateToInputView() {
+    if ((isAutoCaps || Rime.isAsciiMode())
         && (mainKeyboardView != null && !mainKeyboardView.isCapsOn())) {
-      final InputConnection ic = getCurrentInputConnection();
-      if (ic != null) {
-        int caps = 0;
-        final EditorInfo ei = getCurrentInputEditorInfo();
-        if ((ei != null) && (ei.inputType != EditorInfo.TYPE_NULL)) {
-          caps = ic.getCursorCapsMode(ei.inputType);
-        }
-        mainKeyboardView.setShifted(false, caps != 0);
-      }
+      mainKeyboardView.setShifted(false, activeEditorInstance.getCursorCapsMode() != 0);
     }
   }
 
@@ -712,14 +707,6 @@ public class Trime extends LifecycleInputMethodService {
 
   public void commitText(String text) {
     activeEditorInstance.commitText(text, true);
-  }
-
-  public void keyPressVibrate() {
-    if (inputFeedbackManager != null) inputFeedbackManager.keyPressVibrate();
-  }
-
-  public void keyPressSound() {
-    if (inputFeedbackManager != null) inputFeedbackManager.keyPressSound(0);
   }
 
   /**
@@ -739,7 +726,7 @@ public class Trime extends LifecycleInputMethodService {
   public boolean onRimeKey(int[] event) {
     updateRimeOption();
     final boolean ret = Rime.onKey(event);
-    activeEditorInstance.commitTextFromRime();
+    activeEditorInstance.commitRimeText();
     return ret;
   }
 
@@ -904,10 +891,10 @@ public class Trime extends LifecycleInputMethodService {
     activeEditorInstance.updateComposingText();
     if (ic != null && !isWinFixed()) isCursorUpdated = ic.requestCursorUpdates(1);
     if (mCandidateRoot != null) {
-      if (isPopupWindowShown) {
+      if (isPopupWindowEnabled) {
         final int startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize);
         mCandidate.setText(startNum);
-        if (isWinFixed() || !isCursorUpdated) showCompositionView();
+        if (!isCursorUpdated) showCompositionView();
       } else {
         mCandidate.setText(0);
       }

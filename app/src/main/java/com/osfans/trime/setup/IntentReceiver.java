@@ -29,7 +29,6 @@ import timber.log.Timber;
 
 /** 接收 Intent 廣播事件 */
 public class IntentReceiver extends BroadcastReceiver {
-  private static final String TAG = "IntentReceiver";
   private static final String COMMAND_DEPLOY = "com.osfans.trime.deploy";
   private static final String COMMAND_SYNC = "com.osfans.trime.sync";
 
@@ -37,7 +36,7 @@ public class IntentReceiver extends BroadcastReceiver {
   public void onReceive(@NonNull Context context, @NonNull Intent intent) {
     final String command = intent.getAction();
 
-    Timber.d("Receive Command = %s", command);
+    Timber.d("Received Command = %s", command);
     // 防止为空，虽然很少,但是可能会出现
     // http://stackoverflow.com/questions/15048883/intent-getaction-is-returning-null
     if (command == null) return;
