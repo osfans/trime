@@ -112,7 +112,6 @@
     <string name="pref_keyboard__function">檢視</string>
     <string name="pref_keyboard__effect">按键效果</string>
     <string name="pref__draw_overlays_tip_title">顯示在其他應用上方</string>
-    <string name="pref__draw_overlays_tip_message">要正確顯示候選欄，或從鍵盤開啟各項選單，您需要授予同文輸入法“顯示在其他應用上方”的許可權。點選“確定”前往設定頁，或“取消”以稍後手動設定。</string>
     <string name="pref_keyboard_appearance">鍵盤外觀</string>
     <string name="other__show_app_icon_on_summary">此選項僅對部分 ROM 有效</string>
     <string name="other__show_app_icon_title">在啟動器中顯示圖示</string>
@@ -160,4 +159,9 @@
     <string name="keyboard__key_swipe_travel_title">觸發滑動手勢的最短距離</string>
     <string name="other__click_candidate_and_commit">點擊候選詞時直接上屏</string>
     <string name="trime_app_slogan">擊響中文之韻</string>
+    <string name="external_storage_access_required">同文輸入法需要儲存許可權以部署或讀取方案和配置，點選“確定”前往授權。</string>
+    <string name="external_storage_permission_not_available">儲存許可權不可用</string>
+    <string name="external_storage_permission_granted">已授予儲存許可權</string>
+    <string name="external_storage_permission_denied">已拒絕授權儲存許可權，部署或讀取方案和配置功能或不可用</string>
+    <string name="alert_window_access_required">同文輸入法需要允許顯示在其他應用上方以能顯示應用外懸浮窗或對話方塊，點選“確定”以授權。</string>
 </resources>
