@@ -40,7 +40,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.CursorAnchorInfo;
@@ -83,7 +83,6 @@ import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import kotlin.jvm.Synchronized;
@@ -214,6 +213,29 @@ public class Trime extends LifecycleInputMethodService {
         }
       };
 
+  @Synchronized
+  @NonNull
+  public static Trime getService() {
+    assert self != null;
+    return self;
+  }
+
+  @Synchronized
+  @Nullable
+  public static Trime getServiceOrNull() {
+    return self;
+  }
+
+  private static final Handler syncBackgroundHandler =
+          new Handler(
+                  msg -> {
+                    if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
+                      ShortcutUtils.INSTANCE.syncInBackground((Trime) msg.obj);
+                      ((Trime) msg.obj).loadConfig();
+                    }
+                    return false;
+                  });
+
   public Trime() {
     try {
       self = this;
@@ -222,23 +244,6 @@ public class Trime extends LifecycleInputMethodService {
       e.fillInStackTrace();
     }
   }
-
-  @Synchronized
-  @NonNull
-  public static Trime getService() {
-    assert self != null;
-    return self;
-  }
-
-  private static final Handler syncBackgroundHandler =
-      new Handler(
-          msg -> {
-            if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-              ShortcutUtils.INSTANCE.syncInBackground((Trime) msg.obj);
-              ((Trime) msg.obj).loadConfig();
-            }
-            return false;
-          });
 
   @Override
   public void onWindowShown() {
@@ -339,44 +344,10 @@ public class Trime extends LifecycleInputMethodService {
         activeEditorInstance = new EditorInstance(this);
         imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputFeedbackManager = new InputFeedbackManager(this);
-        mIntentReceiver = new IntentReceiver();
-        mIntentReceiver.registerReceiver(this);
 
-        final Config imeConfig = getImeConfig();
-        loadConfig();
         keyboardSwitcher = new KeyboardSwitcher();
 
-        String s =
-            TextUtils.isEmpty(imeConfig.getString("locale")) ? imeConfig.getString("locale") : "";
-        final String DELIMITER = "[-_]";
-        if (s.contains(DELIMITER)) {
-          final String[] lc = s.split(DELIMITER);
-          if (lc.length == 3) {
-            locales[0] = new Locale(lc[0], lc[1], lc[2]);
-          } else {
-            locales[0] = new Locale(lc[0], lc[1]);
-          }
-        } else {
-          locales[0] = Locale.getDefault();
-        }
-
-        s =
-            TextUtils.isEmpty(imeConfig.getString("latin_locale"))
-                ? imeConfig.getString("latin_locale")
-                : "en_US";
-        if (s.contains(DELIMITER)) {
-          final String[] lc = s.split(DELIMITER);
-          if (lc.length == 3) {
-            locales[1] = new Locale(lc[0], lc[1], lc[2]);
-          } else {
-            locales[1] = new Locale(lc[0], lc[1]);
-          }
-        } else {
-          locales[0] = Locale.ENGLISH;
-          locales[1] = new Locale(s);
-        }
-
-        liquidKeyboard = new LiquidKeyboard(this, imeConfig.getClipboardMaxSize());
+        liquidKeyboard = new LiquidKeyboard(this, getImeConfig().getClipboardMaxSize());
         clipBoardMonitor();
       } catch (Exception e) {
         super.onCreate();
@@ -384,66 +355,12 @@ public class Trime extends LifecycleInputMethodService {
         return;
       }
       super.onCreate();
-      for (EventListener listener : (List<EventListener>) eventListeners) {
+      for (EventListener listener : eventListeners) {
         if (listener != null) listener.onCreate();
       }
     } catch (Exception e) {
       e.fillInStackTrace();
     }
-  }
-
-  public void onOptionChanged(@NonNull String option, boolean value) {
-    switch (option) {
-      case "ascii_mode":
-        if (!textInputManager.isTempAsciiMode()) {
-          textInputManager.setAsciiMode(value); // 切換中西文時保存狀態
-        }
-        if (inputFeedbackManager != null)
-          inputFeedbackManager.setTtsLanguage(locales[value ? 1 : 0]);
-        break;
-      case "_hide_comment":
-        setShowComment(!value);
-        break;
-      case "_hide_candidate":
-        if (mCandidateRoot != null) mCandidateRoot.setVisibility(!value ? View.VISIBLE : View.GONE);
-        setCandidatesViewShown(textInputManager.isComposable() && !value);
-        break;
-      case "_liquid_keyboard":
-        selectLiquidKeyboard(0);
-        break;
-      case "_hide_key_hint":
-        if (mainKeyboardView != null) mainKeyboardView.setShowHint(!value);
-        break;
-      default:
-        if (option.startsWith("_keyboard_")
-            && option.length() > 10
-            && value
-            && (keyboardSwitcher != null)) {
-          final String keyboard = option.substring(10);
-          keyboardSwitcher.switchToKeyboard(keyboard);
-          textInputManager.setTempAsciiMode(keyboardSwitcher.getAsciiMode());
-          bindKeyboardToInputView();
-        } else if (option.startsWith("_key_") && option.length() > 5 && value) {
-          boolean needUpdate = textInputManager.getShouldUpdateRimeOption();
-          if (needUpdate)
-            textInputManager.setShouldUpdateRimeOption(false); // 防止在 onMessage 中 setOption
-          final String key = option.substring(5);
-          textInputManager.onEvent(new Event(key));
-          if (needUpdate) textInputManager.setShouldUpdateRimeOption(true);
-        } else if (option.startsWith("_one_hand_mode")) {
-          char c = option.charAt(option.length() - 1);
-          if (c == '1' && value) oneHandMode = 1;
-          else if (c == '2' && value) oneHandMode = 2;
-          else if (c == '3') oneHandMode = value ? 1 : 2;
-          else oneHandMode = 0;
-
-          loadBackground();
-          if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
-          resetKeyboard();
-          bindKeyboardToInputView();
-        }
-    }
-    if (mainKeyboardView != null) mainKeyboardView.invalidateAllKeys();
   }
 
   public void selectLiquidKeyboard(final int tabIndex) {
@@ -701,38 +618,27 @@ public class Trime extends LifecycleInputMethodService {
     super.onCreateInputView();
     inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));
     mainKeyboardView = inputRootBinding.main.mainKeyboardView;
-    // mainKeyboardView.setOnKeyboardActionListener(this);
-    // mainKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
 
     // 初始化候选栏
-    mCandidateRoot = inputRootBinding.main.candidateView.getRoot();
-    mTabRoot = inputRootBinding.symbol.tabView.getRoot();
+    mCandidateRoot = inputRootBinding.main.candidateView.candidateRoot;
     mCandidate = inputRootBinding.main.candidateView.candidates;
-    // mCandidate.setCandidateListener(this);
-    mCandidateRoot.setPageStr(
-        () -> handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0),
-        () -> handleKey(KeyEvent.KEYCODE_PAGE_UP, 0));
 
     // 候选词悬浮窗的容器
     compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
-    hideCompositionView();
+    mComposition = compositionRootBinding.compositions;
     mPopupWindow = new PopupWindow(compositionRootBinding.compositionRoot);
     mPopupWindow.setClippingEnabled(false);
     mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-
-    mComposition = (Composition) compositionRootBinding.compositionRoot.getChildAt(0);
-
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
       mPopupWindow.setWindowLayoutType(dialogType);
     }
-
-    mComposition.setShowComment(!Rime.getOption("_hide_comment"));
-    mCandidateRoot.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
+    hideCompositionView();
+    mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
 
     liquidKeyboard.setView(inputRootBinding.symbol.liquidKeyboardView);
-    tabView = inputRootBinding.symbol.tabView.tab;
+    tabView = inputRootBinding.symbol.tabView.tabs;
 
-    for (EventListener listener : (List<EventListener>) eventListeners) {
+    for (EventListener listener : eventListeners) {
       assert inputRootBinding != null;
       if (listener != null) listener.onInitializeInputUi(inputRootBinding);
     }

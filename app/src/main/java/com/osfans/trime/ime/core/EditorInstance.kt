@@ -10,6 +10,7 @@ import android.view.inputmethod.InputConnection
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.text.TextInputManager
+import timber.log.Timber
 
 class EditorInstance(private val ims: InputMethodService) {
 
@@ -18,6 +19,14 @@ class EditorInstance(private val ims: InputMethodService) {
         get() = ims.currentInputConnection
     val editorInfo: EditorInfo?
         get() = ims.currentInputEditorInfo
+    val cursorCapsMode: Int
+        get() {
+            val ic = inputConnection ?: return 0
+            val ei = editorInfo ?: return 0
+            return if (ei.inputType != EditorInfo.TYPE_NULL) {
+                ic.getCursorCapsMode(ei.inputType)
+            } else 0
+        }
     val textInputManager: TextInputManager
         get() = (ims as Trime).textInputManager
 
@@ -38,7 +47,10 @@ class EditorInstance(private val ims: InputMethodService) {
         return true
     }
 
-    fun commitTextFromRime(): Boolean {
+    /**
+     * Commits the text got from Rime.
+     */
+    fun commitRimeText(): Boolean {
         val ret = Rime.getCommit()
         if (ret) {
             commitText(Rime.getCommitText())
