@@ -110,7 +110,6 @@
     <string name="pref_help__user_community">用户社区</string>
     <string name="pref_keyboard__effect">按键效果</string>
     <string name="pref__draw_overlays_tip_title">显示在其他应用上方</string>
-    <string name="pref__draw_overlays_tip_message">要正确显示候选栏，或从键盘开启各项菜单，您需要授予同文输入法“显示在其他应用上方”的权限。点击“确定”前往设置页，或“取消”以稍后手动设置。</string>
     <string name="pref_keyboard_appearance">键盘外观</string>
     <string name="pref_keyboard__function">视图</string>
     <string name="other__show_app_icon_title">在启动器中显示图标</string>
@@ -159,4 +158,9 @@
     <string name="keyboard__key_swipe_travel_title">触发滑动手势的最短距离</string>
     <string name="other__click_candidate_and_commit">点击候选词时直接上屏</string>
     <string name="trime_app_slogan">击响中文之韵</string>
+    <string name="external_storage_access_required">同文输入法需要存储权限以部署或读取方案和配置，点击“确定”前往授权。</string>
+    <string name="external_storage_permission_not_available">存储权限不可用</string>
+    <string name="external_storage_permission_granted">已授予存储权限</string>
+    <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
+    <string name="alert_window_access_required">同文输入法需要允许显示在其他应用上方以能显示应用外悬浮窗或对话框，点击“确定”以授权。</string>
 </resources>

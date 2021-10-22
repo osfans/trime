@@ -1,7 +1,6 @@
 package com.osfans.trime.settings
 
 import android.Manifest
-import android.annotation.TargetApi
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,28 +16,34 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.blankj.utilcode.util.BarUtils
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.common.InputMethodUtils
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
+const val PERMISSION_REQUEST_EXTERNAL_STORAGE = 0
 
 class PrefMainActivity :
     AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
+    ActivityCompat.OnRequestPermissionsResultCallback,
     CoroutineScope by MainScope() {
     private val prefs get() = Preferences.defaultInstance()
 
@@ -88,7 +93,8 @@ class PrefMainActivity :
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        requestPermission()
+        requestExternalStoragePermission()
+        requestAlertWindowPermission()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -114,6 +120,7 @@ class PrefMainActivity :
             pref.fragment
         ).apply {
             arguments = args
+            @Suppress("DEPRECATION")
             setTargetFragment(caller, 0)
         }
         // Replace the existing Fragment with the new Fragment
@@ -130,6 +137,27 @@ class PrefMainActivity :
             .beginTransaction()
             .replace(binding.preference.id, fragment, FRAGMENT_TAG)
             .commit()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == PERMISSION_REQUEST_EXTERNAL_STORAGE) {
+            // Request for external storage permission
+            if (grantResults.size == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launch {
+                    ToastUtils.showShort(R.string.external_storage_permission_granted)
+                    delay(500)
+                    RimeUtils.deploy(this@PrefMainActivity)
+                }
+            } else {
+                // Permission request was denied
+                ToastUtils.showShort(R.string.external_storage_permission_denied)
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -175,35 +203,62 @@ class PrefMainActivity :
         }
     }
 
-    @TargetApi(VERSION_CODES.M)
-    private fun requestPermission() {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
-                0
-            )
+    private fun requestExternalStoragePermission() {
+        if (AndroidVersion.ATLEAST_M) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // Permission is already available, return
+                return
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    AlertDialog.Builder(this)
+                        .setMessage(R.string.external_storage_access_required)
+                        .setCancelable(true)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            ActivityCompat.requestPermissions(
+                                this,
+                                arrayOf(
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    Manifest.permission.READ_EXTERNAL_STORAGE
+                                ),
+                                PERMISSION_REQUEST_EXTERNAL_STORAGE
+                            )
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create()
+                        .show()
+                } else {
+                    ToastUtils.showShort(R.string.external_storage_permission_not_available)
+
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        ),
+                        PERMISSION_REQUEST_EXTERNAL_STORAGE
+                    )
+                }
+            }
         }
-        if (VERSION.SDK_INT >= VERSION_CODES.P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
+    }
+
+    private fun requestAlertWindowPermission() {
+        if (AndroidVersion.ATLEAST_P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
             if (!Settings.canDrawOverlays(this)) { // 事先说明需要权限的理由
-                AlertDialog.Builder(this).apply {
-                    setTitle(R.string.pref__draw_overlays_tip_title)
-                    setCancelable(true)
-                    setMessage(R.string.pref__draw_overlays_tip_message)
-                    setPositiveButton(android.R.string.ok) { _, _ ->
+                AlertDialog.Builder(this)
+                    .setCancelable(true)
+                    .setMessage(R.string.alert_window_access_required)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
                         val intent = Intent(
                             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                             Uri.parse("package:$packageName")
                         )
-                        // startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
                         startActivity(intent)
                     }
-                    setNegativeButton(android.R.string.cancel, null)
-                }.create().show()
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .create().show()
             }
         }
     }
