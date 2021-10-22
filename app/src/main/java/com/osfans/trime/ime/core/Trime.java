@@ -113,25 +113,17 @@ public class Trime extends LifecycleInputMethodService {
   private CompositionRootBinding compositionRootBinding = null;
   private ScrollView mCandidateRoot, mTabRoot;
   private TabView tabView;
-  private InputRootBinding inputRootBinding = null;
+  public InputRootBinding inputRootBinding = null;
   public CopyOnWriteArrayList<EventListener> eventListeners = new CopyOnWriteArrayList<>();
   public InputMethodManager imeManager = null;
   public InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private IntentReceiver mIntentReceiver = null;
 
   private boolean isWindowShown = false; // 键盘窗口是否已显示
-  private boolean isPopupWindowShown = true; // 顯示懸浮窗口
-  private String isPopupWindowMovable; // 候選窗口是否可移動
-  private int popupWindowX, popupWindowY; // 候選窗座標
-  private int popupMarginH; // 候選窗與邊緣間距
-  private boolean isCursorUpdated = false; // 光標是否移動
-  private int minPopupSize; // 上悬浮窗的候选词的最小词长
-  private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
-  private int realPopupMargin; // 悬浮窗与屏幕两侧的间距
-  private String autoCaps; // 句首自動大寫
+
+  private boolean isAutoCaps; // 句首自動大寫
   private final Locale[] locales = new Locale[2];
 
-  private WindowsPositionType popupWindowPos; // 候選窗口彈出位置
   private int oneHandMode = 0; // 单手键盘模式
   public EditorInstance activeEditorInstance;
   public TextInputManager textInputManager; // 文字输入管理器
@@ -141,6 +133,15 @@ public class Trime extends LifecycleInputMethodService {
           ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
           : WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 
+  private boolean isPopupWindowEnabled = true; // 顯示懸浮窗口
+  private String isPopupWindowMovable; // 悬浮窗口是否可移動
+  private int popupWindowX, popupWindowY; // 悬浮床移动座標
+  private int popupMargin; // 候選窗與邊緣空隙
+  private int popupMarginH; // 悬浮窗与屏幕两侧的间距
+  private boolean isCursorUpdated = false; // 光標是否移動
+  private int minPopupSize; // 上悬浮窗的候选词的最小词长
+  private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
+  private WindowsPositionType popupWindowPos; // 悬浮窗口彈出位置
   private PopupWindow mPopupWindow;
   private RectF mPopupRectF = new RectF();
   private final Handler mPopupHandler = new Handler(Looper.getMainLooper());
@@ -149,25 +150,25 @@ public class Trime extends LifecycleInputMethodService {
         @Override
         public void run() {
           if (mCandidateRoot == null || mCandidateRoot.getWindowToken() == null) return;
-          if (!isPopupWindowShown) return;
+          if (!isPopupWindowEnabled) return;
           int x, y;
           final int[] mParentLocation = ViewUtils.getLocationOnScreen(mCandidateRoot);
-          final int xRight = mCandidateRoot.getWidth() - mPopupWindow.getWidth();
-          final int yRight = mParentLocation[1] - mPopupWindow.getHeight() - popupMarginH;
-          if (isWinFixed() || !isCursorUpdated) {
+          final int measuredWidth = mCandidateRoot.getWidth() - mPopupWindow.getWidth();
+          final int measuredHeight = mPopupWindow.getHeight() + popupMargin;
+          if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP || !isCursorUpdated) {
             // setCandidatesViewShown(true);
             switch (popupWindowPos) {
               case TOP_RIGHT:
-                x = xRight;
-                y = popupMarginH;
+                x = measuredWidth;
+                y = popupMargin;
                 break;
               case TOP_LEFT:
                 x = 0;
-                y = popupMarginH;
+                y = popupMargin;
                 break;
               case BOTTOM_RIGHT:
-                x = xRight;
-                y = yRight;
+                x = measuredWidth;
+                y = mParentLocation[1] - measuredHeight;
                 break;
               case DRAG:
                 x = popupWindowX;
@@ -177,36 +178,33 @@ public class Trime extends LifecycleInputMethodService {
               case BOTTOM_LEFT:
               default:
                 x = 0;
-                y = yRight;
+                y = mParentLocation[1] - measuredHeight;
                 break;
             }
           } else {
             // setCandidatesViewShown(false);
-            if (popupWindowPos == WindowsPositionType.RIGHT
-                || popupWindowPos == WindowsPositionType.RIGHT_UP) {
-              // 此处存在bug，暂未梳理原有算法的问题，单纯根据真机横屏显示长候选词超出屏幕进行了修复
-              // log： mCandidateContainer.getWidth()=1328  mFloatingWindow.getWidth()= 1874
-              // 导致x结果为负，超出屏幕。
-              x = Math.max(0, Math.min(xRight, (int) mPopupRectF.right));
-            } else {
-              x = Math.max(0, Math.min(xRight, (int) mPopupRectF.left));
-            }
-
-            if (popupWindowPos == WindowsPositionType.LEFT_UP
-                || popupWindowPos == WindowsPositionType.RIGHT_UP) {
-              y =
-                  Math.max(
-                      0,
-                      Math.min(
-                          yRight, (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMarginH));
-            } else {
-              // popupMarginH 爲負時，可覆蓋部分鍵盤
-              y = Math.max(0, Math.min(yRight, (int) mPopupRectF.bottom + popupMarginH));
+            switch (popupWindowPos) {
+              case RIGHT:
+              case RIGHT_UP:
+                // 此处存在bug，暂未梳理原有算法的问题，单纯根据真机横屏显示长候选词超出屏幕进行了修复
+                // log： mCandidateContainer.getWidth()=1328  mFloatingWindow.getWidth()= 1874
+                // 导致x结果为负，超出屏幕。
+                x = Math.max(0, Math.min(measuredWidth, (int) mPopupRectF.right));
+                y = Math.max(0, Math.min(measuredHeight, (int) mPopupRectF.top - measuredHeight));
+                break;
+              case LEFT_UP:
+                x = Math.max(0, Math.min(measuredWidth, (int) mPopupRectF.left));
+                y = Math.max(0, Math.min(measuredHeight, (int) mPopupRectF.top - measuredHeight));
+                break;
+              default:
+                x = Math.max(0, Math.min(measuredWidth, (int) mPopupRectF.left));
+                // popupMargin 爲負時，可覆蓋部分鍵盤
+                y = Math.max(0, Math.min(measuredHeight, (int) mPopupRectF.bottom + popupMargin));
+                break;
             }
           }
           y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
-
-          if (x < realPopupMargin) x = realPopupMargin;
+          x = Math.max(x, popupMarginH);
 
           if (!mPopupWindow.isShowing()) {
             mPopupWindow.showAtLocation(mCandidateRoot, Gravity.START | Gravity.TOP, x, y);
@@ -290,11 +288,11 @@ public class Trime extends LifecycleInputMethodService {
             && popupWindowPos != WindowsPositionType.RIGHT_UP);
   }
 
-  public void updateWindow(final int offsetX, final int offsetY) {
+  public void updatePopupWindow(final int offsetX, final int offsetY) {
     popupWindowPos = WindowsPositionType.DRAG;
     popupWindowX = offsetX;
     popupWindowY = offsetY;
-    Timber.i("updateWindow: winX = %s, winY = %s", popupWindowX, popupWindowY);
+    Timber.i("updatePopupWindow: winX = %s, winY = %s", popupWindowX, popupWindowY);
     mPopupWindow.update(popupWindowX, popupWindowY, -1, -1, true);
   }
 
@@ -302,14 +300,14 @@ public class Trime extends LifecycleInputMethodService {
     final Config imeConfig = getImeConfig();
     popupWindowPos = imeConfig.getWinPos();
     isPopupWindowMovable = imeConfig.getString("layout/movable");
-    popupMarginH = imeConfig.getPixel("layout/spacing");
+    popupMargin = imeConfig.getPixel("layout/spacing");
     minPopupSize = imeConfig.getInt("layout/min_length");
     minPopupCheckSize = imeConfig.getInt("layout/min_check");
-    realPopupMargin = imeConfig.getPixel("layout/real_margin");
+    popupMarginH = imeConfig.getPixel("layout/real_margin");
     textInputManager.setShouldResetAsciiMode(imeConfig.getBoolean("reset_ascii_mode"));
-    autoCaps = imeConfig.getString("auto_caps");
-    isPopupWindowShown =
-        getPrefs().getKeyboard().getFloatingWindowEnabled() && imeConfig.hasKey("window");
+    isAutoCaps = imeConfig.getBoolean("auto_caps");
+    isPopupWindowEnabled =
+        getPrefs().getKeyboard().getPopupWindowEnabled() && imeConfig.hasKey("window");
     textInputManager.setShouldUpdateRimeOption(true);
   }
 
@@ -572,9 +570,9 @@ public class Trime extends LifecycleInputMethodService {
       setShowComment(!Rime.getOption("_hide_comment"));
       mCandidateRoot.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset(this);
-      isPopupWindowShown =
-          getPrefs().getKeyboard().getFloatingWindowEnabled() && getImeConfig().hasKey("window");
-      mComposition.setVisibility(isPopupWindowShown ? View.VISIBLE : View.GONE);
+      isPopupWindowEnabled =
+          getPrefs().getKeyboard().getPopupWindowEnabled() && getImeConfig().hasKey("window");
+      mComposition.setVisibility(isPopupWindowEnabled ? View.VISIBLE : View.GONE);
       mComposition.reset(this);
     }
   }
@@ -644,15 +642,19 @@ public class Trime extends LifecycleInputMethodService {
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       final int i = cursorAnchorInfo.getComposingTextStart();
-      if ((popupWindowPos == WindowsPositionType.LEFT
-              || popupWindowPos == WindowsPositionType.LEFT_UP)
-          && i >= 0) {
-        mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
-      } else {
-        mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
-        mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
-        mPopupRectF.right = mPopupRectF.left;
-        mPopupRectF.bottom = cursorAnchorInfo.getInsertionMarkerBottom();
+      switch (popupWindowPos) {
+        case LEFT:
+        case LEFT_UP:
+          if (i >= 0) {
+            mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
+          }
+          break;
+        default:
+          mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
+          mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
+          mPopupRectF.right = mPopupRectF.left;
+          mPopupRectF.bottom = cursorAnchorInfo.getInsertionMarkerBottom();
+          break;
       }
       cursorAnchorInfo.getMatrix().mapRect(mPopupRectF);
       if (mCandidateRoot != null) {
