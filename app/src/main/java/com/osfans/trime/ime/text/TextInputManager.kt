@@ -3,6 +3,7 @@ package com.osfans.trime.ime.text
 import android.os.Build
 import android.text.InputType
 import android.view.KeyEvent
+import android.view.View
 import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputMethodManager
 import com.osfans.trime.Rime
@@ -16,13 +17,17 @@ import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
+import com.osfans.trime.setup.Config
+import com.osfans.trime.setup.IntentReceiver
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.StringUtils.findNextSection
 import com.osfans.trime.util.StringUtils.findPrevSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
 import timber.log.Timber
+import java.util.Locale
 
 /**
  * TextInputManager is responsible for managing everything which is related to text input. All of
@@ -39,8 +44,8 @@ class TextInputManager private constructor() :
     CoroutineScope by MainScope(),
     Trime.EventListener,
     KeyboardView.OnKeyboardActionListener,
-    Candidate.EventListener {
-
+    Candidate.EventListener
+{
     private val trime get() = Trime.getService()
     private val prefs get() = Preferences.defaultInstance()
     private val activeEditorInstance: EditorInstance
@@ -49,10 +54,14 @@ class TextInputManager private constructor() :
         get() = trime.keyboardSwitcher
     private val imeManager: InputMethodManager
         get() = trime.imeManager
+    private var intentReceiver: IntentReceiver? = null
 
     private var mainKeyboardView: KeyboardView? = null
-
+    var candidateRoot: ScrollView? = null
     var candidateView: Candidate? = null
+
+    var locales: Array<Locale> = Array(2) { Locale.getDefault() }
+
     var needSendUpRimeKey: Boolean = false
     var shouldUpdateRimeOption: Boolean = true
     var performEnterAsLineBreak: Boolean = false
@@ -66,6 +75,8 @@ class TextInputManager private constructor() :
         private val DELIMITER_PROPERTY_GROUP = """^(\{[^{}]+\}).*$""".toRegex()
         /** Delimiter regex for property key tag, its format like `Escape: ` following a property group like above */
         private val DELIMITER_PROPERTY_KEY = """^((\{Escape\})?[^{}]+).*$""".toRegex()
+        /** Delimiter regex to split language/locale tags. */
+        private val DELIMITER_SPLITTER = """[-_]""".toRegex()
         private var instance: TextInputManager? = null
 
         @Synchronized
@@ -81,13 +92,66 @@ class TextInputManager private constructor() :
         trime.addEventListener(this)
     }
 
+    /**
+     * Non-UI-related setup + preloading of all required computed layouts (asynchronous in the
+     * background).
+     */
+    override fun onCreate() {
+        super.onCreate()
+
+        intentReceiver = IntentReceiver().also {
+            it.registerReceiver(trime)
+        }
+
+        val imeConfig = Config.get(trime)
+        var s =
+            if (imeConfig.getString("locale").isNullOrEmpty()) {
+                imeConfig.getString("locale")
+            } else ""
+        if (s.contains(DELIMITER_SPLITTER)) {
+            val lc = s.split(DELIMITER_SPLITTER)
+            if (lc.size == 3) {
+                locales[0] = Locale(lc[0], lc[1], lc[2])
+            } else {
+                locales[0] = Locale(lc[0], lc[1])
+            }
+        } else {
+            locales[0] = Locale.getDefault()
+        }
+
+        s = if (imeConfig.getString("latin_locale").isNullOrEmpty()) {
+            imeConfig.getString("latin_locale")
+        } else "en_US"
+        if (s.contains(DELIMITER_SPLITTER)) {
+            val lc = s.split(DELIMITER_SPLITTER)
+            if (lc.size == 3) {
+                locales[1] = Locale(lc[0], lc[1], lc[2])
+            } else {
+                locales[1] = Locale(lc[0], lc[1])
+            }
+        } else {
+            locales[0] = Locale.ENGLISH
+            locales[1] = Locale(s)
+        }
+        // preload all required parameters
+        trime.loadConfig()
+    }
+
     override fun onInitializeInputUi(uiBinding: InputRootBinding) {
         super.onInitializeInputUi(uiBinding)
-
+        // Initialize main keyboard view
         mainKeyboardView = uiBinding.main.mainKeyboardView.also {
             it.setOnKeyboardActionListener(this)
             it.setShowHint(!Rime.getOption("_hide_key_hint"))
             it.reset(trime)
+        }
+        // Initialize candidate bar
+        candidateRoot = uiBinding.main.candidateView.candidateRoot.also {
+            it.setPageStr(
+                Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0) },
+                Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) }
+            )
+            it.visibility = if (Rime.getOption("_hide_candidate")) View.GONE else View.VISIBLE
         }
 
         candidateView = uiBinding.main.candidateView.candidates.also {
@@ -97,9 +161,17 @@ class TextInputManager private constructor() :
         }
     }
 
+    /**
+     * Cancels all coroutines and cleans up.
+     */
     override fun onDestroy() {
+        intentReceiver?.unregisterReceiver(trime)
+        intentReceiver = null
+
         candidateView?.setCandidateListener(null)
         candidateView = null
+
+        candidateRoot = null
 
         mainKeyboardView?.setOnKeyboardActionListener(null)
         mainKeyboardView = null
@@ -155,6 +227,46 @@ class TextInputManager private constructor() :
         }
     }
 
+    fun onOptionChanged(option: String, value: Boolean) {
+        when (option) {
+            "ascii_mode" -> {
+                if (!isTempAsciiMode) {
+                    isAsciiMode = value // 切換中西文時保存狀態
+                }
+                trime.inputFeedbackManager.ttsLanguage =
+                    locales[if (value) 1 else 0]
+            }
+            "_hide_comment" -> trime.setShowComment(!value)
+            "_hide_candidate" -> {
+                candidateRoot?.visibility = if (!value) View.VISIBLE else View.GONE
+                trime.setCandidatesViewShown(isComposable && !value)
+            }
+            "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
+            "_hide_key_hint" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowHint(!value)
+            else -> if (option.startsWith("_keyboard_")
+                && option.length > 10 && value
+            ) {
+                val keyboard = option.substring(10)
+                keyboardSwitcher.switchToKeyboard(keyboard)
+                isTempAsciiMode = keyboardSwitcher.asciiMode
+                trime.bindKeyboardToInputView()
+            } else if (option.startsWith("_key_") && option.length > 5 && value) {
+                shouldUpdateRimeOption = false // 防止在 onMessage 中 setOption
+                val key = option.substring(5)
+                onEvent(Event(key))
+                shouldUpdateRimeOption = true
+            } else if (option.startsWith("_one_hand_mode")) {
+                /*
+                val c = option[option.length - 1]
+                if (c == '1' && value) oneHandMode = 1 else if (c == '2' && value) oneHandMode =
+                    2 else if (c == '3') oneHandMode = if (value) 1 else 2 else oneHandMode = 0
+                trime.loadBackground()
+                trime.initKeyboard() */
+            }
+        }
+        mainKeyboardView?.invalidateAllKeys()
+    }
+
     override fun onPress(keyEventCode: Int) {
         trime.inputFeedbackManager?.let {
             it.keyPressVibrate()
@@ -171,7 +283,7 @@ class TextInputManager private constructor() :
                 shouldUpdateRimeOption = false
             }
             Rime.onKey(Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON))
-            activeEditorInstance.commitTextFromRime()
+            activeEditorInstance.commitRimeText()
         }
     }
 
@@ -189,7 +301,7 @@ class TextInputManager private constructor() :
         when (event.code) {
             KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
                 Rime.toggleOption(event.toggle)
-                activeEditorInstance.commitTextFromRime()
+                activeEditorInstance.commitRimeText()
             }
             KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                 keyboardSwitcher.switchToKeyboard(event.select)
@@ -259,7 +371,7 @@ class TextInputManager private constructor() :
         text ?: return
         if (!text.startsWithAsciiChar() && Rime.isComposing()) {
             Rime.commitComposition()
-            activeEditorInstance.commitTextFromRime()
+            activeEditorInstance.commitRimeText()
         }
         var textToParse = text
         while (textToParse!!.isNotEmpty()) {
@@ -270,7 +382,7 @@ class TextInputManager private constructor() :
                 escapeTagMatcher.matches() -> {
                     target = escapeTagMatcher.group(1) ?: ""
                     Rime.onText(target)
-                    if (!activeEditorInstance.commitTextFromRime() && !Rime.isComposing()) {
+                    if (!activeEditorInstance.commitRimeText() && !Rime.isComposing()) {
                         activeEditorInstance.commitText(target)
                     }
                     trime.updateComposing()
@@ -301,7 +413,7 @@ class TextInputManager private constructor() :
             }
         } else if (prefs.other.clickCandidateAndCommit || index > 9) {
             if (Rime.selectCandidate(index)) {
-                activeEditorInstance.commitTextFromRime()
+                activeEditorInstance.commitRimeText()
             }
         } else if (index == 9) {
 

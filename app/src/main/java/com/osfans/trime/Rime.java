@@ -533,7 +533,7 @@ public class Rime {
         getContexts(); // 切換中英文、簡繁體時更新候選
         final boolean value = !message_value.startsWith("!");
         final String option = message_value.substring(value ? 0 : 1);
-        trime.onOptionChanged(option, value);
+        trime.textInputManager.onOptionChanged(option, value);
         break;
     }
     mOnMessage = false;

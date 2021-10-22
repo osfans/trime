@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.osfans.trime.ime.text.ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tab_root"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,7 +14,7 @@
         android:orientation="horizontal">
 
         <com.osfans.trime.ime.symbol.TabView
-                android:id="@+id/tab"
+                android:id="@+id/tabs"
                 android:layout_width="1000dp"
                 android:layout_height="20dp" />
     </LinearLayout>
