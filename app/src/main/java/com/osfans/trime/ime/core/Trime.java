@@ -81,6 +81,7 @@ import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
+import com.osfans.trime.util.AndroidVersion;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import java.util.Locale;
@@ -286,7 +287,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private boolean isWinFixed() {
-    return VERSION.SDK_INT < VERSION_CODES.LOLLIPOP
+    return AndroidVersion.INSTANCE.getATMOST_LOLLIPOP()
         || (popupWindowPos != WindowsPositionType.LEFT
             && popupWindowPos != WindowsPositionType.RIGHT
             && popupWindowPos != WindowsPositionType.LEFT_UP
@@ -630,7 +631,7 @@ public class Trime extends LifecycleInputMethodService {
     mPopupWindow = new PopupWindow(compositionRootBinding.compositionRoot);
     mPopupWindow.setClippingEnabled(false);
     mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+    if (AndroidVersion.INSTANCE.getATLEAST_M()) {
       mPopupWindow.setWindowLayoutType(dialogType);
     }
     hideCompositionView();
