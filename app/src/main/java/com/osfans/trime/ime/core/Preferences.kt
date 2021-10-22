@@ -193,7 +193,7 @@ class Preferences(
         var softCursorEnabled: Boolean = false
             get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)
             private set
-        var floatingWindowEnabled: Boolean = false
+        var popupWindowEnabled: Boolean = false
             get() = prefs.getPref(FLOATING_WINDOW_ENABLED, true)
             private set
         var popupKeyPressEnabled: Boolean = false

@@ -197,7 +197,7 @@ public class Composition extends AppCompatTextView {
         } else { // MotionEvent.ACTION_MOVE
           mCurrentX = (int) (event.getRawX() + mDx);
           mCurrentY = (int) (event.getRawY() + mDy);
-          Trime.getService().updateWindow(mCurrentX, mCurrentY);
+          Trime.getService().updatePopupWindow(mCurrentX, mCurrentY);
         }
         return true;
       }
