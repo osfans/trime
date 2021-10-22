@@ -4,15 +4,15 @@ import android.inputmethodservice.InputMethodService
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewTreeLifecycleOwner
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.CoroutineScope
 
-open class LifecycleInputMethodService: InputMethodService(),
-    LifecycleOwner
-{
+open class LifecycleInputMethodService :
+    InputMethodService(),
+    LifecycleOwner {
     private val lifecycleRegistry by lazy { LifecycleRegistry(this) }
 
     val uiScope: CoroutineScope

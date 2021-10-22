@@ -29,22 +29,16 @@ class KeyboardFragment :
         val prefs = Preferences.defaultInstance()
         prefs.sync()
         when (key) {
-            "keyboard__key_sound_volume" -> {
-                trime?.keyPressSound()
-            }
-            "keyboard__key_vibration_duration", "keyboard__key_vibration_amplitude" -> {
-                trime?.keyPressVibrate()
-            }
             "keyboard__key_long_press_timeout",
             "keyboard__key_repeat_interval",
             "keyboard__show_key_popup" -> {
-                trime?.resetKeyboard()
+                trime.resetKeyboard()
             }
             "keyboard__show_window" -> {
-                trime?.resetCandidate()
+                trime.resetCandidate()
             }
             "keyboard__inline_preedit", "keyboard__soft_cursor" -> {
-                trime?.loadConfig()
+                trime.loadConfig()
             }
             "keyboard__show_switches" -> {
                 Rime.setShowSwitches(prefs.keyboard.switchesEnabled)
