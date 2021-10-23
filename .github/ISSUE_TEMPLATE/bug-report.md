@@ -30,6 +30,7 @@ If applicable, add screenshots to help explain your problem.
  - Device: [e.g. Xiaomi Mix 4]
  - OS: [e.g. Android 11]
  - Version: [e.g. 3.2.1]
+ - Theme: [e.g. Tongwenfeng]
 
 **Additional context**
 Add any other context about the problem here.
