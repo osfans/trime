@@ -4,12 +4,13 @@ Fixes will automatically close the related issue
 
 Fixes #
 
-#### Manual testing
+#### Manual test
 - [ ] Done
 
 #### Build tasks success
 Successfully running following tasks on local
 - [ ] [CONTRIBUTING](CONTRIBUTING.md)
+The tasks should be checked in every commit
 - [ ] `./gradlew spotlessCheck`
 - [ ] `./gradlew assembleDebug`
 
@@ -27,3 +28,4 @@ Fetch artifact after login
 https://github.com/osfans/trime/actions
 
 #### Additional Info
+
