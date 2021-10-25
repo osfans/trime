@@ -10,6 +10,7 @@ Fixes #
 #### Build tasks success
 Successfully running following tasks on local
 - [ ] [CONTRIBUTING](CONTRIBUTING.md)
+
 The tasks should be checked in every commit
 - [ ] `./gradlew spotlessCheck`
 - [ ] `./gradlew assembleDebug`
