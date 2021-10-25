@@ -165,6 +165,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private int mStartX;
   private int mStartY;
   private int touchX0, touchY0;
+  private boolean touchOnePoint;
 
   private boolean mProximityCorrectOn;
 
@@ -1356,6 +1357,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       case MotionEvent.ACTION_DOWN:
         touchX0 = touchX;
         touchY0 = touchY;
+        touchOnePoint = true;
       case MotionEvent.ACTION_POINTER_DOWN:
         mAbortKey = false;
         mStartX = touchX;
@@ -1369,6 +1371,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         mDownKey = keyIndex;
         mDownTime = me.getEventTime();
         mLastMoveTime = mDownTime;
+        touchOnePoint = false;
         if (action == MotionEvent.ACTION_POINTER_DOWN) break; // 並擊鬆開前的虛擬按鍵事件
         checkMultiTap(eventTime, keyIndex);
         mKeyboardActionListener.onPress(keyIndex != NOT_A_KEY ? mKeys[keyIndex].getCode() : 0);
@@ -1444,7 +1447,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         int absY = Math.abs(dy);
         int travel = getPrefs().getKeyboard().getSwipeTravel();
 
-        if (Math.max(absY, absX) > travel) {
+        if (Math.max(absY, absX) > travel && touchOnePoint) {
           int type;
           if (absX < absY) {
             Timber.d("swipeDebug.ext y, dX=%d, dY=%d", dx, dy);
