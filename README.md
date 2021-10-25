@@ -91,19 +91,19 @@ make release
 
 #### macOS
 
-1. It's recommended that install Android [SDK](https://developer.android.com/studio/index.html) and [NDK](https://developer.android.com/ndk/index.html) manually or via Android Studio.
-2. Install [Homebrew](http://brew.sh/) (If your is network is too slow, you could setup a [Homebrew mirror](https://mirrors.ustc.edu.cn/help/brew.git.html)), then run:
+1. Install [Android SDK](https://developer.android.com/sdk/index.html)
 
+2. Set up ANDROID_SDK_ROOT
   ```bash
-   brew install automake cmake opencc boost python gradle doxygen clang capnp
+  # Android
+   export ANDROID_SDK_ROOT="android_sdk_path"
   ```
 
-  Set the following environment variables in your `~/.bashrc` is recommended：
+3. Set up [mirror](https://mirrors.tuna.tsinghua.edu.cn/help/homebrew/) of Homebrew(Optional)
+
+4. Install [Homebrew](https://brew.sh/)
   ```bash
-   # Android
-   export ANDROID_HOME="your_android_sdk"
-   export ANDROID_NDK="your_android_ndk"
-   export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_NDK
+   brew install cmake capnp
   ```
 
 ## Third Party Libraries
