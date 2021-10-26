@@ -13,10 +13,6 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a"
         }
-        externalNativeBuild {
-            cmake {
-            }
-        }
     }
 
     signingConfigs {
@@ -53,7 +49,9 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/jni/CMakeLists.txt"
-            version "3.18.1"
+            // TODO: upgrade to 3.18
+            // see https://issuetracker.google.com/issues/187134648
+            version "3.10.2"
         }
     }
     ndkVersion "23.0.7599858"

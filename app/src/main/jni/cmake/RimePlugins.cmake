@@ -1,0 +1,44 @@
+set(RIME_PLUGINS
+  librime-lua
+  librime-charcode
+  librime-octagram
+)
+
+# plugins didn't use target_link_libraries, the usage-requirements won't work, include manually
+set(PLUGIN_INCLUDES "")
+find_package(Boost)
+foreach(boost_lib ${Boost_LIBRARIES})
+  unset(includes)
+  get_target_property(includes ${boost_lib} INTERFACE_INCLUDE_DIRECTORIES)
+  list(APPEND PLUGIN_INCLUDES ${includes})
+endforeach()
+include_directories(${PLUGIN_INCLUDES})
+
+# move plugins
+file(GLOB old_plugin_files "librime/plugins/*")
+foreach(file ${old_plugin_files})
+  if(IS_DIRECTORY ${file}) # plugin is directory
+    file(REMOVE "${file}")
+  endif()
+endforeach()
+foreach(plugin ${RIME_PLUGINS})
+  execute_process(COMMAND ln -s 
+    "${CMAKE_SOURCE_DIR}/${plugin}"
+    "${CMAKE_SOURCE_DIR}/librime/plugins"
+  )
+endforeach()
+
+# librime-lua
+file(REMOVE "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty")
+execute_process(COMMAND ln -s
+  "${CMAKE_SOURCE_DIR}/librime-lua-deps"
+  "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty"
+)
+
+# librime-charcode
+option(BUILD_WITH_ICU "" OFF)
+# workaround for librime-charcode
+# it included asio but not used
+# TODO: fix it in upstream
+# TODO: replace with TOUCH after cmake >= 3.12
+file(WRITE "${CMAKE_BINARY_DIR}/include/boost/asio.hpp" "")

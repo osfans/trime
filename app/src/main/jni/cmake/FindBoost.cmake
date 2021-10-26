@@ -24,6 +24,8 @@ set(BOOST_INSTALLED_LIBRARIES
   "signals2"
   "utility"
   "uuid"
+  # for librime-charcode:
+  "locale"
   # dumped from ${__boost_include_libraries}:
   "array"
   "assert"
@@ -83,3 +85,6 @@ set(BOOST_INSTALLED_LIBRARIES
 foreach(comp ${BOOST_INSTALLED_LIBRARIES})
   LIST(APPEND Boost_LIBRARIES Boost::${comp})
 endforeach()
+
+# for librime-charcode
+set(Boost_LOCALE_LIBRARIES Boost::locale)
