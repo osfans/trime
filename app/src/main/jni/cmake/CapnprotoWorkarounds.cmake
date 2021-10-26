@@ -13,7 +13,7 @@ else()
   find_program(CAPNPC_CXX_EXECUTABLE capnpc-c++ HINTS "${capnp_dir}")
 endif()
 
-set(CAPNPC_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/capnproto/c++/src" CACHE FILEPATH "")
+set(CAPNPC_IMPORT_DIRS "${CMAKE_SOURCE_DIR}/capnproto/c++/src")
 
 # placeholder, targets file will be installed later
 # use WRITE instead of TOUCH to avoid duplicated targets while buildCMakeRelWithDebInfo
