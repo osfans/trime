@@ -13,12 +13,6 @@
 [submodule "app/src/main/jni/boost"]
 	path = app/src/main/jni/boost
 	url = https://github.com/boostorg/boost.git
-[submodule "app/src/main/jni/marisa-trie"]
-	path = app/src/main/jni/marisa-trie
-	url = https://github.com/s-yata/marisa-trie.git
-[submodule "app/src/main/jni/miniglog"]
-	path = app/src/main/jni/miniglog
-	url = https://github.com/osfans/miniglog.git
 [submodule "app/src/main/jni/librime"]
 	path = app/src/main/jni/librime
 	url = https://github.com/rime/librime.git
