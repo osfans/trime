@@ -8,8 +8,8 @@ android {
         applicationId "com.osfans.trime"
         minSdkVersion 21 // 21 is required for `readlinkat` for capnpproto
         targetSdkVersion 29
-        versionCode 20211002
-        versionName "3.2.3"
+        versionCode 20211130
+        versionName "3.2.4"
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a"
         }
