@@ -436,8 +436,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 } else if ((deltaY > travel || velocityY > mSwipeThreshold) && absX < absY) {
                   if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                     Timber.d(
-                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%s",
-                        mSwipeThreshold, deltaY, velocityY, endingVelocityY, travel);
+                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%d",
+                        deltaY, velocityY, endingVelocityY, travel, mSwipeThreshold);
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_DOWN.ordinal();
                   } else {
