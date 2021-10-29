@@ -459,21 +459,21 @@ class TextInputManager private constructor() :
                     }
                 }
             }
-        }
-        when (code) {
-            KeyEvent.KEYCODE_A -> ic.performContextMenuAction(android.R.id.selectAll)
-            KeyEvent.KEYCODE_X -> ic.performContextMenuAction(android.R.id.cut)
-            KeyEvent.KEYCODE_C -> ic.performContextMenuAction(android.R.id.copy)
-            KeyEvent.KEYCODE_V -> ic.performContextMenuAction(android.R.id.paste)
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                val et = ic.getExtractedText(ExtractedTextRequest().apply { token = 0 }, 0)
-                val prevSection = et.text.findPrevSection(et.startOffset + et.selectionStart)
-                ic.setSelection(prevSection, prevSection)
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                val et = ic.getExtractedText(ExtractedTextRequest().apply { token = 0 }, 0)
-                val nextSection = et.text.findNextSection(et.startOffset + et.selectionEnd)
-                ic.setSelection(nextSection, nextSection)
+            when (code) {
+                KeyEvent.KEYCODE_A -> ic.performContextMenuAction(android.R.id.selectAll)
+                KeyEvent.KEYCODE_X -> ic.performContextMenuAction(android.R.id.cut)
+                KeyEvent.KEYCODE_C -> ic.performContextMenuAction(android.R.id.copy)
+                KeyEvent.KEYCODE_V -> ic.performContextMenuAction(android.R.id.paste)
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    val et = ic.getExtractedText(ExtractedTextRequest().apply { token = 0 }, 0)
+                    val prevSection = et.text.findPrevSection(et.startOffset + et.selectionStart)
+                    ic.setSelection(prevSection, prevSection)
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    val et = ic.getExtractedText(ExtractedTextRequest().apply { token = 0 }, 0)
+                    val nextSection = et.text.findNextSection(et.startOffset + et.selectionEnd)
+                    ic.setSelection(nextSection, nextSection)
+                }
             }
         }
     }
