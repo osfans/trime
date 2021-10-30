@@ -24,13 +24,15 @@ include(CapnprotoWorkarounds)
 
 #add_subdirectory(glog)
 
-add_subdirectory(yaml-cpp)
+option(YAML_CPP_BUILD_TESTS "" OFF)
+add_subdirectory(librime/thirdparty/src/yaml-cpp)
 
 option(LEVELDB_BUILD_TESTS "" OFF)
 option(LEVELDB_BUILD_BENCHMARKS "" OFF)
 option(LEVELDB_INSTALL "" OFF)
-add_subdirectory(leveldb)
+add_subdirectory(librime/thirdparty/src/leveldb)
 
+# TODO: use librime/thirdparty/src/opencc instead after librime > 1.7.3
 add_subdirectory(OpenCC)
 include(OpenccWorkarounds)
 

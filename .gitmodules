@@ -1,15 +1,9 @@
 [submodule "app/src/main/jni/OpenCC"]
 	path = app/src/main/jni/OpenCC
 	url = https://github.com/BYVoid/OpenCC.git
-[submodule "app/src/main/jni/yaml-cpp"]
-	path = app/src/main/jni/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp.git
 [submodule "app/src/main/jni/snappy"]
 	path = app/src/main/jni/snappy
 	url = https://github.com/google/snappy.git
-[submodule "app/src/main/jni/leveldb"]
-	path = app/src/main/jni/leveldb
-	url = https://github.com/google/leveldb.git
 [submodule "app/src/main/jni/boost"]
 	path = app/src/main/jni/boost
 	url = https://github.com/boostorg/boost.git
