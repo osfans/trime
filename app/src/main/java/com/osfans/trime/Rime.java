@@ -221,8 +221,6 @@ public class Rime {
   private static boolean mOnMessage;
 
   static {
-    System.loadLibrary("opencc");
-    System.loadLibrary("rime");
     System.loadLibrary("rime_jni");
   }
 

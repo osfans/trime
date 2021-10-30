@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+# general options
+option(BUILD_SHARED_LIBS "" OFF)
+option(BUILD_TESTING "" OFF)
+
 include(Iconv)
 # workaround for boost install
 install(TARGETS iconv EXPORT boost_locale-targets
@@ -14,7 +18,6 @@ install(TARGETS iconv EXPORT boost_locale-targets
 
 add_subdirectory(boost)
 
-option(BUILD_TESTING "" OFF)
 option(EXTERNAL_CAPNP "" ON)
 add_subdirectory(capnproto)
 include(CapnprotoWorkarounds)
