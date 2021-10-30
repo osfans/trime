@@ -10,6 +10,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 option(BUILD_SHARED_LIBS "" OFF)
 option(BUILD_TESTING "" OFF)
 
+# iconv for Boost::locale
 include(Iconv)
 # workaround for boost install
 install(TARGETS iconv EXPORT boost_locale-targets
@@ -19,12 +20,16 @@ install(TARGETS iconv EXPORT boost_locale-targets
 add_subdirectory(boost)
 
 option(EXTERNAL_CAPNP "" ON)
+option(CAPNP_LITE "" ON) # librime only needs CapnProto::capnp
 add_subdirectory(capnproto)
 include(CapnprotoWorkarounds)
 
 #add_subdirectory(glog)
 
+option(YAML_CPP_BUILD_TOOLS "" OFF)
+# TODO: remove below options after librime > 1.7.3
 option(YAML_CPP_BUILD_TESTS "" OFF)
+option(YAML_CPP_INSTALL "" OFF)
 add_subdirectory(librime/thirdparty/src/yaml-cpp)
 
 option(LEVELDB_BUILD_TESTS "" OFF)
