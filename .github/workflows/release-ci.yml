@@ -58,7 +58,7 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "app/build/outputs/apk/debug/app-debug.apk"
+          artifacts: "app/build/outputs/apk/**/*.apk"
           body: |
             ${{ steps.release_log.outputs.changelog }}
           token: ${{ secrets.GITHUB_TOKEN }}
