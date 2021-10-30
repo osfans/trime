@@ -32,6 +32,13 @@ option(YAML_CPP_BUILD_TESTS "" OFF)
 option(YAML_CPP_INSTALL "" OFF)
 add_subdirectory(librime/thirdparty/src/yaml-cpp)
 
+# enable compress for leveldb
+option(SNAPPY_BUILD_TESTS "" OFF)
+option(SNAPPY_BUILD_BENCHMARKS "" OFF)
+option(SNAPPY_INSTALL "" OFF)
+add_subdirectory(snappy)
+
+set(HAVE_SNAPPY TRUE)
 option(LEVELDB_BUILD_TESTS "" OFF)
 option(LEVELDB_BUILD_BENCHMARKS "" OFF)
 option(LEVELDB_INSTALL "" OFF)
