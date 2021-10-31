@@ -15,8 +15,8 @@ android {
     }
 
     signingConfigs {
-       release {
-       }
+        release {
+        }
     }
 
     buildTypes {
@@ -25,6 +25,17 @@ android {
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-android.txt'
             signingConfig signingConfigs.release
         }
+    }
+
+    // Use prebuilt JNI library if the 'app/prebuilt' exists
+    //
+    // Steps to generate the prebuilt directory:
+    // $ ./gradlew app:assembleRelease
+    // $ cp --recursive app/build/intermediates/stripped_native_libs/universalRelease/out/lib app/prebuilt
+    if (file("prebuilt").exists()) {
+        sourceSets.main.jniLibs.srcDirs = ['prebuilt']
+    } else {
+        externalNativeBuild.cmake.path = "src/main/jni/CMakeLists.txt"
     }
 
     def propsFile = rootProject.file('keystore.properties') //store release config in keystore.properties
@@ -47,7 +58,6 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "src/main/jni/CMakeLists.txt"
             // TODO: upgrade to 3.18
             // see https://issuetracker.google.com/issues/187134648
             version "3.10.2"
