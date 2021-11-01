@@ -17,6 +17,7 @@ install(TARGETS iconv EXPORT boost_locale-targets
   ARCHIVE DESTINATION dummy # remove this line after cmake >= 3.18
 )
 
+option(BOOST_FILESYSTEM_DISABLE_STATX "" ON) # remove this option after targetSdkVersion >= 30
 add_subdirectory(boost)
 
 option(EXTERNAL_CAPNP "" ON)
