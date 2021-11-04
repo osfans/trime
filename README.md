@@ -43,9 +43,9 @@ Then, we created an input method platform with some code tables, such as Wu dial
 
 Later, it supports Wubi and Liangbi and other shape-based input method, we branded it [*Tongwen Input Method Platform 2.0 (同文输入法平台 2.0)*](https://github.com/osfans/trime-legacy), which implies that the phonetic-based and shape-based input method on one platform, while dialects and Mandrain share one kind of characters.
 
-TRIME now upgrade to 3.0, enjoying the advantages of [librime](https://github.com/rime/librime) with Java Native Interface, referring to as *Tongwen Input Method (同文输入法)*.
+Benefit from the [librime](https://github.com/rime/librime) project by JNI, we are now in version 3.0 of TRIME aka *Tongwen Input Method (同文输入法)*.
 
-You're welcome to [contribute](CONTRIBUTING.md) ~ ! :tada:
+Your [contribution](CONTRIBUTING.md) are welcome ~ ! :tada:
 
 ## Build
 
@@ -87,7 +87,7 @@ make release
    make release
   ```
 
-  For other Linux distributions, please also install the required packages above with their own package managers.
+  For other Linux distributions, you can install the required packages above with their own package managers.
 
 #### macOS
 
