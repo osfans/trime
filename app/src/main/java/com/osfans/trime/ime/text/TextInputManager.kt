@@ -324,11 +324,16 @@ class TextInputManager private constructor() :
                 }
             }
             KeyEvent.KEYCODE_FUNCTION -> { // Command Express
+                // Comments from trime.yaml:
+                // %s或者%1$s爲當前字符
+                // %2$s爲當前輸入的編碼
+                // %3$s爲光標前字符
+                // %4$s爲光標前所有字符
                 val arg = String.format(
                     event.option,
                     activeEditorInstance.lastCommittedText,
                     Rime.RimeGetInput(),
-                    "TODO()",
+                    activeEditorInstance.getTextBeforeCursor(1),
                     activeEditorInstance.getTextBeforeCursor(1024)
                 )
                 if (event.command == "liquid_keyboard") {
