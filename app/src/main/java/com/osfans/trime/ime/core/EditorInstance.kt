@@ -29,7 +29,7 @@ class EditorInstance(private val ims: InputMethodService) {
     val textInputManager: TextInputManager
         get() = (ims as Trime).textInputManager
 
-    lateinit var lastCommittedText: String
+    var lastCommittedText: String = ""
 
     fun commitText(text: String, dispatchToRime: Boolean = true): Boolean {
         val ic = inputConnection ?: return false
