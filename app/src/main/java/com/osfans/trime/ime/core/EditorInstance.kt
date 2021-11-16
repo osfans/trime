@@ -66,7 +66,7 @@ class EditorInstance(private val ims: InputMethodService) {
             InlineModeType.INLINE_INPUT -> Rime.RimeGetInput()
             else -> ""
         }
-        if (ic.getSelectedText(0).isNullOrEmpty() || composingText.isNullOrEmpty()) {
+        if (ic.getSelectedText(0).isNullOrEmpty() || !composingText.isNullOrEmpty()) {
             ic.setComposingText(composingText, 1)
         }
     }
