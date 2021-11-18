@@ -19,7 +19,7 @@ jobs:
 
       - name: Calculate JNI cache hash
         id: cache-hash
-        run: .github/workflows/cache-hash.sh
+        run: script/cache-hash.sh
 
       - name: Fetch JNI cache
         uses: actions/cache@v2
