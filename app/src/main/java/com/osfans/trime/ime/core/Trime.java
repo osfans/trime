@@ -860,7 +860,6 @@ public class Trime extends LifecycleInputMethodService {
     } else if (ShortcutUtils.INSTANCE.openCategory(keyEventCode)) {
       Timber.i("Open category");
     } else {
-      textInputManager.handleMenu(keyEventCode);
       textInputManager.handleEditorAction(keyEventCode, metaState);
       textInputManager.setNeedSendUpRimeKey(true);
       return false;

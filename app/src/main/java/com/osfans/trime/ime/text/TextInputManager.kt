@@ -356,6 +356,7 @@ class TextInputManager private constructor() :
                 }
             }
             KeyEvent.KEYCODE_PROG_RED -> trime.showColorDialog() // Color schemes
+            KeyEvent.KEYCODE_MENU -> trime.showOptionsDialog()
             else -> onKey(event.code, event.mask)
         }
     }
@@ -497,16 +498,6 @@ class TextInputManager private constructor() :
             in KeyEvent.KEYCODE_DPAD_UP..KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 sendDownUpKeyEvent(code, meta(shift = isShiftPressed), count)
             }
-        }
-    }
-
-    /**
-     * Handles [KeyEvent.KEYCODE_MENU] events
-     */
-    fun handleMenu(code: Int) {
-        Timber.i("Trime onKey: Handling menu key...")
-        if (code == KeyEvent.KEYCODE_MENU) {
-            trime.showOptionsDialog()
         }
     }
 }
