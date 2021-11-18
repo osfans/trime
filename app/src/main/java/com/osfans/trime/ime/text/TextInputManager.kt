@@ -1,10 +1,8 @@
 package com.osfans.trime.ime.text
 
-import android.os.Build
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputMethodManager
 import com.osfans.trime.Rime
 import com.osfans.trime.common.startsWithAsciiChar
@@ -20,13 +18,10 @@ import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.setup.Config
 import com.osfans.trime.setup.IntentReceiver
 import com.osfans.trime.util.ShortcutUtils
-import com.osfans.trime.util.StringUtils.findNextSection
-import com.osfans.trime.util.StringUtils.findPrevSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
-import timber.log.Timber
 import java.util.Locale
 
 /**
@@ -432,72 +427,6 @@ class TextInputManager private constructor() :
         when (arrow) {
             Candidate.PAGE_UP_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_UP, 0)
             Candidate.PAGE_DOWN_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
-        }
-    }
-
-    /**
-     * Handles edit actions, like Ctrl + V to paste, etc.
-     */
-    fun handleEditorAction(code: Int, metaState: Int) = activeEditorInstance.apply {
-        Timber.i("Trime onKey: Handling edit actions...")
-        val ic = inputConnection ?: return@apply
-        if (metaState and KeyEvent.META_CTRL_ON != 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                when (code) {
-                    KeyEvent.KEYCODE_V -> { // Paste
-                        if (metaState and KeyEvent.META_ALT_ON != 0 &&
-                            metaState and KeyEvent.META_SHIFT_ON != 0
-                        ) {
-                            ic.performContextMenuAction(android.R.id.pasteAsPlainText)
-                        }
-                    }
-                    KeyEvent.KEYCODE_S -> { // Share selected text
-                        if (metaState and KeyEvent.META_ALT_ON != 0) {
-                            ic.getSelectedText(0) ?: ic.performEditorAction(android.R.id.selectAll)
-                            ic.performContextMenuAction(android.R.id.shareText)
-                        }
-                    }
-                    KeyEvent.KEYCODE_Y -> {
-                        ic.performContextMenuAction(android.R.id.redo)
-                    }
-                    KeyEvent.KEYCODE_Z -> {
-                        ic.performContextMenuAction(android.R.id.undo)
-                    }
-                }
-            }
-            when (code) {
-                KeyEvent.KEYCODE_A -> ic.performContextMenuAction(android.R.id.selectAll)
-                KeyEvent.KEYCODE_X -> ic.performContextMenuAction(android.R.id.cut)
-                KeyEvent.KEYCODE_C -> ic.performContextMenuAction(android.R.id.copy)
-                KeyEvent.KEYCODE_V -> ic.performContextMenuAction(android.R.id.paste)
-                KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    val et = ic.getExtractedText(ExtractedTextRequest().apply { token = 0 }, 0)
-                    val prevSection = et.text.findPrevSection(et.startOffset + et.selectionStart)
-                    ic.setSelection(prevSection, prevSection)
-                }
-                KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    val et = ic.getExtractedText(ExtractedTextRequest().apply { token = 0 }, 0)
-                    val nextSection = et.text.findNextSection(et.startOffset + et.selectionEnd)
-                    ic.setSelection(nextSection, nextSection)
-                }
-            }
-        }
-    }
-
-    /**
-     * Handles [KeyEvent] arrow and move key events
-     */
-    fun handleArrow(code: Int, count: Int = 1) = activeEditorInstance.apply {
-        Timber.i("Trime onKey: Handling arrow actions...")
-        val isShiftPressed = mainKeyboardView?.isShifted == true
-        when (code) {
-            KeyEvent.KEYCODE_MOVE_HOME,
-            KeyEvent.KEYCODE_MOVE_END,
-            KeyEvent.KEYCODE_PAGE_UP,
-            KeyEvent.KEYCODE_PAGE_DOWN,
-            in KeyEvent.KEYCODE_DPAD_UP..KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                sendDownUpKeyEvent(code, meta(shift = isShiftPressed), count)
-            }
         }
     }
 }

@@ -784,18 +784,6 @@ public class Trime extends LifecycleInputMethodService {
       keyCode = KeyEvent.KEYCODE_ESCAPE; // 返回鍵清屏
     }
 
-    if (event.getAction() == KeyEvent.ACTION_DOWN
-        && event.isCtrlPressed()
-        && event.getRepeatCount() == 0
-        && !KeyEvent.isModifierKey(keyCode)) {
-      try {
-        textInputManager.handleEditorAction(keyCode, event.getMetaState());
-        return true;
-      } catch (Exception e) {
-        return false;
-      }
-    }
-
     final int unicodeChar = event.getUnicodeChar();
     final String s = String.valueOf((char) unicodeChar);
     final int i = Event.getClickCode(s);
@@ -860,7 +848,6 @@ public class Trime extends LifecycleInputMethodService {
     } else if (ShortcutUtils.INSTANCE.openCategory(keyEventCode)) {
       Timber.i("Open category");
     } else {
-      textInputManager.handleEditorAction(keyEventCode, metaState);
       textInputManager.setNeedSendUpRimeKey(true);
       return false;
     }
