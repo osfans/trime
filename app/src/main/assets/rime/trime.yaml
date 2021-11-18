@@ -905,7 +905,7 @@ preset_keys:
   paste: {label: 貼上, send: Control+v}
   paste_text: {label: 貼上文本, send: Control+Shift+Alt+v} #>=Android 6.0
   share_text: {label: 分享文本, send: Control+Alt+s} #>=Android 6.0
-  redo: {label: 重做, send: Control+y} #>=Android 6.0
+  redo: {label: 重做, send: Control+Shift+z} #>=Android 6.0
   undo: {label: 撤銷, send: Control+z} #>=Android 6.0
   # rime組合鍵
   F4: {label: 方案選單, send: F4}

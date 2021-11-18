@@ -3889,7 +3889,7 @@ preset_keys:
   paste_clip: {label: 粘贴, send: function, command: clipboard}
   paste_text: {label: 貼上文本, send: Control+Shift+Alt+v} #>=Android 6.0
   share_text: {label: 分享文本, send: Control+Alt+s} #>=Android 6.0
-  redo: {label: 重做, functional: false, send: Control+y} #>=Android 6.0
+  redo: {label: 重做, functional: false, send: Control+Shift+z} #>=Android 6.0
   undo: {label: 撤銷, functional: false, send: Control+z} #>=Android 6.0
   delimiter: {label: 分词, text: ''''}
   x1: {text: '{Home}{Right}{Right}', label: 单字, functional: false}
