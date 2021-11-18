@@ -26,7 +26,7 @@ jobs:
         id: jni-cache
         with:
           path: "app/prebuilt"
-          key: jni-${{ steps.cache-hash.outputs.hash }}
+          key: jni-debug-${{ steps.cache-hash.outputs.hash }}
 
       - name: Fetch submodules
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
