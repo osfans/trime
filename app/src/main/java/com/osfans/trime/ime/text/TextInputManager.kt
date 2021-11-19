@@ -376,8 +376,8 @@ class TextInputManager private constructor() :
         var textToParse = text
         while (textToParse!!.isNotEmpty()) {
             var target: String
-            val escapeTagMatcher = DELIMITER_PROPERTY_KEY.toPattern().matcher(text)
-            val propertyGroupMatcher = DELIMITER_PROPERTY_GROUP.toPattern().matcher(text)
+            val escapeTagMatcher = DELIMITER_PROPERTY_KEY.toPattern().matcher(textToParse)
+            val propertyGroupMatcher = DELIMITER_PROPERTY_GROUP.toPattern().matcher(textToParse)
             when {
                 escapeTagMatcher.matches() -> {
                     target = escapeTagMatcher.group(1) ?: ""
