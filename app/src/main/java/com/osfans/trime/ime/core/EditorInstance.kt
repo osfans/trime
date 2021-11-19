@@ -29,9 +29,9 @@ class EditorInstance(private val ims: InputMethodService) {
     val textInputManager: TextInputManager
         get() = (ims as Trime).textInputManager
 
-    var lastCommittedText: String = ""
+    var lastCommittedText: CharSequence = ""
 
-    fun commitText(text: String, dispatchToRime: Boolean = true): Boolean {
+    fun commitText(text: CharSequence, dispatchToRime: Boolean = true): Boolean {
         val ic = inputConnection ?: return false
         ic.beginBatchEdit()
         ic.commitText(text, 1)

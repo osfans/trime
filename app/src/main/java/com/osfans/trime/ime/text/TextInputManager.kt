@@ -334,7 +334,7 @@ class TextInputManager private constructor() :
                 if (event.command == "liquid_keyboard") {
                     trime.selectLiquidKeyboard(arg)
                 } else {
-                    val textFromCommand = ShortcutUtils.call(trime, event.command, arg) as? String
+                    val textFromCommand = ShortcutUtils.call(trime, event.command, arg)
                     if (textFromCommand != null) {
                         activeEditorInstance.commitText(textFromCommand)
                         trime.updateComposing()
