@@ -53,7 +53,7 @@ jobs:
       - name: Upload Trime artifact
         uses: actions/upload-artifact@v2
         with:
-          name: outputs
+          name: trime.zip
           path: app/build/outputs/apk/**/*.apk
           # keep 30 days
           retention-days: 30
