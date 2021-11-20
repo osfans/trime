@@ -270,7 +270,7 @@ public class Rime {
 
   public static String getCompositionText() {
     RimeComposition composition = getComposition();
-    return (composition == null) ? "" : composition.preedit;
+    return (composition == null || composition.preedit == null) ? "" : composition.preedit;
   }
 
   public static String getComposingText() {
