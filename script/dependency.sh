@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# version on submodule must match
-# update summodule if you change this
-version=0.9.1
-echo "$(nproc) thread to build"
-curl -O https://capnproto.org/capnproto-c++-${version}.tar.gz
-tar zxf capnproto-c++-${version}.tar.gz
-cd capnproto-c++-${version}
+
+# build from submodule source, keep same version
+echo "$(nproc) threads to build"
+cd app/src/main/jni/capnproto/c++
+autoreconf -i
 ./configure
 make -j$(nproc)
 sudo make install
