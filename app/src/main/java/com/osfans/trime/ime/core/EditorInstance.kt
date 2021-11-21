@@ -33,14 +33,8 @@ class EditorInstance(private val ims: InputMethodService) {
 
     fun commitText(text: CharSequence, dispatchToRime: Boolean = true): Boolean {
         val ic = inputConnection ?: return false
-        ic.beginBatchEdit()
         ic.commitText(text, 1)
         lastCommittedText = text
-        if (dispatchToRime && !Rime.isComposing()) {
-            ic.finishComposingText()
-            // Rime.commitComposition()
-        }
-        ic.endBatchEdit()
         // Fix pressing Delete key will clear the input box issue on BlackBerry
         ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
         return true
