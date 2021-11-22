@@ -151,24 +151,26 @@ public class Trime extends LifecycleInputMethodService {
         public void run() {
           if (mCandidateRoot == null || mCandidateRoot.getWindowToken() == null) return;
           if (!isPopupWindowEnabled) return;
-          int x, y;
-          final int[] mParentLocation = ViewUtils.getLocationOnScreen(mCandidateRoot);
-          final int measuredWidth = mCandidateRoot.getWidth() - mPopupWindow.getWidth();
-          final int measuredHeight = mPopupWindow.getHeight() + popupMargin;
-          if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP || !isCursorUpdated) {
+          int x = 0, y = 0;
+          final int[] candidateLocation = ViewUtils.getLocationOnScreen(mCandidateRoot);
+          final int minX = popupMarginH;
+          final int minY = popupMargin;
+          final int maxX = mCandidateRoot.getWidth() - mPopupWindow.getWidth() - minX;
+          final int maxY = candidateLocation[1] - mPopupWindow.getHeight() - minY;
+          if (isWinFixed() || !isCursorUpdated) {
             // setCandidatesViewShown(true);
             switch (popupWindowPos) {
               case TOP_RIGHT:
-                x = measuredWidth;
-                y = popupMargin;
+                x = maxX;
+                y = minY;
                 break;
               case TOP_LEFT:
-                x = 0;
-                y = popupMargin;
+                x = minX;
+                y = minY;
                 break;
               case BOTTOM_RIGHT:
-                x = measuredWidth;
-                y = mParentLocation[1] - measuredHeight;
+                x = maxX;
+                y = maxY;
                 break;
               case DRAG:
                 x = popupWindowX;
@@ -177,34 +179,42 @@ public class Trime extends LifecycleInputMethodService {
               case FIXED:
               case BOTTOM_LEFT:
               default:
-                x = 0;
-                y = mParentLocation[1] - measuredHeight;
+                x = minX;
+                y = maxY;
                 break;
             }
           } else {
             // setCandidatesViewShown(false);
             switch (popupWindowPos) {
+              case LEFT:
+              case LEFT_UP:
+                x = (int) mPopupRectF.left;
+                break;
               case RIGHT:
               case RIGHT_UP:
-                // 此处存在bug，暂未梳理原有算法的问题，单纯根据真机横屏显示长候选词超出屏幕进行了修复
-                // log： mCandidateContainer.getWidth()=1328  mFloatingWindow.getWidth()= 1874
-                // 导致x结果为负，超出屏幕。
-                x = Math.max(0, Math.min(measuredWidth, (int) mPopupRectF.right));
-                y = Math.max(0, Math.min(measuredHeight, (int) mPopupRectF.top - measuredHeight));
-                break;
-              case LEFT_UP:
-                x = Math.max(0, Math.min(measuredWidth, (int) mPopupRectF.left));
-                y = Math.max(0, Math.min(measuredHeight, (int) mPopupRectF.top - measuredHeight));
+                x = (int) mPopupRectF.right;
                 break;
               default:
-                x = Math.max(0, Math.min(measuredWidth, (int) mPopupRectF.left));
-                // popupMargin 爲負時，可覆蓋部分鍵盤
-                y = Math.max(0, Math.min(measuredHeight, (int) mPopupRectF.bottom + popupMargin));
-                break;
+                Timber.wtf("UNREACHABLE BRANCH");
             }
+            x = Math.min(maxX, x);
+            x = Math.max(minX, x);
+            switch (popupWindowPos) {
+              case LEFT:
+              case RIGHT:
+                y = (int) mPopupRectF.bottom + popupMargin;
+                break;
+              case LEFT_UP:
+              case RIGHT_UP:
+                y = (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin;
+                break;
+              default:
+                Timber.wtf("UNREACHABLE BRANCH");
+            }
+            y = Math.min(maxY, y);
+            y = Math.max(minY, y);
           }
           y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
-          x = Math.max(x, popupMarginH);
 
           if (!mPopupWindow.isShowing()) {
             mPopupWindow.showAtLocation(mCandidateRoot, Gravity.START | Gravity.TOP, x, y);
