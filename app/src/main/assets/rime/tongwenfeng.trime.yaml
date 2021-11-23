@@ -51,11 +51,12 @@ style:
     max_height: 300 #最大高度
     min_width: 0 #最小宽度
     min_height: 50 #最小高度
-    margin_x: 5 #水平边距
+    margin_x: 5 #水平邊距 NOTE: margin_{x, y, bottom} 实际为 padding
     margin_y: 5 #竖直边距
     line_spacing: 0 #候选词的行间距(px)
     line_spacing_multiplier: 1.2 #候选词的行间距(倍数)
-    spacing: 1 #与预编辑或边缘的距离
+    real_margin: 3 #屏幕左右边缘和悬浮窗之间的距离 TODO: 在 4.0 时给 real_margin 与 spacing 换一个更适合的名字
+    spacing: 1 #屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离
     round_corner: *round2 #候选窗口圆角
     alpha: 0xff #透明度(0-255)
     elevation: 0 #阴影(>=Android5.0)
