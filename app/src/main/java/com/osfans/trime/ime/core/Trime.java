@@ -576,8 +576,8 @@ public class Trime extends LifecycleInputMethodService {
         case LEFT_UP:
           if (i >= 0) {
             mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
+            break;
           }
-          break;
         default:
           mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
           mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
