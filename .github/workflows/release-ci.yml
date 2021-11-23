@@ -1,4 +1,4 @@
-name: Create release
+name: release ci
 on:
   push:
     tags:

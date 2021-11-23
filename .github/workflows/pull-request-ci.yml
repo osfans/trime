@@ -1,4 +1,4 @@
-name: Pull request ci
+name: pull request ci
 on: [pull_request]
 jobs:
   build:
