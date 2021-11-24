@@ -392,7 +392,7 @@ class TextInputManager private constructor() :
                     onEvent(Event(target))
                 }
                 else -> {
-                    target = text.substring(0, 1)
+                    target = textToParse.substring(0, 1)
                     onEvent(Event(target))
                 }
             }
