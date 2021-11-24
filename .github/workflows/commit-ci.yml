@@ -55,5 +55,5 @@ jobs:
         with:
           name: trime.zip
           path: app/build/outputs/apk/**/*.apk
-          # keep 360 days
-          retention-days: 360
+          # keep 90 days
+          retention-days: 90
