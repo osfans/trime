@@ -569,26 +569,32 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-      final int i = cursorAnchorInfo.getComposingTextStart();
-      switch (popupWindowPos) {
-        case LEFT:
-        case LEFT_UP:
-          if (i >= 0) {
-            mPopupRectF = cursorAnchorInfo.getCharacterBounds(i);
-            break;
-          }
-        default:
-          mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
-          mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
-          mPopupRectF.right = mPopupRectF.left;
-          mPopupRectF.bottom = cursorAnchorInfo.getInsertionMarkerBottom();
-          break;
+    if (!isWinFixed()) {
+      final CharSequence composingText = cursorAnchorInfo.getComposingText();
+      // update mPopupRectF
+      if (composingText == null) {
+        // composing is disabled in target app or trime settings
+        // use the position of the insertion marker instead
+        mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
+        mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
+        mPopupRectF.bottom = cursorAnchorInfo.getInsertionMarkerBottom();
+        mPopupRectF.right = mPopupRectF.left;
+      } else {
+        final int startPos = cursorAnchorInfo.getComposingTextStart();
+        final int endPos = startPos + composingText.length() - 1;
+        final RectF startCharRectF = cursorAnchorInfo.getCharacterBounds(startPos);
+        final RectF endCharRectF = cursorAnchorInfo.getCharacterBounds(endPos);
+        // for different writing system (e.g. right to left languages),
+        // we have to calculate the correct RectF
+        mPopupRectF.top = Math.min(startCharRectF.top, endCharRectF.top);
+        mPopupRectF.left = Math.min(startCharRectF.left, endCharRectF.left);
+        mPopupRectF.bottom = Math.max(startCharRectF.bottom, endCharRectF.bottom);
+        mPopupRectF.right = Math.max(startCharRectF.right, endCharRectF.right);
       }
       cursorAnchorInfo.getMatrix().mapRect(mPopupRectF);
-      if (mCandidateRoot != null) {
-        showCompositionView();
-      }
+    }
+    if (mCandidateRoot != null) {
+      showCompositionView();
     }
   }
 
