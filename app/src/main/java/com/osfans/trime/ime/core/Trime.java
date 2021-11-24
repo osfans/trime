@@ -584,6 +584,11 @@ public class Trime extends LifecycleInputMethodService {
         final int endPos = startPos + composingText.length() - 1;
         final RectF startCharRectF = cursorAnchorInfo.getCharacterBounds(startPos);
         final RectF endCharRectF = cursorAnchorInfo.getCharacterBounds(endPos);
+        if (startCharRectF == null || endCharRectF == null) {
+          // composing text has been changed, the next onUpdateCursorAnchorInfo is on the road
+          // ignore this outdated update
+          return;
+        }
         // for different writing system (e.g. right to left languages),
         // we have to calculate the correct RectF
         mPopupRectF.top = Math.min(startCharRectF.top, endCharRectF.top);
@@ -897,6 +902,8 @@ public class Trime extends LifecycleInputMethodService {
       if (isPopupWindowEnabled) {
         final int startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize);
         mCandidate.setText(startNum);
+        // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
+        // otherwise we need to call it here
         if (!isCursorUpdated) showCompositionView();
       } else {
         mCandidate.setText(0);
