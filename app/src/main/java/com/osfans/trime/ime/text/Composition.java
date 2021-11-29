@@ -164,6 +164,7 @@ public class Composition extends AppCompatTextView {
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
     textInputManager = TextInputManager.Companion.getInstance();
+    setShowComment(!Rime.getOption("_hide_comment"));
     reset(context);
   }
 
