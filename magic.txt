@@ -1,0 +1,3 @@
+# increase this number will invalid jni cache
+# this number will count the trigger
+0
