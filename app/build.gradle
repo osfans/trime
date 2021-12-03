@@ -80,7 +80,7 @@ android {
             include "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
 
             // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            universalApk true
+            universalApk false
         }
     }
 }
