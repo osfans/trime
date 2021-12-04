@@ -7,7 +7,7 @@
  */
 
 buildscript {
-    ext.kotlin_version = '1.5.20'
+    ext.kotlin_version = '1.6.0'
 
     /**
      * The repositories block configures the repositories Gradle uses to
@@ -59,11 +59,11 @@ spotless {
         importOrder()
         removeUnusedImports()
         target 'app/src/main/java/com/osfans/trime/**/*.java'
-        googleJavaFormat('1.12.0')
+        googleJavaFormat('1.13.0')
     }
     kotlin {
         target 'app/src/main/java/com/osfans/trime/**/*.kt'
-        ktlint("0.42.1")
+        ktlint("0.43.2")
         trimTrailingWhitespace()
         indentWithSpaces()
         endWithNewline()
