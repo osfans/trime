@@ -151,7 +151,7 @@ public class Key {
     hilited_key_back_color = config.getDrawable(mk, "hilited_key_back_color");
     key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
     hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
-    round_corner = YamlUtils.INSTANCE.getFloat(mk, "round_corner", 5);
+    round_corner = YamlUtils.INSTANCE.getFloat(mk, "round_corner", 0);
   }
 
   public static List<String> getAndroidKeys() {
