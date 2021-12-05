@@ -143,8 +143,8 @@ public class Key {
       send_bindings = false;
     }
     if (isShift()) mKeyboard.setmShiftKey(this);
-    key_text_size = YamlUtils.INSTANCE.getPixel(mk, "key_text_size", 22);
-    symbol_text_size = YamlUtils.INSTANCE.getPixel(mk, "symbol_text_size", 10);
+    key_text_size = YamlUtils.INSTANCE.getPixel(mk, "key_text_size", 0);
+    symbol_text_size = YamlUtils.INSTANCE.getPixel(mk, "symbol_text_size", 0);
     key_text_color = Config.getColor(context, mk, "key_text_color");
     hilited_key_text_color = Config.getColor(context, mk, "hilited_key_text_color");
     key_back_color = config.getDrawable(mk, "key_back_color");
