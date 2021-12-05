@@ -284,8 +284,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
     mShadowColor = config.getColor("shadow_color");
 
-    mSymbolSize = config.getPixel("symbol_text_size");
-    mKeyTextSize = config.getPixel("key_text_size");
+    mSymbolSize = config.getPixel("symbol_text_size", 10);
+    mKeyTextSize = config.getPixel("key_text_size", 22);
     mVerticalCorrection = config.getPixel("vertical_correction");
     setProximityCorrectionEnabled(config.getBoolean("proximity_correction"));
     mPreviewOffset = config.getPixel("preview_offset");
@@ -784,7 +784,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
       if (!TextUtils.isEmpty(label)) {
         // For characters, use large font. For labels like "Done", use small font.
-        if (key.getKey_text_size() != null) {
+        if (key.getKey_text_size() != null && key.getKey_hint_offset_x() > 0) {
           paint.setTextSize(key.getKey_text_size());
         } else {
           paint.setTextSize(label.length() > 1 ? mLabelTextSize : mKeyTextSize);
@@ -803,7 +803,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         if (mShowHint) {
           if (key.getLongClick() != null) {
             mPaintSymbol.setTextSize(
-                key.getSymbol_text_size() != null ? key.getSymbol_text_size() : mSymbolSize);
+                key.getSymbol_text_size() != null && key.getSymbol_text_size() > 0 ? key.getSymbol_text_size() : mSymbolSize);
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
                 key.getSymbolLabel(),
