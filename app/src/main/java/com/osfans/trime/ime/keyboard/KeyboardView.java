@@ -803,7 +803,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         if (mShowHint) {
           if (key.getLongClick() != null) {
             mPaintSymbol.setTextSize(
-                key.getSymbol_text_size() != null && key.getSymbol_text_size() > 0 ? key.getSymbol_text_size() : mSymbolSize);
+                key.getSymbol_text_size() != null && key.getSymbol_text_size() > 0
+                    ? key.getSymbol_text_size()
+                    : mSymbolSize);
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
                 key.getSymbolLabel(),
