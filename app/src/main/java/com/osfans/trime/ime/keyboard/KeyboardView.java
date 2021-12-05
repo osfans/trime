@@ -784,7 +784,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
       if (!TextUtils.isEmpty(label)) {
         // For characters, use large font. For labels like "Done", use small font.
-        if (key.getKey_text_size() != null && key.getKey_hint_offset_x() > 0) {
+        if (key.getKey_text_size() != null && key.getKey_text_size() > 0) {
           paint.setTextSize(key.getKey_text_size());
         } else {
           paint.setTextSize(label.length() > 1 ? mLabelTextSize : mKeyTextSize);
