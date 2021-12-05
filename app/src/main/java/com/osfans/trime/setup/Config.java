@@ -329,6 +329,7 @@ public class Config {
 
   private Object _getValue(String k1, Object defaultValue) {
     if (mStyle != null && mStyle.containsKey(k1)) return mStyle.get(k1);
+    if (mDefaultStyle != null && mDefaultStyle.containsKey(k1)) return mDefaultStyle.get(k1);
     return defaultValue;
   }
 
@@ -917,7 +918,7 @@ public class Config {
         }
         if (s.matches("(0x|#)?[a-f0-9]+")) return Color.parseColor(s.replace("0x", "#"));
       } catch (Exception e) {
-        Timber.e("getColorRealValue() unknown color, %s", s);
+        Timber.e("getColorRealValue() unknown color, %s ; object %s", s, object);
         e.printStackTrace();
       }
     }

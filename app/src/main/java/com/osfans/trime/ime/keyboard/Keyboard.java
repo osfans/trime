@@ -174,24 +174,32 @@ public class Keyboard {
   public Keyboard(Context context, String name) {
     this(context);
     Config config = Config.get(context);
-    final Map<String, ?> m = config.getKeyboard(name);
-    mLabelTransform = YamlUtils.INSTANCE.getString(m, "label_transform", "none");
-    mAsciiMode = YamlUtils.INSTANCE.getInt(m, "ascii_mode", 1);
-    if (mAsciiMode == 0) mAsciiKeyboard = YamlUtils.INSTANCE.getString(m, "ascii_keyboard", "");
-    mLock = YamlUtils.INSTANCE.getBoolean(m, "lock", false);
-    int columns = YamlUtils.INSTANCE.getInt(m, "columns", 30);
-    int defaultWidth = (int) (YamlUtils.INSTANCE.getDouble(m, "width", 0d) * mDisplayWidth / 100);
+    final Map<String, ?> keyboardConfig = config.getKeyboard(name);
+    mLabelTransform = YamlUtils.INSTANCE.getString(keyboardConfig, "label_transform", "none");
+    mAsciiMode = YamlUtils.INSTANCE.getInt(keyboardConfig, "ascii_mode", 1);
+    if (mAsciiMode == 0)
+      mAsciiKeyboard = YamlUtils.INSTANCE.getString(keyboardConfig, "ascii_keyboard", "");
+    mLock = YamlUtils.INSTANCE.getBoolean(keyboardConfig, "lock", false);
+    int columns = YamlUtils.INSTANCE.getInt(keyboardConfig, "columns", 30);
+    int defaultWidth =
+        (int) (YamlUtils.INSTANCE.getDouble(keyboardConfig, "width", 0d) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
-    int height = YamlUtils.INSTANCE.getPixel(m, "height", 0);
+    int height = YamlUtils.INSTANCE.getPixel(keyboardConfig, "height", 0);
     int defaultHeight = (height > 0) ? height : mDefaultHeight;
     int rowHeight = defaultHeight;
-    List<Map<String, Object>> lm = (List<Map<String, Object>>) m.get("keys");
+    List<Map<String, Object>> lm = (List<Map<String, Object>>) keyboardConfig.get("keys");
 
-    mDefaultHorizontalGap = YamlUtils.INSTANCE.getPixel(m, "horizontal_gap", 3);
-    mDefaultVerticalGap = YamlUtils.INSTANCE.getPixel(m, "vertical_gap", 5);
-    mRoundCorner = YamlUtils.INSTANCE.getFloat(m, "round_corner", 5);
+    mDefaultHorizontalGap =
+        YamlUtils.INSTANCE.getPixel(
+            keyboardConfig, "horizontal_gap", config.getFloat("horizontal_gap", 3));
+    mDefaultVerticalGap =
+        YamlUtils.INSTANCE.getPixel(
+            keyboardConfig, "vertical_gap", config.getFloat("vertical_gap", 5));
+    mRoundCorner =
+        YamlUtils.INSTANCE.getFloat(
+            keyboardConfig, "round_corner", config.getFloat("round_corner", 5));
 
-    Drawable background = config.getDrawable(m, "keyboard_back_color");
+    Drawable background = config.getDrawable(keyboardConfig, "keyboard_back_color");
     if (background != null) mBackground = background;
 
     int x = mDefaultHorizontalGap / 2;
@@ -222,14 +230,30 @@ public class Keyboard {
         continue; // 縮進
       }
 
-      final int defaultKeyTextOffsetX = YamlUtils.INSTANCE.getPixel(m, "key_text_offset_x", 0);
-      final int defaultKeyTextOffsetY = YamlUtils.INSTANCE.getPixel(m, "key_text_offset_y", 0);
-      final int defaultKeySymbolOffsetX = YamlUtils.INSTANCE.getPixel(m, "key_symbol_offset_x", 0);
-      final int defaultKeySymbolOffsetY = YamlUtils.INSTANCE.getPixel(m, "key_symbol_offset_y", 0);
-      final int defaultKeyHintOffsetX = YamlUtils.INSTANCE.getPixel(m, "key_hint_offset_x", 0);
-      final int defaultKeyHintOffsetY = YamlUtils.INSTANCE.getPixel(m, "key_hint_offset_y", 0);
-      final int defaultKeyPressOffsetX = YamlUtils.INSTANCE.getInt(m, "key_press_offset_x", 0);
-      final int defaultKeyPressOffsetY = YamlUtils.INSTANCE.getInt(m, "key_press_offset_y", 0);
+      final int defaultKeyTextOffsetX =
+          YamlUtils.INSTANCE.getPixel(
+              keyboardConfig, "key_text_offset_x", config.getFloat("key_text_offset_x"));
+      final int defaultKeyTextOffsetY =
+          YamlUtils.INSTANCE.getPixel(
+              keyboardConfig, "key_text_offset_y", config.getFloat("key_text_offset_y"));
+      final int defaultKeySymbolOffsetX =
+          YamlUtils.INSTANCE.getPixel(
+              keyboardConfig, "key_symbol_offset_x", config.getFloat("key_symbol_offset_x"));
+      final int defaultKeySymbolOffsetY =
+          YamlUtils.INSTANCE.getPixel(
+              keyboardConfig, "key_symbol_offset_y", config.getFloat("key_symbol_offset_y"));
+      final int defaultKeyHintOffsetX =
+          YamlUtils.INSTANCE.getPixel(
+              keyboardConfig, "key_hint_offset_x", config.getFloat("key_hint_offset_x"));
+      final int defaultKeyHintOffsetY =
+          YamlUtils.INSTANCE.getPixel(
+              keyboardConfig, "key_hint_offset_y", config.getFloat("key_hint_offset_y"));
+      final int defaultKeyPressOffsetX =
+          YamlUtils.INSTANCE.getInt(
+              keyboardConfig, "key_press_offset_x", config.getInt("key_press_offset_x"));
+      final int defaultKeyPressOffsetY =
+          YamlUtils.INSTANCE.getInt(
+              keyboardConfig, "key_press_offset_y", config.getInt("key_press_offset_y"));
 
       final Key key = new Key(context, this, mk);
       key.setKey_text_offset_x(

@@ -759,7 +759,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       if (keyBackground instanceof GradientDrawable) {
         ((GradientDrawable) keyBackground)
             .setCornerRadius(
-                key.getRound_corner() != null ? key.getRound_corner() : mKeyboard.getRoundCorner());
+                key.getRound_corner() != null && key.getRound_corner() > 0
+                    ? key.getRound_corner()
+                    : mKeyboard.getRoundCorner());
       }
       Integer color = key.getTextColorForState(drawableState);
       mPaint.setColor(color != null ? color : mKeyTextColor.getColorForState(drawableState, 0));
