@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+DIGEST_ALGORITHM=sha1sum
 MAGIC=magic.txt
 echo auto generated contents >> $MAGIC
 
@@ -14,8 +15,7 @@ done
 JNI_FILES="$MAGIC app/src/main/jni/cmake/* app/src/main/jni/librime_jni/* app/src/main/jni/CMakeLists.txt"
 
 hash=$(git submodule status)
-hash=$hash$(sha256sum $JNI_FILES)
-hash=$(echo $hash | sha256sum | cut -c-64)
+hash=$hash$($DIGEST_ALGORITHM $JNI_FILES)
+hash=$(echo $hash | $DIGEST_ALGORITHM | cut -c-40)
 
 echo "::set-output name=hash::$hash"
-
