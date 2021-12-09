@@ -10,6 +10,7 @@ import android.icu.util.Calendar
 import android.icu.util.ULocale
 import android.net.Uri
 import android.os.Build
+import android.text.TextUtils
 import android.util.SparseArray
 import android.view.KeyEvent
 import com.blankj.utilcode.util.ActivityUtils
@@ -96,7 +97,7 @@ object ShortcutUtils {
                 locale = opt[0]
             }
         }
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !TextUtils.isEmpty(locale)) {
             val ul = ULocale(locale)
             val cc = Calendar.getInstance(ul)
             val df = if (option.isEmpty()) {
@@ -106,7 +107,7 @@ object ShortcutUtils {
             }
             df.format(cc, StringBuffer(256), FieldPosition(0)).toString()
         } else {
-            SimpleDateFormat(option, Locale.getDefault()).format(Date()) // Time
+            SimpleDateFormat(string, Locale.getDefault()).format(Date()) // Time
         }
     }
 
