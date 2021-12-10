@@ -357,18 +357,14 @@ class TextInputManager private constructor() :
     }
 
     override fun onKey(keyEventCode: Int, metaState: Int) {
-        var metaStateAll = metaState
-        if (mainKeyboardView!!.isShifted) {
-            metaStateAll = metaState or KeyEvent.META_SHIFT_ON
-        }
-        if (trime.handleKey(keyEventCode, metaStateAll)) return
+        if (trime.handleKey(keyEventCode, metaState)) return
         if (keyEventCode >= Key.getSymbolStart()) {
             needSendUpRimeKey = false
             activeEditorInstance.commitText(Event.getDisplayLabel(keyEventCode))
             return
         }
         needSendUpRimeKey = false
-        activeEditorInstance.sendDownUpKeyEvent(keyEventCode, metaStateAll)
+        activeEditorInstance.sendDownUpKeyEvent(keyEventCode, metaState)
     }
 
     override fun onText(text: CharSequence?) {
