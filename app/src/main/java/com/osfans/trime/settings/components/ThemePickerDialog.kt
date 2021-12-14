@@ -107,6 +107,6 @@ class ThemePickerDialog(
 
     private fun onPostExecute() {
         progressDialog.dismiss()
-        Trime.getService().initKeyboard() // 實時生效
+        Trime.getServiceOrNull()?.initKeyboard() // 實時生效
     }
 }

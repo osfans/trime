@@ -41,12 +41,12 @@ class OtherFragment :
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        val trime = Trime.getService()
+        val trime = Trime.getServiceOrNull()
         when (key) {
             "other__show_status_bar_icon" -> {
                 if (sharedPreferences?.getBoolean(key, false) == true) {
                     trime?.showStatusIcon(R.drawable.ic_status)
-                } else { trime.hideStatusIcon() }
+                } else { trime?.hideStatusIcon() }
             }
 
             "other__clipboard_compare" -> {

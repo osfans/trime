@@ -48,7 +48,7 @@ class ColorPickerDialog(
         val colorKey = colorKeys[checkedColorKey]
         prefs.looks.selectedColor = colorKey
         Timber.i("initKeyboard")
-        Trime.getService().initKeyboard() // 立刻重初始化键盘生效
+        Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
         Timber.i("done")
     }
 
