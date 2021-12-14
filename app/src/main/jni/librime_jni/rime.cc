@@ -11,8 +11,12 @@ void on_message(void* context_object,
                 const char* message_type,
                 const char* message_value) {
   if (_session_id == 0) return;
-  JNIEnv* env = (JNIEnv*)context_object;
-  if (env == NULL) return;
+  JavaVM* jvm = (JavaVM*)context_object;
+  JNIEnv* env;
+  if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    // JNI_ERR
+    return;
+  }
   jclass clazz = env->FindClass(CLASSNAME);
   if (clazz == NULL) return;
   jmethodID mid_static_method = env->GetStaticMethodID(clazz, "onMessage","(Ljava/lang/String;Ljava/lang/String;)V");
@@ -29,7 +33,9 @@ void on_message(void* context_object,
 }
 
 void set_notification_handler(JNIEnv *env, jobject thiz) { //TODO
-  RimeSetNotificationHandler(&on_message, env);
+  JavaVM* jvm;
+  env->GetJavaVM(&jvm);
+  RimeSetNotificationHandler(&on_message, jvm);
 }
 
 void init_traits(JNIEnv *env, jstring shared_data_dir, jstring user_data_dir, void (*func)(RimeTraits *)) {
