@@ -522,6 +522,7 @@ public class Trime extends LifecycleInputMethodService {
     resetKeyboard();
   }
 
+  /** Must be called on the UI thread */
   public void initKeyboard() {
     reset();
     setNavBarColor();

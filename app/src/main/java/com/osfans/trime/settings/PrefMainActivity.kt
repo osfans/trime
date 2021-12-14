@@ -26,6 +26,7 @@ import com.osfans.trime.R
 import com.osfans.trime.common.InputMethodUtils
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
@@ -177,6 +178,7 @@ class PrefMainActivity :
                     setMessage(getString(R.string.deploy_progress))
                     show()
                 }
+                Trime.getServiceOrNull()?.initKeyboard()
                 launch {
                     withContext(Dispatchers.IO) {
                         try {
