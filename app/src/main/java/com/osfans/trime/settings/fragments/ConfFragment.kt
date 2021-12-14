@@ -20,7 +20,6 @@ import org.ocpsoft.prettytime.PrettyTime
 import timber.log.Timber
 import java.util.Date
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.exitProcess
 
 class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
     private val job = Job()
@@ -56,7 +55,6 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
                             Timber.e(ex, "Sync Exception")
                         } finally {
                             progressDialog.dismiss()
-                            exitProcess(0)
                         }
                     }.run()
                 }

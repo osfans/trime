@@ -185,7 +185,6 @@ class PrefMainActivity :
                             Timber.e(ex, "Deploy Exception")
                         } finally {
                             progressDialog.dismiss()
-                            // exitProcess(0)
                         }
                     }
                 }

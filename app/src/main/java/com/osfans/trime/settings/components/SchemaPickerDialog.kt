@@ -3,14 +3,12 @@ package com.osfans.trime.settings.components
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.settings.PrefMainActivity
 import com.osfans.trime.setup.Config
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.exitProcess
 
 class SchemaPickerDialog(
     private val context: Context
@@ -86,14 +83,6 @@ class SchemaPickerDialog(
                             Timber.e(e, "Failed to set schema")
                         } finally {
                             progressDialog.dismiss()
-                            val intent = Intent(context, PrefMainActivity::class.java)
-                            intent.flags = (
-                                Intent.FLAG_ACTIVITY_NEW_TASK
-                                    or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                )
-                            context.startActivity(intent)
-                            android.os.Process.killProcess(android.os.Process.myPid())
-                            exitProcess(0) // 清理内存
                         }
                     }
                 }
