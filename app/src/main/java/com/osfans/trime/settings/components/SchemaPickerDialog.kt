@@ -138,7 +138,7 @@ class SchemaPickerDialog(
         }
     }
 
-    private fun setSchema() {
+    private suspend fun setSchema() {
         val checkedIds = ArrayList<String>()
         for ((i, b) in checkedStatus.withIndex()) {
             if (b) schemaItems[i]?.let { checkedIds.add(it) }

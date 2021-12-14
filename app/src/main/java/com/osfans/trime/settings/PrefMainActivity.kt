@@ -31,11 +31,9 @@ import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
@@ -180,14 +178,12 @@ class PrefMainActivity :
                 }
                 Trime.getServiceOrNull()?.initKeyboard()
                 launch {
-                    withContext(Dispatchers.IO) {
-                        try {
-                            RimeUtils.deploy(this@PrefMainActivity)
-                        } catch (ex: Exception) {
-                            Timber.e(ex, "Deploy Exception")
-                        } finally {
-                            progressDialog.dismiss()
-                        }
+                    try {
+                        RimeUtils.deploy(this@PrefMainActivity)
+                    } catch (ex: Exception) {
+                        Timber.e(ex, "Deploy Exception")
+                    } finally {
+                        progressDialog.dismiss()
                     }
                 }
                 true

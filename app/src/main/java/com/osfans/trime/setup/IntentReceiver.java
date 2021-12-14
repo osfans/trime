@@ -25,6 +25,11 @@ import android.content.IntentFilter;
 import androidx.annotation.NonNull;
 import com.osfans.trime.Rime;
 import com.osfans.trime.util.RimeUtils;
+import kotlin.Unit;
+import kotlinx.coroutines.BuildersKt;
+import kotlinx.coroutines.CoroutineStart;
+import kotlinx.coroutines.Dispatchers;
+import kotlinx.coroutines.GlobalScope;
 import timber.log.Timber;
 
 /** 接收 Intent 廣播事件 */
@@ -43,11 +48,24 @@ public class IntentReceiver extends BroadcastReceiver {
 
     switch (command) {
       case COMMAND_DEPLOY:
-        RimeUtils.INSTANCE.deploy(context);
-        System.exit(0);
+        BuildersKt.launch(
+            GlobalScope.INSTANCE,
+            Dispatchers.getMain(),
+            CoroutineStart.DEFAULT,
+            (coroutineScope, continuation) -> {
+              RimeUtils.INSTANCE.deploy(context, continuation);
+              return Unit.INSTANCE;
+            });
         break;
       case COMMAND_SYNC:
-        RimeUtils.INSTANCE.sync(context);
+        BuildersKt.async(
+            GlobalScope.INSTANCE,
+            Dispatchers.getMain(),
+            CoroutineStart.DEFAULT,
+            (coroutineScope, continuation) -> {
+              RimeUtils.INSTANCE.sync(context, continuation);
+              return Unit.INSTANCE;
+            });
         break;
       case Intent.ACTION_SHUTDOWN:
         Rime.destroy();

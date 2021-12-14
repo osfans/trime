@@ -4,6 +4,8 @@ import android.content.Context
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.Rime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess
 
 /**
@@ -17,7 +19,7 @@ object RimeUtils {
     }
 
     /** Deploy means reset Rime instance. **/
-    fun deploy(context: Context) {
+    suspend fun deploy(context: Context) = withContext(Dispatchers.IO) {
         Rime.destroy()
         Rime.get(context, true)
         ToastUtils.showLong(R.string.deploy_finish)
@@ -25,8 +27,8 @@ object RimeUtils {
 
     /** Sync the user data.
      * @return `true` if successfully **/
-    fun sync(context: Context): Boolean {
-        return Rime.sync_user_data().also {
+    suspend fun sync(context: Context): Boolean = withContext(Dispatchers.IO) {
+        Rime.sync_user_data().also {
             Rime.destroy()
             Rime.get(context, true)
         }

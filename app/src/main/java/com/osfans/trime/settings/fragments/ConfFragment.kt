@@ -48,15 +48,13 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
                     show()
                 }
                 launch {
-                    Runnable {
-                        try {
-                            RimeUtils.sync(requireContext())
-                        } catch (ex: Exception) {
-                            Timber.e(ex, "Sync Exception")
-                        } finally {
-                            progressDialog.dismiss()
-                        }
-                    }.run()
+                    try {
+                        RimeUtils.sync(requireContext())
+                    } catch (ex: Exception) {
+                        Timber.e(ex, "Sync Exception")
+                    } finally {
+                        progressDialog.dismiss()
+                    }
                 }
                 true
             }
