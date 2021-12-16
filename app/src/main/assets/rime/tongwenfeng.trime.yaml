@@ -45,6 +45,7 @@ style:
     min_length: 4 #候选窗口最小词长
     max_length: 14 #超过字数则换行
     sticky_lines: 1 #固顶行数
+    sticky_lines_land: 0 #横屏模式下的固顶行数
     max_entries: 5 #候选窗口最大词条数
     border: 0 #候选窗口边框宽度
     max_width: 360 #最大宽度，超过则自动换行

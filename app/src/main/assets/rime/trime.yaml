@@ -33,6 +33,7 @@ style:
     min_length: 5 #最小詞長
     max_length: 10 #超過字數則換行
     sticky_lines: 0 #固頂行數
+    sticky_lines_land: 0 #横屏模式下的固顶行数
     max_entries: 1 #最大詞條數
     min_check: 3 #只要前n个候选词有长度大于等于min_length的词，就会把长度符合以及之前的词全部加到悬浮窗内。
     all_phrases: false #所有滿足條件的詞語都顯示在窗口
