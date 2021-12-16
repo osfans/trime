@@ -817,12 +817,13 @@ public class Config {
     if (!(o instanceof Integer)) return null;
     gd.setColor((int) o);
 
+    if (roundCornerKey != null) gd.setCornerRadius(getFloat(roundCornerKey));
+
     if (borderColorKey != null && borderKey != null) {
       int border = getPixel(borderKey);
       Object borderColor = curcentColors.get(borderColorKey);
       if (borderColor instanceof Integer && border > 0) {
         gd.setStroke(border, getCurrentColor_(borderColorKey));
-        if (roundCornerKey != null) gd.setCornerRadius(getFloat(roundCornerKey));
       }
     }
 
