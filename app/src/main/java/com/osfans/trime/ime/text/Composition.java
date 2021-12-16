@@ -21,6 +21,7 @@ package com.osfans.trime.ime.text;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Build.VERSION;
@@ -60,7 +61,7 @@ public class Composition extends AppCompatTextView {
   private Integer key_back_color;
   private Typeface tfText, tfLabel, tfCandidate, tfComment;
   private final int[] composition_pos = new int[2];
-  private int max_length, sticky_lines;
+  private int max_length, sticky_lines, sticky_lines_land;
   private int max_entries = Candidate.getMaxCandidateCount();
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
@@ -261,6 +262,7 @@ public class Composition extends AppCompatTextView {
     setPadding(margin_x, margin_y, margin_x, margin_bottom);
     max_length = config.getInt("layout/max_length");
     sticky_lines = config.getInt("layout/sticky_lines");
+    sticky_lines_land = config.getInt("layout/sticky_lines_land");
     movable = config.getString("layout/movable");
     all_phrases = config.getBoolean("layout/all_phrases");
     tfLabel = config.getFont("label_font");
@@ -366,6 +368,12 @@ public class Composition extends AppCompatTextView {
     String line = Config.getString(m, "sep");
 
     int line_length = 0;
+    int sticky_lines_now = sticky_lines;
+    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      sticky_lines_now = sticky_lines_land;
+    }
+    //    Timber.d("sticky_lines_now = %d", sticky_lines_now);
+
     String[] labels = Rime.getSelectLabels();
     int i = -1;
     candidate_num = 0;
@@ -384,7 +392,7 @@ public class Composition extends AppCompatTextView {
       final String line_sep;
       if (candidate_num == 0) {
         line_sep = sep;
-      } else if ((sticky_lines > 0 && sticky_lines >= i)
+      } else if ((sticky_lines_now > 0 && sticky_lines_now >= i)
           || (max_length > 0 && line_length + cand.length() > max_length)) {
         line_sep = "\n";
         line_length = 0;
