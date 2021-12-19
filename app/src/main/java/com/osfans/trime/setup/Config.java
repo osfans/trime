@@ -40,15 +40,18 @@ import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
+import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.AppVersionUtils;
 import com.osfans.trime.util.DataUtils;
 import com.osfans.trime.util.YamlUtils;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +81,7 @@ public class Config {
   }
 
   private Map<?, ?> mStyle, mDefaultStyle;
-  private String themeName;
+  private String themeName, soundPackageName;
   private static final String defaultName = "trime";
   private String schema_id;
 
@@ -103,6 +106,8 @@ public class Config {
     deployTheme();
     init();
     prepareCLipBoardRule();
+    soundPackageName = getPrefs().getKeyboard().getSoundPackage();
+    setSoundPackage(soundPackageName);
   }
 
   private void prepareCLipBoardRule() {
@@ -140,6 +145,10 @@ public class Config {
     return themeName;
   }
 
+  public String getSoundPackage() {
+    return soundPackageName;
+  }
+
   public void prepareRime(Context context) {
     boolean isExist = new File(sharedDataDir).exists();
     boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(getPrefs());
@@ -171,15 +180,26 @@ public class Config {
   public static String[] getThemeKeys(boolean isUser) {
     File d = new File(isUser ? DataUtils.getUserDataDir() : DataUtils.getSharedDataDir());
     FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith("trime.yaml");
-    return d.list(trimeFilter);
+    String[] list = d.list(trimeFilter);
+    if (list != null) return list;
+    return new String[] {};
   }
 
-  public static String[] getThemeNames(String[] keys) {
+  public static String[] getSoundPackages() {
+    File d = new File(DataUtils.getUserDataDir(), "sound");
+    FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith(".sound.yaml");
+    String[] list = d.list(trimeFilter);
+    if (list != null) return list;
+    return new String[] {};
+  }
+
+  public static String[] getYamlFileNames(String[] keys) {
     if (keys == null) return null;
     final int n = keys.length;
     final String[] names = new String[n];
     for (int i = 0; i < keys.length; i++) {
-      final String k = keys[i].replace(".trime.yaml", "").replace(".yaml", "");
+      final String k =
+          keys[i].replace(".trime.yaml", "").replace(".sound.yaml", "").replace(".yaml", "");
       names[i] = k;
     }
     return names;
@@ -253,6 +273,42 @@ public class Config {
     themeName = theme;
     getPrefs().getLooks().setSelectedTheme(themeName);
     init();
+  }
+
+  public void setSoundPackage(String name) {
+    soundPackageName = name;
+    // copy soundpackage yaml file from sound folder to build folder
+    try {
+      InputStream in =
+          new FileInputStream(
+              DataUtils.getUserDataDir()
+                  + File.separator
+                  + "sound"
+                  + File.separator
+                  + name
+                  + ".sound.yaml");
+      OutputStream out =
+          new FileOutputStream(
+              DataUtils.getUserDataDir()
+                  + File.separator
+                  + "build"
+                  + File.separator
+                  + name
+                  + ".sound.yaml");
+
+      byte[] buffer = new byte[1024];
+      int len;
+      while ((len = in.read(buffer)) > 0) {
+        out.write(buffer, 0, len);
+      }
+
+      getPrefs().getKeyboard().setSoundPackage(soundPackageName);
+      Sound.get(soundPackageName);
+
+      Timber.i("setSoundPackage = " + soundPackageName);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private void init() {

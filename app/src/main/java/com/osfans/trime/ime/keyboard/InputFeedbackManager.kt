@@ -91,18 +91,21 @@ class InputFeedbackManager(
     fun keyPressSound(keyCode: Int? = null) {
         if (prefs.keyboard.soundEnabled) {
             val soundVolume = prefs.keyboard.soundVolume
-            val effect = when (keyCode) {
-                KeyEvent.KEYCODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
-                KeyEvent.KEYCODE_DEL -> AudioManager.FX_KEYPRESS_DELETE
-                KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN
-                else -> AudioManager.FX_KEYPRESS_STANDARD
-            }
-
-            if (soundVolume > 0) {
-                audioManager!!.playSoundEffect(
-                    effect,
-                    (1 - (ln((101.0 - soundVolume)) / ln(101.0))).toFloat()
-                )
+            if (Sound.get().isEnable)
+                Sound.get().play(keyCode, soundVolume)
+            else {
+                if (soundVolume > 0) {
+                    val effect = when (keyCode) {
+                        KeyEvent.KEYCODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
+                        KeyEvent.KEYCODE_DEL -> AudioManager.FX_KEYPRESS_DELETE
+                        KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN
+                        else -> AudioManager.FX_KEYPRESS_STANDARD
+                    }
+                    audioManager!!.playSoundEffect(
+                        effect,
+                        (1 - (ln((101.0 - soundVolume)) / ln(101.0))).toFloat()
+                    )
+                }
             }
         }
     }

@@ -19,7 +19,7 @@
             android:title="@string/keyboard__fullscreen_mode_title"
             android:entries="@array/keyboard__fullscreen_mode_entries"
             android:entryValues="@array/keyboard__fullscreen_mode_values"
-            android:defaultValue="preview"
+            android:defaultValue="auto_show"
             app:useSimpleSummaryProvider="true"/>
         <SwitchPreferenceCompat android:key="keyboard__soft_cursor"
             app:iconSpaceReserved="false"
@@ -49,6 +49,9 @@
         <SwitchPreferenceCompat android:key="keyboard__key_sound"
             app:iconSpaceReserved="false"
             android:title="@string/keyboard__key_sound_title"/>
+        <Preference android:key="keyboard__key_sound_package"
+            app:iconSpaceReserved="false"
+            android:title="@string/keyboard__key_sound_package_title" />
         <com.osfans.trime.settings.components.DialogSeekBarPreference
             app:allowDividerAbove="false"
             android:key="keyboard__key_sound_volume"

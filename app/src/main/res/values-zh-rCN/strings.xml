@@ -163,4 +163,6 @@
     <string name="external_storage_permission_granted">已授予存储权限</string>
     <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
     <string name="alert_window_access_required">同文输入法需要允许显示在其他应用上方以能显示应用外悬浮窗或对话框，点击“确定”以授权。</string>
+    <string name="keyboard__key_sound_package_title">按键音效包</string>
+    <string name="sound_progress">正在应用音效...</string>
 </resources>

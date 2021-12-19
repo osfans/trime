@@ -4,11 +4,13 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import androidx.core.view.forEach
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.settings.components.SoundPickerDialog
 
 class KeyboardFragment :
     PreferenceFragmentCompat(),
@@ -45,7 +47,15 @@ class KeyboardFragment :
             }
         }
     }
-
+    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
+        return when (preference?.key) {
+            "keyboard__key_sound_package" -> {
+                SoundPickerDialog(requireContext()).show()
+                true
+            }
+            else -> super.onPreferenceTreeClick(preference)
+        }
+    }
     override fun onResume() {
         super.onResume()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)

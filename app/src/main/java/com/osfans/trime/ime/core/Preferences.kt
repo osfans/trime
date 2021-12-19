@@ -172,6 +172,7 @@ class Preferences(
 
             const val SOUND_ENABLED = "keyboard__key_sound"
             const val SOUND_VOLUME = "keyboard__key_sound_volume"
+            const val SOUND_PACKAGE = "keyboard__key_sound_package"
 
             const val VIBRATION_ENABLED = "keyboard__key_vibration"
             const val VIBRATION_DURATION = "keyboard__key_vibration_duration"
@@ -208,6 +209,9 @@ class Preferences(
         var soundEnabled: Boolean = false
             get() = prefs.getPref(SOUND_ENABLED, false)
             private set
+        var soundPackage: String
+            get() = prefs.getPref(SOUND_PACKAGE, "")
+            set(v) = prefs.setPref(SOUND_PACKAGE, v)
         var soundVolume: Int = 0
             get() = prefs.getPref(SOUND_VOLUME, 100)
             private set

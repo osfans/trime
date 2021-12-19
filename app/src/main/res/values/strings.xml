@@ -164,4 +164,6 @@
     <string name="external_storage_permission_granted">External storage permission is granted</string>
     <string name="external_storage_permission_denied">External storage permission was denied, deployment or reading schemas and config may not be available</string>
     <string name="alert_window_access_required">TRIME need alert window permission to show up popup window or dialog, tap OK to grant the permission.</string>
+    <string name="keyboard__key_sound_package_title">Key Sound Package</string>
+    <string name="sound_progress">Loading sound...</string>
 </resources>
