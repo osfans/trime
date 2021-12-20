@@ -78,6 +78,7 @@ import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.settings.PrefMainActivity;
 import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
+import com.osfans.trime.settings.components.SoundPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.setup.IntentReceiver;
@@ -940,6 +941,10 @@ public class Trime extends LifecycleInputMethodService {
   /** 彈出{@link ThemePickerDialog 主題對話框} */
   public void showThemeDialog() {
     new ThemePickerDialog(this).show();
+  }
+  /** 彈出{@link SoundPickerDialog 音效包对话框} */
+  public void showSoundDialog() {
+    new SoundPickerDialog(this).show();
   }
 
   /** Hides the IME and launches {@link PrefMainActivity}. */

@@ -277,38 +277,40 @@ public class Config {
 
   public void setSoundPackage(String name) {
     soundPackageName = name;
-    // copy soundpackage yaml file from sound folder to build folder
-    try {
-      InputStream in =
-          new FileInputStream(
-              DataUtils.getUserDataDir()
-                  + File.separator
-                  + "sound"
-                  + File.separator
-                  + name
-                  + ".sound.yaml");
-      OutputStream out =
-          new FileOutputStream(
-              DataUtils.getUserDataDir()
-                  + File.separator
-                  + "build"
-                  + File.separator
-                  + name
-                  + ".sound.yaml");
+    String path =
+        DataUtils.getUserDataDir()
+            + File.separator
+            + "sound"
+            + File.separator
+            + name
+            + ".sound.yaml";
+    File file = new File(path);
+    if (file.exists()) {
+      // copy soundpackage yaml file from sound folder to build folder
+      try {
+        InputStream in = new FileInputStream(file);
+        OutputStream out =
+            new FileOutputStream(
+                DataUtils.getUserDataDir()
+                    + File.separator
+                    + "build"
+                    + File.separator
+                    + name
+                    + ".sound.yaml");
 
-      byte[] buffer = new byte[1024];
-      int len;
-      while ((len = in.read(buffer)) > 0) {
-        out.write(buffer, 0, len);
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = in.read(buffer)) > 0) {
+          out.write(buffer, 0, len);
+        }
+
+        Timber.i("setSoundPackage = " + soundPackageName);
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-
-      getPrefs().getKeyboard().setSoundPackage(soundPackageName);
-      Sound.get(soundPackageName);
-
-      Timber.i("setSoundPackage = " + soundPackageName);
-    } catch (Exception e) {
-      e.printStackTrace();
     }
+    getPrefs().getKeyboard().setSoundPackage(soundPackageName);
+    Sound.get(soundPackageName);
   }
 
   private void init() {

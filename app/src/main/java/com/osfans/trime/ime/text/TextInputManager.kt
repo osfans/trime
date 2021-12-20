@@ -347,6 +347,7 @@ class TextInputManager private constructor() :
                     "theme" -> trime.showThemeDialog()
                     "color" -> trime.showColorDialog()
                     "schema" -> trime.showSchemaDialog()
+                    "sound" -> trime.showSoundDialog()
                     else -> trime.launchSettings()
                 }
             }

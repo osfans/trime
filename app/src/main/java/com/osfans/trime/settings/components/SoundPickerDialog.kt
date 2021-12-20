@@ -70,7 +70,8 @@ class SoundPickerDialog(
     }
 
     private fun setSound() {
-        config.soundPackage = themeKeys[checkedId]?.replace(".sound.yaml", "")
+        if (checkedId >= 0 && checkedId <themeKeys.size)
+            config.soundPackage = themeKeys[checkedId]?.replace(".sound.yaml", "")
     }
 
     /** 调用该方法显示对话框 **/
