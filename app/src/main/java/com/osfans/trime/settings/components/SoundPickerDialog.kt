@@ -22,8 +22,8 @@ class SoundPickerDialog(
 ) : CoroutineScope by MainScope() {
 
     private val config = Config.get(context)
-    private val themeKeys: Array<String?>
-    private val themeNames: Array<String?>
+    private val soundPackageFiles: Array<String?>
+    private val soundPackageNames: Array<String?>
     private var checkedId: Int = 0
     val pickerDialog: AlertDialog
 
@@ -31,12 +31,11 @@ class SoundPickerDialog(
     private val progressDialog: ProgressDialog
 
     init {
-        val themeFile = config.soundPackage + ".sound.yaml"
-        themeKeys = Config.getSoundPackages()
-        themeKeys.sort()
-        checkedId = themeKeys.binarySearch(themeFile)
+        soundPackageFiles = Config.getSoundPackages()
+        soundPackageFiles.sort()
+        checkedId = soundPackageFiles.binarySearch(config.soundPackage + ".sound.yaml")
 
-        themeNames = Config.getYamlFileNames(themeKeys)
+        soundPackageNames = Config.getYamlFileNames(soundPackageFiles)
 
         // Init picker
         pickerDialog = AlertDialog.Builder(context, R.style.AlertDialogTheme).apply {
@@ -45,7 +44,7 @@ class SoundPickerDialog(
             setNegativeButton(android.R.string.cancel, null)
             setPositiveButton(android.R.string.ok) { _, _ -> execute() }
             setSingleChoiceItems(
-                themeNames, checkedId
+                soundPackageNames, checkedId
             ) { _, id -> checkedId = id }
         }.create()
         // Init progress dialog
@@ -70,8 +69,8 @@ class SoundPickerDialog(
     }
 
     private fun setSound() {
-        if (checkedId >= 0 && checkedId <themeKeys.size)
-            config.soundPackage = themeKeys[checkedId]?.replace(".sound.yaml", "")
+        if (checkedId >= 0 && checkedId <soundPackageFiles.size)
+            config.soundPackage = soundPackageFiles[checkedId]?.replace(".sound.yaml", "")
     }
 
     /** 调用该方法显示对话框 **/
