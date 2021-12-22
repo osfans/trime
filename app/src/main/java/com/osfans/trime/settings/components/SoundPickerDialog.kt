@@ -16,7 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** 顯示配色方案列表 */
+// show sound schema list
 class SoundPickerDialog(
     private val context: Context
 ) : CoroutineScope by MainScope() {
