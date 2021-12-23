@@ -67,6 +67,7 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
+import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
 import com.osfans.trime.ime.symbol.TabManager;
@@ -681,6 +682,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
+    Sound.get().resetProgress();
     for (EventListener listener : eventListeners) {
       if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
     }
