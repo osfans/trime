@@ -33,12 +33,13 @@ public class Sound {
     return self;
   }
 
-  public boolean isEnable() {
-    return enable;
+  public static boolean isEnable() {
+    if (self == null) return false;
+    return self.enable;
   }
 
-  public void resetProgress() {
-    progress = 0;
+  public static void resetProgress() {
+    if (self != null) self.progress = 0;
   }
 
   @SuppressWarnings("unchecked")

@@ -683,7 +683,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
-    Sound.get().resetProgress();
+    Sound.resetProgress();
     for (EventListener listener : eventListeners) {
       if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
     }

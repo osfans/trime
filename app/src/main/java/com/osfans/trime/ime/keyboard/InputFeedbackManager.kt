@@ -91,7 +91,7 @@ class InputFeedbackManager(
     fun keyPressSound(keyCode: Int? = null) {
         if (prefs.keyboard.soundEnabled) {
             val soundVolume = prefs.keyboard.soundVolume
-            if (Sound.get().isEnable)
+            if (Sound.isEnable())
                 Sound.get().play(keyCode, soundVolume)
             else {
                 if (soundVolume > 0) {
