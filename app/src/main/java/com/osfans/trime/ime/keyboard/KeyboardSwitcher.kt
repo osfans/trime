@@ -56,7 +56,7 @@ class KeyboardSwitcher {
             name.contentEquals(".last_lock") -> lastLockId
             name.contentEquals(".ascii") -> {
                 val asciiKeyboard = keyboards[i].asciiKeyboard
-                if (asciiKeyboard.isEmpty()) { i } else { keyboardNames.indexOf(asciiKeyboard) }
+                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { keyboardNames.indexOf(asciiKeyboard) }
             }
             else -> keyboardNames.indexOf(name)
         }
