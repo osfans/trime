@@ -518,6 +518,7 @@ public class Trime extends LifecycleInputMethodService {
     getImeConfig().reset();
     loadConfig();
     getImeConfig().initCurrentColors();
+    getImeConfig().setSoundFromColor();
     if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
     resetCandidate();
     hideCompositionView();
@@ -944,6 +945,7 @@ public class Trime extends LifecycleInputMethodService {
   public void showThemeDialog() {
     new ThemePickerDialog(this).show();
   }
+
   /** 彈出{@link SoundPickerDialog 音效包对话框} */
   public void showSoundDialog() {
     new SoundPickerDialog(this).show();

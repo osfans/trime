@@ -81,9 +81,9 @@ public class Config {
   }
 
   private Map<?, ?> mStyle, mDefaultStyle;
-  private String themeName, soundPackageName;
+  private String themeName, soundPackageName, currentSound;
   private static final String defaultName = "trime";
-  private String schema_id;
+  private String schema_id, colorID;
 
   private Map<?, ?> fallbackColors;
   private Map<String, ?> presetColorSchemes, presetKeyboards;
@@ -102,12 +102,12 @@ public class Config {
     self = this;
     assetManager = context.getAssets();
     themeName = getPrefs().getLooks().getSelectedTheme();
+    soundPackageName = getPrefs().getKeyboard().getSoundPackage();
     prepareRime(context);
     deployTheme();
     init();
+    setSoundFromColor();
     prepareCLipBoardRule();
-    soundPackageName = getPrefs().getKeyboard().getSoundPackage();
-    setSoundPackage(soundPackageName);
   }
 
   private void prepareCLipBoardRule() {
@@ -275,6 +275,7 @@ public class Config {
     init();
   }
 
+  // 设置音效包
   public void setSoundPackage(String name) {
     soundPackageName = name;
     String path =
@@ -286,31 +287,63 @@ public class Config {
             + ".sound.yaml";
     File file = new File(path);
     if (file.exists()) {
-      // copy soundpackage yaml file from sound folder to build folder
-      try {
-        InputStream in = new FileInputStream(file);
-        OutputStream out =
-            new FileOutputStream(
-                DataUtils.getUserDataDir()
-                    + File.separator
-                    + "build"
-                    + File.separator
-                    + name
-                    + ".sound.yaml");
-
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = in.read(buffer)) > 0) {
-          out.write(buffer, 0, len);
-        }
-
-        Timber.i("setSoundPackage = " + soundPackageName);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      applySoundPackage(file, name);
     }
     getPrefs().getKeyboard().setSoundPackage(soundPackageName);
-    Sound.get(soundPackageName);
+  }
+
+  // 应用音效包
+  private void applySoundPackage(File file, String name) {
+    // copy soundpackage yaml file from sound folder to build folder
+    try {
+      InputStream in = new FileInputStream(file);
+      OutputStream out =
+          new FileOutputStream(
+              DataUtils.getUserDataDir()
+                  + File.separator
+                  + "build"
+                  + File.separator
+                  + name
+                  + ".sound.yaml");
+
+      byte[] buffer = new byte[1024];
+      int len;
+      while ((len = in.read(buffer)) > 0) {
+        out.write(buffer, 0, len);
+      }
+
+      Timber.i("applySoundPackage = " + name);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    Sound.get(name);
+    currentSound = name;
+  }
+
+  // 配色指定音效时自动切换音效效果（不会自动修改设置）。
+  public void setSoundFromColor() {
+    final Map<String, ?> m = (Map<String, ?>) presetColorSchemes.get(colorID);
+    if (m.containsKey("sound")) {
+      String sound = (String) m.get("sound");
+      if (sound != currentSound) {
+        String path =
+            DataUtils.getUserDataDir()
+                + File.separator
+                + "sound"
+                + File.separator
+                + sound
+                + ".sound.yaml";
+        File file = new File(path);
+        if (file.exists()) {
+          applySoundPackage(file, sound);
+          return;
+        }
+      }
+    }
+
+    if (currentSound != soundPackageName) {
+      setSoundPackage(soundPackageName);
+    }
   }
 
   private void init() {
@@ -577,9 +610,7 @@ public class Config {
   public Integer getColor(String key) {
     Object o = getColorObject(key);
     if (o == null) {
-      o =
-          ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(getColorSchemeName())))
-              .get(key);
+      o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(colorID))).get(key);
     }
     if (o == null) return null;
     return parseColor(o.toString());
@@ -589,7 +620,7 @@ public class Config {
   public Drawable getDrawable(@NonNull Map<?, ?> m, String k) {
     if (m.containsKey(k)) {
       final Object o = m.get(k);
-      Timber.d("getColorDrawable()" + k + " " + o);
+      //      Timber.d("getColorDrawable()" + k + " " + o);
       return drawableObject(o);
     }
     return null;
@@ -650,10 +681,9 @@ public class Config {
   //  获取当前配色方案的key的value，或者从fallback获取值。
   @Nullable
   private Object getColorObject(String key) {
-    String scheme = getColorSchemeName();
-    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
+    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(colorID);
     if (map == null) return null;
-    getPrefs().getLooks().setSelectedColor(scheme);
+    getPrefs().getLooks().setSelectedColor(colorID);
     Object o = map.get(key);
     String fallbackKey = key;
     while (o == null && fallbackColors.containsKey(fallbackKey)) {
@@ -922,16 +952,16 @@ public class Config {
   // 初始化当前配色 Config 2.0
   public void initCurrentColors() {
     curcentColors.clear();
-    String scheme = getColorSchemeName();
+    colorID = getColorSchemeName();
     backgroundFolder = getString("background_folder");
     Timber.d(
-        "initCurrentColors() scheme=%s themeName=%s schema_id=%s", scheme, themeName, schema_id);
-    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(scheme);
+        "initCurrentColors() colorID=%s themeName=%s schema_id=%s", colorID, themeName, schema_id);
+    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(colorID);
     if (map == null) {
-      Timber.i("no scheme %s", scheme);
+      Timber.i("no colorID %s", colorID);
       return;
     }
-    getPrefs().getLooks().setSelectedColor(scheme);
+    getPrefs().getLooks().setSelectedColor(colorID);
 
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       Object value = getColorRealValue(entry.getValue());

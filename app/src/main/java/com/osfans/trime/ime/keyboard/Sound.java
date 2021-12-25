@@ -43,8 +43,11 @@ public class Sound {
 
   @SuppressWarnings("unchecked")
   public Sound(String soundPackageName) {
-    sp = new SoundPool(3, AudioManager.STREAM_MUSIC, 0);
+    sp = new SoundPool(3, AudioManager.STREAM_SYSTEM, 0);
     keyset = new ArrayList<>();
+    melody = new int[1];
+    progress = -1;
+
     Map<String, ?> m = YamlUtils.INSTANCE.loadMap(soundPackageName + ".sound", "");
     if (m != null) {
       String path = DataUtils.getUserDataDir() + File.separator + "sound" + File.separator;
@@ -69,7 +72,6 @@ public class Sound {
           enable = true;
           return;
         } else if (m.containsKey("keyset")) {
-          progress = -1;
           List<Map<String, ?>> n = (List<Map<String, ?>>) m.get("keyset");
           for (Map<String, ?> o : n) {
             int max = -1, min = -1;
@@ -111,9 +113,9 @@ public class Sound {
       if (sound.length > 0) {
         float soundVolume = volume / 100f;
         if (progress >= 0) {
-          progress++;
           if (progress >= melody.length) progress = 0;
-          currStreamId = sound[melody[progress]];
+          currStreamId = melody[progress];
+          progress++;
         } else if (lastKeycode != keycode) {
           lastKeycode = keycode;
           for (Key key : keyset) {
@@ -138,9 +140,11 @@ public class Sound {
 
   public int getSoundIndex(Object obj) {
     String t = (String) obj;
-    if (t.matches("\\d+")) return Integer.parseInt(t);
-
-    int k = files.indexOf(t);
+    int k;
+    if (t.matches("\\d+")) {
+      k = Integer.parseInt(t);
+      if (k >= sound.length) return 0;
+    } else k = files.indexOf(t);
     return Math.max(k, 0);
   }
 
