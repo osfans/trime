@@ -46,7 +46,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 1. 克隆此项目，**请注意**由于 `boost` 子模块很大，这会花费一些时间。同时，请确保你的磁盘有足够空间保存源代码（约 1.5 GB);
 ```bash
 cd $your_folder
-git clone --recursive https://github.com/osfans/trime.git trime
+git clone --recursive https://github.com/osfans/trime.git
 ```
 2. 如果你想测试应用，运行命令：
 

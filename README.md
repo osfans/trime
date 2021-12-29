@@ -53,7 +53,7 @@ Your [contribution](CONTRIBUTING.md) are welcome ~ ! :tada:
 
 ```bash
 cd $your_folder
-git clone --recursive https://github.com/osfans/trime.git trime
+git clone --recursive https://github.com/osfans/trime.git
 ```
 
 2. If you would like to test the application, run:
