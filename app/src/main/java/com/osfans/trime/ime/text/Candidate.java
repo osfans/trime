@@ -163,17 +163,20 @@ public class Candidate extends View {
    * @return 是否成功選字
    */
   private void onCandidateClick(int index) {
-    ComputedCandidate candidate = computedCandidates.get(index);
-    if (candidate != null) {
-      if (candidate instanceof ComputedCandidate.Word) {
-        if (listener.get() != null) {
-          listener.get().onCandidatePressed(index + startNum);
+    ComputedCandidate candidate = null;
+    if (index >= 0 && index < computedCandidates.size()) {
+      candidate = computedCandidates.get(index);
+      if (candidate != null) {
+        if (candidate instanceof ComputedCandidate.Word) {
+          if (listener.get() != null) {
+            listener.get().onCandidatePressed(index + startNum);
+          }
         }
-      }
-      if (candidate instanceof ComputedCandidate.Symbol) {
-        String arrow = ((ComputedCandidate.Symbol) candidate).getArrow();
-        if (listener.get() != null) {
-          listener.get().onCandidateSymbolPressed(arrow);
+        if (candidate instanceof ComputedCandidate.Symbol) {
+          String arrow = ((ComputedCandidate.Symbol) candidate).getArrow();
+          if (listener.get() != null) {
+            listener.get().onCandidateSymbolPressed(arrow);
+          }
         }
       }
     }
