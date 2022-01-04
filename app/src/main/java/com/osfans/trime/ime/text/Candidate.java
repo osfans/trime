@@ -163,7 +163,11 @@ public class Candidate extends View {
    * @return 是否成功選字
    */
   private void onCandidateClick(int index) {
-    ComputedCandidate candidate = computedCandidates.get(index);
+    ComputedCandidate candidate = null;
+    try {
+      candidate = computedCandidates.get(index);
+    } catch (Exception e) {
+    }
     if (candidate != null) {
       if (candidate instanceof ComputedCandidate.Word) {
         if (listener.get() != null) {
