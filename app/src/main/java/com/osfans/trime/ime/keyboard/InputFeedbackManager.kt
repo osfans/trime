@@ -29,7 +29,7 @@ class InputFeedbackManager(
         try {
             vibrator = ims.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             audioManager = ims.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-            tts = TextToSpeech(ims) { }
+            tts = TextToSpeech(ims.applicationContext) { }
         } catch (e: Exception) {
             e.printStackTrace()
         }
