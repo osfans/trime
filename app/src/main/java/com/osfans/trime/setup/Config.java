@@ -91,7 +91,7 @@ public class Config {
 
   private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
 
-  private String[] clipBoardCompare, clipBoardOutput;
+  private String[] clipBoardCompare, clipBoardOutput, draftOutput;
 
   @NonNull
   private Preferences getPrefs() {
@@ -107,12 +107,9 @@ public class Config {
     deployTheme();
     init();
     setSoundFromColor();
-    prepareCLipBoardRule();
-  }
-
-  private void prepareCLipBoardRule() {
     clipBoardCompare = getPrefs().getOther().getClipboardCompareRules().trim().split("\n");
     clipBoardOutput = getPrefs().getOther().getClipboardOutputRules().trim().split("\n");
+    draftOutput = getPrefs().getOther().getDraftOutputRules().trim().split("\n");
   }
 
   public String[] getClipBoardCompare() {
@@ -123,8 +120,16 @@ public class Config {
     return clipBoardOutput;
   }
 
-  public int getClipboardMaxSize() {
-    return Integer.parseInt(getPrefs().getOther().getClipboardManagerRules());
+  public String[] getDraftOutput() {
+    return draftOutput;
+  }
+
+  public int getClipboardLimit() {
+    return Integer.parseInt(getPrefs().getOther().getClipboardLimit());
+  }
+
+  public int getDraftLimit() {
+    return Integer.parseInt(getPrefs().getOther().getDraftLimit());
   }
 
   public void setClipBoardCompare(String str) {
@@ -139,6 +144,13 @@ public class Config {
     clipBoardOutput = s.split("\n");
 
     getPrefs().getOther().setClipboardOutputRules(s);
+  }
+
+  public void setDraftOutput(String str) {
+    String s = pattern.matcher(str).replaceAll("\n").trim();
+    draftOutput = s.split("\n");
+
+    getPrefs().getOther().setDraftOutputRules(s);
   }
 
   public String getTheme() {

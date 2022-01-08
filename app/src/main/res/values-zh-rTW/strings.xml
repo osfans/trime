@@ -166,4 +166,6 @@
     <string name="alert_window_access_required">同文輸入法需要允許顯示在其他應用上方以能顯示應用外懸浮窗或對話方塊，點選“確定”以授權。</string>
     <string name="keyboard__key_sound_package_title">按鍵音效包</string>
     <string name="sound_progress">正在應用音效...</string>
+    <string name="other__draft_manager_title">草稿箱管理器</string>
+    <string name="other__draft_output_title">草稿箱過濾規則\n每行爲一條正則表達式，與規則匹配的內容不會被緩存</string>
 </resources>

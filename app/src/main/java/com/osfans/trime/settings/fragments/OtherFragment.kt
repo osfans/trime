@@ -61,6 +61,11 @@ class OtherFragment :
                     sharedPreferences?.getString(key, "")
                 )
             }
+            "other__draft_output" -> {
+                Config.get(context).setDraftOutput(
+                    sharedPreferences?.getString(key, "")
+                )
+            }
         }
     }
 
