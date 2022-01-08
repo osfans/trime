@@ -858,20 +858,23 @@ liquid_keyboard:
   single_width: 60    #single类型的按键宽度
   vertical_gap: 8     #纵向按键间隙
   margin_x: 2       #左右按键间隙的1/2
-  keyboards: [emoji, math, ascii, cn, clipboard, history, exit, list , table, symbol, ids , pinyin, jp, unit, exit, grease, rusa, korea, lation, yinbiao, exit]  #tab列表
+  keyboards: [emoji, math, ascii, cn, history, clipboard, draft, list, exit, ids , jp, table, symbol, pinyin, grease, rusa, korea, lation, yinbiao, unit,  exit]  #tab列表
   exit:
     name: 返回
     type: NO_KEY
     keys: EXIT
+  history:
+    name: 常用
+    type: HISTORY
   emoji:
     type: SINGLE
-    keys: "🙂😂🤣😆🙃😅🙈🙉🙊☹😑😄🤐😨😱🌚🌝🤔❤💔♡🌹💣👌👍😣😥😮🙄😏😕😯😪😫😴😌🤑😉😋😎😍😘😚😛😜😝😒😓😔😲😷🤒😇🤓🤗🤕🙁😖😞😟😤😢😭😦😧😨😩😬😰😳😵😡😠☝✌🖕👎🙏🤘👏💪💋☘🍀🌸☕🍵🍺🍻🍦🍬🍚🍜🍲🍖🎂💤"
+    keys: "🙂😂🤣😆🙃😅🥺🙈🙉🙊☹😑😄🤐😨😱🌚🌝🤔❤💔🌹💣👌👍😣😥😮🙄😏😕😯😪😫😴😌🤑😉😋😎😍😘😚😛😜😝😒😓😔😲😷🤒😇🤓🤗🤕🙁😖😞😟😤😢😭😦😧😨😩😬😰😳😵😡😠☝✌🖕👎🙏🤘👏💪💋☘🍀🌸☕🍵🍺🍻🍦🍬🍚🍜🍲🍖🎂💤"
   clipboard:
     type: CLIPBOARD
     name: 剪贴
-  history:
-    name: 最近
-    type: HISTORY
+  draft:
+    type: DRAFT
+    name: 草稿
   math:   #tab名称
     type: SINGLE
     name: 数学
@@ -910,6 +913,7 @@ liquid_keyboard:
       - ～
   symbol:
     name: 特殊
+    type: SINGLE
     keys: "△▽○◇□☆▲▼●◆■★▷◁▶◀♻♲†⚝✡⚹✦✸✹￼�×⌫☑☒✅❎✔✘✓✗☼☽♀☻◐㏂☀☾♂☹◑㏘☜☝☞☚☟☛▪•‥…∷※♩♪♫♬§°♭♯♮‖¶№◎¤۞℗®©卍卐℡™㏇Φ↖↑↗◤㊤◥←↔→㊧㊥㊨↙↓↘◣㊦◢⇄⇅⇆⇤↩⇥❏❐◲〼▢▣⇦⇧⇨⇩⇪↶▸◂▴▾✁↷✍⏍ϟ📝✎✆☱☰☴⚿⛮⚙☲☯☵⛶☩☐☳☷☶💬🗨⟲ღ✈☂🎤🌐🔍"
   unit:
     name: 单位
@@ -950,7 +954,7 @@ liquid_keyboard:
   ids:
     type: SINGLE
     name: IDS
-    keys: "⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻"
+    keys: "⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻↷↔"
   jp:
     type: SINGLE
     name: 假名
@@ -3906,28 +3910,31 @@ preset_keys:
   CommitScriptText: {label: 编码, send: Shift+Return}
   CommitComment: {label: 编码, send: Control+Shift+Return}
   DeleteCandidate: {label: 删词, send: Control+Delete, functional: false}
+  #切换键盘
+  Keyboard_letter: { label: 字母, functional: true, send: Eisu_toggle, select: default }
+  Keyboard_default: { label: 返回, functional: false, send: Eisu_toggle, select: .default }
+  Keyboard_switch: { label: 键盘, functional: true, send: Eisu_toggle, select: .next }
+  Keyboard_number: { label: 123, functional: false, send: Eisu_toggle, select: number }
+  Keyboard_numberb: { label: 123, functional: false, send: Eisu_toggle, select: numberb }
+  Keyboard_symbols: { label: 更多, functional: false, send: Eisu_toggle, select: symbols }
+  Keyboard_move: { label: ❖, functional: true, send: Eisu_toggle, select: move }
+  Keyboard_next: { label: 后退, functional: false, send: Eisu_toggle, select: .next }
+  Keyboard_last: { label: 后退, functional: false, send: Eisu_toggle, select: .last }
+  Keyboard_last_lock: { label: 返回, send: Eisu_toggle, select: .last_lock } #直接切換到下一键盘
+  liquid_keyboard_switch: { label: 更多, send: function, command: liquid_keyboard, option: "特殊" }
+  liquid_keyboard_switch2: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 更多 ] }
+  liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
+  liquid_keyboard_clipboard: { label: 剪贴, send: function, command: liquid_keyboard, option: "剪贴" }
   # rime状态
   Mode_switch: {toggle: ascii_mode, functional: false, send: Mode_switch, states: [ 中文, 西文 ]}
   Zenkaku_Hankaku: {toggle: full_shape, send: Mode_switch, states: [ 半角, 全角 ]}
   Henkan: {toggle: simplification, send: Mode_switch, states: [ 汉字, 汉字 ]}
   Charset_switch: {toggle: extended_charset, send: Mode_switch, states: [ 常用, 增广 ]}
   Punct_switch: {toggle: ascii_punct, send: Mode_switch, states: [ 。，, ．， ]}
-  liquid_keyboard_switch: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 更多 ] }
-  liquid_keyboard_clipboard: {label: 剪贴板, send: function, command: liquid_keyboard, option: "剪贴"}
   # trime设置
   IME_switch: {label: 🌐, send: LANGUAGE_SWITCH} #彈出對話框選擇輸入法
   IME_last: {label: 上一输入法, send: LANGUAGE_SWITCH, select: .last} #直接切換到上一輸入法
   IME_next: {label: 下一输入法, send: LANGUAGE_SWITCH, select: .next} #直接切換到下一輸入法
-  Keyboard_letter: {label: 字母, functional: true, send: Eisu_toggle, select: default}
-  Keyboard_default: {label: 返回, functional: false, send: Eisu_toggle, select: .default}
-  Keyboard_switch: {label: 键盘, functional: true, send: Eisu_toggle, select: .next}
-  Keyboard_number: {label: 123, functional: false, send: Eisu_toggle, select: number}
-  Keyboard_numberb: {label: 123, functional: false, send: Eisu_toggle, select: numberb}
-  Keyboard_symbols: {label: 更多, functional: false, send: Eisu_toggle, select: symbols}
-  Keyboard_move: {label: ❖, functional: true, send: Eisu_toggle, select: move}
-  Keyboard_next: {label: 后退, functional: false, send: Eisu_toggle, select: .next}
-  Keyboard_last: {label: 后退, functional: false, send: Eisu_toggle, select: .last}
-  Keyboard_last_lock: {label: 返回, send: Eisu_toggle, select: .last_lock} #直接切換到下一键盘
   Schema_switch: {label: 下一方案, functional: false, send: Control+Shift+1}
   Schema_Eng: {label: En, functional: true, send: Control+Shift+0}
   Theme_settings: {label: 主题, send: SETTINGS, option: "theme"}
