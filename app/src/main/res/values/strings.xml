@@ -166,4 +166,6 @@
     <string name="alert_window_access_required">TRIME need alert window permission to show up popup window or dialog, tap OK to grant the permission.</string>
     <string name="keyboard__key_sound_package_title">Key Sound Package</string>
     <string name="sound_progress">Loading sound...</string>
+    <string name="other__draft_manager_title">Draft Manager</string>
+    <string name="other__draft_output_title">Draft Filter</string>
 </resources>

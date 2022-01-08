@@ -299,7 +299,9 @@ class Preferences(
             const val CLICK_CANDIDATE_AND_COMMIT = "other__click_candidate_and_commit"
             const val CLIPBOARD_COMPARE_RULES = "other__clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "other__clipboard_output"
-            const val CLIPBOARD_MANAGER_RULES = "other__clipboard_manager"
+            const val DRAFT_OUTPUT_RULES = "other__draft_output"
+            const val DRAFT_LIMIT = "other__draft_limit"
+            const val CLIPBOARD_LIMIT = "other__clipboard_limit"
         }
         var uiMode: String
             get() = prefs.getPref(UI_MODE, "auto")
@@ -325,8 +327,14 @@ class Preferences(
         var clipboardOutputRules: String
             get() = prefs.getPref(CLIPBOARD_OUTPUT_RULES, "")
             set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v)
-        var clipboardManagerRules: String
-            get() = prefs.getPref(CLIPBOARD_MANAGER_RULES, "0")
-            set(v) = prefs.setPref(CLIPBOARD_MANAGER_RULES, v)
+        var draftOutputRules: String
+            get() = prefs.getPref(DRAFT_OUTPUT_RULES, "")
+            set(v) = prefs.setPref(DRAFT_OUTPUT_RULES, v)
+        var clipboardLimit: String
+            get() = prefs.getPref(CLIPBOARD_LIMIT, "50")
+            set(v) = prefs.setPref(CLIPBOARD_LIMIT, v)
+        var draftLimit: String
+            get() = prefs.getPref(DRAFT_LIMIT, "20")
+            set(v) = prefs.setPref(DRAFT_LIMIT, v)
     }
 }
