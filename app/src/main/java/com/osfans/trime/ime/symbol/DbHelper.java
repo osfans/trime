@@ -1,4 +1,4 @@
-package com.osfans.trime.clipboard;
+package com.osfans.trime.ime.symbol;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,15 +6,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.NonNull;
 import timber.log.Timber;
 
-public class ClipboardSqlHelper extends SQLiteOpenHelper {
+public class DbHelper extends SQLiteOpenHelper {
 
   public static final String CREATE_STUDENT =
-      "create table t_clipboard ("
+      "create table if not exists  t_data ("
           + "id integer primary key, text TEXT, html TEXT, type integer, time integer)";
 
-  public ClipboardSqlHelper(
-      Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-    super(context, name, factory, version);
+  public DbHelper(Context context, String name) {
+    super(context, name, null, 3);
   }
 
   @Override
@@ -30,5 +29,14 @@ public class ClipboardSqlHelper extends SQLiteOpenHelper {
   }
 
   @Override
-  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+    if (oldVersion == 1) {
+      Timber.i("onUpgrade() rename db");
+      db.execSQL("ALTER TABLE t_clipboard RENAME TO t_data");
+    } else {
+      Timber.i("onUpgrade() create db");
+      db.execSQL(CREATE_STUDENT);
+    }
+  }
 }
