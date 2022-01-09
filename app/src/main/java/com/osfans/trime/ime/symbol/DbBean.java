@@ -1,8 +1,6 @@
-package com.osfans.trime.draft;
+package com.osfans.trime.ime.symbol;
 
-import com.osfans.trime.ime.symbol.SimpleKeyBean;
-
-public class DraftBean extends SimpleKeyBean {
+public class DbBean extends SimpleKeyBean {
   private long time;
   private String text;
   private final String html;
@@ -36,7 +34,7 @@ public class DraftBean extends SimpleKeyBean {
     this.type = type;
   }
 
-  public DraftBean(String text) {
+  public DbBean(String text) {
     this.text = text;
     this.time = System.currentTimeMillis();
     this.type = 0;
@@ -44,7 +42,7 @@ public class DraftBean extends SimpleKeyBean {
   }
 
   @SuppressWarnings("unused")
-  public DraftBean(String text, String html) {
+  public DbBean(String text, String html) {
     this.text = text;
     this.time = System.currentTimeMillis();
     this.type = 1;
@@ -52,7 +50,7 @@ public class DraftBean extends SimpleKeyBean {
   }
 
   @SuppressWarnings("unused")
-  public DraftBean(String text, String html, int type, long time) {
+  public DbBean(String text, String html, int type, long time) {
     this.text = text;
     this.time = time;
     this.type = type;

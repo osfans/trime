@@ -11,10 +11,8 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.osfans.trime.R;
 import com.osfans.trime.clipboard.ClipboardAdapter;
-import com.osfans.trime.clipboard.ClipboardBean;
 import com.osfans.trime.clipboard.ClipboardDao;
 import com.osfans.trime.draft.DraftAdapter;
-import com.osfans.trime.draft.DraftBean;
 import com.osfans.trime.draft.DraftDao;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
@@ -69,14 +67,14 @@ public class LiquidKeyboard {
   }
 
   public void addClipboardData(String text) {
-    ClipboardBean bean = new ClipboardBean(text);
+    DbBean bean = new DbBean(text);
     ClipboardDao.get().add(bean);
     clipboardBeanList.add(0, bean);
     if (mClipboardAdapter != null) mClipboardAdapter.notifyItemInserted(0);
   }
 
   public void addDraftData(String text) {
-    DraftBean bean = new DraftBean(text);
+    DbBean bean = new DbBean(text);
     DraftDao.get().add(bean);
     draftBeanList.add(0, bean);
     if (mDraftAdapter != null) mDraftAdapter.notifyItemInserted(0);
