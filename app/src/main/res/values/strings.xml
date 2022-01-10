@@ -168,4 +168,13 @@
     <string name="sound_progress">Loading sound...</string>
     <string name="other__draft_manager_title">Draft Manager</string>
     <string name="other__draft_output_title">Draft Filter</string>
+    <string name="setup__next">Next</string>
+    <string name="setup__done">Done</string>
+    <string name="setup__enable_ime_hint">Enable <b>TRIME</b> in Language and input settings</string>
+    <string name="setup__select_ime_hint">Select <b>TRIME</b> as your default input method</string>
+    <string name="setup__enable_ime">Enable Input Method</string>
+    <string name="setup__select_ime">Select Input Method</string>
+    <string name="setup__prev">Prev</string>
+    <string name="setup__step_one">Step 1</string>
+    <string name="setup__step_two">Step 2</string>
 </resources>

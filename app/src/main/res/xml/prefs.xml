@@ -23,22 +23,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:title="@string/trime_app_name">
 
-    <!-- <SwitchPreference android:key="pref_ui"
-        android:order="1"
-        android:title="@string/pref_ui"
-        android:persistent="true" /> -->
-
-    <Preference
-        android:key="pref_enable"
-        android:order="2"
-        android:title="@string/pref_enable"
-        android:summary="@string/pref_enable_summary"/>
-
-    <Preference android:key="pref_select"
-        android:order="3"
-        android:title="@string/pref_select"
-        android:summary="@string/pref_select_summary"/>
-
     <Preference android:key="pref_schemas"
         android:order="4"
         android:title="@string/pref_schemas"

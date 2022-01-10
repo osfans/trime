@@ -2,6 +2,7 @@ package com.osfans.trime
 
 import android.app.Application
 import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.ime.core.Trime
 import timber.log.Timber
 
 /**
@@ -11,8 +12,15 @@ import timber.log.Timber
  * classes everywhere.
  */
 class TrimeApplication : Application() {
+    companion object {
+        private var instance: TrimeApplication? = null
+        fun getInstance() =
+            instance ?: throw IllegalStateException("Trime application is not created!")
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
         try {
             if (BuildConfig.DEBUG) {
                 Timber.plant(Timber.DebugTree())

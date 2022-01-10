@@ -28,6 +28,8 @@ import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.setup.SetupActivity
+import com.osfans.trime.setup.SetupPage
 import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
@@ -39,8 +41,7 @@ import timber.log.Timber
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
 const val PERMISSION_REQUEST_EXTERNAL_STORAGE = 0
 
-class PrefMainActivity :
-    AppCompatActivity(),
+class PrefMainActivity : AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     ActivityCompat.OnRequestPermissionsResultCallback,
     CoroutineScope by MainScope() {
@@ -66,13 +67,12 @@ class PrefMainActivity :
                 this,
                 getColor(R.color.windowBackground)
             )
-        } else if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        } else
             BarUtils.setNavBarColor(
                 this,
                 @Suppress("DEPRECATION")
                 resources.getColor(R.color.windowBackground)
             )
-        }
         setContentView(binding.root)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -92,6 +92,9 @@ class PrefMainActivity :
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        if (SetupPage.hasUndonePage()) {
+            startActivity(Intent(this, SetupActivity::class.java))
+        }
         requestExternalStoragePermission()
         requestAlertWindowPermission()
     }
@@ -263,38 +266,15 @@ class PrefMainActivity :
     class PrefFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.prefs, rootKey)
-            if (InputMethodUtils.checkIsTrimeEnabled(requireContext())) {
-                findPreference<Preference>("pref_enable")?.isVisible = false
-            }
-            if (InputMethodUtils.checkisTrimeSelected(requireContext())) {
-                findPreference<Preference>("pref_select")?.isVisible = false
-            }
         }
 
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
-                "pref_enable" -> { // 啓用
-                    InputMethodUtils.showImeEnablerActivity(requireContext())
-                    true
-                }
-                "pref_select" -> { // 切換
-                    InputMethodUtils.showImePicker(requireContext())
-                }
                 "pref_schemas" -> {
                     SchemaPickerDialog(requireContext()).show()
                     true
                 }
                 else -> super.onPreferenceTreeClick(preference)
-            }
-        }
-
-        override fun onResume() { // 如果同文已被启用/选用，则隐藏设置项
-            super.onResume()
-            if (InputMethodUtils.checkIsTrimeEnabled(requireContext())) {
-                findPreference<Preference>("pref_enable")?.isVisible = false
-            }
-            if (InputMethodUtils.checkisTrimeSelected(requireContext())) {
-                findPreference<Preference>("pref_select")?.isVisible = false
             }
         }
     }

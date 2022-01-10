@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
+import com.osfans.trime.TrimeApplication
 import timber.log.Timber
 
 object InputMethodUtils {
     private const val IME_ID: String = "com.osfans.trime/.TrimeImeService"
+    private val context: Context
+        get() = TrimeApplication.getInstance().applicationContext
 
-    fun checkIsTrimeEnabled(context: Context): Boolean {
+    fun checkIsTrimeEnabled(): Boolean {
         val activeImeIds = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ENABLED_INPUT_METHODS
@@ -18,7 +21,7 @@ object InputMethodUtils {
         return activeImeIds.split(":").contains(IME_ID)
     }
 
-    fun checkisTrimeSelected(context: Context): Boolean {
+    fun checkIsTrimeSelected(): Boolean {
         val selectedImeIds = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.DEFAULT_INPUT_METHOD

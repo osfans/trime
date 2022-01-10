@@ -38,7 +38,8 @@
         android:theme="@style/PreferenceTheme">
 
         <service android:name=".TrimeImeService" android:label="@string/trime_app_name"
-                android:permission="android.permission.BIND_INPUT_METHOD">
+                android:permission="android.permission.BIND_INPUT_METHOD"
+                android:exported="false">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
             </intent-filter>
@@ -62,6 +63,7 @@
         <activity-alias
             android:name="com.osfans.trime.PrefLauncherAlias"
             android:label="@string/trime_app_name"
+            android:exported="true"
             android:launchMode="singleTask"
             android:targetActivity=".settings.PrefMainActivity" >
             <intent-filter>
@@ -76,5 +78,9 @@
 
         <activity android:name=".settings.AboutActivity"
             android:label="@string/settings__about_title" />
+
+        <activity
+            android:name=".setup.SetupActivity"
+            android:exported="false" />
     </application>
 </manifest>

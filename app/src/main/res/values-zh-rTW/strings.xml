@@ -168,4 +168,13 @@
     <string name="sound_progress">正在應用音效...</string>
     <string name="other__draft_manager_title">草稿箱管理器</string>
     <string name="other__draft_output_title">草稿箱過濾規則\n每行爲一條正則表達式，與規則匹配的內容不會被緩存</string>
+    <string name="setup__next">下一步</string>
+    <string name="setup__done">完成</string>
+    <string name="setup__enable_ime_hint">在語言和輸入設定中啟用<b>同文輸入法</b></string>
+    <string name="setup__select_ime_hint">選擇<b>同文輸入法</b>作為預設輸入法</string>
+    <string name="setup__enable_ime">啟用輸入法</string>
+    <string name="setup__select_ime">選擇輸入法</string>
+    <string name="setup__prev">上一步</string>
+    <string name="setup__step_one">第 1 步</string>
+    <string name="setup__step_two">第 2 步</string>
 </resources>
