@@ -23,13 +23,11 @@ import androidx.preference.PreferenceFragmentCompat
 import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
-import com.osfans.trime.common.InputMethodUtils
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.setup.SetupActivity
-import com.osfans.trime.setup.SetupPage
 import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +39,8 @@ import timber.log.Timber
 internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
 const val PERMISSION_REQUEST_EXTERNAL_STORAGE = 0
 
-class PrefMainActivity : AppCompatActivity(),
+class PrefMainActivity :
+    AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     ActivityCompat.OnRequestPermissionsResultCallback,
     CoroutineScope by MainScope() {

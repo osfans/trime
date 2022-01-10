@@ -2,7 +2,6 @@ package com.osfans.trime
 
 import android.app.Application
 import com.osfans.trime.ime.core.Preferences
-import com.osfans.trime.ime.core.Trime
 import timber.log.Timber
 
 /**

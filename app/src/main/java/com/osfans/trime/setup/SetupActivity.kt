@@ -40,8 +40,7 @@ class SetupActivity : FragmentActivity() {
             setOnClickListener {
                 if (viewPager.currentItem != SetupPage.values().size - 1) {
                     viewPager.currentItem = viewPager.currentItem + 1
-                }
-                else finish()
+                } else finish()
             }
         }
         viewPager = binding.viewpager

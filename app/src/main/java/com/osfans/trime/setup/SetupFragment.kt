@@ -19,7 +19,7 @@ class SetupFragment : Fragment() {
         set(new) {
             if (new && page.isLastPage())
                 viewModel.isAllDone.value = true
-            with (binding) {
+            with(binding) {
                 stepText.text = page.getStepText(requireContext())
                 hintText.text = page.getHintText(requireContext())
                 actionButton.visibility = if (new) View.GONE else View.VISIBLE
