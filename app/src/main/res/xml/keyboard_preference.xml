@@ -113,7 +113,7 @@
             app:unit=""/>
         <com.osfans.trime.settings.components.DialogSeekBarPreference
             app:allowDividerAbove="false"
-            android:widgetLayout="@layout/preference_widget_seekbar"
+            android:widgetLayout="@layout/seek_bar_dialog"
             android:key="keyboard__key_long_press_timeout"
             app:iconSpaceReserved="false"
             android:title="@string/keyboard__long_press_timeout_title"

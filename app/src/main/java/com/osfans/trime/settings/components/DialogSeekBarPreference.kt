@@ -1,4 +1,3 @@
-/* This file has been adapted from florisboard */
 package com.osfans.trime.settings.components
 
 import android.content.Context
@@ -9,7 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
-import com.osfans.trime.databinding.PreferenceWidgetSeekbarBinding
+import com.osfans.trime.databinding.SeekBarDialogBinding
 
 /**
  * Custom preference which represents a seek bar which shows the current value in the summary. The
@@ -36,6 +35,9 @@ class DialogSeekBarPreference : Preference {
     private var step: Int = 1
     private var unit: String = ""
 
+    private val currentValue: Int
+        get() = sharedPreferences.getInt(key, defaultValue)
+
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.preferenceStyle)
@@ -53,19 +55,15 @@ class DialogSeekBarPreference : Preference {
             unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: unit
             recycle()
         }
-        onPreferenceChangeListener = OnPreferenceChangeListener { _, newValue ->
-            summary = getTextForValue(newValue.toString())
-            true
-        }
-        onPreferenceClickListener = OnPreferenceClickListener {
-            showSeekBarDialog()
-            true
-        }
+    }
+
+    override fun onClick() {
+        showSeekBarDialog()
     }
 
     override fun onAttachedToHierarchy(preferenceManager: PreferenceManager?) {
         super.onAttachedToHierarchy(preferenceManager)
-        summary = getTextForValue(sharedPreferences.getInt(key, defaultValue))
+        summary = getTextForValue(currentValue)
     }
 
     /**
@@ -73,10 +71,7 @@ class DialogSeekBarPreference : Preference {
      * If [systemDefaultValueText] is not null this method tries to match the given [value] with
      * [systemDefaultValue] and returns [systemDefaultValueText] upon matching.
      */
-    private fun getTextForValue(value: Any): String {
-        if (value !is Int) {
-            "??$unit"
-        }
+    private fun getTextForValue(value: Int): String {
         val systemDefValText = systemDefaultValueText
         return if (value == systemDefaultValue && systemDefValText != null) {
             systemDefValText
@@ -89,10 +84,8 @@ class DialogSeekBarPreference : Preference {
      * Shows the seek bar dialog.
      */
     private fun showSeekBarDialog() {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val dialogView = PreferenceWidgetSeekbarBinding.inflate(inflater)
-        val initValue = sharedPreferences.getInt(key, defaultValue)
+        val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(context))
+        val initValue = currentValue
         dialogView.seekBar.max = actualValueToSeekBarProgress(max)
         dialogView.seekBar.progress = actualValueToSeekBarProgress(initValue)
         dialogView.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -109,16 +102,17 @@ class DialogSeekBarPreference : Preference {
             setView(dialogView.root)
             setPositiveButton(android.R.string.ok) { _, _ ->
                 val actualValue = seekBarProgressToActualValue(dialogView.seekBar.progress)
-                sharedPreferences.edit().putInt(key, actualValue).apply()
+                if (callChangeListener(actualValue)) {
+                    sharedPreferences.edit().putInt(key, actualValue).apply()
+                    summary = getTextForValue(currentValue)
+                }
             }
             setNeutralButton(R.string.pref__default) { _, _ ->
                 sharedPreferences.edit().putInt(key, defaultValue).apply()
+                summary = getTextForValue(currentValue)
             }
             setNegativeButton(android.R.string.cancel, null)
-            setOnDismissListener { summary = getTextForValue(sharedPreferences.getInt(key, defaultValue)) }
-            create()
-            show()
-        }
+        }.show()
     }
 
     /**
