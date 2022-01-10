@@ -92,7 +92,7 @@ class PrefMainActivity : AppCompatActivity(),
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        if (SetupPage.hasUndonePage()) {
+        if (SetupActivity.shouldSetup()) {
             startActivity(Intent(this, SetupActivity::class.java))
         }
         requestExternalStoragePermission()

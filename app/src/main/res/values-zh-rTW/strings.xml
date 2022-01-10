@@ -175,6 +175,8 @@
     <string name="setup__enable_ime">啟用輸入法</string>
     <string name="setup__select_ime">選擇輸入法</string>
     <string name="setup__prev">上一步</string>
+    <string name="setup__channel_hint">同文輸入法設定嚮導</string>
+    <string name="setup__notify_hint">請完成鍵盤設定</string>
     <string name="setup__step_one">第 1 步</string>
     <string name="setup__step_two">第 2 步</string>
 </resources>

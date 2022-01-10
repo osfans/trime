@@ -175,6 +175,8 @@
     <string name="setup__enable_ime">Enable Input Method</string>
     <string name="setup__select_ime">Select Input Method</string>
     <string name="setup__prev">Prev</string>
+    <string name="setup__channel_hint">TRIME Setup Wizard</string>
+    <string name="setup__notify_hint">Finish setting up the keyboard</string>
     <string name="setup__step_one">Step 1</string>
     <string name="setup__step_two">Step 2</string>
 </resources>
