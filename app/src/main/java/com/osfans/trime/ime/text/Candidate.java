@@ -164,20 +164,19 @@ public class Candidate extends View {
    */
   private void onCandidateClick(int index) {
     ComputedCandidate candidate = null;
-    try {
+    if (index >= 0 && index < computedCandidates.size()) {
       candidate = computedCandidates.get(index);
-    } catch (Exception e) {
-    }
-    if (candidate != null) {
-      if (candidate instanceof ComputedCandidate.Word) {
-        if (listener.get() != null) {
-          listener.get().onCandidatePressed(index + startNum);
+      if (candidate != null) {
+        if (candidate instanceof ComputedCandidate.Word) {
+          if (listener.get() != null) {
+            listener.get().onCandidatePressed(index + startNum);
+          }
         }
-      }
-      if (candidate instanceof ComputedCandidate.Symbol) {
-        String arrow = ((ComputedCandidate.Symbol) candidate).getArrow();
-        if (listener.get() != null) {
-          listener.get().onCandidateSymbolPressed(arrow);
+        if (candidate instanceof ComputedCandidate.Symbol) {
+          String arrow = ((ComputedCandidate.Symbol) candidate).getArrow();
+          if (listener.get() != null) {
+            listener.get().onCandidateSymbolPressed(arrow);
+          }
         }
       }
     }
