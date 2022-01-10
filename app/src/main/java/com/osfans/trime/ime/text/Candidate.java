@@ -164,7 +164,7 @@ public class Candidate extends View {
    */
   private void onCandidateClick(int index) {
     ComputedCandidate candidate = null;
-    if (index >= 0 && index < computedCandidates.size()){
+    if (index >= 0 && index < computedCandidates.size()) {
       candidate = computedCandidates.get(index);
       if (candidate != null) {
         if (candidate instanceof ComputedCandidate.Word) {
