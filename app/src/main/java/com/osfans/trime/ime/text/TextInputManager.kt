@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
+import timber.log.Timber
 import java.util.Locale
 
 /**
@@ -196,6 +197,12 @@ class TextInputManager private constructor() :
                     InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
                     InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
                     InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> {
+                        Timber.i(
+                            "EditorInfo: " +
+                                " inputAttrsRaw" + inputAttrsRaw +
+                                "; InputType" + (inputAttrsRaw and InputType.TYPE_MASK_VARIATION)
+                        )
+
                         tempAsciiMode = true
                         ".ascii"
                     }

@@ -35,6 +35,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -96,6 +97,7 @@ import timber.log.Timber;
 public class Trime extends LifecycleInputMethodService {
   private static Trime self = null;
   private LiquidKeyboard liquidKeyboard;
+  private boolean normalTextEditor;
 
   @NonNull
   private Preferences getPrefs() {
@@ -697,13 +699,54 @@ public class Trime extends LifecycleInputMethodService {
     bindKeyboardToInputView();
     if (!restarting) setNavBarColor();
     setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
-    activeEditorInstance.cacheDraft();
-    addDraft();
+
+    switch (attribute.inputType & InputType.TYPE_MASK_VARIATION) {
+      case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
+      case InputType.TYPE_TEXT_VARIATION_PASSWORD:
+      case InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD:
+      case InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS:
+      case InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD:
+        Timber.i(
+            "EditorInfo: private;"
+                + " packageName"
+                + attribute.packageName
+                + "; fieldName"
+                + attribute.fieldName
+                + "; actionLabel"
+                + attribute.actionLabel
+                + "; inputType"
+                + attribute.inputType
+                + "; &v "
+                + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
+                + "; &c "
+                + (attribute.inputType & InputType.TYPE_MASK_CLASS));
+        normalTextEditor = false;
+        break;
+
+      default:
+        Timber.i(
+            "EditorInfo: normal;"
+                + " packageName"
+                + attribute.packageName
+                + "; fieldName"
+                + attribute.fieldName
+                + "; actionLabel"
+                + attribute.actionLabel
+                + "; inputType"
+                + attribute.inputType
+                + "; &v "
+                + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
+                + "; &c "
+                + (attribute.inputType & InputType.TYPE_MASK_CLASS));
+        normalTextEditor = true;
+        activeEditorInstance.cacheDraft();
+        addDraft();
+    }
   }
 
   @Override
   public void onFinishInputView(boolean finishingInput) {
-    addDraft();
+    if (normalTextEditor) addDraft();
     super.onFinishInputView(finishingInput);
     // Dismiss any pop-ups when the input-view is being finished and hidden.
     mainKeyboardView.closing();
