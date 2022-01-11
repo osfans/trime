@@ -40,7 +40,7 @@ class SetupFragment : Fragment() {
         return binding.root
     }
 
-    // called on window focus changed
+    // Called on window focus changed
     fun sync() {
         isDone = page.isDone()
     }
