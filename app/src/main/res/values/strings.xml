@@ -179,4 +179,8 @@
     <string name="setup__notify_hint">Finish setting up the keyboard</string>
     <string name="setup__step_one">Step 1</string>
     <string name="setup__step_two">Step 2</string>
+    <string name="setup__skip">Skip</string>
+    <string name="setup__skip_hint">"Do you want to skip the wizard? "</string>
+    <string name="setup__skip_hint_yes">OK, thanks</string>
+    <string name="setup__skip_hint_no">No, please leave me here</string>
 </resources>

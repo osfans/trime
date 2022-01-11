@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -35,6 +36,18 @@ class SetupActivity : FragmentActivity() {
         val prevButton = binding.prevButton.apply {
             text = getString(R.string.setup__prev)
             setOnClickListener { viewPager.currentItem = viewPager.currentItem - 1 }
+        }
+        binding.skipButton.apply {
+            text = getString(R.string.setup__skip)
+            setOnClickListener {
+                AlertDialog.Builder(this@SetupActivity)
+                    .setMessage(R.string.setup__skip_hint)
+                    .setPositiveButton(R.string.setup__skip_hint_yes) { _, _ ->
+                        finish()
+                    }
+                    .setNegativeButton(R.string.setup__skip_hint_no, null)
+                    .show()
+            }
         }
         val nextButton = binding.nextButton.apply {
             setOnClickListener {
