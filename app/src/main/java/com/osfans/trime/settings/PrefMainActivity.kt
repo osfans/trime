@@ -1,7 +1,6 @@
 package com.osfans.trime.settings
 
 import android.Manifest
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -30,6 +29,7 @@ import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.setup.SetupActivity
 import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
+import com.osfans.trime.util.createLoadingDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -173,11 +173,8 @@ class PrefMainActivity :
                 true
             }
             R.id.preference__menu_deploy -> {
-                @Suppress("DEPRECATION")
-                val progressDialog = ProgressDialog(this).apply {
-                    setMessage(getString(R.string.deploy_progress))
-                    show()
-                }
+                val progressDialog = createLoadingDialog(this, R.string.deploy_progress)
+                progressDialog.show()
                 Trime.getServiceOrNull()?.initKeyboard()
                 launch {
                     try {
@@ -225,7 +222,6 @@ class PrefMainActivity :
                             )
                         }
                         .setNegativeButton(android.R.string.cancel, null)
-                        .create()
                         .show()
                 } else {
                     ToastUtils.showShort(R.string.external_storage_permission_not_available)
@@ -257,7 +253,7 @@ class PrefMainActivity :
                         startActivity(intent)
                     }
                     .setNegativeButton(android.R.string.cancel, null)
-                    .create().show()
+                    .show()
             }
         }
     }

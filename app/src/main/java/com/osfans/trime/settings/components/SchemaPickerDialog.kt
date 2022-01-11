@@ -1,7 +1,6 @@
 package com.osfans.trime.settings.components
 
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
@@ -11,6 +10,7 @@ import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.setup.Config
 import com.osfans.trime.util.RimeUtils
+import com.osfans.trime.util.createLoadingDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,8 +34,7 @@ class SchemaPickerDialog(
     private lateinit var schemaNames: Array<String?>
     var pickerDialogBuilder: AlertDialog.Builder? = null
 
-    @Suppress("DEPRECATION")
-    private var progressDialog: ProgressDialog
+    private var progressDialog: AlertDialog
 
     companion object {
         private class SortByName : Comparator<Map<String?, String?>> {
@@ -50,11 +49,7 @@ class SchemaPickerDialog(
     }
 
     init {
-        @Suppress("DEPRECATION")
-        progressDialog = ProgressDialog(context).apply {
-            setMessage(context.getString(R.string.schemas_progress))
-            setCancelable(false)
-        }
+        progressDialog = createLoadingDialog(context, R.string.schemas_progress)
     }
 
     private fun showPickerDialog() {
@@ -69,10 +64,7 @@ class SchemaPickerDialog(
             pickerDialogBuilder!!.apply {
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    @Suppress("DEPRECATION")
-                    progressDialog = ProgressDialog(context).also {
-                        setMessage(context.getString(R.string.deploy_progress))
-                    }.also {
+                    progressDialog = createLoadingDialog(context, R.string.deploy_progress).also {
                         appendDialogParams(it)
                         it.show()
                     }

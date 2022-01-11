@@ -1,6 +1,5 @@
 package com.osfans.trime.settings.fragments
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
@@ -12,6 +11,7 @@ import com.osfans.trime.R
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.settings.components.ResetAssetsDialog
 import com.osfans.trime.util.RimeUtils
+import com.osfans.trime.util.createLoadingDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,11 +42,7 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
         return when (preference?.key) {
             "conf__synchronize" -> {
-                @Suppress("DEPRECATION")
-                val progressDialog = ProgressDialog(context).apply {
-                    setMessage(getString(R.string.sync_progress))
-                    show()
-                }
+                val progressDialog = createLoadingDialog(requireContext(), R.string.sync_progress)
                 launch {
                     try {
                         RimeUtils.sync(requireContext())
