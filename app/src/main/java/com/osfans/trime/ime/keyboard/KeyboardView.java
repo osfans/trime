@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -47,6 +48,7 @@ import com.osfans.trime.R;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
+import com.osfans.trime.ime.enums.ActionLabelType;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
@@ -237,6 +239,61 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private Method findStateDrawableIndex;
   private Method getStateDrawable;
 
+  private String labelEnter = "";
+  private Map<String, String> mEnterLabels;
+  private ActionLabelType actionLabelType;
+
+  public void resetEnterLabel() {
+    labelEnter = mEnterLabels.get("default");
+  }
+
+  public void setEnterLabel(int action, CharSequence actionLabel) {
+
+    if (actionLabelType == ActionLabelType.ONLY) {
+      if (actionLabel != null && actionLabel.length() > 0) labelEnter = actionLabel.toString();
+      else labelEnter = mEnterLabels.get("default");
+      return;
+    }
+
+    if (actionLabelType == ActionLabelType.FIRST) {
+      if (actionLabel != null && actionLabel.length() > 0) {
+        labelEnter = actionLabel.toString();
+        return;
+      }
+    }
+
+    switch (action) {
+      case EditorInfo.IME_ACTION_DONE:
+        labelEnter = mEnterLabels.get("done");
+        break;
+      case EditorInfo.IME_ACTION_GO:
+        labelEnter = mEnterLabels.get("go");
+        break;
+      case EditorInfo.IME_ACTION_NEXT:
+        labelEnter = mEnterLabels.get("next");
+        break;
+      case EditorInfo.IME_ACTION_PREVIOUS:
+        labelEnter = mEnterLabels.get("pre");
+        break;
+      case EditorInfo.IME_ACTION_SEARCH:
+        labelEnter = mEnterLabels.get("search");
+        break;
+      case EditorInfo.IME_ACTION_SEND:
+        labelEnter = mEnterLabels.get("send");
+        break;
+      case EditorInfo.IME_ACTION_NONE:
+        labelEnter = mEnterLabels.get("none");
+      default:
+        if (actionLabelType == ActionLabelType.LAST) {
+          if (actionLabel != null && actionLabel.length() > 0) {
+            labelEnter = actionLabel.toString();
+            return;
+          }
+        }
+        labelEnter = mEnterLabels.get("default");
+    }
+  }
+
   @NonNull
   private AppPrefs getPrefs() {
     return AppPrefs.Companion.defaultInstance();
@@ -347,6 +404,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     REPEAT_START_DELAY = config.getLongTimeout() + 1;
     LONG_PRESS_TIMEOUT = config.getLongTimeout();
     MULTI_TAP_INTERVAL = config.getLongTimeout();
+
+    mEnterLabels = config.getmEnterLabels();
+    actionLabelType = config.getActionLabelType();
     invalidateAllKeys();
   }
 
