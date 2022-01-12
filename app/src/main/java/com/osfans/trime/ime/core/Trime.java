@@ -700,6 +700,9 @@ public class Trime extends LifecycleInputMethodService {
     if (!restarting) setNavBarColor();
     setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
 
+    mainKeyboardView.setEnterLabel(
+        attribute.imeOptions & EditorInfo.IME_MASK_ACTION, attribute.actionLabel);
+
     switch (attribute.inputType & InputType.TYPE_MASK_VARIATION) {
       case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
       case InputType.TYPE_TEXT_VARIATION_PASSWORD:
@@ -708,36 +711,40 @@ public class Trime extends LifecycleInputMethodService {
       case InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD:
         Timber.i(
             "EditorInfo: private;"
-                + " packageName"
+                + " packageName="
                 + attribute.packageName
-                + "; fieldName"
+                + "; fieldName="
                 + attribute.fieldName
-                + "; actionLabel"
+                + "; actionLabel="
                 + attribute.actionLabel
-                + "; inputType"
+                + "; inputType="
                 + attribute.inputType
-                + "; &v "
+                + "; VARIATION="
                 + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
-                + "; &c "
-                + (attribute.inputType & InputType.TYPE_MASK_CLASS));
+                + "; CLASS="
+                + (attribute.inputType & InputType.TYPE_MASK_CLASS)
+                + "; ACTION="
+                + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
         normalTextEditor = false;
         break;
 
       default:
         Timber.i(
             "EditorInfo: normal;"
-                + " packageName"
+                + " packageName="
                 + attribute.packageName
-                + "; fieldName"
+                + "; fieldName="
                 + attribute.fieldName
-                + "; actionLabel"
+                + "; actionLabel="
                 + attribute.actionLabel
-                + "; inputType"
+                + "; inputType="
                 + attribute.inputType
-                + "; &v "
+                + "; VARIATION="
                 + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
-                + "; &c "
-                + (attribute.inputType & InputType.TYPE_MASK_CLASS));
+                + "; CLASS="
+                + (attribute.inputType & InputType.TYPE_MASK_CLASS)
+                + "; ACTION="
+                + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
         normalTextEditor = true;
         activeEditorInstance.cacheDraft();
         addDraft();
