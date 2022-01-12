@@ -89,6 +89,15 @@ style:
   long_text_font: comment.ttf #剪贴板等可能包含大段文本使用的字体
   #background_folder: #背景图保存在background目录下的哪个子目录
   key_long_text_border: 1
+  action_label_type: never  #是否使用App的ActionLabel内容作为Enter键的文本 only | first | last | never
+  enter_labels:  # 定义Enter键的文本
+    go: 前往
+    done: 完成
+    next: 下个
+    pre:  上个
+    search: 搜索
+    send: 发送
+    default: Enter   # 定义默认Enter键的文本
 
 fallback_colors:
   candidate_text_color: text_color
@@ -893,7 +902,8 @@ preset_keys:
   VOLUME_MUTE: {label: 靜音, send: VOLUME_MUTE}
   # 編輯
   Shift_L: {label: Shift, send: Shift_L, shift_lock: ascii_long}
-  Return: {label: Enter, send: Return}
+  Return: {label: enter_labels, send: Return}
+  Return1: {label: Enter, send: Return }
   Hide: {label: 隱藏, send: BACK}
   BackSpace: {label: 退格, repeatable: true, send: BackSpace}
   space: {repeatable: false, functional: false, send: space}
@@ -1036,7 +1046,7 @@ preset_keyboards:
     - {click: space, width: 30}
     - {click: "'", long_click: '"'}
     - {click: BackSpace, width: 15}
-    - {click: Return, long_click: CommitComment, width: 15}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 15}
   letter:
     __include: /preset_keyboards/default
     ascii_mode: 1
@@ -1097,7 +1107,7 @@ preset_keyboards:
     - {click: space, width: 30}
     - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
-    - {click: Return, long_click: CommitComment, width: 15}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 15}
   qwerty_:
     name: 預設30鍵
     author: "osfans <waxaca@163.com>"
@@ -1141,7 +1151,7 @@ preset_keyboards:
     - {click: Mode_switch, long_click: Menu}
     - {click: space, width: 40}
     - {click: BackSpace, width: 15}
-    - {click: Return, long_click: CommitComment, width: 15}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 15}
   qwerty:
     name: 預設26鍵
     author: "osfans <waxaca@163.com>"
@@ -1195,7 +1205,7 @@ preset_keyboards:
     - {click: space, width: 30}
     - {click: '.', long_click: '>'}
     - {click: '/', long_click: '?'}
-    - {click: Return, long_click: CommitComment, width: 15}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 15}
   us_intl:
     name: 美式國際
     author: "Terry Tsang <archerindigo@gmail.com>"
@@ -1390,7 +1400,7 @@ preset_keyboards:
     - {label: 'ㄦ', long_click: '"', click: "-"}
     - {long_click: '。', click: '，'}
     - {click: BackSpace, long_click: Escape, width: 10}
-    - {click: Return, long_click: CommitComment, width: 10}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 10}
   cangjie5:
     name: 倉頡五代鍵盤
     author: "皛筱晓小笨鱼"
@@ -1434,7 +1444,7 @@ preset_keyboards:
     - {click: space, width: 40}
     - {click: Mode_switch, long_click: Menu}
     - {long_click: '>', click: '.'}
-    - {click: Return, long_click: CommitComment, width: 10}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 10}
   cangjie6:
     ascii_mode: 0
     name: 倉頡六代
@@ -1492,7 +1502,7 @@ preset_keyboards:
     - {click: ",", long_click: .}
     - {click: space, width: 25}
     - {click: "'", long_click: "?"}
-    - {click: Return, long_click: CommitComment, width: 25.5}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 25.5}
   scj6:
     __include: /preset_keyboards/cangjie5
   stroke:
@@ -1517,7 +1527,7 @@ preset_keyboards:
     - {click: Keyboard_symbols, long_click: Keyboard_number, width: 10}
     - {click: space, width: 40}
     - {click: Keyboard_letter, long_click: Menu, width: 10}
-    - {click: Return, long_click: CommitComment, width: 20}
+    - {click: Return, composing: Return1, long_click: CommitComment, width: 20}
   telegraph:
     name: 電碼
     author: 熊貓阿Bo
@@ -1546,7 +1556,7 @@ preset_keyboards:
     - {click: BackSpace}
     - {click: Keyboard_letter, long_click: Menu}
     - {click: space, width: 60}
-    - {click: Return}
+    - {click: Return, composing: Return1}
   terra_pinyin:
     name: 地球拼音鍵盤
     author: 默默ㄇㄛˋ
@@ -1590,7 +1600,7 @@ preset_keyboards:
     - {click: space, width: 40}
     - {click: ".", long_click: '"'}
     - {click: '\', long_click: '.', composing: 'ˋ', send_bindings: false}  #四聲
-    - {click: Return, long_click: CommitComment}
+    - {click: Return, composing: Return1, long_click: CommitComment}
   array30:
     name: 行列30配美式國際
     author: "Terry Tsang <archerindigo@gmail.com>"

@@ -36,6 +36,7 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.ime.enums.ActionLabelType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
@@ -838,6 +839,34 @@ public class Config {
       names[i] = Objects.requireNonNull(m.get("name")).toString();
     }
     return names;
+  }
+
+  private Map<String, String> mEnterLabels;
+
+  public Map<String, String> getmEnterLabels() {
+    return mEnterLabels;
+  }
+
+  public ActionLabelType getActionLabelType() {
+    return ActionLabelType.fromString(getString("action_label_type"));
+  }
+
+  public void initEnterLabels() {
+    Object enter_labels = getValue("enter_labels");
+    if (enter_labels == null) mEnterLabels = new HashMap<>();
+    else mEnterLabels = (Map<String, String>) enter_labels;
+
+    String defaultEnterLabel = "Enter";
+    if (mEnterLabels.containsKey("default")) defaultEnterLabel = mEnterLabels.get("default");
+    else mEnterLabels.put("default", defaultEnterLabel);
+
+    if (!mEnterLabels.containsKey("done")) mEnterLabels.put("done", defaultEnterLabel);
+    if (!mEnterLabels.containsKey("go")) mEnterLabels.put("go", defaultEnterLabel);
+    if (!mEnterLabels.containsKey("next")) mEnterLabels.put("next", defaultEnterLabel);
+    if (!mEnterLabels.containsKey("none")) mEnterLabels.put("none", defaultEnterLabel);
+    if (!mEnterLabels.containsKey("pre")) mEnterLabels.put("pre", defaultEnterLabel);
+    if (!mEnterLabels.containsKey("search")) mEnterLabels.put("search", defaultEnterLabel);
+    if (!mEnterLabels.containsKey("send")) mEnterLabels.put("send", defaultEnterLabel);
   }
 
   public Typeface getFont(String key) {
