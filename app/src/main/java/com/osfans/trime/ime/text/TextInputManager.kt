@@ -3,6 +3,7 @@ package com.osfans.trime.ime.text
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import com.osfans.trime.Rime
 import com.osfans.trime.common.startsWithAsciiChar
@@ -178,40 +179,50 @@ class TextInputManager private constructor() :
         isComposable = false
         performEnterAsLineBreak = false
         var tempAsciiMode = if (shouldResetAsciiMode) false else null
-        val inputAttrsRaw = instance.editorInfo!!.inputType
-        val keyboardType = when (inputAttrsRaw and InputType.TYPE_MASK_CLASS) {
-            InputType.TYPE_CLASS_NUMBER,
-            InputType.TYPE_CLASS_PHONE,
-            InputType.TYPE_CLASS_DATETIME -> {
-                "number"
-            }
-            InputType.TYPE_CLASS_TEXT -> {
-                when (inputAttrsRaw and InputType.TYPE_MASK_VARIATION) {
-                    InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE -> {
-                        null.also { performEnterAsLineBreak = true }
-                    }
-                    InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                    InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                    InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                    InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> {
-                        Timber.i(
-                            "EditorInfo: " +
-                                " inputAttrsRaw" + inputAttrsRaw +
-                                "; InputType" + (inputAttrsRaw and InputType.TYPE_MASK_VARIATION)
-                        )
+        var keyboardType =
+            when (instance.editorInfo!!.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
+                EditorInfo.IME_FLAG_FORCE_ASCII -> {
+                    tempAsciiMode = true
+                    ".ascii"
+                }
+                else -> {
+                    val inputAttrsRaw = instance.editorInfo!!.inputType
+                    when (inputAttrsRaw and InputType.TYPE_MASK_CLASS) {
+                        InputType.TYPE_CLASS_NUMBER,
+                        InputType.TYPE_CLASS_PHONE,
+                        InputType.TYPE_CLASS_DATETIME -> {
+                            "number"
+                        }
+                        InputType.TYPE_CLASS_TEXT -> {
+                            when (inputAttrsRaw and InputType.TYPE_MASK_VARIATION) {
+                                InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE -> {
+                                    null.also { performEnterAsLineBreak = true }
+                                }
+                                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                                InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> {
+                                    Timber.i(
+                                        "EditorInfo: " +
+                                            " inputAttrsRaw" + inputAttrsRaw +
+                                            "; InputType" + (inputAttrsRaw and InputType.TYPE_MASK_VARIATION)
+                                    )
 
-                        tempAsciiMode = true
-                        ".ascii"
+                                    tempAsciiMode = true
+                                    ".ascii"
+                                }
+                                else -> null.also { isComposable = true }
+                            }
+                        }
+                        else -> {
+                            if (inputAttrsRaw <= 0) return
+                            null.also { isComposable = inputAttrsRaw > 0 }
+                        }
                     }
-                    else -> null.also { isComposable = true }
                 }
             }
-            else -> {
-                if (inputAttrsRaw <= 0) return
-                null.also { isComposable = inputAttrsRaw > 0 }
-            }
-        }
+
         keyboardSwitcher.let {
             it.resize(trime.maxWidth)
             // Select a keyboard based on the input type of the editing field.
