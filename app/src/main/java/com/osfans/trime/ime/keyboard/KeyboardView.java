@@ -243,6 +243,10 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private Map<String, String> mEnterLabels;
   private ActionLabelType actionLabelType;
 
+  public void resetEnterLabel() {
+    labelEnter = mEnterLabels.get("default");
+  }
+
   public void setEnterLabel(int action, CharSequence actionLabel) {
 
     if (actionLabelType == ActionLabelType.ONLY) {

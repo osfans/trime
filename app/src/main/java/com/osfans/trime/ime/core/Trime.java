@@ -700,8 +700,13 @@ public class Trime extends LifecycleInputMethodService {
     if (!restarting) setNavBarColor();
     setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
 
-    mainKeyboardView.setEnterLabel(
-        attribute.imeOptions & EditorInfo.IME_MASK_ACTION, attribute.actionLabel);
+    if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION)
+        == EditorInfo.IME_FLAG_NO_ENTER_ACTION) {
+      mainKeyboardView.resetEnterLabel();
+    } else {
+      mainKeyboardView.setEnterLabel(
+          attribute.imeOptions & EditorInfo.IME_MASK_ACTION, attribute.actionLabel);
+    }
 
     switch (attribute.inputType & InputType.TYPE_MASK_VARIATION) {
       case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
