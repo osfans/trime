@@ -1,3 +1,4 @@
+# if you want to add some new plugins, add them to librime_jni/rime_jni.cc too
 set(RIME_PLUGINS
   librime-lua
   librime-charcode
