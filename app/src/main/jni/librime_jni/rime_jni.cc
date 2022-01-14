@@ -411,8 +411,19 @@ int registerNativeMethods(JNIEnv *env, const char * className, const JNINativeMe
     return JNI_TRUE;
 }
 
+extern void rime_require_module_lua();
+extern void rime_require_module_charcode();
+extern void rime_require_module_grammar(); // librime-octagram
+// librime is compiled as a static library, we have to link modules explicitly
+static void declare_librime_module_dependencies() {
+    rime_require_module_lua();
+    rime_require_module_charcode();
+    rime_require_module_grammar();
+}
+
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
+    declare_librime_module_dependencies();
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return -1;
