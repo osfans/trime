@@ -88,6 +88,8 @@ import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.AndroidVersion;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
+import com.osfans.trime.util.TaskerUtilsKt;
+
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import kotlin.jvm.Synchronized;
@@ -1207,6 +1209,8 @@ public class Trime extends LifecycleInputMethodService {
               ClipBoardString = filteredText;
               liquidKeyboard.addClipboardData(rawText);
             }
+
+            TaskerUtilsKt.triggerCopyEvent(getApplicationContext());
           }
         });
   }

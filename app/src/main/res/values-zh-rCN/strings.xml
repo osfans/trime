@@ -182,4 +182,9 @@
     <string name="setup__skip_hint">您确定要跳过向导吗？</string>
     <string name="setup__skip_hint_yes">好的，谢谢</string>
     <string name="setup__skip_hint_no">不，我想留在这儿</string>
+    <string name="copy">复制</string>
+    <string name="copy_text_desc">获取复制文字</string>
+    <string name="copy_text">复制文字</string>
+    <string name="tasker_copy_event">同文复制事件</string>
+    <string name="tasker_copy_action">获取复制文字</string>
 </resources>

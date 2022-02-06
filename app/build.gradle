@@ -99,6 +99,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "com.google.android.flexbox:flexbox:3.0.0"
+    implementation 'com.joaomgcd:taskerpluginlibrary:0.4.2'
 }
 repositories {
     mavenCentral()

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /**
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
@@ -76,7 +75,7 @@
         <item>Input</item>
         <item>None</item>
     </string-array>
-    <string-array name="other__ui_mode_entries" >
+    <string-array name="other__ui_mode_entries">
         <item name="auto">System Default</item>
         <item name="light">Light</item>
         <item name="dark">Dark</item>
@@ -121,7 +120,7 @@
     <string name="other__clipboard_compare_title">Clipboard Compare Rules</string>
     <string name="other__clipboard_output_title">Clipboard Output Rules</string>
     <string name="other__clipboard_manager_summary">Save how many clipboard items.</string>
-    <string-array name="other__clipboard_manager_entries" >
+    <string-array name="other__clipboard_manager_entries">
         <item name="0">Disable</item>
         <item name="20">20</item>
         <item name="50">50</item>
@@ -183,4 +182,9 @@
     <string name="setup__skip_hint">"Do you want to skip the wizard? "</string>
     <string name="setup__skip_hint_yes">OK, thanks</string>
     <string name="setup__skip_hint_no">No, please leave me here</string>
+    <string name="copy">Copy</string>
+    <string name="copy_text_desc">Get copy text</string>
+    <string name="copy_text">Copy text</string>
+    <string name="tasker_copy_event">Trime Copy Event</string>
+    <string name="tasker_copy_action">Trime Copy Action</string>
 </resources>

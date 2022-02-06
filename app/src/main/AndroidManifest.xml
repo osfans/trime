@@ -1,49 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-/**
- * Copyright (C) 2015-present, osfans
- * waxaca@163.com https://github.com/osfans
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
--->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.osfans.trime">
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
-        package="com.osfans.trime" >
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <application
-        android:name="com.osfans.trime.TrimeApplication"
-        android:label="@string/trime_app_name"
-        android:icon="@mipmap/ic_app_icon"
-        android:roundIcon="@mipmap/ic_app_icon_round"
-        android:requestLegacyExternalStorage="true"
-        android:allowBackup="true"
-        android:theme="@style/PreferenceTheme">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-        <service android:name=".TrimeImeService" android:label="@string/trime_app_name"
-                android:permission="android.permission.BIND_INPUT_METHOD"
-                android:exported="false">
+    <application
+        android:name=".TrimeApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_app_icon"
+        android:label="@string/trime_app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_app_icon_round"
+        android:theme="@style/PreferenceTheme">
+        <activity
+            android:name=".tasker.CopyEventActivity"
+            android:exported="true"
+            android:label="@string/tasker_copy_event">
+            <intent-filter>
+                <action android:name="net.dinglisch.android.tasker.ACTION_EDIT_EVENT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".tasker.CopyActionActivity"
+            android:exported="true"
+            android:label="@string/tasker_copy_action">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".TrimeImeService"
+            android:exported="false"
+            android:label="@string/trime_app_name"
+            android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
             </intent-filter>
-            <meta-data android:name="android.view.im" android:resource="@xml/method" />
+
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
         </service>
         <!--
         <activity android:name="Pref" android:label="@string/ime_name">
@@ -52,35 +56,36 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> -->
-
+        </activity>
+        -->
         <!-- Settings activity -->
-        <activity android:name=".settings.PrefMainActivity"
+        <activity
+            android:name=".settings.PrefMainActivity"
             android:label="@string/trime_app_name"
-            android:launchMode="singleTask"/>
-
-        <!-- Using an activity alias to disable/enable the app icon in the launcher -->
+            android:launchMode="singleTask" /> <!-- Using an activity alias to disable/enable the app icon in the launcher -->
         <activity-alias
-            android:name="com.osfans.trime.PrefLauncherAlias"
-            android:label="@string/trime_app_name"
+            android:name=".PrefLauncherAlias"
             android:exported="true"
+            android:label="@string/trime_app_name"
             android:launchMode="singleTask"
-            android:targetActivity=".settings.PrefMainActivity" >
+            android:targetActivity=".settings.PrefMainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
 
-        <activity android:name=".settings.HelpActivity"
+        <activity
+            android:name=".settings.HelpActivity"
             android:label="@string/settings__help_title" />
-
-        <activity android:name=".settings.AboutActivity"
+        <activity
+            android:name=".settings.AboutActivity"
             android:label="@string/settings__about_title" />
-
         <activity
             android:name=".setup.SetupActivity"
             android:exported="false" />
     </application>
+
 </manifest>

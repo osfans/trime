@@ -183,4 +183,9 @@
     <string name="setup__skip_hint">您確定要跳過嚮導嗎？</string>
     <string name="setup__skip_hint_yes">好的，謝謝</string>
     <string name="setup__skip_hint_no">不，我想留在這兒</string>
+    <string name="copy">複製</string>
+    <string name="copy_text_desc">" 獲取複製文字 "</string>
+    <string name="copy_text">複製文字</string>
+    <string name="tasker_copy_event">同文複製事件</string>
+    <string name="tasker_copy_action">獲取複製文字</string>
 </resources>
