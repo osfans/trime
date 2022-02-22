@@ -152,7 +152,7 @@
     <string name="about__app_info">應用資訊</string>
     <string name="about__open_source_license">開源許可</string>
     <string name="about__support">支援</string>
-    <string name="about__used_libraries">我們使用的庫</string>
+    <string name="about__used_libraries">第三方開源軟體庫</string>
     <string name="about__used_library_dialog_title">同文輸入法 | 開源軟體庫</string>
     <string name="other__selection_sense_title">使用 Ctrl+Left / Ctrl+Right 快速移動遊標</string>
     <string name="pref__system_default">系統預設</string>

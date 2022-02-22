@@ -151,7 +151,7 @@
     <string name="about__app_info">应用信息</string>
     <string name="about__open_source_license">开源许可</string>
     <string name="about__support">支持</string>
-    <string name="about__used_libraries">我们使用的库</string>
+    <string name="about__used_libraries">第三方开源库</string>
     <string name="about__used_library_dialog_title">同文输入法 | 开源软件库</string>
     <string name="other__selection_sense_title">用 Ctrl+Left/Right 快速移动光标</string>
     <string name="pref__system_default">系统默认</string>
