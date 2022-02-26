@@ -38,8 +38,5 @@ execute_process(COMMAND ln -s
 
 # librime-charcode
 option(BUILD_WITH_ICU "" OFF)
-# workaround for librime-charcode
-# it included asio but not used
-# TODO: fix it in upstream
 # TODO: replace with TOUCH after cmake >= 3.12
 file(WRITE "${CMAKE_BINARY_DIR}/include/boost/asio.hpp" "")
