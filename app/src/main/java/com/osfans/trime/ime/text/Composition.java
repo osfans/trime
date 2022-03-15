@@ -151,7 +151,9 @@ public class Composition extends AppCompatTextView {
   public static class LetterSpacingSpan extends UnderlineSpan {
     private final float letterSpacing;
 
-    /** @param letterSpacing 字符間距 */
+    /**
+     * @param letterSpacing 字符間距
+     */
     public LetterSpacingSpan(float letterSpacing) {
       this.letterSpacing = letterSpacing;
     }
