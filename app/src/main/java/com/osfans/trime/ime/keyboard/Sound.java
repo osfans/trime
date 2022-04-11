@@ -39,7 +39,9 @@ public class Sound {
   }
 
   public static void resetProgress() {
-    if (self != null) self.progress = 0;
+    if (self != null) {
+      if (self.progress > 0) self.progress = 0;
+    }
   }
 
   @SuppressWarnings("unchecked")
