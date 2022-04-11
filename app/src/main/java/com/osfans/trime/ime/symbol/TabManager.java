@@ -9,8 +9,10 @@ import java.util.Map;
 
 public class TabManager {
   private int selected;
-  private final List<SimpleKeyBean> keyboard;
+  private final List<SimpleKeyBean> keyboardData;
+  private final List<SimpleKeyBean> tabSwitchData;
   private final ArrayList<TabTag> tabTags;
+  private int tabSwitchPosition = 0;
   private final List<List<SimpleKeyBean>> keyboards;
   private static TabManager self;
   private final List<SimpleKeyBean> notKeyboard = new ArrayList<>();
@@ -19,6 +21,15 @@ public class TabManager {
   public static TabManager get() {
     if (null == self) self = new TabManager();
     return self;
+  }
+
+  public List<SimpleKeyBean> getTabSwitchData() {
+    if (tabSwitchData.size() > 0) return tabSwitchData;
+
+    for (TabTag tag : tabTags) {
+      tabSwitchData.add(new SimpleKeyBean(tag.text));
+    }
+    return tabSwitchData;
   }
 
   public static void clear() {
@@ -44,7 +55,8 @@ public class TabManager {
     selected = 0;
     tabTags = new ArrayList<>();
     keyboards = new ArrayList<>();
-    keyboard = new ArrayList<>();
+    keyboardData = new ArrayList<>();
+    tabSwitchData = new ArrayList<>();
   }
 
   public void addTab(@NonNull String name, SymbolKeyboardType type, List<SimpleKeyBean> keyBeans) {
@@ -114,13 +126,19 @@ public class TabManager {
   }
 
   public List<SimpleKeyBean> select(int tabIndex) {
-    if (tabIndex >= tabTags.size()) return keyboard;
+    if (tabIndex >= tabTags.size()) return keyboardData;
     selected = tabIndex;
+    TabTag tag = tabTags.get(tabIndex);
+    if (tag.type == SymbolKeyboardType.TABS) tabSwitchPosition = selected;
     return keyboards.get(tabIndex);
   }
 
   public int getSelected() {
     return selected;
+  }
+
+  public boolean isAfterTabSwitch(int position) {
+    return tabSwitchPosition <= position;
   }
 
   public ArrayList<TabTag> getTabCandidates() {

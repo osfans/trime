@@ -94,6 +94,7 @@ public class LiquidKeyboard {
         initDraftData();
         break;
       case HISTORY:
+      case TABS:
         TabManager.get().select(i);
       default:
         initFixData(i);
@@ -195,12 +196,12 @@ public class LiquidKeyboard {
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
     // 设置适配器
-
+    simpleKeyBeans.clear();
     if (keyboardType == SymbolKeyboardType.HISTORY) {
-      simpleKeyBeans.clear();
       simpleKeyBeans.addAll(historyBeans);
+    } else if (keyboardType == SymbolKeyboardType.TABS) {
+      simpleKeyBeans.addAll(TabManager.get().getTabSwitchData());
     } else {
-      simpleKeyBeans.clear();
       simpleKeyBeans.addAll(TabManager.get().select(i));
     }
 
@@ -218,14 +219,36 @@ public class LiquidKeyboard {
     // 列表适配器的点击监听事件
     simpleAdapter.setOnItemClickListener(
         (view, position) -> {
-          InputConnection ic = Trime.getService().getCurrentInputConnection();
-          if (ic != null) {
-            SimpleKeyBean bean = simpleKeyBeans.get(position);
-            ic.commitText(bean.getText(), 1);
+          if (keyboardType != SymbolKeyboardType.TABS) {
+            InputConnection ic = Trime.getService().getCurrentInputConnection();
+            if (ic != null) {
+              SimpleKeyBean bean = simpleKeyBeans.get(position);
+              ic.commitText(bean.getText(), 1);
 
-            if (keyboardType != SymbolKeyboardType.HISTORY) {
-              historyBeans.add(0, bean);
-              SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans);
+              if (keyboardType != SymbolKeyboardType.HISTORY) {
+                historyBeans.add(0, bean);
+                SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans);
+              }
+            }
+          } else {
+            TabTag tag = TabManager.getTag(position);
+            if (tag.type == SymbolKeyboardType.NO_KEY) {
+              switch (tag.command) {
+                case EXIT:
+                  Trime.getService().selectLiquidKeyboard(-1);
+                  break;
+                  // TODO liquidKeyboard中除返回按钮外，其他按键均未实装
+                case DEL_LEFT:
+                case DEL_RIGHT:
+                case REDO:
+                case UNDO:
+                  break;
+              }
+            } else if (TabManager.get().isAfterTabSwitch(position)) {
+              // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
+              select(position);
+            } else {
+              Trime.getService().selectLiquidKeyboard(position);
             }
           }
         });

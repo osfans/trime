@@ -862,11 +862,14 @@ liquid_keyboard:
   single_width: 60    #single类型的按键宽度
   vertical_gap: 8     #纵向按键间隙
   margin_x: 2       #左右按键间隙的1/2
-  keyboards: [emoji, math, ascii, cn, history, clipboard, draft, list, exit, ids , jp, table, symbol, pinyin, grease, rusa, korea, lation, yinbiao, unit,  exit]  #tab列表
+  keyboards: [emoji, math, ascii, cn, history, clipboard, draft, list, tabs, exit, ids , jp, table, symbol, pinyin, grease, rusa, korea, lation, yinbiao, unit,  exit]  #tab列表
   exit:
     name: 返回
     type: NO_KEY
     keys: EXIT
+  tabs:
+    name: 更多
+    type: TABS
   history:
     name: 常用
     type: HISTORY

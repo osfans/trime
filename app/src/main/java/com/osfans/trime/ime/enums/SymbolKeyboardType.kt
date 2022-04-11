@@ -7,6 +7,9 @@ enum class SymbolKeyboardType {
     // 只占据tab位，不含keys（如返回键
     NO_KEY,
 
+    // tab列表（更多）
+    TABS,
+
     //  剪贴板（大段文本自动缩略，按键长度自适应。）
     CLIPBOARD,
 
