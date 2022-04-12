@@ -61,8 +61,6 @@ class TextInputManager private constructor() :
     var shouldUpdateRimeOption: Boolean = true
     var performEnterAsLineBreak: Boolean = false
     var isComposable: Boolean = false
-    var isAsciiMode: Boolean = true
-    var isTempAsciiMode: Boolean = true
     var shouldResetAsciiMode: Boolean = false
 
     companion object {
@@ -179,7 +177,7 @@ class TextInputManager private constructor() :
         super.onStartInputView(instance, restarting)
         isComposable = false
         performEnterAsLineBreak = false
-        var tempAsciiMode = false
+        var tempAsciiMode = if (shouldResetAsciiMode) false else null
         val inputAttrsRaw = instance.editorInfo!!.inputType
         val keyboardType = when (inputAttrsRaw and InputType.TYPE_MASK_CLASS) {
             InputType.TYPE_CLASS_NUMBER,
@@ -220,7 +218,7 @@ class TextInputManager private constructor() :
             it.switchToKeyboard(keyboardType)
         }
         Rime.get(trime)
-        Rime.setOption("ascii_mode", tempAsciiMode)
+        tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
         isComposable = isComposable && !Rime.isEmpty()
         if (!trime.onEvaluateInputViewShown()) {
             // Show candidate view when using physical keyboard
@@ -231,9 +229,6 @@ class TextInputManager private constructor() :
     fun onOptionChanged(option: String, value: Boolean) {
         when (option) {
             "ascii_mode" -> {
-                if (!isTempAsciiMode) {
-                    isAsciiMode = value // 切換中西文時保存狀態
-                }
                 trime.inputFeedbackManager.ttsLanguage =
                     locales[if (value) 1 else 0]
             }
@@ -249,7 +244,6 @@ class TextInputManager private constructor() :
             ) {
                 val keyboard = option.substring(10)
                 keyboardSwitcher.switchToKeyboard(keyboard)
-                isTempAsciiMode = keyboardSwitcher.asciiMode
                 trime.bindKeyboardToInputView()
             } else if (option.startsWith("_key_") && option.length > 5 && value) {
                 shouldUpdateRimeOption = false // 防止在 onMessage 中 setOption
@@ -307,8 +301,7 @@ class TextInputManager private constructor() :
             KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                 keyboardSwitcher.switchToKeyboard(event.select)
                 /** Set ascii mode according to keyboard's settings, can not place into [Rime.onMessage] */
-                isTempAsciiMode = keyboardSwitcher.asciiMode
-                Rime.setOption("ascii_mode", isTempAsciiMode)
+                Rime.setOption("ascii_mode", keyboardSwitcher.asciiMode)
                 trime.bindKeyboardToInputView()
                 trime.updateComposing()
             }
