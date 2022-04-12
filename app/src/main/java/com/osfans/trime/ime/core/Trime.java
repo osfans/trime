@@ -35,6 +35,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.StrictMode;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -349,6 +350,12 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onCreate() {
+
+    StrictMode.setVmPolicy(
+        new StrictMode.VmPolicy.Builder(StrictMode.getVmPolicy())
+            .detectLeakedClosableObjects()
+            .build());
+
     // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
     try {
       // Additional try..catch wrapper as the event listeners chain or the super.onCreate() method
@@ -369,8 +376,8 @@ public class Trime extends LifecycleInputMethodService {
         clipBoardMonitor();
         DraftDao.get();
       } catch (Exception e) {
+        e.printStackTrace();
         super.onCreate();
-        e.fillInStackTrace();
         return;
       }
       super.onCreate();
@@ -647,6 +654,7 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public View onCreateInputView() {
+    Timber.e("onCreateInputView()");
     // 初始化键盘布局
     super.onCreateInputView();
     inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));

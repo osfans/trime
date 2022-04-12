@@ -1,5 +1,6 @@
 package com.osfans.trime.ime.keyboard;
 
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.view.KeyEvent;
@@ -20,7 +21,7 @@ public class Sound {
   private List<String> files;
   private static Sound self;
   private final boolean enable;
-  private int progress = -1;
+  private int progress;
   private int[] melody;
 
   public static Sound get() {
@@ -44,9 +45,10 @@ public class Sound {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public Sound(String soundPackageName) {
-    sp = new SoundPool(3, AudioManager.STREAM_SYSTEM, 0);
+    AudioAttributes audioAttributes =
+        new AudioAttributes.Builder().setLegacyStreamType(AudioManager.STREAM_SYSTEM).build();
+    sp = new SoundPool.Builder().setAudioAttributes(audioAttributes).setMaxStreams(3).build();
     keyset = new ArrayList<>();
     melody = new int[1];
     progress = -1;
