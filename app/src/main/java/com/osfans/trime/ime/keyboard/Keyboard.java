@@ -29,6 +29,7 @@ import com.osfans.trime.util.YamlUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import timber.log.Timber;
 
 /** 從YAML中加載鍵盤配置，包含多個{@link Key 按鍵}。 */
 public class Keyboard {
@@ -85,6 +86,13 @@ public class Keyboard {
   private boolean mLock; // 切換程序時記憶鍵盤
   private String mAsciiKeyboard; // 英文鍵盤
 
+  // 定义 新的键盘尺寸计算方式， 避免尺寸计算不恰当，导致切换键盘时键盘高度发生变化，UI闪烁的问题。同时可以快速调整整个键盘的尺寸
+  // 1. default键盘的高度 = 其他键盘的高度
+  // 2. 当键盘高度(不含padding)与keyboard_height不一致时，每行按键等比例缩放按键高度高度，行之间的间距向上取整数、padding不缩放；
+  // 3. 由于高度只能取整数，缩放后仍然存在余数的，由 auto_height_index 指定的行吸收（遵循四舍五入）
+  //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
+  private int autoHeightIndex, keyboardHeight;
+
   /**
    * Creates a keyboard from the given xml key layout file.
    *
@@ -112,12 +120,17 @@ public class Keyboard {
     mDefaultWidth = (int) (mDisplayWidth * config.getDouble("key_width") / 100);
 
     mDefaultHeight = config.getPixel("key_height");
-    if (land) mDefaultHeight = config.getPixel("key_height_land", mDefaultHeight);
 
     mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
     mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
     mRoundCorner = config.getFloat("round_corner");
     mBackground = config.getColorDrawable("keyboard_back_color");
+
+    keyboardHeight = config.getPixel("keyboard_height");
+    if (land) {
+      int keyBoardHeightLand = config.getPixel("keyboard_height_land");
+      if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand;
+    }
 
     mKeys = new ArrayList<>();
     mComposingKeys = new ArrayList<>();
@@ -173,6 +186,9 @@ public class Keyboard {
 
   public Keyboard(Context context, String name) {
     this(context);
+    final boolean land =
+        (context.getResources().getConfiguration().orientation
+            == Configuration.ORIENTATION_LANDSCAPE);
     Config config = Config.get(context);
     final Map<String, ?> keyboardConfig = config.getKeyboard(name);
     mLabelTransform = YamlUtils.INSTANCE.getString(keyboardConfig, "label_transform", "none");
@@ -184,9 +200,13 @@ public class Keyboard {
     int defaultWidth =
         (int) (YamlUtils.INSTANCE.getDouble(keyboardConfig, "width", 0d) * mDisplayWidth / 100);
     if (defaultWidth == 0) defaultWidth = mDefaultWidth;
+
+    // 按键高度取值顺序： keys > keyboard/height > style/key_height
+    // 考虑到key设置height_land需要对皮肤做大量修改，而当部分key设置height而部分没有设时会造成按键高度异常，故取消普通按键的height_land参数
     int height = YamlUtils.INSTANCE.getPixel(keyboardConfig, "height", 0);
     int defaultHeight = (height > 0) ? height : mDefaultHeight;
     int rowHeight = defaultHeight;
+    autoHeightIndex = YamlUtils.INSTANCE.getInt(keyboardConfig, "auto_height_index", -1);
     List<Map<String, Object>> lm = (List<Map<String, Object>>) keyboardConfig.get("keys");
 
     mDefaultHorizontalGap =
@@ -209,6 +229,95 @@ public class Keyboard {
     mTotalWidth = 0;
 
     final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
+    float scale;
+    int[] newHeight = new int[0];
+
+    if (keyboardHeight > 0) {
+      int rawSumHeight = 0;
+      List<Integer> rawHeight = new ArrayList<>();
+      for (Map<String, Object> mk : lm) {
+        int gap = mDefaultHorizontalGap;
+        int w = (int) (YamlUtils.INSTANCE.getDouble(mk, "width", 0) * mDisplayWidth / 100);
+        if (w == 0 && mk.containsKey("click")) w = defaultWidth;
+        w -= gap;
+        if (column >= maxColumns || x + w > mDisplayWidth) {
+          x = gap / 2;
+          y += mDefaultVerticalGap + rowHeight;
+          column = 0;
+          row++;
+          rawSumHeight += rowHeight;
+          rawHeight.add(rowHeight);
+        }
+        if (column == 0) {
+          int heightK = YamlUtils.INSTANCE.getPixel(mk, "height", 0);
+          rowHeight = (heightK > 0) ? heightK : defaultHeight;
+        }
+        if (!mk.containsKey("click")) { // 無按鍵事件
+          x += w + gap;
+          continue; // 縮進
+        }
+        column++;
+        int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
+        x += ((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w) + gap;
+      }
+
+      rawSumHeight += rowHeight;
+      rawHeight.add(rowHeight);
+
+      scale =
+          (float) keyboardHeight / (rawSumHeight + mDefaultVerticalGap * (rawHeight.size() + 1));
+
+      Timber.d(
+          "name="
+              + name
+              + ", yGap "
+              + mDefaultVerticalGap
+              + " keyboardHeight="
+              + keyboardHeight
+              + " rawSumHeight="
+              + rawSumHeight);
+      mDefaultVerticalGap = (int) Math.ceil(mDefaultVerticalGap * scale);
+
+      Timber.d("scale=" + scale + ", yGap > " + mDefaultVerticalGap);
+
+      int autoHeight = keyboardHeight - mDefaultVerticalGap * (rawHeight.size() + 1);
+
+      scale = ((float) autoHeight) / rawSumHeight;
+
+      if (autoHeightIndex < 0) {
+        autoHeightIndex = rawHeight.size() + autoHeightIndex;
+        if (autoHeightIndex < 0) autoHeightIndex = 0;
+      } else if (autoHeightIndex >= rawHeight.size()) {
+        autoHeightIndex = rawHeight.size() - 1;
+      }
+
+      newHeight = new int[rawHeight.size()];
+      for (int i = 0; i < rawHeight.size(); i++) {
+        if (i != autoHeightIndex) {
+          int h = (int) (rawHeight.get(i) * scale);
+          newHeight[i] = h;
+          autoHeight -= h;
+        }
+      }
+      if (autoHeight < 1) {
+        if (rawHeight.get(autoHeight) > 0) autoHeight = 1;
+      }
+      newHeight[autoHeightIndex] = autoHeight;
+
+      for (int h : rawHeight) System.out.print(" " + h);
+      System.out.print('\n');
+
+      Timber.d("scale=" + scale + " keyboardHeight: ");
+      for (int h : newHeight) System.out.print(" " + h);
+      System.out.print('\n');
+
+      x = mDefaultHorizontalGap / 2;
+      y = mDefaultVerticalGap;
+      row = 0;
+      column = 0;
+      mTotalWidth = 0;
+    }
+
     for (Map<String, Object> mk : lm) {
       int gap = mDefaultHorizontalGap;
       int w = (int) (YamlUtils.INSTANCE.getDouble(mk, "width", 0) * mDisplayWidth / 100);
@@ -222,8 +331,12 @@ public class Keyboard {
         if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
       }
       if (column == 0) {
-        int heightK = YamlUtils.INSTANCE.getPixel(mk, "height", 0);
-        rowHeight = (heightK > 0) ? heightK : defaultHeight;
+        if (keyboardHeight > 0) {
+          rowHeight = newHeight[row];
+        } else {
+          int heightK = YamlUtils.INSTANCE.getPixel(mk, "height", 0);
+          rowHeight = (heightK > 0) ? heightK : defaultHeight;
+        }
       }
       if (!mk.containsKey("click")) { // 無按鍵事件
         x += w + gap;

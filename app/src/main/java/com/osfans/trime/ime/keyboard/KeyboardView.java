@@ -700,6 +700,14 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
   private void onBufferDraw() {
     if (mBuffer == null || mKeyboardChanged) {
+      Timber.i(
+          "onBufferDraw() mKeyboardChanged="
+              + mKeyboardChanged
+              + " mBuffer_is_null="
+              + (mBuffer == null)
+              + " getHeight()="
+              + getHeight());
+
       if (mBuffer == null
           || mKeyboardChanged
               && (mBuffer.getWidth() != getWidth() || mBuffer.getHeight() != getHeight())) {

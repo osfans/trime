@@ -129,10 +129,28 @@ public class LiquidKeyboard {
         config.getDrawable("liquid_keyboard_background", null, null, null, null);
     if (keyboardBackground != null) parentView.setBackground(keyboardBackground);
 
-    keyHeight = config.getLiquidPixel("key_height_land");
-    if (!isLand || keyHeight <= 0) keyHeight = config.getLiquidPixel("key_height");
-    margin_top = config.getLiquidPixel("vertical_gap");
+    int keyboardHeight = config.getPixel("keyboard_height");
+    if (isLand) {
+      int keyBoardHeightLand = config.getPixel("keyboard_height_land");
+      if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand;
+    }
 
+    int row = (int) config.getLiquidFloat("row");
+    if (row > 0) {
+      if (isLand) {
+        float r = config.getLiquidFloat("row_land");
+        if (r > 0) row = (int) r;
+      }
+      float rawHeight = config.getLiquidFloat("key_height");
+      float rawVGap = config.getLiquidFloat("vertical_gap");
+      float scale = (float) keyboardHeight / ((rawHeight + rawVGap) * row);
+      margin_top = (int) Math.ceil(rawVGap * scale);
+      keyHeight = keyboardHeight / row - margin_top;
+    } else {
+      keyHeight = config.getLiquidPixel("key_height_land");
+      if (!isLand || keyHeight <= 0) keyHeight = config.getLiquidPixel("key_height");
+      margin_top = config.getLiquidPixel("vertical_gap");
+    }
     Timber.i("config keyHeight=" + keyHeight + " marginTop=" + margin_top);
 
     if (isLand) single_width = config.getLiquidPixel("single_width_land");

@@ -704,6 +704,15 @@ public class Config {
     return Float.parseFloat(o.toString());
   }
 
+  public float getLiquidFloat(String key) {
+    if (liquidKeyboard != null) {
+      if (liquidKeyboard.containsKey(key)) {
+        return YamlUtils.INSTANCE.getFloat(liquidKeyboard, key, 0);
+      }
+    }
+    return getFloat(key);
+  }
+
   public float getFloat(String key, float defaultValue) {
     final Object o = getValue(key, defaultValue);
     if (o == null) return defaultValue;

@@ -79,6 +79,8 @@ style:
   latin_font: latin.ttf #西文本体
   latin_locale: en_US #西文语言
   locale: zh_CN #缺省语言 zh_TW,zh_CN,zh_HK,""
+  keyboard_height: 250 #锁定键盘高度，避免切换时键盘高度变化而造成闪烁
+  keyboard_height_land: 200 #锁定横屏下键盘高度，避免切换时键盘高度变化而造成闪烁
   preview_font: latin.ttf #按键提示字体
   preview_height: 56 #按键提示高度
   preview_offset: -32 #按键提示纵向偏移
@@ -853,6 +855,8 @@ liquid_keyboard:
   # 目前只能直接写参数，不支持变量或者fallback机制。
   # 缺少参数时，自动从style中加载参数。除非需要指定liquid_keyboard使用与主键盘不同的背景色、背景图，否则不应设置被注释掉的参数。
   author: "tumuyan"
+  row: 6              #每屏最多显示多少行按键
+  row_land: 5         #横屏每屏最多显示多少行按键
   key_height: 40      #按键高度
   key_height_land: 40 #横屏模式按键高度
   single_width: 60    #single类型的按键宽度
