@@ -752,7 +752,7 @@ public class Trime extends LifecycleInputMethodService {
                 + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
 
         if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)
-                == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
+            == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
           //  应用程求以隐身模式打开键盘应用程序
           Timber.i("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
         } else {
