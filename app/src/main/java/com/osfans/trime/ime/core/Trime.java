@@ -716,39 +716,50 @@ public class Trime extends LifecycleInputMethodService {
       case InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD:
         Timber.i(
             "EditorInfo: private;"
-                + " packageName"
+                + " packageName="
                 + attribute.packageName
-                + "; fieldName"
+                + "; fieldName="
                 + attribute.fieldName
-                + "; actionLabel"
+                + "; actionLabel="
                 + attribute.actionLabel
-                + "; inputType"
+                + "; inputType="
                 + attribute.inputType
-                + "; &v "
+                + "; VARIATION="
                 + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
-                + "; &c "
-                + (attribute.inputType & InputType.TYPE_MASK_CLASS));
+                + "; CLASS="
+                + (attribute.inputType & InputType.TYPE_MASK_CLASS)
+                + "; ACTION="
+                + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
         normalTextEditor = false;
         break;
 
       default:
         Timber.i(
             "EditorInfo: normal;"
-                + " packageName"
+                + " packageName="
                 + attribute.packageName
-                + "; fieldName"
+                + "; fieldName="
                 + attribute.fieldName
-                + "; actionLabel"
+                + "; actionLabel="
                 + attribute.actionLabel
-                + "; inputType"
+                + "; inputType="
                 + attribute.inputType
-                + "; &v "
+                + "; VARIATION="
                 + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
-                + "; &c "
-                + (attribute.inputType & InputType.TYPE_MASK_CLASS));
-        normalTextEditor = true;
-        activeEditorInstance.cacheDraft();
-        addDraft();
+                + "; CLASS="
+                + (attribute.inputType & InputType.TYPE_MASK_CLASS)
+                + "; ACTION="
+                + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
+
+        if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)
+                == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
+          //  应用程求以隐身模式打开键盘应用程序
+          Timber.i("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
+        } else {
+          normalTextEditor = true;
+          activeEditorInstance.cacheDraft();
+          addDraft();
+        }
     }
   }
 
