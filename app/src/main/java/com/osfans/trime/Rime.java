@@ -297,16 +297,23 @@ public class Rime {
   }
 
   private static void init(boolean full_check) {
+    String methodName =
+        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
+    Timber.d(methodName);
     mOnMessage = false;
 
     final String sharedDataDir = DataUtils.getSharedDataDir();
     final String userDataDir = DataUtils.getUserDataDir();
 
+    Timber.d(methodName + "setup");
     // Initialize librime APIs
     setup(sharedDataDir, userDataDir);
+    Timber.d(methodName + "initlialize");
     initialize(sharedDataDir, userDataDir);
 
+    Timber.d(methodName + "check");
     check(full_check);
+    Timber.d(methodName + "set_notification_handler");
     set_notification_handler();
     if (!find_session()) {
       if (create_session() == 0) {
@@ -314,7 +321,10 @@ public class Rime {
         return;
       }
     }
+    Timber.d(methodName + "initSchema");
     initSchema();
+
+    Timber.d(methodName + "finish");
   }
 
   public static void destroy() {
@@ -344,9 +354,10 @@ public class Rime {
   }
 
   private static boolean onKey(int keycode, int mask) {
+    Timber.i("onkey(), keycode=%s, mask=%s", keycode, mask);
     if (isVoidKeycode(keycode)) return false;
     final boolean b = process_key(keycode, mask);
-    Timber.i("process key = %s, keycode = %s, mask = %s", b, keycode, mask);
+    Timber.i("onkey(), keycode=%s, mask=%s, process_key result=%s", keycode, mask, b);
     getContexts();
     return b;
   }
@@ -584,6 +595,29 @@ public class Rime {
   public static native boolean deploy_schema(String schema_file);
 
   public static native boolean deploy_config_file(String file_name, String version_key);
+
+  /**
+   * 部署config文件到build目录
+   *
+   * @param name 配置名称，不含yaml后缀
+   * @param skipIfExists 启用此模式时，如build目录已经存在对应名称的文件，且大小超过10k，则不重新部署，从而节约时间
+   * @return
+   */
+  public static boolean deploy_config_file(String name, boolean skipIfExists) {
+    String file_name = name + ".yaml";
+    if (skipIfExists) {
+      File f = new File(Rime.get_user_data_dir() + File.separator + "build", file_name);
+      if (f.exists()) {
+        if (f.length() > 10000) {
+          Timber.d("deploy_config_file() skip");
+          return true;
+        }
+      } else {
+        return Rime.deploy_config_file(file_name, "config_version");
+      }
+    }
+    return Rime.deploy_config_file(file_name, "config_version");
+  }
 
   public static native boolean sync_user_data();
 

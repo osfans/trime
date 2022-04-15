@@ -26,20 +26,27 @@ class KeyboardSwitcher {
     }
 
     fun newOrReset() {
+        val methodName = "\t<TrimeInit>\t" + Thread.currentThread().stackTrace[2].methodName + "\t"
+        Timber.d(methodName)
         val ims = Trime.getService()
+        Timber.d(methodName + "getConfig")
         keyboardNames = Config.get(ims).keyboardNames
-
+        Timber.d(methodName + "land")
         val land = (
             ims.resources.configuration.orientation
                 == Configuration.ORIENTATION_LANDSCAPE
             )
+        Timber.d(methodName + "getConfig")
         Config.get(ims).getKeyboardPadding(land)
         Timber.d("update KeyboardPadding: KeyboardSwitcher.init")
 
+        Timber.d(methodName + "getKeyboards")
         keyboards = Array(keyboardNames.size) { i ->
             Keyboard(ims, keyboardNames[i])
         }
+        Timber.d(methodName + "setKeyboard")
         setKeyboard(0)
+        Timber.d(methodName + "finish")
     }
 
     /**
@@ -74,6 +81,7 @@ class KeyboardSwitcher {
     }
 
     private fun setKeyboard(id: Int) {
+        Timber.d("\t<TrimeInit>\tsetKeyboard()\t" + currentId + "->" + id)
         lastId = currentId
         if (lastId.isValidId() && keyboards[lastId].isLock) {
             lastLockId = lastId

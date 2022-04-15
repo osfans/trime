@@ -282,7 +282,11 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onWindowHidden() {
+    String methodName =
+        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
+    Timber.d(methodName);
     super.onWindowHidden();
+    Timber.d(methodName + "super finish");
     if (!isWindowShown) {
       Timber.i("Ignoring (is already hidden)");
       return;
@@ -297,6 +301,7 @@ public class Trime extends LifecycleInputMethodService {
       syncBackgroundHandler.sendMessageDelayed(msg, 5000); // 输入面板隐藏5秒后，开始后台同步
     }
 
+    Timber.d(methodName + "eventListeners");
     for (EventListener listener : eventListeners) {
       if (listener != null) listener.onWindowHidden();
     }
@@ -355,7 +360,9 @@ public class Trime extends LifecycleInputMethodService {
         new StrictMode.VmPolicy.Builder(StrictMode.getVmPolicy())
             .detectLeakedClosableObjects()
             .build());
-
+    String methodName =
+        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
+    Timber.d(methodName);
     // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
     try {
       // Additional try..catch wrapper as the event listeners chain or the super.onCreate() method
@@ -366,10 +373,14 @@ public class Trime extends LifecycleInputMethodService {
 
         activeEditorInstance = new EditorInstance(this);
         imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        Timber.d(methodName + "InputFeedbackManager");
         inputFeedbackManager = new InputFeedbackManager(this);
+
+        Timber.d(methodName + "keyboardSwitcher");
 
         keyboardSwitcher = new KeyboardSwitcher();
 
+        Timber.d(methodName + "liquidKeyboard");
         liquidKeyboard =
             new LiquidKeyboard(
                 this, getImeConfig().getClipboardLimit(), getImeConfig().getDraftLimit());
@@ -380,13 +391,16 @@ public class Trime extends LifecycleInputMethodService {
         super.onCreate();
         return;
       }
+      Timber.d(methodName + "super.onCreate()");
       super.onCreate();
+      Timber.d(methodName + "create listener");
       for (EventListener listener : eventListeners) {
         if (listener != null) listener.onCreate();
       }
     } catch (Exception e) {
       e.fillInStackTrace();
     }
+    Timber.d(methodName + "finish");
   }
 
   public void selectLiquidKeyboard(final int tabIndex) {

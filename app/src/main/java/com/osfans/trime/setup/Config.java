@@ -99,17 +99,37 @@ public class Config {
   }
 
   public Config(@NonNull Context context) {
+    this(context, false);
+  }
+
+  public Config(@NonNull Context context, boolean skipDeploy) {
+    String methodName =
+        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
+    Timber.d(methodName);
     self = this;
     assetManager = context.getAssets();
     themeName = getPrefs().getLooks().getSelectedTheme();
     soundPackageName = getPrefs().getKeyboard().getSoundPackage();
+
+    Timber.d(methodName + "prepareRime");
     prepareRime(context);
-    deployTheme();
+
+    //    正常逻辑不应该部署全部主题，init()方法已经做过当前主题的部署
+    //    Timber.d(methodName + "deployTheme");
+    //    deployTheme();
+
+    Timber.d(methodName + "init");
     init(true);
+
+    Timber.d(methodName + "setSoundFromColor");
     setSoundFromColor();
+
+    Timber.d(methodName + "setClipboard&draft");
     clipBoardCompare = getPrefs().getOther().getClipboardCompareRules().trim().split("\n");
     clipBoardOutput = getPrefs().getOther().getClipboardOutputRules().trim().split("\n");
     draftOutput = getPrefs().getOther().getDraftOutputRules().trim().split("\n");
+
+    Timber.d(methodName + "finish");
   }
 
   public String[] getClipBoardCompare() {
@@ -162,9 +182,13 @@ public class Config {
   }
 
   public void prepareRime(Context context) {
+    String methodName =
+        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
+    Timber.d(methodName);
     boolean isExist = new File(sharedDataDir).exists();
     boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(getPrefs());
     String defaultFile = "trime.yaml";
+    Timber.d(methodName + "copy");
     if (isOverwrite) {
       copyFileOrDir("", true);
     } else if (isExist) {
@@ -173,11 +197,13 @@ public class Config {
     } else {
       copyFileOrDir("", false);
     }
+    Timber.d(methodName + "copy2");
     while (!new File(sharedDataDir, defaultFile).exists()) {
-      SystemClock.sleep(3000);
+      SystemClock.sleep(100);
       copyFileOrDir("", isOverwrite);
     }
     // 缺失导致获取方案列表为空
+    Timber.d(methodName + "copy default.custom.yaml");
     final String defaultCustom = "default.custom.yaml";
     if (!new File(sharedDataDir, defaultCustom).exists()) {
       try {
@@ -186,7 +212,9 @@ public class Config {
         e.printStackTrace();
       }
     }
+    Timber.d(methodName + "Rime.get");
     Rime.get(context, !isExist); // 覆蓋時不強制部署
+    Timber.d(methodName + "finish");
   }
 
   public static String[] getThemeKeys(boolean isUser) {
@@ -219,6 +247,9 @@ public class Config {
 
   @SuppressWarnings("UnusedReturnValue")
   public static boolean deployOpencc() {
+    String methodName =
+        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
+    Timber.d(methodName);
     final String dataDir = DataUtils.getAssetsDir("opencc");
     final File d = new File(dataDir);
     if (d.exists()) {
@@ -229,6 +260,8 @@ public class Config {
         Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd2");
       }
     }
+
+    Timber.d(methodName + "finish");
     return true;
   }
 
