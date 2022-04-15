@@ -1,6 +1,7 @@
 package com.osfans.trime.settings.components
 
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
@@ -26,7 +27,7 @@ class ThemePickerDialog(
     private var checkedId: Int = 0
     val pickerDialog: AlertDialog
     @Suppress("DEPRECATION")
-    private val progressDialog: AlertDialog
+    private val progressDialog: ProgressDialog
 
     init {
         val themeFile = config.theme + ".yaml"

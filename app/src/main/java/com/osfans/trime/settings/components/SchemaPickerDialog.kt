@@ -1,6 +1,7 @@
 package com.osfans.trime.settings.components
 
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
@@ -33,7 +34,7 @@ class SchemaPickerDialog(
     private lateinit var schemaNames: Array<String?>
     var pickerDialogBuilder: AlertDialog.Builder? = null
 
-    private var progressDialog: AlertDialog
+    private var progressDialog: ProgressDialog
 
     companion object {
         private class SortByName : Comparator<Map<String?, String?>> {
