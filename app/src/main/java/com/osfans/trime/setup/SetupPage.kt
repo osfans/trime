@@ -3,6 +3,7 @@ package com.osfans.trime.setup
 import android.content.Context
 import com.osfans.trime.R
 import com.osfans.trime.common.InputMethodUtils
+import com.osfans.trime.ime.core.Trime
 
 enum class SetupPage {
     Enable, Select;
@@ -35,7 +36,12 @@ enum class SetupPage {
 
     fun isDone() = when (this) {
         Enable -> InputMethodUtils.checkIsTrimeEnabled()
-        Select -> InputMethodUtils.checkIsTrimeSelected()
+        Select -> {
+            val s = InputMethodUtils.checkIsTrimeSelected()
+            // 利用阻塞
+            Trime.getServiceOrNull()
+            s
+        }
     }
 
     companion object {

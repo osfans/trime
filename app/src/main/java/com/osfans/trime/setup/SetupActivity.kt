@@ -17,6 +17,7 @@ import com.osfans.trime.R
 import com.osfans.trime.databinding.ActivitySetupBinding
 import com.osfans.trime.setup.SetupPage.Companion.firstUndonePage
 import com.osfans.trime.setup.SetupPage.Companion.isLastPage
+import timber.log.Timber
 
 class SetupActivity : FragmentActivity() {
     private lateinit var viewPager: ViewPager2
@@ -68,14 +69,19 @@ class SetupActivity : FragmentActivity() {
                 nextButton.text =
                     getString(
                         if (position.isLastPage())
-                            R.string.setup__done else R.string.setup__next
+                            R.string.busy_progress else R.string.setup__next
                     )
             }
         })
         viewModel.isAllDone.observe(this) { allDone ->
             nextButton.apply {
                 // Hide next button for the last page when allDone == false
-                (allDone || !viewPager.currentItem.isLastPage()).let {
+                val notLastPage = !viewPager.currentItem.isLastPage()
+                Timber.i("Setup page allDone=$allDone, isLastPage=$notLastPage")
+                if (allDone)
+                    finish()
+
+                (allDone || notLastPage).let {
                     visibility = if (it) View.VISIBLE else View.GONE
                 }
             }

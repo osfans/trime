@@ -182,4 +182,5 @@
     <string name="setup__skip_hint">您确定要跳过向导吗？</string>
     <string name="setup__skip_hint_yes">好的，谢谢</string>
     <string name="setup__skip_hint_no">不，我想留在这儿</string>
+    <string name="busy_progress">在忙…</string>
 </resources>

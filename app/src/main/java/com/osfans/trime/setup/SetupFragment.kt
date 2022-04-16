@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.setup.SetupPage.Companion.isLastPage
+import timber.log.Timber
 
 class SetupFragment : Fragment() {
     private val viewModel: SetupViewModel by activityViewModels()
@@ -17,6 +18,7 @@ class SetupFragment : Fragment() {
 
     private var isDone: Boolean = false
         set(new) {
+            Timber.i("Setup page${page.ordinal} = $new")
             if (new && page.isLastPage())
                 viewModel.isAllDone.value = true
             with(binding) {

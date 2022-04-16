@@ -183,4 +183,5 @@
     <string name="setup__skip_hint">"Do you want to skip the setup wizard? "</string>
     <string name="setup__skip_hint_yes">OK, thanks</string>
     <string name="setup__skip_hint_no">No, please leave me here</string>
+    <string name="busy_progress">Busy...</string>
 </resources>
