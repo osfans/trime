@@ -232,7 +232,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
    */
   private boolean mHeadsetRequiredToHearPasswordsAnnounced;
 
-  private boolean mShowHint = true;
+  private boolean mShowHint = true, mShowSymbol = true;
 
   private Method findStateDrawableIndex;
   private Method getStateDrawable;
@@ -276,6 +276,10 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
   public void setShowHint(final boolean value) {
     mShowHint = value;
+  }
+
+  public void setShowSymbol(final boolean value) {
+    mShowSymbol = value;
   }
 
   public void reset(final Context context) {
@@ -808,20 +812,22 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 + top
                 + key.getKey_text_offset_y(),
             paint);
-        if (mShowHint) {
-          if (key.getLongClick() != null) {
+        if (mShowSymbol) {
+          String labelSymbol = key.getSymbolLabel();
+          if (!TextUtils.isEmpty(labelSymbol)) {
             mPaintSymbol.setTextSize(
                 key.getSymbol_text_size() != null && key.getSymbol_text_size() > 0
                     ? key.getSymbol_text_size()
                     : mSymbolSize);
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(
-                key.getSymbolLabel(),
+                labelSymbol,
                 left + key.getKey_symbol_offset_x(),
                 symbolBase + key.getKey_symbol_offset_y(),
                 mPaintSymbol);
           }
-
+        }
+        if (mShowHint) {
           if (!TextUtils.isEmpty(hint)) {
             mPaintSymbol.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
             canvas.drawText(

@@ -137,6 +137,7 @@ class TextInputManager private constructor() :
         mainKeyboardView = uiBinding.main.mainKeyboardView.also {
             it.setOnKeyboardActionListener(this)
             it.setShowHint(!Rime.getOption("_hide_key_hint"))
+            it.setShowSymbol(!Rime.getOption("_hide_key_symbol"))
             it.reset(trime)
         }
         // Initialize candidate bar
@@ -250,6 +251,7 @@ class TextInputManager private constructor() :
             }
             "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
             "_hide_key_hint" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowHint(!value)
+            "_hide_key_symbol" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowSymbol(!value)
             else -> if (option.startsWith("_keyboard_") &&
                 option.length > 10 && value
             ) {

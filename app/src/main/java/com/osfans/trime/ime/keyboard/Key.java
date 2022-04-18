@@ -96,6 +96,7 @@ public class Key {
   private boolean on;
   private String popupCharacters;
   private int popupResId;
+  private String labelSymbol;
 
   /**
    * Create an empty key with no attributes.
@@ -136,6 +137,7 @@ public class Key {
     s = YamlUtils.INSTANCE.getString(mk, "ascii", "");
     if (!TextUtils.isEmpty(s)) ascii = new Event(mKeyboard, s);
     label = YamlUtils.INSTANCE.getString(mk, "label", "");
+    labelSymbol = YamlUtils.INSTANCE.getString(mk, "label_symbol", "");
     hint = YamlUtils.INSTANCE.getString(mk, "hint", "");
     if (mk.containsKey("send_bindings")) {
       send_bindings = YamlUtils.INSTANCE.getBoolean(mk, "send_bindings", true);
@@ -535,6 +537,10 @@ public class Key {
   }
 
   public String getSymbolLabel() {
-    return getLongClick().getLabel();
+    if (labelSymbol.isEmpty()) {
+      Event longClick = getLongClick();
+      if (longClick != null) return longClick.getLabel();
+    }
+    return labelSymbol;
   }
 }

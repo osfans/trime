@@ -518,6 +518,7 @@ public class Trime extends LifecycleInputMethodService {
   public void resetKeyboard() {
     if (mainKeyboardView != null) {
       mainKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
+      mainKeyboardView.setShowSymbol(!Rime.getOption("_hide_key_symbol"));
       mainKeyboardView.reset(this); // 實體鍵盤無軟鍵盤
     }
   }
