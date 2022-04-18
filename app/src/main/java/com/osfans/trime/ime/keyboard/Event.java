@@ -237,6 +237,8 @@ public class Event {
     return keyCode;
   }
 
+  // TODO 把软键盘预设android_keys的keycode(index)->keyname(string)—>rimeKeycode的过程改为直接返回int
+  // https://github.com/rime/librime/blob/99e269c8eb251deddbad9b0d2c4d965b228f8006/src/rime/key_table.cc
   private static int getRimeCode(int code) {
     int i = 0;
     if (code >= 0 && code < Key.androidKeys.size()) {
@@ -250,6 +252,7 @@ public class Event {
     return (mask & modifier) > 0;
   }
 
+  // KeyboardEvent 从软键盘的按键keycode（可能含有mask）和mask，分离出rimekeycode和mask构成的数组
   public static int[] getRimeEvent(int code, int mask) {
     int i = getRimeCode(code);
     int m = 0;

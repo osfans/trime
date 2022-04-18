@@ -457,6 +457,7 @@ public class Key {
     return (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT);
   }
 
+  // shift键在点击时是否触发锁定
   public boolean isShiftLock() {
     switch (getClick().getShiftLock()) {
       case "long":

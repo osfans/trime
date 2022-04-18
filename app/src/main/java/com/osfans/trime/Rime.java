@@ -353,15 +353,18 @@ public class Rime {
     return keycode <= 0 || keycode == XK_VoidSymbol;
   }
 
+  // KeyProcess 调用JNI方法发送keycode和mask
   private static boolean onKey(int keycode, int mask) {
-    Timber.i("onkey(), keycode=%s, mask=%s", keycode, mask);
+    Timber.i("\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s", keycode, mask);
     if (isVoidKeycode(keycode)) return false;
     final boolean b = process_key(keycode, mask);
-    Timber.i("onkey(), keycode=%s, mask=%s, process_key result=%s", keycode, mask, b);
+    Timber.i(
+        "\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s, process_key result=%s", keycode, mask, b);
     getContexts();
     return b;
   }
 
+  // KeyProcess 调用JNI方法发送keycode和mask
   public static boolean onKey(int[] event) {
     if (event != null && event.length == 2) return onKey(event[0], event[1]);
     return false;

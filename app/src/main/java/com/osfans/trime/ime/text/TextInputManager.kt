@@ -293,6 +293,7 @@ class TextInputManager private constructor() :
         }
     }
 
+    // KeyboardEvent 处理软键盘事件
     override fun onEvent(event: Event?) {
         event ?: return
         if (!event.commit.isNullOrEmpty()) {
@@ -364,7 +365,7 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_PROG_RED -> trime.showColorDialog() // Color schemes
             KeyEvent.KEYCODE_MENU -> trime.showOptionsDialog()
-            else -> onKey(event.code, event.mask)
+            else -> onKey(event.code, event.mask or trime.keyboardSwitcher.currentKeyboard.modifer)
         }
     }
 

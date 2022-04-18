@@ -62,6 +62,7 @@ object StringUtils {
         return true
     }
 
+    // KeyCode Android keycode -> 可录入的按键字符
     // 考虑到可能存在魔改机型的keycode有差异，而KeyEvent.keyCodeToString(keyCode)无法从keyCode获得按键字符，故重写这个从keyCode获取Char的方法。
     @JvmStatic
     fun toCharString(keyCode: Int): String {

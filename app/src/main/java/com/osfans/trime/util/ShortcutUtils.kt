@@ -18,6 +18,7 @@ import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.Rime
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
+import timber.log.Timber
 import java.text.FieldPosition
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -127,6 +128,7 @@ object ShortcutUtils {
     fun openCategory(keyCode: Int): Boolean {
         val category = applicationLaunchKeyCategories[keyCode]
         return if (category != null) {
+            Timber.d("\t<TrimeInput>\topenCategory()\tkeycode=%d, app=%s", keyCode, category)
             val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
             ActivityUtils.startActivity(intent)
