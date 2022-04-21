@@ -131,7 +131,9 @@ class EditorInstance(private val ims: InputMethodService) {
     fun meta(
         ctrl: Boolean = false,
         alt: Boolean = false,
-        shift: Boolean = false
+        shift: Boolean = false,
+        meta: Boolean = false,
+        sym: Boolean = false,
     ): Int {
         var metaState = 0
         if (ctrl) {
@@ -143,6 +145,13 @@ class EditorInstance(private val ims: InputMethodService) {
         if (shift) {
             metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
         }
+        if (meta) {
+            metaState = metaState or KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON
+        }
+        if (sym) {
+            metaState = metaState or KeyEvent.META_SYM_ON
+        }
+
         return metaState
     }
 
@@ -214,16 +223,14 @@ class EditorInstance(private val ims: InputMethodService) {
         if (metaState and KeyEvent.META_SHIFT_ON != 0) {
             sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT, 0)
         }
-        /*
-        var sendKeyDownUp = true
-        if (metaState == 0 && mAsciiMode) {
-            // 使用ASCII键盘输入英文字符时，直接上屏，跳过复杂的调用，从表面上解决issue #301 知乎输入英语后输入法失去焦点的问题
-            val keyText = toCharString(keyEventCode)
-            if (keyText.isNotEmpty()) {
-                ic.commitText(keyText, 1)
-                sendKeyDownUp = false
-            }
-        } */
+        if (metaState and KeyEvent.META_META_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT, 0)
+        }
+
+        if (metaState and KeyEvent.META_SYM_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SYM, 0)
+        }
+
         for (n in 0 until count) {
             sendDownKeyEvent(eventTime, keyEventCode, metaState)
             sendUpKeyEvent(eventTime, keyEventCode, metaState)
@@ -237,6 +244,15 @@ class EditorInstance(private val ims: InputMethodService) {
         if (metaState and KeyEvent.META_CTRL_ON != 0) {
             sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT, 0)
         }
+
+        if (metaState and KeyEvent.META_META_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT, 0)
+        }
+
+        if (metaState and KeyEvent.META_SYM_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SYM, 0)
+        }
+
         ic.endBatchEdit()
         return true
     }

@@ -58,7 +58,7 @@ public class Keyboard {
   /** 鍵盤的Shift鍵是否按住 * */
   // private boolean mShifted;
   /** 鍵盤的Shift鍵 */
-  private Key mShiftKey;
+  private Key mShiftKey, mCtrlKey, mAltKey, mMetaKey, mSymKey;
   /** Total height of the keyboard, including the padding and keys */
   private int mTotalHeight;
   /**
@@ -70,7 +70,7 @@ public class Keyboard {
   private final List<Key> mKeys;
 
   private final List<Key> mComposingKeys;
-  private int mMetaState;
+  private int mModifierState;
   /** Width of the screen available to fit the keyboard */
   private int mDisplayWidth;
   /** Keyboard mode, or zero, if none. */
@@ -418,8 +418,30 @@ public class Keyboard {
     return mShiftKey;
   }
 
-  public void setmShiftKey(Key mShiftKey) {
-    this.mShiftKey = mShiftKey;
+  public Key getmAltKey() {
+    return mAltKey;
+  }
+
+  public Key getmMetaKey() {
+    return mMetaKey;
+  }
+
+  public Key getmSymKey() {
+    return mSymKey;
+  }
+
+  public Key getmCtrlKey() {
+    return mCtrlKey;
+  }
+
+  public void setModiferKey(int c, Key key) {
+    if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT) this.mShiftKey = key;
+    else if (c == KeyEvent.KEYCODE_CTRL_LEFT || c == KeyEvent.KEYCODE_CTRL_RIGHT)
+      this.mCtrlKey = key;
+    else if (c == KeyEvent.KEYCODE_META_LEFT || c == KeyEvent.KEYCODE_META_RIGHT)
+      this.mMetaKey = key;
+    else if (c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT) this.mAltKey = key;
+    else if (c == KeyEvent.KEYCODE_SYM) this.mSymKey = key;
   }
 
   public List<Key> getmComposingKeys() {
@@ -479,31 +501,54 @@ public class Keyboard {
     return mTotalWidth;
   }
 
-  private boolean hasModifier(int modifiers) {
-    return (mMetaState & modifiers) != 0;
+  public boolean hasModifier(int modifierMask) {
+    return (mModifierState & modifierMask) != 0;
+  }
+
+  public static boolean hasModifier(int modifierMask, int mModifierState) {
+    return (mModifierState & modifierMask) != 0;
   }
 
   public boolean hasModifier() {
-    return mMetaState != 0;
-  }
-
-  public boolean toggleModifier(int mask) {
-    boolean value = !hasModifier(mask);
-    if (value) mMetaState |= mask;
-    else mMetaState &= ~mask;
-    return value;
+    return mModifierState != 0;
   }
 
   public int getModifer() {
-    return mMetaState;
+    return mModifierState;
   }
 
   private boolean setModifier(int mask, boolean value) {
     boolean b = hasModifier(mask);
     if (b == value) return false;
-    if (value) mMetaState |= mask;
-    else mMetaState &= ~mask;
+    printModifierKeyState("");
+    if (value) mModifierState |= mask;
+    else mModifierState &= ~mask;
+
+    printModifierKeyState("->");
     return true;
+  }
+
+  public void printModifierKeyState(String tag) {
+    Timber.d(
+        "\t<TrimeInput>\tkeyState() ctrl=%s, alt=%s, shift=%s, sym=%s, meta=%s\t%s",
+        hasModifier(KeyEvent.META_CTRL_ON),
+        hasModifier(KeyEvent.META_ALT_ON),
+        hasModifier(KeyEvent.META_SHIFT_ON),
+        hasModifier(KeyEvent.META_SYM_ON),
+        hasModifier(KeyEvent.META_META_ON),
+        tag);
+  }
+
+  public static void printModifierKeyState(int state, String tag) {
+    Timber.d(
+        "\t<TrimeInput>\tkeyState() ctrl=%s, alt=%s, shift=%s, sym=%s, meta=%s, state=%d\t%s",
+        hasModifier(KeyEvent.META_CTRL_ON, state),
+        hasModifier(KeyEvent.META_ALT_ON, state),
+        hasModifier(KeyEvent.META_SHIFT_ON, state),
+        hasModifier(KeyEvent.META_SYM_ON, state),
+        hasModifier(KeyEvent.META_META_ON, state),
+        state,
+        tag);
   }
 
   public boolean isAlted() {
@@ -514,14 +559,16 @@ public class Keyboard {
     return hasModifier(KeyEvent.META_SHIFT_ON);
   }
 
-  public boolean isCtrled() {
-    return hasModifier(KeyEvent.META_CTRL_ON);
+  // 需要优化
+  public boolean needUpCase() {
+    if (mShiftKey != null) if (mShiftKey.isOn()) return true;
+    return hasModifier(KeyEvent.META_SHIFT_ON);
   }
 
   /**
    * 設定鍵盤的Shift鍵狀態
    *
-   * @param on 是否保持Shift按下狀態
+   * @param on 是否保持Shift按下狀態(锁定)
    * @param shifted 是否按下Shift
    * @return Shift鍵狀態是否改變
    */
@@ -531,9 +578,88 @@ public class Keyboard {
     return setModifier(KeyEvent.META_SHIFT_ON, on || shifted);
   }
 
+  /**
+   * 设定修饰键的状态
+   *
+   * @param on 是否锁定修饰键
+   * @param keycode 修饰键on的keyevent mask code
+   * @return
+   */
+  public boolean clikModifierKey(boolean on, int keycode) {
+    boolean keyDown = !hasModifier(keycode);
+    on = on & keyDown;
+    if (mShiftKey != null) mShiftKey.setOn(on);
+
+    if (keycode == KeyEvent.META_SHIFT_ON) {
+      mShiftKey.setOn(on);
+    } else if (keycode == KeyEvent.META_ALT_ON) {
+      mAltKey.setOn(on);
+    } else if (keycode == KeyEvent.META_CTRL_ON) {
+      mCtrlKey.setOn(on);
+    } else if (keycode == KeyEvent.META_META_ON) {
+      mMetaKey.setOn(on);
+    } else if (keycode == KeyEvent.KEYCODE_SYM) {
+      mSymKey.setOn(on);
+    }
+    return setModifier(keycode, on || keyDown);
+  }
+
+  public boolean setAltOn(boolean on, boolean keyDown) {
+    on = on & keyDown;
+    if (mAltKey != null) mAltKey.setOn(on);
+    return setModifier(KeyEvent.META_ALT_ON, on || keyDown);
+  }
+
+  public boolean setCtrlOn(boolean on, boolean keyDown) {
+    on = on & keyDown;
+    if (mCtrlKey != null) mCtrlKey.setOn(on);
+    return setModifier(KeyEvent.META_CTRL_ON, on || keyDown);
+  }
+
+  public boolean setSymOn(boolean on, boolean keyDown) {
+    on = on & keyDown;
+    if (mSymKey != null) mSymKey.setOn(on);
+    return setModifier(KeyEvent.META_SYM_ON, on || keyDown);
+  }
+
+  public boolean setMetaOn(boolean on, boolean keyDown) {
+    on = on & keyDown;
+    if (mMetaKey != null) mMetaKey.setOn(on);
+    return setModifier(KeyEvent.META_META_ON, on || keyDown);
+  }
+
+  //  public boolean setFunctionOn(boolean on, boolean keyDown) {
+  //    on = on & keyDown;
+  //    if (mFunctionKey != null) mFunctionKey.setOn(on);
+  //    return setModifier(KeyEvent.META_FUNCTION_ON, on || keyDown);
+  //  }
+
   public boolean resetShifted() {
     if (mShiftKey != null && !mShiftKey.isOn()) return setModifier(KeyEvent.META_SHIFT_ON, false);
     return false;
+  }
+
+  public boolean resetModifer() {
+    // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
+    mModifierState = 0;
+    return true;
+  }
+
+  public boolean refreshModifier() {
+    // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
+    boolean result = false;
+
+    if (mShiftKey != null && !mShiftKey.isOn())
+      result = result || setModifier(KeyEvent.META_SHIFT_ON, false);
+    if (mAltKey != null && !mAltKey.isOn())
+      result = result || setModifier(KeyEvent.META_ALT_ON, false);
+    if (mCtrlKey != null && !mCtrlKey.isOn())
+      result = result || setModifier(KeyEvent.META_CTRL_ON, false);
+    if (mMetaKey != null && !mMetaKey.isOn())
+      result = result || setModifier(KeyEvent.META_META_ON, false);
+    if (mSymKey != null && !mSymKey.isOn())
+      result = result || setModifier(KeyEvent.KEYCODE_SYM, false);
+    return result;
   }
 
   private void computeNearestNeighbors() {

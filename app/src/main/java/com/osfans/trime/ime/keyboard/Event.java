@@ -182,7 +182,7 @@ public class Event {
   @NonNull
   private String adjustCase(String s) {
     if (TextUtils.isEmpty(s)) return "";
-    if (s.length() == 1 && mKeyboard != null && mKeyboard.isShifted())
+    if (s.length() == 1 && mKeyboard != null && mKeyboard.needUpCase())
       s = s.toUpperCase(Locale.getDefault());
     else if (s.length() == 1
         && mKeyboard != null
@@ -200,7 +200,7 @@ public class Event {
     String s = "";
     if (!TextUtils.isEmpty(text)) s = text;
     else if (mKeyboard != null
-        && mKeyboard.isShifted()
+        && mKeyboard.needUpCase()
         && mask == 0
         && code >= KeyEvent.KEYCODE_A
         && code <= KeyEvent.KEYCODE_Z) s = label;
@@ -284,8 +284,20 @@ public class Event {
     if (hasModifier(mask, KeyEvent.META_SHIFT_ON)) m |= Rime.META_SHIFT_ON;
     if (hasModifier(mask, KeyEvent.META_CTRL_ON)) m |= Rime.META_CTRL_ON;
     if (hasModifier(mask, KeyEvent.META_ALT_ON)) m |= Rime.META_ALT_ON;
+    if (hasModifier(mask, KeyEvent.META_SYM_ON)) m |= Rime.META_SYM_ON;
+    if (hasModifier(mask, KeyEvent.META_META_ON)) m |= Rime.META_META_ON;
     if (mask == Rime.META_RELEASE_ON) m |= Rime.META_RELEASE_ON;
     return new int[] {i, m};
+  }
+
+  public boolean isMeta() {
+    int c = getCode();
+    return (c == KeyEvent.KEYCODE_META_LEFT || c == KeyEvent.KEYCODE_META_RIGHT);
+  }
+
+  public boolean isAlt() {
+    int c = getCode();
+    return (c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT);
   }
 
   private static final Map<String, Integer> masks =
@@ -294,6 +306,8 @@ public class Event {
           put("Shift", KeyEvent.META_SHIFT_ON);
           put("Control", KeyEvent.META_CTRL_ON);
           put("Alt", KeyEvent.META_ALT_ON);
+          put("Meta", KeyEvent.META_META_ON);
+          put("SYM", KeyEvent.META_SYM_ON);
         }
       };
 

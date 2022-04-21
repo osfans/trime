@@ -224,9 +224,17 @@ public class Rime {
     System.loadLibrary("rime_jni");
   }
 
+  /*
+  Android SDK包含了如下6个修饰键的状态，其中function键会被trime消费掉，因此只处理5个键
+  Android和librime对按键命名并不一致。读取可能有误。librime按键命名见如下链接，
+  https://github.com/rime/librime/blob/master/src/rime/key_table.cc
+   */
   public static int META_SHIFT_ON = get_modifier_by_name("Shift");
   public static int META_CTRL_ON = get_modifier_by_name("Control");
   public static int META_ALT_ON = get_modifier_by_name("Alt");
+  public static int META_SYM_ON = get_modifier_by_name("Super");
+  public static int META_META_ON = get_modifier_by_name("Meta");
+
   public static int META_RELEASE_ON = get_modifier_by_name("Release");
   private static boolean showSwitches = true;
   private static boolean showSwitchArrow = false;

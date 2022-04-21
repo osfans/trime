@@ -17,6 +17,8 @@
  */
 package com.osfans.trime.ime.keyboard;
 
+import static android.view.KeyEvent.isModifierKey;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -28,6 +30,7 @@ import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.YamlUtils;
 import java.util.List;
 import java.util.Map;
+import timber.log.Timber;
 
 /** {@link Keyboard 鍵盤}中的各個按鍵，包含單擊、長按、滑動等多種{@link Event 事件} */
 public class Key {
@@ -45,12 +48,12 @@ public class Key {
   public static final int[] KEY_STATE_PRESSED = {android.R.attr.state_pressed};
   public static final int[][] KEY_STATES =
       new int[][] {
-        KEY_STATE_PRESSED_ON,
-        KEY_STATE_PRESSED_OFF,
-        KEY_STATE_NORMAL_ON,
-        KEY_STATE_NORMAL_OFF,
-        KEY_STATE_PRESSED,
-        KEY_STATE_NORMAL
+        KEY_STATE_PRESSED_ON, // 0
+        KEY_STATE_PRESSED_OFF, // 1
+        KEY_STATE_NORMAL_ON, // 2
+        KEY_STATE_NORMAL_OFF, // 3
+        KEY_STATE_PRESSED, // 4
+        KEY_STATE_NORMAL // 5
       };
   public static List<String> androidKeys;
   public static Map<String, Map<String, ?>> presetKeys;
@@ -144,7 +147,7 @@ public class Key {
     } else if (composing == null && has_menu == null && paging == null) {
       send_bindings = false;
     }
-    if (isShift()) mKeyboard.setmShiftKey(this);
+    mKeyboard.setModiferKey(getCode(), this);
     key_text_size = YamlUtils.INSTANCE.getPixel(mk, "key_text_size", 0);
     symbol_text_size = YamlUtils.INSTANCE.getPixel(mk, "symbol_text_size", 0);
     key_text_color = Config.getColor(context, mk, "key_text_color");
@@ -423,6 +426,30 @@ public class Key {
     return xDist * xDist + yDist * yDist;
   }
 
+  // Trime把function键消费掉了，因此键盘只处理function键以外的修饰键
+  public boolean isTrimeModifierKey() {
+    return isTrimeModifierKey(getCode());
+  }
+
+  public static boolean isTrimeModifierKey(int keycode) {
+    if (keycode == KeyEvent.KEYCODE_FUNCTION) return false;
+    return isModifierKey(keycode);
+  }
+
+  public void printModifierKeyState(String invalidKey) {
+    if (isTrimeModifierKey())
+      Timber.d(
+          "\t<TrimeInput>\tkeyState() key=%s, isShifted=%s, on=%s, invalidKey=%s",
+          getLabel(), mKeyboard.hasModifier(getModifierKeyOnMask()), on, invalidKey);
+  }
+
+  public void printModifierKeyState() {
+    if (isTrimeModifierKey())
+      Timber.d(
+          "\t<TrimeInput>\tkeyState() key=%s, isShifted=%s, on=%s",
+          getLabel(), mKeyboard.hasModifier(getModifierKeyOnMask()), on);
+  }
+
   /**
    * Returns the drawable state for the key, based on the current state and type of the key.
    *
@@ -431,7 +458,10 @@ public class Key {
    */
   public int[] getCurrentDrawableState() {
     int[] states = KEY_STATE_NORMAL;
-    boolean isShifted = isShift() && mKeyboard.isShifted(); // 臨時大寫
+    boolean isShifted = isTrimeModifierKey() && mKeyboard.hasModifier(getModifierKeyOnMask());
+    // only for modiferKey debug
+    if (isTrimeModifierKey()) mKeyboard.printModifierKeyState("getCurrentDrawableState");
+
     if (isShifted || on) {
       if (pressed) {
         states = KEY_STATE_PRESSED_ON;
@@ -454,22 +484,60 @@ public class Key {
     return states;
   }
 
+  public int getModifierKeyOnMask() {
+    return getModifierKeyOnMask(getCode());
+  }
+
+  public int getModifierKeyOnMask(int keycode) {
+    if (keycode == KeyEvent.KEYCODE_SHIFT_LEFT || keycode == KeyEvent.KEYCODE_SHIFT_RIGHT)
+      return KeyEvent.META_SHIFT_ON;
+    if (keycode == KeyEvent.KEYCODE_CTRL_LEFT || keycode == KeyEvent.KEYCODE_CTRL_RIGHT)
+      return KeyEvent.META_CTRL_ON;
+    if (keycode == KeyEvent.KEYCODE_META_LEFT || keycode == KeyEvent.KEYCODE_META_RIGHT)
+      return KeyEvent.META_META_ON;
+    if (keycode == KeyEvent.KEYCODE_ALT_LEFT || keycode == KeyEvent.KEYCODE_ALT_RIGHT)
+      return KeyEvent.META_ALT_ON;
+    if (keycode == KeyEvent.KEYCODE_SYM) return KeyEvent.META_SYM_ON;
+    return 0;
+  }
+
   public boolean isShift() {
     int c = getCode();
     return (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT);
   }
 
+  public boolean isCtrl() {
+    int c = getCode();
+    return (c == KeyEvent.KEYCODE_CTRL_LEFT || c == KeyEvent.KEYCODE_CTRL_RIGHT);
+  }
+
+  public boolean isMeta() {
+    int c = getCode();
+    return (c == KeyEvent.KEYCODE_META_LEFT || c == KeyEvent.KEYCODE_META_RIGHT);
+  }
+
+  public boolean isAlt() {
+    int c = getCode();
+    return (c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT);
+  }
+
+  public boolean isSys() {
+    int c = getCode();
+    return (c == KeyEvent.KEYCODE_SYM);
+  }
+
   // shift键在点击时是否触发锁定
   public boolean isShiftLock() {
-    switch (getClick().getShiftLock()) {
-      case "long":
-        return false;
-      case "click":
-        return true;
-    }
+    String s = getClick().getShiftLock();
+    if ("long".equals(s)) return false;
+    if ("click".equals(s)) return true;
     return !Rime.isAsciiMode();
   }
 
+  /**
+   * @param type 同文按键模式（点击/长按/滑动）
+   * @return
+   */
   public boolean sendBindings(int type) {
     Event e = null;
     if (type > 0 && type <= EVENT_NUM) e = events[type];

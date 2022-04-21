@@ -14,6 +14,7 @@ import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.Key
+import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.setup.Config
@@ -290,15 +291,21 @@ class TextInputManager private constructor() :
     }
 
     override fun onRelease(keyEventCode: Int) {
+        Timber.d(
+            "\t<TrimeInput>\tonRelease() needSendUpRimeKey=" + needSendUpRimeKey + ", keyEventcode=" + keyEventCode +
+                ", Event.getRimeEvent=" + Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
+        )
         if (needSendUpRimeKey) {
             if (shouldUpdateRimeOption) {
                 Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
                 Rime.setOption("_horizontal", trime.imeConfig.getBoolean("horizontal"))
                 shouldUpdateRimeOption = false
             }
+            // todo 释放按键可能不对
             Rime.onKey(Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON))
             activeEditorInstance.commitRimeText()
         }
+        Timber.d("\t<TrimeInput>\tonRelease() finish")
     }
 
     // KeyboardEvent 处理软键盘事件
@@ -354,7 +361,8 @@ class TextInputManager private constructor() :
                 if (event.command == "liquid_keyboard") {
                     trime.selectLiquidKeyboard(arg)
                 } else {
-                    val textFromCommand = ShortcutUtils.call(trime, event.command, arg)
+                    val textFromCommand = ShortcutUtils
+                        .call(trime, event.command, arg)
                     if (textFromCommand != null) {
                         activeEditorInstance.commitText(textFromCommand)
                         trime.updateComposing()
@@ -378,6 +386,7 @@ class TextInputManager private constructor() :
     }
 
     override fun onKey(keyEventCode: Int, metaState: Int) {
+        printModifierKeyState(metaState, "keyEventCode=" + keyEventCode)
         if (trime.handleKey(keyEventCode, metaState)) return
         if (keyEventCode >= Key.getSymbolStart()) {
             needSendUpRimeKey = false

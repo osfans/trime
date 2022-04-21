@@ -845,7 +845,7 @@ public class Trime extends LifecycleInputMethodService {
     final int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_MENU) return false; // 不處理 Menu 鍵
     if (keyCode >= Key.getSymbolStart()) return false; // 只處理安卓標準按鍵
-    if (event.getRepeatCount() == 0 && KeyEvent.isModifierKey(keyCode)) {
+    if (event.getRepeatCount() == 0 && Key.isTrimeModifierKey(keyCode)) {
       boolean ret =
           onRimeKey(
               Event.getRimeEvent(
