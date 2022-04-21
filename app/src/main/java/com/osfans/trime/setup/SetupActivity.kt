@@ -69,7 +69,7 @@ class SetupActivity : FragmentActivity() {
                 nextButton.text =
                     getString(
                         if (position.isLastPage())
-                            R.string.busy_progress else R.string.setup__next
+                            R.string.setup__setting_up else R.string.setup__next
                     )
             }
         })
