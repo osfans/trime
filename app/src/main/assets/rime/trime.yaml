@@ -1040,6 +1040,7 @@ preset_keyboards:
   letter:
     __include: /preset_keyboards/default
     ascii_mode: 1
+    reset_ascii_mode: true  #显示键盘时重置为ascii_mode指定的状态
     lock: false
   qwerty0:
     name: 預設36鍵

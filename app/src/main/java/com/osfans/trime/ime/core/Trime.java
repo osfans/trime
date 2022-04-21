@@ -806,7 +806,7 @@ public class Trime extends LifecycleInputMethodService {
    * a sentence.
    */
   private void dispatchCapsStateToInputView() {
-    if ((isAutoCaps || Rime.isAsciiMode())
+    if ((isAutoCaps && Rime.isAsciiMode())
         && (mainKeyboardView != null && !mainKeyboardView.isCapsOn())) {
       mainKeyboardView.setShifted(false, activeEditorInstance.getCursorCapsMode() != 0);
     }

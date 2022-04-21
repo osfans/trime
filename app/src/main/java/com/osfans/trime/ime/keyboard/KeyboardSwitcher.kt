@@ -89,5 +89,9 @@ class KeyboardSwitcher {
         currentId = if (id.isValidId()) id else 0
     }
 
+    public fun getCurrentKeyboardName(): String {
+        return keyboardNames.get(currentId)
+    }
+
     private fun Int.isValidId() = this in keyboards.indices
 }

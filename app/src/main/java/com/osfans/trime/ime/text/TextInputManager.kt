@@ -230,6 +230,12 @@ class TextInputManager private constructor() :
             it.switchToKeyboard(keyboardType)
         }
         Rime.get(trime)
+
+        // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
+        // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。
+        if (shouldResetAsciiMode && keyboardSwitcher.currentKeyboard.isResetAsciiMode) {
+            tempAsciiMode = keyboardSwitcher.currentKeyboard.asciiMode
+        }
         tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
         isComposable = isComposable && !Rime.isEmpty()
         if (!trime.onEvaluateInputViewShown()) {

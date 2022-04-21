@@ -76,6 +76,8 @@ public class Keyboard {
   /** Keyboard mode, or zero, if none. */
   private int mAsciiMode;
 
+  private boolean resetAsciiMode;
+
   // Variables for pre-computing nearest keys.
   private String mLabelTransform;
   private int mCellWidth;
@@ -195,6 +197,7 @@ public class Keyboard {
     mAsciiMode = YamlUtils.INSTANCE.getInt(keyboardConfig, "ascii_mode", 1);
     if (mAsciiMode == 0)
       mAsciiKeyboard = YamlUtils.INSTANCE.getString(keyboardConfig, "ascii_keyboard", "");
+    resetAsciiMode = YamlUtils.INSTANCE.getBoolean(keyboardConfig, "reset_ascii_mode", false);
     mLock = YamlUtils.INSTANCE.getBoolean(keyboardConfig, "lock", false);
     int columns = YamlUtils.INSTANCE.getInt(keyboardConfig, "columns", 30);
     int defaultWidth =
@@ -586,6 +589,10 @@ public class Keyboard {
 
   public boolean getAsciiMode() {
     return mAsciiMode != 0;
+  }
+
+  public boolean isResetAsciiMode() {
+    return resetAsciiMode;
   }
 
   public String getAsciiKeyboard() {
