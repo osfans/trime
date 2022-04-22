@@ -17,7 +17,7 @@ jobs:
         run: script/cache-hash.sh
 
       - name: Fetch JNI cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: jni-cache
         with:
           path: "app/prebuilt"
