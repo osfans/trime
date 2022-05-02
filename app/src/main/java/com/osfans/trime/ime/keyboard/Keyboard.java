@@ -137,6 +137,8 @@ public class Keyboard {
     mKeys = new ArrayList<>();
     mComposingKeys = new ArrayList<>();
   }
+
+  // todo 把按下按键弹出的内容改为单独设计的view，而不是keyboard
   /**
    * Creates a blank keyboard from the given resource file and populates it with the specified
    * characters in left-to-right, top-to-bottom fashion, using the specified number of columns.
@@ -236,6 +238,15 @@ public class Keyboard {
     int[] newHeight = new int[0];
 
     if (keyboardHeight > 0) {
+      int mkeyboardHeight = YamlUtils.INSTANCE.getPixel(keyboardConfig, "keyboard_height", 0);
+      if (land) {
+        int mkeyBoardHeightLand =
+            YamlUtils.INSTANCE.getPixel(keyboardConfig, "keyboard_height_land", 0);
+        if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand;
+      }
+
+      if (mkeyboardHeight > 0) keyboardHeight = mkeyboardHeight;
+
       int rawSumHeight = 0;
       List<Integer> rawHeight = new ArrayList<>();
       for (Map<String, Object> mk : lm) {
