@@ -21,6 +21,7 @@ package com.osfans.trime.ime.core;
 import static android.graphics.Color.parseColor;
 
 import android.app.Dialog;
+import android.app.UiModeManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -111,6 +112,7 @@ public class Trime extends LifecycleInputMethodService {
     return Config.get(this);
   }
 
+  private boolean darkMode; // 当前键盘主题是否处于暗黑模式
   private KeyboardView mainKeyboardView; // 主軟鍵盤
   public KeyboardSwitcher keyboardSwitcher; // 键盘切换器
 
@@ -403,6 +405,21 @@ public class Trime extends LifecycleInputMethodService {
     Timber.d(methodName + "finish");
   }
 
+  /**
+   * 变更配置的暗黑模式开关
+   *
+   * @param darkMode 设置为暗黑模式
+   * @return 模式实际上是否有发生变更
+   */
+  public boolean setDarkMode(boolean darkMode) {
+    if (darkMode != this.darkMode) {
+      Timber.i("setDarkMode " + darkMode);
+      this.darkMode = darkMode;
+      return true;
+    }
+    return false;
+  }
+
   public void selectLiquidKeyboard(final int tabIndex) {
     final LinearLayout symbolInputView =
         inputRootBinding != null ? inputRootBinding.symbol.symbolInput : null;
@@ -563,6 +580,25 @@ public class Trime extends LifecycleInputMethodService {
     updateComposing(); // 切換主題時刷新候選
   }
 
+  public void initKeyboardDarkMode(boolean darkMode) {
+    if (getImeConfig().hasDarkLight()) {
+      getImeConfig().reset();
+      loadConfig();
+      getImeConfig().initCurrentColors(darkMode);
+      getImeConfig().setSoundFromColor();
+      if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
+      resetCandidate();
+      hideCompositionView();
+      resetKeyboard();
+
+      setNavBarColor();
+      textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
+      bindKeyboardToInputView();
+      // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
+      updateComposing(); // 切換主題時刷新候選
+    }
+  }
+
   @Override
   public void onDestroy() {
     if (mIntentReceiver != null) mIntentReceiver.unregisterReceiver(this);
@@ -712,6 +748,12 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
+    UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+    if (setDarkMode(uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES)) {
+      Timber.i("dark mode changed");
+      initKeyboardDarkMode(darkMode);
+    }
+
     Sound.resetProgress();
     for (EventListener listener : eventListeners) {
       if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
