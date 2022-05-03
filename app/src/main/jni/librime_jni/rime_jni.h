@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include "jni-utils.h"
+
+static GlobalRefSingleton *GlobalRef;
 
 #define TAG "Rime-JNI"
 #ifdef ANDROID

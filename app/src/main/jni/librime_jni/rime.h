@@ -6,7 +6,7 @@
 #define BUFSIZE 256
 
 #ifndef CLASSNAME
-#define CLASSNAME "com/osfans/trime/Rime"
+#define CLASSNAME "com/osfans/trime/core/Rime"
 #endif
 
 #ifndef APP_NAME

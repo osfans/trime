@@ -8,11 +8,15 @@ using std::string;
 
 // opencc
 
-jstring get_opencc_version(JNIEnv *env, jobject thiz) {
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_osfans_trime_core_Rime_get_1opencc_1version(JNIEnv *env, jclass thiz) {
   return newJstring(env, OPENCC_VERSION);
 }
 
-jstring opencc_convert(JNIEnv *env, jobject thiz, jstring line, jstring name) {
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_osfans_trime_core_Rime_opencc_1convert(JNIEnv *env, jclass thiz, jstring line, jstring name) {
   if (name == NULL) return line;
   const char* s = env->GetStringUTFChars(name, NULL);
   string str(s);
@@ -25,7 +29,9 @@ jstring opencc_convert(JNIEnv *env, jobject thiz, jstring line, jstring name) {
   return newJstring(env, s);
 }
 
-void opencc_convert_dictionary(JNIEnv *env, jobject thiz, jstring jinputFileName,
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_osfans_trime_core_Rime_opencc_1convert_1dictionary(JNIEnv *env, jclass thiz, jstring jinputFileName,
     jstring joutputFileName, jstring jformatFrom, jstring jformatTo) {
   const char* s = env->GetStringUTFChars(jinputFileName, NULL);
   string inputFileName(s);
