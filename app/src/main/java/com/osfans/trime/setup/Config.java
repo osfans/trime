@@ -790,6 +790,37 @@ public class Config {
     String scheme = getPrefs().getLooks().getSelectedColor();
     if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
+    Map<String, ?> color = (Map<String, ?>) presetColorSchemes.get(scheme);
+    if (color.containsKey("dark_scheme") || color.containsKey("light_scheme")) hasDarkLight = true;
+    return scheme;
+  }
+
+  private boolean hasDarkLight;
+
+  public boolean hasDarkLight() {
+    return hasDarkLight;
+  }
+
+  /**
+   * 获取暗黑模式/明亮模式下配色方案的名称
+   *
+   * @param darkMode 是否暗黑模式
+   * @return 配色方案名称
+   */
+  private String getColorSchemeName(boolean darkMode) {
+    String scheme = getPrefs().getLooks().getSelectedColor();
+    if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
+    if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
+    Map<String, ?> color = (Map<String, ?>) presetColorSchemes.get(scheme);
+    if (darkMode) {
+      if (color.containsKey("dark_scheme")) {
+        return (String) color.get("dark_scheme");
+      }
+    } else {
+      if (color.containsKey("light_scheme")) {
+        return (String) color.get("light_scheme");
+      }
+    }
     return scheme;
   }
 
@@ -1055,6 +1086,52 @@ public class Config {
     backgroundFolder = getString("background_folder");
     Timber.d(
         "initCurrentColors() colorID=%s themeName=%s schema_id=%s", colorID, themeName, schema_id);
+    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(colorID);
+    if (map == null) {
+      Timber.i("no colorID %s", colorID);
+      return;
+    }
+    getPrefs().getLooks().setSelectedColor(colorID);
+
+    for (Map.Entry<?, ?> entry : map.entrySet()) {
+      Object value = getColorRealValue(entry.getValue());
+      if (value != null) curcentColors.put(entry.getKey().toString(), value);
+    }
+
+    for (Map.Entry<?, ?> entry : fallbackColors.entrySet()) {
+      String key = entry.getKey().toString();
+      if (!curcentColors.containsKey(key)) {
+        Object o = map.get(key);
+        String fallbackKey = key;
+        List<String> fallbackKeys = new ArrayList<>();
+        while (o == null && fallbackColors.containsKey(fallbackKey)) {
+          fallbackKey = (String) fallbackColors.get(fallbackKey);
+          o = map.get(fallbackKey);
+          fallbackKeys.add(fallbackKey);
+          // 避免死循环
+          if (fallbackKeys.size() > 40) break;
+        }
+        if (o != null) {
+          Object value = getColorRealValue(o);
+          if (value != null) {
+            curcentColors.put(key, value);
+            for (String k : fallbackKeys) {
+              curcentColors.put(k, value);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 当切换暗黑模式时，刷新键盘配色方案
+  public void initCurrentColors(boolean darkMode) {
+    curcentColors.clear();
+    colorID = getColorSchemeName(darkMode);
+    backgroundFolder = getString("background_folder");
+    Timber.d(
+        "initCurrentColors() colorID=%s themeName=%s schema_id=%s darkMode=%s",
+        colorID, themeName, schema_id, darkMode);
     final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(colorID);
     if (map == null) {
       Timber.i("no colorID %s", colorID);

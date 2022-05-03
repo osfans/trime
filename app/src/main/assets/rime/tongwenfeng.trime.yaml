@@ -150,6 +150,7 @@ preset_color_schemes:
   default:
     name: "标准配色！"  #方案名称
     author: 风花絮 #作者信息
+    dark_scheme: steam
     back_color: *color2 #候选区背景状态栏
     candidate_separator_color: *color2 #候选分割背景
     candidate_text_color: *color1 #候选文本
@@ -676,6 +677,7 @@ preset_color_schemes:
   steam:
     name: "Steam"
     author: "Patricivs <ipatrickmac@me.com>"
+    light_scheme: default
     text_color: 0xff528ccd
     back_color: 0xff171614
     border_color: 0xff383635
@@ -1011,7 +1013,7 @@ preset_keyboards:
       - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
 
       - {click: Keyboard_number, long_click: Menu, width: 12.5, key_back_color: bgn, key_text_color: tgn}
-      - {click: Keyboard_bqrw, long_click: Theme_settings, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+      - {click: Keyboard_bqrw, long_click: Theme_settings, swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
       - {click: ',', label: '，', long_click: '<>{Left}', key_back_color: bh4, key_text_color: th4}
       - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
       - {click: '.', label: '。', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
