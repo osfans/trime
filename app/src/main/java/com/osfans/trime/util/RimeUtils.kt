@@ -3,7 +3,7 @@ package com.osfans.trime.util
 import android.content.Context
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
-import com.osfans.trime.Rime
+import com.osfans.trime.core.Rime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess

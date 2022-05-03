@@ -21,7 +21,7 @@ package com.osfans.trime.ime.keyboard;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import androidx.annotation.NonNull;
-import com.osfans.trime.Rime;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.YamlUtils;
 import java.util.HashMap;

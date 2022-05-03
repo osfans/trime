@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import androidx.annotation.NonNull;
-import com.osfans.trime.Rime;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.util.RimeUtils;
 import kotlin.Unit;
 import kotlinx.coroutines.BuildersKt;

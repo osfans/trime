@@ -60,7 +60,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
-import com.osfans.trime.Rime;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.clipboard.ClipboardDao;
 import com.osfans.trime.common.ViewUtils;
 import com.osfans.trime.databinding.CompositionRootBinding;

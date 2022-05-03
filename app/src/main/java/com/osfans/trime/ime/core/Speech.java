@@ -28,7 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import com.blankj.utilcode.util.ToastUtils;
 import com.osfans.trime.R;
-import com.osfans.trime.Rime;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.setup.Config;
 import java.util.ArrayList;
 import java.util.Arrays;

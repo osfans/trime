@@ -15,7 +15,7 @@ import android.util.SparseArray
 import android.view.KeyEvent
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.IntentUtils
-import com.osfans.trime.Rime
+import com.osfans.trime.core.Rime
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 import timber.log.Timber

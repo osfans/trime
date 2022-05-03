@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
-import com.osfans.trime.Rime
+import com.osfans.trime.core.Rime
 import com.osfans.trime.databinding.AboutActivityBinding
 import com.osfans.trime.util.AppVersionUtils.writeLibraryVersionToSummary
 

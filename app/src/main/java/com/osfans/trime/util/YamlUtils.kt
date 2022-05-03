@@ -2,7 +2,7 @@ package com.osfans.trime.util
 
 import android.util.TypedValue
 import com.blankj.utilcode.util.SizeUtils
-import com.osfans.trime.Rime
+import com.osfans.trime.core.Rime
 
 object YamlUtils {
 

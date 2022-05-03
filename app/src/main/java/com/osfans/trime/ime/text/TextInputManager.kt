@@ -5,7 +5,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import com.osfans.trime.Rime
+import com.osfans.trime.core.Rime
 import com.osfans.trime.common.startsWithAsciiChar
 import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.core.EditorInstance

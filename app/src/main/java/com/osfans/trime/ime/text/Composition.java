@@ -42,7 +42,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
-import com.osfans.trime.Rime;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.common.ViewUtils;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;

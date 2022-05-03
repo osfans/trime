@@ -7,7 +7,7 @@ import androidx.core.view.forEach
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
-import com.osfans.trime.Rime
+import com.osfans.trime.core.Rime
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SoundPickerDialog

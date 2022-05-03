@@ -35,7 +35,7 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.osfans.trime.Rime;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
