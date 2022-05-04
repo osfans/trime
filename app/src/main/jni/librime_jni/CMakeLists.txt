@@ -4,7 +4,6 @@ file(GLOB RIME_JNI_SOURCES
   key_table.cc
   levers.cc
   opencc.cc
-  rime.cc
   rime_jni.cc
 )
 add_library(rime_jni SHARED ${RIME_JNI_SOURCES})

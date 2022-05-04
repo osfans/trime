@@ -1,8 +1,8 @@
 #include <string>
-#include "opencc.h"
 #include <opencc/Common.hpp>
 #include <opencc/SimpleConverter.hpp>
 #include <opencc/DictConverter.hpp>
+#include "rime_jni.h"
 using namespace opencc;
 using std::string;
 
@@ -11,7 +11,7 @@ using std::string;
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_get_1opencc_1version(JNIEnv *env, jclass thiz) {
-  return newJstring(env, OPENCC_VERSION);
+  return env->NewStringUTF(OPENCC_VERSION);
 }
 
 extern "C"
@@ -26,7 +26,7 @@ Java_com_osfans_trime_core_Rime_opencc_1convert(JNIEnv *env, jclass thiz, jstrin
   const string& converted = converter.Convert(input);
   env->ReleaseStringUTFChars(line, input);
   s = converted.c_str();
-  return newJstring(env, s);
+  return env->NewStringUTF(s);
 }
 
 extern "C"

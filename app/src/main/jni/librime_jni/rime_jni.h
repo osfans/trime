@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <rime_api.h>
+#include <rime_levers_api.h>
 #include "jni-utils.h"
 
 static GlobalRefSingleton *GlobalRef;
