@@ -9,4 +9,8 @@
         app:iconSpaceReserved="false"
         android:title="@string/looks__selected_color_title"
         android:summary="@string/looks__selected_color_summary" />
+    <SwitchPreferenceCompat android:key="looks__auto_dark"
+        app:iconSpaceReserved="false"
+        android:title="@string/keyboard__auto_dark_title"
+        android:defaultValue="false"/>
 </PreferenceScreen>

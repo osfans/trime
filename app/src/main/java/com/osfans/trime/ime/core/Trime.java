@@ -748,10 +748,14 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
-    UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
-    if (setDarkMode(uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES)) {
-      Timber.i("dark mode changed");
-      initKeyboardDarkMode(darkMode);
+    if (getPrefs().getLooks().getAutoDark()) {
+      UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+      if (setDarkMode(uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES)) {
+        Timber.i("dark mode changed");
+        initKeyboardDarkMode(darkMode);
+      } else Timber.i("dark mode not changed");
+    } else {
+      Timber.i("auto dark off");
     }
 
     Sound.resetProgress();

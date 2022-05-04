@@ -248,6 +248,7 @@ class Preferences(
         companion object {
             const val SELECTED_THEME = "looks__selected_theme"
             const val SELECTED_COLOR = "looks__selected_color_scheme"
+            const val AUTO_DARK = "looks__auto_dark"
         }
         var selectedTheme: String
             get() = prefs.getPref(SELECTED_THEME, "trime")
@@ -255,6 +256,9 @@ class Preferences(
         var selectedColor: String
             get() = prefs.getPref(SELECTED_COLOR, "default")
             set(v) = prefs.setPref(SELECTED_COLOR, v)
+        var autoDark: Boolean = false
+            get() = prefs.getPref(AUTO_DARK, false)
+            private set
     }
 
     /**
