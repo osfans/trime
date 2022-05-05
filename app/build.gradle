@@ -95,7 +95,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.1.2"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.fragment:fragment-ktx:1.4.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "com.google.android.flexbox:flexbox:3.0.0"
