@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
@@ -27,7 +28,6 @@ import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.setup.SetupActivity
-import com.osfans.trime.util.AndroidVersion
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
 import kotlinx.coroutines.CoroutineScope
@@ -200,7 +200,7 @@ class PrefMainActivity :
     }
 
     private fun requestExternalStoragePermission() {
-        if (AndroidVersion.ATLEAST_M) {
+        if (VERSION.SDK_INT >= VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
@@ -240,7 +240,7 @@ class PrefMainActivity :
     }
 
     private fun requestAlertWindowPermission() {
-        if (AndroidVersion.ATLEAST_P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
+        if (VERSION.SDK_INT >= VERSION_CODES.P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
             if (!Settings.canDrawOverlays(this)) { // 事先说明需要权限的理由
                 AlertDialog.Builder(this)
                     .setCancelable(true)
