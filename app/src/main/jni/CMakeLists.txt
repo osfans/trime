@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.10.0)
-project(jni)
+
+project(trime-lib VERSION 3.0.0)
 
 set(ANDROID_STL c++_shared)
 set(CMAKE_CXX_STANDARD 14)
