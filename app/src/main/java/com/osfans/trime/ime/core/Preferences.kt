@@ -3,12 +3,14 @@ package com.osfans.trime.ime.core
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Environment
+import androidx.core.os.EnvironmentCompat
 import androidx.core.os.UserManagerCompat
 import androidx.preference.PreferenceManager
-import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
+import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
 
 /**
@@ -294,13 +296,13 @@ class Preferences(
             const val SYNC_BACKGROUND_ENABLED = "conf__sync_background"
             const val LAST_SYNC_STATUS = "conf__last_sync_status"
             const val LAST_SYNC_TIME = "conf__last_sync_time"
-            val SDCARD_PATH_PREFIX: String = PathUtils.getExternalStoragePath()
+            val EXTERNAL_PATH_PREFIX: String = appContext.getExternalFilesDir(null)!!.absolutePath
         }
         var sharedDataDir: String
-            get() = prefs.getPref(SHARED_DATA_DIR, "$SDCARD_PATH_PREFIX/rime")
+            get() = prefs.getPref(SHARED_DATA_DIR, "$EXTERNAL_PATH_PREFIX/rime")
             set(v) = prefs.setPref(SHARED_DATA_DIR, v)
         var userDataDir: String
-            get() = prefs.getPref(USER_DATA_DIR, "$SDCARD_PATH_PREFIX/rime")
+            get() = prefs.getPref(USER_DATA_DIR, "$EXTERNAL_PATH_PREFIX/rime")
             set(v) = prefs.setPref(USER_DATA_DIR, v)
         var syncBackgroundEnabled: Boolean
             get() = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)

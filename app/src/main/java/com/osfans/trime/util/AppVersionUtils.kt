@@ -2,7 +2,7 @@ package com.osfans.trime.util
 
 import android.net.Uri
 import androidx.preference.Preference
-import com.blankj.utilcode.util.AppUtils
+import com.osfans.trime.BuildConfig
 import com.osfans.trime.ime.core.Preferences
 
 object AppVersionUtils {
@@ -13,7 +13,7 @@ object AppVersionUtils {
      * @param prefs the [Preferences] instance.
      */
     fun isDifferentVersion(prefs: Preferences): Boolean {
-        val currentVersionName = AppUtils.getAppVersionName()
+        val currentVersionName = BuildConfig.VERSION_NAME
         val lastVersionName = prefs.general.lastVersionName
         return !currentVersionName.contentEquals(lastVersionName).also {
             prefs.general.lastVersionName = currentVersionName
