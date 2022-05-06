@@ -22,21 +22,18 @@ JNI_OnLoad(JavaVM* jvm, void* reserved)
 static jobject rimeConfigValueToJObject(JNIEnv *env, RimeConfig* config, const char* key);
 static RimeSessionId activated_session_id = 0;
 
-void on_message(void* context_object,
-                RimeSessionId session_id,
-                const char* message_type,
-                const char* message_value) {
-    if (activated_session_id == 0) return;
-    auto env = GlobalRef->AttachEnv();
-    env->CallStaticVoidMethod(GlobalRef->Rime, GlobalRef->OnMessage,
-                              *JString(env, message_type),
-                              *JString(env, message_value));
-}
-
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_set_1notification_1handler(JNIEnv *env, jclass /* thiz */) { //TODO
-    RimeSetNotificationHandler(&on_message, GlobalRef->jvm);
+    auto handler = [](void *context_object, RimeSessionId session_id,
+                      const char *message_type, const char *message_value) {
+        if (activated_session_id == 0) return;
+        auto env = GlobalRef->AttachEnv();
+        env->CallStaticVoidMethod(GlobalRef->Rime, GlobalRef->HandleRimeNotification,
+                                  *JString(env, message_type),
+                                  *JString(env, message_value));
+    };
+    RimeSetNotificationHandler(handler, GlobalRef->jvm);
 }
 
 void init_traits(JNIEnv *env, jstring shared_data_dir, jstring user_data_dir, void (*func)(RimeTraits *)) {

@@ -74,7 +74,7 @@ public:
     jmethodID BooleanInit;
 
     jclass Rime;
-    jmethodID OnMessage;
+    jmethodID HandleRimeNotification;
 
     jclass RimeComposition;
     jfieldID RimeCompositionLength;
@@ -134,7 +134,7 @@ public:
         BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");
 
         Rime = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime")));
-        OnMessage = env->GetStaticMethodID(Rime, "onMessage", "(Ljava/lang/String;Ljava/lang/String;)V");
+        HandleRimeNotification = env->GetStaticMethodID(Rime, "handleRimeNotification", "(Ljava/lang/String;Ljava/lang/String;)V");
 
         RimeComposition = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeComposition")));
         RimeCompositionLength = env->GetFieldID(RimeComposition, "length", "I");

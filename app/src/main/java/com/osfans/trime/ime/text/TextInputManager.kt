@@ -266,7 +266,7 @@ class TextInputManager private constructor() :
                 keyboardSwitcher.switchToKeyboard(keyboard)
                 trime.bindKeyboardToInputView()
             } else if (option.startsWith("_key_") && option.length > 5 && value) {
-                shouldUpdateRimeOption = false // 防止在 onMessage 中 setOption
+                shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
                 val key = option.substring(5)
                 onEvent(Event(key))
                 shouldUpdateRimeOption = true
@@ -327,7 +327,7 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                 keyboardSwitcher.switchToKeyboard(event.select)
-                /** Set ascii mode according to keyboard's settings, can not place into [Rime.onMessage] */
+                /** Set ascii mode according to keyboard's settings, can not place into [Rime.handleRimeNotification] */
                 Rime.setOption("ascii_mode", keyboardSwitcher.asciiMode)
                 trime.bindKeyboardToInputView()
                 trime.updateComposing()

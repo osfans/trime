@@ -539,22 +539,21 @@ public class Rime {
     getContexts();
   }
 
-  public static void onMessage(String message_type, String message_value) {
+  public static void handleRimeNotification(String message_type, String message_value) {
     mOnMessage = true;
-    Timber.i("message: [%s] %s", message_type, message_value);
+    final RimeEvent event = RimeEvent.create(message_type, message_value);
+    //Timber.i("message: [%s] %s", message_type, message_value);
+    Timber.i("Notification: %s", event);
     final Trime trime = Trime.getService();
-    switch (message_type) {
-      case "schema":
-        initSchema();
-        trime.initKeyboard();
-        break;
-      case "option":
-        getStatus();
-        getContexts(); // 切換中英文、簡繁體時更新候選
-        final boolean value = !message_value.startsWith("!");
-        final String option = message_value.substring(value ? 0 : 1);
-        trime.textInputManager.onOptionChanged(option, value);
-        break;
+    if (event instanceof RimeEvent.SchemaEvent) {
+      initSchema();
+      trime.initKeyboard();
+    } else if (event instanceof RimeEvent.OptionEvent) {
+      getStatus();
+      getContexts(); // 切換中英文、簡繁體時更新候選
+      final boolean value = !message_value.startsWith("!");
+      final String option = message_value.substring(value ? 0 : 1);
+      trime.textInputManager.onOptionChanged(option, value);
     }
     mOnMessage = false;
   }
