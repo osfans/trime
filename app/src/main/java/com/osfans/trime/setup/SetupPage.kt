@@ -2,7 +2,7 @@ package com.osfans.trime.setup
 
 import android.content.Context
 import com.osfans.trime.R
-import com.osfans.trime.common.InputMethodUtils
+import com.osfans.trime.util.InputMethodUtils
 
 enum class SetupPage {
     Enable, Select;
