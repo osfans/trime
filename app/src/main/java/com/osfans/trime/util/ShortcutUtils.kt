@@ -34,6 +34,7 @@ object ShortcutUtils {
             "clipboard" -> return pasteFromClipboard(context)
             "date" -> return getDate(option)
             "run" -> startIntent(option)
+            "share_text" -> Trime.getService().shareText()
             "liquid_keyboard" -> Trime.getService().selectLiquidKeyboard(option)
             else -> startIntent(command, option)
         }

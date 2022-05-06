@@ -360,6 +360,8 @@ class TextInputManager private constructor() :
                 )
                 if (event.command == "liquid_keyboard") {
                     trime.selectLiquidKeyboard(arg)
+                } else if (event.command == "paste_by_char") {
+                    trime.pasteByChar()
                 } else {
                     val textFromCommand = ShortcutUtils
                         .call(trime, event.command, arg)
@@ -441,12 +443,11 @@ class TextInputManager private constructor() :
                 Rime.toggleOption(index)
                 trime.updateComposing()
             }
-        } else if (prefs.other.clickCandidateAndCommit || index > 9) {
+        } else if (prefs.keyboard.hockCandidate || index > 9) {
             if (Rime.selectCandidate(index)) {
                 activeEditorInstance.commitRimeText()
             }
         } else if (index == 9) {
-
             trime.handleKey(KeyEvent.KEYCODE_0, 0)
         } else {
             trime.handleKey(KeyEvent.KEYCODE_1 + index, 0)

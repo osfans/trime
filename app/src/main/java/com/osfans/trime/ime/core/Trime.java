@@ -48,6 +48,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
@@ -452,6 +454,17 @@ public class Trime extends LifecycleInputMethodService {
   public void selectLiquidKeyboard(@NonNull String name) {
     if (name.matches("\\d+")) selectLiquidKeyboard(Integer.parseInt(name));
     else selectLiquidKeyboard(TabManager.getTagIndex(name));
+  }
+
+  public void pasteByChar() {
+    final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+    final ClipData clipData = clipBoard.getPrimaryClip();
+
+    final ClipData.Item item = clipData.getItemAt(0);
+    if (item == null) return;
+
+    final String text = item.coerceToText(self).toString();
+    commitTextByChar(text);
   }
 
   public void invalidate() {
@@ -866,6 +879,12 @@ public class Trime extends LifecycleInputMethodService {
     activeEditorInstance.commitText(text, true);
   }
 
+  public void commitTextByChar(String text) {
+    for (int i = 1; i < text.length(); i++) {
+      if (!activeEditorInstance.commitText(text.substring(i - 1, i))) break;
+    }
+  }
+
   /**
    * 如果爲{@link KeyEvent#KEYCODE_BACK Back鍵}，則隱藏鍵盤
    *
@@ -940,6 +959,12 @@ public class Trime extends LifecycleInputMethodService {
     } else if (keyCode == KeyEvent.KEYCODE_BACK) {
       keyCode = KeyEvent.KEYCODE_ESCAPE; // 返回鍵清屏
     }
+    if (event.getAction() == KeyEvent.ACTION_DOWN
+        && event.isCtrlPressed()
+        && event.getRepeatCount() == 0
+        && !KeyEvent.isModifierKey(keyCode)) {
+      if (hookKeyboard(keyCode, event.getMetaState())) return true;
+    }
 
     final int unicodeChar = event.getUnicodeChar();
     final String s = String.valueOf((char) unicodeChar);
@@ -1004,6 +1029,8 @@ public class Trime extends LifecycleInputMethodService {
       Timber.d(
           "\t<TrimeInput>\thandleKey()\trimeProcess, keycode=%d, metaState=%d",
           keyEventCode, metaState);
+    } else if (hookKeyboard(keyEventCode, metaState)) {
+      Timber.d("\t<TrimeInput>\thandleKey()\thookKeyboard, keycode=%d", keyEventCode);
     } else if (performEnter(keyEventCode) || handleBack(keyEventCode)) {
       // 处理返回键（隐藏软键盘）和回车键（换行）
       // todo 确认是否有必要单独处理回车键？是否需要把back和escape全部占用？
@@ -1019,6 +1046,80 @@ public class Trime extends LifecycleInputMethodService {
       return false;
     }
     return true;
+  }
+
+  public boolean shareText() {
+    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+      final @Nullable InputConnection ic = getCurrentInputConnection();
+      if (ic == null) return false;
+      CharSequence cs = ic.getSelectedText(0);
+      if (cs == null) ic.performContextMenuAction(android.R.id.selectAll);
+      return ic.performContextMenuAction(android.R.id.shareText);
+    }
+    return false;
+  }
+
+  private boolean hookKeyboard(int code, int mask) { // 編輯操作
+    final @Nullable InputConnection ic = getCurrentInputConnection();
+    if (ic == null) return false;
+    if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
+
+      if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        if (getPrefs().getKeyboard().getHockCtrlZY()) {
+          switch (code) {
+            case KeyEvent.KEYCODE_Y:
+              return ic.performContextMenuAction(android.R.id.redo);
+            case KeyEvent.KEYCODE_Z:
+              return ic.performContextMenuAction(android.R.id.undo);
+          }
+        }
+      }
+      switch (code) {
+        case KeyEvent.KEYCODE_A:
+          if (getPrefs().getKeyboard().getHockCtrlA())
+            return ic.performContextMenuAction(android.R.id.selectAll);
+          return false;
+        case KeyEvent.KEYCODE_X:
+          if (getPrefs().getKeyboard().getHockCtrlCV())
+            return ic.performContextMenuAction(android.R.id.cut);
+          return false;
+        case KeyEvent.KEYCODE_C:
+          if (getPrefs().getKeyboard().getHockCtrlCV())
+            return ic.performContextMenuAction(android.R.id.copy);
+          return false;
+        case KeyEvent.KEYCODE_V:
+          if (getPrefs().getKeyboard().getHockCtrlCV())
+            return ic.performContextMenuAction(android.R.id.paste);
+          return false;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+          if (getPrefs().getKeyboard().getHockCtrlLR()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et != null) {
+              int move_to =
+                  StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
+              ic.setSelection(move_to, move_to);
+              return true;
+            }
+            break;
+          }
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+          if (getPrefs().getKeyboard().getHockCtrlLR()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et != null) {
+              int move_to =
+                  StringUtils.INSTANCE.findPrevSection(et.text, et.startOffset + et.selectionStart);
+              ic.setSelection(move_to, move_to);
+              return true;
+            }
+            break;
+          }
+      }
+    }
+    return false;
   }
 
   /** 獲得當前漢字：候選字、選中字、剛上屏字/光標前字/光標前所有字、光標後所有字 */

@@ -44,6 +44,13 @@ class EditorInstance(private val ims: InputMethodService) {
         return true
     }
 
+    // 直接commit不做任何处理
+    fun commitText(text: CharSequence): Boolean {
+        val ic = inputConnection ?: return false
+        ic.commitText(text, 1)
+        return true
+    }
+
     /**
      * Commits the text got from Rime.
      */

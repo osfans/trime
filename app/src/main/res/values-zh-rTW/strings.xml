@@ -154,10 +154,9 @@
     <string name="about__support">支援</string>
     <string name="about__used_libraries">第三方開源軟體庫</string>
     <string name="about__used_library_dialog_title">同文輸入法 | 開源軟體庫</string>
-    <string name="other__selection_sense_title">使用 Ctrl+Left / Ctrl+Right 快速移動遊標</string>
     <string name="pref__system_default">系統預設</string>
     <string name="keyboard__key_swipe_travel_title">觸發滑動手勢的最短距離</string>
-    <string name="other__click_candidate_and_commit">點擊候選詞時直接上屏</string>
+    <string name="keyboard__hook_candidate">點擊候選詞</string>
     <string name="trime_app_slogan">擊響中文之韻</string>
     <string name="external_storage_access_required">同文輸入法需要儲存許可權以部署或讀取方案和配置，點選“確定”前往授權。</string>
     <string name="external_storage_permission_not_available">儲存許可權不可用</string>
@@ -184,4 +183,12 @@
     <string name="setup__skip_hint_yes">好的，謝謝</string>
     <string name="setup__skip_hint_no">不，我想留在這兒</string>
     <string name="keyboard__auto_dark_title">自動切換暗黑/明亮配色方案</string>
+    <string name="pref_keyboard__hook">攔截事件</string>
+    <string name="keyboard__hook_ctrl_a">攔截 Ctrl+A</string>
+    <string name="keyboard__hook_ctrl_cv">攔截 Ctrl+C/V/X</string>
+    <string name="keyboard__hook_ctrl_lr">攔截 Ctrl+Left/Right</string>
+    <string name="keyboard__hook_ctrl_zy">攔截 Ctrl+Z/Y</string>
+    <string name="pref_keyboard__hook_summary">事件不發送給被編輯的 App 及 librime</string>
+    <string name="keyboard__hook_candidate_on">直接上屏候選詞</string>
+    <string name="keyboard__hook_candidate_off">發送數字鍵模擬鍵盤錄入</string>
 </resources>

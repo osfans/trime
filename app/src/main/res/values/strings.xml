@@ -157,7 +157,7 @@
     <string name="other__selection_sense_title">Use Ctrl+Left/Right to move the cursor</string>
     <string name="pref__system_default">System Default</string>
     <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
-    <string name="other__click_candidate_and_commit">Click candidate and commit directly</string>
+    <string name="keyboard__hook_candidate">Click candidate</string>
     <string name="trime_app_slogan">Trimes with Your Keystrokes</string>
     <string name="external_storage_access_required">Trime needs to access external storage to deploy or read schemas and config, tap OK to grant the permission.</string>
     <string name="external_storage_permission_not_available">External storage permission is not available</string>
@@ -184,4 +184,12 @@
     <string name="setup__skip_hint_yes">OK, thanks</string>
     <string name="setup__skip_hint_no">No, please leave me here</string>
     <string name="keyboard__auto_dark_title">Auto change dark/light color scheme</string>
+    <string name="pref_keyboard__hook">Hook</string>
+    <string name="keyboard__hook_ctrl_a">Hook Ctrl+A</string>
+    <string name="keyboard__hook_ctrl_cv">Hook Ctrl+C/V/X</string>
+    <string name="keyboard__hook_ctrl_lr">Hook Ctrl+Left/Right</string>
+    <string name="keyboard__hook_ctrl_zy">Hook Ctrl+Z/Y</string>
+    <string name="pref_keyboard__hook_summary">Not handled by the App being edited or librime</string>
+    <string name="keyboard__hook_candidate_on">Commit directly</string>
+    <string name="keyboard__hook_candidate_off">Send number key to librime</string>
 </resources>

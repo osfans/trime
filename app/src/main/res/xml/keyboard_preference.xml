@@ -4,44 +4,86 @@
     android:key="pref_keyboard"
     android:title="@string/settings__keyboard_preferences_title">
 
-    <PreferenceCategory app:iconSpaceReserved="false"
-        app:title="@string/pref_keyboard__function"
-        app:key="settings__keyboard_function">
-        <ListPreference android:key="keyboard__inline_preedit"
-            app:iconSpaceReserved="false"
-            android:title="@string/keyboard__inline_preedit_title"
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="settings__keyboard_function"
+        app:title="@string/pref_keyboard__function">
+        <ListPreference
+            android:defaultValue="preview"
             android:entries="@array/keyboard__inline_entries"
             android:entryValues="@array/keyboard__inline_values"
-            android:defaultValue="preview"
-            app:useSimpleSummaryProvider="true"/>
-        <ListPreference android:key="keyboard__fullscreen_mode"
+            android:key="keyboard__inline_preedit"
+            android:title="@string/keyboard__inline_preedit_title"
             app:iconSpaceReserved="false"
-            android:title="@string/keyboard__fullscreen_mode_title"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            android:defaultValue="auto_show"
             android:entries="@array/keyboard__fullscreen_mode_entries"
             android:entryValues="@array/keyboard__fullscreen_mode_values"
-            android:defaultValue="auto_show"
-            app:useSimpleSummaryProvider="true"/>
-        <SwitchPreferenceCompat android:key="keyboard__soft_cursor"
+            android:key="keyboard__fullscreen_mode"
+            android:title="@string/keyboard__fullscreen_mode_title"
             app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="keyboard__soft_cursor"
             android:title="@string/keyboard__soft_cursor_title"
-            android:defaultValue="true"/>
-        <SwitchPreferenceCompat android:key="keyboard__show_window"
-            app:iconSpaceReserved="false"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="keyboard__show_window"
             android:title="@string/keyboard__show_window_title"
-            android:defaultValue="true"/>
-        <SwitchPreferenceCompat android:key="keyboard__show_key_popup"
-            app:iconSpaceReserved="false"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="keyboard__show_key_popup"
             android:title="@string/keyboard__show_key_popup_title"
-            android:defaultValue="false"/>
-        <SwitchPreferenceCompat android:key="keyboard__show_switches"
-            app:iconSpaceReserved="false"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="keyboard__show_switches"
             android:title="@string/keyboard__show_switches_title"
-            android:defaultValue="true" />
-        <SwitchPreferenceCompat android:key="keyboard__show_switch_arrow"
-            app:iconSpaceReserved="false"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="keyboard__show_switch_arrow"
             android:title="@string/keyboard__show_switche_arrow_title"
-            android:defaultValue="true" />
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="settings__keyboard_hook"
+        app:title="@string/pref_keyboard__hook"
+        app:summary="@string/pref_keyboard__hook_summary"
+        >
+
+        <SwitchPreferenceCompat android:key="keyboard__hook_candidate"
+            app:iconSpaceReserved="false"
+            android:title="@string/keyboard__hook_candidate"
+            android:summaryOn="@string/keyboard__hook_candidate_on"
+            android:summaryOff="@string/keyboard__hook_candidate_off"
+            />
+
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_ctrl_lr"
+            android:title="@string/keyboard__hook_ctrl_lr"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_ctrl_a"
+            android:title="@string/keyboard__hook_ctrl_a"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_ctrl_cv"
+            android:title="@string/keyboard__hook_ctrl_cv"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_ctrl_zy"
+            android:title="@string/keyboard__hook_ctrl_zy"
+            app:iconSpaceReserved="false" />
+
+          </PreferenceCategory>
 
     <PreferenceCategory app:iconSpaceReserved="false"
         app:title="@string/pref_keyboard__effect"

@@ -170,6 +170,12 @@ class Preferences(
             const val SWITCH_ARROW_ENABLED = "keyboard__show_switch_arrow"
             const val FULLSCREEN_MODE = "keyboard__fullscreen_mode"
 
+            const val HOOK_CANDIDATE = "keyboard__hook_candidate"
+            const val HOOK_CTRL_A = "keyboard__hook_ctrl_a"
+            const val HOOK_CTRL_CV = "keyboard__hook_ctrl_cv"
+            const val HOOK_CTRL_LR = "keyboard__hook_ctrl_lr"
+            const val HOOK_CTRL_ZY = "keyboard__hook_ctrl_zy"
+
             const val SOUND_ENABLED = "keyboard__key_sound"
             const val SOUND_VOLUME = "keyboard__key_sound_volume"
             const val SOUND_PACKAGE = "keyboard__key_sound_package"
@@ -206,6 +212,23 @@ class Preferences(
         var switchArrowEnabled: Boolean = false
             get() = prefs.getPref(SWITCH_ARROW_ENABLED, true)
             private set
+
+        var hockCandidate: Boolean = false
+            get() = prefs.getPref(HOOK_CANDIDATE, false)
+            private set
+        var hockCtrlA: Boolean = false
+            get() = prefs.getPref(HOOK_CTRL_A, false)
+            private set
+        var hockCtrlCV: Boolean = false
+            get() = prefs.getPref(HOOK_CTRL_CV, false)
+            private set
+        var hockCtrlLR: Boolean = false
+            get() = prefs.getPref(HOOK_CTRL_LR, false)
+            private set
+        var hockCtrlZY: Boolean = false
+            get() = prefs.getPref(HOOK_CTRL_ZY, false)
+            private set
+
         var soundEnabled: Boolean = false
             get() = prefs.getPref(SOUND_ENABLED, false)
             private set
@@ -299,8 +322,6 @@ class Preferences(
             const val SHOW_APP_ICON = "other__show_app_icon"
             const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
             const val DESTROY_ON_QUIT = "other__destroy_on_quit"
-            const val SELECTION_SENSE = "other__selection_sense"
-            const val CLICK_CANDIDATE_AND_COMMIT = "other__click_candidate_and_commit"
             const val CLIPBOARD_COMPARE_RULES = "other__clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "other__clipboard_output"
             const val DRAFT_OUTPUT_RULES = "other__draft_output"
@@ -313,12 +334,6 @@ class Preferences(
         var showAppIcon: Boolean
             get() = prefs.getPref(SHOW_APP_ICON, true)
             set(v) = prefs.setPref(SHOW_APP_ICON, v)
-        var selectionSense: Boolean
-            get() = prefs.getPref(SELECTION_SENSE, true)
-            set(v) = prefs.setPref(SELECTION_SENSE, v)
-        var clickCandidateAndCommit: Boolean
-            get() = prefs.getPref(CLICK_CANDIDATE_AND_COMMIT, true)
-            set(v) = prefs.setPref(CLICK_CANDIDATE_AND_COMMIT, v)
         var showStatusBarIcon: Boolean = false
             get() = prefs.getPref(SHOW_STATUS_BAR_ICON, false)
             private set
