@@ -113,7 +113,7 @@ object ShortcutUtils {
         }
     }
 
-    private fun pasteFromClipboard(context: Context): CharSequence? {
+    fun pasteFromClipboard(context: Context): CharSequence? {
         val systemClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val systemPrimaryClip = systemClipboardManager.getPrimaryClip()
         val clipItem = systemPrimaryClip?.getItemAt(0)

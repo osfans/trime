@@ -1080,16 +1080,44 @@ public class Trime extends LifecycleInputMethodService {
             return ic.performContextMenuAction(android.R.id.selectAll);
           return false;
         case KeyEvent.KEYCODE_X:
-          if (getPrefs().getKeyboard().getHockCtrlCV())
-            return ic.performContextMenuAction(android.R.id.cut);
+          if (getPrefs().getKeyboard().getHockCtrlCV()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et != null) {
+              if (et.selectionEnd - et.selectionStart > 0)
+                return ic.performContextMenuAction(android.R.id.cut);
+            }
+          }
+          Timber.i("hookKeyboard cut fail");
           return false;
         case KeyEvent.KEYCODE_C:
-          if (getPrefs().getKeyboard().getHockCtrlCV())
-            return ic.performContextMenuAction(android.R.id.copy);
+          if (getPrefs().getKeyboard().getHockCtrlCV()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et != null) {
+              if (et.selectionEnd - et.selectionStart > 0)
+                return ic.performContextMenuAction(android.R.id.copy);
+            }
+          }
+          Timber.i("hookKeyboard copy fail");
           return false;
         case KeyEvent.KEYCODE_V:
-          if (getPrefs().getKeyboard().getHockCtrlCV())
-            return ic.performContextMenuAction(android.R.id.paste);
+          if (getPrefs().getKeyboard().getHockCtrlCV()) {
+            ExtractedTextRequest etr = new ExtractedTextRequest();
+            etr.token = 0;
+            ExtractedText et = ic.getExtractedText(etr, 0);
+            if (et == null) {
+              Timber.d("hookKeyboard paste, et == null, try commitText");
+              if (ic.commitText(ShortcutUtils.INSTANCE.pasteFromClipboard(self), 1)) {
+                return true;
+              }
+            } else if (ic.performContextMenuAction(android.R.id.paste)) {
+              return true;
+            }
+            Timber.w("hookKeyboard paste fail");
+          }
           return false;
         case KeyEvent.KEYCODE_DPAD_RIGHT:
           if (getPrefs().getKeyboard().getHockCtrlLR()) {
