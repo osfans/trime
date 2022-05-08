@@ -7,7 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.setup.Config
+import com.osfans.trime.data.Config
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
 class ResetAssetsDialog(context: Context) {

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime.setup;
+package com.osfans.trime.data;
 
 import android.content.Context;
 import android.content.res.AssetManager;

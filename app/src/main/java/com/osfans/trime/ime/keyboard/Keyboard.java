@@ -24,7 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import androidx.annotation.NonNull;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.util.ConfigGetter;
 import java.util.ArrayList;
 import java.util.List;

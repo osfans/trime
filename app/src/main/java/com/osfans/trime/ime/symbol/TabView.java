@@ -32,7 +32,7 @@ import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.util.GraphicUtils;
 import java.util.ArrayList;
 import timber.log.Timber;

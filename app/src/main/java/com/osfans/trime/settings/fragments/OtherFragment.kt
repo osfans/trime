@@ -13,7 +13,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.ime.core.Preferences
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.setup.Config
+import com.osfans.trime.data.Config
 
 class OtherFragment :
     PreferenceFragmentCompat(),

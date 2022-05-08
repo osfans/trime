@@ -29,7 +29,7 @@ import androidx.annotation.StringRes;
 import com.blankj.utilcode.util.ToastUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import timber.log.Timber;

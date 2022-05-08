@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.setup.Config
+import com.osfans.trime.data.Config
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
 import kotlinx.coroutines.CoroutineScope

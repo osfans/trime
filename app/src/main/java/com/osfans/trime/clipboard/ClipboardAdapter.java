@@ -16,7 +16,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.osfans.trime.R;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import java.util.List;
 
 public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

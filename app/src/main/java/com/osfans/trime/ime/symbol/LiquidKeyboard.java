@@ -16,7 +16,7 @@ import com.osfans.trime.draft.DraftAdapter;
 import com.osfans.trime.draft.DraftDao;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.util.ConfigGetter;
 import java.io.File;
 import java.util.ArrayList;

@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.ime.core.Trime;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.util.DataUtils;
 import java.io.File;
 import java.util.ArrayList;

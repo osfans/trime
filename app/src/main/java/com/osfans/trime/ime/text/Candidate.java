@@ -34,7 +34,7 @@ import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.util.GraphicUtils;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
-import com.osfans.trime.setup.Config
+import com.osfans.trime.data.Config
 
 class GraphicUtils(
     context: Context

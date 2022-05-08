@@ -46,7 +46,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.common.ViewUtils;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
-import com.osfans.trime.setup.Config;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.util.ConfigGetter;
 import java.util.List;
 import java.util.Map;
