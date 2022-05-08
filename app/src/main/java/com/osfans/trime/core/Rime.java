@@ -22,9 +22,10 @@ import android.content.Context;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
-import com.osfans.trime.util.DataUtils;
+import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.data.DataManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -310,9 +311,9 @@ public class Rime {
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
     mOnMessage = false;
-
-    final String sharedDataDir = DataUtils.getSharedDataDir();
-    final String userDataDir = DataUtils.getUserDataDir();
+    final AppPrefs appPrefs = AppPrefs.defaultInstance();
+    final String sharedDataDir = appPrefs.getConf().getSharedDataDir();
+    final String userDataDir = appPrefs.getConf().getUserDataDir();
 
     Timber.d(methodName + "setup");
     // Initialize librime APIs
@@ -561,7 +562,7 @@ public class Rime {
 
   public static String openccConvert(String line, String name) {
     if (!TextUtils.isEmpty(name)) {
-      final File f = new File(DataUtils.getAssetsDir("opencc"), name);
+      final File f = new File(DataManager.getDataDir("opencc"), name);
       if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
     }
     return line;

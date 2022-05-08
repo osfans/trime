@@ -43,7 +43,6 @@ import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.AppVersionUtils;
 import com.osfans.trime.util.ConfigGetter;
-import com.osfans.trime.util.DataUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -71,8 +70,8 @@ public class Config {
 
   private static final AppPrefs appPrefs = AppPrefs.defaultInstance();
 
-  private final String sharedDataDir = appPrefs.getConf().getSharedDataDir();
-  private final String userDataDir = appPrefs.getConf().getUserDataDir();
+  private static final String sharedDataDir = appPrefs.getConf().getSharedDataDir();
+  private static final String userDataDir = appPrefs.getConf().getUserDataDir();
 
   public static synchronized Config get(Context context) {
     if (self == null) self = new Config(context);
@@ -214,7 +213,7 @@ public class Config {
   }
 
   public static String[] getThemeKeys(boolean isUser) {
-    File d = new File(isUser ? DataUtils.getUserDataDir() : DataUtils.getSharedDataDir());
+    File d = new File(isUser ? userDataDir : sharedDataDir);
     FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith("trime.yaml");
     String[] list = d.list(trimeFilter);
     if (list != null) return list;
@@ -222,7 +221,7 @@ public class Config {
   }
 
   public static String[] getSoundPackages() {
-    File d = new File(DataUtils.getUserDataDir(), "sound");
+    File d = new File(userDataDir, "sound");
     FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith(".sound.yaml");
     String[] list = d.list(trimeFilter);
     if (list != null) return list;
@@ -246,7 +245,7 @@ public class Config {
     String methodName =
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
-    final String dataDir = DataUtils.getAssetsDir("opencc");
+    final String dataDir = DataManager.getDataDir("opencc");
     final File d = new File(dataDir);
     if (d.exists()) {
       final FilenameFilter txtFilter = (dir, filename) -> filename.endsWith(".txt");
@@ -320,7 +319,7 @@ public class Config {
   public void setSoundPackage(String name) {
     soundPackageName = name;
     String path =
-        DataUtils.getUserDataDir()
+        userDataDir
             + File.separator
             + "sound"
             + File.separator
@@ -340,7 +339,7 @@ public class Config {
       InputStream in = new FileInputStream(file);
       OutputStream out =
           new FileOutputStream(
-              DataUtils.getUserDataDir()
+              userDataDir
                   + File.separator
                   + "build"
                   + File.separator
@@ -370,7 +369,7 @@ public class Config {
       String sound = (String) m.get("sound");
       if (!Objects.equals(sound, currentSound)) {
         String path =
-            DataUtils.getUserDataDir()
+            userDataDir
                 + File.separator
                 + "sound"
                 + File.separator
@@ -420,7 +419,8 @@ public class Config {
       Key.setSymbols((String) androidKeySettings.get("symbols"));
       if (TextUtils.isEmpty(Key.getSymbols()))
         Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
-      presetColorSchemes = (Map<String, Map<String, String>>) globalThemeConfig.get("preset_color_schemes");
+      presetColorSchemes =
+          (Map<String, Map<String, String>>) globalThemeConfig.get("preset_color_schemes");
       presetKeyboards = (Map<String, Map<String, ?>>) globalThemeConfig.get("preset_keyboards");
       liquidKeyboard = (Map<String, ?>) globalThemeConfig.get("liquid_keyboard");
       initLiquidKeyboard();
@@ -880,7 +880,7 @@ public class Config {
   public Typeface getFont(String key) {
     final String name = getString(key);
     if (name != null) {
-      final File f = new File(DataUtils.getAssetsDir("fonts"), name);
+      final File f = new File(DataManager.getDataDir("fonts"), name);
       if (f.exists()) return Typeface.createFromFile(f);
     }
     return Typeface.DEFAULT;
@@ -911,11 +911,11 @@ public class Config {
     if (o instanceof String) {
       String name = (String) o;
       String nameDirectory =
-          DataUtils.getAssetsDir("backgrounds" + File.separator + backgroundFolder);
+          DataManager.getDataDir("backgrounds" + File.separator + backgroundFolder);
       File f = new File(nameDirectory, name);
 
       if (!f.exists()) {
-        nameDirectory = DataUtils.getAssetsDir("backgrounds");
+        nameDirectory = DataManager.getDataDir("backgrounds");
         f = new File(nameDirectory, name);
       }
 
@@ -1196,11 +1196,11 @@ public class Config {
     }
 
     String nameDirectory =
-        DataUtils.getAssetsDir("backgrounds" + File.separator + backgroundFolder);
+        DataManager.getDataDir("backgrounds" + File.separator + backgroundFolder);
     File f = new File(nameDirectory, s);
 
     if (!f.exists()) {
-      nameDirectory = DataUtils.getAssetsDir("backgrounds");
+      nameDirectory = DataManager.getDataDir("backgrounds");
       f = new File(nameDirectory, s);
     }
 
