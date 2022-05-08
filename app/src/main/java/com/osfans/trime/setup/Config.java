@@ -43,8 +43,8 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.AppVersionUtils;
-import com.osfans.trime.util.DataUtils;
 import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.DataUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -59,7 +59,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import kotlin.jvm.Synchronized;
 import timber.log.Timber;
 
 /** 解析 YAML 配置文件 */
@@ -74,8 +73,7 @@ public class Config {
   private final String sharedDataDir = DataUtils.getSharedDataDir();
   private final String userDataDir = DataUtils.getUserDataDir();
 
-  @Synchronized
-  public static Config get(Context context) {
+  public static synchronized Config get(Context context) {
     if (self == null) self = new Config(context);
     return self;
   }
@@ -86,7 +84,8 @@ public class Config {
   private String schema_id, colorID;
 
   private Map<?, ?> fallbackColors;
-  private Map<String, ?> presetColorSchemes, presetKeyboards;
+  private Map<String, Map<String, String>> presetColorSchemes;
+  private Map<String, Map<String, ?>> presetKeyboards;
   private Map<String, ?> liquidKeyboard;
 
   private static final Pattern pattern = Pattern.compile("\\s*\n\\s*");
@@ -409,24 +408,24 @@ public class Config {
       }
       Timber.d("init() deploy_config_file done");
 
-      Map<String, ?> m = ConfigGetter.loadMap(themeName, "");
-      if (m == null) {
+      Map<String, Map<String, ?>> globalThemeConfig = Rime.config_get_map(themeName, "");
+      if (globalThemeConfig == null) {
         themeName = defaultName;
-        m = ConfigGetter.loadMap(themeName, "");
+        globalThemeConfig = Rime.config_get_map(themeName, "");
       }
       Timber.d("init() load_map done");
-      final Map<?, ?> mk = (Map<?, ?>) m.get("android_keys");
-      mDefaultStyle = (Map<?, ?>) m.get("style");
-      fallbackColors = (Map<?, ?>) m.get("fallback_colors");
-      Key.androidKeys = (List<String>) mk.get("name");
+      mDefaultStyle = (Map<?, ?>) globalThemeConfig.get("style");
+      fallbackColors = (Map<?, ?>) globalThemeConfig.get("fallback_colors");
+      final Map<String, ?> androidKeySettings = globalThemeConfig.get("android_keys");
+      Key.androidKeys = (List<String>) androidKeySettings.get("name");
+      Key.presetKeys = (Map<String, Map<String, String>>) globalThemeConfig.get("preset_keys");
       Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
-      Key.setSymbols((String) mk.get("symbols"));
+      Key.setSymbols((String) androidKeySettings.get("symbols"));
       if (TextUtils.isEmpty(Key.getSymbols()))
         Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
-      Key.presetKeys = (Map<String, Map<String, ?>>) m.get("preset_keys");
-      presetColorSchemes = (Map<String, ?>) m.get("preset_color_schemes");
-      presetKeyboards = (Map<String, ?>) m.get("preset_keyboards");
-      liquidKeyboard = (Map<String, ?>) m.get("liquid_keyboard");
+      presetColorSchemes = (Map<String, Map<String, String>>) globalThemeConfig.get("preset_color_schemes");
+      presetKeyboards = (Map<String, Map<String, ?>>) globalThemeConfig.get("preset_keyboards");
+      liquidKeyboard = (Map<String, ?>) globalThemeConfig.get("liquid_keyboard");
       initLiquidKeyboard();
       Timber.d("init() initLiquidKeyboard done");
       Rime.setShowSwitches(getPrefs().getKeyboard().getSwitchesEnabled());

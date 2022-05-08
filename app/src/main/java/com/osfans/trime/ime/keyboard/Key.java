@@ -56,7 +56,7 @@ public class Key {
         KEY_STATE_NORMAL // 5
       };
   public static List<String> androidKeys;
-  public static Map<String, Map<String, ?>> presetKeys;
+  public static Map<String, Map<String, String>> presetKeys;
   private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
   public int edgeFlags;
@@ -163,7 +163,7 @@ public class Key {
     return androidKeys;
   }
 
-  public static Map<String, Map<String, ?>> getPresetKeys() {
+  public static Map<String, Map<String, String>> getPresetKeys() {
     return presetKeys;
   }
 
