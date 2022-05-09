@@ -47,3 +47,24 @@ Java_com_osfans_trime_core_Rime_opencc_1convert_1dictionary(JNIEnv *env, jclass 
   env->ReleaseStringUTFChars(jformatTo, s);
   ConvertDictionary(inputFileName, outputFileName, formatFrom, formatTo);
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_osfans_trime_data_opencc_OpenCCDictManager_openccDictConv(JNIEnv *env, jclass clazz,
+                                                                   jstring src, jstring dest,
+                                                                   jboolean mode) {
+  using namespace opencc;
+  const char *src_file = env->GetStringUTFChars(src, nullptr);
+  const char *dest_file = env->GetStringUTFChars(dest, nullptr);
+  if (mode) {
+    std::string from = "ocd2";
+    std::string to = "text";
+    ConvertDictionary(src_file, dest_file, from, to);
+  } else {
+    std::string from = "text";
+    std::string to = "ocd2";
+    ConvertDictionary(src_file, dest_file, from, to);
+  }
+  env->ReleaseStringUTFChars(src, src_file);
+  env->ReleaseStringUTFChars(dest, dest_file);
+}

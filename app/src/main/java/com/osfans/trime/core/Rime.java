@@ -23,9 +23,9 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.Config;
-import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.data.DataManager;
+import com.osfans.trime.data.opencc.OpenCCDictManager;
+import com.osfans.trime.ime.core.Trime;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -517,7 +517,9 @@ public class Rime {
 
   public static Rime get(Context context, boolean full_check) {
     if (self == null) {
-      if (full_check) Config.deployOpencc();
+      if (full_check) {
+        OpenCCDictManager.internalDeploy();
+      }
       self = new Rime(context, full_check);
     }
     return self;

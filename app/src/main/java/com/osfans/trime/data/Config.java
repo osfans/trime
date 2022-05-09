@@ -240,26 +240,6 @@ public class Config {
     return names;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
-  public static boolean deployOpencc() {
-    String methodName =
-        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
-    Timber.d(methodName);
-    final String dataDir = DataManager.getDataDir("opencc");
-    final File d = new File(dataDir);
-    if (d.exists()) {
-      final FilenameFilter txtFilter = (dir, filename) -> filename.endsWith(".txt");
-      for (String txtName : Objects.requireNonNull(d.list(txtFilter))) {
-        txtName = new File(dataDir, txtName).getPath();
-        String ocdName = txtName.replace(".txt", ".ocd2");
-        Rime.opencc_convert_dictionary(txtName, ocdName, "text", "ocd2");
-      }
-    }
-
-    Timber.d(methodName + "finish");
-    return true;
-  }
-
   public boolean copyFileOrDir(String path, boolean overwrite) {
     try {
       final String assetPath = new File(RIME, path).getPath();

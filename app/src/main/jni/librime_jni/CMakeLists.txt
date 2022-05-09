@@ -35,7 +35,7 @@ string(STRIP ${LIBRIME_VERSION} LIBRIME_VERSION)
 set(LIBRIME_VERSION "${LIBRIME_VERSION}-${ANDROID_ABI}")
 
 target_compile_definitions(rime_jni PRIVATE
-  CLASSNAME="com/osfans/trime/Rime"
+  CLASSNAME="com/osfans/trime/core/Rime"
   TRIME_VERSION="${TRIME_VERSION}"
   OPENCC_VERSION="${OPENCC_VERSION}"
   LIBRIME_VERSION="${LIBRIME_VERSION}"
