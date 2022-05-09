@@ -1,4 +1,4 @@
-package com.osfans.trime.draft;
+package com.osfans.trime.ime.symbol;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -15,20 +15,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.osfans.trime.R;
-import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import com.osfans.trime.data.Config;
 import java.util.List;
 
-public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
   private final List<SimpleKeyBean> list;
   private int keyMarginX, keyMarginTop;
   private Integer textColor;
   private float textSize;
   private Typeface textFont;
-  private Drawable background;
+  private Config config;
 
-  public DraftAdapter(Context context, List<SimpleKeyBean> itemlist) {
+  public ClipboardAdapter(Context context, List<SimpleKeyBean> itemlist) {
     myContext = context;
     list = itemlist;
   }
@@ -43,16 +42,12 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     this.keyMarginTop = keyMarginTop;
 
     //  边框尺寸、圆角、字号直接读取主题通用参数。配色优先读取 liquidKeyboard 专用参数。
-    Config config = Config.get(myContext);
+    config = Config.get(myContext);
     textColor = config.getLiquidColor("long_text_color");
     if (textColor == null) textColor = config.getLiquidColor("key_text_color");
 
     textSize = config.getFloat("key_long_text_size");
     if (textSize <= 0) textSize = config.getFloat("label_text_size");
-
-    background =
-        config.getDrawable(
-            "long_text_back_color", "key_border", "key_long_text_border", "round_corner", null);
 
     textFont = config.getFont("long_text_font");
   }
@@ -64,7 +59,7 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     return new ItemViewHolder(view);
   }
 
-  private static class ItemViewHolder extends RecyclerView.ViewHolder {
+  static class ItemViewHolder extends RecyclerView.ViewHolder {
     public ItemViewHolder(View view) {
       super(view);
 
@@ -80,9 +75,10 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
   @Override
   public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int index) {
 
-    if (viewHolder instanceof ItemViewHolder) {
+    if (viewHolder instanceof ClipboardAdapter.ItemViewHolder) {
       SimpleKeyBean searchHistoryBean = list.get(index);
-      final ItemViewHolder itemViewHold = ((ItemViewHolder) viewHolder);
+      final ClipboardAdapter.ItemViewHolder itemViewHold =
+          ((ClipboardAdapter.ItemViewHolder) viewHolder);
 
       if (textFont != null) itemViewHold.mTitle.setTypeface(textFont);
 
@@ -111,16 +107,11 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
       }
 
-      if (background != null)
-        itemViewHold.listItemLayout.setBackground(
-            Config.get(myContext)
-                .getDrawable(
-                    "long_text_back_color",
-                    "key_border",
-                    "key_long_text_border",
-                    "round_corner",
-                    null));
+      Drawable background =
+          config.getDrawable(
+              "long_text_back_color", "key_border", "key_long_text_border", "round_corner", null);
 
+      if (background != null) itemViewHold.listItemLayout.setBackground(background);
       // 如果设置了回调，则设置点击事件
       if (mOnItemClickListener != null) {
         itemViewHold.listItemLayout.setOnClickListener(
