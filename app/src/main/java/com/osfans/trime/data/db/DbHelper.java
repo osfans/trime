@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.symbol;
+package com.osfans.trime.data.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

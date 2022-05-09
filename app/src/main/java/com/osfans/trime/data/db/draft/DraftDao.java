@@ -1,12 +1,12 @@
-package com.osfans.trime.draft;
+package com.osfans.trime.data.db.draft;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.NonNull;
 import com.osfans.trime.ime.core.Trime;
-import com.osfans.trime.ime.symbol.DbBean;
-import com.osfans.trime.ime.symbol.DbHelper;
+import com.osfans.trime.data.db.DbBean;
+import com.osfans.trime.data.db.DbHelper;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.util.ArrayList;
 import java.util.List;

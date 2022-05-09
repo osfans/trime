@@ -1,4 +1,6 @@
-package com.osfans.trime.ime.symbol;
+package com.osfans.trime.data.db;
+
+import com.osfans.trime.ime.symbol.SimpleKeyBean;
 
 public class DbBean extends SimpleKeyBean {
   private long time;
