@@ -27,7 +27,7 @@ import android.view.KeyEvent;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.setup.Config;
-import com.osfans.trime.util.YamlUtils;
+import com.osfans.trime.util.ConfigGetter;
 import java.util.List;
 import java.util.Map;
 import timber.log.Timber;
@@ -129,34 +129,34 @@ public class Key {
       if (!TextUtils.isEmpty(s)) events[i] = new Event(mKeyboard, s);
       else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
     }
-    s = YamlUtils.INSTANCE.getString(mk, "composing", "");
+    s = ConfigGetter.getString(mk, "composing", "");
     if (!TextUtils.isEmpty(s)) composing = new Event(mKeyboard, s);
-    s = YamlUtils.INSTANCE.getString(mk, "has_menu", "");
+    s = ConfigGetter.getString(mk, "has_menu", "");
     if (!TextUtils.isEmpty(s)) has_menu = new Event(mKeyboard, s);
-    s = YamlUtils.INSTANCE.getString(mk, "paging", "");
+    s = ConfigGetter.getString(mk, "paging", "");
     if (!TextUtils.isEmpty(s)) paging = new Event(mKeyboard, s);
     if (composing != null || has_menu != null || paging != null)
       mKeyboard.getmComposingKeys().add(this);
-    s = YamlUtils.INSTANCE.getString(mk, "ascii", "");
+    s = ConfigGetter.getString(mk, "ascii", "");
     if (!TextUtils.isEmpty(s)) ascii = new Event(mKeyboard, s);
-    label = YamlUtils.INSTANCE.getString(mk, "label", "");
-    labelSymbol = YamlUtils.INSTANCE.getString(mk, "label_symbol", "");
-    hint = YamlUtils.INSTANCE.getString(mk, "hint", "");
+    label = ConfigGetter.getString(mk, "label", "");
+    labelSymbol = ConfigGetter.getString(mk, "label_symbol", "");
+    hint = ConfigGetter.getString(mk, "hint", "");
     if (mk.containsKey("send_bindings")) {
-      send_bindings = YamlUtils.INSTANCE.getBoolean(mk, "send_bindings", true);
+      send_bindings = ConfigGetter.getBoolean(mk, "send_bindings", true);
     } else if (composing == null && has_menu == null && paging == null) {
       send_bindings = false;
     }
     mKeyboard.setModiferKey(getCode(), this);
-    key_text_size = YamlUtils.INSTANCE.getPixel(mk, "key_text_size", 0);
-    symbol_text_size = YamlUtils.INSTANCE.getPixel(mk, "symbol_text_size", 0);
+    key_text_size = ConfigGetter.getPixel(mk, "key_text_size", 0);
+    symbol_text_size = ConfigGetter.getPixel(mk, "symbol_text_size", 0);
     key_text_color = Config.getColor(context, mk, "key_text_color");
     hilited_key_text_color = Config.getColor(context, mk, "hilited_key_text_color");
     key_back_color = config.getDrawable(mk, "key_back_color");
     hilited_key_back_color = config.getDrawable(mk, "hilited_key_back_color");
     key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
     hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
-    round_corner = YamlUtils.INSTANCE.getFloat(mk, "round_corner", 0);
+    round_corner = ConfigGetter.getFloat(mk, "round_corner", 0);
   }
 
   public static List<String> getAndroidKeys() {

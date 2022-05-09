@@ -44,7 +44,7 @@ import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.AppVersionUtils;
 import com.osfans.trime.util.DataUtils;
-import com.osfans.trime.util.YamlUtils;
+import com.osfans.trime.util.ConfigGetter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -409,10 +409,10 @@ public class Config {
       }
       Timber.d("init() deploy_config_file done");
 
-      Map<String, ?> m = YamlUtils.INSTANCE.loadMap(themeName, "");
+      Map<String, ?> m = ConfigGetter.loadMap(themeName, "");
       if (m == null) {
         themeName = defaultName;
-        m = YamlUtils.INSTANCE.loadMap(themeName, "");
+        m = ConfigGetter.loadMap(themeName, "");
       }
       Timber.d("init() load_map done");
       final Map<?, ?> mk = (Map<?, ?>) m.get("android_keys");
@@ -740,7 +740,7 @@ public class Config {
   public float getLiquidFloat(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
-        return YamlUtils.INSTANCE.getFloat(liquidKeyboard, key, 0);
+        return ConfigGetter.getFloat(liquidKeyboard, key, 0);
       }
     }
     return getFloat(key);
@@ -969,7 +969,7 @@ public class Config {
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
-        return YamlUtils.INSTANCE.getPixel(liquidKeyboard, key, 0);
+        return ConfigGetter.getPixel(liquidKeyboard, key, 0);
       }
     }
     return getPixel(key);

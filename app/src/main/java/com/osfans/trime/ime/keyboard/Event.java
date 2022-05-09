@@ -23,7 +23,7 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.setup.Config;
-import com.osfans.trime.util.YamlUtils;
+import com.osfans.trime.util.ConfigGetter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -71,15 +71,15 @@ public class Event {
     if (Key.presetKeys.containsKey(s)) {
       // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
       Map<String, ?> presetKey = Key.presetKeys.get(s);
-      command = YamlUtils.INSTANCE.getString(presetKey, "command", "");
-      option = YamlUtils.INSTANCE.getString(presetKey, "option", "");
-      select = YamlUtils.INSTANCE.getString(presetKey, "select", "");
-      toggle = YamlUtils.INSTANCE.getString(presetKey, "toggle", "");
-      label = YamlUtils.INSTANCE.getString(presetKey, "label", "");
-      preview = YamlUtils.INSTANCE.getString(presetKey, "preview", "");
-      shiftLock = YamlUtils.INSTANCE.getString(presetKey, "shift_lock", "");
-      commit = YamlUtils.INSTANCE.getString(presetKey, "commit", "");
-      String send = YamlUtils.INSTANCE.getString(presetKey, "send", "");
+      command = ConfigGetter.getString(presetKey, "command", "");
+      option = ConfigGetter.getString(presetKey, "option", "");
+      select = ConfigGetter.getString(presetKey, "select", "");
+      toggle = ConfigGetter.getString(presetKey, "toggle", "");
+      label = ConfigGetter.getString(presetKey, "label", "");
+      preview = ConfigGetter.getString(presetKey, "preview", "");
+      shiftLock = ConfigGetter.getString(presetKey, "shift_lock", "");
+      commit = ConfigGetter.getString(presetKey, "commit", "");
+      String send = ConfigGetter.getString(presetKey, "send", "");
       if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command))
         send = "function"; // command默認發function
       int[] sends = parseSend(send);
@@ -89,9 +89,9 @@ public class Event {
       text = Config.getString(presetKey, "text");
       if (code < 0 && TextUtils.isEmpty(text)) text = s;
       if (presetKey.containsKey("states")) states = (List<?>) presetKey.get("states");
-      sticky = YamlUtils.INSTANCE.getBoolean(presetKey, "sticky", false);
-      repeatable = YamlUtils.INSTANCE.getBoolean(presetKey, "repeatable", false);
-      functional = YamlUtils.INSTANCE.getBoolean(presetKey, "functional", true);
+      sticky = ConfigGetter.getBoolean(presetKey, "sticky", false);
+      repeatable = ConfigGetter.getBoolean(presetKey, "repeatable", false);
+      functional = ConfigGetter.getBoolean(presetKey, "functional", true);
     } else if ((code = getClickCode(s)) >= 0) {
       parseLabel();
     } else {
