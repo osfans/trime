@@ -1,10 +1,10 @@
 package com.osfans.trime.util
 
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import java.io.File
 
 object DataUtils {
-    private val prefs get() = Preferences.defaultInstance()
+    private val prefs get() = AppPrefs.defaultInstance()
 
     @JvmStatic
     val sharedDataDir: String get() = prefs.conf.sharedDataDir

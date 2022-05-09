@@ -8,25 +8,19 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.settings.components.ResetAssetsDialog
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
+import com.osfans.trime.util.formatDateTime
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import org.ocpsoft.prettytime.PrettyTime
 import timber.log.Timber
-import java.util.Date
-import kotlin.coroutines.CoroutineContext
 
-class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+class ConfFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope() {
 
-    private val prefs get() = Preferences.defaultInstance()
+    private val prefs get() = AppPrefs.defaultInstance()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.conf_preference)
@@ -83,7 +77,7 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
             var summary: String
             if (syncBgPref?.isChecked == true) {
                 val lastResult = prefs.conf.lastSyncStatus
-                val lastTime = prefs.conf.lastSyncTime
+                val lastTime = prefs.conf.lastBackgroundSync
                 summary = if (lastResult) {
                     context.getString(R.string.pref_sync_bg_success)
                 } else {
@@ -92,7 +86,7 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope {
                 summary = if (lastTime == 0L) {
                     context.getString(R.string.conf__synchronize_background_summary)
                 } else {
-                    summary.format(PrettyTime().format(Date(lastTime)))
+                    summary.format(formatDateTime(lastTime))
                 }
                 syncBgPref.summaryOn = summary
             } else {

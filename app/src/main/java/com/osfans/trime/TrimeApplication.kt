@@ -1,7 +1,7 @@
 package com.osfans.trime
 
 import android.app.Application
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import timber.log.Timber
 
 /**
@@ -24,7 +24,7 @@ class TrimeApplication : Application() {
             if (BuildConfig.DEBUG) {
                 Timber.plant(Timber.DebugTree())
             }
-            val prefs = Preferences.initDefault(this)
+            val prefs = AppPrefs.initDefault(this)
             prefs.initDefaultPreferences()
         } catch (e: Exception) {
             e.fillInStackTrace()

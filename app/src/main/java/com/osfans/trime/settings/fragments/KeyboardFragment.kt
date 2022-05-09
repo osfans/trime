@@ -8,7 +8,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SoundPickerDialog
 
@@ -28,7 +28,7 @@ class KeyboardFragment :
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val trime = Trime.getServiceOrNull()
-        val prefs = Preferences.defaultInstance()
+        val prefs = AppPrefs.defaultInstance()
         prefs.sync()
         when (key) {
             "keyboard__key_long_press_timeout",

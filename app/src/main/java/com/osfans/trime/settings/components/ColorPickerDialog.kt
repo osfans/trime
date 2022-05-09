@@ -5,7 +5,7 @@ import android.os.Build
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.data.Config
 import timber.log.Timber
@@ -17,7 +17,7 @@ class ColorPickerDialog(
     context: Context
 ) {
     val config: Config = Config.get(context)
-    private val prefs get() = Preferences.defaultInstance()
+    private val prefs get() = AppPrefs.defaultInstance()
     private var colorKeys: Array<String>
     private var checkedColorKey: Int = 0
     val pickerDialog: AlertDialog

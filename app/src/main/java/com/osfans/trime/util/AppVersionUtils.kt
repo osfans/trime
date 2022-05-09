@@ -3,16 +3,16 @@ package com.osfans.trime.util
 import android.net.Uri
 import androidx.preference.Preference
 import com.osfans.trime.BuildConfig
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 
 object AppVersionUtils {
     /**
      * Compare the application's version name
      * to check if this version is a newer/older version.
      *
-     * @param prefs the [Preferences] instance.
+     * @param prefs the [AppPrefs] instance.
      */
-    fun isDifferentVersion(prefs: Preferences): Boolean {
+    fun isDifferentVersion(prefs: AppPrefs): Boolean {
         val currentVersionName = BuildConfig.VERSION_NAME
         val lastVersionName = prefs.general.lastVersionName
         return !currentVersionName.contentEquals(lastVersionName).also {

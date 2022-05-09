@@ -44,11 +44,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.R;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
-import com.osfans.trime.ime.core.Preferences;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
-import com.osfans.trime.data.Config;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -238,8 +238,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private Method getStateDrawable;
 
   @NonNull
-  private Preferences getPrefs() {
-    return Preferences.Companion.defaultInstance();
+  private AppPrefs getPrefs() {
+    return AppPrefs.Companion.defaultInstance();
   }
 
   private final MyHandler mHandler = new MyHandler(this);

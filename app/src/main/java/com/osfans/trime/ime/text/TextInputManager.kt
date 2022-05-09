@@ -9,7 +9,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.common.startsWithAsciiChar
 import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.core.EditorInstance
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
@@ -44,7 +44,7 @@ class TextInputManager private constructor() :
     KeyboardView.OnKeyboardActionListener,
     Candidate.EventListener {
     private val trime get() = Trime.getService()
-    private val prefs get() = Preferences.defaultInstance()
+    private val prefs get() = AppPrefs.defaultInstance()
     private val activeEditorInstance: EditorInstance
         get() = trime.activeEditorInstance
     private val keyboardSwitcher: KeyboardSwitcher

@@ -1,10 +1,8 @@
-package com.osfans.trime.ime.core
+package com.osfans.trime.data
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import android.os.Environment
-import androidx.core.os.EnvironmentCompat
 import androidx.core.os.UserManagerCompat
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
@@ -12,11 +10,12 @@ import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
+import java.time.LocalDateTime
 
 /**
  * Helper class for an organized access to the shared preferences.
  */
-class Preferences(
+class AppPrefs(
     context: Context
 ) {
     var shared: SharedPreferences = if (!UserManagerCompat.isUserUnlocked(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -104,16 +103,17 @@ class Preferences(
     }
 
     companion object {
-        private var defaultInstance: Preferences? = null
+        private var defaultInstance: AppPrefs? = null
 
         @Synchronized
-        fun initDefault(context: Context): Preferences {
-            val instance = Preferences(context.applicationContext)
+        fun initDefault(context: Context): AppPrefs {
+            val instance = AppPrefs(context.applicationContext)
             defaultInstance = instance
             return instance
         }
 
-        fun defaultInstance(): Preferences {
+        @JvmStatic
+        fun defaultInstance(): AppPrefs {
             return defaultInstance
                 ?: throw UninitializedPropertyAccessException(
                     """
@@ -150,7 +150,7 @@ class Preferences(
         cacheString.clear()
     }
 
-    class General(private val prefs: Preferences) {
+    class General(private val prefs: AppPrefs) {
         companion object {
             const val LAST_VERSION_NAME = "general__last_version_name"
         }
@@ -162,7 +162,7 @@ class Preferences(
     /**
      *  Wrapper class of keyboard preferences.
      */
-    class Keyboard(private val prefs: Preferences) {
+    class Keyboard(private val prefs: AppPrefs) {
         companion object {
             const val INLINE_PREEDIT_MODE = "keyboard__inline_preedit"
             const val SOFT_CURSOR_ENABLED = "keyboard__soft_cursor"
@@ -269,7 +269,7 @@ class Preferences(
     /**
      *  Wrapper class of keyboard appearance preferences.
      */
-    class Looks(private val prefs: Preferences) {
+    class Looks(private val prefs: AppPrefs) {
         companion object {
             const val SELECTED_THEME = "looks__selected_theme"
             const val SELECTED_COLOR = "looks__selected_color_scheme"
@@ -289,13 +289,13 @@ class Preferences(
     /**
      *  Wrapper class of configuration settings.
      */
-    class Configuration(private val prefs: Preferences) {
+    class Configuration(private val prefs: AppPrefs) {
         companion object {
             const val SHARED_DATA_DIR = "conf__shared_data_dir"
             const val USER_DATA_DIR = "conf__user_data_dir"
             const val SYNC_BACKGROUND_ENABLED = "conf__sync_background"
             const val LAST_SYNC_STATUS = "conf__last_sync_status"
-            const val LAST_SYNC_TIME = "conf__last_sync_time"
+            const val LAST_BACKGROUND_SYNC = "conf__last_background_sync"
             val EXTERNAL_PATH_PREFIX: String = appContext.getExternalFilesDir(null)!!.absolutePath
         }
         var sharedDataDir: String
@@ -310,15 +310,15 @@ class Preferences(
         var lastSyncStatus: Boolean
             get() = prefs.getPref(LAST_SYNC_STATUS, false)
             set(v) = prefs.setPref(LAST_SYNC_STATUS, v)
-        var lastSyncTime: Long
-            get() = prefs.getPref(LAST_SYNC_TIME, 0).toLong()
-            set(v) = prefs.setPref(LAST_SYNC_TIME, v)
+        var lastBackgroundSync: Long
+            get() = prefs.getPref(LAST_BACKGROUND_SYNC, 0L)
+            set(v) = prefs.setPref(LAST_BACKGROUND_SYNC, v)
     }
 
     /**
      *  Wrapper class of configuration settings.
      */
-    class Other(private val prefs: Preferences) {
+    class Other(private val prefs: AppPrefs) {
         companion object {
             const val UI_MODE = "other__ui_mode"
             const val SHOW_APP_ICON = "other__show_app_icon"

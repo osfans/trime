@@ -60,9 +60,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
-import com.osfans.trime.core.Rime;
 import com.osfans.trime.clipboard.ClipboardDao;
 import com.osfans.trime.common.ViewUtils;
+import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.Config;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.draft.DraftDao;
@@ -87,7 +89,6 @@ import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.SoundPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
-import com.osfans.trime.data.Config;
 import com.osfans.trime.setup.IntentReceiver;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
@@ -103,8 +104,8 @@ public class Trime extends LifecycleInputMethodService {
   private boolean normalTextEditor;
 
   @NonNull
-  private Preferences getPrefs() {
-    return Preferences.Companion.defaultInstance();
+  private AppPrefs getPrefs() {
+    return AppPrefs.Companion.defaultInstance();
   }
 
   /** 输入法配置 */

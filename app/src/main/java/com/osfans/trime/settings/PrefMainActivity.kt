@@ -24,7 +24,7 @@ import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.PrefActivityBinding
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.setup.SetupActivity
@@ -44,7 +44,7 @@ class PrefMainActivity :
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     ActivityCompat.OnRequestPermissionsResultCallback,
     CoroutineScope by MainScope() {
-    private val prefs get() = Preferences.defaultInstance()
+    private val prefs get() = AppPrefs.defaultInstance()
 
     lateinit var binding: PrefActivityBinding
     lateinit var imeManager: InputMethodManager

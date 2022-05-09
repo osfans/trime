@@ -36,7 +36,6 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
@@ -70,8 +69,10 @@ public class Config {
   private static Config self = null;
   private static AssetManager assetManager = null;
 
-  private final String sharedDataDir = DataUtils.getSharedDataDir();
-  private final String userDataDir = DataUtils.getUserDataDir();
+  private static final AppPrefs appPrefs = AppPrefs.defaultInstance();
+
+  private final String sharedDataDir = appPrefs.getConf().getSharedDataDir();
+  private final String userDataDir = appPrefs.getConf().getUserDataDir();
 
   public static synchronized Config get(Context context) {
     if (self == null) self = new Config(context);
@@ -92,10 +93,6 @@ public class Config {
 
   private String[] clipBoardCompare, clipBoardOutput, draftOutput;
 
-  @NonNull
-  private Preferences getPrefs() {
-    return Preferences.Companion.defaultInstance();
-  }
 
   public Config(@NonNull Context context) {
     this(context, false);
@@ -107,8 +104,8 @@ public class Config {
     Timber.d(methodName);
     self = this;
     assetManager = context.getAssets();
-    themeName = getPrefs().getLooks().getSelectedTheme();
-    soundPackageName = getPrefs().getKeyboard().getSoundPackage();
+    themeName = appPrefs.getLooks().getSelectedTheme();
+    soundPackageName = appPrefs.getKeyboard().getSoundPackage();
 
     Timber.d(methodName + "prepareRime");
     prepareRime(context);
@@ -124,9 +121,9 @@ public class Config {
     setSoundFromColor();
 
     Timber.d(methodName + "setClipboard&draft");
-    clipBoardCompare = getPrefs().getOther().getClipboardCompareRules().trim().split("\n");
-    clipBoardOutput = getPrefs().getOther().getClipboardOutputRules().trim().split("\n");
-    draftOutput = getPrefs().getOther().getDraftOutputRules().trim().split("\n");
+    clipBoardCompare = appPrefs.getOther().getClipboardCompareRules().trim().split("\n");
+    clipBoardOutput = appPrefs.getOther().getClipboardOutputRules().trim().split("\n");
+    draftOutput = appPrefs.getOther().getDraftOutputRules().trim().split("\n");
 
     Timber.d(methodName + "finish");
   }
@@ -144,32 +141,32 @@ public class Config {
   }
 
   public int getClipboardLimit() {
-    return Integer.parseInt(getPrefs().getOther().getClipboardLimit());
+    return Integer.parseInt(appPrefs.getOther().getClipboardLimit());
   }
 
   public int getDraftLimit() {
-    return Integer.parseInt(getPrefs().getOther().getDraftLimit());
+    return Integer.parseInt(appPrefs.getOther().getDraftLimit());
   }
 
   public void setClipBoardCompare(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
     clipBoardCompare = s.split("\n");
 
-    getPrefs().getOther().setClipboardCompareRules(s);
+    appPrefs.getOther().setClipboardCompareRules(s);
   }
 
   public void setClipBoardOutput(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
     clipBoardOutput = s.split("\n");
 
-    getPrefs().getOther().setClipboardOutputRules(s);
+    appPrefs.getOther().setClipboardOutputRules(s);
   }
 
   public void setDraftOutput(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
     draftOutput = s.split("\n");
 
-    getPrefs().getOther().setDraftOutputRules(s);
+    appPrefs.getOther().setDraftOutputRules(s);
   }
 
   public String getTheme() {
@@ -185,7 +182,7 @@ public class Config {
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
     boolean isExist = new File(sharedDataDir).exists();
-    boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(getPrefs());
+    boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(appPrefs);
     String defaultFile = "trime.yaml";
     Timber.d(methodName + "copy");
     if (isOverwrite) {
@@ -315,7 +312,7 @@ public class Config {
 
   public void setTheme(String theme) {
     themeName = theme;
-    getPrefs().getLooks().setSelectedTheme(themeName);
+    appPrefs.getLooks().setSelectedTheme(themeName);
     init(false);
   }
 
@@ -333,7 +330,7 @@ public class Config {
     if (file.exists()) {
       applySoundPackage(file, name);
     }
-    getPrefs().getKeyboard().setSoundPackage(soundPackageName);
+    appPrefs.getKeyboard().setSoundPackage(soundPackageName);
   }
 
   // 应用音效包
@@ -428,8 +425,8 @@ public class Config {
       liquidKeyboard = (Map<String, ?>) globalThemeConfig.get("liquid_keyboard");
       initLiquidKeyboard();
       Timber.d("init() initLiquidKeyboard done");
-      Rime.setShowSwitches(getPrefs().getKeyboard().getSwitchesEnabled());
-      Rime.setShowSwitchArrow(getPrefs().getKeyboard().getSwitchArrowEnabled());
+      Rime.setShowSwitches(appPrefs.getKeyboard().getSwitchesEnabled());
+      Rime.setShowSwitchArrow(appPrefs.getKeyboard().getSwitchArrowEnabled());
       reset();
       Timber.d("init() reset done");
       initCurrentColors();
@@ -768,7 +765,7 @@ public class Config {
   private Object getColorObject(String key) {
     final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(colorID);
     if (map == null) return null;
-    getPrefs().getLooks().setSelectedColor(colorID);
+    appPrefs.getLooks().setSelectedColor(colorID);
     Object o = map.get(key);
     String fallbackKey = key;
     while (o == null && fallbackColors.containsKey(fallbackKey)) {
@@ -786,7 +783,7 @@ public class Config {
    * @return java.lang.String 首个已配置的主题方案名
    */
   private String getColorSchemeName() {
-    String scheme = getPrefs().getLooks().getSelectedColor();
+    String scheme = appPrefs.getLooks().getSelectedColor();
     if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
     Map<String, ?> color = (Map<String, ?>) presetColorSchemes.get(scheme);
@@ -807,7 +804,7 @@ public class Config {
    * @return 配色方案名称
    */
   private String getColorSchemeName(boolean darkMode) {
-    String scheme = getPrefs().getLooks().getSelectedColor();
+    String scheme = appPrefs.getLooks().getSelectedColor();
     if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
     Map<String, ?> color = (Map<String, ?>) presetColorSchemes.get(scheme);
@@ -954,13 +951,13 @@ public class Config {
   }
 
   public int getLongTimeout() {
-    int progress = getPrefs().getKeyboard().getLongPressTimeout();
+    int progress = appPrefs.getKeyboard().getLongPressTimeout();
     if (progress > 60) progress = 60;
     return progress * 10 + 100;
   }
 
   public int getRepeatInterval() {
-    int progress = getPrefs().getKeyboard().getRepeatInterval();
+    int progress = appPrefs.getKeyboard().getRepeatInterval();
     if (progress > 9) progress = 9;
     return progress * 10 + 10;
   }
@@ -1090,7 +1087,7 @@ public class Config {
       Timber.i("no colorID %s", colorID);
       return;
     }
-    getPrefs().getLooks().setSelectedColor(colorID);
+    appPrefs.getLooks().setSelectedColor(colorID);
 
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       Object value = getColorRealValue(entry.getValue());
@@ -1136,7 +1133,7 @@ public class Config {
       Timber.i("no colorID %s", colorID);
       return;
     }
-    getPrefs().getLooks().setSelectedColor(colorID);
+    appPrefs.getLooks().setSelectedColor(colorID);
 
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       Object value = getColorRealValue(entry.getValue());

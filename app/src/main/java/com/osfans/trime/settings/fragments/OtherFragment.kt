@@ -11,14 +11,14 @@ import androidx.core.view.forEach
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.data.Config
 
 class OtherFragment :
     PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    private val prefs get() = Preferences.defaultInstance()
+    private val prefs get() = AppPrefs.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
         findPreference<ListPreference>("other__ui_mode")?.setOnPreferenceChangeListener { _, newValue ->

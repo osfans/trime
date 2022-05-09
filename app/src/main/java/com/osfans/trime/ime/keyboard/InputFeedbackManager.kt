@@ -9,7 +9,7 @@ import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
-import com.osfans.trime.ime.core.Preferences
+import com.osfans.trime.data.AppPrefs
 import java.util.Locale
 import kotlin.math.ln
 
@@ -19,7 +19,7 @@ import kotlin.math.ln
 class InputFeedbackManager(
     private val ims: InputMethodService
 ) {
-    private val prefs: Preferences = Preferences.defaultInstance()
+    private val prefs: AppPrefs = AppPrefs.defaultInstance()
 
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
