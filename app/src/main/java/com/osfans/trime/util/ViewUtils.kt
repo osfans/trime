@@ -1,4 +1,4 @@
-package com.osfans.trime.common
+package com.osfans.trime.util
 
 import android.view.View
 import android.view.Window
@@ -57,12 +57,5 @@ object ViewUtils {
                     lp.javaClass.name
             )
         }
-    }
-
-    @JvmStatic
-    fun getLocationOnScreen(view: View): IntArray {
-        val outLocation: IntArray = intArrayOf(0, 0)
-        view.getLocationOnScreen(outLocation)
-        return outLocation
     }
 }

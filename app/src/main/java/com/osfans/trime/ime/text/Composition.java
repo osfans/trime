@@ -43,10 +43,9 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.common.ViewUtils;
+import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
-import com.osfans.trime.data.Config;
 import com.osfans.trime.util.ConfigGetter;
 import java.util.List;
 import java.util.Map;
@@ -192,9 +191,7 @@ public class Composition extends AppCompatTextView {
         if (action == MotionEvent.ACTION_DOWN) {
           if (first_move || movable.contentEquals("once")) {
             first_move = false;
-            int[] location = ViewUtils.getLocationOnScreen(this);
-            mCurrentX = location[0];
-            mCurrentY = location[1];
+            this.getLocationOnScreen(new int[]{mCurrentX, mCurrentY});
           }
           mDx = mCurrentX - event.getRawX();
           mDy = mCurrentY - event.getRawY();

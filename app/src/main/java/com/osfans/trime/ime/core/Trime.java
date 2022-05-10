@@ -61,7 +61,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.data.db.clipboard.ClipboardDao;
-import com.osfans.trime.common.ViewUtils;
+import com.osfans.trime.util.ViewUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.data.AppPrefs;
@@ -162,7 +162,8 @@ public class Trime extends LifecycleInputMethodService {
           if (mCandidateRoot == null || mCandidateRoot.getWindowToken() == null) return;
           if (!isPopupWindowEnabled) return;
           int x = 0, y = 0;
-          final int[] candidateLocation = ViewUtils.getLocationOnScreen(mCandidateRoot);
+          final int[] candidateLocation = new int[2];
+          mCandidateRoot.getLocationOnScreen(candidateLocation);
           final int minX = popupMarginH;
           final int minY = popupMargin;
           final int maxX = mCandidateRoot.getWidth() - mPopupWindow.getWidth() - minX;
