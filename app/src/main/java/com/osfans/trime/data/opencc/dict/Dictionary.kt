@@ -7,7 +7,7 @@ abstract class Dictionary {
         OPENCC("ocd2"), Text("txt");
 
         companion object {
-            fun fromFileName(name: String) : Type? {
+            fun fromFileName(name: String): Type? {
                 return when {
                     name.endsWith(".ocd2") -> OPENCC
                     name.endsWith(".ocd") -> OPENCC

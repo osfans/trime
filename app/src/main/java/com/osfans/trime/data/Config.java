@@ -92,7 +92,6 @@ public class Config {
 
   private String[] clipBoardCompare, clipBoardOutput, draftOutput;
 
-
   public Config(@NonNull Context context) {
     this(context, false);
   }
@@ -298,13 +297,7 @@ public class Config {
   // 设置音效包
   public void setSoundPackage(String name) {
     soundPackageName = name;
-    String path =
-        userDataDir
-            + File.separator
-            + "sound"
-            + File.separator
-            + name
-            + ".sound.yaml";
+    String path = userDataDir + File.separator + "sound" + File.separator + name + ".sound.yaml";
     File file = new File(path);
     if (file.exists()) {
       applySoundPackage(file, name);
@@ -319,12 +312,7 @@ public class Config {
       InputStream in = new FileInputStream(file);
       OutputStream out =
           new FileOutputStream(
-              userDataDir
-                  + File.separator
-                  + "build"
-                  + File.separator
-                  + name
-                  + ".sound.yaml");
+              userDataDir + File.separator + "build" + File.separator + name + ".sound.yaml");
 
       byte[] buffer = new byte[1024];
       int len;
@@ -349,12 +337,7 @@ public class Config {
       String sound = (String) m.get("sound");
       if (!Objects.equals(sound, currentSound)) {
         String path =
-            userDataDir
-                + File.separator
-                + "sound"
-                + File.separator
-                + sound
-                + ".sound.yaml";
+            userDataDir + File.separator + "sound" + File.separator + sound + ".sound.yaml";
         File file = new File(path);
         if (file.exists()) {
           applySoundPackage(file, sound);

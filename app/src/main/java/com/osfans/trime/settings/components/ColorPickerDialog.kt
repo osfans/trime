@@ -6,8 +6,8 @@ import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.data.Config
+import com.osfans.trime.ime.core.Trime
 import timber.log.Timber
 
 /** 顯示配色方案列表

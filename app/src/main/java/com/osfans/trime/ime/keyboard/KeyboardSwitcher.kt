@@ -1,8 +1,8 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.data.Config
+import com.osfans.trime.ime.core.Trime
 import timber.log.Timber
 
 /** Manages [Keyboard]s and their status. **/

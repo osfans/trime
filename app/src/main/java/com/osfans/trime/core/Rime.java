@@ -546,7 +546,7 @@ public class Rime {
   public static void handleRimeNotification(String message_type, String message_value) {
     mOnMessage = true;
     final RimeEvent event = RimeEvent.create(message_type, message_value);
-    //Timber.i("message: [%s] %s", message_type, message_value);
+    // Timber.i("message: [%s] %s", message_type, message_value);
     Timber.i("Notification: %s", event);
     final Trime trime = Trime.getService();
     if (event instanceof RimeEvent.SchemaEvent) {

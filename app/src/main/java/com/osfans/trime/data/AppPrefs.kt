@@ -10,7 +10,6 @@ import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
-import java.time.LocalDateTime
 
 /**
  * Helper class for an organized access to the shared preferences.

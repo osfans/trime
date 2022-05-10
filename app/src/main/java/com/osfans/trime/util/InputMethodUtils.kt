@@ -31,8 +31,8 @@ object InputMethodUtils {
         return selectedImeIds == serviceName
     }
 
-    fun showImeEnablerActivity(context: Context)
-        = context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+    fun showImeEnablerActivity(context: Context) =
+        context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
 
     fun showImePicker(context: Context): Boolean {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager

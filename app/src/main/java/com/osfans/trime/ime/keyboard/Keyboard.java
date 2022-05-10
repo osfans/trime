@@ -218,11 +218,9 @@ public class Keyboard {
         ConfigGetter.getPixel(
             keyboardConfig, "horizontal_gap", config.getFloat("horizontal_gap", 3));
     mDefaultVerticalGap =
-        ConfigGetter.getPixel(
-            keyboardConfig, "vertical_gap", config.getFloat("vertical_gap", 5));
+        ConfigGetter.getPixel(keyboardConfig, "vertical_gap", config.getFloat("vertical_gap", 5));
     mRoundCorner =
-        ConfigGetter.getFloat(
-            keyboardConfig, "round_corner", config.getFloat("round_corner", 5));
+        ConfigGetter.getFloat(keyboardConfig, "round_corner", config.getFloat("round_corner", 5));
 
     Drawable background = config.getDrawable(keyboardConfig, "keyboard_back_color");
     if (background != null) mBackground = background;
@@ -240,8 +238,7 @@ public class Keyboard {
     if (keyboardHeight > 0) {
       int mkeyboardHeight = ConfigGetter.getPixel(keyboardConfig, "keyboard_height", 0);
       if (land) {
-        int mkeyBoardHeightLand =
-            ConfigGetter.getPixel(keyboardConfig, "keyboard_height_land", 0);
+        int mkeyBoardHeightLand = ConfigGetter.getPixel(keyboardConfig, "keyboard_height_land", 0);
         if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand;
       }
 

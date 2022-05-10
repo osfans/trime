@@ -6,9 +6,11 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import com.osfans.trime.core.Rime
-import com.osfans.trime.databinding.InputRootBinding
-import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.Config
+import com.osfans.trime.databinding.InputRootBinding
+import com.osfans.trime.ime.broadcast.IntentReceiver
+import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
@@ -16,8 +18,6 @@ import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
-import com.osfans.trime.data.Config
-import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.CoroutineScope

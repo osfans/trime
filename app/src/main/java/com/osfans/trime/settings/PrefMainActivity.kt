@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
@@ -23,8 +22,8 @@ import androidx.preference.PreferenceFragmentCompat
 import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
-import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.settings.components.SchemaPickerDialog
 import com.osfans.trime.setup.SetupActivity

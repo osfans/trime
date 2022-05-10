@@ -17,18 +17,18 @@
  */
 package com.osfans.trime.ime.broadcast
 
-import com.osfans.trime.util.RimeUtils.deploy
-import com.osfans.trime.util.RimeUtils.sync
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import timber.log.Timber
-import com.osfans.trime.core.Rime
 import android.content.IntentFilter
+import com.osfans.trime.core.Rime
+import com.osfans.trime.util.RimeUtils.deploy
+import com.osfans.trime.util.RimeUtils.sync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 /** 接收 Intent 廣播事件  */
 class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {

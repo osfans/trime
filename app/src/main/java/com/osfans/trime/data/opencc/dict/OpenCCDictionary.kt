@@ -23,7 +23,7 @@ class OpenCCDictionary(file: File) : Dictionary() {
             file.extension == type.ext -> {
                 true
             }
-            file.name.endsWith(".${OLD_FORMAT}") -> {
+            file.name.endsWith(".$OLD_FORMAT") -> {
                 false
             }
             else -> throw IllegalArgumentException("Not a libime dict ${file.name}")
@@ -42,7 +42,7 @@ class OpenCCDictionary(file: File) : Dictionary() {
     fun useOCD() {
         if (!isOCD2)
             return
-        val newFile = file.resolveSibling(name + ".${OLD_FORMAT}")
+        val newFile = file.resolveSibling(name + ".$OLD_FORMAT")
         file.renameTo(newFile)
         file = newFile
         isOCD2 = false

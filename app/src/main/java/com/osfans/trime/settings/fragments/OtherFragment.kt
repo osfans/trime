@@ -12,8 +12,8 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.data.Config
+import com.osfans.trime.ime.core.Trime
 
 class OtherFragment :
     PreferenceFragmentCompat(),

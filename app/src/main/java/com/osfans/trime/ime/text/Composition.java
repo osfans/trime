@@ -191,7 +191,7 @@ public class Composition extends AppCompatTextView {
         if (action == MotionEvent.ACTION_DOWN) {
           if (first_move || movable.contentEquals("once")) {
             first_move = false;
-            this.getLocationOnScreen(new int[]{mCurrentX, mCurrentY});
+            this.getLocationOnScreen(new int[] {mCurrentX, mCurrentY});
           }
           mDx = mCurrentX - event.getRawX();
           mDy = mCurrentY - event.getRawY();
