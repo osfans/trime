@@ -89,7 +89,7 @@ import com.osfans.trime.settings.components.ColorPickerDialog;
 import com.osfans.trime.settings.components.SchemaPickerDialog;
 import com.osfans.trime.settings.components.SoundPickerDialog;
 import com.osfans.trime.settings.components.ThemePickerDialog;
-import com.osfans.trime.setup.IntentReceiver;
+import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import java.util.Locale;

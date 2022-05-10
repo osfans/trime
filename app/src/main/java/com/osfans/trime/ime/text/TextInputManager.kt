@@ -18,7 +18,7 @@ import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.data.Config
-import com.osfans.trime.setup.IntentReceiver
+import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.util.ShortcutUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
