@@ -57,6 +57,7 @@ public class TabView extends View {
   private final boolean shouldShowComment = true;
   private boolean isCommentOnTop;
   private boolean shouldCandidateUseCursor;
+  private int candidateOffsetY, commentOffsetY;
   // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset(Context context) {
@@ -78,6 +79,8 @@ public class TabView extends View {
     candidateViewHeight = config.getPixel("candidate_view_height");
 
     candidateFont = config.getFont("candidate_font");
+    candidateOffsetY = config.getFont("candidate_offset_y");
+    commentOffsetY = config.getFont("comment_offset_y");
 
     candidatePaint.setTextSize(candidateTextSize);
     candidatePaint.setTypeface(candidateFont);

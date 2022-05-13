@@ -20,6 +20,7 @@ package com.osfans.trime.ime.text;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,12 +29,14 @@ import android.graphics.Typeface;
 import android.graphics.drawable.PaintDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.Rime;
+import com.osfans.trime.ime.core.Preferences;
 import com.osfans.trime.setup.Config;
 import com.osfans.trime.util.GraphicUtils;
 import java.lang.ref.WeakReference;
@@ -73,6 +76,7 @@ public class Candidate extends View {
   private int commentTextColor, hilitedCommentTextColor;
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private boolean shouldShowComment = true, isCommentOnTop, candidateUseCursor;
+  private int commentOffsetY, candidateOffsetY;
 
   public void reset(Context context) {
     Config config = Config.get(context);
@@ -91,6 +95,8 @@ public class Candidate extends View {
     int comment_text_size = config.getPixel("comment_text_size");
     candidateViewHeight = config.getPixel("candidate_view_height");
     commentHeight = config.getPixel("comment_height");
+    commentOffsetY = config.getPixel("comment_offset_y");
+    candidateOffsetY = config.getPixel("candidate_offset_y");
 
     candidateFont = config.getFont("candidate_font");
     commentFont = config.getFont("comment_font");
@@ -210,6 +216,14 @@ public class Candidate extends View {
     if (candidates == null) return;
     super.onDraw(canvas);
 
+    int cmtcnt = 0;
+    for (ComputedCandidate computedCandidate : computedCandidates) {
+      if (computedCandidate instanceof ComputedCandidate.Word) {
+        String cmt = ((ComputedCandidate.Word) computedCandidate).getComment();
+        if (cmt != null && !cmt.isEmpty())
+          cmtcnt++;
+      }
+    }
     for (ComputedCandidate computedCandidate : computedCandidates) {
       int i = computedCandidates.indexOf(computedCandidate);
       // Draw highlight
@@ -223,22 +237,31 @@ public class Candidate extends View {
         float wordY =
             computedCandidates.get(0).getGeometry().centerY()
                 - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
-        if (shouldShowComment) {
-          String comment = ((ComputedCandidate.Word) computedCandidate).getComment();
-          if (comment != null && !comment.isEmpty()) {
-            float commentX = computedCandidate.getGeometry().centerX();
-            float commentY =
-                commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2;
-            wordY += commentHeight / 2.0f;
-            if (!isCommentOnTop) {
-              float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
-              commentX = computedCandidate.getGeometry().right - commentWidth / 2;
-              commentY += computedCandidates.get(0).getGeometry().bottom - commentHeight;
-              wordX -= commentWidth / 2.0f;
-              wordY -= commentHeight / 2.0f;
+        if (!shouldShowComment){
+          wordY += commentHeight / 2.0f;
+        } else {
+          if (cmtcnt > 0){
+            String comment = ((ComputedCandidate.Word) computedCandidate).getComment();
+            wordY += candidateOffsetY;
+            if (comment != null && !comment.isEmpty()) {
+              wordY += commentHeight / 2.0f;
+              float commentX = computedCandidate.getGeometry().centerX();
+              float commentY =
+                      commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2 + commentOffsetY;
+              if (!isCommentOnTop) {
+                float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
+                commentX = computedCandidate.getGeometry().right - commentWidth / 2;
+                commentY += computedCandidates.get(0).getGeometry().bottom - commentHeight ;
+                commentY -= commentOffsetY;
+                wordX -= commentWidth / 2.0f;
+                wordY -= commentHeight / 2.0f;
+              }
+              commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
+              graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
+            } else {
+              if (isCommentOnTop)
+                wordY += commentHeight / 2.0f;
             }
-            commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
-            graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
           }
         }
         String word = ((ComputedCandidate.Word) computedCandidate).getWord();
@@ -389,7 +412,7 @@ public class Candidate extends View {
   private int updateCandidates() {
     candidates = Rime.getCandidates();
     highlightIndex = Rime.getCandHighlightIndex() - startNum;
-    numCandidates = candidates == null ? 0 : candidates.length - startNum;
+    numCandidates = (candidates == null) ? 0 : candidates.length - startNum;
     return numCandidates;
   }
 }
