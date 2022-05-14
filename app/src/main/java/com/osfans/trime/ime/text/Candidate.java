@@ -77,6 +77,7 @@ public class Candidate extends View {
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private boolean shouldShowComment = true, isCommentOnTop, candidateUseCursor;
   private int commentOffsetY, candidateOffsetY;
+  private int cmtcnt;
 
   public void reset(Context context) {
     Config config = Config.get(context);
@@ -216,6 +217,7 @@ public class Candidate extends View {
     if (candidates == null) return;
     super.onDraw(canvas);
 
+    /*
     int cmtcnt = 0;
     for (ComputedCandidate computedCandidate : computedCandidates) {
       if (computedCandidate instanceof ComputedCandidate.Word) {
@@ -224,6 +226,7 @@ public class Candidate extends View {
           cmtcnt++;
       }
     }
+     */
     for (ComputedCandidate computedCandidate : computedCandidates) {
       int i = computedCandidates.indexOf(computedCandidate);
       // Draw highlight
@@ -251,10 +254,11 @@ public class Candidate extends View {
               if (!isCommentOnTop) {
                 float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
                 commentX = computedCandidate.getGeometry().right - commentWidth / 2;
-                commentY += computedCandidates.get(0).getGeometry().bottom - commentHeight ;
-                commentY -= commentOffsetY;
+                //commentY += computedCandidates.get(0).getGeometry().bottom - commentHeight + candidateOffsetY ;
+                //commentY -= commentOffsetY;
                 wordX -= commentWidth / 2.0f;
                 wordY -= commentHeight / 2.0f;
+                commentY = wordY;
               }
               commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
               graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
@@ -342,6 +346,16 @@ public class Candidate extends View {
               PAGE_DOWN_BUTTON, new Rect(x, 0, (int) ((int) x + right), getMeasuredHeight())));
       x += (int) right;
     }
+
+    cmtcnt = 0;
+    for (ComputedCandidate computedCandidate : computedCandidates) {
+      if (computedCandidate instanceof ComputedCandidate.Word) {
+        String cmt = ((ComputedCandidate.Word) computedCandidate).getComment();
+        if (cmt != null && !cmt.isEmpty())
+          cmtcnt++;
+      }
+    }
+
     LayoutParams params = getLayoutParams();
     params.width = x;
     params.height =
