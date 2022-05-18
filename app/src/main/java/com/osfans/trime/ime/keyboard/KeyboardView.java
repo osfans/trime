@@ -48,7 +48,6 @@ import com.osfans.trime.R;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
-import com.osfans.trime.ime.enums.ActionLabelType;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
@@ -241,21 +240,23 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
   private String labelEnter = "";
   private Map<String, String> mEnterLabels;
-  private ActionLabelType actionLabelType;
+  private int enterLabelMode;
 
   public void resetEnterLabel() {
     labelEnter = mEnterLabels.get("default");
   }
 
   public void setEnterLabel(int action, CharSequence actionLabel) {
+    // enter_label_mode 取值：
+    // 0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel
 
-    if (actionLabelType == ActionLabelType.ONLY) {
+    if (enterLabelMode == 1) {
       if (actionLabel != null && actionLabel.length() > 0) labelEnter = actionLabel.toString();
       else labelEnter = mEnterLabels.get("default");
       return;
     }
 
-    if (actionLabelType == ActionLabelType.FIRST) {
+    if (enterLabelMode == 2) {
       if (actionLabel != null && actionLabel.length() > 0) {
         labelEnter = actionLabel.toString();
         return;
@@ -284,7 +285,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       case EditorInfo.IME_ACTION_NONE:
         labelEnter = mEnterLabels.get("none");
       default:
-        if (actionLabelType == ActionLabelType.LAST) {
+        if (enterLabelMode == 3) {
           if (actionLabel != null && actionLabel.length() > 0) {
             labelEnter = actionLabel.toString();
             return;
@@ -406,7 +407,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     MULTI_TAP_INTERVAL = config.getLongTimeout();
 
     mEnterLabels = config.getmEnterLabels();
-    actionLabelType = config.getActionLabelType();
+    enterLabelMode = config.getInt("enter_label_mode");
     invalidateAllKeys();
   }
 

@@ -36,7 +36,6 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.ime.enums.ActionLabelType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
@@ -846,10 +845,6 @@ public class Config {
 
   public Map<String, String> getmEnterLabels() {
     return mEnterLabels;
-  }
-
-  public ActionLabelType getActionLabelType() {
-    return ActionLabelType.fromString(getString("action_label_type"));
   }
 
   public void initEnterLabels() {

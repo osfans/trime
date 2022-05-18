@@ -89,7 +89,7 @@ style:
   long_text_font: comment.ttf #剪贴板等可能包含大段文本使用的字体
   #background_folder: #背景图保存在background目录下的哪个子目录
   key_long_text_border: 1
-  action_label_type: never  #是否使用App的ActionLabel内容作为Enter键的文本 only | first | last | never
+  enter_label_mode: 0  #是否使用App提供的ActionLabel内容作为Enter键的文本（由于多数App没有适配ActionLable，实际影响不大）。0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel
   enter_labels:  # 定义Enter键的文本
     go: 前往
     done: 完成
