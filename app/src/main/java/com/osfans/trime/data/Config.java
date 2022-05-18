@@ -394,6 +394,7 @@ public class Config {
       reset();
       Timber.d("init() reset done");
       initCurrentColors();
+      initEnterLabels();
       Timber.d("init() finins");
     } catch (Exception e) {
       e.printStackTrace();

@@ -912,7 +912,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
           color != null ? color : (key.isPressed() ? hilited_key_symbol_color : key_symbol_color));
 
       // Switch the character to uppercase if shift is pressed
-      final String label = key.getLabel();
+      String label = key.getLabel();
+      if (label.equals("enter_labels")) label = labelEnter;
       final String hint = key.getHint();
       int left = (key.getWidth() - padding.left - padding.right) / 2 + padding.left;
       int top = padding.top;
