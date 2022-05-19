@@ -178,6 +178,7 @@ class TextInputManager private constructor() :
 
     override fun onStartInputView(instance: EditorInstance, restarting: Boolean) {
         super.onStartInputView(instance, restarting)
+        Trime.getService().selectLiquidKeyboard(-1)
         isComposable = false
         performEnterAsLineBreak = false
         var tempAsciiMode = if (shouldResetAsciiMode) false else null
