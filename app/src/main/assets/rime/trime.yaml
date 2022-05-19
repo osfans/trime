@@ -693,7 +693,7 @@ liquid_keyboard:
   single_width: 60    #single类型的按键宽度
   vertical_gap: 1     #纵向按键间隙
   margin_x: 0.5         #左右按键间隙的1/2
-  keyboards: [emoji, math, ascii, cn, history, clipboard, draft, list, tabs, exit, ids , jp, table, symbol, pinyin, grease, rusa, korea, lation, yinbiao, unit,  exit]  #tab列表
+  keyboards: [emoji, math, ascii, cn, history, clipboard, draft, tabs, exit, list, ids , table, symbol, unit, new, jp, pinyin, grease, rusa, korea, lation, yinbiao,  exit]  #tab列表
   exit:
     name: 返回
     type: NO_KEY
@@ -701,6 +701,9 @@ liquid_keyboard:
   tabs:
     name: 更多
     type: TABS
+  new:
+    name: 新行 #此类型不显示在候选栏中，但是打开“更多”TAB时，下一个按键会换行
+    type: NEW_ROW
   history:
     name: 常用
     type: HISTORY
@@ -732,8 +735,9 @@ liquid_keyboard:
       - ‘
       - ···
       - ……
-      - { click: "——" }
+      - { click: "-" }
       - { click: "——", label: "破折" }
+      - { click: "" } # 内容为空可以强制令键盘从此处新起一行
       - （
       - ）
       - 【

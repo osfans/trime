@@ -27,7 +27,9 @@ public class TabManager {
     if (tabSwitchData.size() > 0) return tabSwitchData;
 
     for (TabTag tag : tabTags) {
-      tabSwitchData.add(new SimpleKeyBean(tag.text));
+      if (SymbolKeyboardType.Companion.hasKey(tag.type))
+        tabSwitchData.add(new SimpleKeyBean(tag.text));
+      else tabSwitchData.add(new SimpleKeyBean(""));
     }
     return tabSwitchData;
   }
@@ -62,7 +64,7 @@ public class TabManager {
   public void addTab(@NonNull String name, SymbolKeyboardType type, List<SimpleKeyBean> keyBeans) {
     if (name.trim().length() < 1) return;
 
-    if (SymbolKeyboardType.Companion.needKeys(type)) {
+    if (SymbolKeyboardType.Companion.hasKeys(type)) {
       for (int i = 0; i < tabTags.size(); i++) {
         TabTag tag = tabTags.get(i);
         if (tag.text.equals(name)) {
@@ -90,7 +92,7 @@ public class TabManager {
 
   // 解析config的数据
   public void addTab(String name, SymbolKeyboardType type, Object obj) {
-    if (SymbolKeyboardType.Companion.needKeys(type)) {
+    if (SymbolKeyboardType.Companion.hasKeys(type)) {
       if (obj instanceof String) {
         addTab(name, type, (String) obj);
       } else if (obj instanceof List<?>) {

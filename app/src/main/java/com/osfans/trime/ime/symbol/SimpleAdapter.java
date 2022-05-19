@@ -94,7 +94,6 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
       final ItemViewHolder itemViewHold = ((ItemViewHolder) viewHolder);
 
       if (textFont != null) itemViewHold.mTitle.setTypeface(textFont);
-      itemViewHold.mTitle.setText(searchHistoryBean.getText());
 
       itemViewHold.mTitle.setText(searchHistoryBean.getLabel());
       if (textSize > 0) itemViewHold.mTitle.setTextSize(textSize);
@@ -104,19 +103,27 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         FlexboxLayoutManager.LayoutParams flexboxLp =
             (FlexboxLayoutManager.LayoutParams) itemViewHold.listItemLayout.getLayoutParams();
 
-        if (keyWidth > 0) flexboxLp.setWidth(keyWidth);
-        if (keyHeight > 0) flexboxLp.setHeight(keyHeight);
-        itemViewHold.mTitle.setTextColor(textColor);
+        if (searchHistoryBean.getLabel().isEmpty()) {
+          flexboxLp.setWrapBefore(true);
+          flexboxLp.setWidth(0);
+          flexboxLp.setHeight(0);
+          flexboxLp.setMargins(0, 0, 0, 0);
+        } else {
 
-        int marginTop = flexboxLp.getMarginTop();
-        int marginX = flexboxLp.getMarginLeft();
-        if (keyMarginTop > 0) marginTop = keyMarginTop;
-        if (keyMarginX > 0) marginX = keyMarginX;
+          if (keyWidth > 0) flexboxLp.setWidth(keyWidth);
+          if (keyHeight > 0) flexboxLp.setHeight(keyHeight);
+          itemViewHold.mTitle.setTextColor(textColor);
 
-        flexboxLp.setMargins(marginX, marginTop, marginX, flexboxLp.getMarginBottom());
+          int marginTop = flexboxLp.getMarginTop();
+          int marginX = flexboxLp.getMarginLeft();
+          if (keyMarginTop > 0) marginTop = keyMarginTop;
+          if (keyMarginX > 0) marginX = keyMarginX;
 
-        if (background != null) {
-          itemViewHold.listItemLayout.setBackground(background);
+          flexboxLp.setMargins(marginX, marginTop, marginX, flexboxLp.getMarginBottom());
+
+          if (background != null) {
+            itemViewHold.listItemLayout.setBackground(background);
+          }
         }
       }
 
