@@ -20,11 +20,21 @@ package com.osfans.trime.ime.enums
 import java.util.HashMap
 import java.util.Locale
 
-enum class WindowsPositionType {
-    LEFT, LEFT_UP, RIGHT, RIGHT_UP, DRAG, FIXED, BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT;
+/**
+ * 悬浮窗。候选栏文字，按键文字，按键气泡文字的定位方式
+ */
+enum class PositionType {
+    // 跟随光标
+    LEFT, LEFT_UP, RIGHT, RIGHT_UP,
+    // 固定位置
+    DRAG, FIXED,
+    // 相对位置
+    BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT,
+    // 暂未实现的相对位置
+    TOP_CENTER, BOTTOM_CENTER, CENTER;
 
     companion object {
-        private val convertMap: HashMap<String, WindowsPositionType> = hashMapOf()
+        private val convertMap: HashMap<String, PositionType> = hashMapOf()
 
         init {
             for (type in values()) {
@@ -33,9 +43,27 @@ enum class WindowsPositionType {
         }
 
         @JvmStatic
-        fun fromString(code: String): WindowsPositionType {
+        fun fromString(code: String): PositionType {
             val type = convertMap[code.uppercase(Locale.getDefault())]
             return type ?: FIXED
+        }
+
+        @JvmStatic
+        fun fromString(code: String, default: PositionType): PositionType {
+            val type = convertMap[code.uppercase(Locale.getDefault())]
+            return type ?: default
+        }
+
+        /**
+         * 解析候选栏文字，按键文字，按键气泡文字的定位方式
+         */
+        @JvmStatic
+        fun parseKeyPosition(code: String): PositionType {
+            val type = convertMap[code.uppercase(Locale.getDefault())]
+            if (type != null)
+                if (type > FIXED)
+                    return type
+            return type ?: CENTER
         }
     }
 }

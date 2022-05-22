@@ -28,7 +28,6 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.ConfigGetter;
-import java.util.List;
 import java.util.Map;
 import timber.log.Timber;
 
@@ -55,7 +54,6 @@ public class Key {
         KEY_STATE_PRESSED, // 4
         KEY_STATE_NORMAL // 5
       };
-  public static List<String> androidKeys;
   public static Map<String, Map<String, String>> presetKeys;
   private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
@@ -157,10 +155,6 @@ public class Key {
     key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
     hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
     round_corner = ConfigGetter.getFloat(mk, "round_corner", 0);
-  }
-
-  public static List<String> getAndroidKeys() {
-    return androidKeys;
   }
 
   public static Map<String, Map<String, String>> getPresetKeys() {

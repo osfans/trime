@@ -36,8 +36,9 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.ime.enums.Keycode;
+import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
-import com.osfans.trime.ime.enums.WindowsPositionType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
@@ -376,9 +377,8 @@ public class Config {
       mDefaultStyle = (Map<?, ?>) globalThemeConfig.get("style");
       fallbackColors = (Map<?, ?>) globalThemeConfig.get("fallback_colors");
       final Map<String, ?> androidKeySettings = globalThemeConfig.get("android_keys");
-      Key.androidKeys = (List<String>) androidKeySettings.get("name");
       Key.presetKeys = (Map<String, Map<String, String>>) globalThemeConfig.get("preset_keys");
-      Key.setSymbolStart(Key.androidKeys.contains("A") ? Key.androidKeys.indexOf("A") : 284);
+      Key.setSymbolStart(Keycode.A.ordinal());
       Key.setSymbols((String) androidKeySettings.get("symbols"));
       if (TextUtils.isEmpty(Key.getSymbols()))
         Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
@@ -934,8 +934,8 @@ public class Config {
     return drawableObject(o);
   }
 
-  public WindowsPositionType getWinPos() {
-    return WindowsPositionType.Companion.fromString(getString("layout/position"));
+  public PositionType getWinPos() {
+    return PositionType.Companion.fromString(getString("layout/position"));
   }
 
   public int getLongTimeout() {
