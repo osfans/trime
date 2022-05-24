@@ -28,6 +28,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.ConfigGetter;
+import java.util.Locale;
 import java.util.Map;
 import timber.log.Timber;
 
@@ -62,10 +63,7 @@ public class Key {
   private static String symbols;
   private static final KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
   private final Keyboard mKeyboard;
-  private Event ascii;
-  private Event composing;
-  private Event has_menu;
-  private Event paging;
+
   private boolean send_bindings = true;
   private int width;
   private int height;
@@ -117,34 +115,29 @@ public class Key {
     this(parent);
     String s;
     Config config = Config.get(context);
-    for (int i = 0; i < EVENT_NUM; i++) {
-      String[] eventTypes =
-          new String[] {
-            "click", "long_click", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "combo"
-          };
-      String eventType = eventTypes[i];
-      s = Config.getString(mk, eventType);
-      if (!TextUtils.isEmpty(s)) events[i] = new Event(mKeyboard, s);
-      else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
+    {
+      boolean hasComposingKey = false;
+
+      for (int i = 0; i < EVENT_NUM - 1; i++) {
+        String eventType = (KeyEventType.Companion.valueOf(i)).toString().toLowerCase(Locale.ROOT);
+        s = ConfigGetter.getString(mk, eventType, "");
+        if (!TextUtils.isEmpty(s)) {
+          events[i] = new Event(mKeyboard, s);
+          if (i < KeyEventType.COMBO.ordinal()) hasComposingKey = true;
+        } else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
+      }
+      if (hasComposingKey) mKeyboard.getComposingKeys().add(this);
+
+      label = ConfigGetter.getString(mk, "label", "");
+      labelSymbol = ConfigGetter.getString(mk, "label_symbol", "");
+      hint = ConfigGetter.getString(mk, "hint", "");
+      if (mk.containsKey("send_bindings")) {
+        send_bindings = ConfigGetter.getBoolean(mk, "send_bindings", true);
+      } else if (!hasComposingKey) {
+        send_bindings = false;
+      }
     }
-    s = ConfigGetter.getString(mk, "composing", "");
-    if (!TextUtils.isEmpty(s)) composing = new Event(mKeyboard, s);
-    s = ConfigGetter.getString(mk, "has_menu", "");
-    if (!TextUtils.isEmpty(s)) has_menu = new Event(mKeyboard, s);
-    s = ConfigGetter.getString(mk, "paging", "");
-    if (!TextUtils.isEmpty(s)) paging = new Event(mKeyboard, s);
-    if (composing != null || has_menu != null || paging != null)
-      mKeyboard.getmComposingKeys().add(this);
-    s = ConfigGetter.getString(mk, "ascii", "");
-    if (!TextUtils.isEmpty(s)) ascii = new Event(mKeyboard, s);
-    label = ConfigGetter.getString(mk, "label", "");
-    labelSymbol = ConfigGetter.getString(mk, "label_symbol", "");
-    hint = ConfigGetter.getString(mk, "hint", "");
-    if (mk.containsKey("send_bindings")) {
-      send_bindings = ConfigGetter.getBoolean(mk, "send_bindings", true);
-    } else if (composing == null && has_menu == null && paging == null) {
-      send_bindings = false;
-    }
+
     mKeyboard.setModiferKey(getCode(), this);
     key_text_size = ConfigGetter.getPixel(mk, "key_text_size", 0);
     symbol_text_size = ConfigGetter.getPixel(mk, "symbol_text_size", 0);
@@ -534,22 +527,26 @@ public class Key {
    */
   public boolean sendBindings(int type) {
     Event e = null;
-    if (type > 0 && type <= EVENT_NUM) e = events[type];
+    if (type != KeyEventType.CLICK.ordinal() && type >= 0 && type <= EVENT_NUM) e = events[type];
     if (e != null) return true;
-    if (ascii != null && Rime.isAsciiMode()) return false;
+    if (events[KeyEventType.ASCII.ordinal()] != null && Rime.isAsciiMode()) return false;
     if (send_bindings) {
-      if (paging != null && Rime.isPaging()) return true;
-      if (has_menu != null && Rime.hasMenu()) return true;
-      if (composing != null && Rime.isComposing()) return true;
+      if (events[KeyEventType.PAGING.ordinal()] != null && Rime.isPaging()) return true;
+      if (events[KeyEventType.HAS_MENU.ordinal()] != null && Rime.hasMenu()) return true;
+      if (events[KeyEventType.COMPOSING.ordinal()] != null && Rime.isComposing()) return true;
     }
     return false;
   }
 
   private Event getEvent() {
-    if (ascii != null && Rime.isAsciiMode()) return ascii;
-    if (paging != null && Rime.isPaging()) return paging;
-    if (has_menu != null && Rime.hasMenu()) return has_menu;
-    if (composing != null && Rime.isComposing()) return composing;
+    if (events[KeyEventType.ASCII.ordinal()] != null && Rime.isAsciiMode())
+      return events[KeyEventType.ASCII.ordinal()];
+    if (events[KeyEventType.PAGING.ordinal()] != null && Rime.isPaging())
+      return events[KeyEventType.PAGING.ordinal()];
+    if (events[KeyEventType.HAS_MENU.ordinal()] != null && Rime.hasMenu())
+      return events[KeyEventType.HAS_MENU.ordinal()];
+    if (events[KeyEventType.COMPOSING.ordinal()] != null && Rime.isComposing())
+      return events[KeyEventType.COMPOSING.ordinal()];
     return getClick();
   }
 
@@ -567,13 +564,17 @@ public class Key {
 
   public Event getEvent(int i) {
     Event e = null;
-    if (i > 0 && i <= EVENT_NUM) e = events[i];
+    if (i != KeyEventType.CLICK.ordinal() && i >= 0 && i <= EVENT_NUM) e = events[i];
     if (e != null) return e;
-    if (ascii != null && Rime.isAsciiMode()) return ascii;
+    if (events[KeyEventType.ASCII.ordinal()] != null && Rime.isAsciiMode())
+      return events[KeyEventType.ASCII.ordinal()];
     if (send_bindings) {
-      if (paging != null && Rime.isPaging()) return paging;
-      if (has_menu != null && Rime.hasMenu()) return has_menu;
-      if (composing != null && Rime.isComposing()) return composing;
+      if (events[KeyEventType.PAGING.ordinal()] != null && Rime.isPaging())
+        return events[KeyEventType.PAGING.ordinal()];
+      if (events[KeyEventType.HAS_MENU.ordinal()] != null && Rime.hasMenu())
+        return events[KeyEventType.HAS_MENU.ordinal()];
+      if (events[KeyEventType.COMPOSING.ordinal()] != null && Rime.isComposing())
+        return events[KeyEventType.COMPOSING.ordinal()];
     }
     return getClick();
   }
@@ -588,7 +589,9 @@ public class Key {
 
   public String getLabel() {
     Event event = getEvent();
-    if (!TextUtils.isEmpty(label) && event == getClick() && (ascii == null && !Rime.isAsciiMode()))
+    if (!TextUtils.isEmpty(label)
+        && event == getClick()
+        && (events[KeyEventType.ASCII.ordinal()] == null && !Rime.isAsciiMode()))
       return label; // 中文狀態顯示標籤
     return event.getLabel();
   }

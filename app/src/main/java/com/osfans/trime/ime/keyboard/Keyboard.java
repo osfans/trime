@@ -329,96 +329,100 @@ public class Keyboard {
       mTotalWidth = 0;
     }
 
-    for (Map<String, Object> mk : lm) {
-      int gap = mDefaultHorizontalGap;
-      int w = (int) (ConfigGetter.getDouble(mk, "width", 0) * mDisplayWidth / 100);
-      if (w == 0 && mk.containsKey("click")) w = defaultWidth;
-      w -= gap;
-      if (column >= maxColumns || x + w > mDisplayWidth) {
-        x = gap / 2;
-        y += mDefaultVerticalGap + rowHeight;
-        column = 0;
-        row++;
-        if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
-      }
-      if (column == 0) {
-        if (keyboardHeight > 0) {
-          rowHeight = newHeight[row];
-        } else {
-          int heightK = ConfigGetter.getPixel(mk, "height", 0);
-          rowHeight = (heightK > 0) ? heightK : defaultHeight;
+    try {
+      for (Map<String, Object> mk : lm) {
+        int gap = mDefaultHorizontalGap;
+        int w = (int) (ConfigGetter.getDouble(mk, "width", 0) * mDisplayWidth / 100);
+        if (w == 0 && mk.containsKey("click")) w = defaultWidth;
+        w -= gap;
+        if (column >= maxColumns || x + w > mDisplayWidth) {
+          x = gap / 2;
+          y += mDefaultVerticalGap + rowHeight;
+          column = 0;
+          row++;
+          if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
+        }
+        if (column == 0) {
+          if (keyboardHeight > 0) {
+            rowHeight = newHeight[row];
+          } else {
+            int heightK = ConfigGetter.getPixel(mk, "height", 0);
+            rowHeight = (heightK > 0) ? heightK : defaultHeight;
+          }
+        }
+        if (!mk.containsKey("click")) { // 無按鍵事件
+          x += w + gap;
+          continue; // 縮進
+        }
+
+        final int defaultKeyTextOffsetX =
+            ConfigGetter.getPixel(
+                keyboardConfig, "key_text_offset_x", config.getFloat("key_text_offset_x"));
+        final int defaultKeyTextOffsetY =
+            ConfigGetter.getPixel(
+                keyboardConfig, "key_text_offset_y", config.getFloat("key_text_offset_y"));
+        final int defaultKeySymbolOffsetX =
+            ConfigGetter.getPixel(
+                keyboardConfig, "key_symbol_offset_x", config.getFloat("key_symbol_offset_x"));
+        final int defaultKeySymbolOffsetY =
+            ConfigGetter.getPixel(
+                keyboardConfig, "key_symbol_offset_y", config.getFloat("key_symbol_offset_y"));
+        final int defaultKeyHintOffsetX =
+            ConfigGetter.getPixel(
+                keyboardConfig, "key_hint_offset_x", config.getFloat("key_hint_offset_x"));
+        final int defaultKeyHintOffsetY =
+            ConfigGetter.getPixel(
+                keyboardConfig, "key_hint_offset_y", config.getFloat("key_hint_offset_y"));
+        final int defaultKeyPressOffsetX =
+            ConfigGetter.getInt(
+                keyboardConfig, "key_press_offset_x", config.getInt("key_press_offset_x"));
+        final int defaultKeyPressOffsetY =
+            ConfigGetter.getInt(
+                keyboardConfig, "key_press_offset_y", config.getInt("key_press_offset_y"));
+
+        final Key key = new Key(context, this, mk);
+        key.setKey_text_offset_x(
+            ConfigGetter.getPixel(mk, "key_text_offset_x", defaultKeyTextOffsetX));
+        key.setKey_text_offset_y(
+            ConfigGetter.getPixel(mk, "key_text_offset_y", defaultKeyTextOffsetY));
+        key.setKey_symbol_offset_x(
+            ConfigGetter.getPixel(mk, "key_symbol_offset_x", defaultKeySymbolOffsetX));
+        key.setKey_symbol_offset_y(
+            ConfigGetter.getPixel(mk, "key_symbol_offset_y", defaultKeySymbolOffsetY));
+        key.setKey_hint_offset_x(
+            ConfigGetter.getPixel(mk, "key_hint_offset_x", defaultKeyHintOffsetX));
+        key.setKey_hint_offset_y(
+            ConfigGetter.getPixel(mk, "key_hint_offset_y", defaultKeyHintOffsetY));
+        key.setKey_press_offset_x(
+            ConfigGetter.getInt(mk, "key_press_offset_x", defaultKeyPressOffsetX));
+        key.setKey_press_offset_y(
+            ConfigGetter.getInt(mk, "key_press_offset_y", defaultKeyPressOffsetY));
+
+        key.setX(x);
+        key.setY(y);
+        int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
+        // 右側不留白
+        key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w);
+        key.setHeight(rowHeight);
+        key.setGap(gap);
+        key.setRow(row);
+        key.setColumn(column);
+        column++;
+        x += key.getWidth() + key.getGap();
+        mKeys.add(key);
+        if (x > mTotalWidth) {
+          mTotalWidth = x;
         }
       }
-      if (!mk.containsKey("click")) { // 無按鍵事件
-        x += w + gap;
-        continue; // 縮進
+      if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
+      mTotalHeight = y + rowHeight + mDefaultVerticalGap;
+      for (Key key : mKeys) {
+        if (key.getColumn() == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
+        if (key.getRow() == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
+        if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
       }
-
-      final int defaultKeyTextOffsetX =
-          ConfigGetter.getPixel(
-              keyboardConfig, "key_text_offset_x", config.getFloat("key_text_offset_x"));
-      final int defaultKeyTextOffsetY =
-          ConfigGetter.getPixel(
-              keyboardConfig, "key_text_offset_y", config.getFloat("key_text_offset_y"));
-      final int defaultKeySymbolOffsetX =
-          ConfigGetter.getPixel(
-              keyboardConfig, "key_symbol_offset_x", config.getFloat("key_symbol_offset_x"));
-      final int defaultKeySymbolOffsetY =
-          ConfigGetter.getPixel(
-              keyboardConfig, "key_symbol_offset_y", config.getFloat("key_symbol_offset_y"));
-      final int defaultKeyHintOffsetX =
-          ConfigGetter.getPixel(
-              keyboardConfig, "key_hint_offset_x", config.getFloat("key_hint_offset_x"));
-      final int defaultKeyHintOffsetY =
-          ConfigGetter.getPixel(
-              keyboardConfig, "key_hint_offset_y", config.getFloat("key_hint_offset_y"));
-      final int defaultKeyPressOffsetX =
-          ConfigGetter.getInt(
-              keyboardConfig, "key_press_offset_x", config.getInt("key_press_offset_x"));
-      final int defaultKeyPressOffsetY =
-          ConfigGetter.getInt(
-              keyboardConfig, "key_press_offset_y", config.getInt("key_press_offset_y"));
-
-      final Key key = new Key(context, this, mk);
-      key.setKey_text_offset_x(
-          ConfigGetter.getPixel(mk, "key_text_offset_x", defaultKeyTextOffsetX));
-      key.setKey_text_offset_y(
-          ConfigGetter.getPixel(mk, "key_text_offset_y", defaultKeyTextOffsetY));
-      key.setKey_symbol_offset_x(
-          ConfigGetter.getPixel(mk, "key_symbol_offset_x", defaultKeySymbolOffsetX));
-      key.setKey_symbol_offset_y(
-          ConfigGetter.getPixel(mk, "key_symbol_offset_y", defaultKeySymbolOffsetY));
-      key.setKey_hint_offset_x(
-          ConfigGetter.getPixel(mk, "key_hint_offset_x", defaultKeyHintOffsetX));
-      key.setKey_hint_offset_y(
-          ConfigGetter.getPixel(mk, "key_hint_offset_y", defaultKeyHintOffsetY));
-      key.setKey_press_offset_x(
-          ConfigGetter.getInt(mk, "key_press_offset_x", defaultKeyPressOffsetX));
-      key.setKey_press_offset_y(
-          ConfigGetter.getInt(mk, "key_press_offset_y", defaultKeyPressOffsetY));
-
-      key.setX(x);
-      key.setY(y);
-      int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
-      // 右側不留白
-      key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w);
-      key.setHeight(rowHeight);
-      key.setGap(gap);
-      key.setRow(row);
-      key.setColumn(column);
-      column++;
-      x += key.getWidth() + key.getGap();
-      mKeys.add(key);
-      if (x > mTotalWidth) {
-        mTotalWidth = x;
-      }
-    }
-    if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
-    mTotalHeight = y + rowHeight + mDefaultVerticalGap;
-    for (Key key : mKeys) {
-      if (key.getColumn() == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
-      if (key.getRow() == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
-      if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -450,10 +454,6 @@ public class Keyboard {
       this.mMetaKey = key;
     else if (c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT) this.mAltKey = key;
     else if (c == KeyEvent.KEYCODE_SYM) this.mSymKey = key;
-  }
-
-  public List<Key> getmComposingKeys() {
-    return mComposingKeys;
   }
 
   public List<Key> getKeys() {

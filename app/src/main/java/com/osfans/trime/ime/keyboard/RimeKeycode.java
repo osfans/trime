@@ -4,6 +4,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.ime.enums.Keycode;
 import java.util.HashMap;
 import java.util.Map;
+import timber.log.Timber;
 
 public class RimeKeycode {
   private Map<Integer, Integer> rimeKeycode;
@@ -30,6 +31,8 @@ public class RimeKeycode {
     if (code >= 0 && code < Keycode.values().length) {
       String s = Keycode.keyNameOf(code);
       i = Rime.get_keycode_by_name(s);
+    } else {
+      Timber.w("code=%s", code);
     }
     return i;
   }

@@ -64,7 +64,7 @@ public class Event {
       int[] sends = Keycode.parseSend(label); // send
       code = sends[0];
       mask = sends[1];
-      if (code >= 0) return;
+      if (code > 0 || mask > 0) return;
       if (parseAction(label)) return;
       s = label; // key
       label = null;
@@ -238,7 +238,7 @@ public class Event {
     int keyCode = -1;
     if (TextUtils.isEmpty(s)) { // 空鍵
       keyCode = 0;
-    } else if (Keycode.fromString(s) != Keycode.UNKNOWN) { // 字母數字
+    } else if (Keycode.fromString(s) != Keycode.VoidSymbol) { // 字母數字
       keyCode = Keycode.keyCodeOf(s);
     } else if (Key.getSymbols().contains(s)) { // 可見符號
       keyCode = Key.getSymbolStart() + Key.getSymbols().indexOf(s);
@@ -262,6 +262,9 @@ public class Event {
     if (hasModifier(mask, KeyEvent.META_SYM_ON)) m |= Rime.META_SYM_ON;
     if (hasModifier(mask, KeyEvent.META_META_ON)) m |= Rime.META_META_ON;
     if (mask == Rime.META_RELEASE_ON) m |= Rime.META_RELEASE_ON;
+    Timber.d(
+        "<Event> getRimeEvent()\tcode=%d, mask=%d, name=%s\toutput key=%d, meta=%d",
+        code, mask, Keycode.keyNameOf(code), i, m);
     return new int[] {i, m};
   }
 

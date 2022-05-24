@@ -476,25 +476,25 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 final float endingVelocityX = mSwipeTracker.getXVelocity();
                 final float endingVelocityY = mSwipeTracker.getYVelocity();
                 boolean sendDownKey = false;
-                int type = 0;
+                KeyEventType type = KeyEventType.CLICK;
                 if ((deltaX > travel || velocityX > mSwipeThreshold) && absY < absX) {
                   if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
                     sendDownKey = true;
-                    type = KeyEventType.SWIPE_RIGHT.ordinal();
+                    type = KeyEventType.SWIPE_RIGHT;
                   } else {
                     return true;
                   }
                 } else if ((deltaX < -travel || velocityX < -mSwipeThreshold) && absY < absX) {
                   if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
                     sendDownKey = true;
-                    type = KeyEventType.SWIPE_LEFT.ordinal();
+                    type = KeyEventType.SWIPE_LEFT;
                   } else {
                     return true;
                   }
                 } else if ((deltaY < -travel || velocityY < -mSwipeThreshold) && absX < absY) {
                   if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
                     sendDownKey = true;
-                    type = KeyEventType.SWIPE_UP.ordinal();
+                    type = KeyEventType.SWIPE_UP;
                   } else {
                     return true;
                   }
@@ -504,7 +504,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                         "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%d",
                         deltaY, velocityY, endingVelocityY, travel, mSwipeThreshold);
                     sendDownKey = true;
-                    type = KeyEventType.SWIPE_DOWN.ordinal();
+                    type = KeyEventType.SWIPE_DOWN;
                   } else {
                     return true;
                   }
@@ -517,7 +517,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 if (sendDownKey) {
                   Timber.d("\t<TrimeInput>\tinitGestureDetector()\tsendDownKey");
                   showPreview(NOT_A_KEY);
-                  showPreview(mDownKey, type);
+                  showPreview(mDownKey, type.ordinal());
                   detectAndSendKey(mDownKey, mStartX, mStartY, me1.getEventTime(), type);
                   return true;
                 }
@@ -1061,29 +1061,31 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     Timber.d("\t<TrimeInput>\treleaseKey() finish");
   }
 
-  private void detectAndSendKey(int index, int x, int y, long eventTime, int type) {
+  private void detectAndSendKey(int index, int x, int y, long eventTime, KeyEventType type) {
+    Timber.d(
+        "\t<TrimeInput>\tdetectAndSendKey()\tindex=%d, x=%d, y=%d, type=%d, mKeys.length=%d",
+        index, x, y, type.ordinal(), mKeys.length);
+
     if (index != NOT_A_KEY && index < mKeys.length) {
       final Key key = mKeys[index];
-      if (Key.isTrimeModifierKey(key.getCode()) && !key.sendBindings(type)) {
+      if (Key.isTrimeModifierKey(key.getCode()) && !key.sendBindings(type.ordinal())) {
         Timber.d(
-            "\t<TrimeInput>\tdetectAndSendKey()\tModifierKey, type=%d, key.getEvent, KeyLabel=%s",
-            type, key.getLabel());
+            "\t<TrimeInput>\tdetectAndSendKey()\tModifierKey, key.getEvent, KeyLabel=%s",
+            key.getLabel());
         setModifier(key);
       } else {
         if (key.getClick().isRepeatable()) {
-          if (type > 0) mAbortKey = true;
-          if (!key.hasEvent(type)) return;
+          if (type.ordinal() > KeyEventType.CLICK.ordinal()) mAbortKey = true;
+          if (!key.hasEvent(type.ordinal())) return;
         }
-        final int code = key.getCode(type);
+        final int code = key.getCode(type.ordinal());
         // TextEntryState.keyPressedAt(key, x, y);
         final int[] codes = new int[MAX_NEARBY_KEYS];
         Arrays.fill(codes, NOT_A_KEY);
         getKeyIndices(x, y, codes);
-        Timber.d(
-            "\t<TrimeInput>\tdetectAndSendKey()\tonEvent, type=%d, code=%d, key.getEvent",
-            type, code);
+        Timber.d("\t<TrimeInput>\tdetectAndSendKey()\tonEvent, code=%d, key.getEvent", code);
         // 可以在这里把 mKeyboard.getModifer() 获取的修饰键状态写入event里
-        mKeyboardActionListener.onEvent(key.getEvent(type));
+        mKeyboardActionListener.onEvent(key.getEvent(type.ordinal()));
         releaseKey(code);
         Timber.d("\t<TrimeInput>\tdetectAndSendKey()\trefreshModifier");
         refreshModifier();
@@ -1095,7 +1097,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   }
 
   private void detectAndSendKey(final int index, final int x, final int y, final long eventTime) {
-    detectAndSendKey(index, x, y, eventTime, 0);
+    detectAndSendKey(index, x, y, eventTime, KeyEventType.CLICK);
   }
 
   private void showPreview(final int keyIndex, final int type) {
@@ -1628,15 +1630,15 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
         if (Math.max(absY, absX) > travel && touchOnePoint) {
           Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\ttouch");
-          int type;
+          KeyEventType type = KeyEventType.CLICK;
           if (absX < absY) {
             Timber.d("swipeDebug.ext y, dX=%d, dY=%d", dx, dy);
-            if (dy > travel) type = KeyEventType.SWIPE_DOWN.ordinal();
-            else type = KeyEventType.SWIPE_UP.ordinal();
+            if (dy > travel) type = KeyEventType.SWIPE_DOWN;
+            else type = KeyEventType.SWIPE_UP;
           } else {
             Timber.d("swipeDebug.ext x, dX=%d, dY=%d", dx, dy);
-            if (dx > travel) type = KeyEventType.SWIPE_RIGHT.ordinal();
-            else type = KeyEventType.SWIPE_LEFT.ordinal();
+            if (dx > travel) type = KeyEventType.SWIPE_RIGHT;
+            else type = KeyEventType.SWIPE_LEFT;
           }
 
           showPreview(NOT_A_KEY);
@@ -1664,7 +1666,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
               touchX,
               touchY,
               eventTime,
-              (mOldPointerCount > 1 || mComboMode) ? KeyEventType.COMBO.ordinal() : 0);
+              (mOldPointerCount > 1 || mComboMode) ? KeyEventType.COMBO : KeyEventType.CLICK);
         }
         Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\tdetectAndSendKey finish");
         invalidateKey(keyIndex);

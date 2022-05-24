@@ -8,7 +8,7 @@ enum class Keycode {
     // 1. 数字开头的keyName添加了下划线(在init阶段已经修复)，受到影响的按键有： 0-12，3D_MODE
     // 2. 按键0恢复为UNKNOWN, VoidSymbol改为最末位的按键
 
-    UNKNOWN, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
+    VoidSymbol, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9,
     asterisk, numbersign, Up, Down, Left, Right, KP_Begin,
     VOLUME_UP, VOLUME_DOWN, POWER, CAMERA, Clear,
@@ -54,7 +54,7 @@ enum class Keycode {
     ALL_APPS, REFRESH, THUMBS_UP, THUMBS_DOWN, PROFILE_SWITCH,
     A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
     exclam, quotedbl, dollar, percent, ampersand, colon, less, greater, question, asciicircum, underscore, braceleft, bar, braceright, asciitilde,
-    VoidSymbol;
+    ;
 
     companion object {
 
@@ -96,20 +96,20 @@ enum class Keycode {
         @JvmStatic
         fun fromString(s: String): Keycode {
             val type = convertMap[s]
-            return type ?: UNKNOWN
+            return type ?: VoidSymbol
         }
 
         @JvmStatic
         fun valueOf(ordinal: Int): Keycode {
             if (ordinal < 0 || ordinal >= values().size) {
-                return UNKNOWN
+                return VoidSymbol
             }
             return values()[ordinal]
         }
 
         @JvmStatic
         fun keyNameOf(ordinal: Int): String {
-            return valueOf(ordinal).toString().replaceFirst("^_", "")
+            return valueOf(ordinal).toString().replaceFirst("^_".toRegex(), "")
         }
 
         @JvmStatic
@@ -122,12 +122,14 @@ enum class Keycode {
             val sends = IntArray(2)
             if (TextUtils.isEmpty(s)) return sends
             val codes: String
-            if (!s.contains("+")) codes = s else {
-                val ss = s.split("\\+").toTypedArray()
+            if (s.contains("+")) {
+                val ss = s.split("+").toTypedArray()
                 val n = ss.size
                 for (i in 0 until n - 1) if (masks.containsKey(ss[i])) sends[1] =
                     addMask(sends[1], ss[i])
                 codes = ss[n - 1]
+            } else {
+                codes = s
             }
             sends[0] = fromString(codes).ordinal
             return sends
