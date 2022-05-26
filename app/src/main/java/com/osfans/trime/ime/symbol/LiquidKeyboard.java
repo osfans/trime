@@ -153,8 +153,10 @@ public class LiquidKeyboard {
     }
     Timber.i("config keyHeight=" + keyHeight + " marginTop=" + margin_top);
 
-    if (isLand) single_width = config.getLiquidPixel("single_width_land");
-    if (single_width <= 0) single_width = config.getLiquidPixel("single_width");
+    if (isLand) {
+      single_width = config.getLiquidPixel("single_width_land");
+      if (single_width <= 0) single_width = config.getLiquidPixel("single_width");
+    } else single_width = config.getLiquidPixel("single_width");
     if (single_width <= 0)
       single_width = context.getResources().getDimensionPixelSize(R.dimen.simple_key_single_width);
 
