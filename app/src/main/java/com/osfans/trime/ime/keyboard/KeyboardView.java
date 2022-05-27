@@ -182,6 +182,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private int mDownKey = NOT_A_KEY;
   private long mLastKeyTime;
   private long mCurrentKeyTime;
+  private long mLastUpTime;
+  private boolean isFastInput;
+  private boolean isClickAtLast;
   private final int[] mKeyIndices = new int[12];
   private GestureDetector mGestureDetector;
   private int mRepeatKeyIndex = NOT_A_KEY;
@@ -191,7 +194,6 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private final Rect mClipRegion = new Rect(0, 0, 0, 0);
   private boolean mPossiblePoly;
   private final SwipeTracker mSwipeTracker = new SwipeTracker();
-  private final int mSwipeThreshold;
   private final boolean mDisambiguateSwipe;
 
   // Variables for dealing with multiple pointers
@@ -443,15 +445,10 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPopupLayout = R.layout.keyboard_popup_keyboard;
     mPopupKeyboard = new PopupWindow(context);
     mPopupKeyboard.setBackgroundDrawable(null);
-    // mPopupKeyboard.setClippingEnabled(false);
 
     mPopupParent = this;
-    // mPredicting = true;
-
     mPadding = new Rect(0, 0, 0, 0);
     mMiniKeyboardCache = new HashMap<>();
-
-    mSwipeThreshold = (int) (500 * getResources().getDisplayMetrics().density);
     mDisambiguateSwipe = true;
 
     resetMultiTap();
@@ -471,38 +468,45 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 final float absY = Math.abs(velocityY);
                 float deltaX = me2.getX() - me1.getX();
                 float deltaY = me2.getY() - me1.getY();
-                final int travel = getPrefs().getKeyboard().getSwipeTravel();
+                final int travel =
+                    (isFastInput && isClickAtLast)
+                        ? getPrefs().getKeyboard().getSwipeTravelHi()
+                        : getPrefs().getKeyboard().getSwipeTravel();
+                final int velocity =
+                    (isFastInput && isClickAtLast)
+                        ? getPrefs().getKeyboard().getSwipeVelocity()
+                        : getPrefs().getKeyboard().getSwipeVelocityHi();
                 mSwipeTracker.computeCurrentVelocity(10);
                 final float endingVelocityX = mSwipeTracker.getXVelocity();
                 final float endingVelocityY = mSwipeTracker.getYVelocity();
                 boolean sendDownKey = false;
                 KeyEventType type = KeyEventType.CLICK;
-                if ((deltaX > travel || velocityX > mSwipeThreshold) && absY < absX) {
+                if ((deltaX > travel || velocityX > velocity) && absY < absX) {
                   if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_RIGHT;
                   } else {
                     return true;
                   }
-                } else if ((deltaX < -travel || velocityX < -mSwipeThreshold) && absY < absX) {
+                } else if ((deltaX < -travel || velocityX < -velocity) && absY < absX) {
                   if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_LEFT;
                   } else {
                     return true;
                   }
-                } else if ((deltaY < -travel || velocityY < -mSwipeThreshold) && absX < absY) {
+                } else if ((deltaY < -travel || velocityY < -velocity) && absX < absY) {
                   if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_UP;
                   } else {
                     return true;
                   }
-                } else if ((deltaY > travel || velocityY > mSwipeThreshold) && absX < absY) {
+                } else if ((deltaY > travel || velocityY > velocity) && absX < absY) {
                   if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                     Timber.d(
                         "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%d",
-                        deltaY, velocityY, endingVelocityY, travel, mSwipeThreshold);
+                        deltaY, velocityY, endingVelocityY, travel, velocity);
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_DOWN;
                   } else {
@@ -519,6 +523,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                   showPreview(NOT_A_KEY);
                   showPreview(mDownKey, type.ordinal());
                   detectAndSendKey(mDownKey, mStartX, mStartY, me1.getEventTime(), type);
+                  isClickAtLast = false;
                   return true;
                 }
                 return false;
@@ -1068,6 +1073,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
     if (index != NOT_A_KEY && index < mKeys.length) {
       final Key key = mKeys[index];
+
       if (Key.isTrimeModifierKey(key.getCode()) && !key.sendBindings(type.ordinal())) {
         Timber.d(
             "\t<TrimeInput>\tdetectAndSendKey()\tModifierKey, key.getEvent, KeyLabel=%s",
@@ -1449,6 +1455,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mComboMode = false;
     if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_CANCEL) {
       mComboCount = 0;
+      if (getPrefs().getKeyboard().getHookFastInput())
+        isFastInput = getPrefs().getKeyboard().getSwipeTimeHi() > me.getEventTime() - mLastUpTime;
+      else isFastInput = false;
     } else if (pointerCount > 1
         || action == MotionEvent.ACTION_POINTER_DOWN
         || action == MotionEvent.ACTION_POINTER_UP) {
@@ -1520,12 +1529,14 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       return true;
     }
 
-    if (mGestureDetector.onTouchEvent(me)) {
-      //      Timber.d("swipeDebug.onModifiedTouchEvent mGestureDetector.onTouchEvent(me) = true");
-      showPreview(NOT_A_KEY);
-      mHandler.removeMessages(MSG_REPEAT);
-      mHandler.removeMessages(MSG_LONGPRESS);
-      return true;
+    // 优先判定是否触发了滑动手势
+    if (getPrefs().getKeyboard().getSwipeEnabled()) {
+      if (mGestureDetector.onTouchEvent(me)) {
+        showPreview(NOT_A_KEY);
+        mHandler.removeMessages(MSG_REPEAT);
+        mHandler.removeMessages(MSG_LONGPRESS);
+        return true;
+      }
     }
 
     // Needs to be called after the gesture detector gets a turn, as it may have
@@ -1533,7 +1544,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     if (mMiniKeyboardOnScreen && action != MotionEvent.ACTION_CANCEL) {
       return true;
     }
-    //    Timber.d("swipeDebug.onModifiedTouchEvent mGestureDetector.onTouchEvent(me) = false");
+
     switch (action) {
       case MotionEvent.ACTION_DOWN:
         touchX0 = touchX;
@@ -1612,6 +1623,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
             "swipeDebug.onModifiedTouchEvent mGestureDetector.onTouchEvent(me) = fall & action_up");
       case MotionEvent.ACTION_POINTER_UP:
         removeMessages();
+        mLastUpTime = eventTime;
         if (keyIndex == mCurrentKey) {
           mCurrentKeyTime += eventTime - mLastMoveTime;
         } else {
@@ -1622,31 +1634,38 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
           mCurrentKeyTime = 0;
         }
 
-        int dx = touchX - touchX0;
-        int dy = touchY - touchY0;
-        int absX = Math.abs(dx);
-        int absY = Math.abs(dy);
-        int travel = getPrefs().getKeyboard().getSwipeTravel();
+        // 滑动兜底，不判定速度，只判定距离
+        if (getPrefs().getKeyboard().getSwipeEnabled()) {
+          int dx = touchX - touchX0;
+          int dy = touchY - touchY0;
+          int absX = Math.abs(dx);
+          int absY = Math.abs(dy);
+          final int travel =
+              (isFastInput && isClickAtLast)
+                  ? getPrefs().getKeyboard().getSwipeTravelHi()
+                  : getPrefs().getKeyboard().getSwipeTravel();
 
-        if (Math.max(absY, absX) > travel && touchOnePoint) {
-          Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\ttouch");
-          KeyEventType type = KeyEventType.CLICK;
-          if (absX < absY) {
-            Timber.d("swipeDebug.ext y, dX=%d, dY=%d", dx, dy);
-            if (dy > travel) type = KeyEventType.SWIPE_DOWN;
-            else type = KeyEventType.SWIPE_UP;
-          } else {
-            Timber.d("swipeDebug.ext x, dX=%d, dY=%d", dx, dy);
-            if (dx > travel) type = KeyEventType.SWIPE_RIGHT;
-            else type = KeyEventType.SWIPE_LEFT;
-          }
+          if (Math.max(absY, absX) > travel && touchOnePoint) {
+            Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\ttouch");
+            KeyEventType type = KeyEventType.CLICK;
+            if (absX < absY) {
+              Timber.d("swipeDebug.ext y, dX=%d, dY=%d", dx, dy);
+              if (dy > travel) type = KeyEventType.SWIPE_DOWN;
+              else type = KeyEventType.SWIPE_UP;
+            } else {
+              Timber.d("swipeDebug.ext x, dX=%d, dY=%d", dx, dy);
+              if (dx > travel) type = KeyEventType.SWIPE_RIGHT;
+              else type = KeyEventType.SWIPE_LEFT;
+            }
 
-          showPreview(NOT_A_KEY);
-          mHandler.removeMessages(MSG_REPEAT);
-          mHandler.removeMessages(MSG_LONGPRESS);
-          detectAndSendKey(mDownKey, mStartX, mStartY, me.getEventTime(), type);
-          return true;
-        } else Timber.d("swipeDebug.ext fail, dX=%d, dY=%d", dx, dy);
+            showPreview(NOT_A_KEY);
+            mHandler.removeMessages(MSG_REPEAT);
+            mHandler.removeMessages(MSG_LONGPRESS);
+            detectAndSendKey(mDownKey, mStartX, mStartY, me.getEventTime(), type);
+            isClickAtLast = false;
+            return true;
+          } else Timber.d("swipeDebug.ext fail, dX=%d, dY=%d", dx, dy);
+        }
 
         if (mCurrentKeyTime < mLastKeyTime
             && mCurrentKeyTime < DEBOUNCE_TIME
@@ -1667,6 +1686,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
               touchY,
               eventTime,
               (mOldPointerCount > 1 || mComboMode) ? KeyEventType.COMBO : KeyEventType.CLICK);
+          isClickAtLast = true;
         }
         Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\tdetectAndSendKey finish");
         invalidateKey(keyIndex);

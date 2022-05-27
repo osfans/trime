@@ -444,7 +444,7 @@ class TextInputManager private constructor() :
                 Rime.toggleOption(index)
                 trime.updateComposing()
             }
-        } else if (prefs.keyboard.hockCandidate || index > 9) {
+        } else if (prefs.keyboard.hookCandidate || index > 9) {
             if (Rime.selectCandidate(index)) {
                 activeEditorInstance.commitRimeText()
             }

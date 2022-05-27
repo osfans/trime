@@ -191,4 +191,11 @@
     <string name="pref_keyboard__hook_summary">事件不發送給被編輯的 App 及 librime</string>
     <string name="keyboard__hook_candidate_on">直接上屏候選詞</string>
     <string name="keyboard__hook_candidate_off">發送數字鍵模擬鍵盤錄入</string>
+<string name="keyboard__key_swipe_travel_hi_title">連續擊鍵時觸發滑動手勢的距離</string>
+    <string name="keyboard__key_swipe_time_hi_title">判定為連續擊鍵的時間間隔</string>
+    <string name="keyboard__hook_fast_input">攔截字母鍵的快速輸入</string>
+    <string name="keyboard__hook_fast_input_summary">合併多次按鍵輸入為一次，從而縮減出候選的時間，但交互的反饋感會變差(暫未實現此功能)</string>
+    <string name="keyboard__swipe_enabled">允許觸發按鍵的滑動手勢</string>
+    <string name="keyboard__key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
+    <string name="keyboard__key_swipe_velocity_hi">連續擊鍵時觸發滑動手勢的速度</string>
 </resources>

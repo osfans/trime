@@ -154,7 +154,7 @@
     <string name="about__used_libraries">第三方开源库</string>
     <string name="about__used_library_dialog_title">同文输入法 | 开源软件库</string>
     <string name="pref__system_default">系统默认</string>
-    <string name="keyboard__key_swipe_travel_title">触发滑动手势的最短距离</string>
+    <string name="keyboard__key_swipe_travel_title">触发按键滑动手势的距离</string>
     <string name="keyboard__hook_candidate">点击候选词</string>
     <string name="trime_app_slogan">击响中文之韵</string>
     <string name="external_storage_access_required">同文输入法需要存储权限以部署或读取方案和配置，点击“确定”前往授权。</string>
@@ -190,4 +190,11 @@
     <string name="pref_keyboard__hook_summary">事件不发送给被编辑的 App 及 librime</string>
     <string name="keyboard__hook_candidate_on">直接上屏候选词</string>
     <string name="keyboard__hook_candidate_off">发送数字键模拟键盘输入</string>
+    <string name="keyboard__key_swipe_travel_hi_title">连续击键时触发滑动手势的距离</string>
+    <string name="keyboard__key_swipe_time_hi_title">判定为连续击键的时间间隔</string>
+    <string name="keyboard__hook_fast_input">拦截字母键的快速输入</string>
+    <string name="keyboard__hook_fast_input_summary">合并多次按键输入为一次，从而缩减出候选的时间，但交互的反馈感会变差(暂未实现此功能)</string>
+    <string name="keyboard__swipe_enabled">允许触发按键的滑动手势</string>
+    <string name="keyboard__key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
+    <string name="keyboard__key_swipe_velocity_hi">连续击键时触发滑动手势的速度</string>
 </resources>

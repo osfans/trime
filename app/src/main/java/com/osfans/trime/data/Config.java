@@ -385,7 +385,7 @@ public class Config {
       presetColorSchemes =
           (Map<String, Map<String, String>>) globalThemeConfig.get("preset_color_schemes");
       presetKeyboards = (Map<String, Map<String, ?>>) globalThemeConfig.get("preset_keyboards");
-      liquidKeyboard = (Map<String, ?>) globalThemeConfig.get("liquid_keyboard");
+      liquidKeyboard = globalThemeConfig.get("liquid_keyboard");
       initLiquidKeyboard();
       Timber.d("init() initLiquidKeyboard done");
       Rime.setShowSwitches(appPrefs.getKeyboard().getSwitchesEnabled());

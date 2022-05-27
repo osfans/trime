@@ -1077,7 +1077,7 @@ public class Trime extends LifecycleInputMethodService {
     if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
 
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        if (getPrefs().getKeyboard().getHockCtrlZY()) {
+        if (getPrefs().getKeyboard().getHookCtrlZY()) {
           switch (code) {
             case KeyEvent.KEYCODE_Y:
               return ic.performContextMenuAction(android.R.id.redo);
@@ -1088,11 +1088,11 @@ public class Trime extends LifecycleInputMethodService {
       }
       switch (code) {
         case KeyEvent.KEYCODE_A:
-          if (getPrefs().getKeyboard().getHockCtrlA())
+          if (getPrefs().getKeyboard().getHookCtrlA())
             return ic.performContextMenuAction(android.R.id.selectAll);
           return false;
         case KeyEvent.KEYCODE_X:
-          if (getPrefs().getKeyboard().getHockCtrlCV()) {
+          if (getPrefs().getKeyboard().getHookCtrlCV()) {
             ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
@@ -1104,7 +1104,7 @@ public class Trime extends LifecycleInputMethodService {
           Timber.i("hookKeyboard cut fail");
           return false;
         case KeyEvent.KEYCODE_C:
-          if (getPrefs().getKeyboard().getHockCtrlCV()) {
+          if (getPrefs().getKeyboard().getHookCtrlCV()) {
             ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
@@ -1116,7 +1116,7 @@ public class Trime extends LifecycleInputMethodService {
           Timber.i("hookKeyboard copy fail");
           return false;
         case KeyEvent.KEYCODE_V:
-          if (getPrefs().getKeyboard().getHockCtrlCV()) {
+          if (getPrefs().getKeyboard().getHookCtrlCV()) {
             ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
@@ -1132,7 +1132,7 @@ public class Trime extends LifecycleInputMethodService {
           }
           return false;
         case KeyEvent.KEYCODE_DPAD_RIGHT:
-          if (getPrefs().getKeyboard().getHockCtrlLR()) {
+          if (getPrefs().getKeyboard().getHookCtrlLR()) {
             ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
@@ -1145,7 +1145,7 @@ public class Trime extends LifecycleInputMethodService {
             break;
           }
         case KeyEvent.KEYCODE_DPAD_LEFT:
-          if (getPrefs().getKeyboard().getHockCtrlLR()) {
+          if (getPrefs().getKeyboard().getHookCtrlLR()) {
             ExtractedTextRequest etr = new ExtractedTextRequest();
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);

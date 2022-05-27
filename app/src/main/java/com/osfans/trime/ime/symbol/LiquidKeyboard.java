@@ -209,6 +209,9 @@ public class LiquidKeyboard {
     Timber.d("Tab.select(%s) beans.size=%s", i, simpleKeyBeans.size());
     simpleAdapter = new SimpleAdapter(context, simpleKeyBeans);
 
+    Timber.d(
+        "configStylet() single_width=%s, keyHeight=%s, margin_x=%s, margin_top=%s",
+        single_width, keyHeight, margin_x, margin_top);
     simpleAdapter.configStyle(single_width, keyHeight, margin_x, margin_top);
     //            simpleAdapter.configKey(single_width,height,margin_x,margin_top);
     keyboardView.setAdapter(simpleAdapter);
