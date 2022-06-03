@@ -139,6 +139,7 @@ public class Sound {
     }
   }
 
+  // 把字符串解析为Android keycode（与librime无关）
   public static int getKeycode(Object string) {
     String keyName = ((String) string).toUpperCase(Locale.ROOT);
     if (keyName.startsWith("KEYCODE_")) return KeyEvent.keyCodeFromString(keyName);

@@ -21,7 +21,6 @@ package com.osfans.trime.ime.core;
 import static android.graphics.Color.parseColor;
 
 import android.app.Dialog;
-import android.app.UiModeManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -766,8 +765,9 @@ public class Trime extends LifecycleInputMethodService {
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
     if (getPrefs().getLooks().getAutoDark()) {
-      UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
-      if (setDarkMode(uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES)) {
+      int nightModeFlags =
+          getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+      if (setDarkMode(nightModeFlags == Configuration.UI_MODE_NIGHT_YES)) {
         Timber.i("dark mode changed");
         initKeyboardDarkMode(darkMode);
       } else Timber.i("dark mode not changed");
