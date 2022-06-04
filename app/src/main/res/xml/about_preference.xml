@@ -10,7 +10,12 @@
             app:title="@string/about__changelog"
             app:iconSpaceReserved="false">
             <intent android:action="android.intent.action.VIEW"
-                android:data="https://github.com/osfans/trime" />
+                android:data="@string/trime_url" />
+        </Preference>
+
+        <Preference app:key="about__buildinfo"
+            app:title="@string/about__buildinfo"
+            app:iconSpaceReserved="false"> />
         </Preference>
 
         <Preference app:key="about__librime_version"
@@ -66,7 +71,7 @@
         <Preference android:key="pref_credits" android:title="@string/pref_credits"
             app:iconSpaceReserved="false">
             <intent android:action="android.intent.action.VIEW"
-                android:data="https://github.com/osfans/trime#%E9%B3%B4%E8%AC%9Dcredits" />
+                android:data="https://github.com/osfans/trime" />
         </Preference>
 
         <Preference app:key="about__product_prime"

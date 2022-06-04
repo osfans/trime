@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.databinding.AboutActivityBinding
@@ -71,7 +72,10 @@ class AboutActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.about_preference, rootKey)
             findPreference<Preference>("about__changelog")
-                ?.writeLibraryVersionToSummary(Rime.get_trime_version())
+                ?.writeLibraryVersionToSummary(BuildConfig.BUILD_VERSION)
+
+            findPreference<Preference>("about__buildinfo")
+                ?.writeLibraryVersionToSummary(BuildConfig.BUILD_INFO)
 
             findPreference<Preference>("about__librime_version")
                 ?.writeLibraryVersionToSummary(Rime.get_librime_version())

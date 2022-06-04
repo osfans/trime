@@ -12,6 +12,9 @@ android {
         versionCode 20220701
         versionName "3.2.7"
         setProperty("archivesBaseName", "trime-$versionName")
+        resValue "string", "trime_url", getGitUrl()
+        buildConfigField 'String', 'BUILD_INFO' , '"Build by '+getGitUser()+ ', in ' + getBuildTime() + ' UTC, branch ' + getGitBranch() + '"'
+        buildConfigField 'String', 'BUILD_VERSION' , '"'+"$versionName" + '-'+ gitGitVersionCode() +'-g'+ getGitVersion()+ '-' + getBuildDate()  + '"'
     }
 
     signingConfigs {
@@ -101,4 +104,37 @@ dependencies {
 }
 repositories {
     mavenCentral()
+}
+
+def getBuildDate() {
+    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
+}
+
+def getBuildTime() {
+    return new Date().format("yyyy-MM-dd HH:mm", TimeZone.getTimeZone("UTC"))
+}
+
+def getGitBranch(){
+    ' git symbolic-ref --short -q HEAD'.execute().text.trim()
+}
+
+def getGitVersion() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
+}
+
+def gitGitVersionCode() {
+    try {
+        return 'git rev-list HEAD --first-parent --count'.execute().text.trim().toInteger()
+    }
+    catch (ignored) {
+        return 1
+    }
+}
+
+def getGitUser() {
+    return 'git config user.name'.execute().text.trim()
+}
+
+def getGitUrl() {
+    return 'git remote get-url  origin'.execute().text.trim().replaceFirst("\\.git\$","")
 }

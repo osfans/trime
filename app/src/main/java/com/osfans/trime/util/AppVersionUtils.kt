@@ -28,7 +28,9 @@ object AppVersionUtils {
         }
         this.summary = versionCode
         val intent = this.intent
-        intent.data = Uri.withAppendedPath(intent.data, "commits/$commitHash")
-        this.intent = intent
+        if (intent != null) {
+            intent.data = Uri.withAppendedPath(intent.data, "commits/$commitHash")
+            this.intent = intent
+        }
     }
 }

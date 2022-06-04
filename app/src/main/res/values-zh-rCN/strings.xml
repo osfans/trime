@@ -36,7 +36,7 @@
     <string name="about__opencc_version">OpenCC版本</string>
     <string name="about__changelog">更新日志</string>
     <string name="about__licensing_title">许可证</string>
-    <string name="pref_credits">鸣谢</string>
+    <string name="pref_credits">贡献代码</string>
     <string name="about__product_prime">微软平台PRIME输入法</string>
     <string name="about__privacy_policy">隐私策略</string>
     <string name="settings__configuration_title">输入配置</string>
@@ -197,4 +197,5 @@
     <string name="keyboard__swipe_enabled">允许触发按键的滑动手势</string>
     <string name="keyboard__key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
     <string name="keyboard__key_swipe_velocity_hi">连续击键时触发滑动手势的速度</string>
+    <string name="about__buildinfo">编译信息</string>
 </resources>
