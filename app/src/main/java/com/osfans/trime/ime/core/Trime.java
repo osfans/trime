@@ -67,6 +67,7 @@ import com.osfans.trime.data.db.draft.DraftDao;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
+import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
@@ -921,7 +922,7 @@ public class Trime extends LifecycleInputMethodService {
   private boolean composeEvent(@NonNull KeyEvent event) {
     final int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_MENU) return false; // 不處理 Menu 鍵
-    if (keyCode >= Key.getSymbolStart()) return false; // 只處理安卓標準按鍵
+    if (Keycode.Companion.isStdKey(keyCode)) return false; // 只處理安卓標準按鍵
     if (event.getRepeatCount() == 0 && Key.isTrimeModifierKey(keyCode)) {
       boolean ret =
           onRimeKey(

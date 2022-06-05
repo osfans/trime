@@ -219,7 +219,7 @@ public class Event {
 
   public static String getDisplayLabel(int keyCode) {
     String s = "";
-    if (keyCode < Key.getSymbolStart()) { // 字母數字
+    if (Keycode.Companion.isStdKey(keyCode)) { // 字母數字
       if (Key.getKcm().isPrintingKey(keyCode)) {
         char c = Key.getKcm().getDisplayLabel(keyCode);
         if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
@@ -227,9 +227,8 @@ public class Event {
       } else {
         s = Keycode.keyNameOf(keyCode);
       }
-    } else if (keyCode < Keycode.values().length) { // 可見符號
-      keyCode -= Key.getSymbolStart();
-      s = Key.getSymbols().substring(keyCode, keyCode + 1);
+    } else if (Keycode.Companion.hasSymbolLabel(keyCode)) { // 可見符號
+      s = Keycode.Companion.getSymbolLabell(Keycode.valueOf(keyCode));
     }
     return s;
   }
@@ -240,8 +239,6 @@ public class Event {
       keyCode = 0;
     } else if (Keycode.fromString(s) != Keycode.VoidSymbol) { // 字母數字
       keyCode = Keycode.keyCodeOf(s);
-    } else if (Key.getSymbols().contains(s)) { // 可見符號
-      keyCode = Key.getSymbolStart() + Key.getSymbols().indexOf(s);
     } else if (symbolAliases.containsKey(s)) {
       keyCode = symbolAliases.get(s);
     }

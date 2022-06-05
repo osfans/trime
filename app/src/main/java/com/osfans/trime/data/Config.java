@@ -31,12 +31,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Key;
@@ -376,12 +374,7 @@ public class Config {
       Timber.d("init() load_map done");
       mDefaultStyle = (Map<?, ?>) globalThemeConfig.get("style");
       fallbackColors = (Map<?, ?>) globalThemeConfig.get("fallback_colors");
-      final Map<String, ?> androidKeySettings = globalThemeConfig.get("android_keys");
       Key.presetKeys = (Map<String, Map<String, String>>) globalThemeConfig.get("preset_keys");
-      Key.setSymbolStart(Keycode.A.ordinal());
-      Key.setSymbols((String) androidKeySettings.get("symbols"));
-      if (TextUtils.isEmpty(Key.getSymbols()))
-        Key.setSymbols("ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"$%&:<>?^_{|}~");
       presetColorSchemes =
           (Map<String, Map<String, String>>) globalThemeConfig.get("preset_color_schemes");
       presetKeyboards = (Map<String, Map<String, ?>>) globalThemeConfig.get("preset_keyboards");

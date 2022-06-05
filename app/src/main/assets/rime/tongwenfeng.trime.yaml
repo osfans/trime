@@ -3867,8 +3867,6 @@ preset_keyboards:
     - {label: '丶', click: space_R1, long_click: Zcj, composing: Keyboard_r, ascii: 'r', combo: r, width: 11.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
     - {label: 'Enter', long_click: Return, click: Return, swipe_up: Escape, composing: Keyboard_e0, width: 15.5, round_corner: *round3, key_back_color: benter, key_text_color: tenter}
 
-android_keys:
-  __include: trime:/android_keys
 
 preset_keys:
   # 安卓
