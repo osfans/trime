@@ -13,8 +13,8 @@ android {
         versionName "3.2.7"
         setProperty("archivesBaseName", "trime-$versionName")
         resValue "string", "trime_url", getGitUrl()
-        buildConfigField 'String', 'BUILD_INFO' , '"Build by '+getGitUser()+ ', in ' + getBuildTime() + ' UTC, branch ' + getGitBranch() + '"'
-        buildConfigField 'String', 'BUILD_VERSION' , '"'+"$versionName" + '-'+ gitGitVersionCode() +'-g'+ getGitVersion()+ '-' + getBuildDate()  + '"'
+        buildConfigField 'String', 'BUILD_INFO' , '"' + getBuildInfo() + '"'
+        buildConfigField 'String', 'BUILD_VERSION' , '"' + "$versionName" + '-g'+ getGitVersion()+ '-' + getBuildDate()  +  '"'
     }
 
     signingConfigs {
@@ -106,12 +106,24 @@ repositories {
     mavenCentral()
 }
 
+def getBuildInfo(){
+    def info =  'Build: ' + getGitUser()+ ' \\nDate: ' + getBuildTime()+ ' UTC \\nCommit: '+getCommitInfo()+ ' \\nBranch: '+ getGitBranch()+ ' \\nRepository: '+ getGitUrl()
+    println( info)
+    return info
+}
+
 def getBuildDate() {
     return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
 }
 
 def getBuildTime() {
     return new Date().format("yyyy-MM-dd HH:mm", TimeZone.getTimeZone("UTC"))
+}
+
+def getCommitInfo(){
+    def text = ' git show --pretty=format:"%ci %cr"'.execute().text
+    text =  (text =~ /${"\\n.*"}/).replaceAll("").trim()
+    return ' git describe'.execute().text.trim() +  ", " + (text =~ /${"(?<=(\\s[+-](\\d{4}))).*"}/).replaceAll("").trim()
 }
 
 def getGitBranch(){
@@ -132,7 +144,10 @@ def gitGitVersionCode() {
 }
 
 def getGitUser() {
-    return 'git config user.name'.execute().text.trim()
+    def name = 'git config user.name'.execute().text.trim()
+    if(name.length()<1)
+        return System.getenv("CI_NAME")
+    return name
 }
 
 def getGitUrl() {
