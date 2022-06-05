@@ -6,7 +6,8 @@ import android.view.KeyEvent
 enum class Keycode {
     // 与原trime.yaml主题android_key/name小节相比，差异如下：
     // 1. 数字开头的keyName添加了下划线(在init阶段已经修复)，受到影响的按键有： 0-12，3D_MODE
-    // 2. 按键0恢复为UNKNOWN, VoidSymbol改为最末位的按键
+    //
+    // 符号英文名称-图形对应关系可以参考 https://www.mianfeiziti.com/font_glyph-172795.htm
 
     VoidSymbol, SOFT_LEFT, SOFT_RIGHT, HOME, BACK, CALL, ENDCALL,
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9,
@@ -59,25 +60,58 @@ enum class Keycode {
     companion object {
 
         private val convertMap: HashMap<String, Keycode> = hashMapOf()
+        private val reverseMap: HashMap<Keycode, String> = hashMapOf()
 
         init {
             for (type in Keycode.values()) {
                 convertMap[type.toString()] = type
             }
 
-            convertMap["3D_MODE"] = Keycode._3D_MODE
-            convertMap["0"] = Keycode._0
-            convertMap["1"] = Keycode._1
-            convertMap["2"] = Keycode._2
-            convertMap["3"] = Keycode._3
-            convertMap["4"] = Keycode._4
-            convertMap["5"] = Keycode._5
-            convertMap["6"] = Keycode._6
-            convertMap["7"] = Keycode._7
-            convertMap["8"] = Keycode._8
-            convertMap["9"] = Keycode._9
-            convertMap["8"] = Keycode._8
-            convertMap["9"] = Keycode._9
+            reverseMap[_3D_MODE] = "3D_MODE"
+            reverseMap[_0] = "0"
+            reverseMap[_1] = "1"
+            reverseMap[_2] = "2"
+            reverseMap[_3] = "3"
+            reverseMap[_4] = "4"
+            reverseMap[_5] = "5"
+            reverseMap[_6] = "6"
+            reverseMap[_7] = "7"
+            reverseMap[_8] = "8"
+            reverseMap[_9] = "9"
+            reverseMap[_8] = "8"
+            reverseMap[_9] = "9"
+
+            reverseMap[exclam] = "!"
+            reverseMap[quotedbl] = "\""
+            reverseMap[dollar] = "$"
+            reverseMap[percent] = "%"
+            reverseMap[ampersand] = "&"
+            reverseMap[colon] = ":"
+            reverseMap[less] = "<"
+            reverseMap[greater] = ">"
+            reverseMap[question] = "?"
+            reverseMap[asciicircum] = "^"
+            reverseMap[underscore] = "_"
+            reverseMap[braceleft] = "<"
+            reverseMap[bar] = "|"
+            reverseMap[braceright] = ">"
+            reverseMap[asciitilde] = "~"
+
+            reverseMap.forEach {
+                convertMap[it.value] = it.key
+            }
+        }
+
+        fun isStdKey(keycode: Int): Boolean {
+            return keycode < A.ordinal
+        }
+
+        fun hasSymbolLabel(keycode: Int): Boolean {
+            return keycode >= A.ordinal && keycode < values().size
+        }
+
+        fun getSymbolLabell(keycode: Keycode): String {
+            return reverseMap[keycode] ?: ""
         }
 
         private val masks = hashMapOf(

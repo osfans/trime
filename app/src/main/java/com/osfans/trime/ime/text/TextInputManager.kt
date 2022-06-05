@@ -13,8 +13,8 @@ import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.keyboard.Event
-import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
@@ -391,9 +391,9 @@ class TextInputManager private constructor() :
     override fun onKey(keyEventCode: Int, metaState: Int) {
         printModifierKeyState(metaState, "keyEventCode=" + keyEventCode)
         if (trime.handleKey(keyEventCode, metaState)) return
-        if (keyEventCode >= Key.getSymbolStart()) {
+        if (Keycode.hasSymbolLabel(keyEventCode)) {
             needSendUpRimeKey = false
-            activeEditorInstance.commitText(Event.getDisplayLabel(keyEventCode))
+            activeEditorInstance.commitText(Keycode.getSymbolLabell(Keycode.valueOf(keyEventCode)))
             return
         }
         needSendUpRimeKey = false

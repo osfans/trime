@@ -59,8 +59,6 @@ public class Key {
   private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
   public int edgeFlags;
-  private static int symbolStart;
-  private static String symbols;
   private static final KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
   private final Keyboard mKeyboard;
 
@@ -152,22 +150,6 @@ public class Key {
 
   public static Map<String, Map<String, String>> getPresetKeys() {
     return presetKeys;
-  }
-
-  public static int getSymbolStart() {
-    return symbolStart;
-  }
-
-  public static void setSymbolStart(int symbolStart) {
-    Key.symbolStart = symbolStart;
-  }
-
-  public static String getSymbols() {
-    return symbols;
-  }
-
-  public static void setSymbols(String symbols) {
-    Key.symbols = symbols;
   }
 
   public static KeyCharacterMap getKcm() {
