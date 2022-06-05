@@ -1,5 +1,7 @@
 name: pull request ci
 on: [pull_request]
+env:
+  CI_NAME: Pull Request CI
 jobs:
   build:
     runs-on: ubuntu-latest

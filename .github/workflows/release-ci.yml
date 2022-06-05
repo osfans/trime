@@ -3,6 +3,8 @@ on:
   push:
     tags:
       - '*'
+env:
+  CI_NAME: Release CI
 jobs:
   build:
     runs-on: ubuntu-latest
