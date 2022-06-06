@@ -121,9 +121,9 @@ def getBuildTime() {
 }
 
 def getCommitInfo(){
-    def text = ' git show --pretty=format:"%ci %cr"'.execute().text
-    text =  (text =~ /${"\\n.*"}/).replaceAll("").trim()
-    return ' git describe'.execute().text.trim() +  ", " + (text =~ /${"(?<=(\\s[+-](\\d{4}))).*"}/).replaceAll("").trim()
+    def text = ' git show --pretty=format:"%ci"'.execute().text.trim()
+    text =  (text =~ /${"(\\n.*|\")"}/).replaceAll("").trim()
+    return ' git describe'.execute().text.trim() +  ", " + text
 }
 
 def getGitBranch(){
