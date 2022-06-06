@@ -106,7 +106,6 @@
     <string name="pref_sync_bg_failure">Last background synchronized failed at %s</string>
     <string name="pref_sync_bg_never">Never synchronized background</string>
     <string name="conf__synchronize_background_summary">Click to enable</string>
-    <string name="pref_help__general_channel">General Channel</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
     <string name="pref_keyboard__function">View</string>

@@ -56,6 +56,64 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:iconSpaceReserved="false"
+        app:title="@string/settings__help_title">
+        <Preference android:key="pref_wiki" android:title="@string/pref_wiki"
+            app:iconSpaceReserved="false">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://github.com/osfans/trime/wiki/UserGuide" />
+        </Preference>
+        <Preference android:key="pref_issues" android:title="@string/pref_issues"
+            app:iconSpaceReserved="false">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://github.com/osfans/trime/issues" />
+        </Preference>
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:iconSpaceReserved="false"
+        app:title="@string/pref_help__user_community"
+        app:key="pref_help__user_community" >
+        <Preference android:key="pref_trime_qq"
+            app:iconSpaceReserved="false"
+            android:title="@string/pref_trime_qq"
+            android:summary="@string/pref_trime_qq_summary">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DzifdI0iaEYjATwYkvVzP1cjsUEWSa9Ha" />
+        </Preference>
+        <Preference android:key="pref_trime_qq2"
+            app:iconSpaceReserved="false"
+            android:title="@string/pref_trime_qq2"
+            android:summary="@string/pref_trime_qq2_summary">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D46XegYX4TQW366gVRKAUhTgtFYmYw7G3" />
+        </Preference>
+        <Preference android:key="pref_rime_qq"
+            app:iconSpaceReserved="false"
+            android:title="@string/pref_rime_qq"
+            android:summary="@string/pref_rime_qq_summary">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3Dm505aYSeLZjOwWeMNAViWylZZDYqMrxV" />
+        </Preference>
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:iconSpaceReserved="false"
+        app:title="@string/pref_help__marketplace"
+        app:key="pref_help__marketplace">
+        <Preference android:key="pref_market" android:title="@string/pref_market"
+            app:iconSpaceReserved="false">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://play.google.com/store/apps/details?id=com.osfans.trime" />
+        </Preference>
+        <Preference android:key="pref_coolmarket" android:title="@string/pref_coolmarket"
+            app:iconSpaceReserved="false">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://www.coolapk.com/apk/com.osfans.trime" />
+        </Preference>
+    </PreferenceCategory>
+
+
     <PreferenceCategory app:key="about__support_category"
         app:title="@string/about__support"
         app:iconSpaceReserved="false">

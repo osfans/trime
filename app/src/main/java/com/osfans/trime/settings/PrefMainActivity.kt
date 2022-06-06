@@ -186,10 +186,6 @@ class PrefMainActivity :
                 }
                 true
             }
-            R.id.preference__menu_help -> {
-                startActivity(Intent(this, HelpActivity::class.java))
-                true
-            }
             R.id.preference__menu_about -> {
                 startActivity(Intent(this, AboutActivity::class.java))
                 true

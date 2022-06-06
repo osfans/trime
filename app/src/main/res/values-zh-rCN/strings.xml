@@ -105,7 +105,6 @@
     <string name="pref_sync_bg_failure">上次同步于 %s，失败</string>
     <string name="pref_sync_bg_never">后台同步未运行</string>
     <string name="conf__synchronize_background_summary">点击以开启后台同步</string>
-    <string name="pref_help__general_channel">常规渠道</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
     <string name="pref_keyboard__effect">按键效果</string>

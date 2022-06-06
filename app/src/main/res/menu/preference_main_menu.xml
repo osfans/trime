@@ -4,8 +4,6 @@
     <item android:id="@+id/preference__menu_deploy"
         android:title="@string/pref_deploy"
         app:showAsAction="ifRoom" />
-    <item android:id="@+id/preference__menu_help"
-        android:title="@string/settings__help_title" />
     <item android:id="@+id/preference__menu_about"
         android:title="@string/settings__about_title" />
 </menu>

@@ -22,7 +22,7 @@
     <!-- 輸入法平臺名稱  -->
     <string name="trime_app_name">同文輸入法</string>
     <!-- Preference settings -->
-    <string name="settings__help_title">求助</string>
+    <string name="settings__help_title">尋求幫助</string>
     <string name="pref_wiki">維基教程</string>
     <string name="pref_issues">問題反饋</string>
     <string name="pref_trime_qq">同文QQ羣</string>
@@ -106,7 +106,6 @@
     <string name="pref_sync_bg_failure">上次同步於 %s，失敗</string>
     <string name="pref_sync_bg_never">後台同步未運行</string>
     <string name="conf__synchronize_background_summary">點擊以啟用後台同步</string>
-    <string name="pref_help__general_channel">常規渠道</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
     <string name="pref_keyboard__function">檢視</string>
