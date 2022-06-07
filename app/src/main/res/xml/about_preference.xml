@@ -74,6 +74,15 @@
     <PreferenceCategory app:iconSpaceReserved="false"
         app:title="@string/pref_help__user_community"
         app:key="pref_help__user_community" >
+
+        <Preference android:key="pref_trime_custom_qq"
+            app:iconSpaceReserved="false"
+            android:title="@string/pref_trime_custom_qq"
+            android:summary="@string/pref_trime_custom_qq_summary">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="@string/pref_trime_custom_qq_data" />
+        </Preference>
+
         <Preference android:key="pref_trime_qq"
             app:iconSpaceReserved="false"
             android:title="@string/pref_trime_qq"

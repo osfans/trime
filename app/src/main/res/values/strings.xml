@@ -199,4 +199,7 @@
      <string name="keyboard__key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
      <string name="keyboard__key_swipe_velocity_hi">The velocity of the swipe gesture on consecutive keystrokes</string>
     <string name="about__buildinfo">Build info</string>
+    <string name="pref_trime_custom_qq">Custom QQ Group</string>
+    <string name="pref_trime_custom_qq_summary" translatable="false"> </string>
+    <string name="pref_trime_custom_qq_data" translatable="false"> </string>
 </resources>

@@ -198,4 +198,5 @@
     <string name="keyboard__key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
     <string name="keyboard__key_swipe_velocity_hi">連續擊鍵時觸發滑動手勢的速度</string>
     <string name="about__buildinfo">編譯信息</string>
+    <string name="pref_trime_custom_qq">修改版QQ羣</string>
 </resources>
