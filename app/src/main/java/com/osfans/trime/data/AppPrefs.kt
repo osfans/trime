@@ -297,6 +297,7 @@ class AppPrefs(
             const val SELECTED_THEME = "looks__selected_theme"
             const val SELECTED_COLOR = "looks__selected_color_scheme"
             const val AUTO_DARK = "looks__auto_dark"
+            const val USE_MINI_KEYBOARD = "looks__use_mini_keyboard"
         }
         var selectedTheme: String
             get() = prefs.getPref(SELECTED_THEME, "trime")
@@ -306,6 +307,9 @@ class AppPrefs(
             set(v) = prefs.setPref(SELECTED_COLOR, v)
         var autoDark: Boolean = false
             get() = prefs.getPref(AUTO_DARK, false)
+            private set
+        var useMiniKeyboard: Boolean = false
+            get() = prefs.getPref(USE_MINI_KEYBOARD, false)
             private set
     }
 

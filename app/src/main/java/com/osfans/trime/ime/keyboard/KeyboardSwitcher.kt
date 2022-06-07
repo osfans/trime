@@ -1,8 +1,10 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.Config
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.util.appContext
 import timber.log.Timber
 
 /** Manages [Keyboard]s and their status. **/
@@ -67,6 +69,37 @@ class KeyboardSwitcher {
             }
             else -> keyboardNames.indexOf(name)
         }
+        setKeyboard(i)
+    }
+    /**
+     * Switch to a certain keyboard by given [name].
+     */
+    fun startKeyboard(name: String?) {
+        var i = if (currentId.isValidId()) currentId else 0
+        i = when {
+            name.isNullOrEmpty() -> if (keyboards[i].isLock) i else lastLockId
+            name.contentEquals(".default") -> 0
+            name.contentEquals(".prior") -> currentId - 1
+            name.contentEquals(".next") -> currentId + 1
+            name.contentEquals(".last") -> lastId
+            name.contentEquals(".last_lock") -> lastLockId
+            name.contentEquals(".ascii") -> {
+                val asciiKeyboard = keyboards[i].asciiKeyboard
+                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { keyboardNames.indexOf(asciiKeyboard) }
+            }
+            else -> keyboardNames.indexOf(name)
+        }
+
+        if (i == 0 && keyboardNames.contains("mini")) {
+            if (AppPrefs.defaultInstance().looks.useMiniKeyboard) {
+                val realkeyboard = appContext.getResources().getConfiguration().keyboard
+                if (realkeyboard != Configuration.KEYBOARD_NOKEYS) {
+                    Timber.i("onStartInputView() configuration.keyboard=" + realkeyboard + ", keyboardType=" + i)
+                    i = keyboardNames.indexOf("mini")
+                }
+            }
+        }
+
         setKeyboard(i)
     }
 

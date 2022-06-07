@@ -229,7 +229,7 @@ class TextInputManager private constructor() :
         keyboardSwitcher.let {
             it.resize(trime.maxWidth)
             // Select a keyboard based on the input type of the editing field.
-            it.switchToKeyboard(keyboardType)
+            it.startKeyboard(keyboardType)
         }
         Rime.get(trime)
 
