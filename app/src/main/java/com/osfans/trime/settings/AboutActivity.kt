@@ -82,6 +82,9 @@ class AboutActivity : AppCompatActivity() {
 
             findPreference<Preference>("about__opencc_version")
                 ?.writeLibraryVersionToSummary(Rime.get_opencc_version())
+
+            findPreference<Preference>("pref_trime_custom_qq")
+                ?.hidden()
         }
 
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
@@ -109,5 +112,11 @@ class AboutActivity : AppCompatActivity() {
                 else -> super.onPreferenceTreeClick(preference)
             }
         }
+    }
+}
+
+private fun Preference.hidden() {
+    if (this.summary.isBlank() || this.intent.data.toString().isBlank()) {
+        this.setVisible(false)
     }
 }
