@@ -893,8 +893,8 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void commitTextByChar(String text) {
-    for (int i = 1; i < text.length(); i++) {
-      if (!activeEditorInstance.commitText(text.substring(i - 1, i))) break;
+    for (int i = 0; i < text.length(); i++) {
+      if (!activeEditorInstance.commitText(text.substring(i, i + 1))) break;
     }
   }
 

@@ -92,9 +92,9 @@ enum class Keycode {
             reverseMap[question] = "?"
             reverseMap[asciicircum] = "^"
             reverseMap[underscore] = "_"
-            reverseMap[braceleft] = "<"
+            reverseMap[braceleft] = "{"
             reverseMap[bar] = "|"
-            reverseMap[braceright] = ">"
+            reverseMap[braceright] = "}"
             reverseMap[asciitilde] = "~"
 
             reverseMap.forEach {
