@@ -153,10 +153,10 @@
     <string name="about__support">Support</string>
     <string name="about__used_libraries">Third Party Open Source Libraries</string>
     <string name="about__used_library_dialog_title">Trime | Open Source Libraries</string>
-    <string name="other__selection_sense_title">Use Ctrl+Left/Right to move the cursor</string>
     <string name="pref__system_default">System Default</string>
     <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
     <string name="keyboard__hook_candidate">Click candidate</string>
+    <string name="keyboard__hook_candidate_commit">Send Space when click candidate</string>
     <string name="trime_app_slogan">Trimes with Your Keystrokes</string>
     <string name="external_storage_access_required">Trime needs to access external storage to deploy or read schemas and config, tap OK to grant the permission.</string>
     <string name="external_storage_permission_not_available">External storage permission is not available</string>

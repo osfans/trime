@@ -446,7 +446,10 @@ class TextInputManager private constructor() :
             }
         } else if (prefs.keyboard.hookCandidate || index > 9) {
             if (Rime.selectCandidate(index)) {
-                activeEditorInstance.commitRimeText()
+                if (prefs.keyboard.hookCandidateCommit)
+                    trime.handleKey(KeyEvent.KEYCODE_SPACE, 0)
+                else
+                    activeEditorInstance.commitRimeText()
             }
         } else if (index == 9) {
             trime.handleKey(KeyEvent.KEYCODE_0, 0)

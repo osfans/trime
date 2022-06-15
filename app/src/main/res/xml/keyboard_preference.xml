@@ -85,6 +85,11 @@
             app:iconSpaceReserved="false" />
 
         <SwitchPreferenceCompat
+            android:key="@string/keyboard__hook_candidate_commit"
+            android:title="@string/keyboard__hook_candidate_commit"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
             android:key="keyboard__hook_ctrl_lr"
             android:title="@string/keyboard__hook_ctrl_lr"
             app:iconSpaceReserved="false" />

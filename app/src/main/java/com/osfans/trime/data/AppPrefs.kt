@@ -174,6 +174,7 @@ class AppPrefs(
 
             const val HOOK_FAST_INPUT = "keyboard__hook_fast_input"
             const val HOOK_CANDIDATE = "keyboard__hook_candidate"
+            const val HOOK_CANDIDATE_COMMIT = "keyboard__hook_candidate_commit"
             const val HOOK_CTRL_A = "keyboard__hook_ctrl_a"
             const val HOOK_CTRL_CV = "keyboard__hook_ctrl_cv"
             const val HOOK_CTRL_LR = "keyboard__hook_ctrl_lr"
@@ -229,6 +230,9 @@ class AppPrefs(
             private set
         var hookCandidate: Boolean = false
             get() = prefs.getPref(HOOK_CANDIDATE, false)
+            private set
+        var hookCandidateCommit: Boolean = false
+            get() = prefs.getPref(HOOK_CANDIDATE_COMMIT, true)
             private set
         var hookCtrlA: Boolean = false
             get() = prefs.getPref(HOOK_CTRL_A, false)
