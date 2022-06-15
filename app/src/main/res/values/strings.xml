@@ -130,7 +130,7 @@
         <item name="1000">1000</item>
         <item name="-1">All</item>
     </string-array>
-    <string name="keyboard__show_switche_arrow_title">Show arrow for candidate switch (→)</string>
+    <string name="keyboard__show_switche_arrow_title">Show arrow for switch (→)</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -156,7 +156,7 @@
     <string name="pref__system_default">System Default</string>
     <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
     <string name="keyboard__hook_candidate">Click candidate</string>
-    <string name="keyboard__hook_candidate_commit">Send Space when click candidate</string>
+    <string name="keyboard__hook_candidate_commit">Send Space when click candidate (coming soon)</string>
     <string name="trime_app_slogan">Trimes with Your Keystrokes</string>
     <string name="external_storage_access_required">Trime needs to access external storage to deploy or read schemas and config, tap OK to grant the permission.</string>
     <string name="external_storage_permission_not_available">External storage permission is not available</string>

@@ -14,6 +14,7 @@ import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.Keycode
+import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
@@ -446,9 +447,11 @@ class TextInputManager private constructor() :
             }
         } else if (prefs.keyboard.hookCandidate || index > 9) {
             if (Rime.selectCandidate(index)) {
-                if (prefs.keyboard.hookCandidateCommit)
-                    trime.handleKey(KeyEvent.KEYCODE_SPACE, 0)
-                else
+                if (prefs.keyboard.hookCandidateCommit) {
+                    // todo 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
+                    // 如果使用了lua处理候选上屏，模拟数字键、空格键是非常有必要的
+                    activeEditorInstance.commitRimeText()
+                } else
                     activeEditorInstance.commitRimeText()
             }
         } else if (index == 9) {
@@ -462,6 +465,7 @@ class TextInputManager private constructor() :
         when (arrow) {
             Candidate.PAGE_UP_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_UP, 0)
             Candidate.PAGE_DOWN_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
+            Candidate.PAGE_EX_BUTTON -> Trime.getService().selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE)
         }
     }
 }

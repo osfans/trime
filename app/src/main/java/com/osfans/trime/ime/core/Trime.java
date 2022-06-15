@@ -69,6 +69,7 @@ import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.PositionType;
+import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.keyboard.Key;
@@ -454,7 +455,12 @@ public class Trime extends LifecycleInputMethodService {
   // 按键需要通过tab name来打开liquidKeyboard的指定tab
   public void selectLiquidKeyboard(@NonNull String name) {
     if (name.matches("\\d+")) selectLiquidKeyboard(Integer.parseInt(name));
+    else if (name.matches("[A-Z]+")) selectLiquidKeyboard(SymbolKeyboardType.valueOf(name));
     else selectLiquidKeyboard(TabManager.getTagIndex(name));
+  }
+
+  public void selectLiquidKeyboard(SymbolKeyboardType type) {
+    selectLiquidKeyboard(TabManager.getTagIndex(type));
   }
 
   public void pasteByChar() {
@@ -1197,6 +1203,7 @@ public class Trime extends LifecycleInputMethodService {
       } else {
         mCandidate.setText(0);
       }
+      mCandidate.setExpectWidth(mainKeyboardView.getWidth());
       // 刷新候选词后，如果候选词超出屏幕宽度，滚动候选栏
       mTabRoot.move(mCandidate.getHighlightLeft(), mCandidate.getHighlightRight());
     }

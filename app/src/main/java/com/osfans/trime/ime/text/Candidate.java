@@ -34,6 +34,7 @@ import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.util.GraphicUtils;
 import java.lang.ref.WeakReference;
@@ -52,7 +53,8 @@ public class Candidate extends View {
   private static final int MAX_CANDIDATE_COUNT = 30;
   public static final String PAGE_UP_BUTTON = "◀";
   public static final String PAGE_DOWN_BUTTON = "▶";
-  // private static final int CANDIDATE_TOUCH_OFFSET = -12;
+  public static final String PAGE_EX_BUTTON = "▼";
+  private int expectWidth = 0;
 
   private WeakReference<EventListener> listener = new WeakReference<>(null);
   private final GraphicUtils graphicUtils;
@@ -154,6 +156,10 @@ public class Candidate extends View {
     if (updateCandidates() > 0) {
       invalidate();
     }
+  }
+
+  public void setExpectWidth(int expectWidth) {
+    this.expectWidth = expectWidth;
   }
 
   /**
@@ -269,17 +275,32 @@ public class Candidate extends View {
   }
 
   private void updateCandidateWidth() {
+    boolean usePageExButton =
+        AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize().equals("10000");
+    int pageBottonWidth =
+        (int)
+            (candidateSpacing
+                + graphicUtils.measureText(symbolPaint, PAGE_DOWN_BUTTON, symbolFont)
+                + 2 * candidatePadding);
+    int minWidth = expectWidth - pageBottonWidth * 2;
+
     computedCandidates.clear();
     updateCandidates();
-    int x =
-        (!Rime.hasLeft())
-            ? 0
-            : (int)
-                (2 * candidatePadding
-                    + graphicUtils.measureText(symbolPaint, PAGE_UP_BUTTON, symbolFont)
-                    + candidateSpacing);
+    int x = (!Rime.hasLeft()) ? 0 : pageBottonWidth;
     for (int i = 0; i < numCandidates; i++) {
       int n = i + startNum;
+
+      if (usePageExButton) {
+        if (x > minWidth) {
+          computedCandidates.add(
+              new ComputedCandidate.Symbol(
+                  PAGE_EX_BUTTON,
+                  new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
+          x += pageBottonWidth;
+          break;
+        }
+      }
+
       float candidateWidth =
           graphicUtils.measureText(candidatePaint, candidates[n].text, candidateFont)
               + 2 * candidatePadding;
@@ -301,24 +322,17 @@ public class Candidate extends View {
       x += candidateWidth + candidateSpacing;
     }
     if (Rime.hasLeft()) {
-      float right =
-          candidateSpacing
-              + graphicUtils.measureText(symbolPaint, PAGE_UP_BUTTON, symbolFont)
-              + 2 * candidatePadding;
       computedCandidates.add(
           new ComputedCandidate.Symbol(
-              PAGE_UP_BUTTON, new Rect(0, 0, (int) right, getMeasuredHeight())));
+              PAGE_UP_BUTTON, new Rect(0, 0, pageBottonWidth, getMeasuredHeight())));
     }
     if (Rime.hasRight()) {
-      float right =
-          candidateSpacing
-              + graphicUtils.measureText(symbolPaint, PAGE_DOWN_BUTTON, symbolFont)
-              + 2 * candidatePadding;
       computedCandidates.add(
           new ComputedCandidate.Symbol(
-              PAGE_DOWN_BUTTON, new Rect(x, 0, (int) ((int) x + right), getMeasuredHeight())));
-      x += (int) right;
+              PAGE_DOWN_BUTTON, new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
+      x += pageBottonWidth;
     }
+
     LayoutParams params = getLayoutParams();
     params.width = x;
     params.height =

@@ -232,7 +232,7 @@ class AppPrefs(
             get() = prefs.getPref(HOOK_CANDIDATE, false)
             private set
         var hookCandidateCommit: Boolean = false
-            get() = prefs.getPref(HOOK_CANDIDATE_COMMIT, true)
+            get() = prefs.getPref(HOOK_CANDIDATE_COMMIT, false)
             private set
         var hookCtrlA: Boolean = false
             get() = prefs.getPref(HOOK_CTRL_A, false)

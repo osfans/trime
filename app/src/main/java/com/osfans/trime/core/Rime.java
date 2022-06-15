@@ -366,11 +366,9 @@ public class Rime {
     return get_commit(mCommit);
   }
 
-  @SuppressWarnings("UnusedReturnValue")
-  private static boolean getContexts() {
-    boolean b = get_context(mContext);
+  public static void getContexts() {
+    get_context(mContext);
     getStatus();
-    return b;
   }
 
   public static boolean isVoidKeycode(int keycode) {
@@ -413,6 +411,11 @@ public class Rime {
   public static RimeCandidate[] getCandidates() {
     if (!isComposing() && showSwitches) return mSchema.getCandidates();
     return mContext.getCandidates();
+  }
+
+  public static RimeCandidate[] getCandidatesWithoutSwitch() {
+    if (isComposing()) return mContext.getCandidates();
+    return null;
   }
 
   public static String[] getSelectLabels() {

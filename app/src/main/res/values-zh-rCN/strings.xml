@@ -129,7 +129,7 @@
         <item name="1000">1000</item>
         <item name="-1">全部</item>
     </string-array>
-    <string name="keyboard__show_switche_arrow_title">候选栏上的开关显示箭头符号(→)</string>
+    <string name="keyboard__show_switche_arrow_title">为开关显示箭头符号(→)</string>
     <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -155,7 +155,7 @@
     <string name="pref__system_default">系统默认</string>
     <string name="keyboard__key_swipe_travel_title">触发按键滑动手势的距离</string>
     <string name="keyboard__hook_candidate">点击候选词</string>
-    <string name="keyboard__hook_candidate_commit">点击候选词后，模拟空格键完成上屏</string>
+    <string name="keyboard__hook_candidate_commit">点击候选词后，模拟空格键完成上屏(暂未实现)</string>
     <string name="trime_app_slogan">击响中文之韵</string>
     <string name="external_storage_access_required">同文输入法需要存储权限以部署或读取方案和配置，点击“确定”前往授权。</string>
     <string name="external_storage_permission_not_available">存储权限不可用</string>

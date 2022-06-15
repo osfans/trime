@@ -53,6 +53,17 @@ public class TabManager {
     return 0;
   }
 
+  public static int getTagIndex(SymbolKeyboardType type) {
+    if (type == null) return 0;
+    for (int i = 0; i < self.tabTags.size(); i++) {
+      TabTag tag = self.tabTags.get(i);
+      if (tag.type.equals(type)) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
   private TabManager() {
     selected = 0;
     tabTags = new ArrayList<>();
