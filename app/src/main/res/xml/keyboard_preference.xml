@@ -6,7 +6,6 @@
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:key="settings__keyboard_function"
         app:title="@string/pref_keyboard__function">
         <ListPreference
             android:defaultValue="preview"
@@ -25,20 +24,26 @@
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="keyboard__soft_cursor"
-            android:title="@string/keyboard__soft_cursor_title"
+            android:defaultValue="false"
+            android:key="keyboard__show_key_popup"
+            android:title="@string/keyboard__show_key_popup_title"
             app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/pref_keyboard__candidate">
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="keyboard__show_window"
             android:title="@string/keyboard__show_window_title"
             app:iconSpaceReserved="false" />
         <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="keyboard__show_key_popup"
-            android:title="@string/keyboard__show_key_popup_title"
+            android:defaultValue="true"
+            android:key="keyboard__soft_cursor"
+            android:title="@string/keyboard__soft_cursor_title"
             app:iconSpaceReserved="false" />
+
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="keyboard__show_switches"
@@ -49,7 +54,17 @@
             android:key="keyboard__show_switch_arrow"
             android:title="@string/keyboard__show_switche_arrow_title"
             app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/keyboard__candidate_page_size_entries"
+            android:entryValues="@array/keyboard__candidate_page_size_values"
+            android:key="keyboard__candidate_page_size"
+            android:title="@string/keyboard__candidate_page_size"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
+
     <PreferenceCategory
         app:iconSpaceReserved="false"
         app:key="settings__keyboard_hook"

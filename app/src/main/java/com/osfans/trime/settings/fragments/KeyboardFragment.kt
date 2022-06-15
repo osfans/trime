@@ -45,6 +45,9 @@ class KeyboardFragment :
             "keyboard__show_switches" -> {
                 Rime.setShowSwitches(prefs.keyboard.switchesEnabled)
             }
+            "keyboard__candidate_page_size" -> {
+                Rime.applySchemaChange()
+            }
         }
     }
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {

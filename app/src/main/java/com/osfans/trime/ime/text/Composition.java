@@ -64,7 +64,7 @@ public class Composition extends AppCompatTextView {
   private int max_entries = Candidate.getMaxCandidateCount();
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
-  private List<Map<String, Object>> components;
+  private List<Map<String, Object>> windows_comps;
   private SpannableStringBuilder ss;
   private final int span = 0;
   private String movable;
@@ -212,7 +212,7 @@ public class Composition extends AppCompatTextView {
 
   public void reset(Context context) {
     final Config config = Config.get(context);
-    components = (List<Map<String, Object>>) config.getValue("window");
+    windows_comps = (List<Map<String, Object>>) config.getValue("window");
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     text_size = config.getPixel("text_size");
@@ -331,9 +331,11 @@ public class Composition extends AppCompatTextView {
    * @return j
    */
   private int calcStartNum(int min_length, int min_check) {
+    Timber.d("setWindow calcStartNum() getCandidates");
     final Rime.RimeCandidate[] candidates = Rime.getCandidates();
     if (candidates == null) return 0;
 
+    Timber.d("setWindow calcStartNum() getCandidates finish, size=" + candidates.length);
     int j = min_check > max_entries ? (max_entries - 1) : (min_check - 1);
     if (j >= candidates.length) j = candidates.length - 1;
     for (; j >= 0; j--) {
@@ -512,6 +514,15 @@ public class Composition extends AppCompatTextView {
 
   public int setWindow(int length, int min_check) {
     if (getVisibility() != View.VISIBLE) return 0;
+    StackTraceElement[] stacks = new Throwable().getStackTrace();
+    Timber.d(
+        "setWindow Rime.getComposition()"
+            + ", [1]"
+            + stacks[1].toString()
+            + ", [2]"
+            + stacks[2].toString()
+            + ", [3]"
+            + stacks[3].toString());
     Rime.RimeComposition r = Rime.getComposition();
     if (r == null) return 0;
     String s = r.getText();
@@ -519,7 +530,8 @@ public class Composition extends AppCompatTextView {
     setSingleLine(true); // 設置單行
     ss = new SpannableStringBuilder();
     int start_num = 0;
-    for (Map<String, ?> m : components) {
+
+    for (Map<String, ?> m : windows_comps) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
         start_num = calcStartNum(length, min_check);

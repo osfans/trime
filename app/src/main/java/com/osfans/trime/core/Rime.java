@@ -26,7 +26,12 @@ import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.ime.core.Trime;
+import java.io.BufferedReader;
+import java.io.CharArrayWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -107,6 +112,7 @@ public class Rime {
     }
 
     public RimeCandidate[] getCandidates() {
+      Timber.d("setWindow getCandidates() size()=" + size());
       return size() == 0 ? null : menu.candidates;
     }
   }
@@ -134,14 +140,20 @@ public class Rime {
     List<Map<String, Object>> switches = new ArrayList<Map<String, Object>>();
 
     public RimeSchema(String schema_id) {
+      Timber.d("RimeSchema() start");
       Object o;
       o = schema_get_value(schema_id, "schema");
       if (o == null || !(o instanceof Map)) return;
+      Timber.d("RimeSchema() switch");
       schema = (Map<String, Object>) o;
       o = schema_get_value(schema_id, "switches");
       if (o == null || !(o instanceof List)) return;
       switches = (List<Map<String, Object>>) o;
       check(); // 檢查不在選單中顯示的選項
+      Timber.d("RimeSchema() menu");
+      o = schema_get_value(schema_id, "menu");
+      if (o == null || !(o instanceof HashMap)) return;
+      Timber.d("RimeSchema() menu.page_size=" + ((Map<Object, Object>) o).get("page_size"));
     }
 
     public void check() {
@@ -296,8 +308,11 @@ public class Rime {
   private static void initSchema() {
     mSchemaList = get_schema_list();
     String schema_id = getSchemaId();
+    Timber.d("initSchema() RimeSchema");
     mSchema = new RimeSchema(schema_id);
+    Timber.d("initSchema() getStatus");
     getStatus();
+    Timber.d("initSchema() done");
   }
 
   @SuppressWarnings("UnusedReturnValue")
@@ -367,6 +382,7 @@ public class Rime {
   private static boolean onKey(int keycode, int mask) {
     Timber.i("\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s", keycode, mask);
     if (isVoidKeycode(keycode)) return false;
+    // 此处调用native方法是耗时操作
     final boolean b = process_key(keycode, mask);
     Timber.i(
         "\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s, process_key result=%s", keycode, mask, b);
@@ -500,9 +516,70 @@ public class Rime {
   }
 
   private static boolean selectSchema(String schema_id) {
+    Timber.d("selectSchema() schema_id=" + schema_id);
+    overWriteSchema(schema_id);
     boolean b = select_schema(schema_id);
     getContexts();
     return b;
+  }
+
+  // 刷新当前输入方案
+  public static void applySchemaChange() {
+    String schema_id = getSchemaId();
+    // 实测直接select_schema(schema_id)方案没有重新载入，切换到不存在的方案，再切回去（会产生1秒的额外耗时）.需要找到更好的方法
+    // 不发生覆盖则不生效
+    if (overWriteSchema(schema_id)) {
+      select_schema("nill");
+      select_schema(schema_id);
+    }
+    getContexts();
+  }
+  // 临时修改scheme文件参数
+  // 临时修改build后的scheme可以避免build过程的耗时
+  // 另外实际上jni读入yaml、修改、导出的效率并不高
+  private static boolean overWriteSchema(String schema_id) {
+    Map<String, String> map = new HashMap<>();
+    String page_size = AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize();
+    Timber.d("overWriteSchema() page_size=" + page_size);
+    if (!page_size.equals("0")) {
+      map.put("page_size", page_size);
+    }
+    if (map.isEmpty()) return false;
+    return overWriteSchema(schema_id, map);
+  }
+
+  private static boolean overWriteSchema(String schema_id, Map<String, String> map) {
+    if (schema_id == null) schema_id = getSchemaId();
+    File file =
+        new File(Rime.get_user_data_dir() + File.separator + "build", schema_id + ".schema.yaml");
+    try {
+      FileReader in = new FileReader(file);
+      BufferedReader bufIn = new BufferedReader(in);
+      CharArrayWriter tempStream = new CharArrayWriter();
+      String line = null;
+      read:
+      while ((line = bufIn.readLine()) != null) {
+        for (String k : map.keySet()) {
+          String key = k + ": ";
+          if (line.contains(key)) {
+            String value = ": " + map.get(k) + System.getProperty("line.separator");
+            tempStream.write(line.replaceFirst(":.+", value));
+            map.remove(k);
+            continue read;
+          }
+        }
+        tempStream.write(line);
+        tempStream.append(System.getProperty("line.separator"));
+      }
+      bufIn.close();
+      FileWriter out = new FileWriter(file);
+      tempStream.writeTo(out);
+      out.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false;
+    }
+    return map.isEmpty();
   }
 
   public static boolean selectSchema(int id) {
@@ -549,9 +626,11 @@ public class Rime {
     // Timber.i("message: [%s] %s", message_type, message_value);
     Timber.i("Notification: %s", event);
     final Trime trime = Trime.getService();
+    Timber.i("Notification: getService done, before det SchemaEvent");
     if (event instanceof RimeEvent.SchemaEvent) {
       initSchema();
       trime.initKeyboard();
+      Timber.i("Notification: solve SchemaEvent");
     } else if (event instanceof RimeEvent.OptionEvent) {
       getStatus();
       getContexts(); // 切換中英文、簡繁體時更新候選

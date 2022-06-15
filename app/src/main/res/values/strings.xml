@@ -130,7 +130,7 @@
         <item name="1000">1000</item>
         <item name="-1">All</item>
     </string-array>
-    <string name="keyboard__show_switche_arrow_title">Show arrow for candidate switch</string>
+    <string name="keyboard__show_switche_arrow_title">Show arrow for candidate switch (→)</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -202,4 +202,24 @@
     <string name="pref_trime_custom_qq">Custom QQ Group</string>
     <string name="pref_trime_custom_qq_summary" translatable="false"> </string>
     <string name="pref_trime_custom_qq_data" translatable="false"> </string>
+    <string name="keyboard__use_mini_keyboard_title">Show mini keyboard when real keyboard linked</string>
+    <string name="pref_keyboard__candidate">Candidate</string>
+    <string name="keyboard__candidate_page_size">Candidate item count for each page</string>
+    <string-array name="keyboard__candidate_page_size_entries" >
+        <item name="10000">Fill candidate</item>
+        <item name="0">Scheme define (Need delete scheme in build path and depoly)</item>
+        <item name="5">5</item>
+        <item name="6">6</item>
+        <item name="7">7</item>
+        <item name="8">8</item>
+        <item name="9">9</item>
+        <item name="10">10</item>
+        <item name="11">11</item>
+        <item name="12">12</item>
+        <item name="15">15</item>
+        <item name="20">20</item>
+        <item name="30">30</item>
+        <item name="50">50</item>
+        <item name="100">100</item>
+    </string-array>
 </resources>

@@ -51,4 +51,21 @@
     </string-array>
     <string name="default_shared_data_dir" translatable="false">/sdcard/rime</string>
     <string name="conf__default_user_data_dir" translatable="false">/sdcard/rime</string>
+    <string-array name="keyboard__candidate_page_size_values">
+        <item>10000</item>
+        <item>0</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>50</item>
+        <item>100</item>
+    </string-array>
 </resources>

@@ -170,6 +170,7 @@ class AppPrefs(
             const val SWITCHES_ENABLED = "keyboard__show_switches"
             const val SWITCH_ARROW_ENABLED = "keyboard__show_switch_arrow"
             const val FULLSCREEN_MODE = "keyboard__fullscreen_mode"
+            const val CANDIDATE_PAGE_SIZE = "keyboard__candidate_page_size"
 
             const val HOOK_FAST_INPUT = "keyboard__hook_fast_input"
             const val HOOK_CANDIDATE = "keyboard__hook_candidate"
@@ -218,6 +219,9 @@ class AppPrefs(
             private set
         var switchArrowEnabled: Boolean = false
             get() = prefs.getPref(SWITCH_ARROW_ENABLED, true)
+            private set
+        var candidatePageSize: String = "0"
+            get() = prefs.getPref(CANDIDATE_PAGE_SIZE, "0")
             private set
 
         var hookFastInput: Boolean = false

@@ -66,7 +66,7 @@
     <string name="keyboard__key_repeat_interval_title">重複按鍵的重複間隔</string>
     <string name="keyboard__show_switches_title">在候選欄中顯示狀態</string>
     <string name="keyboard__show_key_popup_title">按鍵時彈出顯示字符</string>
-    <string name="keyboard__show_window_title">顯示懸浮窗口</string>
+    <string name="keyboard__show_window_title">顯示懸浮窗</string>
     <string name="keyboard__inline_preedit_title">嵌入式編輯模式</string>
     <string-array name="keyboard__inline_entries">
         <item>首選</item>
@@ -79,7 +79,7 @@
         <item name="light">亮色</item>
         <item name="dark">暗色</item>
     </string-array>
-    <string name="keyboard__soft_cursor_title">編碼區使用插入符號(^)</string>
+    <string name="keyboard__soft_cursor_title">懸浮窗編碼區使用插入符號(^)</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改設定後需要再次部署同文輸入法平臺</string>
     <string name="conf__synchronize_title">同步</string>
@@ -130,7 +130,7 @@
         <item name="1000">1000</item>
         <item name="-1">全部</item>
     </string-array>
-    <string name="keyboard__show_switche_arrow_title">在候選欄中顯示狀態時帶箭頭符號</string>
+    <string name="keyboard__show_switche_arrow_title">候選欄上的開關顯示箭頭符號(→)</string>
     <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -199,4 +199,24 @@
     <string name="keyboard__key_swipe_velocity_hi">連續擊鍵時觸發滑動手勢的速度</string>
     <string name="about__buildinfo">編譯信息</string>
     <string name="pref_trime_custom_qq">修改版QQ羣</string>
+    <string name="keyboard__use_mini_keyboard_title">連接實體鍵盤時，顯示迷你軟鍵盤</string>
+    <string name="pref_keyboard__candidate">候選欄</string>
+    <string name="keyboard__candidate_page_size">每頁顯示候選詞數量</string>
+    <string-array name="keyboard__candidate_page_size_entries" >
+        <item name="10000">自動填滿候選欄</item>
+        <item name="0">由方案指定(需刪除build目錄中的方案並重新部署)</item>
+        <item name="5">5</item>
+        <item name="6">6</item>
+        <item name="7">7</item>
+        <item name="8">8</item>
+        <item name="9">9</item>
+        <item name="10">10</item>
+        <item name="11">11</item>
+        <item name="12">12</item>
+        <item name="15">15</item>
+        <item name="20">20</item>
+        <item name="30">30</item>
+        <item name="50">50</item>
+        <item name="100">100</item>
+    </string-array>
 </resources>
