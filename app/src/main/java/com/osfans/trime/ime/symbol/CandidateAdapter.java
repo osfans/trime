@@ -38,6 +38,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   private Drawable background;
 
   private PositionType textPosition, commentPosition;
+  private static int COMMENT_UNKNOW = 0, COMMENT_TOP = 1, COMMENT_DOWN = 2, COMMENT_RIGHT = 3;
+  private static int comment_position;
 
   public CandidateAdapter(Context context) {
     myContext = context;
@@ -45,6 +47,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     prefs = AppPrefs.defaultInstance();
     candidates = new Rime.RimeCandidate[0];
     textInputManager = TextInputManager.Companion.getInstance();
+    comment_position = 0;
   }
 
   public int updateCandidates() {
@@ -74,6 +77,11 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     textColor = config.getLiquidColor("long_text_color");
     if (textColor == null) textColor = config.getLiquidColor("key_text_color");
 
+    comment_position = config.getInt("comment_position");
+    if (comment_position == COMMENT_UNKNOW) {
+      comment_position = config.getBoolean("comment_on_top") ? COMMENT_TOP : COMMENT_RIGHT;
+    }
+
     textSize = config.getFloat("candidate_text_size");
 
     background =
@@ -86,7 +94,19 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   @NonNull
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(myContext).inflate(R.layout.liquid_key_item, parent, false);
+    View view;
+    if (comment_position == COMMENT_DOWN) {
+      view = LayoutInflater.from(myContext).inflate(R.layout.liquid_key_item, parent, false);
+    } else if (comment_position == COMMENT_TOP) {
+      view =
+          LayoutInflater.from(myContext)
+              .inflate(R.layout.liquid_key_item_comment_top, parent, false);
+    } else {
+
+      view =
+          LayoutInflater.from(myContext)
+              .inflate(R.layout.liquid_key_item_comment_right, parent, false);
+    }
     return new ItemViewHolder(view);
   }
 
@@ -137,12 +157,12 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (keyMarginX > 0) marginX = keyMarginX;
 
         flexboxLp.setMargins(marginX, marginTop, marginX, flexboxLp.getMarginBottom());
+        flexboxLp.setFlexGrow(1);
 
         // TODO 设置剪贴板列表样式
         // copy SimpleAdapter 会造成高度始终为 3 行无法自适应的效果。
 
       }
-
       if (background != null)
         itemViewHold.listItemLayout.setBackground(
             Config.get(myContext)

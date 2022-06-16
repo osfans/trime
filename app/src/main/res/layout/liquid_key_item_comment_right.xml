@@ -22,7 +22,6 @@
         android:textColor="#333333"
         android:textSize="14sp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -35,7 +34,6 @@
         android:text="Comment"
         android:textColor="#333333"
         android:textSize="12sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text1" />
+        app:layout_constraintLeft_toRightOf="@id/text1"
+        app:layout_constraintBottom_toBottomOf="@id/text1" />
 </androidx.constraintlayout.widget.ConstraintLayout>

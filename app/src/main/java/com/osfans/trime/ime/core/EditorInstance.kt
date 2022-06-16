@@ -60,6 +60,7 @@ class EditorInstance(private val ims: InputMethodService) {
         if (ret) {
             commitText(Rime.getCommitText())
         }
+        Timber.i("\t<TrimeInput>\tcommitRimeText()\tupdateComposing")
         (ims as Trime).updateComposing()
         return ret
     }

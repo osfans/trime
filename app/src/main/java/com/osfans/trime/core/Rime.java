@@ -367,8 +367,12 @@ public class Rime {
   }
 
   public static void getContexts() {
+    Timber.i("\t<TrimeInput>\tgetContexts() get_context");
+    // get_context() 是耗时操作
     get_context(mContext);
+    Timber.i("\t<TrimeInput>\tgetContexts() getStatus");
     getStatus();
+    Timber.i("\t<TrimeInput>\tgetContexts() finish");
   }
 
   public static boolean isVoidKeycode(int keycode) {
@@ -385,6 +389,7 @@ public class Rime {
     Timber.i(
         "\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s, process_key result=%s", keycode, mask, b);
     getContexts();
+    Timber.i("\t<TrimeInput>\tonkey()\tfinish");
     return b;
   }
 
