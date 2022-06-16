@@ -203,7 +203,12 @@
     <string name="pref_keyboard__candidate">候选栏</string>
     <string name="keyboard__candidate_page_size">每页显示候选词数量</string>
     <string-array name="keyboard__candidate_page_size_entries" >
-        <item name="10000">自动填满候选栏</item>
+        <item name="10000">不超出候选栏</item>
+        <item name="10001">接近于候选栏</item>
+        <item name="10002">略多于候选栏</item>
+        <item name="10005">1.5倍候选栏宽度</item>
+        <item name="10010">2倍候选栏宽度</item>
+        <item name="10020">3倍候选栏宽度</item>
         <item name="0">由方案指定(需删除build目录中的方案并重新部署)</item>
         <item name="5">5</item>
         <item name="6">6</item>

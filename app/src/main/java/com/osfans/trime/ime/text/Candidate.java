@@ -275,14 +275,17 @@ public class Candidate extends View {
   }
 
   private void updateCandidateWidth() {
-    boolean usePageExButton =
-        AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize().equals("10000");
+    Integer pageEx =
+        Integer.parseInt(AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize()) - 10000;
     int pageBottonWidth =
         (int)
             (candidateSpacing
                 + graphicUtils.measureText(symbolPaint, PAGE_DOWN_BUTTON, symbolFont)
                 + 2 * candidatePadding);
-    int minWidth = expectWidth - pageBottonWidth * 2;
+    int minWidth;
+    if (pageEx > 2) minWidth = (int) (expectWidth * (pageEx / 10f + 1) - pageBottonWidth);
+    else if (pageEx == 2) minWidth = (expectWidth - pageBottonWidth * 2);
+    else minWidth = expectWidth - pageBottonWidth;
 
     computedCandidates.clear();
     updateCandidates();
@@ -290,8 +293,8 @@ public class Candidate extends View {
     for (int i = 0; i < numCandidates; i++) {
       int n = i + startNum;
 
-      if (usePageExButton) {
-        if (x > minWidth) {
+      if (pageEx >= 0) {
+        if (x >= minWidth) {
           computedCandidates.add(
               new ComputedCandidate.Symbol(
                   PAGE_EX_BUTTON,
@@ -314,6 +317,16 @@ public class Candidate extends View {
                   : candidateWidth + commentWidth;
         }
       }
+
+      // 自动填满候选栏，并保障展开候选按钮显示出来
+      if (pageEx == 0 && x + candidateWidth + candidateSpacing > minWidth) {
+        computedCandidates.add(
+            new ComputedCandidate.Symbol(
+                PAGE_EX_BUTTON, new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
+        x += pageBottonWidth;
+        break;
+      }
+
       computedCandidates.add(
           new ComputedCandidate.Word(
               candidates[n].text,

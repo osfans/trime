@@ -206,7 +206,12 @@
     <string name="pref_keyboard__candidate">Candidate</string>
     <string name="keyboard__candidate_page_size">Candidate item count for each page</string>
     <string-array name="keyboard__candidate_page_size_entries" >
-        <item name="10000">Fill candidate</item>
+        <item name="10000">Less than candidate</item>
+        <item name="10001">close to candidate</item>
+        <item name="10002">More than candidate</item>
+        <item name="10005">1.5x candidate width</item>
+        <item name="10010">2x candidate width</item>
+        <item name="10020">3x candidate width</item>
         <item name="0">Scheme define (Need delete scheme in build path and depoly)</item>
         <item name="5">5</item>
         <item name="6">6</item>
