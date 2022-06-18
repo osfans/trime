@@ -777,7 +777,8 @@ public class Rime {
 
   public static native String get_property(String prop);
 
-  public static native List get_schema_list();
+  @Nullable
+  public static native List<Map<String, String>> get_schema_list();
 
   public static native String get_current_schema();
 
@@ -857,8 +858,10 @@ public class Rime {
 
   public static native boolean customize_string(String name, String key, String value);
 
+  @Nullable
   public static native List<Map<String, String>> get_available_schema_list();
 
+  @Nullable
   public static native List<Map<String, String>> get_selected_schema_list();
 
   public static native boolean select_schemas(String[] schema_id_list);

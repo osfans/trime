@@ -30,8 +30,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.util.TypedValue;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
@@ -39,6 +41,7 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.ConfigGetter;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+
 import timber.log.Timber;
 
 /** 解析 YAML 配置文件 */
