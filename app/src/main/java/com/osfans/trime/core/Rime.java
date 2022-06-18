@@ -20,18 +20,22 @@ package com.osfans.trime.core;
 
 import android.content.Context;
 import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.ime.core.Trime;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import timber.log.Timber;
 
 /**
@@ -434,6 +438,12 @@ public class Rime {
     return b;
   }
 
+  public static boolean deleteCandidate(int index) {
+    boolean b = delete_candidate_on_current_page(index);
+    getContexts();
+    return b;
+  }
+
   public static void setOption(String option, boolean value) {
     if (mOnMessage) return;
     set_option(option, value);
@@ -715,6 +725,10 @@ public class Rime {
   public static native boolean select_candidate(int index);
 
   public static native boolean select_candidate_on_current_page(int index);
+
+  public static native boolean delete_candidate(int index);
+
+  public static native boolean delete_candidate_on_current_page(int index);
 
   public static native String get_version();
 

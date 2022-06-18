@@ -461,4 +461,9 @@ class TextInputManager private constructor() :
             Candidate.PAGE_DOWN_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
         }
     }
+
+    override fun onCandidateLongClicked(index: Int) {
+        Rime.deleteCandidate(index)
+        trime.updateComposing()
+    }
 }
