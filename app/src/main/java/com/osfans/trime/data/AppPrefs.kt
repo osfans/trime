@@ -152,10 +152,14 @@ class AppPrefs(
     class General(private val prefs: AppPrefs) {
         companion object {
             const val LAST_VERSION_NAME = "general__last_version_name"
+            const val PID = "general__pid"
         }
         var lastVersionName: String
             get() = prefs.getPref(LAST_VERSION_NAME, "")
             set(v) = prefs.setPref(LAST_VERSION_NAME, v)
+        var pid: Int
+            get() = prefs.getPref(PID, 0)
+            set(v) = prefs.setPref(PID, v)
     }
 
     /**
