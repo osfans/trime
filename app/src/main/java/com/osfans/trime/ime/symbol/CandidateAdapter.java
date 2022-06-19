@@ -39,6 +39,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   private PositionType textPosition, commentPosition;
   private static int COMMENT_UNKNOW = 0, COMMENT_TOP = 1, COMMENT_DOWN = 2, COMMENT_RIGHT = 3;
   private static int comment_position;
+  private static boolean hide_comment;
 
   public CandidateAdapter(Context context) {
     myContext = context;
@@ -76,11 +77,15 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     textColor = config.getLiquidColor("long_text_color");
     if (textColor == null) textColor = config.getLiquidColor("key_text_color");
 
-    comment_position = config.getInt("comment_position");
-    if (comment_position == COMMENT_UNKNOW) {
-      comment_position = config.getBoolean("comment_on_top") ? COMMENT_TOP : COMMENT_RIGHT;
+    hide_comment = Rime.getOption("_hide_comment");
+    if (hide_comment) {
+      comment_position = COMMENT_RIGHT;
+    } else {
+      comment_position = config.getInt("comment_position");
+      if (comment_position == COMMENT_UNKNOW) {
+        comment_position = config.getBoolean("comment_on_top") ? COMMENT_TOP : COMMENT_RIGHT;
+      }
     }
-
     textSize = config.getFloat("candidate_text_size");
 
     background =
@@ -132,8 +137,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
       if (textFont != null) itemViewHold.textView1.setTypeface(textFont);
 
       String text = candidates[index].text;
-      String comment = candidates[index].comment;
-      if (comment == null) comment = "";
+      String comment = "";
+      if (!hide_comment && candidates[index].comment != null) comment = candidates[index].comment;
 
       if (text.length() > 300) itemViewHold.textView1.setText(text.substring(0, 300));
       else itemViewHold.textView1.setText(text);

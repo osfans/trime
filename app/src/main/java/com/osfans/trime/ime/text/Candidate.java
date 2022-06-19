@@ -306,12 +306,12 @@ public class Candidate extends View {
           break;
         }
       }
-
+      String comment = null, text = candidates[n].text;
       float candidateWidth =
-          graphicUtils.measureText(candidatePaint, candidates[n].text, candidateFont)
-              + 2 * candidatePadding;
+          graphicUtils.measureText(candidatePaint, text, candidateFont) + 2 * candidatePadding;
+
       if (shouldShowComment) {
-        String comment = candidates[n].comment;
+        comment = candidates[n].comment;
         if (!TextUtils.isEmpty(comment)) {
           float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
           candidateWidth =
@@ -333,9 +333,7 @@ public class Candidate extends View {
 
       computedCandidates.add(
           new ComputedCandidate.Word(
-              candidates[n].text,
-              candidates[n].comment,
-              new Rect(x, 0, (int) (x + candidateWidth), getMeasuredHeight())));
+              text, comment, new Rect(x, 0, (int) (x + candidateWidth), getMeasuredHeight())));
       x += candidateWidth + candidateSpacing;
     }
     if (Rime.hasLeft()) {
