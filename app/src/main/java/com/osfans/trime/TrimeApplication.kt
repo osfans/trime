@@ -2,7 +2,9 @@ package com.osfans.trime
 
 import android.app.Application
 import android.os.Process
+import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.settings.LogActivity
 import timber.log.Timber
 
 /**
@@ -24,6 +26,11 @@ class TrimeApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CaocConfig.Builder
+            .create()
+            .errorActivity(LogActivity::class.java)
+            .enabled(!BuildConfig.DEBUG)
+            .apply()
         instance = this
         try {
             if (BuildConfig.DEBUG) {
