@@ -25,7 +25,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.settings.fragments.PrefFragment
 import com.osfans.trime.setup.SetupActivity
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
@@ -249,22 +249,6 @@ class PrefMainActivity :
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
-            }
-        }
-    }
-
-    class PrefFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.prefs, rootKey)
-        }
-
-        override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-            return when (preference?.key) {
-                "pref_schemas" -> {
-                    SchemaPickerDialog(requireContext()).show()
-                    true
-                }
-                else -> super.onPreferenceTreeClick(preference)
             }
         }
     }
