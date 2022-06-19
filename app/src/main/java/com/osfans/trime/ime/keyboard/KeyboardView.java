@@ -1276,9 +1276,13 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   }
 
   public void invalidateComposingKeys() {
-    final List<Key> keys = mKeyboard.getComposingKeys();
-    if (keys != null && keys.size() > 5) invalidateAllKeys();
-    else invalidateKeys(keys);
+    if (mKeyboard != null) {
+      final List<Key> keys = mKeyboard.getComposingKeys();
+      if (keys != null && keys.size() > 5) invalidateAllKeys();
+      else invalidateKeys(keys);
+    } else {
+      Timber.e("invalidateComposingKeys() mKeyboard==null");
+    }
   }
 
   private boolean openPopupIfRequired(final MotionEvent me) {

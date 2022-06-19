@@ -512,7 +512,26 @@ public class Composition extends AppCompatTextView {
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
-  public int setWindow(int length, int min_check) {
+  /**
+   * 设置悬浮窗文本
+   *
+   * @param charLength 候选词长度大于设定，才会显示到悬浮窗中
+   * @param minCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
+   * @param maxPopup 最多在悬浮窗显示多少个候选词
+   * @return 悬浮窗显示的候选词数量
+   */
+  public int setWindow(int charLength, int minCheck, int maxPopup) {
+    return setWindow(charLength, minCheck);
+  }
+
+  /**
+   * 设置悬浮窗文本
+   *
+   * @param stringMinLength 候选词长度大于设定，才会显示到悬浮窗中
+   * @param candidateMinCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
+   * @return 悬浮窗显示的候选词数量
+   */
+  public int setWindow(int stringMinLength, int candidateMinCheck) {
     if (getVisibility() != View.VISIBLE) return 0;
     StackTraceElement[] stacks = new Throwable().getStackTrace();
     Timber.d(
@@ -534,9 +553,11 @@ public class Composition extends AppCompatTextView {
     for (Map<String, ?> m : windows_comps) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
-        start_num = calcStartNum(length, min_check);
-        Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, length, min_check);
-        appendCandidates(m, length, start_num);
+        start_num = calcStartNum(stringMinLength, candidateMinCheck);
+        Timber.d(
+            "start_num = %s, min_length = %s, min_check = %s",
+            start_num, stringMinLength, candidateMinCheck);
+        appendCandidates(m, stringMinLength, start_num);
       } else if (m.containsKey("click")) appendButton(m);
       else if (m.containsKey("move")) appendMove(m);
     }

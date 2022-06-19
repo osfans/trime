@@ -424,6 +424,8 @@ public class Trime extends LifecycleInputMethodService {
     return false;
   }
 
+  private SymbolKeyboardType symbolKeyboardType = SymbolKeyboardType.NO_KEY;
+
   public void selectLiquidKeyboard(final int tabIndex) {
     final LinearLayout symbolInputView =
         inputRootBinding != null ? inputRootBinding.symbol.symbolInput : null;
@@ -439,14 +441,18 @@ public class Trime extends LifecycleInputMethodService {
         final int orientation = getResources().getConfiguration().orientation;
         liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
         liquidKeyboard.calcPadding(mainInputView.getWidth());
-        liquidKeyboard.select(tabIndex);
-
+        symbolKeyboardType = liquidKeyboard.select(tabIndex);
+        updateComposing();
         tabView.updateTabWidth();
         if (inputRootBinding != null) {
           mTabRoot.setBackground(mCandidateRoot.getBackground());
           mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
         }
-      } else symbolInputView.setVisibility(View.GONE);
+      } else {
+        symbolKeyboardType = SymbolKeyboardType.NO_KEY;
+        symbolInputView.setVisibility(View.GONE);
+        updateComposing();
+      }
     }
     if (mainInputView != null)
       mainInputView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
@@ -1189,17 +1195,25 @@ public class Trime extends LifecycleInputMethodService {
   } */
 
   /** 更新Rime的中西文狀態、編輯區文本 */
-  public void updateComposing() {
+  public int updateComposing() {
     final @Nullable InputConnection ic = getCurrentInputConnection();
     activeEditorInstance.updateComposingText();
     if (ic != null && !isWinFixed()) isCursorUpdated = ic.requestCursorUpdates(1);
+    int startNum = 0;
     if (mCandidateRoot != null) {
       if (isPopupWindowEnabled) {
-        final int startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize);
-        mCandidate.setText(startNum);
-        // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
-        // otherwise we need to call it here
-        if (!isCursorUpdated) showCompositionView();
+        Timber.d("updateComposing() SymbolKeyboardType=%s", symbolKeyboardType.toString());
+        if (symbolKeyboardType != SymbolKeyboardType.NO_KEY
+            && symbolKeyboardType != SymbolKeyboardType.CANDIDATE) {
+          mComposition.getRootView().setVisibility(View.GONE);
+        } else {
+          mComposition.getRootView().setVisibility(View.VISIBLE);
+          startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize, Integer.MAX_VALUE);
+          mCandidate.setText(startNum);
+          // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
+          // otherwise we need to call it here
+          if (!isCursorUpdated) showCompositionView();
+        }
       } else {
         mCandidate.setText(0);
       }
@@ -1210,6 +1224,7 @@ public class Trime extends LifecycleInputMethodService {
     if (mainKeyboardView != null) mainKeyboardView.invalidateComposingKeys();
     if (!onEvaluateInputViewShown())
       setCandidatesViewShown(textInputManager.isComposable()); // 實體鍵盤打字時顯示候選欄
+    return startNum;
   }
 
   private void showDialog(@NonNull Dialog dialog) {

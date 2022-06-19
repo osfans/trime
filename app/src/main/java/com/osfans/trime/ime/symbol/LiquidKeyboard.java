@@ -81,7 +81,7 @@ public class LiquidKeyboard {
     if (mDraftAdapter != null) mDraftAdapter.notifyItemInserted(0);
   }
 
-  public void select(int i) {
+  public SymbolKeyboardType select(int i) {
     TabTag tag = TabManager.getTag(i);
     calcPadding(tag.type);
     keyboardType = tag.type;
@@ -104,6 +104,7 @@ public class LiquidKeyboard {
       default:
         initFixData(i);
     }
+    return keyboardType;
   }
 
   // 设置liquidKeyboard共用的布局参数
