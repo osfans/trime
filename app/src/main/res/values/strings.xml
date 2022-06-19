@@ -227,4 +227,5 @@
         <item name="50">50</item>
         <item name="100">100</item>
     </string-array>
+    <string name="exception_logcat_created">Logcat process is already created</string>
 </resources>
