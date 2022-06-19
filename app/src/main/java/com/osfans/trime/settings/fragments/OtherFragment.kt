@@ -45,7 +45,7 @@ class OtherFragment :
         when (key) {
             "other__show_status_bar_icon" -> {
                 if (sharedPreferences?.getBoolean(key, false) == true) {
-                    trime?.showStatusIcon(R.drawable.ic_status)
+                    trime?.showStatusIcon(R.drawable.ic_trime_status)
                 } else { trime?.hideStatusIcon() }
             }
 

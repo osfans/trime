@@ -792,7 +792,7 @@ public class Trime extends LifecycleInputMethodService {
       if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
     }
     if (getPrefs().getOther().getShowStatusBarIcon()) {
-      showStatusIcon(R.drawable.ic_status); // 狀態欄圖標
+      showStatusIcon(R.drawable.ic_trime_status); // 狀態欄圖標
     }
     bindKeyboardToInputView();
     if (!restarting) setNavBarColor();

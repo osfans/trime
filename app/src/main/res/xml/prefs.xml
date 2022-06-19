@@ -32,7 +32,7 @@
     <Preference android:key="pref_keyboard"
         android:order="5"
         android:title="@string/settings__keyboard_preferences_title"
-        app:icon="@drawable/ic_pref_keyboard_preference"
+        app:icon="@drawable/ic_baseline_keyboard_24"
         android:fragment="com.osfans.trime.settings.fragments.KeyboardFragment"/>
 
     <Preference android:key="pref_keyboard_appearance"
@@ -44,7 +44,7 @@
     <Preference android:key="pref_input"
         android:order="8"
         android:title="@string/settings__configuration_title"
-        app:icon="@drawable/ic_pref_input_config"
+        app:icon="@drawable/ic_baseline_settings_24"
         android:fragment="com.osfans.trime.settings.fragments.ConfFragment"/>
 
     <!-- <Preference android:key="pref_deploy" android:order="16"

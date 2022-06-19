@@ -94,7 +94,7 @@ class SetupActivity : FragmentActivity() {
     override fun onPause() {
         if (SetupPage.hasUndonePage()) {
             NotificationUtils.notify(NOTIFY_ID) { param ->
-                param.setSmallIcon(R.drawable.ic_status)
+                param.setSmallIcon(R.drawable.ic_trime_status)
                     .setContentTitle(getText(R.string.trime_app_name))
                     .setContentText(getText(R.string.setup__notify_hint))
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
