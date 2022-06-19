@@ -18,6 +18,7 @@ import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.settings.LogActivity
 import timber.log.Timber
 import java.text.FieldPosition
 import java.text.SimpleDateFormat
@@ -144,5 +145,11 @@ object ShortcutUtils {
         append(KeyEvent.KEYCODE_CALENDAR, "android.intent.category.APP_CALENDAR")
         append(KeyEvent.KEYCODE_MUSIC, "android.intent.category.APP_MUSIC")
         append(KeyEvent.KEYCODE_CALCULATOR, "android.intent.category.APP_CALCULATOR")
+    }
+
+    fun launchLogActivity(context: Context) {
+        context.startActivity(
+            Intent(context, LogActivity::class.java)
+        )
     }
 }

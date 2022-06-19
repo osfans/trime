@@ -224,4 +224,13 @@
         <item name="50">50</item>
         <item name="100">100</item>
     </string-array>
+    <string name="settings__system_toolkit">工具箱</string>
+    <string name="system">系统</string>
+    <string name="export">导出</string>
+    <string name="clear">清除</string>
+    <string name="crash_logs">崩溃日志</string>
+    <string name="real_time_logs">实时日志</string>
+    <string name="app_crash">应用程序崩溃了</string>
+    <string name="exception_logcat_created">Logcat 进程已创建</string>
+    <string name="app_crash_message">抱歉，但我们提供了日志以供调查。</string>
 </resources>

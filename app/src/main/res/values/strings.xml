@@ -234,4 +234,6 @@
     <string name="crash_logs">Crash logs</string>
     <string name="clear">Clear</string>
     <string name="export">Export</string>
+    <string name="system">System</string>
+    <string name="settings__system_toolkit">Toolkit</string>
 </resources>
