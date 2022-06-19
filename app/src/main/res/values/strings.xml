@@ -228,4 +228,10 @@
         <item name="100">100</item>
     </string-array>
     <string name="exception_logcat_created">Logcat process is already created</string>
+    <string name="app_crash">Application crashed</string>
+    <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
+    <string name="real_time_logs">Real-time logs</string>
+    <string name="crash_logs">Crash logs</string>
+    <string name="clear">Clear</string>
+    <string name="export">Export</string>
 </resources>

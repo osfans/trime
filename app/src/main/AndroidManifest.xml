@@ -79,5 +79,10 @@
         <activity
             android:name=".setup.SetupActivity"
             android:exported="false" />
+        <activity
+            android:name=".settings.LogActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:parentActivityName=".settings.PrefMainActivity" />
     </application>
 </manifest>
