@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="red_A700">#D50000</color>
+    <color name="red_400">#EF5350</color>
+    <color name="yellow_500">#FFEB3B</color>
+    <color name="yellow_800">#F9A825</color>
+    <color name="blue_500">#2196F3</color>
+    <color name="grey_400">#BDBDBD</color>
+    <color name="grey_700">#616161</color>
+
     <!-- 本色彩方案取自 Rime 官网（https://rime.im） -->
     <color name="colorPrimary">#3F4144</color> <!-- 浅主题色 -->
     <color name="colorPrimaryDark">#37393D</color> <!-- 深主题色 -->
