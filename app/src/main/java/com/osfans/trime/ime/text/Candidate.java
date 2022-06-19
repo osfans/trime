@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
+import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.util.GraphicUtils;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -275,6 +276,7 @@ public class Candidate extends View {
   }
 
   private void updateCandidateWidth() {
+    boolean hasExButton = false;
     Integer pageEx =
         Integer.parseInt(AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize()) - 10000;
     int pageBottonWidth =
@@ -300,6 +302,7 @@ public class Candidate extends View {
                   PAGE_EX_BUTTON,
                   new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
           x += pageBottonWidth;
+          hasExButton = true;
           break;
         }
       }
@@ -324,6 +327,7 @@ public class Candidate extends View {
             new ComputedCandidate.Symbol(
                 PAGE_EX_BUTTON, new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
         x += pageBottonWidth;
+        hasExButton = true;
         break;
       }
 
@@ -353,6 +357,8 @@ public class Candidate extends View {
             ? candidateViewHeight + commentHeight
             : candidateViewHeight;
     setLayoutParams(params);
+
+    Trime.getService().setCandidateExPage(hasExButton);
   }
 
   @Override

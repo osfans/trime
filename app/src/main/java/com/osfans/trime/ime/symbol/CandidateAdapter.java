@@ -20,7 +20,6 @@ import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.text.TextInputManager;
-import timber.log.Timber;
 
 public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
@@ -174,15 +173,11 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     null));
 
       // 如果设置了回调，则设置点击事件
-      {
+      if (mOnItemClickListener != null) {
         itemViewHold.listItemLayout.setOnClickListener(
             view -> {
-              int position = itemViewHold.getLayoutPosition();
-              Timber.d("Click " + position + "/" + getItemCount());
-              textInputManager.onCandidatePressed(index);
-              updateCandidates();
-              if (candidates.length < 1) Trime.getService().selectLiquidKeyboard(-1);
-              else notifyDataSetChanged();
+              int position = itemViewHold.getLayoutPosition(); // 在增加数据或者减少数据时候，position和index就不一样了
+              mOnItemClickListener.onItemClick(itemViewHold.listItemLayout, position);
             });
       }
 
@@ -208,4 +203,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   }
 
   private OnItemClickListener mOnItemClickListener;
+
+  public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+    this.mOnItemClickListener = mOnItemClickListener;
+  }
 }

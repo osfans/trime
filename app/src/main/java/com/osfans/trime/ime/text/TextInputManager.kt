@@ -146,7 +146,8 @@ class TextInputManager private constructor() :
         candidateRoot = uiBinding.main.candidateView.candidateRoot.also {
             it.setPageStr(
                 Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0) },
-                Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) }
+                Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) },
+                Runnable { trime.selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE) }
             )
             it.visibility = if (Rime.getOption("_hide_candidate")) View.GONE else View.VISIBLE
         }

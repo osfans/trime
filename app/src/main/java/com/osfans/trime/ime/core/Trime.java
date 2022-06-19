@@ -1466,4 +1466,14 @@ public class Trime extends LifecycleInputMethodService {
       }
     }
   }
+
+  private boolean candidateExPage = false;
+
+  public boolean hasCandidateExPage() {
+    return candidateExPage;
+  }
+
+  public void setCandidateExPage(boolean candidateExPage) {
+    this.candidateExPage = candidateExPage;
+  }
 }

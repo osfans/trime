@@ -16,6 +16,7 @@ import com.osfans.trime.data.db.clipboard.ClipboardDao;
 import com.osfans.trime.data.db.draft.DraftDao;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
+import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.util.ConfigGetter;
 import java.io.File;
 import java.util.ArrayList;
@@ -358,7 +359,17 @@ public class LiquidKeyboard {
 
     keyboardView.setAdapter(candidateAdapter);
     keyboardView.setSelected(true);
-
     candidateAdapter.updateCandidates();
+
+    candidateAdapter.setOnItemClickListener(
+        (view, position) -> {
+          TextInputManager.Companion.getInstance().onCandidatePressed(position);
+          candidateAdapter.updateCandidates();
+          if (candidateAdapter.getItemCount() < 1) Trime.getService().selectLiquidKeyboard(-1);
+          else {
+            candidateAdapter.notifyDataSetChanged();
+            keyboardView.scrollToPosition(0);
+          }
+        });
   }
 }

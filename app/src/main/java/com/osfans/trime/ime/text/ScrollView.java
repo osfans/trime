@@ -10,6 +10,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.HorizontalScrollView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.ime.core.Trime;
 import timber.log.Timber;
 
 public class ScrollView extends HorizontalScrollView {
@@ -20,15 +21,16 @@ public class ScrollView extends HorizontalScrollView {
   private boolean isMoving = false;
   private int left;
 
-  private Runnable pageDownAction, pageUpAction;
+  private Runnable pageDownAction, pageUpAction, pageExAction;
 
   public ScrollView(Context context, AttributeSet attrs) {
     super(context, attrs);
   }
 
-  public void setPageStr(Runnable pageDownAction, Runnable pageUpAction) {
+  public void setPageStr(Runnable pageDownAction, Runnable pageUpAction, Runnable pageExAction) {
     this.pageDownAction = pageDownAction;
     this.pageUpAction = pageUpAction;
+    this.pageExAction = pageExAction;
   }
 
   /**
@@ -94,6 +96,9 @@ public class ScrollView extends HorizontalScrollView {
           if (pageUpAction != null) pageUpAction.run();
           if (inner.getWidth() > this.getWidth())
             scrollTo(this.getWidth() - inner.getWidth() + 400, 0);
+        } else if (inner.getWidth() - inner.getRight() > 100
+            && Trime.getService().hasCandidateExPage()) {
+          if (pageExAction != null) pageExAction.run();
         } else if (inner.getWidth() - inner.getRight() > 100 && Rime.hasRight()) {
           if (pageDownAction != null) pageDownAction.run();
           if (inner.getWidth() > this.getWidth()) {
