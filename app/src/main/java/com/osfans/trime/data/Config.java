@@ -19,7 +19,6 @@
 package com.osfans.trime.data;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -39,13 +38,11 @@ import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
-import com.osfans.trime.util.AppVersionUtils;
 import com.osfans.trime.util.ConfigGetter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -64,7 +61,6 @@ public class Config {
   // private static final String TAG = "Config";
 
   private static Config self = null;
-  private static AssetManager assetManager = null;
 
   private static final AppPrefs appPrefs = AppPrefs.defaultInstance();
 
@@ -99,12 +95,12 @@ public class Config {
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
     self = this;
-    assetManager = context.getAssets();
     themeName = appPrefs.getLooks().getSelectedTheme();
     soundPackageName = appPrefs.getKeyboard().getSoundPackage();
 
-    Timber.d(methodName + "prepareRime");
-    prepareRime(context);
+    Timber.d(methodName + "sync");
+    DataManager.sync();
+    Rime.get(context, !DataManager.INSTANCE.getSharedDataDir().exists());
 
     //    正常逻辑不应该部署全部主题，init()方法已经做过当前主题的部署
     //    Timber.d(methodName + "deployTheme");
@@ -173,30 +169,6 @@ public class Config {
     return soundPackageName;
   }
 
-  public void prepareRime(Context context) {
-    String methodName =
-        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
-    Timber.d(methodName);
-    boolean isExist = new File(sharedDataDir).exists();
-    boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(appPrefs);
-    String defaultFile = "trime.yaml";
-    Timber.d(methodName + "copy");
-    copyFileOrDir("", isOverwrite);
-    // 缺失导致获取方案列表为空
-    Timber.d(methodName + "copy default.custom.yaml");
-    final String defaultCustom = "default.custom.yaml";
-    if (!new File(userDataDir, defaultCustom).exists()) {
-      try {
-        new File(userDataDir, defaultCustom).createNewFile();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    Timber.d(methodName + "Rime.get");
-    Rime.get(context, !isExist); // 覆蓋時不強制部署
-    Timber.d(methodName + "finish");
-  }
-
   public static String[] getThemeKeys(boolean isUser) {
     File d = new File(isUser ? userDataDir : sharedDataDir);
     FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith("trime.yaml");
@@ -223,49 +195,6 @@ public class Config {
       names[i] = k;
     }
     return names;
-  }
-
-  public boolean copyFileOrDir(String path, boolean overwrite) {
-    try {
-      final String assetPath = new File(RIME, path).getPath();
-      final String[] assets = assetManager.list(assetPath);
-      if (assets.length == 0) {
-        // Files
-        copyFile(path, overwrite);
-      } else {
-        // Dirs
-        final File dir = new File(sharedDataDir, path);
-        if (!dir.exists()) // noinspection ResultOfMethodCallIgnored
-        dir.mkdir();
-        for (String asset : assets) {
-          final String subPath = new File(path, asset).getPath();
-          copyFileOrDir(subPath, overwrite);
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-      return false;
-    }
-    return true;
-  }
-
-  private void copyFile(String fileName, boolean overwrite) {
-    if (fileName == null) return;
-
-    final String targetFileName = new File(sharedDataDir, fileName).getPath();
-    if (new File(targetFileName).exists() && !overwrite) return;
-    final String sourceFileName = new File(RIME, fileName).getPath();
-    try (InputStream in = assetManager.open(sourceFileName);
-        final FileOutputStream out = new FileOutputStream(targetFileName)) {
-      final byte[] buffer = new byte[1024];
-      int read;
-      while ((read = in.read(buffer)) != -1) {
-        out.write(buffer, 0, read);
-      }
-      out.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   private void deployTheme() {
