@@ -46,6 +46,9 @@ public class ScrollView extends HorizontalScrollView {
     }
   }
 
+  private int swipeActionLimit = 200;
+  private float swipeStartX = -1;
+
   @SuppressLint("ClickableViewAccessibility")
   @Override
   public boolean onTouchEvent(@NonNull MotionEvent ev) {
@@ -73,9 +76,20 @@ public class ScrollView extends HorizontalScrollView {
   public void commOnTouchEvent(@NonNull MotionEvent ev) {
     int action = ev.getAction();
     switch (action) {
-        /* case MotionEvent.ACTION_DOWN:
-        break; **/
+      case MotionEvent.ACTION_DOWN:
+        swipeActionLimit = Math.min(getWidth() / 4, getHeight() * 10);
+        Timber.i(
+            "commOnTouchEvent limit = "
+                + swipeActionLimit
+                + ", "
+                + getWidth() / 4
+                + ", "
+                + getHeight() * 4);
+        if (swipeActionLimit < 50) swipeActionLimit = 100;
+        break;
+
       case MotionEvent.ACTION_UP:
+        swipeStartX = -1;
         isMoving = false;
         // Fingers loose
         if (isNeedAnimation()) {
@@ -92,19 +106,39 @@ public class ScrollView extends HorizontalScrollView {
         }
 
         // TODO: 翻页后、手指抬起前，降低滑动速度增加阻尼感
-        if (inner.getLeft() > 100 && Rime.hasLeft()) {
+        if (inner.getLeft() > swipeActionLimit && Rime.hasLeft()) {
           if (pageUpAction != null) pageUpAction.run();
           if (inner.getWidth() > this.getWidth())
             scrollTo(this.getWidth() - inner.getWidth() + 400, 0);
-        } else if (inner.getWidth() - inner.getRight() > 100
-            && Trime.getService().hasCandidateExPage()) {
-          if (pageExAction != null) pageExAction.run();
-        } else if (inner.getWidth() - inner.getRight() > 100 && Rime.hasRight()) {
-          if (pageDownAction != null) pageDownAction.run();
-          if (inner.getWidth() > this.getWidth()) {
-            scrollTo(-400, 0);
-          }
         } else {
+          //          Timber.d("commOnTouchEvent "+getWidth() + "-" + inner.getWidth() +"+" +
+          // getScrollX()+", p=" +scrollEndPosition+", x="+ev.getX());
+          Timber.d(
+              "commOnTouchEvent dif=" + (swipeStartX - ev.getX()) + " limit=" + swipeActionLimit);
+
+          if (swipeStartX < 0) {
+            if (getWidth() - inner.getWidth() + getScrollX() >= 0) {
+              swipeStartX = ev.getX();
+            }
+          } else if (swipeStartX - ev.getX() > swipeActionLimit) {
+            if (Trime.getService().hasCandidateExPage()) {
+              if (pageExAction != null) pageExAction.run();
+              return;
+            } else if (Rime.hasRight()) {
+              if (pageDownAction != null) pageDownAction.run();
+              swipeStartX = -1;
+              if (inner.getWidth() > this.getWidth()) {
+                scrollTo(-swipeActionLimit, 0);
+                inner.layout(
+                    inner.getRight(),
+                    inner.getTop(),
+                    inner.getRight() + inner.getWidth(),
+                    inner.getBottom());
+              }
+              return;
+            }
+          }
+
           // When the scroll to the top or the most when it will not scroll, then move the layout.
           isNeedMove();
           // Log.d("MotionEvent "+isMoveing," d="+deltaX+" left="+left+" LR="+inner.getLeft()+",

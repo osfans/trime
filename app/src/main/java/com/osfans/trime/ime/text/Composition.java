@@ -19,7 +19,6 @@
 package com.osfans.trime.ime.text;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -146,7 +145,6 @@ public class Composition extends AppCompatTextView {
     }
   }
 
-  @TargetApi(21)
   public static class LetterSpacingSpan extends UnderlineSpan {
     private final float letterSpacing;
 

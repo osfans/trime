@@ -442,7 +442,6 @@ public class Trime extends LifecycleInputMethodService {
         liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
         liquidKeyboard.calcPadding(mainInputView.getWidth());
         symbolKeyboardType = liquidKeyboard.select(tabIndex);
-        updateComposing();
         tabView.updateTabWidth();
         if (inputRootBinding != null) {
           mTabRoot.setBackground(mCandidateRoot.getBackground());
@@ -451,8 +450,8 @@ public class Trime extends LifecycleInputMethodService {
       } else {
         symbolKeyboardType = SymbolKeyboardType.NO_KEY;
         symbolInputView.setVisibility(View.GONE);
-        updateComposing();
       }
+      updateComposing();
     }
     if (mainInputView != null)
       mainInputView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
