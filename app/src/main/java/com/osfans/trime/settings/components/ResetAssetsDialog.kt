@@ -1,46 +1,46 @@
 package com.osfans.trime.settings.components
 
 import android.content.Context
-import android.os.Build
-import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
+import com.blankj.utilcode.util.ResourceUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
-import com.osfans.trime.data.Config
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.data.DataManager
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.popup
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** 顯示輸入法內置數據列表，並回廠選中的數據 */
-class ResetAssetsDialog(context: Context) {
-    private val config = Config.get(context)
-    /** 內置數據列表 */
-    private var assetItems: Array<String>? = context.assets.list("rime")
+class ResetAssetsDialog(private val context: Context) :
+    CoroutineScope by MainScope() {
 
-    /** 列表勾選狀態 */
-    private var checkedStatus: BooleanArray = BooleanArray(assetItems!!.size)
+    /** Internal assets. 内置资源文件列表 **/
+    private val assets: Array<String>? = appContext.assets.list("rime")
 
-    /** 回廠對話框 */
-    val resetDialog: AlertDialog
+    /** List to show if items are checked. 检查单 */
+    private val checkedList: BooleanArray? = assets?.map { false }?.toBooleanArray()
 
-    init {
-        resetDialog = AlertDialog.Builder(context).apply {
-            setTitle(R.string.conf__reset_title)
-            setCancelable(true)
-            setNegativeButton(android.R.string.cancel, null)
-            setPositiveButton(android.R.string.ok) { _, _ ->
-                selectAssets()
-            }
-            setMultiChoiceItems(
-                assetItems, checkedStatus
-            ) { _, id, isChecked -> checkedStatus[id] = isChecked }
-        }.create()
-    }
-
-    private fun selectAssets() {
+    private suspend fun selectAssets() = withContext(Dispatchers.IO) {
+        if (assets.isNullOrEmpty() || checkedList == null) {
+            ToastUtils.showLong(R.string.reset__asset_is_null_or_empty)
+            return@withContext
+        }
         var res = true
-        for (i in assetItems?.indices!!) {
-            res = if (checkedStatus[i]) {
-                config.copyFileOrDir(assetItems!![i], true)
-            } else false
+        for ((i, a) in assets.withIndex()) {
+            if (checkedList[i]) {
+                res = res and (
+                    runCatching {
+                        ResourceUtils.copyFileFromAssets(
+                            "rime/$a",
+                            "${DataManager.sharedDataDir.absolutePath}/$a"
+                        )
+                    }.getOrNull() ?: false
+                    )
+            }
         }
         ToastUtils.showShort(
             if (res) R.string.reset_success else R.string.reset_failure
@@ -49,15 +49,17 @@ class ResetAssetsDialog(context: Context) {
 
     /** 彈出對話框 */
     fun show() {
-        resetDialog.window?.let { window ->
-            window.attributes.token = Trime.getServiceOrNull()?.window?.window?.decorView?.windowToken
-            window.attributes.type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+        AlertDialog.Builder(context)
+            .setTitle(R.string.conf__reset_title)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setMultiChoiceItems(
+                assets, checkedList
+            ) { _, id, isChecked -> checkedList?.set(id, isChecked) }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                launch {
+                    runCatching { selectAssets() }
+                }
             }
-            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
-        }
-        resetDialog.show()
+            .create().popup()
     }
 }

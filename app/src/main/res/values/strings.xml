@@ -243,4 +243,5 @@
     <string name="export">Export</string>
     <string name="system">System</string>
     <string name="settings__system_toolkit">Toolkit</string>
+    <string name="reset__asset_is_null_or_empty">This path points to a empty directory or null pointer.</string>
 </resources>
