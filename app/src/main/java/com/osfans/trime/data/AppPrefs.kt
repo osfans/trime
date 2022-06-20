@@ -153,6 +153,7 @@ class AppPrefs(
         companion object {
             const val LAST_VERSION_NAME = "general__last_version_name"
             const val PID = "general__pid"
+            const val LAST_BUILD_GIT_HASH = "general__last_build_git_hash"
         }
         var lastVersionName: String
             get() = prefs.getPref(LAST_VERSION_NAME, "")
@@ -160,6 +161,9 @@ class AppPrefs(
         var pid: Int
             get() = prefs.getPref(PID, 0)
             set(v) = prefs.setPref(PID, v)
+        var lastBuildGitHash: String
+            get() = prefs.getPref(LAST_BUILD_GIT_HASH, "")
+            set(v) = prefs.setPref(LAST_BUILD_GIT_HASH, v)
     }
 
     /**

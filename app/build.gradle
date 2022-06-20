@@ -14,7 +14,8 @@ android {
         setProperty("archivesBaseName", "trime-$versionName")
         resValue "string", "trime_url", getGitUrl()
         buildConfigField 'String', 'BUILD_INFO' , '"' + getBuildInfo() + '"'
-        buildConfigField 'String', 'BUILD_VERSION' , '"' + "$versionName" + '-g'+ getGitVersion()+ '-' + getBuildDate()  +  '"'
+        buildConfigField 'String', 'BUILD_VERSION' , '"' + "$versionName" + '-g'+ gitHashShort() + '-' + getBuildDate()  +  '"'
+        buildConfigField 'String', 'BUILD_GIT_HASH', '"' + gitHashShort() + '"'
     }
 
     signingConfigs {
@@ -134,7 +135,7 @@ def getGitBranch(){
     return text
 }
 
-def getGitVersion() {
+static def gitHashShort() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
 
