@@ -10,6 +10,7 @@ import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.osfans.trime.R;
+import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.data.db.DbBean;
 import com.osfans.trime.data.db.clipboard.ClipboardDao;
@@ -365,12 +366,15 @@ public class LiquidKeyboard {
     candidateAdapter.setOnItemClickListener(
         (view, position) -> {
           TextInputManager.Companion.getInstance().onCandidatePressed(position);
-          candidateAdapter.updateCandidates();
-          if (candidateAdapter.getItemCount() < 1) Trime.getService().selectLiquidKeyboard(-1);
-          else {
-            candidateAdapter.notifyDataSetChanged();
-            keyboardView.scrollToPosition(0);
-          }
+          if (Rime.isComposing()) {
+            updateCandidates();
+          } else Trime.getService().selectLiquidKeyboard(-1);
         });
+  }
+
+  public void updateCandidates() {
+    candidateAdapter.updateCandidates();
+    candidateAdapter.notifyDataSetChanged();
+    keyboardView.scrollToPosition(0);
   }
 }

@@ -12,7 +12,7 @@ android:padding="5dp"
 tools:ignore="MissingDefaultResource">
 
 <TextView
-    android:id="@+id/text2"
+    android:id="@+id/comment"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -26,7 +26,7 @@ tools:ignore="MissingDefaultResource">
     app:layout_constraintTop_toTopOf="parent" />
 
 <TextView
-    android:id="@+id/text1"
+    android:id="@+id/text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -37,5 +37,5 @@ tools:ignore="MissingDefaultResource">
     android:textSize="12sp"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/text2" />
+    app:layout_constraintTop_toBottomOf="@id/comment" />
 </androidx.constraintlayout.widget.ConstraintLayout>
