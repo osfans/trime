@@ -1,33 +1,33 @@
-[submodule "app/src/main/jni/OpenCC"]
+[submodule "OpenCC"]
 	path = app/src/main/jni/OpenCC
 	url = https://github.com/BYVoid/OpenCC.git
-[submodule "app/src/main/jni/snappy"]
+[submodule "snappy"]
 	path = app/src/main/jni/snappy
 	url = https://github.com/google/snappy.git
-[submodule "app/src/main/jni/boost"]
+[submodule "boost"]
 	path = app/src/main/jni/boost
 	url = https://github.com/boostorg/boost.git
-[submodule "app/src/main/jni/librime"]
+[submodule "librime"]
 	path = app/src/main/jni/librime
 	url = https://github.com/rime/librime.git
 	ignore = dirty
-[submodule "app/src/main/jni/libiconv"]
+[submodule "libiconv"]
 	path = app/src/main/jni/libiconv
 	url = https://github.com/osfans/libiconv-gnu.git
-[submodule "app/src/main/jni/librime-lua"]
+[submodule "librime-lua"]
 	path = app/src/main/jni/librime-lua
 	url = https://github.com/hchunhui/librime-lua
 	ignore = dirty
-[submodule "app/src/main/jni/librime-lua-deps"]
+[submodule "librime-lua-deps"]
 	path = app/src/main/jni/librime-lua-deps
 	url = https://github.com/hchunhui/librime-lua
 	branch = thirdparty
-[submodule "app/src/main/jni/librime-octagram"]
+[submodule "librime-octagram"]
 	path = app/src/main/jni/librime-octagram
 	url = https://github.com/lotem/librime-octagram.git
-[submodule "app/src/main/jni/capnproto"]
+[submodule "capnproto"]
 	path = app/src/main/jni/capnproto
 	url = https://github.com/capnproto/capnproto.git
-[submodule "app/src/main/jni/librime-charcode"]
+[submodule "librime-charcode"]
 	path = app/src/main/jni/librime-charcode
 	url = https://github.com/rime/librime-charcode
