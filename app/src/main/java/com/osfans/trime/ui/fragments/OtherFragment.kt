@@ -8,16 +8,19 @@ import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.forEach
+import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.Config
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ui.main.MainViewModel
 
 class OtherFragment :
     PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
+    private val viewModel : MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
@@ -31,13 +34,6 @@ class OtherFragment :
             AppCompatDelegate.setDefaultNightMode(uiMode)
             true
         }
-
-        setHasOptionsMenu(true)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.forEach { item -> item.isVisible = false }
-        super.onPrepareOptionsMenu(menu)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -71,13 +67,14 @@ class OtherFragment :
 
     override fun onResume() {
         super.onResume()
+        viewModel.disableTopOptionsMenu()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onPause() {
-        super.onPause()
         updateLauncherIconStatus()
         preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        super.onPause()
     }
 
     private fun updateLauncherIconStatus() {

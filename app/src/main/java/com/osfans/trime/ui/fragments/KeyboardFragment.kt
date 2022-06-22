@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import androidx.core.view.forEach
+import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
@@ -11,19 +12,14 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.SoundPickerDialog
+import com.osfans.trime.ui.main.MainViewModel
 
 class KeyboardFragment :
     PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
+    private val viewModel : MainViewModel by activityViewModels()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.keyboard_preference)
-
-        setHasOptionsMenu(true)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.forEach { item -> item.isVisible = false }
-        super.onPrepareOptionsMenu(menu)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -61,6 +57,7 @@ class KeyboardFragment :
     }
     override fun onResume() {
         super.onResume()
+        viewModel.disableTopOptionsMenu()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 

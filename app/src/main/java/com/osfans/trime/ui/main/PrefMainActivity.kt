@@ -10,12 +10,12 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
-import android.view.inputmethod.InputMethodManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -43,10 +43,10 @@ class PrefMainActivity :
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     ActivityCompat.OnRequestPermissionsResultCallback,
     CoroutineScope by MainScope() {
+    private val viewModel : MainViewModel by viewModels()
     private val prefs get() = AppPrefs.defaultInstance()
 
     lateinit var binding: PrefActivityBinding
-    lateinit var imeManager: InputMethodManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs.sync()
@@ -72,11 +72,16 @@ class PrefMainActivity :
                 resources.getColor(R.color.windowBackground)
             )
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar.toolbar)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        imeManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        viewModel.toolbarTitle.observe(this) {
+            binding.toolbar.toolbar.title = it
+        }
+        viewModel.topOptionsMenu.observe(this) {
+            binding.toolbar.toolbar.menu.forEach { m ->
+                m.isVisible = it
+            }
+        }
 
         if (savedInstanceState == null) {
             loadFragment(PrefFragment())
@@ -162,6 +167,9 @@ class PrefMainActivity :
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.preference_main_menu, menu)
+        menu?.forEach {
+            it.isVisible = viewModel.topOptionsMenu.value ?: true
+        }
         return true
     }
 
