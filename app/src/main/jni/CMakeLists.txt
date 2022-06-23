@@ -32,7 +32,7 @@ option(YAML_CPP_BUILD_TOOLS "" OFF)
 # TODO: remove below options after librime > 1.7.3
 option(YAML_CPP_BUILD_TESTS "" OFF)
 option(YAML_CPP_INSTALL "" OFF)
-add_subdirectory(librime/thirdparty/src/yaml-cpp)
+add_subdirectory(librime/deps/yaml-cpp)
 
 # enable compress for leveldb
 option(SNAPPY_BUILD_TESTS "" OFF)
@@ -44,7 +44,7 @@ set(HAVE_SNAPPY TRUE)
 option(LEVELDB_BUILD_TESTS "" OFF)
 option(LEVELDB_BUILD_BENCHMARKS "" OFF)
 option(LEVELDB_INSTALL "" OFF)
-add_subdirectory(librime/thirdparty/src/leveldb)
+add_subdirectory(librime/deps/leveldb)
 
 # TODO: use librime/thirdparty/src/opencc instead after librime > 1.7.3
 add_subdirectory(OpenCC)
