@@ -54,7 +54,7 @@ include(RimePlugins)
 
 option(BUILD_TEST "" OFF)
 option(ENABLE_LOGGING "" OFF)
-include_directories("librime/thirdparty/include") # for X11/keysym.h
+include_directories("librime/include") # for X11/keysym.h
 include_directories("capnproto/c++/src")
 # workaround for librime/tools/rime_api_console.cc
 # TODO: fix it in upstream
