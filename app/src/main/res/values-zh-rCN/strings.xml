@@ -63,6 +63,7 @@
     <string name="keyboard__speak_key_commit_title">上屏时朗读字符</string>
     <string name="keyboard__long_press_timeout_title">长按按键的延迟时间</string>
     <string name="keyboard__key_repeat_interval_title">重复按键的重复间隔</string>
+    <string name="keyboard__delete_candidate_timeout_title">长按删除候选词的延迟时间</string>
     <string name="keyboard__show_switches_title">在候选栏中显示状态</string>
     <string name="keyboard__show_key_popup_title">按键时弹出显示字符</string>
     <string name="keyboard__show_window_title">显示悬浮窗</string>

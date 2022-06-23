@@ -458,6 +458,12 @@ public class Rime {
     return b;
   }
 
+  public static boolean deleteCandidate(int index) {
+    boolean b = delete_candidate_on_current_page(index);
+    getContexts();
+    return b;
+  }
+
   public static void setOption(String option, boolean value) {
     if (mOnMessage) return;
     set_option(option, value);
@@ -802,6 +808,10 @@ public class Rime {
   public static native boolean select_candidate(int index);
 
   public static native boolean select_candidate_on_current_page(int index);
+
+  public static native boolean delete_candidate(int index);
+
+  public static native boolean delete_candidate_on_current_page(int index);
 
   public static native String get_version();
 

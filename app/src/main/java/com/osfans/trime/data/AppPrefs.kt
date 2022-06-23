@@ -203,6 +203,7 @@ class AppPrefs(
             const val SWIPE_TIME_HI = "keyboard__key_swipe_time_hi"
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
+            const val DELETE_CANDIDATE_TIMEOUT = "keyboard__key_delete_candidate_timeout"
         }
         var inlinePreedit: InlineModeType
             get() = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
@@ -292,6 +293,9 @@ class AppPrefs(
             private set
         var repeatInterval: Int = 0
             get() = prefs.getPref(REPEAT_INTERVAL, 4)
+            private set
+        var deleteCandidateTimeout: Int = 0
+            get() = prefs.getPref(DELETE_CANDIDATE_TIMEOUT, 2000)
             private set
         var isSpeakKey: Boolean
             get() = prefs.getPref(SPEAK_KEY_PRESS_ENABLED, false)

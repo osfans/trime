@@ -49,6 +49,8 @@ public class Candidate extends View {
     void onCandidatePressed(int index);
 
     void onCandidateSymbolPressed(String arrow);
+
+    void onCandidateLongClicked(int index);
   }
 
   private static final int MAX_CANDIDATE_COUNT = 30;
@@ -65,6 +67,7 @@ public class Candidate extends View {
       new ArrayList<>(MAX_CANDIDATE_COUNT);
   private int numCandidates;
   private int startNum = 0;
+  private long timeDown = 0, timeMove = 0;
 
   private PaintDrawable candidateHighlight;
   private final Paint separatorPaint;
@@ -169,14 +172,18 @@ public class Candidate extends View {
    * @param index 候選項序號（從0開始），{@code -1}表示選擇當前高亮候選項
    * @return 是否成功選字
    */
-  private void onCandidateClick(int index) {
+  private void onCandidateClick(int index, boolean isLongClick) {
     ComputedCandidate candidate = null;
     if (index >= 0 && index < computedCandidates.size()) {
       candidate = computedCandidates.get(index);
       if (candidate != null) {
         if (candidate instanceof ComputedCandidate.Word) {
           if (listener.get() != null) {
-            listener.get().onCandidatePressed(index + startNum);
+            if (isLongClick) {
+              listener.get().onCandidateLongClicked(index + startNum);
+            } else {
+              listener.get().onCandidatePressed(index + startNum);
+            }
           }
         }
         if (candidate instanceof ComputedCandidate.Symbol) {
@@ -373,6 +380,7 @@ public class Candidate extends View {
 
     switch (me.getActionMasked()) {
       case MotionEvent.ACTION_DOWN:
+        timeDown = System.currentTimeMillis();
       case MotionEvent.ACTION_MOVE:
         setPressed(true);
         highlightIndex = getCandidateIndex(x, y);
@@ -381,9 +389,11 @@ public class Candidate extends View {
         // updateHighlight(x, y);
       case MotionEvent.ACTION_UP:
       case MotionEvent.ACTION_CANCEL:
+        timeMove = System.currentTimeMillis();
+        long durationMs = timeMove - timeDown;
         setPressed(false);
         if (me.getActionMasked() == MotionEvent.ACTION_UP) {
-          onCandidateClick(highlightIndex);
+          onCandidateClick(highlightIndex, durationMs >= Config.getDeleteCandidateTimeout());
         }
         highlightIndex = -1;
         invalidate();

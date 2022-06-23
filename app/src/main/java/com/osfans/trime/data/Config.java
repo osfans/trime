@@ -943,6 +943,10 @@ public class Config {
     return progress * 10 + 10;
   }
 
+  public static int getDeleteCandidateTimeout() {
+    return appPrefs.getKeyboard().getDeleteCandidateTimeout();
+  }
+
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {

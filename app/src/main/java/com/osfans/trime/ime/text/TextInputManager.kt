@@ -469,4 +469,9 @@ class TextInputManager private constructor() :
             Candidate.PAGE_EX_BUTTON -> Trime.getService().selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE)
         }
     }
+
+    override fun onCandidateLongClicked(index: Int) {
+        Rime.deleteCandidate(index)
+        trime.updateComposing()
+    }
 }

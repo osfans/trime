@@ -618,6 +618,18 @@ Java_com_osfans_trime_core_Rime_select_1candidate_1on_1current_1page(JNIEnv *env
 }
 
 extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_osfans_trime_core_Rime_delete_1candidate(JNIEnv *env, jclass /* thiz */, jint index) {
+    return rime_get_api()->delete_candidate(activated_session_id, index);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_osfans_trime_core_Rime_delete_1candidate_1on_1current_1page(JNIEnv *env, jclass /* thiz */, jint index) {
+    return rime_get_api()->delete_candidate_on_current_page(activated_session_id, index);
+}
+
+extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_get_1version(JNIEnv *env, jclass /* thiz */) {
     return env->NewStringUTF(rime_get_api()->get_version());

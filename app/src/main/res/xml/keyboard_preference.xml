@@ -251,6 +251,17 @@
             app:min="10"
             app:seekBarIncrement="10"
             app:unit="@string/unit__time_ms" />
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
+            android:defaultValue="2000"
+            android:key="keyboard__key_delete_candidate_timeout"
+            android:title="@string/keyboard__delete_candidate_timeout_title"
+            android:widgetLayout="@layout/seek_bar_dialog"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="false"
+            app:max="5000"
+            app:min="500"
+            app:seekBarIncrement="500"
+            app:unit="@string/unit__time_ms" />
     </PreferenceCategory>
 
 </PreferenceScreen>
