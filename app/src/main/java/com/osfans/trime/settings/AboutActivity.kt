@@ -1,8 +1,11 @@
 package com.osfans.trime.settings
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -107,6 +110,13 @@ class AboutActivity : AppCompatActivity() {
                         .setView(webView)
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
+                    true
+                }
+
+                "about__buildinfo" -> {
+                    val cbm = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    cbm.text = BuildConfig.BUILD_INFO
+                    Toast.makeText(context, R.string.copy_done, Toast.LENGTH_LONG).show()
                     true
                 }
                 else -> super.onPreferenceTreeClick(preference)
