@@ -205,6 +205,7 @@
     <string name="keyboard__use_mini_keyboard_title">Show mini keyboard when real keyboard linked</string>
     <string name="pref_keyboard__candidate">Candidate</string>
     <string name="keyboard__candidate_page_size">Candidate item count for each page</string>
+    <string name="copy_done">copy done!</string>
     <string-array name="keyboard__candidate_page_size_entries" >
         <item name="10000">Less than candidate</item>
         <item name="10001">close to candidate</item>

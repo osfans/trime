@@ -203,6 +203,7 @@
     <string name="keyboard__use_mini_keyboard_title">連接實體鍵盤時，顯示迷你軟鍵盤</string>
     <string name="pref_keyboard__candidate">候選欄</string>
     <string name="keyboard__candidate_page_size">每頁顯示候選詞數量</string>
+    <string name="copy_done">已複製</string>
     <string-array name="keyboard__candidate_page_size_entries" >
         <item name="10000">不超出候選欄</item>
         <item name="10001">接近於候選欄</item>
