@@ -62,7 +62,7 @@ style:
   key_long_text_size: 14 #長標籤字號
   key_text_size: 22 #鍵字號
   key_width: 10.0 #鍵寬，佔螢幕寬的百分比
-  keyboards: [.default, letter, number, symbols] #鍵盤配置：自動鍵盤、字母、數字、符號
+  keyboards: [.default, letter, number, symbols, mini] #鍵盤配置：自動鍵盤、字母、數字、符號、精简（供插入实体键盘使用）
   label_text_size: 22 #標籤字號
   label_font: label.ttf #編標籤字型
   latin_font: latin.ttf #西文字型
@@ -906,6 +906,7 @@ preset_keys:
   #切换键盘
   Keyboard_symbols: {label: 符號, send: Eisu_toggle, select: symbols}
   Keyboard_number: {label: 數字, send: Eisu_toggle, select: number}
+  Keyboard_mini: {label: 迷你, send: Eisu_toggle, select: mini}
   Keyboard_letter: {label: 字母, send: Eisu_toggle, select: default}
   Keyboard_default: {label: 返回, send: Eisu_toggle, select: .default}
   Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
@@ -924,7 +925,7 @@ preset_keys:
   Color_switch: {label: 配色, send: PROG_RED}
   Help: {label: 說明, send: Help}
   Info: {label: 關於, send: INFO}
-  Menu: {label: 選單, send: Menu}
+  Menu: {label: 方案, send: Menu}
   Settings: {label: 設定, send: SETTINGS}
   Color_settings: {label: 配色, send: SETTINGS, option: "color"}
   Theme_settings: {label: 主題, send: SETTINGS, option: "theme"}
@@ -961,53 +962,82 @@ preset_keyboards:
     height: 44
     lock: true #切換程序時記憶鍵盤
     keys:
-    - {click: '1', long_click: '!'}
-    - {click: '2', long_click: '@'}
-    - {click: '3', long_click: '#'}
-    - {click: '4', long_click: '$'}
-    - {click: '5', long_click: '%'}
-    - {click: '6', long_click: '^'}
-    - {click: '7', long_click: '&'}
-    - {click: '8', long_click: '*'}
-    - {click: '9', long_click: '('}
-    - {click: '0', long_click: ')'}
-    - {click: 'q', long_click: '_'}
-    - {click: 'w', long_click: '-'}
-    - {click: 'e', long_click: '+'}
-    - {click: 'r', long_click: '='}
-    - {click: 't', long_click: '|'}
-    - {click: 'y', long_click: '\'}
-    - {click: 'u', long_click: '['}
-    - {click: 'i', long_click: ']'}
-    - {click: 'o', long_click: '{'}
-    - {click: 'p', long_click: '}'}
-    - {click: 'a', long_click: select_all }
-    - {click: 's', long_click: Home}
-    - {click: 'd', long_click: End}
-    - {click: 'f', long_click: Page_Up}
-    - {click: 'g', long_click: Page_Down}
-    - {click: 'h', long_click: Left}
-    - {click: 'j', long_click: Down}
-    - {click: 'k', long_click: Up}
-    - {click: 'l', long_click: Right}
-    - {click: ';', long_click: ':'}
-    - {click: 'z', long_click: '`'}
-    - {click: 'x', long_click: cut}
-    - {click: 'c', long_click: copy}
-    - {click: 'v', long_click: paste}
-    - {click: 'b', long_click: '~'}
-    - {click: 'n', long_click: Insert}
-    - {click: 'm', long_click: Delete}
-    - {click: ',', long_click: '<'}
-    - {click: '.', long_click: '>'}
-    - {click: '/', long_click: '?'}
-    - {click: Shift_L}
-    - {click: Keyboard_symbols, long_click: Keyboard_number}
-    - {click: Mode_switch, long_click: Menu}
-    - {click: space, width: 30}
-    - {click: "'", long_click: '"'}
-    - {click: BackSpace, width: 15}
-    - {click: Return, composing: Return1, long_click: CommitComment, width: 15}
+      - {click: '1', long_click: '!'}
+      - {click: '2', long_click: '@'}
+      - {click: '3', long_click: '#'}
+      - {click: '4', long_click: '$'}
+      - {click: '5', long_click: '%'}
+      - {click: '6', long_click: '^'}
+      - {click: '7', long_click: '&'}
+      - {click: '8', long_click: '*'}
+      - {click: '9', long_click: '('}
+      - {click: '0', long_click: ')'}
+      - {click: 'q', long_click: '_'}
+      - {click: 'w', long_click: '-'}
+      - {click: 'e', long_click: '+'}
+      - {click: 'r', long_click: '='}
+      - {click: 't', long_click: '|'}
+      - {click: 'y', long_click: '\'}
+      - {click: 'u', long_click: '['}
+      - {click: 'i', long_click: ']'}
+      - {click: 'o', long_click: '{'}
+      - {click: 'p', long_click: '}'}
+      - {click: 'a', long_click: select_all }
+      - {click: 's', long_click: Home}
+      - {click: 'd', long_click: End}
+      - {click: 'f', long_click: Page_Up}
+      - {click: 'g', long_click: Page_Down}
+      - {click: 'h', long_click: Left}
+      - {click: 'j', long_click: Down}
+      - {click: 'k', long_click: Up}
+      - {click: 'l', long_click: Right}
+      - {click: ';', long_click: ':'}
+      - {click: 'z', long_click: '`'}
+      - {click: 'x', long_click: cut}
+      - {click: 'c', long_click: copy}
+      - {click: 'v', long_click: paste}
+      - {click: 'b', long_click: '~'}
+      - {click: 'n', long_click: Insert}
+      - {click: 'm', long_click: Delete}
+      - {click: ',', long_click: '<'}
+      - {click: '.', long_click: '>'}
+      - {click: '/', long_click: '?'}
+      - {click: Shift_L}
+      - {click: Keyboard_symbols, long_click: Keyboard_number}
+      - {click: Mode_switch, long_click: Menu}
+      - {click: space, width: 30}
+      - {click: "'", long_click: '"'}
+      - {click: BackSpace, width: 15}
+      - {click: Return, composing: Return1, long_click: CommitComment, width: 15}
+  mini:
+    name: 精简键盘
+    author: "tumuyan"
+    ascii_mode: 0
+    width: 10
+    height: 44
+    keyboard_height: 120
+    lock: true #切換程序時記憶鍵盤
+    keys:
+      - {click: '1', long_click: '!'}
+      - {click: '2', long_click: '@'}
+      - {click: '3', long_click: '#'}
+      - {click: '4', long_click: '$'}
+      - {click: '5', long_click: '%'}
+      - {click: '6', long_click: '^'}
+      - {click: '7', long_click: '&'}
+      - {click: '8', long_click: '*'}
+      - {click: '9', long_click: '('}
+      - {click: '0', long_click: ')'}
+      - {click: Shift_L}
+      - {click: Keyboard_symbols, long_click: Keyboard_number}
+      - {click: "'", long_click: '"'}
+      - {click: '-', long_click: '_'}
+      - {click: '=', long_click: '+'}
+      - {click: ',', long_click: '<'}
+      - {click: '.', long_click: '>'}
+      - {click: '/', long_click: '?'}
+      - {click: Mode_switch, long_click: Menu}
+      - {click: Return, composing: Return1, long_click: CommitComment}
   letter:
     __include: /preset_keyboards/default
     ascii_mode: 1
@@ -1229,23 +1259,23 @@ preset_keyboards:
     height: 44
     keys:
     - {click: '+'}
-    - {click: '1'}
-    - {click: '2'}
-    - {click: '3'}
+    - {click: 'KP_1'}
+    - {click: 'KP_2'}
+    - {click: 'KP_3'}
     - {click: '#'}
     - {click: '-'}
-    - {click: '4'}
-    - {click: '5'}
-    - {click: '6'}
+    - {click: 'KP_4'}
+    - {click: 'KP_5'}
+    - {click: 'KP_6'}
     - {click: '%'}
     - {click: '*'}
-    - {click: '7'}
-    - {click: '8'}
-    - {click: '9'}
+    - {click: 'KP_7'}
+    - {click: 'KP_8'}
+    - {click: 'KP_9'}
     - {click: ':'}
     - {click: '/'}
     - {click: '±'}
-    - {click: '0'}
+    - {click: 'KP_0'}
     - {click: '.'}
     - {click: ','}
     - {click: '='}
@@ -1302,7 +1332,8 @@ preset_keyboards:
     - {click: BackSpace, long_click: Escape}
     - {click: Keyboard_default, long_click: Menu, width: 15}
     - {click: Keyboard_number, long_click: Color_switch}
-    - {click: space, width: 40}
+    - {click: Keyboard_mini, long_click: Theme_settings}
+    - {click: space, width: 30}
     - {click: '。', ascii: '.'}
     - {click: liquid_keyboard_switch, long_click: Delete}
     - {click: Return, long_click: select_all, width: 15}
