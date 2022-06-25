@@ -204,6 +204,7 @@ class AppPrefs(
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
             const val DELETE_CANDIDATE_TIMEOUT = "keyboard__key_delete_candidate_timeout"
+            const val SHOULD_LONG_CLICK_DELETE_CANDIDATE = "keyboard__long_click_delete_candidate"
         }
         var inlinePreedit: InlineModeType
             get() = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
@@ -296,6 +297,9 @@ class AppPrefs(
             private set
         var deleteCandidateTimeout: Int = 0
             get() = prefs.getPref(DELETE_CANDIDATE_TIMEOUT, 2000)
+            private set
+        var shouldLongClickDeleteCandidate: Boolean = false
+            get() = prefs.getPref(SHOULD_LONG_CLICK_DELETE_CANDIDATE, false)
             private set
         var isSpeakKey: Boolean
             get() = prefs.getPref(SPEAK_KEY_PRESS_ENABLED, false)

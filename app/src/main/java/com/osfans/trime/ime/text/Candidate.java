@@ -179,7 +179,7 @@ public class Candidate extends View {
       if (candidate != null) {
         if (candidate instanceof ComputedCandidate.Word) {
           if (listener.get() != null) {
-            if (isLongClick) {
+            if (isLongClick && Config.getShouldLongClickDeleteCandidate()) {
               listener.get().onCandidateLongClicked(index + startNum);
             } else {
               listener.get().onCandidatePressed(index + startNum);

@@ -63,6 +63,25 @@
             android:title="@string/keyboard__candidate_page_size"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="keyboard__long_click_delete_candidate"
+            android:title="@string/keyboard__long_click_delete_candidate_title"
+            app:iconSpaceReserved="false" />
+
+        <com.osfans.trime.settings.components.DialogSeekBarPreference
+            android:dependency="keyboard__long_click_delete_candidate"
+            android:defaultValue="2000"
+            android:key="keyboard__key_delete_candidate_timeout"
+            android:title="@string/keyboard__delete_candidate_timeout_title"
+            android:widgetLayout="@layout/seek_bar_dialog"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="false"
+            app:max="5000"
+            app:min="500"
+            app:seekBarIncrement="500"
+            app:unit="@string/unit__time_ms" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -250,17 +269,6 @@
             app:max="100"
             app:min="10"
             app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
-            android:defaultValue="2000"
-            android:key="keyboard__key_delete_candidate_timeout"
-            android:title="@string/keyboard__delete_candidate_timeout_title"
-            android:widgetLayout="@layout/seek_bar_dialog"
-            app:allowDividerAbove="false"
-            app:iconSpaceReserved="false"
-            app:max="5000"
-            app:min="500"
-            app:seekBarIncrement="500"
             app:unit="@string/unit__time_ms" />
     </PreferenceCategory>
 

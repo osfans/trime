@@ -947,6 +947,10 @@ public class Config {
     return appPrefs.getKeyboard().getDeleteCandidateTimeout();
   }
 
+  public static boolean getShouldLongClickDeleteCandidate() {
+    return appPrefs.getKeyboard().getShouldLongClickDeleteCandidate();
+  }
+
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {

@@ -67,6 +67,7 @@
     <string name="keyboard__long_press_timeout_title">Long key press delay</string>
     <string name="keyboard__key_repeat_interval_title">Key repeat interval</string>
     <string name="keyboard__delete_candidate_timeout_title">Long click to delete candidate timeout</string>
+    <string name="keyboard__long_click_delete_candidate_title">Long click to delete candidate</string>
     <string name="keyboard__show_switches_title">Show switches in candidate bar</string>
     <string name="keyboard__show_key_popup_title">Popup on key press</string>
     <string name="keyboard__show_window_title">Show floating window when composing</string>
