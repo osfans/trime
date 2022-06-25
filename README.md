@@ -93,18 +93,19 @@ make release
 
 #### Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 
-Remove `app/build/`, `build/` and `app/.cxx/` directories.
+Run `make clean`.
 
 #### Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
 
-Do not install capnp from package-manager or other sources. Run the dependency script in part *Build*.
+Do not install capnp from package-manager or other sources. Run the dependency script in part **Build**.
 
 #### Other weird problems
 
-1. Try removing `app/build/`, `build/` and `app/.cxx/` directories.
+1. Try `make clean`
 2. Make sure your repo is up-to-date. If one or more submodules are modified, also make sure they are compatible with the current version.
 3. If the problem still exists(very unlikely), try to make a new clone.
-
+4. Check if this is there is an issue/PR related to your problem. If yes, try their solutions.
+5. If none of them works, you may make an issue to ask for help.(optional)
 
 
 ## Third Party Libraries
