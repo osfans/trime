@@ -68,7 +68,7 @@ cd $trime_folder
 sh trime/script/dependency.sh
 ```
 
-3. If you would like to test the application, run:
+3. Debug version without sign:
 
 ```bash
 make debug
@@ -99,7 +99,7 @@ Run `make clean`.
 
 Do not install capnp from package-manager or other sources. Run the dependency script in part **Build**.
 
-#### Other weird problems
+#### Other problems
 
 1. Try `make clean`
 2. Make sure your repo is up-to-date. If one or more submodules are modified, also make sure they are compatible with the current version.
