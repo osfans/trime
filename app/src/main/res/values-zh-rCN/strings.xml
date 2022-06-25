@@ -201,7 +201,6 @@
     <string name="about__buildinfo">编译信息</string>
     <string name="keyboard__use_mini_keyboard_title">连接实体键盘时，显示迷你软键盘</string>
     <string name="pref_trime_custom_qq">修改版QQ群</string>
-    <string name="keyboard__use_mini_keyboard_title">连接实体键盘时，显示迷你软键盘</string>
     <string name="pref_keyboard__candidate">候选栏</string>
     <string name="keyboard__candidate_page_size">每页显示候选词数量</string>
     <string name="copy_done">已复制</string>
