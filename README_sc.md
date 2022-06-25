@@ -41,21 +41,34 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 现在欢迎你前来[贡献](CONTRIBUTING.md) ～！:tada:
 
-## 编译
+## 入门
 
-1. 克隆此项目，**请注意**由于 `boost` 子模块很大，这会花费一些时间。同时，请确保你的磁盘有足够空间保存源代码（约 1.5 GB);
+### 先决条件
+
+Android SDK 应该已经被安装并且正确配置。如果你还不熟悉Android开发，建议安装Android Studio，它会自动安装并配置Android开发环境。
+
+### Build
+
+1. 克隆此项目，请注意由于 boost 子模块很大，这会花费一些时间。同时，请确保你的磁盘有足够空间保存源代码（约 1.5 GB);
+
 ```bash
 cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
-2. 如果你想测试应用，运行命令：
 
+2. 安装capnp:
 ```bash
 cd $trime_folder
+sh trime/script/dependency.sh
+```
+
+3. 生成测试包（不需要签名）:
+
+```bash
 make debug
 ```
 
-或者要为应用签名以释放更新，请创建一个名为 `keystore.properties` 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html)：
+或者如果需要生成正式发布包, 请创建一个名为 keystore.properties 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html):
 
 ```bash
 storePassword=myStorePassword
@@ -64,39 +77,29 @@ keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
-然后运行命令：
+之后执行：
 
 ```bash
-cd $trime_folder
 make release
 ```
 
-### 在特定平台上预编译
-#### [Arch Linux](https://www.archlinux.org/)
+### 故障排除
 
-  ```bash
-   yay -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle clang capnproto
-   make release
-  ```
+#### Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 
-  对于其他 Linux 发行版，请同样使用它们各自的包管理器安装上述开发环境。
+执行 `make clean`.
 
-#### macOS
+#### Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
 
-1. 安装 [Android SDK](https://developer.android.com/sdk/index.html)
+请不要通过包管理器或是其他途径安装capnp。使用**构建**章节中的安装脚本.
 
-2. 设置相应的 ANDROID_SDK_ROOT
-  ```bash
-  # Android
-   export ANDROID_SDK_ROOT="android_sdk_path"
-  ```
+#### 其他问题
 
-3. 设置 Homebrew [镜像](https://mirrors.tuna.tsinghua.edu.cn/help/homebrew/)(可选)
-
-4. 安装 [Homebrew](https://brew.sh/)
-  ```bash
-   brew install cmake capnp
-  ```
+1. 首先尝试 `make clean`
+2. 确保你的仓库与最新版本一致。如果你修改了一个或更多的子模块，请确保它们与当前仓库版本兼容。
+3. 如果问题依然存在（不太可能）, 尝试进行一次新的克隆。
+4. 检查是否有PR/issue与你的问题相关。 如果有的话，尝试他们的解决方案。
+5. 如果以上方法都不工作，你可以提一个issue来寻求帮助(可选)。
 
 ## 第三方库
 - [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)
