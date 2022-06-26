@@ -43,32 +43,34 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 ## 入门
 
-### 先决条件
+### 准备
 
-Android SDK 应该已经被安装并且正确配置。如果你还不熟悉Android开发，建议安装Android Studio，它会自动安装并配置Android开发环境。
+Android SDK 应该已经被安装并且正确配置。如果你还不熟悉 Android 开发，建议安装 Android Studio，它会自动安装并配置 Android 开发环境。
 
-### Build
+### 构建
 
-1. 克隆此项目，请注意由于 boost 子模块很大，这会花费一些时间。同时，请确保你的磁盘有足够空间保存源代码（约 1.5 GB);
+1. 克隆此项目，请注意由于 `boost` 子模块很大，这会花费一些时间。同时，请确保你的磁盘有足够空间保存源代码（约 1.5 GB);
 
 ```bash
 cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
 
-2. 安装capnp:
+2. 安装 `capnp`:
 ```bash
 cd $trime_folder
 sh trime/script/dependency.sh
 ```
 
-3. 生成测试包（不需要签名）:
+3. 编译调试版本:
 
 ```bash
 make debug
 ```
 
-或者如果需要生成正式发布包, 请创建一个名为 keystore.properties 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html):
+4. 编译正式版本：
+
+请创建一个名为 `keystore.properties` 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html):
 
 ```bash
 storePassword=myStorePassword
@@ -77,24 +79,25 @@ keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
-之后执行：
-
 ```bash
 make release
 ```
 
 ### 故障排除
 
-#### Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
+```
+Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
+```
 
 执行 `make clean`.
 
-#### Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
+```
+Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
+```
 
-请不要通过包管理器或是其他途径安装capnp。使用**构建**章节中的安装脚本.
+请不要通过包管理器或是其他途径安装 `capnp`。使用 [构建](#构建) 章节中的安装脚本.
 
-#### 其他问题
-
+其他问题:
 1. 首先尝试 `make clean`
 2. 确保你的仓库与最新版本一致。如果你修改了一个或更多的子模块，请确保它们与当前仓库版本兼容。
 3. 如果问题依然存在（不太可能）, 尝试进行一次新的克隆。

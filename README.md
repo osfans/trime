@@ -1,4 +1,4 @@
-# TRIME
+# Trime
 Rime IME for Android
 
 ![build](https://github.com/osfans/trime/actions/workflows/commit-ci.yml/badge.svg?branch=develop)
@@ -49,9 +49,9 @@ Your [contribution](CONTRIBUTING.md) are welcome ~ ! :tada:
 
 ## Getting Started
 
-### Prerequisite
+### Prepare
 
-Android SDK should be correctly installed and configured. If you are new to Android, Android Studio may be installed to provide it.
+Android SDK should be correctly installed and configured. If you are new to Android development, please install Android Studio.
 
 ### Build
 
@@ -62,7 +62,7 @@ cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
 
-2. Prepare capnp:
+2. Prepare `capnp`:
 ```bash
 cd $trime_folder
 sh trime/script/dependency.sh
@@ -74,7 +74,9 @@ sh trime/script/dependency.sh
 make debug
 ```
 
-Or if you want to sign for the app to release, create a `keystore.properties` contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
+4. Release version with sign:
+
+Create `keystore.properties` file which contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
 
 ```bash
 storePassword=myStorePassword
@@ -83,24 +85,25 @@ keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
-then run:
-
 ```bash
 make release
 ```
 
 ### Troubleshooting
 
-#### Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
+```
+Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
+```
 
 Run `make clean`.
 
-#### Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
+```
+Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
+```
 
-Do not install capnp from package-manager or other sources. Run the dependency script in part **Build**.
+Do not install `capnp` from package manager. Run the dependency script in part [Build](#Build).
 
-#### Other problems
-
+Other issues:
 1. Try `make clean`
 2. Make sure your repo is up-to-date. If one or more submodules are modified, also make sure they are compatible with the current version.
 3. If the problem still exists(very unlikely), try to make a new clone.
