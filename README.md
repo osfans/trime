@@ -47,7 +47,13 @@ Benefit from the [librime](https://github.com/rime/librime) project by JNI, we a
 
 Your [contribution](CONTRIBUTING.md) are welcome ~ ! :tada:
 
-## Build
+## Getting Started
+
+### Prerequisite
+
+Android SDK should be correctly installed and configured. If you are new to Android, Android Studio may be installed to provide it.
+
+### Build
 
 1. Clone this project, please **pay attention** that it would take a while for large-size `boost` submodule. And make sure that you have enough available disk space to hold the source code (about 1.5 GB).
 
@@ -56,10 +62,15 @@ cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
 
-2. If you would like to test the application, run:
-
+2. Prepare capnp:
 ```bash
 cd $trime_folder
+sh trime/script/dependency.sh
+```
+
+3. Debug version without sign:
+
+```bash
 make debug
 ```
 
@@ -75,36 +86,27 @@ storeFile=myStoreFileLocation
 then run:
 
 ```bash
-cd $trime_folder
 make release
 ```
 
-### Guides
-#### [Arch Linux](https://www.archlinux.org/)
+### Troubleshooting
 
-  ```bash
-   yay -S android-{ndk,sdk,sdk-build-tools,sdk-platform-tools,platform} gradle clang capnproto
-   make release
-  ```
+#### Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 
-  For other Linux distributions, you can install the required packages above with their own package managers.
+Run `make clean`.
 
-#### macOS
+#### Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
 
-1. Install [Android SDK](https://developer.android.com/sdk/index.html)
+Do not install capnp from package-manager or other sources. Run the dependency script in part **Build**.
 
-2. Set up ANDROID_SDK_ROOT
-  ```bash
-  # Android
-   export ANDROID_SDK_ROOT="android_sdk_path"
-  ```
+#### Other problems
 
-3. Set up [mirror](https://mirrors.tuna.tsinghua.edu.cn/help/homebrew/) of Homebrew(Optional)
+1. Try `make clean`
+2. Make sure your repo is up-to-date. If one or more submodules are modified, also make sure they are compatible with the current version.
+3. If the problem still exists(very unlikely), try to make a new clone.
+4. Check if this is there is an issue/PR related to your problem. If yes, try their solutions.
+5. If none of them works, you may make an issue to ask for help.(optional)
 
-4. Install [Homebrew](https://brew.sh/)
-  ```bash
-   brew install cmake capnp
-  ```
 
 ## Third Party Libraries
 - [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)

@@ -7,6 +7,7 @@ jniDir=$(mainDir)/jni
 all: release
 
 clean:
+	rm -rf build app/build app/.cxx/
 	./gradlew clean
 
 build:
