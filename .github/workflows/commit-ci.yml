@@ -55,7 +55,23 @@ jobs:
       - name: Upload Trime artifact
         uses: actions/upload-artifact@v3
         with:
-          name: trime.zip
+          name: trime
           path: app/build/outputs/apk/**/*.apk
+          # keep 90 days
+          retention-days: 90
+
+      - name: Upload Trime artifact (ARM64_V8A only)
+        uses: actions/upload-artifact@v3
+        with:
+          name: trime_arm64_v8a
+          path: app/build/outputs/apk/**/*arm64-v8a-debug.apk
+          # keep 90 days
+          retention-days: 90
+
+      - name: Upload jni artifact (librime_jni.so)
+        uses: actions/upload-artifact@v3
+        with:
+          name: librime_jni
+          path: app/build/intermediates/stripped_native_libs/debug/out/lib/*
           # keep 90 days
           retention-days: 90
