@@ -9,8 +9,8 @@ android {
         applicationId "com.osfans.trime"
         minSdkVersion 21 // 21 is required for `readlinkat` for capnpproto
         targetSdkVersion 29
-        versionCode 20220701
-        versionName "3.2.7"
+        versionCode 20220901
+        versionName "3.2.8"
         setProperty("archivesBaseName", "trime-$versionName")
         resValue "string", "trime_url", getGitUrl()
         buildConfigField 'String', 'BUILD_INFO' , '"' + getBuildInfo() + '"'
