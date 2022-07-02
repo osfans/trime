@@ -4,7 +4,7 @@ import android.app.Application
 import android.os.Process
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.settings.LogActivity
+import com.osfans.trime.ui.main.LogActivity
 import timber.log.Timber
 
 /**

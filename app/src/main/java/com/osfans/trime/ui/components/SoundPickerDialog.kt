@@ -1,4 +1,4 @@
-package com.osfans.trime.settings.components
+package com.osfans.trime.ui.components
 
 import android.app.Dialog
 import android.app.ProgressDialog

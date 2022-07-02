@@ -1,4 +1,4 @@
-package com.osfans.trime.settings.fragments
+package com.osfans.trime.ui.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -10,7 +10,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.settings.components.SoundPickerDialog
+import com.osfans.trime.ui.components.SoundPickerDialog
 
 class KeyboardFragment :
     PreferenceFragmentCompat(),

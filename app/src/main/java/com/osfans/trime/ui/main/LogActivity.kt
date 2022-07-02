@@ -1,7 +1,7 @@
 /**
  * Adapted from [fcitx5-android/LogActivity.kt](https://github.com/fcitx5-android/fcitx5-android/blob/e44c1c7/app/src/main/java/org/fcitx/fcitx5/android/ui/main/LogActivity.kt)
  */
-package com.osfans.trime.settings
+package com.osfans.trime.ui.main
 
 import android.os.Bundle
 import android.view.View
@@ -15,7 +15,7 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import com.osfans.trime.databinding.ActivityLogBinding
-import com.osfans.trime.settings.components.LogView
+import com.osfans.trime.ui.components.LogView
 import com.osfans.trime.util.DeviceInfo
 import com.osfans.trime.util.Logcat
 import com.osfans.trime.util.bindOnNotNull

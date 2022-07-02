@@ -1,7 +1,7 @@
 /**
  * Adapted from [fcitx5-android/Logview.kt](https://github.com/fcitx5-android/fcitx5-android/blob/e44c1c7/app/src/main/java/org/fcitx/fcitx5/android/ui/common/LogView.kt)
  */
-package com.osfans.trime.settings.components
+package com.osfans.trime.ui.components
 
 import android.content.Context
 import android.graphics.Typeface

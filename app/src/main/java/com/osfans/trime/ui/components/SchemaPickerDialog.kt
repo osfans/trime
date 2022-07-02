@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.osfans.trime.settings.components
+package com.osfans.trime.ui.components
 
 import android.app.ProgressDialog
 import android.content.Context

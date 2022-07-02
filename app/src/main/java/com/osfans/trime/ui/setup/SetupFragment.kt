@@ -1,4 +1,4 @@
-package com.osfans.trime.setup
+package com.osfans.trime.ui.setup
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.osfans.trime.databinding.FragmentSetupBinding
-import com.osfans.trime.setup.SetupPage.Companion.isLastPage
+import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
 
 class SetupFragment : Fragment() {
     private val viewModel: SetupViewModel by activityViewModels()

@@ -1,4 +1,4 @@
-package com.osfans.trime.settings.components
+package com.osfans.trime.ui.components
 
 import android.content.Context
 import android.util.AttributeSet

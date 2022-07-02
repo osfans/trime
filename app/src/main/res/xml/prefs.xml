@@ -33,19 +33,19 @@
         android:order="5"
         android:title="@string/settings__keyboard_preferences_title"
         app:icon="@drawable/ic_baseline_keyboard_24"
-        android:fragment="com.osfans.trime.settings.fragments.KeyboardFragment"/>
+        android:fragment="com.osfans.trime.ui.fragments.KeyboardFragment"/>
 
     <Preference android:key="pref_keyboard_appearance"
         android:order="6"
         android:title="@string/pref_keyboard_appearance"
         app:icon="@drawable/ic_pref_theme_color"
-        android:fragment="com.osfans.trime.settings.fragments.LooksFragment"/>
+        android:fragment="com.osfans.trime.ui.fragments.LooksFragment"/>
 
     <Preference android:key="pref_input"
         android:order="8"
         android:title="@string/settings__configuration_title"
         app:icon="@drawable/ic_baseline_settings_24"
-        android:fragment="com.osfans.trime.settings.fragments.ConfFragment"/>
+        android:fragment="com.osfans.trime.ui.fragments.ConfFragment"/>
 
     <!-- <Preference android:key="pref_deploy" android:order="16"
         android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/> -->
@@ -54,7 +54,7 @@
         android:order="17"
         android:title="@string/pref_other"
         app:icon="@drawable/ic_pref_other"
-        android:fragment="com.osfans.trime.settings.fragments.OtherFragment"/>
+        android:fragment="com.osfans.trime.ui.fragments.OtherFragment"/>
 
     <!-- <PreferenceScreen android:key="pref_help" android:order="32" android:title="@string/pref_help">
 

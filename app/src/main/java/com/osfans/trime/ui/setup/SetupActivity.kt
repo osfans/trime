@@ -1,4 +1,4 @@
-package com.osfans.trime.setup
+package com.osfans.trime.ui.setup
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -15,8 +15,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.blankj.utilcode.util.NotificationUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.ActivitySetupBinding
-import com.osfans.trime.setup.SetupPage.Companion.firstUndonePage
-import com.osfans.trime.setup.SetupPage.Companion.isLastPage
+import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
+import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
 
 class SetupActivity : FragmentActivity() {
     private lateinit var viewPager: ViewPager2

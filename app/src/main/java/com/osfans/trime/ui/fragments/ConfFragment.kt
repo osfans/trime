@@ -1,4 +1,4 @@
-package com.osfans.trime.settings.fragments
+package com.osfans.trime.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -9,7 +9,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.settings.components.ResetAssetsDialog
+import com.osfans.trime.ui.components.ResetAssetsDialog
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
 import com.osfans.trime.util.formatDateTime

@@ -1,4 +1,4 @@
-package com.osfans.trime.settings.fragments
+package com.osfans.trime.ui.fragments
 
 import android.content.ComponentName
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.osfans.trime.settings
+package com.osfans.trime.ui.main
 
 import android.Manifest
 import android.content.Intent
@@ -25,8 +25,8 @@ import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.databinding.PrefActivityBinding
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.settings.fragments.PrefFragment
-import com.osfans.trime.setup.SetupActivity
+import com.osfans.trime.ui.fragments.PrefFragment
+import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
 import kotlinx.coroutines.CoroutineScope

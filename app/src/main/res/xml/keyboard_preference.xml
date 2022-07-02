@@ -70,7 +70,7 @@
             android:title="@string/keyboard__long_click_delete_candidate_title"
             app:iconSpaceReserved="false" />
 
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:dependency="keyboard__long_click_delete_candidate"
             android:defaultValue="2000"
             android:key="keyboard__key_delete_candidate_timeout"
@@ -156,7 +156,7 @@
             android:key="keyboard__key_sound_package"
             android:title="@string/keyboard__key_sound_package_title"
             app:iconSpaceReserved="false" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
             android:dependency="keyboard__key_sound"
             android:key="keyboard__key_sound_volume"
@@ -173,7 +173,7 @@
             android:key="keyboard__key_vibration"
             android:title="@string/keyboard__key_vibration_title"
             app:iconSpaceReserved="false" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
             android:dependency="keyboard__key_vibration"
             android:key="keyboard__key_vibration_duration"
@@ -186,7 +186,7 @@
             app:systemDefaultValue="-1"
             app:systemDefaultValueText="@string/pref__system_default"
             app:unit="@string/unit__time_ms" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
             android:dependency="keyboard__key_vibration"
             android:key="keyboard__key_vibration_amplitude"
@@ -213,7 +213,7 @@
             android:title="@string/keyboard__swipe_enabled"
             android:defaultValue="true"
             app:iconSpaceReserved="false" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="80"
             android:key="keyboard__key_swipe_travel"
             android:title="@string/keyboard__key_swipe_travel_title"
@@ -223,7 +223,7 @@
             app:min="0"
             app:seekBarIncrement="10"
             app:unit="" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="800"
             android:key="keyboard__key_swipe_velocity"
             android:title="@string/keyboard__key_swipe_velocity"
@@ -233,7 +233,7 @@
             app:min="0"
             app:seekBarIncrement="100"
             app:unit="" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="240"
             android:key="keyboard__key_swipe_travel_hi"
             android:title="@string/keyboard__key_swipe_travel_hi_title"
@@ -243,7 +243,7 @@
             app:min="0"
             app:seekBarIncrement="10"
             app:unit="" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="25000"
             android:key="keyboard__key_swipe_velocity_hi"
             android:title="@string/keyboard__key_swipe_velocity_hi"
@@ -253,7 +253,7 @@
             app:min="0"
             app:seekBarIncrement="100"
             app:unit="" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="50"
             android:key="keyboard__key_swipe_time_hi"
             android:title="@string/keyboard__key_swipe_time_hi_title"
@@ -264,7 +264,7 @@
             app:min="0"
             app:seekBarIncrement="10"
             app:unit="@string/unit__time_ms" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="20"
             android:key="keyboard__key_long_press_timeout"
             android:title="@string/keyboard__long_press_timeout_title"
@@ -275,7 +275,7 @@
             app:min="10"
             app:seekBarIncrement="10"
             app:unit="@string/unit__time_ms" />
-        <com.osfans.trime.settings.components.DialogSeekBarPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="40"
             android:key="keyboard__key_repeat_interval"
             android:title="@string/keyboard__key_repeat_interval_title"

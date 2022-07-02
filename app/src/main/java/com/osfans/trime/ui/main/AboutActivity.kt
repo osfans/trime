@@ -1,4 +1,4 @@
-package com.osfans.trime.settings
+package com.osfans.trime.ui.main
 
 import android.content.ClipboardManager
 import android.content.Context

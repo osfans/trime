@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    tools:context=".settings.PrefMainActivity">
+    tools:context=".ui.main.PrefMainActivity">
 
     <ProgressBar
         android:id="@+id/loading_bar"

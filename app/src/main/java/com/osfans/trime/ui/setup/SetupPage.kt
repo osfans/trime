@@ -1,4 +1,4 @@
-package com.osfans.trime.setup
+package com.osfans.trime.ui.setup
 
 import android.content.Context
 import com.osfans.trime.R

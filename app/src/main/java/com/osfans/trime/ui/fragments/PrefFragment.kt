@@ -1,11 +1,11 @@
-package com.osfans.trime.settings.fragments
+package com.osfans.trime.ui.fragments
 
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
-import com.osfans.trime.settings.components.SchemaPickerDialog
+import com.osfans.trime.ui.components.SchemaPickerDialog
 
 class PrefFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -21,7 +21,7 @@ class PrefFragment : PreferenceFragmentCompat() {
             Preference(context).apply {
                 setTitle(R.string.settings__system_toolkit)
                 setIcon(R.drawable.ic_iconpark_toolkit_24)
-                fragment = "com.osfans.trime.settings.fragments.ToolkitFragment"
+                fragment = "com.osfans.trime.ui.fragments.ToolkitFragment"
                 order = 19
             }
         )
