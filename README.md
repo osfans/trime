@@ -62,7 +62,7 @@ cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
 
-2. Prepare `capnp`:
+2. Install `capnp`:
 ```bash
 cd $trime_folder
 sh trime/script/dependency.sh
