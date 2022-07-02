@@ -54,6 +54,14 @@ public class ClipboardDao {
     db.close();
   }
 
+  /** 删除记录 * */
+  public void delete(@NonNull String str) {
+    helper = new DbHelper(Trime.getService(), "clipboard.db");
+    SQLiteDatabase db = helper.getWritableDatabase();
+    db.delete("t_data", "text=?", new String[] {str});
+    db.close();
+  }
+
   public List<SimpleKeyBean> getAllSimpleBean(int size) {
 
     List<SimpleKeyBean> list = new ArrayList<>();

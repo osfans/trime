@@ -205,6 +205,7 @@
     <string name="pref_keyboard__candidate">候选栏</string>
     <string name="keyboard__candidate_page_size">每页显示候选词数量</string>
     <string name="copy_done">已复制</string>
+    <string name="delete_done">已删除</string>
     <string-array name="keyboard__candidate_page_size_entries" >
         <item name="10000">不超出候选栏</item>
         <item name="10001">接近于候选栏</item>

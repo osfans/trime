@@ -16,6 +16,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.osfans.trime.R;
 import com.osfans.trime.data.Config;
+import com.osfans.trime.data.db.clipboard.ClipboardDao;
 import java.util.List;
 
 public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -124,9 +125,9 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
       itemViewHold.listItemLayout.setOnLongClickListener(
           view -> {
             int position = itemViewHold.getLayoutPosition();
-            //  TODO 长按删除、编辑剪贴板
-            //  当文本较长时，目前样式只缩略显示为 3 行，长按时 toast 消息可以预览全文，略有用处。
-            ToastUtils.showShort(list.get(position).getText());
+            ClipboardDao.get().delete(list.get(position).getText());
+            notifyItemRemoved(position);
+            ToastUtils.showShort(R.string.delete_done);
             return true;
           });
 
