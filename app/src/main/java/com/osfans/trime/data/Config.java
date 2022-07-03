@@ -30,10 +30,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.util.TypedValue;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
@@ -41,7 +39,6 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.ConfigGetter;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,7 +52,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 import timber.log.Timber;
 
 /** 解析 YAML 配置文件 */
@@ -734,24 +731,12 @@ public class Config {
     return parseColor(o);
   }
 
-  public String[] getColorKeys() {
-    if (presetColorSchemes == null) return null;
-    final Object[] keys = new String[presetColorSchemes.size()];
-    presetColorSchemes.keySet().toArray(keys);
-    return (String[]) keys;
-  }
-
-  @Nullable
-  public String[] getColorNames(String[] keys) {
-    if (keys == null) return null;
-    final int n = keys.length;
-    final String[] names = new String[n];
-    for (int i = 0; i < n; i++) {
-      final Map<?, ?> m = (Map<?, ?>) presetColorSchemes.get(keys[i]);
-      assert m != null;
-      names[i] = Objects.requireNonNull(m.get("name")).toString();
-    }
-    return names;
+  @NonNull
+  public List<String[]> getPresetColorSchemes() {
+    if (presetColorSchemes == null) return new ArrayList<>();
+    return presetColorSchemes.entrySet().stream()
+        .map(e -> new String[] {e.getKey(), Objects.requireNonNull(e.getValue().get("name"))})
+        .collect(Collectors.toList());
   }
 
   private Map<String, String> mEnterLabels;
