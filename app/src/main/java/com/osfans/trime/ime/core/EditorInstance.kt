@@ -2,6 +2,7 @@ package com.osfans.trime.ime.core
 
 import android.inputmethodservice.InputMethodService
 import android.os.SystemClock
+import android.text.TextUtils
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -124,6 +125,28 @@ class EditorInstance(private val ims: InputMethodService) {
             return ""
         }
         return ic.getTextBeforeCursor(n.coerceAtMost(1024), 0)?.toString() ?: ""
+    }
+
+    /** 獲得當前漢字：候選字、選中字、剛上屏字/光標前字/光標前所有字、光標後所有字
+     * %s或者%1$s爲當前字符
+     * %2$s爲當前輸入的編碼
+     * %3$s爲光標前字符
+     * %4$s爲光標前所有字符
+     * */
+    fun getActiveText(type: Int): String {
+        if (type == 2) return Rime.RimeGetInput() // 當前編碼
+        var s = Rime.getComposingText() // 當前候選
+        if (TextUtils.isEmpty(s)) {
+            val ic = inputConnection
+            var cs = if (ic != null) ic.getSelectedText(0) else null // 選中字
+            if (type == 1 && TextUtils.isEmpty(cs)) cs = lastCommittedText // 剛上屏字
+            if (TextUtils.isEmpty(cs) && ic != null) {
+                cs = ic.getTextBeforeCursor(if (type == 4) 1024 else 1, 0) // 光標前字
+            }
+            if (TextUtils.isEmpty(cs) && ic != null) cs = ic.getTextAfterCursor(1024, 0) // 光標後面所有字
+            if (cs != null) s = cs.toString()
+        }
+        return s
     }
 
     /**

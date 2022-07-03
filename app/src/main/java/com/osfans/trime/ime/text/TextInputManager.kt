@@ -354,13 +354,23 @@ class TextInputManager private constructor() :
                 // %2$s爲當前輸入的編碼
                 // %3$s爲光標前字符
                 // %4$s爲光標前所有字符
-                val arg = String.format(
-                    event.option,
-                    activeEditorInstance.lastCommittedText,
-                    Rime.RimeGetInput(),
-                    activeEditorInstance.getTextBeforeCursor(1),
-                    activeEditorInstance.getTextBeforeCursor(1024)
-                )
+                var arg = event.option
+                val activeTextRegex = Regex(".*%(\\d*)\\$" + "s.*")
+                if (arg.matches(activeTextRegex)) {
+                    var activeTextMode =
+                        arg.replaceFirst(activeTextRegex, "$1").toDouble().toInt()
+                    if (activeTextMode <1)
+                        activeTextMode = 1
+                    val activeText = activeEditorInstance.getActiveText(activeTextMode)
+                    arg = String.format(
+                        arg,
+                        activeEditorInstance.lastCommittedText,
+                        Rime.RimeGetInput(),
+                        activeText,
+                        activeText
+                    )
+                }
+
                 if (event.command == "liquid_keyboard") {
                     trime.selectLiquidKeyboard(arg)
                 } else if (event.command == "paste_by_char") {
