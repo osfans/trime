@@ -21,15 +21,15 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class ConfFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope() {
+class UserDataFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope() {
 
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.conf_preference)
+        addPreferencesFromResource(R.xml.user_data_preference)
         with(preferenceScreen) {
-            get<Preference>("conf_synchronize")?.setOnPreferenceClickListener {
+            get<Preference>("data_synchronize")?.setOnPreferenceClickListener {
                 val progress = ProgressDialog(context)
                 progress.setMessage(getString(R.string.sync_progress))
                 progress.setCancelable(false)
@@ -44,11 +44,11 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope() {
                 }
                 true
             }
-            get<Preference>("conf__synchronize_background")?.setOnPreferenceClickListener {
+            get<Preference>("data_synchronize_background")?.setOnPreferenceClickListener {
                 setBackgroundSyncSummary(context)
                 true
             }
-            get<Preference>("conf__reset")?.setOnPreferenceClickListener {
+            get<Preference>("data_reset")?.setOnPreferenceClickListener {
                 ResetAssetsDialog(context).show()
                 true
             }
@@ -73,8 +73,8 @@ class ConfFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope() {
         } else {
             var summary: String
             if (syncBgPref?.isChecked == true) {
-                val lastResult = prefs.conf.lastSyncStatus
-                val lastTime = prefs.conf.lastBackgroundSync
+                val lastResult = prefs.userData.lastSyncStatus
+                val lastTime = prefs.userData.lastBackgroundSync
                 summary = if (lastResult) {
                     context.getString(R.string.pref_sync_bg_success)
                 } else {

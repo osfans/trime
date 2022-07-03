@@ -10,17 +10,17 @@ import com.osfans.trime.ui.components.ColorPickerDialog
 import com.osfans.trime.ui.components.ThemePickerDialog
 import com.osfans.trime.ui.main.MainViewModel
 
-class LooksFragment : PreferenceFragmentCompat() {
+class ThemeColorFragment : PreferenceFragmentCompat() {
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.looks_preference)
+        addPreferencesFromResource(R.xml.theme_color_preference)
         with(preferenceScreen) {
-            get<Preference>("looks__selected_theme")?.setOnPreferenceClickListener {
+            get<Preference>("theme_selected_theme")?.setOnPreferenceClickListener {
                 ThemePickerDialog(context).show()
                 true
             }
-            get<Preference>("looks__selected_color")?.setOnPreferenceClickListener {
+            get<Preference>("theme_selected_color")?.setOnPreferenceClickListener {
                 ColorPickerDialog(context).show()
                 true
             }

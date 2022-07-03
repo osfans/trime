@@ -301,7 +301,7 @@ public class Trime extends LifecycleInputMethodService {
     }
     isWindowShown = false;
 
-    if (getPrefs().getConf().getSyncBackgroundEnabled()) {
+    if (getPrefs().getUserData().getSyncBackgroundEnabled()) {
       final Message msg = new Message();
       msg.obj = this;
       syncBackgroundHandler.sendMessageDelayed(msg, 5000); // 输入面板隐藏5秒后，开始后台同步

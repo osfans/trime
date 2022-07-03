@@ -4,12 +4,12 @@
 
     <PreferenceCategory android:title="@string/storage"
         app:iconSpaceReserved="false" >
-        <EditTextPreference android:key="conf__shared_data_dir"
+        <EditTextPreference android:key="data_shared_data_dir"
             app:iconSpaceReserved="false"
             android:title="@string/conf__shared_data_dir_title"
             app:useSimpleSummaryProvider="true"/>
 
-        <EditTextPreference android:key="conf__user_data_dir"
+        <EditTextPreference android:key="data_user_data_dir"
             app:iconSpaceReserved="false"
             android:title="@string/conf__user_data_dir_title"
             app:useSimpleSummaryProvider="true"/>
@@ -17,18 +17,18 @@
 
     <PreferenceCategory android:title="@string/maintenance"
         app:iconSpaceReserved="false" >
-        <Preference android:key="conf__synchronize"
+        <Preference android:key="data_synchronize"
             app:iconSpaceReserved="false"
             android:title="@string/conf__synchronize_title"
             android:summary="@string/conf__synchronize_summary"/>
 
-        <SwitchPreferenceCompat android:key="conf__synchronize_background"
+        <SwitchPreferenceCompat android:key="data_synchronize_background"
             app:iconSpaceReserved="false"
             android:title="@string/conf__synchronize_background_title"
             android:summary="@string/conf__synchronize_background_summary"
             android:persistent="true" />
 
-        <Preference android:key="conf__reset"
+        <Preference android:key="data_reset"
             app:iconSpaceReserved="false"
             android:title="@string/conf__reset_title"
             android:summary="@string/conf__reset_summary"/>

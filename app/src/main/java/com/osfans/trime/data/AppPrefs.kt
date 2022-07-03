@@ -28,10 +28,10 @@ class AppPrefs(
     private val cacheInt: HashMap<String, Int> = hashMapOf()
     private val cacheString: HashMap<String, String> = hashMapOf()
 
-    val general = General(this)
+    val internal = Internal(this)
     val keyboard = Keyboard(this)
-    val looks = Looks(this)
-    val conf = Configuration(this)
+    val looks = ThemeColor(this)
+    val userData = UserData(this)
     val other = Other(this)
 
     /**
@@ -131,8 +131,8 @@ class AppPrefs(
         try {
             applicationContext.get()?.let { context ->
                 PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
-                PreferenceManager.setDefaultValues(context, R.xml.looks_preference, true)
-                PreferenceManager.setDefaultValues(context, R.xml.conf_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.theme_color_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.user_data_preference, true)
                 PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
             }
         } catch (e: Exception) {
@@ -149,7 +149,7 @@ class AppPrefs(
         cacheString.clear()
     }
 
-    class General(private val prefs: AppPrefs) {
+    class Internal(private val prefs: AppPrefs) {
         companion object {
             const val LAST_VERSION_NAME = "general__last_version_name"
             const val PID = "general__pid"
@@ -167,7 +167,7 @@ class AppPrefs(
     }
 
     /**
-     *  Wrapper class of keyboard preferences.
+     *  Wrapper class of keyboard settings.
      */
     class Keyboard(private val prefs: AppPrefs) {
         companion object {
@@ -326,14 +326,14 @@ class AppPrefs(
     }
 
     /**
-     *  Wrapper class of keyboard appearance preferences.
+     *  Wrapper class of theme and color settings.
      */
-    class Looks(private val prefs: AppPrefs) {
+    class ThemeColor(private val prefs: AppPrefs) {
         companion object {
-            const val SELECTED_THEME = "looks__selected_theme"
-            const val SELECTED_COLOR = "looks__selected_color_scheme"
-            const val AUTO_DARK = "looks__auto_dark"
-            const val USE_MINI_KEYBOARD = "looks__use_mini_keyboard"
+            const val SELECTED_THEME = "theme_selected_theme"
+            const val SELECTED_COLOR = "theme_selected_color"
+            const val AUTO_DARK = "theme_auto_dark"
+            const val USE_MINI_KEYBOARD = "theme_use_mini_keyboard"
         }
         var selectedTheme: String
             get() = prefs.getPref(SELECTED_THEME, "trime")
@@ -350,15 +350,15 @@ class AppPrefs(
     }
 
     /**
-     *  Wrapper class of configuration settings.
+     *  Wrapper class of user data settings.
      */
-    class Configuration(private val prefs: AppPrefs) {
+    class UserData(private val prefs: AppPrefs) {
         companion object {
-            const val SHARED_DATA_DIR = "conf__shared_data_dir"
-            const val USER_DATA_DIR = "conf__user_data_dir"
-            const val SYNC_BACKGROUND_ENABLED = "conf__sync_background"
-            const val LAST_SYNC_STATUS = "conf__last_sync_status"
-            const val LAST_BACKGROUND_SYNC = "conf__last_background_sync"
+            const val SHARED_DATA_DIR = "data_shared_data_dir"
+            const val USER_DATA_DIR = "data_user_data_dir"
+            const val SYNC_BACKGROUND_ENABLED = "data_synchronize_background"
+            const val LAST_SYNC_STATUS = "data_last_sync_status"
+            const val LAST_BACKGROUND_SYNC = "data_last_background_sync"
             val EXTERNAL_PATH_PREFIX: String = appContext.getExternalFilesDir(null)!!.absolutePath
         }
         var sharedDataDir: String

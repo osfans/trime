@@ -9,14 +9,14 @@
         android:name="com.osfans.trime.ui.fragments.PrefFragment"
         android:label="PrefFragment" >
         <action
-            android:id="@+id/action_prefFragment_to_confFragment"
-            app:destination="@id/confFragment" />
+            android:id="@+id/action_prefFragment_to_userDataFragment"
+            app:destination="@id/userDataFragment" />
         <action
             android:id="@+id/action_prefFragment_to_keyboardFragment"
             app:destination="@id/keyboardFragment" />
         <action
-            android:id="@+id/action_prefFragment_to_looksFragment"
-            app:destination="@id/looksFragment" />
+            android:id="@+id/action_prefFragment_to_themeColorFragment"
+            app:destination="@id/themeColorFragment" />
         <action
             android:id="@+id/action_prefFragment_to_otherFragment"
             app:destination="@id/otherFragment" />
@@ -28,17 +28,17 @@
             app:destination="@id/aboutFragment" />
     </fragment>
     <fragment
-        android:id="@+id/confFragment"
-        android:name="com.osfans.trime.ui.fragments.ConfFragment"
-        android:label="ConfFragment" />
+        android:id="@+id/userDataFragment"
+        android:name="com.osfans.trime.ui.fragments.UserDataFragment"
+        android:label="UserDataFragment" />
     <fragment
         android:id="@+id/keyboardFragment"
         android:name="com.osfans.trime.ui.fragments.KeyboardFragment"
         android:label="KeyboardFragment" />
     <fragment
-        android:id="@+id/looksFragment"
-        android:name="com.osfans.trime.ui.fragments.LooksFragment"
-        android:label="LooksFragment" />
+        android:id="@+id/themeColorFragment"
+        android:name="com.osfans.trime.ui.fragments.ThemeColorFragment"
+        android:label="ThemeColorFragment" />
     <fragment
         android:id="@+id/otherFragment"
         android:name="com.osfans.trime.ui.fragments.OtherFragment"

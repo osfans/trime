@@ -68,8 +68,8 @@ public class Config {
 
   private static final AppPrefs appPrefs = AppPrefs.defaultInstance();
 
-  private static final String sharedDataDir = appPrefs.getConf().getSharedDataDir();
-  private static final String userDataDir = appPrefs.getConf().getUserDataDir();
+  private static final String sharedDataDir = appPrefs.getUserData().getSharedDataDir();
+  private static final String userDataDir = appPrefs.getUserData().getUserDataDir();
 
   public static synchronized Config get(Context context) {
     if (self == null) self = new Config(context);

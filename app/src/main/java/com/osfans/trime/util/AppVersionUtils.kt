@@ -14,9 +14,9 @@ object AppVersionUtils {
      */
     fun isDifferentVersion(prefs: AppPrefs): Boolean {
         val currentVersionName = BuildConfig.VERSION_NAME
-        val lastVersionName = prefs.general.lastVersionName
+        val lastVersionName = prefs.internal.lastVersionName
         return !currentVersionName.contentEquals(lastVersionName).also {
-            prefs.general.lastVersionName = currentVersionName
+            prefs.internal.lastVersionName = currentVersionName
         }
     }
 

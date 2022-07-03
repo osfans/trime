@@ -8,7 +8,7 @@ import java.io.File
 object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
 
-    val sharedDataDir = File(prefs.conf.sharedDataDir)
+    val sharedDataDir = File(prefs.userData.sharedDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
 
     sealed class Diff {
@@ -19,10 +19,10 @@ object DataManager {
 
     @JvmStatic
     fun getDataDir(child: String = ""): String {
-        return if (File(prefs.conf.sharedDataDir, child).exists()) {
-            File(prefs.conf.sharedDataDir, child).absolutePath
+        return if (File(prefs.userData.sharedDataDir, child).exists()) {
+            File(prefs.userData.sharedDataDir, child).absolutePath
         } else {
-            File(prefs.conf.userDataDir, child).absolutePath
+            File(prefs.userData.userDataDir, child).absolutePath
         }
     }
 
@@ -37,7 +37,7 @@ object DataManager {
     @JvmStatic
     fun sync() {
         val newHash = Const.buildGitHash
-        val oldHash = prefs.general.lastBuildGitHash
+        val oldHash = prefs.internal.lastBuildGitHash
 
         diff(oldHash, newHash).run {
             Timber.d("Diff: $this")

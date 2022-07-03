@@ -33,7 +33,7 @@ class PrefFragment : PreferenceFragmentCompat() {
                 true
             }
             get<Preference>("pref_user_data")?.setOnPreferenceClickListener {
-                findNavController().navigate(R.id.action_prefFragment_to_confFragment)
+                findNavController().navigate(R.id.action_prefFragment_to_userDataFragment)
                 true
             }
             get<Preference>("pref_keyboard")?.setOnPreferenceClickListener {
@@ -41,7 +41,7 @@ class PrefFragment : PreferenceFragmentCompat() {
                 true
             }
             get<Preference>("pref_theme_and_color")?.setOnPreferenceClickListener {
-                findNavController().navigate(R.id.action_prefFragment_to_looksFragment)
+                findNavController().navigate(R.id.action_prefFragment_to_themeColorFragment)
                 true
             }
             get<Preference>("pref_toolkit")?.setOnPreferenceClickListener {

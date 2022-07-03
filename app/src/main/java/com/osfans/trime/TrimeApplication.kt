@@ -41,11 +41,11 @@ class TrimeApplication : Application() {
             // record last pid for crash logs
             val appPrefs = AppPrefs.defaultInstance()
             val currentPid = Process.myPid()
-            appPrefs.general.pid.apply {
+            appPrefs.internal.pid.apply {
                 lastPid = this
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
             }
-            appPrefs.general.pid = currentPid
+            appPrefs.internal.pid = currentPid
         } catch (e: Exception) {
             e.fillInStackTrace()
             return
