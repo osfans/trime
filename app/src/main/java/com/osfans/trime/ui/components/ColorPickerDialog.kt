@@ -8,6 +8,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.Config
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.util.popup
 import timber.log.Timber
 
 /** 顯示配色方案列表
@@ -29,7 +30,7 @@ class ColorPickerDialog(
         val colorNames = config.getColorNames(colorKeys)
         checkedColorKey = colorKeys.binarySearch(colorScheme)
 
-        pickerDialog = AlertDialog.Builder(context, R.style.AlertDialogTheme).apply {
+        pickerDialog = AlertDialog.Builder(context, R.style.Theme_AppCompat_DayNight_Dialog_Alert).apply {
             setTitle(R.string.looks__selected_color_title)
             setCancelable(true)
             setNegativeButton(android.R.string.cancel, null)
@@ -54,15 +55,6 @@ class ColorPickerDialog(
 
     /** 调用该方法显示对话框 **/
     fun show() {
-        pickerDialog.window?.let { window ->
-            window.attributes.token = Trime.getServiceOrNull()?.window?.window?.decorView?.windowToken
-            window.attributes.type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
-            }
-            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
-        }
-        pickerDialog.show()
+        pickerDialog.popup()
     }
 }

@@ -16,28 +16,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.view.forEach
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.databinding.ActivityPrefBinding
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.RimeUtils
-import com.osfans.trime.util.createLoadingDialog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
+import com.osfans.trime.util.withLoadingDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import kotlinx.coroutines.withContext
 
 class PrefMainActivity :
     AppCompatActivity(),
-    ActivityCompat.OnRequestPermissionsResultCallback,
-    CoroutineScope by MainScope() {
+    ActivityCompat.OnRequestPermissionsResultCallback {
     private val viewModel: MainViewModel by viewModels()
     private val prefs get() = AppPrefs.defaultInstance()
 
@@ -112,7 +111,7 @@ class PrefMainActivity :
         if (requestCode == PERMISSION_REQUEST_EXTERNAL_STORAGE) {
             // Request for external storage permission
             if (grantResults.size == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                launch {
+                lifecycleScope.launch {
                     ToastUtils.showShort(R.string.external_storage_permission_granted)
                     delay(500)
                     RimeUtils.deploy(this@PrefMainActivity)
@@ -136,17 +135,13 @@ class PrefMainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.preference__menu_deploy -> {
-                val progressDialog = createLoadingDialog(this, R.string.deploy_progress)
-                progressDialog.show()
-                Trime.getServiceOrNull()?.initKeyboard()
-                launch {
-                    try {
-                        RimeUtils.deploy(this@PrefMainActivity)
-                    } catch (ex: Exception) {
-                        Timber.e(ex, "Deploy Exception")
-                    } finally {
-                        progressDialog.dismiss()
+                lifecycleScope.withLoadingDialog(this, 200L, R.string.deploy_progress
+                ) {
+                    withContext(Dispatchers.IO) {
+                        Rime.destroy()
+                        Rime.get(this@PrefMainActivity, true)
                     }
+                    ToastUtils.showLong(R.string.deploy_finish)
                 }
                 true
             }

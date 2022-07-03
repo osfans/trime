@@ -1,27 +1,24 @@
-@file:Suppress("DEPRECATION")
-
 package com.osfans.trime.ui.fragments
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import com.osfans.trime.R
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ui.components.ResetAssetsDialog
 import com.osfans.trime.ui.main.MainViewModel
-import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.formatDateTime
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import timber.log.Timber
+import com.osfans.trime.util.withLoadingDialog
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
-class UserDataFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope() {
+class UserDataFragment : PreferenceFragmentCompat() {
 
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()
@@ -30,16 +27,11 @@ class UserDataFragment : PreferenceFragmentCompat(), CoroutineScope by MainScope
         addPreferencesFromResource(R.xml.user_data_preference)
         with(preferenceScreen) {
             get<Preference>("data_synchronize")?.setOnPreferenceClickListener {
-                val progress = ProgressDialog(context)
-                progress.setMessage(getString(R.string.sync_progress))
-                progress.setCancelable(false)
-                launch {
-                    try {
-                        RimeUtils.sync(requireContext())
-                    } catch (ex: Exception) {
-                        Timber.e(ex, "Sync Exception")
-                    } finally {
-                        progress.dismiss()
+                lifecycleScope.withLoadingDialog(context, 200L, R.string.sync_progress) {
+                    withContext(Dispatchers.IO) {
+                        Rime.sync_user_data()
+                        Rime.destroy()
+                        Rime.get(context, true)
                     }
                 }
                 true

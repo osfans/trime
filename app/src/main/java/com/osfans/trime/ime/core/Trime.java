@@ -1281,7 +1281,7 @@ public class Trime extends LifecycleInputMethodService {
 
   public void showOptionsDialog() {
     final AlertDialog.Builder dialogBuilder =
-        new AlertDialog.Builder(this, R.style.AlertDialogTheme);
+        new AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert);
     dialogBuilder
         .setTitle(R.string.trime_app_name)
         .setIcon(R.mipmap.ic_app_icon)

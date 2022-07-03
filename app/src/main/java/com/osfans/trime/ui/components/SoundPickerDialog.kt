@@ -1,15 +1,11 @@
 package com.osfans.trime.ui.components
 
-import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.Context
-import android.os.Build
-import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.data.Config
-import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.util.createLoadingDialog
+import com.osfans.trime.util.ProgressBarDialogIndeterminate
+import com.osfans.trime.util.popup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -27,7 +23,7 @@ class SoundPickerDialog(
     private var checkedId: Int = 0
     val pickerDialog: AlertDialog
 
-    private val progressDialog: ProgressDialog
+    private val progressDialog: AlertDialog
 
     init {
         soundPackageFiles = Config.getSoundPackages()
@@ -37,7 +33,7 @@ class SoundPickerDialog(
         soundPackageNames = Config.getYamlFileNames(soundPackageFiles)
 
         // Init picker
-        pickerDialog = AlertDialog.Builder(context, R.style.AlertDialogTheme).apply {
+        pickerDialog = AlertDialog.Builder(context, R.style.Theme_AppCompat_DayNight_Dialog_Alert).apply {
             setTitle(R.string.keyboard__key_sound_package_title)
             setCancelable(true)
             setNegativeButton(android.R.string.cancel, null)
@@ -47,20 +43,7 @@ class SoundPickerDialog(
             ) { _, id -> checkedId = id }
         }.create()
         // Init progress dialog
-        progressDialog = createLoadingDialog(context, R.string.sound_progress)
-    }
-
-    private fun appendDialogParams(dialog: Dialog) {
-        dialog.window?.let { window ->
-            window.attributes.token =
-                Trime.getServiceOrNull()?.window?.window?.decorView?.windowToken
-            window.attributes.type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
-            }
-            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
-        }
+        progressDialog = context.ProgressBarDialogIndeterminate(R.string.sound_progress).create()
     }
 
     private fun setSound() {
@@ -70,8 +53,7 @@ class SoundPickerDialog(
 
     /** 调用该方法显示对话框 **/
     fun show() {
-        appendDialogParams(pickerDialog)
-        pickerDialog.show()
+        pickerDialog.popup()
     }
 
     private fun execute() = launch {
@@ -81,8 +63,7 @@ class SoundPickerDialog(
     }
 
     private fun onPreExecute() {
-        appendDialogParams(progressDialog)
-        progressDialog.show()
+        progressDialog.popup()
     }
 
     private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
