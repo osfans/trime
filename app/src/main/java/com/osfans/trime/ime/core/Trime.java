@@ -905,7 +905,7 @@ public class Trime extends LifecycleInputMethodService {
 
   public void commitTextByChar(String text) {
     for (int i = 0; i < text.length(); i++) {
-      if (!activeEditorInstance.commitText(text.substring(i, i + 1))) break;
+      if (!activeEditorInstance.commitText(text.substring(i, i + 1), false)) break;
     }
   }
 

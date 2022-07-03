@@ -34,6 +34,7 @@ object ShortcutUtils {
             "broadcast" -> context.sendBroadcast(Intent(option))
             "clipboard" -> return pasteFromClipboard(context)
             "date" -> return getDate(option)
+            "commit" -> return option
             "run" -> startIntent(option)
             "share_text" -> Trime.getService().shareText()
             "liquid_keyboard" -> Trime.getService().selectLiquidKeyboard(option)
