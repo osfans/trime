@@ -11,6 +11,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get branch name
+        id: vars
+        run: |
+          echo ${GITHUB_REF#refs/*/}
+          echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
+
       - name: Calculate JNI cache hash
         id: cache-hash
         run: script/cache-hash.sh

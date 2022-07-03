@@ -128,7 +128,10 @@ def getCommitInfo(){
 }
 
 def getGitBranch(){
-    ' git symbolic-ref --short -q HEAD'.execute().text.trim()
+    def text = 'git symbolic-ref --short -q HEAD'.execute().text.trim()
+    if(text.length()<1)
+        return System.getenv("CI_BRANCH")
+    return text
 }
 
 def getGitVersion() {
