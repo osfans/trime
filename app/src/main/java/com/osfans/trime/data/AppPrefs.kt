@@ -373,8 +373,8 @@ class AppPrefs(
         var lastSyncStatus: Boolean
             get() = prefs.getPref(LAST_SYNC_STATUS, false)
             set(v) = prefs.setPref(LAST_SYNC_STATUS, v)
-        var lastBackgroundSync: Long
-            get() = prefs.getPref(LAST_BACKGROUND_SYNC, 0L)
+        var lastBackgroundSync: String
+            get() = prefs.getPref(LAST_BACKGROUND_SYNC, "")
             set(v) = prefs.setPref(LAST_BACKGROUND_SYNC, v)
     }
 

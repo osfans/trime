@@ -124,7 +124,7 @@ object ShortcutUtils {
 
     fun syncInBackground(context: Context) {
         val prefs = AppPrefs.defaultInstance()
-        prefs.userData.lastBackgroundSync = Date().time
+        prefs.userData.lastBackgroundSync = Date().time.toString()
         prefs.userData.lastSyncStatus = Rime.syncUserData(context)
     }
 

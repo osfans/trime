@@ -1,6 +1,5 @@
 package com.osfans.trime.ui.fragments
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -15,8 +14,8 @@ import com.osfans.trime.ui.components.ResetAssetsDialog
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.withLoadingDialog
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UserDataFragment : PreferenceFragmentCompat() {
 
@@ -26,7 +25,7 @@ class UserDataFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.user_data_preference)
         with(preferenceScreen) {
-            get<Preference>("data_synchronize")?.setOnPreferenceClickListener {
+            get<Preference>("data_sync_user_data")?.setOnPreferenceClickListener {
                 lifecycleScope.withLoadingDialog(context, 200L, R.string.sync_progress) {
                     withContext(Dispatchers.IO) {
                         Rime.sync_user_data()
@@ -36,9 +35,25 @@ class UserDataFragment : PreferenceFragmentCompat() {
                 }
                 true
             }
-            get<Preference>("data_synchronize_background")?.setOnPreferenceClickListener {
-                setBackgroundSyncSummary(context)
-                true
+            get<SwitchPreferenceCompat>("data_sync_in_background")?.apply {
+                val lastBackgroundSync = prefs.userData.lastBackgroundSync
+                summaryOn =
+                    if (lastBackgroundSync.isBlank()) {
+                        context.getString(R.string.data_never_sync_in_background)
+                    } else {
+                        context.getString(
+                            R.string.data_last_sync_in_background,
+                            formatDateTime(lastBackgroundSync.toLong()),
+                            context.getString(
+                                if (prefs.userData.lastSyncStatus) {
+                                    R.string.success
+                                } else {
+                                    R.string.failure
+                                }
+                            )
+                        )
+                    }
+                summaryOff = context.getString(R.string.data_enable_syncing_in_background)
             }
             get<Preference>("data_reset")?.setOnPreferenceClickListener {
                 ResetAssetsDialog(context).show()
@@ -51,36 +66,5 @@ class UserDataFragment : PreferenceFragmentCompat() {
         super.onResume()
         viewModel.setToolbarTitle(getString(R.string.pref_user_data))
         viewModel.disableTopOptionsMenu()
-        setBackgroundSyncSummary(context)
-    }
-
-    private fun setBackgroundSyncSummary(context: Context?) {
-        val syncBgPref = findPreference<SwitchPreferenceCompat>("pref_sync_bg")
-        if (context == null) {
-            if (syncBgPref?.isChecked == true) {
-                syncBgPref.setSummaryOn(R.string.pref_sync_bg_never)
-            } else {
-                syncBgPref?.setSummaryOff(R.string.conf__synchronize_background_summary)
-            }
-        } else {
-            var summary: String
-            if (syncBgPref?.isChecked == true) {
-                val lastResult = prefs.userData.lastSyncStatus
-                val lastTime = prefs.userData.lastBackgroundSync
-                summary = if (lastResult) {
-                    context.getString(R.string.pref_sync_bg_success)
-                } else {
-                    context.getString(R.string.pref_sync_bg_failure)
-                }
-                summary = if (lastTime == 0L) {
-                    context.getString(R.string.conf__synchronize_background_summary)
-                } else {
-                    summary.format(formatDateTime(lastTime))
-                }
-                syncBgPref.summaryOn = summary
-            } else {
-                syncBgPref?.setSummaryOff(R.string.conf__synchronize_background_summary)
-            }
-        }
     }
 }

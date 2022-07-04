@@ -53,8 +53,8 @@
     <string name="pref_schemas_summary">Select Installed Schemas</string>
     <string name="looks__selected_color_title">Colors</string>
     <string name="looks__selected_color_summary">Select Desired Color for Keyboard</string>
-    <string name="conf__reset_title">Reset</string>
-    <string name="conf__reset_summary">Use Default Settings to Replace the contents in shared directory</string>
+    <string name="data_reset">Reset</string>
+    <string name="data_reset_summary">Overwrite the same files in shared directory with default built-in assets</string>
     <string name="settings__keyboard_preferences_title">Preferences</string>
     <string name="keyboard__key_sound_title">Sound on keypress</string>
     <string name="keyboard__key_sound_volume_title">Sound volume on key press</string>
@@ -86,8 +86,8 @@
     <string name="keyboard__soft_cursor_title">Use soft cursor(^) in composition</string>
     <string name="pref_deploy">Deploy</string>
     <string name="pref_deploy_summary">Gotta Deploy after Modifying Settings </string>
-    <string name="conf__synchronize_title">Synchronize</string>
-    <string name="conf__synchronize_summary">Synchronize User Dictionary to sync directory</string>
+    <string name="data_sync_user_data">Synchronize</string>
+    <string name="data_sync_user_data_summary">Synchronize files in user dictionary to sync directory</string>
     <string name="reset_success">Reset Succeeded!</string>
     <string name="reset_failure">Reset Failed!</string>
     <string name="deploy_progress">Deploying…</string>
@@ -101,13 +101,12 @@
     <string name="pref_other">Others</string>
     <string name="other__show_status_bar_icon_title">Show icon in notification bar</string>
     <string name="other__destroy_on_quit_title">Free memory on quit</string>
-    <string name="conf__shared_data_dir_title">Shared directory</string>
-    <string name="conf__user_data_dir_title">User directory</string>
-    <string name="conf__synchronize_background_title">Synchronize background</string>
-    <string name="pref_sync_bg_success">Last background synchronized successfully at %s</string>
-    <string name="pref_sync_bg_failure">Last background synchronized failed at %s</string>
-    <string name="pref_sync_bg_never">Never synchronized background</string>
-    <string name="conf__synchronize_background_summary">Click to enable</string>
+    <string name="data_shared_data_dir">Shared directory</string>
+    <string name="data_user_data_dir">User directory</string>
+    <string name="data_sync_in_background">Sync in background</string>
+    <string name="data_last_sync_in_background">Last sync in background: %s\nStatus: %s</string>
+    <string name="data_never_sync_in_background">Never synced in the background</string>
+    <string name="data_enable_syncing_in_background">Click to enable</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
     <string name="pref_keyboard__function">View</string>
@@ -252,4 +251,6 @@
     <string name="storage">Storage</string>
     <string name="maintenance">Maintenance</string>
     <string name="loading">Loading</string>
+    <string name="success">success</string>
+    <string name="failure">failure</string>
 </resources>

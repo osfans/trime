@@ -50,8 +50,6 @@
     <string name="pref_schemas_summary">从已安装的方案中选择方案</string>
     <string name="looks__selected_color_title">配色</string>
     <string name="looks__selected_color_summary">选取键盘配色</string>
-    <string name="conf__reset_title">恢复默认设置</string>
-    <string name="conf__reset_summary">使用默认设置覆盖共享文件夹下同名文件</string>
     <string name="settings__keyboard_preferences_title">偏好设置</string>
     <string name="keyboard__key_sound_title">按键声音</string>
     <string name="keyboard__key_sound_volume_title">按键音量</string>
@@ -83,8 +81,8 @@
     <string name="keyboard__soft_cursor_title">悬浮窗编码区使用插入符号(^)</string>
     <string name="pref_deploy">部署</string>
     <string name="pref_deploy_summary">修改设置后需要再次部署同文输入法平台</string>
-    <string name="conf__synchronize_title">同步</string>
-    <string name="conf__synchronize_summary">同步用户字典至sync文件夹</string>
+    <string name="data_sync_user_data">同步</string>
+    <string name="data_sync_user_data_summary">同步用户文件夹下的文件至 sync 文件夹</string>
     <string name="reset_success">重置成功</string>
     <string name="reset_failure">重置失败</string>
     <string name="deploy_progress">正在部署…</string>
@@ -100,13 +98,10 @@
     <string name="other__destroy_on_quit_title">退出时清除缓存</string>
     <string name="pref_themes_name_tongwenfeng">同文风</string>
     <string name="pref_themes_name_trime">默认</string>
-    <string name="conf__shared_data_dir_title">共享文件夹</string>
-    <string name="conf__user_data_dir_title">用户文件夹</string>
-    <string name="conf__synchronize_background_title">后台同步</string>
-    <string name="pref_sync_bg_success">上次同步于 %s，成功</string>
-    <string name="pref_sync_bg_failure">上次同步于 %s，失败</string>
-    <string name="pref_sync_bg_never">后台同步未运行</string>
-    <string name="conf__synchronize_background_summary">点击以开启后台同步</string>
+    <string name="data_shared_data_dir">共享文件夹</string>
+    <string name="data_user_data_dir">用户文件夹</string>
+    <string name="data_sync_in_background">后台同步</string>
+    <string name="data_enable_syncing_in_background">点击以开启后台同步</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
     <string name="pref_keyboard__effect">按键效果</string>
@@ -245,4 +240,13 @@
     <string name="pref_theme_and_color">主题与配色</string>
     <string name="pref_user_data">用户数据</string>
     <string name="pref_user_data_summary">用于管理您的数据的设置</string>
+    <string name="data_never_sync_in_background">从未在后台同步过</string>
+    <string name="storage">存储</string>
+    <string name="maintenance">维护</string>
+    <string name="loading">正在加载</string>
+    <string name="data_reset">恢复默认设置</string>
+    <string name="data_reset_summary">用默认的内置配置覆盖共享目录中的相同文件</string>
+    <string name="data_last_sync_in_background">上次后台同步时间：%s\n状态：%s</string>
+    <string name="success">成功</string>
+    <string name="failure">失败</string>
 </resources>

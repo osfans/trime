@@ -50,7 +50,7 @@ class ResetAssetsDialog(private val context: Context) :
     /** 彈出對話框 */
     fun show() {
         AlertDialog.Builder(context)
-            .setTitle(R.string.conf__reset_title)
+            .setTitle(R.string.data_reset)
             .setNegativeButton(android.R.string.cancel, null)
             .setMultiChoiceItems(
                 assets, checkedList
