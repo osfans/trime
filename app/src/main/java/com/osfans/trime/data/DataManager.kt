@@ -9,6 +9,7 @@ object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
 
     val sharedDataDir = File(prefs.userData.sharedDataDir)
+    val userDataDir = File(prefs.userData.userDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
 
     sealed class Diff {
