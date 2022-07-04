@@ -135,7 +135,8 @@ class PrefMainActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.preference__menu_deploy -> {
-                lifecycleScope.withLoadingDialog(this, 200L, R.string.deploy_progress
+                lifecycleScope.withLoadingDialog(
+                    this, 200L, R.string.deploy_progress
                 ) {
                     withContext(Dispatchers.IO) {
                         Rime.destroy()

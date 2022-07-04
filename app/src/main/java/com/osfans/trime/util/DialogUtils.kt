@@ -22,26 +22,30 @@ import kotlinx.coroutines.launch
 fun Context.ProgressBarDialogIndeterminate(@StringRes titleId: Int): AlertDialog.Builder {
     return AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
         .setTitle(titleId)
-        .setView(LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            addView(
-                ProgressBar(this@ProgressBarDialogIndeterminate,
-                null, android.R.attr.progressBarStyleHorizontal).apply {
-                    isIndeterminate = true
-                },
-                ViewGroup.MarginLayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    val verticalMargin = SizeUtils.dp2px(26F)
-                    val horizontalMargin = SizeUtils.dp2px(20F)
-                    topMargin = horizontalMargin
-                    bottomMargin = horizontalMargin
-                    leftMargin = verticalMargin
-                    rightMargin = verticalMargin
-                }
-            )
-        })
+        .setView(
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(
+                    ProgressBar(
+                        this@ProgressBarDialogIndeterminate,
+                        null, android.R.attr.progressBarStyleHorizontal
+                    ).apply {
+                        isIndeterminate = true
+                    },
+                    ViewGroup.MarginLayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        val verticalMargin = SizeUtils.dp2px(26F)
+                        val horizontalMargin = SizeUtils.dp2px(20F)
+                        topMargin = horizontalMargin
+                        bottomMargin = horizontalMargin
+                        leftMargin = verticalMargin
+                        rightMargin = verticalMargin
+                    }
+                )
+            }
+        )
         .setCancelable(false)
 }
 
