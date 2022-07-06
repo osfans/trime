@@ -8,8 +8,8 @@ import java.io.File
 object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
 
-    val sharedDataDir = File(prefs.userData.sharedDataDir)
-    val userDataDir = File(prefs.userData.userDataDir)
+    val sharedDataDir = File(prefs.profile.sharedDataDir)
+    val userDataDir = File(prefs.profile.userDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
 
     sealed class Diff {
@@ -20,10 +20,10 @@ object DataManager {
 
     @JvmStatic
     fun getDataDir(child: String = ""): String {
-        return if (File(prefs.userData.sharedDataDir, child).exists()) {
-            File(prefs.userData.sharedDataDir, child).absolutePath
+        return if (File(prefs.profile.sharedDataDir, child).exists()) {
+            File(prefs.profile.sharedDataDir, child).absolutePath
         } else {
-            File(prefs.userData.userDataDir, child).absolutePath
+            File(prefs.profile.userDataDir, child).absolutePath
         }
     }
 

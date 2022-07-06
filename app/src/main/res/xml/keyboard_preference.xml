@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="pref_keyboard"
-    android:title="@string/settings__keyboard_preferences_title">
+    android:title="@string/pref_keyboard">
 
     <PreferenceCategory
         app:iconSpaceReserved="false"

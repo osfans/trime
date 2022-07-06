@@ -301,7 +301,7 @@ public class Trime extends LifecycleInputMethodService {
     }
     isWindowShown = false;
 
-    if (getPrefs().getUserData().getSyncBackgroundEnabled()) {
+    if (getPrefs().getProfile().getSyncBackgroundEnabled()) {
       final Message msg = new Message();
       msg.obj = this;
       syncBackgroundHandler.sendMessageDelayed(msg, 5000); // 输入面板隐藏5秒后，开始后台同步
@@ -1305,7 +1305,7 @@ public class Trime extends LifecycleInputMethodService {
     } else {
       dialogBuilder
           .setNegativeButton(
-              R.string.pref_schemas,
+              R.string.pref_select_schemas,
               (dialog, which) -> {
                 showSchemaDialog();
                 dialog.dismiss();

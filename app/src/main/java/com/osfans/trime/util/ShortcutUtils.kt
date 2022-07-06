@@ -124,8 +124,8 @@ object ShortcutUtils {
 
     fun syncInBackground(context: Context) {
         val prefs = AppPrefs.defaultInstance()
-        prefs.userData.lastBackgroundSync = Date().time.toString()
-        prefs.userData.lastSyncStatus = Rime.syncUserData(context)
+        prefs.profile.lastBackgroundSync = Date().time.toString()
+        prefs.profile.lastSyncStatus = Rime.syncUserData(context)
     }
 
     fun openCategory(keyCode: Int): Boolean {

@@ -58,7 +58,7 @@ public class Sound {
     Map<String, ?> m = ConfigGetter.loadMap(soundPackageName + ".sound", "");
     if (m != null) {
       String path =
-          appPrefs.getUserData().getUserDataDir() + File.separator + "sound" + File.separator;
+          appPrefs.getProfile().getUserDataDir() + File.separator + "sound" + File.separator;
       if (m.containsKey("folder")) path = path + m.get("folder") + File.separator;
 
       if (m.containsKey("sound")) {

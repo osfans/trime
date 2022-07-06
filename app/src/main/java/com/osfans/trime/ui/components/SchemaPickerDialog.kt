@@ -36,7 +36,7 @@ class SchemaPickerDialog(
 
     private fun buildAndShowDialog() {
         val picker = AlertDialog.Builder(context, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
-            .setTitle(R.string.pref_schemas)
+            .setTitle(R.string.pref_select_schemas)
             .setNegativeButton(android.R.string.cancel, null)
         if (availableSchemaIds.isEmpty()) {
             picker.setMessage(R.string.no_schemas)

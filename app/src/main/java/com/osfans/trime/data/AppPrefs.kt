@@ -5,10 +5,10 @@ import android.content.SharedPreferences
 import android.os.Build
 import androidx.core.os.UserManagerCompat
 import androidx.preference.PreferenceManager
+import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
-import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
 
 /**
@@ -31,7 +31,7 @@ class AppPrefs(
     val internal = Internal(this)
     val keyboard = Keyboard(this)
     val looks = ThemeColor(this)
-    val userData = UserData(this)
+    val profile = Profile(this)
     val other = Other(this)
 
     /**
@@ -132,7 +132,7 @@ class AppPrefs(
             applicationContext.get()?.let { context ->
                 PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
                 PreferenceManager.setDefaultValues(context, R.xml.theme_color_preference, true)
-                PreferenceManager.setDefaultValues(context, R.xml.user_data_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.profile_preference, true)
                 PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
             }
         } catch (e: Exception) {
@@ -350,16 +350,16 @@ class AppPrefs(
     }
 
     /**
-     *  Wrapper class of user data settings.
+     *  Wrapper class of profile settings.
      */
-    class UserData(private val prefs: AppPrefs) {
+    class Profile(private val prefs: AppPrefs) {
         companion object {
-            const val SHARED_DATA_DIR = "data_shared_data_dir"
-            const val USER_DATA_DIR = "data_user_data_dir"
-            const val SYNC_BACKGROUND_ENABLED = "data_synchronize_background"
-            const val LAST_SYNC_STATUS = "data_last_sync_status"
-            const val LAST_BACKGROUND_SYNC = "data_last_background_sync"
-            val EXTERNAL_PATH_PREFIX: String = appContext.getExternalFilesDir(null)!!.absolutePath
+            const val SHARED_DATA_DIR = "profile_shared_data_dir"
+            const val USER_DATA_DIR = "profile_user_data_dir"
+            const val SYNC_BACKGROUND_ENABLED = "profile_sync_in_background"
+            const val LAST_SYNC_STATUS = "profile_last_sync_status"
+            const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
+            val EXTERNAL_PATH_PREFIX: String = PathUtils.getExternalStoragePath()
         }
         var sharedDataDir: String
             get() = prefs.getPref(SHARED_DATA_DIR, "$EXTERNAL_PATH_PREFIX/rime")

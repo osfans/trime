@@ -342,8 +342,8 @@ public class Rime {
     Timber.d(methodName);
     mOnMessage = false;
     final AppPrefs appPrefs = AppPrefs.defaultInstance();
-    final String sharedDataDir = appPrefs.getUserData().getSharedDataDir();
-    final String userDataDir = appPrefs.getUserData().getUserDataDir();
+    final String sharedDataDir = appPrefs.getProfile().getSharedDataDir();
+    final String userDataDir = appPrefs.getProfile().getUserDataDir();
 
     Timber.d(methodName + "setup");
     // Initialize librime APIs

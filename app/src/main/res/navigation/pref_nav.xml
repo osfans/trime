@@ -29,7 +29,7 @@
     </fragment>
     <fragment
         android:id="@+id/userDataFragment"
-        android:name="com.osfans.trime.ui.fragments.UserDataFragment"
+        android:name="com.osfans.trime.ui.fragments.ProfileFragment"
         android:label="UserDataFragment" />
     <fragment
         android:id="@+id/keyboardFragment"

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/storage"
+        app:iconSpaceReserved="false" >
+        <EditTextPreference android:key="profile_shared_data_dir"
+            app:iconSpaceReserved="false"
+            android:title="@string/profile_shared_data_dir"
+            android:defaultValue="/storage/emulated/0/rime"
+            app:persistent="true"
+            app:useSimpleSummaryProvider="true"/>
+
+        <EditTextPreference android:key="profile_user_data_dir"
+            app:iconSpaceReserved="false"
+            android:title="@string/profile_user_data_dir"
+            android:defaultValue="/storage/emulated/0/rime"
+            app:persistent="true"
+            app:useSimpleSummaryProvider="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/maintenance"
+        app:iconSpaceReserved="false" >
+        <Preference android:key="profile_sync_user_data"
+            app:iconSpaceReserved="false"
+            android:title="@string/profile_sync_user_data"
+            android:summary="@string/profile_sync_user_data_summary"/>
+
+        <SwitchPreferenceCompat android:key="profile_sync_in_background"
+            app:iconSpaceReserved="false"
+            android:title="@string/profile_sync_in_background"
+            android:persistent="true" />
+
+        <Preference android:key="profile_reset"
+            app:iconSpaceReserved="false"
+            android:title="@string/profile_reset"
+            android:summary="@string/profile_reset_summary"/>
+    </PreferenceCategory>
+</PreferenceScreen>

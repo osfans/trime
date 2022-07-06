@@ -24,14 +24,14 @@
     android:title="@string/trime_app_name">
 
     <Preference android:key="pref_schemas"
-        android:title="@string/pref_schemas"
+        android:title="@string/pref_select_schemas"
         app:icon="@drawable/ic_pref_schema"
-        android:summary="@string/pref_schemas_summary"/>
+        android:summary="@string/pref_select_schemas_summary"/>
 
     <Preference android:key="pref_user_data"
-        android:title="@string/pref_user_data"
+        android:title="@string/pref_profile"
         app:icon="@drawable/ic_baseline_snippet_folder_24"
-        android:summary="@string/pref_user_data_summary"/>
+        android:summary="@string/pref_profile_summary"/>
 
     <Preference android:key="pref_keyboard"
         android:title="@string/pref_keyboard"
