@@ -24,44 +24,29 @@
     android:title="@string/trime_app_name">
 
     <Preference android:key="pref_schemas"
-        android:order="4"
         android:title="@string/pref_schemas"
         app:icon="@drawable/ic_pref_schema"
         android:summary="@string/pref_schemas_summary"/>
 
+    <Preference android:key="pref_user_data"
+        android:title="@string/pref_user_data"
+        app:icon="@drawable/ic_baseline_snippet_folder_24"
+        android:summary="@string/pref_user_data_summary"/>
+
     <Preference android:key="pref_keyboard"
-        android:order="5"
-        android:title="@string/settings__keyboard_preferences_title"
-        app:icon="@drawable/ic_baseline_keyboard_24"
-        android:fragment="com.osfans.trime.ui.fragments.KeyboardFragment"/>
+        android:title="@string/pref_keyboard"
+        app:icon="@drawable/ic_baseline_keyboard_24" />
 
-    <Preference android:key="pref_keyboard_appearance"
-        android:order="6"
-        android:title="@string/pref_keyboard_appearance"
-        app:icon="@drawable/ic_pref_theme_color"
-        android:fragment="com.osfans.trime.ui.fragments.LooksFragment"/>
+    <Preference android:key="pref_theme_and_color"
+        android:title="@string/pref_theme_and_color"
+        app:icon="@drawable/ic_pref_theme_color" />
 
-    <Preference android:key="pref_input"
-        android:order="8"
-        android:title="@string/settings__configuration_title"
-        app:icon="@drawable/ic_baseline_settings_24"
-        android:fragment="com.osfans.trime.ui.fragments.ConfFragment"/>
+    <Preference android:key="pref_toolkit"
+        android:title="@string/pref_toolkit"
+        app:icon="@drawable/ic_iconpark_toolkit_24" />
 
-    <!-- <Preference android:key="pref_deploy" android:order="16"
-        android:title="@string/pref_deploy" android:summary="@string/pref_deploy_summary"/> -->
-
-    <Preference android:key="pref_other"
-        android:order="17"
+    <Preference android:key="pref_others"
         android:title="@string/pref_other"
-        app:icon="@drawable/ic_pref_other"
-        android:fragment="com.osfans.trime.ui.fragments.OtherFragment"/>
-
-    <!-- <PreferenceScreen android:key="pref_help" android:order="32" android:title="@string/pref_help">
-
-    </PreferenceScreen> -->
-
-    <!-- <PreferenceScreen android:key="pref_about" android:order="64" android:title="@string/pref_about">
-
-    </PreferenceScreen> -->
+        app:icon="@drawable/ic_pref_other" />
 
 </PreferenceScreen>

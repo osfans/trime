@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/pref_nav"
+    app:startDestination="@id/prefFragment">
+
+    <fragment
+        android:id="@+id/prefFragment"
+        android:name="com.osfans.trime.ui.fragments.PrefFragment"
+        android:label="PrefFragment" >
+        <action
+            android:id="@+id/action_prefFragment_to_confFragment"
+            app:destination="@id/confFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_keyboardFragment"
+            app:destination="@id/keyboardFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_looksFragment"
+            app:destination="@id/looksFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_otherFragment"
+            app:destination="@id/otherFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_toolkitFragment"
+            app:destination="@id/toolkitFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/confFragment"
+        android:name="com.osfans.trime.ui.fragments.ConfFragment"
+        android:label="ConfFragment" />
+    <fragment
+        android:id="@+id/keyboardFragment"
+        android:name="com.osfans.trime.ui.fragments.KeyboardFragment"
+        android:label="KeyboardFragment" />
+    <fragment
+        android:id="@+id/looksFragment"
+        android:name="com.osfans.trime.ui.fragments.LooksFragment"
+        android:label="LooksFragment" />
+    <fragment
+        android:id="@+id/otherFragment"
+        android:name="com.osfans.trime.ui.fragments.OtherFragment"
+        android:label="OtherFragment" />
+    <fragment
+        android:id="@+id/toolkitFragment"
+        android:name="com.osfans.trime.ui.fragments.ToolkitFragment"
+        android:label="ToolkitFragment" />
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.osfans.trime.ui.fragments.AboutFragment"
+        android:label="AboutFragment" />
+</navigation>

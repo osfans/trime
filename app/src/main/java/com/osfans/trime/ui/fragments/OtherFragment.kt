@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.Menu
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.forEach
 import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
@@ -20,7 +18,7 @@ import com.osfans.trime.ui.main.MainViewModel
 class OtherFragment :
     PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    private val viewModel : MainViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.other_preference)
@@ -67,6 +65,7 @@ class OtherFragment :
 
     override fun onResume() {
         super.onResume()
+        viewModel.setToolbarTitle(getString(R.string.pref_other))
         viewModel.disableTopOptionsMenu()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }

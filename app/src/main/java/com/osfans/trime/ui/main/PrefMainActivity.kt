@@ -16,16 +16,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.view.forEach
-import androidx.fragment.app.Fragment
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.databinding.PrefActivityBinding
+import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.ui.fragments.PrefFragment
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.createLoadingDialog
@@ -35,18 +34,26 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-internal const val FRAGMENT_TAG = "FRAGMENT_TAG"
-const val PERMISSION_REQUEST_EXTERNAL_STORAGE = 0
-
 class PrefMainActivity :
     AppCompatActivity(),
-    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     ActivityCompat.OnRequestPermissionsResultCallback,
     CoroutineScope by MainScope() {
-    private val viewModel : MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
     private val prefs get() = AppPrefs.defaultInstance()
 
-    lateinit var binding: PrefActivityBinding
+    private lateinit var navHostFragment: NavHostFragment
+
+    private fun onNavigateUpListener(): Boolean {
+        val navController = navHostFragment.navController
+        return when (navController.currentDestination?.id) {
+            R.id.prefFragment -> {
+                // "minimize" the app, don't exit activity
+                moveTaskToBack(false)
+                true
+            }
+            else -> onSupportNavigateUp()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs.sync()
@@ -59,7 +66,7 @@ class PrefMainActivity :
         AppCompatDelegate.setDefaultNightMode(uiMode)
 
         super.onCreate(savedInstanceState)
-        binding = PrefActivityBinding.inflate(layoutInflater)
+        val binding = ActivityPrefBinding.inflate(layoutInflater)
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             BarUtils.setNavBarColor(
                 this,
@@ -73,7 +80,13 @@ class PrefMainActivity :
             )
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar.toolbar)
-
+        val appBarConfiguration = AppBarConfiguration(
+            topLevelDestinationIds = setOf(),
+            fallbackOnNavigateUpListener = ::onNavigateUpListener
+        )
+        navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        binding.toolbar.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
         viewModel.toolbarTitle.observe(this) {
             binding.toolbar.toolbar.title = it
         }
@@ -83,65 +96,12 @@ class PrefMainActivity :
             }
         }
 
-        if (savedInstanceState == null) {
-            loadFragment(PrefFragment())
-        } else {
-            title = savedInstanceState.getCharSequence(FRAGMENT_TAG)
-        }
-        supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                setTitle(R.string.trime_app_name)
-            }
-        }
-
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         if (SetupActivity.shouldSetup()) {
             startActivity(Intent(this, SetupActivity::class.java))
         }
         requestExternalStoragePermission()
         requestAlertWindowPermission()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putCharSequence(FRAGMENT_TAG, title)
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        if (supportFragmentManager.popBackStackImmediate()) {
-            return true
-        }
-        return super.onSupportNavigateUp()
-    }
-
-    override fun onPreferenceStartFragment(
-        caller: PreferenceFragmentCompat,
-        pref: Preference
-    ): Boolean {
-        // Instantiate the new Fragment
-        val args = pref.extras
-        val fragment = supportFragmentManager.fragmentFactory.instantiate(
-            classLoader,
-            pref.fragment
-        ).apply {
-            arguments = args
-            @Suppress("DEPRECATION")
-            setTargetFragment(caller, 0)
-        }
-        // Replace the existing Fragment with the new Fragment
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.preference, fragment)
-            .addToBackStack(null)
-            .commit()
-        title = pref.title
-        return true
-    }
-
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager
-            .beginTransaction()
-            .replace(binding.preference.id, fragment, FRAGMENT_TAG)
-            .commit()
     }
 
     override fun onRequestPermissionsResult(
@@ -175,10 +135,6 @@ class PrefMainActivity :
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressed()
-                true
-            }
             R.id.preference__menu_deploy -> {
                 val progressDialog = createLoadingDialog(this, R.string.deploy_progress)
                 progressDialog.show()
@@ -195,7 +151,7 @@ class PrefMainActivity :
                 true
             }
             R.id.preference__menu_about -> {
-                startActivity(Intent(this, AboutActivity::class.java))
+                navHostFragment.navController.navigate(R.id.action_prefFragment_to_aboutFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -259,5 +215,9 @@ class PrefMainActivity :
                     .show()
             }
         }
+    }
+
+    companion object {
+        private const val PERMISSION_REQUEST_EXTERNAL_STORAGE = 0
     }
 }

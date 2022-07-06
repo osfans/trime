@@ -2,8 +2,6 @@ package com.osfans.trime.ui.fragments
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.Menu
-import androidx.core.view.forEach
 import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -17,7 +15,7 @@ import com.osfans.trime.ui.main.MainViewModel
 class KeyboardFragment :
     PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
-    private val viewModel : MainViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.keyboard_preference)
     }
@@ -57,6 +55,7 @@ class KeyboardFragment :
     }
     override fun onResume() {
         super.onResume()
+        viewModel.setToolbarTitle(getString(R.string.pref_keyboard))
         viewModel.disableTopOptionsMenu()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }

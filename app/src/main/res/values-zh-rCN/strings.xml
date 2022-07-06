@@ -231,7 +231,7 @@
         <item name="50">50</item>
         <item name="100">100</item>
     </string-array>
-    <string name="settings__system_toolkit">工具箱</string>
+    <string name="pref_toolkit">工具箱</string>
     <string name="system">系统</string>
     <string name="export">导出</string>
     <string name="clear">清除</string>
@@ -240,4 +240,9 @@
     <string name="app_crash">应用程序崩溃了</string>
     <string name="exception_logcat_created">Logcat 进程已创建</string>
     <string name="app_crash_message">抱歉，但我们提供了日志以供调查。</string>
+    <string name="pref_keyboard">键盘</string>
+    <string name="pref_about">关于</string>
+    <string name="pref_theme_and_color">主题与配色</string>
+    <string name="pref_user_data">用户数据</string>
+    <string name="pref_user_data_summary">用于管理您的数据的设置</string>
 </resources>

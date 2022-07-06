@@ -239,6 +239,11 @@
     <string name="real_time_logs">即時紀錄檔</string>
     <string name="clear">清除</string>
     <string name="system">系統</string>
-    <string name="settings__system_toolkit">工具箱</string>
+    <string name="pref_toolkit">工具箱</string>
     <string name="exception_logcat_created">Logcat 行程已建立</string>
+    <string name="pref_about">關於</string>
+    <string name="pref_theme_and_color">主題與配色</string>
+    <string name="pref_user_data">使用者資料</string>
+    <string name="pref_user_data_summary">用於管理你的資料的設定</string>
+    <string name="pref_keyboard">鍵盤設定</string>
 </resources>
