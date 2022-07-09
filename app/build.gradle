@@ -11,6 +11,8 @@ android {
         targetSdkVersion 29
         versionCode 20220901
         versionName "3.2.8"
+
+        multiDexEnabled true
         setProperty("archivesBaseName", "trime-$versionName")
         resValue "string", "trime_url", getGitUrl()
         buildConfigField 'String', 'BUILD_INFO' , '"' + getBuildInfo() + '"'
@@ -60,6 +62,18 @@ android {
         viewBinding true
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+    }
+    
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
     externalNativeBuild {
         cmake {
             // TODO: upgrade to 3.18
@@ -90,6 +104,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation "com.blankj:utilcodex:1.30.6"
     implementation "com.jakewharton.timber:timber:5.0.1"
     implementation "cat.ereza:customactivityoncrash:2.4.0"
