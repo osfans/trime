@@ -81,6 +81,19 @@ enum class Keycode {
             reverseMap[_8] = "8"
             reverseMap[_9] = "9"
 
+            reverseMap[KP_0] = "0"
+            reverseMap[KP_1] = "1"
+            reverseMap[KP_2] = "2"
+            reverseMap[KP_3] = "3"
+            reverseMap[KP_4] = "4"
+            reverseMap[KP_5] = "5"
+            reverseMap[KP_6] = "6"
+            reverseMap[KP_7] = "7"
+            reverseMap[KP_8] = "8"
+            reverseMap[KP_9] = "9"
+            reverseMap[KP_8] = "8"
+            reverseMap[KP_9] = "9"
+
             reverseMap[exclam] = "!"
             reverseMap[quotedbl] = "\""
             reverseMap[dollar] = "$"
@@ -107,7 +120,11 @@ enum class Keycode {
         }
 
         fun hasSymbolLabel(keycode: Int): Boolean {
-            return keycode >= A.ordinal && keycode < values().size
+            if (keycode < 0 || keycode > values().size)
+                return false
+
+            return keycode >= A.ordinal ||
+                (keycode >= KP_0.ordinal && keycode <= KP_9.ordinal)
         }
 
         fun getSymbolLabell(keycode: Keycode): String {
