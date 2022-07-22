@@ -316,7 +316,7 @@ class TextInputManager private constructor() :
         event ?: return
         if (!event.commit.isNullOrEmpty()) {
             // Directly commit the text and don't dispatch to Rime
-            activeEditorInstance.commitText(event.commit, false)
+            activeEditorInstance.commitText(event.commit, true)
             return
         }
         if (!event.text.isNullOrEmpty()) {

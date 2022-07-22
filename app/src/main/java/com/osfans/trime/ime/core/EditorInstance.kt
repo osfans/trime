@@ -36,20 +36,16 @@ class EditorInstance(private val ims: InputMethodService) {
     var lastCommittedText: CharSequence = ""
     var draftCache: String = ""
 
-    fun commitText(text: CharSequence, dispatchToRime: Boolean = true): Boolean {
-        val ic = inputConnection ?: return false
-        ic.commitText(text, 1)
-        lastCommittedText = text
-        // Fix pressing Delete key will clear the input box issue on BlackBerry
-        ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
-        cacheDraft()
-        return true
-    }
-
     // 直接commit不做任何处理
-    fun commitText(text: CharSequence): Boolean {
+    fun commitText(text: CharSequence, clearMeatKeyState: Boolean = false): Boolean {
         val ic = inputConnection ?: return false
         ic.commitText(text, 1)
+        if (text.isNotEmpty())
+            lastCommittedText = text
+        if (clearMeatKeyState) {
+            ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
+            cacheDraft()
+        }
         return true
     }
 
@@ -88,9 +84,12 @@ class EditorInstance(private val ims: InputMethodService) {
             return ""
         }
         val cs = et.text ?: return ""
-        if (cs.isNullOrBlank())
+        if (cs.isBlank())
             return ""
-        draftCache = cs as String
+        val cache = cs as String
+        if (draftCache.equals(cache))
+            return cache
+        draftCache = cache
         Timber.d("cacheDraft() $draftCache")
         return draftCache
     }

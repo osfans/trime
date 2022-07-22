@@ -952,6 +952,7 @@ preset_keys:
   Share: {label: 分享, command: send, option: "%s"} #分享指定文本: %s或者%1$s爲當前字符
   Deploy: {label: 部署, command: broadcast, option: "com.osfans.trime.deploy"}
   Sync: {label: 同步, command: broadcast, option: "com.osfans.trime.sync"}
+  RepeatCommit: { label: 重复,  command: commit, option: "%1$s" } #重复输入刚上屏的内容
 
 preset_keyboards:
   default:
