@@ -28,6 +28,8 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.ConfigGetter;
+import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import timber.log.Timber;
@@ -48,13 +50,14 @@ public class Key {
   public static final int[] KEY_STATE_PRESSED = {android.R.attr.state_pressed};
   public static final int[][] KEY_STATES =
       new int[][] {
-        KEY_STATE_PRESSED_ON, // 0
-        KEY_STATE_PRESSED_OFF, // 1
-        KEY_STATE_NORMAL_ON, // 2
-        KEY_STATE_NORMAL_OFF, // 3
-        KEY_STATE_PRESSED, // 4
-        KEY_STATE_NORMAL // 5
+        KEY_STATE_PRESSED_ON, // 0    "hilited_on_key_back_color"   锁定时按下的背景
+        KEY_STATE_PRESSED_OFF, // 1   "hilited_off_key_back_color"  功能键按下的背景
+        KEY_STATE_NORMAL_ON, // 2     "on_key_back_color"           锁定时背景
+        KEY_STATE_NORMAL_OFF, // 3    "off_key_back_color"          功能键背景
+        KEY_STATE_PRESSED, // 4       "hilited_key_back_color"      按键按下的背景
+        KEY_STATE_NORMAL // 5         "key_back_color"              按键背景
       };
+
   public static Map<String, Map<String, String>> presetKeys;
   private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
@@ -321,9 +324,7 @@ public class Key {
   }
 
   private boolean isNormal(int[] drawableState) {
-    return (drawableState == KEY_STATE_NORMAL
-        || drawableState == KEY_STATE_NORMAL_ON
-        || drawableState == KEY_STATE_NORMAL_OFF);
+    return (drawableState == KEY_STATE_NORMAL || drawableState == KEY_STATE_NORMAL_OFF);
   }
 
   public Drawable getBackColorForState(int[] drawableState) {
@@ -428,8 +429,6 @@ public class Key {
   public int[] getCurrentDrawableState() {
     int[] states = KEY_STATE_NORMAL;
     boolean isShifted = isTrimeModifierKey() && mKeyboard.hasModifier(getModifierKeyOnMask());
-    // only for modiferKey debug
-    if (isTrimeModifierKey()) mKeyboard.printModifierKeyState("getCurrentDrawableState");
 
     if (isShifted || on) {
       if (pressed) {
@@ -450,6 +449,18 @@ public class Key {
         }
       }
     }
+
+    // only for modiferKey debug
+    if (isTrimeModifierKey())
+      mKeyboard.printModifierKeyState(
+          MessageFormat.format(
+              "getCurrentDrawableState() Key={0} states={1} on={2} isShifted={3} pressed={4} sticky={5}",
+              getLabel(),
+              Arrays.asList(KEY_STATES).indexOf(states),
+              on,
+              isShifted,
+              pressed,
+              getClick().isSticky()));
     return states;
   }
 
