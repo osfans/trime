@@ -642,6 +642,12 @@ public class Keyboard {
   //    return setModifier(KeyEvent.META_FUNCTION_ON, on || keyDown);
   //  }
 
+  public boolean isOnlyShiftOn() {
+    if (mShiftKey != null && mShiftKey.isOn() && mModifierState == KeyEvent.META_SHIFT_ON)
+      return true;
+    return false;
+  }
+
   public boolean resetShifted() {
     if (mShiftKey != null && !mShiftKey.isOn()) return setModifier(KeyEvent.META_SHIFT_ON, false);
     return false;

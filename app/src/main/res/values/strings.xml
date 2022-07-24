@@ -209,6 +209,9 @@
     <string name="keyboard__candidate_page_size">Candidate item count for each page</string>
     <string name="copy_done">Copied to clipboard!</string>
     <string name="delete_done">Deleted</string>
+    <string name="keyboard__hook_shift_space">Ignore Shift locked for Space</string>
+    <string name="keyboard__hook_shift_num">Ignore Shift locked for 0-9</string>
+    <string name="keyboard__hook_shift_symbol">Ignore Shift locked for Symbol keys</string>
     <string-array name="keyboard__candidate_page_size_entries" >
         <item name="10000">Less than candidate</item>
         <item name="10001">close to candidate</item>

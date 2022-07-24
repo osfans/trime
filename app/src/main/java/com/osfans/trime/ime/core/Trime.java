@@ -1087,7 +1087,7 @@ public class Trime extends LifecycleInputMethodService {
   private boolean hookKeyboard(int code, int mask) { // 編輯操作
     final @Nullable InputConnection ic = getCurrentInputConnection();
     if (ic == null) return false;
-    if (Event.hasModifier(mask, KeyEvent.META_CTRL_ON)) {
+    if (mask == KeyEvent.META_CTRL_ON) {
 
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
         if (getPrefs().getKeyboard().getHookCtrlZY()) {
