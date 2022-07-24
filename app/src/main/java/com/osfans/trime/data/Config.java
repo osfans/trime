@@ -30,7 +30,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
-import android.os.SystemClock;
 import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -182,25 +181,13 @@ public class Config {
     boolean isOverwrite = AppVersionUtils.INSTANCE.isDifferentVersion(appPrefs);
     String defaultFile = "trime.yaml";
     Timber.d(methodName + "copy");
-    if (isOverwrite) {
-      copyFileOrDir("", true);
-    } else if (isExist) {
-      String path = new File("", defaultFile).getPath();
-      copyFileOrDir(path, false);
-    } else {
-      copyFileOrDir("", false);
-    }
-    Timber.d(methodName + "copy2");
-    while (!new File(sharedDataDir, defaultFile).exists()) {
-      SystemClock.sleep(100);
-      copyFileOrDir("", isOverwrite);
-    }
+    copyFileOrDir("", isOverwrite);
     // 缺失导致获取方案列表为空
     Timber.d(methodName + "copy default.custom.yaml");
     final String defaultCustom = "default.custom.yaml";
-    if (!new File(sharedDataDir, defaultCustom).exists()) {
+    if (!new File(userDataDir, defaultCustom).exists()) {
       try {
-        new File(sharedDataDir, defaultCustom).createNewFile();
+        new File(userDataDir, defaultCustom).createNewFile();
       } catch (IOException e) {
         e.printStackTrace();
       }
