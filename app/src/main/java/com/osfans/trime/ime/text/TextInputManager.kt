@@ -396,7 +396,26 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_PROG_RED -> trime.showColorDialog() // Color schemes
             KeyEvent.KEYCODE_MENU -> trime.showOptionsDialog()
-            else -> onKey(event.code, event.mask or trime.keyboardSwitcher.currentKeyboard.modifer)
+            else -> {
+                if (event.mask == 0 && trime.keyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
+                    if (event.code == KeyEvent.KEYCODE_SPACE && prefs.keyboard.hookShiftSpace) {
+                        onKey(event.code, 0)
+                        return
+                    } else if (event.code >= KeyEvent.KEYCODE_0 && event.code <= KeyEvent.KEYCODE_9 && prefs.keyboard.hookShiftNum) {
+                        onKey(event.code, 0)
+                        return
+                    } else if (prefs.keyboard.hookShiftSymbol) {
+                        if (event.code >= KeyEvent.KEYCODE_GRAVE && event.code <= KeyEvent.KEYCODE_SLASH ||
+                            event.code == KeyEvent.KEYCODE_COMMA ||
+                            event.code == KeyEvent.KEYCODE_PERIOD
+                        ) {
+                            onKey(event.code, 0)
+                            return
+                        }
+                    }
+                }
+                onKey(event.code, event.mask or trime.keyboardSwitcher.currentKeyboard.modifer)
+            }
         }
     }
 

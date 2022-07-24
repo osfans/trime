@@ -127,6 +127,21 @@
             android:title="@string/keyboard__hook_ctrl_zy"
             app:iconSpaceReserved="false" />
 
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_shift_space"
+            android:title="@string/keyboard__hook_shift_space"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_shift_num"
+            android:title="@string/keyboard__hook_shift_num"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="keyboard__hook_shift_symbol"
+            android:title="@string/keyboard__hook_shift_symbol"
+            app:iconSpaceReserved="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

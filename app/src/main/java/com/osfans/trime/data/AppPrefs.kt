@@ -183,6 +183,9 @@ class AppPrefs(
             const val HOOK_CTRL_CV = "keyboard__hook_ctrl_cv"
             const val HOOK_CTRL_LR = "keyboard__hook_ctrl_lr"
             const val HOOK_CTRL_ZY = "keyboard__hook_ctrl_zy"
+            const val HOOK_SHIFT_SPACE = "keyboard__hook_shift_space"
+            const val HOOK_SHIFT_NUM = "keyboard__hook_shift_num"
+            const val HOOK_SHIFT_SYMBOL = "keyboard__hook_shift_symbol"
 
             const val SOUND_ENABLED = "keyboard__key_sound"
             const val SOUND_VOLUME = "keyboard__key_sound_volume"
@@ -251,6 +254,15 @@ class AppPrefs(
             private set
         var hookCtrlZY: Boolean = false
             get() = prefs.getPref(HOOK_CTRL_ZY, false)
+            private set
+        var hookShiftSpace: Boolean = false
+            get() = prefs.getPref(HOOK_SHIFT_SPACE, false)
+            private set
+        var hookShiftNum: Boolean = false
+            get() = prefs.getPref(HOOK_SHIFT_NUM, false)
+            private set
+        var hookShiftSymbol: Boolean = false
+            get() = prefs.getPref(HOOK_SHIFT_SYMBOL, false)
             private set
 
         var soundEnabled: Boolean = false

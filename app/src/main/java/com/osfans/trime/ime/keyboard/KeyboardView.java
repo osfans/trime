@@ -1089,7 +1089,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         // TextEntryState.keyPressedAt(key, x, y);
         final int[] codes = new int[MAX_NEARBY_KEYS];
         Arrays.fill(codes, NOT_A_KEY);
-        getKeyIndices(x, y, codes);
+        // getKeyIndices(x, y, codes); // 这里实际上并没有生效
         Timber.d("\t<TrimeInput>\tdetectAndSendKey()\tonEvent, code=%d, key.getEvent", code);
         // 可以在这里把 mKeyboard.getModifer() 获取的修饰键状态写入event里
         mKeyboardActionListener.onEvent(key.getEvent(type.ordinal()));
