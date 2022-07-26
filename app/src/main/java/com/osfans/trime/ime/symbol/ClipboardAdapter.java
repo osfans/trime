@@ -126,6 +126,7 @@ public class ClipboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
           view -> {
             int position = itemViewHold.getLayoutPosition();
             ClipboardDao.get().delete(list.get(position).getText());
+            list.remove(position);
             notifyItemRemoved(position);
             ToastUtils.showShort(R.string.delete_done);
             return true;
