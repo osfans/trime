@@ -15,20 +15,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
-import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.text.TextInputManager;
+import java.util.List;
 
+// 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR
 public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
   private final TextInputManager textInputManager;
 
   // 候选词
   private Rime.RimeCandidate[] candidates;
-  private Trime trime;
-  private AppPrefs prefs;
 
   private int keyMarginX, keyMarginTop;
   private Integer textColor, textColor2, commentColor;
@@ -42,20 +40,24 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
   public CandidateAdapter(Context context) {
     myContext = context;
-    trime = Trime.getService();
-    prefs = AppPrefs.defaultInstance();
     candidates = new Rime.RimeCandidate[0];
     textInputManager = TextInputManager.Companion.getInstance();
     comment_position = 0;
   }
 
   public int updateCandidates() {
-
     candidates = Rime.getCandidatesWithoutSwitch();
     if (candidates == null) {
       candidates = new Rime.RimeCandidate[0];
     }
     return candidates.length;
+  }
+
+  public void setCandidates(List<SimpleKeyBean> list) {
+    candidates = new Rime.RimeCandidate[list.size()];
+    for (int i = 0; i < list.size(); i++) {
+      candidates[i] = new Rime.RimeCandidate(list.get(i).getText(), "");
+    }
   }
 
   @Override

@@ -97,7 +97,13 @@ public class LiquidKeyboard {
         break;
       case CANDIDATE:
         TabManager.get().select(i);
+        initCandidateAdapter();
         initCandidate();
+        break;
+      case VAR:
+        TabManager.get().select(i);
+        initCandidateAdapter();
+        initVAR(i);
         break;
       case HISTORY:
       case TABS:
@@ -336,7 +342,7 @@ public class LiquidKeyboard {
         });
   }
 
-  public void initCandidate() {
+  public void initCandidateAdapter() {
     keyboardView.removeAllViews();
     simpleAdapter = null;
     mClipboardAdapter = null;
@@ -354,13 +360,13 @@ public class LiquidKeyboard {
     flexboxLayoutManager.setJustifyContent(JustifyContent.FLEX_START); // 交叉轴的起点对齐。
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    draft_max_size = Config.get(context).getDraftLimit();
-
-    draftBeanList = DraftDao.get().getAllSimpleBean(draft_max_size);
     candidateAdapter.configStyle(margin_x, margin_top);
 
     keyboardView.setAdapter(candidateAdapter);
     keyboardView.setSelected(true);
+  }
+
+  public void initCandidate() {
     candidateAdapter.updateCandidates();
 
     candidateAdapter.setOnItemClickListener(
@@ -369,6 +375,20 @@ public class LiquidKeyboard {
           if (Rime.isComposing()) {
             updateCandidates();
           } else Trime.getService().selectLiquidKeyboard(-1);
+        });
+  }
+
+  public void initVAR(int i) {
+    simpleKeyBeans.clear();
+    simpleKeyBeans.addAll(TabManager.get().select(i));
+    candidateAdapter.setCandidates(simpleKeyBeans);
+    candidateAdapter.setOnItemClickListener(
+        (view, position) -> {
+          InputConnection ic = Trime.getService().getCurrentInputConnection();
+          if (ic != null) {
+            SimpleKeyBean bean = simpleKeyBeans.get(position);
+            ic.commitText(bean.getText(), 1);
+          }
         });
   }
 
