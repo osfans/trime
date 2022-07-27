@@ -244,8 +244,10 @@ public class Key {
     return on;
   }
 
-  public void setOn(boolean on) {
-    this.on = on;
+  public boolean setOn(boolean on) {
+    if (on && this.on) this.on = false;
+    else this.on = on;
+    return this.on;
   }
 
   public String getPopupCharacters() {
@@ -495,12 +497,11 @@ public class Key {
     return (c == KeyEvent.KEYCODE_SYM);
   }
 
-  // shift键在点击时是否触发锁定
+  // Shift、Ctrl、Alt、Meta等修饰键在点击时是否触发锁定
   public boolean isShiftLock() {
     String s = getClick().getShiftLock();
     if ("long".equals(s)) return false;
-    if ("click".equals(s)) return true;
-    return !Rime.isAsciiMode();
+    return "click".equals(s);
   }
 
   /**
