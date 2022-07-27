@@ -595,21 +595,22 @@ public class Keyboard {
    */
   public boolean clikModifierKey(boolean on, int keycode) {
     boolean keyDown = !hasModifier(keycode);
-    on = on & keyDown;
-    if (mShiftKey != null) mShiftKey.setOn(on);
+    boolean keepOn = on;
 
-    if (keycode == KeyEvent.META_SHIFT_ON) {
-      mShiftKey.setOn(on);
-    } else if (keycode == KeyEvent.META_ALT_ON) {
-      mAltKey.setOn(on);
-    } else if (keycode == KeyEvent.META_CTRL_ON) {
-      mCtrlKey.setOn(on);
-    } else if (keycode == KeyEvent.META_META_ON) {
-      mMetaKey.setOn(on);
-    } else if (keycode == KeyEvent.KEYCODE_SYM) {
-      mSymKey.setOn(on);
+    if (keycode == KeyEvent.META_SHIFT_ON && mShiftKey != null) {
+      keepOn = mShiftKey.setOn(on);
+    } else if (keycode == KeyEvent.META_ALT_ON && mAltKey != null) {
+      keepOn = mAltKey.setOn(on);
+    } else if (keycode == KeyEvent.META_CTRL_ON && mCtrlKey != null) {
+      keepOn = mCtrlKey.setOn(on);
+    } else if (keycode == KeyEvent.META_META_ON && mMetaKey != null) {
+      keepOn = mMetaKey.setOn(on);
+    } else if (keycode == KeyEvent.KEYCODE_SYM && mSymKey != null) {
+      keepOn = mSymKey.setOn(on);
     }
-    return setModifier(keycode, on || keyDown);
+
+    if (on) return setModifier(keycode, keepOn);
+    else return setModifier(keycode, keyDown);
   }
 
   public boolean setAltOn(boolean on, boolean keyDown) {
@@ -642,10 +643,27 @@ public class Keyboard {
   //    return setModifier(KeyEvent.META_FUNCTION_ON, on || keyDown);
   //  }
 
+  private final int MASK_META_WITHOUT_SHIFT =
+      KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON | KeyEvent.META_SYM_ON | KeyEvent.META_META_ON;
+  private final int MASK_META_WITHOUT_CTRL =
+      KeyEvent.META_SHIFT_ON | KeyEvent.META_ALT_ON | KeyEvent.META_SYM_ON | KeyEvent.META_META_ON;
+  private final int MASK_META_WITHOUT_ALT =
+      KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON | KeyEvent.META_META_ON;
+  private final int MASK_META_WITHOUT_SYS =
+      KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_META_ON;
+  private final int MASK_META_WITHOUT_META =
+      KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON | KeyEvent.META_SYM_ON | KeyEvent.META_SHIFT_ON;
+  private final int MASK_META =
+      KeyEvent.META_CTRL_ON
+          | KeyEvent.META_ALT_ON
+          | KeyEvent.META_SYM_ON
+          | KeyEvent.META_META_ON
+          | KeyEvent.META_SHIFT_ON;
+
   public boolean isOnlyShiftOn() {
-    if (mShiftKey != null && mShiftKey.isOn() && mModifierState == KeyEvent.META_SHIFT_ON)
-      return true;
-    return false;
+    return (mShiftKey != null
+        && mShiftKey.isOn()
+        && (mModifierState & MASK_META_WITHOUT_SHIFT) == 0);
   }
 
   public boolean resetShifted() {

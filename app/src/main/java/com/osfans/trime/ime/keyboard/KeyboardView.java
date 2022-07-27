@@ -600,7 +600,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   /**
    * 设置键盘修饰键的状态
    *
-   * @param key 按下的修饰键
+   * @param key 按下的修饰键(非组合键）
    * @return
    */
   public boolean setModifier(Key key) {
@@ -980,6 +980,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         paint.setShadowLayer(0, 0, 0, 0);
       }
       canvas.translate(-key.getX() - kbdPaddingLeft, -key.getY() - kbdPaddingTop);
+      //      break;
     }
     mInvalidatedKey = null;
     // Overlay a dark rectangle to dim the keyboard
