@@ -20,7 +20,7 @@ import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.text.TextInputManager;
 import java.util.List;
 
-// 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR
+// 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR_LENGTH
 public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
   private final TextInputManager textInputManager;

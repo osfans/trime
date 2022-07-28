@@ -100,10 +100,10 @@ public class LiquidKeyboard {
         initCandidateAdapter();
         initCandidate();
         break;
-      case VAR:
+      case VAR_LENGTH:
         TabManager.get().select(i);
         initCandidateAdapter();
-        initVAR(i);
+        initVarLengthKeys(i);
         break;
       case HISTORY:
       case TABS:
@@ -378,7 +378,7 @@ public class LiquidKeyboard {
         });
   }
 
-  public void initVAR(int i) {
+  public void initVarLengthKeys(int i) {
     simpleKeyBeans.clear();
     simpleKeyBeans.addAll(TabManager.get().select(i));
     candidateAdapter.setCandidates(simpleKeyBeans);
