@@ -34,7 +34,7 @@ enum class SymbolKeyboardType {
     SHORT,
 
     //  按键长度不固定，与展开候选的样式相同；与
-    VAR,
+    VAR_LENGTH,
 
     //  长度较长，与草稿箱、剪贴板的样式相同，使用小号字体多行展示
     LONG,

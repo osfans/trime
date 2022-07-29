@@ -76,6 +76,13 @@ public class Rime {
   public static class RimeCandidate {
     public String text;
     public String comment;
+
+    public RimeCandidate(String text, String comment) {
+      this.text = text;
+      this.comment = comment;
+    }
+
+    public RimeCandidate() {}
   }
 
   /** Rime候選區，包含多個{@link RimeCandidate 候選項} */
