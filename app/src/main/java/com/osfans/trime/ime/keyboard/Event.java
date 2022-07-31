@@ -229,33 +229,8 @@ public class Event {
     if (c == KeyEvent.KEYCODE_SPACE) {
       label = Rime.getSchemaName();
     } else {
-      if (c > 0) label = getDisplayLabel(c);
+      if (c > 0) label = Keycode.Companion.getDisplayLabel(c, mask);
     }
-  }
-
-  public String getDisplayLabel(int keyCode) {
-    String s = "";
-    if (Keycode.Companion.isStdKey(keyCode)) {
-      // Android keycode区域
-      if (Key.getKcm().isPrintingKey(keyCode)) {
-        KeyEvent event = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, mask);
-        int k = event.getUnicodeChar(mask);
-
-        Timber.d("getDisplayLabel() keycode=" + keyCode + ", mask=" + mask + ", k=" + k);
-        if (k > 0) {
-          s += ((char) (k));
-        } else {
-          char c = Key.getKcm().getDisplayLabel(keyCode);
-          if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
-          s = String.valueOf(c);
-        }
-      } else {
-        s = Keycode.keyNameOf(keyCode);
-      }
-    } else if (Keycode.Companion.hasSymbolLabel(keyCode)) { // 可見符號
-      s = Keycode.Companion.getSymbolLabell(Keycode.valueOf(keyCode));
-    }
-    return s;
   }
 
   public static int getClickCode(String s) {
