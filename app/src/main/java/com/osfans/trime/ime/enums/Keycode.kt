@@ -59,14 +59,18 @@ enum class Keycode {
 
     companion object {
 
+        // librime keyname (x11) - trime keycode (兼容Android)
         private val convertMap: HashMap<String, Keycode> = hashMapOf()
+
+        // 部分符号的 trime keycode (兼容Android) - key label
         private val reverseMap: HashMap<Keycode, String> = hashMapOf()
 
         init {
-            for (type in Keycode.values()) {
+            for (type in values()) {
                 convertMap[type.toString()] = type
             }
 
+            // android keycode 包含的数字开头的按键
             reverseMap[_3D_MODE] = "3D_MODE"
             reverseMap[_0] = "0"
             reverseMap[_1] = "1"
@@ -81,19 +85,26 @@ enum class Keycode {
             reverseMap[_8] = "8"
             reverseMap[_9] = "9"
 
-            reverseMap[KP_0] = "0"
-            reverseMap[KP_1] = "1"
-            reverseMap[KP_2] = "2"
-            reverseMap[KP_3] = "3"
-            reverseMap[KP_4] = "4"
-            reverseMap[KP_5] = "5"
-            reverseMap[KP_6] = "6"
-            reverseMap[KP_7] = "7"
-            reverseMap[KP_8] = "8"
-            reverseMap[KP_9] = "9"
-            reverseMap[KP_8] = "8"
-            reverseMap[KP_9] = "9"
+            // android keycode 已包含的符号
+            reverseMap[grave] = "`"
+            reverseMap[at] = "@"
+            reverseMap[numbersign] = "#"
+            reverseMap[asterisk] = "*"
+            reverseMap[parenleft] = "("
+            reverseMap[parenright] = ")"
+            reverseMap[minus] = "-"
+            reverseMap[equal] = "="
+            reverseMap[plus] = "+"
+            reverseMap[bracketleft] = "["
+            reverseMap[bracketright] = "]"
+            reverseMap[backslash] = "\\"
+            reverseMap[semicolon] = ";"
+            reverseMap[apostrophe] = "'"
+            reverseMap[comma] = ","
+            reverseMap[period] = "."
+            reverseMap[slash] = "/"
 
+            // android keycode未包含的符号
             reverseMap[exclam] = "!"
             reverseMap[quotedbl] = "\""
             reverseMap[dollar] = "$"
@@ -113,18 +124,30 @@ enum class Keycode {
             reverseMap.forEach {
                 convertMap[it.value] = it.key
             }
+
+            // android keycode 包含的小键盘，仅用于输出label，不用于label转按键
+            reverseMap[KP_0] = "0"
+            reverseMap[KP_1] = "1"
+            reverseMap[KP_2] = "2"
+            reverseMap[KP_3] = "3"
+            reverseMap[KP_4] = "4"
+            reverseMap[KP_5] = "5"
+            reverseMap[KP_6] = "6"
+            reverseMap[KP_7] = "7"
+            reverseMap[KP_8] = "8"
+            reverseMap[KP_9] = "9"
+            reverseMap[KP_8] = "8"
+            reverseMap[KP_9] = "9"
         }
 
         fun isStdKey(keycode: Int): Boolean {
-            return keycode < A.ordinal
+            return keycode < A.ordinal && keycode > 0
         }
 
         fun hasSymbolLabel(keycode: Int): Boolean {
             if (keycode < 0 || keycode > values().size)
                 return false
-
-            return keycode >= A.ordinal ||
-                (keycode >= KP_0.ordinal && keycode <= KP_9.ordinal)
+            return keycode >= A.ordinal || reverseMap.containsKey(values()[keycode])
         }
 
         fun getSymbolLabell(keycode: Keycode): String {
