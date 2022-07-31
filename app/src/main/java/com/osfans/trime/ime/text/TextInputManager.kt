@@ -414,7 +414,10 @@ class TextInputManager private constructor() :
                         }
                     }
                 }
-                onKey(event.code, event.mask or trime.keyboardSwitcher.currentKeyboard.modifer)
+                if (event.mask == 0)
+                    onKey(event.code, trime.keyboardSwitcher.currentKeyboard.modifer)
+                else
+                    onKey(event.code, event.mask)
             }
         }
     }
