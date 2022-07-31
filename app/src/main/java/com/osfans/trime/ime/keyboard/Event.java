@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.util.ConfigGetter;
@@ -193,8 +194,22 @@ public class Event {
 
   public String getLabel() {
     if (!TextUtils.isEmpty(toggle)) return (String) states.get(Rime.getOption(toggle) ? 1 : 0);
-    if ((mKeyboard.getModifer() | mask & KeyEvent.META_SHIFT_ON) != 0)
+
+    if (mKeyboard.isOnlyShiftOn()) {
+      if (code >= KeyEvent.KEYCODE_0
+          && code <= KeyEvent.KEYCODE_9
+          && !AppPrefs.defaultInstance().getKeyboard().getHookShiftNum())
+        return adjustCase(shiftLabel);
+      if (code >= KeyEvent.KEYCODE_GRAVE && code <= KeyEvent.KEYCODE_SLASH
+          || code == KeyEvent.KEYCODE_COMMA
+          || code == KeyEvent.KEYCODE_PERIOD) {
+        if (!AppPrefs.defaultInstance().getKeyboard().getHookShiftSymbol())
+          return adjustCase(shiftLabel);
+      }
+    } else if ((mKeyboard.getModifer() | mask & KeyEvent.META_SHIFT_ON) != 0) {
       return adjustCase(shiftLabel);
+    }
+
     return adjustCase(label);
   }
 
