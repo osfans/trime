@@ -13,6 +13,7 @@ import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
@@ -427,6 +428,18 @@ class TextInputManager private constructor() :
 
         // 优先由librime处理按键事件
         if (trime.handleKey(keyEventCode, metaState)) return
+
+        // 如果没有修饰键，或者只有shift修饰键，可以直接commit字符
+        val shiftState = metaState or KeyEvent.META_SHIFT_ON
+        if (shiftState == KeyEvent.META_SHIFT_ON || shiftState == 0) {
+            val text = Keycode.getDisplayLabel(keyEventCode, metaState)
+            if (text!!.length == 1) {
+                needSendUpRimeKey = false
+                activeEditorInstance.commitText(text)
+                return
+            }
+        }
+
         // 大写字母和部分符号转换为Shift+Android keyevent
         val event = toStdKeyEvent(keyEventCode, metaState)
         needSendUpRimeKey = false
