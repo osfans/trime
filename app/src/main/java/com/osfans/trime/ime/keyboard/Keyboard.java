@@ -674,6 +674,11 @@ public class Keyboard {
   public boolean resetModifer() {
     // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
     mModifierState = 0;
+    if (mShiftKey != null && mShiftKey.isOn()) mModifierState = KeyEvent.META_SHIFT_ON;
+    if (mAltKey != null && mAltKey.isOn()) mModifierState |= KeyEvent.META_ALT_ON;
+    if (mCtrlKey != null && mCtrlKey.isOn()) mModifierState |= KeyEvent.META_CTRL_ON;
+    if (mMetaKey != null && mMetaKey.isOn()) mModifierState |= KeyEvent.META_META_ON;
+    if (mSymKey != null && mSymKey.isOn()) mModifierState |= KeyEvent.KEYCODE_SYM;
     return true;
   }
 
