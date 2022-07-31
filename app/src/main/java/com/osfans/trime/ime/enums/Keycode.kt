@@ -2,6 +2,8 @@ package com.osfans.trime.ime.enums
 
 import android.text.TextUtils
 import android.view.KeyEvent
+import com.osfans.trime.ime.keyboard.Key
+import timber.log.Timber
 
 enum class Keycode {
     // 与原trime.yaml主题android_key/name小节相比，差异如下：
@@ -144,6 +146,52 @@ enum class Keycode {
             return keycode < A.ordinal && keycode > 0
         }
 
+        fun toStdKeyEvent(keycode: Int, mask: Int = 0): IntArray {
+            var event = IntArray(2)
+            if (keycode < 0 || keycode > values().size)
+                return event
+            if (keycode < A.ordinal) {
+                event[0] = keycode
+                event[1] = mask
+            } else {
+                if (keycode <= Z.ordinal)
+                    event[0] = keycode - A.ordinal + a.ordinal
+                else if (keycode == exclam.ordinal)
+                    event[0] = _1.ordinal
+                else if (keycode == dollar.ordinal)
+                    event[0] = _4.ordinal
+                else if (keycode == percent.ordinal)
+                    event[0] = _5.ordinal
+                else if (keycode == asciicircum.ordinal)
+                    event[0] = _6.ordinal
+                else if (keycode == ampersand.ordinal)
+                    event[0] = _7.ordinal
+                else if (keycode == quotedbl.ordinal)
+                    event[0] = apostrophe.ordinal
+                else if (keycode == colon.ordinal)
+                    event[0] = semicolon.ordinal
+                else if (keycode == less.ordinal)
+                    event[0] = comma.ordinal
+                else if (keycode == greater.ordinal)
+                    event[0] = period.ordinal
+                else if (keycode == question.ordinal)
+                    event[0] = slash.ordinal
+                else if (keycode == underscore.ordinal)
+                    event[0] = minus.ordinal
+                else if (keycode == braceleft.ordinal)
+                    event[0] = bracketleft.ordinal
+                else if (keycode == braceright.ordinal)
+                    event[0] = bracketright.ordinal
+                else if (keycode == asciitilde.ordinal)
+                    event[0] = grave.ordinal
+                else if (keycode == bar.ordinal)
+                    event[0] = backslash.ordinal
+
+                event[1] = mask or KeyEvent.META_SHIFT_ON
+            }
+            return event
+        }
+
         fun hasSymbolLabel(keycode: Int): Boolean {
             if (keycode < 0 || keycode > values().size)
                 return false
@@ -152,6 +200,30 @@ enum class Keycode {
 
         fun getSymbolLabell(keycode: Keycode): String {
             return reverseMap[keycode] ?: ""
+        }
+
+        fun getDisplayLabel(keyCode: Int, mask: Int): String? {
+            var s: String? = ""
+            if (isStdKey(keyCode)) {
+                // Android keycode区域
+                if (Key.getKcm().isPrintingKey(keyCode)) {
+                    val event = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, mask)
+                    val k = event.getUnicodeChar(mask)
+                    Timber.d("getDisplayLabel() keycode=$keyCode, mask=$mask, k=$k")
+                    if (k > 0) {
+                        s += k.toChar()
+                    } else {
+                        var c = Key.getKcm().getDisplayLabel(keyCode)
+                        if (Character.isUpperCase(c)) c = c.lowercaseChar()
+                        s = c.toString()
+                    }
+                } else {
+                    s = keyNameOf(keyCode)
+                }
+            } else if (hasSymbolLabel(keyCode)) { // 可見符號
+                s = getSymbolLabell(valueOf(keyCode))
+            }
+            return s
         }
 
         private val masks = hashMapOf(

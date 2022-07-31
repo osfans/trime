@@ -13,7 +13,7 @@ import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.ime.enums.Keycode
+import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
@@ -421,14 +421,13 @@ class TextInputManager private constructor() :
 
     override fun onKey(keyEventCode: Int, metaState: Int) {
         printModifierKeyState(metaState, "keyEventCode=" + keyEventCode)
+
+        // 优先由librime处理按键事件
         if (trime.handleKey(keyEventCode, metaState)) return
-        if (Keycode.hasSymbolLabel(keyEventCode)) {
-            needSendUpRimeKey = false
-            activeEditorInstance.commitText(Keycode.getSymbolLabell(Keycode.valueOf(keyEventCode)))
-            return
-        }
+        // 大写字母和部分符号转换为Shift+Android keyevent
+        val event = toStdKeyEvent(keyEventCode, metaState)
         needSendUpRimeKey = false
-        activeEditorInstance.sendDownUpKeyEvent(keyEventCode, metaState)
+        activeEditorInstance.sendDownUpKeyEvent(event[0], event[1])
     }
 
     override fun onText(text: CharSequence?) {
