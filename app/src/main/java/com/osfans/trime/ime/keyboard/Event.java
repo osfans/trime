@@ -39,7 +39,7 @@ public class Event {
   private int code;
   private int mask = 0;
   private String text;
-  private String label;
+  private String label, shiftLabel;
   private String preview;
   private List<?> states;
   private String command;
@@ -99,6 +99,20 @@ public class Event {
       code = 0;
       text = s;
       label = labelPattern.matcher(s).replaceAll("");
+    }
+
+    shiftLabel = label;
+    if (Keycode.Companion.isStdKey(code)) { // Android keycode区域
+      if (Key.getKcm().isPrintingKey(code)) {
+        int mMask = KeyEvent.META_SHIFT_ON | mask;
+        KeyEvent event = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, code, 0, mMask);
+        int k = event.getUnicodeChar(mMask);
+        Timber.d(
+            "shiftLabel = " + shiftLabel + " keycode=" + code + ", mask=" + mMask + ", k=" + k);
+        if (k > 0) {
+          shiftLabel = "" + ((char) (k));
+        }
+      }
     }
   }
 
@@ -179,6 +193,8 @@ public class Event {
 
   public String getLabel() {
     if (!TextUtils.isEmpty(toggle)) return (String) states.get(Rime.getOption(toggle) ? 1 : 0);
+    if ((mKeyboard.getModifer() | mask & KeyEvent.META_SHIFT_ON) != 0)
+      return adjustCase(shiftLabel);
     return adjustCase(label);
   }
 
@@ -217,13 +233,22 @@ public class Event {
     }
   }
 
-  public static String getDisplayLabel(int keyCode) {
+  public String getDisplayLabel(int keyCode) {
     String s = "";
-    if (Keycode.Companion.isStdKey(keyCode)) { // 字母數字
+    if (Keycode.Companion.isStdKey(keyCode)) {
+      // Android keycode区域
       if (Key.getKcm().isPrintingKey(keyCode)) {
-        char c = Key.getKcm().getDisplayLabel(keyCode);
-        if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
-        s = String.valueOf(c);
+        KeyEvent event = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, mask);
+        int k = event.getUnicodeChar(mask);
+
+        Timber.d("getDisplayLabel() keycode=" + keyCode + ", mask=" + mask + ", k=" + k);
+        if (k > 0) {
+          s += ((char) (k));
+        } else {
+          char c = Key.getKcm().getDisplayLabel(keyCode);
+          if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
+          s = String.valueOf(c);
+        }
       } else {
         s = Keycode.keyNameOf(keyCode);
       }
@@ -237,10 +262,8 @@ public class Event {
     int keyCode = -1;
     if (TextUtils.isEmpty(s)) { // 空鍵
       keyCode = 0;
-    } else if (Keycode.fromString(s) != Keycode.VoidSymbol) { // 字母數字
+    } else if (Keycode.fromString(s) != Keycode.VoidSymbol) {
       keyCode = Keycode.keyCodeOf(s);
-    } else if (symbolAliases.containsKey(s)) {
-      keyCode = symbolAliases.get(s);
     }
     return keyCode;
   }
@@ -283,29 +306,6 @@ public class Event {
           put("Alt", KeyEvent.META_ALT_ON);
           put("Meta", KeyEvent.META_META_ON);
           put("SYM", KeyEvent.META_SYM_ON);
-        }
-      };
-
-  private static final Map<String, Integer> symbolAliases =
-      new HashMap<String, Integer>() {
-        {
-          put("#", KeyEvent.KEYCODE_POUND);
-          put("'", KeyEvent.KEYCODE_APOSTROPHE);
-          put("(", KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN);
-          put(")", KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN);
-          put("*", KeyEvent.KEYCODE_STAR);
-          put("+", KeyEvent.KEYCODE_PLUS);
-          put(",", KeyEvent.KEYCODE_COMMA);
-          put("-", KeyEvent.KEYCODE_MINUS);
-          put(".", KeyEvent.KEYCODE_PERIOD);
-          put("/", KeyEvent.KEYCODE_SLASH);
-          put(";", KeyEvent.KEYCODE_SEMICOLON);
-          put("=", KeyEvent.KEYCODE_EQUALS);
-          put("@", KeyEvent.KEYCODE_AT);
-          put("\\", KeyEvent.KEYCODE_BACKSLASH);
-          put("[", KeyEvent.KEYCODE_LEFT_BRACKET);
-          put("`", KeyEvent.KEYCODE_GRAVE);
-          put("]", KeyEvent.KEYCODE_RIGHT_BRACKET);
         }
       };
 }
