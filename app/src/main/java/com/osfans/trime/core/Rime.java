@@ -292,6 +292,14 @@ public class Rime {
     return mStatus.is_ascii_mode;
   }
 
+  public static boolean isAsciiPunch() {
+    return mStatus.is_ascii_punct;
+  }
+
+  public static boolean showAsciiPunch() {
+    return mStatus.is_ascii_punct || mStatus.is_ascii_mode;
+  }
+
   public static RimeComposition getComposition() {
     if (mContext == null) return null;
     return mContext.composition;

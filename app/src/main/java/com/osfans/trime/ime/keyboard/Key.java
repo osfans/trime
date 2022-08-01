@@ -588,7 +588,7 @@ public class Key {
     Event event = getEvent();
     if (!TextUtils.isEmpty(label)
         && event == getClick()
-        && (events[KeyEventType.ASCII.ordinal()] == null && !Rime.isAsciiMode()))
+        && (events[KeyEventType.ASCII.ordinal()] == null && !Rime.showAsciiPunch()))
       return label; // 中文狀態顯示標籤
     return event.getLabel();
   }
