@@ -511,8 +511,11 @@ public class Key {
   // Shift、Ctrl、Alt、Meta等修饰键在点击时是否触发锁定
   public boolean isShiftLock() {
     String s = getClick().getShiftLock();
+    // shift_lock #ascii_long: 英文長按中文單按鎖定, long: 長按鎖定, click: 單按鎖定
     if ("long".equals(s)) return false;
-    return "click".equals(s);
+    if ("click".equals(s)) return true;
+    if ("ascii_long".equals(s)) return !Rime.isAsciiMode();
+    return false;
   }
 
   /**
