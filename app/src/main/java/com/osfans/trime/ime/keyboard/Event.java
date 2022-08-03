@@ -206,7 +206,7 @@ public class Event {
         if (!AppPrefs.defaultInstance().getKeyboard().getHookShiftSymbol())
           return adjustCase(shiftLabel);
       }
-    } else if ((mKeyboard.getModifer() | mask & KeyEvent.META_SHIFT_ON) != 0) {
+    } else if (((mKeyboard.getModifer() | mask) & KeyEvent.META_SHIFT_ON) != 0) {
       return adjustCase(shiftLabel);
     }
 
