@@ -429,20 +429,23 @@ class TextInputManager private constructor() :
         // 优先由librime处理按键事件
         if (trime.handleKey(keyEventCode, metaState)) return
 
-        // 如果没有修饰键，或者只有shift修饰键，可以直接commit字符
-        val shiftState = metaState or KeyEvent.META_SHIFT_ON
-        if (shiftState == KeyEvent.META_SHIFT_ON || shiftState == 0) {
-            val text = Keycode.getDisplayLabel(keyEventCode, metaState)
-            if (text!!.length == 1) {
-                needSendUpRimeKey = false
+        needSendUpRimeKey = false
+
+        // 如果没有修饰键，或者只有shift修饰键，针对非Android标准按键，可以直接commit字符
+        if ((metaState == KeyEvent.META_SHIFT_ON || metaState == 0) && keyEventCode >= Keycode.A.ordinal) {
+            val text = Keycode.getSymbolLabell(Keycode.valueOf(keyEventCode))
+            if (text.length == 1) {
                 activeEditorInstance.commitText(text)
                 return
             }
         }
-
+        // 小键盘自动增加锁定
+        if (keyEventCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyEventCode <= KeyEvent.KEYCODE_NUMPAD_EQUALS) {
+            activeEditorInstance.sendDownUpKeyEvent(keyEventCode, metaState or KeyEvent.META_NUM_LOCK_ON)
+            return
+        }
         // 大写字母和部分符号转换为Shift+Android keyevent
         val event = toStdKeyEvent(keyEventCode, metaState)
-        needSendUpRimeKey = false
         activeEditorInstance.sendDownUpKeyEvent(event[0], event[1])
     }
 
