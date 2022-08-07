@@ -47,8 +47,8 @@ class ColorPickerDialog(
 
     private fun init() {
         val allColors = Config.get(context).presetColorSchemes.toTypedArray()
-        allColorKeys = allColors.map { a -> a[0] }.toTypedArray()
-        allColorNames = allColors.map { a -> a[1] }.toTypedArray()
+        allColorKeys = allColors.map { a -> a.first }.toTypedArray()
+        allColorNames = allColors.map { a -> a.second }.toTypedArray()
         val activeColor = prefs.looks.selectedColor
         Timber.d("activeColor = $activeColor")
         checkedItem = allColorKeys.indexOf(activeColor)

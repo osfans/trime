@@ -52,7 +52,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import kotlin.Pair;
+import kotlin.collections.MapsKt;
 import timber.log.Timber;
 
 /** 解析 YAML 配置文件 */
@@ -732,11 +733,11 @@ public class Config {
   }
 
   @NonNull
-  public List<String[]> getPresetColorSchemes() {
+  public List<Pair<String, String>> getPresetColorSchemes() {
     if (presetColorSchemes == null) return new ArrayList<>();
-    return presetColorSchemes.entrySet().stream()
-        .map(e -> new String[] {e.getKey(), Objects.requireNonNull(e.getValue().get("name"))})
-        .collect(Collectors.toList());
+    return MapsKt.map(
+        presetColorSchemes,
+        entry -> new Pair<>(entry.getKey(), Objects.requireNonNull(entry.getValue().get("name"))));
   }
 
   private Map<String, String> mEnterLabels;
