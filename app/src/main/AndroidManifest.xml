@@ -25,7 +25,6 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application
@@ -48,7 +47,6 @@
 
         <!-- Settings activity -->
         <activity android:name=".ui.main.PrefMainActivity"
-            android:label="@string/trime_app_name"
             android:launchMode="singleTask"/>
 
         <activity
