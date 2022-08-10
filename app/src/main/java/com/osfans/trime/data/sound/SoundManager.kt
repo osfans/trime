@@ -11,9 +11,9 @@ object SoundManager {
             ?.toMutableList() ?: mutableListOf()
     }
 
-    val sharedSounds: MutableList<String> = listSounds(DataManager.sharedDataDir)
+    val sharedSounds: MutableList<String> = listSounds(File(DataManager.sharedDataDir, "sound"))
 
-    val userSounds: MutableList<String> = listSounds(DataManager.userDataDir)
+    val userSounds: MutableList<String> = listSounds(File(DataManager.userDataDir, "sound"))
 
     fun getAllSounds(): List<String> {
         if (DataManager.sharedDataDir.absolutePath == DataManager.userDataDir.absolutePath) {
