@@ -116,6 +116,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "com.google.android.flexbox:flexbox:3.0.0"
+    
+    // Testing
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "junit:junit:4.13.2"
 }
 repositories {
     mavenCentral()
