@@ -985,7 +985,6 @@ preset_keyboards:
     author: "暖暖"
     name: 26键默认布局
     width: 10
-  #  height: 48
     ascii_mode: 0
     keys:
       - {click: q, long_click: 1, key_back_color: bh1, key_text_color: th1}
@@ -1028,6 +1027,179 @@ preset_keyboards:
       - {click: '.', label: '。', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
       - {click: '/', long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
       - {click: Return, composing: Return1, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
+
+  qwerty:
+    author: "tumuyan"
+    name: 26键字母布局
+    import_preset: default
+
+  qwerty0_=:
+    author: "tumuyan"
+    name: 44键布局
+    import_preset: qwerty0_
+
+  qwerty0:
+    author: "tumuyan"
+    name: 26键字母+数字键布局
+    width: 10
+    ascii_mode: 0
+    keys:
+      - {click: '1', key_back_color: bh1, key_text_color: th1}
+      - {click: '2', key_back_color: bh1, key_text_color: th1}
+      - {click: '3', key_back_color: bh1, key_text_color: th1}
+      - {click: '4', key_back_color: bh1, key_text_color: th1}
+      - {click: '5', key_back_color: bh1, key_text_color: th1}
+      - {click: '6', key_back_color: bh1, key_text_color: th1}
+      - {click: '7', key_back_color: bh1, key_text_color: th1}
+      - {click: '8', key_back_color: bh1, key_text_color: th1}
+      - {click: '9', key_back_color: bh1, key_text_color: th1}
+      - {click: '0', key_back_color: bh1, key_text_color: th1}
+
+      - {click: q, long_click: '`', key_back_color: bh1, key_text_color: th1}
+      - {click: w, long_click: '-', key_back_color: bh1, key_text_color: th1}
+      - {click: e, long_click: '=', key_back_color: bh1, key_text_color: th1}
+      - {click: r, long_click: '[', key_back_color: bh1, key_text_color: th1}
+      - {click: t, long_click: ']', key_back_color: bh1, key_text_color: th1}
+      - {click: y, long_click: '\', key_back_color: bh1, key_text_color: th1}
+      - {click: u, long_click: ';', key_back_color: bh1, key_text_color: th1}
+      - {click: i, long_click: "'", key_back_color: bh1, key_text_color: th1}
+      - {click: o, long_click: "{Left}", key_back_color: bh1, key_text_color: th1}
+      - {click: p, long_click: "{Right}", key_back_color: bh1, key_text_color: th1}
+
+      - {width: 5, key_back_color: bh2, key_text_color: th2}
+      - {click: a, long_click: select_all, key_back_color: bh2, key_text_color: th2}
+      - {click: s, long_click: '@', key_back_color: bh2, key_text_color: th2}
+      - {click: d, long_click: '#', key_back_color: bh2, key_text_color: th2}
+      - {click: f, long_click: '$', key_back_color: bh2, key_text_color: th2}
+      - {click: g, long_click: '%', swipe_down: "date_time", key_back_color: bh2, key_text_color: th2}
+      - {click: h, long_click: '!', swipe_down: "+", key_back_color: bh2, key_text_color: th2}
+      - {click: j, long_click: '&', swipe_down: "-", key_back_color: bh2, key_text_color: th2}
+      - {click: k, long_click: '*', swipe_down: "_", key_back_color: bh2, key_text_color: th2}
+      - {click: l, long_click: '(){Left}', swipe_down: "=", key_back_color: bh2, key_text_color: th2}
+      - {width: 5, key_back_color: bh2, key_text_color: th2}
+
+      - {click: Shift_L, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
+      - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
+      - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
+      - {click: v, long_click: paste_clip, swipe_down: paste, key_back_color: bh3, key_text_color: th3}
+      - {click: b, long_click: ";", swipe_down: "\\", key_back_color: bh3, key_text_color: th3}
+      - {click: n, long_click: ":", key_back_color: bh3, key_text_color: th3}
+      - {click: m, long_click: '?', swipe_down: "|", key_back_color: bh3, key_text_color: th3}
+      - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
+
+      - {click: Keyboard_number, long_click: Menu, width: 12.5, key_back_color: bgn, key_text_color: tgn}
+      - {click: Keyboard_bqrw, long_click: Theme_settings, swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+      - {click: ',', label: '，', long_click: '<>{Left}', key_back_color: bh4, key_text_color: th4}
+      - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
+      - {click: '.', label: '。', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
+      - {click: '/', long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
+      - {click: Return, composing: Return1, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
+
+  qwerty_:
+    author: "tumuyan"
+    name: 30键布局
+    width: 10
+    ascii_mode: 0
+    keys:
+      - {click: q, long_click: 1, key_back_color: bh1, key_text_color: th1}
+      - {click: w, long_click: 2, key_back_color: bh1, key_text_color: th1}
+      - {click: e, long_click: 3, key_back_color: bh1, key_text_color: th1}
+      - {click: r, long_click: 4, key_back_color: bh1, key_text_color: th1}
+      - {click: t, long_click: 5, key_back_color: bh1, key_text_color: th1}
+      - {click: y, long_click: 6, key_back_color: bh1, key_text_color: th1}
+      - {click: u, long_click: 7, key_back_color: bh1, key_text_color: th1}
+      - {click: i, long_click: 8, key_back_color: bh1, key_text_color: th1}
+      - {click: o, long_click: 9, key_back_color: bh1, key_text_color: th1}
+      - {click: p, long_click: 0, key_back_color: bh1, key_text_color: th1}
+
+      - {click: a, long_click: select_all, key_back_color: bh2, key_text_color: th2}
+      - {click: s, long_click: '@', key_back_color: bh2, key_text_color: th2}
+      - {click: d, long_click: '#', key_back_color: bh2, key_text_color: th2}
+      - {click: f, long_click: '$', key_back_color: bh2, key_text_color: th2}
+      - {click: g, long_click: '%', swipe_down: "date_time", key_back_color: bh2, key_text_color: th2}
+      - {click: h, long_click: '!', key_back_color: bh2, key_text_color: th2}
+      - {click: j, long_click: '(){Left}', swipe_down: "-", key_back_color: bh2, key_text_color: th2}
+      - {click: k, long_click: '-', key_back_color: bh2, key_text_color: th2}
+      - {click: l, long_click: '=', key_back_color: bh2, key_text_color: th2}
+      - {click: ';', long_click: "'", key_back_color: bh2, key_text_color: th2}
+
+      - {click: Shift_L, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
+      - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
+      - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
+      - {click: v, long_click: paste_clip, swipe_down: paste, key_back_color: bh3, key_text_color: th3}
+      - {click: b, long_click: "[", key_back_color: bh3, key_text_color: th3}
+      - {click: n, long_click: "]", key_back_color: bh3, key_text_color: th3}
+      - {click: m, long_click: '\\', key_back_color: bh3, key_text_color: th3}
+      - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
+
+      - {click: Keyboard_number, long_click: Menu, width: 12.5, key_back_color: bgn, key_text_color: tgn}
+      - {click: Keyboard_bqrw, long_click: Theme_settings, swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+      - {click: ',', long_click: '<>{Left}', key_back_color: bh4, key_text_color: th4}
+      - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
+      - {click: '.', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
+      - {click: '/', long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
+      - {click: Return, composing: Return1, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
+
+
+  qwerty0_:
+    author: "tumuyan"
+    name: 40键布局
+    width: 10
+    ascii_mode: 0
+    keys:
+      - {click: '1', key_back_color: bh1, key_text_color: th1}
+      - {click: '2', key_back_color: bh1, key_text_color: th1}
+      - {click: '3', key_back_color: bh1, key_text_color: th1}
+      - {click: '4', key_back_color: bh1, key_text_color: th1}
+      - {click: '5', key_back_color: bh1, key_text_color: th1}
+      - {click: '6', key_back_color: bh1, key_text_color: th1}
+      - {click: '7', key_back_color: bh1, key_text_color: th1}
+      - {click: '8', key_back_color: bh1, key_text_color: th1}
+      - {click: '9', key_back_color: bh1, key_text_color: th1}
+      - {click: '0', key_back_color: bh1, key_text_color: th1}
+
+      - {click: q, long_click: '`', key_back_color: bh1, key_text_color: th1}
+      - {click: w, long_click: '-', key_back_color: bh1, key_text_color: th1}
+      - {click: e, long_click: '=', key_back_color: bh1, key_text_color: th1}
+      - {click: r, long_click: '[', key_back_color: bh1, key_text_color: th1}
+      - {click: t, long_click: ']', key_back_color: bh1, key_text_color: th1}
+      - {click: y, long_click: '\', key_back_color: bh1, key_text_color: th1}
+      - {click: u, long_click: ';', key_back_color: bh1, key_text_color: th1}
+      - {click: i, long_click: "'", key_back_color: bh1, key_text_color: th1}
+      - {click: o, long_click: "{Left}", key_back_color: bh1, key_text_color: th1}
+      - {click: p, long_click: "{Right}", key_back_color: bh1, key_text_color: th1}
+
+      - {click: a, long_click: select_all, key_back_color: bh2, key_text_color: th2}
+      - {click: s, long_click: '@', key_back_color: bh2, key_text_color: th2}
+      - {click: d, long_click: '#', key_back_color: bh2, key_text_color: th2}
+      - {click: f, long_click: '$', key_back_color: bh2, key_text_color: th2}
+      - {click: g, long_click: '%', swipe_down: "date_time", key_back_color: bh2, key_text_color: th2}
+      - {click: h, long_click: '!', key_back_color: bh2, key_text_color: th2}
+      - {click: j, long_click: '(){Left}', swipe_down: "-", key_back_color: bh2, key_text_color: th2}
+      - {click: k, long_click: '-', key_back_color: bh2, key_text_color: th2}
+      - {click: l, long_click: '=', key_back_color: bh2, key_text_color: th2}
+      - {click: ';', long_click: "'", key_back_color: bh2, key_text_color: th2}
+
+      - {click: Shift_L, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
+      - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
+      - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
+      - {click: v, long_click: paste_clip, swipe_down: paste, key_back_color: bh3, key_text_color: th3}
+      - {click: b, long_click: "[", key_back_color: bh3, key_text_color: th3}
+      - {click: n, long_click: "]", key_back_color: bh3, key_text_color: th3}
+      - {click: m, long_click: '\\', key_back_color: bh3, key_text_color: th3}
+      - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
+
+      - {click: Keyboard_number, long_click: Menu, width: 12.5, key_back_color: bgn, key_text_color: tgn}
+      - {click: Keyboard_bqrw, long_click: Theme_settings, swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
+      - {click: ',', long_click: '<>{Left}', key_back_color: bh4, key_text_color: th4}
+      - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
+      - {click: '.', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
+      - {click: '/', long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
+      - {click: Return, composing: Return1, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
+
 
   letter:
     author: "暖暖"

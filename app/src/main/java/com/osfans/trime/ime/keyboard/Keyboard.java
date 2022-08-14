@@ -660,10 +660,16 @@ public class Keyboard {
           | KeyEvent.META_META_ON
           | KeyEvent.META_SHIFT_ON;
 
+  // shift被锁定，并且没有shift之外的修饰键被按下。
   public boolean isOnlyShiftOn() {
     return (mShiftKey != null
         && mShiftKey.isOn()
         && (mModifierState & MASK_META_WITHOUT_SHIFT) == 0);
+  }
+
+  // 修饰键中只有shift可能被按下
+  public boolean mayShifted() {
+    return (mModifierState & MASK_META_WITHOUT_SHIFT) == 0;
   }
 
   public boolean resetShifted() {

@@ -40,7 +40,7 @@ public class Event {
   private int code;
   private int mask = 0;
   private String text;
-  private String label, shiftLabel;
+  private String label, shiftLabel, presetLabel;
   private String preview;
   private List<?> states;
   private String command;
@@ -78,6 +78,7 @@ public class Event {
       select = ConfigGetter.getString(presetKey, "select", "");
       toggle = ConfigGetter.getString(presetKey, "toggle", "");
       label = ConfigGetter.getString(presetKey, "label", "");
+      presetLabel = label;
       preview = ConfigGetter.getString(presetKey, "preview", "");
       shiftLock = ConfigGetter.getString(presetKey, "shift_lock", "");
       commit = ConfigGetter.getString(presetKey, "commit", "");
@@ -183,17 +184,22 @@ public class Event {
   @NonNull
   private String adjustCase(String s) {
     if (TextUtils.isEmpty(s)) return "";
-    if (s.length() == 1 && mKeyboard != null && mKeyboard.needUpCase())
-      s = s.toUpperCase(Locale.getDefault());
-    else if (s.length() == 1
-        && mKeyboard != null
-        && !Rime.isAsciiMode()
-        && mKeyboard.isLabelUppercase()) s = s.toUpperCase(Locale.getDefault());
+    if (s.length() == 1 && mKeyboard != null && !Rime.isAsciiMode() && mKeyboard.mayShifted()) {
+      String v = Rime.getKeyboardLabel(s, mKeyboard.needUpCase());
+      if (v != null) s = v;
+    } else if (s.length() == 1 && mKeyboard != null && mKeyboard.needUpCase())
+      s = s.toUpperCase(Locale.ROOT);
+
     return s;
   }
 
   public String getLabel() {
     if (!TextUtils.isEmpty(toggle)) return (String) states.get(Rime.getOption(toggle) ? 1 : 0);
+
+    // 如非必要，勿设label
+    if (presetLabel != null && !Rime.isAsciiMode()) {
+      return presetLabel;
+    }
 
     if (mKeyboard.isOnlyShiftOn()) {
       if (code >= KeyEvent.KEYCODE_0
@@ -213,15 +219,22 @@ public class Event {
     return adjustCase(label);
   }
 
+  // todo 不在此处处理字母按键的事件，改为兜底方法处理键值
   public String getText() {
-    String s = "";
-    if (!TextUtils.isEmpty(text)) s = text;
-    else if (mKeyboard != null
-        && mKeyboard.needUpCase()
-        && mask == 0
-        && code >= KeyEvent.KEYCODE_A
-        && code <= KeyEvent.KEYCODE_Z) s = label;
-    return adjustCase(s);
+    if (TextUtils.isEmpty(text)) {
+      if (mKeyboard != null
+          && mask == 0
+          && !Rime.isAsciiMode()
+          && code >= KeyEvent.KEYCODE_A
+          && code <= KeyEvent.KEYCODE_Z) {
+        if (mKeyboard.getModifer() == 0)
+          return Character.toString((char) ('a' + code - KeyEvent.KEYCODE_A));
+        else if (mKeyboard.getModifer() == KeyEvent.META_SHIFT_ON)
+          return Character.toString((char) ('A' + code - KeyEvent.KEYCODE_A));
+      }
+      return "";
+    }
+    return adjustCase(text);
   }
 
   public String getPreviewText() {
@@ -243,6 +256,7 @@ public class Event {
     int c = code;
     if (c == KeyEvent.KEYCODE_SPACE) {
       label = Rime.getSchemaName();
+      presetLabel = label;
     } else {
       if (c > 0) label = Keycode.Companion.getDisplayLabel(c, mask);
     }

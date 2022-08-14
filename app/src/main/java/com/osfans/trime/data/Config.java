@@ -77,7 +77,7 @@ public class Config {
   private Map<?, ?> mStyle, mDefaultStyle;
   private String themeName, soundPackageName, currentSound;
   private static final String defaultName = "trime";
-  private String schema_id, colorID;
+  private String schema_id, colorID, schemaKeyboardLayout;
 
   private Map<?, ?> fallbackColors;
   private Map<String, Map<String, String>> presetColorSchemes;
@@ -316,6 +316,7 @@ public class Config {
     Timber.d("reset()");
     schema_id = Rime.getSchemaId();
     if (schema_id != null) mStyle = (Map<?, ?>) Rime.schema_get_value(schema_id, "style");
+    schemaKeyboardLayout = Rime.getKeyboardLayout();
   }
 
   @Nullable
@@ -378,29 +379,31 @@ public class Config {
 
   private String getKeyboardName(@NonNull String name) {
     if (name.contentEquals(".default")) {
-      if (presetKeyboards.containsKey(schema_id)) name = schema_id; // 匹配方案名
-      else {
-        if (schema_id.contains("_")) name = schema_id.split("_")[0];
-        if (!presetKeyboards.containsKey(name)) { // 匹配“_”前的方案名
-          Object o = Rime.schema_get_value(schema_id, "speller/alphabet");
-          name = "qwerty"; // 26
-          if (o != null) {
-            final String alphabet = o.toString();
-            if (presetKeyboards.containsKey(alphabet)) name = alphabet; // 匹配字母表
-            else {
-              if (alphabet.contains(",") || alphabet.contains(";")) name += "_";
-              if (alphabet.contains("0") || alphabet.contains("1")) name += "0";
-            }
-          }
+      // 匹配方案名
+      if (presetKeyboards.containsKey(schema_id)) return schema_id;
+      // 匹配“_”前的方案名
+      if (schema_id.contains("_")) {
+        String s = schema_id.split("_")[0];
+        if (presetKeyboards.containsKey(s)) return s;
+      }
+      // 方案中 schema/keyboard/layout 定义的键盘布局
+      if (presetKeyboards.containsKey(schemaKeyboardLayout)) return schemaKeyboardLayout;
+
+      // 解析方案中的编码，获取键盘布局
+      Object o = Rime.schema_get_value(schema_id, "speller/alphabet");
+      if (o != null) {
+        final String alphabet = o.toString();
+        if (alphabet.matches("\\d+")) name = "123";
+        else if (alphabet.contains("=") || alphabet.contains("\\") || alphabet.contains("]"))
+          name = "qwerty0_=";
+        else {
+          if (alphabet.contains("[0-9]+")) name = "qwerty0";
+          else name = "qwerty";
+          if (alphabet.contains(",") || alphabet.contains(";")) name += "_";
         }
       }
     }
     if (!presetKeyboards.containsKey(name)) name = "default";
-    @Nullable final Map<?, ?> m = (Map<?, ?>) presetKeyboards.get(name);
-    assert m != null;
-    if (m.containsKey("import_preset")) {
-      name = Objects.requireNonNull(m.get("import_preset")).toString();
-    }
     return name;
   }
 
@@ -409,6 +412,11 @@ public class Config {
     final List<String> keyboards = new ArrayList<>();
     for (Object s : names) {
       s = getKeyboardName((String) s);
+      @Nullable final Map<?, ?> m = (Map<?, ?>) presetKeyboards.get(s);
+      assert m != null;
+      if (m.containsKey("import_preset")) {
+        s = Objects.requireNonNull(m.get("import_preset")).toString();
+      }
       if (!keyboards.contains(s)) keyboards.add((String) s);
     }
     return keyboards;

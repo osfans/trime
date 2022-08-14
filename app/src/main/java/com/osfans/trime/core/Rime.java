@@ -26,6 +26,7 @@ import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.util.ConfigGetter;
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.File;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import timber.log.Timber;
 
@@ -46,6 +48,8 @@ import timber.log.Timber;
  *     href="https://github.com/BYVoid/OpenCC">OpenCC</a>
  */
 public class Rime {
+  private static Map<String, String> mKeyboardLabels;
+
   /** Rime編碼區 */
   public static class RimeComposition {
     int length;
@@ -145,6 +149,8 @@ public class Rime {
 
     Map<String, Object> schema = new HashMap<String, Object>();
     List<Map<String, Object>> switches = new ArrayList<Map<String, Object>>();
+    Map<String, String> keyboardLabels = new HashMap<>();
+    String keyboardLayout;
 
     public RimeSchema(String schema_id) {
       Timber.d("RimeSchema() start");
@@ -161,6 +167,34 @@ public class Rime {
       o = schema_get_value(schema_id, "menu");
       if (o == null || !(o instanceof HashMap)) return;
       Timber.d("RimeSchema() menu.page_size=" + ((Map<Object, Object>) o).get("page_size"));
+
+      o = schema.get("keyboard");
+      if (o != null && o instanceof HashMap) {
+        Map<String, Object> keyboard = (Map<String, Object>) o;
+        if (keyboard.containsKey("layout")) {
+          keyboardLayout = (String) keyboard.get("layout");
+        }
+
+        if (keyboard.containsKey("label")) {
+          o = keyboard.get("label");
+          if (o instanceof HashMap) {
+            keyboardLabels = (Map<String, String>) o;
+          } else {
+            keyboardLabels = (Map<String, String>) ConfigGetter.loadMap("keyboard", (String) o);
+            if (keyboardLabels != null && keyboardLabels.containsKey("import")) {
+              Map<String, String> map =
+                  (Map<String, String>)
+                      ConfigGetter.loadMap("keyboard", keyboardLabels.get("import"));
+              if (o != null) {
+                for (Map.Entry<String, String> set : map.entrySet()) {
+                  if (!keyboardLabels.containsKey(set.getKey()))
+                    keyboardLabels.put(set.getKey(), set.getValue());
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     public void check() {
@@ -328,6 +362,19 @@ public class Rime {
     Timber.d("initSchema() getStatus");
     getStatus();
     Timber.d("initSchema() done");
+    mKeyboardLabels = mSchema.keyboardLabels;
+  }
+
+  public static String getKeyboardLayout() {
+    return mSchema.keyboardLayout;
+  }
+
+  public static String getKeyboardLabel(String s, boolean upCase) {
+    String ss = upCase ? s.toUpperCase(Locale.ROOT) : s;
+    if (mKeyboardLabels != null) {
+      if (mKeyboardLabels.containsKey(ss)) return mKeyboardLabels.get(ss);
+    }
+    return ss;
   }
 
   @SuppressWarnings("UnusedReturnValue")

@@ -1051,6 +1051,7 @@ public class Trime extends LifecycleInputMethodService {
   // 处理键盘事件(Android keycode)
   public boolean handleKey(int keyEventCode, int metaState) { // 軟鍵盤
     textInputManager.setNeedSendUpRimeKey(false);
+    // todo 英文模式下，跳过rime处理流程
     if (onRimeKey(Event.getRimeEvent(keyEventCode, metaState))) {
       // 如果输入法消费了按键事件，则需要释放按键
       textInputManager.setNeedSendUpRimeKey(true);
