@@ -16,6 +16,7 @@ public class DraftDao {
 
   private SQLiteOpenHelper helper;
   private static DraftDao self;
+  private static String DB_NAME = "draft.db";
 
   public static DraftDao get() {
     if (null == self) self = new DraftDao();
@@ -26,7 +27,7 @@ public class DraftDao {
 
   /** 插入新记录 * */
   public void insert(@NonNull DbBean bean) {
-    helper = new DbHelper(Trime.getService(), "draft.db");
+    helper = new DbHelper(Trime.getService(), DB_NAME);
     SQLiteDatabase db = helper.getWritableDatabase();
     db.execSQL(
         "insert into t_data(text,html,type,time) values(?,?,?,?)",
@@ -36,12 +37,27 @@ public class DraftDao {
 
   /** 删除文字相同的记录，插入新记录 * */
   public void add(@NonNull DbBean bean) {
-    helper = new DbHelper(Trime.getService(), "draft.db");
+    helper = new DbHelper(Trime.getService(), DB_NAME);
     SQLiteDatabase db = helper.getWritableDatabase();
     db.delete("t_data", "text=?", new String[] {bean.getText()});
     db.execSQL(
         "insert into t_data(text,html,type,time) values(?,?,?,?)",
         new Object[] {bean.getText(), bean.getHtml(), bean.getType(), bean.getTime()});
+    db.close();
+  }
+
+  /** 删除记录 * */
+  public void delete(@NonNull String str) {
+    helper = new DbHelper(Trime.getService(), DB_NAME);
+    SQLiteDatabase db = helper.getWritableDatabase();
+    db.delete("t_data", "text=?", new String[] {str});
+    db.close();
+  }
+
+  public void delete(@NonNull List<SimpleKeyBean> list) {
+    helper = new DbHelper(Trime.getService(), DB_NAME);
+    SQLiteDatabase db = helper.getWritableDatabase();
+    for (SimpleKeyBean bean : list) db.delete("t_data", "text=?", new String[] {bean.getText()});
     db.close();
   }
 
@@ -53,7 +69,7 @@ public class DraftDao {
     String sql = "select text , html , type , time from t_data ORDER BY time DESC";
     if (size > 0) sql = sql + " limit 0," + size;
 
-    helper = new DbHelper(Trime.getService(), "draft.db");
+    helper = new DbHelper(Trime.getService(), DB_NAME);
 
     SQLiteDatabase db = helper.getWritableDatabase();
     Cursor cursor = db.rawQuery(sql, null);

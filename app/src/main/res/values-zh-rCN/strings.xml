@@ -246,4 +246,10 @@
     <string name="profile_reset_summary">用默认的内置配置覆盖共享目录中的相同文件</string>
     <string name="profile_sync_user_data_summary">备份配置文件和同步用户词典</string>
     <string name="pref_select_schemas_summary">启用或禁用方案并部署</string>
+    <string name="other__list_clipboard_title">剪贴板内容</string>
+    <string name="other__list_draft_title">草稿箱内容</string>
+    <string name="other__list_collection_title">收藏夹内容</string>
+    <string name="delete">删除</string>
+    <string name="collect">收藏</string>
+    <string name="liquid_keyboard_search_hint">搜索(暂未实现)</string>
 </resources>

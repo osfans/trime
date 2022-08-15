@@ -250,4 +250,10 @@
     <string name="success">success</string>
     <string name="failure">failure</string>
     <string name="pref_profile_summary">Define storage locations and change sync settings, etc.</string>
+    <string name="other__list_clipboard_title">Clipboard Data</string>
+    <string name="other__list_draft_title">Draft Data</string>
+    <string name="other__list_collection_title">Collection Data</string>
+    <string name="delete">Delete</string>
+    <string name="collect">Collect</string>
+    <string name="liquid_keyboard_search_hint">Search ( comming soon )</string>
 </resources>

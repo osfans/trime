@@ -26,6 +26,19 @@
         android:title="@string/other__destroy_on_quit_title" />
 
 
+
+    <Preference android:key="other__list_clipboard"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__list_clipboard_title"/>
+
+    <Preference android:key="other__list_collection"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__list_collection_title"/>
+
+    <Preference android:key="other__list_draft"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__list_draft_title"/>
+
     <ListPreference
         android:defaultValue="100"
         app:iconSpaceReserved="false"

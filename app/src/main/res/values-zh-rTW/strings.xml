@@ -247,4 +247,10 @@
     <string name="profile_last_sync_in_background">上次後臺同步時間：%s\n狀態：%s</string>
     <string name="success">成功</string>
     <string name="failure">失敗</string>
+    <string name="other__list_clipboard_title">剪貼板內容</string>
+    <string name="other__list_draft_title">草稿箱內容</string>
+    <string name="other__list_collection_title">收藏夾內容</string>
+    <string name="delete">刪除</string>
+    <string name="collect">收藏</string>
+    <string name="liquid_keyboard_search_hint">搜索(暫未實現)</string>
 </resources>
