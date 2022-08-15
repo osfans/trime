@@ -74,6 +74,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
+
+        <activity
+            android:name=".ui.main.LiquidKeyboardActivity"
+            android:parentActivityName=".ui.main.PrefMainActivity"
+            />
         <!-- All activities must be declared above <activity-alias> tag -->
     </application>
 </manifest>

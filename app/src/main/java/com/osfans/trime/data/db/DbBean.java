@@ -6,7 +6,7 @@ public class DbBean extends SimpleKeyBean {
   private long time;
   private String text;
   private final String html;
-  private int type;
+  private int type; // 0 text, 1 html
 
   public long getTime() {
     return time;

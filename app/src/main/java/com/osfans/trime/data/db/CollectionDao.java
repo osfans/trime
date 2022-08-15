@@ -1,28 +1,26 @@
-package com.osfans.trime.data.db.clipboard;
+package com.osfans.trime.data.db;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
-import com.osfans.trime.data.db.DbBean;
-import com.osfans.trime.data.db.DbHelper;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.util.ArrayList;
 import java.util.List;
 import timber.log.Timber;
 
-public class ClipboardDao {
+public class CollectionDao {
 
   private DbHelper helper;
-  private static ClipboardDao self;
-  private static String DB_NAME = "clipboard.db";
+  private static CollectionDao self;
+  private static String DB_NAME = "collection.db";
 
-  public static ClipboardDao get() {
-    if (null == self) self = new ClipboardDao();
+  public static CollectionDao get() {
+    if (null == self) self = new CollectionDao();
     return self;
   }
 
-  public ClipboardDao() {}
+  public CollectionDao() {}
 
   /** 插入新记录 * */
   public void insert(@NonNull DbBean clipboardBean) {
@@ -70,13 +68,11 @@ public class ClipboardDao {
     db.close();
   }
 
-  public List<SimpleKeyBean> getAllSimpleBean(int size) {
+  public List<SimpleKeyBean> getAllSimpleBean() {
 
     List<SimpleKeyBean> list = new ArrayList<>();
-    if (size == 0) return list;
 
     String sql = "select text , html , type , time from t_data ORDER BY time DESC";
-    if (size > 0) sql = sql + " limit 0," + size;
 
     helper = new DbHelper(Trime.getService(), DB_NAME);
 
@@ -90,7 +86,7 @@ public class ClipboardDao {
       cursor.close();
     }
     db.close();
-    Timber.d("getAllSimpleBean() size=%s limit=%s", list.size(), size);
+    Timber.d("getAllSimpleBean() size=%s", list.size());
     return list;
   }
 }

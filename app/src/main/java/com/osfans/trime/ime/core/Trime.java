@@ -62,6 +62,7 @@ import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
+import com.osfans.trime.data.db.CollectionDao;
 import com.osfans.trime.data.db.clipboard.ClipboardDao;
 import com.osfans.trime.data.db.draft.DraftDao;
 import com.osfans.trime.databinding.CompositionRootBinding;
@@ -237,9 +238,7 @@ public class Trime extends LifecycleInputMethodService {
       };
 
   @Synchronized
-  @NonNull
   public static Trime getService() {
-    assert self != null;
     return self;
   }
 
@@ -391,6 +390,7 @@ public class Trime extends LifecycleInputMethodService {
             new LiquidKeyboard(
                 this, getImeConfig().getClipboardLimit(), getImeConfig().getDraftLimit());
         clipBoardMonitor();
+        CollectionDao.get();
         DraftDao.get();
       } catch (Exception e) {
         e.printStackTrace();

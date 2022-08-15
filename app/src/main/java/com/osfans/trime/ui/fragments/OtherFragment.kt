@@ -2,17 +2,21 @@ package com.osfans.trime.ui.fragments
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.Config
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ui.main.LiquidKeyboardActivity
 import com.osfans.trime.ui.main.MainViewModel
 
 class OtherFragment :
@@ -61,6 +65,24 @@ class OtherFragment :
                 )
             }
         }
+    }
+
+    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
+        val key = preference?.key
+        if (key == "other__list_clipboard" ||
+            key == "other__list_collection" ||
+            key == "other__list_draft"
+        ) {
+            if (Trime.getService() == null)
+                ToastUtils.showShort(R.string.setup__select_ime_hint)
+            else {
+                val intent = Intent(this.context, LiquidKeyboardActivity::class.java)
+                intent.putExtra("type", key.replace("other__list_", ""))
+                startActivity(intent)
+            }
+            return true
+        }
+        return super.onPreferenceTreeClick(preference)
     }
 
     override fun onResume() {
