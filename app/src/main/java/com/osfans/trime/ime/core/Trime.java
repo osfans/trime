@@ -769,7 +769,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void setShowComment(boolean show_comment) {
-    // if (mCandidateRoot != null) mCandidate.setShowComment(show_comment);
+    if (mCandidateRoot != null) mCandidate.setShowComment(show_comment);
     mComposition.setShowComment(show_comment);
   }
 
