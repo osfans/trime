@@ -252,4 +252,5 @@
     <string name="delete">删除</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暂未实现)</string>
+    <string name="other__draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
 </resources>
