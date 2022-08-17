@@ -73,4 +73,12 @@
         android:title="@string/other__draft_output_title"
         android:defaultValue=""
         app:useSimpleSummaryProvider="true"/>
+
+    <EditTextPreference android:key="other__draft_exclude_app"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__draft_exclude_app_title"
+        android:defaultValue=""
+        app:useSimpleSummaryProvider="true"/>
+
+
 </PreferenceScreen>

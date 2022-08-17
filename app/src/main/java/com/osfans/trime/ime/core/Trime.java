@@ -58,6 +58,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.BarUtils;
+import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
@@ -852,7 +853,12 @@ public class Trime extends LifecycleInputMethodService {
         if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)
             == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
           //  应用程求以隐身模式打开键盘应用程序
+          normalTextEditor = false;
           Timber.i("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
+        } else if (attribute.packageName.equals(BuildConfig.APPLICATION_ID)
+            || getPrefs().getOther().getDraftExcludeApp().contains(attribute.packageName)) {
+          normalTextEditor = false;
+          Timber.i("EditorInfo: normal -> exclude, packageName=" + attribute.packageName);
         } else {
           normalTextEditor = true;
           activeEditorInstance.cacheDraft();
@@ -863,7 +869,10 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onFinishInputView(boolean finishingInput) {
-    if (normalTextEditor) addDraft();
+    if (normalTextEditor) {
+      activeEditorInstance.cacheDraft();
+      addDraft();
+    }
     super.onFinishInputView(finishingInput);
     // Dismiss any pop-ups when the input-view is being finished and hidden.
     mainKeyboardView.closing();
