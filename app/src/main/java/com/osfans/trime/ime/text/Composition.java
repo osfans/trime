@@ -46,6 +46,7 @@ import com.osfans.trime.data.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.ConfigGetter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import timber.log.Timber;
@@ -63,7 +64,7 @@ public class Composition extends AppCompatTextView {
   private int max_entries = Candidate.getMaxCandidateCount();
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
-  private List<Map<String, Object>> windows_comps;
+  private List<Map<String, Object>> windows_comps, liquid_keyboard_window_comp;
   private SpannableStringBuilder ss;
   private final int span = 0;
   private String movable;
@@ -210,7 +211,14 @@ public class Composition extends AppCompatTextView {
 
   public void reset(Context context) {
     final Config config = Config.get(context);
-    windows_comps = (List<Map<String, Object>>) config.getValue("window");
+
+    Object o = config.getValue("window");
+    if (o == null) windows_comps = new ArrayList<>();
+    else windows_comps = (List<Map<String, Object>>) o;
+    o = config.getValue("liquid_keyboard_window");
+    if (o == null) liquid_keyboard_window_comp = new ArrayList<>();
+    else liquid_keyboard_window_comp = (List<Map<String, Object>>) o;
+
     if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
     candidate_use_cursor = config.getBoolean("candidate_use_cursor");
     text_size = config.getPixel("text_size");
@@ -563,5 +571,25 @@ public class Composition extends AppCompatTextView {
     setText(ss);
     setMovementMethod(LinkMovementMethod.getInstance());
     return start_num;
+  }
+
+  /** 设置悬浮窗, 用于liquidKeyboard的悬浮窗工具栏 */
+  public void setWindow() {
+    if (getVisibility() != View.VISIBLE) return;
+    if (liquid_keyboard_window_comp.isEmpty()) {
+      this.setVisibility(GONE);
+      return;
+    }
+
+    ss = new SpannableStringBuilder();
+
+    for (Map<String, ?> m : liquid_keyboard_window_comp) {
+      if (m.containsKey("composition")) appendComposition(m);
+      else if (m.containsKey("click")) appendButton(m);
+    }
+    setSingleLine(!ss.toString().contains("\n"));
+
+    setText(ss);
+    setMovementMethod(LinkMovementMethod.getInstance());
   }
 }
