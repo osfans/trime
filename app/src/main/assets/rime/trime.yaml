@@ -57,6 +57,11 @@ style:
     - {start: "", move: 'ㄓ ', end: ""}
     - {start: "", composition: "%s", end: "", letter_spacing: 0} #letter_spacing需要>=Android5.0。TODO: 不爲0時，會導致不換行的問題
     - {start: "\n", label: "%s.", candidate: "%s", comment: " %s", end: "", sep: " "}
+  liquid_keyboard_window: #液态键盘模式下显示的悬浮窗口組件
+    - {start: "", click: "space", label: " 空格 "}
+    - {start: "", click: "BackSpace", label: " 删除 "}
+    - {start: "", click: "Return", label: " 回车 "}
+    - {start: "", click: "liquid_keyboard_exit", label: " 返回 "}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_long_text_size: 14 #長標籤字號
@@ -918,7 +923,7 @@ preset_keys:
   Keyboard_default: {label: 返回, send: Eisu_toggle, select: .default}
   Keyboard_switch: {label: 鍵盤, send: Eisu_toggle, select: .next}
   liquid_keyboard_switch: { label: 更多, send: function, command: liquid_keyboard, option: "特殊" }
-  liquid_keyboard_switch2: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 更多 ] }
+  liquid_keyboard_exit: {label: 返回, send: function, command: liquid_keyboard, option: "-1"}  #退出liquidkeyboard
   liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
   liquid_keyboard_clipboard: { label: 剪贴, send: function, command: liquid_keyboard, option: "剪贴" }
   # trime設定

@@ -897,7 +897,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       int[] drawableState = key.getCurrentDrawableState();
       keyBackground = key.getBackColorForState(drawableState);
       if (keyBackground == null) {
-        Timber.i("onBufferDraw() keyBackground==null, key=%s", key.getLabel());
+        Timber.d("onBufferDraw() keyBackground==null, key=%s", key.getLabel());
         try {
           final int index = (int) findStateDrawableIndex.invoke(mKeyBackColor, drawableState);
           keyBackground = (Drawable) getStateDrawable.invoke(mKeyBackColor, index);
