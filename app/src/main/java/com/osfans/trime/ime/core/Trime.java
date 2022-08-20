@@ -427,6 +427,16 @@ public class Trime extends LifecycleInputMethodService {
 
   private SymbolKeyboardType symbolKeyboardType = SymbolKeyboardType.NO_KEY;
 
+  public void inputSymbol(final String text) {
+    textInputManager.onPress(KeyEvent.KEYCODE_UNKNOWN);
+    if (Rime.isAsciiMode()) Rime.setOption("ascii_mode", false);
+    boolean asciiPunch = Rime.isAsciiPunch();
+    if (asciiPunch) Rime.setOption("ascii_punct", false);
+    textInputManager.onText("{Escape}" + text);
+    if (asciiPunch) Rime.setOption("ascii_punct", true);
+    Trime.getService().selectLiquidKeyboard(-1);
+  }
+
   public void selectLiquidKeyboard(final int tabIndex) {
     final LinearLayout symbolInputView =
         inputRootBinding != null ? inputRootBinding.symbol.symbolInput : null;
