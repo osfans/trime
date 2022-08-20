@@ -26,6 +26,7 @@ import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.File;
@@ -46,6 +47,8 @@ import timber.log.Timber;
  *     href="https://github.com/BYVoid/OpenCC">OpenCC</a>
  */
 public class Rime {
+  private static Map<String, Object> mSymbols;
+
   /** Rime編碼區 */
   public static class RimeComposition {
     int length;
@@ -145,6 +148,7 @@ public class Rime {
 
     Map<String, Object> schema = new HashMap<String, Object>();
     List<Map<String, Object>> switches = new ArrayList<Map<String, Object>>();
+    Map<String, Object> symbolMap = new HashMap<>();
 
     public RimeSchema(String schema_id) {
       Timber.d("RimeSchema() start");
@@ -161,6 +165,14 @@ public class Rime {
       o = schema_get_value(schema_id, "menu");
       if (o == null || !(o instanceof HashMap)) return;
       Timber.d("RimeSchema() menu.page_size=" + ((Map<Object, Object>) o).get("page_size"));
+
+      // todo 取回的key正常，value为null，导致symbolMap无法正常使用
+      o = schema_get_value(schema_id, "punctuator/symbols");
+      if (o != null && o instanceof HashMap) {
+        symbolMap = (Map<String, Object>) o;
+      } else {
+        symbolMap = new HashMap<>();
+      }
     }
 
     public void check() {
@@ -328,6 +340,26 @@ public class Rime {
     Timber.d("initSchema() getStatus");
     getStatus();
     Timber.d("initSchema() done");
+    mSymbols = mSchema.symbolMap;
+  }
+
+  public static boolean hasSymbols(String key) {
+    return (mSymbols.containsKey(key));
+  }
+
+  public static List<String> getSymbols(String key) {
+    if (mSymbols.containsKey(key)) {
+      return (List<String>) mSymbols.get(key);
+    }
+    return new ArrayList<String>();
+  }
+
+  public static List<SimpleKeyBean> getSymbolKeyBeans() {
+    List<SimpleKeyBean> list = new ArrayList<>();
+    for (Map.Entry m : mSymbols.entrySet()) {
+      list.add(new SimpleKeyBean(m.getKey().toString()));
+    }
+    return list;
   }
 
   @SuppressWarnings("UnusedReturnValue")

@@ -121,6 +121,7 @@ public class LiquidKeyboard {
         initCandidateAdapter();
         initVarLengthKeys(i);
         break;
+      case SYMBOL:
       case HISTORY:
       case TABS:
         TabManager.get().select(i);
@@ -254,7 +255,9 @@ public class LiquidKeyboard {
     // 列表适配器的点击监听事件
     simpleAdapter.setOnItemClickListener(
         (view, position) -> {
-          if (keyboardType != SymbolKeyboardType.TABS) {
+          if (keyboardType == SymbolKeyboardType.SYMBOL) {
+            Trime.getService().inputSymbol(simpleKeyBeans.get(position).getText());
+          } else if (keyboardType != SymbolKeyboardType.TABS) {
             InputConnection ic = Trime.getService().getCurrentInputConnection();
             if (ic != null) {
               SimpleKeyBean bean = simpleKeyBeans.get(position);
