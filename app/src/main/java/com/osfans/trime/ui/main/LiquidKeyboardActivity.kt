@@ -6,6 +6,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.blankj.utilcode.util.BarUtils
@@ -20,6 +22,7 @@ class LiquidKeyboardActivity : AppCompatActivity() {
     val CLIPBOARD = "clipboard"
     val COLLECTION = "collection"
     val DRAFT = "draft"
+    var dbName = "clipboard"
     lateinit var binding: LiquidKeyboardActivityBinding
     var type: String = CLIPBOARD
     var beans: List<SimpleKeyBean> = ArrayList()
@@ -81,6 +84,26 @@ class LiquidKeyboardActivity : AppCompatActivity() {
             Timber.d("collect")
             mAdapter.collectSelected()
         }
+
+        binding.btnEdit.setOnClickListener {
+
+            val et = EditText(this)
+            et.setText(mAdapter.checkedText)
+            AlertDialog.Builder(this)
+                .setTitle(R.string.edit)
+                .setView(et)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    mAdapter.updateItem(et.text.toString())
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+
+        binding.btnMerge.setOnClickListener {
+            Timber.d("merge")
+            mAdapter.mergeItem()
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -105,13 +128,15 @@ class LiquidKeyboardActivity : AppCompatActivity() {
     }
 
     fun getDbData() {
-        binding.progressBar.setVisibility(View.VISIBLE)
+        binding.progressBar.visibility = View.VISIBLE
 
         if (type.equals(COLLECTION)) {
-            beans = DbDao(DbDao.COLLECTION).getAllSimpleBean(-1)
-            binding.btnCollect.setVisibility(View.GONE)
+            dbName = type + ".db"
+            beans = DbDao(dbName).getAllSimpleBean(-1)
+            binding.btnCollect.visibility = View.GONE
         } else if (type.equals(DRAFT)) {
-            beans = DbDao(DbDao.DRAFT).getAllSimpleBean(1000)
+            dbName = type + ".db"
+            beans = DbDao(dbName).getAllSimpleBean(1000)
         } else {
             beans = DbDao(DbDao.CLIPBOARD).getAllSimpleBean(1000)
         }
@@ -119,15 +144,24 @@ class LiquidKeyboardActivity : AppCompatActivity() {
         mAdapter = CheckableAdatper(
             this,
             R.layout.checkable_item,
-            beans
+            beans,
+            dbName
         )
-        binding.listWord.setAdapter(mAdapter)
+        binding.listWord.adapter = mAdapter
 
         binding.listWord.setOnItemClickListener({ parent: AdapterView<*>?, view: View?, i: Int, l: Long ->
             mAdapter.clickItem(
                 i
             )
+            val selected = mAdapter.checked.size
+            if (selected> 1) {
+                binding.btnEdit.visibility = View.GONE
+                binding.btnMerge.visibility = View.VISIBLE
+            } else {
+                binding.btnEdit.visibility = View.VISIBLE
+                binding.btnMerge.visibility = View.GONE
+            }
         })
-        binding.progressBar.setVisibility(View.GONE)
+        binding.progressBar.visibility = View.GONE
     }
 }

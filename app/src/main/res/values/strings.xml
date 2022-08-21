@@ -258,4 +258,6 @@
     <string name="liquid_keyboard_search_hint">Search ( comming soon )</string>
     <string name="other__draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="other__draft_pinned_title">Pinned drafts of the current app</string>
+    <string name="edit">Edit</string>
+    <string name="merge">Merge</string>
 </resources>

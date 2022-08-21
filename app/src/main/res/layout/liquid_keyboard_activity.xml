@@ -54,6 +54,24 @@
             android:text="@string/delete" />
 
         <Button
+            android:id="@+id/btn_edit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="25dp"
+            android:text="@string/edit" />
+
+
+        <Button
+            android:id="@+id/btn_merge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:padding="25dp"
+            android:text="@string/merge" />
+
+        <Button
             android:id="@+id/btn_collect"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

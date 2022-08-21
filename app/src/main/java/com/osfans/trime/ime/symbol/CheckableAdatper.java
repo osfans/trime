@@ -19,6 +19,7 @@ import java.util.List;
 public class CheckableAdatper extends ArrayAdapter {
   private LayoutInflater layoutInflater = null;
   private List<SimpleKeyBean> words;
+  private String dbName;
 
   public List<Integer> getChecked() {
     return checked;
@@ -26,11 +27,25 @@ public class CheckableAdatper extends ArrayAdapter {
 
   private List<Integer> checked;
 
-  public CheckableAdatper(@NonNull Context context, int resource, @NonNull List objects) {
+  public String getCheckedText() {
+    if (checked.size() == 1) return words.get(checked.get(0)).getText();
+    if (checked.size() > 1) {
+      StringBuffer buffer = new StringBuffer();
+      for (int i : checked) {
+        buffer.append(words.get(checked.get(i)).getText());
+      }
+      return buffer.toString();
+    }
+    return "";
+  }
+
+  public CheckableAdatper(
+      @NonNull Context context, int resource, @NonNull List objects, String dbName) {
     super(context, resource, objects);
     layoutInflater = LayoutInflater.from(context);
     words = objects;
     checked = new ArrayList<>();
+    this.dbName = dbName;
     Log.i("UserDictAdatper", "set words.size=" + words.size());
   }
 
@@ -38,6 +53,47 @@ public class CheckableAdatper extends ArrayAdapter {
     if (checked.contains(position)) checked.remove((Integer) position);
     else checked.add(position);
 
+    notifyDataSetChanged();
+  }
+
+  public void updateItem(String text) {
+    if (checked.isEmpty()) {
+      new DbDao(dbName).add(new DbBean(text));
+      SimpleKeyBean bean = new SimpleKeyBean(text);
+      words.add(0, bean);
+    } else {
+      int position = checked.get(0);
+      new DbDao(dbName).update(words.get(position).getText(), text);
+      SimpleKeyBean bean = words.get(position);
+      bean.setText(text);
+      words.set(position, bean);
+    }
+    notifyDataSetChanged();
+  }
+
+  public void mergeItem() {
+
+    StringBuffer buffer = new StringBuffer();
+
+    for (int i : checked) {
+      buffer.append("\n");
+      buffer.append(words.get(i).getText());
+    }
+    String text = buffer.toString().trim();
+
+    Collections.sort(checked, Collections.reverseOrder());
+    List<SimpleKeyBean> result = new ArrayList<>();
+    for (int i : checked) {
+      if (i > words.size()) continue;
+      result.add(words.get(i));
+      words.remove(i);
+    }
+    checked.clear();
+    new DbDao(dbName).delete(result);
+    new DbDao(dbName).add(new DbBean(text));
+
+    SimpleKeyBean simpleKeyBean = new SimpleKeyBean(text);
+    words.add(0, simpleKeyBean);
     notifyDataSetChanged();
   }
 

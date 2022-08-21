@@ -1,5 +1,6 @@
 package com.osfans.trime.data.db;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
@@ -38,6 +39,15 @@ public class DbDao {
     db.execSQL(
         "insert into t_data(text,html,type,time) values(?,?,?,?)",
         new Object[] {bean.getText(), bean.getHtml(), bean.getType(), bean.getTime()});
+    db.close();
+  }
+
+  /** 更新记录 * */
+  public void update(@NonNull String oldText, @NonNull String newText) {
+    SQLiteDatabase db = helper.getWritableDatabase();
+    ContentValues args = new ContentValues();
+    args.put("text", newText);
+    db.update("t_data", args, "text=?", new String[] {oldText});
     db.close();
   }
 

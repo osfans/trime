@@ -255,4 +255,6 @@
     <string name="liquid_keyboard_search_hint">搜索(暫未實現)</string>
     <string name="other__draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="other__draft_pinned_title">頂置的當前App的草稿數量</string>
+    <string name="edit">編輯</string>
+    <string name="merge">合併</string>
 </resources>
