@@ -68,6 +68,12 @@
         app:title="@string/other__draft_manager_title"
         app:useSimpleSummaryProvider="true" />
 
+    <EditTextPreference android:key="other__draft_pinned"
+        app:iconSpaceReserved="false"
+        android:title="@string/other__draft_pinned_title"
+        android:defaultValue="3"
+        app:useSimpleSummaryProvider="true"/>
+
     <EditTextPreference android:key="other__draft_output"
         app:iconSpaceReserved="false"
         android:title="@string/other__draft_output_title"

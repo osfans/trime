@@ -10,8 +10,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.R;
-import com.osfans.trime.data.db.CollectionDao;
 import com.osfans.trime.data.db.DbBean;
+import com.osfans.trime.data.db.DbDao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +64,7 @@ public class CheckableAdatper extends ArrayAdapter {
       if (i > words.size()) continue;
       SimpleKeyBean bean = words.get(i);
       result.add(bean);
-      CollectionDao.get().insert(new DbBean(bean.getText()));
+      new DbDao(DbDao.COLLECTION).add(new DbBean(bean.getText()));
     }
     return result;
   }

@@ -11,11 +11,10 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
-import com.osfans.trime.data.db.CollectionDao;
 import com.osfans.trime.data.db.DbBean;
-import com.osfans.trime.data.db.clipboard.ClipboardDao;
-import com.osfans.trime.data.db.draft.DraftDao;
+import com.osfans.trime.data.db.DbDao;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.text.TextInputManager;
@@ -39,7 +38,13 @@ public class LiquidKeyboard {
   private List<SimpleKeyBean> clipboardBeanList, collectionBeanList, draftBeanList;
   private final List<SimpleKeyBean> simpleKeyBeans;
   private List<SimpleKeyBean> historyBeans;
-  private int margin_x, margin_top, single_width, parent_width, clipboard_max_size, draft_max_size;
+  private int margin_x,
+      margin_top,
+      single_width,
+      parent_width,
+      clipboard_max_size,
+      draft_max_size,
+      draft_pinned;
 
   private int keyHeight;
   private boolean isLand;
@@ -57,16 +62,10 @@ public class LiquidKeyboard {
   public LiquidKeyboard(Context context, int clipboard_max_size, int draft_max_size) {
     this.context = context;
 
+    AppPrefs prefs = AppPrefs.defaultInstance();
     this.clipboard_max_size = clipboard_max_size;
     this.draft_max_size = draft_max_size;
-    clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
-    Timber.d("clipboardBeanList.size=%s", clipboardBeanList.size());
-
-    collectionBeanList = CollectionDao.get().getAllSimpleBean();
-    Timber.d("collectionBeanList.size=%s", collectionBeanList.size());
-
-    draftBeanList = DraftDao.get().getAllSimpleBean(draft_max_size);
-    Timber.d("draftBeanList.size=%s", draftBeanList.size());
+    this.draft_pinned = Integer.parseInt(prefs.getOther().getDraftPinned());
 
     simpleKeyBeans = new ArrayList<>();
     historySavePath =
@@ -75,22 +74,15 @@ public class LiquidKeyboard {
 
   public void addClipboardData(String text) {
     DbBean bean = new DbBean(text);
-    ClipboardDao.get().add(bean);
-    clipboardBeanList.add(0, bean);
+    new DbDao(DbDao.CLIPBOARD).add(bean);
+    if (clipboardBeanList != null) clipboardBeanList.add(0, bean);
     if (mClipboardAdapter != null) mClipboardAdapter.notifyItemInserted(0);
   }
 
-  public void addCollectionData(String text) {
-    DbBean bean = new DbBean(text);
-    CollectionDao.get().add(bean);
-    collectionBeanList.add(0, bean);
-    if (mCollectionAdapter != null) mCollectionAdapter.notifyItemInserted(0);
-  }
-
-  public void addDraftData(String text) {
-    DbBean bean = new DbBean(text);
-    DraftDao.get().add(bean);
-    draftBeanList.add(0, bean);
+  public void addDraftData(String text, String app) {
+    DbBean bean = new DbBean(text, app);
+    new DbDao(DbDao.DRAFT).add(bean);
+    if (draftBeanList != null) draftBeanList.add(0, bean);
     if (mDraftAdapter != null) mDraftAdapter.notifyItemInserted(0);
   }
 
@@ -307,7 +299,7 @@ public class LiquidKeyboard {
 
     clipboard_max_size = Config.get(context).getClipboardLimit();
 
-    clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
+    clipboardBeanList = new DbDao(DbDao.CLIPBOARD).getAllSimpleBean(clipboard_max_size);
     mClipboardAdapter = new ClipboardAdapter(context, clipboardBeanList);
 
     mClipboardAdapter.configStyle(margin_x, margin_top);
@@ -340,7 +332,7 @@ public class LiquidKeyboard {
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    collectionBeanList = CollectionDao.get().getAllSimpleBean();
+    collectionBeanList = new DbDao(DbDao.COLLECTION).getAllSimpleBean(-1);
     mCollectionAdapter = new CollectionAdapter(context, collectionBeanList);
 
     mCollectionAdapter.configStyle(margin_x, margin_top);
@@ -374,9 +366,9 @@ public class LiquidKeyboard {
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    draft_max_size = Config.get(context).getDraftLimit();
-
-    draftBeanList = DraftDao.get().getAllSimpleBean(draft_max_size);
+    draftBeanList =
+        new DbDao(DbDao.DRAFT)
+            .getAllSimpleBean(Trime.getService().getCurrentApp(), draft_pinned, draft_max_size);
     mDraftAdapter = new DraftAdapter(context, draftBeanList);
 
     mDraftAdapter.configStyle(margin_x, margin_top);

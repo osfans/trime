@@ -10,9 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.R
-import com.osfans.trime.data.db.CollectionDao
-import com.osfans.trime.data.db.clipboard.ClipboardDao
-import com.osfans.trime.data.db.draft.DraftDao
+import com.osfans.trime.data.db.DbDao
 import com.osfans.trime.databinding.LiquidKeyboardActivityBinding
 import com.osfans.trime.ime.symbol.CheckableAdatper
 import com.osfans.trime.ime.symbol.SimpleKeyBean
@@ -68,11 +66,11 @@ class LiquidKeyboardActivity : AppCompatActivity() {
             val r: List<SimpleKeyBean> = mAdapter.remove(position)
             if (r.isNotEmpty()) {
                 if (type.equals(COLLECTION))
-                    CollectionDao.get().delete(r)
+                    DbDao(DbDao.COLLECTION).delete(r)
                 else if (type.equals(DRAFT))
-                    DraftDao.get().delete(r)
+                    DbDao(DbDao.DRAFT).delete(r)
                 else
-                    ClipboardDao.get().delete(r)
+                    DbDao(DbDao.CLIPBOARD).delete(r)
 
                 Timber.d("delete " + r.size)
             }
@@ -110,12 +108,12 @@ class LiquidKeyboardActivity : AppCompatActivity() {
         binding.progressBar.setVisibility(View.VISIBLE)
 
         if (type.equals(COLLECTION)) {
-            beans = CollectionDao.get().allSimpleBean
+            beans = DbDao(DbDao.COLLECTION).getAllSimpleBean(-1)
             binding.btnCollect.setVisibility(View.GONE)
         } else if (type.equals(DRAFT)) {
-            beans = DraftDao.get().getAllSimpleBean(1000)
+            beans = DbDao(DbDao.DRAFT).getAllSimpleBean(1000)
         } else {
-            beans = ClipboardDao.get().getAllSimpleBean(1000)
+            beans = DbDao(DbDao.CLIPBOARD).getAllSimpleBean(1000)
         }
 
         mAdapter = CheckableAdatper(

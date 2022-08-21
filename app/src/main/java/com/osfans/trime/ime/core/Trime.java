@@ -63,9 +63,6 @@ import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
-import com.osfans.trime.data.db.CollectionDao;
-import com.osfans.trime.data.db.clipboard.ClipboardDao;
-import com.osfans.trime.data.db.draft.DraftDao;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
@@ -117,6 +114,7 @@ public class Trime extends LifecycleInputMethodService {
     return Config.get(this);
   }
 
+  private String currentApp; // 当前输入内容的App
   private boolean darkMode; // 当前键盘主题是否处于暗黑模式
   private KeyboardView mainKeyboardView; // 主軟鍵盤
   public KeyboardSwitcher keyboardSwitcher; // 键盘切换器
@@ -391,8 +389,6 @@ public class Trime extends LifecycleInputMethodService {
             new LiquidKeyboard(
                 this, getImeConfig().getClipboardLimit(), getImeConfig().getDraftLimit());
         clipBoardMonitor();
-        CollectionDao.get();
-        DraftDao.get();
       } catch (Exception e) {
         e.printStackTrace();
         super.onCreate();
@@ -777,6 +773,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
+    currentApp = attribute.packageName;
     if (getPrefs().getLooks().getAutoDark()) {
       int nightModeFlags =
           getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -855,10 +852,10 @@ public class Trime extends LifecycleInputMethodService {
           //  应用程求以隐身模式打开键盘应用程序
           normalTextEditor = false;
           Timber.i("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
-        } else if (attribute.packageName.equals(BuildConfig.APPLICATION_ID)
-            || getPrefs().getOther().getDraftExcludeApp().contains(attribute.packageName)) {
+        } else if (currentApp.equals(BuildConfig.APPLICATION_ID)
+            || getPrefs().getOther().getDraftExcludeApp().contains(currentApp)) {
           normalTextEditor = false;
-          Timber.i("EditorInfo: normal -> exclude, packageName=" + attribute.packageName);
+          Timber.i("EditorInfo: normal -> exclude, packageName=" + currentApp);
         } else {
           normalTextEditor = true;
           activeEditorInstance.cacheDraft();
@@ -1463,7 +1460,6 @@ public class Trime extends LifecycleInputMethodService {
    * ClipBoardOut 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
    */
   private void clipBoardMonitor() {
-    ClipboardDao.get();
     final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
     final Config imeConfig = getImeConfig();
     clipBoard.addPrimaryClipChangedListener(
@@ -1497,7 +1493,7 @@ public class Trime extends LifecycleInputMethodService {
       Timber.i("addDraft() cache=%s, string=%s", draftString, draftCache);
       if (StringUtils.mismatch(draftCache, getImeConfig().getDraftOutput())) {
         draftString = draftCache.trim();
-        liquidKeyboard.addDraftData(draftCache);
+        liquidKeyboard.addDraftData(draftCache, currentApp);
       }
     }
   }
@@ -1510,5 +1506,9 @@ public class Trime extends LifecycleInputMethodService {
 
   public void setCandidateExPage(boolean candidateExPage) {
     this.candidateExPage = candidateExPage;
+  }
+
+  public String getCurrentApp() {
+    return currentApp;
   }
 }

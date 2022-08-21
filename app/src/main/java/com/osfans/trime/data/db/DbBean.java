@@ -5,7 +5,7 @@ import com.osfans.trime.ime.symbol.SimpleKeyBean;
 public class DbBean extends SimpleKeyBean {
   private long time;
   private String text;
-  private final String html;
+  private final String html; // 草稿箱用此字段存储App信息，剪贴板用于存储html信息（未实装）
   private int type; // 0 text, 1 html
 
   public long getTime() {
