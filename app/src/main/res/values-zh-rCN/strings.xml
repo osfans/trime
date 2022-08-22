@@ -256,4 +256,16 @@
     <string name="other__draft_pinned_title">顶置的当前App的草稿数量</string>
     <string name="edit">编辑</string>
     <string name="merge">合并</string>
+    <string name="other__draft_time_out_title">自动清理超时的草稿</string>
+    <string name="other__clipboard_time_out_title">自动清理超时的剪貼板</string>
+    <string-array name="other__draft_time_out_entries">
+        <item>1小时</item>
+        <item>8小时</item>
+        <item>1天</item>
+        <item>3天</item>
+        <item>10天</item>
+        <item>30天</item>
+        <item>90天</item>
+        <item>永不</item>
+    </string-array>
 </resources>

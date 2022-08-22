@@ -394,6 +394,8 @@ class AppPrefs(
             const val DRAFT_PINNED = "other__draft_pinned"
             const val DRAFT_LIMIT = "other__draft_limit"
             const val CLIPBOARD_LIMIT = "other__clipboard_limit"
+            const val DRAFT_TIME_OUT = "other__draft_time_out"
+            const val CLIPBOARD_TIME_OUT = "other__clipboard_time_out"
         }
         var uiMode: String
             get() = prefs.getPref(UI_MODE, "auto")
@@ -428,5 +430,11 @@ class AppPrefs(
         var draftExcludeApp: String
             get() = prefs.getPref(DRAFT_EXCLUDE_APP, "")
             set(v) = prefs.setPref(DRAFT_EXCLUDE_APP, v)
+        var draftTimeOut: String
+            get() = prefs.getPref(DRAFT_TIME_OUT, "0")
+            set(v) = prefs.setPref(DRAFT_TIME_OUT, v)
+        var clipboardTimeOut: String
+            get() = prefs.getPref(CLIPBOARD_TIME_OUT, "0")
+            set(v) = prefs.setPref(CLIPBOARD_TIME_OUT, v)
     }
 }

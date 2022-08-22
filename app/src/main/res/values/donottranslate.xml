@@ -72,4 +72,14 @@
         <item>50</item>
         <item>100</item>
     </string-array>
+    <string-array name="other__draft_time_out_values">
+        <item>1</item>
+        <item>8</item>
+        <item>24</item>
+        <item>72</item>
+        <item>240</item>
+        <item>720</item>
+        <item>2160</item>
+        <item>0</item>
+    </string-array>
 </resources>

@@ -299,7 +299,9 @@ public class LiquidKeyboard {
 
     clipboard_max_size = Config.get(context).getClipboardLimit();
 
-    clipboardBeanList = new DbDao(DbDao.CLIPBOARD).getAllSimpleBean(clipboard_max_size);
+    clipboardBeanList =
+        new DbDao(DbDao.CLIPBOARD)
+            .getAllSimpleBean(clipboard_max_size, Config.get(context).getClipboardTimeOut());
     mClipboardAdapter = new ClipboardAdapter(context, clipboardBeanList);
 
     mClipboardAdapter.configStyle(margin_x, margin_top);
@@ -332,7 +334,7 @@ public class LiquidKeyboard {
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    collectionBeanList = new DbDao(DbDao.COLLECTION).getAllSimpleBean(-1);
+    collectionBeanList = new DbDao(DbDao.COLLECTION).getAllSimpleBean(-1, 0);
     mCollectionAdapter = new CollectionAdapter(context, collectionBeanList);
 
     mCollectionAdapter.configStyle(margin_x, margin_top);
@@ -368,7 +370,11 @@ public class LiquidKeyboard {
 
     draftBeanList =
         new DbDao(DbDao.DRAFT)
-            .getAllSimpleBean(Trime.getService().getCurrentApp(), draft_pinned, draft_max_size);
+            .getAllSimpleBean(
+                Trime.getService().getCurrentApp(),
+                draft_pinned,
+                draft_max_size,
+                Config.get(context).getDraftTimeOut());
     mDraftAdapter = new DraftAdapter(context, draftBeanList);
 
     mDraftAdapter.configStyle(margin_x, margin_top);

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.R
+import com.osfans.trime.data.Config
 import com.osfans.trime.data.db.DbDao
 import com.osfans.trime.databinding.LiquidKeyboardActivityBinding
 import com.osfans.trime.ime.symbol.CheckableAdatper
@@ -123,13 +124,14 @@ class LiquidKeyboardActivity : AppCompatActivity() {
 
         if (type.equals(COLLECTION)) {
             dbName = type + ".db"
-            beans = DbDao(dbName).getAllSimpleBean(-1)
+            beans = DbDao(dbName).getAllSimpleBean(-1, 0)
             binding.btnCollect.visibility = View.GONE
         } else if (type.equals(DRAFT)) {
             dbName = type + ".db"
-            beans = DbDao(dbName).getAllSimpleBean(1000)
+            beans = DbDao(dbName).getAllSimpleBean(1000, Config.get(this).draftTimeOut)
         } else {
-            beans = DbDao(DbDao.CLIPBOARD).getAllSimpleBean(1000)
+            dbName = CLIPBOARD + ".db"
+            beans = DbDao(dbName).getAllSimpleBean(1000, Config.get(this).clipboardTimeOut)
         }
 
         mAdapter = CheckableAdatper(

@@ -93,7 +93,7 @@ public class DbDao {
 
   // 取回指定数量的剪贴板； 收藏夹不限定数量，size = -1
   // DbBean extends SimpleKeyBean
-  public List<SimpleKeyBean> getAllSimpleBean(int size) {
+  public List<SimpleKeyBean> getAllSimpleBean(int size, long timeout) {
 
     List<SimpleKeyBean> list = new ArrayList<>();
     if (size == 0) return list;
@@ -102,6 +102,10 @@ public class DbDao {
     if (size > 0) sql = sql + " limit 0," + size;
 
     SQLiteDatabase db = helper.getWritableDatabase();
+
+    if (timeout > 0)
+      db.rawQuery("delete from t_data where time > 0 and time < '" + timeout + "'", null);
+
     Cursor cursor = db.rawQuery(sql, null);
     if (cursor != null) {
       while (cursor.moveToNext()) {
@@ -123,7 +127,7 @@ public class DbDao {
    * @param size 取回多少条数据
    * @return 全部数据
    */
-  public List<SimpleKeyBean> getAllSimpleBean(String info, int pinned, int size) {
+  public List<SimpleKeyBean> getAllSimpleBean(String info, int pinned, int size, long timeout) {
 
     List<SimpleKeyBean> list = new ArrayList<>();
     List<SimpleKeyBean> tmp = new ArrayList<>();
@@ -134,6 +138,8 @@ public class DbDao {
 
     SQLiteDatabase db = helper.getWritableDatabase();
 
+    if (timeout > 0)
+      db.rawQuery("delete from t_data where time > 0 and time < '" + timeout + "'", null);
     Cursor cursor = db.rawQuery(sql, null);
     if (cursor == null) {
     } else if (info == null || info.isEmpty()) {

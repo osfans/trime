@@ -142,6 +142,18 @@ public class Config {
     return Integer.parseInt(appPrefs.getOther().getDraftLimit());
   }
 
+  public Long getClipboardTimeOut() {
+    int v = Integer.parseInt(appPrefs.getOther().getClipboardTimeOut());
+    if (v > 0) return System.currentTimeMillis() - 3600 * 1000 * v;
+    else return 2L;
+  }
+
+  public Long getDraftTimeOut() {
+    int v = Integer.parseInt(appPrefs.getOther().getDraftTimeOut());
+    if (v > 0) return System.currentTimeMillis() - 3600 * 1000 * v;
+    else return 0L;
+  }
+
   public void setClipBoardCompare(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
     clipBoardCompare = s.split("\n");

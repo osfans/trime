@@ -87,4 +87,21 @@
         app:useSimpleSummaryProvider="true"/>
 
 
+    <ListPreference
+        app:iconSpaceReserved="false"
+        app:entries="@array/other__draft_time_out_entries"
+        app:entryValues="@array/other__draft_time_out_values"
+        app:key="other__clipboard_time_out"
+        app:title="@string/other__clipboard_time_out_title"
+        app:useSimpleSummaryProvider="true" />
+
+
+    <ListPreference
+        app:iconSpaceReserved="false"
+        app:entries="@array/other__draft_time_out_entries"
+        app:entryValues="@array/other__draft_time_out_values"
+        app:key="other__draft_time_out"
+        app:title="@string/other__draft_time_out_title"
+        app:useSimpleSummaryProvider="true" />
+
 </PreferenceScreen>

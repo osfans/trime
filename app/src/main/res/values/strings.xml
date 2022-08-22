@@ -255,9 +255,21 @@
     <string name="other__list_collection_title">Collection Data</string>
     <string name="delete">Delete</string>
     <string name="collect">Collect</string>
-    <string name="liquid_keyboard_search_hint">Search ( comming soon )</string>
+    <string name="liquid_keyboard_search_hint">Search ( coming soon )</string>
     <string name="other__draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="other__draft_pinned_title">Pinned drafts of the current app</string>
     <string name="edit">Edit</string>
     <string name="merge">Merge</string>
+    <string name="other__draft_time_out_title">Clean timeout drafts</string>
+    <string name="other__clipboard_time_out_title">Clean timeout clipboard</string>
+    <string-array name="other__draft_time_out_entries">
+        <item>1 hours</item>
+        <item>8 hours</item>
+        <item>1 days</item>
+        <item>3 days</item>
+        <item>10 days</item>
+        <item>30 days</item>
+        <item>90 days</item>
+        <item>Never</item>
+    </string-array>
 </resources>
