@@ -1,11 +1,13 @@
 package com.osfans.trime.data.db;
 
+import android.database.Cursor;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 
 public class DbBean extends SimpleKeyBean {
+  private int id;
   private long time;
   private String text;
-  private final String html; // 草稿箱用此字段存储App信息，剪贴板用于存储html信息（未实装）
+  private String html = ""; // 草稿箱用此字段存储App信息，剪贴板用于存储html信息（未实装）
   private int type; // 0 text, 1 html
 
   public long getTime() {
@@ -39,23 +41,25 @@ public class DbBean extends SimpleKeyBean {
   public DbBean(String text) {
     this.text = text;
     this.time = System.currentTimeMillis();
-    this.type = 0;
-    this.html = "";
   }
 
-  @SuppressWarnings("unused")
   public DbBean(String text, String html) {
     this.text = text;
-    this.time = System.currentTimeMillis();
-    this.type = 1;
     this.html = html;
+    this.time = System.currentTimeMillis();
   }
 
-  @SuppressWarnings("unused")
-  public DbBean(String text, String html, int type, long time) {
+  public DbBean(int id, String text, String html) {
+    this.id = id;
     this.text = text;
-    this.time = time;
-    this.type = type;
     this.html = html;
+    this.time = System.currentTimeMillis();
+  }
+
+  public DbBean(Cursor cursor) {
+    //  text , html , id,  type , time
+    this.text = cursor.getString(0);
+    this.html = cursor.getString(1);
+    this.id = cursor.getInt(2);
   }
 }

@@ -42,12 +42,35 @@ public class DbDao {
     db.close();
   }
 
+  /** 删除文字相同的记录，插入新记录 * */
+  public void add(@NonNull SimpleKeyBean bean) {
+    SQLiteDatabase db = helper.getWritableDatabase();
+    db.delete("t_data", "text=?", new String[] {bean.getText()});
+    db.execSQL(
+        "insert into t_data(text,time) values(?,?,?,?)",
+        new Object[] {bean.getText(), System.currentTimeMillis()});
+    db.close();
+  }
+
+  /** 删除文字相同的记录，插入新记录 * */
+  public void add(@NonNull String text) {
+    SQLiteDatabase db = helper.getWritableDatabase();
+    db.delete("t_data", "text=?", new String[] {text});
+    db.execSQL(
+        "insert into t_data(text,time) values(?,?,?,?)",
+        new Object[] {text, System.currentTimeMillis()});
+    db.close();
+  }
+
   /** 更新记录 * */
-  public void update(@NonNull String oldText, @NonNull String newText) {
+  public void update(SimpleKeyBean bean, @NonNull String newText) {
     SQLiteDatabase db = helper.getWritableDatabase();
     ContentValues args = new ContentValues();
     args.put("text", newText);
-    db.update("t_data", args, "text=?", new String[] {oldText});
+
+    if (bean.getId() > 0)
+      db.update("t_data", args, "id=?", new String[] {Integer.toString(bean.getId())});
+    else db.update("t_data", args, "text=?", new String[] {bean.getText()});
     db.close();
   }
 
@@ -60,24 +83,29 @@ public class DbDao {
 
   public void delete(@NonNull List<SimpleKeyBean> list) {
     SQLiteDatabase db = helper.getWritableDatabase();
-    for (SimpleKeyBean bean : list) db.delete("t_data", "text=?", new String[] {bean.getText()});
+    for (SimpleKeyBean bean : list) {
+      if (bean.getId() > 0)
+        db.delete("t_data", "id=?", new String[] {Integer.toString(bean.getId())});
+      else db.delete("t_data", "text=?", new String[] {bean.getText()});
+    }
     db.close();
   }
 
   // 取回指定数量的剪贴板； 收藏夹不限定数量，size = -1
+  // DbBean extends SimpleKeyBean
   public List<SimpleKeyBean> getAllSimpleBean(int size) {
 
     List<SimpleKeyBean> list = new ArrayList<>();
     if (size == 0) return list;
 
-    String sql = "select text , html , type , time from t_data ORDER BY time DESC";
+    String sql = "select text , html , id,  type , time from t_data ORDER BY time DESC";
     if (size > 0) sql = sql + " limit 0," + size;
 
     SQLiteDatabase db = helper.getWritableDatabase();
     Cursor cursor = db.rawQuery(sql, null);
     if (cursor != null) {
       while (cursor.moveToNext()) {
-        DbBean v = new DbBean(cursor.getString(0));
+        SimpleKeyBean v = new DbBean(cursor);
         list.add(v);
       }
       cursor.close();
@@ -101,7 +129,7 @@ public class DbDao {
     List<SimpleKeyBean> tmp = new ArrayList<>();
     if (pinned < 0) pinned = Integer.MAX_VALUE;
 
-    String sql = "select text , html , type , time from t_data ORDER BY time DESC";
+    String sql = "select text , html , id, type , time from t_data ORDER BY time DESC";
     if (size > 0) sql = sql + " limit 0," + size;
 
     SQLiteDatabase db = helper.getWritableDatabase();
@@ -111,12 +139,12 @@ public class DbDao {
     } else if (info == null || info.isEmpty()) {
 
       while (cursor.moveToNext()) {
-        DbBean v = new DbBean(cursor.getString(0));
+        DbBean v = new DbBean(cursor);
         list.add(v);
       }
     } else {
       while (cursor.moveToNext()) {
-        DbBean v = new DbBean(cursor.getString(0));
+        DbBean v = new DbBean(cursor);
         if (list.size() < pinned) {
           String packageName = cursor.getString(1);
           if (packageName != null && packageName.equals(info)) list.add(v);
@@ -135,7 +163,7 @@ public class DbDao {
         if (list.size() < pinned) {
           cursor =
               db.rawQuery(
-                  "select text , html , type , time from t_data WHERE html=? "
+                  "select text , html , id, type , time from t_data WHERE html=? "
                       + "ORDER BY time DESC  limit "
                       + list.size()
                       + ","
@@ -143,7 +171,7 @@ public class DbDao {
                   new String[] {info});
           if (cursor != null) {
             while (cursor.moveToNext()) {
-              DbBean v = new DbBean(cursor.getString(0));
+              DbBean v = new DbBean(cursor);
               list.add(v);
             }
             cursor.close();

@@ -10,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.R;
-import com.osfans.trime.data.db.DbBean;
 import com.osfans.trime.data.db.DbDao;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,13 +57,13 @@ public class CheckableAdatper extends ArrayAdapter {
 
   public void updateItem(String text) {
     if (checked.isEmpty()) {
-      new DbDao(dbName).add(new DbBean(text));
       SimpleKeyBean bean = new SimpleKeyBean(text);
+      new DbDao(dbName).add(bean);
       words.add(0, bean);
     } else {
       int position = checked.get(0);
-      new DbDao(dbName).update(words.get(position).getText(), text);
       SimpleKeyBean bean = words.get(position);
+      new DbDao(dbName).update(bean, text);
       bean.setText(text);
       words.set(position, bean);
     }
@@ -90,14 +89,13 @@ public class CheckableAdatper extends ArrayAdapter {
     }
     checked.clear();
     new DbDao(dbName).delete(result);
-    new DbDao(dbName).add(new DbBean(text));
-
     SimpleKeyBean simpleKeyBean = new SimpleKeyBean(text);
+    new DbDao(dbName).add(simpleKeyBean);
     words.add(0, simpleKeyBean);
     notifyDataSetChanged();
   }
 
-  public List<SimpleKeyBean> remove(int checkPositon) {
+  public void remove(int checkPositon) {
     Collections.sort(checked, Collections.reverseOrder());
     List<SimpleKeyBean> result = new ArrayList<>();
     for (int i : checked) {
@@ -110,7 +108,8 @@ public class CheckableAdatper extends ArrayAdapter {
     if (checkPositon >= 0) checked.add(checkPositon);
 
     notifyDataSetChanged();
-    return result;
+
+    new DbDao(dbName).delete(result);
   }
 
   public List<SimpleKeyBean> collectSelected() {
@@ -120,7 +119,7 @@ public class CheckableAdatper extends ArrayAdapter {
       if (i > words.size()) continue;
       SimpleKeyBean bean = words.get(i);
       result.add(bean);
-      new DbDao(DbDao.COLLECTION).add(new DbBean(bean.getText()));
+      new DbDao(DbDao.COLLECTION).add(bean);
     }
     return result;
   }

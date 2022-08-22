@@ -66,17 +66,8 @@ class LiquidKeyboardActivity : AppCompatActivity() {
             var position: Int =
                 binding.listWord.getPositionForView(binding.listWord.getChildAt(0))
             if (position > 0) position++
-            val r: List<SimpleKeyBean> = mAdapter.remove(position)
-            if (r.isNotEmpty()) {
-                if (type.equals(COLLECTION))
-                    DbDao(DbDao.COLLECTION).delete(r)
-                else if (type.equals(DRAFT))
-                    DbDao(DbDao.DRAFT).delete(r)
-                else
-                    DbDao(DbDao.CLIPBOARD).delete(r)
-
-                Timber.d("delete " + r.size)
-            }
+            mAdapter.remove(position)
+            Timber.d("delete")
         }
 
         binding.btnCollect.setOnClickListener {

@@ -6,6 +6,7 @@ import java.io.Serializable;
 public class SimpleKeyBean implements Serializable {
   private String text;
   private String label;
+  private int id;
 
   public SimpleKeyBean() {}
 
@@ -13,9 +14,24 @@ public class SimpleKeyBean implements Serializable {
     this.text = text;
   }
 
+  public SimpleKeyBean(int id, String text) {
+    this.id = id;
+    this.text = text;
+  }
+
   public SimpleKeyBean(String text, String label) {
     this.text = text;
     this.label = label;
+  }
+
+  public SimpleKeyBean(int id, String text, String label) {
+    this.id = id;
+    this.text = text;
+    this.label = label;
+  }
+
+  public int getId() {
+    return id;
   }
 
   public void setText(String text) {
