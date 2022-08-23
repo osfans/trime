@@ -47,8 +47,8 @@ public class DbDao {
     SQLiteDatabase db = helper.getWritableDatabase();
     db.delete("t_data", "text=?", new String[] {bean.getText()});
     db.execSQL(
-        "insert into t_data(text,time) values(?,?,?,?)",
-        new Object[] {bean.getText(), System.currentTimeMillis()});
+        "insert into t_data(text,html,type,time) values(?,?,?,?)",
+        new Object[] {bean.getText(), "", 0, System.currentTimeMillis()});
     db.close();
   }
 
@@ -57,8 +57,8 @@ public class DbDao {
     SQLiteDatabase db = helper.getWritableDatabase();
     db.delete("t_data", "text=?", new String[] {text});
     db.execSQL(
-        "insert into t_data(text,time) values(?,?,?,?)",
-        new Object[] {text, System.currentTimeMillis()});
+        "insert into t_data(text,html,type, time) values(?,?,?,?)",
+        new Object[] {text, "", 0, System.currentTimeMillis()});
     db.close();
   }
 
