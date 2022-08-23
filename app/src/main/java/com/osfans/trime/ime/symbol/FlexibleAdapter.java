@@ -18,7 +18,8 @@ import com.osfans.trime.R;
 import com.osfans.trime.data.Config;
 import java.util.List;
 
-public class CollectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+// LiquidKeyboard中剪贴板、收藏夹、草稿箱共用的Adapter，多行文本，尺寸自适应
+public class FlexibleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private final Context myContext;
   private final List<SimpleKeyBean> list;
   private int keyMarginX, keyMarginTop;
@@ -27,7 +28,7 @@ public class CollectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
   private Typeface textFont;
   private Config config;
 
-  public CollectionAdapter(Context context, List<SimpleKeyBean> itemlist) {
+  public FlexibleAdapter(Context context, List<SimpleKeyBean> itemlist) {
     myContext = context;
     list = itemlist;
   }
@@ -75,10 +76,10 @@ public class CollectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
   @Override
   public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int index) {
 
-    if (viewHolder instanceof CollectionAdapter.ItemViewHolder) {
+    if (viewHolder instanceof FlexibleAdapter.ItemViewHolder) {
       SimpleKeyBean searchHistoryBean = list.get(index);
-      final CollectionAdapter.ItemViewHolder itemViewHold =
-          ((CollectionAdapter.ItemViewHolder) viewHolder);
+      final FlexibleAdapter.ItemViewHolder itemViewHold =
+          ((FlexibleAdapter.ItemViewHolder) viewHolder);
 
       if (textFont != null) itemViewHold.mTitle.setTypeface(textFont);
 

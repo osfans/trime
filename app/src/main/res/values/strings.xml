@@ -259,6 +259,7 @@
     <string name="other__draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="other__draft_pinned_title">Pinned drafts of the current app</string>
     <string name="edit">Edit</string>
+    <string name="add">Add</string>
     <string name="merge">Merge</string>
     <string name="other__draft_time_out_title">Clean timeout drafts</string>
     <string name="other__clipboard_time_out_title">Clean timeout clipboard</string>

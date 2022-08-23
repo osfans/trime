@@ -68,6 +68,10 @@ class LiquidKeyboardActivity : AppCompatActivity() {
                 binding.listWord.getPositionForView(binding.listWord.getChildAt(0))
             if (position > 0) position++
             mAdapter.remove(position)
+
+            binding.btnEdit.visibility = View.VISIBLE
+            binding.btnMerge.visibility = View.GONE
+
             Timber.d("delete")
         }
 
@@ -79,10 +83,16 @@ class LiquidKeyboardActivity : AppCompatActivity() {
 
         binding.btnEdit.setOnClickListener {
 
+            var title = R.string.edit
             val et = EditText(this)
-            et.setText(mAdapter.checkedText)
+            val checked = mAdapter.checked.size
+            if (checked> 0) {
+                et.setText(mAdapter.checkedText)
+            } else {
+                title = R.string.add
+            }
             AlertDialog.Builder(this)
-                .setTitle(R.string.edit)
+                .setTitle(title)
                 .setView(et)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok) { _, _ ->

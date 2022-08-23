@@ -7,6 +7,7 @@ public class SimpleKeyBean implements Serializable {
   private String text;
   private String label;
   private int id;
+  private boolean selected;
 
   public SimpleKeyBean() {}
 
@@ -44,6 +45,14 @@ public class SimpleKeyBean implements Serializable {
 
   public String getLabel() {
     return label == null ? text : label;
+  }
+
+  public void setSelected(boolean selected) {
+    this.selected = selected;
+  }
+
+  public boolean isSelected() {
+    return selected;
   }
 
   @NonNull

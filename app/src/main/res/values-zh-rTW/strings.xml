@@ -256,6 +256,7 @@
     <string name="other__draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="other__draft_pinned_title">頂置的當前App的草稿數量</string>
     <string name="edit">編輯</string>
+    <string name="add">增加</string>
     <string name="merge">合併</string>
     <string name="other__draft_time_out_title">自動清理超時的草稿</string>
     <string name="other__clipboard_time_out_title">自動清理超時的剪貼板</string>
