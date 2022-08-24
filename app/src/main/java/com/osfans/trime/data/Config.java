@@ -179,26 +179,6 @@ public class Config {
     return new String[] {};
   }
 
-  public static String[] getSoundPackages() {
-    File d = new File(userDataDir, "sound");
-    FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith(".sound.yaml");
-    String[] list = d.list(trimeFilter);
-    if (list != null) return list;
-    return new String[] {};
-  }
-
-  public static String[] getYamlFileNames(String[] keys) {
-    if (keys == null) return null;
-    final int n = keys.length;
-    final String[] names = new String[n];
-    for (int i = 0; i < keys.length; i++) {
-      final String k =
-          keys[i].replace(".trime.yaml", "").replace(".sound.yaml", "").replace(".yaml", "");
-      names[i] = k;
-    }
-    return names;
-  }
-
   private void deployTheme() {
     if (userDataDir.contentEquals(sharedDataDir)) return; // 相同文件夾不部署主題
     final String[] configs = getThemeKeys(false);
