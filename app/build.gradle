@@ -116,6 +116,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "com.google.android.flexbox:flexbox:3.0.0"
+    
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 }
 repositories {
     mavenCentral()
