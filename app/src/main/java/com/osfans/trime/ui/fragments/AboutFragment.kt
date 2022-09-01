@@ -1,8 +1,8 @@
 package com.osfans.trime.ui.fragments
 
 import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebView
 import androidx.appcompat.app.AlertDialog
@@ -16,6 +16,8 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.AppVersionUtils.writeLibraryVersionToSummary
+import com.osfans.trime.util.Const
+import com.osfans.trime.util.clipboardManager
 
 class AboutFragment : PreferenceFragmentCompat() {
     private val viewModel: MainViewModel by activityViewModels()
@@ -23,14 +25,19 @@ class AboutFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.about_preference, rootKey)
         with(preferenceScreen) {
-            get<Preference>("about__changelog")
-                ?.writeLibraryVersionToSummary(BuildConfig.BUILD_VERSION)
+            get<Preference>("about__changelog")?.apply {
+                summary = Const.displayVersionName
+                isCopyingEnabled = true
+                intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("${Const.currentGitRepo}/commits/${Const.buildGitHash}")
+                )
+            }
             get<Preference>("about__buildinfo")?.apply {
-                writeLibraryVersionToSummary(BuildConfig.BUILD_INFO)
+                summary = BuildConfig.BUILD_INFO
                 setOnPreferenceClickListener {
-                    val cbm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val info = ClipData.newPlainText("BuildInfo", BuildConfig.BUILD_INFO)
-                    cbm.setPrimaryClip(info)
+                    val info = ClipData.newPlainText("BuildInfo", summary)
+                    clipboardManager.setPrimaryClip(info)
                     ToastUtils.showLong(R.string.copy_done)
                     true
                 }
