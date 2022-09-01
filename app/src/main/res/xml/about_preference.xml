@@ -9,8 +9,6 @@
         <Preference app:key="about__changelog"
             app:title="@string/about__changelog"
             app:iconSpaceReserved="false">
-            <intent android:action="android.intent.action.VIEW"
-                android:data="@string/trime_url" />
         </Preference>
 
         <Preference app:key="about__buildinfo"
