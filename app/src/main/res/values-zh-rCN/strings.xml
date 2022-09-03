@@ -35,7 +35,7 @@
     <string name="about__librime_version">RIME版本</string>
     <string name="about__opencc_version">OpenCC版本</string>
     <string name="about__changelog">更新日志</string>
-    <string name="about__licensing_title">许可证</string>
+    <string name="about__license">许可证</string>
     <string name="pref_credits">贡献代码</string>
     <string name="about__product_prime">微软平台PRIME输入法</string>
     <string name="about__privacy_policy">隐私策略</string>
@@ -140,10 +140,8 @@
     <string name="speech__error_unknown">未知错误</string>
     <string name="speech__error_speech_timeout">无语音输入</string>
     <string name="about__app_info">应用信息</string>
-    <string name="about__open_source_license">开源许可</string>
+    <string name="about__licensing">许可</string>
     <string name="about__support">支持</string>
-    <string name="about__used_libraries">第三方开源库</string>
-    <string name="about__used_library_dialog_title">同文输入法 | 开源软件库</string>
     <string name="pref__system_default">系统默认</string>
     <string name="keyboard__key_swipe_travel_title">触发按键滑动手势的距离</string>
     <string name="keyboard__hook_candidate">点击候选词</string>
@@ -253,4 +251,6 @@
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暂未实现)</string>
     <string name="other__draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
+    <string name="about__open_source_licenses">开源软件许可</string>
+    <string name="about__open_source_licenses_summary">第三方软件库许可证</string>
 </resources>

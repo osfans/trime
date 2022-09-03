@@ -50,5 +50,13 @@
     <fragment
         android:id="@+id/aboutFragment"
         android:name="com.osfans.trime.ui.fragments.AboutFragment"
-        android:label="AboutFragment" />
+        android:label="AboutFragment" >
+        <action
+            android:id="@+id/action_aboutFragment_to_licenseFragment"
+            app:destination="@id/licenseFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/licenseFragment"
+        android:name="com.osfans.trime.ui.fragments.LicenseFragment"
+        android:label="LicenseFragment" />
 </navigation>
