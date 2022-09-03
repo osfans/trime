@@ -4,9 +4,8 @@ import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.webkit.WebView
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.get
@@ -48,25 +47,11 @@ class AboutFragment : PreferenceFragmentCompat() {
                 ?.writeLibraryVersionToSummary(Rime.get_opencc_version())
             get<Preference>("pref_trime_custom_qq")
                 ?.hidden()
-            get<Preference>("about__licensing")?.setOnPreferenceClickListener {
-                val webView = WebView(requireContext())
-                webView.loadUrl("file:///android_asset/license/open_source_license.html")
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.about__licensing_title)
-                    .setView(webView)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-                true
-            }
-            get<Preference>("about__used_libraries")?.setOnPreferenceClickListener {
-                val webView = WebView(requireContext())
-                webView.loadUrl("file:///android_asset/license/library_licenses.html")
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.about__used_library_dialog_title)
-                    .setView(webView)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-                true
+            get<Preference>("about__open_source_licenses")?.apply {
+                setOnPreferenceClickListener {
+                    findNavController().navigate(R.id.action_aboutFragment_to_licenseFragment)
+                    true
+                }
             }
         }
     }

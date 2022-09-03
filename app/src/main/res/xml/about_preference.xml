@@ -39,17 +39,21 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:key="about__open_source_license_category"
-        app:title="@string/about__open_source_license"
+    <PreferenceCategory app:key="about__licensing_category"
+        app:title="@string/about__licensing"
         app:iconSpaceReserved="false">
 
-        <Preference app:key="about__licensing"
-            app:title="@string/about__licensing_title"
-            app:summary="@string/about__licensing_summary"
-            app:iconSpaceReserved="false"/>
+        <Preference app:key="about__license"
+            app:title="@string/about__license"
+            app:summary="@string/about__license_summary"
+            app:iconSpaceReserved="false">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://www.gnu.org/licenses/gpl-3.0.html" />
+        </Preference>
 
-        <Preference app:key="about__used_libraries"
-            app:title="@string/about__used_libraries"
+        <Preference app:key="about__open_source_licenses"
+            app:title="@string/about__open_source_licenses"
+            app:summary="@string/about__open_source_licenses_summary"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
