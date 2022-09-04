@@ -9,28 +9,52 @@
         android:name="com.osfans.trime.ui.fragments.PrefFragment"
         android:label="PrefFragment" >
         <action
-            android:id="@+id/action_prefFragment_to_userDataFragment"
-            app:destination="@id/userDataFragment" />
+            android:id="@+id/action_prefFragment_to_profileFragment"
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_prefFragment_to_keyboardFragment"
-            app:destination="@id/keyboardFragment" />
+            app:destination="@id/keyboardFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_prefFragment_to_themeColorFragment"
-            app:destination="@id/themeColorFragment" />
+            app:destination="@id/themeColorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_prefFragment_to_otherFragment"
-            app:destination="@id/otherFragment" />
+            app:destination="@id/otherFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_prefFragment_to_toolkitFragment"
-            app:destination="@id/toolkitFragment" />
+            app:destination="@id/toolkitFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_prefFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment" />
+            app:destination="@id/aboutFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
-        android:id="@+id/userDataFragment"
+        android:id="@+id/profileFragment"
         android:name="com.osfans.trime.ui.fragments.ProfileFragment"
-        android:label="UserDataFragment" />
+        android:label="ProfileFragment" />
     <fragment
         android:id="@+id/keyboardFragment"
         android:name="com.osfans.trime.ui.fragments.KeyboardFragment"
@@ -53,7 +77,11 @@
         android:label="AboutFragment" >
         <action
             android:id="@+id/action_aboutFragment_to_licenseFragment"
-            app:destination="@id/licenseFragment" />
+            app:destination="@id/licenseFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/licenseFragment"
