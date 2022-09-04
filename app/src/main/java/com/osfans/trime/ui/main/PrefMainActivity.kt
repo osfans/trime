@@ -4,23 +4,25 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -28,6 +30,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.RimeUtils
+import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -65,18 +68,21 @@ class PrefMainActivity :
         AppCompatDelegate.setDefaultNightMode(uiMode)
 
         super.onCreate(savedInstanceState)
+        applyTranslucentSystemBars()
         val binding = ActivityPrefBinding.inflate(layoutInflater)
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            BarUtils.setNavBarColor(
-                this,
-                getColor(R.color.windowBackground)
-            )
-        } else
-            BarUtils.setNavBarColor(
-                this,
-                @Suppress("DEPRECATION")
-                resources.getColor(R.color.windowBackground)
-            )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
+            val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.toolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = statusBars.top
+            }
+            binding.navHostFragment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = navBars.left
+                rightMargin = navBars.right
+            }
+            windowInsets
+        }
+
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar.toolbar)
         val appBarConfiguration = AppBarConfiguration(
@@ -155,7 +161,7 @@ class PrefMainActivity :
     }
 
     private fun requestExternalStoragePermission() {
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
@@ -195,7 +201,7 @@ class PrefMainActivity :
     }
 
     private fun requestAlertWindowPermission() {
-        if (VERSION.SDK_INT >= VERSION_CODES.P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
             if (!Settings.canDrawOverlays(this)) { // 事先说明需要权限的理由
                 AlertDialog.Builder(this)
                     .setCancelable(true)
