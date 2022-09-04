@@ -33,7 +33,7 @@ class PrefFragment : PreferenceFragmentCompat() {
                 true
             }
             get<Preference>("pref_user_data")?.setOnPreferenceClickListener {
-                findNavController().navigate(R.id.action_prefFragment_to_userDataFragment)
+                findNavController().navigate(R.id.action_prefFragment_to_profileFragment)
                 true
             }
             get<Preference>("pref_keyboard")?.setOnPreferenceClickListener {
