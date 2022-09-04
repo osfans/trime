@@ -1,8 +1,12 @@
 package com.osfans.trime.util
 
+import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
+import android.graphics.Color
+import android.os.Build
+import androidx.core.view.WindowCompat
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
@@ -57,4 +61,16 @@ fun iso8601UTCDateTime(timeMillis: Long? = null): String =
 inline fun CharSequence.startsWithAsciiChar(): Boolean {
     val firstCodePoint = this.toString().codePointAt(0)
     return firstCodePoint in 0x20 until 0x80
+}
+
+fun Activity.applyTranslucentSystemBars() {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    // windowLightNavigationBar is available for 27+
+    window.navigationBarColor =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            Color.TRANSPARENT
+        } else {
+            // com.android.internal.R.color.system_bar_background_semi_transparent
+            0x66000000
+        }
 }

@@ -5,10 +5,14 @@ package com.osfans.trime.ui.main
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash
 import com.osfans.trime.BuildConfig
@@ -18,6 +22,7 @@ import com.osfans.trime.databinding.ActivityLogBinding
 import com.osfans.trime.ui.components.LogView
 import com.osfans.trime.util.DeviceInfo
 import com.osfans.trime.util.Logcat
+import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.bindOnNotNull
 import com.osfans.trime.util.iso8601UTCDateTime
 import com.osfans.trime.util.toast
@@ -59,7 +64,22 @@ class LogActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyTranslucentSystemBars()
         val binding = ActivityLogBinding.inflate(layoutInflater)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
+            val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = navBars.left
+                rightMargin = navBars.right
+                bottomMargin = navBars.bottom
+            }
+            binding.toolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = statusBars.top
+            }
+            windowInsets
+        }
+
         setContentView(binding.root)
         with(binding) {
             setSupportActionBar(toolbar.toolbar)
