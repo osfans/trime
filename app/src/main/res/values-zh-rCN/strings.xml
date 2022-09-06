@@ -107,7 +107,7 @@
     <string name="other__show_app_icon_on_summary">此选项仅对部分 ROM 有效</string>
     <string name="other__show_app_icon_off_summary">在某些 ROM 中，您仍会看到图标显示，并可能在点击它后转到系统的应用信息页</string>
     <string name="pref__default">默认</string>
-    <string name="other__clipboard_manager_title">剪贴板管理器</string>
+    <string name="other_clipboard_limit">剪贴板历史记录上限</string>
     <string name="other__clipboard_compare_title">剪贴板去重规则(每行为一条正则表达式)</string>
     <string name="other__clipboard_output_title">剪贴板过滤规则(每行为一条正则表达式)</string>
     <string name="other__clipboard_manager_summary">保存剪贴板内容的数量</string>
@@ -154,7 +154,7 @@
     <string name="alert_window_access_required">同文输入法需要允许显示在其他应用上方以能显示应用外悬浮窗或对话框，点击“确定”以授权。</string>
     <string name="keyboard__key_sound_package_title">按键音效包</string>
     <string name="sound_progress">正在应用音效...</string>
-    <string name="other__draft_manager_title">草稿箱管理器</string>
+    <string name="other_draft_limit">草稿箱历史记录上限</string>
     <string name="other__draft_output_title">草稿箱过滤规则\n每行为一条正则，与规则匹配的文本不会被缓存</string>
     <string name="setup__next">下一步</string>
     <string name="setup__done">完成</string>
@@ -244,13 +244,16 @@
     <string name="profile_reset_summary">用默认的内置配置覆盖共享目录中的相同文件</string>
     <string name="profile_sync_user_data_summary">备份配置文件和同步用户词典</string>
     <string name="pref_select_schemas_summary">启用或禁用方案并部署</string>
-    <string name="other__list_clipboard_title">剪贴板内容</string>
-    <string name="other__list_draft_title">草稿箱内容</string>
-    <string name="other__list_collection_title">收藏夹内容</string>
+    <string name="other_managed_clipboard">剪贴板内容</string>
+    <string name="other_managed_draft">管理草稿箱内容</string>
+    <string name="other_managed_collection">管理收藏夹内容</string>
     <string name="delete">删除</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暂未实现)</string>
     <string name="other__draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
     <string name="about__open_source_licenses">开源软件许可</string>
     <string name="about__open_source_licenses_summary">第三方软件库许可证</string>
+    <string name="other_clipboard">剪贴板</string>
+    <string name="other_draft">草稿箱</string>
+    <string name="other_collection">收藏夹</string>
 </resources>

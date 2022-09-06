@@ -68,21 +68,21 @@ class OtherFragment :
     }
 
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-        val key = preference?.key
-        if (key == "other__list_clipboard" ||
-            key == "other__list_collection" ||
-            key == "other__list_draft"
-        ) {
-            if (Trime.getService() == null)
-                ToastUtils.showShort(R.string.setup__select_ime_hint)
-            else {
-                val intent = Intent(context, LiquidKeyboardActivity::class.java)
-                intent.putExtra(
-                    "type", key.substringAfterLast('_')
-                )
-                startActivity(intent)
+        when (val key = preference?.key) {
+            "other_managed_clipboard",
+            "other_managed_collection",
+            "other_managed_draft" -> {
+                if (Trime.getService() != null) {
+                    val intent = Intent(context, LiquidKeyboardActivity::class.java)
+                    intent.putExtra(
+                        "type", key.substringAfterLast('_')
+                    )
+                    startActivity(intent)
+                } else {
+                    ToastUtils.showShort(R.string.setup__select_ime_hint)
+                }
+                return true
             }
-            return true
         }
         return super.onPreferenceTreeClick(preference)
     }

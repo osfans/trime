@@ -112,7 +112,6 @@
     <string name="other__show_app_icon_title">在啟動器中顯示圖示</string>
     <string name="other__show_app_icon_off_summary">在某些 ROM 中，您仍會看到圖示顯示，並可能在>點選它後轉到系統的應用資訊頁</string>
     <string name="pref__default">預設</string>
-    <string name="other__clipboard_manager_title">剪貼板管理器</string>
     <string name="other__clipboard_compare_title">剪貼板去重規則(每行爲一條正則規則)</string>
     <string name="other__clipboard_output_title">剪貼板過濾規則(每行爲一條正則規則)</string>
     <string name="other__clipboard_manager_summary">保存剪貼板內容的數量</string>
@@ -159,7 +158,7 @@
     <string name="alert_window_access_required">同文輸入法需要允許顯示在其他應用上方以能顯示應用外懸浮窗或對話方塊，點選“確定”以授權。</string>
     <string name="keyboard__key_sound_package_title">按鍵音效包</string>
     <string name="sound_progress">正在應用音效...</string>
-    <string name="other__draft_manager_title">草稿箱管理器</string>
+    <string name="other_draft_limit">草稿箱歷史記錄上限</string>
     <string name="other__draft_output_title">草稿箱過濾規則\n每行爲一條正則表達式，與規則匹配的內容不會被緩存</string>
     <string name="setup__next">下一步</string>
     <string name="setup__done">完成</string>
@@ -245,13 +244,17 @@
     <string name="profile_last_sync_in_background">上次後臺同步時間：%s\n狀態：%s</string>
     <string name="success">成功</string>
     <string name="failure">失敗</string>
-    <string name="other__list_clipboard_title">剪貼板內容</string>
-    <string name="other__list_draft_title">草稿箱內容</string>
-    <string name="other__list_collection_title">收藏夾內容</string>
+    <string name="other_managed_clipboard">剪貼板內容</string>
+    <string name="other_managed_draft">管理草稿箱內容</string>
+    <string name="other_managed_collection">管理收藏夾內容</string>
     <string name="delete">刪除</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暫未實現)</string>
     <string name="other__draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="about__licensing">許可</string>
     <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>
+    <string name="other_clipboard">剪貼簿</string>
+    <string name="other_draft">草稿箱</string>
+    <string name="other_clipboard_limit">剪貼簿歷史記錄上限</string>
+    <string name="other_collection">收藏夾</string>
 </resources>
