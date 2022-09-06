@@ -76,8 +76,10 @@ class OtherFragment :
             if (Trime.getService() == null)
                 ToastUtils.showShort(R.string.setup__select_ime_hint)
             else {
-                val intent = Intent(this.context, LiquidKeyboardActivity::class.java)
-                intent.putExtra("type", key.replace("other__list_", ""))
+                val intent = Intent(context, LiquidKeyboardActivity::class.java)
+                intent.putExtra(
+                    "type", key.substringAfterLast('_')
+                )
                 startActivity(intent)
             }
             return true

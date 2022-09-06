@@ -1,135 +1,105 @@
 package com.osfans.trime.ui.main
 
-import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import com.blankj.utilcode.util.BarUtils
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.data.db.CollectionDao
 import com.osfans.trime.data.db.clipboard.ClipboardDao
 import com.osfans.trime.data.db.draft.DraftDao
 import com.osfans.trime.databinding.LiquidKeyboardActivityBinding
-import com.osfans.trime.ime.symbol.CheckableAdatper
-import com.osfans.trime.ime.symbol.SimpleKeyBean
+import com.osfans.trime.ime.symbol.CheckableAdapter
+import com.osfans.trime.util.applyTranslucentSystemBars
+import com.osfans.trime.util.withLoadingDialog
 import timber.log.Timber
 
 class LiquidKeyboardActivity : AppCompatActivity() {
-    val CLIPBOARD = "clipboard"
-    val COLLECTION = "collection"
-    val DRAFT = "draft"
-    lateinit var binding: LiquidKeyboardActivityBinding
-    var type: String = CLIPBOARD
-    var beans: List<SimpleKeyBean> = ArrayList()
-    lateinit var mAdapter: CheckableAdatper
+
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
-        binding = LiquidKeyboardActivityBinding.inflate(layoutInflater)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            BarUtils.setNavBarColor(
-                this,
-                getColor(R.color.windowBackground)
-            )
-        } else
-            BarUtils.setNavBarColor(
-                this,
-                @Suppress("DEPRECATION")
-                resources.getColor(R.color.windowBackground)
-            )
+        applyTranslucentSystemBars()
+        val binding = LiquidKeyboardActivityBinding.inflate(layoutInflater)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
+            val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = navBars.left
+                rightMargin = navBars.right
+                bottomMargin = navBars.bottom
+            }
+            binding.toolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = statusBars.top
+            }
+            windowInsets
+        }
+
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar.toolbar)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        type = intent.getStringExtra("type").toString()
-        if (type.equals(COLLECTION)) {
-            setTitle(R.string.other__list_collection_title)
-        } else if (type.equals(DRAFT)) {
-            setTitle(R.string.other__list_draft_title)
-        } else {
-            type = CLIPBOARD
-            setTitle(R.string.other__list_clipboard_title)
-        }
-
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        getDbData()
-
-        binding.btnDel.setOnClickListener {
-
-            var position: Int =
-                binding.listWord.getPositionForView(binding.listWord.getChildAt(0))
-            if (position > 0) position++
-            val r: List<SimpleKeyBean> = mAdapter.remove(position)
-            if (r.isNotEmpty()) {
-                if (type.equals(COLLECTION))
-                    CollectionDao.get().delete(r)
-                else if (type.equals(DRAFT))
-                    DraftDao.get().delete(r)
-                else
-                    ClipboardDao.get().delete(r)
-
-                Timber.d("delete " + r.size)
+        val type = Type.valueOf(intent.getStringExtra("type")!!.uppercase())
+        supportActionBar!!.apply {
+            setDisplayHomeAsUpEnabled(true)
+            when (type) {
+                Type.CLIPBOARD -> setTitle(R.string.other__list_clipboard_title)
+                Type.DRAFT -> setTitle(R.string.other__list_draft_title)
+                Type.COLLECTION -> setTitle(R.string.other__list_collection_title)
             }
         }
 
-        binding.btnCollect.setOnClickListener {
+        // getDbData
+        with(binding) {
+            lifecycleScope.withLoadingDialog(this@LiquidKeyboardActivity) {
+                val entries = when (type) {
+                    Type.CLIPBOARD -> ClipboardDao.get().getAllSimpleBean(1000)
+                    Type.DRAFT -> DraftDao.get().getAllSimpleBean(1000)
+                    Type.COLLECTION -> CollectionDao.get().allSimpleBean.also {
+                        collectButton.visibility = View.GONE
+                    }
+                }
 
-            Timber.d("collect")
-            mAdapter.collectSelected()
-        }
-    }
+                val adapter = CheckableAdapter(this@LiquidKeyboardActivity, entries)
+                beanList.adapter = adapter
 
-    override fun onSupportNavigateUp(): Boolean {
-        if (supportFragmentManager.popBackStackImmediate()) {
-            return true
-        }
-        return super.onSupportNavigateUp()
-    }
+                beanList.setOnItemClickListener { _, _, position, _ ->
+                    adapter.clickItem(position)
+                    beanButtons.visibility =
+                        if (adapter.checked.isEmpty()) {
+                            View.GONE
+                        } else {
+                            View.VISIBLE
+                        }
+                }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressed()
-                true
+                deleteButton.setOnClickListener {
+                    val position =
+                        with(beanList.getPositionForView(beanList.getChildAt(0))) {
+                            if (this > 0) this + 1 else this
+                        }
+                    val r = adapter.remove(position)
+                    if (r.isNotEmpty()) {
+                        when (type) {
+                            Type.CLIPBOARD -> ClipboardDao.get().delete(r)
+                            Type.DRAFT -> DraftDao.get().delete(r)
+                            Type.COLLECTION -> CollectionDao.get().delete(r)
+                        }
+                        Timber.d("deleted %s beans", r.size)
+                    }
+                }
+
+                collectButton.setOnClickListener {
+                    adapter.collectSelected()
+                    Timber.d("collected selected beans")
+                }
             }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        return true
-    }
-
-    fun getDbData() {
-        binding.progressBar.setVisibility(View.VISIBLE)
-
-        if (type.equals(COLLECTION)) {
-            beans = CollectionDao.get().allSimpleBean
-            binding.btnCollect.setVisibility(View.GONE)
-        } else if (type.equals(DRAFT)) {
-            beans = DraftDao.get().getAllSimpleBean(1000)
-        } else {
-            beans = ClipboardDao.get().getAllSimpleBean(1000)
-        }
-
-        mAdapter = CheckableAdatper(
-            this,
-            R.layout.checkable_item,
-            beans
-        )
-        binding.listWord.setAdapter(mAdapter)
-
-        binding.listWord.setOnItemClickListener({ parent: AdapterView<*>?, view: View?, i: Int, l: Long ->
-            mAdapter.clickItem(
-                i
-            )
-        })
-        binding.progressBar.setVisibility(View.GONE)
+    enum class Type {
+        CLIPBOARD, DRAFT, COLLECTION
     }
 }
