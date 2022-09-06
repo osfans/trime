@@ -10,6 +10,7 @@ import androidx.preference.get
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataManager
 import com.osfans.trime.ui.components.ResetAssetsDialog
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.formatDateTime
@@ -25,6 +26,8 @@ class ProfileFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.profile_preference)
         with(preferenceScreen) {
+            get<Preference>("profile_shared_data_dir")?.setDefaultValue(DataManager.defaultDataDirectory.path)
+            get<Preference>("profile_user_data_dir")?.setDefaultValue(DataManager.defaultDataDirectory.path)
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
                 lifecycleScope.withLoadingDialog(context, 200L, R.string.sync_progress) {
                     withContext(Dispatchers.IO) {

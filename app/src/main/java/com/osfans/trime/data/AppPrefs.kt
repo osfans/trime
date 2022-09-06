@@ -18,7 +18,7 @@ class AppPrefs(
     context: Context
 ) {
     var shared: SharedPreferences = if (!UserManagerCompat.isUserUnlocked(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        context.createDeviceProtectedStorageContext().getSharedPreferences("shared_psfs", Context.MODE_PRIVATE)
+        context.createDeviceProtectedStorageContext().getSharedPreferences("shared_prefs", Context.MODE_PRIVATE)
     else
         PreferenceManager.getDefaultSharedPreferences(context)
 

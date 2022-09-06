@@ -7,14 +7,12 @@
         <EditTextPreference android:key="profile_shared_data_dir"
             app:iconSpaceReserved="false"
             android:title="@string/profile_shared_data_dir"
-            android:defaultValue="/storage/emulated/0/rime"
             app:persistent="true"
             app:useSimpleSummaryProvider="true"/>
 
         <EditTextPreference android:key="profile_user_data_dir"
             app:iconSpaceReserved="false"
             android:title="@string/profile_user_data_dir"
-            android:defaultValue="/storage/emulated/0/rime"
             app:persistent="true"
             app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
