@@ -10,8 +10,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:clickable="false"
-        android:text="word" />
+        android:clickable="false" />
 
     <TextView
         android:id="@+id/textView"
@@ -21,6 +20,5 @@
         android:fontFamily="serif-monospace"
         android:gravity="end"
         android:maxWidth="250dp"
-        android:visibility="gone"
-        android:text="info" />
+        android:visibility="gone"/>
 </LinearLayout>
