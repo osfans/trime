@@ -73,6 +73,10 @@ class PrefMainActivity :
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            binding.toolbar.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = navBars.left
+                rightMargin = navBars.right
+            }
             binding.toolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = statusBars.top
             }

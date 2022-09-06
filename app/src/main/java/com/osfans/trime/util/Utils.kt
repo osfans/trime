@@ -6,7 +6,10 @@ import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.graphics.Color
 import android.os.Build
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
@@ -73,4 +76,14 @@ fun Activity.applyTranslucentSystemBars() {
             // com.android.internal.R.color.system_bar_background_semi_transparent
             0x66000000
         }
+}
+
+fun RecyclerView.applyNavBarInsetsBottomPadding() {
+    clipToPadding = false
+    ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
+        windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).also {
+            setPadding(paddingLeft, paddingTop, paddingRight, it.bottom)
+        }
+        windowInsets
+    }
 }

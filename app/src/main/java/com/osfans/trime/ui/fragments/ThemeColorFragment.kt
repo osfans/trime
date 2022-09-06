@@ -3,14 +3,14 @@ package com.osfans.trime.ui.fragments
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.get
 import com.osfans.trime.R
 import com.osfans.trime.ui.components.ColorPickerDialog
+import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.components.ThemePickerDialog
 import com.osfans.trime.ui.main.MainViewModel
 
-class ThemeColorFragment : PreferenceFragmentCompat() {
+class ThemeColorFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
