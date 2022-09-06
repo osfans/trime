@@ -45,9 +45,9 @@ class LiquidKeyboardActivity : AppCompatActivity() {
         supportActionBar!!.apply {
             setDisplayHomeAsUpEnabled(true)
             when (type) {
-                Type.CLIPBOARD -> setTitle(R.string.other__list_clipboard_title)
-                Type.DRAFT -> setTitle(R.string.other__list_draft_title)
-                Type.COLLECTION -> setTitle(R.string.other__list_collection_title)
+                Type.CLIPBOARD -> setTitle(R.string.other_managed_clipboard)
+                Type.DRAFT -> setTitle(R.string.other_managed_draft)
+                Type.COLLECTION -> setTitle(R.string.other_managed_collection)
             }
         }
 
@@ -91,9 +91,11 @@ class LiquidKeyboardActivity : AppCompatActivity() {
                     }
                 }
 
-                collectButton.setOnClickListener {
-                    adapter.collectSelected()
-                    Timber.d("collected selected beans")
+                collectButton.apply {
+                    setOnClickListener {
+                        adapter.collectSelected()
+                        Timber.d("collected selected beans")
+                    }
                 }
             }
         }
