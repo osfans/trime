@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
+import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.components.ResetAssetsDialog
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.formatDateTime
@@ -18,7 +18,7 @@ import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ProfileFragment : PreferenceFragmentCompat() {
+class ProfileFragment : PaddingPreferenceFragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()

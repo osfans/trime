@@ -10,17 +10,17 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.Config
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.LiquidKeyboardActivity
 import com.osfans.trime.ui.main.MainViewModel
 
 class OtherFragment :
-    PreferenceFragmentCompat(),
+    PaddingPreferenceFragment(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()

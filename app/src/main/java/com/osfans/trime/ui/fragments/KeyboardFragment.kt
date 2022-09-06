@@ -4,16 +4,16 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.components.SoundPickerDialog
 import com.osfans.trime.ui.main.MainViewModel
 
 class KeyboardFragment :
-    PreferenceFragmentCompat(),
+    PaddingPreferenceFragment(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     private val viewModel: MainViewModel by activityViewModels()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

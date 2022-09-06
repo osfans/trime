@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.get
 import com.osfans.trime.R
+import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.components.SchemaPickerDialog
 import com.osfans.trime.ui.main.MainViewModel
 
-class PrefFragment : PreferenceFragmentCompat() {
+class PrefFragment : PaddingPreferenceFragment() {
 
     private val viewModel: MainViewModel by activityViewModels()
 
