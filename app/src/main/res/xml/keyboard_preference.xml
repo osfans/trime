@@ -81,7 +81,8 @@
             app:max="5000"
             app:min="500"
             app:seekBarIncrement="500"
-            app:unit="@string/unit__time_ms" />
+            app:unit="@string/unit__time_ms"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -164,11 +165,10 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="100"
-            app:min="0"
-            app:seekBarIncrement="1"
             app:systemDefaultValue="-1"
             app:systemDefaultValueText="@string/pref__system_default"
-            app:unit="%" />
+            app:unit="%"
+            app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
             android:key="keyboard__key_vibration"
             android:title="@string/keyboard__key_vibration_title"
@@ -181,11 +181,10 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="100"
-            app:min="0"
-            app:seekBarIncrement="1"
             app:systemDefaultValue="-1"
             app:systemDefaultValueText="@string/pref__system_default"
-            app:unit="@string/unit__time_ms" />
+            app:unit="@string/unit__time_ms"
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
             android:dependency="keyboard__key_vibration"
@@ -194,11 +193,9 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="255"
-            app:min="0"
-            app:seekBarIncrement="1"
             app:systemDefaultValue="-1"
             app:systemDefaultValueText="@string/pref__system_default"
-            app:unit="" />
+            app:useSimpleSummaryProvider="true" />
         <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
         <SwitchPreferenceCompat
             android:key="keyboard__speak_key_press"
@@ -220,9 +217,8 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="400"
-            app:min="0"
             app:seekBarIncrement="10"
-            app:unit="" />
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="800"
             android:key="keyboard__key_swipe_velocity"
@@ -230,9 +226,8 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="30000"
-            app:min="0"
             app:seekBarIncrement="100"
-            app:unit="" />
+            app:useSimpleSummaryProvider="true"/>
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="240"
             android:key="keyboard__key_swipe_travel_hi"
@@ -240,9 +235,8 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="600"
-            app:min="0"
             app:seekBarIncrement="10"
-            app:unit="" />
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="25000"
             android:key="keyboard__key_swipe_velocity_hi"
@@ -250,9 +244,8 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="30000"
-            app:min="0"
             app:seekBarIncrement="100"
-            app:unit="" />
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="50"
             android:key="keyboard__key_swipe_time_hi"
@@ -261,9 +254,9 @@
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="500"
-            app:min="0"
             app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms" />
+            app:unit="@string/unit__time_ms"
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="20"
             android:key="keyboard__key_long_press_timeout"
@@ -274,7 +267,8 @@
             app:max="60"
             app:min="10"
             app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms" />
+            app:unit="@string/unit__time_ms"
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="40"
             android:key="keyboard__key_repeat_interval"
@@ -284,7 +278,8 @@
             app:max="100"
             app:min="10"
             app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms" />
+            app:unit="@string/unit__time_ms"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>
