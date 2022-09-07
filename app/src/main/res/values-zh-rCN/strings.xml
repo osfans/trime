@@ -53,7 +53,7 @@
     <string name="keyboard__key_vibration_title">按键时振动</string>
     <string name="keyboard__key_vibration_duration_title">按键振动时长</string>
     <string name="keyboard__key_vibration_amplitude_title">按键振动强度</string>
-    <string name="unit__time_ms">"  毫秒"</string>
+    <string name="unit__time_ms">" 毫秒"</string>
     <string name="keyboard__speak_key_press_title">按键时朗读字符</string>
     <string name="keyboard__speak_key_commit_title">上屏时朗读字符</string>
     <string name="keyboard__long_press_timeout_title">长按按键的延迟时间</string>

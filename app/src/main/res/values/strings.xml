@@ -59,7 +59,7 @@
     <string name="keyboard__key_vibration_title">Vibrate on key press</string>
     <string name="keyboard__key_vibration_duration_title">Vibration length on key press</string>
     <string name="keyboard__key_vibration_amplitude_title">Vibration amplitude on key press</string>
-    <string name="unit__time_ms">" ms"</string>
+    <string name="unit__time_ms">ms</string>
     <string name="keyboard__speak_key_press_title">Voice on key press</string>
     <string name="keyboard__speak_key_commit_title">Voice on commit</string>
     <string name="keyboard__long_press_timeout_title">Long key press delay</string>

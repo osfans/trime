@@ -8,5 +8,6 @@
         <attr name="systemDefaultValue" format="integer" />
         <attr name="systemDefaultValueText" format="string" />
         <attr name="unit" format="string" />
+        <attr name="useSimpleSummaryProvider" format="boolean" />
     </declare-styleable>
 </resources>

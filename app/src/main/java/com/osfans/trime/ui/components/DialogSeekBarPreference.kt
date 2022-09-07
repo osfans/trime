@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
-import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.databinding.SeekBarDialogBinding
 
@@ -27,43 +26,45 @@ import com.osfans.trime.databinding.SeekBarDialogBinding
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
 class DialogSeekBarPreference : Preference {
-    private var defaultValue: Int = 0
-    private var systemDefaultValue: Int = -1
-    private var systemDefaultValueText: String? = null
-    private var min: Int = 0
-    private var max: Int = 100
-    private var step: Int = 1
-    private var unit: String = ""
-
-    private val currentValue: Int
-        get() = sharedPreferences.getInt(key, defaultValue)
+    var defaultValue: Int
+    var systemDefaultValue: Int
+    var systemDefaultValueText: String
+    var min: Int
+    var max: Int
+    var step: Int
+    var unit: String
 
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.preferenceStyle)
+    constructor(context: Context, attrs: AttributeSet?) :
+        this(context, attrs, androidx.preference.R.attr.preferenceStyle)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        context.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreferenceAttrs).apply {
-            min = getInt(R.styleable.DialogSeekBarPreferenceAttrs_min, min)
-            max = getInt(R.styleable.DialogSeekBarPreferenceAttrs_max, max)
-            step = getInt(R.styleable.DialogSeekBarPreferenceAttrs_seekBarIncrement, step)
-            if (step < 1) {
-                step = 1
+        context.theme.obtainStyledAttributes(attrs, R.styleable.DialogSeekBarPreferenceAttrs, 0, 0).run {
+            try {
+                min = getInt(R.styleable.DialogSeekBarPreferenceAttrs_min, 0)
+                max = getInt(R.styleable.DialogSeekBarPreferenceAttrs_max, 100)
+                step = getInt(R.styleable.DialogSeekBarPreferenceAttrs_seekBarIncrement, 1)
+                defaultValue =
+                    getInt(R.styleable.DialogSeekBarPreferenceAttrs_android_defaultValue, 0)
+                systemDefaultValue =
+                    getInt(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValue, -1)
+                systemDefaultValueText =
+                    getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText) ?: ""
+                unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: ""
+                if (getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_useSimpleSummaryProvider, false)) {
+                    summaryProvider = SimpleSummaryProvider
+                }
+            } finally {
+                recycle()
             }
-            defaultValue = getInt(R.styleable.DialogSeekBarPreferenceAttrs_android_defaultValue, defaultValue)
-            systemDefaultValue = getInt(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValue, min - 1)
-            systemDefaultValueText = getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText)
-            unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: unit
-            recycle()
         }
     }
 
+    private val currentValue: Int
+        get() = getPersistedInt(defaultValue)
+
     override fun onClick() {
         showSeekBarDialog()
-    }
-
-    override fun onAttachedToHierarchy(preferenceManager: PreferenceManager?) {
-        super.onAttachedToHierarchy(preferenceManager)
-        summary = getTextForValue(currentValue)
     }
 
     /**
@@ -72,59 +73,57 @@ class DialogSeekBarPreference : Preference {
      * [systemDefaultValue] and returns [systemDefaultValueText] upon matching.
      */
     private fun getTextForValue(value: Int): String {
-        val systemDefValText = systemDefaultValueText
-        return if (value == systemDefaultValue && systemDefValText != null) {
-            systemDefValText
+        return if (value == systemDefaultValue && systemDefaultValueText.isNotEmpty()) {
+            systemDefaultValueText
         } else {
-            value.toString() + unit
+            "$value $unit"
         }
     }
 
     /**
      * Shows the seek bar dialog.
      */
-    private fun showSeekBarDialog() {
-        val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(context))
+    private fun showSeekBarDialog() = with(context) {
         val initValue = currentValue
-        dialogView.seekBar.max = actualValueToSeekBarProgress(max)
-        dialogView.seekBar.progress = actualValueToSeekBarProgress(initValue)
-        dialogView.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                dialogView.value.text = getTextForValue(seekBarProgressToActualValue(progress))
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-        dialogView.value.text = getTextForValue(initValue)
-        AlertDialog.Builder(context).apply {
-            setTitle(this@DialogSeekBarPreference.title)
-            setCancelable(true)
-            setView(dialogView.root)
-            setPositiveButton(android.R.string.ok) { _, _ ->
-                val actualValue = seekBarProgressToActualValue(dialogView.seekBar.progress)
+        val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(this))
+        dialogView.textView.text = getTextForValue(initValue)
+        dialogView.seekBar.apply {
+            max = getProgressForValue(this@DialogSeekBarPreference.max)
+            progress = getProgressForValue(initValue)
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    dialogView.textView.text = getTextForValue(getValueForProgress(progress))
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+        }
+        AlertDialog.Builder(this)
+            .setTitle(this@DialogSeekBarPreference.title)
+            .setView(dialogView.root)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val actualValue = getValueForProgress(dialogView.seekBar.progress)
                 if (callChangeListener(actualValue)) {
-                    sharedPreferences.edit().putInt(key, actualValue).apply()
-                    summary = getTextForValue(currentValue)
+                    persistInt(actualValue)
+                    notifyChanged()
                 }
             }
-            setNeutralButton(R.string.pref__default) { _, _ ->
-                sharedPreferences.edit().putInt(key, defaultValue).apply()
-                summary = getTextForValue(currentValue)
+            .setNeutralButton(R.string.pref__default) { _, _ ->
+                persistInt(defaultValue)
+                notifyChanged()
             }
-            setNegativeButton(android.R.string.cancel, null)
-        }.show()
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /**
      * Converts the actual value to a progress value which the Android SeekBar implementation can
      * handle. (Android's SeekBar step is fixed at 1 and min at 0)
      *
-     * @param actual The actual value.
+     * @param value The actual value.
      * @return the internal value which is used to allow different min and step values.
      */
-    private fun actualValueToSeekBarProgress(actual: Int): Int {
-        return (actual - min) / step
-    }
+    private fun getProgressForValue(value: Int) = (value - min) / step
 
     /**
      * Converts the Android SeekBar value to the actual value.
@@ -132,7 +131,11 @@ class DialogSeekBarPreference : Preference {
      * @param progress The progress value of the SeekBar.
      * @return the actual value which is ready to use.
      */
-    private fun seekBarProgressToActualValue(progress: Int): Int {
-        return (progress * step) + min
+    private fun getValueForProgress(progress: Int) = (progress * step) + min
+
+    object SimpleSummaryProvider : SummaryProvider<DialogSeekBarPreference> {
+        override fun provideSummary(preference: DialogSeekBarPreference): CharSequence {
+            return preference.getTextForValue(preference.currentValue)
+        }
     }
 }
