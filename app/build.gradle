@@ -1,10 +1,9 @@
 plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
     id 'com.cookpad.android.plugin.license-tools' version '1.2.8'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
 }
-
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 31
@@ -131,10 +130,6 @@ dependencies {
     // Testing
     testImplementation "junit:junit:4.13.2"
     androidTestImplementation "junit:junit:4.13.2"
-}
-
-repositories {
-    mavenCentral()
 }
 
 static String exec(String cmd) {
