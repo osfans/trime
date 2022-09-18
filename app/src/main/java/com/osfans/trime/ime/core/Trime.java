@@ -33,6 +33,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
@@ -96,6 +97,7 @@ import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.ViewUtils;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import kotlin.jvm.Synchronized;
 import timber.log.Timber;
@@ -140,11 +142,6 @@ public class Trime extends LifecycleInputMethodService {
   private int oneHandMode = 0; // 单手键盘模式
   public EditorInstance activeEditorInstance;
   public TextInputManager textInputManager; // 文字输入管理器
-
-  private final int dialogType =
-      VERSION.SDK_INT >= VERSION_CODES.P
-          ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-          : WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 
   private boolean isPopupWindowEnabled = true; // 顯示懸浮窗口
   private String isPopupWindowMovable; // 悬浮窗口是否可移動
@@ -758,7 +755,7 @@ public class Trime extends LifecycleInputMethodService {
     mPopupWindow.setClippingEnabled(false);
     mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      mPopupWindow.setWindowLayoutType(dialogType);
+      mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
     }
     hideCompositionView();
     mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
@@ -1257,11 +1254,12 @@ public class Trime extends LifecycleInputMethodService {
     return startNum;
   }
 
-  private void showDialog(@NonNull Dialog dialog) {
+  public void showDialogAboveInputView(@NonNull final Dialog dialog) {
+    final IBinder token = inputRootBinding.inputRoot.getWindowToken();
     final Window window = dialog.getWindow();
     final WindowManager.LayoutParams lp = window.getAttributes();
-    lp.token = getWindow().getWindow().getDecorView().getWindowToken();
-    lp.type = dialogType;
+    lp.token = Objects.requireNonNull(token, "InputRoot token is null.");
+    lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
     window.setAttributes(lp);
     window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     dialog.show();
@@ -1304,7 +1302,6 @@ public class Trime extends LifecycleInputMethodService {
     dialogBuilder
         .setTitle(R.string.trime_app_name)
         .setIcon(R.mipmap.ic_app_icon)
-        .setCancelable(true)
         .setNegativeButton(
             R.string.other_ime,
             (dialog, which) -> {
@@ -1338,7 +1335,7 @@ public class Trime extends LifecycleInputMethodService {
                 textInputManager.setShouldUpdateRimeOption(true);
               });
     }
-    showDialog(dialogBuilder.create());
+    showDialogAboveInputView(dialogBuilder.create());
   }
 
   /**
