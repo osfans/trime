@@ -1,10 +1,13 @@
 package com.osfans.trime.ime.text
 
+import android.content.DialogInterface
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AlertDialog
+import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.Config
@@ -20,12 +23,17 @@ import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
+import com.osfans.trime.ui.main.colorPicker
+import com.osfans.trime.ui.main.schemaPicker
+import com.osfans.trime.ui.main.soundPicker
+import com.osfans.trime.ui.main.themePicker
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Locale
 
@@ -387,16 +395,30 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_VOICE_ASSIST -> Speech(trime).startListening() // Speech Recognition
             KeyEvent.KEYCODE_SETTINGS -> { // Settings
-                when (event.option) {
-                    "theme" -> trime.showThemeDialog()
-                    "color" -> trime.showColorDialog()
-                    "schema" -> trime.showSchemaDialog()
-                    "sound" -> trime.showSoundDialog()
-                    else -> trime.launchSettings()
+                launch {
+                    when (event.option) {
+                        "theme" -> trime.showDialogAboveInputView(
+                            trime.themePicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                        )
+                        "color" -> trime.showDialogAboveInputView(
+                            trime.colorPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                        )
+                        "schema" -> trime.showDialogAboveInputView(
+                            trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                        )
+                        "sound" -> trime.showDialogAboveInputView(
+                            trime.soundPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                        )
+                        else -> trime.launchSettings()
+                    }
                 }
             }
-            KeyEvent.KEYCODE_PROG_RED -> trime.showColorDialog() // Color schemes
-            KeyEvent.KEYCODE_MENU -> trime.showOptionsDialog()
+            KeyEvent.KEYCODE_PROG_RED -> launch {
+                trime.showDialogAboveInputView(
+                    trime.colorPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                )
+            }
+            KeyEvent.KEYCODE_MENU -> showOptionsDialog()
             else -> {
                 if (event.mask == 0 && trime.keyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
                     if (event.code == KeyEvent.KEYCODE_SPACE && prefs.keyboard.hookShiftSpace) {
@@ -520,5 +542,44 @@ class TextInputManager private constructor() :
     override fun onCandidateLongClicked(index: Int) {
         Rime.deleteCandidate(index)
         trime.updateComposing()
+    }
+
+    private fun showOptionsDialog() {
+        val builder = AlertDialog.Builder(trime, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+        builder
+            .setTitle(R.string.trime_app_name)
+            .setIcon(R.mipmap.ic_app_icon)
+            .setNegativeButton(R.string.other_ime) { dialog, _ ->
+                dialog.dismiss()
+                imeManager.showInputMethodPicker()
+            }
+            .setPositiveButton(R.string.set_ime) { dialog, _ ->
+                trime.launchSettings()
+                dialog.dismiss()
+            }
+        if (Rime.get_current_schema() == (".default")) {
+            builder.setMessage(R.string.no_schemas)
+        } else {
+            builder
+                .setNegativeButton(
+                    R.string.pref_select_schemas
+                ) { dialog, _ ->
+                    launch {
+                        trime.showDialogAboveInputView(
+                            trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                        )
+                    }
+                    dialog.dismiss()
+                }
+                .setSingleChoiceItems(
+                    Rime.getSchemaNames(),
+                    Rime.getSchemaIndex()
+                ) { dialog: DialogInterface, id: Int ->
+                    dialog.dismiss()
+                    Rime.selectSchema(id)
+                    shouldUpdateRimeOption = true
+                }
+        }
+        trime.showDialogAboveInputView(builder.create())
     }
 }

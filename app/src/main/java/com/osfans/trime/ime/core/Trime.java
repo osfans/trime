@@ -57,7 +57,6 @@ import android.widget.PopupWindow;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.BarUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
@@ -88,10 +87,6 @@ import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
 import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
-import com.osfans.trime.ui.components.ColorPickerDialog;
-import com.osfans.trime.ui.components.SchemaPickerDialog;
-import com.osfans.trime.ui.components.SoundPickerDialog;
-import com.osfans.trime.ui.components.ThemePickerDialog;
 import com.osfans.trime.ui.main.PrefMainActivity;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
@@ -1265,26 +1260,6 @@ public class Trime extends LifecycleInputMethodService {
     dialog.show();
   }
 
-  /** 彈出{@link ColorPickerDialog 配色對話框} */
-  public void showColorDialog() {
-    new ColorPickerDialog(this).show();
-  }
-
-  /** 彈出{@link SchemaPickerDialog 輸入法方案對話框} */
-  public void showSchemaDialog() {
-    new SchemaPickerDialog(this).show();
-  }
-
-  /** 彈出{@link ThemePickerDialog 主題對話框} */
-  public void showThemeDialog() {
-    new ThemePickerDialog(this).show();
-  }
-
-  /** 彈出{@link SoundPickerDialog 音效包对话框} */
-  public void showSoundDialog() {
-    new SoundPickerDialog(this).show();
-  }
-
   /** Hides the IME and launches {@link PrefMainActivity}. */
   public void launchSettings() {
     requestHideSelf(0);
@@ -1294,48 +1269,6 @@ public class Trime extends LifecycleInputMethodService {
             | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
             | Intent.FLAG_ACTIVITY_CLEAR_TOP);
     getApplicationContext().startActivity(i);
-  }
-
-  public void showOptionsDialog() {
-    final AlertDialog.Builder dialogBuilder =
-        new AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert);
-    dialogBuilder
-        .setTitle(R.string.trime_app_name)
-        .setIcon(R.mipmap.ic_app_icon)
-        .setNegativeButton(
-            R.string.other_ime,
-            (dialog, which) -> {
-              dialog.dismiss();
-              if (imeManager != null) {
-                imeManager.showInputMethodPicker();
-              }
-            })
-        .setPositiveButton(
-            R.string.set_ime,
-            (dialog, which) -> {
-              launchSettings();
-              dialog.dismiss();
-            });
-    if (Rime.get_current_schema().contentEquals(".default")) {
-      dialogBuilder.setMessage(R.string.no_schemas);
-    } else {
-      dialogBuilder
-          .setNegativeButton(
-              R.string.pref_select_schemas,
-              (dialog, which) -> {
-                showSchemaDialog();
-                dialog.dismiss();
-              })
-          .setSingleChoiceItems(
-              Rime.getSchemaNames(),
-              Rime.getSchemaIndex(),
-              (dialog, id) -> {
-                dialog.dismiss();
-                Rime.selectSchema(id);
-                textInputManager.setShouldUpdateRimeOption(true);
-              });
-    }
-    showDialogAboveInputView(dialogBuilder.create());
   }
 
   /**
