@@ -1,18 +1,21 @@
 package com.osfans.trime.ui.fragments
 
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
+import com.blankj.utilcode.util.ResourceUtils
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.components.ResetAssetsDialog
 import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +62,36 @@ class ProfileFragment : PaddingPreferenceFragment() {
                 summaryOff = context.getString(R.string.profile_enable_syncing_in_background)
             }
             get<Preference>("profile_reset")?.setOnPreferenceClickListener {
-                ResetAssetsDialog(context).show()
+                val items = appContext.assets.list("rime")!!
+                val checkedItems = items.map { false }.toBooleanArray()
+                AlertDialog.Builder(context)
+                    .setTitle(R.string.profile_reset)
+                    .setMultiChoiceItems(items, checkedItems) { _, id, isChecked ->
+                        checkedItems[id] = isChecked
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        var res = true
+                        lifecycleScope.withLoadingDialog(context) {
+                            withContext(Dispatchers.IO) {
+                                for ((i, a) in items.withIndex()) {
+                                    if (checkedItems[i]) {
+                                        res = res and (
+                                            runCatching {
+                                                ResourceUtils.copyFileFromAssets(
+                                                    "rime/$a",
+                                                    "${DataManager.sharedDataDir.absolutePath}/$a"
+                                                )
+                                            }.getOrNull() ?: false
+                                            )
+                                    }
+                                }
+                            }
+                        }
+                        ToastUtils.showShort(
+                            if (res) R.string.reset_success else R.string.reset_failure
+                        )
+                    }.show()
                 true
             }
         }

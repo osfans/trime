@@ -2,13 +2,15 @@ package com.osfans.trime.ui.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.get
 import com.osfans.trime.R
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.components.SchemaPickerDialog
 import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.ui.main.schemaPicker
+import kotlinx.coroutines.launch
 
 class PrefFragment : PaddingPreferenceFragment() {
 
@@ -29,7 +31,7 @@ class PrefFragment : PaddingPreferenceFragment() {
         setPreferencesFromResource(R.xml.prefs, rootKey)
         with(preferenceScreen) {
             get<Preference>("pref_schemas")?.setOnPreferenceClickListener {
-                SchemaPickerDialog(context).show()
+                lifecycleScope.launch { context.schemaPicker().show() }
                 true
             }
             get<Preference>("pref_user_data")?.setOnPreferenceClickListener {

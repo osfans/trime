@@ -3,14 +3,16 @@ package com.osfans.trime.ui.fragments
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.components.SoundPickerDialog
 import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.ui.main.soundPicker
+import kotlinx.coroutines.launch
 
 class KeyboardFragment :
     PaddingPreferenceFragment(),
@@ -18,6 +20,11 @@ class KeyboardFragment :
     private val viewModel: MainViewModel by activityViewModels()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.keyboard_preference)
+        findPreference<Preference>("keyboard__key_sound_package")
+            ?.setOnPreferenceClickListener {
+                lifecycleScope.launch { requireContext().soundPicker().show() }
+                true
+            }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -44,15 +51,7 @@ class KeyboardFragment :
             }
         }
     }
-    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-        return when (preference?.key) {
-            "keyboard__key_sound_package" -> {
-                SoundPickerDialog(requireContext()).show()
-                true
-            }
-            else -> super.onPreferenceTreeClick(preference)
-        }
-    }
+
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(getString(R.string.pref_keyboard))

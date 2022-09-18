@@ -2,13 +2,15 @@ package com.osfans.trime.ui.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.get
 import com.osfans.trime.R
-import com.osfans.trime.ui.components.ColorPickerDialog
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.components.ThemePickerDialog
 import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.ui.main.colorPicker
+import com.osfans.trime.ui.main.themePicker
+import kotlinx.coroutines.launch
 
 class ThemeColorFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
@@ -17,11 +19,11 @@ class ThemeColorFragment : PaddingPreferenceFragment() {
         addPreferencesFromResource(R.xml.theme_color_preference)
         with(preferenceScreen) {
             get<Preference>("theme_selected_theme")?.setOnPreferenceClickListener {
-                ThemePickerDialog(context).show()
+                lifecycleScope.launch { context.themePicker().show() }
                 true
             }
             get<Preference>("theme_selected_color")?.setOnPreferenceClickListener {
-                ColorPickerDialog(context).show()
+                lifecycleScope.launch { context.colorPicker().show() }
                 true
             }
         }
