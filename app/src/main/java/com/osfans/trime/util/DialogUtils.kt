@@ -1,10 +1,7 @@
 package com.osfans.trime.util
 
-import android.app.Dialog
 import android.content.Context
-import android.os.Build
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.annotation.StringRes
@@ -12,7 +9,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.blankj.utilcode.util.SizeUtils
 import com.osfans.trime.R
-import com.osfans.trime.ime.core.Trime
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

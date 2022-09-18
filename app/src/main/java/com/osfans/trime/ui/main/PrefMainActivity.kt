@@ -3,10 +3,8 @@ package com.osfans.trime.ui.main
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
@@ -110,7 +108,6 @@ class PrefMainActivity :
             startActivity(Intent(this, SetupActivity::class.java))
         }
         requestExternalStoragePermission()
-        requestAlertWindowPermission()
     }
 
     override fun onRequestPermissionsResult(
@@ -200,25 +197,6 @@ class PrefMainActivity :
                         PERMISSION_REQUEST_EXTERNAL_STORAGE
                     )
                 }
-            }
-        }
-    }
-
-    private fun requestAlertWindowPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) { // 僅Android P需要此權限在最上層顯示懸浮窗、對話框
-            if (!Settings.canDrawOverlays(this)) { // 事先说明需要权限的理由
-                AlertDialog.Builder(this)
-                    .setCancelable(true)
-                    .setMessage(R.string.alert_window_access_required)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        val intent = Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:$packageName")
-                        )
-                        startActivity(intent)
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show()
             }
         }
     }
