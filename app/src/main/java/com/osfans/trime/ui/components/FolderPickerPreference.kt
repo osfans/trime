@@ -37,8 +37,8 @@ class FolderPickerPreference : Preference {
     private val currentValue: String
         get() = getPersistedString(value)
 
-    override fun onGetDefaultValue(a: TypedArray?, index: Int): Any {
-        return a?.getString(index) ?: ""
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
+        return a.getString(index) ?: ""
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {

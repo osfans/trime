@@ -67,8 +67,8 @@ class OtherFragment :
         }
     }
 
-    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-        when (val key = preference?.key) {
+    override fun onPreferenceTreeClick(preference: Preference): Boolean {
+        when (val key = preference.key) {
             "other_managed_clipboard",
             "other_managed_collection",
             "other_managed_draft" -> {
@@ -91,12 +91,12 @@ class OtherFragment :
         super.onResume()
         viewModel.setToolbarTitle(getString(R.string.pref_other))
         viewModel.disableTopOptionsMenu()
-        preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onPause() {
         updateLauncherIconStatus()
-        preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
         super.onPause()
     }
 

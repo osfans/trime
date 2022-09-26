@@ -62,7 +62,7 @@ class AboutFragment : PaddingPreferenceFragment() {
     }
 
     private fun Preference.hidden() {
-        if (this.summary.isBlank() || this.intent.data.toString().isBlank()) {
+        if (this.summary?.isBlank() == true || this.intent?.data == null) {
             this.isVisible = false
         }
     }
