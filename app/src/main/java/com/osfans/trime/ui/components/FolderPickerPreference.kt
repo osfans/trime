@@ -2,26 +2,27 @@ package com.osfans.trime.ui.components
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.net.Uri
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.ViewGroup.LayoutParams
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.net.toUri
 import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.databinding.FolderPickerDialogBinding
+import com.osfans.trime.util.UriUtils.toUri
+import java.io.File
 
 class FolderPickerPreference : Preference {
     private var value = ""
+    lateinit var documentTreeLauncher: ActivityResultLauncher<Uri?>
+    lateinit var dialogView: FolderPickerDialogBinding
 
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) :
-            this(context, attrs, androidx.preference.R.attr.preferenceStyle)
+        this(context, attrs, androidx.preference.R.attr.preferenceStyle)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         context.theme.obtainStyledAttributes(attrs, R.styleable.FolderPickerPreferenceAttrs, 0, 0).run {
             try {
@@ -49,10 +50,10 @@ class FolderPickerPreference : Preference {
 
     private fun showPickerDialog() {
         val initValue = currentValue
-        val dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
+        dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
         dialogView.editText.setText(initValue)
         dialogView.button.setOnClickListener {
-
+            documentTreeLauncher.launch(File(initValue).toUri())
         }
         AlertDialog.Builder(context)
             .setTitle(this@FolderPickerPreference.title)
