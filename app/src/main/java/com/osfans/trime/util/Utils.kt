@@ -1,9 +1,7 @@
 package com.osfans.trime.util
 
 import android.app.Activity
-import android.content.ClipboardManager
 import android.content.Context
-import android.content.Context.CLIPBOARD_SERVICE
 import android.graphics.Color
 import android.os.Build
 import androidx.core.view.ViewCompat
@@ -24,8 +22,6 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 val appContext: Context get() = TrimeApplication.getInstance().applicationContext
-
-inline val clipboardManager: ClipboardManager get() = appContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
 @OptIn(ExperimentalContracts::class)
 inline fun <T : Any, U> Result<T?>.bindOnNotNull(block: (T) -> Result<U>): Result<U>? {
