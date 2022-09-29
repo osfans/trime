@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /**
  * Copyright (C) 2015-present, osfans
  * waxaca@163.com https://github.com/osfans
@@ -19,35 +18,41 @@
  */
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
-        package="com.osfans.trime" >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.osfans.trime">
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name="com.osfans.trime.TrimeApplication"
-        android:label="@string/trime_app_name"
-        android:icon="@mipmap/ic_app_icon"
-        android:roundIcon="@mipmap/ic_app_icon_round"
-        android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
+        android:icon="@mipmap/ic_app_icon"
+        android:label="@string/trime_app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_app_icon_round"
         android:theme="@style/PreferenceTheme">
 
-        <service android:name=".TrimeImeService" android:label="@string/trime_app_name"
-                android:permission="android.permission.BIND_INPUT_METHOD"
-                android:exported="false">
+        <service
+            android:name=".TrimeImeService"
+            android:exported="false"
+            android:label="@string/trime_app_name"
+            android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
             </intent-filter>
-            <meta-data android:name="android.view.im" android:resource="@xml/method" />
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
         </service>
 
         <!-- Settings activity -->
-        <activity android:name=".ui.main.PrefMainActivity"
-            android:launchMode="singleTask"/>
+        <activity
+            android:name=".ui.main.PrefMainActivity"
+            android:launchMode="singleTask" />
 
         <activity
             android:name=".ui.setup.SetupActivity"
@@ -61,18 +66,18 @@
 
         <activity
             android:name=".ui.main.LiquidKeyboardActivity"
-            android:parentActivityName=".ui.main.PrefMainActivity"
-            />
+            android:parentActivityName=".ui.main.PrefMainActivity" />
 
         <!-- Using an activity alias to disable/enable the app icon in the launcher -->
         <activity-alias
             android:name="com.osfans.trime.PrefLauncherAlias"
-            android:label="@string/trime_app_name"
             android:exported="true"
+            android:label="@string/trime_app_name"
             android:launchMode="singleTask"
-            android:targetActivity=".ui.main.PrefMainActivity" >
+            android:targetActivity=".ui.main.PrefMainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
