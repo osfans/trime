@@ -1,18 +1,13 @@
 package com.osfans.trime.ui.main
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
@@ -22,22 +17,20 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.blankj.utilcode.util.ToastUtils
+import com.hjq.permissions.OnPermissionCallback
+import com.hjq.permissions.Permission
+import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
-import com.osfans.trime.util.RimeUtils
 import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PrefMainActivity :
-    AppCompatActivity(),
-    ActivityCompat.OnRequestPermissionsResultCallback {
+class PrefMainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val prefs get() = AppPrefs.defaultInstance()
 
@@ -107,28 +100,6 @@ class PrefMainActivity :
         if (SetupActivity.shouldSetup()) {
             startActivity(Intent(this, SetupActivity::class.java))
         }
-        requestExternalStoragePermission()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == PERMISSION_REQUEST_EXTERNAL_STORAGE) {
-            // Request for external storage permission
-            if (grantResults.size == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                lifecycleScope.launch {
-                    ToastUtils.showShort(R.string.external_storage_permission_granted)
-                    delay(500)
-                    RimeUtils.deploy(this@PrefMainActivity)
-                }
-            } else {
-                // Permission request was denied
-                ToastUtils.showShort(R.string.external_storage_permission_denied)
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -145,7 +116,7 @@ class PrefMainActivity :
                 lifecycleScope.withLoadingDialog(
                     this, 200L, R.string.deploy_progress
                 ) {
-                    withContext(Dispatchers.IO) {
+                    withContext(Dispatchers.Default) {
                         Rime.destroy()
                         Rime.get(this@PrefMainActivity, true)
                     }
@@ -161,47 +132,31 @@ class PrefMainActivity :
         }
     }
 
-    private fun requestExternalStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                // Permission is already available, return
-                return
-            } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    AlertDialog.Builder(this)
-                        .setMessage(R.string.external_storage_access_required)
-                        .setCancelable(true)
-                        .setPositiveButton(android.R.string.ok) { _, _ ->
-                            ActivityCompat.requestPermissions(
-                                this,
-                                arrayOf(
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE
-                                ),
-                                PERMISSION_REQUEST_EXTERNAL_STORAGE
-                            )
-                        }
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .show()
-                } else {
-                    ToastUtils.showShort(R.string.external_storage_permission_not_available)
-
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ),
-                        PERMISSION_REQUEST_EXTERNAL_STORAGE
-                    )
-                }
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        requestExternalStoragePermission()
     }
 
-    companion object {
-        private const val PERMISSION_REQUEST_EXTERNAL_STORAGE = 0
+    private fun requestExternalStoragePermission() {
+        XXPermissions.with(this)
+            .permission(Permission.Group.STORAGE)
+            .request(object : OnPermissionCallback {
+                override fun onGranted(permissions: MutableList<String>?, all: Boolean) {
+                    if (all) {
+                        ToastUtils.showShort(R.string.external_storage_permission_granted)
+                    }
+                }
+
+                override fun onDenied(permissions: MutableList<String>?, never: Boolean) {
+                    if (never) {
+                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                        XXPermissions.startPermissionActivity(
+                            this@PrefMainActivity, permissions
+                        )
+                    } else {
+                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                    }
+                }
+            })
     }
 }
