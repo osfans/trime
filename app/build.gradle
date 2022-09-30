@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'com.cookpad.android.plugin.license-tools' version '1.2.8'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
+    id 'com.google.devtools.ksp' version '1.7.10-1.0.6'
 }
 
 android {
@@ -125,6 +126,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation "com.google.android.flexbox:flexbox:3.0.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
     // Testing
     testImplementation "junit:junit:4.13.2"
