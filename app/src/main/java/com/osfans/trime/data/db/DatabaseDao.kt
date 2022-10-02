@@ -23,6 +23,9 @@ interface DatabaseDao {
     @Query("DELETE FROM ${DatabaseBean.TABLE_NAME} WHERE id=:id")
     fun delete(id: Int)
 
+    @Delete
+    fun delete(beans: List<DatabaseBean>)
+
     @Query("DELETE FROM ${DatabaseBean.TABLE_NAME}")
     fun deleteAll()
 

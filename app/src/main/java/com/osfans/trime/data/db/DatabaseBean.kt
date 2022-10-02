@@ -1,5 +1,6 @@
 package com.osfans.trime.data.db
 
+import android.content.ClipData
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
@@ -10,11 +11,16 @@ data class DatabaseBean(
     val id: Int = 0,
     val text: String?,
     val html: String? = null,
-    val type: BeanType,
+    val type: BeanType = BeanType.TEXT,
     val time: Long = System.currentTimeMillis()
 ) {
     companion object {
         const val TABLE_NAME = "t_data"
+
+        fun fromClipData(clipData: ClipData): DatabaseBean? {
+            val str = clipData.getItemAt(0).text?.toString() ?: return null
+            return DatabaseBean(text = str)
+        }
     }
 
     enum class BeanType {
