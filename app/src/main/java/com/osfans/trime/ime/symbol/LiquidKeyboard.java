@@ -134,7 +134,7 @@ public class LiquidKeyboard {
   // 设置liquidKeyboard共用的布局参数
   public void calcPadding(int width) {
 
-    Config config = Config.get(context);
+    Config config = Config.get();
     parent_width = width;
     final Map<String, ?> liquid_config = config.getLiquidKeyboard();
 
@@ -197,7 +197,7 @@ public class LiquidKeyboard {
   // 每次点击tab都需要刷新的参数
   private void calcPadding(SymbolKeyboardType type) {
 
-    Config config = Config.get(context);
+    Config config = Config.get();
     int[] padding = config.getKeyboardPadding();
 
     if (type == SymbolKeyboardType.SINGLE) {
@@ -239,7 +239,7 @@ public class LiquidKeyboard {
     }
 
     Timber.d("Tab.select(%s) beans.size=%s", i, simpleKeyBeans.size());
-    simpleAdapter = new SimpleAdapter(context, simpleKeyBeans);
+    simpleAdapter = new SimpleAdapter(simpleKeyBeans);
 
     Timber.d(
         "configStylet() single_width=%s, keyHeight=%s, margin_x=%s, margin_top=%s",
@@ -308,10 +308,10 @@ public class LiquidKeyboard {
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    clipboard_max_size = Config.get(context).getClipboardLimit();
+    clipboard_max_size = Config.get().getClipboardLimit();
 
     clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
-    mClipboardAdapter = new ClipboardAdapter(context, clipboardBeanList);
+    mClipboardAdapter = new ClipboardAdapter(clipboardBeanList);
 
     mClipboardAdapter.configStyle(margin_x, margin_top);
 
@@ -344,7 +344,7 @@ public class LiquidKeyboard {
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
     collectionBeanList = CollectionDao.get().getAllSimpleBean();
-    mCollectionAdapter = new CollectionAdapter(context, collectionBeanList);
+    mCollectionAdapter = new CollectionAdapter(collectionBeanList);
 
     mCollectionAdapter.configStyle(margin_x, margin_top);
 
@@ -377,10 +377,10 @@ public class LiquidKeyboard {
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
     keyboardView.setLayoutManager(flexboxLayoutManager);
 
-    draft_max_size = Config.get(context).getDraftLimit();
+    draft_max_size = Config.get().getDraftLimit();
 
     draftBeanList = DraftDao.get().getAllSimpleBean(draft_max_size);
-    mDraftAdapter = new DraftAdapter(context, draftBeanList);
+    mDraftAdapter = new DraftAdapter(draftBeanList);
 
     mDraftAdapter.configStyle(margin_x, margin_top);
 
@@ -404,7 +404,7 @@ public class LiquidKeyboard {
     mCollectionAdapter = null;
     mDraftAdapter = null;
 
-    if (candidateAdapter == null) candidateAdapter = new CandidateAdapter(context);
+    if (candidateAdapter == null) candidateAdapter = new CandidateAdapter();
 
     // 设置布局管理器
     FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(context);

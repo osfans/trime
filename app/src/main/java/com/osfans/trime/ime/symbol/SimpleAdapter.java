@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.symbol;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -19,7 +18,6 @@ import java.util.List;
 import timber.log.Timber;
 
 public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-  private final Context myContext;
   private final List<SimpleKeyBean> list;
   private int keyWidth, keyHeight, keyMarginX, keyMarginTop;
   private Integer textColor;
@@ -27,8 +25,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
   private Drawable background, background2;
   private Typeface textFont;
 
-  public SimpleAdapter(Context context, List<SimpleKeyBean> itemlist) {
-    myContext = context;
+  public SimpleAdapter(List<SimpleKeyBean> itemlist) {
     list = itemlist;
   }
 
@@ -42,7 +39,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     Timber.d("configStyle keyHeight = %s", keyHeight);
 
     //  边框尺寸、圆角、字号直接读取主题通用参数。
-    Config config = Config.get(myContext);
+    Config config = Config.get();
     textColor = config.getLiquidColor("key_text_color");
     textSize = config.getFloat("label_text_size");
     //  点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
@@ -69,7 +66,9 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
   @NonNull
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(myContext).inflate(R.layout.simple_key_fix_item, parent, false);
+    View view =
+        LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.simple_key_fix_item, parent, false);
     return new ItemViewHolder(view);
   }
 

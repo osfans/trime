@@ -58,7 +58,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
                     withContext(Dispatchers.IO) {
                         Rime.sync_user_data()
                         Rime.destroy()
-                        Rime.get(context, true)
+                        Rime.get(true)
                     }
                 }
                 true

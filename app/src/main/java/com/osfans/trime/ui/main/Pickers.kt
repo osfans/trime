@@ -23,13 +23,13 @@ suspend fun Context.themePicker(
             items = ThemeManager.getAllThemes()
                 .map { it.substringBeforeLast('.') }
                 .toTypedArray()
-            val current = Config.get(this@themePicker).theme.substringBeforeLast('.')
+            val current = Config.get().theme.substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             with(items[checkedItem].toString()) {
-                Config.get(this@themePicker).theme =
+                Config.get().theme =
                     if (this == "trime") this else "$this.trime"
             }
             Trime.getServiceOrNull()?.initKeyboard()
@@ -45,7 +45,7 @@ suspend fun Context.colorPicker(
         title = getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
         onInit {
-            val all = Config.get(this@colorPicker).presetColorSchemes
+            val all = Config.get().presetColorSchemes
             items = all.map { it.second }.toTypedArray()
             val current = prefs.looks.selectedColor
             val source = all.map { it.first }.toTypedArray()
@@ -82,7 +82,7 @@ suspend fun Context.schemaPicker(
                 }.map { it.toString() }.toTypedArray()
             )
             Rime.destroy()
-            Rime.get(this@schemaPicker, true)
+            Rime.get(true)
         }
     }.create()
 }
@@ -97,13 +97,13 @@ suspend fun Context.soundPicker(
             items = SoundManager.getAllSounds()
                 .map { it.substringBeforeLast('.') }
                 .toTypedArray()
-            val current = Config.get(this@soundPicker).soundPackage
+            val current = Config.get().soundPackage
                 .substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            Config.get(this@soundPicker).soundPackage = "${items[checkedItem]}.sound"
+            Config.get().soundPackage = "${items[checkedItem]}.sound"
         }
     }.create()
 }

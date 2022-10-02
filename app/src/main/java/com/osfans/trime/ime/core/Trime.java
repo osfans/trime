@@ -111,7 +111,7 @@ public class Trime extends LifecycleInputMethodService {
   /** 输入法配置 */
   @NonNull
   public Config getImeConfig() {
-    return Config.get(this);
+    return Config.get();
   }
 
   private boolean darkMode; // 当前键盘主题是否处于暗黑模式
@@ -483,7 +483,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void invalidate() {
-    Rime.get(this);
+    Rime.get();
     getImeConfig().destroy();
     reset();
     textInputManager.setShouldUpdateRimeOption(true);
@@ -557,14 +557,14 @@ public class Trime extends LifecycleInputMethodService {
       inputRootBinding.inputRoot.setBackgroundColor(Color.BLACK);
     }
 
-    tabView.reset(self);
+    tabView.reset();
   }
 
   public void resetKeyboard() {
     if (mainKeyboardView != null) {
       mainKeyboardView.setShowHint(!Rime.getOption("_hide_key_hint"));
       mainKeyboardView.setShowSymbol(!Rime.getOption("_hide_key_symbol"));
-      mainKeyboardView.reset(this); // 實體鍵盤無軟鍵盤
+      mainKeyboardView.reset(); // 實體鍵盤無軟鍵盤
     }
   }
 
@@ -573,11 +573,11 @@ public class Trime extends LifecycleInputMethodService {
       loadBackground();
       setShowComment(!Rime.getOption("_hide_comment"));
       mCandidateRoot.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
-      mCandidate.reset(this);
+      mCandidate.reset();
       isPopupWindowEnabled =
           getPrefs().getKeyboard().getPopupWindowEnabled() && getImeConfig().hasKey("window");
       mComposition.setVisibility(isPopupWindowEnabled ? View.VISIBLE : View.GONE);
-      mComposition.reset(this);
+      mComposition.reset();
     }
   }
 

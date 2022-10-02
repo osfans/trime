@@ -37,10 +37,10 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
         Timber.d("Received Command = %s", command)
         when (command) {
             COMMAND_DEPLOY -> launch {
-                deploy(context)
+                deploy()
             }
             COMMAND_SYNC -> async {
-                sync(context)
+                sync()
             }
             Intent.ACTION_SHUTDOWN -> Rime.destroy()
             else -> return

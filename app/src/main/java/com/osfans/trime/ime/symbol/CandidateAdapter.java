@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.symbol;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import java.util.List;
 
 // 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR_LENGTH
 public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-  private final Context myContext;
   private final TextInputManager textInputManager;
 
   // 候选词
@@ -38,8 +36,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   private static int comment_position;
   private static boolean hide_comment;
 
-  public CandidateAdapter(Context context) {
-    myContext = context;
+  public CandidateAdapter() {
     candidates = new Rime.RimeCandidate[0];
     textInputManager = TextInputManager.Companion.getInstance();
     comment_position = 0;
@@ -70,7 +67,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     this.keyMarginTop = keyMarginTop;
 
     //  边框尺寸、圆角、字号直接读取主题通用参数。配色优先读取 liquidKeyboard 专用参数。
-    Config config = Config.get(myContext);
+    Config config = Config.get();
 
     textColor = config.getColor("candidate_text_color");
     textColor2 = config.getColor("hilited_candidate_text_color");
@@ -102,15 +99,16 @@ public class CandidateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view;
     if (comment_position == COMMENT_DOWN) {
-      view = LayoutInflater.from(myContext).inflate(R.layout.liquid_key_item, parent, false);
+      view =
+          LayoutInflater.from(parent.getContext()).inflate(R.layout.liquid_key_item, parent, false);
     } else if (comment_position == COMMENT_TOP) {
       view =
-          LayoutInflater.from(myContext)
+          LayoutInflater.from(parent.getContext())
               .inflate(R.layout.liquid_key_item_comment_top, parent, false);
     } else {
 
       view =
-          LayoutInflater.from(myContext)
+          LayoutInflater.from(parent.getContext())
               .inflate(R.layout.liquid_key_item_comment_right, parent, false);
     }
     return new ItemViewHolder(view);

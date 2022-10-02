@@ -1,6 +1,5 @@
 package com.osfans.trime.util
 
-import android.content.Context
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -19,18 +18,18 @@ object RimeUtils {
     }
 
     /** Deploy means reset Rime instance. **/
-    suspend fun deploy(context: Context) = withContext(Dispatchers.IO) {
+    suspend fun deploy() = withContext(Dispatchers.IO) {
         Rime.destroy()
-        Rime.get(context, true)
+        Rime.get(true)
         ToastUtils.showLong(R.string.deploy_finish)
     }
 
     /** Sync the user data.
      * @return `true` if successfully **/
-    suspend fun sync(context: Context): Boolean = withContext(Dispatchers.IO) {
+    suspend fun sync(): Boolean = withContext(Dispatchers.IO) {
         Rime.sync_user_data().also {
             Rime.destroy()
-            Rime.get(context, true)
+            Rime.get(true)
         }
     }
 }

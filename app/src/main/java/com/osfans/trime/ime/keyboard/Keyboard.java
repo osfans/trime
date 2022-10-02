@@ -107,7 +107,7 @@ public class Keyboard {
         (context.getResources().getConfiguration().orientation
             == Configuration.ORIENTATION_LANDSCAPE);
 
-    final Config config = Config.get(context);
+    final Config config = Config.get();
 
     final DisplayMetrics dm = context.getResources().getDisplayMetrics();
     mDisplayWidth = dm.widthPixels;
@@ -193,7 +193,7 @@ public class Keyboard {
     final boolean land =
         (context.getResources().getConfiguration().orientation
             == Configuration.ORIENTATION_LANDSCAPE);
-    Config config = Config.get(context);
+    Config config = Config.get();
     final Map<String, ?> keyboardConfig = config.getKeyboard(name);
     mLabelTransform = ConfigGetter.getString(keyboardConfig, "label_transform", "none");
     mAsciiMode = ConfigGetter.getInt(keyboardConfig, "ascii_mode", 1);

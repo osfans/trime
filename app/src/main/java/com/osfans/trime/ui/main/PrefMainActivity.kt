@@ -118,7 +118,7 @@ class PrefMainActivity : AppCompatActivity() {
                 ) {
                     withContext(Dispatchers.Default) {
                         Rime.destroy()
-                        Rime.get(this@PrefMainActivity, true)
+                        Rime.get(true)
                     }
                     ToastUtils.showLong(R.string.deploy_finish)
                 }

@@ -108,7 +108,7 @@ class TextInputManager private constructor() :
             it.registerReceiver(trime)
         }
 
-        val imeConfig = Config.get(trime)
+        val imeConfig = Config.get()
         var s =
             if (imeConfig.getString("locale").isNullOrEmpty()) {
                 imeConfig.getString("locale")
@@ -149,7 +149,7 @@ class TextInputManager private constructor() :
             it.setOnKeyboardActionListener(this)
             it.setShowHint(!Rime.getOption("_hide_key_hint"))
             it.setShowSymbol(!Rime.getOption("_hide_key_symbol"))
-            it.reset(trime)
+            it.reset()
         }
         // Initialize candidate bar
         candidateRoot = uiBinding.main.candidateView.candidateRoot.also {
@@ -164,7 +164,7 @@ class TextInputManager private constructor() :
         candidateView = uiBinding.main.candidateView.candidates.also {
             it.setCandidateListener(this)
             it.setShowComment(!Rime.getOption("_hide_comment"))
-            it.reset(trime)
+            it.reset()
         }
     }
 
@@ -242,7 +242,7 @@ class TextInputManager private constructor() :
             // Select a keyboard based on the input type of the editing field.
             it.startKeyboard(keyboardType)
         }
-        Rime.get(trime)
+        Rime.get()
 
         // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
         // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。

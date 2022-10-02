@@ -18,7 +18,6 @@
 
 package com.osfans.trime.data;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -69,8 +68,8 @@ public class Config {
   private static final String sharedDataDir = appPrefs.getProfile().getSharedDataDir();
   private static final String userDataDir = appPrefs.getProfile().getUserDataDir();
 
-  public static synchronized Config get(Context context) {
-    if (self == null) self = new Config(context);
+  public static Config get() {
+    if (self == null) self = new Config();
     return self;
   }
 
@@ -88,11 +87,11 @@ public class Config {
 
   private String[] clipBoardCompare, clipBoardOutput, draftOutput;
 
-  public Config(@NonNull Context context) {
-    this(context, false);
+  public Config() {
+    this(false);
   }
 
-  public Config(@NonNull Context context, boolean skipDeploy) {
+  public Config(boolean skipDeploy) {
     String methodName =
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
@@ -102,7 +101,7 @@ public class Config {
 
     Timber.d(methodName + "sync");
     DataManager.sync();
-    Rime.get(context, !DataManager.INSTANCE.getSharedDataDir().exists());
+    Rime.get(!DataManager.INSTANCE.getSharedDataDir().exists());
 
     //    正常逻辑不应该部署全部主题，init()方法已经做过当前主题的部署
     //    Timber.d(methodName + "deployTheme");
@@ -510,12 +509,12 @@ public class Config {
     return getPixel(m, k, null);
   }
 
-  public static Integer getColor(Context context, @NonNull Map<?, ?> m, String k) {
+  public static Integer getColor(@NonNull Map<?, ?> m, String k) {
     Integer color = null;
     if (m.containsKey(k)) {
       Object o = m.get(k);
       color = parseColor(o);
-      if (color == null) color = get(context).getCurrentColor(o.toString());
+      if (color == null) color = get().getCurrentColor(o.toString());
     }
     return color;
   }

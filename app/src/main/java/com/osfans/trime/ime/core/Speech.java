@@ -109,7 +109,7 @@ public class Speech implements RecognitionListener {
     if (trime != null) {
       final ArrayList<String> matches =
           results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-      final String openccConfig = Config.get(context).getString("speech_opencc_config");
+      final String openccConfig = Config.get().getString("speech_opencc_config");
       for (String result : matches) trime.commitText(Rime.openccConvert(result, openccConfig));
     }
   }

@@ -166,7 +166,7 @@ public class Composition extends AppCompatTextView {
     super(context, attrs);
     textInputManager = TextInputManager.Companion.getInstance();
     setShowComment(!Rime.getOption("_hide_comment"));
-    reset(context);
+    reset();
   }
 
   @SuppressLint("ClickableViewAccessibility")
@@ -209,8 +209,8 @@ public class Composition extends AppCompatTextView {
     show_comment = value;
   }
 
-  public void reset(Context context) {
-    final Config config = Config.get(context);
+  public void reset() {
+    final Config config = Config.get();
 
     Object o = config.getValue("window");
     if (o == null) windows_comps = new ArrayList<>();

@@ -80,8 +80,8 @@ public class Candidate extends View {
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private boolean shouldShowComment = true, isCommentOnTop, candidateUseCursor;
 
-  public void reset(Context context) {
-    Config config = Config.get(context);
+  public void reset() {
+    Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
     candidateHighlight.setCornerRadius(config.getFloat("layout/round_corner"));
     separatorPaint.setColor(config.getColor("candidate_separator_color"));
@@ -133,7 +133,7 @@ public class Candidate extends View {
     separatorPaint = new Paint();
     separatorPaint.setColor(Color.BLACK);
 
-    graphicUtils = new GraphicUtils(context);
+    graphicUtils = new GraphicUtils();
 
     // reset(context);
 

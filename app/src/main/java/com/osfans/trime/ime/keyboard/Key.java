@@ -115,7 +115,7 @@ public class Key {
   public Key(Context context, Keyboard parent, Map<String, Object> mk) {
     this(parent);
     String s;
-    Config config = Config.get(context);
+    Config config = Config.get();
     {
       boolean hasComposingKey = false;
 
@@ -142,12 +142,12 @@ public class Key {
     mKeyboard.setModiferKey(getCode(), this);
     key_text_size = ConfigGetter.getPixel(mk, "key_text_size", 0);
     symbol_text_size = ConfigGetter.getPixel(mk, "symbol_text_size", 0);
-    key_text_color = Config.getColor(context, mk, "key_text_color");
-    hilited_key_text_color = Config.getColor(context, mk, "hilited_key_text_color");
+    key_text_color = Config.getColor(mk, "key_text_color");
+    hilited_key_text_color = Config.getColor(mk, "hilited_key_text_color");
     key_back_color = config.getDrawable(mk, "key_back_color");
     hilited_key_back_color = config.getDrawable(mk, "hilited_key_back_color");
-    key_symbol_color = Config.getColor(context, mk, "key_symbol_color");
-    hilited_key_symbol_color = Config.getColor(context, mk, "hilited_key_symbol_color");
+    key_symbol_color = Config.getColor(mk, "key_symbol_color");
+    hilited_key_symbol_color = Config.getColor(mk, "hilited_key_symbol_color");
     round_corner = ConfigGetter.getFloat(mk, "round_corner", 0);
   }
 

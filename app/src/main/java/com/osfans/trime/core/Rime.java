@@ -327,7 +327,7 @@ public class Rime {
     return mContext.commit_text_preview;
   }
 
-  public Rime(Context context, boolean full_check) {
+  public Rime(boolean full_check) {
     init(full_check);
     self = this;
   }
@@ -653,18 +653,18 @@ public class Rime {
     return selectSchema(target);
   }
 
-  public static Rime get(Context context, boolean full_check) {
+  public static Rime get(boolean full_check) {
     if (self == null) {
       if (full_check) {
         OpenCCDictManager.internalDeploy();
       }
-      self = new Rime(context, full_check);
+      self = new Rime(full_check);
     }
     return self;
   }
 
-  public static Rime get(Context context) {
-    return get(context, false);
+  public static Rime get() {
+    return get(false);
   }
 
   public static String RimeGetInput() {
@@ -719,7 +719,7 @@ public class Rime {
   public static boolean syncUserData(Context context) {
     boolean b = sync_user_data();
     destroy();
-    get(context, true);
+    get(true);
     return b;
   }
 

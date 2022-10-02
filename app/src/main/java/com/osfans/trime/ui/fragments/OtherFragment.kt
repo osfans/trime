@@ -48,19 +48,19 @@ class OtherFragment :
             }
 
             "other__clipboard_compare" -> {
-                Config.get(context).setClipBoardCompare(
+                Config.get().setClipBoardCompare(
                     sharedPreferences?.getString(key, "")
 
                 )
             }
 
             "other__clipboard_output" -> {
-                Config.get(context).setClipBoardOutput(
+                Config.get().setClipBoardOutput(
                     sharedPreferences?.getString(key, "")
                 )
             }
             "other__draft_output" -> {
-                Config.get(context).setDraftOutput(
+                Config.get().setDraftOutput(
                     sharedPreferences?.getString(key, "")
                 )
             }

@@ -59,8 +59,8 @@ public class TabView extends View {
   private boolean shouldCandidateUseCursor;
   // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
 
-  public void reset(Context context) {
-    Config config = Config.get(context);
+  public void reset() {
+    Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
     candidateHighlight.setCornerRadius(config.getFloat("layout/round_corner"));
 
@@ -96,8 +96,8 @@ public class TabView extends View {
     separatorPaint = new Paint();
     separatorPaint.setColor(Color.BLACK);
 
-    graphicUtils = new GraphicUtils(context);
-    reset(context);
+    graphicUtils = new GraphicUtils();
+    reset();
 
     setWillNotDraw(false);
   }

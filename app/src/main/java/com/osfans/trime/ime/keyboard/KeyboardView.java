@@ -342,8 +342,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mShowSymbol = value;
   }
 
-  public void reset(final Context context) {
-    final Config config = Config.get(context);
+  public void reset() {
+    final Config config = Config.get();
     key_symbol_color = config.getColor("key_symbol_color");
     hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
     mShadowColor = config.getColor("shadow_color");

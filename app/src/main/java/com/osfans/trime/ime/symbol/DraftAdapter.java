@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.symbol;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -19,7 +18,6 @@ import com.osfans.trime.data.Config;
 import java.util.List;
 
 public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-  private final Context myContext;
   private final List<SimpleKeyBean> list;
   private int keyMarginX, keyMarginTop;
   private Integer textColor;
@@ -27,8 +25,7 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
   private Typeface textFont;
   private Drawable background;
 
-  public DraftAdapter(Context context, List<SimpleKeyBean> itemlist) {
-    myContext = context;
+  public DraftAdapter(List<SimpleKeyBean> itemlist) {
     list = itemlist;
   }
 
@@ -42,7 +39,7 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     this.keyMarginTop = keyMarginTop;
 
     //  边框尺寸、圆角、字号直接读取主题通用参数。配色优先读取 liquidKeyboard 专用参数。
-    Config config = Config.get(myContext);
+    Config config = Config.get();
     textColor = config.getLiquidColor("long_text_color");
     if (textColor == null) textColor = config.getLiquidColor("key_text_color");
 
@@ -59,7 +56,8 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
   @NonNull
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(myContext).inflate(R.layout.simple_key_item, parent, false);
+    View view =
+        LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_key_item, parent, false);
     return new ItemViewHolder(view);
   }
 
@@ -112,7 +110,7 @@ public class DraftAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
       if (background != null)
         itemViewHold.listItemLayout.setBackground(
-            Config.get(myContext)
+            Config.get()
                 .getDrawable(
                     "long_text_back_color",
                     "key_border",

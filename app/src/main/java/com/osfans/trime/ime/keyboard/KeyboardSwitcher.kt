@@ -32,14 +32,14 @@ class KeyboardSwitcher {
         Timber.d(methodName)
         val ims = Trime.getService()
         Timber.d(methodName + "getConfig")
-        keyboardNames = Config.get(ims).keyboardNames
+        keyboardNames = Config.get().keyboardNames
         Timber.d(methodName + "land")
         val land = (
             ims.resources.configuration.orientation
                 == Configuration.ORIENTATION_LANDSCAPE
             )
         Timber.d(methodName + "getConfig")
-        Config.get(ims).getKeyboardPadding(land)
+        Config.get().getKeyboardPadding(land)
         Timber.d("update KeyboardPadding: KeyboardSwitcher.init")
 
         Timber.d(methodName + "getKeyboards")

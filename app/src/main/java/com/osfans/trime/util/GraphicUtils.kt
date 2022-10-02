@@ -1,14 +1,11 @@
 package com.osfans.trime.util
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import com.osfans.trime.data.Config
 
-class GraphicUtils(
-    context: Context
-) {
+class GraphicUtils {
     private var hanBFont: Typeface = Typeface.DEFAULT
     private var latinFont: Typeface = Typeface.DEFAULT
 
@@ -18,7 +15,7 @@ class GraphicUtils(
     }
 
     init {
-        val imeConfig = Config.get(context)
+        val imeConfig = Config.get()
         hanBFont = imeConfig.getFont(HAN_B_FONT)
         latinFont = imeConfig.getFont(LATIN_FONT)
     }
