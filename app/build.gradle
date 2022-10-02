@@ -103,6 +103,10 @@ android {
     }
 }
 
+ksp {
+    arg "room.schemaLocation", "$projectDir/schemas"
+}
+
 android.applicationVariants.all {
     def variantName = name.capitalize()
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateLicenseJson)
