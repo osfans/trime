@@ -1,10 +1,14 @@
 package com.osfans.trime.ime.symbol;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.view.inputmethod.InputConnection;
 import android.widget.LinearLayout;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.blankj.utilcode.util.SizeUtils;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
@@ -20,6 +24,7 @@ import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.UtilsKt;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,23 +36,36 @@ public class LiquidKeyboard {
 
   private RecyclerView keyboardView;
   private LinearLayout parentView;
-  private ClipboardAdapter mClipboardAdapter;
-  private CollectionAdapter mCollectionAdapter;
-  private DraftAdapter mDraftAdapter;
+  private FlexibleAdapter flexibleAdapter;
   private SimpleAdapter simpleAdapter;
   private CandidateAdapter candidateAdapter;
-  private List<SimpleKeyBean> clipboardBeanList, collectionBeanList, draftBeanList;
+  private List<SimpleKeyBean> dbBeans;
   private final List<SimpleKeyBean> simpleKeyBeans;
   private List<SimpleKeyBean> historyBeans;
   private int margin_x, margin_top, single_width, parent_width, clipboard_max_size, draft_max_size;
 
   private int keyHeight;
   private boolean isLand;
-  private SymbolKeyboardType keyboardType;
   private final String historySavePath;
 
   public void setView(RecyclerView view) {
     keyboardView = view;
+    final RecyclerView.ItemDecoration itemDecoration =
+        new RecyclerView.ItemDecoration() {
+          @Override
+          public void getItemOffsets(
+              @NonNull Rect outRect,
+              @NonNull View view,
+              @NonNull RecyclerView parent,
+              @NonNull RecyclerView.State state) {
+            final int dp = SizeUtils.dp2px(4);
+            outRect.top = dp;
+            outRect.bottom = dp;
+            outRect.left = dp;
+            outRect.right = dp;
+          }
+        };
+    keyboardView.addItemDecoration(itemDecoration);
   }
 
   public void setLand(boolean land) {
@@ -59,57 +77,44 @@ public class LiquidKeyboard {
 
     this.clipboard_max_size = clipboard_max_size;
     this.draft_max_size = draft_max_size;
-    clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
-    Timber.d("clipboardBeanList.size=%s", clipboardBeanList.size());
-
-    collectionBeanList = CollectionDao.get().getAllSimpleBean();
-    Timber.d("collectionBeanList.size=%s", collectionBeanList.size());
-
-    draftBeanList = DraftDao.get().getAllSimpleBean(draft_max_size);
-    Timber.d("draftBeanList.size=%s", draftBeanList.size());
 
     simpleKeyBeans = new ArrayList<>();
     historySavePath =
-        context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "key_history";
+        UtilsKt.getAppContext().getExternalFilesDir(null).getAbsolutePath()
+            + File.separator
+            + "key_history";
   }
 
   public void addClipboardData(String text) {
     DbBean bean = new DbBean(text);
     ClipboardDao.get().add(bean);
-    clipboardBeanList.add(0, bean);
-    if (mClipboardAdapter != null) mClipboardAdapter.notifyItemInserted(0);
+    if (dbBeans != null) dbBeans.add(0, bean);
+    if (flexibleAdapter != null) flexibleAdapter.notifyItemInserted(0);
   }
 
   public void addCollectionData(String text) {
     DbBean bean = new DbBean(text);
     CollectionDao.get().add(bean);
-    collectionBeanList.add(0, bean);
-    if (mCollectionAdapter != null) mCollectionAdapter.notifyItemInserted(0);
+    if (dbBeans != null) dbBeans.add(0, bean);
+    if (flexibleAdapter != null) flexibleAdapter.notifyItemInserted(0);
   }
 
   public void addDraftData(String text) {
     DbBean bean = new DbBean(text);
     DraftDao.get().add(bean);
-    draftBeanList.add(0, bean);
-    if (mDraftAdapter != null) mDraftAdapter.notifyItemInserted(0);
+    if (dbBeans != null) dbBeans.add(0, bean);
+    if (flexibleAdapter != null) flexibleAdapter.notifyItemInserted(0);
   }
 
   public SymbolKeyboardType select(int i) {
-    TabTag tag = TabManager.getTag(i);
+    final TabTag tag = TabManager.getTag(i);
     calcPadding(tag.type);
-    keyboardType = tag.type;
-    switch (keyboardType) {
+    switch (tag.type) {
       case CLIPBOARD:
-        TabManager.get().select(i);
-        initClipboardData();
-        break;
       case COLLECTION:
-        TabManager.get().select(i);
-        initCollectionData();
-        break;
       case DRAFT:
         TabManager.get().select(i);
-        initDraftData();
+        initDbData(tag.type);
         break;
       case CANDIDATE:
         TabManager.get().select(i);
@@ -128,7 +133,7 @@ public class LiquidKeyboard {
       default:
         initFixData(i);
     }
-    return keyboardType;
+    return tag.type;
   }
 
   // 设置liquidKeyboard共用的布局参数
@@ -212,10 +217,9 @@ public class LiquidKeyboard {
   }
 
   public void initFixData(int i) {
+    final TabTag tabTag = TabManager.getTag(i);
     keyboardView.removeAllViews();
-    mClipboardAdapter = null;
-    mCollectionAdapter = null;
-    mDraftAdapter = null;
+    flexibleAdapter = null;
     // 设置布局管理器
     FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(context);
     // flexDirection 属性决定主轴的方向（即项目的排列方向）。类似 LinearLayout 的 vertical 和 horizontal。
@@ -230,12 +234,16 @@ public class LiquidKeyboard {
 
     // 设置适配器
     simpleKeyBeans.clear();
-    if (keyboardType == SymbolKeyboardType.HISTORY) {
-      simpleKeyBeans.addAll(historyBeans);
-    } else if (keyboardType == SymbolKeyboardType.TABS) {
-      simpleKeyBeans.addAll(TabManager.get().getTabSwitchData());
-    } else {
-      simpleKeyBeans.addAll(TabManager.get().select(i));
+    switch (tabTag.type) {
+      case HISTORY:
+        simpleKeyBeans.addAll(historyBeans);
+        break;
+      case TABS:
+        simpleKeyBeans.addAll(TabManager.get().getTabSwitchData());
+        break;
+      default:
+        simpleKeyBeans.addAll(TabManager.get().select(i));
+        break;
     }
 
     Timber.d("Tab.select(%s) beans.size=%s", i, simpleKeyBeans.size());
@@ -255,15 +263,15 @@ public class LiquidKeyboard {
     // 列表适配器的点击监听事件
     simpleAdapter.setOnItemClickListener(
         (view, position) -> {
-          if (keyboardType == SymbolKeyboardType.SYMBOL) {
+          if (tabTag.type == SymbolKeyboardType.SYMBOL) {
             Trime.getService().inputSymbol(simpleKeyBeans.get(position).getText());
-          } else if (keyboardType != SymbolKeyboardType.TABS) {
+          } else if (tabTag.type != SymbolKeyboardType.TABS) {
             InputConnection ic = Trime.getService().getCurrentInputConnection();
             if (ic != null) {
               SimpleKeyBean bean = simpleKeyBeans.get(position);
               ic.commitText(bean.getText(), 1);
 
-              if (keyboardType != SymbolKeyboardType.HISTORY) {
+              if (tabTag.type != SymbolKeyboardType.HISTORY) {
                 historyBeans.add(0, bean);
                 SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans);
               }
@@ -292,80 +300,9 @@ public class LiquidKeyboard {
         });
   }
 
-  public void initClipboardData() {
+  public void initDbData(@NonNull SymbolKeyboardType type) {
     keyboardView.removeAllViews();
     simpleAdapter = null;
-    mCollectionAdapter = null;
-
-    // 设置布局管理器
-    FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(context);
-    // flexDirection 属性决定主轴的方向（即项目的排列方向）。类似 LinearLayout 的 vertical 和 horizontal。
-    flexboxLayoutManager.setFlexDirection(FlexDirection.ROW); // 主轴为水平方向，起点在左端。
-    // flexWrap 默认情况下 Flex 跟 LinearLayout 一样，都是不带换行排列的，但是flexWrap属性可以支持换行排列。
-    flexboxLayoutManager.setFlexWrap(FlexWrap.WRAP); // 按正常方向换行
-    // justifyContent 属性定义了项目在主轴上的对齐方式。
-    flexboxLayoutManager.setJustifyContent(JustifyContent.FLEX_START); // 交叉轴的起点对齐。
-    //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
-    keyboardView.setLayoutManager(flexboxLayoutManager);
-
-    clipboard_max_size = Config.get().getClipboardLimit();
-
-    clipboardBeanList = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
-    mClipboardAdapter = new ClipboardAdapter(clipboardBeanList);
-
-    mClipboardAdapter.configStyle(margin_x, margin_top);
-
-    keyboardView.setAdapter(mClipboardAdapter);
-    // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
-    keyboardView.setSelected(true);
-
-    mClipboardAdapter.setOnItemClickListener(
-        (view, position) -> {
-          InputConnection ic = Trime.getService().getCurrentInputConnection();
-          if (ic != null) {
-            ic.commitText(clipboardBeanList.get(position).getText(), 1);
-          }
-        });
-  }
-
-  public void initCollectionData() {
-    keyboardView.removeAllViews();
-    simpleAdapter = null;
-    mClipboardAdapter = null;
-    // 设置布局管理器
-    FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(context);
-    // flexDirection 属性决定主轴的方向（即项目的排列方向）。类似 LinearLayout 的 vertical 和 horizontal。
-    flexboxLayoutManager.setFlexDirection(FlexDirection.ROW); // 主轴为水平方向，起点在左端。
-    // flexWrap 默认情况下 Flex 跟 LinearLayout 一样，都是不带换行排列的，但是flexWrap属性可以支持换行排列。
-    flexboxLayoutManager.setFlexWrap(FlexWrap.WRAP); // 按正常方向换行
-    // justifyContent 属性定义了项目在主轴上的对齐方式。
-    flexboxLayoutManager.setJustifyContent(JustifyContent.FLEX_START); // 交叉轴的起点对齐。
-    //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
-    keyboardView.setLayoutManager(flexboxLayoutManager);
-
-    collectionBeanList = CollectionDao.get().getAllSimpleBean();
-    mCollectionAdapter = new CollectionAdapter(collectionBeanList);
-
-    mCollectionAdapter.configStyle(margin_x, margin_top);
-
-    keyboardView.setAdapter(mCollectionAdapter);
-    // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
-    keyboardView.setSelected(true);
-
-    mCollectionAdapter.setOnItemClickListener(
-        (view, position) -> {
-          InputConnection ic = Trime.getService().getCurrentInputConnection();
-          if (ic != null) {
-            ic.commitText(collectionBeanList.get(position).getText(), 1);
-          }
-        });
-  }
-
-  public void initDraftData() {
-    keyboardView.removeAllViews();
-    simpleAdapter = null;
-    mClipboardAdapter = null;
-    mCollectionAdapter = null;
     // 设置布局管理器
     FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(context);
     // flexDirection 属性决定主轴的方向（即项目的排列方向）。类似 LinearLayout 的 vertical 和 horizontal。
@@ -379,20 +316,32 @@ public class LiquidKeyboard {
 
     draft_max_size = Config.get().getDraftLimit();
 
-    draftBeanList = DraftDao.get().getAllSimpleBean(draft_max_size);
-    mDraftAdapter = new DraftAdapter(draftBeanList);
+    switch (type) {
+      case CLIPBOARD:
+        dbBeans = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
+        break;
+      case COLLECTION:
+        dbBeans = CollectionDao.get().getAllSimpleBean();
+        break;
+      case DRAFT:
+        dbBeans = DraftDao.get().getAllSimpleBean(draft_max_size);
+        break;
+      default:
+        break;
+    }
 
-    mDraftAdapter.configStyle(margin_x, margin_top);
+    flexibleAdapter = new FlexibleAdapter(dbBeans);
+    flexibleAdapter.configStyle(margin_x, margin_top);
 
-    keyboardView.setAdapter(mDraftAdapter);
+    keyboardView.setAdapter(flexibleAdapter);
     // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
     keyboardView.setSelected(true);
 
-    mDraftAdapter.setOnItemClickListener(
+    flexibleAdapter.setOnItemClickListener(
         (view, position) -> {
-          InputConnection ic = Trime.getService().getCurrentInputConnection();
+          final InputConnection ic = Trime.getService().getCurrentInputConnection();
           if (ic != null) {
-            ic.commitText(draftBeanList.get(position).getText(), 1);
+            ic.commitText(dbBeans.get(position).getText(), 1);
           }
         });
   }
@@ -400,9 +349,7 @@ public class LiquidKeyboard {
   public void initCandidateAdapter() {
     keyboardView.removeAllViews();
     simpleAdapter = null;
-    mClipboardAdapter = null;
-    mCollectionAdapter = null;
-    mDraftAdapter = null;
+    flexibleAdapter = null;
 
     if (candidateAdapter == null) candidateAdapter = new CandidateAdapter();
 
