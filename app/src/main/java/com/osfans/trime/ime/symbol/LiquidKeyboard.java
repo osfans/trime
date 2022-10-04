@@ -1,20 +1,19 @@
 package com.osfans.trime.ime.symbol;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
-import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.blankj.utilcode.util.SizeUtils;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
 import com.osfans.trime.data.db.CollectionDao;
 import com.osfans.trime.data.db.DbBean;
@@ -24,6 +23,7 @@ import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.UtilsKt;
 import java.io.File;
 import java.util.ArrayList;
@@ -33,50 +33,39 @@ import timber.log.Timber;
 
 public class LiquidKeyboard {
   private final Context context;
+  private final Config theme;
 
+  private View rootView;
   private RecyclerView keyboardView;
-  private LinearLayout parentView;
   private FlexibleAdapter flexibleAdapter;
   private SimpleAdapter simpleAdapter;
   private CandidateAdapter candidateAdapter;
   private List<SimpleKeyBean> dbBeans;
   private final List<SimpleKeyBean> simpleKeyBeans;
   private List<SimpleKeyBean> historyBeans;
-  private int margin_x, margin_top, single_width, parent_width, clipboard_max_size, draft_max_size;
+  private int margin_x, margin_top, single_width, parent_width;
 
   private int keyHeight;
   private boolean isLand;
   private final String historySavePath;
 
-  public void setView(RecyclerView view) {
-    keyboardView = view;
-    final RecyclerView.ItemDecoration itemDecoration =
-        new RecyclerView.ItemDecoration() {
-          @Override
-          public void getItemOffsets(
-              @NonNull Rect outRect,
-              @NonNull View view,
-              @NonNull RecyclerView parent,
-              @NonNull RecyclerView.State state) {
-            final int dp = SizeUtils.dp2px(4);
-            outRect.top = dp;
-            outRect.bottom = dp;
-            outRect.left = dp;
-            outRect.right = dp;
-          }
-        };
-    keyboardView.addItemDecoration(itemDecoration);
+  @NonNull
+  private AppPrefs getAppPrefs() {
+    return AppPrefs.defaultInstance();
+  }
+
+  public void setKeyboardView(@NonNull RecyclerView view) {
+    this.keyboardView = view;
+    this.keyboardView.addItemDecoration(new SpacesItemDecoration(DimensionsKt.dp2px(4)));
   }
 
   public void setLand(boolean land) {
     isLand = land;
   }
 
-  public LiquidKeyboard(Context context, int clipboard_max_size, int draft_max_size) {
+  public LiquidKeyboard(@NonNull Context context) {
     this.context = context;
-
-    this.clipboard_max_size = clipboard_max_size;
-    this.draft_max_size = draft_max_size;
+    this.theme = Config.get();
 
     simpleKeyBeans = new ArrayList<>();
     historySavePath =
@@ -138,10 +127,8 @@ public class LiquidKeyboard {
 
   // 设置liquidKeyboard共用的布局参数
   public void calcPadding(int width) {
-
-    Config config = Config.get();
     parent_width = width;
-    final Map<String, ?> liquid_config = config.getLiquidKeyboard();
+    final Map<String, ?> liquid_config = theme.getLiquidKeyboard();
 
     // liquid_keyboard/margin_x定义了每个键左右两边的间隙，也就是说相邻两个键间隙是x2，而horizontal_gap定义的是spacer，使用时需要/2
     if (liquid_config != null) {
@@ -152,7 +139,7 @@ public class LiquidKeyboard {
     }
 
     if (margin_x == 0) {
-      int horizontal_gap = config.getPixel("horizontal_gap");
+      int horizontal_gap = theme.getPixel("horizontal_gap");
       if (horizontal_gap > 1) {
         horizontal_gap = horizontal_gap / 2;
       }
@@ -160,43 +147,41 @@ public class LiquidKeyboard {
     }
 
     // 初次显示布局，需要刷新背景
-    parentView = (LinearLayout) keyboardView.getParent();
+    rootView = (View) keyboardView.getParent();
     Drawable keyboardBackground =
-        config.getDrawable("liquid_keyboard_background", null, null, null, null);
-    if (keyboardBackground != null) parentView.setBackground(keyboardBackground);
+        theme.getDrawable("liquid_keyboard_background", null, null, null, null);
+    if (keyboardBackground != null) rootView.setBackground(keyboardBackground);
 
-    int keyboardHeight = config.getPixel("keyboard_height");
+    int keyboardHeight = theme.getPixel("keyboard_height");
     if (isLand) {
-      int keyBoardHeightLand = config.getPixel("keyboard_height_land");
+      int keyBoardHeightLand = theme.getPixel("keyboard_height_land");
       if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand;
     }
 
-    int row = (int) config.getLiquidFloat("row");
+    int row = (int) theme.getLiquidFloat("row");
     if (row > 0) {
       if (isLand) {
-        float r = config.getLiquidFloat("row_land");
+        float r = theme.getLiquidFloat("row_land");
         if (r > 0) row = (int) r;
       }
-      float rawHeight = config.getLiquidFloat("key_height");
-      float rawVGap = config.getLiquidFloat("vertical_gap");
+      float rawHeight = theme.getLiquidFloat("key_height");
+      float rawVGap = theme.getLiquidFloat("vertical_gap");
       float scale = (float) keyboardHeight / ((rawHeight + rawVGap) * row);
       margin_top = (int) Math.ceil(rawVGap * scale);
       keyHeight = keyboardHeight / row - margin_top;
     } else {
-      keyHeight = config.getLiquidPixel("key_height_land");
-      if (!isLand || keyHeight <= 0) keyHeight = config.getLiquidPixel("key_height");
-      margin_top = config.getLiquidPixel("vertical_gap");
+      keyHeight = theme.getLiquidPixel("key_height_land");
+      if (!isLand || keyHeight <= 0) keyHeight = theme.getLiquidPixel("key_height");
+      margin_top = theme.getLiquidPixel("vertical_gap");
     }
     Timber.i("config keyHeight=" + keyHeight + " marginTop=" + margin_top);
 
     if (isLand) {
-      single_width = config.getLiquidPixel("single_width_land");
-      if (single_width <= 0) single_width = config.getLiquidPixel("single_width");
-    } else single_width = config.getLiquidPixel("single_width");
+      single_width = theme.getLiquidPixel("single_width_land");
+      if (single_width <= 0) single_width = theme.getLiquidPixel("single_width");
+    } else single_width = theme.getLiquidPixel("single_width");
     if (single_width <= 0)
       single_width = context.getResources().getDimensionPixelSize(R.dimen.simple_key_single_width);
-
-    clipboard_max_size = config.getClipboardLimit();
   }
 
   // 每次点击tab都需要刷新的参数
@@ -207,12 +192,12 @@ public class LiquidKeyboard {
 
     if (type == SymbolKeyboardType.SINGLE) {
       padding[0] =
-          (parentView.getWidth() > 0 ? parentView.getWidth() : parent_width)
+          (rootView.getWidth() > 0 ? rootView.getWidth() : parent_width)
               % (single_width + margin_x * 2)
               / 2;
       padding[1] = padding[0];
     }
-    parentView.setPadding(padding[0], 0, padding[1], 0);
+    rootView.setPadding(padding[0], 0, padding[1], 0);
     historyBeans = SimpleKeyDao.getSymbolKeyHistory(historySavePath);
   }
 
@@ -312,19 +297,21 @@ public class LiquidKeyboard {
     // justifyContent 属性定义了项目在主轴上的对齐方式。
     flexboxLayoutManager.setJustifyContent(JustifyContent.FLEX_START); // 交叉轴的起点对齐。
     //            flexboxLayoutManager.setAlignItems(AlignItems.BASELINE);
-    keyboardView.setLayoutManager(flexboxLayoutManager);
-
-    draft_max_size = Config.get().getDraftLimit();
+    final StaggeredGridLayoutManager sglm =
+        new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+    keyboardView.setLayoutManager(sglm);
 
     switch (type) {
       case CLIPBOARD:
-        dbBeans = ClipboardDao.get().getAllSimpleBean(clipboard_max_size);
+        final int clipLimit = Integer.parseInt(getAppPrefs().getOther().getClipboardLimit());
+        dbBeans = ClipboardDao.get().getAllSimpleBean(clipLimit);
         break;
       case COLLECTION:
         dbBeans = CollectionDao.get().getAllSimpleBean();
         break;
       case DRAFT:
-        dbBeans = DraftDao.get().getAllSimpleBean(draft_max_size);
+        final int draftLimit = Integer.parseInt(getAppPrefs().getOther().getDraftLimit());
+        dbBeans = DraftDao.get().getAllSimpleBean(draftLimit);
         break;
       default:
         break;

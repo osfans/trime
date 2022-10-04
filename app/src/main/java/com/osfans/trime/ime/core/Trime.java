@@ -52,7 +52,6 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -379,9 +378,7 @@ public class Trime extends LifecycleInputMethodService {
         keyboardSwitcher = new KeyboardSwitcher();
 
         Timber.d(methodName + "liquidKeyboard");
-        liquidKeyboard =
-            new LiquidKeyboard(
-                this, getImeConfig().getClipboardLimit(), getImeConfig().getDraftLimit());
+        liquidKeyboard = new LiquidKeyboard(this);
         clipBoardMonitor();
         CollectionDao.get();
         DraftDao.get();
@@ -430,34 +427,28 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void selectLiquidKeyboard(final int tabIndex) {
-    final LinearLayout symbolInputView =
-        inputRootBinding != null ? inputRootBinding.symbol.symbolInput : null;
-    final LinearLayout mainInputView =
-        inputRootBinding != null ? inputRootBinding.main.mainInput : null;
-    if (symbolInputView != null) {
-      if (tabIndex >= 0) {
-        final LinearLayout.LayoutParams param =
-            (LinearLayout.LayoutParams) symbolInputView.getLayoutParams();
-        param.height = mainInputView.getHeight();
-        symbolInputView.setVisibility(View.VISIBLE);
+    if (inputRootBinding == null) return;
+    final View symbolInput = inputRootBinding.symbol.symbolInput;
+    final View mainInput = inputRootBinding.main.mainInput;
+    if (tabIndex >= 0) {
+      symbolInput.getLayoutParams().height = mainInput.getHeight();
+      symbolInput.setVisibility(View.VISIBLE);
 
-        final int orientation = getResources().getConfiguration().orientation;
-        liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
-        liquidKeyboard.calcPadding(mainInputView.getWidth());
-        symbolKeyboardType = liquidKeyboard.select(tabIndex);
-        tabView.updateTabWidth();
-        if (inputRootBinding != null) {
-          mTabRoot.setBackground(mCandidateRoot.getBackground());
-          mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
-        }
-      } else {
-        symbolKeyboardType = SymbolKeyboardType.NO_KEY;
-        symbolInputView.setVisibility(View.GONE);
+      final int orientation = getResources().getConfiguration().orientation;
+      liquidKeyboard.setLand(orientation == Configuration.ORIENTATION_LANDSCAPE);
+      liquidKeyboard.calcPadding(mainInput.getWidth());
+      symbolKeyboardType = liquidKeyboard.select(tabIndex);
+      tabView.updateTabWidth();
+      if (inputRootBinding != null) {
+        mTabRoot.setBackground(mCandidateRoot.getBackground());
+        mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
       }
-      updateComposing();
+    } else {
+      symbolKeyboardType = SymbolKeyboardType.NO_KEY;
+      symbolInput.setVisibility(View.GONE);
     }
-    if (mainInputView != null)
-      mainInputView.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
+    updateComposing();
+    mainInput.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
 
   // 按键需要通过tab name来打开liquidKeyboard的指定tab
@@ -584,10 +575,8 @@ public class Trime extends LifecycleInputMethodService {
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
   private void reset() {
     if (inputRootBinding == null) return;
-    final LinearLayout symbolInputView = inputRootBinding.symbol.symbolInput;
-    final LinearLayout mainInputView = inputRootBinding.main.mainInput;
-    if (symbolInputView != null) symbolInputView.setVisibility(View.GONE);
-    if (mainInputView != null) mainInputView.setVisibility(View.VISIBLE);
+    inputRootBinding.symbol.symbolInput.setVisibility(View.GONE);
+    inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
     getImeConfig().reset();
     loadConfig();
     getImeConfig().initCurrentColors();
@@ -755,7 +744,7 @@ public class Trime extends LifecycleInputMethodService {
     hideCompositionView();
     mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
 
-    liquidKeyboard.setView(inputRootBinding.symbol.liquidKeyboardView);
+    liquidKeyboard.setKeyboardView(inputRootBinding.symbol.liquidKeyboardView);
     tabView = inputRootBinding.symbol.tabView.tabs;
 
     for (EventListener listener : eventListeners) {
@@ -1342,7 +1331,7 @@ public class Trime extends LifecycleInputMethodService {
   private void updateSoftInputWindowLayoutParameters() {
     final Window w = getWindow().getWindow();
     if (w == null) return;
-    final LinearLayout inputRoot = inputRootBinding != null ? inputRootBinding.inputRoot : null;
+    final View inputRoot = inputRootBinding != null ? inputRootBinding.inputRoot : null;
     if (inputRoot != null) {
       final int layoutHeight =
           isFullscreenMode()
