@@ -21,6 +21,13 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
         fun onUpdate(text: String)
     }
 
+    var itemCount: Int = 0
+        private set
+
+    private fun updateItemCount() {
+        itemCount = clbDao.itemCount()
+    }
+
     private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
 
     fun addOnUpdateListener(listener: OnClipboardUpdateListener) {
@@ -37,6 +44,8 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
     private val output get() = AppPrefs.defaultInstance().other.clipboardOutputRules
         .trim().split('\n')
 
+    var lastBean: DatabaseBean? = null
+
     fun init(context: Context) {
         clipboardManager.addPrimaryClipChangedListener(this)
         clbDb = Room
@@ -46,14 +55,22 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
         clbDao = clbDb.databaseDao()
     }
 
+    fun get(id: Int) = clbDao.get(id)
     fun getAll() = clbDao.getAll()
+
+    fun pin(id: Int) = clbDao.updatePinned(id, true)
+    fun unpinned(id: Int) = clbDao.updatePinned(id, true)
 
     fun delete(id: Int) {
         clbDao.delete(id)
+        updateItemCount()
     }
-
-    fun deleteAll() {
-        clbDao.deleteAll()
+    fun deleteAll(skipUnpinned: Boolean = true) {
+        if (skipUnpinned) {
+            clbDao.deleteAllUnpinned()
+        } else {
+            clbDao.deleteAll()
+        }
     }
 
     override fun onPrimaryClipChanged() {
@@ -64,20 +81,25 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
             .primaryClip
             ?.let { DatabaseBean.fromClipData(it) }
             ?.takeIf {
-                it.text!!.isNotBlank()
-                it.text.mismatch(output.toTypedArray())
+                it.text!!.isNotBlank() &&
+                    it.text.mismatch(output.toTypedArray())
             }
             ?.let { b ->
                 if (b.text!!.replace(compare.toTypedArray()).isEmpty()) return
                 Timber.d("Accept $b")
                 val all = clbDao.getAll()
+                var pinned = false
                 all.find { b.text == it.text }?.let {
                     clbDao.delete(it.id)
+                    pinned = it.pinned
                 }
-                clbDao.insert(b)
+                val rowId = clbDao.insert(b.copy(pinned = pinned))
                 removeOutdated()
-                onUpdateListeners.forEach { listener ->
-                    listener.onUpdate(b.text)
+                clbDao.get(rowId)?.let { newBean ->
+                    lastBean = newBean
+                    onUpdateListeners.forEach { listener ->
+                        listener.onUpdate(newBean.text ?: "")
+                    }
                 }
             }
     }
@@ -86,6 +108,10 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
         val all = clbDao.getAll()
         if (all.size > limit) {
             val outdated = all
+                .map {
+                    if (it.pinned) it.copy(id = Int.MAX_VALUE)
+                    else it
+                }
                 .sortedBy { it.id }
                 .subList(0, all.size - limit)
             clbDao.delete(outdated)
