@@ -11,9 +11,17 @@ import com.osfans.trime.util.StringUtils.mismatch
 import com.osfans.trime.util.StringUtils.replace
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.clipboardManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
-object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
+object ClipboardHelper :
+    ClipboardManager.OnPrimaryClipChangedListener,
+    CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private lateinit var clbDb: Database
     private lateinit var clbDao: DatabaseDao
 
@@ -21,10 +29,12 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
         fun onUpdate(text: String)
     }
 
+    private val mutex = Mutex()
+
     var itemCount: Int = 0
         private set
 
-    private fun updateItemCount() {
+    private suspend fun updateItemCount() {
         itemCount = clbDao.itemCount()
     }
 
@@ -49,23 +59,24 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
     fun init(context: Context) {
         clipboardManager.addPrimaryClipChangedListener(this)
         clbDb = Room
-            .databaseBuilder(context, Database::class.java, "clipboard")
+            .databaseBuilder(context, Database::class.java, "clipboard.db")
             .addMigrations(Database.MIGRATION_3_4)
             .build()
         clbDao = clbDb.databaseDao()
+        launch { updateItemCount() }
     }
 
-    fun get(id: Int) = clbDao.get(id)
-    fun getAll() = clbDao.getAll()
+    suspend fun get(id: Int) = clbDao.get(id)
+    suspend fun getAll() = clbDao.getAll()
 
-    fun pin(id: Int) = clbDao.updatePinned(id, true)
-    fun unpinned(id: Int) = clbDao.updatePinned(id, true)
+    suspend fun pin(id: Int) = clbDao.updatePinned(id, true)
+    suspend fun unpinned(id: Int) = clbDao.updatePinned(id, true)
 
-    fun delete(id: Int) {
+    suspend fun delete(id: Int) {
         clbDao.delete(id)
         updateItemCount()
     }
-    fun deleteAll(skipUnpinned: Boolean = true) {
+    suspend fun deleteAll(skipUnpinned: Boolean = true) {
         if (skipUnpinned) {
             clbDao.deleteAllUnpinned()
         } else {
@@ -86,25 +97,30 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
             }
             ?.let { b ->
                 if (b.text!!.replace(compare.toTypedArray()).isEmpty()) return
-                Timber.d("Accept $b")
-                val all = clbDao.getAll()
-                var pinned = false
-                all.find { b.text == it.text }?.let {
-                    clbDao.delete(it.id)
-                    pinned = it.pinned
-                }
-                val rowId = clbDao.insert(b.copy(pinned = pinned))
-                removeOutdated()
-                clbDao.get(rowId)?.let { newBean ->
-                    lastBean = newBean
-                    onUpdateListeners.forEach { listener ->
-                        listener.onUpdate(newBean.text ?: "")
+                Timber.d("Accept clipboard $b")
+                launch {
+                    mutex.withLock {
+                        val all = clbDao.getAll()
+                        var pinned = false
+                        all.find { b.text == it.text }?.let {
+                            clbDao.delete(it.id)
+                            pinned = it.pinned
+                        }
+                        val rowId = clbDao.insert(b.copy(pinned = pinned))
+                        removeOutdated()
+                        updateItemCount()
+                        clbDao.get(rowId)?.let { newBean ->
+                            lastBean = newBean
+                            onUpdateListeners.forEach { listener ->
+                                listener.onUpdate(newBean.text ?: "")
+                            }
+                        }
                     }
                 }
             }
     }
 
-    private fun removeOutdated() {
+    private suspend fun removeOutdated() {
         val all = clbDao.getAll()
         if (all.size > limit) {
             val outdated = all
