@@ -50,7 +50,7 @@ object ClipboardHelper : ClipboardManager.OnPrimaryClipChangedListener {
         clipboardManager.addPrimaryClipChangedListener(this)
         clbDb = Room
             .databaseBuilder(context, Database::class.java, "clipboard")
-            .fallbackToDestructiveMigration()
+            .addMigrations(Database.MIGRATION_3_4)
             .build()
         clbDao = clbDb.databaseDao()
     }

@@ -30,6 +30,7 @@ object DraftHelper {
     fun init(context: Context) {
         dftDb = Room
             .databaseBuilder(context, Database::class.java, "draft")
+            .addMigrations(Database.MIGRATION_3_4)
             .build()
         dftDao = dftDb.databaseDao()
     }

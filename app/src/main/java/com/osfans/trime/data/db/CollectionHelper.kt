@@ -9,8 +9,9 @@ object CollectionHelper {
 
     fun init(context: Context) {
         cltDb = Room
-                .databaseBuilder(context, Database::class.java, "collection")
-                .build()
+            .databaseBuilder(context, Database::class.java, "collection")
+            .addMigrations(Database.MIGRATION_3_4)
+            .build()
         cltDao = cltDb.databaseDao()
     }
 

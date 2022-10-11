@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "a2454851e9980be0b3d8da2b70488c2c",
+    "identityHash": "8ed6e54f12922c499c5bcf0e1c2bdea7",
     "entities": [
       {
         "tableName": "t_data",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `text` TEXT, `html` TEXT, `type` INTEGER NOT NULL, `time` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `text` TEXT, `html` TEXT, `type` INTEGER NOT NULL, `time` INTEGER NOT NULL, `pinned` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -37,6 +37,12 @@
             "columnName": "time",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "pinned",
+            "columnName": "pinned",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -52,7 +58,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a2454851e9980be0b3d8da2b70488c2c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8ed6e54f12922c499c5bcf0e1c2bdea7')"
     ]
   }
 }
