@@ -14,26 +14,27 @@ abstract class Database : RoomDatabase() {
     companion object {
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
-                database.execSQL(
-                    """
-                    CREATE TABLE ${DatabaseBean.TABLE_NAME} (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        text TEXT,
-                        html TEXT,
-                        type INTEGER NOT NULL,
-                        time INTEGER NOT NULL,
-                        pinned INTEGER NOT NULL
+                if (database.needUpgrade(4)) {
+                    database.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
+                    database.execSQL("ALTER TABLE _t_data ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
+                    database.execSQL("""
+                        CREATE TABLE IF NOT EXISTS ${DatabaseBean.TABLE_NAME} (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            text TEXT,
+                            html TEXT,
+                            type INTEGER NOT NULL,
+                            time INTEGER NOT NULL,
+                            pinned INTEGER NOT NULL
+                        )
+                    """.trimIndent()
                     )
+                    database.execSQL("""
+                        INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time, pinned)
+                        SELECT id, text, html, type, time, pinned FROM _t_data
                     """.trimIndent()
-                )
-                database.execSQL(
-                    """
-                    INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time)
-                    SELECT id, text, html, type, time FROM _t_data
-                    """.trimIndent()
-                )
-                database.execSQL("DROP TABLE _t_data")
+                    )
+                    database.execSQL("DROP TABLE _t_data")
+                }
             }
         }
     }
