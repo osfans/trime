@@ -62,9 +62,7 @@ import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.Config;
-import com.osfans.trime.data.db.CollectionDao;
-import com.osfans.trime.data.db.clipboard.ClipboardDao;
-import com.osfans.trime.data.db.draft.DraftDao;
+import com.osfans.trime.data.db.draft.DraftHelper;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
@@ -379,9 +377,6 @@ public class Trime extends LifecycleInputMethodService {
 
         Timber.d(methodName + "liquidKeyboard");
         liquidKeyboard = new LiquidKeyboard(this);
-        clipBoardMonitor();
-        CollectionDao.get();
-        DraftDao.get();
       } catch (Exception e) {
         e.printStackTrace();
         super.onCreate();
@@ -852,8 +847,7 @@ public class Trime extends LifecycleInputMethodService {
           Timber.i("EditorInfo: normal -> exclude, packageName=" + attribute.packageName);
         } else {
           normalTextEditor = true;
-          activeEditorInstance.cacheDraft();
-          addDraft();
+          DraftHelper.INSTANCE.onInputEventChanged();
         }
     }
   }
@@ -861,8 +855,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onFinishInputView(boolean finishingInput) {
     if (normalTextEditor) {
-      activeEditorInstance.cacheDraft();
-      addDraft();
+      DraftHelper.INSTANCE.onInputEventChanged();
     }
     super.onFinishInputView(finishingInput);
     // Dismiss any pop-ups when the input-view is being finished and hidden.
@@ -1268,7 +1261,7 @@ public class Trime extends LifecycleInputMethodService {
    */
   private boolean performEnter(int keyCode) { // 回車
     if (keyCode == KeyEvent.KEYCODE_ENTER) {
-      activeEditorInstance.cacheDraft();
+      DraftHelper.INSTANCE.onInputEventChanged();
       if (textInputManager.getPerformEnterAsLineBreak()) {
         commitText("\n");
       } else {
@@ -1381,54 +1374,6 @@ public class Trime extends LifecycleInputMethodService {
     default void onWindowHidden() {}
 
     default void onUpdateSelection() {}
-  }
-
-  private String ClipBoardString = "";
-
-  /**
-   * 此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
-   *
-   * <p>ClipBoardCompare 比较规则。每次通知剪贴板管理器，都会保存 ClipBoardCompare 处理过的 string。如果两次处理过的内容不变，则不通知。
-   * ClipBoardOut 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
-   */
-  private void clipBoardMonitor() {
-    ClipboardDao.get();
-    final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-    final Config imeConfig = getImeConfig();
-    clipBoard.addPrimaryClipChangedListener(
-        () -> {
-          if (imeConfig.getClipboardLimit() != 0) {
-            final ClipData clipData = clipBoard.getPrimaryClip();
-            if (clipData == null) return;
-            final ClipData.Item item = clipData.getItemAt(0);
-            if (item == null) return;
-
-            final String rawText = item.coerceToText(self).toString();
-            final String filteredText =
-                StringUtils.replace(rawText, imeConfig.getClipBoardCompare());
-            if (filteredText.length() < 1 || filteredText.equals(ClipBoardString)) return;
-
-            if (StringUtils.mismatch(rawText, imeConfig.getClipBoardOutput())) {
-              ClipBoardString = filteredText;
-              liquidKeyboard.addClipboardData(rawText);
-            }
-          }
-        });
-  }
-
-  private String draftString = "", draftCache = "";
-
-  private void addDraft() {
-    draftCache = activeEditorInstance.getDraftCache();
-    if (draftCache.isEmpty() || draftCache.trim().equals(draftString)) return;
-
-    if (getImeConfig().getDraftLimit() != 0) {
-      Timber.i("addDraft() cache=%s, string=%s", draftString, draftCache);
-      if (StringUtils.mismatch(draftCache, getImeConfig().getDraftOutput())) {
-        draftString = draftCache.trim();
-        liquidKeyboard.addDraftData(draftCache);
-      }
-    }
   }
 
   private boolean candidateExPage = false;

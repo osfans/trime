@@ -7,10 +7,10 @@ import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.db.draft.DraftHelper
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.text.TextInputManager
 import timber.log.Timber
@@ -34,7 +34,6 @@ class EditorInstance(private val ims: InputMethodService) {
         get() = (ims as Trime).textInputManager
 
     var lastCommittedText: CharSequence = ""
-    var draftCache: String = ""
 
     // 直接commit不做任何处理
     fun commitText(text: CharSequence, clearMeatKeyState: Boolean = false): Boolean {
@@ -44,7 +43,7 @@ class EditorInstance(private val ims: InputMethodService) {
             lastCommittedText = text
         if (clearMeatKeyState) {
             ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
-            cacheDraft()
+            DraftHelper.onInputEventChanged()
         }
         return true
     }
@@ -73,25 +72,6 @@ class EditorInstance(private val ims: InputMethodService) {
         if (ic.getSelectedText(0).isNullOrEmpty() || !composingText.isNullOrEmpty()) {
             ic.setComposingText(composingText, 1)
         }
-    }
-
-    fun cacheDraft(): String {
-        if (prefs.other.draftLimit.equals("0") || inputConnection == null)
-            return ""
-        val et = inputConnection!!.getExtractedText(ExtractedTextRequest(), 0)
-        if (et == null) {
-            Timber.e("cacheDraft() et==null")
-            return ""
-        }
-        val cs = et.text ?: return ""
-        if (cs.isBlank())
-            return ""
-        val cache = cs as String
-        if (draftCache.equals(cache))
-            return cache
-        draftCache = cache
-        Timber.d("cacheDraft() $draftCache")
-        return draftCache
     }
 
     /**

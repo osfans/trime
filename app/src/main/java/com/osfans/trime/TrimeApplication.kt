@@ -4,6 +4,9 @@ import android.app.Application
 import android.os.Process
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.db.CollectionHelper
+import com.osfans.trime.data.db.clipboard.ClipboardHelper
+import com.osfans.trime.data.db.draft.DraftHelper
 import com.osfans.trime.ui.main.LogActivity
 import timber.log.Timber
 
@@ -46,6 +49,9 @@ class TrimeApplication : Application() {
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
             }
             appPrefs.internal.pid = currentPid
+            ClipboardHelper.init(applicationContext)
+            CollectionHelper.init(applicationContext)
+            DraftHelper.init(applicationContext)
         } catch (e: Exception) {
             e.fillInStackTrace()
             return

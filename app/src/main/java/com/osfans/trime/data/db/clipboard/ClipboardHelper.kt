@@ -84,6 +84,14 @@ object ClipboardHelper :
         }
     }
 
+    /**
+     * 此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
+     *
+     * - [compare] 比较规则。每次通知剪贴板管理器，都会保存 ClipBoardCompare 处理过的 string。
+     * 如果两次处理过的内容不变，则不通知。
+     *
+     * - [output] 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
+     */
     override fun onPrimaryClipChanged() {
         if (!(limit != 0 && this::clbDao.isInitialized)) {
             return
