@@ -14,6 +14,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.Config
 import com.osfans.trime.data.db.CollectionHelper
+import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.clipboard.ClipboardHelper
 import com.osfans.trime.data.db.draft.DraftHelper
 import com.osfans.trime.ime.core.Trime
@@ -40,17 +41,6 @@ class LiquidKeyboard(private val context: Context) {
     private var keyHeight = 0
     var isLand = false
     private val historySavePath = "${appContext.getExternalFilesDir(null)!!.absolutePath}/key_history"
-
-    private val dbAdapter: FlexibleAdapter by lazy {
-        object : FlexibleAdapter() {
-            override val theme: Config
-                get() = this@LiquidKeyboard.theme
-
-            override fun onPaste(id: Int) {
-                service.currentInputConnection?.commitText(getBeanById(id).text, 1)
-            }
-        }
-    }
 
     private val flexbox: FlexboxLayoutManager by lazy {
         return@lazy FlexboxLayoutManager(context).apply {
@@ -233,6 +223,42 @@ class LiquidKeyboard(private val context: Context) {
     private fun initDbData(type: SymbolKeyboardType) {
         keyboardView.removeAllViews()
 
+        val dbAdapter = FlexibleAdapter(theme).apply {
+            setListener(object : FlexibleAdapter.Listener {
+                override fun onPaste(bean: DatabaseBean) {
+                    service.currentInputConnection?.commitText(bean.text, 1)
+                }
+
+                override suspend fun onPin(bean: DatabaseBean) {
+                    when (type) {
+                        SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.pin(bean.id)
+                        SymbolKeyboardType.COLLECTION -> CollectionHelper.pin(bean.id)
+                        SymbolKeyboardType.DRAFT -> DraftHelper.pin(bean.id)
+                        else -> return
+                    }
+                }
+
+                override suspend fun onUnpin(bean: DatabaseBean) {
+                    when (type) {
+                        SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.unpin(bean.id)
+                        SymbolKeyboardType.COLLECTION -> CollectionHelper.unpin(bean.id)
+                        SymbolKeyboardType.DRAFT -> DraftHelper.unpin(bean.id)
+                        else -> return
+                    }
+                }
+
+                override suspend fun onDelete(bean: DatabaseBean) {
+                    when (type) {
+                        SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.delete(bean.id)
+                        SymbolKeyboardType.COLLECTION -> CollectionHelper.delete(bean.id)
+                        SymbolKeyboardType.DRAFT -> DraftHelper.delete(bean.id)
+                        else -> return
+                    }
+                }
+
+                override val showCollectButton: Boolean = type != SymbolKeyboardType.COLLECTION
+            })
+        }
         keyboardView.apply {
             layoutManager = oneColumnStaggeredGrid
             adapter = dbAdapter

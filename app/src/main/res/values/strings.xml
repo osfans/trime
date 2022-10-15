@@ -260,4 +260,6 @@
     <string name="other_clipboard">Clipboard</string>
     <string name="other_draft">Draft</string>
     <string name="other_collection">Collection</string>
+    <string name="simple_key_unpin">Unpin</string>
+    <string name="simple_key_pin">Pin</string>
 </resources>

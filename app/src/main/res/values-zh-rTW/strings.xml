@@ -257,4 +257,6 @@
     <string name="other_draft">草稿箱</string>
     <string name="other_clipboard_limit">剪貼簿歷史記錄上限</string>
     <string name="other_collection">收藏夾</string>
+    <string name="simple_key_unpin">取消置頂</string>
+    <string name="simple_key_pin">置頂</string>
 </resources>

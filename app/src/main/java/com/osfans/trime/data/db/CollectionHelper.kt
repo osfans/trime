@@ -22,6 +22,10 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
 
     suspend fun getAll() = cltDao.getAll()
 
+    suspend fun pin(id: Int) = cltDao.updatePinned(id, true)
+
+    suspend fun unpin(id: Int) = cltDao.updatePinned(id, false)
+
     suspend fun delete(id: Int) = cltDao.delete(id)
 
     suspend fun deleteAll() = cltDao.deleteAll()

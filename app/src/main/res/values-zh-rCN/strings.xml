@@ -256,4 +256,6 @@
     <string name="other_clipboard">剪贴板</string>
     <string name="other_draft">草稿箱</string>
     <string name="other_collection">收藏夹</string>
+    <string name="simple_key_unpin">取消置顶</string>
+    <string name="simple_key_pin">置顶</string>
 </resources>

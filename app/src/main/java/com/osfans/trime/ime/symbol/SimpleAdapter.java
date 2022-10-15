@@ -3,6 +3,7 @@ package com.osfans.trime.ime.symbol;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -41,6 +42,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     final SimpleKeyItemBinding binding =
         SimpleKeyItemBinding.inflate(LayoutInflater.from(parent.getContext()));
+    binding.simpleKeyPin.setVisibility(View.INVISIBLE);
     return new ViewHolder(binding);
   }
 
@@ -76,9 +78,6 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
             listener.onSimpleKeyClick(position);
           });
     }
-
-    // 按钮点击时产生背景变色效果
-    holder.itemView.setClickable(true);
   }
 
   /*=====================添加OnItemClickListener回调================================*/

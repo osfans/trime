@@ -8,7 +8,9 @@
     android:minWidth="40sp"
     android:minHeight="30sp"
     android:foreground="?android:attr/selectableItemBackground"
-    app:cardElevation="0dp" >
+    app:cardElevation="0dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/wrapper"
@@ -29,6 +31,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
+
+        <ImageView
+            android:id="@+id/simple_key_pin"
+            android:src="@drawable/ic_baseline_push_pin_24"
+            android:alpha="0.3"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:contentDescription="simple_key_pin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

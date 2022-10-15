@@ -70,7 +70,7 @@ object ClipboardHelper :
     suspend fun getAll() = clbDao.getAll()
 
     suspend fun pin(id: Int) = clbDao.updatePinned(id, true)
-    suspend fun unpinned(id: Int) = clbDao.updatePinned(id, true)
+    suspend fun unpin(id: Int) = clbDao.updatePinned(id, false)
 
     suspend fun delete(id: Int) {
         clbDao.delete(id)
