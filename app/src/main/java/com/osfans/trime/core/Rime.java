@@ -467,7 +467,7 @@ public class Rime {
 
   public static RimeCandidate[] getCandidatesWithoutSwitch() {
     if (isComposing()) return mContext.getCandidates();
-    return null;
+    return new RimeCandidate[0];
   }
 
   public static String[] getSelectLabels() {

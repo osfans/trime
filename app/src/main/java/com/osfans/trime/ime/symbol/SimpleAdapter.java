@@ -1,163 +1,94 @@
 package com.osfans.trime.ime.symbol;
 
-import android.annotation.SuppressLint;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.flexbox.FlexboxLayoutManager;
-import com.osfans.trime.R;
 import com.osfans.trime.data.Config;
+import com.osfans.trime.databinding.SimpleKeyItemBinding;
+import java.util.ArrayList;
 import java.util.List;
-import timber.log.Timber;
 
-public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-  private final List<SimpleKeyBean> list;
-  private int keyWidth, keyHeight, keyMarginX, keyMarginTop;
-  private Integer textColor;
-  private float textSize;
-  private Drawable background, background2;
-  private Typeface textFont;
+public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder> {
+  private final @NonNull List<SimpleKeyBean> mBeans = new ArrayList<>();
 
-  public SimpleAdapter(List<SimpleKeyBean> itemlist) {
-    list = itemlist;
+  @NonNull
+  public final List<SimpleKeyBean> getBeans() {
+    return mBeans;
   }
 
-  public void configStyle(int keyWidth, int keyHeight, int keyMarginX, int keyMarginTop) {
-    // 由于按键宽度、横向间距会影响键盘左右两侧到屏幕边缘的距离，而前者需要提前计算，故adapter直接接收参数，不重新读取设置
-    this.keyHeight = keyHeight;
-    this.keyWidth = keyWidth;
-    this.keyMarginX = keyMarginX;
-    this.keyMarginTop = keyMarginTop;
+  private final Config theme;
 
-    Timber.d("configStyle keyHeight = %s", keyHeight);
+  public SimpleAdapter(@NonNull Config theme) {
+    this.theme = theme;
+  }
 
-    //  边框尺寸、圆角、字号直接读取主题通用参数。
-    Config config = Config.get();
-    textColor = config.getLiquidColor("key_text_color");
-    textSize = config.getFloat("label_text_size");
-    //  点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
-    background =
-        config.getDrawable(
-            "key_back_color", "key_border", "key_border_color", "round_corner", null);
-
-    background2 =
-        config.getDrawable(
-            "hilited_key_back_color",
-            "key_border",
-            "hilited_key_border_color",
-            "round_corner",
-            null);
-
-    textFont = config.getFont("key_font");
+  public void updateBeans(List<SimpleKeyBean> beans) {
+    mBeans.clear();
+    mBeans.addAll(beans);
   }
 
   @Override
   public int getItemCount() {
-    return list.size();
+    return mBeans.size();
   }
 
   @NonNull
   @Override
-  public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View view =
-        LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.simple_key_fix_item, parent, false);
-    return new ItemViewHolder(view);
+  public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    final SimpleKeyItemBinding binding =
+        SimpleKeyItemBinding.inflate(LayoutInflater.from(parent.getContext()));
+    return new ViewHolder(binding);
   }
 
-  static class ItemViewHolder extends RecyclerView.ViewHolder {
-    public ItemViewHolder(View view) {
-      super(view);
+  public static class ViewHolder extends RecyclerView.ViewHolder {
+    final TextView simpleKeyText;
 
-      listItemLayout = view.findViewById(R.id.listitem_layout);
-      mTitle = view.findViewById(R.id.simple_key);
+    public ViewHolder(@NonNull SimpleKeyItemBinding binding) {
+      super(binding.getRoot());
+
+      simpleKeyText = binding.simpleKey;
     }
-
-    LinearLayout listItemLayout;
-    TextView mTitle;
   }
 
-  @SuppressLint("ClickableViewAccessibility")
   @Override
-  public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int index) {
+  public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    final SimpleKeyBean bean = mBeans.get(position);
 
-    if (viewHolder instanceof ItemViewHolder) {
-      SimpleKeyBean searchHistoryBean = list.get(index);
-      final ItemViewHolder itemViewHold = ((ItemViewHolder) viewHolder);
+    holder.simpleKeyText.setText(bean.getLabel());
+    holder.simpleKeyText.setTypeface(theme.getFont("key_font"));
+    holder.simpleKeyText.setGravity(Gravity.CENTER);
+    holder.simpleKeyText.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 
-      if (textFont != null) itemViewHold.mTitle.setTypeface(textFont);
+    final float labelTextSize = theme.getFloat("label_text_size");
+    if (labelTextSize > 0) holder.simpleKeyText.setTextSize(labelTextSize);
 
-      itemViewHold.mTitle.setText(searchHistoryBean.getLabel());
-      if (textSize > 0) itemViewHold.mTitle.setTextSize(textSize);
+    holder.itemView.setBackground(
+        theme.getDrawable(
+            "key_back_color", "key_border", "key_border_color", "round_corner", null));
 
-      ViewGroup.LayoutParams lp = itemViewHold.listItemLayout.getLayoutParams();
-      if (lp instanceof FlexboxLayoutManager.LayoutParams) {
-        FlexboxLayoutManager.LayoutParams flexboxLp =
-            (FlexboxLayoutManager.LayoutParams) itemViewHold.listItemLayout.getLayoutParams();
-
-        if (searchHistoryBean.getLabel().isEmpty()) {
-          flexboxLp.setWrapBefore(true);
-          flexboxLp.setWidth(0);
-          flexboxLp.setHeight(0);
-          flexboxLp.setMargins(0, 0, 0, 0);
-        } else {
-
-          if (keyWidth > 0) flexboxLp.setWidth(keyWidth);
-          if (keyHeight > 0) flexboxLp.setHeight(keyHeight);
-          itemViewHold.mTitle.setTextColor(textColor);
-
-          int marginTop = flexboxLp.getMarginTop();
-          int marginX = flexboxLp.getMarginLeft();
-          if (keyMarginTop > 0) marginTop = keyMarginTop;
-          if (keyMarginX > 0) marginX = keyMarginX;
-
-          flexboxLp.setMargins(marginX, marginTop, marginX, flexboxLp.getMarginBottom());
-
-          if (background != null) {
-            itemViewHold.listItemLayout.setBackground(background);
-          }
-        }
-      }
-
-      if (mOnItemClickListener != null) {
-        itemViewHold.listItemLayout.setOnClickListener(
-            view -> {
-              int position = itemViewHold.getLayoutPosition(); // 在增加数据或者减少数据时候，position和index就不一样了
-              mOnItemClickListener.onItemClick(itemViewHold.listItemLayout, position);
-            });
-      }
-
-      // 按钮点击时产生背景变色效果
-      itemViewHold.listItemLayout.setOnTouchListener(
-          (view, motionEvent) -> {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-              if (background2 != null) itemViewHold.listItemLayout.setBackground(background2);
-            } else {
-              if (motionEvent.getAction() == MotionEvent.ACTION_UP
-                  || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
-                if (background != null) itemViewHold.listItemLayout.setBackground(background);
-              }
-            }
-            return false;
+    if (listener != null) {
+      holder.itemView.setOnClickListener(
+          view -> {
+            listener.onSimpleKeyClick(position);
           });
     }
+
+    // 按钮点击时产生背景变色效果
+    holder.itemView.setClickable(true);
   }
 
   /*=====================添加OnItemClickListener回调================================*/
-  public interface OnItemClickListener {
-    void onItemClick(View view, int position);
+  public interface Listener {
+    void onSimpleKeyClick(int position);
   }
 
-  private OnItemClickListener mOnItemClickListener;
+  private Listener listener;
 
-  public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
-    this.mOnItemClickListener = mOnItemClickListener;
+  public void setListener(@NonNull Listener listener) {
+    this.listener = listener;
   }
 }

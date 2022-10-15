@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.symbol
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
@@ -64,19 +63,25 @@ abstract class FlexibleAdapter : RecyclerView.Adapter<FlexibleAdapter.ViewHolder
             // copy SimpleAdapter 会造成高度始终为 3 行无法自适应的效果。
 
             // if (background != null) viewHolder.itemView.setBackground(background);
-            (itemView as CardView).setCardBackgroundColor(theme.getColor("long_text_back_color"))
+            (itemView as CardView).background = theme.getDrawable(
+                "long_text_back_color",
+                "key_border",
+                "key_long_text_border",
+                "round_corner",
+                null
+            )
 
             // 如果设置了回调，则设置点击事件
             itemView.setOnClickListener {
                 onPaste(id)
             }
-            viewHolder.itemView.setOnLongClickListener { view: View? ->
+            itemView.setOnLongClickListener {
                 //  TODO 长按删除、编辑剪贴板
                 //  当文本较长时，目前样式只缩略显示为 3 行，长按时 toast 消息可以预览全文，略有用处。
                 ToastUtils.showShort(text)
                 true
             }
-            viewHolder.itemView.isClickable = true
+            itemView.isClickable = true
         }
     }
 

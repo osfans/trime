@@ -19,13 +19,12 @@ import com.osfans.trime.data.db.draft.DraftHelper
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
-import com.osfans.trime.ime.text.TextInputManager.Companion.getInstance
+import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ConfigGetter.getPixel
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
 import kotlin.math.ceil
 
 class LiquidKeyboard(private val context: Context) {
@@ -33,18 +32,14 @@ class LiquidKeyboard(private val context: Context) {
     private val service: Trime = Trime.getService()
     private var rootView: View? = null
     private lateinit var keyboardView: RecyclerView
-    private var flexibleAdapter: FlexibleAdapter? = null
-    private var simpleAdapter: SimpleAdapter? = null
-    private var candidateAdapter: CandidateAdapter? = null
-    private val simpleKeyBeans: MutableList<SimpleKeyBean>
     private var historyBeans: MutableList<SimpleKeyBean>? = null
     private var marginLeft = 0
     private var marginTop = 0
     private var singleWidth = 0
     private var parentWidth = 0
     private var keyHeight = 0
-    private var isLand = false
-    private val historySavePath: String
+    var isLand = false
+    private val historySavePath = "${appContext.getExternalFilesDir(null)!!.absolutePath}/key_history"
 
     private val dbAdapter: FlexibleAdapter by lazy {
         object : FlexibleAdapter() {
@@ -79,19 +74,6 @@ class LiquidKeyboard(private val context: Context) {
         }
     }
 
-    fun setLand(land: Boolean) {
-        isLand = land
-    }
-
-    init {
-        simpleKeyBeans = ArrayList()
-        historySavePath = (
-            appContext.getExternalFilesDir(null)!!.absolutePath +
-                File.separator +
-                "key_history"
-            )
-    }
-
     fun select(i: Int): SymbolKeyboardType {
         val tag = TabManager.getTag(i)
         calcPadding(tag.type)
@@ -104,13 +86,10 @@ class LiquidKeyboard(private val context: Context) {
             }
             SymbolKeyboardType.CANDIDATE -> {
                 TabManager.get().select(i)
-                initCandidateAdapter()
-                initCandidate()
+                initCandidates()
             }
             SymbolKeyboardType.VAR_LENGTH -> {
-                TabManager.get().select(i)
-                initCandidateAdapter()
-                initVarLengthKeys(i)
+                initVarLengthKeys(TabManager.get().select(i))
             }
             SymbolKeyboardType.SYMBOL, SymbolKeyboardType.HISTORY, SymbolKeyboardType.TABS -> {
                 TabManager.get().select(i)
@@ -136,7 +115,7 @@ class LiquidKeyboard(private val context: Context) {
         if (marginLeft == 0) {
             var horizontal_gap = theme.getPixel("horizontal_gap")
             if (horizontal_gap > 1) {
-                horizontal_gap = horizontal_gap / 2
+                horizontal_gap /= 2
             }
             marginLeft = horizontal_gap
         }
@@ -189,70 +168,70 @@ class LiquidKeyboard(private val context: Context) {
         historyBeans = SimpleKeyDao.getSymbolKeyHistory(historySavePath)
     }
 
-    fun initFixData(i: Int) {
+    private fun initFixData(i: Int) {
         val tabTag = TabManager.getTag(i)
         keyboardView.removeAllViews()
-        flexibleAdapter = null
 
-        keyboardView.removeAllViews()
-        keyboardView.layoutManager = flexbox
-
-        // 设置适配器
-        simpleKeyBeans.clear()
-        when (tabTag.type) {
-            SymbolKeyboardType.HISTORY -> simpleKeyBeans.addAll(historyBeans!!)
-            SymbolKeyboardType.TABS -> simpleKeyBeans.addAll(TabManager.get().tabSwitchData)
-            else -> simpleKeyBeans.addAll(TabManager.get().select(i))
-        }
-        Timber.d("Tab.select(%s) beans.size=%s", i, simpleKeyBeans.size)
-        simpleAdapter = SimpleAdapter(simpleKeyBeans)
-        Timber.d(
-            "configStylet() single_width=%s, keyHeight=%s, margin_x=%s, margin_top=%s",
-            singleWidth, keyHeight, marginLeft, marginTop
-        )
-        simpleAdapter!!.configStyle(singleWidth, keyHeight, marginLeft, marginTop)
-        //            simpleAdapter.configKey(single_width,height,margin_x,margin_top);
-        keyboardView.adapter = simpleAdapter
-        // 添加分割线
-        // 设置添加删除动画
-        // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
-        keyboardView.isSelected = true
-
-        // 列表适配器的点击监听事件
-        simpleAdapter!!.setOnItemClickListener { view: View?, position: Int ->
-            if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                Trime.getService().inputSymbol(simpleKeyBeans[position].text)
-            } else if (tabTag.type !== SymbolKeyboardType.TABS) {
-                val ic = Trime.getService().currentInputConnection
-                if (ic != null) {
-                    val bean = simpleKeyBeans[position]
-                    ic.commitText(bean.text, 1)
-                    if (tabTag.type !== SymbolKeyboardType.HISTORY) {
-                        historyBeans?.add(0, bean)
-                        SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans!!)
+        val simpleAdapter = SimpleAdapter(theme).apply {
+            // 列表适配器的点击监听事件
+            setListener { position ->
+                val bean = beans[position]
+                if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+                    service.inputSymbol(bean.text)
+                } else if (tabTag.type !== SymbolKeyboardType.TABS) {
+                    service.currentInputConnection?.run {
+                        commitText(bean.text, 1)
+                        if (tabTag.type !== SymbolKeyboardType.HISTORY) {
+                            historyBeans?.add(0, bean)
+                            SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans!!)
+                        }
                     }
-                }
-            } else {
-                val tag = TabManager.getTag(position)
-                if (tag.type === SymbolKeyboardType.NO_KEY) {
-                    when (tag.command) {
-                        KeyCommandType.EXIT -> Trime.getService().selectLiquidKeyboard(-1)
-                        KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
-                        else -> {}
-                    }
-                } else if (TabManager.get().isAfterTabSwitch(position)) {
-                    // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                    select(position)
                 } else {
-                    Trime.getService().selectLiquidKeyboard(position)
+                    val tag = TabManager.getTag(position)
+                    if (tag.type === SymbolKeyboardType.NO_KEY) {
+                        when (tag.command) {
+                            KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
+                            KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
+                            else -> {}
+                        }
+                    } else if (TabManager.get().isAfterTabSwitch(position)) {
+                        // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
+                        select(position)
+                    } else {
+                        service.selectLiquidKeyboard(position)
+                    }
                 }
             }
         }
+        keyboardView.apply {
+            layoutManager = flexbox
+            /*
+            Timber.d(
+                "configStylet() single_width=%s, keyHeight=%s, margin_x=%s, margin_top=%s",
+                singleWidth, keyHeight, marginLeft, marginTop
+            ) **/
+            // simpleAdapter!!.configStyle(singleWidth, keyHeight, marginLeft, marginTop)
+            //            simpleAdapter.configKey(single_width,height,margin_x,margin_top);
+            adapter = simpleAdapter
+            // 添加分割线
+            // 设置添加删除动画
+            // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
+            isSelected = true
+        }
+
+        when (tabTag.type) {
+            SymbolKeyboardType.HISTORY ->
+                simpleAdapter.updateBeans(historyBeans!!)
+            SymbolKeyboardType.TABS ->
+                simpleAdapter.updateBeans(TabManager.get().tabSwitchData)
+            else ->
+                simpleAdapter.updateBeans(TabManager.get().select(i))
+        }
+        Timber.d("Tab #%s with bean size %s", i, simpleAdapter.itemCount)
     }
 
-    fun initDbData(type: SymbolKeyboardType) {
+    private fun initDbData(type: SymbolKeyboardType) {
         keyboardView.removeAllViews()
-        simpleAdapter = null
 
         keyboardView.apply {
             layoutManager = oneColumnStaggeredGrid
@@ -281,45 +260,45 @@ class LiquidKeyboard(private val context: Context) {
         }
     }
 
-    fun initCandidateAdapter() {
+    private fun initCandidates() {
         keyboardView.removeAllViews()
-        simpleAdapter = null
-        flexibleAdapter = null
-        if (candidateAdapter == null) candidateAdapter = CandidateAdapter()
 
-        // 设置布局管理器
-        keyboardView.layoutManager = flexbox
-        candidateAdapter!!.configStyle(marginLeft, marginTop)
-        keyboardView.adapter = candidateAdapter
-        keyboardView.isSelected = true
-    }
-
-    fun initCandidate() {
-        candidateAdapter!!.updateCandidates()
-        candidateAdapter!!.setOnItemClickListener { view: View?, position: Int ->
-            getInstance().onCandidatePressed(position)
-            if (Rime.isComposing()) {
-                updateCandidates()
-            } else Trime.getService().selectLiquidKeyboard(-1)
-        }
-    }
-
-    fun initVarLengthKeys(i: Int) {
-        simpleKeyBeans.clear()
-        simpleKeyBeans.addAll(TabManager.get().select(i))
-        candidateAdapter!!.setCandidates(simpleKeyBeans)
-        candidateAdapter!!.setOnItemClickListener { view: View?, position: Int ->
-            val ic = Trime.getService().currentInputConnection
-            if (ic != null) {
-                val bean = simpleKeyBeans[position]
-                ic.commitText(bean.text, 1)
+        val candidateAdapter = CandidateAdapter(theme).apply {
+            setListener { position ->
+                TextInputManager.getInstance().onCandidatePressed(position)
+                if (Rime.isComposing()) {
+                    updateCandidates(Rime.getCandidatesWithoutSwitch().asList())
+                    keyboardView.scrollToPosition(0)
+                } else service.selectLiquidKeyboard(-1)
             }
         }
+        // 设置布局管理器
+        keyboardView.apply {
+            layoutManager = flexbox
+            adapter = candidateAdapter
+            isSelected = true
+        }
+
+        candidateAdapter.updateCandidates(Rime.getCandidatesWithoutSwitch().asList())
+        keyboardView.scrollToPosition(0)
     }
 
-    fun updateCandidates() {
-        candidateAdapter!!.updateCandidates()
-        candidateAdapter!!.notifyDataSetChanged()
-        keyboardView.scrollToPosition(0)
+    private fun initVarLengthKeys(data: List<SimpleKeyBean>) {
+        keyboardView.removeAllViews()
+
+        val candidateAdapter = CandidateAdapter(theme).apply {
+            setListener { position ->
+                service.currentInputConnection?.commitText(data[position].text, 1)
+            }
+        }
+        // 设置布局管理器
+        keyboardView.apply {
+            layoutManager = flexbox
+            adapter = candidateAdapter
+            keyboardView.isSelected = true
+        }
+        candidateAdapter.updateCandidates(
+            data.map { b -> Rime.RimeCandidate(b.text, "") }
+        )
     }
 }

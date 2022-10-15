@@ -121,26 +121,6 @@ public class Config {
     Timber.d(methodName + "finish");
   }
 
-  public String[] getClipBoardCompare() {
-    return clipBoardCompare;
-  }
-
-  public String[] getClipBoardOutput() {
-    return clipBoardOutput;
-  }
-
-  public String[] getDraftOutput() {
-    return draftOutput;
-  }
-
-  public int getClipboardLimit() {
-    return Integer.parseInt(appPrefs.getOther().getClipboardLimit());
-  }
-
-  public int getDraftLimit() {
-    return Integer.parseInt(appPrefs.getOther().getDraftLimit());
-  }
-
   public void setClipBoardCompare(String str) {
     String s = pattern.matcher(str).replaceAll("\n").trim();
     clipBoardCompare = s.split("\n");

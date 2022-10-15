@@ -17,7 +17,8 @@ abstract class Database : RoomDatabase() {
                 if (database.needUpgrade(4)) {
                     database.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
                     database.execSQL("ALTER TABLE _t_data ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
-                    database.execSQL("""
+                    database.execSQL(
+                        """
                         CREATE TABLE IF NOT EXISTS ${DatabaseBean.TABLE_NAME} (
                             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                             text TEXT,
@@ -26,12 +27,13 @@ abstract class Database : RoomDatabase() {
                             time INTEGER NOT NULL,
                             pinned INTEGER NOT NULL
                         )
-                    """.trimIndent()
+                        """.trimIndent()
                     )
-                    database.execSQL("""
+                    database.execSQL(
+                        """
                         INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time, pinned)
                         SELECT id, text, html, type, time, pinned FROM _t_data
-                    """.trimIndent()
+                        """.trimIndent()
                     )
                     database.execSQL("DROP TABLE _t_data")
                 }
