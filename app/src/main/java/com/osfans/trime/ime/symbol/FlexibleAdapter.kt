@@ -118,7 +118,7 @@ class FlexibleAdapter(
                             add(R.string.collect).apply {
                                 setIcon(R.drawable.ic_baseline_star_24)
                                 setOnMenuItemClickListener {
-                                    scope.launch { CollectionHelper.insert(bean.copy(text = bean.text)) }
+                                    scope.launch { CollectionHelper.insert(DatabaseBean(text = bean.text)) }
                                     true
                                 }
                             }
