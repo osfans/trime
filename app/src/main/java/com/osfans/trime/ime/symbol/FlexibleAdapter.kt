@@ -27,7 +27,16 @@ class FlexibleAdapter(
         get() = mBeans
 
     fun updateBeans(beans: List<DatabaseBean>) {
-        val sorted = beans.sortedByDescending { it.id }
+        val sorted = beans.sortedWith { b1, b2 ->
+            when {
+                // 如果 b1 置顶而 b2 没置顶，则 b1 比 b2 小，排前面
+                b1.pinned && !b2.pinned -> -1
+                // 如果 b1 没置顶而 b2 置顶，则 b1 比 b2 大，排后面
+                !b1.pinned && b2.pinned -> 1
+                // 如果都置顶了或都没置顶，则比较 id，id 小的排前面
+                else -> b2.id.compareTo(b1.id)
+            }
+        }
         mBeans.clear()
         mBeans.addAll(sorted)
         mBeansId.clear()
