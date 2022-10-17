@@ -80,6 +80,11 @@ public class Candidate extends View {
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private boolean shouldShowComment = true, isCommentOnTop, candidateUseCursor;
 
+  @NonNull
+  private AppPrefs getAppPrefs() {
+    return AppPrefs.defaultInstance();
+  }
+
   public void reset() {
     Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
@@ -179,7 +184,7 @@ public class Candidate extends View {
       if (candidate != null) {
         if (candidate instanceof ComputedCandidate.Word) {
           if (listener.get() != null) {
-            if (isLongClick && Config.getShouldLongClickDeleteCandidate()) {
+            if (isLongClick && getAppPrefs().getKeyboard().getShouldLongClickDeleteCandidate()) {
               listener.get().onCandidateLongClicked(index + startNum);
             } else {
               listener.get().onCandidatePressed(index + startNum);
@@ -393,7 +398,7 @@ public class Candidate extends View {
         long durationMs = timeMove - timeDown;
         setPressed(false);
         if (me.getActionMasked() == MotionEvent.ACTION_UP) {
-          onCandidateClick(highlightIndex, durationMs >= Config.getDeleteCandidateTimeout());
+          onCandidateClick(highlightIndex, durationMs >= getAppPrefs().getKeyboard().getDeleteCandidateTimeout());
         }
         highlightIndex = -1;
         invalidate();

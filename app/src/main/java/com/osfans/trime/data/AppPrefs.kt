@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
  * Helper class for an organized access to the shared preferences.
  */
 class AppPrefs(
-    private val shared : SharedPreferences
+    private val shared: SharedPreferences
 ) {
     private val applicationContext: WeakReference<Context> = WeakReference(appContext)
 
@@ -257,10 +257,10 @@ class AppPrefs(
             get() = prefs.getPref(SWIPE_TIME_HI, 80)
             private set
         var longPressTimeout: Int = 0
-            get() = prefs.getPref(LONG_PRESS_TIMEOUT, 20)
+            get() = prefs.getPref(LONG_PRESS_TIMEOUT, 400)
             private set
         var repeatInterval: Int = 0
-            get() = prefs.getPref(REPEAT_INTERVAL, 4)
+            get() = prefs.getPref(REPEAT_INTERVAL, 50)
             private set
         var deleteCandidateTimeout: Int = 0
             get() = prefs.getPref(DELETE_CANDIDATE_TIMEOUT, 2000)

@@ -38,7 +38,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.PopupWindow;
@@ -202,17 +201,12 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private int mComboCount = 0;
   private boolean mComboMode = false;
 
-  private static int REPEAT_INTERVAL = 50; // ~20 keys per second
-  private static int REPEAT_START_DELAY = 400;
-  private static int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
-
   private static final int MAX_NEARBY_KEYS = 12;
   private final int[] mDistances = new int[MAX_NEARBY_KEYS];
 
   // For multi-tap
   private int mLastSentIndex;
   private long mLastTapTime;
-  private static int MULTI_TAP_INTERVAL = 800; // milliseconds
   private final StringBuilder mPreviewLabel = new StringBuilder(1);
 
   /** Whether the keyboard bitmap needs to be redrawn before it's blitted. * */
@@ -298,8 +292,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   }
 
   @NonNull
-  private AppPrefs getPrefs() {
-    return AppPrefs.Companion.defaultInstance();
+  private static AppPrefs getPrefs() {
+    return AppPrefs.defaultInstance();
   }
 
   private final MyHandler mHandler = new MyHandler(this);
@@ -324,7 +318,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         case MSG_REPEAT:
           if (mKeyboardView.repeatKey()) {
             Message repeat = Message.obtain(this, MSG_REPEAT);
-            sendMessageDelayed(repeat, REPEAT_INTERVAL);
+            sendMessageDelayed(repeat, getPrefs().getKeyboard().getRepeatInterval());
           }
           break;
         case MSG_LONGPRESS:
@@ -402,11 +396,6 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPaintSymbol.setColor(key_symbol_color);
     mPaintSymbol.setTextSize(mSymbolSize);
     mPreviewText.setTypeface(config.getFont("preview_font"));
-
-    REPEAT_INTERVAL = config.getRepeatInterval();
-    REPEAT_START_DELAY = config.getLongTimeout() + 1;
-    LONG_PRESS_TIMEOUT = config.getLongTimeout();
-    MULTI_TAP_INTERVAL = config.getLongTimeout();
 
     mEnterLabels = config.getmEnterLabels();
     enterLabelMode = config.getInt("enter_label_mode");
@@ -1576,7 +1565,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         if (mCurrentKey >= 0 && mKeys[mCurrentKey].getClick().isRepeatable()) {
           mRepeatKeyIndex = mCurrentKey;
           final Message msg = mHandler.obtainMessage(MSG_REPEAT);
-          mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);
+          final int repeatStartDelay = getPrefs().getKeyboard().getLongPressTimeout() + 1;
+          mHandler.sendMessageDelayed(msg, repeatStartDelay);
           // Delivering the key could have caused an abort
           if (mAbortKey) {
             mRepeatKeyIndex = NOT_A_KEY;
@@ -1585,7 +1575,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         }
         if (mCurrentKey != NOT_A_KEY) {
           final Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
-          mHandler.sendMessageDelayed(msg, LONG_PRESS_TIMEOUT);
+          mHandler.sendMessageDelayed(msg, getPrefs().getKeyboard().getLongPressTimeout());
         }
         showPreview(keyIndex, 0);
         break;
@@ -1617,7 +1607,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
           // Start new long press if key has changed
           if (keyIndex != NOT_A_KEY) {
             final Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
-            mHandler.sendMessageDelayed(msg, LONG_PRESS_TIMEOUT);
+            mHandler.sendMessageDelayed(msg, getPrefs().getKeyboard().getLongPressTimeout());
           }
         }
         showPreview(mCurrentKey);
@@ -1768,7 +1758,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private void checkMultiTap(long eventTime, int keyIndex) {
     if (keyIndex == NOT_A_KEY) return;
     // final Key key = mKeys[keyIndex];
-    if (eventTime > mLastTapTime + MULTI_TAP_INTERVAL || keyIndex != mLastSentIndex) {
+    final int multiTabInterval = getPrefs().getKeyboard().getLongPressTimeout();
+    if (eventTime > mLastTapTime + multiTabInterval || keyIndex != mLastSentIndex) {
       resetMultiTap();
     }
   }
