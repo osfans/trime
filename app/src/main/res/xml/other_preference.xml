@@ -28,12 +28,13 @@
     <PreferenceCategory android:key="other_clipboard"
         app:iconSpaceReserved="false"
         app:title="@string/other_clipboard">
-        <ListPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             app:key="other_clipboard_limit"
-            android:defaultValue="100"
+            android:defaultValue="10"
             app:iconSpaceReserved="false"
-            app:entries="@array/other__clipboard_manager_entries"
-            app:entryValues="@array/other__clipboard_manager_values"
+            app:max="100"
+            app:systemDefaultValue="0"
+            app:systemDefaultValueText="@string/disable"
             app:title="@string/other_clipboard_limit"
             app:useSimpleSummaryProvider="true" />
 
@@ -64,11 +65,13 @@
     <PreferenceCategory android:key="other_draft"
         app:iconSpaceReserved="false"
         app:title="@string/other_draft">
-        <ListPreference
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
             app:key="other_draft_limit"
             app:iconSpaceReserved="false"
-            app:entries="@array/other__clipboard_manager_entries"
-            app:entryValues="@array/other__clipboard_manager_values"
+            android:defaultValue="10"
+            app:max="100"
+            app:systemDefaultValue="0"
+            app:systemDefaultValueText="@string/disable"
             app:title="@string/other_draft_limit"
             app:useSimpleSummaryProvider="true" />
 

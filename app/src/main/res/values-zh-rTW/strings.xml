@@ -260,4 +260,5 @@
     <string name="simple_key_unpin">取消置頂</string>
     <string name="simple_key_pin">置頂</string>
     <string name="delete_all">刪除全部</string>
+    <string name="disable">禁用</string>
 </resources>

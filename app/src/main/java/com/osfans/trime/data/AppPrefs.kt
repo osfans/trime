@@ -366,11 +366,11 @@ class AppPrefs(
         var draftOutputRules: List<String>
             get() = prefs.getPref(DRAFT_OUTPUT_RULES, "").trim().split('\n')
             set(v) = prefs.setPref(DRAFT_OUTPUT_RULES, v.joinToString("\n"))
-        var clipboardLimit: String
-            get() = prefs.getPref(CLIPBOARD_LIMIT, "50")
+        var clipboardLimit: Int
+            get() = prefs.getPref(CLIPBOARD_LIMIT, 10)
             set(v) = prefs.setPref(CLIPBOARD_LIMIT, v)
-        var draftLimit: String
-            get() = prefs.getPref(DRAFT_LIMIT, "20")
+        var draftLimit: Int
+            get() = prefs.getPref(DRAFT_LIMIT, 10)
             set(v) = prefs.setPref(DRAFT_LIMIT, v)
         var draftExcludeApp: String
             get() = prefs.getPref(DRAFT_EXCLUDE_APP, "")
