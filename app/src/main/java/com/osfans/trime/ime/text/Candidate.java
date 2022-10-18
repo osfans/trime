@@ -35,7 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.Config;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.util.GraphicUtils;
 import java.lang.ref.WeakReference;
@@ -398,7 +398,9 @@ public class Candidate extends View {
         long durationMs = timeMove - timeDown;
         setPressed(false);
         if (me.getActionMasked() == MotionEvent.ACTION_UP) {
-          onCandidateClick(highlightIndex, durationMs >= getAppPrefs().getKeyboard().getDeleteCandidateTimeout());
+          onCandidateClick(
+              highlightIndex,
+              durationMs >= getAppPrefs().getKeyboard().getDeleteCandidateTimeout());
         }
         highlightIndex = -1;
         invalidate();

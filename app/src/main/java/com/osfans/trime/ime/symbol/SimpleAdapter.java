@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.osfans.trime.data.Config;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.databinding.SimpleKeyItemBinding;
 import java.util.ArrayList;
 import java.util.List;

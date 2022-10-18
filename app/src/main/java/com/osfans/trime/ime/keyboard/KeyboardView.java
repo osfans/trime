@@ -45,7 +45,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.R;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.Config;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;

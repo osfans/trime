@@ -25,7 +25,7 @@ import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.data.Config;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.ConfigGetter;
 import java.text.MessageFormat;

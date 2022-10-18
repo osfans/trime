@@ -30,7 +30,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
-import com.osfans.trime.data.Config;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.util.GraphicUtils;

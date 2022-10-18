@@ -3,7 +3,7 @@ package com.osfans.trime.util
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
-import com.osfans.trime.data.Config
+import com.osfans.trime.data.theme.Config
 
 class GraphicUtils {
     private var hanBFont: Typeface = Typeface.DEFAULT

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.osfans.trime.data;
+package com.osfans.trime.data.theme;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -32,6 +32,8 @@ import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.AppPrefs;
+import com.osfans.trime.data.DataManager;
 import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Key;
@@ -207,7 +209,7 @@ public class Config {
 
       Timber.d("Fetching global theme config map ...");
       final Map<String, Map<String, ?>> globalThemeConfig =
-              Rime.config_get_map(currentThemeName, "") != null
+          Rime.config_get_map(currentThemeName, "") != null
               ? Rime.config_get_map(currentThemeName, "")
               : Rime.config_get_map(defaultThemeName, "config_version");
       Objects.requireNonNull(globalThemeConfig, "The theme file cannot be empty!");
@@ -469,7 +471,9 @@ public class Config {
     }
     o = getColorObject(key);
     if (o == null) {
-      o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(currentColorSchemeId))).get(key);
+      o =
+          ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(currentColorSchemeId)))
+              .get(key);
     }
     return parseColor(o);
   }
@@ -866,8 +870,9 @@ public class Config {
     currentColorSchemeId = getColorSchemeName();
     backgroundFolder = getString("background_folder");
     Timber.d("Initializing currentColors ...");
-    Timber.d("currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s",
-            currentColorSchemeId, currentThemeName, currentSchemaId);
+    Timber.d(
+        "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s",
+        currentColorSchemeId, currentThemeName, currentSchemaId);
     final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(currentColorSchemeId);
     if (map == null) {
       Timber.i("Color scheme id not found: %s", currentColorSchemeId);
@@ -912,8 +917,9 @@ public class Config {
     currentColorSchemeId = getColorSchemeName(darkMode);
     backgroundFolder = getString("background_folder");
     Timber.d("Initializing currentColors ...");
-    Timber.d("currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s, isDarkMode = %s",
-            currentColorSchemeId, currentThemeName, currentSchemaId, darkMode);
+    Timber.d(
+        "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s, isDarkMode = %s",
+        currentColorSchemeId, currentThemeName, currentSchemaId, darkMode);
     final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(currentColorSchemeId);
     if (map == null) {
       Timber.i("Color scheme id not found: %s", currentColorSchemeId);

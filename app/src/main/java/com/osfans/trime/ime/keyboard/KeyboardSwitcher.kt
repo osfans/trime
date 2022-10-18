@@ -2,7 +2,7 @@ package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.Config
+import com.osfans.trime.data.theme.Config
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.util.appContext
 import timber.log.Timber

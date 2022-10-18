@@ -10,9 +10,9 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.R
-import com.osfans.trime.data.Config
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
+import com.osfans.trime.data.theme.Config
 import com.osfans.trime.databinding.SimpleKeyItemBinding
 import kotlinx.coroutines.launch
 

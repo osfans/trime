@@ -6,8 +6,8 @@ import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.Config
 import com.osfans.trime.data.sound.SoundManager
+import com.osfans.trime.data.theme.Config
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.CoroutineChoiceDialog

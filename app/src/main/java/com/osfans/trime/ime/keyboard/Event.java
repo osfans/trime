@@ -23,7 +23,7 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.Config;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.util.ConfigGetter;
 import java.util.HashMap;
