@@ -1,12 +1,6 @@
 #ifndef RIME_JNI_H_
 #define RIME_JNI_H_
 
-#include <jni.h>
-#include <stdio.h>
-#include <string.h>
-#include <string>
-#include <rime_api.h>
-#include <rime_levers_api.h>
 #include "jni-utils.h"
 
 static GlobalRefSingleton *GlobalRef;
@@ -22,7 +16,5 @@ static GlobalRefSingleton *GlobalRef;
 #endif
 
 #define BUFSIZE 256
-
-jstring newJstring(JNIEnv* env, const char* pat);
 
 #endif  // RIME_JNI_H_

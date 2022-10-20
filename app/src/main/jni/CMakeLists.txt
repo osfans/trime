@@ -26,7 +26,13 @@ option(CAPNP_LITE "" ON) # librime only needs CapnProto::capnp
 add_subdirectory(capnproto)
 include(CapnprotoWorkarounds)
 
-#add_subdirectory(glog)
+add_library(miniglog STATIC miniglog/miniglog/logging.cc)
+target_link_libraries(miniglog log)
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/miniglog/miniglog/logging.h"
+    "${CMAKE_BINARY_DIR}/include/glog/logging.h"
+    COPYONLY
+)
 
 option(YAML_CPP_BUILD_TOOLS "" OFF)
 # TODO: remove below options after librime > 1.7.3
@@ -53,7 +59,6 @@ include(OpenccWorkarounds)
 include(RimePlugins)
 
 option(BUILD_TEST "" OFF)
-option(ENABLE_LOGGING "" OFF)
 include_directories("librime/include") # for X11/keysym.h
 include_directories("capnproto/c++/src")
 # workaround for librime/tools/rime_api_console.cc

@@ -1,4 +1,6 @@
 #include "rime_jni.h"
+#include <jni.h>
+#include <rime_levers_api.h>
 
 // customize settings
 
