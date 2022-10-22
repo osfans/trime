@@ -61,15 +61,20 @@ class FlexibleAdapter(
         with(viewHolder) {
             val bean = mBeans[position]
             simpleKeyText.apply {
-                this.text = bean.text
-                this.typeface = theme.getFont("long_text_font")
+                text = bean.text
+                typeface = theme.getFont("long_text_font")
+                when (val textColor = theme.getLiquidColor("long_text_color")) {
+                    null -> setTextColor(theme.getLiquidColor("key_text_color"))
+                    else -> setTextColor(textColor)
+                }
 
                 val longTextSize = theme.getFloat("key_long_text_size")
                 val labelTextSize = theme.getFloat("label_text_size")
-                if (longTextSize > 0)
-                    this.textSize = longTextSize
-                else if (labelTextSize > 0)
-                    this.textSize = labelTextSize
+                textSize = when {
+                    longTextSize > 0 -> longTextSize
+                    labelTextSize > 0 -> labelTextSize
+                    else -> textSize
+                }
             }
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
 
