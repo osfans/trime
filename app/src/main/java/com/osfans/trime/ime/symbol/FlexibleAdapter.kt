@@ -33,7 +33,7 @@ class FlexibleAdapter(
                 b1.pinned && !b2.pinned -> -1
                 // 如果 b1 没置顶而 b2 置顶，则 b1 比 b2 大，排后面
                 !b1.pinned && b2.pinned -> 1
-                // 如果都置顶了或都没置顶，则比较 id，id 小的排前面
+                // 如果都置顶了或都没置顶，则比较 id，id 大的排前面
                 else -> b2.id.compareTo(b1.id)
             }
         }
@@ -138,6 +138,17 @@ class FlexibleAdapter(
                                 true
                             }
                         }
+                        if (beans.isNotEmpty()) {
+                            add(R.string.delete_all).apply {
+                                setIcon(R.drawable.ic_baseline_delete_sweep_24)
+                                setOnMenuItemClickListener {
+                                    scope.launch {
+                                        listener.onDeleteAll()
+                                    }
+                                    true
+                                }
+                            }
+                        }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         menu.setForceShowIcon(true)
@@ -173,6 +184,8 @@ class FlexibleAdapter(
         suspend fun onPin(bean: DatabaseBean)
         suspend fun onUnpin(bean: DatabaseBean)
         suspend fun onDelete(bean: DatabaseBean)
+
+        suspend fun onDeleteAll()
 
         val showCollectButton: Boolean
     }

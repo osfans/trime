@@ -28,5 +28,10 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
 
     suspend fun delete(id: Int) = cltDao.delete(id)
 
-    suspend fun deleteAll() = cltDao.deleteAll()
+    suspend fun deleteAll(skipPinned: Boolean = true) {
+        if (skipPinned)
+            cltDao.deleteAllUnpinned()
+        else
+            cltDao.deleteAll()
+    }
 }

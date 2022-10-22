@@ -1,5 +1,6 @@
 package com.osfans.trime.ime.symbol
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import androidx.core.view.setPadding
@@ -254,6 +255,39 @@ class LiquidKeyboard(private val context: Context) {
                         SymbolKeyboardType.DRAFT -> DraftHelper.delete(bean.id)
                         else -> return
                     }
+                }
+
+                // FIXME: 这个方法可能实现得比较粗糙，需要日后改进
+                @SuppressLint("NotifyDataSetChanged")
+                override suspend fun onDeleteAll() {
+                    if (beans.all { it.pinned }) {
+                        // 如果没有未置顶的条目，则删除所有已置顶的条目
+                        when (type) {
+                            SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.deleteAll(false)
+                            SymbolKeyboardType.COLLECTION -> CollectionHelper.deleteAll(false)
+                            SymbolKeyboardType.DRAFT -> DraftHelper.deleteAll(false)
+                            else -> return
+                        }
+                        updateBeans(emptyList())
+                    } else {
+                        // 如果有已置顶的条目，则删除所有未置顶的条目
+                        when (type) {
+                            SymbolKeyboardType.CLIPBOARD -> {
+                                ClipboardHelper.deleteAll()
+                                updateBeans(ClipboardHelper.getAll())
+                            }
+                            SymbolKeyboardType.COLLECTION -> {
+                                CollectionHelper.deleteAll()
+                                updateBeans(CollectionHelper.getAll())
+                            }
+                            SymbolKeyboardType.DRAFT -> {
+                                DraftHelper.deleteAll()
+                                updateBeans(DraftHelper.getAll())
+                            }
+                            else -> return
+                        }
+                    }
+                    notifyDataSetChanged()
                 }
 
                 override val showCollectButton: Boolean = type != SymbolKeyboardType.COLLECTION

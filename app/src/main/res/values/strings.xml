@@ -262,4 +262,5 @@
     <string name="other_collection">Collection</string>
     <string name="simple_key_unpin">Unpin</string>
     <string name="simple_key_pin">Pin</string>
+    <string name="delete_all">Delete all</string>
 </resources>
