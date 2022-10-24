@@ -7,7 +7,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
@@ -29,8 +28,6 @@ class KeyboardFragment :
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val trime = Trime.getServiceOrNull()
-        val prefs = AppPrefs.defaultInstance()
-        prefs.sync()
         when (key) {
             "keyboard__key_long_press_timeout",
             "keyboard__key_repeat_interval",
@@ -42,9 +39,6 @@ class KeyboardFragment :
             }
             "keyboard__inline_preedit", "keyboard__soft_cursor" -> {
                 trime?.loadConfig()
-            }
-            "keyboard__show_switches" -> {
-                Rime.setShowSwitches(prefs.keyboard.switchesEnabled)
             }
             "keyboard__candidate_page_size" -> {
                 Rime.applySchemaChange()

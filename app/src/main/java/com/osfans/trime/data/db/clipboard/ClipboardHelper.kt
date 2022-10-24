@@ -50,9 +50,7 @@ object ClipboardHelper :
 
     private val limit get() = AppPrefs.defaultInstance().other.clipboardLimit.toInt()
     private val compare get() = AppPrefs.defaultInstance().other.clipboardCompareRules
-        .trim().split('\n')
     private val output get() = AppPrefs.defaultInstance().other.clipboardOutputRules
-        .trim().split('\n')
 
     var lastBean: DatabaseBean? = null
 

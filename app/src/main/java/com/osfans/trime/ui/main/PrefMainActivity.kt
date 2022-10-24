@@ -49,7 +49,6 @@ class PrefMainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        prefs.sync()
         val uiMode = when (prefs.other.uiMode) {
             "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             "light" -> AppCompatDelegate.MODE_NIGHT_NO

@@ -31,7 +31,6 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
 
     private val limit get() = AppPrefs.defaultInstance().other.draftLimit.toInt()
     private val output get() = AppPrefs.defaultInstance().other.draftOutputRules
-        .trim().split('\n')
 
     var lastBean: DatabaseBean? = null
 

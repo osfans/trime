@@ -2,6 +2,7 @@ package com.osfans.trime
 
 import android.app.Application
 import android.os.Process
+import androidx.preference.PreferenceManager
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.CollectionHelper
@@ -39,8 +40,10 @@ class TrimeApplication : Application() {
             if (BuildConfig.DEBUG) {
                 Timber.plant(Timber.DebugTree())
             }
-            val prefs = AppPrefs.initDefault(this)
-            prefs.initDefaultPreferences()
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            AppPrefs.initDefault(sharedPreferences).apply {
+                initDefaultPreferences()
+            }
             // record last pid for crash logs
             val appPrefs = AppPrefs.defaultInstance()
             val currentPid = Process.myPid()

@@ -91,7 +91,7 @@ class KeyboardSwitcher {
         }
 
         if (i == 0 && keyboardNames.contains("mini")) {
-            if (AppPrefs.defaultInstance().looks.useMiniKeyboard) {
+            if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard) {
                 val realkeyboard = appContext.getResources().getConfiguration().keyboard
                 if (realkeyboard != Configuration.KEYBOARD_NOKEYS) {
                     Timber.i("onStartInputView() configuration.keyboard=" + realkeyboard + ", keyboardType=" + i)

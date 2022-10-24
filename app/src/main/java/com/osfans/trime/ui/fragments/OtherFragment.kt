@@ -3,7 +3,6 @@ package com.osfans.trime.ui.fragments
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
@@ -13,15 +12,12 @@ import androidx.preference.Preference
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.Config
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.LiquidKeyboardActivity
 import com.osfans.trime.ui.main.MainViewModel
 
-class OtherFragment :
-    PaddingPreferenceFragment(),
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class OtherFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -35,35 +31,6 @@ class OtherFragment :
             }
             AppCompatDelegate.setDefaultNightMode(uiMode)
             true
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        val trime = Trime.getServiceOrNull()
-        when (key) {
-            "other__show_status_bar_icon" -> {
-                if (sharedPreferences?.getBoolean(key, false) == true) {
-                    trime?.showStatusIcon(R.drawable.ic_trime_status)
-                } else { trime?.hideStatusIcon() }
-            }
-
-            "other__clipboard_compare" -> {
-                Config.get().setClipBoardCompare(
-                    sharedPreferences?.getString(key, "")
-
-                )
-            }
-
-            "other__clipboard_output" -> {
-                Config.get().setClipBoardOutput(
-                    sharedPreferences?.getString(key, "")
-                )
-            }
-            "other__draft_output" -> {
-                Config.get().setDraftOutput(
-                    sharedPreferences?.getString(key, "")
-                )
-            }
         }
     }
 
@@ -91,12 +58,10 @@ class OtherFragment :
         super.onResume()
         viewModel.setToolbarTitle(getString(R.string.pref_other))
         viewModel.disableTopOptionsMenu()
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onPause() {
         updateLauncherIconStatus()
-        preferenceScreen.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
         super.onPause()
     }
 

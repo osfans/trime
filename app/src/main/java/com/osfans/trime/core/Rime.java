@@ -195,6 +195,7 @@ public class Rime {
         candidates[i].text = states.get(value).toString();
 
         String kRightArrow = "→ ";
+        final boolean showSwitchArrow = getAppPrefs().getKeyboard().getSwitchArrowEnabled();
         if (showSwitchArrow)
           candidates[i].comment =
               o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
@@ -257,6 +258,12 @@ public class Rime {
     System.loadLibrary("rime_jni");
   }
 
+  @NonNull
+  private static AppPrefs getAppPrefs() {
+    return AppPrefs.defaultInstance();
+  }
+  ;
+
   /*
   Android SDK包含了如下6个修饰键的状态，其中function键会被trime消费掉，因此只处理5个键
   Android和librime对按键命名并不一致。读取可能有误。librime按键命名见如下链接，
@@ -269,16 +276,6 @@ public class Rime {
   public static int META_META_ON = get_modifier_by_name("Meta");
 
   public static int META_RELEASE_ON = get_modifier_by_name("Release");
-  private static boolean showSwitches = true;
-  private static boolean showSwitchArrow = false;
-
-  public static void setShowSwitches(boolean show) {
-    showSwitches = show;
-  }
-
-  public static void setShowSwitchArrow(boolean show) {
-    showSwitchArrow = show;
-  }
 
   public static boolean hasMenu() {
     return isComposing() && mContext.menu.num_candidates != 0;
@@ -373,9 +370,8 @@ public class Rime {
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
     mOnMessage = false;
-    final AppPrefs appPrefs = AppPrefs.defaultInstance();
-    final String sharedDataDir = appPrefs.getProfile().getSharedDataDir();
-    final String userDataDir = appPrefs.getProfile().getUserDataDir();
+    final String sharedDataDir = getAppPrefs().getProfile().getSharedDataDir();
+    final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
     Timber.d(methodName + "setup");
     // Initialize librime APIs
@@ -461,6 +457,7 @@ public class Rime {
   }
 
   public static RimeCandidate[] getCandidates() {
+    final boolean showSwitches = getAppPrefs().getKeyboard().getSwitchesEnabled();
     if (!isComposing() && showSwitches) return mSchema.getCandidates();
     return mContext.getCandidates();
   }

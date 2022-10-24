@@ -2,79 +2,43 @@ package com.osfans.trime.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Build
-import androidx.core.os.UserManagerCompat
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
+import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
 
 /**
  * Helper class for an organized access to the shared preferences.
  */
 class AppPrefs(
-    context: Context
+    private val shared : SharedPreferences
 ) {
-    var shared: SharedPreferences = if (!UserManagerCompat.isUserUnlocked(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        context.createDeviceProtectedStorageContext().getSharedPreferences("shared_prefs", Context.MODE_PRIVATE)
-    else
-        PreferenceManager.getDefaultSharedPreferences(context)
-
-    private val applicationContext: WeakReference<Context> = WeakReference(context.applicationContext)
-
-    private val cacheBoolean: HashMap<String, Boolean> = hashMapOf()
-    private val cacheInt: HashMap<String, Int> = hashMapOf()
-    private val cacheString: HashMap<String, String> = hashMapOf()
+    private val applicationContext: WeakReference<Context> = WeakReference(appContext)
 
     val internal = Internal(this)
     val keyboard = Keyboard(this)
-    val looks = ThemeColor(this)
+    val themeAndColor = ThemeAndColor(this)
     val profile = Profile(this)
     val other = Other(this)
 
     /**
-     * Checks the cache if an entry for [key] exists, else calls [getPrefInternal] to retrieve the
-     * value. The type is automatically derived from the given [default] value.
+     * Fetches the value for [key] from the shared preferences and returns it.
+     * The type is automatically derived from the given [default] value.
      * @return The value for [key] or [default].
      */
     private inline fun <reified T> getPref(key: String, default: T): T {
         return when {
             false is T -> {
-                (cacheBoolean[key] ?: getPrefInternal(key, default)) as T
+                shared.getBoolean(key, default as Boolean) as T
             }
             0 is T -> {
-                (cacheInt[key] ?: getPrefInternal(key, default)) as T
+                shared.getInt(key, default as Int) as T
             }
             "" is T -> {
-                (cacheString[key] ?: getPrefInternal(key, default)) as T
-            }
-            else -> null as T
-        }
-    }
-
-    /**
-     * Fetches the value for [key] from the shared preferences, puts the value into the
-     * corresponding cache and returns it.
-     * @return The value for [key] or [default].
-     */
-    private inline fun <reified T> getPrefInternal(key: String, default: T): T {
-        return when {
-            false is T -> {
-                val value = shared.getBoolean(key, default as Boolean)
-                cacheBoolean[key] = value
-                value as T
-            }
-            0 is T -> {
-                val value = shared.getInt(key, default as Int)
-                cacheInt[key] = value
-                value as T
-            }
-            "" is T -> {
-                val value = shared.getString(key, default as String) ?: (default as String)
-                cacheString[key] = value
-                value as T
+                (shared.getString(key, default as String) ?: (default as String)) as T
             }
             else -> null as T
         }
@@ -88,15 +52,12 @@ class AppPrefs(
         when {
             false is T -> {
                 shared.edit().putBoolean(key, value as Boolean).apply()
-                cacheBoolean[key] = value as Boolean
             }
             0 is T -> {
                 shared.edit().putInt(key, value as Int).apply()
-                cacheInt[key] = value as Int
             }
             "" is T -> {
                 shared.edit().putString(key, value as String).apply()
-                cacheString[key] = value as String
             }
         }
     }
@@ -104,9 +65,8 @@ class AppPrefs(
     companion object {
         private var defaultInstance: AppPrefs? = null
 
-        @Synchronized
-        fun initDefault(context: Context): AppPrefs {
-            val instance = AppPrefs(context.applicationContext)
+        fun initDefault(sharedPreferences: SharedPreferences): AppPrefs {
+            val instance = AppPrefs(sharedPreferences)
             defaultInstance = instance
             return instance
         }
@@ -138,15 +98,6 @@ class AppPrefs(
         } catch (e: Exception) {
             e.fillInStackTrace()
         }
-    }
-
-    /**
-     * Syncs the system preference values and clears the cache.
-     */
-    fun sync() {
-        cacheBoolean.clear()
-        cacheInt.clear()
-        cacheString.clear()
     }
 
     class Internal(private val prefs: AppPrefs) {
@@ -328,7 +279,7 @@ class AppPrefs(
     /**
      *  Wrapper class of theme and color settings.
      */
-    class ThemeColor(private val prefs: AppPrefs) {
+    class ThemeAndColor(private val prefs: AppPrefs) {
         companion object {
             const val SELECTED_THEME = "theme_selected_theme"
             const val SELECTED_COLOR = "theme_selected_color"
@@ -406,15 +357,15 @@ class AppPrefs(
         var destroyOnQuit: Boolean = false
             get() = prefs.getPref(DESTROY_ON_QUIT, false)
             private set
-        var clipboardCompareRules: String
-            get() = prefs.getPref(CLIPBOARD_COMPARE_RULES, "")
-            set(v) = prefs.setPref(CLIPBOARD_COMPARE_RULES, v)
-        var clipboardOutputRules: String
-            get() = prefs.getPref(CLIPBOARD_OUTPUT_RULES, "")
-            set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v)
-        var draftOutputRules: String
-            get() = prefs.getPref(DRAFT_OUTPUT_RULES, "")
-            set(v) = prefs.setPref(DRAFT_OUTPUT_RULES, v)
+        var clipboardCompareRules: List<String>
+            get() = prefs.getPref(CLIPBOARD_COMPARE_RULES, "").trim().split('\n')
+            set(v) = prefs.setPref(CLIPBOARD_COMPARE_RULES, v.joinToString("\n"))
+        var clipboardOutputRules: List<String>
+            get() = prefs.getPref(CLIPBOARD_OUTPUT_RULES, "").trim().split('\n')
+            set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v.joinToString("\n"))
+        var draftOutputRules: List<String>
+            get() = prefs.getPref(DRAFT_OUTPUT_RULES, "").trim().split('\n')
+            set(v) = prefs.setPref(DRAFT_OUTPUT_RULES, v.joinToString("\n"))
         var clipboardLimit: String
             get() = prefs.getPref(CLIPBOARD_LIMIT, "50")
             set(v) = prefs.setPref(CLIPBOARD_LIMIT, v)

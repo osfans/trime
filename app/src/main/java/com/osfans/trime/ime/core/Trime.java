@@ -102,7 +102,7 @@ public class Trime extends LifecycleInputMethodService {
 
   @NonNull
   private AppPrefs getPrefs() {
-    return AppPrefs.Companion.defaultInstance();
+    return AppPrefs.defaultInstance();
   }
 
   /** 输入法配置 */
@@ -763,7 +763,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     super.onStartInputView(attribute, restarting);
-    if (getPrefs().getLooks().getAutoDark()) {
+    if (getPrefs().getThemeAndColor().getAutoDark()) {
       int nightModeFlags =
           getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
       if (setDarkMode(nightModeFlags == Configuration.UI_MODE_NIGHT_YES)) {

@@ -47,13 +47,13 @@ suspend fun Context.colorPicker(
         onInit {
             val all = Config.get().presetColorSchemes
             items = all.map { it.second }.toTypedArray()
-            val current = prefs.looks.selectedColor
+            val current = prefs.themeAndColor.selectedColor
             val source = all.map { it.first }.toTypedArray()
             checkedItem = source.indexOf(current)
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            prefs.looks.selectedColor = items[checkedItem].toString()
+            prefs.themeAndColor.selectedColor = items[checkedItem].toString()
             Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
         }
     }.create()
