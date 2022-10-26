@@ -26,6 +26,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.applyTranslucentSystemBars
+import com.osfans.trime.util.briefResultLogDialog
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -113,13 +114,16 @@ class PrefMainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.preference__menu_deploy -> {
                 lifecycleScope.withLoadingDialog(
-                    this, 200L, R.string.deploy_progress
+                    context = this, titleId = R.string.deploy_progress
                 ) {
+                    withContext(Dispatchers.IO) {
+                        Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
+                    }
                     withContext(Dispatchers.Default) {
                         Rime.destroy()
                         Rime.get(true)
                     }
-                    ToastUtils.showLong(R.string.deploy_finish)
+                    briefResultLogDialog("native", "W", 1)
                 }
                 true
             }

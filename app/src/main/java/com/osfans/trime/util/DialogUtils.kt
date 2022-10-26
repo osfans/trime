@@ -2,16 +2,20 @@ package com.osfans.trime.util
 
 import android.content.Context
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleCoroutineScope
-import com.blankj.utilcode.util.SizeUtils
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
+import com.osfans.trime.ui.components.log.LogView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Suppress("FunctionName")
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/e37f5513239bab279a9e58cf0c9b163e0dbf5efb/app/src/main/java/org/fcitx/fcitx5/android/ui/common/Preset.kt#L60
@@ -28,12 +32,12 @@ fun Context.ProgressBarDialogIndeterminate(@StringRes titleId: Int): AlertDialog
                     ).apply {
                         isIndeterminate = true
                     },
-                    ViewGroup.MarginLayoutParams(
+                    MarginLayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     ).apply {
-                        val verticalMargin = SizeUtils.dp2px(26F)
-                        val horizontalMargin = SizeUtils.dp2px(20F)
+                        val verticalMargin = dp2px(26)
+                        val horizontalMargin = dp2px(20)
                         topMargin = horizontalMargin
                         bottomMargin = horizontalMargin
                         leftMargin = verticalMargin
@@ -63,5 +67,35 @@ fun LifecycleCoroutineScope.withLoadingDialog(
         if (loading.isShowing) {
             loading.dismiss()
         }
+    }
+}
+
+suspend fun Context.briefResultLogDialog(
+    tag: String,
+    priority: String,
+    thresholds: Int
+) = withContext(Dispatchers.Main.immediate) {
+    val log = withContext(Dispatchers.IO) {
+        Runtime.getRuntime()
+            .exec(arrayOf("logcat", "-d", "-v", "brief", "-s", "$tag:$priority"))
+            .inputStream
+            .bufferedReader()
+            .readLines()
+    }
+    if (log.size > thresholds) {
+        val logView = LogView(this@briefResultLogDialog).apply {
+            fromCustomLogLines(log)
+            layoutParams = MarginLayoutParams(MarginLayoutParams.MATCH_PARENT, MarginLayoutParams.WRAP_CONTENT).apply {
+                setPadding(dp2px(20), paddingTop, dp2px(20), paddingBottom)
+            }
+        }
+        AlertDialog.Builder(this@briefResultLogDialog)
+            .setTitle(R.string.setup__done)
+            .setMessage(R.string.found_some_problems)
+            .setView(logView)
+            .setPositiveButton(R.string.setup__skip_hint_yes, null)
+            .show()
+    } else {
+        ToastUtils.showShort(R.string.setup__done)
     }
 }

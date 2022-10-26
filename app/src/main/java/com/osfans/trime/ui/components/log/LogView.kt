@@ -53,33 +53,43 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         super.onDetachedFromWindow()
     }
 
+    fun fromCustomLogLines(lines: List<String>) {
+        lines.onEach {
+            dyeAndAppendString(it)
+        }
+    }
+
     fun setLogcat(logcat: Logcat) {
         this.logcat = logcat
         logcat.initLogFlow()
         logcat.logFlow.onEach {
-            val color = ContextCompat.getColor(
-                context,
-                when (it.first()) {
-                    'V' -> R.color.grey_700
-                    'D' -> R.color.grey_700
-                    'I' -> R.color.blue_500
-                    'W' -> R.color.yellow_800
-                    'E' -> R.color.red_400
-                    'F' -> R.color.red_A700
-                    else -> R.color.colorPrimary
-                }
-            )
-            logAdapter.append(
-                SpannableString(it).apply {
-                    setSpan(
-                        ForegroundColorSpan(color),
-                        0,
-                        it.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-            )
+            dyeAndAppendString(it)
         }.launchIn(findViewTreeLifecycleOwner()!!.lifecycleScope)
+    }
+
+    private fun dyeAndAppendString(str: String) {
+        val color = ContextCompat.getColor(
+            context,
+            when (str.first()) {
+                'V' -> R.color.grey_700
+                'D' -> R.color.grey_700
+                'I' -> R.color.blue_500
+                'W' -> R.color.yellow_800
+                'E' -> R.color.red_400
+                'F' -> R.color.red_A700
+                else -> R.color.colorPrimary
+            }
+        )
+        logAdapter.append(
+            SpannableString(str).apply {
+                setSpan(
+                    ForegroundColorSpan(color),
+                    0,
+                    str.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        )
     }
 
     val currentLog: String

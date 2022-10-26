@@ -260,4 +260,5 @@
     <string name="simple_key_pin">置顶</string>
     <string name="delete_all">删除全部</string>
     <string name="disable">禁用</string>
+    <string name="found_some_problems">但是我们似乎发现了些问题，请检查：</string>
 </resources>
