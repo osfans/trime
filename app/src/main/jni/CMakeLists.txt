@@ -21,11 +21,6 @@ install(TARGETS iconv EXPORT boost_locale-targets
 option(BOOST_FILESYSTEM_DISABLE_STATX "" ON) # remove this option after targetSdkVersion >= 30
 add_subdirectory(boost)
 
-option(EXTERNAL_CAPNP "" ON)
-option(CAPNP_LITE "" ON) # librime only needs CapnProto::capnp
-add_subdirectory(capnproto)
-include(CapnprotoWorkarounds)
-
 add_library(miniglog STATIC miniglog/miniglog/logging.cc)
 target_link_libraries(miniglog log)
 configure_file(
@@ -60,7 +55,6 @@ include(RimePlugins)
 
 option(BUILD_TEST "" OFF)
 include_directories("librime/include") # for X11/keysym.h
-include_directories("capnproto/c++/src")
 # workaround for librime/tools/rime_api_console.cc
 # TODO: fix it in upstream
 string(REPLACE "-Werror=format-security" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
