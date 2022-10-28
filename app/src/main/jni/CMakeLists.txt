@@ -21,12 +21,17 @@ install(TARGETS iconv EXPORT boost_locale-targets
 option(BOOST_FILESYSTEM_DISABLE_STATX "" ON) # remove this option after targetSdkVersion >= 30
 add_subdirectory(boost)
 
-add_library(miniglog STATIC miniglog/miniglog/logging.cc)
-target_link_libraries(miniglog log)
-configure_file(
-    "${CMAKE_CURRENT_LIST_DIR}/miniglog/miniglog/logging.h"
-    "${CMAKE_BINARY_DIR}/include/glog/logging.h"
-    COPYONLY
+option(WITH_GFLAGS "Use gflags" OFF)
+option(WITH_GTEST "Use googletest" OFF)
+option(WITH_UNWIND "Enable libunwind support" OFF)
+add_subdirectory(librime/deps/glog)
+file(INSTALL DESTINATION "${CMAKE_BINARY_DIR}/include/glog" TYPE FILE FILES
+    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/export.h"
+    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/logging.h"
+    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/raw_logging.h"
+    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/stl_logging.h"
+    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/vlog_is_on.h"
+    "librime/deps/glog/src/glog/log_severity.h"
 )
 
 option(YAML_CPP_BUILD_TOOLS "" OFF)
