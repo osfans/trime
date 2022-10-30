@@ -25,14 +25,6 @@ option(WITH_GFLAGS "Use gflags" OFF)
 option(WITH_GTEST "Use googletest" OFF)
 option(WITH_UNWIND "Enable libunwind support" OFF)
 add_subdirectory(librime/deps/glog)
-file(INSTALL DESTINATION "${CMAKE_BINARY_DIR}/include/glog" TYPE FILE FILES
-    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/export.h"
-    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/logging.h"
-    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/raw_logging.h"
-    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/stl_logging.h"
-    "${CMAKE_BINARY_DIR}/librime/deps/glog/glog/vlog_is_on.h"
-    "librime/deps/glog/src/glog/log_severity.h"
-)
 
 option(YAML_CPP_BUILD_TOOLS "" OFF)
 # TODO: remove below options after librime > 1.7.3
@@ -59,7 +51,11 @@ include(OpenccWorkarounds)
 include(RimePlugins)
 
 option(BUILD_TEST "" OFF)
-include_directories("librime/include") # for X11/keysym.h
+include_directories(
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librime/include"
+    PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/librime/deps/glog"
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librime/deps/glog/src"
+)
 # workaround for librime/tools/rime_api_console.cc
 # TODO: fix it in upstream
 string(REPLACE "-Werror=format-security" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
