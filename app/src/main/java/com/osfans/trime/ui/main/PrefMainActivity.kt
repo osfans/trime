@@ -123,7 +123,7 @@ class PrefMainActivity : AppCompatActivity() {
                         Rime.destroy()
                         Rime.get(true)
                     }
-                    briefResultLogDialog("native", "W", 1)
+                    briefResultLogDialog("rime.trime", "W", 1)
                 }
                 true
             }
