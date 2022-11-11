@@ -10,7 +10,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.db.draft.DraftHelper
+import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.text.TextInputManager
 import timber.log.Timber

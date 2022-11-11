@@ -2,19 +2,14 @@ package com.osfans.trime.ui.fragments
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
-import androidx.preference.Preference
-import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.main.LiquidKeyboardActivity
 import com.osfans.trime.ui.main.MainViewModel
 
 class OtherFragment : PaddingPreferenceFragment() {
@@ -32,26 +27,6 @@ class OtherFragment : PaddingPreferenceFragment() {
             AppCompatDelegate.setDefaultNightMode(uiMode)
             true
         }
-    }
-
-    override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        when (val key = preference.key) {
-            "other_managed_clipboard",
-            "other_managed_collection",
-            "other_managed_draft" -> {
-                if (Trime.getService() != null) {
-                    val intent = Intent(context, LiquidKeyboardActivity::class.java)
-                    intent.putExtra(
-                        "type", key.substringAfterLast('_')
-                    )
-                    startActivity(intent)
-                } else {
-                    ToastUtils.showShort(R.string.setup__select_ime_hint)
-                }
-                return true
-            }
-        }
-        return super.onPreferenceTreeClick(preference)
     }
 
     override fun onResume() {

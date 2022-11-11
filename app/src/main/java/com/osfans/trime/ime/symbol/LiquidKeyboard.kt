@@ -13,10 +13,10 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
-import com.osfans.trime.data.db.clipboard.ClipboardHelper
-import com.osfans.trime.data.db.draft.DraftHelper
+import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Config
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType

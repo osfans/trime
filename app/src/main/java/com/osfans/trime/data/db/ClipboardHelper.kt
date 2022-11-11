@@ -1,12 +1,9 @@
-package com.osfans.trime.data.db.clipboard
+package com.osfans.trime.data.db
 
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.db.Database
-import com.osfans.trime.data.db.DatabaseBean
-import com.osfans.trime.data.db.DatabaseDao
 import com.osfans.trime.util.StringUtils.mismatch
 import com.osfans.trime.util.StringUtils.replace
 import com.osfans.trime.util.WeakHashSet

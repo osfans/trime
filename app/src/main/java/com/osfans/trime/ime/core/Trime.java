@@ -61,7 +61,7 @@ import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.db.draft.DraftHelper;
+import com.osfans.trime.data.db.DraftHelper;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
