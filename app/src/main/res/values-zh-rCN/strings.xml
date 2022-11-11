@@ -107,20 +107,10 @@
     <string name="other__show_app_icon_on_summary">此选项仅对部分 ROM 有效</string>
     <string name="other__show_app_icon_off_summary">在某些 ROM 中，您仍会看到图标显示，并可能在点击它后转到系统的应用信息页</string>
     <string name="pref__default">默认</string>
-    <string name="other_clipboard_limit">剪贴板历史记录上限</string>
-    <string name="other__clipboard_compare_title">剪贴板去重规则(每行为一条正则表达式)</string>
-    <string name="other__clipboard_output_title">剪贴板过滤规则(每行为一条正则表达式)</string>
+    <string name="clipboard_clipboard_limit">剪贴板历史记录上限</string>
+    <string name="clipboard_clipboard_compare_title">剪贴板去重规则</string>
+    <string name="clipboard_clipboard_output_title">剪贴板过滤规则</string>
     <string name="other__clipboard_manager_summary">保存剪贴板内容的数量</string>
-    <string-array name="other__clipboard_manager_entries" >
-        <item name="0">停用</item>
-        <item name="20">20</item>
-        <item name="50">50</item>
-        <item name="100">100</item>
-        <item name="200">200</item>
-        <item name="500">500</item>
-        <item name="1000">1000</item>
-        <item name="-1">全部</item>
-    </string-array>
     <string name="keyboard__show_switche_arrow_title">为开关显示箭头符号(→)</string>
     <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
@@ -154,8 +144,8 @@
     <string name="alert_window_access_required">同文输入法需要允许显示在其他应用上方以能显示应用外悬浮窗或对话框，点击“确定”以授权。</string>
     <string name="keyboard__key_sound_package_title">按键音效包</string>
     <string name="sound_progress">正在应用音效...</string>
-    <string name="other_draft_limit">草稿箱历史记录上限</string>
-    <string name="other__draft_output_title">草稿箱过滤规则\n每行为一条正则，与规则匹配的文本不会被缓存</string>
+    <string name="clipboard_draft_limit">草稿箱历史记录上限</string>
+    <string name="clipboard_draft_output_title">草稿箱过滤规则</string>
     <string name="setup__next">下一步</string>
     <string name="setup__done">完成</string>
     <string name="setup__enable_ime_hint">在语言和输入设置中启用<b>同文输入法</b></string>
@@ -250,15 +240,17 @@
     <string name="delete">删除</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暂未实现)</string>
-    <string name="other__draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
+    <string name="clipboard_draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
     <string name="about__open_source_licenses">开源软件许可</string>
     <string name="about__open_source_licenses_summary">第三方软件库许可证</string>
-    <string name="other_clipboard">剪贴板</string>
-    <string name="other_draft">草稿箱</string>
-    <string name="other_collection">收藏夹</string>
+    <string name="clipboard">剪贴板</string>
+    <string name="clipboard_draft">草稿箱</string>
+    <string name="clipboard_collection">收藏夹</string>
     <string name="simple_key_unpin">取消置顶</string>
     <string name="simple_key_pin">置顶</string>
     <string name="delete_all">删除全部</string>
     <string name="disable">禁用</string>
     <string name="found_some_problems">但是我们似乎发现了些问题，请检查：</string>
+    <string name="pref_clipboard_summary">收藏夹和草稿箱也在这里管理</string>
+    <string name="a_regular_expression_per_line">一行一条正则表达式</string>
 </resources>

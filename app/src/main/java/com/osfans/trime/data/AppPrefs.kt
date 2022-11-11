@@ -22,6 +22,7 @@ class AppPrefs(
     val keyboard = Keyboard(this)
     val themeAndColor = ThemeAndColor(this)
     val profile = Profile(this)
+    val clipboard = Clipboard(this)
     val other = Other(this)
 
     /**
@@ -329,34 +330,15 @@ class AppPrefs(
             set(v) = prefs.setPref(LAST_BACKGROUND_SYNC, v)
     }
 
-    /**
-     *  Wrapper class of configuration settings.
-     */
-    class Other(private val prefs: AppPrefs) {
+    class Clipboard(private val prefs: AppPrefs) {
         companion object {
-            const val UI_MODE = "other__ui_mode"
-            const val SHOW_APP_ICON = "other__show_app_icon"
-            const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
-            const val DESTROY_ON_QUIT = "other__destroy_on_quit"
-            const val CLIPBOARD_COMPARE_RULES = "other__clipboard_compare"
-            const val CLIPBOARD_OUTPUT_RULES = "other__clipboard_output"
-            const val DRAFT_OUTPUT_RULES = "other__draft_output"
-            const val DRAFT_EXCLUDE_APP = "other__draft_exclude_app"
-            const val DRAFT_LIMIT = "other__draft_limit"
-            const val CLIPBOARD_LIMIT = "other__clipboard_limit"
+            const val CLIPBOARD_COMPARE_RULES = "clipboard_clipboard_compare"
+            const val CLIPBOARD_OUTPUT_RULES = "clipboard_clipboard_output"
+            const val DRAFT_OUTPUT_RULES = "clipboard_draft_output"
+            const val DRAFT_EXCLUDE_APP = "clipboard_draft_exclude_app"
+            const val DRAFT_LIMIT = "clipboard_draft_limit"
+            const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
         }
-        var uiMode: String
-            get() = prefs.getPref(UI_MODE, "auto")
-            set(v) = prefs.setPref(UI_MODE, v)
-        var showAppIcon: Boolean
-            get() = prefs.getPref(SHOW_APP_ICON, true)
-            set(v) = prefs.setPref(SHOW_APP_ICON, v)
-        var showStatusBarIcon: Boolean = false
-            get() = prefs.getPref(SHOW_STATUS_BAR_ICON, false)
-            private set
-        var destroyOnQuit: Boolean = false
-            get() = prefs.getPref(DESTROY_ON_QUIT, false)
-            private set
         var clipboardCompareRules: List<String>
             get() = prefs.getPref(CLIPBOARD_COMPARE_RULES, "").trim().split('\n')
             set(v) = prefs.setPref(CLIPBOARD_COMPARE_RULES, v.joinToString("\n"))
@@ -375,5 +357,29 @@ class AppPrefs(
         var draftExcludeApp: String
             get() = prefs.getPref(DRAFT_EXCLUDE_APP, "")
             set(v) = prefs.setPref(DRAFT_EXCLUDE_APP, v)
+    }
+
+    /**
+     *  Wrapper class of configuration settings.
+     */
+    class Other(private val prefs: AppPrefs) {
+        companion object {
+            const val UI_MODE = "other__ui_mode"
+            const val SHOW_APP_ICON = "other__show_app_icon"
+            const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
+            const val DESTROY_ON_QUIT = "other__destroy_on_quit"
+        }
+        var uiMode: String
+            get() = prefs.getPref(UI_MODE, "auto")
+            set(v) = prefs.setPref(UI_MODE, v)
+        var showAppIcon: Boolean
+            get() = prefs.getPref(SHOW_APP_ICON, true)
+            set(v) = prefs.setPref(SHOW_APP_ICON, v)
+        var showStatusBarIcon: Boolean = false
+            get() = prefs.getPref(SHOW_STATUS_BAR_ICON, false)
+            private set
+        var destroyOnQuit: Boolean = false
+            get() = prefs.getPref(DESTROY_ON_QUIT, false)
+            private set
     }
 }

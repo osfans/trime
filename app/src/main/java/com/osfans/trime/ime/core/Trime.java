@@ -842,7 +842,7 @@ public class Trime extends LifecycleInputMethodService {
           normalTextEditor = false;
           Timber.i("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
         } else if (attribute.packageName.equals(BuildConfig.APPLICATION_ID)
-            || getPrefs().getOther().getDraftExcludeApp().contains(attribute.packageName)) {
+            || getPrefs().getClipboard().getDraftExcludeApp().contains(attribute.packageName)) {
           normalTextEditor = false;
           Timber.i("EditorInfo: normal -> exclude, packageName=" + attribute.packageName);
         } else {

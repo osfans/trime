@@ -41,6 +41,11 @@
         android:title="@string/pref_theme_and_color"
         app:icon="@drawable/ic_pref_theme_color" />
 
+    <Preference android:key="pref_clipboard"
+        android:title="@string/clipboard"
+        android:summary="@string/pref_clipboard_summary"
+        app:icon="@drawable/ic_baseline_assignment_24"/>
+
     <Preference android:key="pref_toolkit"
         android:title="@string/pref_toolkit"
         app:icon="@drawable/ic_iconpark_toolkit_24" />

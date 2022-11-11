@@ -26,8 +26,8 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
         itemCount = dftDao.itemCount()
     }
 
-    private val limit get() = AppPrefs.defaultInstance().other.draftLimit.toInt()
-    private val output get() = AppPrefs.defaultInstance().other.draftOutputRules
+    private val limit get() = AppPrefs.defaultInstance().clipboard.draftLimit
+    private val output get() = AppPrefs.defaultInstance().clipboard.draftOutputRules
 
     var lastBean: DatabaseBean? = null
 

@@ -45,9 +45,9 @@ object ClipboardHelper :
         onUpdateListeners.remove(listener)
     }
 
-    private val limit get() = AppPrefs.defaultInstance().other.clipboardLimit.toInt()
-    private val compare get() = AppPrefs.defaultInstance().other.clipboardCompareRules
-    private val output get() = AppPrefs.defaultInstance().other.clipboardOutputRules
+    private val limit get() = AppPrefs.defaultInstance().clipboard.clipboardLimit
+    private val compare get() = AppPrefs.defaultInstance().clipboard.clipboardCompareRules
+    private val output get() = AppPrefs.defaultInstance().clipboard.clipboardOutputRules
 
     var lastBean: DatabaseBean? = null
 

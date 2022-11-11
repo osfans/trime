@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/clipboard" >
+
+    <PreferenceCategory android:key="clipboard_clipboard"
+        app:iconSpaceReserved="false"
+        app:title="@string/clipboard">
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
+            app:key="clipboard_clipboard_limit"
+            android:defaultValue="10"
+            app:iconSpaceReserved="false"
+            app:max="100"
+            app:systemDefaultValue="0"
+            app:systemDefaultValueText="@string/disable"
+            app:title="@string/clipboard_clipboard_limit"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference android:key="clipboard_clipboard_compare"
+            app:iconSpaceReserved="false"
+            android:title="@string/clipboard_clipboard_compare_title"
+            android:defaultValue=""
+            android:dialogMessage="@string/a_regular_expression_per_line"
+            app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference android:key="clipboard_clipboard_output"
+            app:iconSpaceReserved="false"
+            android:title="@string/clipboard_clipboard_output_title"
+            android:dialogMessage="@string/a_regular_expression_per_line"
+            android:defaultValue=""
+            app:useSimpleSummaryProvider="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="clipboard_collection"
+        android:title="@string/clipboard_collection"
+        app:iconSpaceReserved="false" >
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="clipboard_draft"
+        app:iconSpaceReserved="false"
+        app:title="@string/clipboard_draft">
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
+            app:key="clipboard_draft_limit"
+            app:iconSpaceReserved="false"
+            android:defaultValue="10"
+            app:max="100"
+            app:systemDefaultValue="0"
+            app:systemDefaultValueText="@string/disable"
+            app:title="@string/clipboard_draft_limit"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference android:key="clipboard_draft_output"
+            app:iconSpaceReserved="false"
+            android:title="@string/clipboard_draft_output_title"
+            android:defaultValue=""
+            android:dialogMessage="@string/a_regular_expression_per_line"
+            app:useSimpleSummaryProvider="true"/>
+
+        <EditTextPreference android:key="clipboard_draft_exclude_app"
+            app:iconSpaceReserved="false"
+            android:title="@string/clipboard_draft_exclude_app_title"
+            android:defaultValue=""
+            app:useSimpleSummaryProvider="true"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

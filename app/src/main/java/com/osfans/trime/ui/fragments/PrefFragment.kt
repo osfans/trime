@@ -46,6 +46,10 @@ class PrefFragment : PaddingPreferenceFragment() {
                 findNavController().navigate(R.id.action_prefFragment_to_themeColorFragment)
                 true
             }
+            get<Preference>("pref_clipboard")?.setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_prefFragment_to_clipboardFragment)
+                true
+            }
             get<Preference>("pref_toolkit")?.setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_prefFragment_to_toolkitFragment)
                 true

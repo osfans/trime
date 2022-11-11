@@ -112,19 +112,9 @@
     <string name="other__show_app_icon_title">在啟動器中顯示圖示</string>
     <string name="other__show_app_icon_off_summary">在某些 ROM 中，您仍會看到圖示顯示，並可能在>點選它後轉到系統的應用資訊頁</string>
     <string name="pref__default">預設</string>
-    <string name="other__clipboard_compare_title">剪貼板去重規則(每行爲一條正則規則)</string>
-    <string name="other__clipboard_output_title">剪貼板過濾規則(每行爲一條正則規則)</string>
+    <string name="clipboard_clipboard_compare_title">剪貼板去重規則</string>
+    <string name="clipboard_clipboard_output_title">剪貼板過濾規則</string>
     <string name="other__clipboard_manager_summary">保存剪貼板內容的數量</string>
-    <string-array name="other__clipboard_manager_entries" >
-        <item name="0">停用</item>
-        <item name="20">20</item>
-        <item name="50">50</item>
-        <item name="100">100</item>
-        <item name="200">200</item>
-        <item name="500">500</item>
-        <item name="1000">1000</item>
-        <item name="-1">全部</item>
-    </string-array>
     <string name="keyboard__show_switche_arrow_title">爲開關顯示箭頭符號(→)</string>
     <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
@@ -158,8 +148,8 @@
     <string name="alert_window_access_required">同文輸入法需要允許顯示在其他應用上方以能顯示應用外懸浮窗或對話方塊，點選“確定”以授權。</string>
     <string name="keyboard__key_sound_package_title">按鍵音效包</string>
     <string name="sound_progress">正在應用音效...</string>
-    <string name="other_draft_limit">草稿箱歷史記錄上限</string>
-    <string name="other__draft_output_title">草稿箱過濾規則\n每行爲一條正則表達式，與規則匹配的內容不會被緩存</string>
+    <string name="clipboard_draft_limit">草稿箱歷史記錄上限</string>
+    <string name="clipboard_draft_output_title">草稿箱過濾規則</string>
     <string name="setup__next">下一步</string>
     <string name="setup__done">完成</string>
     <string name="setup__enable_ime_hint">在語言和輸入設定中啟用<b>同文輸入法</b></string>
@@ -250,16 +240,18 @@
     <string name="delete">刪除</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暫未實現)</string>
-    <string name="other__draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
+    <string name="clipboard_draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="about__licensing">許可</string>
     <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>
-    <string name="other_clipboard">剪貼簿</string>
-    <string name="other_draft">草稿箱</string>
-    <string name="other_clipboard_limit">剪貼簿歷史記錄上限</string>
-    <string name="other_collection">收藏夾</string>
+    <string name="clipboard">剪貼簿</string>
+    <string name="clipboard_draft">草稿箱</string>
+    <string name="clipboard_clipboard_limit">剪貼簿歷史記錄上限</string>
+    <string name="clipboard_collection">收藏夾</string>
     <string name="simple_key_unpin">取消置頂</string>
     <string name="simple_key_pin">置頂</string>
     <string name="delete_all">刪除全部</string>
     <string name="disable">禁用</string>
     <string name="found_some_problems">但是我們似乎發現了些問題，請檢查：</string>
+    <string name="pref_clipboard_summary">收藏夾和草稿箱也在這裡管理</string>
+    <string name="a_regular_expression_per_line">一行一條正則表示式</string>
 </resources>

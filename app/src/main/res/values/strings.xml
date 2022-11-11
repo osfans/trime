@@ -114,20 +114,10 @@
     <string name="other__show_app_icon_on_summary">This option is only available on some ROMs</string>
     <string name="other__show_app_icon_off_summary">In some ROMs, you will still see this icon in the launcher and may go to the system\'s app information page after tapping it</string>
     <string name="pref__default">Default</string>
-    <string name="other_clipboard_limit">Clipboard History Limit</string>
-    <string name="other__clipboard_compare_title">Clipboard Compare Rules</string>
-    <string name="other__clipboard_output_title">Clipboard Output Rules</string>
+    <string name="clipboard_clipboard_limit">Clipboard History Limit</string>
+    <string name="clipboard_clipboard_compare_title">Clipboard Compare Rules</string>
+    <string name="clipboard_clipboard_output_title">Clipboard Output Rules</string>
     <string name="other__clipboard_manager_summary">Number of clipboard saved items</string>
-    <string-array name="other__clipboard_manager_entries" >
-        <item name="0">Disable</item>
-        <item name="20">20</item>
-        <item name="50">50</item>
-        <item name="100">100</item>
-        <item name="200">200</item>
-        <item name="500">500</item>
-        <item name="1000">1000</item>
-        <item name="-1">All</item>
-    </string-array>
     <string name="keyboard__show_switche_arrow_title">Show arrow for switch (→)</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
@@ -162,8 +152,8 @@
     <string name="alert_window_access_required">Trime needs alert window permission to show up popup window or dialog, tap OK to grant the permission.</string>
     <string name="keyboard__key_sound_package_title">Key Sound Package</string>
     <string name="sound_progress">Loading sound...</string>
-    <string name="other_draft_limit">Draft History Limit</string>
-    <string name="other__draft_output_title">Draft Filter</string>
+    <string name="clipboard_draft_limit">Draft History Limit</string>
+    <string name="clipboard_draft_output_title">Draft Filter</string>
     <string name="setup__next">Next</string>
     <string name="setup__done">Done</string>
     <string name="setup__enable_ime_hint">Enable <b>Trime</b> in Language and input settings</string>
@@ -255,14 +245,16 @@
     <string name="delete">Delete</string>
     <string name="collect">Collect</string>
     <string name="liquid_keyboard_search_hint">Search ( comming soon )</string>
-    <string name="other__draft_exclude_app_title">Apps not save draft (package name)</string>
+    <string name="clipboard_draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
-    <string name="other_clipboard">Clipboard</string>
-    <string name="other_draft">Draft</string>
-    <string name="other_collection">Collection</string>
+    <string name="clipboard">Clipboard</string>
+    <string name="clipboard_draft">Draft</string>
+    <string name="clipboard_collection">Collection</string>
     <string name="simple_key_unpin">Unpin</string>
     <string name="simple_key_pin">Pin</string>
     <string name="delete_all">Delete all</string>
     <string name="disable">Disbale</string>
     <string name="found_some_problems">But we may found some problems, please check:</string>
+    <string name="pref_clipboard_summary">Collection and draft are also managed here</string>
+    <string name="a_regular_expression_per_line">A regular expression per line</string>
 </resources>
