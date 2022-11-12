@@ -55,10 +55,6 @@ jobs:
       - name: Spotless code style check
         run: make spotless
 
-      - name: Install dependency
-        if: ${{ !steps.jni-cache.outputs.cache-hit }}
-        run: ./script/dependency.sh
-
       - name: Build Trime
         run: make debug
         
