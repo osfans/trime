@@ -1,7 +1,6 @@
 package com.osfans.trime.util
 
 import android.app.SearchManager
-import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -115,11 +114,9 @@ object ShortcutUtils {
         }
     }
 
+    @JvmStatic
     fun pasteFromClipboard(context: Context): CharSequence? {
-        val systemClipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val systemPrimaryClip = systemClipboardManager.getPrimaryClip()
-        val clipItem = systemPrimaryClip?.getItemAt(0)
-        return clipItem?.coerceToText(context)
+        return clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(context)
     }
 
     fun syncInBackground(context: Context) {

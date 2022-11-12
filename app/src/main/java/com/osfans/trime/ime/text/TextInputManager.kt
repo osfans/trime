@@ -5,7 +5,6 @@ import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -28,6 +27,7 @@ import com.osfans.trime.ui.main.schemaPicker
 import com.osfans.trime.ui.main.soundPicker
 import com.osfans.trime.ui.main.themePicker
 import com.osfans.trime.util.ShortcutUtils
+import com.osfans.trime.util.inputMethodManager
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -59,8 +59,6 @@ class TextInputManager private constructor() :
         get() = trime.activeEditorInstance
     private val keyboardSwitcher: KeyboardSwitcher
         get() = trime.keyboardSwitcher
-    private val imeManager: InputMethodManager
-        get() = trime.imeManager
     private var intentReceiver: IntentReceiver? = null
 
     private var mainKeyboardView: KeyboardView? = null
@@ -353,7 +351,7 @@ class TextInputManager private constructor() :
                         trime.switchToPrevIme()
                     }
                     else -> {
-                        imeManager.showInputMethodPicker()
+                        inputMethodManager.showInputMethodPicker()
                     }
                 }
             }
@@ -551,7 +549,7 @@ class TextInputManager private constructor() :
             .setIcon(R.mipmap.ic_app_icon)
             .setNegativeButton(R.string.other_ime) { dialog, _ ->
                 dialog.dismiss()
-                imeManager.showInputMethodPicker()
+                inputMethodManager.showInputMethodPicker()
             }
             .setPositiveButton(R.string.set_ime) { dialog, _ ->
                 trime.launchSettings()

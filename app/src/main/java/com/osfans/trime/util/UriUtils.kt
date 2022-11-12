@@ -1,9 +1,7 @@
 package com.osfans.trime.util
 
-import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import timber.log.Timber
 import java.io.File
@@ -44,14 +42,13 @@ object UriUtils {
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
                 }
                 else -> {
-                    val sm = appContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
                     val storageVolume = Class.forName("android.os.storage.StorageVolume")
-                    val getVolumeList = sm::class.java.getMethod("getVolumeList")
+                    val getVolumeList = storageManager::class.java.getMethod("getVolumeList")
                     val getUuid = storageVolume.getMethod("getUuid")
                     val getPath = storageVolume.getMethod("getPath")
                     val isPrimary = storageVolume.getMethod("isPrimary")
 
-                    val result = getVolumeList.invoke(sm)
+                    val result = getVolumeList.invoke(storageManager)
                     val resultSize = Array.getLength(result!!)
 
                     var final: String? = null

@@ -50,6 +50,7 @@ import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
+import com.osfans.trime.util.SystemServicesKt;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1310,9 +1311,8 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       View mMiniKeyboardContainer = mMiniKeyboardCache.get(popupKey);
       final KeyboardView mMiniKeyboard;
       if (mMiniKeyboardContainer == null) {
-        final LayoutInflater inflater =
-            (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mMiniKeyboardContainer = inflater.inflate(mPopupLayout, null);
+        mMiniKeyboardContainer =
+            SystemServicesKt.getLayoutInflater(this).inflate(mPopupLayout, null);
         mMiniKeyboard = mMiniKeyboardContainer.findViewById(android.R.id.keyboardView);
         final View closeButton = mMiniKeyboardContainer.findViewById(android.R.id.closeButton);
         if (closeButton != null) closeButton.setOnClickListener(this);

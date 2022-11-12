@@ -1,15 +1,15 @@
 package com.osfans.trime.ime.keyboard
 
-import android.content.Context
 import android.inputmethodservice.InputMethodService
 import android.media.AudioManager
 import android.os.Build
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.util.audioManager
+import com.osfans.trime.util.vibrator
 import java.util.Locale
 import kotlin.math.ln
 
@@ -19,16 +19,12 @@ import kotlin.math.ln
 class InputFeedbackManager(
     private val ims: InputMethodService
 ) {
-    private val prefs: AppPrefs = AppPrefs.defaultInstance()
+    private val prefs: AppPrefs get() = AppPrefs.defaultInstance()
 
-    private var vibrator: Vibrator? = null
-    private var audioManager: AudioManager? = null
     private var tts: TextToSpeech? = null
 
     init {
         try {
-            vibrator = ims.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-            audioManager = ims.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
             tts = TextToSpeech(ims.applicationContext) { }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -61,14 +57,14 @@ class InputFeedbackManager(
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator?.vibrate(
+                vibrator.vibrate(
                     VibrationEffect.createOneShot(
                         vibrationDuration, vibrationAmplitude
                     )
                 )
             } else {
                 @Suppress("DEPRECATION")
-                vibrator?.vibrate(vibrationDuration)
+                vibrator.vibrate(vibrationDuration)
             }
         }
     }
@@ -76,12 +72,7 @@ class InputFeedbackManager(
     /** Text to Speech engine's language getter and setter */
     var ttsLanguage: Locale?
         get() {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                tts?.voice?.locale
-            } else {
-                @Suppress("DEPRECATION")
-                tts?.language
-            }
+            return tts?.voice?.locale
         }
         set(v) { tts?.language = v }
 
@@ -101,7 +92,7 @@ class InputFeedbackManager(
                         KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN
                         else -> AudioManager.FX_KEYPRESS_STANDARD
                     }
-                    audioManager!!.playSoundEffect(
+                    audioManager.playSoundEffect(
                         effect,
                         (1 - (ln((101.0 - soundVolume)) / ln(101.0))).toFloat()
                     )
@@ -136,17 +127,10 @@ class InputFeedbackManager(
             else -> null
         } ?: return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TrimeTTS")
-        } else {
-            @Suppress("DEPRECATION")
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null)
-        }
+        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TrimeTTS")
     }
 
     fun destroy() {
-        vibrator = null
-        audioManager = null
         if (tts != null) {
             tts?.stop().also { tts = null }
         }

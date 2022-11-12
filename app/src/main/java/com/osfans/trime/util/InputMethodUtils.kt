@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.view.inputmethod.InputMethodManager
 import com.osfans.trime.TrimeImeService
 import timber.log.Timber
 
@@ -35,12 +34,7 @@ object InputMethodUtils {
         context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
 
     fun showImePicker(context: Context): Boolean {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        return if (imm != null) {
-            imm.showInputMethodPicker()
-            true
-        } else {
-            false
-        }
+        inputMethodManager.showInputMethodPicker()
+        return true
     }
 }

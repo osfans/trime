@@ -21,9 +21,6 @@ package com.osfans.trime.ime.core;
 import static android.graphics.Color.parseColor;
 
 import android.app.Dialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -51,7 +48,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.PopupWindow;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -87,6 +83,7 @@ import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.ui.main.PrefMainActivity;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
+import com.osfans.trime.util.SystemServicesKt;
 import com.osfans.trime.util.ViewUtils;
 import java.util.Locale;
 import java.util.Objects;
@@ -122,7 +119,6 @@ public class Trime extends LifecycleInputMethodService {
   private TabView tabView;
   public InputRootBinding inputRootBinding = null;
   public CopyOnWriteArrayList<EventListener> eventListeners = new CopyOnWriteArrayList<>();
-  public InputMethodManager imeManager = null;
   public InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private IntentReceiver mIntentReceiver = null;
 
@@ -367,7 +363,6 @@ public class Trime extends LifecycleInputMethodService {
         Timber.i("onCreate...");
 
         activeEditorInstance = new EditorInstance(this);
-        imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         Timber.d(methodName + "InputFeedbackManager");
         inputFeedbackManager = new InputFeedbackManager(this);
 
@@ -458,14 +453,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void pasteByChar() {
-    final ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-    final ClipData clipData = clipBoard.getPrimaryClip();
-
-    final ClipData.Item item = clipData.getItemAt(0);
-    if (item == null) return;
-
-    final String text = item.coerceToText(self).toString();
-    commitTextByChar(text);
+    commitTextByChar(Objects.requireNonNull(ShortcutUtils.pasteFromClipboard(this)).toString());
   }
 
   public void invalidate() {
@@ -618,7 +606,6 @@ public class Trime extends LifecycleInputMethodService {
     if (inputFeedbackManager != null) inputFeedbackManager.destroy();
     inputFeedbackManager = null;
     inputRootBinding = null;
-    imeManager = null;
 
     if (getPrefs().getOther().getDestroyOnQuit()) {
       Rime.destroy();
@@ -1008,16 +995,13 @@ public class Trime extends LifecycleInputMethodService {
       } else {
         Window window = getWindow().getWindow();
         if (window != null) {
-          if (imeManager != null) {
-            imeManager.switchToLastInputMethod(window.getAttributes().token);
-          }
+          SystemServicesKt.getInputMethodManager()
+              .switchToLastInputMethod(window.getAttributes().token);
         }
       }
     } catch (Exception e) {
       Timber.e(e, "Unable to switch to the previous IME.");
-      if (imeManager != null) {
-        imeManager.showInputMethodPicker();
-      }
+      SystemServicesKt.getInputMethodManager().showInputMethodPicker();
     }
   }
 
@@ -1028,16 +1012,13 @@ public class Trime extends LifecycleInputMethodService {
       } else {
         Window window = getWindow().getWindow();
         if (window != null) {
-          if (imeManager != null) {
-            imeManager.switchToNextInputMethod(window.getAttributes().token, false);
-          }
+          SystemServicesKt.getInputMethodManager()
+              .switchToNextInputMethod(window.getAttributes().token, false);
         }
       }
     } catch (Exception e) {
       Timber.e(e, "Unable to switch to the next IME.");
-      if (imeManager != null) {
-        imeManager.showInputMethodPicker();
-      }
+      SystemServicesKt.getInputMethodManager().showInputMethodPicker();
     }
   }
 
