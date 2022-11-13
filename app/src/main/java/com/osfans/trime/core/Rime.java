@@ -144,104 +144,102 @@ public class Rime {
 
   /** Rime方案 */
   public static class RimeSchema {
-    private final String kRadioSelected = " ✓";
+    private Map<String, Object> schema;
+    private List<Map<String, Object>> switches;
+    public Map<String, Object> symbolMap;
 
-    Map<String, Object> schema = new HashMap<String, Object>();
-    List<Map<String, Object>> switches = new ArrayList<Map<String, Object>>();
-    Map<String, Object> symbolMap = new HashMap<>();
+    public RimeSchema(@NonNull String schemaId) {
+      Timber.d("RimeSchema <init>, schemaId=%s", schemaId);
+      if ((schema = (Map<String, Object>) getRimeSchemaValue(schemaId, "schema")) == null) {
+        Timber.w("Failed to parse schema meta info, fallback to empty collection");
+        schema = new HashMap<>();
+      }
+      if ((switches = (List<Map<String, Object>>) getRimeSchemaValue(schemaId, "switches"))
+          == null) {
+        Timber.w("Failed to parse schema status switches, fallback to empty collection");
+        switches = new ArrayList<>();
+      }
+      // 剔除没有 states 条目项的值，它们不作为开关使用
+      if (!switches.isEmpty()) {
+        for (final Iterator<Map<String, Object>> it = switches.iterator(); it.hasNext(); ) {
+          final Map<String, Object> s = it.next();
+          if (!s.containsKey("states")) it.remove();
+        }
+      }
+      final Map<String, Object> menu;
+      if ((menu = (Map<String, Object>) getRimeSchemaValue(schemaId, "menu")) != null) {
+        Timber.d("The menu field of this schema is set, page_size=%s", menu.get("page_size"));
+      }
 
-    public RimeSchema(String schema_id) {
-      Timber.d("RimeSchema() start");
-      Object o;
-      o = schema_get_value(schema_id, "schema");
-      if (o == null || !(o instanceof Map)) return;
-      Timber.d("RimeSchema() switch");
-      schema = (Map<String, Object>) o;
-      o = schema_get_value(schema_id, "switches");
-      if (o == null || !(o instanceof List)) return;
-      switches = (List<Map<String, Object>>) o;
-      check(); // 檢查不在選單中顯示的選項
-      Timber.d("RimeSchema() menu");
-      o = schema_get_value(schema_id, "menu");
-      if (o == null || !(o instanceof HashMap)) return;
-      Timber.d("RimeSchema() menu.page_size=" + ((Map<Object, Object>) o).get("page_size"));
-
-      // todo 取回的key正常，value为null，导致symbolMap无法正常使用
-      o = schema_get_value(schema_id, "punctuator/symbols");
-      if (o != null && o instanceof HashMap) {
-        symbolMap = (Map<String, Object>) o;
-      } else {
+      // FIXME: 取回的key正常，value为null，导致symbolMap无法正常使用
+      if ((symbolMap = (Map<String, Object>) getRimeSchemaValue(schemaId, "punctuator/symbols"))
+          == null) {
         symbolMap = new HashMap<>();
       }
     }
 
-    public void check() {
-      if (switches.isEmpty()) return;
-      for (Iterator<?> it = switches.iterator(); it.hasNext(); ) {
-        Map<?, ?> o = (Map<?, ?>) it.next();
-        if (!o.containsKey("states")) it.remove();
-      }
-    }
-
-    public RimeCandidate[] getCandidates() {
-      if (switches.isEmpty()) return null;
-      RimeCandidate[] candidates = new RimeCandidate[switches.size()];
+    public RimeCandidate[] getStatusSwitches() {
+      if (switches.isEmpty()) return new RimeCandidate[0];
+      final RimeCandidate[] candidates = new RimeCandidate[switches.size()];
       int i = 0;
-      for (Map<String, Object> o : switches) {
+      for (final Map<String, Object> s : switches) {
         candidates[i] = new RimeCandidate();
-        final List<?> states = (List<?>) o.get("states");
-        Integer value = (Integer) o.get("value");
-        if (value == null) value = 0;
-        candidates[i].text = states.get(value).toString();
+        final List<String> states = (List<String>) s.get("states");
+        int enabled = s.get("enabled") != null ? (int) s.get("enabled") : 0;
+        assert states != null;
+        final String text = states.get(enabled);
 
-        String kRightArrow = "→ ";
-        final boolean showSwitchArrow = getAppPrefs().getKeyboard().getSwitchArrowEnabled();
-        if (showSwitchArrow)
-          candidates[i].comment =
-              o.containsKey("options") ? "" : kRightArrow + states.get(1 - value).toString();
-        else
-          candidates[i].comment = o.containsKey("options") ? "" : states.get(1 - value).toString();
+        boolean showSwitchArrow = getAppPrefs().getKeyboard().getSwitchArrowEnabled();
+        final String comment =
+            s.containsKey("options")
+                ? ""
+                : showSwitchArrow ? "→ " + states.get(1 - enabled) : states.get(1 - enabled);
+        candidates[i] = new RimeCandidate(text, comment);
         i++;
       }
       return candidates;
     }
 
-    public void getValue() {
+    public void updateSwitchOptions() {
       if (switches.isEmpty()) return; // 無方案
-      for (int j = 0; j < switches.size(); j++) {
-        final Map<String, Object> o = switches.get(j);
-        if (o.containsKey("options")) {
-          List<?> options = (List<?>) o.get("options");
-          for (int i = 0; i < options.size(); i++) {
-            final String s = (String) options.get(i);
-            if (Rime.get_option(s)) {
-              o.put("value", i);
+      int i = 0;
+      for (final Map<String, Object> s : switches) {
+        if (s.containsKey("options")) { // 带有一系列 Rime 运行时选项的开关，找到启用的选项并标记
+          final List<String> options = (List<String>) s.get("options");
+          assert options != null;
+          int j = 0;
+          for (final String option : options) {
+            if (Rime.get_option(option)) {
+              // 将启用状态标记为此选项的索引值，方便切换时直接从选项列表中获取
+              s.put("enabled", j);
               break;
             }
+            j++;
           }
-        } else {
-          o.put("value", Rime.get_option(o.get("name").toString()) ? 1 : 0);
+        } else { // 只有单 Rime 运行时选项的开关，开关名即选项名，标记其启用状态
+          s.put("enabled", Rime.get_option(s.get("name").toString()) ? 1 : 0);
         }
-        switches.set(j, o);
+        switches.set(i++, s);
       }
     }
 
-    public void toggleOption(int i) {
+    public void toggleSwitchOption(int index) {
       if (switches.isEmpty()) return;
-      Map<String, Object> o = switches.get(i);
-      Integer value = (Integer) o.get("value");
-      if (value == null) value = 0;
-      if (o.containsKey("options")) {
-        List<String> options = (List<String>) o.get("options");
-        Rime.setOption(options.get(value), false);
-        value = (value + 1) % options.size();
-        Rime.setOption(options.get(value), true);
+      final Map<String, Object> s = switches.get(index);
+      int enabled = s.get("enabled") != null ? (int) s.get("enabled") : 0;
+      int nextOrReserved;
+      if (s.containsKey("options")) {
+        final List<String> options = (List<String>) s.get("options");
+        assert options != null;
+        Rime.setOption(options.get(enabled), false);
+        nextOrReserved = (enabled + 1) % options.size();
+        Rime.setOption(options.get(nextOrReserved), true);
       } else {
-        value = 1 - value;
-        Rime.setOption(o.get("name").toString(), value == 1);
+        nextOrReserved = 1 - enabled;
+        Rime.setOption(s.get("name").toString(), enabled == 1);
       }
-      o.put("value", value);
-      switches.set(i, o);
+      s.put("enabled", nextOrReserved);
+      switches.set(index, s);
     }
   }
 
@@ -361,7 +359,7 @@ public class Rime {
 
   @SuppressWarnings("UnusedReturnValue")
   private static boolean getStatus() {
-    mSchema.getValue();
+    mSchema.updateSwitchOptions();
     return get_status(mStatus);
   }
 
@@ -456,9 +454,9 @@ public class Rime {
     return b;
   }
 
-  public static RimeCandidate[] getCandidates() {
+  public static RimeCandidate[] getCandidatesOrStatusSwitches() {
     final boolean showSwitches = getAppPrefs().getKeyboard().getSwitchesEnabled();
-    if (!isComposing() && showSwitches) return mSchema.getCandidates();
+    if (!isComposing() && showSwitches) return mSchema.getStatusSwitches();
     return mContext.getCandidates();
   }
 
@@ -522,8 +520,8 @@ public class Rime {
     setOption(option, !b);
   }
 
-  public static void toggleOption(int i) {
-    mSchema.toggleOption(i);
+  public static void toggleSwitchOption(int i) {
+    mSchema.toggleSwitchOption(i);
   }
 
   public static void setProperty(String prop, String value) {
@@ -836,11 +834,12 @@ public class Rime {
   public static native List config_get_list(String name, String key);
 
   @Nullable
-  public static native Map<String, Map<String, ?>> config_get_map(String name, String key);
+  public static native Map<String, Object> getRimeConfigMap(
+      @NonNull String configId, @NonNull String key);
 
-  public static native Object config_get_value(String name, String key);
+  public static native Object getRimeConfigValue(@NonNull String configId, @NonNull String key);
 
-  public static native Object schema_get_value(String name, String key);
+  public static native Object getRimeSchemaValue(@NonNull String schemaId, @NonNull String key);
 
   // testing
   public static native boolean simulate_key_sequence(String key_sequence);

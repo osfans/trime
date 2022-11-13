@@ -435,7 +435,7 @@ public class Candidate extends View {
   }
 
   private int updateCandidates() {
-    candidates = Rime.getCandidates();
+    candidates = Rime.getCandidatesOrStatusSwitches();
     highlightIndex = Rime.getCandHighlightIndex() - startNum;
     numCandidates = candidates == null ? 0 : candidates.length - startNum;
     return numCandidates;

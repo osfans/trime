@@ -88,7 +88,6 @@ import com.osfans.trime.util.ViewUtils;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import kotlin.jvm.Synchronized;
 import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */
@@ -223,12 +222,10 @@ public class Trime extends LifecycleInputMethodService {
         }
       };
 
-  @Synchronized
   public static Trime getService() {
     return self;
   }
 
-  @Synchronized
   @Nullable
   public static Trime getServiceOrNull() {
     return self;

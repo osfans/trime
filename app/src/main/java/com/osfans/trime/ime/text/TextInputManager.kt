@@ -82,7 +82,6 @@ class TextInputManager private constructor() :
         private val DELIMITER_SPLITTER = """[-_]""".toRegex()
         private var instance: TextInputManager? = null
 
-        @Synchronized
         fun getInstance(): TextInputManager {
             if (instance == null) {
                 instance = TextInputManager()
@@ -510,7 +509,7 @@ class TextInputManager private constructor() :
         onPress(0)
         if (!Rime.isComposing()) {
             if (index >= 0) {
-                Rime.toggleOption(index)
+                Rime.toggleSwitchOption(index)
                 trime.updateComposing()
             }
         } else if (prefs.keyboard.hookCandidate || index > 9) {

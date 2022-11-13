@@ -338,7 +338,7 @@ public class Composition extends AppCompatTextView {
    */
   private int calcStartNum(int min_length, int min_check) {
     Timber.d("setWindow calcStartNum() getCandidates");
-    final Rime.RimeCandidate[] candidates = Rime.getCandidates();
+    final Rime.RimeCandidate[] candidates = Rime.getCandidatesOrStatusSwitches();
     if (candidates == null) return 0;
 
     Timber.d("setWindow calcStartNum() getCandidates finish, size=" + candidates.length);
@@ -365,7 +365,7 @@ public class Composition extends AppCompatTextView {
     Timber.d("appendCandidates(): length = %s", length);
     int start, end;
 
-    final Rime.RimeCandidate[] candidates = Rime.getCandidates();
+    final Rime.RimeCandidate[] candidates = Rime.getCandidatesOrStatusSwitches();
     if (candidates == null) return;
     String sep = Config.getString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;

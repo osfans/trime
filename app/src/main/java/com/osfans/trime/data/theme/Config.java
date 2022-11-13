@@ -70,15 +70,15 @@ public class Config {
     return self;
   }
 
-  private Map<String, ?> defaultKeyboardStyle;
+  private Map<String, Object> defaultKeyboardStyle;
   private String currentThemeName, soundPackageName, currentSound;
   private static final String defaultThemeName = "trime";
   private String currentSchemaId, currentColorSchemeId;
 
   private Map<String, String> fallbackColors;
   private Map<String, Map<String, String>> presetColorSchemes;
-  private Map<String, Map<String, ?>> presetKeyboards;
-  private Map<String, ?> liquidKeyboard;
+  private Map<String, Map<String, Object>> presetKeyboards;
+  private Map<String, Object> liquidKeyboard;
 
   public Config() {
     this(false);
@@ -208,20 +208,25 @@ public class Config {
       }
 
       Timber.d("Fetching global theme config map ...");
-      final Map<String, Map<String, ?>> globalThemeConfig =
-          Rime.config_get_map(currentThemeName, "") != null
-              ? Rime.config_get_map(currentThemeName, "")
-              : Rime.config_get_map(defaultThemeName, "config_version");
-      Objects.requireNonNull(globalThemeConfig, "The theme file cannot be empty!");
+      long start = System.currentTimeMillis();
+      Map<String, Object> fullThemeConfigMap;
+      if ((fullThemeConfigMap = Rime.getRimeConfigMap(currentThemeName, "")) == null) {
+        fullThemeConfigMap = Rime.getRimeConfigMap(defaultThemeName, "");
+      }
+
+      Objects.requireNonNull(fullThemeConfigMap, "The theme file cannot be empty!");
       Timber.d("Fetching done");
 
-      defaultKeyboardStyle = (Map<String, Map<String, ?>>) globalThemeConfig.get("style");
-      fallbackColors = (Map<String, String>) globalThemeConfig.get("fallback_colors");
-      Key.presetKeys = (Map<String, Map<String, String>>) globalThemeConfig.get("preset_keys");
+      defaultKeyboardStyle = (Map<String, Object>) fullThemeConfigMap.get("style");
+      fallbackColors = (Map<String, String>) fullThemeConfigMap.get("fallback_colors");
+      Key.presetKeys = (Map<String, Map<String, String>>) fullThemeConfigMap.get("preset_keys");
       presetColorSchemes =
-          (Map<String, Map<String, String>>) globalThemeConfig.get("preset_color_schemes");
-      presetKeyboards = (Map<String, Map<String, ?>>) globalThemeConfig.get("preset_keyboards");
-      liquidKeyboard = globalThemeConfig.get("liquid_keyboard");
+          (Map<String, Map<String, String>>) fullThemeConfigMap.get("preset_color_schemes");
+      presetKeyboards =
+          (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keyboards");
+      liquidKeyboard = (Map<String, Object>) fullThemeConfigMap.get("liquid_keyboard");
+      long end = System.currentTimeMillis();
+      Timber.d("Setting up all theme config map takes %s ms", end - start);
       initLiquidKeyboard();
       Timber.d("init() initLiquidKeyboard done");
       reloadSchemaId();
@@ -295,7 +300,7 @@ public class Config {
       else {
         if (currentSchemaId.contains("_")) name = currentSchemaId.split("_")[0];
         if (!presetKeyboards.containsKey(name)) { // 匹配“_”前的方案名
-          Object o = Rime.schema_get_value(currentSchemaId, "speller/alphabet");
+          Object o = Rime.getRimeSchemaValue(currentSchemaId, "speller/alphabet");
           name = "qwerty"; // 26
           if (o != null) {
             final String alphabet = o.toString();

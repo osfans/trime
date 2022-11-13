@@ -7,7 +7,7 @@ import com.osfans.trime.core.Rime
 object ConfigGetter {
 
     @JvmStatic
-    fun loadMap(name: String, key: String = ""): Map<String, *>? = Rime.config_get_map(name, key)
+    fun loadMap(name: String, key: String = ""): Map<String, *>? = Rime.getRimeConfigMap(name, key)
 
     @JvmStatic
     fun Map<String, *>.getInt(key: String, default: Int): Int {
