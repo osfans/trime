@@ -1,8 +1,6 @@
-#include <jni.h>
 #include <string>
-#include <rime_api.h>
 #include "rime_jni.h"
-#include "levers.h"
+#include "jni-common.h"
 
 extern void rime_require_module_lua();
 extern void rime_require_module_charcode();
