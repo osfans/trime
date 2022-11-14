@@ -25,7 +25,6 @@ import androidx.annotation.Nullable;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
-import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
@@ -38,6 +37,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import kotlinx.coroutines.channels.BufferOverflow;
+import kotlinx.coroutines.flow.FlowKt;
+import kotlinx.coroutines.flow.MutableSharedFlow;
+import kotlinx.coroutines.flow.SharedFlow;
+import kotlinx.coroutines.flow.SharedFlowKt;
 import timber.log.Timber;
 
 /**
@@ -48,6 +52,8 @@ import timber.log.Timber;
  */
 public class Rime {
   private static Map<String, Object> mSymbols;
+
+  public final SharedFlow<RimeEvent> rimeNotiFlow = FlowKt.asSharedFlow(rimeNotiFlow_);
 
   /** Rime編碼區 */
   public static class RimeComposition {
@@ -250,7 +256,10 @@ public class Rime {
   private static final RimeStatus mStatus = new RimeStatus();
   private static RimeSchema mSchema;
   private static List<?> mSchemaList;
-  private static boolean mOnMessage;
+  private static boolean isHandlingRimeNotification;
+
+  public static final MutableSharedFlow<RimeEvent> rimeNotiFlow_ =
+      SharedFlowKt.MutableSharedFlow(0, 15, BufferOverflow.DROP_OLDEST);
 
   static {
     System.loadLibrary("rime_jni");
@@ -327,7 +336,7 @@ public class Rime {
     self = this;
   }
 
-  private static void initSchema() {
+  public static void initSchema() {
     mSchemaList = get_schema_list();
     String schema_id = getSchemaId();
     Timber.d("initSchema() RimeSchema");
@@ -367,7 +376,7 @@ public class Rime {
     String methodName =
         "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
     Timber.d(methodName);
-    mOnMessage = false;
+    isHandlingRimeNotification = false;
     final String sharedDataDir = getAppPrefs().getProfile().getSharedDataDir();
     final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
@@ -507,7 +516,7 @@ public class Rime {
   }
 
   public static void setOption(String option, boolean value) {
-    if (mOnMessage) return;
+    if (isHandlingRimeNotification) return;
     set_option(option, value);
   }
 
@@ -525,7 +534,7 @@ public class Rime {
   }
 
   public static void setProperty(String prop, String value) {
-    if (mOnMessage) return;
+    if (isHandlingRimeNotification) return;
     set_property(prop, value);
   }
 
@@ -676,25 +685,13 @@ public class Rime {
     getContexts();
   }
 
-  public static void handleRimeNotification(String message_type, String message_value) {
-    mOnMessage = true;
-    final RimeEvent event = RimeEvent.create(message_type, message_value);
-    // Timber.i("message: [%s] %s", message_type, message_value);
-    Timber.i("Notification: %s", event);
-    final Trime trime = Trime.getService();
-    Timber.i("Notification: getService done, before det SchemaEvent");
-    if (event instanceof RimeEvent.SchemaEvent) {
-      initSchema();
-      trime.initKeyboard();
-      Timber.i("Notification: solve SchemaEvent");
-    } else if (event instanceof RimeEvent.OptionEvent) {
-      getStatus();
-      getContexts(); // 切換中英文、簡繁體時更新候選
-      final boolean value = !message_value.startsWith("!");
-      final String option = message_value.substring(value ? 0 : 1);
-      trime.textInputManager.onOptionChanged(option, value);
-    }
-    mOnMessage = false;
+  public static void handleRimeNotification(
+      @NonNull String messageType, @NonNull String messageValue) {
+    isHandlingRimeNotification = true;
+    final RimeEvent event = RimeEvent.create(messageType, messageValue);
+    Timber.d("Handling Rime notification: %s", event);
+    rimeNotiFlow_.tryEmit(event);
+    isHandlingRimeNotification = false;
   }
 
   public static String openccConvert(String line, String name) {

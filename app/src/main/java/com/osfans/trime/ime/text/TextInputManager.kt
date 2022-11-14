@@ -6,8 +6,10 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeEvent
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Config
 import com.osfans.trime.databinding.InputRootBinding
@@ -30,9 +32,12 @@ import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.inputMethodManager
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Locale
@@ -60,6 +65,7 @@ class TextInputManager private constructor() :
     private val keyboardSwitcher: KeyboardSwitcher
         get() = trime.keyboardSwitcher
     private var intentReceiver: IntentReceiver? = null
+    private var rimeNotiHandlerJob: Job? = null
 
     private var mainKeyboardView: KeyboardView? = null
     var candidateRoot: ScrollView? = null
@@ -104,6 +110,9 @@ class TextInputManager private constructor() :
         intentReceiver = IntentReceiver().also {
             it.registerReceiver(trime)
         }
+        rimeNotiHandlerJob = Rime.get().rimeNotiFlow
+            .onEach(::handleRimeNotification)
+            .launchIn(trime.lifecycleScope)
 
         val imeConfig = Config.get()
         var s =
@@ -181,6 +190,8 @@ class TextInputManager private constructor() :
         mainKeyboardView = null
 
         cancel()
+        rimeNotiHandlerJob?.cancel()
+        rimeNotiHandlerJob = null
         instance = null
     }
 
@@ -254,41 +265,48 @@ class TextInputManager private constructor() :
         }
     }
 
-    fun onOptionChanged(option: String, value: Boolean) {
-        when (option) {
-            "ascii_mode" -> {
-                trime.inputFeedbackManager.ttsLanguage =
-                    locales[if (value) 1 else 0]
+    private fun handleRimeNotification(event: RimeEvent) {
+        if (event is RimeEvent.SchemaEvent) {
+            Rime.initSchema()
+            trime.initKeyboard()
+        } else if (event is RimeEvent.OptionEvent) {
+            Rime.getContexts() // 切換中英文、簡繁體時更新候選
+            val value = event.value
+            when (val option = event.option) {
+                "ascii_mode" -> {
+                    trime.inputFeedbackManager.ttsLanguage =
+                        locales[if (value) 1 else 0]
+                }
+                "_hide_comment" -> trime.setShowComment(!value)
+                "_hide_candidate" -> {
+                    candidateRoot?.visibility = if (!value) View.VISIBLE else View.GONE
+                    trime.setCandidatesViewShown(isComposable && !value)
+                }
+                "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
+                "_hide_key_hint" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowHint(!value)
+                "_hide_key_symbol" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowSymbol(!value)
+                else -> if (option.startsWith("_keyboard_") &&
+                    option.length > 10 && value
+                ) {
+                    val keyboard = option.substring(10)
+                    keyboardSwitcher.switchToKeyboard(keyboard)
+                    trime.bindKeyboardToInputView()
+                } else if (option.startsWith("_key_") && option.length > 5 && value) {
+                    shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
+                    val key = option.substring(5)
+                    onEvent(Event(key))
+                    shouldUpdateRimeOption = true
+                } else if (option.startsWith("_one_hand_mode")) {
+                    /*
+                    val c = option[option.length - 1]
+                    if (c == '1' && value) oneHandMode = 1 else if (c == '2' && value) oneHandMode =
+                        2 else if (c == '3') oneHandMode = if (value) 1 else 2 else oneHandMode = 0
+                    trime.loadBackground()
+                    trime.initKeyboard() */
+                }
             }
-            "_hide_comment" -> trime.setShowComment(!value)
-            "_hide_candidate" -> {
-                candidateRoot?.visibility = if (!value) View.VISIBLE else View.GONE
-                trime.setCandidatesViewShown(isComposable && !value)
-            }
-            "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
-            "_hide_key_hint" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowHint(!value)
-            "_hide_key_symbol" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowSymbol(!value)
-            else -> if (option.startsWith("_keyboard_") &&
-                option.length > 10 && value
-            ) {
-                val keyboard = option.substring(10)
-                keyboardSwitcher.switchToKeyboard(keyboard)
-                trime.bindKeyboardToInputView()
-            } else if (option.startsWith("_key_") && option.length > 5 && value) {
-                shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
-                val key = option.substring(5)
-                onEvent(Event(key))
-                shouldUpdateRimeOption = true
-            } else if (option.startsWith("_one_hand_mode")) {
-                /*
-                val c = option[option.length - 1]
-                if (c == '1' && value) oneHandMode = 1 else if (c == '2' && value) oneHandMode =
-                    2 else if (c == '3') oneHandMode = if (value) 1 else 2 else oneHandMode = 0
-                trime.loadBackground()
-                trime.initKeyboard() */
-            }
+            mainKeyboardView?.invalidateAllKeys()
         }
-        mainKeyboardView?.invalidateAllKeys()
     }
 
     override fun onPress(keyEventCode: Int) {
