@@ -43,7 +43,6 @@ import com.osfans.trime.util.ConfigGetter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -117,20 +116,6 @@ public class Config {
     return soundPackageName;
   }
 
-  public static String[] getThemeKeys(boolean isUser) {
-    File d = new File(isUser ? userDataDir : sharedDataDir);
-    FilenameFilter trimeFilter = (dir, filename) -> filename.endsWith("trime.yaml");
-    String[] list = d.list(trimeFilter);
-    if (list != null) return list;
-    return new String[] {};
-  }
-
-  private void deployTheme() {
-    if (userDataDir.contentEquals(sharedDataDir)) return; // 相同文件夾不部署主題
-    final String[] configs = getThemeKeys(false);
-    for (String config : configs) Rime.deploy_config_file(config, "config_version");
-  }
-
   public void setTheme(String theme) {
     currentThemeName = theme;
     appPrefs.getThemeAndColor().setSelectedTheme(currentThemeName);
@@ -174,14 +159,12 @@ public class Config {
 
   // 配色指定音效时自动切换音效效果（不会自动修改设置）。
   public void setSoundFromColor() {
-    final Map<String, ?> m = (Map<String, ?>) presetColorSchemes.get(currentColorSchemeId);
+    final Map<String, String> m = presetColorSchemes.get(currentColorSchemeId);
     assert m != null;
     if (m.containsKey("sound")) {
-      String sound = (String) m.get("sound");
+      String sound = m.get("sound");
       if (!Objects.equals(sound, currentSound)) {
-        String path =
-            userDataDir + File.separator + "sound" + File.separator + sound + ".sound.yaml";
-        File file = new File(path);
+        File file = new File(userDataDir + "/sound/" + sound + ".sound.yaml");
         if (file.exists()) {
           applySoundPackage(file, sound);
           return;
@@ -234,6 +217,8 @@ public class Config {
       initCurrentColors();
       initEnterLabels();
       Timber.i("The theme is initialized");
+      long initEnd = System.currentTimeMillis();
+      Timber.d("Initializing cache takes %s ms", initEnd - end);
     } catch (Exception e) {
       Timber.e(e, "Failed to parse the theme!");
       if (!currentThemeName.equals(defaultThemeName)) setTheme(defaultThemeName);
@@ -246,18 +231,16 @@ public class Config {
 
   @Nullable
   private Object _getValue(String k1, String k2) {
-    Map<?, ?> m;
     if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1)) {
-      m = (Map<?, ?>) defaultKeyboardStyle.get(k1);
+      final Map<String, Object> m = (Map<String, Object>) defaultKeyboardStyle.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
     return null;
   }
 
   private Object _getValue(String k1, String k2, Object defaultValue) {
-    Map<?, ?> m;
     if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1)) {
-      m = (Map<?, ?>) defaultKeyboardStyle.get(k1);
+      final Map<String, Object> m = (Map<String, Object>) defaultKeyboardStyle.get(k1);
       if (m != null && m.containsKey(k2)) return m.get(k2);
     }
     return defaultValue;
@@ -314,7 +297,7 @@ public class Config {
       }
     }
     if (!presetKeyboards.containsKey(name)) name = "default";
-    @Nullable final Map<?, ?> m = (Map<?, ?>) presetKeyboards.get(name);
+    final Map<String, Object> m = presetKeyboards.get(name);
     assert m != null;
     if (m.containsKey("import_preset")) {
       name = Objects.requireNonNull(m.get("import_preset")).toString();
@@ -323,11 +306,11 @@ public class Config {
   }
 
   public List<String> getKeyboardNames() {
-    final List<?> names = (List<?>) getValue("keyboards");
+    final List<String> names = (List<String>) getValue("keyboards");
     final List<String> keyboards = new ArrayList<>();
-    for (Object s : names) {
-      s = getKeyboardName((String) s);
-      if (!keyboards.contains(s)) keyboards.add((String) s);
+    for (String s : names) {
+      s = getKeyboardName(s);
+      if (!keyboards.contains(s)) keyboards.add(s);
     }
     return keyboards;
   }
@@ -336,12 +319,12 @@ public class Config {
     TabManager.clear();
     if (liquidKeyboard == null) return;
     Timber.d("Initializing LiquidKeyboard ...");
-    final List<?> names = (List<?>) liquidKeyboard.get("keyboards");
+    final List<String> names = (List<String>) liquidKeyboard.get("keyboards");
     if (names == null) return;
-    for (Object s : names) {
-      String name = (String) s;
+    for (String s : names) {
+      String name = s;
       if (liquidKeyboard.containsKey(name)) {
-        Map<?, ?> keyboard = (Map<?, ?>) liquidKeyboard.get(name);
+        Map<String, Object> keyboard = (Map<String, Object>) liquidKeyboard.get(name);
         if (keyboard != null) {
           if (keyboard.containsKey("name")) {
             name = (String) keyboard.get("name");
@@ -358,12 +341,12 @@ public class Config {
     }
   }
 
-  public Map<String, ?> getKeyboard(String name) {
+  public Map<String, Object> getKeyboard(String name) {
     if (!presetKeyboards.containsKey(name)) name = "default";
-    return (Map<String, ?>) presetKeyboards.get(name);
+    return presetKeyboards.get(name);
   }
 
-  public Map<String, ?> getLiquidKeyboard() {
+  public Map<String, Object> getLiquidKeyboard() {
     return liquidKeyboard;
   }
 
@@ -474,11 +457,9 @@ public class Config {
       o = curcentColors.get(key);
       if (o instanceof Integer) return (Integer) o;
     }
-    o = getColorObject(key);
+    o = getColorValue(key);
     if (o == null) {
-      o =
-          ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(currentColorSchemeId)))
-              .get(key);
+      o = (Objects.requireNonNull(presetColorSchemes.get(currentColorSchemeId))).get(key);
     }
     return parseColor(o);
   }
@@ -556,17 +537,17 @@ public class Config {
 
   //  获取当前配色方案的key的value，或者从fallback获取值。
   @Nullable
-  private Object getColorObject(String key) {
-    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(currentColorSchemeId);
+  private String getColorValue(String key) {
+    final Map<String, String> map = presetColorSchemes.get(currentColorSchemeId);
     if (map == null) return null;
     appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
-    Object o = map.get(key);
+    String colorValue = map.get(key);
     String fallbackKey = key;
-    while (o == null && fallbackColors.containsKey(fallbackKey)) {
-      fallbackKey = (String) fallbackColors.get(fallbackKey);
-      o = map.get(fallbackKey);
+    while (colorValue == null && fallbackColors.containsKey(fallbackKey)) {
+      fallbackKey = fallbackColors.get(key);
+      colorValue = map.get(fallbackKey);
     }
-    return o;
+    return colorValue;
   }
 
   /**
@@ -577,12 +558,13 @@ public class Config {
    * @return java.lang.String 首个已配置的主题方案名
    */
   private String getColorSchemeName() {
-    String scheme = appPrefs.getThemeAndColor().getSelectedColor();
-    if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
-    if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
-    Map<String, ?> color = (Map<String, ?>) presetColorSchemes.get(scheme);
-    if (color.containsKey("dark_scheme") || color.containsKey("light_scheme")) hasDarkLight = true;
-    return scheme;
+    String schemeId = appPrefs.getThemeAndColor().getSelectedColor();
+    if (!presetColorSchemes.containsKey(schemeId)) schemeId = getString("color_scheme"); // 主題中指定的配色
+    if (!presetColorSchemes.containsKey(schemeId)) schemeId = "default"; // 主題中的default配色
+    Map<String, String> colorMap = presetColorSchemes.get(schemeId);
+    if (colorMap.containsKey("dark_scheme") || colorMap.containsKey("light_scheme"))
+      hasDarkLight = true;
+    return schemeId;
   }
 
   private boolean hasDarkLight;
@@ -601,14 +583,14 @@ public class Config {
     String scheme = appPrefs.getThemeAndColor().getSelectedColor();
     if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
-    Map<String, ?> color = (Map<String, ?>) presetColorSchemes.get(scheme);
+    Map<String, String> colorMap = presetColorSchemes.get(scheme);
     if (darkMode) {
-      if (color.containsKey("dark_scheme")) {
-        return (String) color.get("dark_scheme");
+      if (colorMap.containsKey("dark_scheme")) {
+        return colorMap.get("dark_scheme");
       }
     } else {
-      if (color.containsKey("light_scheme")) {
-        return (String) color.get("light_scheme");
+      if (colorMap.containsKey("light_scheme")) {
+        return colorMap.get("light_scheme");
       }
     }
     return scheme;
@@ -647,7 +629,7 @@ public class Config {
   }
 
   public Integer getCurrentColor(String key) {
-    Object o = getColorObject(key);
+    Object o = getColorValue(key);
     return parseColor(o);
   }
 
@@ -748,7 +730,7 @@ public class Config {
   }
 
   public Drawable getColorDrawable(String key) {
-    final Object o = getColorObject(key);
+    final Object o = getColorValue(key);
     return drawableObject(o);
   }
 
@@ -878,33 +860,33 @@ public class Config {
     Timber.d(
         "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s",
         currentColorSchemeId, currentThemeName, currentSchemaId);
-    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(currentColorSchemeId);
-    if (map == null) {
-      Timber.i("Color scheme id not found: %s", currentColorSchemeId);
+    final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
+    if (colorMap == null) {
+      Timber.d("Color scheme id not found: %s", currentColorSchemeId);
       return;
     }
     appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
 
-    for (Map.Entry<?, ?> entry : map.entrySet()) {
+    for (Map.Entry<String, String> entry : colorMap.entrySet()) {
       Object value = getColorRealValue(entry.getValue());
-      if (value != null) curcentColors.put(entry.getKey().toString(), value);
+      if (value != null) curcentColors.put(entry.getKey(), value);
     }
 
-    for (Map.Entry<?, ?> entry : fallbackColors.entrySet()) {
-      String key = entry.getKey().toString();
+    for (Map.Entry<String, String> entry : fallbackColors.entrySet()) {
+      String key = entry.getKey();
       if (!curcentColors.containsKey(key)) {
-        Object o = map.get(key);
+        String colorValue = colorMap.get(key);
         String fallbackKey = key;
         List<String> fallbackKeys = new ArrayList<>();
-        while (o == null && fallbackColors.containsKey(fallbackKey)) {
-          fallbackKey = (String) fallbackColors.get(fallbackKey);
-          o = map.get(fallbackKey);
+        while (colorValue == null && fallbackColors.containsKey(fallbackKey)) {
+          fallbackKey = fallbackColors.get(fallbackKey);
+          colorValue = colorMap.get(fallbackKey);
           fallbackKeys.add(fallbackKey);
           // 避免死循环
           if (fallbackKeys.size() > 40) break;
         }
-        if (o != null) {
-          Object value = getColorRealValue(o);
+        if (colorValue != null) {
+          Object value = getColorRealValue(colorValue);
           if (value != null) {
             curcentColors.put(key, value);
             for (String k : fallbackKeys) {
@@ -925,33 +907,33 @@ public class Config {
     Timber.d(
         "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s, isDarkMode = %s",
         currentColorSchemeId, currentThemeName, currentSchemaId, darkMode);
-    final Map<?, ?> map = (Map<?, ?>) presetColorSchemes.get(currentColorSchemeId);
-    if (map == null) {
+    final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
+    if (colorMap == null) {
       Timber.i("Color scheme id not found: %s", currentColorSchemeId);
       return;
     }
     appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
 
-    for (Map.Entry<?, ?> entry : map.entrySet()) {
+    for (Map.Entry<String, String> entry : colorMap.entrySet()) {
       Object value = getColorRealValue(entry.getValue());
-      if (value != null) curcentColors.put(entry.getKey().toString(), value);
+      if (value != null) curcentColors.put(entry.getKey(), value);
     }
 
-    for (Map.Entry<?, ?> entry : fallbackColors.entrySet()) {
-      String key = entry.getKey().toString();
+    for (Map.Entry<String, String> entry : fallbackColors.entrySet()) {
+      String key = entry.getKey();
       if (!curcentColors.containsKey(key)) {
-        Object o = map.get(key);
+        String colorValue = colorMap.get(key);
         String fallbackKey = key;
         List<String> fallbackKeys = new ArrayList<>();
-        while (o == null && fallbackColors.containsKey(fallbackKey)) {
-          fallbackKey = (String) fallbackColors.get(fallbackKey);
-          o = map.get(fallbackKey);
+        while (colorValue == null && fallbackColors.containsKey(fallbackKey)) {
+          fallbackKey = fallbackColors.get(fallbackKey);
+          colorValue = colorMap.get(fallbackKey);
           fallbackKeys.add(fallbackKey);
           // 避免死循环
           if (fallbackKeys.size() > 40) break;
         }
-        if (o != null) {
-          Object value = getColorRealValue(o);
+        if (colorValue != null) {
+          Object value = getColorRealValue(colorValue);
           if (value != null) {
             curcentColors.put(key, value);
             for (String k : fallbackKeys) {
