@@ -230,6 +230,76 @@ public class Config {
   }
 
   @Nullable
+  public static Object obtainValue(Map<String, Object> map, @NonNull String vararg) {
+    if (map == null || map.isEmpty() || vararg.isEmpty()) return null;
+    final String[] keys = vararg.split("/");
+    switch (keys.length) {
+      case 2:
+        if (map.containsKey(keys[0])) {
+          final Map<String, Object> sub = (Map<String, Object>) map.get(keys[0]);
+          if (sub != null && sub.containsKey(keys[1])) {
+            return sub.get(keys[1]);
+          }
+        }
+        return null;
+      case 1:
+        if (map.containsKey(keys[0])) {
+          return map.get(keys[0]);
+        }
+        return null;
+      default:
+        return null;
+    }
+  }
+
+  public static String obtainString(Map<String, Object> map, @NonNull String key, @NonNull String defValue) {
+    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+    final String v;
+    return ((v = (String) obtainValue(map, key)) != null) ? v : defValue;
+  }
+
+  public static String obtainString(Map<String, Object> map, @NonNull String key) {
+    return obtainString(map, key, "");
+  }
+
+  public static int obtainInt(Map<String, Object> map, @NonNull String key, int defValue) {
+    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+    final String nm;
+    try {
+      return (!(nm = obtainString(map, key)).isEmpty()) ? Long.decode(nm).intValue() : defValue;
+    } catch (NumberFormatException nfe) {
+      return defValue;
+    }
+  }
+
+  public static int obtainInt(Map<String, Object> map, @NonNull String key) {
+    return obtainInt(map, key, 0);
+  }
+
+  public static float obtainFloat(Map<String, Object> map, @NonNull String key, float defValue) {
+    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+    final String s;
+    try {
+      return (!(s = obtainString(map, key)).isEmpty()) ? Float.parseFloat(s) : defValue;
+    } catch (NumberFormatException nfe) {
+      return defValue;
+    }
+  }
+
+  public static float obtainFloat(Map<String, Object> map, @NonNull String key) {
+    return obtainFloat(map, key, 0f);
+  }
+
+  public static boolean obtainBoolean(Map<String, Object> map, @NonNull String key, boolean defValue) {
+    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+    return Boolean.parseBoolean(obtainString(map, key));
+  }
+
+  public static boolean obtainBoolean(Map<String, Object> map, @NonNull String key) {
+    return obtainBoolean(map, key, false);
+  }
+
+  @Nullable
   private Object _getValue(String k1, String k2) {
     if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1)) {
       final Map<String, Object> m = (Map<String, Object>) defaultKeyboardStyle.get(k1);
