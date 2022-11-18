@@ -12,6 +12,7 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 suspend fun Context.themePicker(
     @StyleRes themeResId: Int = 0
@@ -32,7 +33,9 @@ suspend fun Context.themePicker(
                 Config.get().theme =
                     if (this == "trime") this else "$this.trime"
             }
-            Trime.getServiceOrNull()?.initKeyboard()
+            launch {
+                Trime.getServiceOrNull()?.initKeyboard()
+            }
         }
     }.create()
 }
@@ -56,7 +59,9 @@ suspend fun Context.colorPicker(
             val all = Config.get().presetColorSchemes
             val schemeIds = all.map { it.first }
             prefs.themeAndColor.selectedColor = schemeIds[checkedItem]
-            Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
+            launch {
+                Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
+            }
         }
     }.create()
 }
