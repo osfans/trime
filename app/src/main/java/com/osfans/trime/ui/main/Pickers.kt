@@ -33,7 +33,9 @@ suspend fun Context.themePicker(
                 ThemeManager.switchTheme(if (this == "trime") this else "$this.trime")
                 Config.get().init()
             }
-            Trime.getServiceOrNull()?.initKeyboard()
+            launch {
+                Trime.getServiceOrNull()?.initKeyboard()
+            }
         }
     }.create()
 }
