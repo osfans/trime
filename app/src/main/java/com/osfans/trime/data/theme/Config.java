@@ -48,7 +48,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import kotlin.Pair;
@@ -680,22 +679,30 @@ public class Config {
     return parseColor(object.toString());
   }
 
-  private static Integer parseColor(String s) {
-    Integer color = null;
-    if (s.contains(".")) return color; // picture name
+  @Nullable
+  private static Integer parseColor(@NonNull String s) {
+    if (s.contains(".")) return null; // picture name
+    final String hex = s.startsWith("#") ? s.replace("#", "0x") : s;
     try {
-      s = s.toLowerCase(Locale.getDefault());
-      if (s.startsWith("0x")) {
-        if (s.length() == 3 || s.length() == 4)
-          s = String.format("#%02x000000", Long.decode(s.substring(2))); // 0xAA
-        else if (s.length() < 8) s = String.format("#%06x", Long.decode(s.substring(2)));
-        else if (s.length() == 9) s = "#0" + s.substring(2);
+      final String completed;
+      if (hex.startsWith("0x") || hex.startsWith("0X")) {
+        if (hex.length() == 3 || hex.length() == 4) {
+          completed = String.format("#%02x000000", Long.decode(hex)); // 0xA -> #AA000000
+        } else if (hex.length() < 8) { // 0xGBB -> #RRGGBB
+          completed = String.format("#%06x", Long.decode(hex));
+        } else if (hex.length() == 9) { // 0xARRGGBB -> #AARRGGBB
+          completed = "#0" + hex.substring(2);
+        } else {
+          completed = "#" + hex.substring(2); // 0xAARRGGBB -> #AARRGGBB, 0xRRGGBB -> #RRGGBB
+        }
+      } else {
+        completed = hex; // red, green, blue ...
       }
-      color = Color.parseColor(s.replace("0x", "#"));
+      return Color.parseColor(completed);
     } catch (Exception e) {
-      // Log.e(TAG, "unknown color " + s);
+      Timber.w(e, "Error on parsing color: %s", s);
+      return null;
     }
-    return color;
   }
 
   public Integer getCurrentColor(String key) {
@@ -1030,14 +1037,7 @@ public class Config {
     String s = object.toString();
     if (!s.matches(".*[.\\\\/].*")) {
       try {
-        s = s.toLowerCase(Locale.getDefault());
-        if (s.startsWith("0x")) {
-          if (s.length() == 3 || s.length() == 4)
-            s = String.format("#%02x000000", Long.decode(s.substring(2))); // 0xAA
-          else if (s.length() < 8) s = String.format("#%06x", Long.decode(s.substring(2)));
-          else if (s.length() == 9) s = "#0" + s.substring(2);
-        }
-        if (s.matches("(0x|#)?[a-f0-9]+")) return Color.parseColor(s.replace("0x", "#"));
+        return parseColor(s);
       } catch (Exception e) {
         Timber.e("getColorRealValue() unknown color, %s ; object %s", s, object);
         e.printStackTrace();
