@@ -17,13 +17,10 @@
  */
 package com.osfans.trime.ime.enums
 
-import java.util.HashMap
-import java.util.Locale
-
 /**
  * 悬浮窗。候选栏文字，按键文字，按键气泡文字的定位方式
  */
-enum class PositionType {
+enum class PopupPosition {
     // 跟随光标
     LEFT, LEFT_UP, RIGHT, RIGHT_UP,
     // 固定位置
@@ -34,36 +31,28 @@ enum class PositionType {
     TOP_CENTER, BOTTOM_CENTER, CENTER;
 
     companion object {
-        private val convertMap: HashMap<String, PositionType> = hashMapOf()
-
-        init {
-            for (type in values()) {
-                convertMap[type.toString()] = type
-            }
+        @JvmStatic
+        fun fromString(code: String): PopupPosition {
+            return runCatching {
+                valueOf(code.uppercase())
+            }.getOrDefault(FIXED)
         }
 
         @JvmStatic
-        fun fromString(code: String): PositionType {
-            val type = convertMap[code.uppercase(Locale.getDefault())]
-            return type ?: FIXED
-        }
-
-        @JvmStatic
-        fun fromString(code: String, default: PositionType): PositionType {
-            val type = convertMap[code.uppercase(Locale.getDefault())]
-            return type ?: default
+        fun fromString(code: String, default: PopupPosition): PopupPosition {
+            return runCatching {
+                valueOf(code.uppercase())
+            }.getOrDefault(default)
         }
 
         /**
          * 解析候选栏文字，按键文字，按键气泡文字的定位方式
          */
         @JvmStatic
-        fun parseKeyPosition(code: String): PositionType {
-            val type = convertMap[code.uppercase(Locale.getDefault())]
-            if (type != null)
-                if (type > FIXED)
-                    return type
-            return type ?: CENTER
+        fun parseKeyPosition(code: String): PopupPosition {
+            return runCatching {
+                valueOf(code.uppercase())
+            }.getOrDefault(CENTER)
         }
     }
 }

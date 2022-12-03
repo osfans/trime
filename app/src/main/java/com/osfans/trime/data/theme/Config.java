@@ -34,7 +34,6 @@ import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
-import com.osfans.trime.ime.enums.PositionType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
@@ -809,10 +808,6 @@ public class Config {
   public Drawable getColorDrawable(String key) {
     final Object o = getColorValue(key);
     return drawableObject(o);
-  }
-
-  public PositionType getWinPos() {
-    return PositionType.Companion.fromString(getString("layout/position"));
   }
 
   public int getLiquidPixel(String key) {

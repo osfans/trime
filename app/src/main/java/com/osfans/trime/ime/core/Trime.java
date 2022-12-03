@@ -63,7 +63,7 @@ import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
-import com.osfans.trime.ime.enums.PositionType;
+import com.osfans.trime.ime.enums.PopupPosition;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
@@ -138,7 +138,7 @@ public class Trime extends LifecycleInputMethodService {
   private boolean isCursorUpdated = false; // 光標是否移動
   private int minPopupSize; // 上悬浮窗的候选词的最小词长
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
-  private PositionType popupWindowPos; // 悬浮窗口彈出位置
+  private PopupPosition popupWindowPos; // 悬浮窗口彈出位置
   private PopupWindow mPopupWindow;
   private RectF mPopupRectF = new RectF();
   private final Handler mPopupHandler = new Handler(Looper.getMainLooper());
@@ -297,14 +297,14 @@ public class Trime extends LifecycleInputMethodService {
 
   private boolean isWinFixed() {
     return VERSION.SDK_INT <= VERSION_CODES.LOLLIPOP
-        || (popupWindowPos != PositionType.LEFT
-            && popupWindowPos != PositionType.RIGHT
-            && popupWindowPos != PositionType.LEFT_UP
-            && popupWindowPos != PositionType.RIGHT_UP);
+        || (popupWindowPos != PopupPosition.LEFT
+            && popupWindowPos != PopupPosition.RIGHT
+            && popupWindowPos != PopupPosition.LEFT_UP
+            && popupWindowPos != PopupPosition.RIGHT_UP);
   }
 
   public void updatePopupWindow(final int offsetX, final int offsetY) {
-    popupWindowPos = PositionType.DRAG;
+    popupWindowPos = PopupPosition.DRAG;
     popupWindowX = offsetX;
     popupWindowY = offsetY;
     Timber.i("updatePopupWindow: winX = %s, winY = %s", popupWindowX, popupWindowY);
@@ -313,7 +313,7 @@ public class Trime extends LifecycleInputMethodService {
 
   public void loadConfig() {
     final Config imeConfig = getImeConfig();
-    popupWindowPos = imeConfig.getWinPos();
+    popupWindowPos = PopupPosition.fromString(imeConfig.getString("layout/position"));
     isPopupWindowMovable = imeConfig.getString("layout/movable");
     popupMargin = imeConfig.getPixel("layout/spacing");
     minPopupSize = imeConfig.getInt("layout/min_length");
@@ -462,7 +462,7 @@ public class Trime extends LifecycleInputMethodService {
 
   private void hideCompositionView() {
     if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
-      popupWindowPos = getImeConfig().getWinPos();
+      popupWindowPos = PopupPosition.fromString(getImeConfig().getString("layout/position"));
     }
 
     if (mPopupWindow != null && mPopupWindow.isShowing()) {
