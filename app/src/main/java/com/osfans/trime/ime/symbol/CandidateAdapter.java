@@ -54,7 +54,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
       final ConstraintSet set = new ConstraintSet();
       set.clone(binding.getRoot());
       final CommentPosition commentPosition =
-          CommentPosition.values()[theme.getInt("comment_position")];
+          CommentPosition.values()[theme.style.getInt("comment_position")];
       switch (commentPosition) {
         case BOTTOM:
           set.centerHorizontally(binding.comment.getId(), ConstraintSet.PARENT_ID);
@@ -120,8 +120,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
       holder.comment.setText(candidate.comment);
     }
 
-    final float candidateSize = theme.getFloat("candidate_text_size");
-    final float commentSize = theme.getFloat("comment_text_size");
+    final float candidateSize = theme.style.getFloat("candidate_text_size");
+    final float commentSize = theme.style.getFloat("comment_text_size");
     if (candidateSize > 0) holder.candidate.setTextSize(candidateSize);
     if (commentSize > 0) holder.comment.setTextSize(commentSize);
 

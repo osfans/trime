@@ -313,14 +313,14 @@ public class Trime extends LifecycleInputMethodService {
 
   public void loadConfig() {
     final Config imeConfig = getImeConfig();
-    popupWindowPos = PopupPosition.fromString(imeConfig.getString("layout/position"));
-    isPopupWindowMovable = imeConfig.getString("layout/movable");
+    popupWindowPos = PopupPosition.fromString(imeConfig.style.getString("layout/position"));
+    isPopupWindowMovable = imeConfig.style.getString("layout/movable");
     popupMargin = imeConfig.getPixel("layout/spacing");
-    minPopupSize = imeConfig.getInt("layout/min_length");
-    minPopupCheckSize = imeConfig.getInt("layout/min_check");
+    minPopupSize = imeConfig.style.getInt("layout/min_length");
+    minPopupCheckSize = imeConfig.style.getInt("layout/min_check");
     popupMarginH = imeConfig.getPixel("layout/real_margin");
-    textInputManager.setShouldResetAsciiMode(imeConfig.getBoolean("reset_ascii_mode"));
-    isAutoCaps = imeConfig.getBoolean("auto_caps");
+    textInputManager.setShouldResetAsciiMode(imeConfig.style.getBoolean("reset_ascii_mode"));
+    isAutoCaps = imeConfig.style.getBoolean("auto_caps");
     isPopupWindowEnabled =
         getPrefs().getKeyboard().getPopupWindowEnabled() && imeConfig.hasKey("window");
     textInputManager.setShouldUpdateRimeOption(true);
@@ -331,7 +331,7 @@ public class Trime extends LifecycleInputMethodService {
     try {
       if (textInputManager.getShouldUpdateRimeOption()) {
         Rime.setOption("soft_cursor", getPrefs().getKeyboard().getSoftCursorEnabled()); // 軟光標
-        Rime.setOption("_horizontal", getImeConfig().getBoolean("horizontal")); // 水平模式
+        Rime.setOption("_horizontal", getImeConfig().style.getBoolean("horizontal")); // 水平模式
         textInputManager.setShouldUpdateRimeOption(false);
       }
     } catch (Exception e) {
@@ -462,7 +462,7 @@ public class Trime extends LifecycleInputMethodService {
 
   private void hideCompositionView() {
     if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
-      popupWindowPos = PopupPosition.fromString(getImeConfig().getString("layout/position"));
+      popupWindowPos = PopupPosition.fromString(getImeConfig().style.getString("layout/position"));
     }
 
     if (mPopupWindow != null && mPopupWindow.isShowing()) {

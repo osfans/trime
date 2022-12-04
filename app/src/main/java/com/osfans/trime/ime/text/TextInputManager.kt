@@ -116,8 +116,8 @@ class TextInputManager private constructor() :
 
         val imeConfig = Config.get()
         var s =
-            if (imeConfig.getString("locale").isNullOrEmpty()) {
-                imeConfig.getString("locale")
+            if (imeConfig.style.getString("locale").isNullOrEmpty()) {
+                imeConfig.style.getString("locale")
             } else ""
         if (s.contains(DELIMITER_SPLITTER)) {
             val lc = s.split(DELIMITER_SPLITTER)
@@ -130,8 +130,8 @@ class TextInputManager private constructor() :
             locales[0] = Locale.getDefault()
         }
 
-        s = if (imeConfig.getString("latin_locale").isNullOrEmpty()) {
-            imeConfig.getString("latin_locale")
+        s = if (imeConfig.style.getString("latin_locale").isNullOrEmpty()) {
+            imeConfig.style.getString("latin_locale")
         } else "en_US"
         if (s.contains(DELIMITER_SPLITTER)) {
             val lc = s.split(DELIMITER_SPLITTER)
@@ -325,7 +325,7 @@ class TextInputManager private constructor() :
         if (needSendUpRimeKey) {
             if (shouldUpdateRimeOption) {
                 Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                Rime.setOption("_horizontal", trime.imeConfig.getBoolean("horizontal"))
+                Rime.setOption("_horizontal", trime.imeConfig.style.getBoolean("horizontal"))
                 shouldUpdateRimeOption = false
             }
             // todo 释放按键可能不对

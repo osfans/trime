@@ -66,7 +66,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     holder.simpleKeyText.setGravity(Gravity.CENTER);
     holder.simpleKeyText.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 
-    final float labelTextSize = theme.getFloat("label_text_size");
+    final float labelTextSize = theme.style.getFloat("label_text_size");
     if (labelTextSize > 0) holder.simpleKeyText.setTextSize(labelTextSize);
 
     holder.itemView.setBackground(

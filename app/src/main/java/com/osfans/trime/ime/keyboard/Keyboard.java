@@ -119,13 +119,13 @@ public class Keyboard {
 
     mDefaultHorizontalGap = config.getPixel("horizontal_gap");
     mDefaultVerticalGap = config.getPixel("vertical_gap");
-    mDefaultWidth = (int) (mDisplayWidth * config.getDouble("key_width") / 100);
+    mDefaultWidth = (int) (mDisplayWidth * config.style.getFloat("key_width") / 100);
 
     mDefaultHeight = config.getPixel("key_height");
 
     mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
     mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
-    mRoundCorner = config.getFloat("round_corner");
+    mRoundCorner = config.style.getFloat("round_corner");
     mBackground = config.getColorDrawable("keyboard_back_color");
 
     keyboardHeight = config.getPixel("keyboard_height");
@@ -216,11 +216,13 @@ public class Keyboard {
 
     mDefaultHorizontalGap =
         ConfigGetter.getPixel(
-            keyboardConfig, "horizontal_gap", config.getFloat("horizontal_gap", 3));
+            keyboardConfig, "horizontal_gap", config.style.getFloat("horizontal_gap"));
     mDefaultVerticalGap =
-        ConfigGetter.getPixel(keyboardConfig, "vertical_gap", config.getFloat("vertical_gap", 5));
+        ConfigGetter.getPixel(
+            keyboardConfig, "vertical_gap", config.style.getFloat("vertical_gap"));
     mRoundCorner =
-        ConfigGetter.getFloat(keyboardConfig, "round_corner", config.getFloat("round_corner", 5));
+        ConfigGetter.getFloat(
+            keyboardConfig, "round_corner", config.style.getFloat("round_corner"));
 
     Drawable background = config.getDrawable(keyboardConfig, "keyboard_back_color");
     if (background != null) mBackground = background;
@@ -357,28 +359,32 @@ public class Keyboard {
 
         final int defaultKeyTextOffsetX =
             ConfigGetter.getPixel(
-                keyboardConfig, "key_text_offset_x", config.getFloat("key_text_offset_x"));
+                keyboardConfig, "key_text_offset_x", config.style.getFloat("key_text_offset_x"));
         final int defaultKeyTextOffsetY =
             ConfigGetter.getPixel(
-                keyboardConfig, "key_text_offset_y", config.getFloat("key_text_offset_y"));
+                keyboardConfig, "key_text_offset_y", config.style.getFloat("key_text_offset_y"));
         final int defaultKeySymbolOffsetX =
             ConfigGetter.getPixel(
-                keyboardConfig, "key_symbol_offset_x", config.getFloat("key_symbol_offset_x"));
+                keyboardConfig,
+                "key_symbol_offset_x",
+                config.style.getFloat("key_symbol_offset_x"));
         final int defaultKeySymbolOffsetY =
             ConfigGetter.getPixel(
-                keyboardConfig, "key_symbol_offset_y", config.getFloat("key_symbol_offset_y"));
+                keyboardConfig,
+                "key_symbol_offset_y",
+                config.style.getFloat("key_symbol_offset_y"));
         final int defaultKeyHintOffsetX =
             ConfigGetter.getPixel(
-                keyboardConfig, "key_hint_offset_x", config.getFloat("key_hint_offset_x"));
+                keyboardConfig, "key_hint_offset_x", config.style.getFloat("key_hint_offset_x"));
         final int defaultKeyHintOffsetY =
             ConfigGetter.getPixel(
-                keyboardConfig, "key_hint_offset_y", config.getFloat("key_hint_offset_y"));
+                keyboardConfig, "key_hint_offset_y", config.style.getFloat("key_hint_offset_y"));
         final int defaultKeyPressOffsetX =
             ConfigGetter.getInt(
-                keyboardConfig, "key_press_offset_x", config.getInt("key_press_offset_x"));
+                keyboardConfig, "key_press_offset_x", config.style.getInt("key_press_offset_x"));
         final int defaultKeyPressOffsetY =
             ConfigGetter.getInt(
-                keyboardConfig, "key_press_offset_y", config.getInt("key_press_offset_y"));
+                keyboardConfig, "key_press_offset_y", config.style.getInt("key_press_offset_y"));
 
         final Key key = new Key(context, this, mk);
         key.setKey_text_offset_x(

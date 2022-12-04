@@ -68,8 +68,8 @@ class FlexibleAdapter(
                     else -> setTextColor(textColor)
                 }
 
-                val longTextSize = theme.getFloat("key_long_text_size")
-                val labelTextSize = theme.getFloat("label_text_size")
+                val longTextSize = theme.style.getFloat("key_long_text_size")
+                val labelTextSize = theme.style.getFloat("label_text_size")
                 textSize = when {
                     longTextSize > 0 -> longTextSize
                     labelTextSize > 0 -> labelTextSize

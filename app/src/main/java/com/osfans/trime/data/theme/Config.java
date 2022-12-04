@@ -67,7 +67,6 @@ public class Config {
     return self;
   }
 
-  private Map<String, Object> defaultKeyboardStyle;
   private String currentThemeName, soundPackageName, currentSound;
   private static final String defaultThemeName = "trime";
   private String currentSchemaId, currentColorSchemeId;
@@ -77,19 +76,18 @@ public class Config {
   private Map<String, Map<String, Object>> presetKeyboards;
   private Map<String, Object> liquidKeyboard;
 
+  public Style style;
+
   public Config() {
     this(false);
   }
 
   public Config(boolean skipDeploy) {
-    String methodName =
-        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
-    Timber.d(methodName);
     self = this;
     currentThemeName = appPrefs.getThemeAndColor().getSelectedTheme();
     soundPackageName = appPrefs.getKeyboard().getSoundPackage();
 
-    Timber.d(methodName + "sync");
+    Timber.d("Syncing asset data ...");
     DataManager.sync();
     Rime.get(!DataManager.INSTANCE.getSharedDataDir().exists());
 
@@ -97,13 +95,12 @@ public class Config {
     //    Timber.d(methodName + "deployTheme");
     //    deployTheme();
 
-    Timber.d(methodName + "init");
     init(true);
 
-    Timber.d(methodName + "setSoundFromColor");
+    Timber.d("Setting sound from color ...");
     setSoundFromColor();
 
-    Timber.d(methodName + "finish");
+    Timber.d("Initialization finished");
   }
 
   public String getTheme() {
@@ -147,7 +144,7 @@ public class Config {
       }
       in.close();
       out.close();
-      Timber.i("applySoundPackage = " + name);
+      Timber.i("applySoundPackage=%s", name);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -198,9 +195,9 @@ public class Config {
       Objects.requireNonNull(fullThemeConfigMap, "The theme file cannot be empty!");
       Timber.d("Fetching done");
 
-      defaultKeyboardStyle = (Map<String, Object>) fullThemeConfigMap.get("style");
+      style = new Style((Map<String, Object>) fullThemeConfigMap.get("style"));
       fallbackColors = (Map<String, String>) fullThemeConfigMap.get("fallback_colors");
-      Key.presetKeys = (Map<String, Map<String, String>>) fullThemeConfigMap.get("preset_keys");
+      Key.presetKeys = (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keys");
       presetColorSchemes =
           (Map<String, Map<String, String>>) fullThemeConfigMap.get("preset_color_schemes");
       presetKeyboards =
@@ -250,10 +247,11 @@ public class Config {
     }
   }
 
-  public static String obtainString(Map<String, Object> map, @NonNull String key, @NonNull String defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
-    final String v;
-    return ((v = (String) obtainValue(map, key)) != null) ? v : defValue;
+  public static String obtainString(
+      Map<String, Object> map, @NonNull String key, @NonNull String defValue) {
+    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
+    final Object v;
+    return ((v = obtainValue(map, key)) != null) ? v.toString() : defValue;
   }
 
   public static String obtainString(Map<String, Object> map, @NonNull String key) {
@@ -261,7 +259,7 @@ public class Config {
   }
 
   public static int obtainInt(Map<String, Object> map, @NonNull String key, int defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
     final String nm;
     try {
       return (!(nm = obtainString(map, key)).isEmpty()) ? Long.decode(nm).intValue() : defValue;
@@ -275,7 +273,7 @@ public class Config {
   }
 
   public static float obtainFloat(Map<String, Object> map, @NonNull String key, float defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
     final String s;
     try {
       return (!(s = obtainString(map, key)).isEmpty()) ? Float.parseFloat(s) : defValue;
@@ -288,8 +286,9 @@ public class Config {
     return obtainFloat(map, key, 0f);
   }
 
-  public static boolean obtainBoolean(Map<String, Object> map, @NonNull String key, boolean defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue;
+  public static boolean obtainBoolean(
+      Map<String, Object> map, @NonNull String key, boolean defValue) {
+    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
     return Boolean.parseBoolean(obtainString(map, key));
   }
 
@@ -297,52 +296,36 @@ public class Config {
     return obtainBoolean(map, key, false);
   }
 
-  @Nullable
-  private Object _getValue(String k1, String k2) {
-    if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1)) {
-      final Map<String, Object> m = (Map<String, Object>) defaultKeyboardStyle.get(k1);
-      if (m != null && m.containsKey(k2)) return m.get(k2);
+  public static class Style {
+    private final Map<String, Object> styleConfigMap;
+
+    public Style(final Map<String, Object> styleConfigMap) {
+      this.styleConfigMap = styleConfigMap;
     }
-    return null;
-  }
 
-  private Object _getValue(String k1, String k2, Object defaultValue) {
-    if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1)) {
-      final Map<String, Object> m = (Map<String, Object>) defaultKeyboardStyle.get(k1);
-      if (m != null && m.containsKey(k2)) return m.get(k2);
+    public String getString(@NonNull String key) {
+      return obtainString(styleConfigMap, key);
     }
-    return defaultValue;
-  }
 
-  @Nullable
-  private Object _getValue(String k1) {
-    if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1))
-      return defaultKeyboardStyle.get(k1);
-    return null;
-  }
+    public int getInt(@NonNull String key) {
+      return obtainInt(styleConfigMap, key);
+    }
 
-  private Object _getValue(String k1, Object defaultValue) {
-    if (defaultKeyboardStyle != null && defaultKeyboardStyle.containsKey(k1))
-      return defaultKeyboardStyle.get(k1);
-    return defaultValue;
-  }
+    public float getFloat(@NonNull String key) {
+      return obtainFloat(styleConfigMap, key);
+    }
 
-  public Object getValue(@NonNull String s) {
-    final String[] ss = s.split("/");
-    if (ss.length == 1) return _getValue(ss[0]);
-    else if (ss.length == 2) return _getValue(ss[0], ss[1]);
-    return null;
-  }
+    public boolean getBoolean(@NonNull String key) {
+      return obtainBoolean(styleConfigMap, key);
+    }
 
-  public Object getValue(@NonNull String s, Object defaultValue) {
-    final String[] ss = s.split("/");
-    if (ss.length == 1) return _getValue(ss[0], defaultValue);
-    else if (ss.length == 2) return _getValue(ss[0], ss[1], defaultValue);
-    return null;
+    public Object getObject(@NonNull String key) {
+      return obtainValue(styleConfigMap, key);
+    }
   }
 
   public boolean hasKey(String s) {
-    return getValue(s) != null;
+    return style.getObject(s) != null;
   }
 
   private String getKeyboardName(@NonNull String name) {
@@ -374,7 +357,7 @@ public class Config {
   }
 
   public List<String> getKeyboardNames() {
-    final List<String> names = (List<String>) getValue("keyboards");
+    final List<String> names = (List<String>) style.getObject("keyboards");
     final List<String> keyboards = new ArrayList<>();
     for (String s : names) {
       s = getKeyboardName(s);
@@ -419,7 +402,7 @@ public class Config {
   }
 
   public void destroy() {
-    if (defaultKeyboardStyle != null) defaultKeyboardStyle.clear();
+    if (style != null) style = null;
     self = null;
   }
 
@@ -479,12 +462,12 @@ public class Config {
   }
 
   public int getPixel(String key) {
-    return getPixel(getFloat(key));
+    return getPixel(style.getFloat(key));
   }
 
   public int getPixel(String key, int defaultValue) {
-    float v = getFloat(key, Float.MAX_VALUE);
-    if (v == Float.MAX_VALUE) return defaultValue;
+    float v = style.getFloat(key);
+    if (v == 0f) return defaultValue;
     return getPixel(v);
   }
 
@@ -546,61 +529,13 @@ public class Config {
     return m.containsKey(k) ? m.get(k) : o;
   }
 
-  @NonNull
-  public static String getString(Map<?, ?> m, String k, Object s) {
-    final Object o = getValue(m, k, s);
-    if (o == null) return "";
-    return o.toString();
-  }
-
-  @NonNull
-  public static String getString(Map<?, ?> m, String k) {
-    return getString(m, k, "");
-  }
-
-  public boolean getBoolean(String key) {
-    final Object o = getValue(key);
-    if (o == null) return true;
-    return Boolean.parseBoolean(o.toString());
-  }
-
-  public double getDouble(String key) {
-    final Object o = getValue(key);
-    if (o == null) return 0d;
-    return Double.parseDouble(o.toString());
-  }
-
-  public float getFloat(String key) {
-    final Object o = getValue(key);
-    if (o == null) return 0f;
-    return Float.parseFloat(o.toString());
-  }
-
   public float getLiquidFloat(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
-        return ConfigGetter.getFloat(liquidKeyboard, key, 0);
+        return obtainFloat(liquidKeyboard, key, 0);
       }
     }
-    return getFloat(key);
-  }
-
-  public float getFloat(String key, float defaultValue) {
-    final Object o = getValue(key, defaultValue);
-    if (o == null) return defaultValue;
-    return Float.parseFloat(o.toString());
-  }
-
-  public int getInt(String key) {
-    final Object o = getValue(key);
-    if (o == null) return 0;
-    return Long.decode(o.toString()).intValue();
-  }
-
-  public String getString(String key) {
-    final Object o = getValue(key);
-    if (o == null) return "";
-    return o.toString();
+    return style.getFloat(key);
   }
 
   //  获取当前配色方案的key的value，或者从fallback获取值。
@@ -627,7 +562,8 @@ public class Config {
    */
   private String getColorSchemeName() {
     String schemeId = appPrefs.getThemeAndColor().getSelectedColor();
-    if (!presetColorSchemes.containsKey(schemeId)) schemeId = getString("color_scheme"); // 主題中指定的配色
+    if (!presetColorSchemes.containsKey(schemeId))
+      schemeId = style.getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(schemeId)) schemeId = "default"; // 主題中的default配色
     Map<String, String> colorMap = presetColorSchemes.get(schemeId);
     if (colorMap.containsKey("dark_scheme") || colorMap.containsKey("light_scheme"))
@@ -649,7 +585,8 @@ public class Config {
    */
   private String getColorSchemeName(boolean darkMode) {
     String scheme = appPrefs.getThemeAndColor().getSelectedColor();
-    if (!presetColorSchemes.containsKey(scheme)) scheme = getString("color_scheme"); // 主題中指定的配色
+    if (!presetColorSchemes.containsKey(scheme))
+      scheme = style.getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
     Map<String, String> colorMap = presetColorSchemes.get(scheme);
     if (darkMode) {
@@ -724,9 +661,9 @@ public class Config {
   }
 
   public void initEnterLabels() {
-    Object enter_labels = getValue("enter_labels");
-    if (enter_labels == null) mEnterLabels = new HashMap<>();
-    else mEnterLabels = (Map<String, String>) enter_labels;
+    if ((mEnterLabels = (Map<String, String>) style.getObject("enter_labels")) == null) {
+      mEnterLabels = new HashMap<>();
+    }
 
     String defaultEnterLabel = "Enter";
     if (mEnterLabels.containsKey("default")) defaultEnterLabel = mEnterLabels.get("default");
@@ -742,7 +679,7 @@ public class Config {
   }
 
   public Typeface getFont(String key) {
-    final String name = getString(key);
+    final String name = style.getString(key);
     if (name != null) {
       final File f = new File(DataManager.getDataDir("fonts"), name);
       if (f.exists()) return Typeface.createFromFile(f);
@@ -865,7 +802,7 @@ public class Config {
     if (drawable != null) {
       if (alphaKey != null) {
         if (hasKey(alphaKey)) {
-          int alpha = getInt("layout/alpha");
+          int alpha = style.getInt("layout/alpha");
           if (alpha <= 0) alpha = 0;
           else if (alpha >= 255) alpha = 255;
           drawable.setAlpha(alpha);
@@ -879,7 +816,7 @@ public class Config {
     if (!(o instanceof Integer)) return null;
     gd.setColor((int) o);
 
-    if (roundCornerKey != null) gd.setCornerRadius(getFloat(roundCornerKey));
+    if (roundCornerKey != null) gd.setCornerRadius(style.getFloat(roundCornerKey));
 
     if (borderColorKey != null && borderKey != null) {
       int border = getPixel(borderKey);
@@ -891,7 +828,7 @@ public class Config {
 
     if (alphaKey != null) {
       if (hasKey(alphaKey)) {
-        int alpha = getInt("layout/alpha");
+        int alpha = style.getInt("layout/alpha");
         if (alpha <= 0) alpha = 0;
         else if (alpha >= 255) alpha = 255;
         gd.setAlpha(alpha);
@@ -927,7 +864,7 @@ public class Config {
   public void initCurrentColors() {
     curcentColors.clear();
     currentColorSchemeId = getColorSchemeName();
-    backgroundFolder = getString("background_folder");
+    backgroundFolder = style.getString("background_folder");
     Timber.d("Initializing currentColors ...");
     Timber.d(
         "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s",
@@ -974,7 +911,7 @@ public class Config {
   public void initCurrentColors(boolean darkMode) {
     curcentColors.clear();
     currentColorSchemeId = getColorSchemeName(darkMode);
-    backgroundFolder = getString("background_folder");
+    backgroundFolder = style.getString("background_folder");
     Timber.d("Initializing currentColors ...");
     Timber.d(
         "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s, isDarkMode = %s",

@@ -88,7 +88,7 @@ public class Candidate extends View {
   public void reset() {
     Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
-    candidateHighlight.setCornerRadius(config.getFloat("layout/round_corner"));
+    candidateHighlight.setCornerRadius(config.style.getFloat("layout/round_corner"));
     separatorPaint.setColor(config.getColor("candidate_separator_color"));
     candidateSpacing = config.getPixel("candidate_spacing");
     candidatePadding = config.getPixel("candidate_padding");
@@ -114,8 +114,8 @@ public class Candidate extends View {
     commentPaint.setTextSize(comment_text_size);
     commentPaint.setTypeface(commentFont);
 
-    isCommentOnTop = config.getBoolean("comment_on_top");
-    candidateUseCursor = config.getBoolean("candidate_use_cursor");
+    isCommentOnTop = config.style.getBoolean("comment_on_top");
+    candidateUseCursor = config.style.getBoolean("candidate_use_cursor");
     invalidate();
   }
 

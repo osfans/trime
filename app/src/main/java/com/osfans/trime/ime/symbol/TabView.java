@@ -62,7 +62,7 @@ public class TabView extends View {
   public void reset() {
     Config config = Config.get();
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
-    candidateHighlight.setCornerRadius(config.getFloat("layout/round_corner"));
+    candidateHighlight.setCornerRadius(config.style.getFloat("layout/round_corner"));
 
     separatorPaint.setColor(config.getColor("candidate_separator_color"));
 
@@ -82,8 +82,8 @@ public class TabView extends View {
     candidatePaint.setTextSize(candidateTextSize);
     candidatePaint.setTypeface(candidateFont);
 
-    isCommentOnTop = config.getBoolean("comment_on_top");
-    shouldCandidateUseCursor = config.getBoolean("candidate_use_cursor");
+    isCommentOnTop = config.style.getBoolean("comment_on_top");
+    shouldCandidateUseCursor = config.style.getBoolean("candidate_use_cursor");
     invalidate();
   }
 

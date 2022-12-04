@@ -346,15 +346,15 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mSymbolSize = config.getPixel("symbol_text_size", 10);
     mKeyTextSize = config.getPixel("key_text_size", 22);
     mVerticalCorrection = config.getPixel("vertical_correction");
-    setProximityCorrectionEnabled(config.getBoolean("proximity_correction"));
+    setProximityCorrectionEnabled(config.style.getBoolean("proximity_correction"));
     mPreviewOffset = config.getPixel("preview_offset");
     mPreviewHeight = config.getPixel("preview_height");
     mLabelTextSize = config.getPixel("key_long_text_size");
     if (mLabelTextSize == 0) mLabelTextSize = mKeyTextSize;
 
-    mBackgroundDimAmount = config.getFloat("background_dim_amount");
-    mShadowRadius = config.getFloat("shadow_radius");
-    final float mRoundCorner = config.getFloat("round_corner");
+    mBackgroundDimAmount = config.style.getFloat("background_dim_amount");
+    mShadowRadius = config.style.getFloat("shadow_radius");
+    final float mRoundCorner = config.style.getFloat("round_corner");
 
     mKeyBackColor = new StateListDrawable();
     mKeyBackColor.addState(
@@ -388,7 +388,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
       background.setCornerRadius(mRoundCorner);
       mPreviewText.setBackground(background);
     }
-    final int mPreviewTextSizeLarge = config.getInt("preview_text_size");
+    final int mPreviewTextSizeLarge = config.style.getInt("preview_text_size");
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
     mShowPreview = getPrefs().getKeyboard().getPopupKeyPressEnabled();
 
@@ -399,7 +399,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPreviewText.setTypeface(config.getFont("preview_font"));
 
     mEnterLabels = config.getmEnterLabels();
-    enterLabelMode = config.getInt("enter_label_mode");
+    enterLabelMode = config.style.getInt("enter_label_mode");
     invalidateAllKeys();
   }
 

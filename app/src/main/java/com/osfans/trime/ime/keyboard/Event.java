@@ -23,7 +23,6 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.util.ConfigGetter;
 import java.util.HashMap;
@@ -42,7 +41,7 @@ public class Event {
   private String text;
   private String label, shiftLabel;
   private String preview;
-  private List<?> states;
+  private List<String> states;
   private String command;
   private String option;
   private String select;
@@ -72,7 +71,7 @@ public class Event {
     }
     if (Key.presetKeys.containsKey(s)) {
       // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
-      Map<String, ?> presetKey = Key.presetKeys.get(s);
+      Map<String, Object> presetKey = Key.presetKeys.get(s);
       command = ConfigGetter.getString(presetKey, "command", "");
       option = ConfigGetter.getString(presetKey, "option", "");
       select = ConfigGetter.getString(presetKey, "select", "");
@@ -88,9 +87,9 @@ public class Event {
       code = sends[0];
       mask = sends[1];
       parseLabel();
-      text = Config.getString(presetKey, "text");
+      text = (String) presetKey.get("text");
       if (code < 0 && TextUtils.isEmpty(text)) text = s;
-      if (presetKey.containsKey("states")) states = (List<?>) presetKey.get("states");
+      if (presetKey.containsKey("states")) states = (List<String>) presetKey.get("states");
       sticky = ConfigGetter.getBoolean(presetKey, "sticky", false);
       repeatable = ConfigGetter.getBoolean(presetKey, "repeatable", false);
       functional = ConfigGetter.getBoolean(presetKey, "functional", true);

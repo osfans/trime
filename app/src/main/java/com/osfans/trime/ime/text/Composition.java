@@ -23,8 +23,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
@@ -61,7 +59,7 @@ public class Composition extends AppCompatTextView {
   private Typeface tfText, tfLabel, tfCandidate, tfComment;
   private final int[] composition_pos = new int[2];
   private int max_length, sticky_lines, sticky_lines_land;
-  private int max_entries = Candidate.getMaxCandidateCount();
+  private int max_entries;
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
   private List<Map<String, Object>> windows_comps, liquid_keyboard_window_comp;
@@ -212,15 +210,19 @@ public class Composition extends AppCompatTextView {
   public void reset() {
     final Config config = Config.get();
 
-    Object o = config.getValue("window");
-    if (o == null) windows_comps = new ArrayList<>();
-    else windows_comps = (List<Map<String, Object>>) o;
-    o = config.getValue("liquid_keyboard_window");
-    if (o == null) liquid_keyboard_window_comp = new ArrayList<>();
-    else liquid_keyboard_window_comp = (List<Map<String, Object>>) o;
+    if ((windows_comps = (List<Map<String, Object>>) config.style.getObject("window")) == null) {
+      windows_comps = new ArrayList<>();
+    }
+    if ((liquid_keyboard_window_comp =
+            (List<Map<String, Object>>) config.style.getObject("liquid_keyboard_window"))
+        == null) {
+      liquid_keyboard_window_comp = new ArrayList<>();
+    }
 
-    if (config.hasKey("layout/max_entries")) max_entries = config.getInt("layout/max_entries");
-    candidate_use_cursor = config.getBoolean("candidate_use_cursor");
+    if ((max_entries = config.style.getInt("layout/max_entries")) == 0) {
+      max_entries = Candidate.getMaxCandidateCount();
+    }
+    candidate_use_cursor = config.style.getBoolean("candidate_use_cursor");
     text_size = config.getPixel("text_size");
     candidate_text_size = config.getPixel("candidate_text_size");
     comment_text_size = config.getPixel("comment_text_size");
@@ -246,9 +248,9 @@ public class Composition extends AppCompatTextView {
     key_text_color = config.getColor("key_text_color");
     key_back_color = config.getColor("key_back_color");
 
-    float line_spacing_multiplier = config.getFloat("layout/line_spacing_multiplier");
+    float line_spacing_multiplier = config.style.getFloat("layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;
-    setLineSpacing(config.getFloat("layout/line_spacing"), line_spacing_multiplier);
+    setLineSpacing(config.style.getFloat("layout/line_spacing"), line_spacing_multiplier);
     setMinWidth(config.getPixel("layout/min_width"));
     setMinHeight(config.getPixel("layout/min_height"));
 
@@ -265,21 +267,21 @@ public class Composition extends AppCompatTextView {
     margin_y = config.getPixel("layout/margin_y");
     margin_bottom = config.getPixel("layout/margin_bottom", margin_y);
     setPadding(margin_x, margin_y, margin_x, margin_bottom);
-    max_length = config.getInt("layout/max_length");
-    sticky_lines = config.getInt("layout/sticky_lines");
-    sticky_lines_land = config.getInt("layout/sticky_lines_land");
-    movable = config.getString("layout/movable");
-    all_phrases = config.getBoolean("layout/all_phrases");
+    max_length = config.style.getInt("layout/max_length");
+    sticky_lines = config.style.getInt("layout/sticky_lines");
+    sticky_lines_land = config.style.getInt("layout/sticky_lines_land");
+    movable = config.style.getString("layout/movable");
+    all_phrases = config.style.getBoolean("layout/all_phrases");
     tfLabel = config.getFont("label_font");
     tfText = config.getFont("text_font");
     tfCandidate = config.getFont("candidate_font");
     tfComment = config.getFont("comment_font");
   }
 
-  private Object getAlign(Map<?, ?> m) {
+  private Object getAlign(Map<String, Object> m) {
     Layout.Alignment i = Layout.Alignment.ALIGN_NORMAL;
     if (m.containsKey("align")) {
-      String align = Config.getString(m, "align");
+      String align = Config.obtainString(m, "align");
       switch (align) {
         case "left":
         case "normal":
@@ -297,12 +299,12 @@ public class Composition extends AppCompatTextView {
     return new AlignmentSpan.Standard(i);
   }
 
-  private void appendComposition(Map<String, ?> m) {
+  private void appendComposition(Map<String, Object> m) {
     final Rime.RimeComposition r = Rime.getComposition();
     assert r != null;
     final String s = r.getText();
     int start, end;
-    String sep = Config.getString(m, "start");
+    String sep = Config.obtainString(m, "start");
     if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -317,7 +319,7 @@ public class Composition extends AppCompatTextView {
     composition_pos[1] = end;
     ss.setSpan(new CompositionSpan(), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && m.containsKey("letter_spacing")) {
+    if (m.containsKey("letter_spacing")) {
       final float size = ConfigGetter.getFloat(m, "letter_spacing", 0);
       if (size != 0f) ss.setSpan(new LetterSpacingSpan(size), start, end, span);
     }
@@ -325,7 +327,7 @@ public class Composition extends AppCompatTextView {
     end = composition_pos[0] + r.getEnd();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
-    sep = Config.getString(m, "end");
+    sep = Config.obtainString(m, "end");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
@@ -361,18 +363,18 @@ public class Composition extends AppCompatTextView {
   }
 
   /** 生成悬浮窗内的文本 */
-  private void appendCandidates(Map<?, ?> m, int length, int end_num) {
+  private void appendCandidates(Map<String, Object> m, int length, int end_num) {
     Timber.d("appendCandidates(): length = %s", length);
     int start, end;
 
     final Rime.RimeCandidate[] candidates = Rime.getCandidatesOrStatusSwitches();
     if (candidates == null) return;
-    String sep = Config.getString(m, "start");
+    String sep = Config.obtainString(m, "start");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
-    String label_format = Config.getString(m, "label");
-    String candidate_format = Config.getString(m, "candidate");
-    String comment_format = Config.getString(m, "comment");
-    String line = Config.getString(m, "sep");
+    String label_format = Config.obtainString(m, "label");
+    String candidate_format = Config.obtainString(m, "candidate");
+    String comment_format = Config.obtainString(m, "comment");
+    String line = Config.obtainString(m, "sep");
 
     int line_length = 0;
     int sticky_lines_now = sticky_lines;
@@ -463,23 +465,23 @@ public class Composition extends AppCompatTextView {
       }
       candidate_num++;
     }
-    sep = Config.getString(m, "end");
+    sep = Config.obtainString(m, "end");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
-  private void appendButton(@NonNull Map<?, ?> m) {
+  private void appendButton(@NonNull Map<String, Object> m) {
     if (m.containsKey("when")) {
-      final String when = Config.getString(m, "when");
+      final String when = Config.obtainString(m, "when");
       if (when.contentEquals("paging") && !Rime.isPaging()) return;
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     final String label;
-    final Event e = new Event(Config.getString(m, "click"));
-    if (m.containsKey("label")) label = Config.getString(m, "label");
+    final Event e = new Event(Config.obtainString(m, "click"));
+    if (m.containsKey("label")) label = Config.obtainString(m, "label");
     else label = e.getLabel();
     int start, end;
     String sep = null;
-    if (m.containsKey("start")) sep = Config.getString(m, "start");
+    if (m.containsKey("start")) sep = Config.obtainString(m, "start");
     if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -492,14 +494,14 @@ public class Composition extends AppCompatTextView {
     ss.setSpan(getAlign(m), start, end, span);
     ss.setSpan(new EventSpan(e), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
-    sep = Config.getString(m, "end");
+    sep = Config.obtainString(m, "end");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
-  private void appendMove(Map<?, ?> m) {
-    String s = Config.getString(m, "move");
+  private void appendMove(Map<String, Object> m) {
+    String s = Config.obtainString(m, "move");
     int start, end;
-    String sep = Config.getString(m, "start");
+    String sep = Config.obtainString(m, "start");
     if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -514,7 +516,7 @@ public class Composition extends AppCompatTextView {
     move_pos[1] = end;
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
-    sep = Config.getString(m, "end");
+    sep = Config.obtainString(m, "end");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
@@ -556,7 +558,7 @@ public class Composition extends AppCompatTextView {
     ss = new SpannableStringBuilder();
     int start_num = 0;
 
-    for (Map<String, ?> m : windows_comps) {
+    for (Map<String, Object> m : windows_comps) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
         start_num = calcStartNum(stringMinLength, candidateMinCheck);
@@ -583,7 +585,7 @@ public class Composition extends AppCompatTextView {
 
     ss = new SpannableStringBuilder();
 
-    for (Map<String, ?> m : liquid_keyboard_window_comp) {
+    for (Map<String, Object> m : liquid_keyboard_window_comp) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("click")) appendButton(m);
     }
