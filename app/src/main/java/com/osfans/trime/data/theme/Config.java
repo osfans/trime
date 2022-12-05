@@ -74,6 +74,7 @@ public class Config {
   private Map<String, Object> liquidKeyboard;
 
   public Style style;
+  public Liquid liquid;
 
   public Config() {
     this(false);
@@ -200,6 +201,7 @@ public class Config {
       presetKeyboards =
           (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keyboards");
       liquidKeyboard = (Map<String, Object>) fullThemeConfigMap.get("liquid_keyboard");
+      liquid = new Liquid(liquidKeyboard);
       long end = System.currentTimeMillis();
       Timber.d("Setting up all theme config map takes %s ms", end - start);
       initLiquidKeyboard();
@@ -321,6 +323,22 @@ public class Config {
     }
   }
 
+  public static class Liquid {
+    private final Map<String, Object> liquidConfigMap;
+
+    public Liquid(@NonNull Map<String, Object> liquidConfigMap) {
+      this.liquidConfigMap = liquidConfigMap;
+    }
+
+    public int getInt(@NonNull String key) {
+      return obtainInt(liquidConfigMap, key);
+    }
+
+    public float getFloat(@NonNull String key) {
+      return obtainFloat(liquidConfigMap, key, self.style.getFloat(key));
+    }
+  }
+
   public boolean hasKey(String s) {
     return style.getObject(s) != null;
   }
@@ -394,12 +412,9 @@ public class Config {
     return presetKeyboards.get(name);
   }
 
-  public Map<String, Object> getLiquidKeyboard() {
-    return liquidKeyboard;
-  }
-
   public void destroy() {
     if (style != null) style = null;
+    if (liquid != null) liquid = null;
     self = null;
   }
 
@@ -493,15 +508,6 @@ public class Config {
       return drawableObject(o);
     }
     return null;
-  }
-
-  public float getLiquidFloat(String key) {
-    if (liquidKeyboard != null) {
-      if (liquidKeyboard.containsKey(key)) {
-        return obtainFloat(liquidKeyboard, key, 0);
-      }
-    }
-    return style.getFloat(key);
   }
 
   //  获取当前配色方案的key的value，或者从fallback获取值。
@@ -702,25 +708,6 @@ public class Config {
   public Drawable getColorDrawable(String key) {
     final Object o = getColorValue(key);
     return drawableObject(o);
-  }
-
-  public int getLiquidPixel(String key) {
-    if (liquidKeyboard != null) {
-      if (liquidKeyboard.containsKey(key)) {
-        return (int) DimensionsKt.dp2px(obtainFloat(liquidKeyboard, key));
-      }
-    }
-    return (int) DimensionsKt.dp2px(style.getFloat(key));
-  }
-
-  public Integer getLiquidColor(String key) {
-    if (liquidKeyboard != null) {
-      if (liquidKeyboard.containsKey(key)) {
-        Integer value = parseColor(liquidKeyboard.get(key));
-        if (value != null) return value;
-      }
-    }
-    return getColor(key);
   }
 
   // 获取当前色彩 Config 2.0

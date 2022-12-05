@@ -22,7 +22,6 @@ import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
-import com.osfans.trime.util.ConfigGetter.getPixel
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
@@ -94,15 +93,10 @@ class LiquidKeyboard(private val context: Context) {
     // 设置liquidKeyboard共用的布局参数
     fun calcPadding(width: Int) {
         parentWidth = width
-        val liquid_config = theme.liquidKeyboard
 
-        // liquid_keyboard/margin_x定义了每个键左右两边的间隙，也就是说相邻两个键间隙是x2，而horizontal_gap定义的是spacer，使用时需要/2
-        if (liquid_config != null) {
-            if (liquid_config.containsKey("margin_x")) {
-                val o: Any = liquid_config.getPixel("margin_x", 0f)
-                marginLeft = o as Int
-            }
-        }
+        // liquid_keyboard/margin_x定义了每个键左右两边的间隙，
+        // 也就是说相邻两个键间隙是x2，而horizontal_gap定义的是spacer，使用时需要/2
+        marginLeft = dp2px(theme.liquid.getFloat("margin_x")).toInt()
         if (marginLeft == 0) {
             var horizontal_gap = dp2px(theme.style.getFloat("horizontal_gap")).toInt()
             if (horizontal_gap > 1) {
@@ -120,27 +114,27 @@ class LiquidKeyboard(private val context: Context) {
             val keyBoardHeightLand = dp2px(theme.style.getFloat("keyboard_height_land")).toInt()
             if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand
         }
-        var row = theme.getLiquidFloat("row").toInt()
+        var row = theme.liquid.getInt("row")
         if (row > 0) {
             if (isLand) {
-                val r = theme.getLiquidFloat("row_land")
-                if (r > 0) row = r.toInt()
+                val r = theme.liquid.getInt("row_land")
+                if (r > 0) row = r
             }
-            val rawHeight = theme.getLiquidFloat("key_height")
-            val rawVGap = theme.getLiquidFloat("vertical_gap")
+            val rawHeight = theme.liquid.getFloat("key_height")
+            val rawVGap = theme.liquid.getFloat("vertical_gap")
             val scale = keyboardHeight.toFloat() / ((rawHeight + rawVGap) * row)
             marginTop = ceil((rawVGap * scale).toDouble()).toInt()
             keyHeight = keyboardHeight / row - marginTop
         } else {
-            keyHeight = theme.getLiquidPixel("key_height_land")
-            if (!isLand || keyHeight <= 0) keyHeight = theme.getLiquidPixel("key_height")
-            marginTop = theme.getLiquidPixel("vertical_gap")
+            keyHeight = dp2px(theme.liquid.getFloat("key_height_land")).toInt()
+            if (!isLand || keyHeight <= 0) keyHeight = dp2px(theme.liquid.getFloat("key_height")).toInt()
+            marginTop = dp2px(theme.liquid.getFloat("vertical_gap")).toInt()
         }
         Timber.i("config keyHeight=$keyHeight marginTop=$marginTop")
         if (isLand) {
-            singleWidth = theme.getLiquidPixel("single_width_land")
-            if (singleWidth <= 0) singleWidth = theme.getLiquidPixel("single_width")
-        } else singleWidth = theme.getLiquidPixel("single_width")
+            singleWidth = dp2px(theme.liquid.getFloat("single_width_land")).toInt()
+            if (singleWidth <= 0) singleWidth = dp2px(theme.liquid.getFloat("single_width")).toInt()
+        } else singleWidth = dp2px(theme.liquid.getFloat("single_width")).toInt()
         if (singleWidth <= 0) singleWidth = context.resources.getDimensionPixelSize(R.dimen.simple_key_single_width)
     }
 

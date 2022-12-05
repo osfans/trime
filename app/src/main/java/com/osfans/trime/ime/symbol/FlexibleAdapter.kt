@@ -64,8 +64,8 @@ class FlexibleAdapter(
             simpleKeyText.apply {
                 text = bean.text
                 typeface = FontManager.getTypeface(theme.style.getString("long_text_font"))
-                when (val textColor = theme.getLiquidColor("long_text_color")) {
-                    null -> setTextColor(theme.getLiquidColor("key_text_color"))
+                when (val textColor = theme.getColor("long_text_color")) {
+                    null -> setTextColor(theme.getColor("key_text_color"))
                     else -> setTextColor(textColor)
                 }
 

@@ -15,6 +15,7 @@ object ThemeManager {
 
     val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
 
+    @JvmStatic
     fun getAllThemes(): List<String> {
         if (DataManager.sharedDataDir.absolutePath == DataManager.userDataDir.absolutePath) {
             return userThemes
