@@ -104,7 +104,7 @@ class LiquidKeyboard(private val context: Context) {
             }
         }
         if (marginLeft == 0) {
-            var horizontal_gap = theme.getPixel("horizontal_gap")
+            var horizontal_gap = dp2px(theme.style.getFloat("horizontal_gap")).toInt()
             if (horizontal_gap > 1) {
                 horizontal_gap /= 2
             }
@@ -115,9 +115,9 @@ class LiquidKeyboard(private val context: Context) {
         rootView = keyboardView.parent as View
         val keyboardBackground = theme.getDrawable("liquid_keyboard_background", null, null, null, null)
         if (keyboardBackground != null) rootView!!.background = keyboardBackground
-        var keyboardHeight = theme.getPixel("keyboard_height")
+        var keyboardHeight = dp2px(theme.style.getFloat("keyboard_height")).toInt()
         if (isLand) {
-            val keyBoardHeightLand = theme.getPixel("keyboard_height_land")
+            val keyBoardHeightLand = dp2px(theme.style.getFloat("keyboard_height_land")).toInt()
             if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand
         }
         var row = theme.getLiquidFloat("row").toInt()

@@ -49,6 +49,7 @@ import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
+import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
 import com.osfans.trime.util.SystemServicesKt;
 import java.lang.reflect.Method;
@@ -343,13 +344,13 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
     mShadowColor = config.getColor("shadow_color");
 
-    mSymbolSize = config.getPixel("symbol_text_size", 10);
-    mKeyTextSize = config.getPixel("key_text_size", 22);
-    mVerticalCorrection = config.getPixel("vertical_correction");
+    mSymbolSize = (int) DimensionsKt.sp2px(config.style.getFloat("symbol_text_size"));
+    mKeyTextSize = (int) DimensionsKt.sp2px(config.style.getFloat("key_text_size"));
+    mVerticalCorrection = (int) DimensionsKt.dp2px(config.style.getFloat("vertical_correction"));
     setProximityCorrectionEnabled(config.style.getBoolean("proximity_correction"));
-    mPreviewOffset = config.getPixel("preview_offset");
-    mPreviewHeight = config.getPixel("preview_height");
-    mLabelTextSize = config.getPixel("key_long_text_size");
+    mPreviewOffset = (int) DimensionsKt.dp2px(config.style.getFloat("preview_offset"));
+    mPreviewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("preview_height"));
+    mLabelTextSize = (int) DimensionsKt.sp2px(config.style.getFloat("key_long_text_size"));
     if (mLabelTextSize == 0) mLabelTextSize = mKeyTextSize;
 
     mBackgroundDimAmount = config.style.getFloat("background_dim_amount");

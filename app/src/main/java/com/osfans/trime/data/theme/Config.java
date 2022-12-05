@@ -18,7 +18,6 @@
 
 package com.osfans.trime.data.theme;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,7 +27,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
-import android.util.TypedValue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
@@ -38,7 +36,7 @@ import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
-import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.DimensionsKt;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -423,28 +421,28 @@ public class Config {
     keyboardPadding = new int[3];
     this.one_hand_mode = one_hand_mode;
     if (land_mode) {
-      keyboardPadding[0] = getPixel("keyboard_padding_land");
+      keyboardPadding[0] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_land"));
       keyboardPadding[1] = keyboardPadding[0];
-      keyboardPadding[2] = getPixel("keyboard_padding_land_bottom");
+      keyboardPadding[2] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_land_bottom"));
     } else {
       switch (one_hand_mode) {
         case 0:
           // 普通键盘 预留，目前未实装
-          keyboardPadding[0] = getPixel("keyboard_padding");
+          keyboardPadding[0] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding"));
           keyboardPadding[1] = keyboardPadding[0];
-          keyboardPadding[2] = getPixel("keyboard_padding_bottom");
+          keyboardPadding[2] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_bottom"));
           break;
         case 1:
           // 左手键盘
-          keyboardPadding[0] = getPixel("keyboard_padding_left");
-          keyboardPadding[1] = getPixel("keyboard_padding_right");
-          keyboardPadding[2] = getPixel("keyboard_padding_bottom");
+          keyboardPadding[0] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_left"));
+          keyboardPadding[1] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_right"));
+          keyboardPadding[2] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_bottom"));
           break;
         case 2:
           // 右手键盘
-          keyboardPadding[1] = getPixel("keyboard_padding_left");
-          keyboardPadding[0] = getPixel("keyboard_padding_right");
-          keyboardPadding[2] = getPixel("keyboard_padding_bottom");
+          keyboardPadding[1] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_left"));
+          keyboardPadding[0] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_right"));
+          keyboardPadding[2] = (int) DimensionsKt.dp2px(style.getFloat("keyboard_padding_bottom"));
           break;
       }
     }
@@ -452,33 +450,6 @@ public class Config {
         "update KeyboardPadding: %s %s %s one_hand_mode=%s",
         keyboardPadding[0], keyboardPadding[1], keyboardPadding[2], one_hand_mode);
     return keyboardPadding;
-  }
-
-  private static int getPixel(Float f) {
-    if (f == null) return 0;
-    return (int)
-        TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_SP, f, Resources.getSystem().getDisplayMetrics());
-  }
-
-  public int getPixel(String key) {
-    return getPixel(style.getFloat(key));
-  }
-
-  public int getPixel(String key, int defaultValue) {
-    float v = style.getFloat(key);
-    if (v == 0f) return defaultValue;
-    return getPixel(v);
-  }
-
-  public static Integer getPixel(Map<?, ?> m, String k, Object s) {
-    Object o = getValue(m, k, s);
-    if (o == null) return null;
-    return getPixel(Float.valueOf(o.toString()));
-  }
-
-  public static Integer getPixel(Map<?, ?> m, String k) {
-    return getPixel(m, k, null);
   }
 
   public static Integer getColor(@NonNull Map<?, ?> m, String k) {
@@ -750,10 +721,10 @@ public class Config {
   public int getLiquidPixel(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
-        return ConfigGetter.getPixel(liquidKeyboard, key, 0);
+        return (int) DimensionsKt.dp2px(obtainFloat(liquidKeyboard, key));
       }
     }
-    return getPixel(key);
+    return (int) DimensionsKt.dp2px(style.getFloat(key));
   }
 
   public Integer getLiquidColor(String key) {
@@ -819,7 +790,7 @@ public class Config {
     if (roundCornerKey != null) gd.setCornerRadius(style.getFloat(roundCornerKey));
 
     if (borderColorKey != null && borderKey != null) {
-      int border = getPixel(borderKey);
+      int border = (int) DimensionsKt.dp2px(style.getFloat(borderKey));
       Object borderColor = curcentColors.get(borderColorKey);
       if (borderColor instanceof Integer && border > 0) {
         gd.setStroke(border, getCurrentColor_(borderColorKey));

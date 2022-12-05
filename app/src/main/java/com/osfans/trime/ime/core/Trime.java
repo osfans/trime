@@ -81,6 +81,7 @@ import com.osfans.trime.ime.text.Composition;
 import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.ui.main.PrefMainActivity;
+import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.SystemServicesKt;
@@ -315,10 +316,10 @@ public class Trime extends LifecycleInputMethodService {
     final Config imeConfig = getImeConfig();
     popupWindowPos = PopupPosition.fromString(imeConfig.style.getString("layout/position"));
     isPopupWindowMovable = imeConfig.style.getString("layout/movable");
-    popupMargin = imeConfig.getPixel("layout/spacing");
+    popupMargin = (int) DimensionsKt.dp2px(imeConfig.style.getFloat("layout/spacing"));
     minPopupSize = imeConfig.style.getInt("layout/min_length");
     minPopupCheckSize = imeConfig.style.getInt("layout/min_check");
-    popupMarginH = imeConfig.getPixel("layout/real_margin");
+    popupMarginH = (int) DimensionsKt.dp2px(imeConfig.style.getFloat("layout/real_margin"));
     textInputManager.setShouldResetAsciiMode(imeConfig.style.getBoolean("reset_ascii_mode"));
     isAutoCaps = imeConfig.style.getBoolean("auto_caps");
     isPopupWindowEnabled =
@@ -496,8 +497,8 @@ public class Trime extends LifecycleInputMethodService {
               "layout/round_corner",
               "layout/alpha");
       if (textBackground != null) mPopupWindow.setBackgroundDrawable(textBackground);
-      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
-        mPopupWindow.setElevation(mConfig.getPixel("layout/elevation"));
+      mPopupWindow.setElevation(
+          (int) DimensionsKt.dp2px(mConfig.style.getFloat("layout/elevation")));
     }
 
     if (mCandidateRoot != null) {

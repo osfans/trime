@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -117,20 +118,21 @@ public class Keyboard {
     // final int mDisplayHeight = dm.heightPixels;
     // Log.v(TAG, "keyboard's display metrics:" + dm);
 
-    mDefaultHorizontalGap = config.getPixel("horizontal_gap");
-    mDefaultVerticalGap = config.getPixel("vertical_gap");
+    mDefaultHorizontalGap = (int) DimensionsKt.dp2px(config.style.getFloat("horizontal_gap"));
+    mDefaultVerticalGap = (int) DimensionsKt.dp2px(config.style.getFloat("vertical_gap"));
     mDefaultWidth = (int) (mDisplayWidth * config.style.getFloat("key_width") / 100);
 
-    mDefaultHeight = config.getPixel("key_height");
+    mDefaultHeight = (int) DimensionsKt.dp2px(config.style.getFloat("key_height"));
 
     mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
     mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
     mRoundCorner = config.style.getFloat("round_corner");
     mBackground = config.getColorDrawable("keyboard_back_color");
 
-    keyboardHeight = config.getPixel("keyboard_height");
+    keyboardHeight = (int) DimensionsKt.dp2px(config.style.getFloat("keyboard_height"));
     if (land) {
-      int keyBoardHeightLand = config.getPixel("keyboard_height_land");
+      int keyBoardHeightLand =
+          (int) DimensionsKt.dp2px(config.style.getFloat("keyboard_height_land"));
       if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand;
     }
 

@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
+import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.GraphicUtils;
 import java.util.ArrayList;
 import timber.log.Timber;
@@ -66,16 +67,16 @@ public class TabView extends View {
 
     separatorPaint.setColor(config.getColor("candidate_separator_color"));
 
-    candidateSpacing = config.getPixel("candidate_spacing");
-    candidatePadding = config.getPixel("candidate_padding");
+    candidateSpacing = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_spacing"));
+    candidatePadding = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_padding"));
 
     candidateTextColor = config.getColor("candidate_text_color");
     hilitedCandidateTextColor = config.getColor("hilited_candidate_text_color");
 
-    commentHeight = config.getPixel("comment_height");
+    commentHeight = (int) DimensionsKt.dp2px(config.style.getFloat("comment_height"));
 
-    int candidateTextSize = config.getPixel("candidate_text_size");
-    candidateViewHeight = config.getPixel("candidate_view_height");
+    int candidateTextSize = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_text_size"));
+    candidateViewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_view_height"));
 
     candidateFont = config.getFont("candidate_font");
 

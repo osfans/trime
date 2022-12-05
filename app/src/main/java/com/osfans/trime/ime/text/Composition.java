@@ -44,6 +44,7 @@ import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -223,10 +224,10 @@ public class Composition extends AppCompatTextView {
       max_entries = Candidate.getMaxCandidateCount();
     }
     candidate_use_cursor = config.style.getBoolean("candidate_use_cursor");
-    text_size = config.getPixel("text_size");
-    candidate_text_size = config.getPixel("candidate_text_size");
-    comment_text_size = config.getPixel("comment_text_size");
-    label_text_size = config.getPixel("label_text_size");
+    text_size = (int) DimensionsKt.sp2px(config.style.getFloat("text_size"));
+    candidate_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("candidate_text_size"));
+    comment_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("comment_text_size"));
+    label_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("label_text_size"));
 
     text_color = config.getColor("text_color");
     candidate_text_color = config.getColor("candidate_text_color");
@@ -244,28 +245,28 @@ public class Composition extends AppCompatTextView {
     hilited_back_color = config.getColor("hilited_back_color");
     hilited_candidate_back_color = config.getColor("hilited_candidate_back_color");
 
-    key_text_size = config.getPixel("key_text_size");
+    key_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("key_text_size"));
     key_text_color = config.getColor("key_text_color");
     key_back_color = config.getColor("key_back_color");
 
     float line_spacing_multiplier = config.style.getFloat("layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;
     setLineSpacing(config.style.getFloat("layout/line_spacing"), line_spacing_multiplier);
-    setMinWidth(config.getPixel("layout/min_width"));
-    setMinHeight(config.getPixel("layout/min_height"));
+    setMinWidth((int) DimensionsKt.dp2px(config.style.getFloat("layout/min_width")));
+    setMinHeight((int) DimensionsKt.dp2px(config.style.getFloat("layout/min_height")));
 
-    int max_width = config.getPixel("layout/max_width");
-    int real_margin = config.getPixel("layout/real_margin");
+    int max_width = (int) DimensionsKt.dp2px(config.style.getFloat("layout/max_width"));
+    int real_margin = (int) DimensionsKt.dp2px(config.style.getFloat("layout/real_margin"));
     int displayWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
     Timber.d("max_width = %s, displayWidth = %s ", max_width, displayWidth);
     if (max_width > displayWidth) max_width = displayWidth;
     setMaxWidth(max_width - real_margin * 2);
 
-    setMaxHeight(config.getPixel("layout/max_height"));
+    setMaxHeight((int) DimensionsKt.dp2px(config.style.getFloat("layout/max_height")));
     int margin_x, margin_y, margin_bottom;
-    margin_x = config.getPixel("layout/margin_x");
-    margin_y = config.getPixel("layout/margin_y");
-    margin_bottom = config.getPixel("layout/margin_bottom", margin_y);
+    margin_x = (int) DimensionsKt.dp2px(config.style.getFloat("layout/margin_x"));
+    margin_y = (int) DimensionsKt.dp2px(config.style.getFloat("layout/margin_y"));
+    margin_bottom = (int) DimensionsKt.dp2px(config.style.getFloat("layout/margin_bottom"));
     setPadding(margin_x, margin_y, margin_x, margin_bottom);
     max_length = config.style.getInt("layout/max_length");
     sticky_lines = config.style.getInt("layout/sticky_lines");

@@ -37,6 +37,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.core.Trime;
+import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.GraphicUtils;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -90,18 +91,19 @@ public class Candidate extends View {
     candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
     candidateHighlight.setCornerRadius(config.style.getFloat("layout/round_corner"));
     separatorPaint.setColor(config.getColor("candidate_separator_color"));
-    candidateSpacing = config.getPixel("candidate_spacing");
-    candidatePadding = config.getPixel("candidate_padding");
+    candidateSpacing = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_spacing"));
+    candidatePadding = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_padding"));
 
     candidateTextColor = config.getColor("candidate_text_color");
     commentTextColor = config.getColor("comment_text_color");
     hilitedCandidateTextColor = config.getColor("hilited_candidate_text_color");
     hilitedCommentTextColor = config.getColor("hilited_comment_text_color");
 
-    int candidate_text_size = config.getPixel("candidate_text_size");
-    int comment_text_size = config.getPixel("comment_text_size");
-    candidateViewHeight = config.getPixel("candidate_view_height");
-    commentHeight = config.getPixel("comment_height");
+    int candidate_text_size =
+        (int) DimensionsKt.sp2px(config.style.getFloat("candidate_text_size"));
+    int comment_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("comment_text_size"));
+    candidateViewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_view_height"));
+    commentHeight = (int) DimensionsKt.dp2px(config.style.getFloat("comment_height"));
 
     candidateFont = config.getFont("candidate_font");
     commentFont = config.getFont("comment_font");
