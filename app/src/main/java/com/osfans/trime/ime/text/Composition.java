@@ -41,6 +41,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.ConfigGetter;
@@ -273,10 +274,10 @@ public class Composition extends AppCompatTextView {
     sticky_lines_land = config.style.getInt("layout/sticky_lines_land");
     movable = config.style.getString("layout/movable");
     all_phrases = config.style.getBoolean("layout/all_phrases");
-    tfLabel = config.getFont("label_font");
-    tfText = config.getFont("text_font");
-    tfCandidate = config.getFont("candidate_font");
-    tfComment = config.getFont("comment_font");
+    tfLabel = FontManager.getTypeface(config.style.getString("label_font"));
+    tfText = FontManager.getTypeface(config.style.getString("text_font"));
+    tfCandidate = FontManager.getTypeface(config.style.getString("candidate_font"));
+    tfComment = FontManager.getTypeface(config.style.getString("comment_font"));
   }
 
   private Object getAlign(Map<String, Object> m) {

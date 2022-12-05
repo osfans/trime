@@ -46,6 +46,7 @@ import androidx.annotation.NonNull;
 import com.osfans.trime.R;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
@@ -393,11 +394,11 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
     mShowPreview = getPrefs().getKeyboard().getPopupKeyPressEnabled();
 
-    mPaint.setTypeface(config.getFont("key_font"));
-    mPaintSymbol.setTypeface(config.getFont("symbol_font"));
+    mPaint.setTypeface(FontManager.getTypeface(config.style.getString("key_font")));
+    mPaintSymbol.setTypeface(FontManager.getTypeface(config.style.getString("symbol_font")));
     mPaintSymbol.setColor(key_symbol_color);
     mPaintSymbol.setTextSize(mSymbolSize);
-    mPreviewText.setTypeface(config.getFont("preview_font"));
+    mPreviewText.setTypeface(FontManager.getTypeface(config.style.getString("preview_font")));
 
     mEnterLabels = config.getmEnterLabels();
     enterLabelMode = config.style.getInt("enter_label_mode");

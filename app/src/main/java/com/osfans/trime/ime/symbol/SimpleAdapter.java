@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.databinding.SimpleKeyItemBinding;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
 
     holder.simpleKeyText.setText(bean.getLabel());
     holder.simpleKeyText.setTextColor(theme.getLiquidColor("key_text_color"));
-    holder.simpleKeyText.setTypeface(theme.getFont("key_font"));
+    holder.simpleKeyText.setTypeface(FontManager.getTypeface(theme.style.getString("key_font")));
     holder.simpleKeyText.setGravity(Gravity.CENTER);
     holder.simpleKeyText.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 

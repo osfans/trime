@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.GraphicUtils;
@@ -105,9 +106,9 @@ public class Candidate extends View {
     candidateViewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_view_height"));
     commentHeight = (int) DimensionsKt.dp2px(config.style.getFloat("comment_height"));
 
-    candidateFont = config.getFont("candidate_font");
-    commentFont = config.getFont("comment_font");
-    symbolFont = config.getFont("symbol_font");
+    candidateFont = FontManager.getTypeface(config.style.getString("candidate_font"));
+    commentFont = FontManager.getTypeface(config.style.getString("comment_font"));
+    symbolFont = FontManager.getTypeface(config.style.getString("symbol_font"));
 
     candidatePaint.setTextSize(candidate_text_size);
     candidatePaint.setTypeface(candidateFont);

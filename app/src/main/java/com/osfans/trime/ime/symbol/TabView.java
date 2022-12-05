@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.util.DimensionsKt;
@@ -78,7 +79,7 @@ public class TabView extends View {
     int candidateTextSize = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_text_size"));
     candidateViewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_view_height"));
 
-    candidateFont = config.getFont("candidate_font");
+    candidateFont = FontManager.getTypeface(config.style.getString("candidate_font"));
 
     candidatePaint.setTextSize(candidateTextSize);
     candidatePaint.setTypeface(candidateFont);

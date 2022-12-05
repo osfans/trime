@@ -13,6 +13,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.theme.Config
+import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.databinding.SimpleKeyItemBinding
 import kotlinx.coroutines.launch
 
@@ -62,7 +63,7 @@ class FlexibleAdapter(
             val bean = mBeans[position]
             simpleKeyText.apply {
                 text = bean.text
-                typeface = theme.getFont("long_text_font")
+                typeface = FontManager.getTypeface(theme.style.getString("long_text_font"))
                 when (val textColor = theme.getLiquidColor("long_text_color")) {
                     null -> setTextColor(theme.getLiquidColor("key_text_color"))
                     else -> setTextColor(textColor)

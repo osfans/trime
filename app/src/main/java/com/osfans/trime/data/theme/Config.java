@@ -23,7 +23,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.NinePatch;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
@@ -496,10 +495,6 @@ public class Config {
     return null;
   }
 
-  public static Object getValue(@NonNull Map<?, ?> m, String k, Object o) {
-    return m.containsKey(k) ? m.get(k) : o;
-  }
-
   public float getLiquidFloat(String key) {
     if (liquidKeyboard != null) {
       if (liquidKeyboard.containsKey(key)) {
@@ -647,15 +642,6 @@ public class Config {
     if (!mEnterLabels.containsKey("pre")) mEnterLabels.put("pre", defaultEnterLabel);
     if (!mEnterLabels.containsKey("search")) mEnterLabels.put("search", defaultEnterLabel);
     if (!mEnterLabels.containsKey("send")) mEnterLabels.put("send", defaultEnterLabel);
-  }
-
-  public Typeface getFont(String key) {
-    final String name = style.getString(key);
-    if (name != null) {
-      final File f = new File(DataManager.getDataDir("fonts"), name);
-      if (f.exists()) return Typeface.createFromFile(f);
-    }
-    return Typeface.DEFAULT;
   }
 
   //  返回drawable。参数可以是颜色或者图片。如果参数缺失，返回null

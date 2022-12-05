@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.databinding.LiquidKeyItemBinding;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +111,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     final Rime.RimeCandidate candidate = mCandidates.get(position);
 
-    final Typeface candidateFont = theme.getFont("candidate_font");
-    final Typeface commentFont = theme.getFont("comment_font");
+    final Typeface candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
+    final Typeface commentFont = FontManager.getTypeface(theme.style.getString("comment_font"));
     holder.candidate.setTypeface(candidateFont);
     holder.comment.setTypeface(commentFont);
 
