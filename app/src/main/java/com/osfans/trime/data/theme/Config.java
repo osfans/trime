@@ -28,6 +28,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.blankj.utilcode.util.FileUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
@@ -37,10 +38,6 @@ import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.DimensionsKt;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,36 +115,20 @@ public class Config {
   // 设置音效包
   public void setSoundPackage(String name) {
     soundPackageName = name;
-    String path = userDataDir + File.separator + "sound" + File.separator + name + ".sound.yaml";
-    File file = new File(path);
-    if (file.exists()) {
-      applySoundPackage(file, name);
-    }
+    applySoundPackage(name);
     appPrefs.getKeyboard().setSoundPackage(soundPackageName);
   }
 
   // 应用音效包
-  private void applySoundPackage(File file, String name) {
-    // copy soundpackage yaml file from sound folder to build folder
-    try {
-      InputStream in = new FileInputStream(file);
-      OutputStream out =
-          new FileOutputStream(
-              userDataDir + File.separator + "build" + File.separator + name + ".sound.yaml");
-
-      byte[] buffer = new byte[1024];
-      int len;
-      while ((len = in.read(buffer)) > 0) {
-        out.write(buffer, 0, len);
-      }
-      in.close();
-      out.close();
-      Timber.i("applySoundPackage=%s", name);
-    } catch (Exception e) {
-      e.printStackTrace();
+  private boolean applySoundPackage(@NonNull String name) {
+    final String src = userDataDir + "/sound/" + name + ".sound.yaml";
+    final String dest = userDataDir + "/build/" + name + ".sound.yaml";
+    boolean result = FileUtils.copy(src, dest);
+    if (result) {
+      Sound.get(name);
+      currentSound = name;
     }
-    Sound.get(name);
-    currentSound = name;
+    return result;
   }
 
   // 配色指定音效时自动切换音效效果（不会自动修改设置）。
@@ -157,9 +138,7 @@ public class Config {
     if (m.containsKey("sound")) {
       String sound = m.get("sound");
       if (!Objects.equals(sound, currentSound)) {
-        File file = new File(userDataDir + "/sound/" + sound + ".sound.yaml");
-        if (file.exists()) {
-          applySoundPackage(file, sound);
+        if (applySoundPackage(sound)) {
           return;
         }
       }
