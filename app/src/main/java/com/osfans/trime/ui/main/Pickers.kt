@@ -23,14 +23,14 @@ suspend fun Context.themePicker(
             items = ThemeManager.getAllThemes()
                 .map { it.substringBeforeLast('.') }
                 .toTypedArray()
-            val current = Config.get().theme.substringBeforeLast('.')
+            val current = ThemeManager.getActiveTheme().substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             with(items[checkedItem].toString()) {
-                Config.get().theme =
-                    if (this == "trime") this else "$this.trime"
+                ThemeManager.switchTheme(if (this == "trime") this else "$this.trime")
+                Config.get().init(false)
             }
             Trime.getServiceOrNull()?.initKeyboard()
         }

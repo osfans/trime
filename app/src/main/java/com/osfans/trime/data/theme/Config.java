@@ -61,7 +61,7 @@ public class Config {
     return self;
   }
 
-  private String currentThemeName, soundPackageName, currentSound;
+  private String soundPackageName, currentSound;
   private static final String defaultThemeName = "trime";
   private String currentSchemaId, currentColorSchemeId;
 
@@ -79,7 +79,7 @@ public class Config {
 
   public Config(boolean skipDeploy) {
     self = this;
-    currentThemeName = appPrefs.getThemeAndColor().getSelectedTheme();
+    ThemeManager.init();
     soundPackageName = appPrefs.getKeyboard().getSoundPackage();
 
     Timber.d("Syncing asset data ...");
@@ -98,18 +98,8 @@ public class Config {
     Timber.d("Initialization finished");
   }
 
-  public String getTheme() {
-    return currentThemeName;
-  }
-
   public String getSoundPackage() {
     return soundPackageName;
-  }
-
-  public void setTheme(String theme) {
-    currentThemeName = theme;
-    appPrefs.getThemeAndColor().setSelectedTheme(currentThemeName);
-    init(false);
   }
 
   // 设置音效包
@@ -151,9 +141,10 @@ public class Config {
 
   public void init(boolean skipDeployment) {
     Timber.d("Initializing theme ..., skip deployment: %s", skipDeployment);
-    Timber.d("Current theme: %s, current schema id: %s", currentThemeName, currentSchemaId);
+    Timber.d(
+        "Current theme: %s, current schema id: %s", ThemeManager.getActiveTheme(), currentSchemaId);
     try {
-      final String fullThemeFileName = currentThemeName + ".yaml";
+      final String fullThemeFileName = ThemeManager.getActiveTheme() + ".yaml";
       final File themeFile = new File(Rime.get_user_data_dir(), "build/" + fullThemeFileName);
       if (skipDeployment && themeFile.exists()) {
         Timber.d("Skipped theme file deployment");
@@ -165,7 +156,7 @@ public class Config {
       Timber.d("Fetching global theme config map ...");
       long start = System.currentTimeMillis();
       Map<String, Object> fullThemeConfigMap;
-      if ((fullThemeConfigMap = Rime.getRimeConfigMap(currentThemeName, "")) == null) {
+      if ((fullThemeConfigMap = Rime.getRimeConfigMap(ThemeManager.getActiveTheme(), "")) == null) {
         fullThemeConfigMap = Rime.getRimeConfigMap(defaultThemeName, "");
       }
 
@@ -194,7 +185,10 @@ public class Config {
       Timber.d("Initializing cache takes %s ms", initEnd - end);
     } catch (Exception e) {
       Timber.e(e, "Failed to parse the theme!");
-      if (!currentThemeName.equals(defaultThemeName)) setTheme(defaultThemeName);
+      if (!ThemeManager.getActiveTheme().equals(defaultThemeName)) {
+        ThemeManager.switchTheme(defaultThemeName);
+        init(false);
+      }
     }
   }
 
@@ -791,7 +785,7 @@ public class Config {
     Timber.d("Initializing currentColors ...");
     Timber.d(
         "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s",
-        currentColorSchemeId, currentThemeName, currentSchemaId);
+        currentColorSchemeId, ThemeManager.getActiveTheme(), currentSchemaId);
     final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
     if (colorMap == null) {
       Timber.d("Color scheme id not found: %s", currentColorSchemeId);
@@ -838,7 +832,7 @@ public class Config {
     Timber.d("Initializing currentColors ...");
     Timber.d(
         "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s, isDarkMode = %s",
-        currentColorSchemeId, currentThemeName, currentSchemaId, darkMode);
+        currentColorSchemeId, ThemeManager.getActiveTheme(), currentSchemaId, darkMode);
     final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
     if (colorMap == null) {
       Timber.i("Color scheme id not found: %s", currentColorSchemeId);
