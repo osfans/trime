@@ -65,6 +65,7 @@ public class Config {
   private static final String defaultThemeName = "trime";
   private String currentSchemaId, currentColorSchemeId;
 
+  private Map<String, Object> generalStyle;
   private Map<String, String> fallbackColors;
   private Map<String, Map<String, String>> presetColorSchemes;
   private Map<String, Map<String, Object>> presetKeyboards;
@@ -163,7 +164,7 @@ public class Config {
       Objects.requireNonNull(fullThemeConfigMap, "The theme file cannot be empty!");
       Timber.d("Fetching done");
 
-      style = new Style((Map<String, Object>) fullThemeConfigMap.get("style"));
+      generalStyle = (Map<String, Object>) fullThemeConfigMap.get("style");
       fallbackColors = (Map<String, String>) fullThemeConfigMap.get("fallback_colors");
       Key.presetKeys = (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keys");
       presetColorSchemes =
@@ -171,7 +172,8 @@ public class Config {
       presetKeyboards =
           (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keyboards");
       liquidKeyboard = (Map<String, Object>) fullThemeConfigMap.get("liquid_keyboard");
-      liquid = new Liquid(liquidKeyboard);
+      style = new Style(this);
+      liquid = new Liquid(this);
       long end = System.currentTimeMillis();
       Timber.d("Setting up all theme config map takes %s ms", end - start);
       initLiquidKeyboard();
@@ -269,46 +271,46 @@ public class Config {
   }
 
   public static class Style {
-    private final Map<String, Object> styleConfigMap;
+    private final Config theme;
 
-    public Style(final Map<String, Object> styleConfigMap) {
-      this.styleConfigMap = styleConfigMap;
+    public Style(@NonNull final Config theme) {
+      this.theme = theme;
     }
 
     public String getString(@NonNull String key) {
-      return obtainString(styleConfigMap, key);
+      return obtainString(theme.generalStyle, key);
     }
 
     public int getInt(@NonNull String key) {
-      return obtainInt(styleConfigMap, key);
+      return obtainInt(theme.generalStyle, key);
     }
 
     public float getFloat(@NonNull String key) {
-      return obtainFloat(styleConfigMap, key);
+      return obtainFloat(theme.generalStyle, key);
     }
 
     public boolean getBoolean(@NonNull String key) {
-      return obtainBoolean(styleConfigMap, key);
+      return obtainBoolean(theme.generalStyle, key);
     }
 
     public Object getObject(@NonNull String key) {
-      return obtainValue(styleConfigMap, key);
+      return obtainValue(theme.generalStyle, key);
     }
   }
 
   public static class Liquid {
-    private final Map<String, Object> liquidConfigMap;
+    private final Config theme;
 
-    public Liquid(@NonNull Map<String, Object> liquidConfigMap) {
-      this.liquidConfigMap = liquidConfigMap;
+    public Liquid(@NonNull final Config theme) {
+      this.theme = theme;
     }
 
     public int getInt(@NonNull String key) {
-      return obtainInt(liquidConfigMap, key);
+      return obtainInt(theme.liquidKeyboard, key);
     }
 
     public float getFloat(@NonNull String key) {
-      return obtainFloat(liquidConfigMap, key, self.style.getFloat(key));
+      return obtainFloat(theme.liquidKeyboard, key, theme.style.getFloat(key));
     }
   }
 
