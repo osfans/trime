@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import kotlin.Pair;
+import kotlin.collections.CollectionsKt;
 import kotlin.collections.MapsKt;
 import timber.log.Timber;
 
@@ -202,23 +203,15 @@ public class Config {
   public static Object obtainValue(Map<String, Object> map, @NonNull String vararg) {
     if (map == null || map.isEmpty() || vararg.isEmpty()) return null;
     final String[] keys = vararg.split("/");
-    switch (keys.length) {
-      case 2:
-        if (map.containsKey(keys[0])) {
-          final Map<String, Object> sub = (Map<String, Object>) map.get(keys[0]);
-          if (sub != null && sub.containsKey(keys[1])) {
-            return sub.get(keys[1]);
-          }
-        }
+    Object v = map;
+    for (final String key : keys) {
+      if (v instanceof Map && ((Map<String, Object>) v).containsKey(key)) {
+        v = ((Map<String, Object>) v).get(key);
+      } else {
         return null;
-      case 1:
-        if (map.containsKey(keys[0])) {
-          return map.get(keys[0]);
-        }
-        return null;
-      default:
-        return null;
+      }
     }
+    return v;
   }
 
   public static String obtainString(
@@ -348,12 +341,8 @@ public class Config {
 
   public List<String> getKeyboardNames() {
     final List<String> names = (List<String>) style.getObject("keyboards");
-    final List<String> keyboards = new ArrayList<>();
-    for (String s : names) {
-      s = getKeyboardName(s);
-      if (!keyboards.contains(s)) keyboards.add(s);
-    }
-    return keyboards;
+    if (names == null) return new ArrayList<>();
+    return CollectionsKt.distinct(CollectionsKt.map(names, this::getKeyboardName));
   }
 
   public void initLiquidKeyboard() {
@@ -450,22 +439,12 @@ public class Config {
     }
     return color;
   }
-  /*
-
-    public Integer getColor(String key) {
-      Object o = getColorObject(key);
-      if (o == null) {
-        o = ((Map<?, ?>) Objects.requireNonNull(presetColorSchemes.get(colorID))).get(key);
-      }
-      return parseColor(o);
-    }
-  */
 
   // API 2.0
   public Integer getColor(String key) {
     Object o;
-    if (curcentColors.containsKey(key)) {
-      o = curcentColors.get(key);
+    if (currentColors.containsKey(key)) {
+      o = currentColors.get(key);
       if (o instanceof Integer) return (Integer) o;
     }
     o = getColorValue(key);
@@ -490,14 +469,14 @@ public class Config {
   private String getColorValue(String key) {
     final Map<String, String> map = presetColorSchemes.get(currentColorSchemeId);
     if (map == null) return null;
-    appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
-    String colorValue = map.get(key);
-    String fallbackKey = key;
-    while (colorValue == null && fallbackColors.containsKey(fallbackKey)) {
-      fallbackKey = fallbackColors.get(key);
-      colorValue = map.get(fallbackKey);
+    String value;
+    String newKey = key;
+    int limit = fallbackColors.size() * 2;
+    for (int i = 0; i < limit; i++) {
+      if ((value = map.get(newKey)) != null || !fallbackColors.containsKey(newKey)) return value;
+      newKey = fallbackColors.get(newKey);
     }
-    return colorValue;
+    return null;
   }
 
   /**
@@ -631,8 +610,8 @@ public class Config {
     String name = o.toString();
     Integer color = parseColor(o);
     if (color == null) {
-      if (curcentColors.containsKey(name)) {
-        o = curcentColors.get(name);
+      if (currentColors.containsKey(name)) {
+        o = currentColors.get(name);
         color = parseColor(o);
       }
     }
@@ -659,8 +638,8 @@ public class Config {
       }
 
       if (!f.exists()) {
-        if (curcentColors.containsKey(name)) {
-          o = curcentColors.get(name);
+        if (currentColors.containsKey(name)) {
+          o = currentColors.get(name);
           if (o instanceof String) f = new File((String) o);
         }
       }
@@ -687,13 +666,13 @@ public class Config {
 
   // 获取当前色彩 Config 2.0
   public Integer getCurrentColor_(String key) {
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     return (Integer) o;
   }
 
   // 获取当前背景图路径 Config 2.0
   public String getCurrentImage(String key) {
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (o instanceof String) return (String) o;
     return "";
   }
@@ -702,7 +681,7 @@ public class Config {
   //  参数可以是颜色或者图片。如果参数缺失，返回null
   public Drawable getDrawable_(String key) {
     if (key == null) return null;
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (o instanceof Integer) {
       Integer color = (Integer) o;
       final GradientDrawable gd = new GradientDrawable();
@@ -731,7 +710,7 @@ public class Config {
     }
 
     GradientDrawable gd = new GradientDrawable();
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (!(o instanceof Integer)) return null;
     gd.setColor((int) o);
 
@@ -739,7 +718,7 @@ public class Config {
 
     if (borderColorKey != null && borderKey != null) {
       int border = (int) DimensionsKt.dp2px(style.getFloat(borderKey));
-      Object borderColor = curcentColors.get(borderColorKey);
+      Object borderColor = currentColors.get(borderColorKey);
       if (borderColor instanceof Integer && border > 0) {
         gd.setStroke(border, getCurrentColor_(borderColorKey));
       }
@@ -762,7 +741,7 @@ public class Config {
   public Drawable getDrawableBitmap_(String key) {
     if (key == null) return null;
 
-    Object o = curcentColors.get(key);
+    Object o = currentColors.get(key);
     if (o instanceof String) {
       String path = (String) o;
       if (path.contains(".9.png")) {
@@ -777,11 +756,11 @@ public class Config {
   }
 
   // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
-  private final Map<String, Object> curcentColors = new HashMap<>();
+  private final Map<String, Object> currentColors = new HashMap<>();
   private String backgroundFolder;
   // 初始化当前配色 Config 2.0
   public void initCurrentColors() {
-    curcentColors.clear();
+    currentColors.clear();
     currentColorSchemeId = getColorSchemeName();
     backgroundFolder = style.getString("background_folder");
     Timber.d("Initializing currentColors ...");
@@ -797,29 +776,17 @@ public class Config {
 
     for (Map.Entry<String, String> entry : colorMap.entrySet()) {
       Object value = getColorRealValue(entry.getValue());
-      if (value != null) curcentColors.put(entry.getKey(), value);
+      if (value != null) currentColors.put(entry.getKey(), value);
     }
 
     for (Map.Entry<String, String> entry : fallbackColors.entrySet()) {
       String key = entry.getKey();
-      if (!curcentColors.containsKey(key)) {
-        String colorValue = colorMap.get(key);
-        String fallbackKey = key;
-        List<String> fallbackKeys = new ArrayList<>();
-        while (colorValue == null && fallbackColors.containsKey(fallbackKey)) {
-          fallbackKey = fallbackColors.get(fallbackKey);
-          colorValue = colorMap.get(fallbackKey);
-          fallbackKeys.add(fallbackKey);
-          // 避免死循环
-          if (fallbackKeys.size() > 40) break;
-        }
+      if (!currentColors.containsKey(key)) {
+        final String colorValue = getColorValue(key);
         if (colorValue != null) {
           Object value = getColorRealValue(colorValue);
           if (value != null) {
-            curcentColors.put(key, value);
-            for (String k : fallbackKeys) {
-              curcentColors.put(k, value);
-            }
+            currentColors.put(key, value);
           }
         }
       }
@@ -828,7 +795,7 @@ public class Config {
 
   // 当切换暗黑模式时，刷新键盘配色方案
   public void initCurrentColors(boolean darkMode) {
-    curcentColors.clear();
+    currentColors.clear();
     currentColorSchemeId = getColorSchemeName(darkMode);
     backgroundFolder = style.getString("background_folder");
     Timber.d("Initializing currentColors ...");
@@ -844,29 +811,17 @@ public class Config {
 
     for (Map.Entry<String, String> entry : colorMap.entrySet()) {
       Object value = getColorRealValue(entry.getValue());
-      if (value != null) curcentColors.put(entry.getKey(), value);
+      if (value != null) currentColors.put(entry.getKey(), value);
     }
 
     for (Map.Entry<String, String> entry : fallbackColors.entrySet()) {
       String key = entry.getKey();
-      if (!curcentColors.containsKey(key)) {
-        String colorValue = colorMap.get(key);
-        String fallbackKey = key;
-        List<String> fallbackKeys = new ArrayList<>();
-        while (colorValue == null && fallbackColors.containsKey(fallbackKey)) {
-          fallbackKey = fallbackColors.get(fallbackKey);
-          colorValue = colorMap.get(fallbackKey);
-          fallbackKeys.add(fallbackKey);
-          // 避免死循环
-          if (fallbackKeys.size() > 40) break;
-        }
+      if (!currentColors.containsKey(key)) {
+        final String colorValue = getColorValue(key);
         if (colorValue != null) {
           Object value = getColorRealValue(colorValue);
           if (value != null) {
-            curcentColors.put(key, value);
-            for (String k : fallbackKeys) {
-              curcentColors.put(k, value);
-            }
+            currentColors.put(key, value);
           }
         }
       }
@@ -906,22 +861,5 @@ public class Config {
 
     if (f.exists()) return f.getPath();
     return null;
-  }
-
-  //  把int和long打印为hex，对color做debug使用
-  public static String data2hex(Object data) {
-    Long a;
-    if (data instanceof Integer) a = (long) (int) data;
-    else a = (Long) data;
-    int len = (int) Math.ceil(Math.log(a) / Math.log(16));
-    char[] result = new char[len];
-    String s = "0123456789ABCDEF";
-
-    for (int i = len - 1; i >= 0; i--) {
-      int b = (int) (15 & a);
-      result[i] = s.charAt(b);
-      a = a >> 4;
-    }
-    return new String(result);
   }
 }
