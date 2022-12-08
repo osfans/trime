@@ -19,7 +19,6 @@ package com.osfans.trime.ime.keyboard;
 
 import static android.view.KeyEvent.isModifierKey;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.KeyCharacterMap;
@@ -112,7 +111,7 @@ public class Key {
    * @param parent 按鍵所在的{@link Keyboard 鍵盤}
    * @param mk 從YAML中解析得到的Map
    */
-  public Key(Context context, Keyboard parent, Map<String, Object> mk) {
+  public Key(Keyboard parent, Map<String, Object> mk) {
     this(parent);
     String s;
     Config config = Config.get();

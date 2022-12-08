@@ -1353,13 +1353,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
         final Keyboard keyboard;
         if (popupKey.getPopupCharacters() != null) {
           keyboard =
-              new Keyboard(
-                  getContext(),
-                  popupKey.getPopupCharacters(),
-                  -1,
-                  getPaddingLeft() + getPaddingRight());
+              new Keyboard(popupKey.getPopupCharacters(), -1, getPaddingLeft() + getPaddingRight());
         } else {
-          keyboard = new Keyboard(getContext());
+          keyboard = new Keyboard();
         }
         mMiniKeyboard.setKeyboard(keyboard);
         mMiniKeyboard.setPopupParent(this);

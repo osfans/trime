@@ -1,9 +1,9 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
+import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Config
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.util.appContext
 import timber.log.Timber
 
@@ -30,21 +30,15 @@ class KeyboardSwitcher {
     fun newOrReset() {
         val methodName = "\t<TrimeInit>\t" + Thread.currentThread().stackTrace[2].methodName + "\t"
         Timber.d(methodName)
-        val ims = Trime.getService()
         Timber.d(methodName + "getConfig")
         keyboardNames = Config.get().keyboardNames
-        Timber.d(methodName + "land")
-        val land = (
-            ims.resources.configuration.orientation
-                == Configuration.ORIENTATION_LANDSCAPE
-            )
         Timber.d(methodName + "getConfig")
-        Config.get().getKeyboardPadding(land)
+        Config.get().getKeyboardPadding(ScreenUtils.isLandscape())
         Timber.d("update KeyboardPadding: KeyboardSwitcher.init")
 
         Timber.d(methodName + "getKeyboards")
         keyboards = Array(keyboardNames.size) { i ->
-            Keyboard(ims, keyboardNames[i])
+            Keyboard(keyboardNames[i])
         }
         Timber.d(methodName + "setKeyboard")
         setKeyboard(0)
