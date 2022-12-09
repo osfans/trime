@@ -15,11 +15,13 @@ class KeyboardSwitcher {
 
     private var currentDisplayWidth: Int = 0
 
-    lateinit var keyboards: Array<Keyboard>
-    lateinit var keyboardNames: List<String>
+    private val theme = Config.get()
+    val availableKeyboardNames = (theme.style.getObject("keyboards") as? List<String>)
+        ?.map { theme.keyboards.getKeyboardName(it) }?.distinct() ?: listOf()
+    val availableKeyboards = availableKeyboardNames.map { Keyboard(theme.keyboards.getKeyboardName(it)) }
 
     /** To get current keyboard instance. **/
-    val currentKeyboard: Keyboard get() = keyboards[currentId]
+    val currentKeyboard: Keyboard get() = availableKeyboards[currentId]
     /** To get [currentKeyboard]'s ascii mode. **/
     val asciiMode: Boolean get() = currentKeyboard.asciiMode
 
@@ -31,15 +33,8 @@ class KeyboardSwitcher {
         val methodName = "\t<TrimeInit>\t" + Thread.currentThread().stackTrace[2].methodName + "\t"
         Timber.d(methodName)
         Timber.d(methodName + "getConfig")
-        keyboardNames = Config.get().keyboardNames
-        Timber.d(methodName + "getConfig")
-        Config.get().getKeyboardPadding(ScreenUtils.isLandscape())
+        theme.getKeyboardPadding(ScreenUtils.isLandscape())
         Timber.d("update KeyboardPadding: KeyboardSwitcher.init")
-
-        Timber.d(methodName + "getKeyboards")
-        keyboards = Array(keyboardNames.size) { i ->
-            Keyboard(keyboardNames[i])
-        }
         Timber.d(methodName + "setKeyboard")
         setKeyboard(0)
         Timber.d(methodName + "finish")
@@ -51,17 +46,17 @@ class KeyboardSwitcher {
     fun switchToKeyboard(name: String?) {
         var i = if (currentId.isValidId()) currentId else 0
         i = when {
-            name.isNullOrEmpty() -> if (keyboards[i].isLock) i else lastLockId
+            name.isNullOrEmpty() -> if (availableKeyboards[i].isLock) i else lastLockId
             name.contentEquals(".default") -> 0
             name.contentEquals(".prior") -> currentId - 1
             name.contentEquals(".next") -> currentId + 1
             name.contentEquals(".last") -> lastId
             name.contentEquals(".last_lock") -> lastLockId
             name.contentEquals(".ascii") -> {
-                val asciiKeyboard = keyboards[i].asciiKeyboard
-                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { keyboardNames.indexOf(asciiKeyboard) }
+                val asciiKeyboard = availableKeyboards[i].asciiKeyboard
+                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { availableKeyboardNames.indexOf(asciiKeyboard) }
             }
-            else -> keyboardNames.indexOf(name)
+            else -> availableKeyboardNames.indexOf(name)
         }
         setKeyboard(i)
     }
@@ -71,25 +66,25 @@ class KeyboardSwitcher {
     fun startKeyboard(name: String?) {
         var i = if (currentId.isValidId()) currentId else 0
         i = when {
-            name.isNullOrEmpty() -> if (keyboards[i].isLock) i else lastLockId
+            name.isNullOrEmpty() -> if (availableKeyboards[i].isLock) i else lastLockId
             name.contentEquals(".default") -> 0
             name.contentEquals(".prior") -> currentId - 1
             name.contentEquals(".next") -> currentId + 1
             name.contentEquals(".last") -> lastId
             name.contentEquals(".last_lock") -> lastLockId
             name.contentEquals(".ascii") -> {
-                val asciiKeyboard = keyboards[i].asciiKeyboard
-                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { keyboardNames.indexOf(asciiKeyboard) }
+                val asciiKeyboard = availableKeyboards[i].asciiKeyboard
+                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { availableKeyboardNames.indexOf(asciiKeyboard) }
             }
-            else -> keyboardNames.indexOf(name)
+            else -> availableKeyboardNames.indexOf(name)
         }
 
-        if (i == 0 && keyboardNames.contains("mini")) {
+        if (i == 0 && availableKeyboardNames.contains("mini")) {
             if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard) {
-                val realkeyboard = appContext.getResources().getConfiguration().keyboard
+                val realkeyboard = appContext.resources.configuration.keyboard
                 if (realkeyboard != Configuration.KEYBOARD_NOKEYS) {
                     Timber.i("onStartInputView() configuration.keyboard=" + realkeyboard + ", keyboardType=" + i)
-                    i = keyboardNames.indexOf("mini")
+                    i = availableKeyboardNames.indexOf("mini")
                 }
             }
         }
@@ -110,15 +105,11 @@ class KeyboardSwitcher {
     private fun setKeyboard(id: Int) {
         Timber.d("\t<TrimeInit>\tsetKeyboard()\t" + currentId + "->" + id)
         lastId = currentId
-        if (lastId.isValidId() && keyboards[lastId].isLock) {
+        if (lastId.isValidId() && availableKeyboards[lastId].isLock) {
             lastLockId = lastId
         }
         currentId = if (id.isValidId()) id else 0
     }
 
-    public fun getCurrentKeyboardName(): String {
-        return keyboardNames.get(currentId)
-    }
-
-    private fun Int.isValidId() = this in keyboards.indices
+    private fun Int.isValidId() = this in availableKeyboards.indices
 }

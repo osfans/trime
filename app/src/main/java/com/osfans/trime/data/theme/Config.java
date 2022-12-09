@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import kotlin.Pair;
-import kotlin.collections.CollectionsKt;
 import kotlin.collections.MapsKt;
 import timber.log.Timber;
 
@@ -69,11 +68,12 @@ public class Config {
   private Map<String, Object> generalStyle;
   private Map<String, String> fallbackColors;
   private Map<String, Map<String, String>> presetColorSchemes;
-  private Map<String, Map<String, Object>> presetKeyboards;
+  private Map<String, Object> presetKeyboards;
   private Map<String, Object> liquidKeyboard;
 
   public Style style;
   public Liquid liquid;
+  public Keyboards keyboards;
 
   public Config() {
     this(false);
@@ -170,11 +170,11 @@ public class Config {
       Key.presetKeys = (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keys");
       presetColorSchemes =
           (Map<String, Map<String, String>>) fullThemeConfigMap.get("preset_color_schemes");
-      presetKeyboards =
-          (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keyboards");
+      presetKeyboards = (Map<String, Object>) fullThemeConfigMap.get("preset_keyboards");
       liquidKeyboard = (Map<String, Object>) fullThemeConfigMap.get("liquid_keyboard");
       style = new Style(this);
       liquid = new Liquid(this);
+      keyboards = new Keyboards(this);
       long end = System.currentTimeMillis();
       Timber.d("Setting up all theme config map takes %s ms", end - start);
       initLiquidKeyboard();
@@ -307,42 +307,60 @@ public class Config {
     }
   }
 
-  public boolean hasKey(String s) {
-    return style.getObject(s) != null;
-  }
+  public static class Keyboards {
+    private final Config theme;
 
-  private String getKeyboardName(@NonNull String name) {
-    if (name.contentEquals(".default")) {
-      if (presetKeyboards.containsKey(currentSchemaId)) name = currentSchemaId; // 匹配方案名
-      else {
-        if (currentSchemaId.contains("_")) name = currentSchemaId.split("_")[0];
-        if (!presetKeyboards.containsKey(name)) { // 匹配“_”前的方案名
-          Object o = Rime.getRimeSchemaValue(currentSchemaId, "speller/alphabet");
-          name = "qwerty"; // 26
-          if (o != null) {
-            final String alphabet = o.toString();
-            if (presetKeyboards.containsKey(alphabet)) name = alphabet; // 匹配字母表
-            else {
-              if (alphabet.contains(",") || alphabet.contains(";")) name += "_";
-              if (alphabet.contains("0") || alphabet.contains("1")) name += "0";
+    public Keyboards(@NonNull final Config theme) {
+      this.theme = theme;
+    }
+
+    public Object getObject(@NonNull String key) {
+      return obtainValue(theme.presetKeyboards, key);
+    }
+
+    public String getKeyboardName(@NonNull String name) {
+      final String remapped;
+      if (".default".equals(name)) {
+        final String currentSchemaId = Rime.get_current_schema();
+        final String shortSchemaId = currentSchemaId.split("_")[0];
+        if (theme.presetKeyboards.containsKey(shortSchemaId)) {
+          return shortSchemaId;
+        } else {
+          final String alphabet =
+              (String) Rime.getRimeSchemaValue(currentSchemaId, "speller/alphabet");
+          final String twentySix = "qwerty";
+          if (theme.presetKeyboards.containsKey(alphabet)) {
+            return alphabet;
+          } else {
+            if (alphabet != null && (alphabet.contains(",") || alphabet.contains(";"))) {
+              remapped = twentySix + "_";
+            } else if (alphabet != null && (alphabet.contains("0") || alphabet.contains("1"))) {
+              remapped = twentySix + "0";
+            } else {
+              remapped = twentySix;
             }
           }
         }
+      } else {
+        remapped = name;
       }
+      if (!theme.presetKeyboards.containsKey(remapped)) {
+        Timber.w("Cannot find keyboard definition %s, fallback ...", remapped);
+        final Map<String, Object> defaultMap =
+            (Map<String, Object>) theme.presetKeyboards.get("default");
+        if (defaultMap == null)
+          throw new IllegalStateException("The default keyboard definition is missing!");
+        if (defaultMap.containsKey("import_preset")) {
+          final String v;
+          return ((v = (String) defaultMap.get("import_preset")) != null) ? v : "default";
+        }
+      }
+      return remapped;
     }
-    if (!presetKeyboards.containsKey(name)) name = "default";
-    final Map<String, Object> m = presetKeyboards.get(name);
-    assert m != null;
-    if (m.containsKey("import_preset")) {
-      name = Objects.requireNonNull(m.get("import_preset")).toString();
-    }
-    return name;
   }
 
-  public List<String> getKeyboardNames() {
-    final List<String> names = (List<String>) style.getObject("keyboards");
-    if (names == null) return new ArrayList<>();
-    return CollectionsKt.distinct(CollectionsKt.map(names, this::getKeyboardName));
+  public boolean hasKey(String s) {
+    return style.getObject(s) != null;
   }
 
   public void initLiquidKeyboard() {
@@ -371,14 +389,10 @@ public class Config {
     }
   }
 
-  public Map<String, Object> getKeyboard(String name) {
-    if (!presetKeyboards.containsKey(name)) name = "default";
-    return presetKeyboards.get(name);
-  }
-
   public void destroy() {
     if (style != null) style = null;
     if (liquid != null) liquid = null;
+    if (keyboards != null) keyboards = null;
     self = null;
   }
 

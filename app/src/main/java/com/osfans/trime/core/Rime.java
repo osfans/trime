@@ -804,7 +804,7 @@ public class Rime {
   @Nullable
   public static native List<Map<String, String>> get_schema_list();
 
-  @Nullable
+  @NonNull
   public static native String get_current_schema();
 
   public static native boolean select_schema(String schema_id);

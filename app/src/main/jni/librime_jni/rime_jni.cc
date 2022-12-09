@@ -393,7 +393,7 @@ Java_com_osfans_trime_core_Rime_get_1current_1schema(JNIEnv *env, jclass /* thiz
     char current[BUFSIZE] = {0};
     bool b = RimeGetCurrentSchema(activated_session_id, current, sizeof(current));
     if (b) return env->NewStringUTF(current);
-    return nullptr;
+    return env->NewStringUTF("");
 }
 
 extern "C"
