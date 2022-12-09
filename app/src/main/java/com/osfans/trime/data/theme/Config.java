@@ -318,7 +318,7 @@ public class Config {
       return obtainValue(theme.presetKeyboards, key);
     }
 
-    public String getKeyboardName(@NonNull String name) {
+    public String remapKeyboardId(@NonNull String name) {
       final String remapped;
       if (".default".equals(name)) {
         final String currentSchemaId = Rime.get_current_schema();

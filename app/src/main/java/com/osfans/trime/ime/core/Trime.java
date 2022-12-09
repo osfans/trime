@@ -110,7 +110,6 @@ public class Trime extends LifecycleInputMethodService {
 
   private boolean darkMode; // 当前键盘主题是否处于暗黑模式
   private KeyboardView mainKeyboardView; // 主軟鍵盤
-  public KeyboardSwitcher keyboardSwitcher; // 键盘切换器
 
   private Candidate mCandidate; // 候選
   private Composition mComposition; // 編碼
@@ -364,10 +363,6 @@ public class Trime extends LifecycleInputMethodService {
         Timber.d(methodName + "InputFeedbackManager");
         inputFeedbackManager = new InputFeedbackManager(this);
 
-        Timber.d(methodName + "keyboardSwitcher");
-
-        keyboardSwitcher = new KeyboardSwitcher();
-
         Timber.d(methodName + "liquidKeyboard");
         liquidKeyboard = new LiquidKeyboard(this);
       } catch (Exception e) {
@@ -562,7 +557,7 @@ public class Trime extends LifecycleInputMethodService {
     loadConfig();
     getImeConfig().initCurrentColors();
     getImeConfig().setSoundFromColor();
-    if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
+    KeyboardSwitcher.newOrReset();
     resetCandidate();
     hideCompositionView();
     resetKeyboard();
@@ -584,7 +579,7 @@ public class Trime extends LifecycleInputMethodService {
       loadConfig();
       getImeConfig().initCurrentColors(darkMode);
       getImeConfig().setSoundFromColor();
-      if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
+      KeyboardSwitcher.newOrReset();
       resetCandidate();
       hideCompositionView();
       resetKeyboard();
@@ -734,7 +729,7 @@ public class Trime extends LifecycleInputMethodService {
     getImeConfig().initCurrentColors();
     loadBackground();
 
-    if (keyboardSwitcher != null) keyboardSwitcher.newOrReset();
+    KeyboardSwitcher.newOrReset();
     Timber.i("onCreateInputView() finish");
 
     return inputRootBinding.inputRoot;
@@ -856,7 +851,7 @@ public class Trime extends LifecycleInputMethodService {
   public void bindKeyboardToInputView() {
     if (mainKeyboardView != null) {
       // Bind the selected keyboard to the input view.
-      Keyboard sk = keyboardSwitcher.getCurrentKeyboard();
+      Keyboard sk = KeyboardSwitcher.getCurrentKeyboard();
       mainKeyboardView.setKeyboard(sk);
       dispatchCapsStateToInputView();
     }

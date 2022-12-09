@@ -8,88 +8,72 @@ import com.osfans.trime.util.appContext
 import timber.log.Timber
 
 /** Manages [Keyboard]s and their status. **/
-class KeyboardSwitcher {
-    var currentId: Int = -1
+object KeyboardSwitcher {
+    var currentId: Int = 0
     var lastId: Int = 0
     var lastLockId: Int = 0
 
     private var currentDisplayWidth: Int = 0
 
     private val theme = Config.get()
-    val availableKeyboardNames = (theme.style.getObject("keyboards") as? List<String>)
-        ?.map { theme.keyboards.getKeyboardName(it) }?.distinct() ?: listOf()
-    val availableKeyboards = availableKeyboardNames.map { Keyboard(theme.keyboards.getKeyboardName(it)) }
+    lateinit var availableKeyboardIds: List<String>
+    lateinit var availableKeyboards: List<Keyboard>
 
     /** To get current keyboard instance. **/
+    @JvmStatic
     val currentKeyboard: Keyboard get() = availableKeyboards[currentId]
-    /** To get [currentKeyboard]'s ascii mode. **/
-    val asciiMode: Boolean get() = currentKeyboard.asciiMode
 
     init {
         newOrReset()
     }
 
+    @JvmStatic
     fun newOrReset() {
-        val methodName = "\t<TrimeInit>\t" + Thread.currentThread().stackTrace[2].methodName + "\t"
-        Timber.d(methodName)
-        Timber.d(methodName + "getConfig")
+        Timber.d("Refreshing keyboard padding ...")
         theme.getKeyboardPadding(ScreenUtils.isLandscape())
-        Timber.d("update KeyboardPadding: KeyboardSwitcher.init")
-        Timber.d(methodName + "setKeyboard")
-        setKeyboard(0)
-        Timber.d(methodName + "finish")
+        Timber.d("Switching keyboard back to .default ...")
+        availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
+                ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
+        availableKeyboards = availableKeyboardIds.map { Keyboard(theme.keyboards.remapKeyboardId(it)) }
     }
 
-    /**
-     * Switch to a certain keyboard by given [name].
-     */
-    fun switchToKeyboard(name: String?) {
-        var i = if (currentId.isValidId()) currentId else 0
-        i = when {
-            name.isNullOrEmpty() -> if (availableKeyboards[i].isLock) i else lastLockId
-            name.contentEquals(".default") -> 0
-            name.contentEquals(".prior") -> currentId - 1
-            name.contentEquals(".next") -> currentId + 1
-            name.contentEquals(".last") -> lastId
-            name.contentEquals(".last_lock") -> lastLockId
-            name.contentEquals(".ascii") -> {
-                val asciiKeyboard = availableKeyboards[i].asciiKeyboard
-                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { availableKeyboardNames.indexOf(asciiKeyboard) }
+    fun switchKeyboard(name: String?) {
+        val i = when (name) {
+            ".default" -> 0
+            ".prior" -> currentId - 1
+            ".next" -> currentId + 1
+            ".last" -> lastId
+            ".last_lock" -> lastLockId
+            ".ascii" -> {
+                val asciiKeyboard = availableKeyboards[currentId].asciiKeyboard
+                if (asciiKeyboard.isNullOrEmpty()) { currentId } else { availableKeyboardIds.indexOf(asciiKeyboard) }
             }
-            else -> availableKeyboardNames.indexOf(name)
-        }
-        setKeyboard(i)
-    }
-    /**
-     * Switch to a certain keyboard by given [name].
-     */
-    fun startKeyboard(name: String?) {
-        var i = if (currentId.isValidId()) currentId else 0
-        i = when {
-            name.isNullOrEmpty() -> if (availableKeyboards[i].isLock) i else lastLockId
-            name.contentEquals(".default") -> 0
-            name.contentEquals(".prior") -> currentId - 1
-            name.contentEquals(".next") -> currentId + 1
-            name.contentEquals(".last") -> lastId
-            name.contentEquals(".last_lock") -> lastLockId
-            name.contentEquals(".ascii") -> {
-                val asciiKeyboard = availableKeyboards[i].asciiKeyboard
-                if (asciiKeyboard == null || asciiKeyboard.isEmpty()) { i } else { availableKeyboardNames.indexOf(asciiKeyboard) }
-            }
-            else -> availableKeyboardNames.indexOf(name)
-        }
-
-        if (i == 0 && availableKeyboardNames.contains("mini")) {
-            if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard) {
-                val realkeyboard = appContext.resources.configuration.keyboard
-                if (realkeyboard != Configuration.KEYBOARD_NOKEYS) {
-                    Timber.i("onStartInputView() configuration.keyboard=" + realkeyboard + ", keyboardType=" + i)
-                    i = availableKeyboardNames.indexOf("mini")
+            else -> {
+                if (name.isNullOrEmpty()) {
+                    if (availableKeyboards[currentId].isLock) currentId else lastLockId
+                } else {
+                    availableKeyboardIds.indexOf(name)
                 }
             }
         }
 
-        setKeyboard(i)
+        val deviceKeyboard = appContext.resources.configuration.keyboard
+        var mini = -1
+        if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard) {
+            if (i == 0 && "mini" in availableKeyboardIds) {
+                if (deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
+                    mini = availableKeyboardIds.indexOf("mini")
+                }
+            }
+        }
+
+        if (currentId >= 0 && availableKeyboards[currentId].isLock) {
+            lastLockId = currentId
+        }
+        lastId = currentId
+        currentId = if (mini >= 0) mini else i
+        Timber.i("Switched keyboard from ${availableKeyboardIds[lastId]} " +
+                "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard).")
     }
 
     /**
@@ -101,15 +85,4 @@ class KeyboardSwitcher {
         currentDisplayWidth = displayWidth
         newOrReset()
     }
-
-    private fun setKeyboard(id: Int) {
-        Timber.d("\t<TrimeInit>\tsetKeyboard()\t" + currentId + "->" + id)
-        lastId = currentId
-        if (lastId.isValidId() && availableKeyboards[lastId].isLock) {
-            lastLockId = lastId
-        }
-        currentId = if (id.isValidId()) id else 0
-    }
-
-    private fun Int.isValidId() = this in availableKeyboards.indices
 }

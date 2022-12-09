@@ -62,8 +62,6 @@ class TextInputManager private constructor() :
     private val prefs get() = AppPrefs.defaultInstance()
     private val activeEditorInstance: EditorInstance
         get() = trime.activeEditorInstance
-    private val keyboardSwitcher: KeyboardSwitcher
-        get() = trime.keyboardSwitcher
     private var intentReceiver: IntentReceiver? = null
     private var rimeNotiHandlerJob: Job? = null
 
@@ -245,17 +243,17 @@ class TextInputManager private constructor() :
                 }
             }
 
-        keyboardSwitcher.let {
-            it.resize(trime.maxWidth)
+        KeyboardSwitcher.run {
+            resize(trime.maxWidth)
             // Select a keyboard based on the input type of the editing field.
-            it.startKeyboard(keyboardType)
+            switchKeyboard(keyboardType)
         }
         Rime.get()
 
         // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
         // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。
-        if (shouldResetAsciiMode && keyboardSwitcher.currentKeyboard.isResetAsciiMode) {
-            tempAsciiMode = keyboardSwitcher.currentKeyboard.asciiMode
+        if (shouldResetAsciiMode && KeyboardSwitcher.currentKeyboard.isResetAsciiMode) {
+            tempAsciiMode = KeyboardSwitcher.currentKeyboard.asciiMode
         }
         tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
         isComposable = isComposable && !Rime.isEmpty()
@@ -289,7 +287,7 @@ class TextInputManager private constructor() :
                     option.length > 10 && value
                 ) {
                     val keyboard = option.substring(10)
-                    keyboardSwitcher.switchToKeyboard(keyboard)
+                    KeyboardSwitcher.switchKeyboard(keyboard)
                     trime.bindKeyboardToInputView()
                 } else if (option.startsWith("_key_") && option.length > 5 && value) {
                     shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
@@ -353,9 +351,9 @@ class TextInputManager private constructor() :
                 activeEditorInstance.commitRimeText()
             }
             KeyEvent.KEYCODE_EISU -> { // Switch keyboard
-                keyboardSwitcher.switchToKeyboard(event.select)
+                KeyboardSwitcher.switchKeyboard(event.select)
                 /** Set ascii mode according to keyboard's settings, can not place into [Rime.handleRimeNotification] */
-                Rime.setOption("ascii_mode", keyboardSwitcher.asciiMode)
+                Rime.setOption("ascii_mode", KeyboardSwitcher.currentKeyboard.asciiMode)
                 trime.bindKeyboardToInputView()
                 trime.updateComposing()
             }
@@ -435,7 +433,7 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_MENU -> showOptionsDialog()
             else -> {
-                if (event.mask == 0 && trime.keyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
+                if (event.mask == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
                     if (event.code == KeyEvent.KEYCODE_SPACE && prefs.keyboard.hookShiftSpace) {
                         onKey(event.code, 0)
                         return
@@ -453,7 +451,7 @@ class TextInputManager private constructor() :
                     }
                 }
                 if (event.mask == 0)
-                    onKey(event.code, trime.keyboardSwitcher.currentKeyboard.modifer)
+                    onKey(event.code, KeyboardSwitcher.currentKeyboard.modifer)
                 else
                     onKey(event.code, event.mask)
             }
