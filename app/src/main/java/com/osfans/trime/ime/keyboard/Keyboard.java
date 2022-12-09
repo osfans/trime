@@ -179,8 +179,13 @@ public class Keyboard {
   public Keyboard(String name) {
     this();
     Config config = Config.get();
-    final Map<String, Object> keyboardConfig =
-        (Map<String, Object>) config.keyboards.getObject(name);
+    final Map<String, Object> keyboardConfig;
+    final Object v = config.keyboards.getObject(name);
+    if (v != null) {
+      keyboardConfig = (Map<String, Object>) v;
+    } else {
+      keyboardConfig = (Map<String, Object>) config.keyboards.getObject("default");
+    }
     mLabelTransform = ConfigGetter.getString(keyboardConfig, "label_transform", "none");
     mAsciiMode = ConfigGetter.getInt(keyboardConfig, "ascii_mode", 1);
     if (mAsciiMode == 0)
