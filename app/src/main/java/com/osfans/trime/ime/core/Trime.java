@@ -553,7 +553,6 @@ public class Trime extends LifecycleInputMethodService {
     if (inputRootBinding == null) return;
     inputRootBinding.symbol.symbolInput.setVisibility(View.GONE);
     inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
-    getImeConfig().reloadSchemaId();
     loadConfig();
     getImeConfig().initCurrentColors();
     getImeConfig().setSoundFromColor();
@@ -575,7 +574,6 @@ public class Trime extends LifecycleInputMethodService {
 
   public void initKeyboardDarkMode(boolean darkMode) {
     if (getImeConfig().hasDarkLight()) {
-      getImeConfig().reloadSchemaId();
       loadConfig();
       getImeConfig().initCurrentColors(darkMode);
       getImeConfig().setSoundFromColor();

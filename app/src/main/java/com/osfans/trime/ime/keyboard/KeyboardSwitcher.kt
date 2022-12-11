@@ -33,7 +33,7 @@ object KeyboardSwitcher {
         theme.getKeyboardPadding(ScreenUtils.isLandscape())
         Timber.d("Switching keyboard back to .default ...")
         availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
-                ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
+            ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
         availableKeyboards = availableKeyboardIds.map { Keyboard(theme.keyboards.remapKeyboardId(it)) }
     }
 
@@ -72,8 +72,10 @@ object KeyboardSwitcher {
         }
         lastId = currentId
         currentId = if (mini >= 0) mini else i
-        Timber.i("Switched keyboard from ${availableKeyboardIds[lastId]} " +
-                "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard).")
+        Timber.i(
+            "Switched keyboard from ${availableKeyboardIds[lastId]} " +
+                "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard)."
+        )
     }
 
     /**

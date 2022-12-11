@@ -18,6 +18,7 @@
 
 package com.osfans.trime.data.theme;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -63,7 +64,7 @@ public class Config {
 
   private String soundPackageName, currentSound;
   private static final String defaultThemeName = "trime";
-  private String currentSchemaId, currentColorSchemeId;
+  private String currentColorSchemeId;
 
   private Map<String, Object> generalStyle;
   private Map<String, String> fallbackColors;
@@ -76,10 +77,6 @@ public class Config {
   public Keyboards keyboards;
 
   public Config() {
-    this(false);
-  }
-
-  public Config(boolean skipDeploy) {
     self = this;
     ThemeManager.init();
     soundPackageName = appPrefs.getKeyboard().getSoundPackage();
@@ -88,11 +85,7 @@ public class Config {
     DataManager.sync();
     Rime.get(!DataManager.INSTANCE.getSharedDataDir().exists());
 
-    //    正常逻辑不应该部署全部主题，init()方法已经做过当前主题的部署
-    //    Timber.d(methodName + "deployTheme");
-    //    deployTheme();
-
-    init(true);
+    init();
 
     Timber.d("Setting sound from color ...");
     setSoundFromColor();
@@ -141,17 +134,15 @@ public class Config {
     }
   }
 
-  public void init(boolean skipDeployment) {
-    Timber.d("Initializing theme ..., skip deployment: %s", skipDeployment);
-    Timber.d(
-        "Current theme: %s, current schema id: %s", ThemeManager.getActiveTheme(), currentSchemaId);
+  public void init() {
+    Timber.i("Initializing theme, current theme name: %s ...", ThemeManager.getActiveTheme());
     try {
       final String fullThemeFileName = ThemeManager.getActiveTheme() + ".yaml";
       final File themeFile = new File(Rime.get_user_data_dir(), "build/" + fullThemeFileName);
-      if (skipDeployment && themeFile.exists()) {
-        Timber.d("Skipped theme file deployment");
+      if (themeFile.exists()) {
+        Timber.i("Deployed file exists, skipping deployment ...");
       } else {
-        Timber.d("The theme has not been deployed yet, deploying ...");
+        Timber.i("The theme has not been deployed yet, deploying ...");
         Rime.deploy_config_file(fullThemeFileName, "config_version");
       }
 
@@ -179,7 +170,6 @@ public class Config {
       Timber.d("Setting up all theme config map takes %s ms", end - start);
       initLiquidKeyboard();
       Timber.d("init() initLiquidKeyboard done");
-      reloadSchemaId();
       Timber.d("init() reset done");
       initCurrentColors();
       initEnterLabels();
@@ -190,13 +180,9 @@ public class Config {
       Timber.e(e, "Failed to parse the theme!");
       if (!ThemeManager.getActiveTheme().equals(defaultThemeName)) {
         ThemeManager.switchTheme(defaultThemeName);
-        init(false);
+        init();
       }
     }
-  }
-
-  public void reloadSchemaId() {
-    currentSchemaId = Rime.getSchemaId();
   }
 
   @Nullable
@@ -665,7 +651,7 @@ public class Config {
           final byte[] chunk = bitmap.getNinePatchChunk();
           // 如果 .9.png 没有经过第一步，那么 chunk 就是 null, 只能按照普通方式加载
           if (NinePatch.isNinePatchChunk(chunk))
-            return new NinePatchDrawable(bitmap, chunk, new Rect(), null);
+            return new NinePatchDrawable(Resources.getSystem(), bitmap, chunk, new Rect(), null);
         }
         return Drawable.createFromPath(name);
       }
@@ -762,7 +748,7 @@ public class Config {
         final Bitmap bitmap = BitmapFactory.decodeFile(path);
         final byte[] chunk = bitmap.getNinePatchChunk();
         if (NinePatch.isNinePatchChunk(chunk))
-          return new NinePatchDrawable(bitmap, chunk, new Rect(), null);
+          return new NinePatchDrawable(Resources.getSystem(), bitmap, chunk, new Rect(), null);
       }
       return Drawable.createFromPath(path);
     }
@@ -777,10 +763,10 @@ public class Config {
     currentColors.clear();
     currentColorSchemeId = getColorSchemeName();
     backgroundFolder = style.getString("background_folder");
-    Timber.d("Initializing currentColors ...");
+    Timber.d("Caching color values ...");
     Timber.d(
-        "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s",
-        currentColorSchemeId, ThemeManager.getActiveTheme(), currentSchemaId);
+        "currentColorSchemeId = %s, currentThemeName = %s",
+        currentColorSchemeId, ThemeManager.getActiveTheme());
     final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
     if (colorMap == null) {
       Timber.d("Color scheme id not found: %s", currentColorSchemeId);
@@ -812,13 +798,12 @@ public class Config {
     currentColors.clear();
     currentColorSchemeId = getColorSchemeName(darkMode);
     backgroundFolder = style.getString("background_folder");
-    Timber.d("Initializing currentColors ...");
-    Timber.d(
-        "currentColorSchemeId = %s, currentThemeName = %s, currentSchemaId = %s, isDarkMode = %s",
-        currentColorSchemeId, ThemeManager.getActiveTheme(), currentSchemaId, darkMode);
+    Timber.i(
+        "Caching currentColors (currentColorSchemeId=%s, isDarkMode=%s) ...",
+        currentColorSchemeId, darkMode);
     final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
     if (colorMap == null) {
-      Timber.i("Color scheme id not found: %s", currentColorSchemeId);
+      Timber.w("Color scheme id not found: %s", currentColorSchemeId);
       return;
     }
     appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);

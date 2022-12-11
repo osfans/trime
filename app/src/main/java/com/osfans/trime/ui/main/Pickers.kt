@@ -30,7 +30,7 @@ suspend fun Context.themePicker(
         onOKButton {
             with(items[checkedItem].toString()) {
                 ThemeManager.switchTheme(if (this == "trime") this else "$this.trime")
-                Config.get().init(false)
+                Config.get().init()
             }
             Trime.getServiceOrNull()?.initKeyboard()
         }
