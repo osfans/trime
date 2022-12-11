@@ -30,6 +30,7 @@ import kotlin.math.ceil
 
 class LiquidKeyboard(private val context: Context) {
     private val theme: Config = Config.get()
+    private val tabManager: TabManager = TabManager.get()
     private val service: Trime = Trime.getService()
     private var rootView: View? = null
     private lateinit var keyboardView: RecyclerView
@@ -71,18 +72,18 @@ class LiquidKeyboard(private val context: Context) {
             SymbolKeyboardType.CLIPBOARD,
             SymbolKeyboardType.COLLECTION,
             SymbolKeyboardType.DRAFT -> {
-                TabManager.get().select(i)
+                tabManager.select(i)
                 initDbData(tag.type)
             }
             SymbolKeyboardType.CANDIDATE -> {
-                TabManager.get().select(i)
+                tabManager.select(i)
                 initCandidates()
             }
             SymbolKeyboardType.VAR_LENGTH -> {
-                initVarLengthKeys(TabManager.get().select(i))
+                initVarLengthKeys(tabManager.select(i))
             }
             SymbolKeyboardType.SYMBOL, SymbolKeyboardType.HISTORY, SymbolKeyboardType.TABS -> {
-                TabManager.get().select(i)
+                tabManager.select(i)
                 initFixData(i)
             }
             else -> initFixData(i)
@@ -179,7 +180,7 @@ class LiquidKeyboard(private val context: Context) {
                             KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
                             else -> {}
                         }
-                    } else if (TabManager.get().isAfterTabSwitch(position)) {
+                    } else if (tabManager.isAfterTabSwitch(position)) {
                         // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
                         select(position)
                     } else {
@@ -208,9 +209,9 @@ class LiquidKeyboard(private val context: Context) {
             SymbolKeyboardType.HISTORY ->
                 simpleAdapter.updateBeans(historyBeans!!)
             SymbolKeyboardType.TABS ->
-                simpleAdapter.updateBeans(TabManager.get().tabSwitchData)
+                simpleAdapter.updateBeans(tabManager.tabSwitchData)
             else ->
-                simpleAdapter.updateBeans(TabManager.get().select(i))
+                simpleAdapter.updateBeans(tabManager.select(i))
         }
         Timber.d("Tab #%s with bean size %s", i, simpleAdapter.itemCount)
     }

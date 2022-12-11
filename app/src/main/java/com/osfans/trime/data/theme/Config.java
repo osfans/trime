@@ -33,10 +33,8 @@ import com.blankj.utilcode.util.FileUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
-import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
-import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.util.DimensionsKt;
 import java.io.File;
 import java.util.ArrayList;
@@ -168,11 +166,7 @@ public class Config {
       keyboards = new Keyboards(this);
       long end = System.currentTimeMillis();
       Timber.d("Setting up all theme config map takes %s ms", end - start);
-      initLiquidKeyboard();
-      Timber.d("init() initLiquidKeyboard done");
-      Timber.d("init() reset done");
       initCurrentColors();
-      initEnterLabels();
       Timber.i("The theme is initialized");
       long initEnd = System.currentTimeMillis();
       Timber.d("Initializing cache takes %s ms", initEnd - end);
@@ -284,6 +278,10 @@ public class Config {
       this.theme = theme;
     }
 
+    public Object getObject(@NonNull String key) {
+      return obtainValue(theme.liquidKeyboard, key);
+    }
+
     public int getInt(@NonNull String key) {
       return obtainInt(theme.liquidKeyboard, key);
     }
@@ -347,32 +345,6 @@ public class Config {
 
   public boolean hasKey(String s) {
     return style.getObject(s) != null;
-  }
-
-  public void initLiquidKeyboard() {
-    TabManager.clear();
-    if (liquidKeyboard == null) return;
-    Timber.d("Initializing LiquidKeyboard ...");
-    final List<String> names = (List<String>) liquidKeyboard.get("keyboards");
-    if (names == null) return;
-    for (String s : names) {
-      String name = s;
-      if (liquidKeyboard.containsKey(name)) {
-        Map<String, Object> keyboard = (Map<String, Object>) liquidKeyboard.get(name);
-        if (keyboard != null) {
-          if (keyboard.containsKey("name")) {
-            name = (String) keyboard.get("name");
-          }
-          if (keyboard.containsKey("type")) {
-            TabManager.get()
-                .addTab(
-                    name,
-                    SymbolKeyboardType.Companion.fromObject(keyboard.get("type")),
-                    keyboard.get("keys"));
-          }
-        }
-      }
-    }
   }
 
   public void destroy() {
@@ -578,30 +550,6 @@ public class Config {
     return MapsKt.map(
         presetColorSchemes,
         entry -> new Pair<>(entry.getKey(), Objects.requireNonNull(entry.getValue().get("name"))));
-  }
-
-  private Map<String, String> mEnterLabels;
-
-  public Map<String, String> getmEnterLabels() {
-    return mEnterLabels;
-  }
-
-  public void initEnterLabels() {
-    if ((mEnterLabels = (Map<String, String>) style.getObject("enter_labels")) == null) {
-      mEnterLabels = new HashMap<>();
-    }
-
-    String defaultEnterLabel = "Enter";
-    if (mEnterLabels.containsKey("default")) defaultEnterLabel = mEnterLabels.get("default");
-    else mEnterLabels.put("default", defaultEnterLabel);
-
-    if (!mEnterLabels.containsKey("done")) mEnterLabels.put("done", defaultEnterLabel);
-    if (!mEnterLabels.containsKey("go")) mEnterLabels.put("go", defaultEnterLabel);
-    if (!mEnterLabels.containsKey("next")) mEnterLabels.put("next", defaultEnterLabel);
-    if (!mEnterLabels.containsKey("none")) mEnterLabels.put("none", defaultEnterLabel);
-    if (!mEnterLabels.containsKey("pre")) mEnterLabels.put("pre", defaultEnterLabel);
-    if (!mEnterLabels.containsKey("search")) mEnterLabels.put("search", defaultEnterLabel);
-    if (!mEnterLabels.containsKey("send")) mEnterLabels.put("send", defaultEnterLabel);
   }
 
   //  返回drawable。参数可以是颜色或者图片。如果参数缺失，返回null

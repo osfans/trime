@@ -245,6 +245,27 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     labelEnter = mEnterLabels.get("default");
   }
 
+  private void handleEnterLabel(@NonNull Config theme) {
+    if ((mEnterLabels = (Map<String, String>) theme.style.getObject("enter_labels")) == null) {
+      mEnterLabels = new HashMap<>();
+    }
+
+    final String defaultEnterLabel;
+    if (mEnterLabels.containsKey("default")) {
+      defaultEnterLabel = mEnterLabels.get("default");
+    } else {
+      defaultEnterLabel = "Enter";
+      mEnterLabels.put("default", defaultEnterLabel);
+    }
+
+    for (final String label :
+        new String[] {"done", "go", "next", "none", "pre", "search", "send"}) {
+      if (!mEnterLabels.containsKey(label)) {
+        mEnterLabels.put(label, defaultEnterLabel);
+      }
+    }
+  }
+
   public void setEnterLabel(int action, CharSequence actionLabel) {
     // enter_label_mode 取值：
     // 0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel
@@ -400,7 +421,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPaintSymbol.setTextSize(mSymbolSize);
     mPreviewText.setTypeface(FontManager.getTypeface(config.style.getString("preview_font")));
 
-    mEnterLabels = config.getmEnterLabels();
+    handleEnterLabel(config);
     enterLabelMode = config.style.getInt("enter_label_mode");
     invalidateAllKeys();
   }

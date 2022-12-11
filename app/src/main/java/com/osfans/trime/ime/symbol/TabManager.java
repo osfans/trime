@@ -2,19 +2,21 @@ package com.osfans.trime.ime.symbol;
 
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
+import com.osfans.trime.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class TabManager {
-  private int selected;
-  private final List<SimpleKeyBean> keyboardData;
-  private final List<SimpleKeyBean> tabSwitchData;
-  private final ArrayList<TabTag> tabTags;
+  private int selected = 0;
+  private final List<SimpleKeyBean> keyboardData = new ArrayList<>();
+  private final List<SimpleKeyBean> tabSwitchData = new ArrayList<>();
+  private final ArrayList<TabTag> tabTags = new ArrayList<>();
   private int tabSwitchPosition = 0;
-  private final List<List<SimpleKeyBean>> keyboards;
+  private final List<List<SimpleKeyBean>> keyboards = new ArrayList<>();
   private static TabManager self;
   private final List<SimpleKeyBean> notKeyboard = new ArrayList<>();
   private final TabTag tagExit = new TabTag("返回", SymbolKeyboardType.NO_KEY, KeyCommandType.EXIT);
@@ -28,15 +30,10 @@ public class TabManager {
     if (tabSwitchData.size() > 0) return tabSwitchData;
 
     for (TabTag tag : tabTags) {
-      if (SymbolKeyboardType.Companion.hasKey(tag.type))
-        tabSwitchData.add(new SimpleKeyBean(tag.text));
+      if (SymbolKeyboardType.hasKey(tag.type)) tabSwitchData.add(new SimpleKeyBean(tag.text));
       else tabSwitchData.add(new SimpleKeyBean(""));
     }
     return tabSwitchData;
-  }
-
-  public static void clear() {
-    self = new TabManager();
   }
 
   public static TabTag getTag(int i) {
@@ -66,17 +63,28 @@ public class TabManager {
   }
 
   private TabManager() {
-    selected = 0;
-    tabTags = new ArrayList<>();
-    keyboards = new ArrayList<>();
-    keyboardData = new ArrayList<>();
-    tabSwitchData = new ArrayList<>();
+    final Config theme = Config.get();
+    final List<String> availables = (List<String>) theme.liquid.getObject("keyboards");
+    if (availables != null) {
+      for (final String id : availables) {
+        final Map<String, Object> keyboard;
+        if ((keyboard = (Map<String, Object>) theme.liquid.getObject(id)) != null) {
+          final String name = (String) CollectionUtils.getOrDefault(keyboard, "name", id);
+          if (keyboard.containsKey("type")) {
+            addTab(
+                name,
+                SymbolKeyboardType.fromString((String) keyboard.get("type")),
+                keyboard.get("keys"));
+          }
+        }
+      }
+    }
   }
 
   public void addTab(@NonNull String name, SymbolKeyboardType type, List<SimpleKeyBean> keyBeans) {
-    if (name.trim().length() < 1) return;
+    if (name.trim().isEmpty()) return;
 
-    if (SymbolKeyboardType.Companion.hasKeys(type)) {
+    if (SymbolKeyboardType.hasKeys(type)) {
       for (int i = 0; i < tabTags.size(); i++) {
         TabTag tag = tabTags.get(i);
         if (tag.text.equals(name)) {
