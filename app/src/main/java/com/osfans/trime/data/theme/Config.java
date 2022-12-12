@@ -29,12 +29,14 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.math.MathUtils;
 import com.blankj.utilcode.util.FileUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
+import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
 import java.io.File;
 import java.util.ArrayList;
@@ -133,7 +135,7 @@ public class Config {
   }
 
   public void init() {
-    Timber.i("Initializing theme, current theme name: %s ...", ThemeManager.getActiveTheme());
+    Timber.i("Initializing theme, currentThemeName=%s ...", ThemeManager.getActiveTheme());
     try {
       final String fullThemeFileName = ThemeManager.getActiveTheme() + ".yaml";
       final File themeFile = new File(Rime.get_user_data_dir(), "build/" + fullThemeFileName);
@@ -179,70 +181,6 @@ public class Config {
     }
   }
 
-  @Nullable
-  public static Object obtainValue(Map<String, Object> map, @NonNull String vararg) {
-    if (map == null || map.isEmpty() || vararg.isEmpty()) return null;
-    final String[] keys = vararg.split("/");
-    Object v = map;
-    for (final String key : keys) {
-      if (v instanceof Map && ((Map<String, Object>) v).containsKey(key)) {
-        v = ((Map<String, Object>) v).get(key);
-      } else {
-        return null;
-      }
-    }
-    return v;
-  }
-
-  public static String obtainString(
-      Map<String, Object> map, @NonNull String key, @NonNull String defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
-    final Object v;
-    return ((v = obtainValue(map, key)) != null) ? v.toString() : defValue;
-  }
-
-  public static String obtainString(Map<String, Object> map, @NonNull String key) {
-    return obtainString(map, key, "");
-  }
-
-  public static int obtainInt(Map<String, Object> map, @NonNull String key, int defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
-    final String nm;
-    try {
-      return (!(nm = obtainString(map, key)).isEmpty()) ? Long.decode(nm).intValue() : defValue;
-    } catch (NumberFormatException nfe) {
-      return defValue;
-    }
-  }
-
-  public static int obtainInt(Map<String, Object> map, @NonNull String key) {
-    return obtainInt(map, key, 0);
-  }
-
-  public static float obtainFloat(Map<String, Object> map, @NonNull String key, float defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
-    final String s;
-    try {
-      return (!(s = obtainString(map, key)).isEmpty()) ? Float.parseFloat(s) : defValue;
-    } catch (NumberFormatException nfe) {
-      return defValue;
-    }
-  }
-
-  public static float obtainFloat(Map<String, Object> map, @NonNull String key) {
-    return obtainFloat(map, key, 0f);
-  }
-
-  public static boolean obtainBoolean(
-      Map<String, Object> map, @NonNull String key, boolean defValue) {
-    if (map == null || map.isEmpty() || key.isEmpty()) return defValue;
-    return Boolean.parseBoolean(obtainString(map, key));
-  }
-
-  public static boolean obtainBoolean(Map<String, Object> map, @NonNull String key) {
-    return obtainBoolean(map, key, false);
-  }
-
   public static class Style {
     private final Config theme;
 
@@ -251,23 +189,23 @@ public class Config {
     }
 
     public String getString(@NonNull String key) {
-      return obtainString(theme.generalStyle, key);
+      return CollectionUtils.obtainString(theme.generalStyle, key, "");
     }
 
     public int getInt(@NonNull String key) {
-      return obtainInt(theme.generalStyle, key);
+      return CollectionUtils.obtainInt(theme.generalStyle, key, 0);
     }
 
     public float getFloat(@NonNull String key) {
-      return obtainFloat(theme.generalStyle, key);
+      return CollectionUtils.obtainFloat(theme.generalStyle, key, 0f);
     }
 
     public boolean getBoolean(@NonNull String key) {
-      return obtainBoolean(theme.generalStyle, key);
+      return CollectionUtils.obtainBoolean(theme.generalStyle, key, false);
     }
 
     public Object getObject(@NonNull String key) {
-      return obtainValue(theme.generalStyle, key);
+      return CollectionUtils.obtainValue(theme.generalStyle, key);
     }
   }
 
@@ -279,15 +217,15 @@ public class Config {
     }
 
     public Object getObject(@NonNull String key) {
-      return obtainValue(theme.liquidKeyboard, key);
+      return CollectionUtils.obtainValue(theme.liquidKeyboard, key);
     }
 
     public int getInt(@NonNull String key) {
-      return obtainInt(theme.liquidKeyboard, key);
+      return CollectionUtils.obtainInt(theme.liquidKeyboard, key, 0);
     }
 
     public float getFloat(@NonNull String key) {
-      return obtainFloat(theme.liquidKeyboard, key, theme.style.getFloat(key));
+      return CollectionUtils.obtainFloat(theme.liquidKeyboard, key, theme.style.getFloat(key));
     }
   }
 
@@ -299,7 +237,7 @@ public class Config {
     }
 
     public Object getObject(@NonNull String key) {
-      return obtainValue(theme.presetKeyboards, key);
+      return CollectionUtils.obtainValue(theme.presetKeyboards, key);
     }
 
     public String remapKeyboardId(@NonNull String name) {
@@ -539,6 +477,21 @@ public class Config {
     }
   }
 
+  @NonNull
+  private String joinToFullImagePath(String value) {
+    File imgSrc;
+    if ((imgSrc =
+            new File(
+                Rime.get_user_data_dir(),
+                "backgrounds/" + style.getString("background_folder") + value))
+        .exists()) {
+      return imgSrc.getPath();
+    } else if ((imgSrc = new File(Rime.get_user_data_dir(), "backgrounds/" + value)).exists()) {
+      return imgSrc.getPath();
+    }
+    return "";
+  }
+
   public Integer getCurrentColor(String key) {
     Object o = getColorValue(key);
     return parseColor(o);
@@ -575,33 +528,19 @@ public class Config {
   private Drawable drawableBitmapObject(Object o) {
     if (o == null) return null;
     if (o instanceof String) {
-      String name = (String) o;
-      String nameDirectory =
-          DataManager.getDataDir("backgrounds" + File.separator + backgroundFolder);
-      File f = new File(nameDirectory, name);
+      final String value = (String) o;
+      File imgSrc = new File(joinToFullImagePath(value));
 
-      if (!f.exists()) {
-        nameDirectory = DataManager.getDataDir("backgrounds");
-        f = new File(nameDirectory, name);
-      }
-
-      if (!f.exists()) {
-        if (currentColors.containsKey(name)) {
-          o = currentColors.get(name);
-          if (o instanceof String) f = new File((String) o);
+      if (!imgSrc.exists()) {
+        if (currentColors.containsKey(value)) {
+          final Object v = currentColors.get(value);
+          if (v instanceof String) imgSrc = new File((String) v);
         }
       }
 
-      if (f.exists()) {
-        name = f.getPath();
-        if (name.contains(".9.png")) {
-          final Bitmap bitmap = BitmapFactory.decodeFile(name);
-          final byte[] chunk = bitmap.getNinePatchChunk();
-          // 如果 .9.png 没有经过第一步，那么 chunk 就是 null, 只能按照普通方式加载
-          if (NinePatch.isNinePatchChunk(chunk))
-            return new NinePatchDrawable(Resources.getSystem(), bitmap, chunk, new Rect(), null);
-        }
-        return Drawable.createFromPath(name);
+      if (imgSrc.exists()) {
+        final String path = imgSrc.getPath();
+        return getBitmapDrawable(path);
       }
     }
     return null;
@@ -648,9 +587,7 @@ public class Config {
     if (drawable != null) {
       if (alphaKey != null) {
         if (hasKey(alphaKey)) {
-          int alpha = style.getInt("layout/alpha");
-          if (alpha <= 0) alpha = 0;
-          else if (alpha >= 255) alpha = 255;
+          int alpha = MathUtils.clamp(style.getInt(alphaKey), 0, 255);
           drawable.setAlpha(alpha);
         }
       }
@@ -674,9 +611,7 @@ public class Config {
 
     if (alphaKey != null) {
       if (hasKey(alphaKey)) {
-        int alpha = style.getInt("layout/alpha");
-        if (alpha <= 0) alpha = 0;
-        else if (alpha >= 255) alpha = 255;
+        int alpha = MathUtils.clamp(style.getInt(alphaKey), 0, 255);
         gd.setAlpha(alpha);
       }
     }
@@ -692,63 +627,41 @@ public class Config {
     Object o = currentColors.get(key);
     if (o instanceof String) {
       String path = (String) o;
-      if (path.contains(".9.png")) {
-        final Bitmap bitmap = BitmapFactory.decodeFile(path);
-        final byte[] chunk = bitmap.getNinePatchChunk();
-        if (NinePatch.isNinePatchChunk(chunk))
-          return new NinePatchDrawable(Resources.getSystem(), bitmap, chunk, new Rect(), null);
-      }
-      return Drawable.createFromPath(path);
+      return getBitmapDrawable(path);
     }
     return null;
   }
 
+  private Drawable getBitmapDrawable(@NonNull String path) {
+    if (path.contains(".9.png")) {
+      final Bitmap bitmap = BitmapFactory.decodeFile(path);
+      final byte[] chunk = bitmap.getNinePatchChunk();
+      if (NinePatch.isNinePatchChunk(chunk))
+        return new NinePatchDrawable(Resources.getSystem(), bitmap, chunk, new Rect(), null);
+    }
+    return Drawable.createFromPath(path);
+  }
+
   // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
   private final Map<String, Object> currentColors = new HashMap<>();
-  private String backgroundFolder;
   // 初始化当前配色 Config 2.0
   public void initCurrentColors() {
-    currentColors.clear();
     currentColorSchemeId = getColorSchemeName();
-    backgroundFolder = style.getString("background_folder");
-    Timber.d("Caching color values ...");
-    Timber.d(
-        "currentColorSchemeId = %s, currentThemeName = %s",
-        currentColorSchemeId, ThemeManager.getActiveTheme());
-    final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
-    if (colorMap == null) {
-      Timber.d("Color scheme id not found: %s", currentColorSchemeId);
-      return;
-    }
-    appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
-
-    for (Map.Entry<String, String> entry : colorMap.entrySet()) {
-      Object value = getColorRealValue(entry.getValue());
-      if (value != null) currentColors.put(entry.getKey(), value);
-    }
-
-    for (Map.Entry<String, String> entry : fallbackColors.entrySet()) {
-      String key = entry.getKey();
-      if (!currentColors.containsKey(key)) {
-        final String colorValue = getColorValue(key);
-        if (colorValue != null) {
-          Object value = getColorRealValue(colorValue);
-          if (value != null) {
-            currentColors.put(key, value);
-          }
-        }
-      }
-    }
+    Timber.i("Caching color values (currentColorSchemeId=%s) ...", currentColorSchemeId);
+    cacheColorValues();
   }
 
   // 当切换暗黑模式时，刷新键盘配色方案
   public void initCurrentColors(boolean darkMode) {
-    currentColors.clear();
     currentColorSchemeId = getColorSchemeName(darkMode);
-    backgroundFolder = style.getString("background_folder");
     Timber.i(
-        "Caching currentColors (currentColorSchemeId=%s, isDarkMode=%s) ...",
+        "Caching color values (currentColorSchemeId=%s, isDarkMode=%s) ...",
         currentColorSchemeId, darkMode);
+    cacheColorValues();
+  }
+
+  private void cacheColorValues() {
+    currentColors.clear();
     final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
     if (colorMap == null) {
       Timber.w("Color scheme id not found: %s", currentColorSchemeId);
@@ -757,56 +670,34 @@ public class Config {
     appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
 
     for (Map.Entry<String, String> entry : colorMap.entrySet()) {
-      Object value = getColorRealValue(entry.getValue());
-      if (value != null) currentColors.put(entry.getKey(), value);
+      final String key = entry.getKey();
+      if (key.equals("name") || key.equals("author")) continue;
+      Object value = parseColorValue(entry.getValue());
+      if (value != null) currentColors.put(key, value);
     }
 
     for (Map.Entry<String, String> entry : fallbackColors.entrySet()) {
-      String key = entry.getKey();
+      final String key = entry.getKey();
       if (!currentColors.containsKey(key)) {
-        final String colorValue = getColorValue(key);
-        if (colorValue != null) {
-          Object value = getColorRealValue(colorValue);
-          if (value != null) {
-            currentColors.put(key, value);
-          }
-        }
+        final Object value = parseColorValue(getColorValue(key));
+        if (value != null) currentColors.put(key, value);
       }
     }
   }
 
   // 获取参数的真实value，Config 2.0
   // 如果是色彩返回int，如果是背景图返回path string，如果处理失败返回null
-  private Object getColorRealValue(Object object) {
-    if (object == null) return null;
-    if (object instanceof Integer) {
-      return object;
-    }
-    if (object instanceof Long) {
-      Long o = (Long) object;
-      //      Timber.w("getColorRealValue() Long, %d ; 0X%s", o, data2hex(object));
-      return o.intValue();
-    }
-    String s = object.toString();
-    if (!s.matches(".*[.\\\\/].*")) {
+  private Object parseColorValue(String value) {
+    if (value == null) return null;
+    if (value.matches(".*[.\\\\/].*")) {
+      return joinToFullImagePath(value);
+    } else {
       try {
-        return parseColor(s);
+        return parseColor(value);
       } catch (Exception e) {
-        Timber.e("getColorRealValue() unknown color, %s ; object %s", s, object);
-        e.printStackTrace();
+        Timber.e(e, "Unknown color value: %s", value);
       }
     }
-
-    String nameDirectory =
-        DataManager.getDataDir("backgrounds" + File.separator + backgroundFolder);
-    File f = new File(nameDirectory, s);
-
-    if (!f.exists()) {
-      nameDirectory = DataManager.getDataDir("backgrounds");
-      f = new File(nameDirectory, s);
-    }
-
-    if (f.exists()) return f.getPath();
     return null;
   }
 }

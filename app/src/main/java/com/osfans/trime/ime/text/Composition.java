@@ -44,6 +44,7 @@ import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.ConfigGetter;
 import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
@@ -283,7 +284,7 @@ public class Composition extends AppCompatTextView {
   private Object getAlign(Map<String, Object> m) {
     Layout.Alignment i = Layout.Alignment.ALIGN_NORMAL;
     if (m.containsKey("align")) {
-      String align = Config.obtainString(m, "align");
+      String align = CollectionUtils.obtainString(m, "align", "");
       switch (align) {
         case "left":
         case "normal":
@@ -306,7 +307,7 @@ public class Composition extends AppCompatTextView {
     assert r != null;
     final String s = r.getText();
     int start, end;
-    String sep = Config.obtainString(m, "start");
+    String sep = CollectionUtils.obtainString(m, "start", "");
     if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -329,7 +330,7 @@ public class Composition extends AppCompatTextView {
     end = composition_pos[0] + r.getEnd();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
-    sep = Config.obtainString(m, "end");
+    sep = CollectionUtils.obtainString(m, "end", "");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
@@ -371,12 +372,12 @@ public class Composition extends AppCompatTextView {
 
     final Rime.RimeCandidate[] candidates = Rime.getCandidatesOrStatusSwitches();
     if (candidates == null) return;
-    String sep = Config.obtainString(m, "start");
+    String sep = CollectionUtils.obtainString(m, "start", "");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
-    String label_format = Config.obtainString(m, "label");
-    String candidate_format = Config.obtainString(m, "candidate");
-    String comment_format = Config.obtainString(m, "comment");
-    String line = Config.obtainString(m, "sep");
+    String label_format = CollectionUtils.obtainString(m, "label", "");
+    String candidate_format = CollectionUtils.obtainString(m, "candidate", "");
+    String comment_format = CollectionUtils.obtainString(m, "comment", "");
+    String line = CollectionUtils.obtainString(m, "sep", "");
 
     int line_length = 0;
     int sticky_lines_now = sticky_lines;
@@ -467,23 +468,23 @@ public class Composition extends AppCompatTextView {
       }
       candidate_num++;
     }
-    sep = Config.obtainString(m, "end");
+    sep = CollectionUtils.obtainString(m, "end", "");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
   private void appendButton(@NonNull Map<String, Object> m) {
     if (m.containsKey("when")) {
-      final String when = Config.obtainString(m, "when");
+      final String when = CollectionUtils.obtainString(m, "when", "");
       if (when.contentEquals("paging") && !Rime.isPaging()) return;
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     final String label;
-    final Event e = new Event(Config.obtainString(m, "click"));
-    if (m.containsKey("label")) label = Config.obtainString(m, "label");
+    final Event e = new Event(CollectionUtils.obtainString(m, "click", ""));
+    if (m.containsKey("label")) label = CollectionUtils.obtainString(m, "label", "");
     else label = e.getLabel();
     int start, end;
     String sep = null;
-    if (m.containsKey("start")) sep = Config.obtainString(m, "start");
+    if (m.containsKey("start")) sep = CollectionUtils.obtainString(m, "start", "");
     if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -496,14 +497,14 @@ public class Composition extends AppCompatTextView {
     ss.setSpan(getAlign(m), start, end, span);
     ss.setSpan(new EventSpan(e), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
-    sep = Config.obtainString(m, "end");
+    sep = CollectionUtils.obtainString(m, "end", "");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
   private void appendMove(Map<String, Object> m) {
-    String s = Config.obtainString(m, "move");
+    String s = CollectionUtils.obtainString(m, "move", "");
     int start, end;
-    String sep = Config.obtainString(m, "start");
+    String sep = CollectionUtils.obtainString(m, "start", "");
     if (!TextUtils.isEmpty(sep)) {
       start = ss.length();
       ss.append(sep);
@@ -518,7 +519,7 @@ public class Composition extends AppCompatTextView {
     move_pos[1] = end;
     ss.setSpan(new AbsoluteSizeSpan(key_text_size), start, end, span);
     ss.setSpan(new ForegroundColorSpan(key_text_color), start, end, span);
-    sep = Config.obtainString(m, "end");
+    sep = CollectionUtils.obtainString(m, "end", "");
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 

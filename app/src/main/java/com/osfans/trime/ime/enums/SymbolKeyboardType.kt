@@ -1,8 +1,5 @@
 package com.osfans.trime.ime.enums
 
-import java.util.HashMap
-import java.util.Locale
-
 enum class SymbolKeyboardType {
     // 不占据tab位，仅当在“更多”面板，即“TABS”中显示时，产生换行效果
     NEW_ROW,
