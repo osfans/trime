@@ -108,7 +108,7 @@ class LiquidKeyboard(private val context: Context) {
 
         // 初次显示布局，需要刷新背景
         rootView = keyboardView.parent as View
-        val keyboardBackground = theme.getDrawable("liquid_keyboard_background", null, null, null, null)
+        val keyboardBackground = theme.colors.getDrawable("liquid_keyboard_background")
         if (keyboardBackground != null) rootView!!.background = keyboardBackground
         var keyboardHeight = dp2px(theme.style.getFloat("keyboard_height")).toInt()
         if (isLand) {

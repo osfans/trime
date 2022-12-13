@@ -89,16 +89,16 @@ public class Candidate extends View {
 
   public void reset() {
     Config config = Config.get();
-    candidateHighlight = new PaintDrawable(config.getColor("hilited_candidate_back_color"));
+    candidateHighlight = new PaintDrawable(config.colors.getColor("hilited_candidate_back_color"));
     candidateHighlight.setCornerRadius(config.style.getFloat("layout/round_corner"));
-    separatorPaint.setColor(config.getColor("candidate_separator_color"));
+    separatorPaint.setColor(config.colors.getColor("candidate_separator_color"));
     candidateSpacing = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_spacing"));
     candidatePadding = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_padding"));
 
-    candidateTextColor = config.getColor("candidate_text_color");
-    commentTextColor = config.getColor("comment_text_color");
-    hilitedCandidateTextColor = config.getColor("hilited_candidate_text_color");
-    hilitedCommentTextColor = config.getColor("hilited_comment_text_color");
+    candidateTextColor = config.colors.getColor("candidate_text_color");
+    commentTextColor = config.colors.getColor("comment_text_color");
+    hilitedCandidateTextColor = config.colors.getColor("hilited_candidate_text_color");
+    hilitedCommentTextColor = config.colors.getColor("hilited_comment_text_color");
 
     int candidate_text_size =
         (int) DimensionsKt.sp2px(config.style.getFloat("candidate_text_size"));

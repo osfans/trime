@@ -18,15 +18,10 @@
 
 package com.osfans.trime.data.theme;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.NinePatch;
-import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.NinePatchDrawable;
+import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.math.MathUtils;
@@ -37,7 +32,9 @@ import com.osfans.trime.data.DataManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.util.CollectionUtils;
+import com.osfans.trime.util.ColorUtils;
 import com.osfans.trime.util.DimensionsKt;
+import com.osfans.trime.util.DrawableKt;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,12 +65,13 @@ public class Config {
 
   private Map<String, Object> generalStyle;
   private Map<String, String> fallbackColors;
-  private Map<String, Map<String, String>> presetColorSchemes;
+  private Map<String, Map<String, Object>> presetColorSchemes;
   private Map<String, Object> presetKeyboards;
   private Map<String, Object> liquidKeyboard;
 
   public Style style;
   public Liquid liquid;
+  public Colors colors;
   public Keyboards keyboards;
 
   public Config() {
@@ -118,10 +116,10 @@ public class Config {
 
   // 配色指定音效时自动切换音效效果（不会自动修改设置）。
   public void setSoundFromColor() {
-    final Map<String, String> m = presetColorSchemes.get(currentColorSchemeId);
+    final Map<String, Object> m = presetColorSchemes.get(currentColorSchemeId);
     assert m != null;
     if (m.containsKey("sound")) {
-      String sound = m.get("sound");
+      String sound = (String) m.get("sound");
       if (!Objects.equals(sound, currentSound)) {
         if (applySoundPackage(sound)) {
           return;
@@ -160,11 +158,12 @@ public class Config {
       fallbackColors = (Map<String, String>) fullThemeConfigMap.get("fallback_colors");
       Key.presetKeys = (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_keys");
       presetColorSchemes =
-          (Map<String, Map<String, String>>) fullThemeConfigMap.get("preset_color_schemes");
+          (Map<String, Map<String, Object>>) fullThemeConfigMap.get("preset_color_schemes");
       presetKeyboards = (Map<String, Object>) fullThemeConfigMap.get("preset_keyboards");
       liquidKeyboard = (Map<String, Object>) fullThemeConfigMap.get("liquid_keyboard");
       style = new Style(this);
       liquid = new Liquid(this);
+      colors = new Colors(this);
       keyboards = new Keyboards(this);
       long end = System.currentTimeMillis();
       Timber.d("Setting up all theme config map takes %s ms", end - start);
@@ -229,6 +228,97 @@ public class Config {
     }
   }
 
+  public static class Colors {
+    private final Config theme;
+
+    public Colors(@NonNull final Config theme) {
+      this.theme = theme;
+    }
+
+    // API 2.0
+    public Integer getColor(String key) {
+      final Object o = theme.currentColors.get(key);
+      if (o instanceof Integer) {
+        return (Integer) o;
+      }
+      return null;
+    }
+
+    public Integer getColor(@NonNull Map<String, Object> m, String key) {
+      if (!m.containsKey(key)) return null;
+      final Integer color = ColorUtils.parseColor((String) m.get(key));
+      return color != null ? color : getColor((String) m.get(key));
+    }
+
+    //  返回drawable。  Config 2.0
+    //  参数可以是颜色或者图片。如果参数缺失，返回null
+    public Drawable getDrawable(@NonNull String key) {
+      Object o = theme.currentColors.get(key);
+      if (o instanceof Integer) {
+        final Integer color = (Integer) o;
+        return new ColorDrawable(color);
+      } else if (o instanceof String) {
+        final String path = (String) o;
+        return DrawableKt.bitmapDrawable(path);
+      }
+      return null;
+    }
+
+    // API 2.0
+    public Drawable getDrawable(@NonNull Map<String, Object> m, String key) {
+      if (!m.containsKey(key)) return null;
+      final Object o = theme.currentColors.get((String) m.get(key));
+      if (o instanceof Integer) {
+        Integer color = (Integer) o;
+        return new ColorDrawable(color);
+      } else if (o instanceof String) {
+        String path = (String) o;
+        return DrawableKt.bitmapDrawable(path);
+      }
+      return null;
+    }
+
+    //  返回图片或背景的drawable,支持null参数。 Config 2.0
+    public Drawable getDrawable(
+        String key,
+        String borderKey,
+        String borderColorKey,
+        String roundCornerKey,
+        String alphaKey) {
+      if (key == null) return null;
+      Object o = theme.currentColors.get(key);
+      if (o instanceof String) {
+        final String path = (String) o;
+        final Drawable bitmap;
+        if ((bitmap = DrawableKt.bitmapDrawable(path)) != null) {
+          if (!TextUtils.isEmpty(alphaKey) || theme.style.getObject(alphaKey) != null) {
+            bitmap.setAlpha(MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255));
+          }
+          return bitmap;
+        }
+      } else if (o instanceof Integer) {
+        final Integer color = (Integer) o;
+        final GradientDrawable gradient = new GradientDrawable();
+        gradient.setColor(color);
+        if (!TextUtils.isEmpty(roundCornerKey)) {
+          gradient.setCornerRadius(theme.style.getFloat(roundCornerKey));
+        }
+        if (!TextUtils.isEmpty(borderColorKey) && !TextUtils.isEmpty(borderKey)) {
+          float border = DimensionsKt.dp2px(theme.style.getFloat(borderKey));
+          final Integer stroke = getColor(borderColorKey);
+          if (stroke != null && border > 0) {
+            gradient.setStroke((int) border, stroke);
+          }
+        }
+        if (!TextUtils.isEmpty(alphaKey) || theme.style.getObject(alphaKey) != null) {
+          gradient.setAlpha(MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255));
+        }
+        return gradient;
+      }
+      return null;
+    }
+  }
+
   public static class Keyboards {
     private final Config theme;
 
@@ -281,13 +371,10 @@ public class Config {
     }
   }
 
-  public boolean hasKey(String s) {
-    return style.getObject(s) != null;
-  }
-
   public void destroy() {
     if (style != null) style = null;
     if (liquid != null) liquid = null;
+    if (colors != null) colors = null;
     if (keyboards != null) keyboards = null;
     self = null;
   }
@@ -340,46 +427,12 @@ public class Config {
     return keyboardPadding;
   }
 
-  public static Integer getColor(@NonNull Map<?, ?> m, String k) {
-    Integer color = null;
-    if (m.containsKey(k)) {
-      Object o = m.get(k);
-      color = parseColor(o);
-      if (color == null) color = get().getCurrentColor(o.toString());
-    }
-    return color;
-  }
-
-  // API 2.0
-  public Integer getColor(String key) {
-    Object o;
-    if (currentColors.containsKey(key)) {
-      o = currentColors.get(key);
-      if (o instanceof Integer) return (Integer) o;
-    }
-    o = getColorValue(key);
-    if (o == null) {
-      o = (Objects.requireNonNull(presetColorSchemes.get(currentColorSchemeId))).get(key);
-    }
-    return parseColor(o);
-  }
-
-  // API 2.0
-  public Drawable getDrawable(@NonNull Map<?, ?> m, String k) {
-    if (m.containsKey(k)) {
-      final Object o = m.get(k);
-      //      Timber.d("getColorDrawable()" + k + " " + o);
-      return drawableObject(o);
-    }
-    return null;
-  }
-
   //  获取当前配色方案的key的value，或者从fallback获取值。
   @Nullable
-  private String getColorValue(String key) {
-    final Map<String, String> map = presetColorSchemes.get(currentColorSchemeId);
+  private Object getColorValue(String key) {
+    final Map<String, Object> map = presetColorSchemes.get(currentColorSchemeId);
     if (map == null) return null;
-    String value;
+    Object value;
     String newKey = key;
     int limit = fallbackColors.size() * 2;
     for (int i = 0; i < limit; i++) {
@@ -401,7 +454,7 @@ public class Config {
     if (!presetColorSchemes.containsKey(schemeId))
       schemeId = style.getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(schemeId)) schemeId = "default"; // 主題中的default配色
-    Map<String, String> colorMap = presetColorSchemes.get(schemeId);
+    Map<String, Object> colorMap = presetColorSchemes.get(schemeId);
     if (colorMap.containsKey("dark_scheme") || colorMap.containsKey("light_scheme"))
       hasDarkLight = true;
     return schemeId;
@@ -424,57 +477,17 @@ public class Config {
     if (!presetColorSchemes.containsKey(scheme))
       scheme = style.getString("color_scheme"); // 主題中指定的配色
     if (!presetColorSchemes.containsKey(scheme)) scheme = "default"; // 主題中的default配色
-    Map<String, String> colorMap = presetColorSchemes.get(scheme);
+    Map<String, Object> colorMap = presetColorSchemes.get(scheme);
     if (darkMode) {
       if (colorMap.containsKey("dark_scheme")) {
-        return colorMap.get("dark_scheme");
+        return (String) colorMap.get("dark_scheme");
       }
     } else {
       if (colorMap.containsKey("light_scheme")) {
-        return colorMap.get("light_scheme");
+        return (String) colorMap.get("light_scheme");
       }
     }
     return scheme;
-  }
-
-  // API 2.0
-  private static Integer parseColor(Object object) {
-    if (object == null) return null;
-    if (object instanceof Integer) {
-      return (Integer) object;
-    }
-    if (object instanceof Long) {
-      Long o = (Long) object;
-      // 这个方法可以把超出Integer.MAX_VALUE的值处理为负数int
-      return o.intValue();
-    }
-    return parseColor(object.toString());
-  }
-
-  @Nullable
-  private static Integer parseColor(@NonNull String s) {
-    if (s.contains(".")) return null; // picture name
-    final String hex = s.startsWith("#") ? s.replace("#", "0x") : s;
-    try {
-      final String completed;
-      if (hex.startsWith("0x") || hex.startsWith("0X")) {
-        if (hex.length() == 3 || hex.length() == 4) {
-          completed = String.format("#%02x000000", Long.decode(hex)); // 0xA -> #AA000000
-        } else if (hex.length() < 8) { // 0xGBB -> #RRGGBB
-          completed = String.format("#%06x", Long.decode(hex));
-        } else if (hex.length() == 9) { // 0xARRGGBB -> #AARRGGBB
-          completed = "#0" + hex.substring(2);
-        } else {
-          completed = "#" + hex.substring(2); // 0xAARRGGBB -> #AARRGGBB, 0xRRGGBB -> #RRGGBB
-        }
-      } else {
-        completed = hex; // red, green, blue ...
-      }
-      return Color.parseColor(completed);
-    } catch (Exception e) {
-      Timber.w(e, "Error on parsing color: %s", s);
-      return null;
-    }
   }
 
   @NonNull
@@ -492,154 +505,14 @@ public class Config {
     return "";
   }
 
-  public Integer getCurrentColor(String key) {
-    Object o = getColorValue(key);
-    return parseColor(o);
-  }
-
   @NonNull
   public List<Pair<String, String>> getPresetColorSchemes() {
     if (presetColorSchemes == null) return new ArrayList<>();
     return MapsKt.map(
         presetColorSchemes,
-        entry -> new Pair<>(entry.getKey(), Objects.requireNonNull(entry.getValue().get("name"))));
-  }
-
-  //  返回drawable。参数可以是颜色或者图片。如果参数缺失，返回null
-  private Drawable drawableObject(Object o) {
-    if (o == null) return null;
-    String name = o.toString();
-    Integer color = parseColor(o);
-    if (color == null) {
-      if (currentColors.containsKey(name)) {
-        o = currentColors.get(name);
-        color = parseColor(o);
-      }
-    }
-    if (color != null) {
-      final GradientDrawable gd = new GradientDrawable();
-      gd.setColor(color);
-      return gd;
-    }
-    return drawableBitmapObject(name);
-  }
-
-  //  返回图片的drawable。如果参数缺失、非图片，返回null
-  private Drawable drawableBitmapObject(Object o) {
-    if (o == null) return null;
-    if (o instanceof String) {
-      final String value = (String) o;
-      File imgSrc = new File(joinToFullImagePath(value));
-
-      if (!imgSrc.exists()) {
-        if (currentColors.containsKey(value)) {
-          final Object v = currentColors.get(value);
-          if (v instanceof String) imgSrc = new File((String) v);
-        }
-      }
-
-      if (imgSrc.exists()) {
-        final String path = imgSrc.getPath();
-        return getBitmapDrawable(path);
-      }
-    }
-    return null;
-  }
-
-  public Drawable getColorDrawable(String key) {
-    final Object o = getColorValue(key);
-    return drawableObject(o);
-  }
-
-  // 获取当前色彩 Config 2.0
-  public Integer getCurrentColor_(String key) {
-    Object o = currentColors.get(key);
-    return (Integer) o;
-  }
-
-  // 获取当前背景图路径 Config 2.0
-  public String getCurrentImage(String key) {
-    Object o = currentColors.get(key);
-    if (o instanceof String) return (String) o;
-    return "";
-  }
-
-  //  返回drawable。  Config 2.0
-  //  参数可以是颜色或者图片。如果参数缺失，返回null
-  public Drawable getDrawable_(String key) {
-    if (key == null) return null;
-    Object o = currentColors.get(key);
-    if (o instanceof Integer) {
-      Integer color = (Integer) o;
-      final GradientDrawable gd = new GradientDrawable();
-      gd.setColor(color);
-      return gd;
-    } else if (o instanceof String) return getDrawableBitmap_(key);
-
-    return null;
-  }
-
-  //  返回图片或背景的drawable,支持null参数。 Config 2.0
-  public Drawable getDrawable(
-      String key, String borderKey, String borderColorKey, String roundCornerKey, String alphaKey) {
-    if (key == null) return null;
-    Drawable drawable = getDrawableBitmap_(key);
-    if (drawable != null) {
-      if (alphaKey != null) {
-        if (hasKey(alphaKey)) {
-          int alpha = MathUtils.clamp(style.getInt(alphaKey), 0, 255);
-          drawable.setAlpha(alpha);
-        }
-      }
-      return drawable;
-    }
-
-    GradientDrawable gd = new GradientDrawable();
-    Object o = currentColors.get(key);
-    if (!(o instanceof Integer)) return null;
-    gd.setColor((int) o);
-
-    if (roundCornerKey != null) gd.setCornerRadius(style.getFloat(roundCornerKey));
-
-    if (borderColorKey != null && borderKey != null) {
-      int border = (int) DimensionsKt.dp2px(style.getFloat(borderKey));
-      Object borderColor = currentColors.get(borderColorKey);
-      if (borderColor instanceof Integer && border > 0) {
-        gd.setStroke(border, getCurrentColor_(borderColorKey));
-      }
-    }
-
-    if (alphaKey != null) {
-      if (hasKey(alphaKey)) {
-        int alpha = MathUtils.clamp(style.getInt(alphaKey), 0, 255);
-        gd.setAlpha(alpha);
-      }
-    }
-
-    return gd;
-  }
-
-  //  返回图片的drawable。 Config 2.0
-  //  如果参数缺失、非图片，返回null. 在genCurrentColors()中已经验证存在文件，因此不需要重新验证。
-  public Drawable getDrawableBitmap_(String key) {
-    if (key == null) return null;
-
-    Object o = currentColors.get(key);
-    if (o instanceof String) {
-      String path = (String) o;
-      return getBitmapDrawable(path);
-    }
-    return null;
-  }
-
-  private Drawable getBitmapDrawable(@NonNull String path) {
-    if (path.contains(".9.png")) {
-      final Bitmap bitmap = BitmapFactory.decodeFile(path);
-      final byte[] chunk = bitmap.getNinePatchChunk();
-      if (NinePatch.isNinePatchChunk(chunk))
-        return new NinePatchDrawable(Resources.getSystem(), bitmap, chunk, new Rect(), null);
-    }
-    return Drawable.createFromPath(path);
+        entry ->
+            new Pair<>(
+                entry.getKey(), Objects.requireNonNull((String) entry.getValue().get("name"))));
   }
 
   // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
@@ -662,14 +535,14 @@ public class Config {
 
   private void cacheColorValues() {
     currentColors.clear();
-    final Map<String, String> colorMap = presetColorSchemes.get(currentColorSchemeId);
+    final Map<String, Object> colorMap = presetColorSchemes.get(currentColorSchemeId);
     if (colorMap == null) {
       Timber.w("Color scheme id not found: %s", currentColorSchemeId);
       return;
     }
     appPrefs.getThemeAndColor().setSelectedColor(currentColorSchemeId);
 
-    for (Map.Entry<String, String> entry : colorMap.entrySet()) {
+    for (Map.Entry<String, Object> entry : colorMap.entrySet()) {
       final String key = entry.getKey();
       if (key.equals("name") || key.equals("author")) continue;
       Object value = parseColorValue(entry.getValue());
@@ -687,15 +560,18 @@ public class Config {
 
   // 获取参数的真实value，Config 2.0
   // 如果是色彩返回int，如果是背景图返回path string，如果处理失败返回null
-  private Object parseColorValue(String value) {
+  private Object parseColorValue(Object value) {
     if (value == null) return null;
-    if (value.matches(".*[.\\\\/].*")) {
-      return joinToFullImagePath(value);
-    } else {
-      try {
-        return parseColor(value);
-      } catch (Exception e) {
-        Timber.e(e, "Unknown color value: %s", value);
+    if (value instanceof String) {
+      final String valueStr = (String) value;
+      if (valueStr.matches(".*[.\\\\/].*")) {
+        return joinToFullImagePath(valueStr);
+      } else {
+        try {
+          return ColorUtils.parseColor(valueStr);
+        } catch (Exception e) {
+          Timber.e(e, "Unknown color value: %s", value);
+        }
       }
     }
     return null;

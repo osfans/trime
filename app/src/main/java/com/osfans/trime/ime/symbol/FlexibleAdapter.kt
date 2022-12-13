@@ -64,8 +64,8 @@ class FlexibleAdapter(
             simpleKeyText.apply {
                 text = bean.text
                 typeface = FontManager.getTypeface(theme.style.getString("long_text_font"))
-                when (val textColor = theme.getColor("long_text_color")) {
-                    null -> setTextColor(theme.getColor("key_text_color"))
+                when (val textColor = theme.colors.getColor("long_text_color")) {
+                    null -> setTextColor(theme.colors.getColor("key_text_color"))
                     else -> setTextColor(textColor)
                 }
 
@@ -80,7 +80,7 @@ class FlexibleAdapter(
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
 
             // if (background != null) viewHolder.itemView.setBackground(background);
-            (itemView as CardView).background = theme.getDrawable(
+            (itemView as CardView).background = theme.colors.getDrawable(
                 "long_text_back_color",
                 "key_border",
                 "key_long_text_border",

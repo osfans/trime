@@ -62,7 +62,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     final SimpleKeyBean bean = mBeans.get(position);
 
     holder.simpleKeyText.setText(bean.getLabel());
-    holder.simpleKeyText.setTextColor(theme.getColor("key_text_color"));
+    holder.simpleKeyText.setTextColor(theme.colors.getColor("key_text_color"));
     holder.simpleKeyText.setTypeface(FontManager.getTypeface(theme.style.getString("key_font")));
     holder.simpleKeyText.setGravity(Gravity.CENTER);
     holder.simpleKeyText.setEllipsize(TextUtils.TruncateAt.MARQUEE);
@@ -71,7 +71,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     if (labelTextSize > 0) holder.simpleKeyText.setTextSize(labelTextSize);
 
     holder.itemView.setBackground(
-        theme.getDrawable(
+        theme.colors.getDrawable(
             "key_back_color", "key_border", "key_border_color", "round_corner", null));
 
     if (listener != null) {

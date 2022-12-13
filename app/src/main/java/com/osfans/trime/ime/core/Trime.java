@@ -322,7 +322,8 @@ public class Trime extends LifecycleInputMethodService {
     textInputManager.setShouldResetAsciiMode(imeConfig.style.getBoolean("reset_ascii_mode"));
     isAutoCaps = imeConfig.style.getBoolean("auto_caps");
     isPopupWindowEnabled =
-        getPrefs().getKeyboard().getPopupWindowEnabled() && imeConfig.hasKey("window");
+        getPrefs().getKeyboard().getPopupWindowEnabled()
+            && imeConfig.style.getObject("window") != null;
     textInputManager.setShouldUpdateRimeOption(true);
   }
 
@@ -485,7 +486,7 @@ public class Trime extends LifecycleInputMethodService {
 
     if (mPopupWindow != null) {
       final Drawable textBackground =
-          mConfig.getDrawable(
+          mConfig.colors.getDrawable(
               "text_back_color",
               "layout/border",
               "border_color",
@@ -498,7 +499,7 @@ public class Trime extends LifecycleInputMethodService {
 
     if (mCandidateRoot != null) {
       final Drawable candidateBackground =
-          mConfig.getDrawable(
+          mConfig.colors.getDrawable(
               "candidate_background",
               "candidate_border",
               "candidate_border_color",
@@ -516,7 +517,7 @@ public class Trime extends LifecycleInputMethodService {
         padding[0], padding[1], padding[2], orientation);
     mainKeyboardView.setPadding(padding[0], 0, padding[1], padding[2]);
 
-    final Drawable inputRootBackground = mConfig.getDrawable_("root_background");
+    final Drawable inputRootBackground = mConfig.colors.getDrawable("root_background");
     if (inputRootBackground != null) {
       inputRootBinding.inputRoot.setBackground(inputRootBackground);
     } else {
@@ -542,7 +543,8 @@ public class Trime extends LifecycleInputMethodService {
       mCandidateRoot.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset();
       isPopupWindowEnabled =
-          getPrefs().getKeyboard().getPopupWindowEnabled() && getImeConfig().hasKey("window");
+          getPrefs().getKeyboard().getPopupWindowEnabled()
+              && getImeConfig().style.getObject("window") != null;
       mComposition.setVisibility(isPopupWindowEnabled ? View.VISIBLE : View.GONE);
       mComposition.reset();
     }
@@ -565,7 +567,7 @@ public class Trime extends LifecycleInputMethodService {
   /** Must be called on the UI thread */
   public void initKeyboard() {
     reset();
-    setNavBarColor();
+    // setNavBarColor();
     textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
     bindKeyboardToInputView();
     // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
@@ -582,7 +584,7 @@ public class Trime extends LifecycleInputMethodService {
       hideCompositionView();
       resetKeyboard();
 
-      setNavBarColor();
+      // setNavBarColor();
       textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
       bindKeyboardToInputView();
       // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
@@ -760,7 +762,7 @@ public class Trime extends LifecycleInputMethodService {
       showStatusIcon(R.drawable.ic_trime_status); // 狀態欄圖標
     }
     bindKeyboardToInputView();
-    if (!restarting) setNavBarColor();
+    // if (!restarting) setNavBarColor();
     setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
 
     if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION)
@@ -1247,7 +1249,7 @@ public class Trime extends LifecycleInputMethodService {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       try {
         final Window window = getWindow().getWindow();
-        @ColorInt final Integer keyboardBackColor = getImeConfig().getCurrentColor_("back_color");
+        @ColorInt final Integer keyboardBackColor = getImeConfig().colors.getColor("back_color");
         if (keyboardBackColor != null) {
           BarUtils.setNavBarColor(window, keyboardBackColor);
         }

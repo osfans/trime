@@ -126,15 +126,16 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
     if (candidateSize > 0) holder.candidate.setTextSize(candidateSize);
     if (commentSize > 0) holder.comment.setTextSize(commentSize);
 
-    final int candidateColor = theme.getColor("candidate_text_color");
-    final int commentColor = theme.getColor("comment_text_color");
+    final int candidateColor = theme.colors.getColor("candidate_text_color");
+    final int commentColor = theme.colors.getColor("comment_text_color");
     holder.candidate.setTextColor(candidateColor);
     holder.comment.setTextColor(commentColor);
 
     //  点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
     // 如果直接使用background，会造成滚动时部分内容的背景填充错误的问题
     final Drawable background =
-        theme.getDrawable("key_back_color", "key_border", "key_border_color", "round_corner", null);
+        theme.colors.getDrawable(
+            "key_back_color", "key_border", "key_border_color", "round_corner", null);
     if (background != null) holder.itemView.setBackground(background);
 
     // 如果设置了回调，则设置点击事件
@@ -145,7 +146,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
     // 点击时产生背景变色效果
     holder.itemView.setOnTouchListener(
         (view, motionEvent) -> {
-          final int hilited = theme.getColor("hilited_candidate_text_color");
+          final int hilited = theme.colors.getColor("hilited_candidate_text_color");
           if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
             holder.candidate.setTextColor(hilited);
           }

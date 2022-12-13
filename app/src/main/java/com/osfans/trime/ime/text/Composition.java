@@ -231,25 +231,25 @@ public class Composition extends AppCompatTextView {
     comment_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("comment_text_size"));
     label_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("label_text_size"));
 
-    text_color = config.getColor("text_color");
-    candidate_text_color = config.getColor("candidate_text_color");
-    comment_text_color = config.getColor("comment_text_color");
-    hilited_text_color = config.getColor("hilited_text_color");
-    hilited_candidate_text_color = config.getColor("hilited_candidate_text_color");
-    hilited_comment_text_color = config.getColor("hilited_comment_text_color");
-    label_color = config.getColor("label_color");
-    hilited_label_color = config.getColor("hilited_label_color");
+    text_color = config.colors.getColor("text_color");
+    candidate_text_color = config.colors.getColor("candidate_text_color");
+    comment_text_color = config.colors.getColor("comment_text_color");
+    hilited_text_color = config.colors.getColor("hilited_text_color");
+    hilited_candidate_text_color = config.colors.getColor("hilited_candidate_text_color");
+    hilited_comment_text_color = config.colors.getColor("hilited_comment_text_color");
+    label_color = config.colors.getColor("label_color");
+    hilited_label_color = config.colors.getColor("hilited_label_color");
     if (hilited_label_color == null) {
       hilited_label_color = hilited_candidate_text_color;
     }
 
-    back_color = config.getColor("back_color");
-    hilited_back_color = config.getColor("hilited_back_color");
-    hilited_candidate_back_color = config.getColor("hilited_candidate_back_color");
+    back_color = config.colors.getColor("back_color");
+    hilited_back_color = config.colors.getColor("hilited_back_color");
+    hilited_candidate_back_color = config.colors.getColor("hilited_candidate_back_color");
 
     key_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("key_text_size"));
-    key_text_color = config.getColor("key_text_color");
-    key_back_color = config.getColor("key_back_color");
+    key_text_color = config.colors.getColor("key_text_color");
+    key_back_color = config.colors.getColor("key_back_color");
 
     float line_spacing_multiplier = config.style.getFloat("layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;

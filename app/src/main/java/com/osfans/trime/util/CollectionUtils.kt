@@ -5,8 +5,8 @@ object CollectionUtils {
     fun <K, V> getOrDefault(map: Map<K, V>, key: K, defaultValue: V): V = map[key] ?: defaultValue
 
     @JvmStatic
-    fun obtainValue(map: Map<String?, Any?>?, vararg: String): Any? {
-        if (map == null || map.isEmpty() || vararg.isEmpty()) return null
+    fun obtainValue(map: Map<String?, Any?>?, vararg: String?): Any? {
+        if (map.isNullOrEmpty() || vararg == null) return null
         val keys = vararg.split('/')
         var v: Any? = map
         for (key in keys) {

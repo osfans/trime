@@ -362,9 +362,9 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
   public void reset() {
     final Config config = Config.get();
-    key_symbol_color = config.getColor("key_symbol_color");
-    hilited_key_symbol_color = config.getColor("hilited_key_symbol_color");
-    mShadowColor = config.getColor("shadow_color");
+    key_symbol_color = config.colors.getColor("key_symbol_color");
+    hilited_key_symbol_color = config.colors.getColor("hilited_key_symbol_color");
+    mShadowColor = config.colors.getColor("shadow_color");
 
     mSymbolSize = (int) DimensionsKt.sp2px(config.style.getFloat("symbol_text_size"));
     mKeyTextSize = (int) DimensionsKt.sp2px(config.style.getFloat("key_text_size"));
@@ -381,30 +381,31 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
 
     mKeyBackColor = new StateListDrawable();
     mKeyBackColor.addState(
-        Key.KEY_STATE_PRESSED_ON, config.getColorDrawable("hilited_on_key_back_color"));
+        Key.KEY_STATE_PRESSED_ON, config.colors.getDrawable("hilited_on_key_back_color"));
     mKeyBackColor.addState(
-        Key.KEY_STATE_PRESSED_OFF, config.getColorDrawable("hilited_off_key_back_color"));
-    mKeyBackColor.addState(Key.KEY_STATE_NORMAL_ON, config.getColorDrawable("on_key_back_color"));
-    mKeyBackColor.addState(Key.KEY_STATE_NORMAL_OFF, config.getColorDrawable("off_key_back_color"));
+        Key.KEY_STATE_PRESSED_OFF, config.colors.getDrawable("hilited_off_key_back_color"));
+    mKeyBackColor.addState(Key.KEY_STATE_NORMAL_ON, config.colors.getDrawable("on_key_back_color"));
     mKeyBackColor.addState(
-        Key.KEY_STATE_PRESSED, config.getColorDrawable("hilited_key_back_color"));
-    mKeyBackColor.addState(Key.KEY_STATE_NORMAL, config.getColorDrawable("key_back_color"));
+        Key.KEY_STATE_NORMAL_OFF, config.colors.getDrawable("off_key_back_color"));
+    mKeyBackColor.addState(
+        Key.KEY_STATE_PRESSED, config.colors.getDrawable("hilited_key_back_color"));
+    mKeyBackColor.addState(Key.KEY_STATE_NORMAL, config.colors.getDrawable("key_back_color"));
 
     mKeyTextColor =
         new ColorStateList(
             Key.KEY_STATES,
             new int[] {
-              config.getColor("hilited_on_key_text_color"),
-              config.getColor("hilited_off_key_text_color"),
-              config.getColor("on_key_text_color"),
-              config.getColor("off_key_text_color"),
-              config.getColor("hilited_key_text_color"),
-              config.getColor("key_text_color")
+              config.colors.getColor("hilited_on_key_text_color"),
+              config.colors.getColor("hilited_off_key_text_color"),
+              config.colors.getColor("on_key_text_color"),
+              config.colors.getColor("off_key_text_color"),
+              config.colors.getColor("hilited_key_text_color"),
+              config.colors.getColor("key_text_color")
             });
 
-    final Integer color = config.getColor("preview_text_color");
+    final Integer color = config.colors.getColor("preview_text_color");
     if (color != null) mPreviewText.setTextColor(color);
-    final Integer previewBackColor = config.getColor("preview_back_color");
+    final Integer previewBackColor = config.colors.getColor("preview_back_color");
     if (previewBackColor != null) {
       final GradientDrawable background = new GradientDrawable();
       background.setColor(previewBackColor);

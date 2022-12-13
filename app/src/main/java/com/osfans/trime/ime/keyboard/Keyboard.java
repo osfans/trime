@@ -114,7 +114,7 @@ public class Keyboard {
     mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
     mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
     mRoundCorner = config.style.getFloat("round_corner");
-    mBackground = config.getColorDrawable("keyboard_back_color");
+    mBackground = config.colors.getDrawable("keyboard_back_color");
 
     keyboardHeight = (int) DimensionsKt.dp2px(config.style.getFloat("keyboard_height"));
     if (ScreenUtils.isLandscape()) {
@@ -215,7 +215,7 @@ public class Keyboard {
         ConfigGetter.getFloat(
             keyboardConfig, "round_corner", config.style.getFloat("round_corner"));
 
-    Drawable background = config.getDrawable(keyboardConfig, "keyboard_back_color");
+    Drawable background = config.colors.getDrawable(keyboardConfig, "keyboard_back_color");
     if (background != null) mBackground = background;
 
     int x = mDefaultHorizontalGap / 2;
