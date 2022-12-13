@@ -25,12 +25,11 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.math.MathUtils;
-import com.blankj.utilcode.util.FileUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
+import com.osfans.trime.data.sound.SoundManager;
 import com.osfans.trime.ime.keyboard.Key;
-import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.ColorUtils;
 import com.osfans.trime.util.DimensionsKt;
@@ -59,7 +58,6 @@ public class Config {
     return self;
   }
 
-  private String soundPackageName, currentSound;
   private static final String defaultThemeName = "trime";
   private String currentColorSchemeId;
 
@@ -77,7 +75,6 @@ public class Config {
   public Config() {
     self = this;
     ThemeManager.init();
-    soundPackageName = appPrefs.getKeyboard().getSoundPackage();
 
     Timber.d("Syncing asset data ...");
     DataManager.sync();
@@ -86,57 +83,16 @@ public class Config {
     init();
 
     Timber.d("Setting sound from color ...");
-    setSoundFromColor();
+    SoundManager.switchSound(colors.getString("sound"));
 
     Timber.d("Initialization finished");
-  }
-
-  public String getSoundPackage() {
-    return soundPackageName;
-  }
-
-  // 设置音效包
-  public void setSoundPackage(String name) {
-    soundPackageName = name;
-    applySoundPackage(name);
-    appPrefs.getKeyboard().setSoundPackage(soundPackageName);
-  }
-
-  // 应用音效包
-  private boolean applySoundPackage(@NonNull String name) {
-    final String src = userDataDir + "/sound/" + name + ".sound.yaml";
-    final String dest = userDataDir + "/build/" + name + ".sound.yaml";
-    boolean result = FileUtils.copy(src, dest);
-    if (result) {
-      Sound.get(name);
-      currentSound = name;
-    }
-    return result;
-  }
-
-  // 配色指定音效时自动切换音效效果（不会自动修改设置）。
-  public void setSoundFromColor() {
-    final Map<String, Object> m = presetColorSchemes.get(currentColorSchemeId);
-    assert m != null;
-    if (m.containsKey("sound")) {
-      String sound = (String) m.get("sound");
-      if (!Objects.equals(sound, currentSound)) {
-        if (applySoundPackage(sound)) {
-          return;
-        }
-      }
-    }
-
-    if (!Objects.equals(currentSound, soundPackageName)) {
-      setSoundPackage(soundPackageName);
-    }
   }
 
   public void init() {
     Timber.i("Initializing theme, currentThemeName=%s ...", ThemeManager.getActiveTheme());
     try {
       final String fullThemeFileName = ThemeManager.getActiveTheme() + ".yaml";
-      final File themeFile = new File(Rime.get_user_data_dir(), "build/" + fullThemeFileName);
+      final File themeFile = new File(Rime.getRimeUserDataDir(), "build/" + fullThemeFileName);
       if (themeFile.exists()) {
         Timber.i("Deployed file exists, skipping deployment ...");
       } else {
@@ -233,6 +189,10 @@ public class Config {
 
     public Colors(@NonNull final Config theme) {
       this.theme = theme;
+    }
+
+    public String getString(@NonNull String key) {
+      return CollectionUtils.obtainString(theme.presetColorSchemes, key, "");
     }
 
     // API 2.0
@@ -495,11 +455,11 @@ public class Config {
     File imgSrc;
     if ((imgSrc =
             new File(
-                Rime.get_user_data_dir(),
+                Rime.getRimeUserDataDir(),
                 "backgrounds/" + style.getString("background_folder") + value))
         .exists()) {
       return imgSrc.getPath();
-    } else if ((imgSrc = new File(Rime.get_user_data_dir(), "backgrounds/" + value)).exists()) {
+    } else if ((imgSrc = new File(Rime.getRimeUserDataDir(), "backgrounds/" + value)).exists()) {
       return imgSrc.getPath();
     }
     return "";

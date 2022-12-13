@@ -102,13 +102,13 @@ suspend fun Context.soundPicker(
             items = SoundManager.getAllSounds()
                 .map { it.substringBeforeLast('.') }
                 .toTypedArray()
-            val current = Config.get().soundPackage
+            val current = SoundManager.getActiveSound()
                 .substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            Config.get().soundPackage = "${items[checkedItem]}.sound"
+            SoundManager.switchSound("${items[checkedItem]}.sound")
         }
     }.create()
 }

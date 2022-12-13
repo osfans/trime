@@ -768,8 +768,8 @@ Java_com_osfans_trime_core_Rime_get_1shared_1data_1dir(JNIEnv *env, jclass /* th
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_get_1user_1data_1dir(JNIEnv *env, jclass /* thiz */) {
-    return env->NewStringUTF(RimeGetUserDataDir());
+Java_com_osfans_trime_core_Rime_getRimeUserDataDir(JNIEnv *env, jclass /* thiz */) {
+    return env->NewStringUTF(rime_get_api()->get_user_data_dir());
 }
 
 extern "C"

@@ -58,6 +58,7 @@ import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.db.DraftHelper;
+import com.osfans.trime.data.sound.SoundManager;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
@@ -557,7 +558,7 @@ public class Trime extends LifecycleInputMethodService {
     inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
     loadConfig();
     getImeConfig().initCurrentColors();
-    getImeConfig().setSoundFromColor();
+    SoundManager.switchSound(getImeConfig().colors.getString("sound"));
     KeyboardSwitcher.newOrReset();
     resetCandidate();
     hideCompositionView();
@@ -578,7 +579,7 @@ public class Trime extends LifecycleInputMethodService {
     if (getImeConfig().hasDarkLight()) {
       loadConfig();
       getImeConfig().initCurrentColors(darkMode);
-      getImeConfig().setSoundFromColor();
+      SoundManager.switchSound(getImeConfig().colors.getString("sound"));
       KeyboardSwitcher.newOrReset();
       resetCandidate();
       hideCompositionView();

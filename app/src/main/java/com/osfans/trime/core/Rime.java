@@ -616,7 +616,7 @@ public class Rime {
   private static boolean overWriteSchema(String schema_id, Map<String, String> map) {
     if (schema_id == null) schema_id = getSchemaId();
     File file =
-        new File(Rime.get_user_data_dir() + File.separator + "build", schema_id + ".schema.yaml");
+        new File(Rime.getRimeUserDataDir() + File.separator + "build", schema_id + ".schema.yaml");
     try {
       FileReader in = new FileReader(file);
       BufferedReader bufIn = new BufferedReader(in);
@@ -752,7 +752,7 @@ public class Rime {
   public static boolean deploy_config_file(String name, boolean skipIfExists) {
     String file_name = name + ".yaml";
     if (skipIfExists) {
-      File f = new File(Rime.get_user_data_dir() + File.separator + "build", file_name);
+      File f = new File(Rime.getRimeUserDataDir() + File.separator + "build", file_name);
       if (f.exists()) {
         if (f.length() > 10000) {
           Timber.d("deploy_config_file() skip");
@@ -864,7 +864,7 @@ public class Rime {
 
   public static native String get_shared_data_dir();
 
-  public static native String get_user_data_dir();
+  public static native String getRimeUserDataDir();
 
   public static native String get_sync_dir();
 
