@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import kotlin.collections.CollectionsKt;
+import kotlin.collections.IndexedValue;
 import kotlinx.coroutines.channels.BufferOverflow;
 import kotlinx.coroutines.flow.FlowKt;
 import kotlinx.coroutines.flow.MutableSharedFlow;
@@ -149,17 +151,13 @@ public class Rime {
   }
 
   /** Rime方案 */
+  @SuppressWarnings("unchecked")
   public static class RimeSchema {
-    private Map<String, Object> schema;
     private List<Map<String, Object>> switches;
     public Map<String, Object> symbolMap;
 
     public RimeSchema(@NonNull String schemaId) {
       Timber.d("RimeSchema <init>, schemaId=%s", schemaId);
-      if ((schema = (Map<String, Object>) getRimeSchemaValue(schemaId, "schema")) == null) {
-        Timber.w("Failed to parse schema meta info, fallback to empty collection");
-        schema = new HashMap<>();
-      }
       if ((switches = (List<Map<String, Object>>) getRimeSchemaValue(schemaId, "switches"))
           == null) {
         Timber.w("Failed to parse schema status switches, fallback to empty collection");
@@ -208,24 +206,22 @@ public class Rime {
 
     public void updateSwitchOptions() {
       if (switches.isEmpty()) return; // 無方案
-      int i = 0;
-      for (final Map<String, Object> s : switches) {
+      for (final IndexedValue<Map<String, Object>> is : CollectionsKt.withIndex(switches)) {
+        final Map<String, Object> s = is.getValue();
         if (s.containsKey("options")) { // 带有一系列 Rime 运行时选项的开关，找到启用的选项并标记
           final List<String> options = (List<String>) s.get("options");
           assert options != null;
-          int j = 0;
-          for (final String option : options) {
-            if (Rime.get_option(option)) {
+          for (final IndexedValue<String> io : CollectionsKt.withIndex(options)) {
+            if (Rime.get_option(io.getValue())) {
               // 将启用状态标记为此选项的索引值，方便切换时直接从选项列表中获取
-              s.put("enabled", j);
+              s.put("enabled", io.getIndex());
               break;
             }
-            j++;
           }
         } else { // 只有单 Rime 运行时选项的开关，开关名即选项名，标记其启用状态
-          s.put("enabled", Rime.get_option(s.get("name").toString()) ? 1 : 0);
+          s.put("enabled", Rime.get_option((String) s.get("name")) ? 1 : 0);
         }
-        switches.set(i++, s);
+        switches.set(is.getIndex(), s);
       }
     }
 
@@ -242,7 +238,7 @@ public class Rime {
         Rime.setOption(options.get(nextOrReserved), true);
       } else {
         nextOrReserved = 1 - enabled;
-        Rime.setOption(s.get("name").toString(), enabled == 1);
+        Rime.setOption((String) s.get("name"), nextOrReserved == 1);
       }
       s.put("enabled", nextOrReserved);
       switches.set(index, s);
