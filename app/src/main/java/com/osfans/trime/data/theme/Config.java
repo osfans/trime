@@ -46,12 +46,10 @@ import timber.log.Timber;
 
 /** 解析 YAML 配置文件 */
 public class Config {
+  private static final String VERSION_KEY = "config_version";
   private static Config self = null;
 
   private static final AppPrefs appPrefs = AppPrefs.defaultInstance();
-
-  private static final String sharedDataDir = appPrefs.getProfile().getSharedDataDir();
-  private static final String userDataDir = appPrefs.getProfile().getUserDataDir();
 
   public static Config get() {
     if (self == null) self = new Config();
@@ -91,13 +89,14 @@ public class Config {
   public void init() {
     Timber.i("Initializing theme, currentThemeName=%s ...", ThemeManager.getActiveTheme());
     try {
-      final String fullThemeFileName = ThemeManager.getActiveTheme() + ".yaml";
-      final File themeFile = new File(Rime.getRimeUserDataDir(), "build/" + fullThemeFileName);
-      if (themeFile.exists()) {
+      final String themeFileName = ThemeManager.getActiveTheme() + ".yaml";
+      final File original = new File(Rime.getRimeUserDataDir(), themeFileName);
+      final File built = new File(Rime.getRimeUserDataDir(), "build/" + themeFileName);
+      if (original.lastModified() <= built.lastModified()) {
         Timber.i("Deployed file exists, skipping deployment ...");
       } else {
-        Timber.i("The theme has not been deployed yet, deploying ...");
-        Rime.deploy_config_file(fullThemeFileName, "config_version");
+        Timber.i("The theme has been modified or not yet been deployed, deploying ...");
+        Rime.deployRimeConfigFile(themeFileName, VERSION_KEY);
       }
 
       Timber.d("Fetching global theme config map ...");

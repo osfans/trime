@@ -122,13 +122,8 @@ Java_com_osfans_trime_core_Rime_deploy_1schema(JNIEnv *env, jclass /* thiz */, j
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_deploy_1config_1file(JNIEnv *env, jclass /* thiz */, jstring file_name, jstring version_key) {
-    const char* s = file_name == nullptr ? nullptr : env->GetStringUTFChars(file_name, nullptr);
-    const char* s2 = version_key == nullptr ? nullptr : env->GetStringUTFChars(version_key, nullptr);
-    bool b = RimeDeployConfigFile(s, s2);
-    env->ReleaseStringUTFChars(file_name, s);
-    env->ReleaseStringUTFChars(version_key, s2);
-    return b;
+Java_com_osfans_trime_core_Rime_deployRimeConfigFile(JNIEnv *env, jclass /* thiz */, jstring file_name, jstring version_key) {
+    return rime_get_api()->deploy_config_file(CString(env, file_name), CString(env, version_key));
 }
 
 extern "C"

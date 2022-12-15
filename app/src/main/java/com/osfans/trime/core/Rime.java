@@ -736,7 +736,8 @@ public class Rime {
 
   public static native boolean deploy_schema(String schema_file);
 
-  public static native boolean deploy_config_file(String file_name, String version_key);
+  public static native boolean deployRimeConfigFile(
+      @NonNull String fileName, @NonNull String versionKey);
 
   /**
    * 部署config文件到build目录
@@ -755,10 +756,10 @@ public class Rime {
           return true;
         }
       } else {
-        return Rime.deploy_config_file(file_name, "config_version");
+        return Rime.deployRimeConfigFile(file_name, "config_version");
       }
     }
-    return Rime.deploy_config_file(file_name, "config_version");
+    return Rime.deployRimeConfigFile(file_name, "config_version");
   }
 
   public static native boolean sync_user_data();
