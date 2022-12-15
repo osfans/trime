@@ -18,6 +18,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.main.LogActivity
+import splitties.systemservices.clipboardManager
 import timber.log.Timber
 import java.text.FieldPosition
 import java.text.SimpleDateFormat

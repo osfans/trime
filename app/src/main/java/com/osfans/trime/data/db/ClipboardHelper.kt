@@ -7,13 +7,13 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.util.StringUtils.mismatch
 import com.osfans.trime.util.StringUtils.replace
 import com.osfans.trime.util.WeakHashSet
-import com.osfans.trime.util.clipboardManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import splitties.systemservices.clipboardManager
 import timber.log.Timber
 
 object ClipboardHelper :

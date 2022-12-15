@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import com.osfans.trime.TrimeImeService
+import splitties.systemservices.inputMethodManager
 import timber.log.Timber
 
 object InputMethodUtils {

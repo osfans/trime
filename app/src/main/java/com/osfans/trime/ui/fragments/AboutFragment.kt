@@ -16,7 +16,7 @@ import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.AppVersionUtils.writeLibraryVersionToSummary
 import com.osfans.trime.util.Const
-import com.osfans.trime.util.clipboardManager
+import splitties.systemservices.clipboardManager
 
 class AboutFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()

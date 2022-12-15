@@ -11,8 +11,8 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundThemeManager
-import com.osfans.trime.util.audioManager
-import com.osfans.trime.util.vibrator
+import splitties.systemservices.audioManager
+import splitties.systemservices.vibrator
 import timber.log.Timber
 import java.util.Locale
 

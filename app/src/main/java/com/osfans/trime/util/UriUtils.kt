@@ -3,6 +3,7 @@ package com.osfans.trime.util
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
+import splitties.systemservices.storageManager
 import timber.log.Timber
 import java.io.File
 import java.lang.reflect.Array

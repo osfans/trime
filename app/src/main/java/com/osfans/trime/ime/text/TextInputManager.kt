@@ -29,7 +29,6 @@ import com.osfans.trime.ui.main.schemaPicker
 import com.osfans.trime.ui.main.soundPicker
 import com.osfans.trime.ui.main.themePicker
 import com.osfans.trime.util.ShortcutUtils
-import com.osfans.trime.util.inputMethodManager
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -39,6 +38,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import splitties.systemservices.inputMethodManager
 import timber.log.Timber
 import java.util.Locale
 

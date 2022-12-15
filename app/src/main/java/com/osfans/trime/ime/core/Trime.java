@@ -84,11 +84,11 @@ import com.osfans.trime.ui.main.PrefMainActivity;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
-import com.osfans.trime.util.SystemServicesKt;
 import com.osfans.trime.util.ViewUtils;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import splitties.systemservices.SystemServicesKt;
 import timber.log.Timber;
 
 /** {@link InputMethodService 輸入法}主程序 */
