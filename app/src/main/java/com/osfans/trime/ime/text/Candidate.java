@@ -207,7 +207,7 @@ public class Candidate extends View {
   private void removeHighlight() {
     highlightIndex = -1;
     invalidate();
-    requestLayout();
+    // requestLayout(); // FIXME: this will make crash sometimes, workaround it with disabling
   }
 
   private boolean isHighlighted(int i) {
