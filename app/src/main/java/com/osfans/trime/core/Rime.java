@@ -635,11 +635,6 @@ public class Rime {
   public static native void startupRime(
       @NonNull String sharedDir, @NonNull String userDir, boolean fullCheck);
 
-  // deployment
-  public static native void deployer_initialize(String shared_data_dir, String user_data_dir);
-
-  public static native boolean prebuild();
-
   public static native void deployRime();
 
   public static native boolean deploy_schema(String schema_file);

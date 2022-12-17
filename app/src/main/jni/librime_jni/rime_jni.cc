@@ -154,18 +154,6 @@ JNI_OnLoad(JavaVM* jvm, void* reserved)
 
 static jobject rimeConfigValueToJObject(JNIEnv *env, RimeConfig* config, const std::string &key);
 
-void init_traits(JNIEnv *env, jstring shared_data_dir, jstring user_data_dir, void (*func)(RimeTraits *)) {
-    RIME_STRUCT(RimeTraits, traits);
-    const char* p_shared_data_dir = shared_data_dir == nullptr ? nullptr : env->GetStringUTFChars(shared_data_dir, nullptr);
-    const char* p_user_data_dir = user_data_dir == nullptr ? nullptr : env->GetStringUTFChars(user_data_dir, nullptr);
-    traits.shared_data_dir = p_shared_data_dir;
-    traits.user_data_dir = p_user_data_dir;
-    traits.app_name = "rime.trime";
-    func(&traits);
-    env->ReleaseStringUTFChars(shared_data_dir, p_shared_data_dir);
-    env->ReleaseStringUTFChars(user_data_dir, p_user_data_dir);
-}
-
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_startupRime(JNIEnv *env, jclass clazz, jstring shared_dir, jstring user_dir,
@@ -183,18 +171,6 @@ Java_com_osfans_trime_core_Rime_startupRime(JNIEnv *env, jclass clazz, jstring s
 }
 
 // deployment
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_osfans_trime_core_Rime_deployer_1initialize(JNIEnv *env, jclass /* thiz */, jstring shared_data_dir, jstring user_data_dir) {
-    init_traits(env, shared_data_dir, user_data_dir, RimeDeployerInitialize);
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_prebuild(JNIEnv *env, jclass /* thiz */) {
-    return RimePrebuildAllSchemas();
-}
-
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_deployRime(JNIEnv *env, jclass /* thiz */) {
