@@ -5,6 +5,7 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundTheme
 import com.osfans.trime.data.sound.SoundThemeManager
@@ -74,12 +75,12 @@ suspend fun Context.schemaPicker(
         title = getString(R.string.pref_select_schemas)
         initDispatcher = Dispatchers.IO
         onInit {
-            items = Rime.get_available_schema_list()
-                ?.map { it["schema_id"]!! }
-                ?.toTypedArray() ?: arrayOf()
-            val checked = Rime.get_selected_schema_list()
-                ?.map { it["schema_id"]!! }
-                ?.toTypedArray() ?: arrayOf()
+            items = Rime.getAvailableRimeSchemaList()
+                .mapNotNull(SchemaListItem::schemaId)
+                .toTypedArray()
+            val checked = Rime.getSelectedRimeSchemaList()
+                .mapNotNull(SchemaListItem::schemaId)
+                .toTypedArray()
             checkedItems = items.map { checked.contains(it) }.toBooleanArray()
         }
         postiveDispatcher = Dispatchers.Default

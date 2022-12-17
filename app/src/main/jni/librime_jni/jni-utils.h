@@ -166,6 +166,9 @@ public:
     jfieldID RimeStatusTraditional;
     jfieldID RimeStatusAsciiPunct;
 
+    jclass SchemaListItem;
+    jmethodID SchemaListItemInit;
+
     GlobalRefSingleton(JavaVM *jvm_) : jvm(jvm_) {
         JNIEnv *env;
         jvm->AttachCurrentThread(&env, nullptr);
@@ -233,6 +236,9 @@ public:
         RimeStatusSimplified = env->GetFieldID(RimeStatus, "is_simplified", "Z");
         RimeStatusTraditional = env->GetFieldID(RimeStatus, "is_traditional", "Z");
         RimeStatusAsciiPunct = env->GetFieldID(RimeStatus, "is_ascii_punct", "Z");
+
+        SchemaListItem = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/SchemaListItem")));
+        SchemaListItemInit = env->GetMethodID(SchemaListItem, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
     }
 
     const JEnv AttachEnv() const { return JEnv(jvm); }

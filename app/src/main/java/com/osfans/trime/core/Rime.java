@@ -251,7 +251,6 @@ public class Rime {
   private static final RimeContext mContext = new RimeContext();
   private static final RimeStatus mStatus = new RimeStatus();
   private static RimeSchema mSchema;
-  private static List<?> mSchemaList;
   private static boolean isHandlingRimeNotification;
 
   public static final MutableSharedFlow<RimeEvent> rimeNotiFlow_ =
@@ -333,10 +332,8 @@ public class Rime {
   }
 
   public static void initSchema() {
-    mSchemaList = get_schema_list();
-    String schema_id = getSchemaId();
     Timber.d("initSchema() RimeSchema");
-    mSchema = new RimeSchema(schema_id);
+    mSchema = new RimeSchema(getCurrentRimeSchema());
     Timber.d("initSchema() getStatus");
     getStatus();
     Timber.d("initSchema() done");
@@ -539,7 +536,7 @@ public class Rime {
   }
 
   public static String getSchemaId() {
-    return get_current_schema();
+    return getCurrentRimeSchema();
   }
 
   private static boolean isEmpty(@NonNull String s) {
@@ -550,36 +547,14 @@ public class Rime {
     return isEmpty(getSchemaId());
   }
 
-  public static String[] getSchemaNames() {
-    int n = mSchemaList.size();
-    String[] names = new String[n];
-    int i = 0;
-    for (Object o : mSchemaList) {
-      Map<?, ?> m = (Map<?, ?>) o;
-      names[i++] = (String) m.get("name");
-    }
-    return names;
-  }
-
-  public static int getSchemaIndex() {
-    String schema_id = getSchemaId();
-    int i = 0;
-    for (Object o : mSchemaList) {
-      Map<?, ?> m = (Map<?, ?>) o;
-      if (m.get("schema_id").toString().contentEquals(schema_id)) return i;
-      i++;
-    }
-    return 0;
-  }
-
   public static String getSchemaName() {
     return mStatus.schema_name;
   }
 
-  private static boolean selectSchema(String schema_id) {
-    Timber.d("selectSchema() schema_id=" + schema_id);
-    overWriteSchema(schema_id);
-    boolean b = select_schema(schema_id);
+  public static boolean selectSchema(String schemaId) {
+    Timber.d("Selecting schemaId=%s", schemaId);
+    overWriteSchema(schemaId);
+    boolean b = select_schema(schemaId);
     getContexts();
     return b;
   }
@@ -641,16 +616,6 @@ public class Rime {
       return false;
     }
     return map.isEmpty();
-  }
-
-  public static boolean selectSchema(int id) {
-    int n = mSchemaList.size();
-    if (id < 0 || id >= n) return false;
-    final String schema_id = getSchemaId();
-    Map<String, String> m = (Map<String, String>) mSchemaList.get(id);
-    final String target = m.get("schema_id");
-    if (target.contentEquals(schema_id)) return false;
-    return selectSchema(target);
   }
 
   public static Rime get(boolean full_check) {
@@ -798,11 +763,11 @@ public class Rime {
 
   public static native String get_property(String prop);
 
-  @Nullable
-  public static native List<Map<String, String>> get_schema_list();
+  @NonNull
+  public static native SchemaListItem[] getRimeSchemaList();
 
   @NonNull
-  public static native String get_current_schema();
+  public static native String getCurrentRimeSchema();
 
   public static native boolean select_schema(String schema_id);
 
@@ -881,11 +846,11 @@ public class Rime {
 
   public static native boolean customize_string(String name, String key, String value);
 
-  @Nullable
-  public static native List<Map<String, String>> get_available_schema_list();
+  @NonNull
+  public static native SchemaListItem[] getAvailableRimeSchemaList();
 
-  @Nullable
-  public static native List<Map<String, String>> get_selected_schema_list();
+  @NonNull
+  public static native SchemaListItem[] getSelectedRimeSchemaList();
 
   public static native boolean select_schemas(String[] schema_id_list);
 

@@ -299,7 +299,7 @@ public class Config {
     public String remapKeyboardId(@NonNull String name) {
       final String remapped;
       if (".default".equals(name)) {
-        final String currentSchemaId = Rime.get_current_schema();
+        final String currentSchemaId = Rime.getCurrentRimeSchema();
         final String shortSchemaId = currentSchemaId.split("_")[0];
         if (theme.presetKeyboards.containsKey(shortSchemaId)) {
           return shortSchemaId;

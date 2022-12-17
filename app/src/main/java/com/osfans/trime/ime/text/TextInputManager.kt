@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeEvent
+import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Config
 import com.osfans.trime.databinding.InputRootBinding
@@ -572,9 +573,13 @@ class TextInputManager private constructor() :
                 trime.launchSettings()
                 dialog.dismiss()
             }
-        if (Rime.get_current_schema() == (".default")) {
+        if (Rime.getCurrentRimeSchema() == (".default")) {
             builder.setMessage(R.string.no_schemas)
         } else {
+            val schemaList = Rime.getRimeSchemaList()
+            val schemaNameList = schemaList.map(SchemaListItem::name).toTypedArray()
+            val schemaIdList = schemaList.map(SchemaListItem::schemaId).toTypedArray()
+            val currentSchema = Rime.getCurrentRimeSchema()
             builder
                 .setNegativeButton(
                     R.string.pref_select_schemas
@@ -587,11 +592,11 @@ class TextInputManager private constructor() :
                     dialog.dismiss()
                 }
                 .setSingleChoiceItems(
-                    Rime.getSchemaNames(),
-                    Rime.getSchemaIndex()
+                    schemaNameList,
+                    schemaIdList.indexOf(currentSchema)
                 ) { dialog: DialogInterface, id: Int ->
                     dialog.dismiss()
-                    Rime.selectSchema(id)
+                    Rime.selectSchema(schemaIdList[id])
                     shouldUpdateRimeOption = true
                 }
         }

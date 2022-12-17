@@ -77,85 +77,32 @@ Java_com_osfans_trime_core_Rime_customize_1string(JNIEnv *env, jclass /* thiz */
   return b;
 }
 
-jobject rimeSchemaListToJObject(JNIEnv *env, RimeSchemaList* list) {
-  if (list == nullptr) return nullptr;
-  jclass ArrayList = env->FindClass("java/util/ArrayList");
-  jmethodID ArrayListInit = env->GetMethodID(ArrayList, "<init>", "()V");
-  jmethodID add = env->GetMethodID(ArrayList, "add", "(Ljava/lang/Object;)Z");
-  jobject schema_list = env->NewObject(ArrayList, ArrayListInit);
-  
-  jclass HashMap = env->FindClass("java/util/HashMap");
-  jmethodID HashMapInit = env->GetMethodID(HashMap, "<init>", "()V");
-  jmethodID HashMapPut = env->GetMethodID(HashMap, "put",
-            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
-  size_t n = list->size;
-  if (n > 0) {
-    for (int i = 0; i < n; i++) {
-      jobject schema_item = env->NewObject(HashMap, HashMapInit);
-      RimeSchemaListItem& item(list->list[i]);
-      env->CallObjectMethod(schema_item, HashMapPut,
-                            *JString(env, "schema_id"),
-                            *JString(env, item.schema_id));
-      if (item.name) {
-        env->CallObjectMethod(schema_item, HashMapPut,
-                              *JString(env, "name"),
-                              *JString(env, item.name));
-      }
-      /**
-      if (0 && item.reserved) { //workaround for jni string overflow
-        RimeSchemaInfo* info = (RimeSchemaInfo*) item.reserved;
-        key = newJstring(env, "version");
-        value = newJstring(env, api_->get_schema_version(info));
-        env->CallObjectMethod(schema_item, put, key, value);
-        key = newJstring(env, "author");
-        value = newJstring(env, api_->get_schema_author(info));
-        env->CallObjectMethod(schema_item, put, key, value);
-        key = newJstring(env, "description");
-        value = newJstring(env, api_->get_schema_description(info));
-        env->CallObjectMethod(schema_item, put, key, value);
-      } */
-
-      env->CallBooleanMethod(schema_list, add, schema_item);
-      env->DeleteLocalRef(schema_item);
-    }
-  }
-  env->DeleteLocalRef(HashMap);
-  env->DeleteLocalRef(ArrayList);
-  return schema_list;
+extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_com_osfans_trime_core_Rime_getAvailableRimeSchemaList(JNIEnv *env, jclass /* thiz */) {
+  auto levers = get_levers();
+  auto switcher = levers->switcher_settings_init();
+  RimeSchemaList list = {0};
+  levers->load_settings((RimeCustomSettings *) switcher);
+  levers->get_available_schema_list(switcher, &list);
+  auto array = rimeSchemaListToJObjectArray(env, list);
+  levers->schema_list_destroy(&list);
+  levers->custom_settings_destroy((RimeCustomSettings *) switcher);
+  return array;
 }
 
 extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_get_1available_1schema_1list(JNIEnv *env, jclass /* thiz */) {
-  RimeLeversApi* api_ = get_levers();
-  RimeSwitcherSettings* settings_ = api_->switcher_settings_init();
+JNIEXPORT jobjectArray JNICALL
+Java_com_osfans_trime_core_Rime_getSelectedRimeSchemaList(JNIEnv *env, jclass /* thiz */) {
+  auto levers = get_levers();
+  auto switcher = levers->switcher_settings_init();
   RimeSchemaList list = {0};
-  jobject jobj = nullptr;
-  Bool b = api_->load_settings((RimeCustomSettings*)settings_);
-  if (b) {
-    api_->get_available_schema_list(settings_, &list);
-    jobj = rimeSchemaListToJObject(env, &list);
-    api_->schema_list_destroy(&list);
-    api_->custom_settings_destroy((RimeCustomSettings*)settings_);
-  }
-  return jobj;
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_get_1selected_1schema_1list(JNIEnv *env, jclass /* thiz */) {
-  RimeLeversApi* api_ = get_levers();
-  RimeSwitcherSettings* settings_ = api_->switcher_settings_init();
-  RimeSchemaList list = {0};
-  jobject jobj = nullptr;
-  Bool b = api_->load_settings((RimeCustomSettings*)settings_);
-  if (b) {
-    api_->get_selected_schema_list(settings_, &list);
-    jobj = rimeSchemaListToJObject(env, &list);
-    api_->schema_list_destroy(&list);
-    api_->custom_settings_destroy((RimeCustomSettings*)settings_);
-  }
-  return jobj;
+  levers->load_settings((RimeCustomSettings *) switcher);
+  levers->get_selected_schema_list(switcher, &list);
+  auto array = rimeSchemaListToJObjectArray(env, list);
+  levers->schema_list_destroy(&list);
+  levers->custom_settings_destroy((RimeCustomSettings *) switcher);
+  return array;
 }
 
 extern "C"

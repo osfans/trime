@@ -365,29 +365,46 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_get_1property(JNIEnv *env, jclass /* thiz */, jstring prop) {
     const char* s = prop == nullptr ? nullptr : env->GetStringUTFChars(prop, nullptr);
-    char value[BUFSIZE] = {0};
-    bool b = RimeGetProperty(activated_session_id, s, value, BUFSIZE);
+    char value[MAX_BUFFER_LENGTH] = {0};
+    bool b = RimeGetProperty(activated_session_id, s, value, MAX_BUFFER_LENGTH);
     env->ReleaseStringUTFChars(prop, s);
     return b ? env->NewStringUTF(value) : nullptr;
 }
 
+jobjectArray rimeSchemaListToJObjectArray(JNIEnv *env, RimeSchemaList &list) {
+    jobjectArray array = env->NewObjectArray(static_cast<int>(list.size), GlobalRef->SchemaListItem,
+                                             nullptr);
+    for (int i = 0; i < list.size; i++) {
+        auto item = list.list[i];
+        auto obj = JRef<>(env, env->NewObject(GlobalRef->SchemaListItem, GlobalRef->SchemaListItemInit,
+                                              *JString(env, item.schema_id),
+                                              *JString(env, item.name)));
+        env->SetObjectArrayElement(array, i, obj);
+    }
+    return array;
+}
+
 extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_get_1schema_1list(JNIEnv *env, jclass /* thiz */) {
-    RimeSchemaList list;
-    jobject jobj = nullptr;
-    if (RimeGetSchemaList(&list)) jobj = rimeSchemaListToJObject(env, &list);
-    RimeFreeSchemaList(&list);
-    return jobj;
+JNIEXPORT jobjectArray JNICALL
+Java_com_osfans_trime_core_Rime_getRimeSchemaList(JNIEnv *env, jclass /* thiz */) {
+    auto rime = rime_get_api();
+    RimeSchemaList list = {0};
+    rime->get_schema_list(&list);
+    auto array = rimeSchemaListToJObjectArray(env, list);
+    rime->free_schema_list(&list);
+    return array;
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_get_1current_1schema(JNIEnv *env, jclass /* thiz */) {
-    char current[BUFSIZE] = {0};
-    bool b = RimeGetCurrentSchema(activated_session_id, current, sizeof(current));
-    if (b) return env->NewStringUTF(current);
-    return env->NewStringUTF("");
+Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv *env, jclass /* thiz */) {
+    auto rime = rime_get_api();
+    char current[MAX_BUFFER_LENGTH] = {0};
+    if (rime->get_current_schema(activated_session_id, current, MAX_BUFFER_LENGTH)) {
+        return env->NewStringUTF(current);
+    } else {
+        return env->NewStringUTF("");
+    }
 }
 
 extern "C"
@@ -530,10 +547,10 @@ Java_com_osfans_trime_core_Rime_config_1get_1string(JNIEnv *env, jclass /* thiz 
     RimeConfig config = {nullptr};
     Bool b = RimeConfigOpen(s, &config);
     env->ReleaseStringUTFChars(name, s);
-    char value[BUFSIZE] = {0};
+    char value[MAX_BUFFER_LENGTH] = {0};
     if (b) {
         s = env->GetStringUTFChars(key, nullptr);
-        b = RimeConfigGetString(&config, s, value, BUFSIZE);
+        b = RimeConfigGetString(&config, s, value, MAX_BUFFER_LENGTH);
         env->ReleaseStringUTFChars(key, s);
     }
     RimeConfigClose(&config);

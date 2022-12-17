@@ -5,6 +5,6 @@
 #include <rime_api.h>
 #include <rime_levers_api.h>
 
-jobject rimeSchemaListToJObject(JNIEnv *env, RimeSchemaList* list);
+jobjectArray rimeSchemaListToJObjectArray(JNIEnv *env, RimeSchemaList &list);
 
 #endif  // RIME_JNI_H_
