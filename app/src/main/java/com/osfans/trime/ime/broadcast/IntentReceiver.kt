@@ -21,13 +21,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.blankj.utilcode.util.ToastUtils
+import com.osfans.trime.R
 import com.osfans.trime.core.Rime
-import com.osfans.trime.util.RimeUtils.deploy
-import com.osfans.trime.util.RimeUtils.sync
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 /** 接收 Intent 廣播事件  */
@@ -37,12 +39,15 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
         Timber.d("Received Command = %s", command)
         when (command) {
             COMMAND_DEPLOY -> launch {
-                deploy()
+                withContext(Dispatchers.Default) {
+                    Rime.deployRime()
+                }
+                ToastUtils.showLong(R.string.deploy_finish)
             }
             COMMAND_SYNC -> async {
-                sync()
+                Rime.sync_user_data()
+                Rime.deployRime()
             }
-            Intent.ACTION_SHUTDOWN -> Rime.destroy()
             else -> return
         }
     }

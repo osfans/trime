@@ -121,8 +121,7 @@ class PrefMainActivity : AppCompatActivity() {
                         Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
                     }
                     withContext(Dispatchers.Default) {
-                        Rime.destroy()
-                        Rime.get(true)
+                        Rime.deployRime()
                     }
                     briefResultLogDialog("rime.trime", "W", 1)
                 }

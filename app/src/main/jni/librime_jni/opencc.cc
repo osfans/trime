@@ -31,25 +31,6 @@ Java_com_osfans_trime_core_Rime_opencc_1convert(JNIEnv *env, jclass thiz, jstrin
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_osfans_trime_core_Rime_opencc_1convert_1dictionary(JNIEnv *env, jclass thiz, jstring jinputFileName,
-    jstring joutputFileName, jstring jformatFrom, jstring jformatTo) {
-  const char* s = env->GetStringUTFChars(jinputFileName, NULL);
-  string inputFileName(s);
-  env->ReleaseStringUTFChars(jinputFileName, s);
-  s = env->GetStringUTFChars(joutputFileName, NULL);
-  string outputFileName(s);
-  env->ReleaseStringUTFChars(joutputFileName, s);
-  s = env->GetStringUTFChars(jformatFrom, NULL);
-  string formatFrom(s);
-  env->ReleaseStringUTFChars(jformatFrom, s);
-  s = env->GetStringUTFChars(jformatTo, NULL);
-  string formatTo(s);
-  env->ReleaseStringUTFChars(jformatTo, s);
-  ConvertDictionary(inputFileName, outputFileName, formatFrom, formatTo);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
 Java_com_osfans_trime_data_opencc_OpenCCDictManager_openccDictConv(JNIEnv *env, jclass clazz,
                                                                    jstring src, jstring dest,
                                                                    jboolean mode) {

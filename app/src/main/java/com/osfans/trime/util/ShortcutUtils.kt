@@ -120,10 +120,10 @@ object ShortcutUtils {
         return clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(context)
     }
 
-    fun syncInBackground(context: Context) {
+    fun syncInBackground() {
         val prefs = AppPrefs.defaultInstance()
         prefs.profile.lastBackgroundSync = Date().time.toString()
-        prefs.profile.lastSyncStatus = Rime.syncUserData(context)
+        prefs.profile.lastSyncStatus = Rime.syncUserData()
     }
 
     fun openCategory(keyCode: Int): Boolean {

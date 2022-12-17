@@ -90,8 +90,7 @@ suspend fun Context.schemaPicker(
                     checkedItems[index]
                 }.map { it.toString() }.toTypedArray()
             )
-            Rime.destroy()
-            Rime.get(true)
+            Rime.deployRime()
         }
     }.create()
 }

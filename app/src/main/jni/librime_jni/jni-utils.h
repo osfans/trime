@@ -135,11 +135,9 @@ public:
     jfieldID RimeCandidateComment;
 
     jclass RimeCommit;
-    jfieldID RimeCommitDataSize;
     jfieldID RimeCommitText;
 
     jclass RimeContext;
-    jfieldID RimeContextDataSize;
     jfieldID RimeContextComposition;
     jfieldID RimeContextMenu;
     jfieldID RimeContextCommitTextPreview;
@@ -155,7 +153,6 @@ public:
     jfieldID RimeMenuSelectKeys;
 
     jclass RimeStatus;
-    jfieldID RimeStatusDataSize;
     jfieldID RimeStatusSchemaId;
     jfieldID RimeStatusSchemaName;
     jfieldID RimeStatusDisable;
@@ -206,11 +203,9 @@ public:
         RimeCandidateComment = env->GetFieldID(RimeCandidate, "comment", "Ljava/lang/String;");
 
         RimeCommit = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeCommit")));
-        RimeCommitDataSize = env->GetFieldID(RimeCommit, "data_size", "I");
         RimeCommitText = env->GetFieldID(RimeCommit, "text", "Ljava/lang/String;");
 
         RimeContext = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeContext")));
-        RimeContextDataSize = env->GetFieldID(RimeContext, "data_size", "I");
         RimeContextComposition = env->GetFieldID(RimeContext, "composition", "Lcom/osfans/trime/core/Rime$RimeComposition;");
         RimeContextMenu = env->GetFieldID(RimeContext, "menu", "Lcom/osfans/trime/core/Rime$RimeMenu;");
         RimeContextCommitTextPreview = env->GetFieldID(RimeContext, "commit_text_preview", "Ljava/lang/String;");
@@ -226,7 +221,6 @@ public:
         RimeMenuSelectKeys = env->GetFieldID(RimeMenu, "select_keys", "Ljava/lang/String;");
 
         RimeStatus = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeStatus")));
-        RimeStatusDataSize = env->GetFieldID(RimeStatus, "data_size", "I");
         RimeStatusSchemaId = env->GetFieldID(RimeStatus, "schema_id", "Ljava/lang/String;");
         RimeStatusSchemaName = env->GetFieldID(RimeStatus, "schema_name", "Ljava/lang/String;");
         RimeStatusDisable = env->GetFieldID(RimeStatus, "is_disabled", "Z");

@@ -18,7 +18,6 @@
 
 package com.osfans.trime.core;
 
-import android.content.Context;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -116,7 +115,6 @@ public class Rime {
 
   /** Rime環境，包括 {@link RimeComposition 編碼區} 、{@link RimeMenu 候選區} */
   public static class RimeContext {
-    int data_size;
     // v0.9
     RimeComposition composition;
     RimeMenu menu;
@@ -137,7 +135,6 @@ public class Rime {
 
   /** Rime狀態 */
   public static class RimeStatus {
-    int data_size;
     // v0.9
     String schema_id;
     String schema_name;
@@ -366,39 +363,17 @@ public class Rime {
   }
 
   private static void init(boolean full_check) {
-    String methodName =
-        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
-    Timber.d(methodName);
     isHandlingRimeNotification = false;
     final String sharedDataDir = getAppPrefs().getProfile().getSharedDataDir();
     final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
-    Timber.d(methodName + "setup");
-    // Initialize librime APIs
-    setup(sharedDataDir, userDataDir);
-    Timber.d(methodName + "initlialize");
-    initialize(sharedDataDir, userDataDir);
+    Timber.i("Starting up Rime APIs ...");
+    startupRime(sharedDataDir, userDataDir, full_check);
 
-    Timber.d(methodName + "check");
-    check(full_check);
-    Timber.d(methodName + "set_notification_handler");
-    set_notification_handler();
-    if (!find_session()) {
-      if (create_session() == 0) {
-        Timber.wtf("Error creating rime session");
-        return;
-      }
-    }
-    Timber.d(methodName + "initSchema");
+    Timber.i("Initializing schema stuffs ...");
     initSchema();
 
-    Timber.d(methodName + "finish");
-  }
-
-  public static void destroy() {
-    destroy_session();
-    finalize1();
-    self = null;
+    Timber.i("Finishing startup");
   }
 
   public static String getCommitText() {
@@ -535,16 +510,12 @@ public class Rime {
     return get_property(prop);
   }
 
-  public static String getSchemaId() {
-    return getCurrentRimeSchema();
-  }
-
   private static boolean isEmpty(@NonNull String s) {
     return s.contentEquals(".default"); // 無方案
   }
 
   public static boolean isEmpty() {
-    return isEmpty(getSchemaId());
+    return isEmpty(getCurrentRimeSchema());
   }
 
   public static String getSchemaName() {
@@ -561,7 +532,7 @@ public class Rime {
 
   // 刷新当前输入方案
   public static void applySchemaChange() {
-    String schema_id = getSchemaId();
+    String schema_id = getCurrentRimeSchema();
     // 实测直接select_schema(schema_id)方案没有重新载入，切换到不存在的方案，再切回去（会产生1秒的额外耗时）.需要找到更好的方法
     // 不发生覆盖则不生效
     if (overWriteSchema(schema_id)) {
@@ -585,7 +556,7 @@ public class Rime {
   }
 
   private static boolean overWriteSchema(String schema_id, Map<String, String> map) {
-    if (schema_id == null) schema_id = getSchemaId();
+    if (schema_id == null) schema_id = getCurrentRimeSchema();
     File file =
         new File(Rime.getRimeUserDataDir() + File.separator + "build", schema_id + ".schema.yaml");
     try {
@@ -663,79 +634,31 @@ public class Rime {
     return line;
   }
 
-  public static void check(boolean full_check) {
-    if (start_maintenance(full_check) && is_maintenance_mode()) {
-      join_maintenance_thread();
-    }
-  }
-
-  public static boolean syncUserData(Context context) {
+  public static boolean syncUserData() {
     boolean b = sync_user_data();
-    destroy();
-    get(true);
+    deployRime();
     return b;
   }
 
   // init
-  public static native void setup(String shared_data_dir, String user_data_dir);
-
-  public static native void set_notification_handler();
-
-  // entry and exit
-  public static native void initialize(String shared_data_dir, String user_data_dir);
-
-  public static native void finalize1();
-
-  public static native boolean start_maintenance(boolean full_check);
-
-  public static native boolean is_maintenance_mode();
-
-  public static native void join_maintenance_thread();
+  public static native void startupRime(
+      @NonNull String sharedDir, @NonNull String userDir, boolean fullCheck);
 
   // deployment
   public static native void deployer_initialize(String shared_data_dir, String user_data_dir);
 
   public static native boolean prebuild();
 
-  public static native boolean deploy();
+  public static native void deployRime();
 
   public static native boolean deploy_schema(String schema_file);
 
   public static native boolean deployRimeConfigFile(
       @NonNull String fileName, @NonNull String versionKey);
 
-  /**
-   * 部署config文件到build目录
-   *
-   * @param name 配置名称，不含yaml后缀
-   * @param skipIfExists 启用此模式时，如build目录已经存在对应名称的文件，且大小超过10k，则不重新部署，从而节约时间
-   * @return
-   */
-  public static boolean deploy_config_file(String name, boolean skipIfExists) {
-    String file_name = name + ".yaml";
-    if (skipIfExists) {
-      File f = new File(Rime.getRimeUserDataDir() + File.separator + "build", file_name);
-      if (f.exists()) {
-        if (f.length() > 10000) {
-          Timber.d("deploy_config_file() skip");
-          return true;
-        }
-      } else {
-        return Rime.deployRimeConfigFile(file_name, "config_version");
-      }
-    }
-    return Rime.deployRimeConfigFile(file_name, "config_version");
-  }
-
   public static native boolean sync_user_data();
 
   // session management
-  public static native int create_session();
-
-  public static native boolean find_session();
-
-  public static native boolean destroy_session();
-
   public static native void cleanup_stale_sessions();
 
   public static native void cleanup_all_sessions();
@@ -817,8 +740,6 @@ public class Rime {
 
   public static native boolean delete_candidate_on_current_page(int index);
 
-  public static native String get_version();
-
   public static native String get_librime_version();
 
   // module
@@ -858,9 +779,4 @@ public class Rime {
   public static native String get_opencc_version();
 
   public static native String opencc_convert(String line, String name);
-
-  public static native void opencc_convert_dictionary(
-      String inputFileName, String outputFileName, String formatFrom, String formatTo);
-
-  public static native String get_trime_version();
 }
