@@ -676,27 +676,6 @@ public class Rime {
 
   public static native boolean selectRimeSchema(@NonNull String schemaId);
 
-  // configuration
-  public static native Boolean config_get_bool(String name, String key);
-
-  public static native boolean config_set_bool(String name, String key, boolean value);
-
-  public static native Integer config_get_int(String name, String key);
-
-  public static native boolean config_set_int(String name, String key, int value);
-
-  public static native Double config_get_double(String name, String key);
-
-  public static native boolean config_set_double(String name, String key, double value);
-
-  public static native String config_get_string(String name, String key);
-
-  public static native boolean config_set_string(String name, String key, String value);
-
-  public static native int config_list_size(String name, String key);
-
-  public static native List config_get_list(String name, String key);
-
   @Nullable
   public static native Map<String, Object> getRimeConfigMap(
       @NonNull String configId, @NonNull String key);
@@ -735,15 +714,6 @@ public class Rime {
   public static native int get_modifier_by_name(String name);
 
   public static native int get_keycode_by_name(String name);
-
-  // customize setting
-  public static native boolean customize_bool(String name, String key, boolean value);
-
-  public static native boolean customize_int(String name, String key, int value);
-
-  public static native boolean customize_double(String name, String key, double value);
-
-  public static native boolean customize_string(String name, String key, String value);
 
   @NonNull
   public static native SchemaListItem[] getAvailableRimeSchemaList();
