@@ -50,7 +50,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     final LiquidKeyItemBinding binding =
         LiquidKeyItemBinding.inflate(LayoutInflater.from(parent.getContext()));
-    final boolean isCommentHidden = Rime.get_option("_hide_comment");
+    final boolean isCommentHidden = Rime.getRimeOption("_hide_comment");
     if (!isCommentHidden) {
       final ConstraintSet set = new ConstraintSet();
       set.clone(binding.getRoot());

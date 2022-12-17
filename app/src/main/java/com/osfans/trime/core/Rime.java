@@ -209,14 +209,14 @@ public class Rime {
           final List<String> options = (List<String>) s.get("options");
           assert options != null;
           for (final IndexedValue<String> io : CollectionsKt.withIndex(options)) {
-            if (Rime.get_option(io.getValue())) {
+            if (Rime.getRimeOption(io.getValue())) {
               // 将启用状态标记为此选项的索引值，方便切换时直接从选项列表中获取
               s.put("enabled", io.getIndex());
               break;
             }
           }
         } else { // 只有单 Rime 运行时选项的开关，开关名即选项名，标记其启用状态
-          s.put("enabled", Rime.get_option((String) s.get("name")) ? 1 : 0);
+          s.put("enabled", Rime.getRimeOption((String) s.get("name")) ? 1 : 0);
         }
         switches.set(is.getIndex(), s);
       }
@@ -359,7 +359,7 @@ public class Rime {
   @SuppressWarnings("UnusedReturnValue")
   private static boolean getStatus() {
     mSchema.updateSwitchOptions();
-    return get_status(mStatus);
+    return getRimeStatus(mStatus);
   }
 
   private static void init(boolean full_check) {
@@ -381,13 +381,13 @@ public class Rime {
   }
 
   public static boolean getCommit() {
-    return get_commit(mCommit);
+    return getRimeCommit(mCommit);
   }
 
   public static void getContexts() {
     Timber.i("\t<TrimeInput>\tgetContexts() get_context");
     // get_context() 是耗时操作
-    get_context(mContext);
+    getRimeContext(mContext);
     Timber.i("\t<TrimeInput>\tgetContexts() getStatus");
     getStatus();
     Timber.i("\t<TrimeInput>\tgetContexts() finish");
@@ -403,7 +403,7 @@ public class Rime {
     Timber.i("\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s", keycode, mask);
     if (isVoidKeycode(keycode)) return false;
     // 此处调用native方法是耗时操作
-    final boolean b = process_key(keycode, mask);
+    final boolean b = processRimeKey(keycode, mask);
     Timber.i(
         "\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s, process_key result=%s", keycode, mask, b);
     getContexts();
@@ -425,7 +425,7 @@ public class Rime {
 
   public static boolean onText(CharSequence text) {
     if (!isValidText(text)) return false;
-    boolean b = simulate_key_sequence(text.toString().replace("{}", "{braceleft}{braceright}"));
+    boolean b = simulateKeySequence(text.toString().replace("{}", "{braceleft}{braceright}"));
     Timber.i("simulate key sequence = %s, input = %s", b, text);
     getContexts();
     return b;
@@ -461,35 +461,35 @@ public class Rime {
   }
 
   public static boolean commitComposition() {
-    boolean b = commit_composition();
+    boolean b = commitRimeComposition();
     getContexts();
     return b;
   }
 
   public static void clearComposition() {
-    clear_composition();
+    clearRimeComposition();
     getContexts();
   }
 
   public static boolean selectCandidate(int index) {
-    boolean b = select_candidate_on_current_page(index);
+    boolean b = selectRimeCandidateOnCurrentPage(index);
     getContexts();
     return b;
   }
 
   public static boolean deleteCandidate(int index) {
-    boolean b = delete_candidate_on_current_page(index);
+    boolean b = deleteRimeCandidateOnCurrentPage(index);
     getContexts();
     return b;
   }
 
   public static void setOption(String option, boolean value) {
     if (isHandlingRimeNotification) return;
-    set_option(option, value);
+    setRimeOption(option, value);
   }
 
   public static boolean getOption(String option) {
-    return get_option(option);
+    return getRimeOption(option);
   }
 
   public static void toggleOption(String option) {
@@ -499,15 +499,6 @@ public class Rime {
 
   public static void toggleSwitchOption(int i) {
     mSchema.toggleSwitchOption(i);
-  }
-
-  public static void setProperty(String prop, String value) {
-    if (isHandlingRimeNotification) return;
-    set_property(prop, value);
-  }
-
-  public static String getProperty(String prop) {
-    return get_property(prop);
   }
 
   private static boolean isEmpty(@NonNull String s) {
@@ -604,16 +595,16 @@ public class Rime {
   }
 
   public static String RimeGetInput() {
-    String s = get_input();
+    String s = getRimeRawInput();
     return s == null ? "" : s;
   }
 
   public static int RimeGetCaretPos() {
-    return get_caret_pos();
+    return getRimeCaretPos();
   }
 
   public static void RimeSetCaretPos(int caret_pos) {
-    set_caret_pos(caret_pos);
+    setRimeCaretPos(caret_pos);
     getContexts();
   }
 
@@ -635,7 +626,7 @@ public class Rime {
   }
 
   public static boolean syncUserData() {
-    boolean b = sync_user_data();
+    boolean b = syncRimeUserData();
     deployRime();
     return b;
   }
@@ -656,35 +647,26 @@ public class Rime {
   public static native boolean deployRimeConfigFile(
       @NonNull String fileName, @NonNull String versionKey);
 
-  public static native boolean sync_user_data();
-
-  // session management
-  public static native void cleanup_stale_sessions();
-
-  public static native void cleanup_all_sessions();
+  public static native boolean syncRimeUserData();
 
   // input
-  public static native boolean process_key(int keycode, int mask);
+  public static native boolean processRimeKey(int keycode, int mask);
 
-  public static native boolean commit_composition();
+  public static native boolean commitRimeComposition();
 
-  public static native void clear_composition();
+  public static native void clearRimeComposition();
 
   // output
-  public static native boolean get_commit(RimeCommit commit);
+  public static native boolean getRimeCommit(RimeCommit commit);
 
-  public static native boolean get_context(RimeContext context);
+  public static native boolean getRimeContext(RimeContext context);
 
-  public static native boolean get_status(RimeStatus status);
+  public static native boolean getRimeStatus(RimeStatus status);
 
   // runtime options
-  public static native void set_option(String option, boolean value);
+  public static native void setRimeOption(@NonNull String option, boolean value);
 
-  public static native boolean get_option(String option);
-
-  public static native void set_property(String prop, String value);
-
-  public static native String get_property(String prop);
+  public static native boolean getRimeOption(@NonNull String option);
 
   @NonNull
   public static native SchemaListItem[] getRimeSchemaList();
@@ -724,21 +706,17 @@ public class Rime {
   public static native Object getRimeSchemaValue(@NonNull String schemaId, @NonNull String key);
 
   // testing
-  public static native boolean simulate_key_sequence(String key_sequence);
+  public static native boolean simulateKeySequence(@NonNull String keySequence);
 
-  public static native String get_input();
+  public static native String getRimeRawInput();
 
-  public static native int get_caret_pos();
+  public static native int getRimeCaretPos();
 
-  public static native void set_caret_pos(int caret_pos);
+  public static native void setRimeCaretPos(int caretPos);
 
-  public static native boolean select_candidate(int index);
+  public static native boolean selectRimeCandidateOnCurrentPage(int index);
 
-  public static native boolean select_candidate_on_current_page(int index);
-
-  public static native boolean delete_candidate(int index);
-
-  public static native boolean delete_candidate_on_current_page(int index);
+  public static native boolean deleteRimeCandidateOnCurrentPage(int index);
 
   public static native String get_librime_version();
 
