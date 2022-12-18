@@ -3,49 +3,35 @@
 #include <opencc/SimpleConverter.hpp>
 #include <opencc/DictConverter.hpp>
 #include "rime_jni.h"
-using namespace opencc;
-using std::string;
+#include "jni-utils.h"
 
 // opencc
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_get_1opencc_1version(JNIEnv *env, jclass thiz) {
+Java_com_osfans_trime_data_opencc_OpenCCDictManager_getOpenCCVersion(JNIEnv *env, jclass clazz) {
   return env->NewStringUTF(OPENCC_VERSION);
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_opencc_1convert(JNIEnv *env, jclass thiz, jstring line, jstring name) {
-  if (name == NULL) return line;
-  const char* s = env->GetStringUTFChars(name, NULL);
-  string str(s);
-  SimpleConverter converter(str);
-  env->ReleaseStringUTFChars(name, s);
-  const char* input = env->GetStringUTFChars(line, NULL);
-  const string& converted = converter.Convert(input);
-  env->ReleaseStringUTFChars(line, input);
-  s = converted.c_str();
-  return env->NewStringUTF(s);
+Java_com_osfans_trime_data_opencc_OpenCCDictManager_openCCLineConv(JNIEnv *env, jclass clazz,
+                                                                   jstring input,
+                                                                   jstring config_file_name) {
+  opencc::SimpleConverter converter(CString(env, config_file_name));
+  return env->NewStringUTF(converter.Convert(*CString(env, input)).data());
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_osfans_trime_data_opencc_OpenCCDictManager_openccDictConv(JNIEnv *env, jclass clazz,
+Java_com_osfans_trime_data_opencc_OpenCCDictManager_openCCDictConv(JNIEnv *env, jclass clazz,
                                                                    jstring src, jstring dest,
                                                                    jboolean mode) {
-  using namespace opencc;
-  const char *src_file = env->GetStringUTFChars(src, nullptr);
-  const char *dest_file = env->GetStringUTFChars(dest, nullptr);
+  auto src_file = CString(env, src);
+  auto dest_file = CString(env, dest);
   if (mode) {
-    std::string from = "ocd2";
-    std::string to = "text";
-    ConvertDictionary(src_file, dest_file, from, to);
+    opencc::ConvertDictionary(src_file, dest_file, "ocd2", "text");
   } else {
-    std::string from = "text";
-    std::string to = "ocd2";
-    ConvertDictionary(src_file, dest_file, from, to);
+    opencc::ConvertDictionary(src_file, dest_file, "text", "ocd2");
   }
-  env->ReleaseStringUTFChars(src, src_file);
-  env->ReleaseStringUTFChars(dest, dest_file);
 }

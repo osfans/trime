@@ -23,7 +23,7 @@ class TextDictionary(file: File) : Dictionary() {
 
     override fun toOpenCCDictionary(dest: File): OpenCCDictionary {
         ensureBin(dest)
-        OpenCCDictManager.openccDictConv(
+        OpenCCDictManager.openCCDictConv(
             file.absolutePath,
             dest.absolutePath,
             OpenCCDictManager.MODE_TXT_TO_BIN

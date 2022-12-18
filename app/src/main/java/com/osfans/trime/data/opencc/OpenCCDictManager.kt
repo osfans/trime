@@ -1,5 +1,6 @@
 package com.osfans.trime.data.opencc
 
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.opencc.dict.Dictionary
 import com.osfans.trime.data.opencc.dict.OpenCCDictionary
@@ -68,7 +69,26 @@ object OpenCCDictManager {
     }
 
     @JvmStatic
-    external fun openccDictConv(src: String, dest: String, mode: Boolean)
+    fun convertLine(input: String, configFileName: String): String {
+        if (configFileName.isEmpty()) return input
+        with(File(Rime.getRimeUserDataDir(), "opencc/$configFileName")) {
+            if (exists()) return openCCLineConv(input, path)
+        }
+        with(File(Rime.get_shared_data_dir(), "opencc/$configFileName")) {
+            if (exists()) return openCCLineConv(input, path)
+        }
+        Timber.w("Specified config $configFileName doesn't exist, returning raw input ...")
+        return input
+    }
+
+    @JvmStatic
+    external fun openCCDictConv(src: String, dest: String, mode: Boolean)
+
+    @JvmStatic
+    external fun openCCLineConv(input: String, configFileName: String): String
+
+    @JvmStatic
+    external fun getOpenCCVersion(): String
 
     const val MODE_BIN_TO_TXT = true // OCD2 to TXT
     const val MODE_TXT_TO_BIN = false // TXT to OCD2

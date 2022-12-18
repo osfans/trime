@@ -18,11 +18,9 @@
 
 package com.osfans.trime.core;
 
-import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.ime.symbol.SimpleKeyBean;
 import java.io.BufferedReader;
@@ -617,14 +615,6 @@ public class Rime {
     isHandlingRimeNotification = false;
   }
 
-  public static String openccConvert(String line, String name) {
-    if (!TextUtils.isEmpty(name)) {
-      final File f = new File(DataManager.getDataDir("opencc"), name);
-      if (f.exists()) return opencc_convert(line, f.getAbsolutePath());
-    }
-    return line;
-  }
-
   public static boolean syncUserData() {
     boolean b = syncRimeUserData();
     deployRime();
@@ -717,9 +707,4 @@ public class Rime {
   public static native SchemaListItem[] getSelectedRimeSchemaList();
 
   public static native boolean selectRimeSchemas(@NonNull String[] schemaIds);
-
-  // opencc
-  public static native String get_opencc_version();
-
-  public static native String opencc_convert(String line, String name);
 }

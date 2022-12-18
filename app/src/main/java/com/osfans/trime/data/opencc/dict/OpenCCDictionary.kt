@@ -50,7 +50,7 @@ class OpenCCDictionary(file: File) : Dictionary() {
 
     override fun toTextDictionary(dest: File): TextDictionary {
         ensureTxt(dest)
-        OpenCCDictManager.openccDictConv(
+        OpenCCDictManager.openCCDictConv(
             file.absolutePath,
             dest.absolutePath,
             OpenCCDictManager.MODE_BIN_TO_TXT
