@@ -266,13 +266,13 @@ public class Rime {
   Android和librime对按键命名并不一致。读取可能有误。librime按键命名见如下链接，
   https://github.com/rime/librime/blob/master/src/rime/key_table.cc
    */
-  public static int META_SHIFT_ON = get_modifier_by_name("Shift");
-  public static int META_CTRL_ON = get_modifier_by_name("Control");
-  public static int META_ALT_ON = get_modifier_by_name("Alt");
-  public static int META_SYM_ON = get_modifier_by_name("Super");
-  public static int META_META_ON = get_modifier_by_name("Meta");
+  public static int META_SHIFT_ON = getRimeModifierByName("Shift");
+  public static int META_CTRL_ON = getRimeModifierByName("Control");
+  public static int META_ALT_ON = getRimeModifierByName("Alt");
+  public static int META_SYM_ON = getRimeModifierByName("Super");
+  public static int META_META_ON = getRimeModifierByName("Meta");
 
-  public static int META_RELEASE_ON = get_modifier_by_name("Release");
+  public static int META_RELEASE_ON = getRimeModifierByName("Release");
 
   public static boolean hasMenu() {
     return isComposing() && mContext.menu.num_candidates != 0;
@@ -397,7 +397,7 @@ public class Rime {
   }
 
   // KeyProcess 调用JNI方法发送keycode和mask
-  private static boolean onKey(int keycode, int mask) {
+  public static boolean processKey(int keycode, int mask) {
     Timber.i("\t<TrimeInput>\tonkey()\tkeycode=%s, mask=%s", keycode, mask);
     if (isVoidKeycode(keycode)) return false;
     // 此处调用native方法是耗时操作
@@ -407,12 +407,6 @@ public class Rime {
     getContexts();
     Timber.i("\t<TrimeInput>\tonkey()\tfinish");
     return b;
-  }
-
-  // KeyProcess 调用JNI方法发送keycode和mask
-  public static boolean onKey(int[] event) {
-    if (event != null && event.length == 2) return onKey(event[0], event[1]);
-    return false;
   }
 
   public static boolean isValidText(CharSequence text) {
@@ -592,15 +586,6 @@ public class Rime {
     return get(false);
   }
 
-  public static String RimeGetInput() {
-    String s = getRimeRawInput();
-    return s == null ? "" : s;
-  }
-
-  public static int RimeGetCaretPos() {
-    return getRimeCaretPos();
-  }
-
   public static void RimeSetCaretPos(int caret_pos) {
     setRimeCaretPos(caret_pos);
     getContexts();
@@ -615,19 +600,13 @@ public class Rime {
     isHandlingRimeNotification = false;
   }
 
-  public static boolean syncUserData() {
-    boolean b = syncRimeUserData();
-    deployRime();
-    return b;
-  }
-
   // init
   public static native void startupRime(
       @NonNull String sharedDir, @NonNull String userDir, boolean fullCheck);
 
   public static native void deployRime();
 
-  public static native boolean deploy_schema(String schema_file);
+  public static native boolean deployRimeSchemaFile(@NonNull String schemaFile);
 
   public static native boolean deployRimeConfigFile(
       @NonNull String fileName, @NonNull String versionKey);
@@ -682,23 +661,23 @@ public class Rime {
 
   public static native boolean deleteRimeCandidateOnCurrentPage(int index);
 
-  public static native String get_librime_version();
+  public static native String getLibrimeVersion();
 
   // module
-  public static native boolean run_task(String task_name);
+  public static native boolean runRimeTask(String task_name);
 
-  public static native String get_shared_data_dir();
+  public static native String getRimeSharedDataDir();
 
   public static native String getRimeUserDataDir();
 
-  public static native String get_sync_dir();
+  public static native String getRimeSyncDir();
 
-  public static native String get_user_id();
+  public static native String getRimeUserId();
 
   // key_table
-  public static native int get_modifier_by_name(String name);
+  public static native int getRimeModifierByName(@NonNull String name);
 
-  public static native int get_keycode_by_name(String name);
+  public static native int getRimeKeycodeByName(@NonNull String name);
 
   @NonNull
   public static native SchemaListItem[] getAvailableRimeSchemaList();

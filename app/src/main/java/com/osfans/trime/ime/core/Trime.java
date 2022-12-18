@@ -893,7 +893,7 @@ public class Trime extends LifecycleInputMethodService {
   public boolean onRimeKey(int[] event) {
     updateRimeOption();
     // todo 改为异步处理按键事件、刷新UI
-    final boolean ret = Rime.onKey(event);
+    final boolean ret = Rime.processKey(event[0], event[1]);
     activeEditorInstance.commitRimeText();
     return ret;
   }

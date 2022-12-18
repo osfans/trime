@@ -66,7 +66,7 @@ class EditorInstance(private val ims: InputMethodService) {
         val composingText = when (prefs.keyboard.inlinePreedit) {
             InlineModeType.INLINE_PREVIEW -> Rime.getComposingText()
             InlineModeType.INLINE_COMPOSITION -> Rime.getCompositionText()
-            InlineModeType.INLINE_INPUT -> Rime.RimeGetInput()
+            InlineModeType.INLINE_INPUT -> Rime.getRimeRawInput() ?: ""
             else -> ""
         }
         if (ic.getSelectedText(0).isNullOrEmpty() || !composingText.isNullOrEmpty()) {
@@ -113,7 +113,7 @@ class EditorInstance(private val ims: InputMethodService) {
      * %4$s爲光標前所有字符
      * */
     fun getActiveText(type: Int): String {
-        if (type == 2) return Rime.RimeGetInput() // 當前編碼
+        if (type == 2) return Rime.getRimeRawInput() ?: "" // 當前編碼
         var s = Rime.getComposingText() // 當前候選
         if (TextUtils.isEmpty(s)) {
             val ic = inputConnection

@@ -30,7 +30,7 @@ public class RimeKeycode {
     int i = 0;
     if (code >= 0 && code < Keycode.values().length) {
       String s = Keycode.keyNameOf(code);
-      i = Rime.get_keycode_by_name(s);
+      i = Rime.getRimeKeycodeByName(s);
     } else {
       Timber.w("code=%s", code);
     }

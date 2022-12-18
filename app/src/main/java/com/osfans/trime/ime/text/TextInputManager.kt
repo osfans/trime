@@ -328,7 +328,8 @@ class TextInputManager private constructor() :
                 shouldUpdateRimeOption = false
             }
             // todo 释放按键可能不对
-            Rime.onKey(Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON))
+            val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
+            Rime.processKey(event[0], event[1])
             activeEditorInstance.commitRimeText()
         }
         Timber.d("\t<TrimeInput>\tonRelease() finish")
@@ -390,7 +391,7 @@ class TextInputManager private constructor() :
                     arg = String.format(
                         arg,
                         activeEditorInstance.lastCommittedText,
-                        Rime.RimeGetInput(),
+                        Rime.getRimeRawInput() ?: "",
                         activeText,
                         activeText
                     )

@@ -74,7 +74,7 @@ object OpenCCDictManager {
         with(File(Rime.getRimeUserDataDir(), "opencc/$configFileName")) {
             if (exists()) return openCCLineConv(input, path)
         }
-        with(File(Rime.get_shared_data_dir(), "opencc/$configFileName")) {
+        with(File(Rime.getRimeSharedDataDir(), "opencc/$configFileName")) {
             if (exists()) return openCCLineConv(input, path)
         }
         Timber.w("Specified config $configFileName doesn't exist, returning raw input ...")

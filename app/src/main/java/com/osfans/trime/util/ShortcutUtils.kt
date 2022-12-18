@@ -123,7 +123,7 @@ object ShortcutUtils {
     fun syncInBackground() {
         val prefs = AppPrefs.defaultInstance()
         prefs.profile.lastBackgroundSync = Date().time.toString()
-        prefs.profile.lastSyncStatus = Rime.syncUserData()
+        prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { Rime.deployRime() }
     }
 
     fun openCategory(keyCode: Int): Boolean {

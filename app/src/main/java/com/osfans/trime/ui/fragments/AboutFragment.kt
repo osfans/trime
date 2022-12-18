@@ -43,7 +43,7 @@ class AboutFragment : PaddingPreferenceFragment() {
                 }
             }
             get<Preference>("about__librime_version")
-                ?.writeLibraryVersionToSummary(Rime.get_librime_version())
+                ?.writeLibraryVersionToSummary(Rime.getLibrimeVersion())
             get<Preference>("about__opencc_version")
                 ?.writeLibraryVersionToSummary(OpenCCDictManager.getOpenCCVersion())
             get<Preference>("pref_trime_custom_qq")
