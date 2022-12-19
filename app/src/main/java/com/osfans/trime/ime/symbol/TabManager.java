@@ -1,7 +1,7 @@
 package com.osfans.trime.ime.symbol;
 
 import androidx.annotation.NonNull;
-import com.osfans.trime.core.Rime;
+import com.osfans.trime.data.schema.SchemaManager;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
@@ -135,7 +135,7 @@ public class TabManager {
                 else keys.add(new SimpleKeyBean((String) p.get("click")));
               } else {
                 for (Map.Entry<String, String> entry : p.entrySet()) {
-                  if (Rime.hasSymbols(entry.getValue()))
+                  if (SchemaManager.hasSymbols(entry.getValue()))
                     keys.add(new SimpleKeyBean(entry.getValue(), entry.getKey()));
                 }
               }

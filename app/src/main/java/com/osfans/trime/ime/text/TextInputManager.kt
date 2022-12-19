@@ -12,6 +12,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeEvent
 import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.Config
 import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.broadcast.IntentReceiver
@@ -529,7 +530,7 @@ class TextInputManager private constructor() :
         onPress(0)
         if (!Rime.isComposing()) {
             if (index >= 0) {
-                Rime.toggleSwitchOption(index)
+                SchemaManager.toggleSwitchOption(index)
                 trime.updateComposing()
             }
         } else if (prefs.keyboard.hookCandidate || index > 9) {

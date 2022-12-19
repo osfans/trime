@@ -22,20 +22,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
-import com.osfans.trime.ime.symbol.SimpleKeyBean;
+import com.osfans.trime.data.schema.SchemaManager;
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import kotlin.collections.CollectionsKt;
-import kotlin.collections.IndexedValue;
 import kotlinx.coroutines.channels.BufferOverflow;
 import kotlinx.coroutines.flow.FlowKt;
 import kotlinx.coroutines.flow.MutableSharedFlow;
@@ -50,8 +45,6 @@ import timber.log.Timber;
  *     href="https://github.com/BYVoid/OpenCC">OpenCC</a>
  */
 public class Rime {
-  private static Map<String, Object> mSymbols;
-
   public final SharedFlow<RimeEvent> rimeNotiFlow = FlowKt.asSharedFlow(rimeNotiFlow_);
 
   /** Rime編碼區 */
@@ -145,107 +138,11 @@ public class Rime {
     boolean is_ascii_punct;
   }
 
-  /** Rime方案 */
-  @SuppressWarnings("unchecked")
-  public static class RimeSchema {
-    private List<Map<String, Object>> switches;
-    public Map<String, Object> symbolMap;
-
-    public RimeSchema(@NonNull String schemaId) {
-      Timber.d("RimeSchema <init>, schemaId=%s", schemaId);
-      if ((switches = (List<Map<String, Object>>) getRimeSchemaValue(schemaId, "switches"))
-          == null) {
-        Timber.w("Failed to parse schema status switches, fallback to empty collection");
-        switches = new ArrayList<>();
-      }
-      // 剔除没有 states 条目项的值，它们不作为开关使用
-      if (!switches.isEmpty()) {
-        for (final Iterator<Map<String, Object>> it = switches.iterator(); it.hasNext(); ) {
-          final Map<String, Object> s = it.next();
-          if (!s.containsKey("states")) it.remove();
-        }
-      }
-      final Map<String, Object> menu;
-      if ((menu = (Map<String, Object>) getRimeSchemaValue(schemaId, "menu")) != null) {
-        Timber.d("The menu field of this schema is set, page_size=%s", menu.get("page_size"));
-      }
-
-      // FIXME: 取回的key正常，value为null，导致symbolMap无法正常使用
-      if ((symbolMap = (Map<String, Object>) getRimeSchemaValue(schemaId, "punctuator/symbols"))
-          == null) {
-        symbolMap = new HashMap<>();
-      }
-    }
-
-    public RimeCandidate[] getStatusSwitches() {
-      if (switches.isEmpty()) return new RimeCandidate[0];
-      final RimeCandidate[] candidates = new RimeCandidate[switches.size()];
-      int i = 0;
-      for (final Map<String, Object> s : switches) {
-        candidates[i] = new RimeCandidate();
-        final List<String> states = (List<String>) s.get("states");
-        int enabled = s.get("enabled") != null ? (int) s.get("enabled") : 0;
-        assert states != null;
-        final String text = states.get(enabled);
-
-        boolean showSwitchArrow = getAppPrefs().getKeyboard().getSwitchArrowEnabled();
-        final String comment =
-            s.containsKey("options")
-                ? ""
-                : showSwitchArrow ? "→ " + states.get(1 - enabled) : states.get(1 - enabled);
-        candidates[i] = new RimeCandidate(text, comment);
-        i++;
-      }
-      return candidates;
-    }
-
-    public void updateSwitchOptions() {
-      if (switches.isEmpty()) return; // 無方案
-      for (final IndexedValue<Map<String, Object>> is : CollectionsKt.withIndex(switches)) {
-        final Map<String, Object> s = is.getValue();
-        if (s.containsKey("options")) { // 带有一系列 Rime 运行时选项的开关，找到启用的选项并标记
-          final List<String> options = (List<String>) s.get("options");
-          assert options != null;
-          for (final IndexedValue<String> io : CollectionsKt.withIndex(options)) {
-            if (Rime.getRimeOption(io.getValue())) {
-              // 将启用状态标记为此选项的索引值，方便切换时直接从选项列表中获取
-              s.put("enabled", io.getIndex());
-              break;
-            }
-          }
-        } else { // 只有单 Rime 运行时选项的开关，开关名即选项名，标记其启用状态
-          s.put("enabled", Rime.getRimeOption((String) s.get("name")) ? 1 : 0);
-        }
-        switches.set(is.getIndex(), s);
-      }
-    }
-
-    public void toggleSwitchOption(int index) {
-      if (switches.isEmpty()) return;
-      final Map<String, Object> s = switches.get(index);
-      int enabled = s.get("enabled") != null ? (int) s.get("enabled") : 0;
-      int nextOrReserved;
-      if (s.containsKey("options")) {
-        final List<String> options = (List<String>) s.get("options");
-        assert options != null;
-        Rime.setOption(options.get(enabled), false);
-        nextOrReserved = (enabled + 1) % options.size();
-        Rime.setOption(options.get(nextOrReserved), true);
-      } else {
-        nextOrReserved = 1 - enabled;
-        Rime.setOption((String) s.get("name"), nextOrReserved == 1);
-      }
-      s.put("enabled", nextOrReserved);
-      switches.set(index, s);
-    }
-  }
-
   private static Rime self;
 
   private static final RimeCommit mCommit = new RimeCommit();
   private static final RimeContext mContext = new RimeContext();
   private static final RimeStatus mStatus = new RimeStatus();
-  private static RimeSchema mSchema;
   private static boolean isHandlingRimeNotification;
 
   public static final MutableSharedFlow<RimeEvent> rimeNotiFlow_ =
@@ -328,35 +225,14 @@ public class Rime {
 
   public static void initSchema() {
     Timber.d("initSchema() RimeSchema");
-    mSchema = new RimeSchema(getCurrentRimeSchema());
+    SchemaManager.init(getCurrentRimeSchema());
     Timber.d("initSchema() getStatus");
     getStatus();
-    Timber.d("initSchema() done");
-    mSymbols = mSchema.symbolMap;
-  }
-
-  public static boolean hasSymbols(String key) {
-    return (mSymbols.containsKey(key));
-  }
-
-  public static List<String> getSymbols(String key) {
-    if (mSymbols.containsKey(key)) {
-      return (List<String>) mSymbols.get(key);
-    }
-    return new ArrayList<String>();
-  }
-
-  public static List<SimpleKeyBean> getSymbolKeyBeans() {
-    List<SimpleKeyBean> list = new ArrayList<>();
-    for (Map.Entry m : mSymbols.entrySet()) {
-      list.add(new SimpleKeyBean(m.getKey().toString()));
-    }
-    return list;
   }
 
   @SuppressWarnings("UnusedReturnValue")
   private static boolean getStatus() {
-    mSchema.updateSwitchOptions();
+    SchemaManager.updateSwitchOptions();
     return getRimeStatus(mStatus);
   }
 
@@ -425,7 +301,7 @@ public class Rime {
 
   public static RimeCandidate[] getCandidatesOrStatusSwitches() {
     final boolean showSwitches = getAppPrefs().getKeyboard().getSwitchesEnabled();
-    if (!isComposing() && showSwitches) return mSchema.getStatusSwitches();
+    if (!isComposing() && showSwitches) return SchemaManager.getStatusSwitches();
     return mContext.getCandidates();
   }
 
@@ -487,10 +363,6 @@ public class Rime {
   public static void toggleOption(String option) {
     boolean b = getOption(option);
     setOption(option, !b);
-  }
-
-  public static void toggleSwitchOption(int i) {
-    mSchema.toggleSwitchOption(i);
   }
 
   private static boolean isEmpty(@NonNull String s) {
