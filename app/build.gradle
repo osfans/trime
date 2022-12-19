@@ -117,6 +117,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:5.0.1"
     implementation "cat.ereza:customactivityoncrash:2.4.0"
     implementation "com.github.getActivity:XXPermissions:16.2"
+    implementation "com.charleskorn.kaml:kaml:0.49.0"
     implementation "androidx.core:core-ktx:1.8.0"
     implementation "androidx.appcompat:appcompat:1.4.2"
     implementation "androidx.preference:preference-ktx:1.2.0"
