@@ -27,6 +27,7 @@ import androidx.core.math.MathUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
+import com.osfans.trime.data.schema.SchemaManager;
 import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.CollectionUtils;
@@ -304,8 +305,7 @@ public class Config {
         if (theme.presetKeyboards.containsKey(shortSchemaId)) {
           return shortSchemaId;
         } else {
-          final String alphabet =
-              (String) Rime.getRimeSchemaValue(currentSchemaId, "speller/alphabet");
+          final String alphabet = SchemaManager.getActiveSchema().getSpeller().getAlphabet();
           final String twentySix = "qwerty";
           if (theme.presetKeyboards.containsKey(alphabet)) {
             return alphabet;

@@ -516,10 +516,6 @@ public class Rime {
   public static native Map<String, Object> getRimeConfigMap(
       @NonNull String configId, @NonNull String key);
 
-  public static native Object getRimeConfigValue(@NonNull String configId, @NonNull String key);
-
-  public static native Object getRimeSchemaValue(@NonNull String schemaId, @NonNull String key);
-
   // testing
   public static native boolean simulateKeySequence(@NonNull String keySequence);
 

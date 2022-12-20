@@ -11,8 +11,6 @@ object SchemaManager {
     private lateinit var currentSchema: RimeSchema
     private lateinit var visibleSwitches: List<RimeSchema.Switch>
 
-    private lateinit var symbolMap: Map<String, List<String>>
-
     private val arrow get() = AppPrefs.defaultInstance().keyboard.switchArrowEnabled
 
     private val yaml = Yaml(
@@ -23,15 +21,21 @@ object SchemaManager {
 
     @JvmStatic
     fun init(schemaId: String) {
-        currentSchema = yaml.decodeFromStream(
+        val raw = File(Rime.getRimeUserDataDir(), "build/$schemaId.schema.yaml")
+            .inputStream()
+            .bufferedReader()
+            .readText()
+        currentSchema = yaml.decodeFromString(
             RimeSchema.serializer(),
-            File(Rime.getRimeUserDataDir(), "build/$schemaId.schema.yaml").inputStream()
+            raw
         )
         visibleSwitches = currentSchema.switches ?: listOf<RimeSchema.Switch>()
             .filter { !it.states.isNullOrEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
         updateSwitchOptions()
-        symbolMap = currentSchema.punctuator.symbols ?: mapOf()
     }
+
+    @JvmStatic
+    fun getActiveSchema() = currentSchema
 
     @JvmStatic
     fun updateSwitchOptions() {
@@ -82,7 +86,4 @@ object SchemaManager {
             RimeCandidate(text, comment)
         }
     }
-
-    @JvmStatic
-    fun hasSymbols(key: String) = symbolMap.containsKey(key)
 }

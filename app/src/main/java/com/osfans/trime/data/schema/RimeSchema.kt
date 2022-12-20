@@ -7,10 +7,11 @@ import kotlinx.serialization.Transient
 @Serializable
 data class RimeSchema(
     @SerialName("__build_info")
-    val buildInfo: BuildInfo,
-    val schema: Schema,
-    val switches: List<Switch>?,
-    val punctuator: Punctuator
+    val buildInfo: BuildInfo, // 构建信息
+    val schema: Schema, // 方案信息
+    val switches: List<Switch>?, // 选项开关
+    val punctuator: Punctuator, // 标点
+    val speller: Speller // 拼写器
 ) {
     @Serializable
     data class BuildInfo(
@@ -41,5 +42,10 @@ data class RimeSchema(
     @Serializable
     data class Punctuator(
         val symbols: Map<String, List<String>>?
+    )
+
+    @Serializable
+    data class Speller(
+        val alphabet: String?
     )
 }

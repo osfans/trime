@@ -551,32 +551,6 @@ jobject rimeConfigValueToJObject(JNIEnv *env, RimeConfig *config, const std::str
 }
 
 extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_getRimeConfigValue(JNIEnv *env, jclass clazz, jstring config_id, jstring key) {
-    auto rime = rime_get_api();
-    RimeConfig config = {nullptr};
-    jobject obj = nullptr;
-    if (rime->config_open(CString(env, config_id), &config)) {
-        obj = rimeConfigValueToJObject(env, &config, CString(env, key));
-        rime->config_close(&config);
-    }
-    return obj;
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_getRimeSchemaValue(JNIEnv *env, jclass clazz, jstring schema_id, jstring key) {
-    auto rime = rime_get_api();
-    RimeConfig config = {nullptr};
-    jobject obj = nullptr;
-    if (rime->schema_open(CString(env, schema_id), &config)) {
-        obj = rimeConfigValueToJObject(env, &config, CString(env, key));
-        rime->config_close(&config);
-    }
-    return obj;
-}
-
-extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_runRimeTask(JNIEnv *env, jclass /* thiz */, jstring task_name) {
     const char* s = env->GetStringUTFChars(task_name, nullptr);

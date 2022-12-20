@@ -134,8 +134,10 @@ public class TabManager {
                   keys.add(new SimpleKeyBean((String) p.get("click"), (String) p.get("label")));
                 else keys.add(new SimpleKeyBean((String) p.get("click")));
               } else {
+                final Map<String, List<String>> symbolMaps =
+                    SchemaManager.getActiveSchema().getPunctuator().getSymbols();
                 for (Map.Entry<String, String> entry : p.entrySet()) {
-                  if (SchemaManager.hasSymbols(entry.getValue()))
+                  if (symbolMaps != null && symbolMaps.containsKey(entry.getValue()))
                     keys.add(new SimpleKeyBean(entry.getValue(), entry.getKey()));
                 }
               }
