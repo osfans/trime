@@ -49,7 +49,6 @@ import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
-import com.osfans.trime.ime.lifecycle.CoroutineScopeJava;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
 import java.lang.reflect.Method;
@@ -57,19 +56,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import kotlin.coroutines.CoroutineContext;
-import kotlinx.coroutines.CoroutineScope;
 import splitties.systemservices.SystemServicesKt;
 import timber.log.Timber;
 
 /** 顯示{@link Keyboard 鍵盤}及{@link Key 按鍵} */
-public class KeyboardView extends View implements View.OnClickListener, CoroutineScope {
-
-  @NonNull
-  @Override
-  public CoroutineContext getCoroutineContext() {
-    return CoroutineScopeJava.getMainScopeJava().getCoroutineContext();
-  }
+public class KeyboardView extends View implements View.OnClickListener {
 
   /** 處理按鍵、觸摸等輸入事件 */
   public interface OnKeyboardActionListener {
