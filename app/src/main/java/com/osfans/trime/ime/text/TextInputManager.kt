@@ -75,7 +75,6 @@ class TextInputManager private constructor() :
 
     var needSendUpRimeKey: Boolean = false
     var shouldUpdateRimeOption: Boolean = true
-    var performEnterAsLineBreak: Boolean = false
     var isComposable: Boolean = false
     var shouldResetAsciiMode: Boolean = false
 
@@ -199,7 +198,6 @@ class TextInputManager private constructor() :
         super.onStartInputView(instance, restarting)
         Trime.getService().selectLiquidKeyboard(-1)
         isComposable = false
-        performEnterAsLineBreak = false
         var tempAsciiMode = if (shouldResetAsciiMode) false else null
         var keyboardType =
             when (instance.editorInfo!!.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
@@ -218,7 +216,7 @@ class TextInputManager private constructor() :
                         InputType.TYPE_CLASS_TEXT -> {
                             when (inputAttrsRaw and InputType.TYPE_MASK_VARIATION) {
                                 InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE -> {
-                                    null.also { performEnterAsLineBreak = true }
+                                    null
                                 }
                                 InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
                                 InputType.TYPE_TEXT_VARIATION_PASSWORD,

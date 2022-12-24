@@ -88,6 +88,7 @@ import com.osfans.trime.util.ViewUtils;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import splitties.bitflags.BitFlagsKt;
 import splitties.systemservices.SystemServicesKt;
 import timber.log.Timber;
 
@@ -120,6 +121,8 @@ public class Trime extends LifecycleInputMethodService {
   public CopyOnWriteArrayList<EventListener> eventListeners = new CopyOnWriteArrayList<>();
   public InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private IntentReceiver mIntentReceiver = null;
+
+  public EditorInfo editorInfo = null;
 
   private boolean isWindowShown = false; // 键盘窗口是否已显示
 
@@ -606,6 +609,35 @@ public class Trime extends LifecycleInputMethodService {
     self = null;
   }
 
+  private void handleReturnKey() {
+    if (editorInfo == null) sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+    if ((editorInfo.inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_NULL) {
+      sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+    }
+    if (BitFlagsKt.hasFlag(editorInfo.imeOptions, EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
+      final InputConnection ic = getCurrentInputConnection();
+      if (ic != null) ic.commitText("\n", 1);
+      return;
+    }
+    if (!TextUtils.isEmpty(editorInfo.actionLabel)
+        && editorInfo.actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
+      final InputConnection ic = getCurrentInputConnection();
+      if (ic != null) ic.performEditorAction(editorInfo.actionId);
+      return;
+    }
+    final int action = editorInfo.imeOptions & EditorInfo.IME_MASK_ACTION;
+    final InputConnection ic = getCurrentInputConnection();
+    switch (action) {
+      case EditorInfo.IME_ACTION_UNSPECIFIED:
+      case EditorInfo.IME_ACTION_NONE:
+        if (ic != null) ic.commitText("\n", 1);
+        break;
+      default:
+        if (ic != null) ic.performEditorAction(action);
+        break;
+    }
+  }
+
   @Override
   public void onConfigurationChanged(@NonNull Configuration newConfig) {
     final Configuration config = getResources().getConfiguration();
@@ -733,8 +765,15 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   @Override
+  public void onStartInput(EditorInfo attribute, boolean restarting) {
+    editorInfo = attribute;
+    Timber.d("onStartInput: restarting=%s", restarting);
+  }
+
+  @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
-    super.onStartInputView(attribute, restarting);
+    Timber.d("onStartInputView: restarting=%s", restarting);
+    editorInfo = attribute;
     if (getPrefs().getThemeAndColor().getAutoDark()) {
       int nightModeFlags =
           getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -840,6 +879,12 @@ public class Trime extends LifecycleInputMethodService {
     } catch (Exception e) {
       Timber.e(e, "Failed to show the PopupWindow.");
     }
+  }
+
+  @Override
+  public void onFinishInput() {
+    editorInfo = null;
+    super.onFinishInput();
   }
 
   public void bindKeyboardToInputView() {
@@ -1224,11 +1269,7 @@ public class Trime extends LifecycleInputMethodService {
   private boolean performEnter(int keyCode) { // 回車
     if (keyCode == KeyEvent.KEYCODE_ENTER) {
       DraftHelper.INSTANCE.onInputEventChanged();
-      if (textInputManager.getPerformEnterAsLineBreak()) {
-        commitText("\n");
-      } else {
-        sendKeyChar('\n');
-      }
+      handleReturnKey();
       return true;
     }
     return false;
