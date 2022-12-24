@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.core.RimeKeyMapping;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.util.ConfigGetter;
@@ -263,7 +264,7 @@ public class Event {
 
   // KeyboardEvent 从软键盘的按键keycode（可能含有mask）和mask，分离出rimekeycode和mask构成的数组
   public static int[] getRimeEvent(int code, int mask) {
-    int i = RimeKeycode.get().getRimeCode(code);
+    int i = RimeKeyMapping.keyCodeToVal(code);
     int m = 0;
     if (hasModifier(mask, KeyEvent.META_SHIFT_ON)) m |= Rime.META_SHIFT_ON;
     if (hasModifier(mask, KeyEvent.META_CTRL_ON)) m |= Rime.META_CTRL_ON;
