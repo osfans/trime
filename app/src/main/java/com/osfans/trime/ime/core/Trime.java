@@ -21,7 +21,6 @@ package com.osfans.trime.ime.core;
 import static android.graphics.Color.parseColor;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.RectF;
@@ -80,7 +79,6 @@ import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
 import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
-import com.osfans.trime.ui.main.PrefMainActivity;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
@@ -1005,13 +1003,9 @@ public class Trime extends LifecycleInputMethodService {
     }
 
     final int unicodeChar = event.getUnicodeChar();
-    final String s = String.valueOf((char) unicodeChar);
-    final int i = Event.getClickCode(s);
-    int mask = 0;
-    if (i > 0) {
-      keyCode = i;
-    } else { // 空格、回車等
-      mask = event.getMetaState();
+    int mask = event.getMetaState();
+    if (unicodeChar > 0) {
+      keyCode = unicodeChar;
     }
     final boolean ret = handleKey(keyCode, mask);
     if (isComposing()) setCandidatesViewShown(textInputManager.isComposable()); // 藍牙鍵盤打字時顯示候選欄
@@ -1142,7 +1136,7 @@ public class Trime extends LifecycleInputMethodService {
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et == null) {
               Timber.d("hookKeyboard paste, et == null, try commitText");
-              if (ic.commitText(ShortcutUtils.INSTANCE.pasteFromClipboard(self), 1)) {
+              if (ic.commitText(ShortcutUtils.pasteFromClipboard(this), 1)) {
                 return true;
               }
             } else if (ic.performContextMenuAction(android.R.id.paste)) {
@@ -1245,17 +1239,6 @@ public class Trime extends LifecycleInputMethodService {
     window.setAttributes(lp);
     window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     dialog.show();
-  }
-
-  /** Hides the IME and launches {@link PrefMainActivity}. */
-  public void launchSettings() {
-    requestHideSelf(0);
-    final Intent i = new Intent(this, PrefMainActivity.class);
-    i.addFlags(
-        Intent.FLAG_ACTIVITY_NEW_TASK
-            | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-            | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    getApplicationContext().startActivity(i);
   }
 
   /**

@@ -18,6 +18,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.main.LogActivity
+import com.osfans.trime.ui.main.PrefMainActivity
 import splitties.systemservices.clipboardManager
 import timber.log.Timber
 import java.text.FieldPosition
@@ -144,6 +145,18 @@ object ShortcutUtils {
         append(KeyEvent.KEYCODE_CALENDAR, "android.intent.category.APP_CALENDAR")
         append(KeyEvent.KEYCODE_MUSIC, "android.intent.category.APP_MUSIC")
         append(KeyEvent.KEYCODE_CALCULATOR, "android.intent.category.APP_CALCULATOR")
+    }
+
+    fun launchMainActivity(context: Context) {
+        context.startActivity(
+            Intent(context, PrefMainActivity::class.java).apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                        or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                        or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                )
+            }
+        )
     }
 
     fun launchLogActivity(context: Context) {

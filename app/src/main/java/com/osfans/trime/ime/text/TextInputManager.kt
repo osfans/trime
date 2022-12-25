@@ -405,7 +405,7 @@ class TextInputManager private constructor() :
                         "sound" -> trime.showDialogAboveInputView(
                             trime.soundPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
                         )
-                        else -> trime.launchSettings()
+                        else -> ShortcutUtils.launchMainActivity(trime)
                     }
                 }
             }
@@ -550,7 +550,7 @@ class TextInputManager private constructor() :
                 inputMethodManager.showInputMethodPicker()
             }
             .setPositiveButton(R.string.set_ime) { dialog, _ ->
-                trime.launchSettings()
+                ShortcutUtils.launchMainActivity(trime)
                 dialog.dismiss()
             }
         if (Rime.getCurrentRimeSchema() == (".default")) {
