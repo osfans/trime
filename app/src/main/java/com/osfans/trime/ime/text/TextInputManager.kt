@@ -71,7 +71,7 @@ class TextInputManager private constructor() :
     var candidateRoot: ScrollView? = null
     var candidateView: Candidate? = null
 
-    var locales: Array<Locale> = Array(2) { Locale.getDefault() }
+    val locales = Array(2) { Locale.getDefault() }
 
     var needSendUpRimeKey: Boolean = false
     var shouldUpdateRimeOption: Boolean = true
@@ -114,34 +114,18 @@ class TextInputManager private constructor() :
             .launchIn(trime.lifecycleScope)
 
         val imeConfig = Config.get()
-        var s =
-            if (imeConfig.style.getString("locale").isNullOrEmpty()) {
-                imeConfig.style.getString("locale")
-            } else ""
-        if (s.contains(DELIMITER_SPLITTER)) {
-            val lc = s.split(DELIMITER_SPLITTER)
-            if (lc.size == 3) {
-                locales[0] = Locale(lc[0], lc[1], lc[2])
-            } else {
-                locales[0] = Locale(lc[0], lc[1])
-            }
-        } else {
-            locales[0] = Locale.getDefault()
+        val defaultLocale = imeConfig.style.getString("locale").split(DELIMITER_SPLITTER)
+        locales[0] = when (defaultLocale.size) {
+            3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
+            2 -> Locale(defaultLocale[0], defaultLocale[1])
+            else -> Locale.getDefault()
         }
 
-        s = if (imeConfig.style.getString("latin_locale").isNullOrEmpty()) {
-            imeConfig.style.getString("latin_locale")
-        } else "en_US"
-        if (s.contains(DELIMITER_SPLITTER)) {
-            val lc = s.split(DELIMITER_SPLITTER)
-            if (lc.size == 3) {
-                locales[1] = Locale(lc[0], lc[1], lc[2])
-            } else {
-                locales[1] = Locale(lc[0], lc[1])
-            }
-        } else {
-            locales[0] = Locale.ENGLISH
-            locales[1] = Locale(s)
+        val latinLocale = imeConfig.style.getString("latin_locale").split(DELIMITER_SPLITTER)
+        locales[1] = when (latinLocale.size) {
+            3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
+            2 -> Locale(latinLocale[0], latinLocale[1])
+            else -> Locale.US
         }
         // preload all required parameters
         trime.loadConfig()

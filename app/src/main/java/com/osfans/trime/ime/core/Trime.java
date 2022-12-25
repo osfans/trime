@@ -85,7 +85,6 @@ import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.ViewUtils;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import splitties.bitflags.BitFlagsKt;
@@ -127,7 +126,6 @@ public class Trime extends LifecycleInputMethodService {
   private boolean isWindowShown = false; // 键盘窗口是否已显示
 
   private boolean isAutoCaps; // 句首自動大寫
-  private final Locale[] locales = new Locale[2];
 
   private int oneHandMode = 0; // 单手键盘模式
   public EditorInstance activeEditorInstance;
