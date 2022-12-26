@@ -17,25 +17,16 @@
  */
 package com.osfans.trime.ime.enums
 
-import java.util.HashMap
-import java.util.Locale
-
 /*按键的特殊命令枚举（仅用于新增的liquidKeyboard）*/
 enum class KeyCommandType {
-    NULL, LEFT, RIGHT, EXIT, DEL_LEFT, DEL_RIGHT, UNDO, REDO, ;
+    NULL, LEFT, RIGHT, EXIT, DEL_LEFT, DEL_RIGHT, UNDO, REDO;
 
     companion object {
-        private val convertMap: HashMap<String, KeyCommandType> = hashMapOf()
-
-        init {
-            for (type in values()) {
-                convertMap[type.toString()] = type
-            }
-        }
-
+        @JvmStatic
         fun fromString(code: String): KeyCommandType {
-            val type = convertMap[code.uppercase(Locale.getDefault())]
-            return type ?: NULL
+            return runCatching {
+                valueOf(code.uppercase())
+            }.getOrDefault(NULL)
         }
     }
 }

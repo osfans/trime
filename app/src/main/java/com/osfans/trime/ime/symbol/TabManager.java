@@ -100,14 +100,19 @@ public class TabManager {
   // 处理single类型和no_key类型。前者把字符串切分为多个按键，后者把字符串转换为命令
   public void addTab(String name, SymbolKeyboardType type, String string) {
     if (string == null) return;
-
-    if (type == SymbolKeyboardType.SINGLE) {
-      addTab(name, type, SimpleKeyDao.Single(string));
-    } else if (type == SymbolKeyboardType.NO_KEY) {
-      KeyCommandType command = KeyCommandType.Companion.fromString(string);
-      tabTags.add(new TabTag(name, type, command));
-      keyboards.add(notKeyboard);
-    } else addTab(name, type, SimpleKeyDao.SimpleKeyboard(string));
+    switch (type) {
+      case SINGLE:
+        addTab(name, type, SimpleKeyDao.Single(string));
+        break;
+      case NO_KEY:
+        final KeyCommandType commandType = KeyCommandType.fromString(string);
+        tabTags.add(new TabTag(name, type, commandType));
+        keyboards.add(notKeyboard);
+        break;
+      default:
+        addTab(name, type, SimpleKeyDao.SimpleKeyboard(string));
+        break;
+    }
   }
 
   // 解析config的数据

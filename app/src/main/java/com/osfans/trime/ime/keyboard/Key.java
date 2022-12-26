@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.ime.enums.KeyEventType;
+import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.ConfigGetter;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -118,13 +119,15 @@ public class Key {
     {
       boolean hasComposingKey = false;
 
-      for (int i = 0; i < EVENT_NUM - 1; i++) {
-        String eventType = (KeyEventType.Companion.valueOf(i)).toString().toLowerCase(Locale.ROOT);
-        s = ConfigGetter.getString(mk, eventType, "");
+      for (final KeyEventType type : KeyEventType.values()) {
+        final String typeStr = type.toString().toLowerCase(Locale.ROOT);
+        s = CollectionUtils.obtainString(mk, typeStr, "");
         if (!TextUtils.isEmpty(s)) {
-          events[i] = new Event(mKeyboard, s);
-          if (i < KeyEventType.COMBO.ordinal()) hasComposingKey = true;
-        } else if (i == KeyEventType.CLICK.ordinal()) events[i] = new Event(mKeyboard, "");
+          events[type.ordinal()] = new Event(mKeyboard, s);
+          hasComposingKey = type.ordinal() < KeyEventType.COMBO.ordinal();
+        } else if (type == KeyEventType.CLICK) {
+          events[type.ordinal()] = new Event(mKeyboard, "");
+        }
       }
       if (hasComposingKey) mKeyboard.getComposingKeys().add(this);
 
