@@ -1,9 +1,10 @@
 package com.osfans.trime.ime.enums
 
-import android.text.TextUtils
 import android.view.KeyEvent
 import com.osfans.trime.ime.keyboard.Key
 import timber.log.Timber
+import java.util.EnumMap
+import kotlin.collections.HashMap
 
 enum class Keycode {
     // 与原trime.yaml主题android_key/name小节相比，差异如下：
@@ -65,7 +66,7 @@ enum class Keycode {
         private val convertMap: HashMap<String, Keycode> = hashMapOf()
 
         // 部分符号的 trime keycode (兼容Android) - key label
-        private val reverseMap: HashMap<Keycode, String> = hashMapOf()
+        private val reverseMap: EnumMap<Keycode, String> = EnumMap(Keycode::class.java)
 
         init {
             for (type in values()) {
@@ -143,88 +144,70 @@ enum class Keycode {
         }
 
         fun isStdKey(keycode: Int): Boolean {
-            return keycode < A.ordinal && keycode > 0
+            return keycode in SOFT_LEFT.ordinal..PROFILE_SWITCH.ordinal
         }
 
         fun toStdKeyEvent(keycode: Int, mask: Int = 0): IntArray {
-            var event = IntArray(2)
-            if (keycode < 0 || keycode > values().size)
-                return event
+            val event = IntArray(2)
+            if (keycode !in values().indices) return event
             if (keycode < A.ordinal) {
                 event[0] = keycode
                 event[1] = mask
             } else {
                 if (keycode <= Z.ordinal)
                     event[0] = keycode - A.ordinal + a.ordinal
-                else if (keycode == exclam.ordinal)
-                    event[0] = _1.ordinal
-                else if (keycode == dollar.ordinal)
-                    event[0] = _4.ordinal
-                else if (keycode == percent.ordinal)
-                    event[0] = _5.ordinal
-                else if (keycode == asciicircum.ordinal)
-                    event[0] = _6.ordinal
-                else if (keycode == ampersand.ordinal)
-                    event[0] = _7.ordinal
-                else if (keycode == quotedbl.ordinal)
-                    event[0] = apostrophe.ordinal
-                else if (keycode == colon.ordinal)
-                    event[0] = semicolon.ordinal
-                else if (keycode == less.ordinal)
-                    event[0] = comma.ordinal
-                else if (keycode == greater.ordinal)
-                    event[0] = period.ordinal
-                else if (keycode == question.ordinal)
-                    event[0] = slash.ordinal
-                else if (keycode == underscore.ordinal)
-                    event[0] = minus.ordinal
-                else if (keycode == braceleft.ordinal)
-                    event[0] = bracketleft.ordinal
-                else if (keycode == braceright.ordinal)
-                    event[0] = bracketright.ordinal
-                else if (keycode == asciitilde.ordinal)
-                    event[0] = grave.ordinal
-                else if (keycode == bar.ordinal)
-                    event[0] = backslash.ordinal
-
+                else {
+                    event[0] = when (keycode) {
+                        exclam.ordinal -> _1.ordinal
+                        dollar.ordinal -> _4.ordinal
+                        percent.ordinal -> _5.ordinal
+                        asciicircum.ordinal -> _6.ordinal
+                        ampersand.ordinal -> _7.ordinal
+                        quotedbl.ordinal -> apostrophe.ordinal
+                        colon.ordinal -> semicolon.ordinal
+                        less.ordinal -> comma.ordinal
+                        greater.ordinal -> period.ordinal
+                        question.ordinal -> slash.ordinal
+                        underscore.ordinal -> minus.ordinal
+                        braceleft.ordinal -> bracketleft.ordinal
+                        braceright.ordinal -> bracketright.ordinal
+                        asciitilde.ordinal -> grave.ordinal
+                        bar.ordinal -> backslash.ordinal
+                        else -> 0
+                    }
+                }
                 event[1] = mask or KeyEvent.META_SHIFT_ON
             }
             return event
         }
 
-        fun hasSymbolLabel(keycode: Int): Boolean {
-            if (keycode < 0 || keycode > values().size)
-                return false
+        private fun hasSymbolLabel(keycode: Int): Boolean {
+            if (keycode !in values().indices) return false
             return keycode >= A.ordinal || reverseMap.containsKey(values()[keycode])
         }
 
-        fun getSymbolLabell(keycode: Keycode): String {
+        fun getSymbolLabel(keycode: Keycode): String {
             return reverseMap[keycode] ?: ""
         }
 
-        fun getDisplayLabel(keyCode: Int, mask: Int): String? {
-            var s: String? = ""
+        fun getDisplayLabel(keyCode: Int, mask: Int): String =
             if (isStdKey(keyCode)) {
                 // Android keycode区域
                 if (Key.getKcm().isPrintingKey(keyCode)) {
                     val event = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, mask)
-                    val k = event.getUnicodeChar(mask)
-                    Timber.d("getDisplayLabel() keycode=$keyCode, mask=$mask, k=$k")
-                    if (k > 0) {
-                        s += k.toChar()
+                    val charCode = event.getUnicodeChar(mask)
+                    Timber.d("getDisplayLabel(): keycode=$keyCode, mask=$mask, charCode=$charCode")
+                    if (charCode > 0) {
+                        charCode.toChar().toString()
                     } else {
-                        var c = Key.getKcm().getDisplayLabel(keyCode)
-                        if (Character.isUpperCase(c)) c = c.lowercaseChar()
-                        s = c.toString()
+                        Key.getKcm().getDisplayLabel(keyCode).lowercase()
                     }
                 } else {
-                    s = keyNameOf(keyCode)
+                    keyNameOf(keyCode)
                 }
             } else if (hasSymbolLabel(keyCode)) { // 可見符號
-                s = getSymbolLabell(valueOf(keyCode))
-            }
-            return s
-        }
+                getSymbolLabel(valueOf(keyCode))
+            } else ""
 
         private val masks = hashMapOf(
             "Shift" to KeyEvent.META_SHIFT_ON,
@@ -234,50 +217,40 @@ enum class Keycode {
             "SYM" to KeyEvent.META_SYM_ON,
         )
 
-        fun addMask(mask: Int, s: String): Int {
-            val m = masks[s] ?: 0
-            return m or mask
-        }
-
         @JvmStatic
         fun fromString(s: String): Keycode {
-            val type = convertMap[s]
-            return type ?: VoidSymbol
+            return convertMap[s] ?: VoidSymbol
         }
 
         @JvmStatic
         fun valueOf(ordinal: Int): Keycode {
-            if (ordinal < 0 || ordinal >= values().size) {
-                return VoidSymbol
-            }
-            return values()[ordinal]
+            return runCatching {
+                values()[ordinal]
+            }.getOrDefault(VoidSymbol)
         }
 
         @JvmStatic
         fun keyNameOf(ordinal: Int): String {
-            return valueOf(ordinal).toString().replaceFirst("^_".toRegex(), "")
+            return valueOf(ordinal).toString().substringAfter('_')
         }
 
         @JvmStatic
         fun keyCodeOf(name: String): Int {
+            Timber.d("keyCodeOf(): name=$name")
             return fromString(name).ordinal
         }
 
         @JvmStatic
         fun parseSend(s: String): IntArray {
             val sends = IntArray(2)
-            if (TextUtils.isEmpty(s)) return sends
-            val codes: String
-            if (s.contains("+")) {
-                val ss = s.split("+").toTypedArray()
-                val n = ss.size
-                for (i in 0 until n - 1) if (masks.containsKey(ss[i])) sends[1] =
-                    addMask(sends[1], ss[i])
-                codes = ss[n - 1]
-            } else {
-                codes = s
+            if (s.isEmpty()) return sends
+            val keys = s.split('+')
+            sends[0] = fromString(keys.last()).ordinal
+            for (key in keys) {
+                if (masks.containsKey(key)) {
+                    sends[1] = sends[1] or (masks[key] ?: 0)
+                }
             }
-            sends[0] = fromString(codes).ordinal
             return sends
         }
     }

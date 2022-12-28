@@ -451,7 +451,7 @@ class TextInputManager private constructor() :
 
         // 如果没有修饰键，或者只有shift修饰键，针对非Android标准按键，可以直接commit字符
         if ((metaState == KeyEvent.META_SHIFT_ON || metaState == 0) && keyEventCode >= Keycode.A.ordinal) {
-            val text = Keycode.getSymbolLabell(Keycode.valueOf(keyEventCode))
+            val text = Keycode.getSymbolLabel(Keycode.valueOf(keyEventCode))
             if (text.length == 1) {
                 activeEditorInstance.commitText(text)
                 return
