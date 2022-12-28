@@ -81,7 +81,6 @@ public class Rime {
     int highlighted_candidate_index;
     int num_candidates;
     CandidateListItem[] candidates;
-    String select_keys;
   }
 
   /** Rime上屏的字符串 */
@@ -100,13 +99,10 @@ public class Rime {
     String commit_text_preview;
     String[] select_labels;
 
-    public int numCandidates() {
-      return menu != null ? menu.num_candidates : 0;
-    }
-
     public CandidateListItem[] getCandidates() {
-      Timber.d("setWindow getCandidates() numCandidates()=%s", numCandidates());
-      return numCandidates() != 0 ? menu.candidates : new CandidateListItem[0];
+      int numCandidates = menu != null ? menu.num_candidates : 0;
+      Timber.d("setWindow getCandidates() numCandidates=%s", numCandidates);
+      return numCandidates != 0 ? menu.candidates : new CandidateListItem[0];
     }
   }
 
@@ -297,17 +293,7 @@ public class Rime {
   }
 
   public static String[] getSelectLabels() {
-    if (mContext != null && mContext.numCandidates() > 0) {
-      if (mContext.select_labels != null) return mContext.select_labels;
-      if (mContext.menu.select_keys != null) return mContext.menu.select_keys.split("\\B");
-      int n = mContext.numCandidates();
-      String[] labels = new String[n];
-      for (int i = 0; i < n; i++) {
-        labels[i] = String.valueOf((i + 1) % 10);
-      }
-      return labels;
-    }
-    return null;
+    return mContext.select_labels;
   }
 
   public static int getCandHighlightIndex() {

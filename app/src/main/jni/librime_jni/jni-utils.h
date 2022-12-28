@@ -149,7 +149,6 @@ public:
     jfieldID RimeMenuHighlightedCandidateIndex;
     jfieldID RimeMenuNumCandidates;
     jfieldID RimeMenuCandidates;
-    jfieldID RimeMenuSelectKeys;
 
     jclass RimeStatus;
     jfieldID RimeStatusSchemaId;
@@ -216,7 +215,6 @@ public:
         RimeMenuHighlightedCandidateIndex = env->GetFieldID(RimeMenu, "highlighted_candidate_index", "I");
         RimeMenuNumCandidates = env->GetFieldID(RimeMenu, "num_candidates", "I");
         RimeMenuCandidates = env->GetFieldID(RimeMenu, "candidates", "[Lcom/osfans/trime/core/CandidateListItem;");
-        RimeMenuSelectKeys = env->GetFieldID(RimeMenu, "select_keys", "Ljava/lang/String;");
 
         RimeStatus = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeStatus")));
         RimeStatusSchemaId = env->GetFieldID(RimeStatus, "schema_id", "Ljava/lang/String;");

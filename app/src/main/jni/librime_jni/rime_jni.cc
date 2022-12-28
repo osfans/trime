@@ -237,59 +237,53 @@ Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */, jo
 }
 
 void rimeContextToJObject(JNIEnv *env, const RimeContext &context, const jobject &jcontext) {
-    {
-        auto composition = env->AllocObject(GlobalRef->RimeComposition);
-        env->SetIntField(composition, GlobalRef->RimeCompositionLength, context.composition.length);
-        env->SetIntField(composition, GlobalRef->RimeCompositionCursorPos,
+    auto composition = JRef<>(env, env->AllocObject(GlobalRef->RimeComposition));
+    env->SetIntField(composition, GlobalRef->RimeCompositionLength, context.composition.length);
+    env->SetIntField(composition, GlobalRef->RimeCompositionCursorPos,
                          context.composition.cursor_pos);
-        env->SetIntField(composition, GlobalRef->RimeCompositionSelStart,
+    env->SetIntField(composition, GlobalRef->RimeCompositionSelStart,
                          context.composition.sel_start);
-        env->SetIntField(composition, GlobalRef->RimeCompositionSelEnd,
+    env->SetIntField(composition, GlobalRef->RimeCompositionSelEnd,
                          context.composition.sel_end);
-        env->SetObjectField(composition, GlobalRef->RimeCompositionPreedit,
+    env->SetObjectField(composition, GlobalRef->RimeCompositionPreedit,
                             JString(env, context.composition.preedit));
-        env->SetObjectField(jcontext, GlobalRef->RimeContextComposition, composition);
-    }
-    {
-        auto menu = env->AllocObject(GlobalRef->RimeMenu);
-        env->SetIntField(menu, GlobalRef->RimeMenuPageSize, context.menu.page_size);
-        env->SetIntField(menu, GlobalRef->RimeMenuPageNo, context.menu.page_no);
-        env->SetBooleanField(menu, GlobalRef->RimeMenuIsLastPage, context.menu.is_last_page);
-        env->SetIntField(menu, GlobalRef->RimeMenuHighlightedCandidateIndex,
-                         context.menu.highlighted_candidate_index);
-        env->SetIntField(menu, GlobalRef->RimeMenuNumCandidates, context.menu.num_candidates);
-        {
-            int num = context.menu.num_candidates;
-            auto candidates = env->NewObjectArray(num, GlobalRef->CandidateListItem, nullptr);
-            for (int i = 0; i < num; ++i) {
-                auto &candidate = context.menu.candidates[i];
-                auto jcandidate = JRef<>(env, env->NewObject(GlobalRef->CandidateListItem, GlobalRef->CandidateListItemInit,
-                                                            *JString(env, candidate.comment ? candidate.comment : ""),
-                                                            *JString(env, candidate.text ? candidate.text : "")));
-                env->SetObjectArrayElement(candidates, i, jcandidate);
-            }
-            env->SetObjectField(menu, GlobalRef->RimeMenuCandidates, candidates);
-        }
-            env->SetObjectField(menu, GlobalRef->RimeMenuSelectKeys,
-                                JString(env, context.menu.select_keys));
-            env->SetObjectField(jcontext, GlobalRef->RimeContextMenu, menu);
-    }
-    env->SetObjectField(jcontext, GlobalRef->RimeContextCommitTextPreview, JString(env, context.commit_text_preview));
+    env->SetObjectField(jcontext, GlobalRef->RimeContextComposition, composition);
 
-    {
-        if (RIME_STRUCT_HAS_MEMBER(context, context.select_labels)
-            && context.select_labels) {
-            int pageSize = context.menu.page_size;
-            auto selectLabels = env->NewObjectArray(pageSize, GlobalRef->String, nullptr);
-            for (int i = 0; i < pageSize; ++i) {
-                env->SetObjectArrayElement(selectLabels, i,
-                                           JString(env, context.select_labels[i]));
-            }
-            env->SetObjectField(jcontext, GlobalRef->RimeContextSelectLabels, selectLabels);
+    const auto &menu = context.menu;
+    auto jmenu = JRef<>(env, env->AllocObject(GlobalRef->RimeMenu));
+    env->SetIntField(jmenu, GlobalRef->RimeMenuPageSize, menu.page_size);
+    env->SetIntField(jmenu, GlobalRef->RimeMenuPageNo, menu.page_no);
+    env->SetBooleanField(jmenu, GlobalRef->RimeMenuIsLastPage, menu.is_last_page);
+    env->SetIntField(jmenu, GlobalRef->RimeMenuHighlightedCandidateIndex,
+                     menu.highlighted_candidate_index);
+    env->SetIntField(jmenu, GlobalRef->RimeMenuNumCandidates, context.menu.num_candidates);
+
+    size_t numSelectKeys = menu.select_keys ? std::strlen(menu.select_keys) : 0;
+    bool hasLabel = RIME_STRUCT_HAS_MEMBER(context, context.select_labels) && context.select_labels;
+    auto selectLabels = JRef<jobjectArray>(env, env->NewObjectArray(menu.num_candidates, GlobalRef->String, nullptr));
+    auto candidates = JRef<jobjectArray>(env, env->NewObjectArray(menu.num_candidates, GlobalRef->CandidateListItem, nullptr));
+    for (int i = 0; i < menu.num_candidates; ++i) {
+        std::string label;
+        if (i < menu.page_size && hasLabel) {
+            label = context.select_labels[i];
+        } else if (i < numSelectKeys) {
+            label = std::string(1, menu.select_keys[i]);
         } else {
-            env->SetObjectField(jcontext, GlobalRef->RimeContextSelectLabels, nullptr);
+            label = std::to_string((i + 1) % 10);
         }
+        label.append(" ");
+        env->SetObjectArrayElement(selectLabels, i, JString(env, label));
+        auto &candidate = context.menu.candidates[i];
+        auto jcandidate = JRef<>(env, env->NewObject(GlobalRef->CandidateListItem, GlobalRef->CandidateListItemInit,
+                                                     *JString(env, candidate.comment ? candidate.comment : ""),
+                                                     *JString(env, candidate.text ? candidate.text : "")));
+        env->SetObjectArrayElement(candidates, i, jcandidate);
     }
+    env->SetObjectField(jmenu, GlobalRef->RimeMenuCandidates, candidates);
+
+    env->SetObjectField(jcontext, GlobalRef->RimeContextMenu, jmenu);
+    env->SetObjectField(jcontext, GlobalRef->RimeContextCommitTextPreview, JString(env, context.commit_text_preview));
+    env->SetObjectField(jcontext, GlobalRef->RimeContextSelectLabels, selectLabels);
 }
 
 extern "C"
