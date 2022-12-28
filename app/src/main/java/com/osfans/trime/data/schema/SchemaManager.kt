@@ -2,8 +2,8 @@ package com.osfans.trime.data.schema
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
+import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
-import com.osfans.trime.core.Rime.RimeCandidate
 import com.osfans.trime.data.AppPrefs
 import java.io.File
 
@@ -74,7 +74,7 @@ object SchemaManager {
     }
 
     @JvmStatic
-    fun getStatusSwitches(): Array<RimeCandidate> {
+    fun getStatusSwitches(): Array<CandidateListItem> {
         if (!this::visibleSwitches.isInitialized || visibleSwitches.isEmpty()) return arrayOf()
         return Array(visibleSwitches.size) {
             val switch = visibleSwitches[it]
@@ -83,7 +83,7 @@ object SchemaManager {
             val comment = if (switch.options.isNullOrEmpty()) {
                 "${if (arrow) "→ " else ""}${switch.states[1 - enabled]}"
             } else ""
-            RimeCandidate(text, comment)
+            CandidateListItem(comment, text)
         }
     }
 }

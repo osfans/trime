@@ -10,6 +10,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
@@ -272,7 +273,7 @@ class LiquidKeyboard(private val context: Context) {
             keyboardView.isSelected = true
         }
         candidateAdapter.updateCandidates(
-            data.map { b -> Rime.RimeCandidate(b.text, "") }
+            data.map { b -> CandidateListItem("", b.text) }
         )
     }
 }

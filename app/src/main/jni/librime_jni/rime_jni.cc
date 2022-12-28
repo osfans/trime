@@ -260,15 +260,13 @@ void rimeContextToJObject(JNIEnv *env, const RimeContext &context, const jobject
         env->SetIntField(menu, GlobalRef->RimeMenuNumCandidates, context.menu.num_candidates);
         {
             int num = context.menu.num_candidates;
-            auto candidates = env->NewObjectArray(num, GlobalRef->RimeCandidate, nullptr);
+            auto candidates = env->NewObjectArray(num, GlobalRef->CandidateListItem, nullptr);
             for (int i = 0; i < num; ++i) {
-                auto candidate = env->AllocObject(GlobalRef->RimeCandidate);
-                env->SetObjectField(candidate, GlobalRef->RimeCandidateText,
-                                    JString(env, context.menu.candidates[i].text));
-                env->SetObjectField(candidate, GlobalRef->RimeCandidateComment,
-                                    JString(env, context.menu.candidates[i].comment));
-                env->SetObjectArrayElement(candidates, i, candidate);
-                env->DeleteLocalRef(candidate);
+                auto &candidate = context.menu.candidates[i];
+                auto jcandidate = JRef<>(env, env->NewObject(GlobalRef->CandidateListItem, GlobalRef->CandidateListItemInit,
+                                                            *JString(env, candidate.comment ? candidate.comment : ""),
+                                                            *JString(env, candidate.text ? candidate.text : "")));
+                env->SetObjectArrayElement(candidates, i, jcandidate);
             }
             env->SetObjectField(menu, GlobalRef->RimeMenuCandidates, candidates);
         }

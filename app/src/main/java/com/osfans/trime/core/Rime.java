@@ -73,27 +73,14 @@ public class Rime {
     }
   }
 
-  /** Rime候選項 */
-  public static class RimeCandidate {
-    public String text;
-    public String comment;
-
-    public RimeCandidate(String text, String comment) {
-      this.text = text;
-      this.comment = comment;
-    }
-
-    public RimeCandidate() {}
-  }
-
-  /** Rime候選區，包含多個{@link RimeCandidate 候選項} */
+  /** Rime候選區，包含多個{@link CandidateListItem 候選項} */
   public static class RimeMenu {
     int page_size;
     int page_no;
     boolean is_last_page;
     int highlighted_candidate_index;
     int num_candidates;
-    RimeCandidate[] candidates;
+    CandidateListItem[] candidates;
     String select_keys;
   }
 
@@ -113,14 +100,13 @@ public class Rime {
     String commit_text_preview;
     String[] select_labels;
 
-    public int size() {
-      if (menu == null) return 0;
-      return menu.num_candidates;
+    public int numCandidates() {
+      return menu != null ? menu.num_candidates : 0;
     }
 
-    public RimeCandidate[] getCandidates() {
-      Timber.d("setWindow getCandidates() size()=" + size());
-      return size() == 0 ? null : menu.candidates;
+    public CandidateListItem[] getCandidates() {
+      Timber.d("setWindow getCandidates() numCandidates()=%s", numCandidates());
+      return numCandidates() != 0 ? menu.candidates : new CandidateListItem[0];
     }
   }
 
@@ -299,22 +285,22 @@ public class Rime {
     return b;
   }
 
-  public static RimeCandidate[] getCandidatesOrStatusSwitches() {
+  public static CandidateListItem[] getCandidatesOrStatusSwitches() {
     final boolean showSwitches = getAppPrefs().getKeyboard().getSwitchesEnabled();
     if (!isComposing() && showSwitches) return SchemaManager.getStatusSwitches();
     return mContext.getCandidates();
   }
 
-  public static RimeCandidate[] getCandidatesWithoutSwitch() {
+  public static CandidateListItem[] getCandidatesWithoutSwitch() {
     if (isComposing()) return mContext.getCandidates();
-    return new RimeCandidate[0];
+    return new CandidateListItem[0];
   }
 
   public static String[] getSelectLabels() {
-    if (mContext != null && mContext.size() > 0) {
+    if (mContext != null && mContext.numCandidates() > 0) {
       if (mContext.select_labels != null) return mContext.select_labels;
       if (mContext.menu.select_keys != null) return mContext.menu.select_keys.split("\\B");
-      int n = mContext.size();
+      int n = mContext.numCandidates();
       String[] labels = new String[n];
       for (int i = 0; i < n; i++) {
         labels[i] = String.valueOf((i + 1) % 10);

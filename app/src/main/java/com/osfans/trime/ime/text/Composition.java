@@ -39,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
+import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
@@ -343,21 +344,21 @@ public class Composition extends AppCompatTextView {
    */
   private int calcStartNum(int min_length, int min_check) {
     Timber.d("setWindow calcStartNum() getCandidates");
-    final Rime.RimeCandidate[] candidates = Rime.getCandidatesOrStatusSwitches();
-    if (candidates == null) return 0;
+    final CandidateListItem[] candidates = Rime.getCandidatesOrStatusSwitches();
+    if (candidates.length == 0) return 0;
 
-    Timber.d("setWindow calcStartNum() getCandidates finish, size=" + candidates.length);
+    Timber.d("setWindow calcStartNum() getCandidates finish, size=%s", candidates.length);
     int j = min_check > max_entries ? (max_entries - 1) : (min_check - 1);
     if (j >= candidates.length) j = candidates.length - 1;
     for (; j >= 0; j--) {
-      final String cand = candidates[j].text;
+      final String cand = candidates[j].getText();
       if (cand.length() >= min_length) break;
     }
 
     if (j < 0) j = 0;
 
     for (; j < max_entries && j < candidates.length; j++) {
-      final String cand = candidates[j].text;
+      final String cand = candidates[j].getText();
       if (cand.length() < min_length) {
         return j;
       }
@@ -370,8 +371,8 @@ public class Composition extends AppCompatTextView {
     Timber.d("appendCandidates(): length = %s", length);
     int start, end;
 
-    final Rime.RimeCandidate[] candidates = Rime.getCandidatesOrStatusSwitches();
-    if (candidates == null) return;
+    final CandidateListItem[] candidates = Rime.getCandidatesOrStatusSwitches();
+    if (candidates.length == 0) return;
     String sep = CollectionUtils.obtainString(m, "start", "");
     highlightIndex = candidate_use_cursor ? Rime.getCandHighlightIndex() : -1;
     String label_format = CollectionUtils.obtainString(m, "label", "");
@@ -389,8 +390,8 @@ public class Composition extends AppCompatTextView {
     String[] labels = Rime.getSelectLabels();
     int i = -1;
     candidate_num = 0;
-    for (Rime.RimeCandidate o : candidates) {
-      String cand = o.text;
+    for (CandidateListItem o : candidates) {
+      String cand = o.getText();
       if (TextUtils.isEmpty(cand)) cand = "";
       i++;
       if (candidate_num >= max_entries) break;
@@ -446,7 +447,7 @@ public class Composition extends AppCompatTextView {
           end,
           span);
       ss.setSpan(new AbsoluteSizeSpan(candidate_text_size), start, end, span);
-      String comment = o.comment;
+      String comment = o.getComment();
       if (show_comment && !TextUtils.isEmpty(comment_format) && !TextUtils.isEmpty(comment)) {
         comment = String.format(comment_format, comment);
         start = ss.length();

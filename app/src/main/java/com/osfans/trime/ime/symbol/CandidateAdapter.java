@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
+import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
@@ -20,7 +21,7 @@ import java.util.List;
 
 // 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR_LENGTH
 public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.ViewHolder> {
-  @NonNull private final List<Rime.RimeCandidate> mCandidates = new ArrayList<>();
+  @NonNull private final List<CandidateListItem> mCandidates = new ArrayList<>();
 
   private final Config theme;
 
@@ -35,7 +36,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
     RIGHT;
   }
 
-  public void updateCandidates(List<Rime.RimeCandidate> candidates) {
+  public void updateCandidates(List<CandidateListItem> candidates) {
     mCandidates.clear();
     mCandidates.addAll(candidates);
   }
@@ -109,16 +110,16 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
   @SuppressLint("ClickableViewAccessibility")
   @Override
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-    final Rime.RimeCandidate candidate = mCandidates.get(position);
+    final CandidateListItem candidate = mCandidates.get(position);
 
     final Typeface candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
     final Typeface commentFont = FontManager.getTypeface(theme.style.getString("comment_font"));
     holder.candidate.setTypeface(candidateFont);
     holder.comment.setTypeface(commentFont);
 
-    holder.candidate.setText(candidate.text);
+    holder.candidate.setText(candidate.getText());
     if (holder.comment.getVisibility() == View.VISIBLE) {
-      holder.comment.setText(candidate.comment);
+      holder.comment.setText(candidate.getComment());
     }
 
     final float candidateSize = theme.style.getFloat("candidate_text_size");

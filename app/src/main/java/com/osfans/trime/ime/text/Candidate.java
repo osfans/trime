@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.Config;
@@ -64,7 +65,7 @@ public class Candidate extends View {
   private WeakReference<EventListener> listener = new WeakReference<>(null);
   private final GraphicUtils graphicUtils;
   private int highlightIndex = -1;
-  private Rime.RimeCandidate[] candidates;
+  private CandidateListItem[] candidates;
   private final ArrayList<ComputedCandidate> computedCandidates =
       new ArrayList<>(MAX_CANDIDATE_COUNT);
   private int numCandidates;
@@ -321,12 +322,12 @@ public class Candidate extends View {
           break;
         }
       }
-      String comment = null, text = candidates[n].text;
+      String comment = null, text = candidates[n].getText();
       float candidateWidth =
           graphicUtils.measureText(candidatePaint, text, candidateFont) + 2 * candidatePadding;
 
       if (shouldShowComment) {
-        comment = candidates[n].comment;
+        comment = candidates[n].getComment();
         if (!TextUtils.isEmpty(comment)) {
           float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
           candidateWidth =

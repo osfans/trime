@@ -130,9 +130,8 @@ public:
     jfieldID RimeCompositionSelEnd;
     jfieldID RimeCompositionPreedit;
 
-    jclass RimeCandidate;
-    jfieldID RimeCandidateText;
-    jfieldID RimeCandidateComment;
+    jclass CandidateListItem;
+    jmethodID CandidateListItemInit;
 
     jclass RimeCommit;
     jfieldID RimeCommitText;
@@ -198,9 +197,8 @@ public:
         RimeCompositionSelEnd = env->GetFieldID(RimeComposition, "sel_end", "I");
         RimeCompositionPreedit = env->GetFieldID(RimeComposition, "preedit", "Ljava/lang/String;");
 
-        RimeCandidate = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeCandidate")));
-        RimeCandidateText = env->GetFieldID(RimeCandidate, "text", "Ljava/lang/String;");
-        RimeCandidateComment = env->GetFieldID(RimeCandidate, "comment", "Ljava/lang/String;");
+        CandidateListItem = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/CandidateListItem")));
+        CandidateListItemInit = env->GetMethodID(CandidateListItem, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
 
         RimeCommit = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeCommit")));
         RimeCommitText = env->GetFieldID(RimeCommit, "text", "Ljava/lang/String;");
@@ -217,7 +215,7 @@ public:
         RimeMenuIsLastPage = env->GetFieldID(RimeMenu, "is_last_page", "Z");
         RimeMenuHighlightedCandidateIndex = env->GetFieldID(RimeMenu, "highlighted_candidate_index", "I");
         RimeMenuNumCandidates = env->GetFieldID(RimeMenu, "num_candidates", "I");
-        RimeMenuCandidates = env->GetFieldID(RimeMenu, "candidates", "[Lcom/osfans/trime/core/Rime$RimeCandidate;");
+        RimeMenuCandidates = env->GetFieldID(RimeMenu, "candidates", "[Lcom/osfans/trime/core/CandidateListItem;");
         RimeMenuSelectKeys = env->GetFieldID(RimeMenu, "select_keys", "Ljava/lang/String;");
 
         RimeStatus = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime$RimeStatus")));
