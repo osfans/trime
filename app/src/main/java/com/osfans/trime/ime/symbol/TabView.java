@@ -43,12 +43,8 @@ import timber.log.Timber;
 // 为了公用候选栏的皮肤参数以及外观，大部分代码从Candidate.java复制而来。
 public class TabView extends View {
 
-  private static final int MAX_CANDIDATE_COUNT = 30;
-  private static final int CANDIDATE_TOUCH_OFFSET = -12;
-
   private int highlightIndex;
   private ArrayList<TabTag> tabTags;
-  private final GraphicUtils graphicUtils;
 
   private PaintDrawable candidateHighlight;
   private final Paint separatorPaint;
@@ -56,7 +52,6 @@ public class TabView extends View {
   private Typeface candidateFont;
   private int candidateTextColor, hilitedCandidateTextColor;
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
-  private final boolean shouldShowComment = true;
   private boolean isCommentOnTop;
   private boolean shouldCandidateUseCursor;
   // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
@@ -97,8 +92,6 @@ public class TabView extends View {
 
     separatorPaint = new Paint();
     separatorPaint.setColor(Color.BLACK);
-
-    graphicUtils = new GraphicUtils();
     reset();
 
     setWillNotDraw(false);
@@ -142,7 +135,7 @@ public class TabView extends View {
       float tabX = computedTab.geometry.centerX();
 
       candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
-      graphicUtils.drawText(canvas, computedTab.text, tabX, tabY, candidatePaint, candidateFont);
+      GraphicUtils.drawText(canvas, computedTab.text, tabX, tabY, candidatePaint, candidateFont);
       // Draw the separator at the right edge of each candidate.
       canvas.drawRect(
           computedTab.geometry.right - candidateSpacing,
@@ -161,15 +154,12 @@ public class TabView extends View {
     for (TabTag computedTab : tabTags) {
       int i = tabTags.indexOf(computedTab);
       computedTab.geometry = new Rect(x, 0, (int) (x + getTabWidth(i)), getHeight());
-      x += +getTabWidth(i) + candidateSpacing;
+      x += getTabWidth(i) + candidateSpacing;
     }
     LayoutParams params = getLayoutParams();
     Timber.i("update, from Height=" + params.height + " width=" + params.width);
     params.width = x;
-    params.height =
-        (shouldShowComment && isCommentOnTop)
-            ? candidateViewHeight + commentHeight
-            : candidateViewHeight;
+    params.height = isCommentOnTop ? candidateViewHeight + commentHeight : candidateViewHeight;
     Timber.i("update, to Height=" + candidateViewHeight + " width=" + x);
     setLayoutParams(params);
     params = getLayoutParams();
@@ -260,7 +250,7 @@ public class TabView extends View {
   private float getTabWidth(int i) {
     String s = tabTags.get(i).text;
     return s != null
-        ? 2 * candidatePadding + graphicUtils.measureText(candidatePaint, s, candidateFont)
+        ? 2 * candidatePadding + GraphicUtils.measureText(candidatePaint, s, candidateFont)
         : 2 * candidatePadding;
   }
 }

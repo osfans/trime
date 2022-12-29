@@ -63,7 +63,6 @@ public class Candidate extends View {
   private int expectWidth = 0;
 
   private WeakReference<EventListener> listener = new WeakReference<>(null);
-  private final GraphicUtils graphicUtils;
   private int highlightIndex = -1;
   private CandidateListItem[] candidates;
   private final ArrayList<ComputedCandidate> computedCandidates =
@@ -142,8 +141,6 @@ public class Candidate extends View {
     separatorPaint = new Paint();
     separatorPaint.setColor(Color.BLACK);
 
-    graphicUtils = new GraphicUtils();
-
     // reset(context);
 
     setWillNotDraw(false);
@@ -179,10 +176,9 @@ public class Candidate extends View {
    * 選取候選項
    *
    * @param index 候選項序號（從0開始），{@code -1}表示選擇當前高亮候選項
-   * @return 是否成功選字
    */
   private void onCandidateClick(int index, boolean isLongClick) {
-    ComputedCandidate candidate = null;
+    ComputedCandidate candidate;
     if (index >= 0 && index < computedCandidates.size()) {
       candidate = computedCandidates.get(index);
       if (candidate != null) {
@@ -254,25 +250,25 @@ public class Candidate extends View {
                 commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2;
             wordY += commentHeight / 2.0f;
             if (!isCommentOnTop) {
-              float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
+              float commentWidth = GraphicUtils.measureText(commentPaint, comment, commentFont);
               commentX = computedCandidate.getGeometry().right - commentWidth / 2;
               commentY += computedCandidates.get(0).getGeometry().bottom - commentHeight;
               wordX -= commentWidth / 2.0f;
               wordY -= commentHeight / 2.0f;
             }
             commentPaint.setColor(isHighlighted(i) ? hilitedCommentTextColor : commentTextColor);
-            graphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
+            GraphicUtils.drawText(canvas, comment, commentX, commentY, commentPaint, commentFont);
           }
         }
         String word = ((ComputedCandidate.Word) computedCandidate).getWord();
         candidatePaint.setColor(isHighlighted(i) ? hilitedCandidateTextColor : candidateTextColor);
-        graphicUtils.drawText(canvas, word, wordX, wordY, candidatePaint, candidateFont);
+        GraphicUtils.drawText(canvas, word, wordX, wordY, candidatePaint, candidateFont);
       } else if (computedCandidate instanceof ComputedCandidate.Symbol) {
         // Draw page up / down buttons
         String arrow = ((ComputedCandidate.Symbol) computedCandidate).getArrow();
         float arrowX =
             computedCandidate.getGeometry().centerX()
-                - graphicUtils.measureText(symbolPaint, arrow, symbolFont) / 2;
+                - GraphicUtils.measureText(symbolPaint, arrow, symbolFont) / 2;
         float arrowY =
             computedCandidates.get(0).getGeometry().centerY()
                 - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
@@ -293,12 +289,12 @@ public class Candidate extends View {
 
   private void updateCandidateWidth() {
     boolean hasExButton = false;
-    Integer pageEx =
+    int pageEx =
         Integer.parseInt(AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize()) - 10000;
     int pageBottonWidth =
         (int)
             (candidateSpacing
-                + graphicUtils.measureText(symbolPaint, PAGE_DOWN_BUTTON, symbolFont)
+                + GraphicUtils.measureText(symbolPaint, PAGE_DOWN_BUTTON, symbolFont)
                 + 2 * candidatePadding);
     int minWidth;
     if (pageEx > 2) minWidth = (int) (expectWidth * (pageEx / 10f + 1) - pageBottonWidth);
@@ -315,8 +311,7 @@ public class Candidate extends View {
         if (x >= minWidth) {
           computedCandidates.add(
               new ComputedCandidate.Symbol(
-                  PAGE_EX_BUTTON,
-                  new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
+                  PAGE_EX_BUTTON, new Rect(x, 0, (x + pageBottonWidth), getMeasuredHeight())));
           x += pageBottonWidth;
           hasExButton = true;
           break;
@@ -324,12 +319,12 @@ public class Candidate extends View {
       }
       String comment = null, text = candidates[n].getText();
       float candidateWidth =
-          graphicUtils.measureText(candidatePaint, text, candidateFont) + 2 * candidatePadding;
+          GraphicUtils.measureText(candidatePaint, text, candidateFont) + 2 * candidatePadding;
 
       if (shouldShowComment) {
         comment = candidates[n].getComment();
         if (!TextUtils.isEmpty(comment)) {
-          float commentWidth = graphicUtils.measureText(commentPaint, comment, commentFont);
+          float commentWidth = GraphicUtils.measureText(commentPaint, comment, commentFont);
           candidateWidth =
               isCommentOnTop
                   ? Math.max(candidateWidth, commentWidth)
@@ -341,7 +336,7 @@ public class Candidate extends View {
       if (pageEx == 0 && x + candidateWidth + candidateSpacing > minWidth) {
         computedCandidates.add(
             new ComputedCandidate.Symbol(
-                PAGE_EX_BUTTON, new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
+                PAGE_EX_BUTTON, new Rect(x, 0, (x + pageBottonWidth), getMeasuredHeight())));
         x += pageBottonWidth;
         hasExButton = true;
         break;
@@ -360,7 +355,7 @@ public class Candidate extends View {
     if (Rime.hasRight()) {
       computedCandidates.add(
           new ComputedCandidate.Symbol(
-              PAGE_DOWN_BUTTON, new Rect(x, 0, ((int) x + pageBottonWidth), getMeasuredHeight())));
+              PAGE_DOWN_BUTTON, new Rect(x, 0, (x + pageBottonWidth), getMeasuredHeight())));
       x += pageBottonWidth;
     }
 

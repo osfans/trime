@@ -6,15 +6,12 @@ import android.graphics.Typeface
 import com.osfans.trime.data.theme.Config
 import com.osfans.trime.data.theme.FontManager
 
-class GraphicUtils {
+object GraphicUtils {
+    const val HAN_B_FONT = "hanb_font"
+    const val LATIN_FONT = "latin_font"
     private val theme = Config.get()
     private val hanBFont = FontManager.getTypeface(theme.style.getString(HAN_B_FONT))
     private val latinFont = FontManager.getTypeface(theme.style.getString(LATIN_FONT))
-
-    companion object {
-        const val HAN_B_FONT = "hanb_font"
-        const val LATIN_FONT = "latin_font"
-    }
 
     private fun determineTypeface(codePoint: Int, font: Typeface): Typeface {
         return if (hanBFont != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codePoint)) {
@@ -24,6 +21,7 @@ class GraphicUtils {
         } else font
     }
 
+    @JvmStatic
     fun Paint.measureText(text: String, font: Typeface): Float {
         if (text.isEmpty()) return 0.0f
         val codePoints = text.codePointCount(0, text.length)
@@ -47,6 +45,7 @@ class GraphicUtils {
         return x
     }
 
+    @JvmStatic
     fun Canvas.drawText(text: String, centerX: Float, y: Float, paint: Paint, font: Typeface) {
         if (text.isEmpty()) return
         val codePoints = text.codePointCount(0, text.length)
