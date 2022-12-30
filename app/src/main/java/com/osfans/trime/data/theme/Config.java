@@ -74,8 +74,6 @@ public class Config {
     self = this;
     ThemeManager.init();
 
-    Timber.d("Syncing asset data ...");
-    DataManager.sync();
     Rime.get(!DataManager.INSTANCE.getSharedDataDir().exists());
 
     init();

@@ -21,6 +21,7 @@ package com.osfans.trime.core;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osfans.trime.data.AppPrefs;
+import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.data.schema.SchemaManager;
 import java.io.BufferedReader;
@@ -220,6 +221,8 @@ public class Rime {
 
   private static void init(boolean full_check) {
     isHandlingRimeNotification = false;
+
+    DataManager.sync();
     final String sharedDataDir = getAppPrefs().getProfile().getSharedDataDir();
     final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
