@@ -120,6 +120,10 @@ public:
     jmethodID ArrayListInit;
     jmethodID ArrayListAdd;
 
+    jclass Pair;
+    jmethodID PairFirst;
+    jmethodID PairSecond;
+
     jclass Rime;
     jmethodID HandleRimeNotification;
 
@@ -185,6 +189,10 @@ public:
         ArrayList = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/util/ArrayList")));
         ArrayListInit = env->GetMethodID(ArrayList, "<init>", "(I)V");
         ArrayListAdd = env->GetMethodID(ArrayList, "add", "(ILjava/lang/Object;)V");
+
+        Pair = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("kotlin/Pair")));
+        PairFirst = env->GetMethodID(Pair, "getFirst", "()Ljava/lang/Object;");
+        PairSecond = env->GetMethodID(Pair, "getSecond", "()Ljava/lang/Object;");
 
         Rime = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime")));
         HandleRimeNotification = env->GetStaticMethodID(Rime, "handleRimeNotification", "(Ljava/lang/String;Ljava/lang/String;)V");

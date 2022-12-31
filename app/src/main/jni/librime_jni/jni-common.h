@@ -3,7 +3,7 @@
 
 #include "jni-utils.h"
 
-static GlobalRefSingleton *GlobalRef;
+extern GlobalRefSingleton *GlobalRef;
 
 #define TAG "rime.jni"
 #ifdef ANDROID

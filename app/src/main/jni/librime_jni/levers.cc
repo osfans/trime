@@ -56,3 +56,21 @@ Java_com_osfans_trime_core_Rime_selectRimeSchemas(JNIEnv *env, jclass /* thiz */
   }
   return true;
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_osfans_trime_core_Rime_setRimeCustomConfigInt(JNIEnv *env, jclass clazz, jstring config_id,
+                                                       jobjectArray key_value_pairs) {
+  auto levers = get_levers();
+  auto custom = levers->custom_settings_init(CString(env, config_id), "rime.trime");
+  levers->load_settings(custom);
+  int arrayLength = env->GetArrayLength(key_value_pairs);
+  for (int i = 0; i < arrayLength; i++) {
+    auto pair = JRef<>(env, env->GetObjectArrayElement(key_value_pairs, i));
+    auto key = CString(env, (jstring) env->CallObjectMethod(pair, GlobalRef->PairFirst));
+    auto value = (jint) (size_t) env->CallObjectMethod(pair, GlobalRef->PairSecond);
+    levers->customize_int(custom, key, value);
+    levers->save_settings(custom);
+  }
+  levers->custom_settings_destroy(custom);
+}

@@ -24,14 +24,8 @@ import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
 import com.osfans.trime.data.schema.SchemaManager;
-import java.io.BufferedReader;
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import kotlin.Pair;
 import kotlinx.coroutines.channels.BufferOverflow;
 import kotlinx.coroutines.flow.FlowKt;
 import kotlinx.coroutines.flow.MutableSharedFlow;
@@ -354,69 +348,9 @@ public class Rime {
 
   public static boolean selectSchema(String schemaId) {
     Timber.d("Selecting schemaId=%s", schemaId);
-    overWriteSchema(schemaId);
     boolean b = selectRimeSchema(schemaId);
     getContexts();
     return b;
-  }
-
-  // 刷新当前输入方案
-  public static void applySchemaChange() {
-    String schema_id = getCurrentRimeSchema();
-    // 实测直接select_schema(schema_id)方案没有重新载入，切换到不存在的方案，再切回去（会产生1秒的额外耗时）.需要找到更好的方法
-    // 不发生覆盖则不生效
-    if (overWriteSchema(schema_id)) {
-      selectRimeSchema("nill");
-      selectRimeSchema(schema_id);
-    }
-    getContexts();
-  }
-  // 临时修改scheme文件参数
-  // 临时修改build后的scheme可以避免build过程的耗时
-  // 另外实际上jni读入yaml、修改、导出的效率并不高
-  private static boolean overWriteSchema(String schema_id) {
-    Map<String, String> map = new HashMap<>();
-    String page_size = AppPrefs.defaultInstance().getKeyboard().getCandidatePageSize();
-    Timber.d("overWriteSchema() page_size=" + page_size);
-    if (!page_size.equals("0")) {
-      map.put("page_size", page_size);
-    }
-    if (map.isEmpty()) return false;
-    return overWriteSchema(schema_id, map);
-  }
-
-  private static boolean overWriteSchema(String schema_id, Map<String, String> map) {
-    if (schema_id == null) schema_id = getCurrentRimeSchema();
-    File file =
-        new File(Rime.getRimeUserDataDir() + File.separator + "build", schema_id + ".schema.yaml");
-    try {
-      FileReader in = new FileReader(file);
-      BufferedReader bufIn = new BufferedReader(in);
-      CharArrayWriter tempStream = new CharArrayWriter();
-      String line = null;
-      read:
-      while ((line = bufIn.readLine()) != null) {
-        for (String k : map.keySet()) {
-          String key = k + ": ";
-          if (line.contains(key)) {
-            String value = ": " + map.get(k) + System.getProperty("line.separator");
-            tempStream.write(line.replaceFirst(":.+", value));
-            map.remove(k);
-            continue read;
-          }
-        }
-        tempStream.write(line);
-        tempStream.append(System.getProperty("line.separator"));
-      }
-      bufIn.close();
-      FileWriter out = new FileWriter(file);
-      tempStream.writeTo(out);
-      out.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-      return false;
-    }
-    return map.isEmpty();
   }
 
   public static Rime get(boolean full_check) {
@@ -490,6 +424,9 @@ public class Rime {
   @Nullable
   public static native Map<String, Object> getRimeConfigMap(
       @NonNull String configId, @NonNull String key);
+
+  public static native void setRimeCustomConfigInt(
+      @NonNull String configId, @NonNull Pair<String, Integer>[] keyValuePairs);
 
   // testing
   public static native boolean simulateKeySequence(@NonNull String keySequence);

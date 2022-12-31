@@ -144,6 +144,8 @@ private:
 #define RETURN_IF_NOT_RUNNING DO_IF_NOT_RUNNING(return)
 #define RETURN_VALUE_IF_NOT_RUNNING(v) DO_IF_NOT_RUNNING(return (v))
 
+GlobalRefSingleton *GlobalRef;
+
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM* jvm, void* reserved)
 {
@@ -483,23 +485,6 @@ static jobject rimeConfigListToJObject(JNIEnv *env, RimeConfig* config, const st
     }
     rime->config_end(&iter);
     return obj;
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_config_1get_1list(JNIEnv *env, jclass /* thiz */, jstring name, jstring key) {
-    const char* s = env->GetStringUTFChars(name, nullptr);
-    RimeConfig config = {nullptr};
-    Bool b = RimeConfigOpen(s, &config);
-    env->ReleaseStringUTFChars(name, s);
-    jobject value = nullptr;
-    if (b) {
-        s = env->GetStringUTFChars(key, nullptr);
-        value = rimeConfigListToJObject(env, &config, s);
-        env->ReleaseStringUTFChars(key, s);
-    }
-    RimeConfigClose(&config);
-    return value;
 }
 
 static jobject rimeConfigMapToJObject(JNIEnv *env, RimeConfig *config, const std::string &key) {

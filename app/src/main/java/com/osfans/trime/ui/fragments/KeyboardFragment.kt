@@ -7,11 +7,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.ui.main.soundPicker
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class KeyboardFragment :
     PaddingPreferenceFragment(),
@@ -41,7 +45,17 @@ class KeyboardFragment :
                 trime?.loadConfig()
             }
             "keyboard__candidate_page_size" -> {
-                Rime.applySchemaChange()
+                val pageSize = AppPrefs.defaultInstance().keyboard.candidatePageSize.toInt()
+                if (pageSize <= 0) return
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        Rime.setRimeCustomConfigInt(
+                            "default",
+                            arrayOf("menu/page_size" to pageSize)
+                        )
+                        Rime.deployRimeConfigFile("${DataManager.userDataDir}/default.yaml", "")
+                    }
+                }
             }
         }
     }
