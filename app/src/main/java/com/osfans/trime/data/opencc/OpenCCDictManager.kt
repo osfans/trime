@@ -16,17 +16,23 @@ object OpenCCDictManager {
         System.loadLibrary("rime_jni")
     }
 
-    private val openccDictDir = File(
-        DataManager.getDataDir("opencc")
-    ).also { it.mkdirs() }
+    val sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
+    val userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
 
-    fun dictionaries(): List<Dictionary> = openccDictDir
+    fun sharedDictionaries(): List<Dictionary> = sharedDir
         .listFiles()
-        ?.mapNotNull { Dictionary.new(it) }
-        ?.toList() ?: listOf()
+        ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
-    fun openccDictionaries(): List<OpenCCDictionary> =
-        dictionaries().mapNotNull { it as? OpenCCDictionary }
+    fun userDictionaries(): List<Dictionary> = userDir
+        .listFiles()
+        ?.mapNotNull { Dictionary.new(it) } ?: listOf()
+
+    fun getAllDictionaries(): List<Dictionary> =
+        if (sharedDir.path == userDir.path) userDictionaries()
+        else (sharedDictionaries() + userDictionaries())
+
+    fun openCCDictionaries(): List<OpenCCDictionary> =
+        getAllDictionaries().mapNotNull { it as? OpenCCDictionary }
 
     fun importFromFile(file: File): OpenCCDictionary {
         val raw = Dictionary.new(file)
@@ -35,7 +41,7 @@ object OpenCCDictManager {
         // preserve original file name
         val new = raw.toOpenCCDictionary(
             File(
-                openccDictDir,
+                userDir,
                 file.nameWithoutExtension + ".${Dictionary.Type.OPENCC.ext}"
             )
         )
@@ -47,8 +53,8 @@ object OpenCCDictManager {
      * Convert internal text dict to opencc format
      */
     @JvmStatic
-    fun internalDeploy() {
-        for (d in dictionaries()) {
+    fun buildOpenCCDict() {
+        for (d in getAllDictionaries()) {
             if (d is TextDictionary) {
                 val result: OpenCCDictionary
                 measureTimeMillis {

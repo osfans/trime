@@ -356,7 +356,7 @@ public class Rime {
   public static Rime get(boolean full_check) {
     if (self == null) {
       if (full_check) {
-        OpenCCDictManager.internalDeploy();
+        OpenCCDictManager.buildOpenCCDict();
       }
       self = new Rime(full_check);
     }
