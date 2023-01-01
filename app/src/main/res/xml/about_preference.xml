@@ -88,21 +88,21 @@
         <Preference android:key="pref_trime_qq"
             app:iconSpaceReserved="false"
             android:title="@string/pref_trime_qq"
-            android:summary="@string/pref_trime_qq_summary">
+            android:summary="811142286">
             <intent android:action="android.intent.action.VIEW"
                 android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DzifdI0iaEYjATwYkvVzP1cjsUEWSa9Ha" />
         </Preference>
         <Preference android:key="pref_trime_qq2"
             app:iconSpaceReserved="false"
             android:title="@string/pref_trime_qq2"
-            android:summary="@string/pref_trime_qq2_summary">
+            android:summary="224230445">
             <intent android:action="android.intent.action.VIEW"
-                android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D46XegYX4TQW366gVRKAUhTgtFYmYw7G3" />
+                android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DtZzftXfwDX6JAFaq3OysVW3BcPHUSvFV" />
         </Preference>
         <Preference android:key="pref_rime_qq"
             app:iconSpaceReserved="false"
             android:title="@string/pref_rime_qq"
-            android:summary="@string/pref_rime_qq_summary">
+            android:summary="77608640">
             <intent android:action="android.intent.action.VIEW"
                 android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3Dm505aYSeLZjOwWeMNAViWylZZDYqMrxV" />
         </Preference>
