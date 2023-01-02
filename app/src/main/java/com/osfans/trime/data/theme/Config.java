@@ -18,7 +18,6 @@
 
 package com.osfans.trime.data.theme;
 
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
@@ -215,7 +214,9 @@ public class Config {
       Object o = theme.currentColors.get(key);
       if (o instanceof Integer) {
         final Integer color = (Integer) o;
-        return new ColorDrawable(color);
+        final GradientDrawable gradient = new GradientDrawable();
+        gradient.setColor(color);
+        return gradient;
       } else if (o instanceof String) {
         final String path = (String) o;
         return DrawableKt.bitmapDrawable(path);
@@ -229,7 +230,9 @@ public class Config {
       final Object o = theme.currentColors.get((String) m.get(key));
       if (o instanceof Integer) {
         Integer color = (Integer) o;
-        return new ColorDrawable(color);
+        final GradientDrawable gradient = new GradientDrawable();
+        gradient.setColor(color);
+        return gradient;
       } else if (o instanceof String) {
         String path = (String) o;
         return DrawableKt.bitmapDrawable(path);
