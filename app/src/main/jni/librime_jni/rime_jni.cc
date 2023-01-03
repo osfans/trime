@@ -409,20 +409,17 @@ Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv *env, jclass /* thiz
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_select_1schema(JNIEnv *env, jclass /* thiz */, jstring schema_id) {
-    const char* s = schema_id == nullptr ? nullptr : env->GetStringUTFChars(schema_id, nullptr);
-    RimeConfig config = {nullptr};
-    Bool b = RimeUserConfigOpen("user", &config);
-    if (b) {
-        b = RimeConfigSetString(&config, "var/previously_selected_schema", s);
-        std::string str(s);
-        str = "var/schema_access_time/" + str;
-        b = RimeConfigSetInt(&config, str.c_str(), time(nullptr));
+Java_com_osfans_trime_core_Rime_selectRimeSchema(JNIEnv *env, jclass /* thiz */, jstring schema_id) {
+    auto rime = rime_get_api();
+    RimeConfig user = {nullptr};
+    auto schema = CString(env, schema_id);
+    if (rime->user_config_open("user", &user)) {
+        rime->config_set_string(&user, "var/previously_selected_schema", schema);
+        std::string key = "var/schema_access_time/" + std::string (schema);
+        rime->config_set_int(&user, key.c_str(), time(nullptr));
+        rime->config_close(&user);
     }
-    RimeConfigClose(&config);
-    bool value = RimeSelectSchema(activated_session_id, s);
-    env->ReleaseStringUTFChars(schema_id, s);
-    return value;
+    return rime->select_schema(activated_session_id, schema);
 }
 
 // configuration

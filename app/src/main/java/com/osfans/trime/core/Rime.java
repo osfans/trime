@@ -554,7 +554,7 @@ public class Rime {
   public static boolean selectSchema(String schemaId) {
     Timber.d("Selecting schemaId=%s", schemaId);
     overWriteSchema(schemaId);
-    boolean b = select_schema(schemaId);
+    boolean b = selectRimeSchema(schemaId);
     getContexts();
     return b;
   }
@@ -565,8 +565,8 @@ public class Rime {
     // 实测直接select_schema(schema_id)方案没有重新载入，切换到不存在的方案，再切回去（会产生1秒的额外耗时）.需要找到更好的方法
     // 不发生覆盖则不生效
     if (overWriteSchema(schema_id)) {
-      select_schema("nill");
-      select_schema(schema_id);
+      selectRimeSchema("nill");
+      selectRimeSchema(schema_id);
     }
     getContexts();
   }
@@ -769,7 +769,7 @@ public class Rime {
   @NonNull
   public static native String getCurrentRimeSchema();
 
-  public static native boolean select_schema(String schema_id);
+  public static native boolean selectRimeSchema(@NonNull String schemaId);
 
   // configuration
   public static native Boolean config_get_bool(String name, String key);
@@ -852,7 +852,7 @@ public class Rime {
   @NonNull
   public static native SchemaListItem[] getSelectedRimeSchemaList();
 
-  public static native boolean select_schemas(String[] schema_id_list);
+  public static native boolean selectRimeSchemas(@NonNull String[] schemaIds);
 
   // opencc
   public static native String get_opencc_version();

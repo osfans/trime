@@ -85,7 +85,7 @@ suspend fun Context.schemaPicker(
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            Rime.select_schemas(
+            Rime.selectRimeSchemas(
                 items.filterIndexed { index, _ ->
                     checkedItems[index]
                 }.map { it.toString() }.toTypedArray()

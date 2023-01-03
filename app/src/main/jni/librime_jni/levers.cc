@@ -107,30 +107,22 @@ Java_com_osfans_trime_core_Rime_getSelectedRimeSchemaList(JNIEnv *env, jclass /*
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_select_1schemas(JNIEnv *env, jclass /* thiz */, jobjectArray stringArray) {
-  if (stringArray == nullptr) return false;
-  int count = env->GetArrayLength(stringArray);
-  if (count == 0) return false;
-  const char** schema_id_list = new const char*[count];
-  for (int i = 0; i < count; i++) {
-    auto string = (jstring) env->GetObjectArrayElement(stringArray, i);
-    const char *rawString = env->GetStringUTFChars(string, nullptr);
-    schema_id_list[i] = rawString;
+Java_com_osfans_trime_core_Rime_selectRimeSchemas(JNIEnv *env, jclass /* thiz */, jobjectArray array) {
+  int schemaIdsLength = env->GetArrayLength(array);
+  const char* entries[schemaIdsLength];
+  for (int i = 0; i < schemaIdsLength; i++) {
+    auto string = JRef<jstring>(env, env->GetObjectArrayElement(array, i));
+    entries[i] = env->GetStringUTFChars(string, nullptr);
   }
-  RimeLeversApi* api_ = get_levers();
-  RimeSwitcherSettings* settings_ = api_->switcher_settings_init();
-  auto *custom_settings_ = (RimeCustomSettings *) settings_;
-  Bool b = api_->load_settings(custom_settings_);
-  if (b) {
-    b = api_->select_schemas(settings_, schema_id_list, count);
-    api_->save_settings(custom_settings_);
-    api_->custom_settings_destroy(custom_settings_);
+  auto levers = get_levers();
+  auto switcher = levers->switcher_settings_init();
+  levers->load_settings((RimeCustomSettings *) switcher);
+  levers->select_schemas(switcher, entries, schemaIdsLength);
+  levers->save_settings((RimeCustomSettings *) switcher);
+  levers->custom_settings_destroy((RimeCustomSettings *) switcher);
+  for (int i = 0; i < schemaIdsLength; i++) {
+      auto string = JRef<jstring>(env, env->GetObjectArrayElement(array, i));
+      env->ReleaseStringUTFChars(string, entries[i]);
   }
-  for (int i = 0; i < count; i++) {
-    auto string = (jstring) env->GetObjectArrayElement(stringArray, i);
-    const char *rawString = schema_id_list[i];
-    env->ReleaseStringUTFChars(string, rawString);
-  }
-  delete[] schema_id_list;
-  return b;
+  return true;
 }
