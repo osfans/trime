@@ -203,7 +203,7 @@ public class Config {
     }
 
     public Integer getColor(@NonNull Map<String, Object> m, String key) {
-      if (!m.containsKey(key)) return null;
+      if (!m.containsKey(key) || m.get(key) == null) return null;
       final Integer color = ColorUtils.parseColor((String) m.get(key));
       return color != null ? color : getColor((String) m.get(key));
     }
@@ -226,18 +226,15 @@ public class Config {
 
     // API 2.0
     public Drawable getDrawable(@NonNull Map<String, Object> m, String key) {
-      if (!m.containsKey(key)) return null;
-      final Object o = theme.currentColors.get((String) m.get(key));
-      if (o instanceof Integer) {
-        Integer color = (Integer) o;
+      if (!m.containsKey(key) || m.get(key) == null) return null;
+      final String value = (String) m.get(key);
+      final Integer override = ColorUtils.parseColor(value);
+      if (override != null) {
         final GradientDrawable gradient = new GradientDrawable();
-        gradient.setColor(color);
+        gradient.setColor(override);
         return gradient;
-      } else if (o instanceof String) {
-        String path = (String) o;
-        return DrawableKt.bitmapDrawable(path);
       }
-      return null;
+      return theme.currentColors.containsKey(value) ? getDrawable(value) : getDrawable(key);
     }
 
     //  返回图片或背景的drawable,支持null参数。 Config 2.0

@@ -28,8 +28,8 @@ object ColorUtils {
                 hex // red, green, blue ...
             }
             Color.parseColor(completed)
-        } catch (e: Exception) {
-            Timber.w(e, "Error on parsing color: key=%s", s)
+        } catch (e: IllegalArgumentException) {
+            Timber.w("Invalid or unknown color value: %s", s)
             null
         }
     }
