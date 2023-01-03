@@ -3,6 +3,8 @@ package com.osfans.trime.ui.main
 import android.content.Context
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.SchemaListItem
@@ -68,31 +70,32 @@ suspend fun Context.colorPicker(
     }.create()
 }
 
-suspend fun Context.schemaPicker(
+fun Context.schemaPicker(
     @StyleRes themeResId: Int = 0
 ): AlertDialog {
-    return CoroutineChoiceDialog(this, themeResId).apply {
-        title = getString(R.string.pref_select_schemas)
-        initDispatcher = Dispatchers.IO
-        onInit {
-            items = Rime.getAvailableRimeSchemaList()
-                .mapNotNull(SchemaListItem::schemaId)
-                .toTypedArray()
-            val checked = Rime.getSelectedRimeSchemaList()
-                .mapNotNull(SchemaListItem::schemaId)
-                .toTypedArray()
-            checkedItems = items.map { checked.contains(it) }.toBooleanArray()
+    val available = Rime.getAvailableRimeSchemaList()
+    val selected = Rime.getSelectedRimeSchemaList()
+    val availableIds = available.mapNotNull(SchemaListItem::schemaId)
+    val selectedIds = selected.mapNotNull(SchemaListItem::schemaId)
+    val checked = availableIds.map(selectedIds::contains).toBooleanArray()
+    return AlertDialog.Builder(this, themeResId)
+        .setTitle(R.string.pref_select_schemas)
+        .setMultiChoiceItems(
+            available.mapNotNull(SchemaListItem::name).toTypedArray(),
+            checked
+        ) { _, id, isChecked -> checked[id] = isChecked }
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            (this as LifecycleOwner).lifecycleScope.launch {
+                Rime.selectRimeSchemas(
+                    availableIds
+                        .filterIndexed { i, _ -> checked[i] }
+                        .toTypedArray()
+                )
+                Rime.deployRime()
+            }
         }
-        postiveDispatcher = Dispatchers.Default
-        onOKButton {
-            Rime.selectRimeSchemas(
-                items.filterIndexed { index, _ ->
-                    checkedItems[index]
-                }.map { it.toString() }.toTypedArray()
-            )
-            Rime.deployRime()
-        }
-    }.create()
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 }
 
 fun Context.soundPicker(

@@ -564,19 +564,17 @@ class TextInputManager private constructor() :
                 .setNegativeButton(
                     R.string.pref_select_schemas
                 ) { dialog, _ ->
-                    trime.lifecycleScope.launch {
-                        trime.showDialogAboveInputView(
-                            trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
-                        )
-                    }
                     dialog.dismiss()
+                    trime.showDialogAboveInputView(trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert))
                 }
                 .setSingleChoiceItems(
                     schemaNameList,
                     schemaIdList.indexOf(currentSchema)
                 ) { dialog: DialogInterface, id: Int ->
                     dialog.dismiss()
-                    Rime.selectSchema(schemaIdList[id])
+                    trime.lifecycleScope.launch {
+                        Rime.selectSchema(schemaIdList[id])
+                    }
                     shouldUpdateRimeOption = true
                 }
         }
