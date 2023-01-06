@@ -94,23 +94,21 @@ suspend fun Context.schemaPicker(
     }.create()
 }
 
-suspend fun Context.soundPicker(
+fun Context.soundPicker(
     @StyleRes themeResId: Int = 0
 ): AlertDialog {
-    return CoroutineChoiceDialog(this, themeResId).apply {
-        title = getString(R.string.keyboard__key_sound_package_title)
-        initDispatcher = Dispatchers.IO
-        onInit {
-            items = SoundManager.getAllSounds()
-                .map { it.substringBeforeLast('.') }
-                .toTypedArray()
-            val current = SoundManager.getActiveSound()
-                .substringBeforeLast('.')
-            checkedItem = items.indexOf(current)
+    val all = SoundManager.getAllSounds().map { it.substringBeforeLast('.') }
+    val current = SoundManager.getActiveSound().substringBeforeLast('.')
+    var checked = all.indexOf(current)
+    return AlertDialog.Builder(this, themeResId)
+        .setTitle(R.string.keyboard__key_sound_package_title)
+        .setSingleChoiceItems(
+            all.toTypedArray(),
+            checked
+        ) { _, id -> checked = id }
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            SoundManager.switchSound("${all[checked]}.sound")
         }
-        postiveDispatcher = Dispatchers.Default
-        onOKButton {
-            SoundManager.switchSound("${items[checkedItem]}.sound")
-        }
-    }.create()
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 }
