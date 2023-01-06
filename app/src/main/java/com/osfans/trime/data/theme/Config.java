@@ -86,12 +86,19 @@ public class Config {
   }
 
   public void init() {
-    Timber.i("Initializing theme, currentThemeName=%s ...", ThemeManager.getActiveTheme());
+    final String active = ThemeManager.getActiveTheme();
+    Timber.i("Initializing theme, currentThemeName=%s ...", active);
     try {
-      final String themeFileName = ThemeManager.getActiveTheme() + ".yaml";
+      final String themeFileName = active + ".yaml";
+      final String themeCustomFileName =
+          active.equals("trime")
+              ? active + ".custom.yaml"
+              : active.replace(".trime", ".custom") + ".yaml";
       final File original = new File(Rime.getRimeUserDataDir(), themeFileName);
+      final File custom = new File(Rime.getRimeUserDataDir(), themeCustomFileName);
       final File built = new File(Rime.getRimeUserDataDir(), "build/" + themeFileName);
-      if (original.lastModified() <= built.lastModified()) {
+      if (original.lastModified() <= built.lastModified()
+          && custom.lastModified() <= built.lastModified()) {
         Timber.i("Deployed file exists, skipping deployment ...");
       } else {
         Timber.i("The theme has been modified or not yet been deployed, deploying ...");
