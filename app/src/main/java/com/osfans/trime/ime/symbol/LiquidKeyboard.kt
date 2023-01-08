@@ -2,7 +2,6 @@ package com.osfans.trime.ime.symbol
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.View
 import androidx.core.view.setPadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -11,8 +10,8 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
@@ -22,33 +21,22 @@ import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
-import com.osfans.trime.util.appContext
 import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.math.ceil
 
 class LiquidKeyboard(private val context: Context) {
     private val theme: Config = Config.get()
     private val tabManager: TabManager = TabManager.get()
     private val service: Trime = Trime.getService()
-    private var rootView: View? = null
     private lateinit var keyboardView: RecyclerView
-    private var historyBeans: MutableList<SimpleKeyBean>? = null
-    private var marginLeft = 0
-    private var marginTop = 0
-    private var singleWidth = 0
-    private var parentWidth = 0
-    private var keyHeight = 0
-    var isLand = false
-    private val historySavePath = "${appContext.getExternalFilesDir(null)!!.absolutePath}/key_history"
+    private val symbolHistory = SymbolHistory(180)
 
     private val flexbox: FlexboxLayoutManager by lazy {
         return@lazy FlexboxLayoutManager(context).apply {
             flexDirection = FlexDirection.ROW // 主轴为水平方向，起点在左端。
             flexWrap = FlexWrap.WRAP // 按正常方向换行
             justifyContent = JustifyContent.FLEX_START // 交叉轴的起点对齐
-            // alignItems = AlignItems.BASELINE
         }
     }
 
@@ -67,7 +55,8 @@ class LiquidKeyboard(private val context: Context) {
 
     fun select(i: Int): SymbolKeyboardType {
         val tag = TabManager.getTag(i)
-        calcPadding(tag.type)
+        symbolHistory.load()
+        keyboardView.removeAllViews()
         when (tag.type) {
             SymbolKeyboardType.CLIPBOARD,
             SymbolKeyboardType.COLLECTION,
@@ -91,72 +80,8 @@ class LiquidKeyboard(private val context: Context) {
         return tag.type
     }
 
-    // 设置liquidKeyboard共用的布局参数
-    fun calcPadding(width: Int) {
-        parentWidth = width
-
-        // liquid_keyboard/margin_x定义了每个键左右两边的间隙，
-        // 也就是说相邻两个键间隙是x2，而horizontal_gap定义的是spacer，使用时需要/2
-        marginLeft = dp2px(theme.liquid.getFloat("margin_x")).toInt()
-        if (marginLeft == 0) {
-            var horizontal_gap = dp2px(theme.style.getFloat("horizontal_gap")).toInt()
-            if (horizontal_gap > 1) {
-                horizontal_gap /= 2
-            }
-            marginLeft = horizontal_gap
-        }
-
-        // 初次显示布局，需要刷新背景
-        rootView = keyboardView.parent as View
-        val keyboardBackground = theme.colors.getDrawable("liquid_keyboard_background")
-        if (keyboardBackground != null) rootView!!.background = keyboardBackground
-        var keyboardHeight = dp2px(theme.style.getFloat("keyboard_height")).toInt()
-        if (isLand) {
-            val keyBoardHeightLand = dp2px(theme.style.getFloat("keyboard_height_land")).toInt()
-            if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand
-        }
-        var row = theme.liquid.getInt("row")
-        if (row > 0) {
-            if (isLand) {
-                val r = theme.liquid.getInt("row_land")
-                if (r > 0) row = r
-            }
-            val rawHeight = theme.liquid.getFloat("key_height")
-            val rawVGap = theme.liquid.getFloat("vertical_gap")
-            val scale = keyboardHeight.toFloat() / ((rawHeight + rawVGap) * row)
-            marginTop = ceil((rawVGap * scale).toDouble()).toInt()
-            keyHeight = keyboardHeight / row - marginTop
-        } else {
-            keyHeight = dp2px(theme.liquid.getFloat("key_height_land")).toInt()
-            if (!isLand || keyHeight <= 0) keyHeight = dp2px(theme.liquid.getFloat("key_height")).toInt()
-            marginTop = dp2px(theme.liquid.getFloat("vertical_gap")).toInt()
-        }
-        Timber.i("config keyHeight=$keyHeight marginTop=$marginTop")
-        if (isLand) {
-            singleWidth = dp2px(theme.liquid.getFloat("single_width_land")).toInt()
-            if (singleWidth <= 0) singleWidth = dp2px(theme.liquid.getFloat("single_width")).toInt()
-        } else singleWidth = dp2px(theme.liquid.getFloat("single_width")).toInt()
-        if (singleWidth <= 0) singleWidth = context.resources.getDimensionPixelSize(R.dimen.simple_key_single_width)
-    }
-
-    // 每次点击tab都需要刷新的参数
-    private fun calcPadding(type: SymbolKeyboardType) {
-        val padding = theme.keyboardPadding
-        if (type === SymbolKeyboardType.SINGLE) {
-            padding[0] = (
-                (if (rootView!!.width > 0) rootView!!.width else parentWidth) %
-                    (singleWidth + marginLeft * 2) /
-                    2
-                )
-            padding[1] = padding[0]
-        }
-        rootView!!.setPadding(padding[0], 0, padding[1], 0)
-        historyBeans = SimpleKeyDao.getSymbolKeyHistory(historySavePath)
-    }
-
     private fun initFixData(i: Int) {
         val tabTag = TabManager.getTag(i)
-        keyboardView.removeAllViews()
 
         val simpleAdapter = SimpleAdapter(theme).apply {
             // 列表适配器的点击监听事件
@@ -168,8 +93,8 @@ class LiquidKeyboard(private val context: Context) {
                     service.currentInputConnection?.run {
                         commitText(bean.text, 1)
                         if (tabTag.type !== SymbolKeyboardType.HISTORY) {
-                            historyBeans?.add(0, bean)
-                            SimpleKeyDao.saveSymbolKeyHistory(historySavePath, historyBeans!!)
+                            symbolHistory.insert(bean.text)
+                            symbolHistory.save()
                         }
                     }
                 } else {
@@ -207,7 +132,7 @@ class LiquidKeyboard(private val context: Context) {
 
         when (tabTag.type) {
             SymbolKeyboardType.HISTORY ->
-                simpleAdapter.updateBeans(historyBeans!!)
+                simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
             SymbolKeyboardType.TABS ->
                 simpleAdapter.updateBeans(tabManager.tabSwitchData)
             else ->
@@ -217,8 +142,6 @@ class LiquidKeyboard(private val context: Context) {
     }
 
     private fun initDbData(type: SymbolKeyboardType) {
-        keyboardView.removeAllViews()
-
         val dbAdapter = FlexibleAdapter(theme).apply {
             setListener(object : FlexibleAdapter.Listener {
                 override fun onPaste(bean: DatabaseBean) {
@@ -316,8 +239,6 @@ class LiquidKeyboard(private val context: Context) {
     }
 
     private fun initCandidates() {
-        keyboardView.removeAllViews()
-
         val candidateAdapter = CandidateAdapter(theme).apply {
             setListener { position ->
                 TextInputManager.getInstance().onCandidatePressed(position)
@@ -339,8 +260,6 @@ class LiquidKeyboard(private val context: Context) {
     }
 
     private fun initVarLengthKeys(data: List<SimpleKeyBean>) {
-        keyboardView.removeAllViews()
-
         val candidateAdapter = CandidateAdapter(theme).apply {
             setListener { position ->
                 service.currentInputConnection?.commitText(data[position].text, 1)
