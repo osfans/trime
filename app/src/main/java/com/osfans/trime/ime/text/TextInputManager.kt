@@ -32,11 +32,8 @@ import com.osfans.trime.ui.main.soundPicker
 import com.osfans.trime.ui.main.themePicker
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.startsWithAsciiChar
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -56,7 +53,6 @@ import java.util.Locale
  * instance and the CandidateView.
  */
 class TextInputManager private constructor() :
-    CoroutineScope by MainScope(),
     Trime.EventListener,
     KeyboardView.OnKeyboardActionListener,
     Candidate.EventListener {
@@ -172,7 +168,6 @@ class TextInputManager private constructor() :
         mainKeyboardView?.setOnKeyboardActionListener(null)
         mainKeyboardView = null
 
-        cancel()
         rimeNotiHandlerJob?.cancel()
         rimeNotiHandlerJob = null
         instance = null
@@ -183,7 +178,7 @@ class TextInputManager private constructor() :
         Trime.getService().selectLiquidKeyboard(-1)
         isComposable = false
         var tempAsciiMode = if (shouldResetAsciiMode) false else null
-        var keyboardType =
+        val keyboardType =
             when (instance.editorInfo!!.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
                 EditorInfo.IME_FLAG_FORCE_ASCII -> {
                     tempAsciiMode = true
@@ -191,6 +186,7 @@ class TextInputManager private constructor() :
                 }
                 else -> {
                     val inputAttrsRaw = instance.editorInfo!!.inputType
+                    isComposable = inputAttrsRaw > 0
                     when (inputAttrsRaw and InputType.TYPE_MASK_CLASS) {
                         InputType.TYPE_CLASS_NUMBER,
                         InputType.TYPE_CLASS_PHONE,
@@ -221,7 +217,7 @@ class TextInputManager private constructor() :
                         }
                         else -> {
                             if (inputAttrsRaw <= 0) return
-                            null.also { isComposable = inputAttrsRaw > 0 }
+                            null
                         }
                     }
                 }
@@ -265,8 +261,8 @@ class TextInputManager private constructor() :
                     trime.setCandidatesViewShown(isComposable && !value)
                 }
                 "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
-                "_hide_key_hint" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowHint(!value)
-                "_hide_key_symbol" -> if (mainKeyboardView != null) mainKeyboardView!!.setShowSymbol(!value)
+                "_hide_key_hint" -> mainKeyboardView?.setShowHint(!value)
+                "_hide_key_symbol" -> mainKeyboardView?.setShowSymbol(!value)
                 else -> if (option.startsWith("_keyboard_") &&
                     option.length > 10 && value
                 ) {
@@ -278,14 +274,14 @@ class TextInputManager private constructor() :
                     val key = option.substring(5)
                     onEvent(Event(key))
                     shouldUpdateRimeOption = true
-                } else if (option.startsWith("_one_hand_mode")) {
-                    /*
+                } /*else if (option.startsWith("_one_hand_mode")) {
+                    *//*
                     val c = option[option.length - 1]
                     if (c == '1' && value) oneHandMode = 1 else if (c == '2' && value) oneHandMode =
                         2 else if (c == '3') oneHandMode = if (value) 1 else 2 else oneHandMode = 0
                     trime.loadBackground()
-                    trime.initKeyboard() */
-                }
+                    trime.initKeyboard() *//*
+                }*/
             }
             mainKeyboardView?.invalidateAllKeys()
         }
@@ -395,7 +391,7 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_VOICE_ASSIST -> Speech(trime).startListening() // Speech Recognition
             KeyEvent.KEYCODE_SETTINGS -> { // Settings
-                launch {
+                trime.lifecycleScope.launch {
                     when (event.option) {
                         "theme" -> trime.showDialogAboveInputView(
                             trime.themePicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
@@ -413,7 +409,7 @@ class TextInputManager private constructor() :
                     }
                 }
             }
-            KeyEvent.KEYCODE_PROG_RED -> launch {
+            KeyEvent.KEYCODE_PROG_RED -> trime.lifecycleScope.launch {
                 trime.showDialogAboveInputView(
                     trime.colorPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
                 )
@@ -446,7 +442,7 @@ class TextInputManager private constructor() :
     }
 
     override fun onKey(keyEventCode: Int, metaState: Int) {
-        printModifierKeyState(metaState, "keyEventCode=" + keyEventCode)
+        printModifierKeyState(metaState, "keyEventCode=$keyEventCode")
 
         // 优先由librime处理按键事件
         if (trime.handleKey(keyEventCode, metaState)) return
@@ -568,7 +564,7 @@ class TextInputManager private constructor() :
                 .setNegativeButton(
                     R.string.pref_select_schemas
                 ) { dialog, _ ->
-                    launch {
+                    trime.lifecycleScope.launch {
                         trime.showDialogAboveInputView(
                             trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert)
                         )
