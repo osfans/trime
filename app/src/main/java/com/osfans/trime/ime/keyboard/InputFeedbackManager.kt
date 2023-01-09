@@ -72,7 +72,12 @@ class InputFeedbackManager(
             val hapticsPerformed = if (vibrationDuration < 0) {
                 ims.window?.window?.decorView?.performHapticFeedback(
                     HapticFeedbackConstants.KEYBOARD_TAP,
-                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                    } else {
+                        @Suppress("DEPRECATION")
+                        HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                    }
                 )
             } else {
                 false

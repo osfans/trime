@@ -7,9 +7,9 @@
  */
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.7.20'
     ext.kotlin_coroutines_version = '1.6.4'
-    ext.nav_version = '2.5.1'
+    ext.nav_version = '2.5.3'
     ext.room_version = '2.4.3'
     ext.splitties_version = '3.0.0'
     
