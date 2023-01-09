@@ -27,6 +27,7 @@ object KeyboardSwitcher {
         newOrReset()
     }
 
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun newOrReset() {
         Timber.d("Refreshing keyboard padding ...")

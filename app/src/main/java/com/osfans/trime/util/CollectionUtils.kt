@@ -4,6 +4,7 @@ object CollectionUtils {
     @JvmStatic
     fun <K, V> getOrDefault(map: Map<K, V>, key: K, defaultValue: V): V = map[key] ?: defaultValue
 
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun obtainValue(map: Map<String?, Any?>?, vararg: String?): Any? {
         if (map.isNullOrEmpty() || vararg == null) return null

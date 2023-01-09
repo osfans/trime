@@ -33,7 +33,7 @@ object InputMethodUtils {
     fun showImeEnablerActivity(context: Context) =
         context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
 
-    fun showImePicker(context: Context): Boolean {
+    fun showImePicker(): Boolean {
         inputMethodManager.showInputMethodPicker()
         return true
     }
