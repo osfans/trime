@@ -6,7 +6,8 @@ import androidx.appcompat.app.AlertDialog
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.sound.SoundManager
+import com.osfans.trime.data.sound.SoundTheme
+import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.data.theme.Config
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
@@ -97,8 +98,8 @@ suspend fun Context.schemaPicker(
 fun Context.soundPicker(
     @StyleRes themeResId: Int = 0
 ): AlertDialog {
-    val all = SoundManager.getAllSounds().map { it.substringBeforeLast('.') }
-    val current = SoundManager.getActiveSound().substringBeforeLast('.')
+    val all = SoundThemeManager.getAllSoundThemes().mapNotNull(SoundTheme::name)
+    val current = SoundThemeManager.getActiveSoundTheme().getOrNull()?.name ?: ""
     var checked = all.indexOf(current)
     return AlertDialog.Builder(this, themeResId)
         .setTitle(R.string.keyboard__key_sound_package_title)
@@ -107,7 +108,7 @@ fun Context.soundPicker(
             checked
         ) { _, id -> checked = id }
         .setPositiveButton(android.R.string.ok) { _, _ ->
-            SoundManager.switchSound("${all[checked]}.sound")
+            SoundThemeManager.switchSound(all[checked])
         }
         .setNegativeButton(android.R.string.cancel, null)
         .create()

@@ -58,7 +58,7 @@ import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.db.DraftHelper;
-import com.osfans.trime.data.sound.SoundManager;
+import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
@@ -72,7 +72,6 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
-import com.osfans.trime.ime.keyboard.Sound;
 import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
 import com.osfans.trime.ime.symbol.TabManager;
@@ -555,7 +554,7 @@ public class Trime extends LifecycleInputMethodService {
     inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
     loadConfig();
     getImeConfig().initCurrentColors();
-    SoundManager.switchSound(getImeConfig().colors.getString("sound"));
+    SoundThemeManager.switchSound(getImeConfig().colors.getString("sound"));
     KeyboardSwitcher.newOrReset();
     resetCandidate();
     hideCompositionView();
@@ -576,7 +575,7 @@ public class Trime extends LifecycleInputMethodService {
     if (getImeConfig().hasDarkLight()) {
       loadConfig();
       getImeConfig().initCurrentColors(darkMode);
-      SoundManager.switchSound(getImeConfig().colors.getString("sound"));
+      SoundThemeManager.switchSound(getImeConfig().colors.getString("sound"));
       KeyboardSwitcher.newOrReset();
       resetCandidate();
       hideCompositionView();
@@ -752,7 +751,8 @@ public class Trime extends LifecycleInputMethodService {
       Timber.i("auto dark off");
     }
 
-    Sound.resetProgress();
+    inputFeedbackManager.resumeSoundPool();
+    inputFeedbackManager.resetPlayProgress();
     for (EventListener listener : eventListeners) {
       if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
     }
@@ -839,6 +839,7 @@ public class Trime extends LifecycleInputMethodService {
     // Dismiss any pop-ups when the input-view is being finished and hidden.
     mainKeyboardView.closing();
     performEscape();
+    inputFeedbackManager.releaseSoundPool();
     try {
       hideCompositionView();
     } catch (Exception e) {

@@ -23,7 +23,7 @@ import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.sound.SoundManager
+import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.applyTranslucentSystemBars
@@ -148,7 +148,7 @@ class PrefMainActivity : AppCompatActivity() {
                 override fun onGranted(permissions: MutableList<String>?, all: Boolean) {
                     if (all) {
                         ToastUtils.showShort(R.string.external_storage_permission_granted)
-                        SoundManager.init()
+                        SoundThemeManager.init()
                     }
                 }
 

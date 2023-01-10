@@ -257,4 +257,5 @@
     <string name="found_some_problems">But we may found some problems, please check:</string>
     <string name="pref_clipboard_summary">Collection and draft are also managed here</string>
     <string name="a_regular_expression_per_line">A regular expression per line</string>
+    <string name="keyboard__custom_key_sound">Use custom key sound</string>
 </resources>

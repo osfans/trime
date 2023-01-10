@@ -254,4 +254,5 @@
     <string name="found_some_problems">但是我們似乎發現了些問題，請檢查：</string>
     <string name="pref_clipboard_summary">收藏夾和草稿箱也在這裡管理</string>
     <string name="a_regular_expression_per_line">一行一條正則表示式</string>
+    <string name="keyboard__custom_key_sound">使用自訂按鍵音</string>
 </resources>

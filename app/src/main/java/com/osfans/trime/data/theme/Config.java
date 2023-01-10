@@ -27,7 +27,7 @@ import androidx.core.math.MathUtils;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.DataManager;
-import com.osfans.trime.data.sound.SoundManager;
+import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.ColorUtils;
@@ -80,7 +80,7 @@ public class Config {
     init();
 
     Timber.d("Setting sound from color ...");
-    SoundManager.switchSound(colors.getString("sound"));
+    SoundThemeManager.switchSound(colors.getString("sound"));
 
     Timber.d("Initialization finished");
   }

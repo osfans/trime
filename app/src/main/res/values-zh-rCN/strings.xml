@@ -253,4 +253,5 @@
     <string name="found_some_problems">但是我们似乎发现了些问题，请检查：</string>
     <string name="pref_clipboard_summary">收藏夹和草稿箱也在这里管理</string>
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
+    <string name="keyboard__custom_key_sound">使用自定义按键音</string>
 </resources>

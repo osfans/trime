@@ -153,9 +153,15 @@
             android:key="keyboard__key_sound"
             android:title="@string/keyboard__key_sound_title"
             app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:key="keyboard__custom_key_sound"
+            android:title="@string/keyboard__custom_key_sound"
+            android:dependency="keyboard__key_sound"
+            app:iconSpaceReserved="false" />
         <Preference
             android:key="keyboard__key_sound_package"
             android:title="@string/keyboard__key_sound_package_title"
+            android:dependency="keyboard__custom_key_sound"
             app:iconSpaceReserved="false" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
