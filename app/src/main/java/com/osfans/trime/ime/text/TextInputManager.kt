@@ -353,7 +353,9 @@ class TextInputManager private constructor() :
             KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                 KeyboardSwitcher.switchKeyboard(event.select)
                 /** Set ascii mode according to keyboard's settings, can not place into [Rime.handleRimeNotification] */
-                Rime.setOption("ascii_mode", KeyboardSwitcher.currentKeyboard.asciiMode)
+                if (shouldResetAsciiMode && KeyboardSwitcher.currentKeyboard.isResetAsciiMode) {
+                    Rime.setOption("ascii_mode", KeyboardSwitcher.currentKeyboard.asciiMode)
+                }
                 trime.bindKeyboardToInputView()
                 trime.updateComposing()
             }
