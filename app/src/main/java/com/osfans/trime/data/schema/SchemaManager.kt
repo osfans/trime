@@ -5,6 +5,7 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataManager
 import java.io.File
 
 object SchemaManager {
@@ -21,7 +22,7 @@ object SchemaManager {
 
     @JvmStatic
     fun init(schemaId: String) {
-        val raw = File(Rime.getRimeUserDataDir(), "build/$schemaId.schema.yaml")
+        val raw = File(DataManager.buildDir, "$schemaId.schema.yaml")
             .inputStream()
             .bufferedReader()
             .readText()

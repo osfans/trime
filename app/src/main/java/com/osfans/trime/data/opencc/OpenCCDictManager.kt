@@ -1,6 +1,5 @@
 package com.osfans.trime.data.opencc
 
-import com.osfans.trime.core.Rime
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.opencc.dict.Dictionary
 import com.osfans.trime.data.opencc.dict.OpenCCDictionary
@@ -77,10 +76,10 @@ object OpenCCDictManager {
     @JvmStatic
     fun convertLine(input: String, configFileName: String): String {
         if (configFileName.isEmpty()) return input
-        with(File(Rime.getRimeUserDataDir(), "opencc/$configFileName")) {
+        with(File(userDir, configFileName)) {
             if (exists()) return openCCLineConv(input, path)
         }
-        with(File(Rime.getRimeSharedDataDir(), "opencc/$configFileName")) {
+        with(File(sharedDir, configFileName)) {
             if (exists()) return openCCLineConv(input, path)
         }
         Timber.w("Specified config $configFileName doesn't exist, returning raw input ...")

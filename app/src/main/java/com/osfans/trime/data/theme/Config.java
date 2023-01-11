@@ -459,11 +459,11 @@ public class Config {
     File imgSrc;
     if ((imgSrc =
             new File(
-                Rime.getRimeUserDataDir(),
+                DataManager.getUserDataDir(),
                 "backgrounds/" + style.getString("background_folder") + value))
         .exists()) {
       return imgSrc.getPath();
-    } else if ((imgSrc = new File(Rime.getRimeUserDataDir(), "backgrounds/" + value)).exists()) {
+    } else if ((imgSrc = new File(DataManager.getUserDataDir(), "backgrounds/" + value)).exists()) {
       return imgSrc.getPath();
     }
     return "";

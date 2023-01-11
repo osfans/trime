@@ -2,7 +2,6 @@ package com.osfans.trime.data
 
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ResourceUtils
-import com.osfans.trime.core.Rime
 import com.osfans.trime.util.Const
 import timber.log.Timber
 import java.io.File
@@ -11,10 +10,13 @@ object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
 
     val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
+    @JvmStatic
     val sharedDataDir = File(prefs.profile.sharedDataDir)
+    @JvmStatic
     val userDataDir = File(prefs.profile.userDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
-    val buildDir = File(Rime.getRimeUserDataDir(), "build")
+    @JvmStatic
+    val buildDir = File(userDataDir, "build")
 
     sealed class Diff {
         object New : Diff()
