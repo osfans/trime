@@ -15,8 +15,12 @@ import com.osfans.trime.data.theme.Config
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
+import com.osfans.trime.util.ProgressBarDialogIndeterminate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 suspend fun Context.themePicker(
     @StyleRes themeResId: Int = 0
@@ -91,7 +95,18 @@ fun Context.schemaPicker(
                         .filterIndexed { i, _ -> checked[i] }
                         .toTypedArray()
                 )
-                Rime.deployRime()
+                val loading = ProgressBarDialogIndeterminate(titleId = R.string.deploy_progress).create()
+                val job = launch {
+                    delay(200L)
+                    loading.show()
+                }
+                withContext(Dispatchers.Default) {
+                    Rime.deployRime()
+                    job.cancelAndJoin()
+                    if (loading.isShowing) {
+                        loading.dismiss()
+                    }
+                }
             }
         }
         .setNegativeButton(android.R.string.cancel, null)
