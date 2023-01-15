@@ -449,7 +449,7 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
     mPopupParent = this;
     mPadding = new Rect(0, 0, 0, 0);
     mMiniKeyboardCache = new HashMap<>();
-    mDisambiguateSwipe = true;
+    mDisambiguateSwipe = false;
 
     resetMultiTap();
     initGestureDetector();
@@ -458,21 +458,30 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
   private void initGestureDetector() {
     mGestureDetector =
         new GestureDetector(
-            getContext(),
+            null,
             new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onFling(
                   MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+                /*
+                Judgment basis: the sliding distance exceeds the threshold value,
+                and the sliding distance on the corresponding axis is less than
+                the sliding distance on the other coordinate axis.
+                 */
                 if (mPossiblePoly) return false;
-                final float absX = Math.abs(velocityX);
-                final float absY = Math.abs(velocityY);
-                float deltaX = me2.getX() - me1.getX();
-                float deltaY = me2.getY() - me1.getY();
-                final int travel =
+                float deltaX = me2.getX() - me1.getX(); // distance X
+                float deltaY = me2.getY() - me1.getY(); // distance Y
+                final float absX = Math.abs(deltaX); // absolute value of distance X
+                final float absY = Math.abs(deltaY); // absolute value of distance Y
+                final int travel = // threshold distance
+                    // I don't really know what getSwipeTravelHi is.
+                    // For any one see this plz change the method name to something
+                    // more understandable.
                     (isFastInput && isClickAtLast)
                         ? getPrefs().getKeyboard().getSwipeTravelHi()
                         : getPrefs().getKeyboard().getSwipeTravel();
-                final int velocity =
+                final int velocity = // threshold velocity.
+                    // Same here for getSwipeVelocityHi
                     (isFastInput && isClickAtLast)
                         ? getPrefs().getKeyboard().getSwipeVelocity()
                         : getPrefs().getKeyboard().getSwipeVelocityHi();
@@ -481,36 +490,67 @@ public class KeyboardView extends View implements View.OnClickListener, Coroutin
                 final float endingVelocityY = mSwipeTracker.getYVelocity();
                 boolean sendDownKey = false;
                 KeyEventType type = KeyEventType.CLICK;
-                if ((deltaX > travel || velocityX > velocity) && absY < absX) {
-                  if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
+                //  In my tests velocity always smaller than 400
+                //  so I don't really why we need to compare velocity here,
+                //  as default value of getSwipeVelocity() is 800
+                //  and default value of getSwipeVelocityHi() is 25000,
+                //  so for most of the users that judgment is always true
+                if ((deltaX > travel || velocityX > velocity)
+                    && (absY < absX
+                        || (deltaY > 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_UP.ordinal()] == null)
+                        || (deltaY < 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal()] == null))
+                    && mKeys[mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal()] != null) {
+                  // I should have implement mDisambiguateSwipe as a config option, but the logic
+                  // here is really weird, and I don't really know
+                  // when it is enabled what should be the behavior, so I just left it always false.
+                  // endingVelocityX and endingVelocityY seems always > 0 but velocityX and
+                  // velocityY can be negative.
+                  if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
+                    return true;
+                  } else {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_RIGHT;
-                  } else {
-                    return true;
                   }
-                } else if ((deltaX < -travel || velocityX < -velocity) && absY < absX) {
-                  if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
+                } else if ((deltaX < -travel || velocityX < -velocity)
+                    && (absY < absX
+                        || (deltaY > 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_UP.ordinal()] == null)
+                        || (deltaY < 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal()] == null))
+                    && mKeys[mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal()] != null) {
+                  if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
+                    return true;
+                  } else {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_LEFT;
-                  } else {
-                    return true;
                   }
-                } else if ((deltaY < -travel || velocityY < -velocity) && absX < absY) {
-                  if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
+                } else if ((deltaY < -travel || velocityY < -velocity)
+                    && (absX < absY
+                        || (deltaX > 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal()] == null)
+                        || (deltaX < 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal()] == null))
+                    && mKeys[mDownKey].events[KeyEventType.SWIPE_UP.ordinal()] != null) {
+                  if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
+                    return true;
+                  } else {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_UP;
-                  } else {
-                    return true;
                   }
-                } else if ((deltaY > travel || velocityY > velocity) && absX < absY) {
-                  if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
-                    Timber.d(
-                        "swipeDebug.onFling sendDownKey, dY=%f, vY=%f, eVY=%f, travel=%d, mSwipeThreshold=%d",
-                        deltaY, velocityY, endingVelocityY, travel, velocity);
+                } else if ((deltaY > travel || velocityY > velocity)
+                    && (absX < absY
+                        || (deltaX > 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal()] == null)
+                        || (deltaX < 0
+                            && mKeys[mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal()] == null))
+                    && mKeys[mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal()] != null) {
+                  if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
+                    return true;
+                  } else {
                     sendDownKey = true;
                     type = KeyEventType.SWIPE_DOWN;
-                  } else {
-                    return true;
                   }
                 } else {
                   Timber.d(
