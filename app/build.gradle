@@ -1,3 +1,12 @@
+import org.gradle.work.ChangeType
+import org.gradle.work.Incremental
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import com.google.common.hash.Hashing
+import org.gradle.work.InputChanges
+import java.nio.charset.Charset
+import kotlin.io.FilesKt
+
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
@@ -113,9 +122,16 @@ ksp {
     arg "room.schemaLocation", "$projectDir/schemas"
 }
 
+def generateBuiltinDataChecksum =
+        tasks.register("generateBuiltinDataChecksum", BuiltinDataChecksumTask) {
+    inputDir = file("src/main/assets")
+    outputFile = file("src/main/assets/checksums.json")
+    dependsOn(generateLicenseJson)
+}
+
 android.applicationVariants.all {
     def variantName = name.capitalize()
-    tasks.findByName("merge${variantName}Assets")?.dependsOn(generateLicenseJson)
+    tasks.findByName("merge${variantName}Assets")?.dependsOn(generateBuiltinDataChecksum)
 }
 
 dependencies {
@@ -203,4 +219,83 @@ static String getBuildInfo() {
     def info = writer.toString()
     println(info)
     return info
+}
+
+abstract class BuiltinDataChecksumTask extends DefaultTask {
+    @Incremental
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    @InputDirectory
+    abstract DirectoryProperty getInputDir()
+
+    @OutputFile
+    abstract RegularFileProperty getOutputFile()
+
+    private void serialize(Map<String, String> map) {
+        def targetFile = outputFile.get().asFile
+        targetFile.deleteOnExit()
+        targetFile.setText(
+            JsonOutput.prettyPrint(
+                JsonOutput.toJson(
+                    Map<Object, Object>.of(
+                        "sha256", Hashing.sha256()
+                            .hashString(
+                                map.entrySet().join(", ").replace("=", ""),
+                                Charset.defaultCharset()
+                            ).toString(),
+                        "files", map
+                    )
+                )
+            )
+        )
+    }
+
+    private Map<String, String> deserialize() {
+        def targetFile = outputFile.get().asFile
+        return ((Map<String, String>) ((Map<Object, Object>) JsonSlurper().parseText(targetFile.text))["files"])
+    }
+
+    static String sha256(File f) {
+        return Hashing.sha256().hashBytes(f.bytes).toString()
+    }
+
+    @TaskAction
+    void execute(InputChanges inputChanges) {
+        def targetFile = outputFile.get().asFile
+        LinkedHashMap<String, String> map
+        if (targetFile.exists()) {
+            try {
+                map = LinkedHashMap<String, String>(deserialize().findAll { !it.value.isBlank() })
+            } catch (Throwable ignored) {
+                map = LinkedHashMap<String, String>.of()
+            }
+        } else {
+            map = LinkedHashMap<String, String>.of()
+        }
+
+        inputChanges.getFileChanges(inputDir).each { change ->
+            if (change.file.name == targetFile.name) return
+            logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
+            def key = FilesKt.relativeTo(change.file, targetFile.parentFile).path
+            if (change.changeType == ChangeType.REMOVED) {
+                map.remove(key)
+            } else {
+                map[key] = sha256(change.file)
+            }
+        }
+        def allParents = { File f ->
+            if (f.parentFile == null || map.containsKey(f.parentFile.path)) {
+                return List<File>.of()
+            } else {
+                ArrayList<File> result = ArrayList<File>(f.parentFile)
+                result.addAll(allParents(f))
+                return result
+            }
+        }
+        inputDir.get().asFile.listFiles().each {
+            allParents(FilesKt.relativeTo(it, targetFile.parentFile)).each { p ->
+                map[p.path] = ""
+            }
+        }
+        serialize(map.toSorted())
+    }
 }
