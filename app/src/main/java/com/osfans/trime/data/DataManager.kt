@@ -16,10 +16,9 @@ object DataManager {
 
     val defaultDataDirectory = File(Environment.getExternalStorageDirectory().absolutePath, "rime")
     @JvmStatic
-    val sharedDataDir = File(prefs.profile.sharedDataDir)
+    val sharedDataDir = File(appContext.getExternalFilesDir(null), "rime")
     @JvmStatic
     val userDataDir = File(prefs.profile.userDataDir)
-    val customDefault = File(sharedDataDir, "default.custom.yaml")
     @JvmStatic
     val buildDir = File(userDataDir, "build")
 

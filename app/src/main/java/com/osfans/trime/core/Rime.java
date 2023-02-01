@@ -217,7 +217,7 @@ public class Rime {
     isHandlingRimeNotification = false;
 
     DataManager.sync();
-    final String sharedDataDir = getAppPrefs().getProfile().getSharedDataDir();
+    final String sharedDataDir = DataManager.getSharedDataDir().getAbsolutePath();
     final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
     Timber.i("Starting up Rime APIs ...");

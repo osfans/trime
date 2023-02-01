@@ -45,10 +45,6 @@ class ProfileFragment : PaddingPreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.profile_preference)
         with(preferenceScreen) {
-            get<FolderPickerPreference>("profile_shared_data_dir")?.apply {
-                setDefaultValue(DataManager.defaultDataDirectory.path)
-                registerDocumentTreeLauncher()
-            }
             get<FolderPickerPreference>("profile_user_data_dir")?.apply {
                 setDefaultValue(DataManager.defaultDataDirectory.path)
                 registerDocumentTreeLauncher()
