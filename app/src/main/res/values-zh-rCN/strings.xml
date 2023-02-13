@@ -20,7 +20,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 输入法平台名称  -->
-    <string name="trime_app_name">同文输入法</string>
+    <string name="app_name_release">同文输入法</string>
+    <string name="app_name_debug">同文输入法（调试）</string>
     <string name="settings__help_title">寻求帮助</string>
     <string name="pref_wiki">维基教程</string>
     <string name="pref_issues">问题反馈</string>
