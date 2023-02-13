@@ -1,15 +1,20 @@
 package com.osfans.trime.data
 
-import com.blankj.utilcode.util.PathUtils
-import com.blankj.utilcode.util.ResourceUtils
-import com.osfans.trime.util.Const
+import android.os.Environment
+import com.osfans.trime.util.appContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
+    private const val dataChecksumName = "checksums.json"
 
-    val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
+    val defaultDataDirectory = File(Environment.getExternalStorageDirectory().absolutePath, "rime")
     @JvmStatic
     val sharedDataDir = File(prefs.profile.sharedDataDir)
     @JvmStatic
@@ -18,53 +23,142 @@ object DataManager {
     @JvmStatic
     val buildDir = File(userDataDir, "build")
 
+    private val externalFilesDir = appContext.getExternalFilesDir(null)
+    private val dataDir = File(appContext.applicationInfo.dataDir)
+    private val destChecksumFile = File(dataDir, dataChecksumName)
+
+    private val lock = ReentrantLock()
+
+    @Serializable
+    data class DataChecksum(
+        val sha256: String,
+        val files: Map<String, String>
+    )
+
     sealed class Diff {
-        object New : Diff()
-        object Update : Diff()
-        object Keep : Diff()
-    }
+        abstract val key: String
+        abstract val order: Int
 
-    @JvmStatic
-    fun getDataDir(child: String = ""): String {
-        return if (File(prefs.profile.sharedDataDir, child).exists()) {
-            File(prefs.profile.sharedDataDir, child).absolutePath
-        } else {
-            File(prefs.profile.userDataDir, child).absolutePath
+        data class New(override val key: String, val new: String) : Diff() {
+            override val order: Int get() = 3
+        }
+
+        data class Update(override val key: String, val old: String, val new: String) : Diff() {
+            override val order: Int get() = 2
+        }
+
+        data class Delete(override val key: String, val old: String) : Diff() {
+            override val order: Int get() = 0
+        }
+
+        data class DeleteDir(override val key: String) : Diff() {
+            override val order: Int get() = 1
         }
     }
 
-    private fun diff(old: String, new: String): Diff {
-        return when {
-            old.isBlank() -> Diff.New
-            !new.contentEquals(old) -> Diff.Update
-            else -> Diff.Keep
-        }
+    private fun deserialize(raw: String) = runCatching {
+        Json.decodeFromString<DataChecksum>(raw)
     }
 
-    @JvmStatic
-    fun sync() {
-        val newHash = Const.buildGitHash
-        val oldHash = prefs.internal.lastBuildGitHash
+    private fun diff(old: DataChecksum, new: DataChecksum): List<Diff> =
+        if (old.sha256 == new.sha256)
+            listOf()
+        else
+            new.files.mapNotNull {
+                when {
+                    // empty sha256 -> dir
+                    it.key !in old.files && it.value.isNotBlank() -> Diff.New(it.key, it.value)
+                    old.files[it.key] != it.value ->
+                        // if the new one is not a dir
+                        if (it.value.isNotBlank())
+                            Diff.Update(
+                                it.key,
+                                old.files.getValue(it.key),
+                                it.value
+                            )
+                        else null
+                    else -> null
+                }
+            }.toMutableList().apply {
+                addAll(
+                    old.files.filterKeys { it !in new.files }
+                        .map {
+                            if (it.value.isNotBlank())
+                                Diff.Delete(it.key, it.value)
+                            else
+                                Diff.DeleteDir(it.key)
+                        }
+                )
+            }
 
-        diff(oldHash, newHash).run {
-            Timber.d("Diff: $this")
-            when (this) {
-                is Diff.New -> ResourceUtils.copyFileFromAssets(
-                    "rime", sharedDataDir.absolutePath
+    @JvmStatic
+    fun sync() = lock.withLock {
+        val destDescriptor =
+            destChecksumFile
+                .takeIf { it.exists() && it.isFile }
+                ?.runCatching { readText() }
+                ?.getOrNull()
+                ?.let { deserialize(it) }
+                ?.getOrNull()
+                ?: DataChecksum("", mapOf())
+
+        val bundledDescriptor =
+            appContext.assets
+                .open(dataChecksumName)
+                .bufferedReader()
+                .use { it.readText() }
+                .let { deserialize(it) }
+                .getOrThrow()
+
+        val d = diff(destDescriptor, bundledDescriptor).sortedBy { it.order }
+        d.forEach {
+            Timber.d("Diff: $it")
+            when (it) {
+                is Diff.Delete -> deleteFile(it.key)
+                is Diff.DeleteDir -> deleteDir(it.key)
+                is Diff.New -> copyFile(
+                    externalFilesDir!!.absolutePath,
+                    it.key
                 )
-                is Diff.Update -> ResourceUtils.copyFileFromAssets(
-                    "rime", sharedDataDir.absolutePath
+                is Diff.Update -> copyFile(
+                    externalFilesDir!!.absolutePath,
+                    it.key
                 )
-                is Diff.Keep -> {}
             }
         }
 
-        // FIXME：缺失 default.custom.yaml 会导致方案列表为空
-        if (!customDefault.exists()) {
-            Timber.d("Creating empty default.custom.yaml ...")
-            customDefault.createNewFile()
-        }
+        copyFile(dataDir.absolutePath, dataChecksumName)
 
         Timber.i("Synced!")
+    }
+
+    fun deleteAndSync() {
+        sharedDataDir.deleteRecursively()
+        sync()
+    }
+
+    private fun deleteFile(path: String) {
+        val file = File(sharedDataDir, path)
+        if (file.exists() && file.isFile)
+            file.delete()
+    }
+
+    private fun deleteDir(path: String) {
+        val dir = File(sharedDataDir, path)
+        if (dir.exists() && dir.isDirectory)
+            dir.deleteRecursively()
+    }
+
+    private fun copyFile(dest: String, filename: String) {
+        with(appContext.assets) {
+            open(filename).use { i ->
+                File(dest, filename)
+                    .also { it.parentFile?.mkdirs() }
+                    .outputStream().use { o ->
+                        i.copyTo(o)
+                        Unit
+                    }
+            }
+        }
     }
 }
