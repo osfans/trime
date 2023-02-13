@@ -217,6 +217,7 @@ public class Rime {
     isHandlingRimeNotification = false;
 
     DataManager.sync();
+    OpenCCDictManager.buildOpenCCDict();
     final String sharedDataDir = DataManager.getSharedDataDir().getAbsolutePath();
     final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
@@ -355,9 +356,6 @@ public class Rime {
 
   public static Rime get(boolean full_check) {
     if (self == null) {
-      if (full_check) {
-        OpenCCDictManager.buildOpenCCDict();
-      }
       self = new Rime(full_check);
     }
     return self;

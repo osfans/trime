@@ -75,7 +75,7 @@ public class Config {
     self = this;
     ThemeManager.init();
 
-    Rime.get(!DataManager.INSTANCE.getSharedDataDir().exists());
+    Rime.get();
 
     init();
 
