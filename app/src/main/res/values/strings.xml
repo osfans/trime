@@ -20,7 +20,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
     <!-- Input Method Platform Tittle  -->
-    <string name="trime_app_name">Trime</string>
+    <string name="app_name_release">Trime</string>
+    <string name="app_name_debug">Trime (Debug)</string>
     <!-- Preference settings -->
     <string name="settings__help_title">Help</string>
     <string name="pref_wiki">Wiki</string>

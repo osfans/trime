@@ -35,6 +35,13 @@ android {
             minifyEnabled false
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-android.txt'
             signingConfig signingConfigs.release
+
+            resValue "string", "trime_app_name", "@string/app_name_release"
+        }
+        debug {
+            applicationIdSuffix ".debug"
+
+            resValue "string", "trime_app_name", "@string/app_name_debug"
         }
     }
 
