@@ -1,5 +1,6 @@
 package com.osfans.trime.data.theme
 
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import java.io.File
@@ -8,7 +9,7 @@ object ThemeManager {
 
     private fun listThemes(path: File): MutableList<String> {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
-            ?.map { f -> f.nameWithoutExtension }
+            ?.map(File::nameWithoutExtension)
             ?.toMutableList() ?: mutableListOf()
     }
 
@@ -26,16 +27,14 @@ object ThemeManager {
 
     @JvmStatic
     fun init() {
+        for (theme in getAllThemes()) {
+            Rime.deployRimeConfigFile("$theme.yaml", "config_version")
+        }
         currentThemeName = AppPrefs.defaultInstance().themeAndColor.selectedTheme
     }
 
     @JvmStatic
-    fun getAllThemes(): List<String> {
-        if (DataManager.sharedDataDir.absolutePath == DataManager.userDataDir.absolutePath) {
-            return userThemes
-        }
-        return sharedThemes + userThemes
-    }
+    fun getAllThemes(): List<String> = sharedThemes + userThemes
 
     @JvmStatic
     fun getActiveTheme() = currentThemeName
