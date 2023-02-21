@@ -1,5 +1,6 @@
 package com.osfans.trime.ui.setup
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
+import java.io.Serializable
 
 class SetupFragment : Fragment() {
     private val viewModel: SetupViewModel by activityViewModels()
     private lateinit var binding: FragmentSetupBinding
 
-    private val page: SetupPage by lazy { requireArguments().get("page") as SetupPage }
+    private val page: SetupPage by lazy { requireArguments().serializable("page")!! }
 
     private var isDone: Boolean = false
         set(new) {
@@ -48,5 +50,16 @@ class SetupFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         sync()
+    }
+
+    companion object {
+        private inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                getSerializable(key, T::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                get(key) as? T
+            }
+        }
     }
 }
