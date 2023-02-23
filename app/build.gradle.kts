@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import android.databinding.tool.ext.capitalizeUS
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import groovy.json.JsonOutput
@@ -183,6 +184,15 @@ android.applicationVariants.all {
     val variantName = name.capitalizeUS()
     tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataChecksum)
 }
+
+tasks.register<Delete>("cleanGeneratedAssets") {
+    delete(file("src/main/assets/checksums.json"))
+    delete(file("src/main/assets/licenses.json"))
+}.also { tasks.clean.dependsOn(it) }
+
+tasks.register<Delete>("cleanCxxIntermediates") {
+    delete(file(".cxx"))
+}.also { tasks.clean.dependsOn(it) }
 
 dependencies {
     ksp(project(":codegen"))
