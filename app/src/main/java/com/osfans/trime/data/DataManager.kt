@@ -132,18 +132,18 @@ object DataManager {
     }
 
     fun deleteAndSync() {
-        sharedDataDir.deleteRecursively()
+        externalFilesDir!!.deleteRecursively()
         sync()
     }
 
     private fun deleteFile(path: String) {
-        val file = File(sharedDataDir, path)
+        val file = File(externalFilesDir, path)
         if (file.exists() && file.isFile)
             file.delete()
     }
 
     private fun deleteDir(path: String) {
-        val dir = File(sharedDataDir, path)
+        val dir = File(externalFilesDir, path)
         if (dir.exists() && dir.isDirectory)
             dir.deleteRecursively()
     }

@@ -218,11 +218,12 @@ public class Rime {
 
     DataManager.sync();
     OpenCCDictManager.buildOpenCCDict();
-    final String sharedDataDir = DataManager.getSharedDataDir().getAbsolutePath();
-    final String userDataDir = getAppPrefs().getProfile().getUserDataDir();
 
     Timber.i("Starting up Rime APIs ...");
-    startupRime(sharedDataDir, userDataDir, full_check);
+    startupRime(
+        DataManager.getSharedDataDir().getAbsolutePath(),
+        DataManager.getUserDataDir().getAbsolutePath(),
+        full_check);
 
     Timber.i("Updating schema switchers ...");
     initSchema();
