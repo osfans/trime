@@ -115,11 +115,10 @@ public:
         return rime->delete_candidate_on_current_page(session, index);
     }
 
-    void deploy() {
+    void exit() {
         rime->destroy_session(session);
         session = 0;
         rime->finalize();
-        startup(true);
     }
 
     bool sync() {
@@ -172,13 +171,14 @@ Java_com_osfans_trime_core_Rime_startupRime(JNIEnv *env, jclass clazz, jstring s
     Rime::Instance().startup(full_check);
 }
 
-// deployment
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_osfans_trime_core_Rime_deployRime(JNIEnv *env, jclass /* thiz */) {
-    Rime::Instance().deploy();
+Java_com_osfans_trime_core_Rime_exitRime(JNIEnv *env, jclass /* thiz */) {
+    RETURN_IF_NOT_RUNNING
+    Rime::Instance().exit();
 }
 
+// deployment
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_deployRimeSchemaFile(JNIEnv *env, jclass /* thiz */, jstring schema_file) {
