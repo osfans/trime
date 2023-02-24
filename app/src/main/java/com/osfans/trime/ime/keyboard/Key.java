@@ -124,7 +124,7 @@ public class Key {
         s = CollectionUtils.obtainString(mk, typeStr, "");
         if (!TextUtils.isEmpty(s)) {
           events[type.ordinal()] = new Event(mKeyboard, s);
-          hasComposingKey = type.ordinal() < KeyEventType.COMBO.ordinal();
+          if (type.ordinal() < KeyEventType.COMBO.ordinal()) hasComposingKey = true;
         } else if (type == KeyEventType.CLICK) {
           events[type.ordinal()] = new Event(mKeyboard, "");
         }
