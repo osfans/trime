@@ -1664,3 +1664,60 @@ preset_keyboards:
     - {click: "'", long_click: '"'}
     - {click: BackSpace, swipe_right: Delete, swipe_left: Escape, width: 15}
     - {click: Return, long_click: CommitComment, width: 15}
+  quick5:
+    ascii_mode: 0
+    name: 速成
+    height: 44
+    width: 9.7
+    keys:
+    - {width: 3}
+    - {click: 1, long_click: "!"}
+    - {click: 2, long_click: "@"}
+    - {click: 3, long_click: "#"}
+    - {click: 4, long_click: "$"}
+    - {click: 5, long_click: "%"}
+    - {click: 6, long_click: "^"}
+    - {click: 7, long_click: "&"}
+    - {click: 8, long_click: "*"}
+    - {click: 9, long_click: "("}
+    - {click: 0, long_click: ")"}
+    - {width: 3}
+    - {click: q, label: "手", long_click: _}
+    - {click: w, label: "田", long_click: "-"}
+    - {click: e, label: "水", long_click: "+"}
+    - {click: r, label: "口", long_click: "="}
+    - {click: t, label: "廿", long_click: "|"}
+    - {click: y, label: "卜", long_click: "\\"}
+    - {click: u, label: "山", long_click: "["}
+    - {click: i, label: "戈", long_click: "]"}
+    - {click: o, label: "人", long_click: "{"}
+    - {click: p, label: "心", long_click: "}"}
+    - {width: 7}
+    - {click: a, label: "日", long_click: select_all}
+    - {click: s, label: "尸", long_click: Home}
+    - {click: d, label: "木", long_click: End}
+    - {click: f, label: "火", long_click: Page_Up}
+    - {click: g, label: "土", long_click: Page_Down}
+    - {click: h, label: "竹", long_click: Left}
+    - {click: j, label: "十", long_click: Down}
+    - {click: k, label: "大", long_click: Up}
+    - {click: l, label: "中", long_click: Right}
+    - {width: 6}
+    - {width: 3}
+    - {click: Shift_L, width: 13.8}
+    - {click: z, label: "重", long_click: "`"}
+    - {click: x, label: "難", long_click: cut}
+    - {click: c, label: "金", long_click: copy}
+    - {click: v, label: "女", long_click: paste}
+    - {click: b, label: "月", long_click: "~"}
+    - {click: n, label: "弓", long_click: '"'}
+    - {click: m, label: "一", long_click: Delete}
+    - {click: BackSpace, width: 13.8}
+    - {width: 2}
+    - {width: 3}
+    - {click: Menu, long_click: Color_switch, width: 14}
+    - {click: Keyboard_symbols, long_click: Keyboard_number, width: 11.5}
+    - {click: ",", long_click: .}
+    - {click: space, width: 25}
+    - {click: "'", long_click: "?"}
+    - {click: Return, long_click: CommitComment, width: 25.5}
