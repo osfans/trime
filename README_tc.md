@@ -55,19 +55,13 @@ cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
 
-2. 安裝 `capnp`:
-```bash
-cd $trime_folder
-sh trime/script/dependency.sh
-```
-
-3. 編譯調試版本:
+2. 編譯調試版本:
 
 ```bash
 make debug
 ```
 
-4. 編譯正式版本：
+3. 編譯正式版本：
 
 請創建一個名為 keystore.properties 的文件，包含以下內容，註明[簽名信息](https://developer.android.com/studio/publish/app-signing.html):
 
@@ -90,12 +84,6 @@ Target "boost_log_setup" links to target "Boost::coroutine" but the target was n
 
 執行 `make clean`.
 
-```
-Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
-```
-
-請不要通過包管理器或是其他途徑安裝 `capnp`。使用 [構建](#構建) 章節中的安裝腳本.
-
 其它問題:
 1. 首先嘗試 `make clean`
 2. 確保你的倉庫與最新版本一致。如果你修改了一個或更多的子模塊，請確保它們與當前倉庫版本兼容。
@@ -105,16 +93,15 @@ Version mismatch between generated code and library headers. You must use the sa
 
 ## 第三方庫
 - [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)
-- [Cap'n Proto](https://capnproto.org/) (MIT License)
 - [darts-clone](https://github.com/s-yata/darts-clone) (New BSD License)
 - [LevelDB](https://github.com/google/leveldb) (New BSD License)
 - [libiconv](https://www.gnu.org/software/libiconv/) (LGPL License)
 - [marisa-trie](https://github.com/s-yata/marisa-trie) (BSD License)
-- [minilog](http://ceres-solver.org/) (New BSD License)
+- [glog](https://github.com/google/glog) (New BSD License)
 - [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
 - [RIME](https://rime.im) (BSD License)
 - [snappy](https://github.com/google/snappy)(BSD License)
-- [UTF8-CPP](http://utfcpp.sourceforge.net/) (Boost Software License)
+- [utfcpp](https://github.com/nemtrif/utfcpp) (Boost Software License)
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) (MIT License)
 - [注音倉頡輸入法](https://code.google.com/p/android-traditional-chinese-ime/) (Apache License 2.0)
 
