@@ -62,19 +62,13 @@ cd $your_folder
 git clone --recursive https://github.com/osfans/trime.git
 ```
 
-2. Install `capnp`:
-```bash
-cd $trime_folder
-sh trime/script/dependency.sh
-```
-
-3. Debug version without sign:
+2. Debug version without sign:
 
 ```bash
 make debug
 ```
 
-4. Release version with sign:
+3. Release version with sign:
 
 Create `keystore.properties` file which contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
 
@@ -97,12 +91,6 @@ Target "boost_log_setup" links to target "Boost::coroutine" but the target was n
 
 Run `make clean`.
 
-```
-Version mismatch between generated code and library headers. You must use the same version of the Cap'n Proto compiler and library.
-```
-
-Do not install `capnp` from package manager. Run the dependency script in part [Build](#Build).
-
 Other issues:
 1. Try `make clean`
 2. Make sure your repo is up-to-date. If one or more submodules are modified, also make sure they are compatible with the current version.
@@ -113,16 +101,15 @@ Other issues:
 
 ## Third Party Libraries
 - [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)
-- [Cap'n Proto](https://capnproto.org/) (MIT License)
 - [darts-clone](https://github.com/s-yata/darts-clone) (New BSD License)
 - [LevelDB](https://github.com/google/leveldb) (New BSD License)
 - [libiconv](https://www.gnu.org/software/libiconv/) (LGPL License)
 - [marisa-trie](https://github.com/s-yata/marisa-trie) (BSD License)
-- [minilog](http://ceres-solver.org/) (New BSD License)
+- [glog](https://github.com/google/glog) (New BSD License)
 - [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
 - [RIME](https://rime.im) (BSD License)
 - [snappy](https://github.com/google/snappy)(BSD License)
-- [UTF8-CPP](http://utfcpp.sourceforge.net/) (Boost Software License)
+- [utfcpp](https://github.com/nemtrif/utfcpp) (Boost Software License)
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) (MIT License)
 - [Android Traditional Chinese IME](https://code.google.com/p/android-traditional-chinese-ime/) (Apache License 2.0)
 
