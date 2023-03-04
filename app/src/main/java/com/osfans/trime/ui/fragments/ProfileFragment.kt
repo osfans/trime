@@ -56,7 +56,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
                 lifecycleScope.withLoadingDialog(context, 200L, R.string.sync_progress) {
                     withContext(Dispatchers.IO) {
                         Rime.syncRimeUserData()
-                        Rime.deployRime()
+                        Rime.deploy()
                     }
                 }
                 true

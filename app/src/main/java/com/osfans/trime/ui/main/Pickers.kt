@@ -101,7 +101,7 @@ fun Context.schemaPicker(
                     loading.show()
                 }
                 withContext(Dispatchers.Default) {
-                    Rime.deployRime()
+                    Rime.deploy()
                     job.cancelAndJoin()
                     if (loading.isShowing) {
                         loading.dismiss()
