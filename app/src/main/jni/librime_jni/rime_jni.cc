@@ -118,6 +118,10 @@ public:
         return rime->delete_candidate_on_current_page(session, index);
     }
 
+    std::string stateLabel(const std::string &optionName, bool state) {
+        return rime->get_state_label(session, optionName.c_str(), state);
+    }
+
     void exit() {
         rime->destroy_session(session);
         session = 0;
@@ -255,7 +259,6 @@ Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */, jo
     RETURN_VALUE_IF_NOT_RUNNING(false)
     RIME_STRUCT(RimeStatus, status)
     auto rime = rime_get_api();
-    Bool r = RimeGetStatus(Rime::Instance().sessionId(), &status);
     if (rime->get_status(Rime::Instance().sessionId(), &status)) {
         rimeStatusToJObject(env, status, jstatus);
         rime->free_status(&status);
@@ -438,4 +441,12 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getRimeUserId(JNIEnv *env, jclass /* thiz */) {
     return env->NewStringUTF(RimeGetUserId());
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_osfans_trime_core_Rime_getRimeStateLabel(JNIEnv *env, jclass /* thiz */,
+                                                  jstring option_name, jboolean state) {
+    RETURN_VALUE_IF_NOT_RUNNING(nullptr)
+    return env->NewStringUTF(Rime::Instance().stateLabel(CString(env, option_name), state).c_str());
 }

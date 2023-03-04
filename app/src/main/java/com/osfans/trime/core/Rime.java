@@ -469,4 +469,7 @@ public class Rime {
   public static native SchemaListItem[] getSelectedRimeSchemaList();
 
   public static native boolean selectRimeSchemas(@NonNull String[] schemaIds);
+
+  @Nullable
+  public static native String getRimeStateLabel(@NonNull String optionName, boolean state);
 }
