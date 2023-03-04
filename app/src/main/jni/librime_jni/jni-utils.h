@@ -242,4 +242,6 @@ public:
     const JEnv AttachEnv() const { return JEnv(jvm); }
 };
 
+extern GlobalRefSingleton *GlobalRef;
+
 #endif //TRIME_JNI_UTILS_H

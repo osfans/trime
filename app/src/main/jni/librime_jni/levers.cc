@@ -1,5 +1,6 @@
-#include "jni-common.h"
-#include "rime_jni.h"
+#include <rime_levers_api.h>
+#include "jni-utils.h"
+#include "objconv.h"
 
 // customize settings
 

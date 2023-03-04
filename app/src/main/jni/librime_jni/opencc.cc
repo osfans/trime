@@ -2,7 +2,6 @@
 #include <opencc/Common.hpp>
 #include <opencc/SimpleConverter.hpp>
 #include <opencc/DictConverter.hpp>
-#include "rime_jni.h"
 #include "jni-utils.h"
 
 // opencc
