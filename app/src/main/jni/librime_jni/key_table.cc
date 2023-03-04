@@ -1,5 +1,4 @@
 #include <rime/key_table.h>
-#include "rime_jni.h"
 #include "jni-utils.h"
 
 extern "C"
