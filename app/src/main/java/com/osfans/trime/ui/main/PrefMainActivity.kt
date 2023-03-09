@@ -142,16 +142,16 @@ class PrefMainActivity : AppCompatActivity() {
 
     private fun requestExternalStoragePermission() {
         XXPermissions.with(this)
-            .permission(Permission.Group.STORAGE)
+            .permission(Permission.MANAGE_EXTERNAL_STORAGE)
             .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: MutableList<String>?, all: Boolean) {
+                override fun onGranted(permissions: List<String>, all: Boolean) {
                     if (all) {
                         ToastUtils.showShort(R.string.external_storage_permission_granted)
                         SoundThemeManager.init()
                     }
                 }
 
-                override fun onDenied(permissions: MutableList<String>?, never: Boolean) {
+                override fun onDenied(permissions: List<String>, never: Boolean) {
                     if (never) {
                         ToastUtils.showShort(R.string.external_storage_permission_denied)
                         XXPermissions.startPermissionActivity(

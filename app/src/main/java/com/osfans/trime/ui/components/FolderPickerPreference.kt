@@ -7,11 +7,10 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
-import androidx.core.net.toUri
 import androidx.preference.Preference
+import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.FolderPickerDialogBinding
-import com.osfans.trime.util.UriUtils.toUri
 import java.io.File
 
 class FolderPickerPreference : Preference {
@@ -53,7 +52,7 @@ class FolderPickerPreference : Preference {
         dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
         dialogView.editText.setText(initValue)
         dialogView.button.setOnClickListener {
-            documentTreeLauncher.launch(File(initValue).toUri())
+            documentTreeLauncher.launch(UriUtils.file2Uri(File(initValue)))
         }
         AlertDialog.Builder(context)
             .setTitle(this@FolderPickerPreference.title)

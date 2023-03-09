@@ -52,11 +52,11 @@ fun buildInfo(): String {
         timeZone = TimeZone.getTimeZone("UTC")
     }.format(Date(System.currentTimeMillis()))
     writer.append("Builder: ${gitUserOrCIName}\\n")
-    writer.append("Build Time: ${time} UTC\\n")
+    writer.append("Build Time: $time UTC\\n")
     writer.append("Build Version Name: ${gitVersionName}\\n")
     writer.append("Git Hash: ${gitHashShort}\\n")
     writer.append("Git Branch: ${gitWorkingOrCIBranch}\\n")
-    writer.append("Git Repo: ${gitRemoteUrl}")
+    writer.append("Git Repo: $gitRemoteUrl")
     val info = writer.toString()
     println(info)
     return info
@@ -69,7 +69,7 @@ android {
     defaultConfig {
         applicationId  = "com.osfans.trime"
         minSdk = 21
-        targetSdk =  29
+        targetSdk = 33
         versionCode = 20230301
         versionName = "3.2.11"
 
