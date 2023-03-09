@@ -9,7 +9,7 @@
 plugins {
     id("com.android.application") version "7.4.0" apply false
     id("com.android.library") version "7.4.0" apply false
-    kotlin("android") version "${Extra.kotlinVersion}" apply false
+    kotlin("android") version Extra.kotlinVersion apply false
     id("com.diffplug.spotless") version "6.3.0"
 }
 
