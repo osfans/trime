@@ -6,7 +6,8 @@ import kotlin.collections.HashMap
 enum class LandscapeInputUIMode {
     AUTO_SHOW,
     ALWAYS_SHOW,
-    NEVER_SHOW;
+    NEVER_SHOW,
+    ;
 
     companion object {
         private val convertMap: HashMap<String, LandscapeInputUIMode> = hashMapOf()
