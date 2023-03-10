@@ -27,13 +27,13 @@ abstract class Database : RoomDatabase() {
                             time INTEGER NOT NULL,
                             pinned INTEGER NOT NULL
                         )
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                     database.execSQL(
                         """
                         INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time, pinned)
                         SELECT id, text, html, type, time, pinned FROM _t_data
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                     database.execSQL("DROP TABLE _t_data")
                 }

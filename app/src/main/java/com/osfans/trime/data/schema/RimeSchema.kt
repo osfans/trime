@@ -11,13 +11,13 @@ data class RimeSchema(
     val schema: Schema, // 方案信息
     val switches: List<Switch> = listOf(), // 选项开关
     val punctuator: Punctuator? = null, // 标点
-    val speller: Speller? = null // 拼写器
+    val speller: Speller? = null, // 拼写器
 ) {
     @Serializable
     data class BuildInfo(
         @SerialName("rime_version")
         val rimeVersion: String,
-        val timestamps: Map<String, Long> = mapOf()
+        val timestamps: Map<String, Long> = mapOf(),
     )
 
     @Serializable
@@ -27,7 +27,7 @@ data class RimeSchema(
         val schemaId: String,
         val version: String? = null,
         val dependencies: List<String> = listOf(),
-        val description: String? = null
+        val description: String? = null,
     )
 
     @Serializable
@@ -41,11 +41,11 @@ data class RimeSchema(
 
     @Serializable
     data class Punctuator(
-        val symbols: Map<String, List<String>> = mapOf()
+        val symbols: Map<String, List<String>> = mapOf(),
     )
 
     @Serializable
     data class Speller(
-        val alphabet: String? = null
+        val alphabet: String? = null,
     )
 }

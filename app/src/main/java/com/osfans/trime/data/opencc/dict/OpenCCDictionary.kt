@@ -14,8 +14,11 @@ class OpenCCDictionary(file: File) : Dictionary() {
     override val type: Type = Type.OPENCC
 
     override val name: String
-        get() = if (isOCD2) super.name
-        else file.name.substringBefore("")
+        get() = if (isOCD2) {
+            super.name
+        } else {
+            file.name.substringBefore("")
+        }
 
     init {
         ensureFileExists()
@@ -31,8 +34,9 @@ class OpenCCDictionary(file: File) : Dictionary() {
     }
 
     fun useOCD2() {
-        if (isOCD2)
+        if (isOCD2) {
             return
+        }
         val newFile = file.resolveSibling(name + ".${type.ext}")
         file.renameTo(newFile)
         file = newFile
@@ -40,8 +44,9 @@ class OpenCCDictionary(file: File) : Dictionary() {
     }
 
     fun useOCD() {
-        if (!isOCD2)
+        if (!isOCD2) {
             return
+        }
         val newFile = file.resolveSibling(name + ".$OLD_FORMAT")
         file.renameTo(newFile)
         file = newFile
@@ -53,7 +58,7 @@ class OpenCCDictionary(file: File) : Dictionary() {
         OpenCCDictManager.openCCDictConv(
             file.absolutePath,
             dest.absolutePath,
-            OpenCCDictManager.MODE_BIN_TO_TXT
+            OpenCCDictManager.MODE_BIN_TO_TXT,
         )
         return TextDictionary(dest)
     }

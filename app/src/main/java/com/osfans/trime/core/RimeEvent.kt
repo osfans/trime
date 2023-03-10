@@ -43,7 +43,7 @@ sealed class RimeEvent {
         Schema,
         Option,
         Deploy,
-        Unknown
+        Unknown,
     }
 
     companion object RimeNotificationHandler {

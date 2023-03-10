@@ -27,8 +27,11 @@ object OpenCCDictManager {
         ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
     fun getAllDictionaries(): List<Dictionary> =
-        if (sharedDir.path == userDir.path) userDictionaries()
-        else (sharedDictionaries() + userDictionaries())
+        if (sharedDir.path == userDir.path) {
+            userDictionaries()
+        } else {
+            (sharedDictionaries() + userDictionaries())
+        }
 
     fun openCCDictionaries(): List<OpenCCDictionary> =
         getAllDictionaries().mapNotNull { it as? OpenCCDictionary }
@@ -41,8 +44,8 @@ object OpenCCDictManager {
         val new = raw.toOpenCCDictionary(
             File(
                 userDir,
-                file.nameWithoutExtension + ".${Dictionary.Type.OPENCC.ext}"
-            )
+                file.nameWithoutExtension + ".${Dictionary.Type.OPENCC.ext}",
+            ),
         )
         Timber.d("Converted $raw to $new")
         return new

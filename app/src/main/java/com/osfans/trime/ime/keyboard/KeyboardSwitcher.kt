@@ -75,7 +75,7 @@ object KeyboardSwitcher {
         currentId = if (mini >= 0) mini else i
         Timber.i(
             "Switched keyboard from ${availableKeyboardIds[lastId]} " +
-                "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard)."
+                "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard).",
         )
     }
 

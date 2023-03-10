@@ -17,8 +17,9 @@ class SetupFragment : Fragment() {
 
     private var isDone: Boolean = false
         set(new) {
-            if (new && page.isLastPage())
+            if (new && page.isLastPage()) {
                 viewModel.isAllDone.value = true
+            }
             with(binding) {
                 stepText.text = page.getStepText(requireContext())
                 hintText.text = page.getHintText(requireContext())
@@ -33,7 +34,7 @@ class SetupFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentSetupBinding.inflate(inflater)
         sync()

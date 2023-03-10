@@ -18,9 +18,10 @@ import com.osfans.trime.databinding.SimpleKeyItemBinding
 import kotlinx.coroutines.launch
 
 class FlexibleAdapter(
-    private val theme: Config
+    private val theme: Config,
 ) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
+
     // 映射条目的 id 和其在视图中位置的关系
     // 以应对增删条目时 id 和其位置的相对变化
     private val mBeansId = mutableMapOf<Int, Int>()
@@ -85,7 +86,7 @@ class FlexibleAdapter(
                 "key_border",
                 "key_long_text_border",
                 "round_corner",
-                null
+                null,
             )
 
             // 如果设置了回调，则设置点击事件

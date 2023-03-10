@@ -17,8 +17,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@Suppress("FunctionName")
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/e37f5513239bab279a9e58cf0c9b163e0dbf5efb/app/src/main/java/org/fcitx/fcitx5/android/ui/common/Preset.kt#L60
+@Suppress("FunctionName")
 fun Context.ProgressBarDialogIndeterminate(@StringRes titleId: Int): AlertDialog.Builder {
     return AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
         .setTitle(titleId)
@@ -28,13 +28,14 @@ fun Context.ProgressBarDialogIndeterminate(@StringRes titleId: Int): AlertDialog
                 addView(
                     ProgressBar(
                         this@ProgressBarDialogIndeterminate,
-                        null, android.R.attr.progressBarStyleHorizontal
+                        null,
+                        android.R.attr.progressBarStyleHorizontal,
                     ).apply {
                         isIndeterminate = true
                     },
                     MarginLayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
                     ).apply {
                         val verticalMargin = dp2px(26)
                         val horizontalMargin = dp2px(20)
@@ -42,9 +43,9 @@ fun Context.ProgressBarDialogIndeterminate(@StringRes titleId: Int): AlertDialog
                         bottomMargin = horizontalMargin
                         leftMargin = verticalMargin
                         rightMargin = verticalMargin
-                    }
+                    },
                 )
-            }
+            },
         )
         .setCancelable(false)
 }
@@ -54,7 +55,7 @@ fun LifecycleCoroutineScope.withLoadingDialog(
     context: Context,
     thresholds: Long = 200L,
     @StringRes titleId: Int = R.string.loading,
-    action: suspend () -> Unit
+    action: suspend () -> Unit,
 ) {
     val loading = context.ProgressBarDialogIndeterminate(titleId).create()
     val job = launch {
@@ -73,7 +74,7 @@ fun LifecycleCoroutineScope.withLoadingDialog(
 suspend fun Context.briefResultLogDialog(
     tag: String,
     priority: String,
-    thresholds: Int
+    thresholds: Int,
 ) = withContext(Dispatchers.Main.immediate) {
     val log = withContext(Dispatchers.IO) {
         Runtime.getRuntime()

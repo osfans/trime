@@ -11,8 +11,9 @@ class TextDictionary(file: File) : Dictionary() {
 
     init {
         ensureFileExists()
-        if (file.extension != type.ext)
+        if (file.extension != type.ext) {
             throw IllegalArgumentException("Not a text dict ${file.name}")
+        }
     }
 
     override fun toTextDictionary(dest: File): TextDictionary {
@@ -26,7 +27,7 @@ class TextDictionary(file: File) : Dictionary() {
         OpenCCDictManager.openCCDictConv(
             file.absolutePath,
             dest.absolutePath,
-            OpenCCDictManager.MODE_TXT_TO_BIN
+            OpenCCDictManager.MODE_TXT_TO_BIN,
         )
         return OpenCCDictionary(dest)
     }

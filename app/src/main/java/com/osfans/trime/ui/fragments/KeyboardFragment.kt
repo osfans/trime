@@ -35,7 +35,8 @@ class KeyboardFragment :
         when (key) {
             "keyboard__key_long_press_timeout",
             "keyboard__key_repeat_interval",
-            "keyboard__show_key_popup" -> {
+            "keyboard__show_key_popup",
+            -> {
                 trime?.resetKeyboard()
             }
             "keyboard__show_window" -> {
@@ -51,7 +52,7 @@ class KeyboardFragment :
                     withContext(Dispatchers.IO) {
                         Rime.setRimeCustomConfigInt(
                             "default",
-                            arrayOf("menu/page_size" to pageSize)
+                            arrayOf("menu/page_size" to pageSize),
                         )
                         Rime.deployRimeConfigFile("${DataManager.userDataDir}/default.yaml", "")
                     }

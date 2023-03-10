@@ -155,9 +155,9 @@ enum class Keycode {
                 event[0] = keycode
                 event[1] = mask
             } else {
-                if (keycode <= Z.ordinal)
+                if (keycode <= Z.ordinal) {
                     event[0] = keycode - A.ordinal + a.ordinal
-                else {
+                } else {
                     event[0] = when (keycode) {
                         exclam.ordinal -> _1.ordinal
                         dollar.ordinal -> _4.ordinal
@@ -208,7 +208,9 @@ enum class Keycode {
                 }
             } else if (hasSymbolLabel(keyCode)) { // 可見符號
                 getSymbolLabel(valueOf(keyCode))
-            } else ""
+            } else {
+                ""
+            }
 
         private val masks = hashMapOf(
             "Shift" to KeyEvent.META_SHIFT_ON,

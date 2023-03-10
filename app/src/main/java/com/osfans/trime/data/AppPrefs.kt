@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
  * Helper class for an organized access to the shared preferences.
  */
 class AppPrefs(
-    private val shared: SharedPreferences
+    private val shared: SharedPreferences,
 ) {
     private val applicationContext: WeakReference<Context> = WeakReference(appContext)
 
@@ -79,7 +79,7 @@ class AppPrefs(
                     """
                     Default preferences not initialized! Make sure to call initDefault()
                     before accessing the default preferences.
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
         }
     }

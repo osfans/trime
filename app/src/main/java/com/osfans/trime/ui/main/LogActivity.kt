@@ -89,7 +89,7 @@ class LogActivity : AppCompatActivity() {
                         .setPositiveButton(android.R.string.ok) { _, _ -> }
                         .show()
                     Logcat(TrimeApplication.getLastPid())
-                }
+                },
             )
             clearButton.setOnClickListener {
                 logView.clear()

@@ -11,21 +11,21 @@ enum class SetupPage {
         when (this) {
             Enable -> R.string.setup__step_one
             Select -> R.string.setup__step_two
-        }
+        },
     )
 
     fun getHintText(context: Context) = context.getText(
         when (this) {
             Enable -> R.string.setup__enable_ime_hint
             Select -> R.string.setup__select_ime_hint
-        }
+        },
     )
 
     fun getButtonText(context: Context) = context.getText(
         when (this) {
             Enable -> R.string.setup__enable_ime
             Select -> R.string.setup__select_ime
-        }
+        },
     )
 
     fun getButtonAction(context: Context) {

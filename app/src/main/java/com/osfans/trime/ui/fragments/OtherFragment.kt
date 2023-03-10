@@ -57,7 +57,7 @@ class OtherFragment : PaddingPreferenceFragment() {
             pkg.setComponentEnabledSetting(
                 ComponentName(context, SETTINGS_ACTIVITY_NAME),
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP
+                PackageManager.DONT_KILL_APP,
             )
         }
 
@@ -66,7 +66,7 @@ class OtherFragment : PaddingPreferenceFragment() {
             pkg.setComponentEnabledSetting(
                 ComponentName(context, SETTINGS_ACTIVITY_NAME),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP
+                PackageManager.DONT_KILL_APP,
             )
         }
     }

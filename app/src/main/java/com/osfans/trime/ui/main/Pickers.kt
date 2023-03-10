@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 suspend fun Context.themePicker(
-    @StyleRes themeResId: Int = 0
+    @StyleRes themeResId: Int = 0,
 ): AlertDialog {
     return CoroutineChoiceDialog(this, themeResId).apply {
         title = getString(R.string.looks__selected_theme_title)
@@ -49,7 +49,7 @@ suspend fun Context.themePicker(
 }
 
 suspend fun Context.colorPicker(
-    @StyleRes themeResId: Int = 0
+    @StyleRes themeResId: Int = 0,
 ): AlertDialog {
     val prefs by lazy { AppPrefs.defaultInstance() }
     return CoroutineChoiceDialog(this, themeResId).apply {
@@ -75,7 +75,7 @@ suspend fun Context.colorPicker(
 }
 
 fun Context.schemaPicker(
-    @StyleRes themeResId: Int = 0
+    @StyleRes themeResId: Int = 0,
 ): AlertDialog {
     val available = Rime.getAvailableRimeSchemaList()
     val selected = Rime.getSelectedRimeSchemaList()
@@ -86,14 +86,14 @@ fun Context.schemaPicker(
         .setTitle(R.string.pref_select_schemas)
         .setMultiChoiceItems(
             available.mapNotNull(SchemaListItem::name).toTypedArray(),
-            checked
+            checked,
         ) { _, id, isChecked -> checked[id] = isChecked }
         .setPositiveButton(android.R.string.ok) { _, _ ->
             (this as LifecycleOwner).lifecycleScope.launch {
                 Rime.selectRimeSchemas(
                     availableIds
                         .filterIndexed { i, _ -> checked[i] }
-                        .toTypedArray()
+                        .toTypedArray(),
                 )
                 val loading = ProgressBarDialogIndeterminate(titleId = R.string.deploy_progress).create()
                 val job = launch {
@@ -114,7 +114,7 @@ fun Context.schemaPicker(
 }
 
 fun Context.soundPicker(
-    @StyleRes themeResId: Int = 0
+    @StyleRes themeResId: Int = 0,
 ): AlertDialog {
     val all = SoundThemeManager.getAllSoundThemes().mapNotNull(SoundTheme::name)
     val current = SoundThemeManager.getActiveSoundTheme().getOrNull()?.name ?: ""
@@ -123,7 +123,7 @@ fun Context.soundPicker(
         .setTitle(R.string.keyboard__key_sound_package_title)
         .setSingleChoiceItems(
             all.toTypedArray(),
-            checked
+            checked,
         ) { _, id -> checked = id }
         .setPositiveButton(android.R.string.ok) { _, _ ->
             SoundThemeManager.switchSound(all[checked])

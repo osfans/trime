@@ -31,7 +31,7 @@ class LicenseFragment : PaddingPreferenceFragment() {
                                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(license.licenseUrl)))
                                 true
                             }
-                        }
+                        },
                     )
                 }
                 preferenceScreen = screen

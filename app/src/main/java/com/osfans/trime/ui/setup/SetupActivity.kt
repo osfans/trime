@@ -39,7 +39,10 @@ class SetupActivity : FragmentActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.root.setPadding(
-                sysBars.left, sysBars.top, sysBars.right, sysBars.bottom
+                sysBars.left,
+                sysBars.top,
+                sysBars.right,
+                sysBars.bottom,
             )
             windowInsets
         }
@@ -64,7 +67,9 @@ class SetupActivity : FragmentActivity() {
             setOnClickListener {
                 if (viewPager.currentItem != SetupPage.values().size - 1) {
                     viewPager.currentItem = viewPager.currentItem + 1
-                } else finish()
+                } else {
+                    finish()
+                }
             }
         }
         viewPager = binding.viewpager
@@ -78,8 +83,11 @@ class SetupActivity : FragmentActivity() {
                 prevButton.visibility = if (position != 0) View.VISIBLE else View.GONE
                 nextButton.text =
                     getString(
-                        if (position.isLastPage())
-                            R.string.setup__done else R.string.setup__next
+                        if (position.isLastPage()) {
+                            R.string.setup__done
+                        } else {
+                            R.string.setup__next
+                        },
                     )
             }
         })
@@ -114,8 +122,8 @@ class SetupActivity : FragmentActivity() {
                             this,
                             0,
                             Intent(this, javaClass),
-                            PendingIntent.FLAG_IMMUTABLE
-                        )
+                            PendingIntent.FLAG_IMMUTABLE,
+                        ),
                     )
                     .setAutoCancel(true)
             }

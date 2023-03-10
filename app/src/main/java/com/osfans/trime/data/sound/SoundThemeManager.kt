@@ -13,8 +13,8 @@ object SoundThemeManager {
 
     private val yaml = Yaml(
         configuration = YamlConfiguration(
-            strictMode = false
-        )
+            strictMode = false,
+        ),
     )
 
     private fun listSounds(): MutableList<SoundTheme> {

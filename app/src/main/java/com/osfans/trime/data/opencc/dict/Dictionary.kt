@@ -40,19 +40,22 @@ abstract class Dictionary {
     }
 
     protected fun ensureFileExists() {
-        if (!file.exists())
+        if (!file.exists()) {
             throw IllegalStateException("File ${file.absolutePath} does not exist")
+        }
     }
 
     protected fun ensureTxt(dest: File) {
-        if (dest.extension != Type.Text.ext)
+        if (dest.extension != Type.Text.ext) {
             throw IllegalArgumentException("Dest file name must end with .${Type.Text.ext}")
+        }
         dest.delete()
     }
 
     protected fun ensureBin(dest: File) {
-        if (dest.extension != Type.OPENCC.ext)
+        if (dest.extension != Type.OPENCC.ext) {
             throw IllegalArgumentException("Dest file name must end with .${Type.OPENCC.ext}")
+        }
         dest.delete()
     }
 

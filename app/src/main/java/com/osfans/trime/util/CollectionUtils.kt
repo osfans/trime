@@ -24,7 +24,7 @@ object CollectionUtils {
     fun obtainString(
         map: Map<String?, Any?>?,
         key: String,
-        defValue: String = ""
+        defValue: String = "",
     ): String {
         if (map == null || map.isEmpty() || key.isEmpty()) return defValue
         val v = obtainValue(map, key)
@@ -53,7 +53,7 @@ object CollectionUtils {
     fun obtainBoolean(
         map: Map<String?, Any?>?,
         key: String,
-        defValue: Boolean = false
+        defValue: Boolean = false,
     ): Boolean {
         return if (map == null || map.isEmpty() || key.isEmpty()) defValue else obtainString(map, key).toBoolean()
     }

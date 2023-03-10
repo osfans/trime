@@ -15,7 +15,7 @@ object InputMethodUtils {
     fun checkIsTrimeEnabled(): Boolean {
         val activeImeIds = Settings.Secure.getString(
             appContext.contentResolver,
-            Settings.Secure.ENABLED_INPUT_METHODS
+            Settings.Secure.ENABLED_INPUT_METHODS,
         ) ?: "(none)"
 
         Timber.i("List of active IMEs: $activeImeIds")
@@ -25,7 +25,7 @@ object InputMethodUtils {
     fun checkIsTrimeSelected(): Boolean {
         val selectedImeIds = Settings.Secure.getString(
             appContext.contentResolver,
-            Settings.Secure.DEFAULT_INPUT_METHOD
+            Settings.Secure.DEFAULT_INPUT_METHOD,
         ) ?: "(none)"
         Timber.i("Selected IME: $selectedImeIds")
         return selectedImeIds == serviceName

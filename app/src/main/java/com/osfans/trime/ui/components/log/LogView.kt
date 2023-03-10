@@ -43,8 +43,8 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
             recyclerView,
             LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ),
         )
     }
 
@@ -78,7 +78,7 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
                 'E' -> R.color.red_400
                 'F' -> R.color.red_A700
                 else -> R.color.colorPrimary
-            }
+            },
         )
         logAdapter.append(
             SpannableString(str).apply {
@@ -86,9 +86,9 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
                     ForegroundColorSpan(color),
                     0,
                     str.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
                 )
-            }
+            },
         )
     }
 

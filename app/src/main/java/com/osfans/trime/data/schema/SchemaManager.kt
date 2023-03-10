@@ -16,8 +16,8 @@ object SchemaManager {
 
     private val yaml = Yaml(
         configuration = YamlConfiguration(
-            strictMode = false
-        )
+            strictMode = false,
+        ),
     )
 
     @JvmStatic
@@ -28,7 +28,7 @@ object SchemaManager {
             .readText()
         currentSchema = yaml.decodeFromString(
             RimeSchema.serializer(),
-            raw
+            raw,
         )
         visibleSwitches = currentSchema.switches
             .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
@@ -78,7 +78,9 @@ object SchemaManager {
             val text = switch.states[enabled]
             val comment = if (switch.options.isEmpty()) {
                 "${if (arrow) "→ " else ""}${switch.states[1 - enabled]}"
-            } else ""
+            } else {
+                ""
+            }
             CandidateListItem(comment, text)
         }
     }

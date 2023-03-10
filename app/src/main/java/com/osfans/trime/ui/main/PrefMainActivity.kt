@@ -83,7 +83,7 @@ class PrefMainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar.toolbar)
         val appBarConfiguration = AppBarConfiguration(
             topLevelDestinationIds = setOf(),
-            fallbackOnNavigateUpListener = ::onNavigateUpListener
+            fallbackOnNavigateUpListener = ::onNavigateUpListener,
         )
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -115,7 +115,8 @@ class PrefMainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.preference__menu_deploy -> {
                 lifecycleScope.withLoadingDialog(
-                    context = this, titleId = R.string.deploy_progress
+                    context = this,
+                    titleId = R.string.deploy_progress,
                 ) {
                     withContext(Dispatchers.IO) {
                         Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
@@ -155,7 +156,8 @@ class PrefMainActivity : AppCompatActivity() {
                     if (never) {
                         ToastUtils.showShort(R.string.external_storage_permission_denied)
                         XXPermissions.startPermissionActivity(
-                            this@PrefMainActivity, permissions
+                            this@PrefMainActivity,
+                            permissions,
                         )
                     } else {
                         ToastUtils.showShort(R.string.external_storage_permission_denied)

@@ -3,7 +3,7 @@ package com.osfans.trime.data
 import com.osfans.trime.util.appContext
 
 class SymbolHistory(
-    val capacity: Int
+    val capacity: Int,
 ) : LinkedHashMap<String, String>(0, .75f, true) {
 
     companion object {
@@ -15,8 +15,9 @@ class SymbolHistory(
     fun load() {
         val all = file.readLines()
         all.forEach {
-            if (it.isNotBlank())
+            if (it.isNotBlank()) {
                 put(it, it)
+            }
         }
     }
 

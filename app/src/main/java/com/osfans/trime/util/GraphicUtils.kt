@@ -18,7 +18,9 @@ object GraphicUtils {
             hanBFont
         } else if (latinFont != Typeface.DEFAULT && codePoint < 0x2E80) {
             latinFont
-        } else font
+        } else {
+            font
+        }
     }
 
     @JvmStatic

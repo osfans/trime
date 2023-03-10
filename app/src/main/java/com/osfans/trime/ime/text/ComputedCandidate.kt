@@ -18,7 +18,7 @@ sealed class ComputedCandidate(val geometry: Rect) {
     class Word(
         val word: String,
         val comment: String?,
-        geometry: Rect
+        geometry: Rect,
     ) : ComputedCandidate(geometry) {
         override fun toString(): String {
             return "Word { word=\"$word\", comment=\"$comment\", geometry=$geometry }"
@@ -33,7 +33,7 @@ sealed class ComputedCandidate(val geometry: Rect) {
      */
     class Symbol(
         val arrow: String,
-        geometry: Rect
+        geometry: Rect,
     ) : ComputedCandidate(geometry) {
         override fun toString(): String {
             return "Symbol { arrow=$arrow, geometry=$geometry }"

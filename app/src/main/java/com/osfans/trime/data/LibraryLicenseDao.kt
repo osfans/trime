@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 
 object LibraryLicenseDao {
     private const val LICENSE_JSON = "licenses.json"
+
     @Serializable
     data class License(
         val artifactId: ArtifactId,
@@ -18,14 +19,14 @@ object LibraryLicenseDao {
         val licenseUrl: String? = null,
         val normalizedLicense: String? = null,
         val url: String? = null,
-        val libraryName: String
+        val libraryName: String,
     )
 
     @Serializable
     data class ArtifactId(
         val name: String,
         val group: String,
-        val version: String
+        val version: String,
     )
 
     private lateinit var result: List<License>
@@ -46,9 +47,9 @@ object LibraryLicenseDao {
                 val parsed = json.decodeFromString(
                     MapSerializer(
                         String.serializer(),
-                        ListSerializer(License.serializer())
+                        ListSerializer(License.serializer()),
                     ),
-                    raw
+                    raw,
                 )["libraries"]!!
                     .filter { !it.licenseUrl.isNullOrEmpty() }
                     .sortedBy { it.libraryName }

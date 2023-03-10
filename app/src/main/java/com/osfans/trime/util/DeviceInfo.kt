@@ -26,13 +26,13 @@ object DeviceInfo {
             appendLine("Screen Density: ${ScreenUtils.getScreenDensity()}")
             appendLine(
                 "Screen orientation: ${
-                when (context.resources.configuration.orientation) {
-                    Configuration.ORIENTATION_PORTRAIT -> "Portrait"
-                    Configuration.ORIENTATION_LANDSCAPE -> "Landscape"
-                    Configuration.ORIENTATION_UNDEFINED -> "Undefined"
-                    else -> "Unknown"
-                }
-                }"
+                    when (context.resources.configuration.orientation) {
+                        Configuration.ORIENTATION_PORTRAIT -> "Portrait"
+                        Configuration.ORIENTATION_LANDSCAPE -> "Landscape"
+                        Configuration.ORIENTATION_UNDEFINED -> "Undefined"
+                        else -> "Unknown"
+                    }
+                }",
             )
         }
 }

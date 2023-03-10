@@ -8,14 +8,14 @@ import androidx.annotation.StringRes
 inline fun <T : Throwable> errorT(
     cons: (String) -> T,
     @StringRes messageTemplate: Int,
-    messageArg: String? = null
+    messageArg: String? = null,
 ): Nothing =
     throw cons(
         messageArg?.let {
             appContext.getString(messageTemplate, it)
         } ?: appContext.getString(
-            messageTemplate
-        )
+            messageTemplate,
+        ),
     )
 
 fun errorState(@StringRes messageTemplate: Int, messageArg: String? = null): Nothing =

@@ -50,7 +50,7 @@ class LogAdapter(private val entries: MutableList<SpannableString> = mutableList
                     marginStart = dp2px(4)
                     marginEnd = dp2px(4)
                 }
-            }
+            },
         )
     }
 

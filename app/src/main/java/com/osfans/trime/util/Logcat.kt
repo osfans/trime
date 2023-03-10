@@ -56,23 +56,25 @@ class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope
      * Create a process reading logcat, sending lines to [logFlow]
      */
     fun initLogFlow() =
-        if (process != null)
+        if (process != null) {
             errorState(R.string.exception_logcat_created)
-        else launch {
-            runCatching {
-                Runtime
-                    .getRuntime()
-                    .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "brief"))
-                    .also { process = it }
-                    .inputStream
-                    .bufferedReader()
-                    .lineSequence()
-                    .asFlow()
-                    .flowOn(Dispatchers.IO)
-                    .cancellable()
-                    .collect { flow.emit(it) }
-            }
-        }.also { emittingJob = it }
+        } else {
+            launch {
+                runCatching {
+                    Runtime
+                        .getRuntime()
+                        .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "brief"))
+                        .also { process = it }
+                        .inputStream
+                        .bufferedReader()
+                        .lineSequence()
+                        .asFlow()
+                        .flowOn(Dispatchers.IO)
+                        .cancellable()
+                        .collect { flow.emit(it) }
+                }
+            }.also { emittingJob = it }
+        }
 
     /**
      * Destroy the reading process

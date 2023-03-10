@@ -35,14 +35,14 @@ fun pressHighlightDrawable(@ColorInt color: Int) = StateListDrawable().apply {
 fun circlePressHighlightDrawable(@ColorInt color: Int) = StateListDrawable().apply {
     addState(
         intArrayOf(android.R.attr.state_pressed),
-        ShapeDrawable(OvalShape()).apply { paint.color = color }
+        ShapeDrawable(OvalShape()).apply { paint.color = color },
     )
 }
 
 fun borderDrawable(
     width: Int,
     @ColorInt stroke: Int,
-    @ColorInt background: Int = Color.TRANSPARENT
+    @ColorInt background: Int = Color.TRANSPARENT,
 ) = GradientDrawable().apply {
     setStroke(width, stroke)
     setColor(background)
@@ -53,7 +53,7 @@ fun borderDrawable(
     radius: Float,
     alpha: Int,
     @ColorInt stroke: Int,
-    @ColorInt background: Int = Color.TRANSPARENT
+    @ColorInt background: Int = Color.TRANSPARENT,
 ) = GradientDrawable().apply {
     setStroke(width, stroke)
     cornerRadius = radius

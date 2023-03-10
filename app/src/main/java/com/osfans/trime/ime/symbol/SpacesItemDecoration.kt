@@ -9,7 +9,7 @@ class SpacesItemDecoration(private val space: Int) : RecyclerView.ItemDecoration
         outRect: Rect,
         view: View,
         parent: RecyclerView,
-        state: RecyclerView.State
+        state: RecyclerView.State,
     ) = outRect.run {
         left = space
         top = space

@@ -1,4 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE")
+
 package com.osfans.trime.util
 
 import android.content.res.Resources

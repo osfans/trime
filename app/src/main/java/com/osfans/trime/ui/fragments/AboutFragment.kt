@@ -30,7 +30,7 @@ class AboutFragment : PaddingPreferenceFragment() {
                 isCopyingEnabled = true
                 intent = Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("${Const.currentGitRepo}/commits/${Const.buildGitHash}")
+                    Uri.parse("${Const.currentGitRepo}/commits/${Const.buildGitHash}"),
                 )
             }
             get<Preference>("about__buildinfo")?.apply {

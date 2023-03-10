@@ -54,7 +54,7 @@ object ViewUtils {
         } else {
             throw IllegalArgumentException(
                 "Layout parameter doesn't have gravity: " +
-                    lp.javaClass.name
+                    lp.javaClass.name,
             )
         }
     }

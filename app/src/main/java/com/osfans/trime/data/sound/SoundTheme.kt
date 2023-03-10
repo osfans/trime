@@ -10,7 +10,7 @@ data class SoundTheme(
     val sound: List<String>,
     val folder: String,
     val melody: List<String>? = null,
-    val keyset: List<Key>
+    val keyset: List<Key>,
 ) {
     @Serializable
     data class Key(
@@ -18,7 +18,7 @@ data class SoundTheme(
         val max: String? = null,
         val keys: List<String>? = null,
         val inOrder: Boolean,
-        val sounds: List<Int>
+        val sounds: List<Int>,
     ) {
         val sysKeys = keys?.map(String::uppercase)?.map(KeyEvent::keyCodeFromString)
 

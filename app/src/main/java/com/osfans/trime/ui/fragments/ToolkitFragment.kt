@@ -23,7 +23,7 @@ class ToolkitFragment : PaddingPreferenceFragment() {
                     ShortcutUtils.launchLogActivity(context)
                     true
                 }
-            }
+            },
         )
         preferenceScreen = screen
     }

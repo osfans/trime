@@ -61,7 +61,8 @@ class LiquidKeyboard(private val context: Context) {
         when (tag.type) {
             SymbolKeyboardType.CLIPBOARD,
             SymbolKeyboardType.COLLECTION,
-            SymbolKeyboardType.DRAFT -> {
+            SymbolKeyboardType.DRAFT,
+            -> {
                 tabManager.select(i)
                 initDbData(tag.type)
             }
@@ -246,7 +247,9 @@ class LiquidKeyboard(private val context: Context) {
                 if (Rime.isComposing()) {
                     updateCandidates(Rime.getCandidatesWithoutSwitch().asList())
                     keyboardView.scrollToPosition(0)
-                } else service.selectLiquidKeyboard(-1)
+                } else {
+                    service.selectLiquidKeyboard(-1)
+                }
             }
         }
         // 设置布局管理器
@@ -273,7 +276,7 @@ class LiquidKeyboard(private val context: Context) {
             keyboardView.isSelected = true
         }
         candidateAdapter.updateCandidates(
-            data.map { b -> CandidateListItem("", b.text) }
+            data.map { b -> CandidateListItem("", b.text) },
         )
     }
 }

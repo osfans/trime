@@ -16,8 +16,10 @@ object StringUtils {
                     if (SECTION_DIVIDER.indexOf(c) < 0) true else false
                 while (i < str.length) {
                     c = str[i]
-                    if (SECTION_DIVIDER.indexOf(c) < 0) judge =
-                        true else if (judge) {
+                    if (SECTION_DIVIDER.indexOf(c) < 0) {
+                        judge =
+                            true
+                    } else if (judge) {
                         return i
                     }
                     i++
@@ -36,8 +38,10 @@ object StringUtils {
                     if (SECTION_DIVIDER.indexOf(c) < 0) true else false
                 while (i >= 0) {
                     c = str[i]
-                    if (SECTION_DIVIDER.indexOf(c) < 0) judge =
-                        true else if (judge) {
+                    if (SECTION_DIVIDER.indexOf(c) < 0) {
+                        judge =
+                            true
+                    } else if (judge) {
                         return i
                     }
                     i--

@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 class CoroutineChoiceDialog(
     context: Context,
-    @StyleRes themeResId: Int
+    @StyleRes themeResId: Int,
 ) : CoroutineScope by (context as LifecycleOwner).lifecycleScope {
     private val builder = AlertDialog.Builder(context, themeResId)
     var items: Array<CharSequence> = arrayOf()

@@ -28,7 +28,9 @@ class EditorInstance(private val ims: InputMethodService) {
             val ei = editorInfo ?: return 0
             return if (ei.inputType != EditorInfo.TYPE_NULL) {
                 ic.getCursorCapsMode(ei.inputType)
-            } else 0
+            } else {
+                0
+            }
         }
     val textInputManager: TextInputManager
         get() = (ims as Trime).textInputManager
@@ -39,8 +41,9 @@ class EditorInstance(private val ims: InputMethodService) {
     fun commitText(text: CharSequence, clearMeatKeyState: Boolean = false): Boolean {
         val ic = inputConnection ?: return false
         ic.commitText(text, 1)
-        if (text.isNotEmpty())
+        if (text.isNotEmpty()) {
             lastCommittedText = text
+        }
         if (clearMeatKeyState) {
             ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
             DraftHelper.onInputEventChanged()
@@ -179,8 +182,8 @@ class EditorInstance(private val ims: InputMethodService) {
                 KeyCharacterMap.VIRTUAL_KEYBOARD,
                 0,
                 KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE,
-                InputDevice.SOURCE_KEYBOARD
-            )
+                InputDevice.SOURCE_KEYBOARD,
+            ),
         )
     }
 
@@ -197,8 +200,8 @@ class EditorInstance(private val ims: InputMethodService) {
                 KeyCharacterMap.VIRTUAL_KEYBOARD,
                 0,
                 KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE,
-                InputDevice.SOURCE_KEYBOARD
-            )
+                InputDevice.SOURCE_KEYBOARD,
+            ),
         )
     }
 
@@ -221,7 +224,7 @@ class EditorInstance(private val ims: InputMethodService) {
                 or KeyEvent.META_ALT_MASK
                 or KeyEvent.META_CTRL_MASK
                 or KeyEvent.META_META_MASK
-                or KeyEvent.META_SYM_ON
+                or KeyEvent.META_SYM_ON,
         )
         ic.beginBatchEdit()
         val eventTime = SystemClock.uptimeMillis()

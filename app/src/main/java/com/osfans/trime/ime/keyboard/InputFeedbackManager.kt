@@ -20,7 +20,7 @@ import java.util.Locale
  * Manage the key press effects, such as vibration, sound, speaking and so on.
  */
 class InputFeedbackManager(
-    private val ims: InputMethodService
+    private val ims: InputMethodService,
 ) {
     private val prefs: AppPrefs get() = AppPrefs.defaultInstance()
 
@@ -47,7 +47,7 @@ class InputFeedbackManager(
                 .setAudioAttributes(
                     AudioAttributes.Builder()
                         .setLegacyStreamType(AudioManager.STREAM_SYSTEM)
-                        .build()
+                        .build(),
                 ).build()
             soundIds.clear()
             soundIds.addAll(path.map { soundPool!!.load(it, 1) })
@@ -77,7 +77,7 @@ class InputFeedbackManager(
                     } else {
                         @Suppress("DEPRECATION")
                         HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                    }
+                    },
                 )
             } else {
                 false
@@ -94,8 +94,9 @@ class InputFeedbackManager(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(
                     VibrationEffect.createOneShot(
-                        vibrationDuration, vibrationAmplitude
-                    )
+                        vibrationDuration,
+                        vibrationAmplitude,
+                    ),
                 )
             } else {
                 @Suppress("DEPRECATION")
@@ -152,7 +153,7 @@ class InputFeedbackManager(
                 }
                 audioManager.playSoundEffect(
                     effect,
-                    soundVolume
+                    soundVolume,
                 )
             }
         }

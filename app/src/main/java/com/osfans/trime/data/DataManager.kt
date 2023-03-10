@@ -10,11 +10,14 @@ object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
 
     val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
+
     @JvmStatic
     val sharedDataDir = File(prefs.profile.sharedDataDir)
+
     @JvmStatic
     val userDataDir = File(prefs.profile.userDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
+
     @JvmStatic
     val buildDir = File(userDataDir, "build")
 
@@ -50,10 +53,12 @@ object DataManager {
             Timber.d("Diff: $this")
             when (this) {
                 is Diff.New -> ResourceUtils.copyFileFromAssets(
-                    "rime", sharedDataDir.absolutePath
+                    "rime",
+                    sharedDataDir.absolutePath,
                 )
                 is Diff.Update -> ResourceUtils.copyFileFromAssets(
-                    "rime", sharedDataDir.absolutePath
+                    "rime",
+                    sharedDataDir.absolutePath,
                 )
                 is Diff.Keep -> {}
             }

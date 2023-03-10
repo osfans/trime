@@ -128,8 +128,11 @@ object ClipboardHelper :
         if (all.size > limit) {
             val outdated = all
                 .map {
-                    if (it.pinned) it.copy(id = Int.MAX_VALUE)
-                    else it
+                    if (it.pinned) {
+                        it.copy(id = Int.MAX_VALUE)
+                    } else {
+                        it
+                    }
                 }
                 .sortedBy { it.id }
                 .subList(0, all.size - limit)

@@ -15,7 +15,7 @@ data class DatabaseBean(
     val html: String? = null,
     val type: BeanType = BeanType.TEXT,
     val time: Long = System.currentTimeMillis(),
-    val pinned: Boolean = false
+    val pinned: Boolean = false,
 ) {
     companion object {
         const val TABLE_NAME = "t_data"
@@ -32,7 +32,7 @@ data class DatabaseBean(
     }
 
     enum class BeanType {
-        TEXT, HTML;
+        TEXT, HTML
     }
 
     class Converters {

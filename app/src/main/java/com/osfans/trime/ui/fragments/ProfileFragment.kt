@@ -35,7 +35,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
             it ?: return@registerForActivityResult
             val uri = DocumentsContract.buildDocumentUriUsingTree(
                 it,
-                DocumentsContract.getTreeDocumentId(it)
+                DocumentsContract.getTreeDocumentId(it),
             )
             dialogView.editText.setText(UriUtils.uri2File(uri).absolutePath)
         }
@@ -75,8 +75,8 @@ class ProfileFragment : PaddingPreferenceFragment() {
                                     R.string.success
                                 } else {
                                     R.string.failure
-                                }
-                            )
+                                },
+                            ),
                         )
                     }
                 summaryOff = context.getString(R.string.profile_enable_syncing_in_background)
@@ -100,7 +100,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
                                             runCatching {
                                                 ResourceUtils.copyFileFromAssets(
                                                     "rime/$a",
-                                                    "${DataManager.sharedDataDir.absolutePath}/$a"
+                                                    "${DataManager.sharedDataDir.absolutePath}/$a",
                                                 )
                                             }.getOrNull() ?: false
                                             )
@@ -109,7 +109,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
                             }
                         }
                         ToastUtils.showShort(
-                            if (res) R.string.reset_success else R.string.reset_failure
+                            if (res) R.string.reset_success else R.string.reset_failure,
                         )
                     }.show()
                 true
