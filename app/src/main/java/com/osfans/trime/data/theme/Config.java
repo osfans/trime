@@ -90,25 +90,15 @@ public class Config {
     Timber.i("Initializing theme, currentThemeName=%s ...", active);
     try {
       final String themeFileName = active + ".yaml";
-      final String themeCustomFileName =
-          active.equals("trime")
-              ? active + ".custom.yaml"
-              : active.replace(".trime", ".custom") + ".yaml";
-      final File original = new File(Rime.getRimeUserDataDir(), themeFileName);
-      final File custom = new File(Rime.getRimeUserDataDir(), themeCustomFileName);
-      final File built = new File(Rime.getRimeUserDataDir(), "build/" + themeFileName);
-      if (original.lastModified() <= built.lastModified()
-          && custom.lastModified() <= built.lastModified()) {
-        Timber.i("Deployed file exists, skipping deployment ...");
-      } else {
-        Timber.i("The theme has been modified or not yet been deployed, deploying ...");
-        Rime.deployRimeConfigFile(themeFileName, VERSION_KEY);
+      Timber.i("Deploying theme '%s' ...", themeFileName);
+      if (!Rime.deployRimeConfigFile(themeFileName, VERSION_KEY)) {
+        Timber.w("Deploying theme '%s' failed", themeFileName);
       }
 
       Timber.d("Fetching global theme config map ...");
       long start = System.currentTimeMillis();
       Map<String, Object> fullThemeConfigMap;
-      if ((fullThemeConfigMap = Rime.getRimeConfigMap(ThemeManager.getActiveTheme(), "")) == null) {
+      if ((fullThemeConfigMap = Rime.getRimeConfigMap(active, "")) == null) {
         fullThemeConfigMap = Rime.getRimeConfigMap(defaultThemeName, "");
       }
 
