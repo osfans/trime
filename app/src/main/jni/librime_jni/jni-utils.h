@@ -4,6 +4,12 @@
 #include <jni.h>
 #include <string>
 
+static inline void throwJavaException(JNIEnv *env, const char *msg) {
+    jclass c = env->FindClass("java/lang/Exception");
+    env->ThrowNew(c, msg);
+    env->DeleteLocalRef(c);
+}
+
 class CString {
 private:
     JNIEnv *env_;
@@ -15,7 +21,7 @@ public:
             : env_(env), str_(str), chr_(env->GetStringUTFChars(str, nullptr)) {}
 
     ~CString() {
-            env_->ReleaseStringUTFChars(str_, chr_);
+        env_->ReleaseStringUTFChars(str_, chr_);
     }
 
     operator std::string() { return chr_; }
@@ -35,7 +41,7 @@ public:
     JRef(JNIEnv *env, jobject ref) : env_(env), ref_(reinterpret_cast<T>(ref)) {}
 
     ~JRef() {
-            env_->DeleteLocalRef(ref_);
+        env_->DeleteLocalRef(ref_);
     }
 
     operator T() { return ref_; }
