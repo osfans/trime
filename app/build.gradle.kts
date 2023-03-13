@@ -63,6 +63,7 @@ fun buildInfo(): String {
 }
 
 android {
+    namespace = "com.osfans.trime"
     compileSdk = 33
     ndkVersion = "24.0.8215888"
 
