@@ -14,11 +14,8 @@ option(BUILD_TESTING "" OFF)
 # iconv for Boost::locale
 include(Iconv)
 # workaround for boost install
-install(TARGETS iconv EXPORT boost_locale-targets
-  ARCHIVE DESTINATION dummy # remove this line after cmake >= 3.18
-)
+install(TARGETS iconv EXPORT boost_locale-targets)
 
-option(BOOST_FILESYSTEM_DISABLE_STATX "" ON) # remove this option after targetSdkVersion >= 30
 add_subdirectory(boost)
 
 option(WITH_GFLAGS "Use gflags" OFF)
@@ -27,7 +24,6 @@ option(WITH_UNWIND "Enable libunwind support" OFF)
 add_subdirectory(librime/deps/glog)
 
 option(YAML_CPP_BUILD_TOOLS "" OFF)
-# TODO: remove below options after librime > 1.7.3
 option(YAML_CPP_BUILD_TESTS "" OFF)
 option(YAML_CPP_INSTALL "" OFF)
 add_subdirectory(librime/deps/yaml-cpp)
@@ -44,7 +40,6 @@ option(LEVELDB_BUILD_BENCHMARKS "" OFF)
 option(LEVELDB_INSTALL "" OFF)
 add_subdirectory(librime/deps/leveldb)
 
-# TODO: use librime/thirdparty/src/opencc instead after librime > 1.7.3
 add_subdirectory(OpenCC)
 include(OpenccWorkarounds)
 

@@ -1,4 +1,4 @@
-set(Boot_FOUND TRUE)
+set(Boost_FOUND TRUE)
 
 # libraries that can't compile
 set(BOOST_EXCLUDE_LIBRARIES "context;coroutine;fiber" CACHE STRING "" FORCE)
