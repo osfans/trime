@@ -135,6 +135,11 @@ android {
         jvmTarget = "1.8"
     }
 
+    // hack workaround lint gradle 8.0.2
+    lintOptions {
+        isCheckReleaseBuilds = false
+    }
+
     externalNativeBuild {
         cmake {
             version = "3.22.1"
