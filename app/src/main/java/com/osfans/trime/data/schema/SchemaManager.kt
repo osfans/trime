@@ -20,16 +20,20 @@ object SchemaManager {
         ),
     )
 
+    private val defaultSchema = RimeSchema()
+
     @JvmStatic
     fun init(schemaId: String) {
         val raw = File(DataManager.buildDir, "$schemaId.schema.yaml")
             .inputStream()
             .bufferedReader()
-            .readText()
-        currentSchema = yaml.decodeFromString(
-            RimeSchema.serializer(),
-            raw,
-        )
+            .use { it.readText() }
+        currentSchema = kotlin.runCatching {
+            yaml.decodeFromString(
+                RimeSchema.serializer(),
+                raw,
+            )
+        }.getOrDefault(defaultSchema)
         visibleSwitches = currentSchema.switches
             .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
         updateSwitchOptions()
@@ -56,17 +60,15 @@ object SchemaManager {
         if (!this::visibleSwitches.isInitialized || visibleSwitches.isEmpty()) return
         val switch = visibleSwitches[index]
         val enabled = switch.enabled
-        val next: Int
-        if (switch.options.isEmpty()) {
-            next = 1 - switch.enabled
-            Rime.setOption(switch.name!!, next == 1)
+        switch.enabled = if (switch.options.isEmpty()) {
+            (1 - enabled).also { Rime.setOption(switch.name!!, it == 1) }
         } else {
             val options = switch.options
-            next = (enabled + 1) % options.size
-            Rime.setOption(options[enabled], false)
-            Rime.setOption(options[next], true)
+            ((enabled + 1) % options.size).also {
+                Rime.setOption(options[enabled], false)
+                Rime.setOption(options[it], true)
+            }
         }
-        switch.enabled = next
     }
 
     @JvmStatic
