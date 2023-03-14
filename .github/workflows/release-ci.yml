@@ -52,6 +52,9 @@ jobs:
           echo "set up keystore for release"
           echo "need help!!"
 
+      - name: Install dependency
+        run: ./script/dependency.sh
+
       - name: Build Trime
         run: make debug
         

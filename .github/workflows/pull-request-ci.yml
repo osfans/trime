@@ -44,6 +44,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Install dependency
+        run: ./script/dependency.sh
+
       - name: Build Trime
         run: make debug
 
