@@ -51,9 +51,6 @@ jobs:
         run: |
           echo "set up keystore for release"
           echo "need help!!"
-          
-      - name: Spotless code style check
-        run: make spotless
 
       - name: Build Trime
         run: make debug
