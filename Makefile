@@ -2,7 +2,7 @@ mainDir=app/src/main
 resDir=$(mainDir)/res
 jniDir=$(mainDir)/jni
 
-.PHONY: all clean build debug spotless release install opencc-data translate ndk android
+.PHONY: all clean build debug spotlessCheck spotlessApply clang-format-lint clang-format style-lint style-apply release install opencc-data translate ndk android
 
 all: release
 
@@ -10,18 +10,31 @@ clean:
 	rm -rf build app/build app/.cxx/
 	./gradlew clean
 
-build:
+build: style-lint
 	./gradlew build
 
-TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
-release: opencc-data spotless
-	./gradlew assembleRelease
-
-spotless:
+spotlessCheck:
 	./gradlew spotlessCheck
 
-debug:
+spotlessApply:
+	./gradlew spotlessApply
+
+clang-format-lint:
+	./script/clang-format.sh -n
+
+clang-format:
+	./script/clang-format.sh -i
+
+style-lint: spotlessCheck clang-format-lint
+
+style-apply: spotlessApply clang-format
+
+debug: style-lint
 	./gradlew assembleDebug
+
+TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
+release: opencc-data style-lint
+	./gradlew assembleRelease
 
 install: release
 	./gradlew installRelease
