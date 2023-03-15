@@ -17,9 +17,9 @@ import java.text.SimpleDateFormat
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("com.cookpad.android.plugin.license-tools") version "1.2.8"
     kotlin("plugin.serialization") version "1.7.20"
     id("com.google.devtools.ksp") version "1.7.20-1.0.8"
+    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 fun exec(cmd: String): String = ByteArrayOutputStream().use {
@@ -174,6 +174,14 @@ kotlin {
     }
 }
 
+aboutLibraries {
+    configPath = "app/licenses"
+    excludeFields = arrayOf("generated", "developers", "organization", "scm", "funding", "content")
+    fetchRemoteLicense = false
+    fetchRemoteFunding = false
+    includePlatform = false
+}
+
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
@@ -181,7 +189,6 @@ ksp {
 val generateDataChecksum by tasks.register<DataChecksumsTask>("generateDataChecksum") {
     inputDir.set(file("src/main/assets"))
     outputFile.set(file("src/main/assets/checksums.json"))
-    dependsOn(tasks.findByName("generateLicenseJson"))
 }
 
 android.applicationVariants.all {
@@ -191,7 +198,6 @@ android.applicationVariants.all {
 
 tasks.register<Delete>("cleanGeneratedAssets") {
     delete(file("src/main/assets/checksums.json"))
-    delete(file("src/main/assets/licenses.json"))
 }.also { tasks.clean.dependsOn(it) }
 
 tasks.register<Delete>("cleanCxxIntermediates") {
@@ -205,6 +211,7 @@ dependencies {
     implementation("cat.ereza:customactivityoncrash:2.4.0")
     implementation("com.github.getActivity:XXPermissions:16.2")
     implementation("com.charleskorn.kaml:kaml:0.49.0")
+    implementation("com.mikepenz:aboutlibraries-core:10.6.1")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("androidx.preference:preference-ktx:1.2.0")
