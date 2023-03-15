@@ -1,0 +1,11 @@
+{
+    "uniqueId": "google/leveldb",
+    "artifactVersion": "1.23.0",
+    "description": "Fast key-value storage library written that provides an ordered mapping from string keys to string values",
+    "name": "google/leveldb",
+    "website": "https://github.com/google/leveldb",
+    "tag": "native",
+    "licenses": [
+        "BSD-3-Clause"
+    ]
+}

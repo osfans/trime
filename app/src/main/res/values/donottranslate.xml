@@ -19,7 +19,6 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
-    <string name="about__license_summary" translatable="false">GPLv3</string>
     <string-array name="keyboard__inline_values">
         <item>preview</item>
         <item>composition</item>

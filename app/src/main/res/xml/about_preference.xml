@@ -45,7 +45,7 @@
 
         <Preference app:key="about__license"
             app:title="@string/about__license"
-            app:summary="@string/about__license_summary"
+            app:summary="GPL-3.0-or-later"
             app:iconSpaceReserved="false">
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://www.gnu.org/licenses/gpl-3.0.html" />
