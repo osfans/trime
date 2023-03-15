@@ -1,0 +1,11 @@
+{
+    "uniqueId": "s-yata/marisa-trie",
+    "artifactVersion": "0.2.6",
+    "description": "A static and space-efficient trie data structure",
+    "name": "s-yata/marisa-trie",
+    "website": "https://github.com/s-yata/marisa-trie",
+    "tag": "native",
+    "licenses": [
+        "BSD-2-Clause", "LGPL-2.1-or-later"
+    ]
+}
