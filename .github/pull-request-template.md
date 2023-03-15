@@ -1,22 +1,23 @@
 ## Pull request
 
 #### Issue tracker
-Fixes will automatically close the related issue
+Fixes will automatically close the related issues
 
 Fixes #
 
 #### Feature
-Describe feature of pull request
+Describe features of pull request
 
 #### Code of conduct
 - [ ] [CONTRIBUTING](CONTRIBUTING.md)
 
-#### Gradle task
-Tasks passed on every commit
-- [ ] `./gradlew spotlessCheck`
-- [ ] `./gradlew assembleDebug`
+#### Style lint
+- [ ] `make sytle-lint`
 
-#### Manual test
+#### Build pass
+- [ ] `make debug`
+
+#### Manually test
 - [ ] Done
 
 #### Code Review
@@ -28,8 +29,7 @@ Tasks passed on every commit
 6. PR will be merged by rebase upstream base
 
 #### Daily build
-Login to fetch artifact
-
-https://github.com/osfans/trime/actions
+Login and download artifact at https://github.com/osfans/trime/actions
 
 #### Additional Info
+
