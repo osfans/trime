@@ -18,8 +18,8 @@ object DataManager {
     val userDataDir = File(prefs.profile.userDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
 
-    @JvmStatic
-    val buildDir = File(userDataDir, "build")
+    private val stagingDir = File(userDataDir, "build")
+    private val prebuiltDataDir = File(sharedDataDir, "build")
 
     sealed class Diff {
         object New : Diff()
@@ -27,13 +27,21 @@ object DataManager {
         object Keep : Diff()
     }
 
+    /**
+     * Return the absolute path of the compiled config file
+     * based on given resource id.
+     *
+     * @param resourceId usually equals the config file name without the extension
+     * @return the absolute path of the compiled config file
+     */
     @JvmStatic
-    fun getDataDir(child: String = ""): String {
-        return if (File(prefs.profile.sharedDataDir, child).exists()) {
-            File(prefs.profile.sharedDataDir, child).absolutePath
-        } else {
-            File(prefs.profile.userDataDir, child).absolutePath
+    fun resolvePath(resourceId: String): String {
+        val defaultPath = File(stagingDir, "$resourceId.yaml")
+        if (!defaultPath.exists()) {
+            val fallbackPath = File(prebuiltDataDir, "$resourceId.yaml")
+            if (fallbackPath.exists()) return fallbackPath.absolutePath
         }
+        return defaultPath.absolutePath
     }
 
     private fun diff(old: String, new: String): Diff {
