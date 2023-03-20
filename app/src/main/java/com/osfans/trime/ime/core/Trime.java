@@ -1211,7 +1211,8 @@ public class Trime extends LifecycleInputMethodService {
         Timber.d("updateComposing() SymbolKeyboardType=%s", symbolKeyboardType.toString());
         if (symbolKeyboardType != SymbolKeyboardType.NO_KEY
             && symbolKeyboardType != SymbolKeyboardType.CANDIDATE) {
-          mComposition.getRootView().setVisibility(View.GONE);
+          mComposition.setWindow();
+          showCompositionView(false);
         } else {
           mComposition.getRootView().setVisibility(View.VISIBLE);
           startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize, Integer.MAX_VALUE);
