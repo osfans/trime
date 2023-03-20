@@ -1,11 +1,20 @@
 package com.osfans.trime.util.config
 
+import com.osfans.trime.data.DataManager
 import timber.log.Timber
 
 /**
  * New YAML config parser intended to replace the old one.
  */
 class Config(private val data: ConfigData = ConfigData()) {
+
+    companion object {
+        fun create(fileName: String) = Config(
+            ConfigData().apply {
+                loadFromFile(DataManager.resolveDeployedResourcePath(fileName))
+            },
+        )
+    }
 
     fun loadFromFile(fileName: String) = data.loadFromFile(fileName)
 

@@ -24,7 +24,7 @@ object SchemaManager {
 
     @JvmStatic
     fun init(schemaId: String) {
-        val raw = File(DataManager.resolvePath("$schemaId.schema"))
+        val raw = File(DataManager.resolveDeployedResourcePath("$schemaId.schema"))
             .inputStream()
             .bufferedReader()
             .use { it.readText() }

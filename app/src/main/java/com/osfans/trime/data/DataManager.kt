@@ -35,7 +35,7 @@ object DataManager {
      * @return the absolute path of the compiled config file
      */
     @JvmStatic
-    fun resolvePath(resourceId: String): String {
+    fun resolveDeployedResourcePath(resourceId: String): String {
         val defaultPath = File(stagingDir, "$resourceId.yaml")
         if (!defaultPath.exists()) {
             val fallbackPath = File(prebuiltDataDir, "$resourceId.yaml")
