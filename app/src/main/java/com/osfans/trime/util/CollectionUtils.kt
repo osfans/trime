@@ -6,7 +6,7 @@ object CollectionUtils {
 
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
-    fun obtainValue(map: Map<String?, Any?>?, vararg: String?): Any? {
+    fun obtainValue(map: Map<String, Any?>?, vararg: String?): Any? {
         if (map.isNullOrEmpty() || vararg == null) return null
         val keys = vararg.split('/')
         var v: Any? = map
@@ -22,18 +22,18 @@ object CollectionUtils {
 
     @JvmStatic
     fun obtainString(
-        map: Map<String?, Any?>?,
+        map: Map<String, Any?>?,
         key: String,
         defValue: String = "",
     ): String {
-        if (map == null || map.isEmpty() || key.isEmpty()) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val v = obtainValue(map, key)
         return v?.toString() ?: defValue
     }
 
     @JvmStatic
-    fun obtainInt(map: Map<String?, Any?>?, key: String, defValue: Int = 0): Int {
-        if (map == null || map.isEmpty() || key.isEmpty()) return defValue
+    fun obtainInt(map: Map<String, Any?>?, key: String, defValue: Int = 0): Int {
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val nm = obtainString(map, key)
         return runCatching {
             if (nm.isNotEmpty()) java.lang.Long.decode(nm).toInt() else defValue
@@ -41,7 +41,7 @@ object CollectionUtils {
     }
 
     @JvmStatic
-    fun obtainFloat(map: Map<String?, Any?>?, key: String, defValue: Float = 0f): Float {
+    fun obtainFloat(map: Map<String, Any?>?, key: String, defValue: Float = 0f): Float {
         if (map == null || map.isEmpty() || key.isEmpty()) return defValue
         val s = obtainString(map, key)
         return runCatching {
@@ -51,10 +51,10 @@ object CollectionUtils {
 
     @JvmStatic
     fun obtainBoolean(
-        map: Map<String?, Any?>?,
+        map: Map<String, Any?>?,
         key: String,
         defValue: Boolean = false,
     ): Boolean {
-        return if (map == null || map.isEmpty() || key.isEmpty()) defValue else obtainString(map, key).toBoolean()
+        return if (map.isNullOrEmpty() || key.isEmpty()) defValue else obtainString(map, key).toBoolean()
     }
 }

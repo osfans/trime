@@ -45,8 +45,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.osfans.trime.R;
 import com.osfans.trime.data.AppPrefs;
-import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
+import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.DimensionsKt;
@@ -236,7 +236,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     labelEnter = mEnterLabels.get("default");
   }
 
-  private void handleEnterLabel(@NonNull Config theme) {
+  private void handleEnterLabel(@NonNull Theme theme) {
     if ((mEnterLabels = (Map<String, String>) theme.style.getObject("enter_labels")) == null) {
       mEnterLabels = new HashMap<>();
     }
@@ -352,69 +352,69 @@ public class KeyboardView extends View implements View.OnClickListener {
   }
 
   public void reset() {
-    final Config config = Config.get();
-    key_symbol_color = config.colors.getColor("key_symbol_color");
-    hilited_key_symbol_color = config.colors.getColor("hilited_key_symbol_color");
-    mShadowColor = config.colors.getColor("shadow_color");
+    final Theme theme = Theme.get();
+    key_symbol_color = theme.colors.getColor("key_symbol_color");
+    hilited_key_symbol_color = theme.colors.getColor("hilited_key_symbol_color");
+    mShadowColor = theme.colors.getColor("shadow_color");
 
-    mSymbolSize = (int) DimensionsKt.sp2px(config.style.getFloat("symbol_text_size"));
-    mKeyTextSize = (int) DimensionsKt.sp2px(config.style.getFloat("key_text_size"));
-    mVerticalCorrection = (int) DimensionsKt.dp2px(config.style.getFloat("vertical_correction"));
-    setProximityCorrectionEnabled(config.style.getBoolean("proximity_correction"));
-    mPreviewOffset = (int) DimensionsKt.dp2px(config.style.getFloat("preview_offset"));
-    mPreviewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("preview_height"));
-    mLabelTextSize = (int) DimensionsKt.sp2px(config.style.getFloat("key_long_text_size"));
+    mSymbolSize = (int) DimensionsKt.sp2px(theme.style.getFloat("symbol_text_size"));
+    mKeyTextSize = (int) DimensionsKt.sp2px(theme.style.getFloat("key_text_size"));
+    mVerticalCorrection = (int) DimensionsKt.dp2px(theme.style.getFloat("vertical_correction"));
+    setProximityCorrectionEnabled(theme.style.getBoolean("proximity_correction"));
+    mPreviewOffset = (int) DimensionsKt.dp2px(theme.style.getFloat("preview_offset"));
+    mPreviewHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("preview_height"));
+    mLabelTextSize = (int) DimensionsKt.sp2px(theme.style.getFloat("key_long_text_size"));
     if (mLabelTextSize == 0) mLabelTextSize = mKeyTextSize;
 
-    mBackgroundDimAmount = config.style.getFloat("background_dim_amount");
-    mShadowRadius = config.style.getFloat("shadow_radius");
-    final float mRoundCorner = config.style.getFloat("round_corner");
+    mBackgroundDimAmount = theme.style.getFloat("background_dim_amount");
+    mShadowRadius = theme.style.getFloat("shadow_radius");
+    final float mRoundCorner = theme.style.getFloat("round_corner");
 
     mKeyBackColor = new StateListDrawable();
     mKeyBackColor.addState(
-        Key.KEY_STATE_PRESSED_ON, config.colors.getDrawable("hilited_on_key_back_color"));
+        Key.KEY_STATE_PRESSED_ON, theme.colors.getDrawable("hilited_on_key_back_color"));
     mKeyBackColor.addState(
-        Key.KEY_STATE_PRESSED_OFF, config.colors.getDrawable("hilited_off_key_back_color"));
-    mKeyBackColor.addState(Key.KEY_STATE_NORMAL_ON, config.colors.getDrawable("on_key_back_color"));
+        Key.KEY_STATE_PRESSED_OFF, theme.colors.getDrawable("hilited_off_key_back_color"));
+    mKeyBackColor.addState(Key.KEY_STATE_NORMAL_ON, theme.colors.getDrawable("on_key_back_color"));
     mKeyBackColor.addState(
-        Key.KEY_STATE_NORMAL_OFF, config.colors.getDrawable("off_key_back_color"));
+        Key.KEY_STATE_NORMAL_OFF, theme.colors.getDrawable("off_key_back_color"));
     mKeyBackColor.addState(
-        Key.KEY_STATE_PRESSED, config.colors.getDrawable("hilited_key_back_color"));
-    mKeyBackColor.addState(Key.KEY_STATE_NORMAL, config.colors.getDrawable("key_back_color"));
+        Key.KEY_STATE_PRESSED, theme.colors.getDrawable("hilited_key_back_color"));
+    mKeyBackColor.addState(Key.KEY_STATE_NORMAL, theme.colors.getDrawable("key_back_color"));
 
     mKeyTextColor =
         new ColorStateList(
             Key.KEY_STATES,
             new int[] {
-              config.colors.getColor("hilited_on_key_text_color"),
-              config.colors.getColor("hilited_off_key_text_color"),
-              config.colors.getColor("on_key_text_color"),
-              config.colors.getColor("off_key_text_color"),
-              config.colors.getColor("hilited_key_text_color"),
-              config.colors.getColor("key_text_color")
+              theme.colors.getColor("hilited_on_key_text_color"),
+              theme.colors.getColor("hilited_off_key_text_color"),
+              theme.colors.getColor("on_key_text_color"),
+              theme.colors.getColor("off_key_text_color"),
+              theme.colors.getColor("hilited_key_text_color"),
+              theme.colors.getColor("key_text_color")
             });
 
-    final Integer color = config.colors.getColor("preview_text_color");
+    final Integer color = theme.colors.getColor("preview_text_color");
     if (color != null) mPreviewText.setTextColor(color);
-    final Integer previewBackColor = config.colors.getColor("preview_back_color");
+    final Integer previewBackColor = theme.colors.getColor("preview_back_color");
     if (previewBackColor != null) {
       final GradientDrawable background = new GradientDrawable();
       background.setColor(previewBackColor);
       background.setCornerRadius(mRoundCorner);
       mPreviewText.setBackground(background);
     }
-    final int mPreviewTextSizeLarge = config.style.getInt("preview_text_size");
+    final int mPreviewTextSizeLarge = theme.style.getInt("preview_text_size");
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
     mShowPreview = getPrefs().getKeyboard().getPopupKeyPressEnabled();
 
-    mPaint.setTypeface(FontManager.getTypeface(config.style.getString("key_font")));
-    mPaintSymbol.setTypeface(FontManager.getTypeface(config.style.getString("symbol_font")));
+    mPaint.setTypeface(FontManager.getTypeface(theme.style.getString("key_font")));
+    mPaintSymbol.setTypeface(FontManager.getTypeface(theme.style.getString("symbol_font")));
     mPaintSymbol.setColor(key_symbol_color);
     mPaintSymbol.setTextSize(mSymbolSize);
-    mPreviewText.setTypeface(FontManager.getTypeface(config.style.getString("preview_font")));
+    mPreviewText.setTypeface(FontManager.getTypeface(theme.style.getString("preview_font")));
 
-    handleEnterLabel(config);
-    enterLabelMode = config.style.getInt("enter_label_mode");
+    handleEnterLabel(theme);
+    enterLabelMode = theme.style.getInt("enter_label_mode");
     invalidateAllKeys();
   }
 

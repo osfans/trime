@@ -12,13 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.R
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
-import com.osfans.trime.data.theme.Config
 import com.osfans.trime.data.theme.FontManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleKeyItemBinding
 import kotlinx.coroutines.launch
 
 class FlexibleAdapter(
-    private val theme: Config,
+    private val theme: Theme,
 ) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
 
@@ -66,7 +66,7 @@ class FlexibleAdapter(
                 text = bean.text
                 typeface = FontManager.getTypeface(theme.style.getString("long_text_font"))
                 when (val textColor = theme.colors.getColor("long_text_color")) {
-                    null -> setTextColor(theme.colors.getColor("key_text_color"))
+                    null -> theme.colors.getColor("key_text_color")?.let { setTextColor(it) }
                     else -> setTextColor(textColor)
                 }
 

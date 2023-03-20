@@ -24,7 +24,7 @@ import android.text.TextUtils;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.ConfigGetter;
@@ -115,7 +115,7 @@ public class Key {
   public Key(Keyboard parent, Map<String, Object> mk) {
     this(parent);
     String s;
-    Config config = Config.get();
+    Theme theme = Theme.get();
     {
       boolean hasComposingKey = false;
 
@@ -144,12 +144,12 @@ public class Key {
     mKeyboard.setModiferKey(getCode(), this);
     key_text_size = ConfigGetter.getPixel(mk, "key_text_size", 0);
     symbol_text_size = ConfigGetter.getPixel(mk, "symbol_text_size", 0);
-    key_text_color = config.colors.getColor(mk, "key_text_color");
-    hilited_key_text_color = config.colors.getColor(mk, "hilited_key_text_color");
-    key_back_color = config.colors.getDrawable(mk, "key_back_color");
-    hilited_key_back_color = config.colors.getDrawable(mk, "hilited_key_back_color");
-    key_symbol_color = config.colors.getColor(mk, "key_symbol_color");
-    hilited_key_symbol_color = config.colors.getColor(mk, "hilited_key_symbol_color");
+    key_text_color = theme.colors.getColor(mk, "key_text_color");
+    hilited_key_text_color = theme.colors.getColor(mk, "hilited_key_text_color");
+    key_back_color = theme.colors.getDrawable(mk, "key_back_color");
+    hilited_key_back_color = theme.colors.getDrawable(mk, "hilited_key_back_color");
+    key_symbol_color = theme.colors.getColor(mk, "key_symbol_color");
+    hilited_key_symbol_color = theme.colors.getColor(mk, "hilited_key_symbol_color");
     round_corner = ConfigGetter.getFloat(mk, "round_corner", 0);
   }
 

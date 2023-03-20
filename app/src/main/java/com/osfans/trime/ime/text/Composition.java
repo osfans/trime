@@ -41,8 +41,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
+import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.CollectionUtils;
@@ -212,74 +212,74 @@ public class Composition extends AppCompatTextView {
   }
 
   public void reset() {
-    final Config config = Config.get();
+    final Theme theme = Theme.get();
 
-    if ((windows_comps = (List<Map<String, Object>>) config.style.getObject("window")) == null) {
+    if ((windows_comps = (List<Map<String, Object>>) theme.style.getObject("window")) == null) {
       windows_comps = new ArrayList<>();
     }
     if ((liquid_keyboard_window_comp =
-            (List<Map<String, Object>>) config.style.getObject("liquid_keyboard_window"))
+            (List<Map<String, Object>>) theme.style.getObject("liquid_keyboard_window"))
         == null) {
       liquid_keyboard_window_comp = new ArrayList<>();
     }
 
-    if ((max_entries = config.style.getInt("layout/max_entries")) == 0) {
+    if ((max_entries = theme.style.getInt("layout/max_entries")) == 0) {
       max_entries = Candidate.getMaxCandidateCount();
     }
-    candidate_use_cursor = config.style.getBoolean("candidate_use_cursor");
-    text_size = (int) DimensionsKt.sp2px(config.style.getFloat("text_size"));
-    candidate_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("candidate_text_size"));
-    comment_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("comment_text_size"));
-    label_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("label_text_size"));
+    candidate_use_cursor = theme.style.getBoolean("candidate_use_cursor");
+    text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("text_size"));
+    candidate_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("candidate_text_size"));
+    comment_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("comment_text_size"));
+    label_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("label_text_size"));
 
-    text_color = config.colors.getColor("text_color");
-    candidate_text_color = config.colors.getColor("candidate_text_color");
-    comment_text_color = config.colors.getColor("comment_text_color");
-    hilited_text_color = config.colors.getColor("hilited_text_color");
-    hilited_candidate_text_color = config.colors.getColor("hilited_candidate_text_color");
-    hilited_comment_text_color = config.colors.getColor("hilited_comment_text_color");
-    label_color = config.colors.getColor("label_color");
-    hilited_label_color = config.colors.getColor("hilited_label_color");
+    text_color = theme.colors.getColor("text_color");
+    candidate_text_color = theme.colors.getColor("candidate_text_color");
+    comment_text_color = theme.colors.getColor("comment_text_color");
+    hilited_text_color = theme.colors.getColor("hilited_text_color");
+    hilited_candidate_text_color = theme.colors.getColor("hilited_candidate_text_color");
+    hilited_comment_text_color = theme.colors.getColor("hilited_comment_text_color");
+    label_color = theme.colors.getColor("label_color");
+    hilited_label_color = theme.colors.getColor("hilited_label_color");
     if (hilited_label_color == null) {
       hilited_label_color = hilited_candidate_text_color;
     }
 
-    back_color = config.colors.getColor("back_color");
-    hilited_back_color = config.colors.getColor("hilited_back_color");
-    hilited_candidate_back_color = config.colors.getColor("hilited_candidate_back_color");
+    back_color = theme.colors.getColor("back_color");
+    hilited_back_color = theme.colors.getColor("hilited_back_color");
+    hilited_candidate_back_color = theme.colors.getColor("hilited_candidate_back_color");
 
-    key_text_size = (int) DimensionsKt.sp2px(config.style.getFloat("key_text_size"));
-    key_text_color = config.colors.getColor("key_text_color");
-    key_back_color = config.colors.getColor("key_back_color");
+    key_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("key_text_size"));
+    key_text_color = theme.colors.getColor("key_text_color");
+    key_back_color = theme.colors.getColor("key_back_color");
 
-    float line_spacing_multiplier = config.style.getFloat("layout/line_spacing_multiplier");
+    float line_spacing_multiplier = theme.style.getFloat("layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;
-    setLineSpacing(config.style.getFloat("layout/line_spacing"), line_spacing_multiplier);
-    setMinWidth((int) DimensionsKt.dp2px(config.style.getFloat("layout/min_width")));
-    setMinHeight((int) DimensionsKt.dp2px(config.style.getFloat("layout/min_height")));
+    setLineSpacing(theme.style.getFloat("layout/line_spacing"), line_spacing_multiplier);
+    setMinWidth((int) DimensionsKt.dp2px(theme.style.getFloat("layout/min_width")));
+    setMinHeight((int) DimensionsKt.dp2px(theme.style.getFloat("layout/min_height")));
 
-    int max_width = (int) DimensionsKt.dp2px(config.style.getFloat("layout/max_width"));
-    int real_margin = (int) DimensionsKt.dp2px(config.style.getFloat("layout/real_margin"));
+    int max_width = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/max_width"));
+    int real_margin = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/real_margin"));
     int displayWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
     Timber.d("max_width = %s, displayWidth = %s ", max_width, displayWidth);
     if (max_width > displayWidth) max_width = displayWidth;
     setMaxWidth(max_width - real_margin * 2);
 
-    setMaxHeight((int) DimensionsKt.dp2px(config.style.getFloat("layout/max_height")));
+    setMaxHeight((int) DimensionsKt.dp2px(theme.style.getFloat("layout/max_height")));
     int margin_x, margin_y, margin_bottom;
-    margin_x = (int) DimensionsKt.dp2px(config.style.getFloat("layout/margin_x"));
-    margin_y = (int) DimensionsKt.dp2px(config.style.getFloat("layout/margin_y"));
-    margin_bottom = (int) DimensionsKt.dp2px(config.style.getFloat("layout/margin_bottom"));
+    margin_x = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/margin_x"));
+    margin_y = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/margin_y"));
+    margin_bottom = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/margin_bottom"));
     setPadding(margin_x, margin_y, margin_x, margin_bottom);
-    max_length = config.style.getInt("layout/max_length");
-    sticky_lines = config.style.getInt("layout/sticky_lines");
-    sticky_lines_land = config.style.getInt("layout/sticky_lines_land");
-    movable = config.style.getString("layout/movable");
-    all_phrases = config.style.getBoolean("layout/all_phrases");
-    tfLabel = FontManager.getTypeface(config.style.getString("label_font"));
-    tfText = FontManager.getTypeface(config.style.getString("text_font"));
-    tfCandidate = FontManager.getTypeface(config.style.getString("candidate_font"));
-    tfComment = FontManager.getTypeface(config.style.getString("comment_font"));
+    max_length = theme.style.getInt("layout/max_length");
+    sticky_lines = theme.style.getInt("layout/sticky_lines");
+    sticky_lines_land = theme.style.getInt("layout/sticky_lines_land");
+    movable = theme.style.getString("layout/movable");
+    all_phrases = theme.style.getBoolean("layout/all_phrases");
+    tfLabel = FontManager.getTypeface(theme.style.getString("label_font"));
+    tfText = FontManager.getTypeface(theme.style.getString("text_font"));
+    tfCandidate = FontManager.getTypeface(theme.style.getString("candidate_font"));
+    tfComment = FontManager.getTypeface(theme.style.getString("comment_font"));
   }
 
   private Object getAlign(Map<String, Object> m) {

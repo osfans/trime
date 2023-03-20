@@ -3,7 +3,7 @@ package com.osfans.trime.ime.keyboard
 import android.content.res.Configuration
 import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.theme.Config
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.util.appContext
 import timber.log.Timber
 
@@ -15,7 +15,7 @@ object KeyboardSwitcher {
 
     private var currentDisplayWidth: Int = 0
 
-    private val theme = Config.get()
+    private val theme = Theme.get()
     lateinit var availableKeyboardIds: List<String>
     lateinit var availableKeyboards: List<Keyboard>
 

@@ -11,7 +11,7 @@ import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundTheme
 import com.osfans.trime.data.sound.SoundThemeManager
-import com.osfans.trime.data.theme.Config
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
@@ -39,7 +39,7 @@ suspend fun Context.themePicker(
         onOKButton {
             with(items[checkedItem].toString()) {
                 ThemeManager.switchTheme(if (this == "trime") this else "$this.trime")
-                Config.get().init()
+                Theme.get().init()
             }
             launch {
                 Trime.getServiceOrNull()?.initKeyboard()
@@ -56,7 +56,7 @@ suspend fun Context.colorPicker(
         title = getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
         onInit {
-            val all = Config.get().presetColorSchemes
+            val all = Theme.get().getPresetColorSchemes()
             items = all.map { it.second }.toTypedArray()
             val current = prefs.themeAndColor.selectedColor
             val schemeIds = all.map { it.first }
@@ -64,7 +64,7 @@ suspend fun Context.colorPicker(
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            val all = Config.get().presetColorSchemes
+            val all = Theme.get().getPresetColorSchemes()
             val schemeIds = all.map { it.first }
             prefs.themeAndColor.selectedColor = schemeIds[checkedItem]
             launch {

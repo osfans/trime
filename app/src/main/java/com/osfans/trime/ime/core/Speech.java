@@ -29,7 +29,7 @@ import androidx.annotation.StringRes;
 import com.blankj.utilcode.util.ToastUtils;
 import com.osfans.trime.R;
 import com.osfans.trime.data.opencc.OpenCCDictManager;
-import com.osfans.trime.data.theme.Config;
+import com.osfans.trime.data.theme.Theme;
 import java.util.ArrayList;
 import java.util.Arrays;
 import timber.log.Timber;
@@ -109,7 +109,7 @@ public class Speech implements RecognitionListener {
     if (trime != null) {
       final ArrayList<String> matches =
           results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-      final String openccConfig = Config.get().style.getString("speech_opencc_config");
+      final String openccConfig = Theme.get().style.getString("speech_opencc_config");
       for (String result : matches)
         trime.commitText(OpenCCDictManager.convertLine(result, openccConfig));
     }

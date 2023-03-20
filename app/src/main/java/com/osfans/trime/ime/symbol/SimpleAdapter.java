@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
+import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.SimpleKeyItemBinding;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +22,9 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     return mBeans;
   }
 
-  private final Config theme;
+  private final Theme theme;
 
-  public SimpleAdapter(@NonNull Config theme) {
+  public SimpleAdapter(@NonNull Theme theme) {
     this.theme = theme;
   }
 

@@ -13,8 +13,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
 import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
-import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
+import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.LiquidKeyItemBinding;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +23,9 @@ import java.util.List;
 public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.ViewHolder> {
   @NonNull private final List<CandidateListItem> mCandidates = new ArrayList<>();
 
-  private final Config theme;
+  private final Theme theme;
 
-  public CandidateAdapter(@NonNull Config theme) {
+  public CandidateAdapter(@NonNull Theme theme) {
     this.theme = theme;
   }
 

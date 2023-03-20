@@ -30,8 +30,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
-import com.osfans.trime.data.theme.Config;
 import com.osfans.trime.data.theme.FontManager;
+import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.util.DimensionsKt;
@@ -57,30 +57,30 @@ public class TabView extends View {
   // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset() {
-    Config config = Config.get();
-    candidateHighlight = new PaintDrawable(config.colors.getColor("hilited_candidate_back_color"));
-    candidateHighlight.setCornerRadius(config.style.getFloat("layout/round_corner"));
+    Theme theme = Theme.get();
+    candidateHighlight = new PaintDrawable(theme.colors.getColor("hilited_candidate_back_color"));
+    candidateHighlight.setCornerRadius(theme.style.getFloat("layout/round_corner"));
 
-    separatorPaint.setColor(config.colors.getColor("candidate_separator_color"));
+    separatorPaint.setColor(theme.colors.getColor("candidate_separator_color"));
 
-    candidateSpacing = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_spacing"));
-    candidatePadding = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_padding"));
+    candidateSpacing = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_spacing"));
+    candidatePadding = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_padding"));
 
-    candidateTextColor = config.colors.getColor("candidate_text_color");
-    hilitedCandidateTextColor = config.colors.getColor("hilited_candidate_text_color");
+    candidateTextColor = theme.colors.getColor("candidate_text_color");
+    hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color");
 
-    commentHeight = (int) DimensionsKt.dp2px(config.style.getFloat("comment_height"));
+    commentHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("comment_height"));
 
-    int candidateTextSize = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_text_size"));
-    candidateViewHeight = (int) DimensionsKt.dp2px(config.style.getFloat("candidate_view_height"));
+    int candidateTextSize = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_text_size"));
+    candidateViewHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_view_height"));
 
-    candidateFont = FontManager.getTypeface(config.style.getString("candidate_font"));
+    candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
 
     candidatePaint.setTextSize(candidateTextSize);
     candidatePaint.setTypeface(candidateFont);
 
-    isCommentOnTop = config.style.getBoolean("comment_on_top");
-    shouldCandidateUseCursor = config.style.getBoolean("candidate_use_cursor");
+    isCommentOnTop = theme.style.getBoolean("comment_on_top");
+    shouldCandidateUseCursor = theme.style.getBoolean("candidate_use_cursor");
     invalidate();
   }
 
