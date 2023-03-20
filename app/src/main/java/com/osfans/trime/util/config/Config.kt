@@ -1,13 +1,5 @@
 package com.osfans.trime.util.config
 
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
-import com.charleskorn.kaml.YamlNull
-import com.charleskorn.kaml.YamlScalar
-import com.charleskorn.kaml.yamlList
-import com.charleskorn.kaml.yamlMap
-import com.charleskorn.kaml.yamlScalar
 import timber.log.Timber
 
 /**
@@ -19,65 +11,65 @@ class Config(private val data: ConfigData = ConfigData()) {
 
     fun isNull(path: String): Boolean {
         val p = data.traverse(path)
-        return p == null || p is YamlNull
+        return p == null || p.type == ConfigItem.ValueType.Null
     }
 
     fun isValue(path: String): Boolean {
         val p = data.traverse(path)
-        return p == null || p is YamlScalar
+        return p == null || p.type == ConfigItem.ValueType.Scalar
     }
 
     fun isList(path: String): Boolean {
         val p = data.traverse(path)
-        return p == null || p is YamlList
+        return p == null || p.type == ConfigItem.ValueType.List
     }
 
     fun isMap(path: String): Boolean {
         val p = data.traverse(path)
-        return p == null || p is YamlMap
+        return p == null || p.type == ConfigItem.ValueType.Map
     }
 
     fun getBool(path: String, defValue: Boolean = false): Boolean {
         Timber.d("read: $path")
-        val p = data.traverse(path)?.yamlScalar
-        return p?.toBoolean() ?: defValue
+        val p = data.traverse(path)?.configValue
+        return p?.getBool() ?: defValue
     }
 
     fun getInt(path: String, defValue: Int = 0): Int {
         Timber.d("read: $path")
-        val p = data.traverse(path)?.yamlScalar
-        return p?.toInt() ?: defValue
+        val p = data.traverse(path)?.configValue
+        return p?.getInt() ?: defValue
     }
 
     fun getFloat(path: String, defValue: Float = 0f): Float {
         Timber.d("read: $path")
-        val p = data.traverse(path)?.yamlScalar
-        return p?.toFloat() ?: defValue
+        val p = data.traverse(path)?.configValue
+        return p?.getFloat() ?: defValue
     }
 
     fun getString(path: String, defValue: String = ""): String {
         Timber.d("read: $path")
-        val p = data.traverse(path)?.yamlScalar
-        return p?.content ?: defValue
+        val p = data.traverse(path)?.configValue
+        return p?.getString() ?: defValue
     }
 
-    fun getNode(path: String): YamlNode? {
+    fun getItem(path: String): ConfigItem? {
         Timber.d("read: $path")
         return data.traverse(path)
     }
 
-    fun getValue(path: String): YamlScalar? {
+    fun getValue(path: String): ConfigValue? {
         Timber.d("read: $path")
-        return data.traverse(path)?.yamlScalar
+        return data.traverse(path)?.configValue
     }
 
-    fun getList(path: String): YamlList? {
+    fun getList(path: String): ConfigList? {
         Timber.d("read: $path")
-        return data.traverse(path)?.yamlList
+        return data.traverse(path)?.configList
     }
 
-    fun getMap(path: String): YamlMap? {
+    fun getMap(path: String): ConfigMap? {
         Timber.d("read: $path")
-        return data.traverse(path)?.yamlMap
+        return data.traverse(path)?.configMap
     }
 }

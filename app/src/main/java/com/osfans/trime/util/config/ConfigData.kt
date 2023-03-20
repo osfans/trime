@@ -3,17 +3,32 @@ package com.osfans.trime.util.config
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlException
+import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlNull
+import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.yamlScalar
 import timber.log.Timber
 import java.io.File
+
+fun convertFromYaml(node: YamlNode): ConfigItem? {
+    return when (node) {
+        is YamlNull -> null
+        is YamlScalar -> ConfigValue(node.yamlScalar)
+        is YamlList -> ConfigList(node.yamlList)
+        is YamlMap -> ConfigMap(node.yamlMap)
+        else -> null
+    }
+}
 
 /**
  * The wrapper of parsed YAML node.
  */
 class ConfigData {
-    var root: YamlNode? = null
+    var root: ConfigItem? = null
 
     private val yaml = Yaml(
         configuration = YamlConfiguration(
@@ -33,24 +48,25 @@ class ConfigData {
                 .inputStream()
                 .bufferedReader()
                 .use { it.readText() }
-            root = yaml.parseToYamlNode(doc)
+            val node = yaml.parseToYamlNode(doc)
+            root = convertFromYaml(node)
         } catch (e: YamlException) {
-            Timber.e("Error parsing YAML: ${e.message}")
+            Timber.e(e, "Error parsing YAML")
             return false
         }
         return true
     }
 
-    fun traverse(path: String): YamlNode? {
+    fun traverse(path: String): ConfigItem? {
         Timber.d("traverse: $path")
         if (path.isEmpty() || path == "/") return root
         val keys = path.trimEnd('/').split('/')
         var p = root
         for (key in keys) {
-            if (p == null || p !is YamlMap) {
+            if (p == null || p !is ConfigMap) {
                 return null
             }
-            p = p.yamlMap[key]
+            p = p.configMap[key]
         }
         return p
     }
