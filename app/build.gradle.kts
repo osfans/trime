@@ -208,7 +208,6 @@ dependencies {
     ksp(project(":codegen"))
     implementation("com.blankj:utilcodex:1.31.1")
     implementation("com.jakewharton.timber:timber:5.0.1")
-    implementation("cat.ereza:customactivityoncrash:2.4.0")
     implementation("com.github.getActivity:XXPermissions:16.2")
     implementation("com.charleskorn.kaml:kaml:0.52.0")
     implementation("com.mikepenz:aboutlibraries-core:10.6.1")

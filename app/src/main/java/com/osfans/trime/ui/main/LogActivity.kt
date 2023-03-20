@@ -11,7 +11,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import cat.ereza.customactivityoncrash.CustomActivityOnCrash
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import com.osfans.trime.databinding.ActivityLogBinding
@@ -35,6 +34,11 @@ class LogActivity : AppCompatActivity() {
 
     private lateinit var launcher: ActivityResultLauncher<String>
     private lateinit var logView: LogView
+
+    companion object {
+        const val FROM_CRASH = "from_crash"
+        const val CRASH_STACK_TRACE = "crash_stack_trace"
+    }
 
     private fun registerLauncher() {
         launcher = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
@@ -73,24 +77,24 @@ class LogActivity : AppCompatActivity() {
         with(binding) {
             setSupportActionBar(toolbar.toolbar)
             this@LogActivity.logView = logView
-            logView.setLogcat(
-                if (CustomActivityOnCrash.getConfigFromIntent(intent) == null) {
-                    supportActionBar!!.apply {
-                        setDisplayHomeAsUpEnabled(true)
-                        setTitle(R.string.real_time_logs)
-                    }
-                    Logcat()
-                } else {
-                    supportActionBar!!.setTitle(R.string.crash_logs)
-                    clearButton.visibility = View.GONE
-                    AlertDialog.Builder(this@LogActivity)
-                        .setTitle(R.string.app_crash)
-                        .setMessage(R.string.app_crash_message)
-                        .setPositiveButton(android.R.string.ok) { _, _ -> }
-                        .show()
-                    Logcat(TrimeApplication.getLastPid())
-                },
-            )
+            if (intent.hasExtra(FROM_CRASH)) {
+                supportActionBar!!.setTitle(R.string.crash_logs)
+                clearButton.visibility = View.GONE
+                AlertDialog.Builder(this@LogActivity)
+                    .setTitle(R.string.app_crash)
+                    .setMessage(R.string.app_crash_message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+                logView.append("--------- Crash stacktrace")
+                logView.append(intent.getStringExtra(CRASH_STACK_TRACE) ?: "<empty>")
+                logView.setLogcat(Logcat(TrimeApplication.getLastPid()))
+            } else {
+                supportActionBar!!.apply {
+                    setDisplayHomeAsUpEnabled(true)
+                    setTitle(R.string.real_time_logs)
+                }
+                logView.setLogcat(Logcat())
+            }
             clearButton.setOnClickListener {
                 logView.clear()
             }

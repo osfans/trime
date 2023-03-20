@@ -1,16 +1,17 @@
 package com.osfans.trime
 
 import android.app.Application
+import android.content.Intent
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
-import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.ui.main.LogActivity
 import timber.log.Timber
+import kotlin.system.exitProcess
 
 /**
  * Custom Application class.
@@ -27,15 +28,31 @@ class TrimeApplication : Application() {
             instance ?: throw IllegalStateException("Trime application is not created!")
 
         fun getLastPid() = lastPid
+        private const val MAX_STACKTRACE_SIZE = 128000
     }
 
     override fun onCreate() {
         super.onCreate()
-        CaocConfig.Builder
-            .create()
-            .errorActivity(LogActivity::class.java)
-            .enabled(!BuildConfig.DEBUG)
-            .apply()
+        if (!BuildConfig.DEBUG) {
+            Thread.setDefaultUncaughtExceptionHandler { _, e ->
+                startActivity(
+                    Intent(applicationContext, LogActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        putExtra(LogActivity.FROM_CRASH, true)
+                        // avoid transaction overflow
+                        val truncated = e.stackTraceToString().let {
+                            if (it.length > MAX_STACKTRACE_SIZE) {
+                                it.take(MAX_STACKTRACE_SIZE) + "<truncated>"
+                            } else {
+                                it
+                            }
+                        }
+                        putExtra(LogActivity.CRASH_STACK_TRACE, truncated)
+                    },
+                )
+                exitProcess(10)
+            }
+        }
         instance = this
         try {
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)

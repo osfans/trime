@@ -1,13 +1,12 @@
 package com.osfans.trime.ui.components.log
 
 import android.content.Context
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import androidx.core.content.ContextCompat
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,13 +15,14 @@ import com.osfans.trime.R
 import com.osfans.trime.util.Logcat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import splitties.resources.styledColor
 
 /**
  * A scroll view to look up the app log.
  *
  * This file is adapted from fcitx5-android project.
  * Source:
- * [fcitx5-android/LogView](https://github.com/fcitx5-android/fcitx5-android/blob/24457e13b7c3f9f59a6f220db7caad3d02f27651/app/src/main/java/org/fcitx/fcitx5/android/ui/main/log/LogView.kt)
+ * [fcitx5-android/LogView](https://github.com/fcitx5-android/fcitx5-android/blob/5ac719c3547165a3e77fe265c471a5a211580320/app/src/main/java/org/fcitx/fcitx5/android/ui/main/log/LogView.kt)
  */
 class LogView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) :
     HorizontalScrollView(context, attributeSet) {
@@ -59,6 +59,14 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
         }
     }
 
+    fun append(content: String) {
+        logAdapter.append(
+            buildSpannedString {
+                color(styledColor(android.R.attr.colorForeground)) { append(content) }
+            },
+        )
+    }
+
     fun setLogcat(logcat: Logcat) {
         this.logcat = logcat
         logcat.initLogFlow()
@@ -81,13 +89,8 @@ class LogView @JvmOverloads constructor(context: Context, attributeSet: Attribut
             },
         )
         logAdapter.append(
-            SpannableString(str).apply {
-                setSpan(
-                    ForegroundColorSpan(color),
-                    0,
-                    str.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
-                )
+            buildSpannedString {
+                color(color) { append(str) }
             },
         )
     }
