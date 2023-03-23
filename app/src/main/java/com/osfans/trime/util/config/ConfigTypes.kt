@@ -10,7 +10,7 @@ import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 
 /** Config item base class */
-open class ConfigItem(val node: YamlNode) {
+abstract class ConfigItem(val node: YamlNode) {
     enum class ValueType {
         Null, Scalar, List, Map, Tagged
     }
@@ -22,6 +22,8 @@ open class ConfigItem(val node: YamlNode) {
         is YamlMap -> ValueType.Map
         else -> ValueType.Null
     }
+
+    abstract fun contentToString(): String
 
     val configValue: ConfigValue
         get() = this as? ConfigValue ?: error(this, "ConfigValue")
@@ -47,6 +49,7 @@ class ConfigValue(private val scalar: YamlScalar) : ConfigItem(scalar) {
     fun getBool() = scalar.toBoolean()
 
     override fun isEmpty() = scalar.content.isEmpty()
+    override fun contentToString(): String = scalar.contentToString()
 }
 
 /** The wrapper of [YamlList] */
@@ -56,6 +59,7 @@ class ConfigList(private val list: YamlList) : ConfigItem(list) {
     val items get() = list.items.map { convertFromYaml(it) }
 
     override fun isEmpty() = list.items.isEmpty()
+    override fun contentToString(): String = list.contentToString()
 
     operator fun get(index: Int) = items[index]
     fun getValue(index: Int) = get(index)?.configValue
@@ -65,6 +69,7 @@ class ConfigMap(private val map: YamlMap) : ConfigItem(map) {
     constructor(item: ConfigItem) : this(item.node.yamlMap)
 
     override fun isEmpty() = map.entries.isEmpty()
+    override fun contentToString(): String = map.contentToString()
 
     fun hasKey(key: String) = map.getKey(key) != null
 
