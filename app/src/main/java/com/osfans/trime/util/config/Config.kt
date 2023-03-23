@@ -9,11 +9,14 @@ import timber.log.Timber
 class Config(private val data: ConfigData = ConfigData()) {
 
     companion object {
-        fun create(fileName: String) = Config(
-            ConfigData().apply {
-                loadFromFile(DataManager.resolveDeployedResourcePath(fileName))
-            },
-        )
+        fun create(fileName: String): Config? {
+            val data = ConfigData()
+            return if (data.loadFromFile(DataManager.resolveDeployedResourcePath(fileName))) {
+                Config(data)
+            } else {
+                null
+            }
+        }
     }
 
     fun loadFromFile(fileName: String) = data.loadFromFile(fileName)

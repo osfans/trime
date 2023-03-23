@@ -247,14 +247,14 @@ class Theme {
                 if (theme.presetKeyboards!!.containsKey(shortSchemaId)) {
                     return shortSchemaId
                 } else {
-                    val alphabet = SchemaManager.getActiveSchema().speller?.alphabet
+                    val alphabet = SchemaManager.getActiveSchema().alphabet
                     val twentySix = "qwerty"
-                    if (alphabet != null && theme.presetKeyboards!!.containsKey(alphabet)) {
+                    if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
                         return alphabet
                     } else {
-                        if (alphabet != null && (alphabet.contains(",") || alphabet.contains(";"))) {
+                        if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
                             twentySix + "_"
-                        } else if (alphabet != null && (alphabet.contains("0") || alphabet.contains("1"))) {
+                        } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
                             twentySix + "0"
                         } else {
                             twentySix
