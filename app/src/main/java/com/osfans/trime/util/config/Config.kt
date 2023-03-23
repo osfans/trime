@@ -81,4 +81,6 @@ class Config(private val data: ConfigData = ConfigData()) {
         Timber.d("read: $path")
         return data.traverse(path)?.configMap
     }
+
+    fun getItem() = data.root
 }

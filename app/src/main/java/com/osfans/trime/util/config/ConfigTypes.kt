@@ -58,6 +58,8 @@ class ConfigList(private val list: YamlList) : ConfigItem(list) {
 
     val items get() = list.items.map { convertFromYaml(it) }
 
+    operator fun iterator() = items.iterator()
+
     override fun isEmpty() = list.items.isEmpty()
     override fun contentToString(): String = list.contentToString()
 
@@ -71,11 +73,13 @@ class ConfigMap(private val map: YamlMap) : ConfigItem(map) {
     override fun isEmpty() = map.entries.isEmpty()
     override fun contentToString(): String = map.contentToString()
 
-    fun hasKey(key: String) = map.getKey(key) != null
+    fun containsKey(key: String) = map.getKey(key) != null
 
     val entries get() = map.entries.entries.associate { (s, n) ->
         s.content to convertFromYaml(n)
     }
+
+    operator fun iterator() = entries.iterator()
 
     @Suppress("UNCHECKED_CAST")
     operator fun <T : ConfigItem> get(key: String): T? =
