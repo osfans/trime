@@ -228,6 +228,7 @@ public class Candidate extends View {
     if (candidates == null) return;
     super.onDraw(canvas);
 
+    boolean moveAllCandidatesDown = false;
     for (ComputedCandidate computedCandidate : computedCandidates) {
       int i = computedCandidates.indexOf(computedCandidate);
       // Draw highlight
@@ -243,11 +244,12 @@ public class Candidate extends View {
                 - (candidatePaint.ascent() + candidatePaint.descent()) / 2;
         if (shouldShowComment) {
           String comment = ((ComputedCandidate.Word) computedCandidate).getComment();
+          moveAllCandidatesDown |= comment != null && !comment.isEmpty();
+          if (moveAllCandidatesDown) wordY += commentHeight / 2.0f;
           if (comment != null && !comment.isEmpty()) {
             float commentX = computedCandidate.getGeometry().centerX();
             float commentY =
                 commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2;
-            wordY += commentHeight / 2.0f;
             if (!isCommentOnTop) {
               float commentWidth = GraphicUtils.measureText(commentPaint, comment, commentFont);
               commentX = computedCandidate.getGeometry().right - commentWidth / 2;
