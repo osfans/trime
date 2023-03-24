@@ -25,7 +25,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeKeyMapping;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.ime.enums.Keycode;
-import com.osfans.trime.util.ConfigGetter;
+import com.osfans.trime.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -73,15 +73,15 @@ public class Event {
     if (Key.presetKeys.containsKey(s)) {
       // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
       Map<String, Object> presetKey = Key.presetKeys.get(s);
-      command = ConfigGetter.getString(presetKey, "command", "");
-      option = ConfigGetter.getString(presetKey, "option", "");
-      select = ConfigGetter.getString(presetKey, "select", "");
-      toggle = ConfigGetter.getString(presetKey, "toggle", "");
-      label = ConfigGetter.getString(presetKey, "label", "");
-      preview = ConfigGetter.getString(presetKey, "preview", "");
-      shiftLock = ConfigGetter.getString(presetKey, "shift_lock", "");
-      commit = ConfigGetter.getString(presetKey, "commit", "");
-      String send = ConfigGetter.getString(presetKey, "send", "");
+      command = CollectionUtils.obtainString(presetKey, "command", "");
+      option = CollectionUtils.obtainString(presetKey, "option", "");
+      select = CollectionUtils.obtainString(presetKey, "select", "");
+      toggle = CollectionUtils.obtainString(presetKey, "toggle", "");
+      label = CollectionUtils.obtainString(presetKey, "label", "");
+      preview = CollectionUtils.obtainString(presetKey, "preview", "");
+      shiftLock = CollectionUtils.obtainString(presetKey, "shift_lock", "");
+      commit = CollectionUtils.obtainString(presetKey, "commit", "");
+      String send = CollectionUtils.obtainString(presetKey, "send", "");
       if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command))
         send = "function"; // command默認發function
       int[] sends = Keycode.parseSend(send);
@@ -91,9 +91,9 @@ public class Event {
       text = (String) presetKey.get("text");
       if (code < 0 && TextUtils.isEmpty(text)) text = s;
       if (presetKey.containsKey("states")) states = (List<String>) presetKey.get("states");
-      sticky = ConfigGetter.getBoolean(presetKey, "sticky", false);
-      repeatable = ConfigGetter.getBoolean(presetKey, "repeatable", false);
-      functional = ConfigGetter.getBoolean(presetKey, "functional", true);
+      sticky = CollectionUtils.obtainBoolean(presetKey, "sticky", false);
+      repeatable = CollectionUtils.obtainBoolean(presetKey, "repeatable", false);
+      functional = CollectionUtils.obtainBoolean(presetKey, "functional", true);
     } else if ((code = getClickCode(s)) >= 0) {
       parseLabel();
     } else {

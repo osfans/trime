@@ -46,7 +46,6 @@ import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.CollectionUtils;
-import com.osfans.trime.util.ConfigGetter;
 import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
 import java.util.List;
@@ -324,7 +323,7 @@ public class Composition extends AppCompatTextView {
     ss.setSpan(new CompositionSpan(), start, end, span);
     ss.setSpan(new AbsoluteSizeSpan(text_size), start, end, span);
     if (m.containsKey("letter_spacing")) {
-      final float size = ConfigGetter.getFloat(m, "letter_spacing", 0);
+      final float size = CollectionUtils.obtainFloat(m, "letter_spacing", 0);
       if (size != 0f) ss.setSpan(new LetterSpacingSpan(size), start, end, span);
     }
     start = composition_pos[0] + r.getStart();
