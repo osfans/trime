@@ -31,7 +31,9 @@ object SchemaManager {
                 Rime.getRimeOption(s.name!!).compareTo(false)
             } else { // 带有一系列 Rime 运行时选项的开关，找到启用的选项并标记
                 // 将启用状态标记为此选项的索引值，方便切换时直接从选项列表中获取
-                s.options.indexOfFirst { Rime.getRimeOption(it) }
+                // 注意：有可能每个 option 的状态都为 false（未启用）, 因此 indexOfFirst 可能会返回 -1,
+                // 需要 coerceAtLeast 确保其至少为 0
+                s.options.indexOfFirst { Rime.getRimeOption(it) }.coerceAtLeast(0)
             }
         }
     }
