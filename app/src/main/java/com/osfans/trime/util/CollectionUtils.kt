@@ -42,7 +42,7 @@ object CollectionUtils {
 
     @JvmStatic
     fun obtainFloat(map: Map<String, Any?>?, key: String, defValue: Float = 0f): Float {
-        if (map == null || map.isEmpty() || key.isEmpty()) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val s = obtainString(map, key)
         return runCatching {
             if (s.isNotEmpty()) s.toFloat() else defValue

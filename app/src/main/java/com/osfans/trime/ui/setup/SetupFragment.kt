@@ -8,12 +8,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.osfans.trime.databinding.FragmentSetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
+import com.osfans.trime.util.serializable
 
 class SetupFragment : Fragment() {
     private val viewModel: SetupViewModel by activityViewModels()
     private lateinit var binding: FragmentSetupBinding
 
-    private val page: SetupPage by lazy { requireArguments().get("page") as SetupPage }
+    private val page: SetupPage by lazy { requireArguments().serializable("page")!! }
 
     private var isDone: Boolean = false
         set(new) {

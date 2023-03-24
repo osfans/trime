@@ -225,6 +225,7 @@ public class Trime extends LifecycleInputMethodService {
 
   private static final Handler syncBackgroundHandler =
       new Handler(
+          Looper.getMainLooper(),
           msg -> {
             if (!((Trime) msg.obj).isShowInputRequested()) { // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
               ShortcutUtils.INSTANCE.syncInBackground();
@@ -1150,8 +1151,7 @@ public class Trime extends LifecycleInputMethodService {
             etr.token = 0;
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
-              int move_to =
-                  StringUtils.INSTANCE.findNextSection(et.text, et.startOffset + et.selectionEnd);
+              int move_to = StringUtils.findSectionAfter(et.text, et.startOffset + et.selectionEnd);
               ic.setSelection(move_to, move_to);
               return true;
             }
@@ -1164,7 +1164,7 @@ public class Trime extends LifecycleInputMethodService {
             ExtractedText et = ic.getExtractedText(etr, 0);
             if (et != null) {
               int move_to =
-                  StringUtils.INSTANCE.findPrevSection(et.text, et.startOffset + et.selectionStart);
+                  StringUtils.findSectionBefore(et.text, et.startOffset + et.selectionStart);
               ic.setSelection(move_to, move_to);
               return true;
             }

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.Trime
-import com.osfans.trime.util.StringUtils.mismatch
+import com.osfans.trime.util.StringUtils.matches
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -68,7 +68,7 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
             ?.let { DatabaseBean.fromInputConnection(it) }
             ?.takeIf {
                 it.text!!.isNotBlank() &&
-                    it.text.mismatch(output.toTypedArray())
+                    !it.text.matches(output.toTypedArray())
             }
             ?.let { b ->
                 Timber.d("Accept $b")

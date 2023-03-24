@@ -4,8 +4,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.util.StringUtils.mismatch
-import com.osfans.trime.util.StringUtils.replace
+import com.osfans.trime.util.StringUtils.matches
+import com.osfans.trime.util.StringUtils.removeAll
 import com.osfans.trime.util.WeakHashSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -96,10 +96,10 @@ object ClipboardHelper :
             ?.let { DatabaseBean.fromClipData(it) }
             ?.takeIf {
                 it.text!!.isNotBlank() &&
-                    it.text.mismatch(output.toTypedArray())
+                    !it.text.matches(output.toTypedArray())
             }
             ?.let { b ->
-                if (b.text!!.replace(compare.toTypedArray()).isEmpty()) return
+                if (b.text!!.removeAll(compare.toTypedArray()).isEmpty()) return
                 Timber.d("Accept clipboard $b")
                 launch {
                     mutex.withLock {

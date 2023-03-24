@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
+import android.os.Bundle
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,6 +14,7 @@ import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -81,5 +83,14 @@ fun RecyclerView.applyNavBarInsetsBottomPadding() {
             setPadding(paddingLeft, paddingTop, paddingRight, it.bottom)
         }
         windowInsets
+    }
+}
+
+inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getSerializable(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getSerializable(key) as? T
     }
 }
