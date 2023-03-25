@@ -16,6 +16,8 @@ import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.Const
+import com.osfans.trime.util.optionalPreference
+import com.osfans.trime.util.thirdPartySummary
 import splitties.systemservices.clipboardManager
 
 class AboutFragment : PaddingPreferenceFragment() {
@@ -41,28 +43,11 @@ class AboutFragment : PaddingPreferenceFragment() {
                     true
                 }
             }
-            get<Preference>("about__librime_version")?.apply {
-                val version = Rime.getLibrimeVersion()
-                summary = version
-                intent = intent?.let {
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.withAppendedPath(it.data, "commits/$version"),
-                    )
-                }
-            }
-            get<Preference>("about__opencc_version").apply {
-                val version = OpenCCDictManager.getOpenCCVersion()
-                summary = version
-                intent = intent?.let {
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.withAppendedPath(it.data, "commits/$version"),
-                    )
-                }
-            }
-            get<Preference>("pref_trime_custom_qq")
-                ?.hidden()
+            get<Preference>("about__librime_version")
+                ?.thirdPartySummary(Rime.getLibrimeVersion())
+            get<Preference>("about__opencc_version")
+                ?.thirdPartySummary(OpenCCDictManager.getOpenCCVersion())
+            get<Preference>("pref_trime_custom_qq")?.optionalPreference()
             get<Preference>("about__open_source_licenses")?.apply {
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_aboutFragment_to_licenseFragment)
@@ -75,11 +60,5 @@ class AboutFragment : PaddingPreferenceFragment() {
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(getString(R.string.pref_about))
-    }
-
-    private fun Preference.hidden() {
-        if (this.summary?.isBlank() == true || this.intent?.data == null) {
-            this.isVisible = false
-        }
     }
 }
