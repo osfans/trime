@@ -197,7 +197,11 @@ public class Rime {
 
   public Rime(boolean full_check) {
     startup(full_check);
-    self = this;
+  }
+
+  public static void destroy() {
+    exitRime();
+    self = null;
   }
 
   public static void initSchema() {
@@ -228,8 +232,9 @@ public class Rime {
   }
 
   public static void deploy() {
-    exitRime();
-    startup(true);
+    destroy();
+    Rime.get(true);
+    OpenCCDictManager.buildOpenCCDict();
   }
 
   public static String getCommitText() {
@@ -358,9 +363,6 @@ public class Rime {
 
   public static Rime get(boolean full_check) {
     if (self == null) {
-      if (full_check) {
-        OpenCCDictManager.buildOpenCCDict();
-      }
       self = new Rime(full_check);
     }
     return self;
