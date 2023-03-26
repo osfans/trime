@@ -30,7 +30,7 @@ class Rime {
 
   bool isRunning() { return session != 0; }
 
-  void startup(bool fullCheck) {
+  void startup(bool fullCheck, const RimeNotificationHandler &notificationHandler) {
     if (!rime) return;
     const char *userDir = getenv("RIME_USER_DATA_DIR");
     const char *sharedDir = getenv("RIME_SHARED_DATA_DIR");
@@ -48,15 +48,7 @@ class Rime {
       firstRun = false;
     }
     rime->initialize(&trime_traits);
-    rime->set_notification_handler(
-        [](void *context_object, RimeSessionId session_id,
-           const char *message_type, const char *message_value) {
-          auto env = GlobalRef->AttachEnv();
-          env->CallStaticVoidMethod(
-              GlobalRef->Rime, GlobalRef->HandleRimeNotification,
-              *JString(env, message_type), *JString(env, message_value));
-        },
-        GlobalRef->jvm);
+    rime->set_notification_handler(notificationHandler, GlobalRef->jvm);
     if (rime->start_maintenance(fullCheck) && rime->is_maintenance_mode()) {
       rime->join_maintenance_thread();
     }
@@ -157,7 +149,15 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
   // for rime user data dir
   setenv("RIME_USER_DATA_DIR", CString(env, user_dir), 1);
 
-  Rime::Instance().startup(full_check);
+  auto notificationHandler =
+          [](void *context_object, RimeSessionId session_id, const char *message_type, const char *message_value) {
+      auto env = GlobalRef->AttachEnv();
+      env->CallStaticVoidMethod(
+              GlobalRef->Rime, GlobalRef->HandleRimeNotification,
+              *JString(env, message_type), *JString(env, message_value));
+  };
+
+  Rime::Instance().startup(full_check, notificationHandler);
 }
 
 extern "C" JNIEXPORT void JNICALL
