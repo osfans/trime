@@ -52,20 +52,13 @@ class Rime(fullCheck: Boolean) {
         private var mContext: RimeContext? = null
         private var mStatus: RimeStatus? = null
         private var isHandlingRimeNotification = false
-        private val notificationFlow_ = MutableSharedFlow<RimeEvent>(
+        private val notificationFlow_ = MutableSharedFlow<RimeNotification>(
             extraBufferCapacity = 15,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
 
         init {
             System.loadLibrary("rime_jni")
-        }
-
-        fun initSchema() {
-            Timber.d("initSchema() RimeSchema")
-            SchemaManager.init(getCurrentRimeSchema())
-            Timber.d("initSchema() getStatus")
-            updateStatus()
         }
 
         private fun startup(fullCheck: Boolean) {
@@ -78,8 +71,10 @@ class Rime(fullCheck: Boolean) {
 
             Timber.i("Starting up Rime APIs ...")
             startupRime(sharedDataDir, userDataDir, fullCheck)
-            Timber.i("Updating schema switchers ...")
-            initSchema()
+
+            Timber.i("Initializing schema stuffs after starting up ...")
+            SchemaManager.init(getCurrentRimeSchema())
+            updateStatus()
         }
 
         fun destroy() {
@@ -98,7 +93,7 @@ class Rime(fullCheck: Boolean) {
             return true
         }
 
-        private fun updateStatus() {
+        fun updateStatus() {
             SchemaManager.updateSwitchOptions()
             measureTimeMillis {
                 mStatus = getRimeStatus() ?: RimeStatus()
@@ -431,9 +426,9 @@ class Rime(fullCheck: Boolean) {
             messageValue: String,
         ) {
             isHandlingRimeNotification = true
-            val event = RimeEvent.create(messageType, messageValue)
-            Timber.d("Handling Rime notification: %s", event)
-            notificationFlow_.tryEmit(event)
+            val notification = RimeNotification.create(messageType, messageValue)
+            Timber.d("Handling Rime notification: $notification")
+            notificationFlow_.tryEmit(notification)
             isHandlingRimeNotification = false
         }
     }
