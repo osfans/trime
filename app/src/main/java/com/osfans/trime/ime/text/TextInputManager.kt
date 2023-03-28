@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
-import com.osfans.trime.core.RimeEvent
+import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
@@ -247,14 +247,15 @@ class TextInputManager private constructor() :
         }
     }
 
-    private fun handleRimeNotification(event: RimeEvent) {
-        if (event is RimeEvent.SchemaEvent) {
-            Rime.initSchema()
+    private fun handleRimeNotification(notification: RimeNotification) {
+        if (notification is RimeNotification.SchemaNotification) {
+            SchemaManager.init(notification.schemaId)
+            Rime.updateStatus()
             trime.initKeyboard()
-        } else if (event is RimeEvent.OptionEvent) {
+        } else if (notification is RimeNotification.OptionNotification) {
             Rime.updateContext() // 切換中英文、簡繁體時更新候選
-            val value = event.value
-            when (val option = event.option) {
+            val value = notification.value
+            when (val option = notification.option) {
                 "ascii_mode" -> {
                     trime.inputFeedbackManager.ttsLanguage =
                         locales[if (value) 1 else 0]
