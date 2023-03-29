@@ -48,7 +48,6 @@ class Rime(fullCheck: Boolean) {
             return instance!!
         }
 
-        private var mCommit: RimeCommit? = null
         private var mContext: RimeContext? = null
         private var mStatus: RimeStatus? = null
         private var isHandlingRimeNotification = false
@@ -86,11 +85,6 @@ class Rime(fullCheck: Boolean) {
             destroy()
             getInstance(true)
             OpenCCDictManager.buildOpenCCDict()
-        }
-
-        fun updateCommit(): Boolean {
-            mCommit = getRimeCommit() ?: return false
-            return true
         }
 
         fun updateStatus() {
@@ -174,10 +168,6 @@ class Rime(fullCheck: Boolean) {
         @JvmStatic
         val composingText: String
             get() = mContext?.commitTextPreview ?: ""
-
-        @JvmStatic
-        val commitText: String
-            get() = mCommit?.commitText ?: ""
 
         @JvmStatic
         val selectLabels: Array<String>
