@@ -55,11 +55,11 @@ class EditorInstance(private val ims: InputMethodService) {
      * Commits the text got from Rime.
      */
     fun commitRimeText(): Boolean {
-        return Rime.updateCommit().also {
-            if (it) commitText(Rime.commitText)
-            Timber.i("\t<TrimeInput>\tcommitRimeText()\tupdateComposing")
-            (ims as Trime).updateComposing()
-        }
+        val commit = Rime.getRimeCommit()
+        commit?.let { commitText(it.commitText) }
+        Timber.i("\t<TrimeInput>\tcommitRimeText()\tupdateComposing")
+        (ims as Trime).updateComposing()
+        return commit != null
     }
 
     fun updateComposingText() {
