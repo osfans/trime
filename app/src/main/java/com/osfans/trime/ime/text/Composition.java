@@ -41,6 +41,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
+import com.osfans.trime.core.RimeComposition;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.ime.core.Trime;
@@ -180,7 +181,7 @@ public class Composition extends AppCompatTextView {
         String s =
             getText().toString().substring(n, composition_pos[1]).replace(" ", "").replace("‸", "");
         n = Rime.getRimeRawInput().length() - s.length(); // 從右側定位
-        Rime.RimeSetCaretPos(n);
+        Rime.setCaretPos(n);
         Trime.getService().updateComposing();
         return true;
       }
@@ -303,9 +304,9 @@ public class Composition extends AppCompatTextView {
   }
 
   private void appendComposition(Map<String, Object> m) {
-    final Rime.RimeComposition r = Rime.getComposition();
+    final RimeComposition r = Rime.getComposition();
     assert r != null;
-    final String s = r.getText();
+    final String s = r.getPreedit();
     int start, end;
     String sep = CollectionUtils.obtainString(m, "start", "");
     if (!TextUtils.isEmpty(sep)) {
@@ -326,8 +327,8 @@ public class Composition extends AppCompatTextView {
       final float size = CollectionUtils.obtainFloat(m, "letter_spacing", 0);
       if (size != 0f) ss.setSpan(new LetterSpacingSpan(size), start, end, span);
     }
-    start = composition_pos[0] + r.getStart();
-    end = composition_pos[0] + r.getEnd();
+    start = composition_pos[0] + r.getSelStartPos();
+    end = composition_pos[0] + r.getSelEndPos();
     ss.setSpan(new ForegroundColorSpan(hilited_text_color), start, end, span);
     ss.setSpan(new BackgroundColorSpan(hilited_back_color), start, end, span);
     sep = CollectionUtils.obtainString(m, "end", "");
@@ -475,7 +476,7 @@ public class Composition extends AppCompatTextView {
   private void appendButton(@NonNull Map<String, Object> m) {
     if (m.containsKey("when")) {
       final String when = CollectionUtils.obtainString(m, "when", "");
-      if (when.contentEquals("paging") && !Rime.isPaging()) return;
+      if (when.contentEquals("paging") && !Rime.hasLeft()) return;
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     final String label;
@@ -553,9 +554,9 @@ public class Composition extends AppCompatTextView {
             + stacks[2].toString()
             + ", [3]"
             + stacks[3].toString());
-    Rime.RimeComposition r = Rime.getComposition();
+    RimeComposition r = Rime.getComposition();
     if (r == null) return 0;
-    String s = r.getText();
+    String s = r.getPreedit();
     if (TextUtils.isEmpty(s)) return 0;
     setSingleLine(true); // 設置單行
     ss = new SpannableStringBuilder();

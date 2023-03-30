@@ -242,7 +242,7 @@ public class Event {
     if (!TextUtils.isEmpty(label)) return;
     int c = code;
     if (c == KeyEvent.KEYCODE_SPACE) {
-      label = Rime.getSchemaName();
+      label = Rime.getCurrentSchemaName();
     } else {
       if (c > 0) label = Keycode.Companion.getDisplayLabel(c, mask);
     }

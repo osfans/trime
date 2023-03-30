@@ -418,7 +418,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void invalidate() {
-    Rime.get();
+    Rime.getInstance(false);
     Theme.get().destroy();
     reset();
     textInputManager.setShouldUpdateRimeOption(true);
@@ -671,7 +671,7 @@ public class Trime extends LifecycleInputMethodService {
       // 移動光標時，更新候選區
       if ((newSelEnd < candidatesEnd) && (newSelEnd >= candidatesStart)) {
         final int n = newSelEnd - candidatesStart;
-        Rime.RimeSetCaretPos(n);
+        Rime.setCaretPos(n);
         updateComposing();
       }
     }

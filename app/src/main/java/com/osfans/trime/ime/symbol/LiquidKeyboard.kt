@@ -244,8 +244,8 @@ class LiquidKeyboard(private val context: Context) {
         val candidateAdapter = CandidateAdapter(theme).apply {
             setListener { position ->
                 TextInputManager.getInstance().onCandidatePressed(position)
-                if (Rime.isComposing()) {
-                    updateCandidates(Rime.getCandidatesWithoutSwitch().asList())
+                if (Rime.isComposing) {
+                    updateCandidates(Rime.candidatesWithoutSwitch.toList())
                     keyboardView.scrollToPosition(0)
                 } else {
                     service.selectLiquidKeyboard(-1)
@@ -259,7 +259,7 @@ class LiquidKeyboard(private val context: Context) {
             isSelected = true
         }
 
-        candidateAdapter.updateCandidates(Rime.getCandidatesWithoutSwitch().asList())
+        candidateAdapter.updateCandidates(Rime.candidatesWithoutSwitch.toList())
         keyboardView.scrollToPosition(0)
     }
 

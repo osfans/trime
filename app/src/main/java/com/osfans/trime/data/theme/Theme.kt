@@ -77,7 +77,7 @@ class Theme {
     init {
         self = this
         ThemeManager.init()
-        Rime.get(!sharedDataDir.exists())
+        Rime.getInstance(!sharedDataDir.exists())
         init()
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
