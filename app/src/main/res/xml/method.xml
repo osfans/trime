@@ -21,7 +21,7 @@
 
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:supportsSwitchingToNextInputMethod="true"
-    android:settingsActivity="com.osfans.trime.settings.PrefMainActivity">
+    android:settingsActivity="com.osfans.trime.ui.main.PrefMainActivity">
 
     <!-- Add default system subtype so we can properly set the icon and label -->
     <subtype android:label="@string/trime_app_slogan"
