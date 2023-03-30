@@ -531,7 +531,7 @@ public class Key {
     if (e != null) return true;
     if (events[KeyEventType.ASCII.ordinal()] != null && Rime.isAsciiMode()) return false;
     if (send_bindings) {
-      if (events[KeyEventType.PAGING.ordinal()] != null && Rime.isPaging()) return true;
+      if (events[KeyEventType.PAGING.ordinal()] != null && Rime.hasLeft()) return true;
       if (events[KeyEventType.HAS_MENU.ordinal()] != null && Rime.hasMenu()) return true;
       if (events[KeyEventType.COMPOSING.ordinal()] != null && Rime.isComposing()) return true;
     }
@@ -541,7 +541,7 @@ public class Key {
   private Event getEvent() {
     if (events[KeyEventType.ASCII.ordinal()] != null && Rime.isAsciiMode())
       return events[KeyEventType.ASCII.ordinal()];
-    if (events[KeyEventType.PAGING.ordinal()] != null && Rime.isPaging())
+    if (events[KeyEventType.PAGING.ordinal()] != null && Rime.hasLeft())
       return events[KeyEventType.PAGING.ordinal()];
     if (events[KeyEventType.HAS_MENU.ordinal()] != null && Rime.hasMenu())
       return events[KeyEventType.HAS_MENU.ordinal()];
@@ -569,7 +569,7 @@ public class Key {
     if (events[KeyEventType.ASCII.ordinal()] != null && Rime.isAsciiMode())
       return events[KeyEventType.ASCII.ordinal()];
     if (send_bindings) {
-      if (events[KeyEventType.PAGING.ordinal()] != null && Rime.isPaging())
+      if (events[KeyEventType.PAGING.ordinal()] != null && Rime.hasLeft())
         return events[KeyEventType.PAGING.ordinal()];
       if (events[KeyEventType.HAS_MENU.ordinal()] != null && Rime.hasMenu())
         return events[KeyEventType.HAS_MENU.ordinal()];

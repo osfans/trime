@@ -5,38 +5,23 @@
 
 #include "jni-utils.h"
 
-inline void rimeCommitToJObject(JNIEnv *env, const RimeCommit &commit,
-                                const jobject &jcommit) {
-  env->SetObjectField(jcommit, GlobalRef->RimeCommitText,
-                      JString(env, commit.text));
+inline jobject rimeCommitToJObject(JNIEnv *env, const RimeCommit &commit) {
+  return env->NewObject(GlobalRef->RimeCommit, GlobalRef->RimeCommitInit,
+                        *JString(env, commit.text));
 }
 
-inline void rimeContextToJObject(JNIEnv *env, const RimeContext &context,
-                                 const jobject &jcontext) {
-  auto composition = JRef<>(env, env->AllocObject(GlobalRef->RimeComposition));
-  env->SetIntField(composition, GlobalRef->RimeCompositionLength,
-                   context.composition.length);
-  env->SetIntField(composition, GlobalRef->RimeCompositionCursorPos,
-                   context.composition.cursor_pos);
-  env->SetIntField(composition, GlobalRef->RimeCompositionSelStart,
-                   context.composition.sel_start);
-  env->SetIntField(composition, GlobalRef->RimeCompositionSelEnd,
-                   context.composition.sel_end);
-  env->SetObjectField(composition, GlobalRef->RimeCompositionPreedit,
-                      JString(env, context.composition.preedit));
-  env->SetObjectField(jcontext, GlobalRef->RimeContextComposition, composition);
+inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
+  auto jcomposition = JRef<>(
+      env,
+      env->NewObject(GlobalRef->RimeComposition, GlobalRef->RimeCompositionInit,
+                     context.composition.length, context.composition.cursor_pos,
+                     context.composition.sel_start, context.composition.sel_end,
+                     *JString(env, context.composition.preedit)));
 
   const auto &menu = context.menu;
-  auto jmenu = JRef<>(env, env->AllocObject(GlobalRef->RimeMenu));
-  env->SetIntField(jmenu, GlobalRef->RimeMenuPageSize, menu.page_size);
-  env->SetIntField(jmenu, GlobalRef->RimeMenuPageNo, menu.page_no);
-  env->SetBooleanField(jmenu, GlobalRef->RimeMenuIsLastPage, menu.is_last_page);
-  env->SetIntField(jmenu, GlobalRef->RimeMenuHighlightedCandidateIndex,
-                   menu.highlighted_candidate_index);
-  env->SetIntField(jmenu, GlobalRef->RimeMenuNumCandidates,
-                   context.menu.num_candidates);
 
-  size_t numSelectKeys = menu.select_keys ? std::strlen(menu.select_keys) : 0;
+  size_t numSelectKeys =
+      menu.select_keys ? std::strlen(context.menu.select_keys) : 0;
   bool hasLabel = RIME_STRUCT_HAS_MEMBER(context, context.select_labels) &&
                   context.select_labels;
   auto selectLabels = JRef<jobjectArray>(
@@ -64,35 +49,25 @@ inline void rimeContextToJObject(JNIEnv *env, const RimeContext &context,
                  *JString(env, candidate.text ? candidate.text : "")));
     env->SetObjectArrayElement(candidates, i, jcandidate);
   }
-  env->SetObjectField(jmenu, GlobalRef->RimeMenuCandidates, candidates);
 
-  env->SetObjectField(jcontext, GlobalRef->RimeContextMenu, jmenu);
-  env->SetObjectField(jcontext, GlobalRef->RimeContextCommitTextPreview,
-                      JString(env, context.commit_text_preview));
-  env->SetObjectField(jcontext, GlobalRef->RimeContextSelectLabels,
-                      selectLabels);
+  auto jmenu = JRef<>(
+      env, env->NewObject(GlobalRef->RimeMenu, GlobalRef->RimeMenuInit,
+                          menu.page_size, menu.page_no, menu.is_last_page,
+                          menu.highlighted_candidate_index, menu.num_candidates,
+                          *candidates));
+
+  return env->NewObject(
+      GlobalRef->RimeContext, GlobalRef->RimeContextInit, *jcomposition, *jmenu,
+      *JString(env, context.commit_text_preview), *selectLabels);
 }
 
-inline void rimeStatusToJObject(JNIEnv *env, const RimeStatus &status,
-                                const jobject &jstatus) {
-  env->SetObjectField(jstatus, GlobalRef->RimeStatusSchemaId,
-                      JString(env, status.schema_id));
-  env->SetObjectField(jstatus, GlobalRef->RimeStatusSchemaName,
-                      JString(env, status.schema_name));
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusDisable,
-                       status.is_disabled);
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusComposing,
-                       status.is_composing);
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusAsciiMode,
-                       status.is_ascii_mode);
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusFullShape,
-                       status.is_full_shape);
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusSimplified,
-                       status.is_simplified);
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusTraditional,
-                       status.is_traditional);
-  env->SetBooleanField(jstatus, GlobalRef->RimeStatusAsciiPunct,
-                       status.is_ascii_punct);
+inline jobject rimeStatusToJObject(JNIEnv *env, const RimeStatus &status) {
+  return env->NewObject(GlobalRef->RimeStatus, GlobalRef->RimeStatusInit,
+                        *JString(env, status.schema_id),
+                        *JString(env, status.schema_name), status.is_disabled,
+                        status.is_composing, status.is_ascii_mode,
+                        status.is_full_shape, status.is_simplified,
+                        status.is_traditional, status.is_ascii_punct);
 }
 
 inline jobject rimeConfigValueToJObject(JNIEnv *env, RimeConfig *config,
