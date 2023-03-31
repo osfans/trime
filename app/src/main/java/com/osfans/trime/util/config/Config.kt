@@ -41,28 +41,28 @@ class Config(private val data: ConfigData = ConfigData()) {
         return p == null || p.type == ConfigItem.ValueType.Map
     }
 
-    fun getBool(path: String, defValue: Boolean = false): Boolean {
+    fun getBool(path: String): Boolean? {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getBool() ?: defValue
+        return p?.getBool()
     }
 
-    fun getInt(path: String, defValue: Int = 0): Int {
+    fun getInt(path: String): Int? {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getInt() ?: defValue
+        return p?.getInt()
     }
 
-    fun getFloat(path: String, defValue: Float = 0f): Float {
+    fun getFloat(path: String): Float? {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getFloat() ?: defValue
+        return p?.getFloat()
     }
 
-    fun getString(path: String, defValue: String = ""): String {
+    fun getString(path: String): String? {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getString() ?: defValue
+        return p?.getString()
     }
 
     fun getItem(path: String): ConfigItem? {
