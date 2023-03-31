@@ -17,7 +17,6 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
-import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
@@ -26,6 +25,7 @@ import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
+import com.osfans.trime.ime.speech.SpeechRecognizer
 import com.osfans.trime.ui.main.colorPicker
 import com.osfans.trime.ui.main.schemaPicker
 import com.osfans.trime.ui.main.soundPicker
@@ -395,7 +395,9 @@ class TextInputManager private constructor() :
                     }
                 }
             }
-            KeyEvent.KEYCODE_VOICE_ASSIST -> Speech(trime).startListening() // Speech Recognition
+            KeyEvent.KEYCODE_VOICE_ASSIST -> SpeechRecognizer(
+                trime,
+            ).startListening() // Speech Recognition
             KeyEvent.KEYCODE_SETTINGS -> { // Settings
                 trime.lifecycleScope.launch {
                     when (event.option) {
