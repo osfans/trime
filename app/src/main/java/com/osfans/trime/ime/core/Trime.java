@@ -481,13 +481,23 @@ public class Trime extends LifecycleInputMethodService {
     if (inputRootBinding == null) return;
 
     // 单手键盘模式
-    int oneHandMode = 0;
-    int[] padding =
-        theme.getKeyboardPadding(oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE);
-    Timber.i(
-        "update KeyboardPadding: Trime.loadBackground, padding= %s %s %s, orientation=%s",
-        padding[0], padding[1], padding[2], orientation);
-    mainKeyboardView.setPadding(padding[0], 0, padding[1], padding[2]);
+    // int oneHandMode = 0;
+    boolean isLandMode = orientation == Configuration.ORIENTATION_LANDSCAPE;
+    int horizontalKeyboardPadding;
+    int bottomKeyboardPadding;
+    if (isLandMode) {
+      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_land"));
+      bottomKeyboardPadding =
+          DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_land_bottom"));
+    } else {
+      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding"));
+      bottomKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_bottom"));
+    }
+    Timber.d(
+        "mainKeyboardView.setPadding: padding=(%s, %s, %s), orientation=%s",
+        horizontalKeyboardPadding, horizontalKeyboardPadding, bottomKeyboardPadding, orientation);
+    mainKeyboardView.setPadding(
+        horizontalKeyboardPadding, 0, horizontalKeyboardPadding, bottomKeyboardPadding);
 
     final Drawable inputRootBackground = theme.colors.getDrawable("root_background");
     if (inputRootBackground != null) {

@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
-import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.util.appContext
@@ -30,8 +29,6 @@ object KeyboardSwitcher {
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun newOrReset() {
-        Timber.d("Refreshing keyboard padding ...")
-        theme.getKeyboardPadding(ScreenUtils.isLandscape())
         Timber.d("Switching keyboard back to .default ...")
         availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
             ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()

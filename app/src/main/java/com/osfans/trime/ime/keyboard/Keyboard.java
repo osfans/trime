@@ -100,8 +100,16 @@ public class Keyboard {
     // 橫屏模式下，键盘左右两侧到屏幕边缘的距离
 
     final Theme theme = ThemeManager.getActiveTheme();
-    int[] keyboardPadding = theme.getKeyboardPadding();
-    mDisplayWidth = ScreenUtils.getScreenWidth() - keyboardPadding[0] - keyboardPadding[1];
+    int horizontalKeyboardPadding;
+    if (ScreenUtils.isLandscape()) {
+      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_land"));
+    } else {
+      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding"));
+    }
+    mDisplayWidth = ScreenUtils.getScreenWidth() - 2 * horizontalKeyboardPadding;
+    Timber.d(
+        "Screen width: %s, display width: %s, keyboard padding: %s",
+        ScreenUtils.getScreenWidth(), mDisplayWidth, horizontalKeyboardPadding);
     /* Height of the screen */
     // final int mDisplayHeight = dm.heightPixels;
     // Log.v(TAG, "keyboard's display metrics:" + dm);
