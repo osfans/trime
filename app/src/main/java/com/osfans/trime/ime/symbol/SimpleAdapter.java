@@ -63,11 +63,11 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
 
     holder.simpleKeyText.setText(bean.getLabel());
     holder.simpleKeyText.setTextColor(theme.colors.getColor("key_text_color"));
-    holder.simpleKeyText.setTypeface(FontManager.getTypeface(theme.style.getString("key_font")));
+    holder.simpleKeyText.setTypeface(FontManager.getTypeface(theme.s("style/key_font")));
     holder.simpleKeyText.setGravity(Gravity.CENTER);
     holder.simpleKeyText.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 
-    final float labelTextSize = theme.style.getFloat("label_text_size");
+    final float labelTextSize = theme.f("style/label_text_size");
     if (labelTextSize > 0) holder.simpleKeyText.setTextSize(labelTextSize);
 
     holder.itemView.setBackground(

@@ -112,14 +112,14 @@ class TextInputManager private constructor() :
             .launchIn(trime.lifecycleScope)
 
         val theme = ThemeManager.getActiveTheme()
-        val defaultLocale = theme.style.getString("locale").split(DELIMITER_SPLITTER)
+        val defaultLocale = theme.s("style/locale").split(DELIMITER_SPLITTER)
         locales[0] = when (defaultLocale.size) {
             3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
             2 -> Locale(defaultLocale[0], defaultLocale[1])
             else -> Locale.getDefault()
         }
 
-        val latinLocale = theme.style.getString("latin_locale").split(DELIMITER_SPLITTER)
+        val latinLocale = theme.s("style/latin_locale").split(DELIMITER_SPLITTER)
         locales[1] = when (latinLocale.size) {
             3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
             2 -> Locale(latinLocale[0], latinLocale[1])
@@ -308,7 +308,7 @@ class TextInputManager private constructor() :
         if (needSendUpRimeKey) {
             if (shouldUpdateRimeOption) {
                 Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                Rime.setOption("_horizontal", ThemeManager.getActiveTheme().style.getBoolean("horizontal"))
+                Rime.setOption("_horizontal", ThemeManager.getActiveTheme().b("style/horizontal"))
                 shouldUpdateRimeOption = false
             }
             // todo 释放按键可能不对

@@ -49,9 +49,14 @@ import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
+import com.osfans.trime.util.config.ConfigItem;
+import com.osfans.trime.util.config.ConfigList;
+import com.osfans.trime.util.config.ConfigMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.Contract;
 import timber.log.Timber;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
@@ -67,7 +72,7 @@ public class Composition extends AppCompatTextView {
   private int max_entries;
   private boolean candidate_use_cursor, show_comment;
   private int highlightIndex;
-  private List<Map<String, Object>> windows_comps, liquid_keyboard_window_comp;
+  private List<Map<String, String>> windows_comps, liquid_keyboard_window_comp;
   private SpannableStringBuilder ss;
   private final int span = 0;
   private String movable;
@@ -215,23 +220,48 @@ public class Composition extends AppCompatTextView {
   public void reset() {
     final Theme theme = ThemeManager.getActiveTheme();
 
-    if ((windows_comps = (List<Map<String, Object>>) theme.style.getObject("window")) == null) {
+    ConfigItem win = theme.o("style/window");
+    if (win != null) {
+      ConfigList list = win.getConfigList();
+      List<Map<String, String>> tmpList = new ArrayList<>();
+      for (ConfigItem le : list.getItems()) {
+        ConfigMap map = le.getConfigMap();
+        Map<String, String> tmpMap = new HashMap<>();
+        for (Map.Entry<String, ConfigItem> me : map.getEntries().entrySet()) {
+          tmpMap.put(me.getKey(), me.getValue().getConfigValue().getString());
+        }
+        tmpList.add(tmpMap);
+      }
+      windows_comps = tmpList;
+    } else {
       windows_comps = new ArrayList<>();
     }
-    if ((liquid_keyboard_window_comp =
-            (List<Map<String, Object>>) theme.style.getObject("liquid_keyboard_window"))
-        == null) {
+
+    ConfigItem liquidWin = theme.o("style/liquid_keyboard_window");
+    if (liquidWin != null) {
+      ConfigList list = liquidWin.getConfigList();
+      List<Map<String, String>> tmpList = new ArrayList<>();
+      for (ConfigItem le : list.getItems()) {
+        ConfigMap map = le.getConfigMap();
+        Map<String, String> tmpMap = new HashMap<>();
+        for (Map.Entry<String, ConfigItem> me : map.getEntries().entrySet()) {
+          tmpMap.put(me.getKey(), me.getValue().getConfigValue().getString());
+        }
+        tmpList.add(tmpMap);
+      }
+      liquid_keyboard_window_comp = tmpList;
+    } else {
       liquid_keyboard_window_comp = new ArrayList<>();
     }
 
-    if ((max_entries = theme.style.getInt("layout/max_entries")) == 0) {
+    if ((max_entries = theme.i("style/layout/max_entries")) == 0) {
       max_entries = Candidate.getMaxCandidateCount();
     }
-    candidate_use_cursor = theme.style.getBoolean("candidate_use_cursor");
-    text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("text_size"));
-    candidate_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("candidate_text_size"));
-    comment_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("comment_text_size"));
-    label_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("label_text_size"));
+    candidate_use_cursor = theme.b("style/candidate_use_cursor");
+    text_size = (int) DimensionsKt.sp2px(theme.f("style/text_size"));
+    candidate_text_size = (int) DimensionsKt.sp2px(theme.f("style/candidate_text_size"));
+    comment_text_size = (int) DimensionsKt.sp2px(theme.f("style/comment_text_size"));
+    label_text_size = (int) DimensionsKt.sp2px(theme.f("style/label_text_size"));
 
     text_color = theme.colors.getColor("text_color");
     candidate_text_color = theme.colors.getColor("candidate_text_color");
@@ -249,62 +279,65 @@ public class Composition extends AppCompatTextView {
     hilited_back_color = theme.colors.getColor("hilited_back_color");
     hilited_candidate_back_color = theme.colors.getColor("hilited_candidate_back_color");
 
-    key_text_size = (int) DimensionsKt.sp2px(theme.style.getFloat("key_text_size"));
+    key_text_size = (int) DimensionsKt.sp2px(theme.f("style/key_text_size"));
     key_text_color = theme.colors.getColor("key_text_color");
     key_back_color = theme.colors.getColor("key_back_color");
 
-    float line_spacing_multiplier = theme.style.getFloat("layout/line_spacing_multiplier");
+    float line_spacing_multiplier = theme.f("style/layout/line_spacing_multiplier");
     if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f;
-    setLineSpacing(theme.style.getFloat("layout/line_spacing"), line_spacing_multiplier);
-    setMinWidth((int) DimensionsKt.dp2px(theme.style.getFloat("layout/min_width")));
-    setMinHeight((int) DimensionsKt.dp2px(theme.style.getFloat("layout/min_height")));
+    setLineSpacing(theme.f("style/layout/line_spacing"), line_spacing_multiplier);
+    setMinWidth((int) DimensionsKt.dp2px(theme.f("style/layout/min_width")));
+    setMinHeight((int) DimensionsKt.dp2px(theme.f("style/layout/min_height")));
 
-    int max_width = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/max_width"));
-    int real_margin = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/real_margin"));
+    int max_width = (int) DimensionsKt.dp2px(theme.f("style/layout/max_width"));
+    int real_margin = (int) DimensionsKt.dp2px(theme.f("style/layout/real_margin"));
     int displayWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
     Timber.d("max_width = %s, displayWidth = %s ", max_width, displayWidth);
     if (max_width > displayWidth) max_width = displayWidth;
     setMaxWidth(max_width - real_margin * 2);
 
-    setMaxHeight((int) DimensionsKt.dp2px(theme.style.getFloat("layout/max_height")));
+    setMaxHeight((int) DimensionsKt.dp2px(theme.f("style/layout/max_height")));
     int margin_x, margin_y, margin_bottom;
-    margin_x = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/margin_x"));
-    margin_y = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/margin_y"));
-    margin_bottom = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/margin_bottom"));
+    margin_x = (int) DimensionsKt.dp2px(theme.f("style/layout/margin_x"));
+    margin_y = (int) DimensionsKt.dp2px(theme.f("style/layout/margin_y"));
+    margin_bottom = (int) DimensionsKt.dp2px(theme.f("style/layout/margin_bottom"));
     setPadding(margin_x, margin_y, margin_x, margin_bottom);
-    max_length = theme.style.getInt("layout/max_length");
-    sticky_lines = theme.style.getInt("layout/sticky_lines");
-    sticky_lines_land = theme.style.getInt("layout/sticky_lines_land");
-    movable = theme.style.getString("layout/movable");
-    all_phrases = theme.style.getBoolean("layout/all_phrases");
-    tfLabel = FontManager.getTypeface(theme.style.getString("label_font"));
-    tfText = FontManager.getTypeface(theme.style.getString("text_font"));
-    tfCandidate = FontManager.getTypeface(theme.style.getString("candidate_font"));
-    tfComment = FontManager.getTypeface(theme.style.getString("comment_font"));
+    max_length = theme.i("style/layout/max_length");
+    sticky_lines = theme.i("style/layout/sticky_lines");
+    sticky_lines_land = theme.i("style/layout/sticky_lines_land");
+    movable = theme.s("style/layout/movable");
+    all_phrases = theme.b("style/layout/all_phrases");
+    tfLabel = FontManager.getTypeface(theme.s("style/label_font"));
+    tfText = FontManager.getTypeface(theme.s("style/text_font"));
+    tfCandidate = FontManager.getTypeface(theme.s("style/candidate_font"));
+    tfComment = FontManager.getTypeface(theme.s("style/comment_font"));
   }
 
-  private Object getAlign(Map<String, Object> m) {
-    Layout.Alignment i = Layout.Alignment.ALIGN_NORMAL;
-    if (m.containsKey("align")) {
-      String align = CollectionUtils.obtainString(m, "align", "");
-      switch (align) {
-        case "left":
-        case "normal":
-          i = Layout.Alignment.ALIGN_NORMAL;
-          break;
-        case "right":
-        case "opposite":
-          i = Layout.Alignment.ALIGN_OPPOSITE;
-          break;
-        case "center":
-          i = Layout.Alignment.ALIGN_CENTER;
-          break;
-      }
+  @NonNull
+  @Contract("_ -> new")
+  private Object getAlign(@NonNull Map<String, String> m) {
+    Layout.Alignment i;
+    String align;
+    ;
+    if ((align = m.get("align")) == null) align = "";
+    switch (align) {
+      case "right":
+      case "opposite":
+        i = Layout.Alignment.ALIGN_OPPOSITE;
+        break;
+      case "center":
+        i = Layout.Alignment.ALIGN_CENTER;
+        break;
+      case "left":
+      case "normal":
+      default:
+        i = Layout.Alignment.ALIGN_NORMAL;
+        break;
     }
     return new AlignmentSpan.Standard(i);
   }
 
-  private void appendComposition(Map<String, Object> m) {
+  private void appendComposition(Map<String, String> m) {
     final RimeComposition r = Rime.getComposition();
     assert r != null;
     final String s = r.getPreedit();
@@ -368,7 +401,7 @@ public class Composition extends AppCompatTextView {
   }
 
   /** 生成悬浮窗内的文本 */
-  private void appendCandidates(Map<String, Object> m, int length, int end_num) {
+  private void appendCandidates(Map<String, String> m, int length, int end_num) {
     Timber.d("appendCandidates(): length = %s", length);
     int start, end;
 
@@ -419,7 +452,7 @@ public class Composition extends AppCompatTextView {
         end = ss.length();
         ss.setSpan(getAlign(m), start, end, span);
       }
-      if (!TextUtils.isEmpty(label_format) && labels != null) {
+      if (!TextUtils.isEmpty(label_format)) {
         final String label = String.format(label_format, labels[i]);
         start = ss.length();
         ss.append(label);
@@ -474,7 +507,7 @@ public class Composition extends AppCompatTextView {
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
-  private void appendButton(@NonNull Map<String, Object> m) {
+  private void appendButton(@NonNull Map<String, String> m) {
     if (m.containsKey("when")) {
       final String when = CollectionUtils.obtainString(m, "when", "");
       if (when.contentEquals("paging") && !Rime.hasLeft()) return;
@@ -503,7 +536,7 @@ public class Composition extends AppCompatTextView {
     if (!TextUtils.isEmpty(sep)) ss.append(sep);
   }
 
-  private void appendMove(Map<String, Object> m) {
+  private void appendMove(Map<String, String> m) {
     String s = CollectionUtils.obtainString(m, "move", "");
     int start, end;
     String sep = CollectionUtils.obtainString(m, "start", "");
@@ -563,7 +596,7 @@ public class Composition extends AppCompatTextView {
     ss = new SpannableStringBuilder();
     int start_num = 0;
 
-    for (Map<String, Object> m : windows_comps) {
+    for (Map<String, String> m : windows_comps) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
         start_num = calcStartNum(stringMinLength, candidateMinCheck);
@@ -590,7 +623,7 @@ public class Composition extends AppCompatTextView {
 
     ss = new SpannableStringBuilder();
 
-    for (Map<String, Object> m : liquid_keyboard_window_comp) {
+    for (Map<String, String> m : liquid_keyboard_window_comp) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("click")) appendButton(m);
     }

@@ -300,16 +300,16 @@ public class Trime extends LifecycleInputMethodService {
 
   public void loadConfig() {
     final Theme theme = ThemeManager.getActiveTheme();
-    popupWindowPos = PopupPosition.fromString(theme.style.getString("layout/position"));
-    isPopupWindowMovable = theme.style.getString("layout/movable");
-    popupMargin = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/spacing"));
-    minPopupSize = theme.style.getInt("layout/min_length");
-    minPopupCheckSize = theme.style.getInt("layout/min_check");
-    popupMarginH = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/real_margin"));
-    textInputManager.setShouldResetAsciiMode(theme.style.getBoolean("reset_ascii_mode"));
-    isAutoCaps = theme.style.getBoolean("auto_caps");
+    popupWindowPos = PopupPosition.fromString(theme.s("style/layout/position"));
+    isPopupWindowMovable = theme.s("style/layout/movable");
+    popupMargin = (int) DimensionsKt.dp2px(theme.f("style/layout/spacing"));
+    minPopupSize = theme.i("style/layout/min_length");
+    minPopupCheckSize = theme.i("style/layout/min_check");
+    popupMarginH = (int) DimensionsKt.dp2px(theme.f("style/layout/real_margin"));
+    textInputManager.setShouldResetAsciiMode(theme.b("style/reset_ascii_mode"));
+    isAutoCaps = theme.b("style/auto_caps");
     isPopupWindowEnabled =
-        getPrefs().getKeyboard().getPopupWindowEnabled() && theme.style.getObject("window") != null;
+        getPrefs().getKeyboard().getPopupWindowEnabled() && theme.o("style/window") != null;
     textInputManager.setShouldUpdateRimeOption(true);
   }
 
@@ -318,8 +318,7 @@ public class Trime extends LifecycleInputMethodService {
     try {
       if (textInputManager.getShouldUpdateRimeOption()) {
         Rime.setOption("soft_cursor", getPrefs().getKeyboard().getSoftCursorEnabled()); // 軟光標
-        Rime.setOption(
-            "_horizontal", ThemeManager.getActiveTheme().style.getBoolean("horizontal")); // 水平模式
+        Rime.setOption("_horizontal", ThemeManager.getActiveTheme().b("style/horizontal")); // 水平模式
         textInputManager.setShouldUpdateRimeOption(false);
       }
     } catch (Exception e) {
@@ -429,8 +428,7 @@ public class Trime extends LifecycleInputMethodService {
   private void hideCompositionView() {
     if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
       popupWindowPos =
-          PopupPosition.fromString(
-              ThemeManager.getActiveTheme().style.getString("layout/position"));
+          PopupPosition.fromString(ThemeManager.getActiveTheme().s("style/layout/position"));
     }
 
     if (mPopupWindow != null && mPopupWindow.isShowing()) {
@@ -464,7 +462,7 @@ public class Trime extends LifecycleInputMethodService {
               "layout/round_corner",
               "layout/alpha");
       if (textBackground != null) mPopupWindow.setBackgroundDrawable(textBackground);
-      mPopupWindow.setElevation((int) DimensionsKt.dp2px(theme.style.getFloat("layout/elevation")));
+      mPopupWindow.setElevation((int) DimensionsKt.dp2px(theme.f("style/layout/elevation")));
     }
 
     if (mCandidateRoot != null) {
@@ -486,12 +484,11 @@ public class Trime extends LifecycleInputMethodService {
     int horizontalKeyboardPadding;
     int bottomKeyboardPadding;
     if (isLandMode) {
-      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_land"));
-      bottomKeyboardPadding =
-          DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_land_bottom"));
+      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.i("style/keyboard_padding_land"));
+      bottomKeyboardPadding = DimensionsKt.dp2px(theme.i("style/keyboard_padding_land_bottom"));
     } else {
-      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding"));
-      bottomKeyboardPadding = DimensionsKt.dp2px(theme.style.getInt("keyboard_padding_bottom"));
+      horizontalKeyboardPadding = DimensionsKt.dp2px(theme.i("style/keyboard_padding"));
+      bottomKeyboardPadding = DimensionsKt.dp2px(theme.i("style/keyboard_padding_bottom"));
     }
     Timber.d(
         "mainKeyboardView.setPadding: padding=(%s, %s, %s), orientation=%s",
@@ -526,7 +523,7 @@ public class Trime extends LifecycleInputMethodService {
       mCandidate.reset();
       isPopupWindowEnabled =
           getPrefs().getKeyboard().getPopupWindowEnabled()
-              && ThemeManager.getActiveTheme().style.getObject("window") != null;
+              && ThemeManager.getActiveTheme().o("style/window") != null;
       mComposition.setVisibility(isPopupWindowEnabled ? View.VISIBLE : View.GONE);
       mComposition.reset();
     }

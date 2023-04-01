@@ -64,14 +64,14 @@ class FlexibleAdapter(
             val bean = mBeans[position]
             simpleKeyText.apply {
                 text = bean.text
-                typeface = FontManager.getTypeface(theme.style.getString("long_text_font"))
+                typeface = FontManager.getTypeface(theme.s("style/long_text_font"))
                 when (val textColor = theme.colors.getColor("long_text_color")) {
                     null -> theme.colors.getColor("key_text_color")?.let { setTextColor(it) }
                     else -> setTextColor(textColor)
                 }
 
-                val longTextSize = theme.style.getFloat("key_long_text_size")
-                val labelTextSize = theme.style.getFloat("label_text_size")
+                val longTextSize = theme.f("style/key_long_text_size")
+                val labelTextSize = theme.f("style/label_text_size")
                 textSize = when {
                     longTextSize > 0 -> longTextSize
                     labelTextSize > 0 -> labelTextSize

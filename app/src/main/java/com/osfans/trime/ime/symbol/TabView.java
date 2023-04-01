@@ -60,28 +60,28 @@ public class TabView extends View {
   public void reset() {
     Theme theme = ThemeManager.getActiveTheme();
     candidateHighlight = new PaintDrawable(theme.colors.getColor("hilited_candidate_back_color"));
-    candidateHighlight.setCornerRadius(theme.style.getFloat("layout/round_corner"));
+    candidateHighlight.setCornerRadius(theme.f("style/layout/round_corner"));
 
     separatorPaint.setColor(theme.colors.getColor("candidate_separator_color"));
 
-    candidateSpacing = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_spacing"));
-    candidatePadding = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_padding"));
+    candidateSpacing = (int) DimensionsKt.dp2px(theme.f("style/candidate_spacing"));
+    candidatePadding = (int) DimensionsKt.dp2px(theme.f("style/candidate_padding"));
 
     candidateTextColor = theme.colors.getColor("candidate_text_color");
     hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color");
 
-    commentHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("comment_height"));
+    commentHeight = (int) DimensionsKt.dp2px(theme.f("style/comment_height"));
 
-    int candidateTextSize = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_text_size"));
-    candidateViewHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_view_height"));
+    int candidateTextSize = (int) DimensionsKt.dp2px(theme.f("style/candidate_text_size"));
+    candidateViewHeight = (int) DimensionsKt.dp2px(theme.f("style/candidate_view_height"));
 
-    candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
+    candidateFont = FontManager.getTypeface(theme.s("style/candidate_font"));
 
     candidatePaint.setTextSize(candidateTextSize);
     candidatePaint.setTypeface(candidateFont);
 
-    isCommentOnTop = theme.style.getBoolean("comment_on_top");
-    shouldCandidateUseCursor = theme.style.getBoolean("candidate_use_cursor");
+    isCommentOnTop = theme.b("style/comment_on_top");
+    shouldCandidateUseCursor = theme.b("style/candidate_use_cursor");
     invalidate();
   }
 

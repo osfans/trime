@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.util.appContext
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import timber.log.Timber
 
 /** Manages [Keyboard]s and their status. **/
@@ -26,11 +28,10 @@ object KeyboardSwitcher {
         newOrReset()
     }
 
-    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun newOrReset() {
         Timber.d("Switching keyboard back to .default ...")
-        availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
+        availableKeyboardIds = theme.o("style/keyboards")?.decode(ListSerializer(String.serializer()))
             ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
         availableKeyboards = availableKeyboardIds.map { Keyboard(theme.keyboards.remapKeyboardId(it)) }
     }

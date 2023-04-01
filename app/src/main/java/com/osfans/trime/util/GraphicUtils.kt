@@ -10,8 +10,8 @@ object GraphicUtils {
     const val HAN_B_FONT = "hanb_font"
     const val LATIN_FONT = "latin_font"
     private val theme = ThemeManager.getActiveTheme()
-    private val hanBFont = FontManager.getTypeface(theme.style.getString(HAN_B_FONT))
-    private val latinFont = FontManager.getTypeface(theme.style.getString(LATIN_FONT))
+    private val hanBFont = FontManager.getTypeface(theme.s("style/$HAN_B_FONT"))
+    private val latinFont = FontManager.getTypeface(theme.s("style/$LATIN_FONT"))
 
     private fun determineTypeface(codePoint: Int, font: Typeface): Typeface {
         return if (hanBFont != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codePoint)) {

@@ -56,7 +56,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
       final ConstraintSet set = new ConstraintSet();
       set.clone(binding.getRoot());
       final CommentPosition commentPosition =
-          CommentPosition.values()[theme.style.getInt("comment_position")];
+          CommentPosition.values()[theme.i("style/comment_position")];
       switch (commentPosition) {
         case BOTTOM:
           set.centerHorizontally(binding.comment.getId(), ConstraintSet.PARENT_ID);
@@ -112,8 +112,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     final CandidateListItem candidate = mCandidates.get(position);
 
-    final Typeface candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
-    final Typeface commentFont = FontManager.getTypeface(theme.style.getString("comment_font"));
+    final Typeface candidateFont = FontManager.getTypeface(theme.s("style/candidate_font"));
+    final Typeface commentFont = FontManager.getTypeface(theme.s("style/comment_font"));
     holder.candidate.setTypeface(candidateFont);
     holder.comment.setTypeface(commentFont);
 
@@ -122,8 +122,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
       holder.comment.setText(candidate.getComment());
     }
 
-    final float candidateSize = theme.style.getFloat("candidate_text_size");
-    final float commentSize = theme.style.getFloat("comment_text_size");
+    final float candidateSize = theme.f("style/candidate_text_size");
+    final float commentSize = theme.f("style/comment_text_size");
     if (candidateSize > 0) holder.candidate.setTextSize(candidateSize);
     if (commentSize > 0) holder.comment.setTextSize(commentSize);
 

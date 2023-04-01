@@ -29,6 +29,7 @@ import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.util.CollectionUtils
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.bitmapDrawable
+import com.osfans.trime.util.config.Config
 import com.osfans.trime.util.dp2px
 import timber.log.Timber
 import java.io.File
@@ -36,8 +37,9 @@ import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
 class Theme(val themeId: String) {
+    private val config = Config.create(themeId)
+        ?: throw IllegalArgumentException("Nonexistent theme config file $themeId.yaml")
     private var currentColorSchemeId: String? = null
-    private var generalStyle: Map<String, Any?>? = null
     private var fallbackColors: Map<String, String>? = null
     private var presetColorSchemes: Map<String, Map<String, Any>?>? = null
     private var presetKeyboards: Map<String, Any?>? = null
@@ -45,9 +47,6 @@ class Theme(val themeId: String) {
 
     // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
     private val currentColors: MutableMap<String, Any> = hashMapOf()
-
-    @JvmField
-    val style = Style(this)
 
     @JvmField
     val liquid = Liquid(this)
@@ -71,7 +70,6 @@ class Theme(val themeId: String) {
             val configMap = Rime.getRimeConfigMap(themeId, "")
                 ?: throw IllegalArgumentException("Failed to fetch theme config map")
             Timber.d("Fetching done")
-            generalStyle = configMap["style"] as? Map<String, Any?>
             presetKeyboards = configMap["preset_keyboards"] as? Map<String, Any?>
             Key.presetKeys = configMap["preset_keys"] as? Map<String?, Map<String?, Any?>?>
             fallbackColors = configMap["fallback_colors"] as? Map<String, String>
@@ -85,27 +83,15 @@ class Theme(val themeId: String) {
         SoundThemeManager.switchSound(colors.getString("sound"))
     }
 
-    class Style(private val theme: Theme) {
-        fun getString(key: String): String {
-            return CollectionUtils.obtainString(theme.generalStyle, key, "")
-        }
+    fun s(key: String) = config.getString(key) ?: ""
 
-        fun getInt(key: String): Int {
-            return CollectionUtils.obtainInt(theme.generalStyle, key, 0)
-        }
+    fun i(key: String) = config.getInt(key) ?: 0
 
-        fun getFloat(key: String): Float {
-            return CollectionUtils.obtainFloat(theme.generalStyle, key, 0f)
-        }
+    fun f(key: String) = config.getFloat(key) ?: 0f
 
-        fun getBoolean(key: String): Boolean {
-            return CollectionUtils.obtainBoolean(theme.generalStyle, key, false)
-        }
+    fun b(key: String) = config.getBool(key) ?: false
 
-        fun getObject(key: String): Any? {
-            return CollectionUtils.obtainValue(theme.generalStyle, key)
-        }
-    }
+    fun o(key: String) = config.getItem(key)
 
     class Liquid(private val theme: Theme) {
         fun getObject(key: String): Any? {
@@ -117,7 +103,7 @@ class Theme(val themeId: String) {
         }
 
         fun getFloat(key: String): Float {
-            return CollectionUtils.obtainFloat(theme.liquidKeyboard, key, theme.style.getFloat(key))
+            return CollectionUtils.obtainFloat(theme.liquidKeyboard, key, theme.f("style/$key"))
         }
     }
 
@@ -173,25 +159,25 @@ class Theme(val themeId: String) {
             if (o is String) {
                 val bitmap = bitmapDrawable(o)
                 if (bitmap != null) {
-                    if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                        bitmap.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
+                    if (!alphaKey.isNullOrEmpty() && theme.o("style/$alphaKey") != null) {
+                        bitmap.alpha = MathUtils.clamp(theme.i("style/$alphaKey"), 0, 255)
                     }
                     return bitmap
                 }
             } else if (o is Int) {
                 val gradient = GradientDrawable().apply { setColor(o) }
                 if (roundCornerKey.isNotEmpty()) {
-                    gradient.cornerRadius = theme.style.getFloat(roundCornerKey)
+                    gradient.cornerRadius = theme.f("style/$roundCornerKey")
                 }
                 if (!borderColorKey.isNullOrEmpty() && !borderKey.isNullOrEmpty()) {
-                    val border = dp2px(theme.style.getFloat(borderKey))
+                    val border = dp2px(theme.f("style/$borderKey"))
                     val stroke = getColor(borderColorKey)
                     if (stroke != null && border > 0) {
                         gradient.setStroke(border.toInt(), stroke)
                     }
                 }
-                if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                    gradient.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
+                if (!alphaKey.isNullOrEmpty() && theme.o("style/$alphaKey") != null) {
+                    gradient.alpha = MathUtils.clamp(theme.i("style/$alphaKey"), 0, 255)
                 }
                 return gradient
             }
@@ -268,7 +254,7 @@ class Theme(val themeId: String) {
     private val colorSchemeName: String
         get() {
             var schemeId = appPrefs.themeAndColor.selectedColor
-            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = style.getString("color_scheme") // 主題中指定的配色
+            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = s("style/color_scheme") // 主題中指定的配色
             if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = "default" // 主題中的default配色
             val colorMap = presetColorSchemes!![schemeId]
             if (colorMap!!.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
@@ -286,7 +272,7 @@ class Theme(val themeId: String) {
      */
     private fun getColorSchemeName(darkMode: Boolean): String? {
         var scheme = appPrefs.themeAndColor.selectedColor
-        if (!presetColorSchemes!!.containsKey(scheme)) scheme = style.getString("color_scheme") // 主題中指定的配色
+        if (!presetColorSchemes!!.containsKey(scheme)) scheme = s("style/color_scheme") // 主題中指定的配色
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = "default" // 主題中的default配色
         val colorMap = presetColorSchemes!![scheme]
         if (darkMode) {
@@ -302,7 +288,7 @@ class Theme(val themeId: String) {
     }
 
     private fun joinToFullImagePath(value: String): String {
-        val defaultPath = File(userDataDir, "backgrounds/${style.getString("background_folder")}/$value")
+        val defaultPath = File(userDataDir, "backgrounds/${s("style/background_folder")}/$value")
         if (!defaultPath.exists()) {
             val fallbackPath = File(userDataDir, "backgrounds/$value")
             if (fallbackPath.exists()) return fallbackPath.path

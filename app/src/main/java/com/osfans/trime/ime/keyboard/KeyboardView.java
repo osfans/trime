@@ -52,6 +52,8 @@ import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.LeakGuardHandlerWrapper;
+import com.osfans.trime.util.config.ConfigItem;
+import com.osfans.trime.util.config.ConfigMap;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -238,7 +240,15 @@ public class KeyboardView extends View implements View.OnClickListener {
   }
 
   private void handleEnterLabel(@NonNull Theme theme) {
-    if ((mEnterLabels = (Map<String, String>) theme.style.getObject("enter_labels")) == null) {
+    ConfigItem item = theme.o("style/enter_labels");
+    if (item != null) {
+      ConfigMap list = item.getConfigMap();
+      Map<String, String> tmp = new HashMap<>();
+      for (Map.Entry<String, ConfigItem> e : list.getEntries().entrySet()) {
+        tmp.put(e.getKey(), e.getValue().getConfigValue().getString());
+      }
+      mEnterLabels = tmp;
+    } else {
       mEnterLabels = new HashMap<>();
     }
 
@@ -358,18 +368,18 @@ public class KeyboardView extends View implements View.OnClickListener {
     hilited_key_symbol_color = theme.colors.getColor("hilited_key_symbol_color");
     mShadowColor = theme.colors.getColor("shadow_color");
 
-    mSymbolSize = (int) DimensionsKt.sp2px(theme.style.getFloat("symbol_text_size"));
-    mKeyTextSize = (int) DimensionsKt.sp2px(theme.style.getFloat("key_text_size"));
-    mVerticalCorrection = (int) DimensionsKt.dp2px(theme.style.getFloat("vertical_correction"));
-    setProximityCorrectionEnabled(theme.style.getBoolean("proximity_correction"));
-    mPreviewOffset = (int) DimensionsKt.dp2px(theme.style.getFloat("preview_offset"));
-    mPreviewHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("preview_height"));
-    mLabelTextSize = (int) DimensionsKt.sp2px(theme.style.getFloat("key_long_text_size"));
+    mSymbolSize = (int) DimensionsKt.sp2px(theme.f("style/symbol_text_size"));
+    mKeyTextSize = (int) DimensionsKt.sp2px(theme.f("style/key_text_size"));
+    mVerticalCorrection = (int) DimensionsKt.dp2px(theme.f("style/vertical_correction"));
+    setProximityCorrectionEnabled(theme.b("style/proximity_correction"));
+    mPreviewOffset = (int) DimensionsKt.dp2px(theme.f("style/preview_offset"));
+    mPreviewHeight = (int) DimensionsKt.dp2px(theme.f("style/preview_height"));
+    mLabelTextSize = (int) DimensionsKt.sp2px(theme.f("style/key_long_text_size"));
     if (mLabelTextSize == 0) mLabelTextSize = mKeyTextSize;
 
-    mBackgroundDimAmount = theme.style.getFloat("background_dim_amount");
-    mShadowRadius = theme.style.getFloat("shadow_radius");
-    final float mRoundCorner = theme.style.getFloat("round_corner");
+    mBackgroundDimAmount = theme.f("style/background_dim_amount");
+    mShadowRadius = theme.f("style/shadow_radius");
+    final float mRoundCorner = theme.f("style/round_corner");
 
     mKeyBackColor = new StateListDrawable();
     mKeyBackColor.addState(
@@ -404,18 +414,18 @@ public class KeyboardView extends View implements View.OnClickListener {
       background.setCornerRadius(mRoundCorner);
       mPreviewText.setBackground(background);
     }
-    final int mPreviewTextSizeLarge = theme.style.getInt("preview_text_size");
+    final int mPreviewTextSizeLarge = theme.i("style/preview_text_size");
     mPreviewText.setTextSize(mPreviewTextSizeLarge);
     mShowPreview = getPrefs().getKeyboard().getPopupKeyPressEnabled();
 
-    mPaint.setTypeface(FontManager.getTypeface(theme.style.getString("key_font")));
-    mPaintSymbol.setTypeface(FontManager.getTypeface(theme.style.getString("symbol_font")));
+    mPaint.setTypeface(FontManager.getTypeface(theme.s("style/key_font")));
+    mPaintSymbol.setTypeface(FontManager.getTypeface(theme.s("style/symbol_font")));
     mPaintSymbol.setColor(key_symbol_color);
     mPaintSymbol.setTextSize(mSymbolSize);
-    mPreviewText.setTypeface(FontManager.getTypeface(theme.style.getString("preview_font")));
+    mPreviewText.setTypeface(FontManager.getTypeface(theme.s("style/preview_font")));
 
     handleEnterLabel(theme);
-    enterLabelMode = theme.style.getInt("enter_label_mode");
+    enterLabelMode = theme.i("style/enter_label_mode");
     invalidateAllKeys();
   }
 
