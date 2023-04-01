@@ -2,9 +2,11 @@ package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
+import timber.log.Timber
 import java.io.File
 
 object ThemeManager {
+    val prefs = AppPrefs.defaultInstance()
 
     private fun listThemes(path: File): MutableList<String> {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
@@ -14,19 +16,23 @@ object ThemeManager {
 
     @JvmStatic
     fun switchTheme(theme: String) {
-        currentThemeName = theme
-        AppPrefs.defaultInstance().themeAndColor.selectedTheme = theme
+        currentTheme = runCatching { Theme(theme) }.getOrNull() ?: Theme("trime")
+        prefs.themeAndColor.selectedTheme = theme
     }
 
-    val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
+    val sharedThemes = listThemes(DataManager.sharedDataDir)
 
-    val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
+    val userThemes = listThemes(DataManager.userDataDir)
 
-    private lateinit var currentThemeName: String
+    private lateinit var currentTheme: Theme
 
     @JvmStatic
     fun init() {
-        currentThemeName = AppPrefs.defaultInstance().themeAndColor.selectedTheme
+        val selectedThemeName = prefs.themeAndColor.selectedTheme
+        currentTheme = runCatching { Theme(selectedThemeName) }.getOrNull() ?: Theme("trime").also {
+            Timber.w("Cannot find selected theme '$selectedThemeName', fallback to ${it.themeId}")
+            prefs.themeAndColor.selectedTheme = it.themeId
+        }
     }
 
     @JvmStatic
@@ -38,5 +44,5 @@ object ThemeManager {
     }
 
     @JvmStatic
-    fun getActiveTheme() = currentThemeName
+    fun getActiveTheme() = currentTheme
 }

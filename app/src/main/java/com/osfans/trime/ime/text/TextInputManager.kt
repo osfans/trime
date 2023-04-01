@@ -13,7 +13,7 @@ import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
@@ -111,7 +111,7 @@ class TextInputManager private constructor() :
             .onEach(::handleRimeNotification)
             .launchIn(trime.lifecycleScope)
 
-        val theme = Theme.get()
+        val theme = ThemeManager.getActiveTheme()
         val defaultLocale = theme.style.getString("locale").split(DELIMITER_SPLITTER)
         locales[0] = when (defaultLocale.size) {
             3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
@@ -308,7 +308,7 @@ class TextInputManager private constructor() :
         if (needSendUpRimeKey) {
             if (shouldUpdateRimeOption) {
                 Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                Rime.setOption("_horizontal", Theme.get().style.getBoolean("horizontal"))
+                Rime.setOption("_horizontal", ThemeManager.getActiveTheme().style.getBoolean("horizontal"))
                 shouldUpdateRimeOption = false
             }
             // todo 释放按键可能不对

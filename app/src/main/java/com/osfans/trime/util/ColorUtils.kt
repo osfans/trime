@@ -1,7 +1,6 @@
 package com.osfans.trime.util
 
 import android.graphics.Color
-import timber.log.Timber
 
 object ColorUtils {
     @JvmStatic
@@ -29,7 +28,7 @@ object ColorUtils {
             }
             Color.parseColor(completed)
         } catch (e: IllegalArgumentException) {
-            Timber.w("Invalid or unknown color value: %s", s)
+            // Timber.w("Invalid or unknown color value: %s", s)
             null
         }
     }

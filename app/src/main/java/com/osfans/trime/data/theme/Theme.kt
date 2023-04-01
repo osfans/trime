@@ -22,7 +22,6 @@ import android.graphics.drawable.GradientDrawable
 import androidx.core.math.MathUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager.sharedDataDir
 import com.osfans.trime.data.DataManager.userDataDir
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.sound.SoundThemeManager
@@ -33,11 +32,10 @@ import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.dp2px
 import timber.log.Timber
 import java.io.File
-import java.util.Objects
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
-class Theme {
+class Theme(val themeId: String) {
     private var currentColorSchemeId: String? = null
     private var generalStyle: Map<String, Any?>? = null
     private var fallbackColors: Map<String, String>? = null
@@ -62,63 +60,29 @@ class Theme {
 
     companion object {
         private const val VERSION_KEY = "config_version"
-        private var self: Theme? = null
         private val appPrefs = AppPrefs.defaultInstance()
-
-        @JvmStatic
-        fun get(): Theme {
-            if (self == null) self = Theme()
-            return self as Theme
-        }
-
-        private const val defaultThemeName = "trime"
     }
 
     init {
-        self = this
-        ThemeManager.init()
-        Rime.getInstance(!sharedDataDir.exists())
-        init()
+        Rime.getInstance()
+        measureTimeMillis {
+            Rime.deployRimeConfigFile("$themeId.yaml", VERSION_KEY)
+            Timber.d("Fetching full theme config map ...")
+            val configMap = Rime.getRimeConfigMap(themeId, "")
+                ?: throw IllegalArgumentException("Failed to fetch theme config map")
+            Timber.d("Fetching done")
+            generalStyle = configMap["style"] as? Map<String, Any?>
+            presetKeyboards = configMap["preset_keyboards"] as? Map<String, Any?>
+            Key.presetKeys = configMap["preset_keys"] as? Map<String?, Map<String?, Any?>?>
+            fallbackColors = configMap["fallback_colors"] as? Map<String, String>
+            presetColorSchemes = configMap["preset_color_schemes"] as? Map<String, Map<String, Any>?>
+            liquidKeyboard = configMap["liquid_keyboard"] as? Map<String, Any?>
+        }.also { Timber.d("Setting up all theme config map takes $it ms") }
+        measureTimeMillis {
+            initCurrentColors()
+        }.also { Timber.d("Initializing cache takes $it ms") }
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
-        Timber.d("Initialization finished")
-    }
-
-    fun init() {
-        val active = ThemeManager.getActiveTheme()
-        Timber.i("Initializing theme, currentThemeName=%s ...", active)
-        runCatching {
-            val themeFileName = "$active.yaml"
-            Timber.i("Deploying theme '%s' ...", themeFileName)
-            if (!Rime.deployRimeConfigFile(themeFileName, VERSION_KEY)) {
-                Timber.w("Deploying theme '%s' failed", themeFileName)
-            }
-            Timber.d("Fetching global theme config map ...")
-            measureTimeMillis {
-                var fullThemeConfigMap: Map<String, Any>?
-                if (Rime.getRimeConfigMap(active, "").also { fullThemeConfigMap = it } == null) {
-                    fullThemeConfigMap = Rime.getRimeConfigMap(defaultThemeName, "")
-                }
-                Objects.requireNonNull(fullThemeConfigMap, "The theme file cannot be empty!")
-                Timber.d("Fetching done")
-                generalStyle = fullThemeConfigMap!!["style"] as Map<String, Any?>?
-                fallbackColors = fullThemeConfigMap!!["fallback_colors"] as Map<String, String>?
-                Key.presetKeys = fullThemeConfigMap!!["preset_keys"] as Map<String?, Map<String?, Any?>?>?
-                presetColorSchemes = fullThemeConfigMap!!["preset_color_schemes"] as Map<String, Map<String, Any>?>?
-                presetKeyboards = fullThemeConfigMap!!["preset_keyboards"] as Map<String, Any?>?
-                liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
-            }.also { Timber.d("Setting up all theme config map takes $it ms") }
-            measureTimeMillis {
-                initCurrentColors()
-            }.also { Timber.d("Initializing cache takes $it ms") }
-            Timber.i("The theme is initialized")
-        }.getOrElse {
-            Timber.e("Failed to parse the theme: ${it.message}")
-            if (ThemeManager.getActiveTheme() != defaultThemeName) {
-                ThemeManager.switchTheme(defaultThemeName)
-                init()
-            }
-        }
     }
 
     class Style(private val theme: Theme) {
@@ -274,10 +238,6 @@ class Theme {
             }
             return remapped
         }
-    }
-
-    fun destroy() {
-        self = null
     }
 
     lateinit var keyboardPadding: IntArray

@@ -47,6 +47,7 @@ import com.osfans.trime.R;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.DimensionsKt;
@@ -352,7 +353,7 @@ public class KeyboardView extends View implements View.OnClickListener {
   }
 
   public void reset() {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     key_symbol_color = theme.colors.getColor("key_symbol_color");
     hilited_key_symbol_color = theme.colors.getColor("hilited_key_symbol_color");
     mShadowColor = theme.colors.getColor("shadow_color");

@@ -4,12 +4,12 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import com.osfans.trime.data.theme.FontManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 
 object GraphicUtils {
     const val HAN_B_FONT = "hanb_font"
     const val LATIN_FONT = "latin_font"
-    private val theme = Theme.get()
+    private val theme = ThemeManager.getActiveTheme()
     private val hanBFont = FontManager.getTypeface(theme.style.getString(HAN_B_FONT))
     private val latinFont = FontManager.getTypeface(theme.style.getString(LATIN_FONT))
 

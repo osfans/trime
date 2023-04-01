@@ -38,6 +38,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.GraphicUtils;
@@ -88,7 +89,7 @@ public class Candidate extends View {
   }
 
   public void reset() {
-    Theme theme = Theme.get();
+    Theme theme = ThemeManager.getActiveTheme();
     candidateHighlight = new PaintDrawable(theme.colors.getColor("hilited_candidate_back_color"));
     candidateHighlight.setCornerRadius(theme.style.getFloat("layout/round_corner"));
     separatorPaint.setColor(theme.colors.getColor("candidate_separator_color"));

@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.view.KeyEvent;
 import com.blankj.utilcode.util.ScreenUtils;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class Keyboard {
 
     // 橫屏模式下，键盘左右两侧到屏幕边缘的距离
 
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     int[] keyboardPadding = theme.getKeyboardPadding();
     mDisplayWidth = ScreenUtils.getScreenWidth() - keyboardPadding[0] - keyboardPadding[1];
     /* Height of the screen */
@@ -178,7 +179,7 @@ public class Keyboard {
 
   public Keyboard(String name) {
     this();
-    Theme theme = Theme.get();
+    Theme theme = ThemeManager.getActiveTheme();
     final Map<String, Object> keyboardConfig;
     final Object v = theme.keyboards.getObject(name);
     if (v != null) {

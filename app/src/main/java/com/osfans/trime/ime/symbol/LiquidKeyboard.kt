@@ -18,6 +18,7 @@ import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LiquidKeyboard(private val context: Context) {
-    private val theme: Theme = Theme.get()
+    private val theme: Theme = ThemeManager.getActiveTheme()
     private val tabManager: TabManager = TabManager.get()
     private val service: Trime = Trime.getService()
     private lateinit var keyboardView: RecyclerView

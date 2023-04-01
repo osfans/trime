@@ -25,6 +25,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.enums.KeyEventType;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
@@ -115,7 +116,7 @@ public class Key {
   public Key(Keyboard parent, Map<String, Object> mk) {
     this(parent);
     String s;
-    Theme theme = Theme.get();
+    Theme theme = ThemeManager.getActiveTheme();
     {
       boolean hasComposingKey = false;
 

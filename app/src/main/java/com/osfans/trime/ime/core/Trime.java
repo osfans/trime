@@ -57,6 +57,7 @@ import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.db.DraftHelper;
 import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
@@ -298,7 +299,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void loadConfig() {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     popupWindowPos = PopupPosition.fromString(theme.style.getString("layout/position"));
     isPopupWindowMovable = theme.style.getString("layout/movable");
     popupMargin = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/spacing"));
@@ -317,7 +318,8 @@ public class Trime extends LifecycleInputMethodService {
     try {
       if (textInputManager.getShouldUpdateRimeOption()) {
         Rime.setOption("soft_cursor", getPrefs().getKeyboard().getSoftCursorEnabled()); // 軟光標
-        Rime.setOption("_horizontal", Theme.get().style.getBoolean("horizontal")); // 水平模式
+        Rime.setOption(
+            "_horizontal", ThemeManager.getActiveTheme().style.getBoolean("horizontal")); // 水平模式
         textInputManager.setShouldUpdateRimeOption(false);
       }
     } catch (Exception e) {
@@ -336,6 +338,7 @@ public class Trime extends LifecycleInputMethodService {
       //  and lead to a crash loop
       try {
         Timber.d("onCreate");
+        ThemeManager.init();
         activeEditorInstance = new EditorInstance(this);
         inputFeedbackManager = new InputFeedbackManager(this);
         liquidKeyboard = new LiquidKeyboard(this);
@@ -419,14 +422,15 @@ public class Trime extends LifecycleInputMethodService {
 
   public void invalidate() {
     Rime.getInstance(false);
-    Theme.get().destroy();
     reset();
     textInputManager.setShouldUpdateRimeOption(true);
   }
 
   private void hideCompositionView() {
     if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
-      popupWindowPos = PopupPosition.fromString(Theme.get().style.getString("layout/position"));
+      popupWindowPos =
+          PopupPosition.fromString(
+              ThemeManager.getActiveTheme().style.getString("layout/position"));
     }
 
     if (mPopupWindow != null && mPopupWindow.isShowing()) {
@@ -448,7 +452,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void loadBackground() {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     final int orientation = getResources().getConfiguration().orientation;
 
     if (mPopupWindow != null) {
@@ -512,7 +516,7 @@ public class Trime extends LifecycleInputMethodService {
       mCandidate.reset();
       isPopupWindowEnabled =
           getPrefs().getKeyboard().getPopupWindowEnabled()
-              && Theme.get().style.getObject("window") != null;
+              && ThemeManager.getActiveTheme().style.getObject("window") != null;
       mComposition.setVisibility(isPopupWindowEnabled ? View.VISIBLE : View.GONE);
       mComposition.reset();
     }
@@ -524,7 +528,7 @@ public class Trime extends LifecycleInputMethodService {
     inputRootBinding.symbol.symbolInput.setVisibility(View.GONE);
     inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
     loadConfig();
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     theme.initCurrentColors();
     SoundThemeManager.switchSound(theme.colors.getString("sound"));
     KeyboardSwitcher.newOrReset();
@@ -544,7 +548,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void initKeyboardDarkMode(boolean darkMode) {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     if (theme.getHasDarkLight()) {
       loadConfig();
       theme.initCurrentColors(darkMode);
@@ -720,7 +724,7 @@ public class Trime extends LifecycleInputMethodService {
       assert inputRootBinding != null;
       listener.onInitializeInputUi(inputRootBinding);
     }
-    Theme.get().initCurrentColors();
+    ThemeManager.getActiveTheme().initCurrentColors();
     loadBackground();
 
     KeyboardSwitcher.newOrReset();

@@ -32,6 +32,7 @@ import android.view.ViewGroup.LayoutParams;
 import androidx.annotation.NonNull;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.util.DimensionsKt;
@@ -57,7 +58,7 @@ public class TabView extends View {
   // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset() {
-    Theme theme = Theme.get();
+    Theme theme = ThemeManager.getActiveTheme();
     candidateHighlight = new PaintDrawable(theme.colors.getColor("hilited_candidate_back_color"));
     candidateHighlight.setCornerRadius(theme.style.getFloat("layout/round_corner"));
 

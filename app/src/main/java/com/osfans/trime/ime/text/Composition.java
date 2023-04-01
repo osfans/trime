@@ -44,6 +44,7 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeComposition;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.util.CollectionUtils;
@@ -212,7 +213,7 @@ public class Composition extends AppCompatTextView {
   }
 
   public void reset() {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
 
     if ((windows_comps = (List<Map<String, Object>>) theme.style.getObject("window")) == null) {
       windows_comps = new ArrayList<>();
