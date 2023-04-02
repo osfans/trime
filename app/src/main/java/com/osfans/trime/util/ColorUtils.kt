@@ -5,7 +5,7 @@ import android.graphics.Color
 object ColorUtils {
     @JvmStatic
     fun parseColor(s: String?): Int? {
-        if (s == null) return null
+        if (s.isNullOrEmpty()) return null
         val hex: String = if (s.startsWith("#")) s.replace("#", "0x") else s
         return try {
             val completed = if (hex.startsWith("0x") || hex.startsWith("0X")) {

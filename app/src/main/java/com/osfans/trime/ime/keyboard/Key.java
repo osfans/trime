@@ -111,9 +111,9 @@ public class Key {
    * Create an empty key with no attributes.
    *
    * @param parent 按鍵所在的{@link Keyboard 鍵盤}
-   * @param mk 從YAML中解析得到的Map
+   * @param keyDef 從YAML中解析得到的按键定义
    */
-  public Key(Keyboard parent, Map<String, Object> mk) {
+  public Key(Keyboard parent, Map<String, String> keyDef) {
     this(parent);
     String s;
     Theme theme = ThemeManager.getActiveTheme();
@@ -122,7 +122,7 @@ public class Key {
 
       for (final KeyEventType type : KeyEventType.values()) {
         final String typeStr = type.toString().toLowerCase(Locale.ROOT);
-        s = CollectionUtils.obtainString(mk, typeStr, "");
+        s = CollectionUtils.obtainString(keyDef, typeStr, "");
         if (!TextUtils.isEmpty(s)) {
           events[type.ordinal()] = new Event(mKeyboard, s);
           if (type.ordinal() < KeyEventType.COMBO.ordinal()) hasComposingKey = true;
@@ -132,27 +132,28 @@ public class Key {
       }
       if (hasComposingKey) mKeyboard.getComposingKeys().add(this);
 
-      label = CollectionUtils.obtainString(mk, "label", "");
-      labelSymbol = CollectionUtils.obtainString(mk, "label_symbol", "");
-      hint = CollectionUtils.obtainString(mk, "hint", "");
-      if (mk.containsKey("send_bindings")) {
-        send_bindings = CollectionUtils.obtainBoolean(mk, "send_bindings", true);
+      label = CollectionUtils.obtainString(keyDef, "label", "");
+      labelSymbol = CollectionUtils.obtainString(keyDef, "label_symbol", "");
+      hint = CollectionUtils.obtainString(keyDef, "hint", "");
+      if (keyDef.containsKey("send_bindings")) {
+        send_bindings = CollectionUtils.obtainBoolean(keyDef, "send_bindings", true);
       } else if (!hasComposingKey) {
         send_bindings = false;
       }
     }
 
     mKeyboard.setModiferKey(getCode(), this);
-    key_text_size = (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(mk, "key_text_size", 0));
+    key_text_size =
+        (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(keyDef, "key_text_size", 0));
     symbol_text_size =
-        (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(mk, "symbol_text_size", 0));
-    key_text_color = theme.colors.getColor(mk, "key_text_color");
-    hilited_key_text_color = theme.colors.getColor(mk, "hilited_key_text_color");
-    key_back_color = theme.colors.getDrawable(mk, "key_back_color");
-    hilited_key_back_color = theme.colors.getDrawable(mk, "hilited_key_back_color");
-    key_symbol_color = theme.colors.getColor(mk, "key_symbol_color");
-    hilited_key_symbol_color = theme.colors.getColor(mk, "hilited_key_symbol_color");
-    round_corner = CollectionUtils.obtainFloat(mk, "round_corner", 0);
+        (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(keyDef, "symbol_text_size", 0));
+    key_text_color = theme.colors.getColor(keyDef, "key_text_color");
+    hilited_key_text_color = theme.colors.getColor(keyDef, "hilited_key_text_color");
+    key_back_color = theme.colors.getDrawable(keyDef, "key_back_color");
+    hilited_key_back_color = theme.colors.getDrawable(keyDef, "hilited_key_back_color");
+    key_symbol_color = theme.colors.getColor(keyDef, "key_symbol_color");
+    hilited_key_symbol_color = theme.colors.getColor(keyDef, "hilited_key_symbol_color");
+    round_corner = CollectionUtils.obtainFloat(keyDef, "round_corner", 0);
   }
 
   public static Map<String, Map<String, Object>> getPresetKeys() {

@@ -1,9 +1,12 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.util.appContext
+import com.osfans.trime.util.config.ConfigMap
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import timber.log.Timber
@@ -17,24 +20,13 @@ object KeyboardSwitcher {
     private var currentDisplayWidth: Int = 0
 
     private val theme = ThemeManager.getActiveTheme()
-    lateinit var availableKeyboardIds: List<String>
-    lateinit var availableKeyboards: List<Keyboard>
+    private val availableKeyboardIds = theme.o("style/keyboards")?.decode(ListSerializer(String.serializer()))
+        ?.map { remapKeyboardId(it) }?.distinct() ?: listOf()
+    private val availableKeyboards = availableKeyboardIds.map { Keyboard(it) }
 
     /** To get current keyboard instance. **/
     @JvmStatic
     val currentKeyboard: Keyboard get() = availableKeyboards[currentId]
-
-    init {
-        newOrReset()
-    }
-
-    @JvmStatic
-    fun newOrReset() {
-        Timber.d("Switching keyboard back to .default ...")
-        availableKeyboardIds = theme.o("style/keyboards")?.decode(ListSerializer(String.serializer()))
-            ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
-        availableKeyboards = availableKeyboardIds.map { Keyboard(theme.keyboards.remapKeyboardId(it)) }
-    }
 
     fun switchKeyboard(name: String?) {
         val i = when (name) {
@@ -84,6 +76,41 @@ object KeyboardSwitcher {
         if (currentId >= 0 && (displayWidth == currentDisplayWidth)) return
 
         currentDisplayWidth = displayWidth
-        newOrReset()
+    }
+
+    private fun remapKeyboardId(name: String): String {
+        val presetKeyboards = theme.o("preset_keyboards")?.configMap
+        val remapped = if (".default" == name) {
+            val currentSchemaId = Rime.getCurrentRimeSchema()
+            val shortSchemaId = currentSchemaId.split('_')[0]
+            if (presetKeyboards?.containsKey(shortSchemaId) == true) {
+                return shortSchemaId
+            } else {
+                val alphabet = SchemaManager.getActiveSchema().alphabet
+                val twentySix = "qwerty"
+                if (!alphabet.isNullOrEmpty() && presetKeyboards?.containsKey(alphabet) == true) {
+                    return alphabet
+                } else {
+                    if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
+                        twentySix + "_"
+                    } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
+                        twentySix + "0"
+                    } else {
+                        twentySix
+                    }
+                }
+            }
+        } else {
+            name
+        }
+        if (presetKeyboards?.containsKey(remapped) == false) {
+            Timber.w("Cannot find keyboard definition '$remapped', fallback to default")
+            val defaultMap = presetKeyboards.get<ConfigMap>("default")
+                ?: throw IllegalStateException("The default keyboard definition is missing!")
+            if (defaultMap.containsKey("import_preset")) {
+                return defaultMap.getValue("import_preset")?.getString() ?: "default"
+            }
+        }
+        return remapped
     }
 }

@@ -538,7 +538,6 @@ public class Trime extends LifecycleInputMethodService {
     final Theme theme = ThemeManager.getActiveTheme();
     theme.initCurrentColors();
     SoundThemeManager.switchSound(theme.colors.getString("sound"));
-    KeyboardSwitcher.newOrReset();
     resetCandidate();
     hideCompositionView();
     resetKeyboard();
@@ -560,7 +559,6 @@ public class Trime extends LifecycleInputMethodService {
       loadConfig();
       theme.initCurrentColors(darkMode);
       SoundThemeManager.switchSound(theme.colors.getString("sound"));
-      KeyboardSwitcher.newOrReset();
       resetCandidate();
       hideCompositionView();
       resetKeyboard();
@@ -734,7 +732,6 @@ public class Trime extends LifecycleInputMethodService {
     ThemeManager.getActiveTheme().initCurrentColors();
     loadBackground();
 
-    KeyboardSwitcher.newOrReset();
     Timber.i("onCreateInputView() finish");
 
     return inputRootBinding.inputRoot;

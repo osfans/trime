@@ -23,7 +23,6 @@ import androidx.core.math.MathUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager.userDataDir
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.util.CollectionUtils
@@ -42,16 +41,12 @@ class Theme(val themeId: String) {
     private var currentColorSchemeId: String? = null
     private var fallbackColors: Map<String, String>? = null
     private var presetColorSchemes: Map<String, Map<String, Any>?>? = null
-    private var presetKeyboards: Map<String, Any?>? = null
 
     // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
     private val currentColors: MutableMap<String, Any> = hashMapOf()
 
     @JvmField
     val colors = Colors(this)
-
-    @JvmField
-    val keyboards = Keyboards(this)
 
     companion object {
         private const val VERSION_KEY = "config_version"
@@ -62,14 +57,9 @@ class Theme(val themeId: String) {
         Rime.getInstance()
         measureTimeMillis {
             Rime.deployRimeConfigFile("$themeId.yaml", VERSION_KEY)
-            Timber.d("Fetching full theme config map ...")
-            val configMap = Rime.getRimeConfigMap(themeId, "")
-                ?: throw IllegalArgumentException("Failed to fetch theme config map")
-            Timber.d("Fetching done")
-            presetKeyboards = configMap["preset_keyboards"] as? Map<String, Any?>
-            Key.presetKeys = configMap["preset_keys"] as? Map<String?, Map<String?, Any?>?>
-            fallbackColors = configMap["fallback_colors"] as? Map<String, String>
-            presetColorSchemes = configMap["preset_color_schemes"] as? Map<String, Map<String, Any>?>
+            Key.presetKeys = Rime.getRimeConfigMap(themeId, "preset_keys") as? Map<String?, Map<String?, Any?>?>
+            fallbackColors = Rime.getRimeConfigMap(themeId, "fallback_colors") as? Map<String, String>
+            presetColorSchemes = Rime.getRimeConfigMap(themeId, "preset_color_schemes") as? Map<String, Map<String, Any>?>
         }.also { Timber.d("Setting up all theme config map takes $it ms") }
         measureTimeMillis {
             initCurrentColors()
@@ -87,6 +77,14 @@ class Theme(val themeId: String) {
     fun b(key: String) = config.getBool(key) ?: false
 
     fun o(key: String) = config.getItem(key)
+
+    fun sE(key: String, defValue: String) = config.getString(key) ?: defValue
+
+    fun iE(key: String, defValue: Int) = config.getInt(key) ?: defValue
+
+    fun fE(key: String, defValue: Float) = config.getFloat(key) ?: defValue
+
+    fun bE(key: String, defValue: Boolean) = config.getBool(key) ?: defValue
 
     class Colors(private val theme: Theme) {
         fun getString(key: String): String {
@@ -163,47 +161,6 @@ class Theme(val themeId: String) {
                 return gradient
             }
             return null
-        }
-    }
-
-    class Keyboards(private val theme: Theme) {
-        fun getObject(key: String): Any? {
-            return CollectionUtils.obtainValue(theme.presetKeyboards, key)
-        }
-
-        fun remapKeyboardId(name: String): String {
-            val remapped = if (".default" == name) {
-                val currentSchemaId = Rime.getCurrentRimeSchema()
-                val shortSchemaId = currentSchemaId.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-                if (theme.presetKeyboards!!.containsKey(shortSchemaId)) {
-                    return shortSchemaId
-                } else {
-                    val alphabet = SchemaManager.getActiveSchema().alphabet
-                    val twentySix = "qwerty"
-                    if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
-                        return alphabet
-                    } else {
-                        if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
-                            twentySix + "_"
-                        } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
-                            twentySix + "0"
-                        } else {
-                            twentySix
-                        }
-                    }
-                }
-            } else {
-                name
-            }
-            if (!theme.presetKeyboards!!.containsKey(remapped)) {
-                Timber.w("Cannot find keyboard definition %s, fallback ...", remapped)
-                val defaultMap = theme.presetKeyboards!!["default"] as Map<String, Any>?
-                    ?: throw IllegalStateException("The default keyboard definition is missing!")
-                if (defaultMap.containsKey("import_preset")) {
-                    return defaultMap["import_preset"] as? String ?: "default"
-                }
-            }
-            return remapped
         }
     }
 
