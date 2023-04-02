@@ -30,6 +30,8 @@ import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.config.Config
 import com.osfans.trime.util.dp2px
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import timber.log.Timber
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -39,8 +41,10 @@ class Theme(val themeId: String) {
     private val config = Config.create(themeId)
         ?: throw IllegalArgumentException("Nonexistent theme config file $themeId.yaml")
     private var currentColorSchemeId: String? = null
-    private var fallbackColors: Map<String, String>? = null
-    private var presetColorSchemes: Map<String, Map<String, Any>?>? = null
+    private val fallbackColors = config.getMap("fallback_colors")
+        ?.decode(MapSerializer(String.serializer(), String.serializer()))
+    private val presetColorSchemes = config.getMap("preset_color_schemes")
+        ?.decode(MapSerializer(String.serializer(), MapSerializer(String.serializer(), String.serializer())))
 
     // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
     private val currentColors: MutableMap<String, Any> = hashMapOf()
@@ -58,8 +62,6 @@ class Theme(val themeId: String) {
         measureTimeMillis {
             Rime.deployRimeConfigFile("$themeId.yaml", VERSION_KEY)
             Key.presetKeys = Rime.getRimeConfigMap(themeId, "preset_keys") as? Map<String?, Map<String?, Any?>?>
-            fallbackColors = Rime.getRimeConfigMap(themeId, "fallback_colors") as? Map<String, String>
-            presetColorSchemes = Rime.getRimeConfigMap(themeId, "preset_color_schemes") as? Map<String, Map<String, Any>?>
         }.also { Timber.d("Setting up all theme config map takes $it ms") }
         measureTimeMillis {
             initCurrentColors()
@@ -88,7 +90,7 @@ class Theme(val themeId: String) {
 
     class Colors(private val theme: Theme) {
         fun getString(key: String): String {
-            return CollectionUtils.obtainString(theme.presetColorSchemes, key, "")
+            return CollectionUtils.obtainString(theme.presetColorSchemes!![theme.currentColorSchemeId], key, "")
         }
 
         // API 2.0
@@ -168,14 +170,14 @@ class Theme(val themeId: String) {
 
     //  获取当前配色方案的key的value，或者从fallback获取值。
     private fun getColorValue(key: String?): Any? {
-        val map = presetColorSchemes!![currentColorSchemeId] ?: return null
+        val map = presetColorSchemes?.get(currentColorSchemeId!!) ?: return null
         var value: Any?
         var newKey = key
         val limit = fallbackColors!!.size * 2
         for (i in 0 until limit) {
             value = map[newKey]
-            if (value != null || !fallbackColors!!.containsKey(newKey)) return value
-            newKey = fallbackColors!![newKey]
+            if (value != null || !fallbackColors.containsKey(newKey)) return value
+            newKey = fallbackColors[newKey]
         }
         return null
     }
@@ -193,8 +195,8 @@ class Theme(val themeId: String) {
         get() {
             var schemeId = appPrefs.themeAndColor.selectedColor
             if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = s("style/color_scheme") // 主題中指定的配色
-            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = "default" // 主題中的default配色
-            val colorMap = presetColorSchemes!![schemeId]
+            if (!presetColorSchemes.containsKey(schemeId)) schemeId = "default" // 主題中的default配色
+            val colorMap = presetColorSchemes[schemeId]
             if (colorMap!!.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
             return schemeId
         }
@@ -211,15 +213,15 @@ class Theme(val themeId: String) {
     private fun getColorSchemeName(darkMode: Boolean): String? {
         var scheme = appPrefs.themeAndColor.selectedColor
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = s("style/color_scheme") // 主題中指定的配色
-        if (!presetColorSchemes!!.containsKey(scheme)) scheme = "default" // 主題中的default配色
-        val colorMap = presetColorSchemes!![scheme]
+        if (!presetColorSchemes.containsKey(scheme)) scheme = "default" // 主題中的default配色
+        val colorMap = presetColorSchemes[scheme]
         if (darkMode) {
             if (colorMap!!.containsKey("dark_scheme")) {
-                return colorMap["dark_scheme"] as String?
+                return colorMap["dark_scheme"]
             }
         } else {
             if (colorMap!!.containsKey("light_scheme")) {
-                return colorMap["light_scheme"] as String?
+                return colorMap["light_scheme"]
             }
         }
         return scheme
@@ -235,13 +237,9 @@ class Theme(val themeId: String) {
     }
 
     fun getPresetColorSchemes(): List<Pair<String, String>> {
-        return if (presetColorSchemes == null) {
-            arrayListOf()
-        } else {
-            presetColorSchemes!!.map { (key, value) ->
-                Pair(key, value!!["name"] as String)
-            }
-        }
+        return presetColorSchemes?.entries?.map { (key, value) ->
+            Pair(key, value["name"] ?: "")
+        } ?: arrayListOf()
     }
 
     // 初始化当前配色 Config 2.0
