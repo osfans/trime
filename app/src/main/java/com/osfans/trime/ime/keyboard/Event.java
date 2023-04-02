@@ -24,12 +24,14 @@ import androidx.annotation.NonNull;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeKeyMapping;
 import com.osfans.trime.data.AppPrefs;
+import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.enums.Keycode;
-import com.osfans.trime.util.CollectionUtils;
-import java.util.HashMap;
+import com.osfans.trime.util.config.ConfigItem;
+import com.osfans.trime.util.config.ConfigList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 import timber.log.Timber;
 
@@ -70,30 +72,39 @@ public class Event {
       s = label; // key
       label = null;
     }
-    if (Key.presetKeys.containsKey(s)) {
+
+    Theme theme = ThemeManager.getActiveTheme();
+    if (!theme.isNull("preset_keys/" + s)) {
       // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
-      Map<String, Object> presetKey = Key.presetKeys.get(s);
-      command = CollectionUtils.obtainString(presetKey, "command", "");
-      option = CollectionUtils.obtainString(presetKey, "option", "");
-      select = CollectionUtils.obtainString(presetKey, "select", "");
-      toggle = CollectionUtils.obtainString(presetKey, "toggle", "");
-      label = CollectionUtils.obtainString(presetKey, "label", "");
-      preview = CollectionUtils.obtainString(presetKey, "preview", "");
-      shiftLock = CollectionUtils.obtainString(presetKey, "shift_lock", "");
-      commit = CollectionUtils.obtainString(presetKey, "commit", "");
-      String send = CollectionUtils.obtainString(presetKey, "send", "");
+      String currentDefPath = "preset_keys/" + s + "/";
+      command = theme.sE(currentDefPath + "command", "");
+      option = theme.sE(currentDefPath + "option", "");
+      select = theme.sE(currentDefPath + "select", "");
+      toggle = theme.sE(currentDefPath + "toggle", "");
+      label = theme.sE(currentDefPath + "label", "");
+      preview = theme.sE(currentDefPath + "preview", "");
+      shiftLock = theme.sE(currentDefPath + "shift_lock", "");
+      commit = theme.sE(currentDefPath + "commit", "");
+      String send = theme.sE(currentDefPath + "send", "");
       if (TextUtils.isEmpty(send) && !TextUtils.isEmpty(command))
         send = "function"; // command默認發function
       int[] sends = Keycode.parseSend(send);
       code = sends[0];
       mask = sends[1];
       parseLabel();
-      text = (String) presetKey.get("text");
+      text = theme.sE(currentDefPath + "text", "");
       if (code < 0 && TextUtils.isEmpty(text)) text = s;
-      if (presetKey.containsKey("states")) states = (List<String>) presetKey.get("states");
-      sticky = CollectionUtils.obtainBoolean(presetKey, "sticky", false);
-      repeatable = CollectionUtils.obtainBoolean(presetKey, "repeatable", false);
-      functional = CollectionUtils.obtainBoolean(presetKey, "functional", true);
+      ConfigList stateList = theme.l(currentDefPath + "states");
+      if (stateList != null) {
+        List<String> tmp = new ArrayList<>();
+        for (ConfigItem e : stateList.getItems()) {
+          tmp.add(e.getConfigValue().getString());
+        }
+        states = tmp;
+      }
+      sticky = theme.bE(currentDefPath + "sticky", false);
+      repeatable = theme.bE(currentDefPath + "repeatable", false);
+      functional = theme.bE(currentDefPath + "functional", true);
     } else if ((code = getClickCode(s)) >= 0) {
       parseLabel();
     } else {
@@ -287,15 +298,4 @@ public class Event {
     int c = getCode();
     return (c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT);
   }
-
-  private static final Map<String, Integer> masks =
-      new HashMap<String, Integer>() {
-        {
-          put("Shift", KeyEvent.META_SHIFT_ON);
-          put("Control", KeyEvent.META_CTRL_ON);
-          put("Alt", KeyEvent.META_ALT_ON);
-          put("Meta", KeyEvent.META_META_ON);
-          put("SYM", KeyEvent.META_SYM_ON);
-        }
-      };
 }

@@ -24,7 +24,6 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager.userDataDir
 import com.osfans.trime.data.sound.SoundThemeManager
-import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.util.CollectionUtils
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.bitmapDrawable
@@ -61,11 +60,10 @@ class Theme(val themeId: String) {
         Rime.getInstance()
         measureTimeMillis {
             Rime.deployRimeConfigFile("$themeId.yaml", VERSION_KEY)
-            Key.presetKeys = Rime.getRimeConfigMap(themeId, "preset_keys") as? Map<String?, Map<String?, Any?>?>
-        }.also { Timber.d("Setting up all theme config map takes $it ms") }
+        }.also { Timber.d("Took $it ms to finish theme deployment") }
         measureTimeMillis {
             initCurrentColors()
-        }.also { Timber.d("Initializing cache takes $it ms") }
+        }.also { Timber.d("Initializing cache took $it ms") }
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
     }
@@ -80,6 +78,10 @@ class Theme(val themeId: String) {
 
     fun o(key: String) = config.getItem(key)
 
+    fun m(key: String) = config.getMap(key)
+
+    fun l(key: String) = config.getList(key)
+
     fun sE(key: String, defValue: String) = config.getString(key) ?: defValue
 
     fun iE(key: String, defValue: Int) = config.getInt(key) ?: defValue
@@ -87,6 +89,14 @@ class Theme(val themeId: String) {
     fun fE(key: String, defValue: Float) = config.getFloat(key) ?: defValue
 
     fun bE(key: String, defValue: Boolean) = config.getBool(key) ?: defValue
+
+    fun isNull(key: String) = config.isNull(key)
+
+    fun isValue(key: String) = config.isValue(key)
+
+    fun isMap(key: String) = config.isMap(key)
+
+    fun isList(key: String) = config.isList(key)
 
     class Colors(private val theme: Theme) {
         fun getString(key: String): String {

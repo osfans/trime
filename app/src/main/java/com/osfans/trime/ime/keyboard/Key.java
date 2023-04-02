@@ -59,7 +59,6 @@ public class Key {
         KEY_STATE_NORMAL // 5         "key_back_color"              按键背景
       };
 
-  public static Map<String, Map<String, Object>> presetKeys;
   private static final int EVENT_NUM = KeyEventType.values().length;
   public Event[] events = new Event[EVENT_NUM];
   public int edgeFlags;
@@ -154,10 +153,6 @@ public class Key {
     key_symbol_color = theme.colors.getColor(keyDef, "key_symbol_color");
     hilited_key_symbol_color = theme.colors.getColor(keyDef, "hilited_key_symbol_color");
     round_corner = CollectionUtils.obtainFloat(keyDef, "round_corner", 0);
-  }
-
-  public static Map<String, Map<String, Object>> getPresetKeys() {
-    return presetKeys;
   }
 
   public static KeyCharacterMap getKcm() {
