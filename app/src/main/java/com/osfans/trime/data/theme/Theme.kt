@@ -43,13 +43,9 @@ class Theme(val themeId: String) {
     private var fallbackColors: Map<String, String>? = null
     private var presetColorSchemes: Map<String, Map<String, Any>?>? = null
     private var presetKeyboards: Map<String, Any?>? = null
-    private var liquidKeyboard: Map<String, Any?>? = null
 
     // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
     private val currentColors: MutableMap<String, Any> = hashMapOf()
-
-    @JvmField
-    val liquid = Liquid(this)
 
     @JvmField
     val colors = Colors(this)
@@ -74,7 +70,6 @@ class Theme(val themeId: String) {
             Key.presetKeys = configMap["preset_keys"] as? Map<String?, Map<String?, Any?>?>
             fallbackColors = configMap["fallback_colors"] as? Map<String, String>
             presetColorSchemes = configMap["preset_color_schemes"] as? Map<String, Map<String, Any>?>
-            liquidKeyboard = configMap["liquid_keyboard"] as? Map<String, Any?>
         }.also { Timber.d("Setting up all theme config map takes $it ms") }
         measureTimeMillis {
             initCurrentColors()
@@ -92,20 +87,6 @@ class Theme(val themeId: String) {
     fun b(key: String) = config.getBool(key) ?: false
 
     fun o(key: String) = config.getItem(key)
-
-    class Liquid(private val theme: Theme) {
-        fun getObject(key: String): Any? {
-            return CollectionUtils.obtainValue(theme.liquidKeyboard, key)
-        }
-
-        fun getInt(key: String): Int {
-            return CollectionUtils.obtainInt(theme.liquidKeyboard, key, 0)
-        }
-
-        fun getFloat(key: String): Float {
-            return CollectionUtils.obtainFloat(theme.liquidKeyboard, key, theme.f("style/$key"))
-        }
-    }
 
     class Colors(private val theme: Theme) {
         fun getString(key: String): String {

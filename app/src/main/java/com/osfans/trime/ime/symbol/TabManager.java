@@ -6,7 +6,10 @@ import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
-import com.osfans.trime.util.CollectionUtils;
+import com.osfans.trime.util.config.ConfigItem;
+import com.osfans.trime.util.config.ConfigList;
+import com.osfans.trime.util.config.ConfigMap;
+import com.osfans.trime.util.config.ConfigValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,19 +68,26 @@ public class TabManager {
 
   private TabManager() {
     final Theme theme = ThemeManager.getActiveTheme();
-    final List<String> availables = (List<String>) theme.liquid.getObject("keyboards");
-    if (availables != null) {
-      for (final String id : availables) {
-        final Map<String, Object> keyboard;
-        if ((keyboard = (Map<String, Object>) theme.liquid.getObject(id)) != null) {
-          final String name = (String) CollectionUtils.getOrDefault(keyboard, "name", id);
-          if (keyboard.containsKey("type")) {
-            addTab(
-                name,
-                SymbolKeyboardType.fromString((String) keyboard.get("type")),
-                keyboard.get("keys"));
-          }
-        }
+    final List<String> availables = new ArrayList<>();
+    ConfigItem keyboards = theme.o("liquid_keyboard/keyboards");
+    if (keyboards != null) {
+      ConfigList list = keyboards.getConfigList();
+      for (ConfigItem e : list.getItems()) {
+        availables.add(e.getConfigValue().getString());
+      }
+    }
+
+    for (final String id : availables) {
+      ConfigItem k = theme.o("liquid_keyboard/" + id);
+      if (k != null) {
+        ConfigValue t = k.getConfigMap().getValue("type");
+        if (t == null) return;
+
+        ConfigValue n = k.getConfigMap().getValue("name");
+        String name = n != null ? n.getString() : id;
+
+        ConfigItem keys = k.getConfigMap().get("keys");
+        addTab(name, SymbolKeyboardType.fromString(t.getString()), keys);
       }
     }
   }
@@ -117,46 +127,43 @@ public class TabManager {
   }
 
   // 解析config的数据
-  public void addTab(String name, SymbolKeyboardType type, Object obj) {
+  public void addTab(String name, SymbolKeyboardType type, ConfigItem obj) {
     if (SymbolKeyboardType.Companion.hasKeys(type)) {
-      if (obj instanceof String) {
-        addTab(name, type, (String) obj);
-      } else if (obj instanceof List<?>) {
-        List<?> list = (List<?>) obj;
-        if (list.size() > 0) {
-          int i = 0;
-          Object o;
-          List<SimpleKeyBean> keys = new ArrayList<>();
-
-          while (i < list.size()) {
-            o = list.get(i);
-            if (o instanceof String) {
-              String s = (String) o;
-              keys.add(new SimpleKeyBean(s));
-            } else if (o instanceof Map<?, ?>) {
-              Map<String, String> p = (Map<String, String>) o;
-              if (p.containsKey("click")) {
-                if (p.containsKey("label"))
-                  keys.add(new SimpleKeyBean((String) p.get("click"), (String) p.get("label")));
-                else keys.add(new SimpleKeyBean((String) p.get("click")));
+      if (obj instanceof ConfigValue) {
+        addTab(name, type, obj.getConfigValue().getString());
+      } else if (obj instanceof ConfigList) {
+        List<ConfigItem> list = obj.getConfigList().getItems();
+        List<SimpleKeyBean> keys = new ArrayList<>();
+        for (ConfigItem e : list) {
+          if (e instanceof ConfigValue) {
+            ConfigValue v = e.getConfigValue();
+            keys.add(new SimpleKeyBean(v.getString()));
+          } else if (e instanceof ConfigMap) {
+            ConfigMap m = e.getConfigMap();
+            if (m.containsKey("click")) {
+              if (m.containsKey("label")) {
+                keys.add(
+                    new SimpleKeyBean(
+                        m.getValue("click").getString(), m.getValue("label").getString()));
               } else {
-                final Map<String, List<String>> symbolMaps =
-                    SchemaManager.getActiveSchema().getSymbols();
-                for (Map.Entry<String, String> entry : p.entrySet()) {
-                  if (symbolMaps != null && symbolMaps.containsKey(entry.getValue()))
-                    keys.add(new SimpleKeyBean(entry.getValue(), entry.getKey()));
+                keys.add(new SimpleKeyBean(m.getValue("click").getString()));
+              }
+            } else {
+              Map<String, List<String>> symbolMap = SchemaManager.getActiveSchema().getSymbols();
+              for (Map.Entry<String, ConfigItem> s : m.getEntries().entrySet()) {
+                if (symbolMap != null
+                    && symbolMap.containsKey(s.getValue().getConfigValue().getString())) {
+                  keys.add(
+                      new SimpleKeyBean(s.getValue().getConfigValue().getString(), s.getKey()));
                 }
               }
             }
-
-            i++;
           }
-          addTab(name, type, keys);
         }
+        addTab(name, type, keys);
       }
     } else {
-      if (obj == null) addTab(name, type, "1");
-      addTab(name, type, (String) obj);
+      addTab(name, type, obj != null ? obj.getConfigValue().getString() : "1");
     }
   }
 
