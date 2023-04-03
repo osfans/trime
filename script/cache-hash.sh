@@ -18,4 +18,4 @@ hash=$(git submodule status)
 hash=$hash$($DIGEST_ALGORITHM $JNI_FILES)
 hash=$(echo $hash | $DIGEST_ALGORITHM | cut -c-64)
 
-echo "{hash}={hash}" >> $GITHUB_OUTPUT
+echo "hash=$hash" >> $GITHUB_OUTPUT
