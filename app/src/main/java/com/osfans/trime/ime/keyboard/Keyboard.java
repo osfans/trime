@@ -21,6 +21,7 @@ package com.osfans.trime.ime.keyboard;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.KeyEvent;
+import androidx.annotation.NonNull;
 import com.blankj.utilcode.util.ScreenUtils;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.data.theme.ThemeManager;
@@ -190,10 +191,11 @@ public class Keyboard {
     mTotalHeight = y + mDefaultHeight;
   }
 
-  public Keyboard(String name) {
+  public Keyboard(@NonNull Theme theme, String name) {
     this();
-    Theme theme = ThemeManager.getActiveTheme();
     String currentPath = "preset_keyboards/" + name + "/";
+    if (theme.isNull(currentPath))
+      throw new IllegalStateException("Nonexistent keyboard definition " + name);
 
     mLabelTransform = theme.sE(currentPath + "label_transform", "none");
     mAsciiMode = theme.iE(currentPath + "ascii_mode", 1);

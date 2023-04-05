@@ -22,7 +22,16 @@ object KeyboardSwitcher {
     private val theme = ThemeManager.getActiveTheme()
     private val availableKeyboardIds = theme.o("style/keyboards")?.decode(ListSerializer(String.serializer()))
         ?.map { remapKeyboardId(it) }?.distinct() ?: listOf()
-    private val availableKeyboards = availableKeyboardIds.map { Keyboard(it) }
+    private val availableKeyboards = availableKeyboardIds
+        .mapNotNull decode@{
+            val keyboard = runCatching {
+                Keyboard(theme, remapKeyboardId(it))
+            }.getOrElse { e ->
+                Timber.w("Failed to decode keyboard definition $it: ${e.message}")
+                return@decode null
+            }
+            return@decode keyboard
+        }
 
     /** To get current keyboard instance. **/
     @JvmStatic
