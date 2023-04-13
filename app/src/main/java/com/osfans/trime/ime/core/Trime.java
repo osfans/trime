@@ -32,7 +32,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.StrictMode;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -82,8 +81,8 @@ import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.ViewUtils;
+import com.osfans.trime.util.WeakHashSet;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 import splitties.bitflags.BitFlagsKt;
 import splitties.systemservices.SystemServicesKt;
 import timber.log.Timber;
@@ -108,7 +107,7 @@ public class Trime extends LifecycleInputMethodService {
   private ScrollView mCandidateRoot, mTabRoot;
   private TabView tabView;
   public InputRootBinding inputRootBinding = null;
-  public CopyOnWriteArrayList<EventListener> eventListeners = new CopyOnWriteArrayList<>();
+  public WeakHashSet<EventListener> eventListeners = new WeakHashSet<>();
   public InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private IntentReceiver mIntentReceiver = null;
 
@@ -118,7 +117,6 @@ public class Trime extends LifecycleInputMethodService {
 
   private boolean isAutoCaps; // 句首自動大寫
 
-  private int oneHandMode = 0; // 单手键盘模式
   public EditorInstance activeEditorInstance;
   public TextInputManager textInputManager; // 文字输入管理器
 
@@ -132,7 +130,7 @@ public class Trime extends LifecycleInputMethodService {
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
   private PopupPosition popupWindowPos; // 悬浮窗口彈出位置
   private PopupWindow mPopupWindow;
-  private RectF mPopupRectF = new RectF();
+  private final RectF mPopupRectF = new RectF();
   private final Handler mPopupHandler = new Handler(Looper.getMainLooper());
   private final Runnable mPopupTimer =
       new Runnable() {
@@ -257,22 +255,18 @@ public class Trime extends LifecycleInputMethodService {
     updateComposing();
 
     for (EventListener listener : eventListeners) {
-      if (listener != null) listener.onWindowShown();
+      listener.onWindowShown();
     }
   }
 
   @Override
   public void onWindowHidden() {
-    String methodName =
-        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
-    Timber.d(methodName);
     super.onWindowHidden();
-    Timber.d(methodName + "super finish");
     if (!isWindowShown) {
-      Timber.i("Ignoring (is already hidden)");
+      Timber.d("Ignoring (window is already hidden)");
       return;
     } else {
-      Timber.i("onWindowHidden...");
+      Timber.d("onWindowHidden");
     }
     isWindowShown = false;
 
@@ -282,9 +276,8 @@ public class Trime extends LifecycleInputMethodService {
       syncBackgroundHandler.sendMessageDelayed(msg, 5000); // 输入面板隐藏5秒后，开始后台同步
     }
 
-    Timber.d(methodName + "eventListeners");
     for (EventListener listener : eventListeners) {
-      if (listener != null) listener.onWindowHidden();
+      listener.onWindowHidden();
     }
   }
 
@@ -297,10 +290,10 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void updatePopupWindow(final int offsetX, final int offsetY) {
+    Timber.d("updatePopupWindow: winX = %s, winY = %s", offsetX, offsetY);
     popupWindowPos = PopupPosition.DRAG;
     popupWindowX = offsetX;
     popupWindowY = offsetY;
-    Timber.i("updatePopupWindow: winX = %s, winY = %s", popupWindowX, popupWindowY);
     mPopupWindow.update(popupWindowX, popupWindowY, -1, -1, true);
   }
 
@@ -336,43 +329,28 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onCreate() {
-
-    StrictMode.setVmPolicy(
-        new StrictMode.VmPolicy.Builder(StrictMode.getVmPolicy())
-            .detectLeakedClosableObjects()
-            .build());
-    String methodName =
-        "\t<TrimeInit>\t" + Thread.currentThread().getStackTrace()[2].getMethodName() + "\t";
-    Timber.d(methodName);
     // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
     try {
       // Additional try..catch wrapper as the event listeners chain or the super.onCreate() method
       // could crash
       //  and lead to a crash loop
       try {
-        Timber.i("onCreate...");
-
+        Timber.d("onCreate");
         activeEditorInstance = new EditorInstance(this);
-        Timber.d(methodName + "InputFeedbackManager");
         inputFeedbackManager = new InputFeedbackManager(this);
-
-        Timber.d(methodName + "liquidKeyboard");
         liquidKeyboard = new LiquidKeyboard(this);
       } catch (Exception e) {
         e.printStackTrace();
         super.onCreate();
         return;
       }
-      Timber.d(methodName + "super.onCreate()");
       super.onCreate();
-      Timber.d(methodName + "create listener");
       for (EventListener listener : eventListeners) {
-        if (listener != null) listener.onCreate();
+        listener.onCreate();
       }
     } catch (Exception e) {
       e.fillInStackTrace();
     }
-    Timber.d(methodName + "finish");
   }
 
   /**
@@ -383,7 +361,7 @@ public class Trime extends LifecycleInputMethodService {
    */
   public boolean setDarkMode(boolean darkMode) {
     if (darkMode != this.darkMode) {
-      Timber.i("setDarkMode " + darkMode);
+      Timber.d("setDarkMode: %s", darkMode);
       this.darkMode = darkMode;
       return true;
     }
@@ -440,7 +418,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void invalidate() {
-    Rime.get();
+    Rime.getInstance(false);
     Theme.get().destroy();
     reset();
     textInputManager.setShouldUpdateRimeOption(true);
@@ -498,6 +476,8 @@ public class Trime extends LifecycleInputMethodService {
 
     if (inputRootBinding == null) return;
 
+    // 单手键盘模式
+    int oneHandMode = 0;
     int[] padding =
         theme.getKeyboardPadding(oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE);
     Timber.i(
@@ -591,7 +571,7 @@ public class Trime extends LifecycleInputMethodService {
     inputRootBinding = null;
 
     for (EventListener listener : eventListeners) {
-      if (listener != null) listener.onDestroy();
+      listener.onDestroy();
     }
     eventListeners.clear();
     super.onDestroy();
@@ -691,7 +671,7 @@ public class Trime extends LifecycleInputMethodService {
       // 移動光標時，更新候選區
       if ((newSelEnd < candidatesEnd) && (newSelEnd >= candidatesStart)) {
         final int n = newSelEnd - candidatesStart;
-        Rime.RimeSetCaretPos(n);
+        Rime.setCaretPos(n);
         updateComposing();
       }
     }
@@ -738,7 +718,7 @@ public class Trime extends LifecycleInputMethodService {
 
     for (EventListener listener : eventListeners) {
       assert inputRootBinding != null;
-      if (listener != null) listener.onInitializeInputUi(inputRootBinding);
+      listener.onInitializeInputUi(inputRootBinding);
     }
     Theme.get().initCurrentColors();
     loadBackground();
@@ -778,7 +758,7 @@ public class Trime extends LifecycleInputMethodService {
     inputFeedbackManager.resumeSoundPool();
     inputFeedbackManager.resetPlayProgress();
     for (EventListener listener : eventListeners) {
-      if (listener != null) listener.onStartInputView(activeEditorInstance, restarting);
+      listener.onStartInputView(activeEditorInstance, restarting);
     }
     if (getPrefs().getOther().getShowStatusBarIcon()) {
       showStatusIcon(R.drawable.ic_trime_status); // 狀態欄圖標
@@ -842,11 +822,11 @@ public class Trime extends LifecycleInputMethodService {
             == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
           //  应用程求以隐身模式打开键盘应用程序
           normalTextEditor = false;
-          Timber.i("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
+          Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
         } else if (attribute.packageName.equals(BuildConfig.APPLICATION_ID)
             || getPrefs().getClipboard().getDraftExcludeApp().contains(attribute.packageName)) {
           normalTextEditor = false;
-          Timber.i("EditorInfo: normal -> exclude, packageName=" + attribute.packageName);
+          Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName);
         } else {
           normalTextEditor = true;
           DraftHelper.INSTANCE.onInputEventChanged();
@@ -1174,24 +1154,6 @@ public class Trime extends LifecycleInputMethodService {
     }
     return false;
   }
-
-  /** 獲得當前漢字：候選字、選中字、剛上屏字/光標前字/光標前所有字、光標後所有字 */
-  /*
-  private String getActiveText(int type) {
-    if (type == 2) return Rime.RimeGetInput(); // 當前編碼
-    String s = Rime.getComposingText(); // 當前候選
-    if (TextUtils.isEmpty(s)) {
-      final InputConnection ic = getCurrentInputConnection();
-      CharSequence cs = ic != null ? ic.getSelectedText(0) : null; // 選中字
-      if (type == 1 && TextUtils.isEmpty(cs)) cs = lastCommittedText; // 剛上屏字
-      if (TextUtils.isEmpty(cs) && ic != null) {
-        cs = ic.getTextBeforeCursor(type == 4 ? 1024 : 1, 0); // 光標前字
-      }
-      if (TextUtils.isEmpty(cs) && ic != null) cs = ic.getTextAfterCursor(1024, 0); // 光標後面所有字
-      if (cs != null) s = cs.toString();
-    }
-    return s;
-  } */
 
   /** 更新Rime的中西文狀態、編輯區文本 */
   public int updateComposing() {

@@ -1,5 +1,7 @@
 package com.osfans.trime.util.config
 
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
@@ -8,6 +10,7 @@ import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
+import kotlinx.serialization.DeserializationStrategy
 
 /** Config item base class */
 abstract class ConfigItem(val node: YamlNode) {
@@ -24,6 +27,10 @@ abstract class ConfigItem(val node: YamlNode) {
     }
 
     abstract fun contentToString(): String
+
+    fun <T> decode(deserializer: DeserializationStrategy<T>) =
+        Yaml(configuration = YamlConfiguration(strictMode = false))
+            .decodeFromYamlNode(deserializer, node)
 
     val configValue: ConfigValue
         get() = this as? ConfigValue ?: error(this, "ConfigValue")

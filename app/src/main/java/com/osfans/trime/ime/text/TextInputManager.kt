@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
-import com.osfans.trime.core.RimeEvent
+import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
@@ -107,7 +107,7 @@ class TextInputManager private constructor() :
         intentReceiver = IntentReceiver().also {
             it.registerReceiver(trime)
         }
-        rimeNotiHandlerJob = Rime.get().rimeNotiFlow
+        rimeNotiHandlerJob = Rime.getInstance().notificationFlow
             .onEach(::handleRimeNotification)
             .launchIn(trime.lifecycleScope)
 
@@ -232,7 +232,7 @@ class TextInputManager private constructor() :
             // Select a keyboard based on the input type of the editing field.
             switchKeyboard(keyboardType)
         }
-        Rime.get()
+        Rime.getInstance()
 
         // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
         // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。
@@ -240,21 +240,22 @@ class TextInputManager private constructor() :
             tempAsciiMode = KeyboardSwitcher.currentKeyboard.asciiMode
         }
         tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
-        isComposable = isComposable && !Rime.isEmpty()
+        isComposable = isComposable && !Rime.isEmpty
         if (!trime.onEvaluateInputViewShown()) {
             // Show candidate view when using physical keyboard
             trime.setCandidatesViewShown(isComposable)
         }
     }
 
-    private fun handleRimeNotification(event: RimeEvent) {
-        if (event is RimeEvent.SchemaEvent) {
-            Rime.initSchema()
+    private fun handleRimeNotification(notification: RimeNotification) {
+        if (notification is RimeNotification.SchemaNotification) {
+            SchemaManager.init(notification.schemaId)
+            Rime.updateStatus()
             trime.initKeyboard()
-        } else if (event is RimeEvent.OptionEvent) {
-            Rime.getContexts() // 切換中英文、簡繁體時更新候選
-            val value = event.value
-            when (val option = event.option) {
+        } else if (notification is RimeNotification.OptionNotification) {
+            Rime.updateContext() // 切換中英文、簡繁體時更新候選
+            val value = notification.value
+            when (val option = notification.option) {
                 "ascii_mode" -> {
                     trime.inputFeedbackManager.ttsLanguage =
                         locales[if (value) 1 else 0]
@@ -475,7 +476,7 @@ class TextInputManager private constructor() :
 
     override fun onText(text: CharSequence?) {
         text ?: return
-        if (!text.startsWithAsciiChar() && Rime.isComposing()) {
+        if (!text.startsWithAsciiChar() && Rime.isComposing) {
             Rime.commitComposition()
             activeEditorInstance.commitRimeText()
         }
@@ -487,8 +488,8 @@ class TextInputManager private constructor() :
             when {
                 escapeTagMatcher.matches() -> {
                     target = escapeTagMatcher.group(1) ?: ""
-                    Rime.onText(target)
-                    if (!activeEditorInstance.commitRimeText() && !Rime.isComposing()) {
+                    Rime.simulateKeySequence(target)
+                    if (!activeEditorInstance.commitRimeText() && !Rime.isComposing) {
                         activeEditorInstance.commitText(target)
                     }
                     trime.updateComposing()
@@ -512,7 +513,7 @@ class TextInputManager private constructor() :
      */
     override fun onCandidatePressed(index: Int) {
         onPress(0)
-        if (!Rime.isComposing()) {
+        if (!Rime.isComposing) {
             if (index >= 0) {
                 SchemaManager.toggleSwitchOption(index)
                 trime.updateComposing()
@@ -580,7 +581,7 @@ class TextInputManager private constructor() :
                 ) { dialog: DialogInterface, id: Int ->
                     dialog.dismiss()
                     trime.lifecycleScope.launch {
-                        Rime.selectSchema(schemaIdList[id])
+                        Rime.selectSchema(schemaIdList[id] ?: return@launch)
                     }
                     shouldUpdateRimeOption = true
                 }

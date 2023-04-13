@@ -30,7 +30,8 @@ class Rime {
 
   bool isRunning() { return session != 0; }
 
-  void startup(bool fullCheck) {
+  void startup(bool fullCheck,
+               const RimeNotificationHandler &notificationHandler) {
     if (!rime) return;
     const char *userDir = getenv("RIME_USER_DATA_DIR");
     const char *sharedDir = getenv("RIME_SHARED_DATA_DIR");
@@ -48,15 +49,7 @@ class Rime {
       firstRun = false;
     }
     rime->initialize(&trime_traits);
-    rime->set_notification_handler(
-        [](void *context_object, RimeSessionId session_id,
-           const char *message_type, const char *message_value) {
-          auto env = GlobalRef->AttachEnv();
-          env->CallStaticVoidMethod(
-              GlobalRef->Rime, GlobalRef->HandleRimeNotification,
-              *JString(env, message_type), *JString(env, message_value));
-        },
-        GlobalRef->jvm);
+    rime->set_notification_handler(notificationHandler, GlobalRef->jvm);
     if (rime->start_maintenance(fullCheck) && rime->is_maintenance_mode()) {
       rime->join_maintenance_thread();
     }
@@ -157,7 +150,16 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
   // for rime user data dir
   setenv("RIME_USER_DATA_DIR", CString(env, user_dir), 1);
 
-  Rime::Instance().startup(full_check);
+  auto notificationHandler = [](void *context_object, RimeSessionId session_id,
+                                const char *message_type,
+                                const char *message_value) {
+    auto env = GlobalRef->AttachEnv();
+    env->CallStaticVoidMethod(
+        GlobalRef->Rime, GlobalRef->HandleRimeNotification,
+        *JString(env, message_type), *JString(env, message_value));
+  };
+
+  Rime::Instance().startup(full_check, notificationHandler);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -220,52 +222,49 @@ Java_com_osfans_trime_core_Rime_clearRimeComposition(JNIEnv *env,
 }
 
 // output
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */,
-                                              jobject jcommit) {
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
   if (!is_rime_running()) {
-    return false;
+    return nullptr;
   }
   RIME_STRUCT(RimeCommit, commit)
   auto rime = rime_get_api();
+  jobject obj = nullptr;
   if (rime->get_commit(Rime::Instance().sessionId(), &commit)) {
-    rimeCommitToJObject(env, commit, jcommit);
+    obj = rimeCommitToJObject(env, commit);
     rime->free_commit(&commit);
-    return true;
   }
-  return false;
+  return obj;
 }
 
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */,
-                                               jobject jcontext) {
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
   if (!is_rime_running()) {
-    return false;
+    return nullptr;
   }
   RIME_STRUCT(RimeContext, context)
   auto rime = rime_get_api();
+  jobject obj = nullptr;
   if (rime->get_context(Rime::Instance().sessionId(), &context)) {
-    rimeContextToJObject(env, context, jcontext);
+    obj = rimeContextToJObject(env, context);
     rime->free_context(&context);
-    return true;
   }
-  return false;
+  return obj;
 }
 
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */,
-                                              jobject jstatus) {
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
   if (!is_rime_running()) {
-    return false;
+    return nullptr;
   }
   RIME_STRUCT(RimeStatus, status)
   auto rime = rime_get_api();
+  jobject obj = nullptr;
   if (rime->get_status(Rime::Instance().sessionId(), &status)) {
-    rimeStatusToJObject(env, status, jstatus);
+    obj = rimeStatusToJObject(env, status);
     rime->free_status(&status);
-    return true;
   }
-  return false;
+  return obj;
 }
 
 static bool is_save_option(const char *p) {
@@ -356,9 +355,9 @@ Java_com_osfans_trime_core_Rime_selectRimeSchema(JNIEnv *env, jclass /* thiz */,
 
 // testing
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_simulateKeySequence(JNIEnv *env,
-                                                    jclass /* thiz */,
-                                                    jstring key_sequence) {
+Java_com_osfans_trime_core_Rime_simulateRimeKeySequence(JNIEnv *env,
+                                                        jclass /* thiz */,
+                                                        jstring key_sequence) {
   if (!is_rime_running()) {
     return false;
   }

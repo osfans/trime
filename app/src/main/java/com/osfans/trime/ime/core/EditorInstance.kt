@@ -55,24 +55,22 @@ class EditorInstance(private val ims: InputMethodService) {
      * Commits the text got from Rime.
      */
     fun commitRimeText(): Boolean {
-        val ret = Rime.getCommit()
-        if (ret) {
-            commitText(Rime.getCommitText())
-        }
+        val commit = Rime.getRimeCommit()
+        commit?.let { commitText(it.commitText) }
         Timber.i("\t<TrimeInput>\tcommitRimeText()\tupdateComposing")
         (ims as Trime).updateComposing()
-        return ret
+        return commit != null
     }
 
     fun updateComposingText() {
         val ic = inputConnection ?: return
         val composingText = when (prefs.keyboard.inlinePreedit) {
-            InlineModeType.INLINE_PREVIEW -> Rime.getComposingText()
-            InlineModeType.INLINE_COMPOSITION -> Rime.getCompositionText()
+            InlineModeType.INLINE_PREVIEW -> Rime.composingText
+            InlineModeType.INLINE_COMPOSITION -> Rime.compositionText
             InlineModeType.INLINE_INPUT -> Rime.getRimeRawInput() ?: ""
             else -> ""
         }
-        if (ic.getSelectedText(0).isNullOrEmpty() || !composingText.isNullOrEmpty()) {
+        if (ic.getSelectedText(0).isNullOrEmpty() || composingText.isNotEmpty()) {
             ic.setComposingText(composingText, 1)
         }
     }
@@ -117,7 +115,7 @@ class EditorInstance(private val ims: InputMethodService) {
      * */
     fun getActiveText(type: Int): String {
         if (type == 2) return Rime.getRimeRawInput() ?: "" // 當前編碼
-        var s = Rime.getComposingText() // 當前候選
+        var s = Rime.composingText // 當前候選
         if (TextUtils.isEmpty(s)) {
             val ic = inputConnection
             var cs = if (ic != null) ic.getSelectedText(0) else null // 選中字
