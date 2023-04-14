@@ -3,6 +3,7 @@ set(RIME_PLUGINS
   librime-lua
   librime-charcode
   librime-octagram
+  librime-predict
 )
 
 # plugins didn't use target_link_libraries, the usage-requirements won't work, include manually
