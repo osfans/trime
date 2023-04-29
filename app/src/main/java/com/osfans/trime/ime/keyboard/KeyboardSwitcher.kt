@@ -20,18 +20,12 @@ object KeyboardSwitcher {
     private var currentDisplayWidth: Int = 0
 
     private val theme = ThemeManager.getActiveTheme()
-    private val availableKeyboardIds = theme.o("style/keyboards")?.decode(ListSerializer(String.serializer()))
-        ?.map { remapKeyboardId(it) }?.distinct() ?: listOf()
-    private val availableKeyboards = availableKeyboardIds
-        .mapNotNull decode@{
-            val keyboard = runCatching {
-                Keyboard(theme, remapKeyboardId(it))
-            }.getOrElse { e ->
-                Timber.w("Failed to decode keyboard definition $it: ${e.message}")
-                return@decode null
-            }
-            return@decode keyboard
-        }
+    private lateinit var availableKeyboardIds: List<String>
+    private lateinit var availableKeyboards: List<Keyboard>
+
+    init {
+        reset()
+    }
 
     /** To get current keyboard instance. **/
     @JvmStatic
@@ -85,6 +79,22 @@ object KeyboardSwitcher {
         if (currentId >= 0 && (displayWidth == currentDisplayWidth)) return
 
         currentDisplayWidth = displayWidth
+        reset()
+    }
+
+    private fun reset() {
+        availableKeyboardIds = theme.o("style/keyboards")?.decode(ListSerializer(String.serializer()))
+            ?.map { remapKeyboardId(it) }?.distinct() ?: listOf()
+        availableKeyboards = availableKeyboardIds
+            .mapNotNull decode@{
+                val keyboard = runCatching {
+                    Keyboard(theme, remapKeyboardId(it))
+                }.getOrElse { e ->
+                    Timber.w("Failed to decode keyboard definition $it: ${e.message}")
+                    return@decode null
+                }
+                return@decode keyboard
+            }
     }
 
     private fun remapKeyboardId(name: String): String {
