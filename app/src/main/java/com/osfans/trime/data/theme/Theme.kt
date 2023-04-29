@@ -20,7 +20,6 @@ package com.osfans.trime.data.theme
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import androidx.core.math.MathUtils
-import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager.userDataDir
 import com.osfans.trime.data.sound.SoundThemeManager
@@ -57,10 +56,6 @@ class Theme(val themeId: String) {
     }
 
     init {
-        Rime.getInstance()
-        measureTimeMillis {
-            Rime.deployRimeConfigFile("$themeId.yaml", VERSION_KEY)
-        }.also { Timber.d("Took $it ms to finish theme deployment") }
         measureTimeMillis {
             initCurrentColors()
         }.also { Timber.d("Initializing cache took $it ms") }

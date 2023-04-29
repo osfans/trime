@@ -1,11 +1,15 @@
 package com.osfans.trime.data.theme
 
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import timber.log.Timber
 import java.io.File
+import kotlin.system.measureTimeMillis
 
 object ThemeManager {
+    private const val VERSION_KEY = "config_version"
+
     val prefs = AppPrefs.defaultInstance()
 
     private fun listThemes(path: File): MutableList<String> {
@@ -16,6 +20,9 @@ object ThemeManager {
 
     @JvmStatic
     fun switchTheme(theme: String) {
+        measureTimeMillis {
+            Rime.deployRimeConfigFile("$theme.yaml", VERSION_KEY)
+        }.also { Timber.d("Took $it ms to finish theme deployment") }
         currentTheme = runCatching { Theme(theme) }.getOrNull() ?: Theme("trime")
         prefs.themeAndColor.selectedTheme = theme
     }
@@ -29,6 +36,10 @@ object ThemeManager {
     @JvmStatic
     fun init() {
         val selectedThemeName = prefs.themeAndColor.selectedTheme
+        Rime.getInstance()
+        measureTimeMillis {
+            Rime.deployRimeConfigFile("$selectedThemeName.yaml", VERSION_KEY)
+        }.also { Timber.d("Took $it ms to finish theme deployment") }
         currentTheme = runCatching { Theme(selectedThemeName) }.getOrNull() ?: Theme("trime").also {
             Timber.w("Cannot find selected theme '$selectedThemeName', fallback to ${it.themeId}")
             prefs.themeAndColor.selectedTheme = it.themeId
