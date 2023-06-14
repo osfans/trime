@@ -23,7 +23,9 @@ import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.dp2px
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class LiquidKeyboard(private val context: Context) {
@@ -223,17 +225,23 @@ class LiquidKeyboard(private val context: Context) {
         when (type) {
             SymbolKeyboardType.CLIPBOARD -> {
                 service.lifecycleScope.launch {
-                    dbAdapter.updateBeans(ClipboardHelper.getAll())
+                    withContext(Dispatchers.IO) {
+                        dbAdapter.updateBeans(ClipboardHelper.getAll())
+                    }
                 }
             }
             SymbolKeyboardType.COLLECTION -> {
                 service.lifecycleScope.launch {
-                    dbAdapter.updateBeans(CollectionHelper.getAll())
+                    withContext(Dispatchers.IO) {
+                        dbAdapter.updateBeans(CollectionHelper.getAll())
+                    }
                 }
             }
             SymbolKeyboardType.DRAFT -> {
                 service.lifecycleScope.launch {
-                    dbAdapter.updateBeans(DraftHelper.getAll())
+                    withContext(Dispatchers.IO) {
+                        dbAdapter.updateBeans(DraftHelper.getAll())
+                    }
                 }
             }
             else -> return
