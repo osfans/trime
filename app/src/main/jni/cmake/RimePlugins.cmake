@@ -5,16 +5,6 @@ set(RIME_PLUGINS
   librime-octagram
 )
 
-# plugins didn't use target_link_libraries, the usage-requirements won't work, include manually
-set(PLUGIN_INCLUDES "")
-find_package(Boost)
-foreach(boost_lib ${Boost_LIBRARIES})
-  unset(includes)
-  get_target_property(includes ${boost_lib} INTERFACE_INCLUDE_DIRECTORIES)
-  list(APPEND PLUGIN_INCLUDES ${includes})
-endforeach()
-include_directories(${PLUGIN_INCLUDES})
-
 # move plugins
 file(GLOB old_plugin_files "librime/plugins/*")
 foreach(file ${old_plugin_files})
@@ -38,5 +28,3 @@ execute_process(COMMAND ln -s
 
 # librime-charcode
 option(BUILD_WITH_ICU "" OFF)
-# TODO: replace with TOUCH after cmake >= 3.12
-file(WRITE "${CMAKE_BINARY_DIR}/include/boost/asio.hpp" "")
