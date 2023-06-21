@@ -17,9 +17,8 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt")
          EXPECTED_HASH SHA256=0b9dbf2e18196bdc9b89cd278559cb0db6a3256c90897b7183da4585ac1d6efb)
 
     message(STATUS "Extracting prebuilt.tar.zst")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt.tar.zst"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    file(ARCHIVE_EXTRACT INPUT "${CMAKE_CURRENT_SOURCE_DIR}/prebuilt.tar.zst"
+         DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}" VERBOSE
     )
 endif()
 
