@@ -1,6 +1,6 @@
 find_package(Opencc REQUIRED)
 
-file(GLOB RIME_JNI_SOURCES
+set(RIME_JNI_SOURCES
   key_table.cc
   levers.cc
   opencc.cc

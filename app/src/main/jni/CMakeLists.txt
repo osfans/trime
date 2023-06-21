@@ -65,6 +65,7 @@ foreach(mod IN LISTS BOOST_MODULES)
     set("boost_${mod}_DIR" "${BOOST_ROOT}/lib/cmake/boost_${mod}-${BOOST_VERSION}")
 endforeach()
 
+option(ENABLE_DARTS "" OFF)
 option(USE_SYSTEM_MARISA "" TRUE)
 option(BUILD_SHARED_LIBS "" OFF)
 add_subdirectory(OpenCC)
