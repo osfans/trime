@@ -34,10 +34,6 @@ set(CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH}
     # "${CMAKE_CURRENT_SOURCE_DIR}/librime" # for librime to locate bundle X11/keysym.h
 )
 
-# set for librime-charcode
-set(ICONV_LIBRARY "${PREBUILT_DIR}/libiconv-libicu/${ANDROID_ABI}/lib/libiconv.so")
-set(ICONV_INCLUDE_DIR "${PREBUILT_DIR}/libiconv-libicu/${ANDROID_ABI}/include")
-
 # prebuilt snappy
 set(Snappy_DIR "${PREBUILT_DIR}/snappy/${ANDROID_ABI}/lib/cmake/Snappy")
 find_package(Snappy)
