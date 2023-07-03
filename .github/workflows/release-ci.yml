@@ -56,7 +56,7 @@ jobs:
         run: ./script/dependency.sh
 
       - name: Build Trime
-        run: make debug
+        run: make release
         
       - name: Build changelog
         id: release_log
