@@ -1,8 +1,9 @@
 name: release ci
 on:
-  push:
-    tags:
-      - '*'
+  repository_dispatch:
+  
+  workflow_dispatch:
+  
 env:
   CI_NAME: Release CI
 jobs:
