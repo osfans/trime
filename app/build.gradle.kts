@@ -88,7 +88,6 @@ android {
             if (keyPropFile.exists()) {
                 val props = Properties()
                 props.load(keyPropFile.inputStream())
-
                 storeFile = rootProject.file(props["storeFile"]!!)
                 storePassword = props["storePassword"] as? String
                 keyAlias = props["keyAlias"] as? String
@@ -106,7 +105,7 @@ android {
         release {
             isMinifyEnabled = false
             //proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-android.txt"
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = null
 
             resValue("string", "trime_app_name", "@string/app_name_release")
         }
