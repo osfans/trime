@@ -84,16 +84,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keyPropFile = rootProject.file("keystore.properties")
-            if (keyPropFile.exists()) {
-                val props = Properties()
-                props.load(keyPropFile.inputStream())
-
-                storeFile = rootProject.file(props["storeFile"]!!)
-                storePassword = props["storePassword"] as? String
-                keyAlias = props["keyAlias"] as? String
-                keyPassword = props["keyPassword"] as? String
-            }
+            signingConfig signingConfigs.debug;
         }
     }
 
