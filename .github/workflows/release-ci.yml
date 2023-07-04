@@ -64,9 +64,9 @@ jobs:
         # TODO: replace debug with release after we switched to "make release"
         run: cp -R app/build/intermediates/stripped_native_libs/release/out/lib app/prebuilt
 
-      - name: Create release
-        uses: ncipollo/release-action@v1
+      - name: Upload Fdroid release APKs
+        uses: actions/upload-artifact@v3
         with:
-          artifacts: "app/build/outputs/apk/**/*.apk"
-          body: "test release"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: trime-release
+          path: |
+            app/build/outputs/apk/**/*.apk
