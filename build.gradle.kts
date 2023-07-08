@@ -22,7 +22,7 @@ spotless {
         googleJavaFormat("1.17.0")
     }
     kotlin {
-        target("app/src/main/java/com/osfans/trime/**/*.kt")
+        target("**/*.kt")
         ktlint("0.49.1")
         trimTrailingWhitespace()
         indentWithSpaces()
