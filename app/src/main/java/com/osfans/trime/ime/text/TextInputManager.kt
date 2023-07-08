@@ -5,6 +5,7 @@ import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
@@ -400,16 +401,16 @@ class TextInputManager private constructor() :
                 trime.lifecycleScope.launch {
                     when (event.option) {
                         "theme" -> trime.showDialogAboveInputView(
-                            trime.themePicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert),
+                            trime.themePicker(Theme_AppCompat_DayNight_Dialog_Alert),
                         )
                         "color" -> trime.showDialogAboveInputView(
-                            trime.colorPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert),
+                            trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                         )
                         "schema" -> trime.showDialogAboveInputView(
-                            trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert),
+                            trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                         )
                         "sound" -> trime.showDialogAboveInputView(
-                            trime.soundPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert),
+                            trime.soundPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                         )
                         else -> ShortcutUtils.launchMainActivity(trime)
                     }
@@ -417,7 +418,7 @@ class TextInputManager private constructor() :
             }
             KeyEvent.KEYCODE_PROG_RED -> trime.lifecycleScope.launch {
                 trime.showDialogAboveInputView(
-                    trime.colorPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert),
+                    trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                 )
             }
             KeyEvent.KEYCODE_MENU -> showOptionsDialog()
@@ -549,9 +550,9 @@ class TextInputManager private constructor() :
     }
 
     private fun showOptionsDialog() {
-        val builder = AlertDialog.Builder(trime, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+        val builder = AlertDialog.Builder(trime, Theme_AppCompat_DayNight_Dialog_Alert)
         builder
-            .setTitle(R.string.trime_app_name)
+            .setTitle(R.string.app_name_release)
             .setIcon(R.mipmap.ic_app_icon)
             .setNegativeButton(R.string.other_ime) { dialog, _ ->
                 dialog.dismiss()
@@ -573,7 +574,7 @@ class TextInputManager private constructor() :
                     R.string.pref_select_schemas,
                 ) { dialog, _ ->
                     dialog.dismiss()
-                    trime.showDialogAboveInputView(trime.schemaPicker(R.style.Theme_AppCompat_DayNight_Dialog_Alert))
+                    trime.showDialogAboveInputView(trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert))
                 }
                 .setSingleChoiceItems(
                     schemaNameList,
