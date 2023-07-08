@@ -65,7 +65,7 @@ fun buildInfo(): String {
 android {
     namespace = "com.osfans.trime"
     compileSdk = 33
-    ndkVersion = "24.0.8215888"
+    ndkVersion = "25.2.9519653"
 
     defaultConfig {
         applicationId  = "com.osfans.trime"
