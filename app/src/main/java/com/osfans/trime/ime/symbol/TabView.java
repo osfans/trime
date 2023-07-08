@@ -54,6 +54,7 @@ public class TabView extends View {
   private int candidateViewHeight, commentHeight, candidateSpacing, candidatePadding;
   private boolean isCommentOnTop;
   private boolean shouldCandidateUseCursor;
+
   // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
 
   public void reset() {

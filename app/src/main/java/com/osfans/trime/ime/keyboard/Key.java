@@ -106,6 +106,7 @@ public class Key {
   public Key(Keyboard parent) {
     mKeyboard = parent;
   }
+
   /**
    * Create an empty key with no attributes.
    *
