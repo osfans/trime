@@ -23,7 +23,7 @@ spotless {
     }
     kotlin {
         target("app/src/main/java/com/osfans/trime/**/*.kt")
-        ktlint("0.48.2")
+        ktlint("0.49.1")
         trimTrailingWhitespace()
         indentWithSpaces()
         endWithNewline()

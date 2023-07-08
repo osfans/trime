@@ -280,14 +280,7 @@ class TextInputManager private constructor() :
                     val key = option.substring(5)
                     onEvent(Event(key))
                     shouldUpdateRimeOption = true
-                } /*else if (option.startsWith("_one_hand_mode")) {
-                    *//*
-                    val c = option[option.length - 1]
-                    if (c == '1' && value) oneHandMode = 1 else if (c == '2' && value) oneHandMode =
-                        2 else if (c == '3') oneHandMode = if (value) 1 else 2 else oneHandMode = 0
-                    trime.loadBackground()
-                    trime.initKeyboard() *//*
-                }*/
+                }
             }
             mainKeyboardView?.invalidateAllKeys()
         }
