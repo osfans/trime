@@ -9,6 +9,7 @@ import com.osfans.trime.ime.enums.InlineModeType
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
+import java.util.Calendar
 
 /**
  * Helper class for an organized access to the shared preferences.
@@ -38,6 +39,9 @@ class AppPrefs(
             0 is T -> {
                 shared.getInt(key, default as Int) as T
             }
+            0L is T -> {
+                shared.getLong(key, default as Long) as T
+            }
             "" is T -> {
                 (shared.getString(key, default as String) ?: (default as String)) as T
             }
@@ -56,6 +60,9 @@ class AppPrefs(
             }
             0 is T -> {
                 shared.edit().putInt(key, value as Int).apply()
+            }
+            0L is T -> {
+                shared.edit().putLong(key, value as Long).apply()
             }
             "" is T -> {
                 shared.edit().putString(key, value as String).apply()
@@ -313,6 +320,8 @@ class AppPrefs(
             const val SHARED_DATA_DIR = "profile_shared_data_dir"
             const val USER_DATA_DIR = "profile_user_data_dir"
             const val SYNC_BACKGROUND_ENABLED = "profile_sync_in_background"
+            const val TIMING_SYNC_ENABLED = "profile_timing_sync"
+            const val TIMING_SYNC_TRIGGER_TIME = "profile_timing_sync_trigger_time"
             const val LAST_SYNC_STATUS = "profile_last_sync_status"
             const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
             val EXTERNAL_PATH_PREFIX: String = PathUtils.getExternalStoragePath()
@@ -326,6 +335,12 @@ class AppPrefs(
         var syncBackgroundEnabled: Boolean
             get() = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)
             set(v) = prefs.setPref(SYNC_BACKGROUND_ENABLED, v)
+        var timingSyncEnabled: Boolean
+            get() = prefs.getPref(TIMING_SYNC_ENABLED, false)
+            set(v) = prefs.setPref(TIMING_SYNC_ENABLED, v)
+        var timingSyncTriggerTime: Long
+            get() = prefs.getPref(TIMING_SYNC_TRIGGER_TIME, Calendar.getInstance().timeInMillis + 1200000L)
+            set(v) = prefs.setPref(TIMING_SYNC_TRIGGER_TIME, v)
         var lastSyncStatus: Boolean
             get() = prefs.getPref(LAST_SYNC_STATUS, false)
             set(v) = prefs.setPref(LAST_SYNC_STATUS, v)

@@ -20,7 +20,10 @@ package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.RectF;
@@ -327,6 +330,24 @@ public class Trime extends LifecycleInputMethodService {
     return true;
   }
 
+  public void restartSystemStartTimingSync() { // 防止重启系统 强行停止应用时alarm任务丢失
+    if (getPrefs().getProfile().getTimingSyncEnabled()) {
+      long triggerTime = getPrefs().getProfile().getTimingSyncTriggerTime();
+      AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+      PendingIntent pendingIntent =
+          PendingIntent.getBroadcast( // 设置待发送的同步事件
+              this,
+              0,
+              new Intent("com.osfans.trime.timing.sync"),
+              PendingIntent.FLAG_UPDATE_CURRENT);
+      if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+      } else {
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+      }
+    }
+  }
+
   @Override
   public void onCreate() {
     // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
@@ -339,6 +360,7 @@ public class Trime extends LifecycleInputMethodService {
         activeEditorInstance = new EditorInstance(this);
         inputFeedbackManager = new InputFeedbackManager(this);
         liquidKeyboard = new LiquidKeyboard(this);
+        restartSystemStartTimingSync();
       } catch (Exception e) {
         e.printStackTrace();
         super.onCreate();

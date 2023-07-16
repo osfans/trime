@@ -31,6 +31,11 @@
             android:title="@string/profile_sync_in_background"
             android:persistent="true" />
 
+        <SwitchPreferenceCompat android:key="profile_timing_sync"
+            app:iconSpaceReserved="false"
+            android:title="@string/profile_timing_sync"
+            android:persistent="true" />
+
         <Preference android:key="profile_reset"
             app:iconSpaceReserved="false"
             android:title="@string/profile_reset"
