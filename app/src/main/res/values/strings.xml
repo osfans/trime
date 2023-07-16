@@ -106,6 +106,9 @@
     <string name="profile_last_sync_in_background">Last sync in background: %s\nStatus: %s</string>
     <string name="profile_never_sync_in_background">Never synced in the background</string>
     <string name="profile_enable_syncing_in_background">Click to enable</string>
+    <string name="profile_timing_sync">Timing sync</string>
+    <string name="profile_timing_sync_trigger_time">Timing sync is enabled Next sync at time: %s</string>
+    <string name="profile_enable_timing_sync">Click to enable</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
     <string name="pref_keyboard__function">View</string>
