@@ -28,7 +28,7 @@ import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.formatDateTime
+import com.osfans.trime.util.socialStyleTime
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -81,7 +81,7 @@ class ProfileFragment :
                     } else {
                         context.getString(
                             R.string.profile_last_sync_in_background,
-                            formatDateTime(lastBackgroundSync.toLong()),
+                            socialStyleTime(lastBackgroundSync.toLong()),
                             context.getString(
                                 if (prefs.profile.lastSyncStatus) {
                                     R.string.success

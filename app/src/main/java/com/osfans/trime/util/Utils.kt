@@ -16,6 +16,7 @@ import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.ocpsoft.prettytime.PrettyTime
 import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -59,6 +60,9 @@ private val iso8601DateFormat by lazy {
 
 fun iso8601UTCDateTime(timeMillis: Long? = null): String =
     iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())
+
+fun socialStyleTime(timeMillis: Long? = null): String =
+    PrettyTime().format(timeMillis?.let { Date(it) } ?: Date())
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun CharSequence.startsWithAsciiChar(): Boolean {
