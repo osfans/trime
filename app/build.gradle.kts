@@ -169,6 +169,7 @@ android {
 }
 
 kotlin {
+    jvmToolchain(8)
     sourceSets.configureEach {
         kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
     }
