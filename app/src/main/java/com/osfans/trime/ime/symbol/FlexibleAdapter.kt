@@ -176,7 +176,6 @@ class FlexibleAdapter(
         notifyItemRemoved(position)
     }
 
-
     private fun setPinStatus(id: Int, pinned: Boolean) {
         val position = mBeansId.getValue(id)
         mBeans[position] = mBeans[position].copy(pinned = pinned)

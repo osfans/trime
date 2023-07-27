@@ -26,7 +26,7 @@ import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboardUpdateListener{
+class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboardUpdateListener {
     private val theme: Theme = Theme.get()
     private val tabManager: TabManager = TabManager.get()
     private val service: Trime = Trime.getService()
