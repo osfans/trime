@@ -1,5 +1,6 @@
 package com.osfans.trime.ime.symbol
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -172,12 +173,14 @@ class FlexibleAdapter(
         notifyItemRemoved(position)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setPinStatus(id: Int, pinned: Boolean) {
         val position = mBeansId.getValue(id)
         mBeans[position] = mBeans[position].copy(pinned = pinned)
-        notifyItemChanged(position)
         // 置顶会改变条目的排列顺序
         updateBeans(mBeans)
+        // 置顶状态改变后，可能影响多个条目，需要更新全部
+        notifyDataSetChanged()
     }
 
     // 添加回调
