@@ -29,6 +29,7 @@ class FlexibleAdapter(
     val beans: List<DatabaseBean>
         get() = mBeans
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateBeans(beans: List<DatabaseBean>) {
         val sorted = beans.sortedWith { b1, b2 ->
             when {
@@ -46,6 +47,8 @@ class FlexibleAdapter(
         mBeans.forEachIndexed { index: Int, (id): DatabaseBean ->
             mBeansId[id] = index
         }
+        // 更新视图
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int = mBeans.size
@@ -173,14 +176,12 @@ class FlexibleAdapter(
         notifyItemRemoved(position)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+
     private fun setPinStatus(id: Int, pinned: Boolean) {
         val position = mBeansId.getValue(id)
         mBeans[position] = mBeans[position].copy(pinned = pinned)
         // 置顶会改变条目的排列顺序
         updateBeans(mBeans)
-        // 置顶状态改变后，可能影响多个条目，需要更新全部
-        notifyDataSetChanged()
     }
 
     // 添加回调

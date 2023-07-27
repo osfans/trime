@@ -23,12 +23,10 @@ import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.dp2px
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class LiquidKeyboard(private val context: Context) {
+class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboardUpdateListener{
     private val theme: Theme = Theme.get()
     private val tabManager: TabManager = TabManager.get()
     private val service: Trime = Trime.getService()
@@ -209,7 +207,6 @@ class LiquidKeyboard(private val context: Context) {
                             else -> return
                         }
                     }
-                    notifyDataSetChanged()
                 }
 
                 override val showCollectButton: Boolean = type != SymbolKeyboardType.COLLECTION
@@ -225,27 +222,23 @@ class LiquidKeyboard(private val context: Context) {
         when (type) {
             SymbolKeyboardType.CLIPBOARD -> {
                 service.lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
-                        dbAdapter.updateBeans(ClipboardHelper.getAll())
-                    }
+                    dbAdapter.updateBeans(ClipboardHelper.getAll())
                 }
             }
             SymbolKeyboardType.COLLECTION -> {
                 service.lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
-                        dbAdapter.updateBeans(CollectionHelper.getAll())
-                    }
+                    dbAdapter.updateBeans(CollectionHelper.getAll())
                 }
             }
             SymbolKeyboardType.DRAFT -> {
                 service.lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
-                        dbAdapter.updateBeans(DraftHelper.getAll())
-                    }
+                    dbAdapter.updateBeans(DraftHelper.getAll())
                 }
             }
             else -> return
         }
+        // 注册剪贴板更新监听器
+        ClipboardHelper.addOnUpdateListener(this)
     }
 
     private fun initCandidates() {
@@ -286,5 +279,19 @@ class LiquidKeyboard(private val context: Context) {
         candidateAdapter.updateCandidates(
             data.map { b -> CandidateListItem("", b.text) },
         )
+    }
+
+    /**
+     * 实现 OnClipboardUpdateListener 中的 onUpdate
+     * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
+     */
+    override fun onUpdate(text: String) {
+        val tag = TabManager.getTag(tabManager.selected)
+        // FIXME 先判断液体键盘是否打开，否则会在液体键盘未开启状态执行视图数据更新，可能浪费性能
+        if (tag.type == SymbolKeyboardType.CLIPBOARD) {
+            service.lifecycleScope.launch {
+                (keyboardView.adapter as FlexibleAdapter).updateBeans(ClipboardHelper.getAll())
+            }
+        }
     }
 }
