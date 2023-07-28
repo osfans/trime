@@ -1191,7 +1191,7 @@ public class Trime extends LifecycleInputMethodService {
           mComposition.setWindow();
           showCompositionView(false);
         } else {
-          mComposition.getRootView().setVisibility(View.VISIBLE);
+          mComposition.setVisibility(View.VISIBLE);
           startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize, Integer.MAX_VALUE);
           mCandidate.setText(startNum);
           // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
