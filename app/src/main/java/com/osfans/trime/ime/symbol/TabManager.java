@@ -205,6 +205,10 @@ public class TabManager {
     return selected;
   }
 
+  public void setTabExited() {
+    this.selected = -1;
+  }
+
   public boolean isAfterTabSwitch(int position) {
     return tabSwitchPosition <= position;
   }

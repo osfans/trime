@@ -291,11 +291,15 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
      * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
      */
     override fun onUpdate(text: String) {
-        val tag = TabManager.getTag(tabManager.selected)
-        // FIXME 先判断液体键盘是否打开，否则会在液体键盘未开启状态执行视图数据更新，可能浪费性能
-        if (tag.type == SymbolKeyboardType.CLIPBOARD) {
-            service.lifecycleScope.launch {
-                (keyboardView.adapter as FlexibleAdapter).updateBeans(ClipboardHelper.getAll())
+        val selected = tabManager.selected
+        // 判断液体键盘视图是否已开启，-1为未开启
+        if (selected >= 0) {
+            val tag = TabManager.getTag(selected)
+            if (tag.type == SymbolKeyboardType.CLIPBOARD) {
+                Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
+                service.lifecycleScope.launch {
+                    (keyboardView.adapter as FlexibleAdapter).updateBeans(ClipboardHelper.getAll())
+                }
             }
         }
     }
