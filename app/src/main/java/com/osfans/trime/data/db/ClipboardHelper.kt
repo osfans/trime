@@ -38,17 +38,21 @@ object ClipboardHelper :
     private val onUpdateListeners = WeakHashSet<OnClipboardUpdateListener>()
 
     fun addOnUpdateListener(listener: OnClipboardUpdateListener) {
-        Timber.d("Add OnUpdateListener: ${listener}")
+        Timber.d("Add OnUpdateListener: $listener")
         val result = onUpdateListeners.add(listener)
-        Timber.d("onUpdateListeners.add: result = ${result}," +
-                "onUpdateListeners.size = ${onUpdateListeners.size}")
+        Timber.d(
+            "onUpdateListeners.add: result = $result," +
+                "onUpdateListeners.size = ${onUpdateListeners.size}",
+        )
     }
 
     fun removeOnUpdateListener(listener: OnClipboardUpdateListener) {
-        Timber.d("Remove OnUpdateListener: ${listener}")
+        Timber.d("Remove OnUpdateListener: $listener")
         val result = onUpdateListeners.remove(listener)
-        Timber.d("onUpdateListeners.remove: result = ${result}," +
-                "onUpdateListeners.size = ${onUpdateListeners.size}")
+        Timber.d(
+            "onUpdateListeners.remove: result = $result," +
+                "onUpdateListeners.size = ${onUpdateListeners.size}",
+        )
     }
 
     private val limit get() = AppPrefs.defaultInstance().clipboard.clipboardLimit

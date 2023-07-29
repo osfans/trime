@@ -102,8 +102,10 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 } else {
                     val tag = tabManager.getTabSwitchTabTag(position)
                     val truePosition = tabManager.getTabSwitchPosition(position)
-                    Timber.v("TABS click: " +
-                            "position = ${position}, truePosition = ${truePosition}, tag.text = ${tag.text}")
+                    Timber.v(
+                        "TABS click: " +
+                            "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
+                    )
                     if (tag.type === SymbolKeyboardType.NO_KEY) {
                         when (tag.command) {
                             KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)

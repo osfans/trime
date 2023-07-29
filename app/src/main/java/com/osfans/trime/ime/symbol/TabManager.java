@@ -36,8 +36,7 @@ public class TabManager {
   }
 
   /**
-   * 得到TABS中对应的TabTag
-   * 去除不显示的tagTab(没有keys列表的tagTab)之后按顺序排列tagTab,再从中获取TabTag
+   * 得到TABS中对应的TabTag 去除不显示的tagTab(没有keys列表的tagTab)之后按顺序排列tagTab,再从中获取TabTag
    *
    * @param position 位置（索引）
    * @return TabTag
@@ -53,8 +52,7 @@ public class TabManager {
   }
 
   /**
-   * 得到TABS中对应的真实索引
-   * 真实的索引是去除 没有keys列表的tagTab 之后按顺序排列的tagTab索引
+   * 得到TABS中对应的真实索引 真实的索引是去除 没有keys列表的tagTab 之后按顺序排列的tagTab索引
    *
    * @param position 位置（索引）
    * @return int TABS中显示的真实索引
