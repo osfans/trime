@@ -100,18 +100,23 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                         }
                     }
                 } else {
-                    val tag = TabManager.getTag(position)
+                    val tag = tabManager.getTabSwitchTabTag(position)
+                    val truePosition = tabManager.getTabSwitchPosition(position)
+                    Timber.v(
+                        "TABS click: " +
+                            "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
+                    )
                     if (tag.type === SymbolKeyboardType.NO_KEY) {
                         when (tag.command) {
                             KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
                             KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
                             else -> {}
                         }
-                    } else if (tabManager.isAfterTabSwitch(position)) {
+                    } else if (tabManager.isAfterTabSwitch(truePosition)) {
                         // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                        select(position)
+                        select(truePosition)
                     } else {
-                        service.selectLiquidKeyboard(position)
+                        service.selectLiquidKeyboard(truePosition)
                     }
                 }
             }
@@ -135,8 +140,10 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
         when (tabTag.type) {
             SymbolKeyboardType.HISTORY ->
                 simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
-            SymbolKeyboardType.TABS ->
+            SymbolKeyboardType.TABS -> {
                 simpleAdapter.updateBeans(tabManager.tabSwitchData)
+                Timber.v("All tags in TABS: tabManager.tabSwitchData = ${tabManager.tabSwitchData}")
+            }
             else ->
                 simpleAdapter.updateBeans(tabManager.select(i))
         }
@@ -286,11 +293,15 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
      * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
      */
     override fun onUpdate(text: String) {
-        val tag = TabManager.getTag(tabManager.selected)
-        // FIXME 先判断液体键盘是否打开，否则会在液体键盘未开启状态执行视图数据更新，可能浪费性能
-        if (tag.type == SymbolKeyboardType.CLIPBOARD) {
-            service.lifecycleScope.launch {
-                (keyboardView.adapter as FlexibleAdapter).updateBeans(ClipboardHelper.getAll())
+        val selected = tabManager.selected
+        // 判断液体键盘视图是否已开启，-1为未开启
+        if (selected >= 0) {
+            val tag = TabManager.getTag(selected)
+            if (tag.type == SymbolKeyboardType.CLIPBOARD) {
+                Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
+                service.lifecycleScope.launch {
+                    (keyboardView.adapter as FlexibleAdapter).updateBeans(ClipboardHelper.getAll())
+                }
             }
         }
     }

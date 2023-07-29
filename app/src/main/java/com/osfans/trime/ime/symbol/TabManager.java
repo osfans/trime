@@ -31,9 +31,41 @@ public class TabManager {
 
     for (TabTag tag : tabTags) {
       if (SymbolKeyboardType.hasKey(tag.type)) tabSwitchData.add(new SimpleKeyBean(tag.text));
-      else tabSwitchData.add(new SimpleKeyBean(""));
     }
     return tabSwitchData;
+  }
+
+  /**
+   * 得到TABS中对应的TabTag 去除不显示的tagTab(没有keys列表的tagTab)之后按顺序排列tagTab,再从中获取TabTag
+   *
+   * @param position 位置（索引）
+   * @return TabTag
+   */
+  public TabTag getTabSwitchTabTag(int position) {
+    int i = 0;
+    for (TabTag tag : tabTags) {
+      if (SymbolKeyboardType.hasKey(tag.type)) {
+        if (i++ == position) return tag;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 得到TABS中对应的真实索引 真实的索引是去除 没有keys列表的tagTab 之后按顺序排列的tagTab索引
+   *
+   * @param position 位置（索引）
+   * @return int TABS中显示的真实索引
+   */
+  public int getTabSwitchPosition(int position) {
+    int i = 0;
+    for (TabTag tag : tabTags) {
+      if (SymbolKeyboardType.hasKey(tag.type)) {
+        if (position-- <= 0) break;
+      }
+      i++;
+    }
+    return i;
   }
 
   public static TabTag getTag(int i) {
@@ -169,6 +201,10 @@ public class TabManager {
 
   public int getSelected() {
     return selected;
+  }
+
+  public void setTabExited() {
+    this.selected = -1;
   }
 
   public boolean isAfterTabSwitch(int position) {

@@ -418,6 +418,8 @@ public class Trime extends LifecycleInputMethodService {
       }
     } else {
       symbolKeyboardType = SymbolKeyboardType.NO_KEY;
+      // 设置液体键盘处于隐藏状态
+      TabManager.get().setTabExited();
       symbolInput.setVisibility(View.GONE);
     }
     updateComposing();
