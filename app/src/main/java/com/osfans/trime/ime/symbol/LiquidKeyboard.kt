@@ -100,18 +100,21 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                         }
                     }
                 } else {
-                    val tag = TabManager.getTag(position)
+                    val tag = tabManager.getTabSwitchTabTag(position)
+                    val truePosition = tabManager.getTabSwitchPosition(position)
+                    Timber.v("TABS click: " +
+                            "position = ${position}, truePosition = ${truePosition}, tag.text = ${tag.text}")
                     if (tag.type === SymbolKeyboardType.NO_KEY) {
                         when (tag.command) {
                             KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
                             KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
                             else -> {}
                         }
-                    } else if (tabManager.isAfterTabSwitch(position)) {
+                    } else if (tabManager.isAfterTabSwitch(truePosition)) {
                         // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                        select(position)
+                        select(truePosition)
                     } else {
-                        service.selectLiquidKeyboard(position)
+                        service.selectLiquidKeyboard(truePosition)
                     }
                 }
             }
@@ -135,8 +138,10 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
         when (tabTag.type) {
             SymbolKeyboardType.HISTORY ->
                 simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
-            SymbolKeyboardType.TABS ->
+            SymbolKeyboardType.TABS -> {
                 simpleAdapter.updateBeans(tabManager.tabSwitchData)
+                Timber.v("All tags in TABS: tabManager.tabSwitchData = ${tabManager.tabSwitchData}")
+            }
             else ->
                 simpleAdapter.updateBeans(tabManager.select(i))
         }
