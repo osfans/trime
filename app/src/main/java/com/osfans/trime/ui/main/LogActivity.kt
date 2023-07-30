@@ -67,7 +67,7 @@ class LogActivity : AppCompatActivity() {
                 rightMargin = navBars.right
                 bottomMargin = navBars.bottom
             }
-            binding.toolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.logToolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = statusBars.top
             }
             windowInsets
@@ -75,7 +75,7 @@ class LogActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         with(binding) {
-            setSupportActionBar(toolbar.toolbar)
+            setSupportActionBar(logToolbar.toolbar)
             this@LogActivity.logView = logView
             if (intent.hasExtra(FROM_CRASH)) {
                 supportActionBar!!.setTitle(R.string.crash_logs)
