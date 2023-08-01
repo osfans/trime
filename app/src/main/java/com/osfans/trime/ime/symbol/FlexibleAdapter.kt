@@ -25,6 +25,7 @@ class FlexibleAdapter(
 
     // 映射条目的 id 和其在视图中位置的关系
     // 以应对增删条目时 id 和其位置的相对变化
+    // [<id, position>, ...]
     private val mBeansId = mutableMapOf<Int, Int>()
     val beans: List<DatabaseBean>
         get() = mBeans
@@ -102,6 +103,15 @@ class FlexibleAdapter(
                     val menu = PopupMenu(it.context, it)
                     val scope = it.findViewTreeLifecycleOwner()!!.lifecycleScope
                     menu.menu.apply {
+                        add(R.string.edit).apply {
+                            setIcon(R.drawable.ic_baseline_edit_24)
+                            setOnMenuItemClickListener {
+                                scope.launch {
+                                    listener.onEdit(bean)
+                                }
+                                true
+                            }
+                        }
                         if (bean.pinned) {
                             add(R.string.simple_key_unpin).apply {
                                 setIcon(R.drawable.ic_outline_push_pin_24)
@@ -189,6 +199,8 @@ class FlexibleAdapter(
         suspend fun onPin(bean: DatabaseBean)
         suspend fun onUnpin(bean: DatabaseBean)
         suspend fun onDelete(bean: DatabaseBean)
+
+        suspend fun onEdit(bean: DatabaseBean)
 
         suspend fun onDeleteAll()
 

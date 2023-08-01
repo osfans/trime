@@ -2,6 +2,7 @@ package com.osfans.trime.ime.symbol
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.core.view.setPadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +23,7 @@ import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
+import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -184,6 +186,10 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                     }
                 }
 
+                override suspend fun onEdit(bean: DatabaseBean) {
+                    bean.text?.let { launchLiquidKeyboardEditText(context, type, bean.id, it) }
+                }
+
                 // FIXME: 这个方法可能实现得比较粗糙，需要日后改进
                 @SuppressLint("NotifyDataSetChanged")
                 override suspend fun onDeleteAll() {
@@ -304,5 +310,16 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 }
             }
         }
+    }
+
+    private fun launchLiquidKeyboardEditText(context: Context, type: SymbolKeyboardType, id: Int, text: String) {
+        context.startActivity(
+            Intent(context, LiquidKeyboardEditActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(LiquidKeyboardEditActivity.DB_BEAN_ID, id)
+                putExtra(LiquidKeyboardEditActivity.DB_BEAN_TEXT, text)
+                putExtra(LiquidKeyboardEditActivity.LIQUID_KEYBOARD_TYPE, type.name)
+            }
+        )
     }
 }

@@ -35,4 +35,6 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
             cltDao.deleteAll()
         }
     }
+
+    suspend fun updateText(id: Int, text: String) = cltDao.updateText(id, text)
 }

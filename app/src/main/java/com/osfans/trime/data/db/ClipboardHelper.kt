@@ -149,4 +149,6 @@ object ClipboardHelper :
             clbDao.delete(outdated)
         }
     }
+
+    suspend fun updateText(id: Int, text: String) = clbDao.updateText(id, text)
 }

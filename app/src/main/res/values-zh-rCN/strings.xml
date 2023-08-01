@@ -242,8 +242,10 @@
     <string name="other_managed_draft">管理草稿箱内容</string>
     <string name="other_managed_collection">管理收藏夹内容</string>
     <string name="delete">删除</string>
+    <string name="edit">编辑</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暂未实现)</string>
+    <string name="liquid_keyboard_edit_text_hint">在此处编辑文本</string>
     <string name="clipboard_draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
     <string name="about__open_source_licenses">开源软件许可</string>
     <string name="about__open_source_licenses_summary">第三方软件库许可证</string>

@@ -247,8 +247,10 @@
     <string name="other_managed_draft">Manage Draft Data</string>
     <string name="other_managed_collection">Manage Collection Data</string>
     <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
     <string name="collect">Collect</string>
     <string name="liquid_keyboard_search_hint">Search ( comming soon )</string>
+    <string name="liquid_keyboard_edit_text_hint">Edit text here</string>
     <string name="clipboard_draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
