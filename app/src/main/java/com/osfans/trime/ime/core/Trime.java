@@ -604,9 +604,13 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private void handleReturnKey() {
-    if (editorInfo == null) sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+    if (editorInfo == null) {
+      sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+      return;
+    }
     if ((editorInfo.inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_NULL) {
       sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+      return;
     }
     if (BitFlagsKt.hasFlag(editorInfo.imeOptions, EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
       final InputConnection ic = getCurrentInputConnection();
