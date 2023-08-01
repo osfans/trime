@@ -199,13 +199,15 @@ class FlexibleAdapter(
     private fun askToDeleteAll() {
         val service = Trime.getService()
         val askDialog = AlertDialog.Builder(
-            appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
-        ).setTitle("Delete All ?").setPositiveButton("Yes") { dialog, which ->
-            service.lifecycleScope.launch {
-                listener.onDeleteAll()
-            }
-        }.setNegativeButton("No") { dialog, which ->
-        }.create()
+            appContext,
+            androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert,
+        ).setTitle(R.string.liquid_keyboard_ask_to_delete_all)
+            .setPositiveButton(R.string.ok) { dialog, which ->
+                service.lifecycleScope.launch {
+                    listener.onDeleteAll()
+                }
+            }.setNegativeButton(R.string.cancel) { dialog, which ->
+            }.create()
         service.showDialogAboveInputView(askDialog)
     }
 

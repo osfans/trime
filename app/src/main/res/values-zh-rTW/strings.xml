@@ -246,6 +246,9 @@
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暫未實現)</string>
     <string name="liquid_keyboard_edit_text_hint">在此處編輯文本</string>
+    <string name="liquid_keyboard_ask_to_delete_all">刪除全部？</string>
+    <string name="ok">確定</string>
+    <string name="cancel">取消</string>
     <string name="clipboard_draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="about__licensing">許可</string>
     <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>

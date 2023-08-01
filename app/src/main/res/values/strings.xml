@@ -251,6 +251,9 @@
     <string name="collect">Collect</string>
     <string name="liquid_keyboard_search_hint">Search ( comming soon )</string>
     <string name="liquid_keyboard_edit_text_hint">Edit text here</string>
+    <string name="liquid_keyboard_ask_to_delete_all">Delete All?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">CANCEL</string>
     <string name="clipboard_draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
