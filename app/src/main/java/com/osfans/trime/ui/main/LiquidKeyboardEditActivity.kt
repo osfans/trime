@@ -45,8 +45,7 @@ class LiquidKeyboardEditActivity : AppCompatActivity() {
             val text = intent.getStringExtra(DB_BEAN_TEXT)
             editText.setText(text)
             Timber.d(
-                "LiquidKeyboardEditActivity:" +
-                        "processIntent (type=$type, id=$id, text=$text)"
+                "LiquidKeyboardEditActivity:" + "processIntent (type=$type, id=$id, text=$text)"
             )
         }
     }
@@ -81,6 +80,11 @@ class LiquidKeyboardEditActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         processIntent(intent)
         super.onNewIntent(intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        finish()
     }
 
     companion object {

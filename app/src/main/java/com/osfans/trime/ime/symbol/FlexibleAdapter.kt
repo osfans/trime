@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +17,8 @@ import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleKeyItemBinding
+import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.util.appContext
 import kotlinx.coroutines.launch
 
 class FlexibleAdapter(
@@ -159,7 +162,7 @@ class FlexibleAdapter(
                                 setIcon(R.drawable.ic_baseline_delete_sweep_24)
                                 setOnMenuItemClickListener {
                                     scope.launch {
-                                        listener.onDeleteAll()
+                                        askToDeleteAll()
                                     }
                                     true
                                 }
@@ -191,6 +194,19 @@ class FlexibleAdapter(
         mBeans[position] = mBeans[position].copy(pinned = pinned)
         // 置顶会改变条目的排列顺序
         updateBeans(mBeans)
+    }
+
+    private fun askToDeleteAll() {
+        val service = Trime.getService()
+        val askDialog = AlertDialog.Builder(
+            appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
+        ).setTitle("Delete All ?").setPositiveButton("Yes") { dialog, which ->
+            service.lifecycleScope.launch {
+                listener.onDeleteAll()
+            }
+        }.setNegativeButton("No") { dialog, which ->
+        }.create()
+        service.showDialogAboveInputView(askDialog)
     }
 
     // 添加回调

@@ -312,14 +312,17 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
         }
     }
 
-    private fun launchLiquidKeyboardEditText(context: Context, type: SymbolKeyboardType, id: Int, text: String) {
-        context.startActivity(
-            Intent(context, LiquidKeyboardEditActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                putExtra(LiquidKeyboardEditActivity.DB_BEAN_ID, id)
-                putExtra(LiquidKeyboardEditActivity.DB_BEAN_TEXT, text)
-                putExtra(LiquidKeyboardEditActivity.LIQUID_KEYBOARD_TYPE, type.name)
-            }
-        )
+    private fun launchLiquidKeyboardEditText(
+        context: Context,
+        type: SymbolKeyboardType,
+        id: Int,
+        text: String
+    ) {
+        context.startActivity(Intent(context, LiquidKeyboardEditActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(LiquidKeyboardEditActivity.DB_BEAN_ID, id)
+            putExtra(LiquidKeyboardEditActivity.DB_BEAN_TEXT, text)
+            putExtra(LiquidKeyboardEditActivity.LIQUID_KEYBOARD_TYPE, type.name)
+        })
     }
 }
