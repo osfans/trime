@@ -35,13 +35,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     private lateinit var keyboardView: RecyclerView
     private val symbolHistory = SymbolHistory(180)
 
-    private val flexbox: FlexboxLayoutManager by lazy {
-        return@lazy FlexboxLayoutManager(context).apply {
-            flexDirection = FlexDirection.ROW // 主轴为水平方向，起点在左端。
-            flexWrap = FlexWrap.WRAP // 按正常方向换行
-            justifyContent = JustifyContent.FLEX_START // 交叉轴的起点对齐
-        }
-    }
+    private lateinit var flexbox: FlexboxLayoutManager
 
     private val oneColumnStaggeredGrid: StaggeredGridLayoutManager by lazy {
         return@lazy StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
@@ -53,6 +47,25 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             val space = dp2px(3)
             addItemDecoration(SpacesItemDecoration(space))
             setPadding(space)
+        }
+    }
+
+    /**
+     * 根据屏幕状态初始化 flexbox
+     */
+    fun initFlexbox(isLandscape: Boolean) {
+        if (isLandscape) {
+            flexbox = FlexboxLayoutManager(context).apply {
+                flexDirection = FlexDirection.COLUMN // 主轴为垂直方向，起点在左端。
+                flexWrap = FlexWrap.WRAP // 按正常方向换行
+                justifyContent = JustifyContent.FLEX_START // 交叉轴的起点对齐
+            }
+        } else {
+            flexbox = FlexboxLayoutManager(context).apply {
+                flexDirection = FlexDirection.ROW // 主轴为水平方向，起点在左端。
+                flexWrap = FlexWrap.WRAP // 按正常方向换行
+                justifyContent = JustifyContent.FLEX_START // 交叉轴的起点对齐
+            }
         }
     }
 
