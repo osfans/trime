@@ -23,6 +23,7 @@ import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
@@ -122,6 +123,12 @@ class PrefMainActivity : AppCompatActivity() {
                         Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
                     }
                     withContext(Dispatchers.Default) {
+                        // All functions that implement the DirectoryChangeListener.Listener
+                        //   interface are called here.
+                        // To refresh directory settings.
+                        DataDirectoryChangeListener.directoryChangeListeners.forEach {
+                            it.onDataDirectoryChange()
+                        }
                         Rime.deploy()
                     }
                     briefResultLogDialog("rime.trime", "W", 1)
