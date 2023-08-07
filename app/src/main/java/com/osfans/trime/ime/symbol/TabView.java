@@ -149,7 +149,7 @@ public class TabView extends View {
 
   public void updateTabWidth() {
     tabTags = TabManager.get().getTabCandidates();
-    highlightIndex = TabManager.get().getSelected();
+    highlightIndex = TabManager.get().getSelectedOrZero();
 
     int x = 0;
     for (TabTag computedTab : tabTags) {

@@ -14,6 +14,7 @@ import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import com.osfans.trime.util.ProgressBarDialogIndeterminate
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ suspend fun Context.themePicker(
             with(items[checkedItem].toString()) {
                 ThemeManager.switchTheme(if (this == "trime") this else "$this.trime")
                 Theme.get().init()
+                TabManager.updateSelf()
             }
             launch {
                 Trime.getServiceOrNull()?.initKeyboard()

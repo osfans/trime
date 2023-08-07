@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+// 使用TabManager时，不应该使用变量保存TabManager实例，应该使用TabManager.get()方法获取
 public class TabManager {
   private int selected = 0;
   private final List<SimpleKeyBean> keyboardData = new ArrayList<>();
@@ -20,6 +21,10 @@ public class TabManager {
   private static TabManager self;
   private final List<SimpleKeyBean> notKeyboard = new ArrayList<>();
   private final TabTag tagExit = new TabTag("返回", SymbolKeyboardType.NO_KEY, KeyCommandType.EXIT);
+
+  public static void updateSelf() {
+    self = new TabManager();
+  }
 
   public static TabManager get() {
     if (null == self) self = new TabManager();
@@ -192,8 +197,8 @@ public class TabManager {
   }
 
   public List<SimpleKeyBean> select(int tabIndex) {
-    if (tabIndex >= tabTags.size()) return keyboardData;
     selected = tabIndex;
+    if (tabIndex >= tabTags.size()) return keyboardData;
     TabTag tag = tabTags.get(tabIndex);
     if (tag.type == SymbolKeyboardType.TABS) tabSwitchPosition = selected;
     return keyboards.get(tabIndex);
@@ -201,6 +206,10 @@ public class TabManager {
 
   public int getSelected() {
     return selected;
+  }
+
+  public int getSelectedOrZero() {
+    return (selected == -1) ? 0 : selected;
   }
 
   public void setTabExited() {
