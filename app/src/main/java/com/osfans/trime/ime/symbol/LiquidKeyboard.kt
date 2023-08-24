@@ -270,6 +270,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 TextInputManager.getInstance().onCandidatePressed(position)
                 if (Rime.isComposing) {
                     updateCandidates(Rime.candidatesWithoutSwitch.toList())
+                    notifyDataSetChanged()
                     keyboardView.scrollToPosition(0)
                 } else {
                     service.selectLiquidKeyboard(-1)
