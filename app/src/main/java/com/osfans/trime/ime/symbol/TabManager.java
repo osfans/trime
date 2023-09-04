@@ -20,7 +20,6 @@ public class TabManager {
   private final List<List<SimpleKeyBean>> keyboards = new ArrayList<>();
   private static TabManager self;
   private final List<SimpleKeyBean> notKeyboard = new ArrayList<>();
-  private final TabTag tagExit = new TabTag("返回", SymbolKeyboardType.NO_KEY, KeyCommandType.EXIT);
 
   public static void updateSelf() {
     self = new TabManager();
@@ -221,17 +220,6 @@ public class TabManager {
   }
 
   public ArrayList<TabTag> getTabCandidates() {
-    boolean addExit = true;
-    for (TabTag tag : tabTags) {
-      if (tag.command == KeyCommandType.EXIT) {
-        addExit = false;
-        break;
-      }
-    }
-    if (addExit) {
-      tabTags.add(tagExit);
-      keyboards.add(notKeyboard);
-    }
     return tabTags;
   }
 }
