@@ -205,14 +205,19 @@ public class KeyboardView extends View implements View.OnClickListener {
 
   /** Whether the keyboard bitmap needs to be redrawn before it's blitted. * */
   private boolean mDrawPending;
+
   /** The dirty region in the keyboard bitmap */
   private final Rect mDirtyRect = new Rect();
+
   /** The keyboard bitmap for faster updates */
   private Bitmap mBuffer;
+
   /** Notes if the keyboard just changed, so that we could possibly reallocate the mBuffer. */
   private boolean mKeyboardChanged;
+
   /** The canvas for the above mutable keyboard bitmap */
   private Canvas mCanvas;
+
   // The accessibility manager for accessibility support */
   // private AccessibilityManager mAccessibilityManager;
   // The audio manager for accessibility support */

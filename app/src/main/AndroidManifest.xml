@@ -26,6 +26,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission  android:name ="android.permission.WAKE_LOCK" />
 
     <application
         android:name="com.osfans.trime.TrimeApplication"
@@ -63,6 +65,16 @@
             android:exported="false"
             android:launchMode="singleTask"
             android:parentActivityName=".ui.main.PrefMainActivity" />
+
+        <activity
+            android:name=".ui.main.LiquidKeyboardEditActivity"
+            android:autoRemoveFromRecents="true"
+            android:excludeFromRecents="true"
+            android:label="@string/edit"
+            android:launchMode="singleInstance"
+            android:taskAffinity=".ui.main.LiquidKeyboardEditActivity"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustPan" />
 
         <!-- Using an activity alias to disable/enable the app icon in the launcher -->
         <activity-alias

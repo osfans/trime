@@ -104,6 +104,9 @@
     <string name="profile_user_data_dir">使用者資料夾</string>
     <string name="profile_never_sync_in_background">從未在後臺同步過</string>
     <string name="profile_enable_syncing_in_background">點擊以啟用後台同步</string>
+    <string name="profile_timing_sync">定時同步</string>
+    <string name="profile_timing_sync_trigger_time">已啟用定時同步 下次同步時間: %s</string>
+    <string name="profile_enable_timing_sync">點擊以啟用定時同步</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
     <string name="pref_keyboard__function">檢視</string>
@@ -239,8 +242,13 @@
     <string name="other_managed_draft">管理草稿箱內容</string>
     <string name="other_managed_collection">管理收藏夾內容</string>
     <string name="delete">刪除</string>
+    <string name="edit">編輯</string>
     <string name="collect">收藏</string>
     <string name="liquid_keyboard_search_hint">搜索(暫未實現)</string>
+    <string name="liquid_keyboard_edit_text_hint">在此處編輯文本</string>
+    <string name="liquid_keyboard_ask_to_delete_all">刪除全部？</string>
+    <string name="ok">確定</string>
+    <string name="cancel">取消</string>
     <string name="clipboard_draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="about__licensing">許可</string>
     <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>

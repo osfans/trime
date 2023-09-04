@@ -23,6 +23,7 @@ import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
@@ -65,11 +66,11 @@ class PrefMainActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.toolbar.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.prefToolbar.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = navBars.left
                 rightMargin = navBars.right
             }
-            binding.toolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.prefToolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = statusBars.top
             }
             binding.navHostFragment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -80,19 +81,19 @@ class PrefMainActivity : AppCompatActivity() {
         }
 
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar.toolbar)
+        setSupportActionBar(binding.prefToolbar.toolbar)
         val appBarConfiguration = AppBarConfiguration(
             topLevelDestinationIds = setOf(),
             fallbackOnNavigateUpListener = ::onNavigateUpListener,
         )
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        binding.toolbar.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
+        binding.prefToolbar.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
         viewModel.toolbarTitle.observe(this) {
-            binding.toolbar.toolbar.title = it
+            binding.prefToolbar.toolbar.title = it
         }
         viewModel.topOptionsMenu.observe(this) {
-            binding.toolbar.toolbar.menu.forEach { m ->
+            binding.prefToolbar.toolbar.menu.forEach { m ->
                 m.isVisible = it
             }
         }
@@ -122,6 +123,12 @@ class PrefMainActivity : AppCompatActivity() {
                         Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
                     }
                     withContext(Dispatchers.Default) {
+                        // All functions that implement the DirectoryChangeListener.Listener
+                        //   interface are called here.
+                        // To refresh directory settings.
+                        DataDirectoryChangeListener.directoryChangeListeners.forEach {
+                            it.onDataDirectoryChange()
+                        }
                         Rime.deploy()
                     }
                     briefResultLogDialog("rime.trime", "W", 1)

@@ -6,7 +6,7 @@ import timber.log.Timber
 import java.util.EnumMap
 import kotlin.collections.HashMap
 
-@Suppress("ktlint:enum-entry-name-case")
+@Suppress("ktlint:standard:enum-entry-name-case")
 enum class Keycode {
     // 与原trime.yaml主题android_key/name小节相比，差异如下：
     // 1. 数字开头的keyName添加了下划线(在init阶段已经修复)，受到影响的按键有： 0-12，3D_MODE

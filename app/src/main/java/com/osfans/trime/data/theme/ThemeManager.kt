@@ -1,10 +1,16 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.DataManager
 import java.io.File
 
-object ThemeManager {
+object ThemeManager : DataDirectoryChangeListener.Listener {
+
+    init {
+        // register listener
+        DataDirectoryChangeListener.addDirectoryChangeListener(this)
+    }
 
     private fun listThemes(path: File): MutableList<String> {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
@@ -18,13 +24,20 @@ object ThemeManager {
         AppPrefs.defaultInstance().themeAndColor.selectedTheme = theme
     }
 
-    val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
+    var sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
 
-    val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
+    var userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
 
     private lateinit var currentThemeName: String
 
-    @JvmStatic
+    /**
+     * Update sharedThemes and userThemes.
+     */
+    override fun onDataDirectoryChange() {
+        sharedThemes = listThemes(DataManager.sharedDataDir)
+        userThemes = listThemes(DataManager.userDataDir)
+    }
+
     fun init() {
         currentThemeName = AppPrefs.defaultInstance().themeAndColor.selectedTheme
     }

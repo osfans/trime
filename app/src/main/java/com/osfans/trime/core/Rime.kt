@@ -106,7 +106,7 @@ class Rime(fullCheck: Boolean) {
   Android SDK包含了如下6个修饰键的状态，其中function键会被trime消费掉，因此只处理5个键
   Android和librime对按键命名并不一致。读取可能有误。librime按键命名见如下链接，
   https://github.com/rime/librime/blob/master/src/rime/key_table.cc
-   */
+         */
         @JvmField
         val META_SHIFT_ON = getRimeModifierByName("Shift")
 

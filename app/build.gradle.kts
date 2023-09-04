@@ -65,14 +65,14 @@ fun buildInfo(): String {
 android {
     namespace = "com.osfans.trime"
     compileSdk = 33
-    ndkVersion = "24.0.8215888"
+    ndkVersion = "25.2.9519653"
 
     defaultConfig {
         applicationId  = "com.osfans.trime"
         minSdk = 21
         targetSdk = 33
-        versionCode = 20230901
-        versionName = "3.2.14"
+        versionCode = 20231101
+        versionName = "3.2.15"
 
         multiDexEnabled = true
         setProperty("archivesBaseName", "trime-$versionName")

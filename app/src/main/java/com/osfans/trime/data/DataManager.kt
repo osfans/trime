@@ -6,20 +6,24 @@ import com.osfans.trime.util.Const
 import timber.log.Timber
 import java.io.File
 
-object DataManager {
+object DataManager : DataDirectoryChangeListener.Listener {
     private val prefs get() = AppPrefs.defaultInstance()
 
     val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
 
     @JvmStatic
-    val sharedDataDir = File(prefs.profile.sharedDataDir)
+    var sharedDataDir = File(prefs.profile.sharedDataDir)
 
     @JvmStatic
-    val userDataDir = File(prefs.profile.userDataDir)
+    var userDataDir = File(prefs.profile.userDataDir)
     val customDefault = File(sharedDataDir, "default.custom.yaml")
 
     private val stagingDir = File(userDataDir, "build")
     private val prebuiltDataDir = File(sharedDataDir, "build")
+
+    init {
+        DataDirectoryChangeListener.addDirectoryChangeListener(this)
+    }
 
     sealed class Diff {
         object New : Diff()
@@ -79,5 +83,13 @@ object DataManager {
         }
 
         Timber.i("Synced!")
+    }
+
+    /**
+     * Update sharedDataDir and userDataDir.
+     */
+    override fun onDataDirectoryChange() {
+        sharedDataDir = File(prefs.profile.sharedDataDir)
+        userDataDir = File(prefs.profile.userDataDir)
     }
 }

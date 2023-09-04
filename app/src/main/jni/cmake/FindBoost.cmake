@@ -33,6 +33,8 @@ set(BOOST_INSTALLED_LIBRARIES
   "concept_check"
   "config"
   "core"
+  "coroutine"
+  "describe"
   "exception"
   "function"
   "iterator"

@@ -6,6 +6,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.annotation.StringRes
+import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.blankj.utilcode.util.ToastUtils
@@ -20,7 +21,7 @@ import kotlinx.coroutines.withContext
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/e37f5513239bab279a9e58cf0c9b163e0dbf5efb/app/src/main/java/org/fcitx/fcitx5/android/ui/common/Preset.kt#L60
 @Suppress("FunctionName")
 fun Context.ProgressBarDialogIndeterminate(@StringRes titleId: Int): AlertDialog.Builder {
-    return AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+    return AlertDialog.Builder(this, Theme_AppCompat_DayNight_Dialog_Alert)
         .setTitle(titleId)
         .setView(
             LinearLayout(this).apply {

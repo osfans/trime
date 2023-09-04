@@ -38,39 +38,52 @@ public class Keyboard {
   private static final int GRID_WIDTH = 10;
   private static final int GRID_HEIGHT = 5;
   private static final int GRID_SIZE = GRID_WIDTH * GRID_HEIGHT;
+
   // private static final String TAG = Keyboard.class.getSimpleName();
   /** Number of key widths from current touch point to search for nearest keys. */
   public static float SEARCH_DISTANCE = 1.4f;
+
   /** 按鍵默認水平間距 */
   private int mDefaultHorizontalGap;
+
   /** 默認鍵寬 */
   private int mDefaultWidth;
+
   /** 默認鍵高 */
   private int mDefaultHeight;
+
   /** 默認行距 */
   private int mDefaultVerticalGap;
+
   /** 默認按鍵圓角半徑 */
   private float mRoundCorner;
+
   /** 鍵盤背景 */
   private Drawable mBackground;
+
   /** 鍵盤的Shift鍵是否按住 * */
   // private boolean mShifted;
   /** 鍵盤的Shift鍵 */
   private Key mShiftKey, mCtrlKey, mAltKey, mMetaKey, mSymKey;
+
   /** Total height of the keyboard, including the padding and keys */
   private int mTotalHeight;
+
   /**
    * Total width of the keyboard, including left side gaps and keys, but not any gaps on the right
    * side.
    */
   private int mTotalWidth;
+
   /** List of keys in this keyboard */
   private final List<Key> mKeys;
 
   private final List<Key> mComposingKeys;
   private int mModifierState;
+
   /** Width of the screen available to fit the keyboard */
   private int mDisplayWidth;
+
   /** Keyboard mode, or zero, if none. */
   private int mAsciiMode;
 

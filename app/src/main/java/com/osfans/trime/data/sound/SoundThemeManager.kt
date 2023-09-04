@@ -3,13 +3,26 @@ package com.osfans.trime.data.sound
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.DataManager
 import timber.log.Timber
 import java.io.File
 
-object SoundThemeManager {
+object SoundThemeManager : DataDirectoryChangeListener.Listener {
 
-    val userDir = File(DataManager.userDataDir, "sound")
+    var userDir = File(DataManager.userDataDir, "sound")
+
+    init {
+        // register listener
+        DataDirectoryChangeListener.addDirectoryChangeListener(this)
+    }
+
+    /**
+     * Update userDir.
+     */
+    override fun onDataDirectoryChange() {
+        userDir = File(DataManager.userDataDir, "sound")
+    }
 
     private val yaml = Yaml(
         configuration = YamlConfiguration(

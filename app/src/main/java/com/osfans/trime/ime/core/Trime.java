@@ -20,7 +20,10 @@ package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.RectF;
@@ -327,6 +330,24 @@ public class Trime extends LifecycleInputMethodService {
     return true;
   }
 
+  public void restartSystemStartTimingSync() { // 防止重启系统 强行停止应用时alarm任务丢失
+    if (getPrefs().getProfile().getTimingSyncEnabled()) {
+      long triggerTime = getPrefs().getProfile().getTimingSyncTriggerTime();
+      AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+      PendingIntent pendingIntent =
+          PendingIntent.getBroadcast( // 设置待发送的同步事件
+              this,
+              0,
+              new Intent("com.osfans.trime.timing.sync"),
+              PendingIntent.FLAG_UPDATE_CURRENT);
+      if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+      } else {
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+      }
+    }
+  }
+
   @Override
   public void onCreate() {
     // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
@@ -339,6 +360,7 @@ public class Trime extends LifecycleInputMethodService {
         activeEditorInstance = new EditorInstance(this);
         inputFeedbackManager = new InputFeedbackManager(this);
         liquidKeyboard = new LiquidKeyboard(this);
+        restartSystemStartTimingSync();
       } catch (Exception e) {
         e.printStackTrace();
         super.onCreate();
@@ -396,6 +418,8 @@ public class Trime extends LifecycleInputMethodService {
       }
     } else {
       symbolKeyboardType = SymbolKeyboardType.NO_KEY;
+      // 设置液体键盘处于隐藏状态
+      TabManager.get().setTabExited();
       symbolInput.setVisibility(View.GONE);
     }
     updateComposing();
@@ -580,9 +604,13 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private void handleReturnKey() {
-    if (editorInfo == null) sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+    if (editorInfo == null) {
+      sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+      return;
+    }
     if ((editorInfo.inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_NULL) {
       sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
+      return;
     }
     if (BitFlagsKt.hasFlag(editorInfo.imeOptions, EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
       final InputConnection ic = getCurrentInputConnection();
@@ -1169,7 +1197,7 @@ public class Trime extends LifecycleInputMethodService {
           mComposition.setWindow();
           showCompositionView(false);
         } else {
-          mComposition.getRootView().setVisibility(View.VISIBLE);
+          mComposition.setVisibility(View.VISIBLE);
           startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize, Integer.MAX_VALUE);
           mCandidate.setText(startNum);
           // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
