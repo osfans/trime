@@ -72,7 +72,11 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                     context,
                     0,
                     Intent("com.osfans.trime.timing.sync"),
-                    PendingIntent.FLAG_UPDATE_CURRENT,
+                    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    } else {
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    },
                 )
                 if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
                     alarmManager.setExactAndAllowWhileIdle(

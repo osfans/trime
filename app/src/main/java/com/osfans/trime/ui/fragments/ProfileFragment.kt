@@ -114,7 +114,11 @@ class ProfileFragment :
                     context,
                     0,
                     Intent("com.osfans.trime.timing.sync"),
-                    PendingIntent.FLAG_UPDATE_CURRENT,
+                    if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    } else {
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    },
                 )
                 val cal = Calendar.getInstance()
                 if (get<SwitchPreferenceCompat>("profile_timing_sync")?.isChecked == true) { // 当定时同步偏好打开时

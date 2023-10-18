@@ -339,7 +339,9 @@ public class Trime extends LifecycleInputMethodService {
               this,
               0,
               new Intent("com.osfans.trime.timing.sync"),
-              PendingIntent.FLAG_UPDATE_CURRENT);
+              VERSION.SDK_INT >= VERSION_CODES.M
+                  ? (PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
+                  : PendingIntent.FLAG_UPDATE_CURRENT);
       if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
       } else {
