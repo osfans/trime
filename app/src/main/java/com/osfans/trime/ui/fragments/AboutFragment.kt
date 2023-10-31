@@ -23,16 +23,20 @@ import splitties.systemservices.clipboardManager
 class AboutFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
         setPreferencesFromResource(R.xml.about_preference, rootKey)
         with(preferenceScreen) {
             get<Preference>("about__changelog")?.apply {
                 summary = Const.displayVersionName
                 isCopyingEnabled = true
-                intent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("${Const.currentGitRepo}/commits/${Const.buildGitHash}"),
-                )
+                intent =
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("${Const.currentGitRepo}/commits/${Const.buildGitHash}"),
+                    )
             }
             get<Preference>("about__buildinfo")?.apply {
                 summary = BuildConfig.BUILD_INFO

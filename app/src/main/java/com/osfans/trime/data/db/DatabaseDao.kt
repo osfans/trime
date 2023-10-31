@@ -15,10 +15,16 @@ interface DatabaseDao {
     suspend fun update(bean: DatabaseBean)
 
     @Query("UPDATE ${DatabaseBean.TABLE_NAME} SET text=:newText WHERE id=:id")
-    suspend fun updateText(id: Int, newText: String)
+    suspend fun updateText(
+        id: Int,
+        newText: String,
+    )
 
     @Query("UPDATE ${DatabaseBean.TABLE_NAME} SET pinned=:pinned WHERE id=:id")
-    suspend fun updatePinned(id: Int, pinned: Boolean)
+    suspend fun updatePinned(
+        id: Int,
+        pinned: Boolean,
+    )
 
     @Delete
     suspend fun delete(bean: DatabaseBean)

@@ -39,17 +39,17 @@ inline fun <T : Any, U> Result<T?>.bindOnNotNull(block: (T) -> Result<U>): Resul
     }
 }
 
-suspend fun <T> Result<T>.toast() = withContext(Dispatchers.Main.immediate) {
-    onSuccess {
-        ToastUtils.showShort(R.string.setup__done)
+suspend fun <T> Result<T>.toast() =
+    withContext(Dispatchers.Main.immediate) {
+        onSuccess {
+            ToastUtils.showShort(R.string.setup__done)
+        }
+        onFailure {
+            ToastUtils.showShort(it.message)
+        }
     }
-    onFailure {
-        ToastUtils.showShort(it.message)
-    }
-}
 
-fun formatDateTime(timeMillis: Long? = null): String =
-    SimpleDateFormat.getDateTimeInstance().format(timeMillis?.let { Date(it) } ?: Date())
+fun formatDateTime(timeMillis: Long? = null): String = SimpleDateFormat.getDateTimeInstance().format(timeMillis?.let { Date(it) } ?: Date())
 
 private val iso8601DateFormat by lazy {
     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
@@ -57,8 +57,7 @@ private val iso8601DateFormat by lazy {
     }
 }
 
-fun iso8601UTCDateTime(timeMillis: Long? = null): String =
-    iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())
+fun iso8601UTCDateTime(timeMillis: Long? = null): String = iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun CharSequence.startsWithAsciiChar(): Boolean {
@@ -100,11 +99,12 @@ inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
 fun Preference.thirdPartySummary(versionCode: String) {
     summary = versionCode
     intent?.let {
-        val commitHash = if (versionCode.contains("-g")) {
-            versionCode.replace("^(.*-g)([0-9a-f]+)(.*)$".toRegex(), "$2")
-        } else {
-            versionCode.replace("^([^-]*)(-.*)$".toRegex(), "$1")
-        }
+        val commitHash =
+            if (versionCode.contains("-g")) {
+                versionCode.replace("^(.*-g)([0-9a-f]+)(.*)$".toRegex(), "$2")
+            } else {
+                versionCode.replace("^([^-]*)(-.*)$".toRegex(), "$1")
+            }
         it.data = Uri.withAppendedPath(it.data, "commits/$commitHash")
     }
 }

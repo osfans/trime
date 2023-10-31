@@ -83,38 +83,47 @@ class DialogSeekBarPreference : Preference {
     /**
      * Shows the seek bar dialog.
      */
-    private fun showSeekBarDialog() = with(context) {
-        val initValue = currentValue
-        val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(this))
-        dialogView.textView.text = getTextForValue(initValue)
-        dialogView.seekBar.apply {
-            max = getProgressForValue(this@DialogSeekBarPreference.max)
-            progress = getProgressForValue(initValue)
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    dialogView.textView.text = getTextForValue(getValueForProgress(progress))
+    private fun showSeekBarDialog() =
+        with(context) {
+            val initValue = currentValue
+            val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(this))
+            dialogView.textView.text = getTextForValue(initValue)
+            dialogView.seekBar.apply {
+                max = getProgressForValue(this@DialogSeekBarPreference.max)
+                progress = getProgressForValue(initValue)
+                setOnSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
+                        override fun onProgressChanged(
+                            seekBar: SeekBar?,
+                            progress: Int,
+                            fromUser: Boolean,
+                        ) {
+                            dialogView.textView.text = getTextForValue(getValueForProgress(progress))
+                        }
+
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                    },
+                )
+            }
+            AlertDialog.Builder(this)
+                .setTitle(this@DialogSeekBarPreference.title)
+                .setView(dialogView.root)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    val actualValue = getValueForProgress(dialogView.seekBar.progress)
+                    if (callChangeListener(actualValue)) {
+                        persistInt(actualValue)
+                        notifyChanged()
+                    }
                 }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-        }
-        AlertDialog.Builder(this)
-            .setTitle(this@DialogSeekBarPreference.title)
-            .setView(dialogView.root)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val actualValue = getValueForProgress(dialogView.seekBar.progress)
-                if (callChangeListener(actualValue)) {
-                    persistInt(actualValue)
+                .setNeutralButton(R.string.pref__default) { _, _ ->
+                    persistInt(defaultValue)
                     notifyChanged()
                 }
-            }
-            .setNeutralButton(R.string.pref__default) { _, _ ->
-                persistInt(defaultValue)
-                notifyChanged()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
 
     /**
      * Converts the actual value to a progress value which the Android SeekBar implementation can

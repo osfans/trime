@@ -4,7 +4,6 @@ package com.osfans.trime.data
  * Do something when data directory change.
  */
 object DataDirectoryChangeListener {
-
     // listener list
     val directoryChangeListeners = mutableListOf<DataDirectoryChangeListener.Listener>()
 

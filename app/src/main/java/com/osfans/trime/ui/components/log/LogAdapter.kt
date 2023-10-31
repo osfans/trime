@@ -18,7 +18,6 @@ import splitties.dimensions.dp
  */
 class LogAdapter(private val entries: MutableList<CharSequence> = mutableListOf()) :
     RecyclerView.Adapter<LogAdapter.ViewHolder>() {
-
     inner class ViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
 
     fun append(line: CharSequence) {
@@ -37,7 +36,10 @@ class LogAdapter(private val entries: MutableList<CharSequence> = mutableListOf(
 
     override fun getItemCount() = entries.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         return ViewHolder(
             TextView(parent.context).apply {
                 textSize = 12f
@@ -45,15 +47,19 @@ class LogAdapter(private val entries: MutableList<CharSequence> = mutableListOf(
                 if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
                     setTextClassifier(TextClassifier.NO_OP)
                 }
-                layoutParams = MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT).apply {
-                    marginStart = dp(4)
-                    marginEnd = dp(4)
-                }
+                layoutParams =
+                    MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT).apply {
+                        marginStart = dp(4)
+                        marginEnd = dp(4)
+                    }
             },
         )
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         holder.textView.text = entries[position]
     }
 }

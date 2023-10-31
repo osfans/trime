@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
  * Source: [fcitx5-android/LogActivity](https://github.com/fcitx5-android/fcitx5-android/blob/24457e13b7c3f9f59a6f220db7caad3d02f27651/app/src/main/java/org/fcitx/fcitx5/android/ui/main/LogActivity.kt)
  */
 class LogActivity : AppCompatActivity() {
-
     private lateinit var launcher: ActivityResultLauncher<String>
     private lateinit var logView: LogView
 
@@ -41,18 +40,19 @@ class LogActivity : AppCompatActivity() {
     }
 
     private fun registerLauncher() {
-        launcher = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-            lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                uri?.runCatching {
-                    contentResolver.openOutputStream(this)?.use { os ->
-                        os.bufferedWriter().use {
-                            it.write(DeviceInfo.get(this@LogActivity))
-                            it.write(logView.currentLog)
+        launcher =
+            registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+                lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
+                    uri?.runCatching {
+                        contentResolver.openOutputStream(this)?.use { os ->
+                            os.bufferedWriter().use {
+                                it.write(DeviceInfo.get(this@LogActivity))
+                                it.write(logView.currentLog)
+                            }
                         }
-                    }
-                }?.toast()
+                    }?.toast()
+                }
             }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -52,12 +52,13 @@ class PrefMainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val uiMode = when (prefs.other.uiMode) {
-            "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            "light" -> AppCompatDelegate.MODE_NIGHT_NO
-            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
-        }
+        val uiMode =
+            when (prefs.other.uiMode) {
+                "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                "light" -> AppCompatDelegate.MODE_NIGHT_NO
+                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
+            }
         AppCompatDelegate.setDefaultNightMode(uiMode)
 
         super.onCreate(savedInstanceState)
@@ -82,10 +83,11 @@ class PrefMainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         setSupportActionBar(binding.prefToolbar.toolbar)
-        val appBarConfiguration = AppBarConfiguration(
-            topLevelDestinationIds = setOf(),
-            fallbackOnNavigateUpListener = ::onNavigateUpListener,
-        )
+        val appBarConfiguration =
+            AppBarConfiguration(
+                topLevelDestinationIds = setOf(),
+                fallbackOnNavigateUpListener = ::onNavigateUpListener,
+            )
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         binding.prefToolbar.toolbar.setupWithNavController(navHostFragment.navController, appBarConfiguration)
@@ -151,25 +153,33 @@ class PrefMainActivity : AppCompatActivity() {
     private fun requestExternalStoragePermission() {
         XXPermissions.with(this)
             .permission(Permission.MANAGE_EXTERNAL_STORAGE)
-            .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: List<String>, all: Boolean) {
-                    if (all) {
-                        ToastUtils.showShort(R.string.external_storage_permission_granted)
-                        SoundThemeManager.init()
+            .request(
+                object : OnPermissionCallback {
+                    override fun onGranted(
+                        permissions: List<String>,
+                        all: Boolean,
+                    ) {
+                        if (all) {
+                            ToastUtils.showShort(R.string.external_storage_permission_granted)
+                            SoundThemeManager.init()
+                        }
                     }
-                }
 
-                override fun onDenied(permissions: List<String>, never: Boolean) {
-                    if (never) {
-                        ToastUtils.showShort(R.string.external_storage_permission_denied)
-                        XXPermissions.startPermissionActivity(
-                            this@PrefMainActivity,
-                            permissions,
-                        )
-                    } else {
-                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                    override fun onDenied(
+                        permissions: List<String>,
+                        never: Boolean,
+                    ) {
+                        if (never) {
+                            ToastUtils.showShort(R.string.external_storage_permission_denied)
+                            XXPermissions.startPermissionActivity(
+                                this@PrefMainActivity,
+                                permissions,
+                            )
+                        } else {
+                            ToastUtils.showShort(R.string.external_storage_permission_denied)
+                        }
                     }
-                }
-            })
+                },
+            )
     }
 }

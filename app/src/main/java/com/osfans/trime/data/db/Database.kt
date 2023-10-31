@@ -12,32 +12,33 @@ abstract class Database : RoomDatabase() {
     abstract fun databaseDao(): DatabaseDao
 
     companion object {
-        val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                if (database.needUpgrade(4)) {
-                    database.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
-                    database.execSQL("ALTER TABLE _t_data ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
-                    database.execSQL(
-                        """
-                        CREATE TABLE IF NOT EXISTS ${DatabaseBean.TABLE_NAME} (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                            text TEXT,
-                            html TEXT,
-                            type INTEGER NOT NULL,
-                            time INTEGER NOT NULL,
-                            pinned INTEGER NOT NULL
+        val MIGRATION_3_4 =
+            object : Migration(3, 4) {
+                override fun migrate(database: SupportSQLiteDatabase) {
+                    if (database.needUpgrade(4)) {
+                        database.execSQL("ALTER TABLE ${DatabaseBean.TABLE_NAME} RENAME TO _t_data")
+                        database.execSQL("ALTER TABLE _t_data ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0")
+                        database.execSQL(
+                            """
+                            CREATE TABLE IF NOT EXISTS ${DatabaseBean.TABLE_NAME} (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                                text TEXT,
+                                html TEXT,
+                                type INTEGER NOT NULL,
+                                time INTEGER NOT NULL,
+                                pinned INTEGER NOT NULL
+                            )
+                            """.trimIndent(),
                         )
-                        """.trimIndent(),
-                    )
-                    database.execSQL(
-                        """
-                        INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time, pinned)
-                        SELECT id, text, html, type, time, pinned FROM _t_data
-                        """.trimIndent(),
-                    )
-                    database.execSQL("DROP TABLE _t_data")
+                        database.execSQL(
+                            """
+                            INSERT INTO ${DatabaseBean.TABLE_NAME} (id, text, html, type, time, pinned)
+                            SELECT id, text, html, type, time, pinned FROM _t_data
+                            """.trimIndent(),
+                        )
+                        database.execSQL("DROP TABLE _t_data")
+                    }
                 }
             }
-        }
     }
 }

@@ -13,7 +13,10 @@ object GraphicUtils {
     private val hanBFont = FontManager.getTypeface(theme.style.getString(HAN_B_FONT))
     private val latinFont = FontManager.getTypeface(theme.style.getString(LATIN_FONT))
 
-    private fun determineTypeface(codePoint: Int, font: Typeface): Typeface {
+    private fun determineTypeface(
+        codePoint: Int,
+        font: Typeface,
+    ): Typeface {
         return if (hanBFont != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codePoint)) {
             hanBFont
         } else if (latinFont != Typeface.DEFAULT && codePoint < 0x2E80) {
@@ -24,7 +27,10 @@ object GraphicUtils {
     }
 
     @JvmStatic
-    fun Paint.measureText(text: String, font: Typeface): Float {
+    fun Paint.measureText(
+        text: String,
+        font: Typeface,
+    ): Float {
         if (text.isEmpty()) return 0.0f
         val codePoints = text.codePointCount(0, text.length)
         var x = 0.0f
@@ -48,7 +54,13 @@ object GraphicUtils {
     }
 
     @JvmStatic
-    fun Canvas.drawText(text: String, centerX: Float, y: Float, paint: Paint, font: Typeface) {
+    fun Canvas.drawText(
+        text: String,
+        centerX: Float,
+        y: Float,
+        paint: Paint,
+        font: Typeface,
+    ) {
         if (text.isEmpty()) return
         val codePoints = text.codePointCount(0, text.length)
         var x = centerX - paint.measureText(text, font) / 2

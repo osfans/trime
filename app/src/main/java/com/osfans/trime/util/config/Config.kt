@@ -7,7 +7,6 @@ import timber.log.Timber
  * New YAML config parser intended to replace the old one.
  */
 class Config(private val data: ConfigData = ConfigData()) {
-
     companion object {
         fun create(fileName: String): Config? {
             val data = ConfigData()
@@ -41,25 +40,37 @@ class Config(private val data: ConfigData = ConfigData()) {
         return p == null || p.type == ConfigItem.ValueType.Map
     }
 
-    fun getBool(path: String, defValue: Boolean = false): Boolean {
+    fun getBool(
+        path: String,
+        defValue: Boolean = false,
+    ): Boolean {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
         return p?.getBool() ?: defValue
     }
 
-    fun getInt(path: String, defValue: Int = 0): Int {
+    fun getInt(
+        path: String,
+        defValue: Int = 0,
+    ): Int {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
         return p?.getInt() ?: defValue
     }
 
-    fun getFloat(path: String, defValue: Float = 0f): Float {
+    fun getFloat(
+        path: String,
+        defValue: Float = 0f,
+    ): Float {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
         return p?.getFloat() ?: defValue
     }
 
-    fun getString(path: String, defValue: String = ""): String {
+    fun getString(
+        path: String,
+        defValue: String = "",
+    ): String {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
         return p?.getString() ?: defValue

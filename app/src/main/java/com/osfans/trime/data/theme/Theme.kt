@@ -71,7 +71,7 @@ class Theme {
             return self as Theme
         }
 
-        private const val defaultThemeName = "trime"
+        private val defaultThemeName = "trime"
     }
 
     init {
@@ -168,7 +168,10 @@ class Theme {
             return if (o is Int) o else null
         }
 
-        fun getColor(m: Map<String?, Any?>, key: String?): Int? {
+        fun getColor(
+            m: Map<String?, Any?>,
+            key: String?,
+        ): Int? {
             if (m[key] == null) return null
             return ColorUtils.parseColor(m[key] as String?) ?: getColor(m[key] as String?)
         }
@@ -186,7 +189,10 @@ class Theme {
         }
 
         // API 2.0
-        fun getDrawable(m: Map<String?, Any?>, key: String): Drawable? {
+        fun getDrawable(
+            m: Map<String?, Any?>,
+            key: String,
+        ): Drawable? {
             m[key] ?: return null
             val value = m[key] as String?
             val override = ColorUtils.parseColor(value)
@@ -241,33 +247,35 @@ class Theme {
         }
 
         fun remapKeyboardId(name: String): String {
-            val remapped = if (".default" == name) {
-                val currentSchemaId = Rime.getCurrentRimeSchema()
-                val shortSchemaId = currentSchemaId.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-                if (theme.presetKeyboards!!.containsKey(shortSchemaId)) {
-                    return shortSchemaId
-                } else {
-                    val alphabet = SchemaManager.getActiveSchema().alphabet
-                    val twentySix = "qwerty"
-                    if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
-                        return alphabet
+            val remapped =
+                if (".default" == name) {
+                    val currentSchemaId = Rime.getCurrentRimeSchema()
+                    val shortSchemaId = currentSchemaId.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+                    if (theme.presetKeyboards!!.containsKey(shortSchemaId)) {
+                        return shortSchemaId
                     } else {
-                        if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
-                            twentySix + "_"
-                        } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
-                            twentySix + "0"
+                        val alphabet = SchemaManager.getActiveSchema().alphabet
+                        val twentySix = "qwerty"
+                        if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
+                            return alphabet
                         } else {
-                            twentySix
+                            if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
+                                twentySix + "_"
+                            } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
+                                twentySix + "0"
+                            } else {
+                                twentySix
+                            }
                         }
                     }
+                } else {
+                    name
                 }
-            } else {
-                name
-            }
             if (!theme.presetKeyboards!!.containsKey(remapped)) {
                 Timber.w("Cannot find keyboard definition %s, fallback ...", remapped)
-                val defaultMap = theme.presetKeyboards!!["default"] as Map<String, Any>?
-                    ?: throw IllegalStateException("The default keyboard definition is missing!")
+                val defaultMap =
+                    theme.presetKeyboards!!["default"] as Map<String, Any>?
+                        ?: throw IllegalStateException("The default keyboard definition is missing!")
                 if (defaultMap.containsKey("import_preset")) {
                     return defaultMap["import_preset"] as? String ?: "default"
                 }
@@ -289,7 +297,11 @@ class Theme {
     }
 
     private var oneHandMode = 0
-    fun getKeyboardPadding(oneHandMode1: Int, landMode: Boolean): IntArray {
+
+    fun getKeyboardPadding(
+        oneHandMode1: Int,
+        landMode: Boolean,
+    ): IntArray {
         keyboardPadding = IntArray(3)
         this.oneHandMode = oneHandMode1
         if (landMode) {

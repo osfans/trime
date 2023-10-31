@@ -4,7 +4,6 @@ import com.osfans.trime.data.opencc.OpenCCDictManager
 import java.io.File
 
 class OpenCCDictionary(file: File) : Dictionary() {
-
     override var file: File = file
         private set
 
@@ -14,23 +13,25 @@ class OpenCCDictionary(file: File) : Dictionary() {
     override val type: Type = Type.OPENCC
 
     override val name: String
-        get() = if (isOCD2) {
-            super.name
-        } else {
-            file.name.substringBefore("")
-        }
+        get() =
+            if (isOCD2) {
+                super.name
+            } else {
+                file.name.substringBefore("")
+            }
 
     init {
         ensureFileExists()
-        isOCD2 = when {
-            file.extension == type.ext -> {
-                true
+        isOCD2 =
+            when {
+                file.extension == type.ext -> {
+                    true
+                }
+                file.name.endsWith(".$OLD_FORMAT") -> {
+                    false
+                }
+                else -> throw IllegalArgumentException("Not a libime dict ${file.name}")
             }
-            file.name.endsWith(".$OLD_FORMAT") -> {
-                false
-            }
-            else -> throw IllegalArgumentException("Not a libime dict ${file.name}")
-        }
     }
 
     fun useOCD2() {

@@ -1,7 +1,6 @@
 package com.osfans.trime.core
 
 sealed class RimeNotification {
-
     abstract val messageType: MessageType
 
     data class SchemaNotification(val messageValue: String) :
@@ -51,12 +50,14 @@ sealed class RimeNotification {
 
     companion object RimeNotificationHandler {
         @JvmStatic
-        fun create(type: String, value: String) =
-            when (type) {
-                "schema" -> SchemaNotification(value)
-                "option" -> OptionNotification(value)
-                "deploy" -> DeployNotification(value)
-                else -> UnknownNotification(value)
-            }
+        fun create(
+            type: String,
+            value: String,
+        ) = when (type) {
+            "schema" -> SchemaNotification(value)
+            "option" -> OptionNotification(value)
+            "deploy" -> DeployNotification(value)
+            else -> UnknownNotification(value)
+        }
     }
 }

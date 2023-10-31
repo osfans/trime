@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MainViewModel : ViewModel() {
-
     val toolbarTitle = MutableLiveData<String>()
 
     val topOptionsMenu = MutableLiveData<Boolean>()

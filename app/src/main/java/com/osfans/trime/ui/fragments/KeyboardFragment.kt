@@ -21,7 +21,11 @@ class KeyboardFragment :
     PaddingPreferenceFragment(),
     SharedPreferences.OnSharedPreferenceChangeListener {
     private val viewModel: MainViewModel by activityViewModels()
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
         addPreferencesFromResource(R.xml.keyboard_preference)
         findPreference<Preference>("keyboard__key_sound_package")
             ?.setOnPreferenceClickListener {
@@ -30,7 +34,10 @@ class KeyboardFragment :
             }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+    override fun onSharedPreferenceChanged(
+        sharedPreferences: SharedPreferences?,
+        key: String?,
+    ) {
         val trime = Trime.getServiceOrNull()
         when (key) {
             "keyboard__key_long_press_timeout",

@@ -6,7 +6,6 @@ import com.osfans.trime.data.DataManager
 import java.io.File
 
 object ThemeManager : DataDirectoryChangeListener.Listener {
-
     init {
         // register listener
         DataDirectoryChangeListener.addDirectoryChangeListener(this)

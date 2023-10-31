@@ -19,7 +19,11 @@ package com.osfans.trime.ime.enums
 
 /** 嵌入模式枚举  */
 enum class InlineModeType {
-    INLINE_NONE, INLINE_PREVIEW, INLINE_COMPOSITION, INLINE_INPUT;
+    INLINE_NONE,
+    INLINE_PREVIEW,
+    INLINE_COMPOSITION,
+    INLINE_INPUT,
+    ;
 
     companion object {
         fun fromString(string: String): InlineModeType {

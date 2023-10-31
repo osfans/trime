@@ -30,9 +30,10 @@ suspend fun Context.themePicker(
         title = getString(R.string.looks__selected_theme_title)
         initDispatcher = Dispatchers.IO
         onInit {
-            items = ThemeManager.getAllThemes()
-                .map { it.substringBeforeLast('.') }
-                .toTypedArray()
+            items =
+                ThemeManager.getAllThemes()
+                    .map { it.substringBeforeLast('.') }
+                    .toTypedArray()
             val current = ThemeManager.getActiveTheme().substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
@@ -98,10 +99,11 @@ fun Context.schemaPicker(
                         .toTypedArray(),
                 )
                 val loading = ProgressBarDialogIndeterminate(titleId = R.string.deploy_progress).create()
-                val job = launch {
-                    delay(200L)
-                    loading.show()
-                }
+                val job =
+                    launch {
+                        delay(200L)
+                        loading.show()
+                    }
                 withContext(Dispatchers.Default) {
                     Rime.deploy()
                     job.cancelAndJoin()

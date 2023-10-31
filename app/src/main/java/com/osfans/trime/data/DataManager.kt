@@ -27,7 +27,9 @@ object DataManager : DataDirectoryChangeListener.Listener {
 
     sealed class Diff {
         object New : Diff()
+
         object Update : Diff()
+
         object Keep : Diff()
     }
 
@@ -48,7 +50,10 @@ object DataManager : DataDirectoryChangeListener.Listener {
         return defaultPath.absolutePath
     }
 
-    private fun diff(old: String, new: String): Diff {
+    private fun diff(
+        old: String,
+        new: String,
+    ): Diff {
         return when {
             old.isBlank() -> Diff.New
             !new.contentEquals(old) -> Diff.Update
@@ -64,14 +69,16 @@ object DataManager : DataDirectoryChangeListener.Listener {
         diff(oldHash, newHash).run {
             Timber.d("Diff: $this")
             when (this) {
-                is Diff.New -> ResourceUtils.copyFileFromAssets(
-                    "rime",
-                    sharedDataDir.absolutePath,
-                )
-                is Diff.Update -> ResourceUtils.copyFileFromAssets(
-                    "rime",
-                    sharedDataDir.absolutePath,
-                )
+                is Diff.New ->
+                    ResourceUtils.copyFileFromAssets(
+                        "rime",
+                        sharedDataDir.absolutePath,
+                    )
+                is Diff.Update ->
+                    ResourceUtils.copyFileFromAssets(
+                        "rime",
+                        sharedDataDir.absolutePath,
+                    )
                 is Diff.Keep -> {}
             }
         }

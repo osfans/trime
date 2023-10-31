@@ -11,6 +11,7 @@ enum class LandscapeInputUIMode {
 
     companion object {
         private val convertMap: HashMap<String, LandscapeInputUIMode> = hashMapOf()
+
         fun fromString(mode: String): LandscapeInputUIMode {
             val type = convertMap[mode.uppercase(Locale.getDefault())]
             return type ?: AUTO_SHOW

@@ -35,16 +35,17 @@ class FlexibleAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateBeans(beans: List<DatabaseBean>) {
-        val sorted = beans.sortedWith { b1, b2 ->
-            when {
-                // 如果 b1 置顶而 b2 没置顶，则 b1 比 b2 小，排前面
-                b1.pinned && !b2.pinned -> -1
-                // 如果 b1 没置顶而 b2 置顶，则 b1 比 b2 大，排后面
-                !b1.pinned && b2.pinned -> 1
-                // 如果都置顶了或都没置顶，则比较 id，id 大的排前面
-                else -> b2.id.compareTo(b1.id)
+        val sorted =
+            beans.sortedWith { b1, b2 ->
+                when {
+                    // 如果 b1 置顶而 b2 没置顶，则 b1 比 b2 小，排前面
+                    b1.pinned && !b2.pinned -> -1
+                    // 如果 b1 没置顶而 b2 置顶，则 b1 比 b2 大，排后面
+                    !b1.pinned && b2.pinned -> 1
+                    // 如果都置顶了或都没置顶，则比较 id，id 大的排前面
+                    else -> b2.id.compareTo(b1.id)
+                }
             }
-        }
         mBeans.clear()
         mBeans.addAll(sorted)
         mBeansId.clear()
@@ -57,7 +58,10 @@ class FlexibleAdapter(
 
     override fun getItemCount(): Int = mBeans.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val binding = SimpleKeyItemBinding.inflate(LayoutInflater.from(parent.context))
         return ViewHolder(binding)
     }
@@ -67,7 +71,10 @@ class FlexibleAdapter(
         val simpleKeyPin = binding.simpleKeyPin
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: ViewHolder,
+        position: Int,
+    ) {
         with(viewHolder) {
             val bean = mBeans[position]
             simpleKeyText.apply {
@@ -80,22 +87,24 @@ class FlexibleAdapter(
 
                 val longTextSize = theme.style.getFloat("key_long_text_size")
                 val labelTextSize = theme.style.getFloat("label_text_size")
-                textSize = when {
-                    longTextSize > 0 -> longTextSize
-                    labelTextSize > 0 -> labelTextSize
-                    else -> textSize
-                }
+                textSize =
+                    when {
+                        longTextSize > 0 -> longTextSize
+                        labelTextSize > 0 -> labelTextSize
+                        else -> textSize
+                    }
             }
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
 
             // if (background != null) viewHolder.itemView.setBackground(background);
-            (itemView as CardView).background = theme.colors.getDrawable(
-                "long_text_back_color",
-                "key_border",
-                "key_long_text_border",
-                "round_corner",
-                null,
-            )
+            (itemView as CardView).background =
+                theme.colors.getDrawable(
+                    "long_text_back_color",
+                    "key_border",
+                    "key_long_text_border",
+                    "round_corner",
+                    null,
+                )
 
             // 如果设置了回调，则设置点击事件
             if (this@FlexibleAdapter::listener.isInitialized) {
@@ -189,7 +198,10 @@ class FlexibleAdapter(
         notifyItemRemoved(position)
     }
 
-    private fun setPinStatus(id: Int, pinned: Boolean) {
+    private fun setPinStatus(
+        id: Int,
+        pinned: Boolean,
+    ) {
         val position = mBeansId.getValue(id)
         mBeans[position] = mBeans[position].copy(pinned = pinned)
         // 置顶会改变条目的排列顺序
@@ -198,24 +210,28 @@ class FlexibleAdapter(
 
     private fun askToDeleteAll() {
         val service = Trime.getService()
-        val askDialog = AlertDialog.Builder(
-            appContext,
-            androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert,
-        ).setTitle(R.string.liquid_keyboard_ask_to_delete_all)
-            .setPositiveButton(R.string.ok) { dialog, which ->
-                service.lifecycleScope.launch {
-                    listener.onDeleteAll()
-                }
-            }.setNegativeButton(R.string.cancel) { dialog, which ->
-            }.create()
+        val askDialog =
+            AlertDialog.Builder(
+                appContext,
+                androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert,
+            ).setTitle(R.string.liquid_keyboard_ask_to_delete_all)
+                .setPositiveButton(R.string.ok) { dialog, which ->
+                    service.lifecycleScope.launch {
+                        listener.onDeleteAll()
+                    }
+                }.setNegativeButton(R.string.cancel) { dialog, which ->
+                }.create()
         service.showDialogAboveInputView(askDialog)
     }
 
     // 添加回调
     interface Listener {
         fun onPaste(bean: DatabaseBean)
+
         suspend fun onPin(bean: DatabaseBean)
+
         suspend fun onUnpin(bean: DatabaseBean)
+
         suspend fun onDelete(bean: DatabaseBean)
 
         suspend fun onEdit(bean: DatabaseBean)

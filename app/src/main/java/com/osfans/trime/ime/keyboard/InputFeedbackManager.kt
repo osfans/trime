@@ -42,13 +42,14 @@ class InputFeedbackManager(
 
     fun resumeSoundPool() {
         SoundThemeManager.getActiveSoundFilePaths().onSuccess { path ->
-            soundPool = SoundPool.Builder()
-                .setMaxStreams(1)
-                .setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setLegacyStreamType(AudioManager.STREAM_SYSTEM)
-                        .build(),
-                ).build()
+            soundPool =
+                SoundPool.Builder()
+                    .setMaxStreams(1)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setLegacyStreamType(AudioManager.STREAM_SYSTEM)
+                            .build(),
+                    ).build()
             soundIds.clear()
             soundIds.addAll(path.map { soundPool!!.load(it, 1) })
         }
@@ -69,19 +70,20 @@ class InputFeedbackManager(
             val vibrationDuration = prefs.keyboard.vibrationDuration.toLong()
             var vibrationAmplitude = prefs.keyboard.vibrationAmplitude
 
-            val hapticsPerformed = if (vibrationDuration < 0) {
-                ims.window?.window?.decorView?.performHapticFeedback(
-                    HapticFeedbackConstants.KEYBOARD_TAP,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                    } else {
-                        @Suppress("DEPRECATION")
-                        HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                    },
-                )
-            } else {
-                false
-            }
+            val hapticsPerformed =
+                if (vibrationDuration < 0) {
+                    ims.window?.window?.decorView?.performHapticFeedback(
+                        HapticFeedbackConstants.KEYBOARD_TAP,
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                        } else {
+                            @Suppress("DEPRECATION")
+                            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING or HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                        },
+                    )
+                } else {
+                    false
+                }
 
             if (hapticsPerformed == true) {
                 return
@@ -110,13 +112,18 @@ class InputFeedbackManager(
         get() {
             return tts?.voice?.locale
         }
-        set(v) { tts?.language = v }
+        set(v) {
+            tts?.language = v
+        }
 
     fun resetPlayProgress() {
         if (playProgress > 0) playProgress = 0
     }
 
-    private fun playCustomSoundEffect(keycode: Int, volume: Float) {
+    private fun playCustomSoundEffect(
+        keycode: Int,
+        volume: Float,
+    ) {
         SoundThemeManager.getActiveSoundTheme().onSuccess { theme ->
             if (theme.sound.isEmpty()) return
             val sounds = theme.sound
@@ -145,12 +152,13 @@ class InputFeedbackManager(
             if (prefs.keyboard.customSoundEnabled) {
                 playCustomSoundEffect(keyCode, soundVolume)
             } else {
-                val effect = when (keyCode) {
-                    KeyEvent.KEYCODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
-                    KeyEvent.KEYCODE_DEL -> AudioManager.FX_KEYPRESS_DELETE
-                    KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN
-                    else -> AudioManager.FX_KEYPRESS_STANDARD
-                }
+                val effect =
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
+                        KeyEvent.KEYCODE_DEL -> AudioManager.FX_KEYPRESS_DELETE
+                        KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN
+                        else -> AudioManager.FX_KEYPRESS_STANDARD
+                    }
                 audioManager.playSoundEffect(
                     effect,
                     soundVolume,
@@ -174,16 +182,17 @@ class InputFeedbackManager(
     }
 
     private inline fun <reified T> contentSpeakInternal(content: T) {
-        val text = when {
-            0 is T -> {
-                KeyEvent.keyCodeToString(content as Int)
-                    .replace("KEYCODE_", "")
-                    .replace("_", " ")
-                    .lowercase(Locale.getDefault())
-            }
-            "" is T -> content as String
-            else -> null
-        } ?: return
+        val text =
+            when {
+                0 is T -> {
+                    KeyEvent.keyCodeToString(content as Int)
+                        .replace("KEYCODE_", "")
+                        .replace("_", " ")
+                        .lowercase(Locale.getDefault())
+                }
+                "" is T -> content as String
+                else -> null
+            } ?: return
 
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TrimeTTS")
     }

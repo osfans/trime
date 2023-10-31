@@ -21,7 +21,10 @@ import android.widget.LinearLayout
  */
 object ViewUtils {
     @JvmStatic
-    fun updateLayoutHeightOf(window: Window, layoutHeight: Int) {
+    fun updateLayoutHeightOf(
+        window: Window,
+        layoutHeight: Int,
+    ) {
         val params = window.attributes
         if (params != null && params.height != layoutHeight) {
             params.height = layoutHeight
@@ -30,7 +33,10 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun updateLayoutHeightOf(view: View, layoutHeight: Int) {
+    fun updateLayoutHeightOf(
+        view: View,
+        layoutHeight: Int,
+    ) {
         val params = view.layoutParams
         if (params != null && params.height != layoutHeight) {
             params.height = layoutHeight
@@ -39,7 +45,10 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun updateLayoutGravityOf(view: View, layoutGravity: Int) {
+    fun updateLayoutGravityOf(
+        view: View,
+        layoutGravity: Int,
+    ) {
         val lp = view.layoutParams
         if (lp is LinearLayout.LayoutParams) {
             if (lp.gravity != layoutGravity) {

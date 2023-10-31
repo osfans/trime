@@ -24,14 +24,15 @@ class LiquidKeyboardEditActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.attributes.gravity = Gravity.TOP
-        val binding = ActivityLiquidKeyboardEditBinding.inflate(layoutInflater).apply {
-            editText = liquidKeyboardEditText
-            liquidKeyboardEditCancel.setOnClickListener { finish() }
-            liquidKeyboardEditOk.setOnClickListener {
-                editHandler()
-                finish()
+        val binding =
+            ActivityLiquidKeyboardEditBinding.inflate(layoutInflater).apply {
+                editText = liquidKeyboardEditText
+                liquidKeyboardEditCancel.setOnClickListener { finish() }
+                liquidKeyboardEditOk.setOnClickListener {
+                    editHandler()
+                    finish()
+                }
             }
-        }
         setContentView(binding.root)
         processIntent(intent)
     }

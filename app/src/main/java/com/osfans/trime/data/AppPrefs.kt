@@ -31,7 +31,10 @@ class AppPrefs(
      * The type is automatically derived from the given [default] value.
      * @return The value for [key] or [default].
      */
-    private inline fun <reified T> getPref(key: String, default: T): T {
+    private inline fun <reified T> getPref(
+        key: String,
+        default: T,
+    ): T {
         return when {
             false is T -> {
                 shared.getBoolean(key, default as Boolean) as T
@@ -53,7 +56,10 @@ class AppPrefs(
      * Sets the [value] for [key] in the shared preferences, puts the value into the corresponding
      * cache and returns it.
      */
-    private inline fun <reified T> setPref(key: String, value: T) {
+    private inline fun <reified T> setPref(
+        key: String,
+        value: T,
+    ) {
         when {
             false is T -> {
                 shared.edit().putBoolean(key, value as Boolean).apply()
@@ -114,6 +120,7 @@ class AppPrefs(
             const val PID = "general__pid"
             const val LAST_BUILD_GIT_HASH = "general__last_build_git_hash"
         }
+
         var lastVersionName: String
             get() = prefs.getPref(LAST_VERSION_NAME, "")
             set(v) = prefs.setPref(LAST_VERSION_NAME, v)
@@ -173,6 +180,7 @@ class AppPrefs(
             const val DELETE_CANDIDATE_TIMEOUT = "keyboard__key_delete_candidate_timeout"
             const val SHOULD_LONG_CLICK_DELETE_CANDIDATE = "keyboard__long_click_delete_candidate"
         }
+
         var inlinePreedit: InlineModeType
             get() = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
             set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
@@ -298,6 +306,7 @@ class AppPrefs(
             const val AUTO_DARK = "theme_auto_dark"
             const val USE_MINI_KEYBOARD = "theme_use_mini_keyboard"
         }
+
         var selectedTheme: String
             get() = prefs.getPref(SELECTED_THEME, "trime")
             set(v) = prefs.setPref(SELECTED_THEME, v)
@@ -326,6 +335,7 @@ class AppPrefs(
             const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
             val EXTERNAL_PATH_PREFIX: String = PathUtils.getExternalStoragePath()
         }
+
         var sharedDataDir: String
             get() = prefs.getPref(SHARED_DATA_DIR, "$EXTERNAL_PATH_PREFIX/rime")
             set(v) = prefs.setPref(SHARED_DATA_DIR, v)
@@ -358,6 +368,7 @@ class AppPrefs(
             const val DRAFT_LIMIT = "clipboard_draft_limit"
             const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
         }
+
         var clipboardCompareRules: List<String>
             get() = prefs.getPref(CLIPBOARD_COMPARE_RULES, "").trim().split('\n')
             set(v) = prefs.setPref(CLIPBOARD_COMPARE_RULES, v.joinToString("\n"))
@@ -388,6 +399,7 @@ class AppPrefs(
             const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
             const val DESTROY_ON_QUIT = "other__destroy_on_quit"
         }
+
         var uiMode: String
             get() = prefs.getPref(UI_MODE, "auto")
             set(v) = prefs.setPref(UI_MODE, v)

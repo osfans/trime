@@ -9,10 +9,12 @@ import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ShortcutUtils
 
 class ToolkitFragment : PaddingPreferenceFragment() {
-
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
         screen.addPreference(

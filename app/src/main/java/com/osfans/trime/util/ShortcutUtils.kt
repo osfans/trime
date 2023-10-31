@@ -30,7 +30,11 @@ import java.util.Locale
  * Implementation to open/call specified application/function
  */
 object ShortcutUtils {
-    fun call(context: Context, command: String, option: String): CharSequence? {
+    fun call(
+        context: Context,
+        command: String,
+        option: String,
+    ): CharSequence? {
         when (command) {
             "broadcast" -> context.sendBroadcast(Intent(option))
             "clipboard" -> return pasteFromClipboard(context)
@@ -45,26 +49,30 @@ object ShortcutUtils {
     }
 
     private fun startIntent(arg: String) {
-        val intent = when {
-            arg.indexOf(':') >= 0 -> {
-                Intent.parseUri(arg, Intent.URI_INTENT_SCHEME)
-            }
-            arg.indexOf('/') >= 0 -> {
-                Intent(Intent.ACTION_MAIN).apply {
-                    addCategory(Intent.CATEGORY_LAUNCHER)
-                    component = ComponentName.unflattenFromString(arg)
+        val intent =
+            when {
+                arg.indexOf(':') >= 0 -> {
+                    Intent.parseUri(arg, Intent.URI_INTENT_SCHEME)
                 }
+                arg.indexOf('/') >= 0 -> {
+                    Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
+                        component = ComponentName.unflattenFromString(arg)
+                    }
+                }
+                else -> IntentUtils.getLaunchAppIntent(arg)
             }
-            else -> IntentUtils.getLaunchAppIntent(arg)
-        }
         intent.flags = (
             Intent.FLAG_ACTIVITY_NEW_TASK
                 or Intent.FLAG_ACTIVITY_NO_HISTORY
-            )
+        )
         ActivityUtils.startActivity(intent)
     }
 
-    private fun startIntent(action: String, arg: String) {
+    private fun startIntent(
+        action: String,
+        arg: String,
+    ) {
         val act = "android.intent.action.${action.uppercase()}"
         var intent = Intent(act)
         when (act) {
@@ -105,11 +113,12 @@ object ShortcutUtils {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !TextUtils.isEmpty(locale)) {
             val ul = ULocale(locale)
             val cc = Calendar.getInstance(ul)
-            val df = if (option.isEmpty()) {
-                DateFormat.getDateInstance(DateFormat.LONG, ul)
-            } else {
-                android.icu.text.SimpleDateFormat(option, ul.toLocale())
-            }
+            val df =
+                if (option.isEmpty()) {
+                    DateFormat.getDateInstance(DateFormat.LONG, ul)
+                } else {
+                    android.icu.text.SimpleDateFormat(option, ul.toLocale())
+                }
             df.format(cc, StringBuffer(256), FieldPosition(0)).toString()
         } else {
             SimpleDateFormat(string, Locale.getDefault()).format(Date()) // Time
@@ -140,14 +149,15 @@ object ShortcutUtils {
         }
     }
 
-    private val applicationLaunchKeyCategories = SparseArray<String>().apply {
-        append(KeyEvent.KEYCODE_EXPLORER, "android.intent.category.APP_BROWSER")
-        append(KeyEvent.KEYCODE_ENVELOPE, "android.intent.category.APP_EMAIL")
-        append(KeyEvent.KEYCODE_CONTACTS, "android.intent.category.APP_CONTACTS")
-        append(KeyEvent.KEYCODE_CALENDAR, "android.intent.category.APP_CALENDAR")
-        append(KeyEvent.KEYCODE_MUSIC, "android.intent.category.APP_MUSIC")
-        append(KeyEvent.KEYCODE_CALCULATOR, "android.intent.category.APP_CALCULATOR")
-    }
+    private val applicationLaunchKeyCategories =
+        SparseArray<String>().apply {
+            append(KeyEvent.KEYCODE_EXPLORER, "android.intent.category.APP_BROWSER")
+            append(KeyEvent.KEYCODE_ENVELOPE, "android.intent.category.APP_EMAIL")
+            append(KeyEvent.KEYCODE_CONTACTS, "android.intent.category.APP_CONTACTS")
+            append(KeyEvent.KEYCODE_CALENDAR, "android.intent.category.APP_CALENDAR")
+            append(KeyEvent.KEYCODE_MUSIC, "android.intent.category.APP_MUSIC")
+            append(KeyEvent.KEYCODE_CALCULATOR, "android.intent.category.APP_CALCULATOR")
+        }
 
     fun launchMainActivity(context: Context) {
         context.startActivity(

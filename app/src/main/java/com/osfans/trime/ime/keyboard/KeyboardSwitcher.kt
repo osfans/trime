@@ -39,24 +39,29 @@ object KeyboardSwitcher {
     }
 
     fun switchKeyboard(name: String?) {
-        val i = when (name) {
-            ".default" -> 0
-            ".prior" -> currentId - 1
-            ".next" -> currentId + 1
-            ".last" -> lastId
-            ".last_lock" -> lastLockId
-            ".ascii" -> {
-                val asciiKeyboard = availableKeyboards[currentId].asciiKeyboard
-                if (asciiKeyboard.isNullOrEmpty()) { currentId } else { availableKeyboardIds.indexOf(asciiKeyboard) }
-            }
-            else -> {
-                if (name.isNullOrEmpty()) {
-                    if (availableKeyboards[currentId].isLock) currentId else lastLockId
-                } else {
-                    availableKeyboardIds.indexOf(name)
+        val i =
+            when (name) {
+                ".default" -> 0
+                ".prior" -> currentId - 1
+                ".next" -> currentId + 1
+                ".last" -> lastId
+                ".last_lock" -> lastLockId
+                ".ascii" -> {
+                    val asciiKeyboard = availableKeyboards[currentId].asciiKeyboard
+                    if (asciiKeyboard.isNullOrEmpty()) {
+                        currentId
+                    } else {
+                        availableKeyboardIds.indexOf(asciiKeyboard)
+                    }
+                }
+                else -> {
+                    if (name.isNullOrEmpty()) {
+                        if (availableKeyboards[currentId].isLock) currentId else lastLockId
+                    } else {
+                        availableKeyboardIds.indexOf(name)
+                    }
                 }
             }
-        }
 
         val deviceKeyboard = appContext.resources.configuration.keyboard
         var mini = -1
