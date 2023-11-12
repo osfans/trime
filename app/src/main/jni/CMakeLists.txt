@@ -51,12 +51,7 @@ include_directories(
     PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/librime/deps/glog"
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librime/deps/glog/src"
 )
-# workaround for librime/tools/rime_api_console.cc
-# TODO: fix it in upstream
-string(REPLACE "-Werror=format-security" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-string(REPLACE "-Wformat" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-add_definitions("-Wno-format")
-# workaround end
+
 add_subdirectory(librime)
 
 add_subdirectory(librime_jni)
