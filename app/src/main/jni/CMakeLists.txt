@@ -52,18 +52,19 @@ option(LEVELDB_BUILD_BENCHMARKS "" OFF)
 option(LEVELDB_INSTALL "" OFF)
 add_subdirectory(librime/deps/leveldb)
 
+add_subdirectory(librime/deps/marisa-trie)
+
+set(LIBMARISA marisa)
+option(USE_SYSTEM_MARISA "" ON)
 add_subdirectory(OpenCC)
 include(OpenccWorkarounds)
 
 include(RimePlugins)
 
-option(BUILD_TEST "" OFF)
-include_directories(
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librime/include"
-    PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/librime/deps/glog"
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librime/deps/glog/src"
-)
+set(X11Keysym "${CMAKE_SOURCE_DIR}/librime/include")
+include_directories("${X11Keysym}")
 
+option(BUILD_TEST "" OFF)
 add_subdirectory(librime)
 
 add_subdirectory(librime_jni)
