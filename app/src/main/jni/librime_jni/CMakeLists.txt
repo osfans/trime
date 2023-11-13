@@ -1,17 +1,17 @@
 find_package(Opencc REQUIRED)
 
-file(GLOB RIME_JNI_SOURCES
+set(RIME_JNI_SOURCES
   key_table.cc
   levers.cc
   opencc.cc
   rime_jni.cc
 )
 add_library(rime_jni SHARED ${RIME_JNI_SOURCES})
+target_link_libraries(rime_jni log rime-static ${Opencc_LIBRARY})
 target_include_directories(rime_jni PRIVATE
   "${CMAKE_SOURCE_DIR}/librime/src"
   "${Opencc_INCLUDE_PATH}"
 )
-target_link_libraries(rime_jni rime-static log ${Opencc_LIBRARY})
 
 string(TIMESTAMP TODAY "%Y%m%d")
 execute_process(
