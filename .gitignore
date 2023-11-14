@@ -468,3 +468,8 @@ keystore.properties
 
 # Project
 app/src/main/assets/checksums.json
+
+# boost
+app/boost-*.tar.xz
+app/src/main/jni/boost/
+
