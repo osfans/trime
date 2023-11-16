@@ -47,12 +47,9 @@ option(USE_SYSTEM_MARISA "" ON)
 add_subdirectory(OpenCC)
 include(OpenccWorkarounds)
 
-include(RimePlugins)
-
 set(X11Keysym "${CMAKE_SOURCE_DIR}/librime/include")
 include_directories("${X11Keysym}")
 
-option(BUILD_TEST "" OFF)
-add_subdirectory(librime)
+include(Rime)
 
 add_subdirectory(librime_jni)
