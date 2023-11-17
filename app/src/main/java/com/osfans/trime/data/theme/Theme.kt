@@ -250,9 +250,8 @@ class Theme {
             val remapped =
                 if (".default" == name) {
                     val currentSchemaId = Rime.getCurrentRimeSchema()
-                    val shortSchemaId = currentSchemaId.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-                    if (theme.presetKeyboards!!.containsKey(shortSchemaId)) {
-                        return shortSchemaId
+                    if (theme.presetKeyboards!!.containsKey(currentSchemaId)) {
+                        return currentSchemaId
                     } else {
                         val alphabet = SchemaManager.getActiveSchema().alphabet
                         val twentySix = "qwerty"
