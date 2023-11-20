@@ -966,7 +966,13 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     Timber.i("\t<TrimeInput>\tonKeyDown()\tkeycode=%d, event=%s", keyCode, event.toString());
-    if (composeEvent(event) && onKeyEvent(event)) return true;
+    if (composeEvent(event) && onKeyEvent(event)) {
+      if (!isWindowShown) {
+        return super.onKeyDown(keyCode, event);
+      } else {
+        return true;
+      }
+    }
     return super.onKeyDown(keyCode, event);
   }
 
@@ -975,7 +981,11 @@ public class Trime extends LifecycleInputMethodService {
     Timber.i("\t<TrimeInput>\tonKeyUp()\tkeycode=%d, event=%s", keyCode, event.toString());
     if (composeEvent(event) && textInputManager.getNeedSendUpRimeKey()) {
       textInputManager.onRelease(keyCode);
-      return true;
+      if (!isWindowShown) {
+        return super.onKeyUp(keyCode, event);
+      } else {
+        return true;
+      }
     }
     return super.onKeyUp(keyCode, event);
   }
