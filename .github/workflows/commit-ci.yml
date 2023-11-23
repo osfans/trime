@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout last commit
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -66,11 +66,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: trime_arm64_v8a
-          path: app/build/outputs/apk/**/*arm64-v8a-debug.apk
+          path: app/build/outputs/apk/**/*arm64-v8a-*.apk
           # keep 90 days
           retention-days: 90
 
-      - name: Upload jni artifact (librime_jni.so)
+      - name: Upload JNI artifact (librime_jni.so)
         uses: actions/upload-artifact@v3
         with:
           name: librime_jni
