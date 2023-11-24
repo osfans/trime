@@ -71,7 +71,7 @@ jobs:
           configurationJson: |
             {
               "template": "Change log from #{{FROM_TAG}} to #{{TO_TAG}}: #{{RELEASE_DIFF}}\n#{{UNCATEGORIZED}}",
-              "pr_template": "- #{{MERGE_SHA}} #{{TITLE}}"
+              "pr_template": "- [#{{MERGE_SHA}}] - #{{TITLE}}"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
