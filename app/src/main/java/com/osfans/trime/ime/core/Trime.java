@@ -19,6 +19,7 @@
 package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
+import static splitties.systemservices.SystemServicesKt.getWindowManager;
 
 import android.app.AlarmManager;
 import android.app.Dialog;
@@ -37,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -141,23 +143,22 @@ public class Trime extends LifecycleInputMethodService {
         public void run() {
           if (mCandidateRoot == null || mCandidateRoot.getWindowToken() == null) return;
           if (!isPopupWindowEnabled) return;
-          int x = 0, y = 0;
-          final int[] candidateLocation = new int[2];
-          mCandidateRoot.getLocationOnScreen(candidateLocation);
+
           final int minX = popupMarginH;
           final int minY = popupMargin;
-          final int maxX = mCandidateRoot.getWidth() - mPopupWindow.getWidth() - minX;
-          final int maxY = candidateLocation[1] - mPopupWindow.getHeight() - minY;
+
+          DisplayMetrics displayMetrics = new DisplayMetrics();
+          getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+          final int maxX = displayMetrics.widthPixels - mPopupWindow.getWidth() - minX;
+          final int maxY = displayMetrics.heightPixels - mPopupWindow.getHeight() - minY;
+
+          int x = minX, y = minY;
           if (isWinFixed() || !isCursorUpdated) {
-            // setCandidatesViewShown(true);
             switch (popupWindowPos) {
+              case TOP_LEFT:
+                break;
               case TOP_RIGHT:
                 x = maxX;
-                y = minY;
-                break;
-              case TOP_LEFT:
-                x = minX;
-                y = minY;
                 break;
               case BOTTOM_RIGHT:
                 x = maxX;
@@ -170,42 +171,37 @@ public class Trime extends LifecycleInputMethodService {
               case FIXED:
               case BOTTOM_LEFT:
               default:
-                x = minX;
                 y = maxY;
                 break;
             }
           } else {
-            // setCandidatesViewShown(false);
             switch (popupWindowPos) {
               case LEFT:
-              case LEFT_UP:
                 x = (int) mPopupRectF.left;
-                break;
-              case RIGHT:
-              case RIGHT_UP:
-                x = (int) mPopupRectF.right;
-                break;
-              default:
-                Timber.wtf("UNREACHABLE BRANCH");
-            }
-            x = Math.min(maxX, x);
-            x = Math.max(minX, x);
-            switch (popupWindowPos) {
-              case LEFT:
-              case RIGHT:
                 y = (int) mPopupRectF.bottom + popupMargin;
                 break;
               case LEFT_UP:
-              case RIGHT_UP:
+                x = (int) mPopupRectF.left;
                 y = (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin;
                 break;
+              case RIGHT:
+                x = (int) mPopupRectF.right;
+                y = (int) mPopupRectF.bottom + popupMargin;
+                break;
+              case RIGHT_UP:
               default:
-                Timber.wtf("UNREACHABLE BRANCH");
+                x = (int) mPopupRectF.right;
+                y = (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin;
+                break;
             }
-            y = Math.min(maxY, y);
-            y = Math.max(minY, y);
           }
+
+          // 只要修正一次就可以，别让悬浮窗超出了屏幕界限
+          x = Math.max(minX, x);
+          x = Math.min(maxX, x);
           y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
+          y = Math.max(minY, y);
+          y = Math.min(maxY, y);
 
           if (!mPopupWindow.isShowing()) {
             mPopupWindow.showAtLocation(mCandidateRoot, Gravity.START | Gravity.TOP, x, y);
@@ -966,13 +962,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     Timber.i("\t<TrimeInput>\tonKeyDown()\tkeycode=%d, event=%s", keyCode, event.toString());
-    if (composeEvent(event) && onKeyEvent(event)) {
-      if (!isWindowShown) {
-        return super.onKeyDown(keyCode, event);
-      } else {
-        return true;
-      }
-    }
+    if (composeEvent(event) && onKeyEvent(event) && isWindowShown) return true;
     return super.onKeyDown(keyCode, event);
   }
 
@@ -981,11 +971,7 @@ public class Trime extends LifecycleInputMethodService {
     Timber.i("\t<TrimeInput>\tonKeyUp()\tkeycode=%d, event=%s", keyCode, event.toString());
     if (composeEvent(event) && textInputManager.getNeedSendUpRimeKey()) {
       textInputManager.onRelease(keyCode);
-      if (!isWindowShown) {
-        return super.onKeyUp(keyCode, event);
-      } else {
-        return true;
-      }
+      if (isWindowShown) return true;
     }
     return super.onKeyUp(keyCode, event);
   }
