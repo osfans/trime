@@ -8,18 +8,23 @@ set(RIME_PLUGINS
 
 # symlink plugins
 foreach(plugin ${RIME_PLUGINS})
-    execute_process(COMMAND ln -sv
-        "${CMAKE_SOURCE_DIR}/${plugin}"
-        "${CMAKE_SOURCE_DIR}/librime/plugins"
-    )
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/librime/plugins/${plugin}")
+        file(CREATE_LINK 
+            "${CMAKE_SOURCE_DIR}/${plugin}"
+            "${CMAKE_SOURCE_DIR}/librime/plugins/${plugin}"
+            COPY_ON_ERROR SYMBOLIC
+        )
+    endif()
 endforeach()
 
 # librime-lua
-file(REMOVE "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty")
-execute_process(COMMAND ln -sv
-    "${CMAKE_SOURCE_DIR}/librime-lua-deps"
-    "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty"
-)
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty")
+    file(CREATE_LINK
+        "${CMAKE_SOURCE_DIR}/librime-lua-deps"
+        "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty"
+        COPY_ON_ERROR SYMBOLIC
+    )
+endif()
 
 # librime-charcode
 option(BUILD_WITH_ICU "" OFF)
