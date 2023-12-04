@@ -64,20 +64,22 @@ object KeyboardSwitcher {
             }
 
         val deviceKeyboard = appContext.resources.configuration.keyboard
-        var mini = -1
-        if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard) {
-            if (i == 0 && "mini" in availableKeyboardIds) {
-                if (deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
-                    mini = availableKeyboardIds.indexOf("mini")
-                }
-            }
-        }
-
         if (currentId >= 0 && availableKeyboards[currentId].isLock) {
             lastLockId = currentId
         }
         lastId = currentId
-        currentId = if (mini >= 0) mini else i
+
+        currentId = if (i >= availableKeyboardIds.size) 0 else i
+        if ("mini" in availableKeyboardIds) {
+            val mini = availableKeyboardIds.indexOf("mini")
+            currentId =
+                if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
+                    if (currentId == 0) mini else currentId
+                } else {
+                    if (currentId == mini) 0 else currentId
+                }
+        }
+
         Timber.i(
             "Switched keyboard from ${availableKeyboardIds[lastId]} " +
                 "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard).",
