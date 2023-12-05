@@ -41,40 +41,73 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 现在欢迎你前来[贡献](CONTRIBUTING.md) ～！:tada:
 
-## 入门
+## 开发入门
 
 ### 准备
 
-Android SDK 应该已经被安装并且正确配置。如果你还不熟悉 Android 开发，建议安装 Android Studio，它会自动安装并配置 Android 开发环境。
+开发者应正确安装配置好 Android SDK 和 Android NDK。如果还不熟悉 Android 开发，建议安装 Android Studio，它会自动安装并配置 Android 开发环境。
 
 ### 构建
 
-1. 克隆此项目，请注意由于 `boost` 子模块很大，这会花费一些时间。同时，请确保你的磁盘有足够空间保存源代码（约 1.5 GB);
+<details>
+<summary>Windows 上的前提条件</summary>
 
-```bash
-cd $your_folder
-git clone --recursive https://github.com/osfans/trime.git
+当前构建配置会使构建过程中创建符号链接，开发者需要：
+
+- 启用[开发者模式](https://learn.microsoft.com/zh-cn/windows/apps/get-started/enable-your-device-for-development) 以在无管理员权限的情况下创建符号链接。
+
+- 启用 `git` 的符号链接支持：
+
+    ```powershell
+    git config --global core.symlinks true
+    ```
+
+如果无法或者不想启用上述设置也没关系。构建系统会自动在符号链接创建失败时使用复制代替。
+
+</details>
+
+1. 克隆此项目并拉取所有子模块。
+
+```sh
+git clone git@github.com:osfans/trime.git
+git submodule update --init --recursive
 ```
 
 2. 编译调试版本:
+
+Linux 或 macOS 上可执行：
 
 ```bash
 make debug
 ```
 
+Windows 上执行：
+
+```powershell
+.\gradle :app:assembleDebug
+```
+
 3. 编译正式版本：
 
-请创建一个名为 `keystore.properties` 的文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html):
+请创建 `keystore.properties` 文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html)：
 
-```bash
+```gradle.properties
 storePassword=myStorePassword
 keyPassword=mykeyPassword
 keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
+之后，Linux 和 macOS 上可执行：
+
 ```bash
 make release
+```
+
+Windows 上执行：
+
+```powershell
+.\gradlew :app:assembleRelease
 ```
 
 ### 故障排除
@@ -82,8 +115,7 @@ make release
 ```
 Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 ```
-
-执行 `make clean`.
+在 Linux 或 macOS 上执行 `make clean`，Windows 上执行 `.\gradlew clean`。
 
 其他问题:
 1. 首先尝试 `make clean`
