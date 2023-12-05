@@ -39,9 +39,6 @@ val gitUserOrCIName = envOrDefault("CI_NAME") {
 }
 val gitVersionName = exec("git describe --tags --long --always")
 val gitHashShort = exec("git rev-parse --short HEAD")
-val gitWorkingOrCIBranch = envOrDefault("CI_BRANCH") {
-    exec("git symbolic-ref --short HEAD")
-}
 val gitRemoteUrl = exec("git remote get-url origin")
     .replaceFirst("^git@github\\.com:", "https://github.com/")
     .replaceFirst("\\.git\$", "")
@@ -55,7 +52,6 @@ fun buildInfo(): String {
     writer.append("Build Time: $time UTC\\n")
     writer.append("Build Version Name: ${gitVersionName}\\n")
     writer.append("Git Hash: ${gitHashShort}\\n")
-    writer.append("Git Branch: ${gitWorkingOrCIBranch}\\n")
     writer.append("Git Repo: $gitRemoteUrl")
     val info = writer.toString()
     println(info)
