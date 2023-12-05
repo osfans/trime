@@ -105,12 +105,10 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                     if (tabTag.type === SymbolKeyboardType.SYMBOL) {
                         service.inputSymbol(bean.text)
                     } else if (tabTag.type !== SymbolKeyboardType.TABS) {
-                        service.currentInputConnection?.run {
-                            commitText(bean.text, 1)
-                            if (tabTag.type !== SymbolKeyboardType.HISTORY) {
-                                symbolHistory.insert(bean.text)
-                                symbolHistory.save()
-                            }
+                        service.commitText(bean.text)
+                        if (tabTag.type !== SymbolKeyboardType.HISTORY) {
+                            symbolHistory.insert(bean.text)
+                            symbolHistory.save()
                         }
                     } else {
                         val tag = TabManager.get().getTabSwitchTabTag(position)
@@ -162,7 +160,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 setListener(
                     object : FlexibleAdapter.Listener {
                         override fun onPaste(bean: DatabaseBean) {
-                            service.currentInputConnection?.commitText(bean.text, 1)
+                            service.commitText(bean.text)
                         }
 
                         override suspend fun onPin(bean: DatabaseBean) {
