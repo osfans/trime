@@ -1246,7 +1246,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   /** 模擬PC鍵盤中Esc鍵的功能：清除輸入的編碼和候選項 */
-  private void performEscape() {
+  public void performEscape() {
     if (isComposing()) textInputManager.onKey(KeyEvent.KEYCODE_ESCAPE, 0);
   }
 

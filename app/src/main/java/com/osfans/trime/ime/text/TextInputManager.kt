@@ -189,6 +189,9 @@ class TextInputManager private constructor() :
         ) {
             super.onStartInputView(instance, restarting)
             Trime.getService().selectLiquidKeyboard(-1)
+            if (restarting) {
+                trime.performEscape()
+            }
             isComposable = false
             var tempAsciiMode = if (shouldResetAsciiMode) false else null
             val keyboardType =
