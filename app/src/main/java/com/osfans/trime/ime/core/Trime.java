@@ -82,6 +82,7 @@ import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
 import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
+import com.osfans.trime.ime.util.UiUtil;
 import com.osfans.trime.util.DimensionsKt;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
@@ -237,9 +238,8 @@ public class Trime extends LifecycleInputMethodService {
   public Trime() {
     try {
       self = this;
-      textInputManager = TextInputManager.Companion.getInstance();
     } catch (Exception e) {
-      e.fillInStackTrace();
+      Timber.e(e);
     }
   }
 
@@ -358,12 +358,13 @@ public class Trime extends LifecycleInputMethodService {
       //  and lead to a crash loop
       try {
         Timber.d("onCreate");
+        textInputManager = TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(this));
         activeEditorInstance = new EditorInstance(this);
         inputFeedbackManager = new InputFeedbackManager(this);
         liquidKeyboard = new LiquidKeyboard(this);
         restartSystemStartTimingSync();
       } catch (Exception e) {
-        e.printStackTrace();
+        Timber.e(e);
         super.onCreate();
         return;
       }
@@ -372,7 +373,7 @@ public class Trime extends LifecycleInputMethodService {
         listener.onCreate();
       }
     } catch (Exception e) {
-      e.fillInStackTrace();
+      Timber.e(e);
     }
   }
 
@@ -384,10 +385,11 @@ public class Trime extends LifecycleInputMethodService {
    */
   public boolean setDarkMode(boolean darkMode) {
     if (darkMode != this.darkMode) {
-      Timber.d("setDarkMode: %s", darkMode);
+      Timber.d("Dark mode changed: %s", darkMode);
       this.darkMode = darkMode;
       return true;
     }
+    Timber.d("Dark mode not changed: %s", darkMode);
     return false;
   }
 
@@ -549,8 +551,9 @@ public class Trime extends LifecycleInputMethodService {
     inputRootBinding.symbol.symbolInput.setVisibility(View.GONE);
     inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
     loadConfig();
-    final Theme theme = Theme.get();
-    theme.initCurrentColors();
+    updateDarkMode();
+    final Theme theme = Theme.get(darkMode);
+    theme.initCurrentColors(darkMode);
     SoundThemeManager.switchSound(theme.colors.getString("sound"));
     KeyboardSwitcher.newOrReset();
     resetCandidate();
@@ -726,6 +729,9 @@ public class Trime extends LifecycleInputMethodService {
     Timber.e("onCreateInputView()");
     // 初始化键盘布局
     super.onCreateInputView();
+    updateDarkMode();
+    Theme.get(darkMode).initCurrentColors(darkMode);
+
     inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));
     mainKeyboardView = inputRootBinding.main.mainKeyboardView;
 
@@ -752,7 +758,6 @@ public class Trime extends LifecycleInputMethodService {
       assert inputRootBinding != null;
       listener.onInitializeInputUi(inputRootBinding);
     }
-    Theme.get().initCurrentColors();
     loadBackground();
 
     KeyboardSwitcher.newOrReset();
@@ -772,19 +777,19 @@ public class Trime extends LifecycleInputMethodService {
     Timber.d("onStartInput: restarting=%s", restarting);
   }
 
+  private boolean updateDarkMode() {
+    boolean isDarkMode = UiUtil.INSTANCE.isDarkMode(this);
+
+    return setDarkMode(isDarkMode);
+  }
+
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     Timber.d("onStartInputView: restarting=%s", restarting);
     editorInfo = attribute;
-    if (getPrefs().getThemeAndColor().getAutoDark()) {
-      int nightModeFlags =
-          getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-      if (setDarkMode(nightModeFlags == Configuration.UI_MODE_NIGHT_YES)) {
-        Timber.i("dark mode changed");
-        initKeyboardDarkMode(darkMode);
-      } else Timber.i("dark mode not changed");
-    } else {
-      Timber.i("auto dark off");
+
+    if (updateDarkMode()) {
+      initKeyboardDarkMode(darkMode);
     }
 
     inputFeedbackManager.resumeSoundPool();

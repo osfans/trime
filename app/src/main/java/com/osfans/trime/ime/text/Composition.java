@@ -46,6 +46,7 @@ import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.ime.util.UiUtil;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public class Composition extends AppCompatTextView {
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
-    textInputManager = TextInputManager.Companion.getInstance();
+    textInputManager = TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(context));
     setShowComment(!Rime.getOption("_hide_comment"));
     reset();
   }

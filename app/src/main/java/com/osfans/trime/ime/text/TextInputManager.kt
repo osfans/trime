@@ -1,10 +1,14 @@
 package com.osfans.trime.ime.text
 
+import android.content.Context
 import android.content.DialogInterface
+import android.os.Build
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -53,7 +57,7 @@ import java.util.Locale
  * TextInputManager is also the hub in the communication between the system, the active editor
  * instance and the CandidateView.
  */
-class TextInputManager private constructor() :
+class TextInputManager private constructor(private val isDarkMode: Boolean) :
     Trime.EventListener,
     KeyboardView.OnKeyboardActionListener,
     Candidate.EventListener {
@@ -86,9 +90,9 @@ class TextInputManager private constructor() :
             private val DELIMITER_SPLITTER = """[-_]""".toRegex()
             private var instance: TextInputManager? = null
 
-            fun getInstance(): TextInputManager {
+            fun getInstance(isDarkMode: Boolean): TextInputManager {
                 if (instance == null) {
-                    instance = TextInputManager()
+                    instance = TextInputManager(isDarkMode)
                 }
                 return instance!!
             }
@@ -114,7 +118,7 @@ class TextInputManager private constructor() :
                     .onEach(::handleRimeNotification)
                     .launchIn(trime.lifecycleScope)
 
-            val theme = Theme.get()
+            val theme = Theme.get(isDarkMode)
             val defaultLocale = theme.style.getString("locale").split(DELIMITER_SPLITTER)
             locales[0] =
                 when (defaultLocale.size) {

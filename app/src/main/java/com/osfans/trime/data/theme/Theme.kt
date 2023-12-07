@@ -37,7 +37,7 @@ import java.util.Objects
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
-class Theme {
+class Theme private constructor(isDarkMode: Boolean) {
     private var currentColorSchemeId: String? = null
     private var generalStyle: Map<String, Any?>? = null
     private var fallbackColors: Map<String, String>? = null
@@ -67,7 +67,13 @@ class Theme {
 
         @JvmStatic
         fun get(): Theme {
-            if (self == null) self = Theme()
+            if (self == null) self = Theme(false)
+            return self as Theme
+        }
+
+        @JvmStatic
+        fun get(isDarkMode: Boolean): Theme {
+            if (self == null) self = Theme(isDarkMode)
             return self as Theme
         }
 
@@ -78,13 +84,13 @@ class Theme {
         self = this
         ThemeManager.init()
         Rime.getInstance(!sharedDataDir.exists())
-        init()
+        init(isDarkMode)
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
         Timber.d("Initialization finished")
     }
 
-    fun init() {
+    fun init(isDarkMode: Boolean) {
         val active = ThemeManager.getActiveTheme()
         Timber.i("Initializing theme, currentThemeName=%s ...", active)
         runCatching {
@@ -109,14 +115,14 @@ class Theme {
                 liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
             }.also { Timber.d("Setting up all theme config map takes $it ms") }
             measureTimeMillis {
-                initCurrentColors()
+                initCurrentColors(isDarkMode)
             }.also { Timber.d("Initializing cache takes $it ms") }
             Timber.i("The theme is initialized")
         }.getOrElse {
             Timber.e("Failed to parse the theme: ${it.message}")
             if (ThemeManager.getActiveTheme() != defaultThemeName) {
                 ThemeManager.switchTheme(defaultThemeName)
-                init()
+                init(isDarkMode)
             }
         }
     }
@@ -355,25 +361,6 @@ class Theme {
         return null
     }
 
-    /**
-     * 获取配色方案名
-     *
-     * 优先级：设置>color_scheme>default
-     *
-     * 避免直接读取 default
-     *
-     * @return 首个已配置的主题方案名
-     */
-    private val colorSchemeName: String
-        get() {
-            var schemeId = appPrefs.themeAndColor.selectedColor
-            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = style.getString("color_scheme") // 主題中指定的配色
-            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = "default" // 主題中的default配色
-            val colorMap = presetColorSchemes!![schemeId]
-            if (colorMap!!.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
-            return schemeId
-        }
-
     var hasDarkLight = false
         private set
 
@@ -387,13 +374,14 @@ class Theme {
         var scheme = appPrefs.themeAndColor.selectedColor
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = style.getString("color_scheme") // 主題中指定的配色
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = "default" // 主題中的default配色
-        val colorMap = presetColorSchemes!![scheme]
+        val colorMap = presetColorSchemes!![scheme] as Map<String, Any>
+        if (colorMap.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
         if (darkMode) {
-            if (colorMap!!.containsKey("dark_scheme")) {
+            if (colorMap.containsKey("dark_scheme")) {
                 return colorMap["dark_scheme"] as String?
             }
         } else {
-            if (colorMap!!.containsKey("light_scheme")) {
+            if (colorMap.containsKey("light_scheme")) {
                 return colorMap["light_scheme"] as String?
             }
         }
@@ -419,13 +407,6 @@ class Theme {
         }
     }
 
-    // 初始化当前配色 Config 2.0
-    fun initCurrentColors() {
-        currentColorSchemeId = colorSchemeName
-        Timber.i("Caching color values (currentColorSchemeId=%s) ...", currentColorSchemeId)
-        cacheColorValues()
-    }
-
     // 当切换暗黑模式时，刷新键盘配色方案
     fun initCurrentColors(darkMode: Boolean) {
         currentColorSchemeId = getColorSchemeName(darkMode)
@@ -444,9 +425,9 @@ class Theme {
             Timber.w("Color scheme id not found: %s", currentColorSchemeId)
             return
         }
-        appPrefs.themeAndColor.selectedColor = currentColorSchemeId!!
+
         for ((key, value1) in colorMap) {
-            if (key == "name" || key == "author") continue
+            if (key == "name" || key == "author" || key == "light_scheme" || key == "dark_scheme") continue
             val value = parseColorValue(value1)
             if (value != null) currentColors[key] = value
         }
