@@ -20,6 +20,7 @@ jobs:
 
       - name: Get branch name
         id: vars
+        shell: bash
         run: |
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
@@ -52,17 +53,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android NDK
-        run: |
-          sdkmanager --install "cmake;3.22.1"
-
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
+        
+      - name: Check code format
+        run: |
+          ./gradlew spotlessCheck
 
       # `make debug` works not well on Windows
       - name: Build Debug APK
         run: |
-          ./gradlew spotlessCheck
           ./gradlew :app:assembleDebug
 
       - name: Add JNI cache
