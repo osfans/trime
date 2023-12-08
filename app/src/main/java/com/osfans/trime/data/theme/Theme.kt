@@ -78,6 +78,10 @@ class Theme private constructor(isDarkMode: Boolean) {
         }
 
         private val defaultThemeName = "trime"
+
+        fun isImageString(str: String?): Boolean {
+            return str?.contains(Regex(".(png|jpg)")) == true
+        }
     }
 
     init {
@@ -205,7 +209,23 @@ class Theme private constructor(isDarkMode: Boolean) {
             if (override != null) {
                 return GradientDrawable().apply { setColor(override) }
             }
-            return if (theme.currentColors.containsKey(value)) getDrawable(value!!) else getDrawable(key)
+
+            // value maybe a color label or a image path
+            return if (isImageString(value)) {
+                val path = theme.getImagePath(value!!)
+                if (path.isNotEmpty()) {
+                    bitmapDrawable(path)
+                } else {
+                    // fallback if image not found
+                    getDrawable(key)
+                }
+            } else if (theme.currentColors.containsKey(value)) {
+                // use custom color label
+                getDrawable(value!!)
+            } else {
+                // fallback color
+                getDrawable(key)
+            }
         }
 
         //  返回图片或背景的drawable,支持null参数。 Config 2.0
@@ -445,8 +465,7 @@ class Theme private constructor(isDarkMode: Boolean) {
         value ?: return null
         if (value is String) {
             if (value.matches(".*[.\\\\/].*".toRegex())) {
-                val fullPath = joinToFullImagePath(value)
-                return if (File(fullPath).exists()) fullPath else ""
+                return getImagePath(value)
             } else {
                 runCatching {
                     return ColorUtils.parseColor(value)
@@ -456,5 +475,14 @@ class Theme private constructor(isDarkMode: Boolean) {
             }
         }
         return null
+    }
+
+    private fun getImagePath(value: String): String {
+        return if (value.matches(".*[.\\\\/].*".toRegex())) {
+            val fullPath = joinToFullImagePath(value)
+            if (File(fullPath).exists()) fullPath else ""
+        } else {
+            ""
+        }
     }
 }
