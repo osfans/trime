@@ -227,9 +227,12 @@
     <string name="app_crash">Application crashed</string>
     <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
     <string name="real_time_logs">Real-time logs</string>
+    <string name="real_time_logs_clear">Clear All Logs</string>
+    <string name="real_time_logs_confirm">Do you want to clear all Logs? (This action cannot be undo)</string>
     <string name="crash_logs">Crash logs</string>
-    <string name="clear">Clear</string>
+    <string name="clear">Clear Screen</string>
     <string name="export">Export</string>
+    <string name="scroll_to_bottom">Jump to Bottom</string>
     <string name="system">System</string>
     <string name="pref_toolkit">Toolkit</string>
     <string name="reset__asset_is_null_or_empty">This path points to a empty directory or null pointer.</string>

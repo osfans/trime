@@ -218,11 +218,14 @@
         <item name="100">100</item>
     </string-array>
     <string name="export">匯出</string>
+    <string name="scroll_to_bottom">跳到最後</string>
     <string name="app_crash_message">抱歉，但我們為您帶來了一些紀錄檔以供調查。</string>
     <string name="app_crash">應用程式當機</string>
     <string name="crash_logs">當機紀錄檔</string>
     <string name="real_time_logs">即時紀錄檔</string>
-    <string name="clear">清除</string>
+    <string name="real_time_logs_clear">清除所有紀錄檔</string>
+    <string name="real_time_logs_confirm">要清除有紀錄檔嗎？(此動作不能復原)</string>
+    <string name="clear">清除畫面</string>
     <string name="system">系統</string>
     <string name="pref_toolkit">工具箱</string>
     <string name="exception_logcat_created">Logcat 行程已建立</string>

@@ -101,6 +101,9 @@ class LogActivity : AppCompatActivity() {
             exportButton.setOnClickListener {
                 launcher.launch("$packageName-${iso8601UTCDateTime()}.txt")
             }
+            jumpToBottomButton.setOnClickListener {
+                logView.scrollToBottom()
+            }
         }
         registerLauncher()
     }

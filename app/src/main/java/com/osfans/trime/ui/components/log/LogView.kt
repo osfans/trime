@@ -105,4 +105,8 @@ class LogView
         fun clear() {
             logAdapter.clear()
         }
+
+        fun scrollToBottom() {
+            recyclerView.scrollToPosition(logAdapter.itemCount - 1)
+        }
     }
