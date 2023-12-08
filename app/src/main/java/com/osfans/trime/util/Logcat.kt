@@ -63,7 +63,7 @@ class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope
                 runCatching {
                     Runtime
                         .getRuntime()
-                        .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "brief"))
+                        .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "time"))
                         .also { process = it }
                         .inputStream
                         .bufferedReader()
