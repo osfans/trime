@@ -65,7 +65,7 @@ suspend fun Context.colorPicker(
             items = all.map { it.second }.toTypedArray()
             val current = prefs.themeAndColor.selectedColor
             val schemeIds = all.map { it.first }
-            checkedItem = schemeIds.indexOf(current)
+            checkedItem = schemeIds.indexOf(current).takeIf { it > -1 } ?: 1
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
