@@ -73,8 +73,12 @@ fun bitmapDrawable(path: String?): Drawable? {
     val bitmap = BitmapFactory.decodeFile(path) ?: return null
     if (path.endsWith(".9.png")) {
         val chunk = bitmap.ninePatchChunk
-        if (NinePatch.isNinePatchChunk(chunk)) {
-            return NinePatchDrawable(Resources.getSystem(), bitmap, chunk, Rect(), null)
+        return if (NinePatch.isNinePatchChunk(chunk)) {
+            // for compiled nine patch image
+            NinePatchDrawable(Resources.getSystem(), bitmap, chunk, Rect(), null)
+        } else {
+            // for source nine patch image
+            NinePatchBitmapFactory.createNinePatchDrawable(Resources.getSystem(), bitmap)
         }
     }
     return BitmapDrawable(Resources.getSystem(), bitmap)
