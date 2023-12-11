@@ -19,7 +19,6 @@
 package com.osfans.trime.ime.core;
 
 import static android.graphics.Color.parseColor;
-import static splitties.systemservices.SystemServicesKt.getWindowManager;
 
 import android.app.AlarmManager;
 import android.app.Dialog;
@@ -38,7 +37,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -143,21 +141,23 @@ public class Trime extends LifecycleInputMethodService {
         public void run() {
           if (mCandidateRoot == null || mCandidateRoot.getWindowToken() == null) return;
           if (!isPopupWindowEnabled) return;
-
-          DisplayMetrics displayMetrics = new DisplayMetrics();
-          getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+          int x = 0, y = 0;
+          final int[] candidateLocation = new int[2];
+          mCandidateRoot.getLocationOnScreen(candidateLocation);
           final int minX = popupMarginH;
-          final int maxX = displayMetrics.widthPixels - mPopupWindow.getWidth() - popupMarginH;
-          final int minY = popupMargin + BarUtils.getStatusBarHeight() + mPopupWindow.getHeight();
-          final int maxY = displayMetrics.heightPixels - popupMargin - mPopupWindow.getHeight();
-
-          int x = minX, y = minY;
+          final int minY = popupMargin;
+          final int maxX = mCandidateRoot.getWidth() - mPopupWindow.getWidth() - minX;
+          final int maxY = candidateLocation[1] - mPopupWindow.getHeight() - minY;
           if (isWinFixed() || !isCursorUpdated) {
+            // setCandidatesViewShown(true);
             switch (popupWindowPos) {
-              case TOP_LEFT:
-                break;
               case TOP_RIGHT:
                 x = maxX;
+                y = minY;
+                break;
+              case TOP_LEFT:
+                x = minX;
+                y = minY;
                 break;
               case BOTTOM_RIGHT:
                 x = maxX;
@@ -170,10 +170,12 @@ public class Trime extends LifecycleInputMethodService {
               case FIXED:
               case BOTTOM_LEFT:
               default:
+                x = minX;
                 y = maxY;
                 break;
             }
           } else {
+            // setCandidatesViewShown(false);
             switch (popupWindowPos) {
               case LEFT:
               case LEFT_UP:
@@ -181,28 +183,27 @@ public class Trime extends LifecycleInputMethodService {
                 break;
               case RIGHT:
               case RIGHT_UP:
-              default:
                 x = (int) mPopupRectF.right;
-            }
-            x = Math.max(minX, x);
-            x = Math.min(maxX, x);
-
-            switch (popupWindowPos) {
-              case RIGHT_UP:
-              case LEFT_UP:
-                y =
-                    ((int) mPopupRectF.top < minY)
-                        ? (int) mPopupRectF.bottom + popupMargin
-                        : (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin;
                 break;
-              case RIGHT:
-              case LEFT:
               default:
-                y =
-                    ((int) mPopupRectF.bottom > maxY)
-                        ? (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin
-                        : (int) mPopupRectF.bottom + popupMargin;
+                Timber.wtf("UNREACHABLE BRANCH");
             }
+            x = Math.min(maxX, x);
+            x = Math.max(minX, x);
+            switch (popupWindowPos) {
+              case LEFT:
+              case RIGHT:
+                y = (int) mPopupRectF.bottom + popupMargin;
+                break;
+              case LEFT_UP:
+              case RIGHT_UP:
+                y = (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin;
+                break;
+              default:
+                Timber.wtf("UNREACHABLE BRANCH");
+            }
+            y = Math.min(maxY, y);
+            y = Math.max(minY, y);
           }
           y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
 
