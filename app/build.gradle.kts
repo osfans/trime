@@ -17,8 +17,8 @@ import java.text.SimpleDateFormat
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("plugin.serialization") version "1.8.0"
-    id("com.google.devtools.ksp") version "1.8.0-1.0.8"
+    kotlin("plugin.serialization") version Versions.kotlin
+    id("com.google.devtools.ksp") version Versions.ksp
     id("com.mikepenz.aboutlibraries.plugin")
 }
 
@@ -60,7 +60,8 @@ fun buildInfo(): String {
 
 android {
     namespace = "com.osfans.trime"
-    compileSdk = 33
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
     ndkVersion = "25.2.9519653"
 
     defaultConfig {
@@ -120,6 +121,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
 
@@ -129,7 +131,7 @@ android {
     }
     
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     // hack workaround lint gradle 8.0.2
@@ -204,31 +206,31 @@ dependencies {
     ksp(project(":codegen"))
     implementation("com.blankj:utilcodex:1.31.1")
     implementation("com.jakewharton.timber:timber:5.0.1")
-    implementation("com.github.getActivity:XXPermissions:16.2")
-    implementation("com.charleskorn.kaml:kaml:0.52.0")
-    implementation("com.mikepenz:aboutlibraries-core:10.6.1")
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.0")
+    implementation("com.github.getActivity:XXPermissions:18.5")
+    implementation("com.charleskorn.kaml:kaml:0.56.0")
+    implementation("com.mikepenz:aboutlibraries-core:${Versions.aboutlibraries}")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation("androidx.fragment:fragment-ktx:1.5.4")
-    implementation("androidx.navigation:navigation-fragment-ktx:${Extra.navVersion}")
-    implementation("androidx.navigation:navigation-ui-ktx:${Extra.navVersion}")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Extra.kotlinVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Extra.kotlinCoroutinesVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Extra.kotlinCoroutinesVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:${Versions.navigation}")
+    implementation("androidx.navigation:navigation-ui-ktx:${Versions.navigation}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinCoroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
-    implementation("com.louiscad.splitties:splitties-bitflags:${Extra.splittiesVersion}")
-    implementation("com.louiscad.splitties:splitties-systemservices:${Extra.splittiesVersion}")
-    implementation("com.louiscad.splitties:splitties-views-dsl:${Extra.splittiesVersion}")
-    implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:${Extra.splittiesVersion}")
-    implementation("com.louiscad.splitties:splitties-views-dsl-recyclerview:${Extra.splittiesVersion}")
-    implementation("com.louiscad.splitties:splitties-views-recyclerview:${Extra.splittiesVersion}")
-    implementation("androidx.room:room-runtime:${Extra.roomVersion}")
-    ksp("androidx.room:room-compiler:${Extra.roomVersion}")
-    implementation("androidx.room:room-ktx:${Extra.roomVersion}")
+    implementation("com.louiscad.splitties:splitties-bitflags:${Versions.splitties}")
+    implementation("com.louiscad.splitties:splitties-systemservices:${Versions.splitties}")
+    implementation("com.louiscad.splitties:splitties-views-dsl:${Versions.splitties}")
+    implementation("com.louiscad.splitties:splitties-views-dsl-constraintlayout:${Versions.splitties}")
+    implementation("com.louiscad.splitties:splitties-views-dsl-recyclerview:${Versions.splitties}")
+    implementation("com.louiscad.splitties:splitties-views-recyclerview:${Versions.splitties}")
+    implementation("androidx.room:room-runtime:${Versions.room}")
+    ksp("androidx.room:room-compiler:${Versions.room}")
+    implementation("androidx.room:room-ktx:${Versions.room}")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
