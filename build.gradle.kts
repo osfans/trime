@@ -19,7 +19,7 @@ spotless {
         importOrder()
         removeUnusedImports()
         target("app/src/main/java/com/osfans/trime/**/*.java")
-        googleJavaFormat("1.17.0")
+        googleJavaFormat("1.18.1")
     }
     kotlin {
         target("**/*.kt")
