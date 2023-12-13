@@ -10,7 +10,7 @@ plugins {
     id("com.android.application") version Versions.androidGradlePlugin apply false
     id("com.android.library") version Versions.androidGradlePlugin apply false
     kotlin("android") version Versions.kotlin apply false
-    id("com.diffplug.spotless") version "6.22.0"
+    id("com.diffplug.spotless") version "6.23.3"
     id("com.mikepenz.aboutlibraries.plugin") version Versions.aboutlibraries apply false
 }
 
