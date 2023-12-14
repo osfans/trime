@@ -52,9 +52,6 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
         
       - name: Check code style
         run: |
