@@ -13,6 +13,7 @@ import com.osfans.trime.data.sound.SoundTheme
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.util.UiUtil
@@ -107,7 +108,7 @@ fun Context.schemaPicker(
                         loading.show()
                     }
                 withContext(Dispatchers.Default) {
-                    Rime.deploy()
+                    RimeWrapper.deploy()
                     job.cancelAndJoin()
                     if (loading.isShowing) {
                         loading.dismiss()

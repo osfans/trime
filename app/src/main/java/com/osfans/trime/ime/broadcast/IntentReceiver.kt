@@ -32,6 +32,7 @@ import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.ime.core.RimeWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -54,14 +55,14 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
             COMMAND_DEPLOY ->
                 launch {
                     withContext(Dispatchers.Default) {
-                        Rime.deploy()
+                        RimeWrapper.deploy()
                     }
                     ToastUtils.showLong(R.string.deploy_finish)
                 }
             COMMAND_SYNC ->
                 async {
                     Rime.syncRimeUserData()
-                    Rime.deploy()
+                    RimeWrapper.deploy()
                 }
             COMMAND_TIMING_SYNC ->
                 async {
@@ -96,7 +97,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                         alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
                     }
                     Rime.syncRimeUserData()
-                    Rime.deploy()
+                    RimeWrapper.deploy()
                     wakeLock.release() // 释放唤醒锁
                 }
             else -> return

@@ -124,16 +124,18 @@ class PrefMainActivity : AppCompatActivity() {
                     withContext(Dispatchers.IO) {
                         Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
                     }
-                    withContext(Dispatchers.Default) {
-                        // All functions that implement the DirectoryChangeListener.Listener
-                        //   interface are called here.
-                        // To refresh directory settings.
-                        DataDirectoryChangeListener.directoryChangeListeners.forEach {
-                            it.onDataDirectoryChange()
+                    val deployResult =
+                        withContext(Dispatchers.Default) {
+                            // All functions that implement the DirectoryChangeListener.Listener
+                            //   interface are called here.
+                            // To refresh directory settings.
+                            return@withContext RimeWrapper.deploy()
                         }
-                        Rime.deploy()
+                    if (deployResult) {
+                        briefResultLogDialog("rime.trime", "W", 1)
+                    } else {
+                        ToastUtils.showLong("Rime is already deploying/starting")
                     }
-                    briefResultLogDialog("rime.trime", "W", 1)
                 }
                 true
             }

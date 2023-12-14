@@ -16,9 +16,13 @@ import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import splitties.systemservices.clipboardManager
 import timber.log.Timber
 import java.text.FieldPosition
@@ -133,7 +137,9 @@ object ShortcutUtils {
     fun syncInBackground() {
         val prefs = AppPrefs.defaultInstance()
         prefs.profile.lastBackgroundSync = Date().time.toString()
-        prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { Rime.deploy() }
+        CoroutineScope(Dispatchers.IO).launch {
+            prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { RimeWrapper.deploy() }
+        }
     }
 
     fun openCategory(keyCode: Int): Boolean {
