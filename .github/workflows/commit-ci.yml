@@ -25,10 +25,10 @@ jobs:
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
-      - name: Install coreutils macOS
+      - name: Install macOS utils
         if: startsWith(matrix.os, 'macOS')
         run: |
-          brew install coreutils
+          brew install coreutils clang-format
 
       - name: Calculate JNI cache hash
         id: cache-hash
