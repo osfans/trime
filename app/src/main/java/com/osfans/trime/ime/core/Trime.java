@@ -61,6 +61,7 @@ import com.osfans.trime.data.db.DraftHelper;
 import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.CompositionRootBinding;
+import com.osfans.trime.databinding.InputLoadingBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
@@ -722,6 +723,10 @@ public class Trime extends LifecycleInputMethodService {
     }
     // Update the caps-lock status for the current cursor position.
     dispatchCapsStateToInputView();
+
+    Timber.d(
+        "OnUpdateSelection: old: %d, %d, new: %d, %d, candidate: %d, %d",
+        oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
   }
 
   @Override
@@ -776,7 +781,7 @@ public class Trime extends LifecycleInputMethodService {
         });
     Timber.i("onCreateInputView() finish");
 
-    return null;
+    return InputLoadingBinding.inflate(LayoutInflater.from(this)).getRoot();
   }
 
   public void setShowComment(boolean show_comment) {
@@ -893,21 +898,24 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onFinishInputView(boolean finishingInput) {
-    if (normalTextEditor) {
-      DraftHelper.INSTANCE.onInputEventChanged();
-    }
     super.onFinishInputView(finishingInput);
-    // Dismiss any pop-ups when the input-view is being finished and hidden.
-    mainKeyboardView.closing();
-    performEscape();
-    if (inputFeedbackManager != null) {
-      inputFeedbackManager.releaseSoundPool();
+    if (RimeWrapper.INSTANCE.isReady()) {
+      if (normalTextEditor) {
+        DraftHelper.INSTANCE.onInputEventChanged();
+      }
+      try {
+        // Dismiss any pop-ups when the input-view is being finished and hidden.
+        mainKeyboardView.closing();
+        performEscape();
+        if (inputFeedbackManager != null) {
+          inputFeedbackManager.releaseSoundPool();
+        }
+        hideCompositionView();
+      } catch (Exception e) {
+        Timber.e(e, "Failed to show the PopupWindow.");
+      }
     }
-    try {
-      hideCompositionView();
-    } catch (Exception e) {
-      Timber.e(e, "Failed to show the PopupWindow.");
-    }
+    Timber.d("OnFinishInputView");
   }
 
   @Override
@@ -1293,13 +1301,16 @@ public class Trime extends LifecycleInputMethodService {
       } else {
         switch (getPrefs().getKeyboard().getFullscreenMode()) {
           case AUTO_SHOW:
+            Timber.d("FullScreen: Auto");
             final EditorInfo ei = getCurrentInputEditorInfo();
             if (ei != null && (ei.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0) {
               return false;
             }
           case ALWAYS_SHOW:
+            Timber.d("FullScreen: Always");
             return true;
           case NEVER_SHOW:
+            Timber.d("FullScreen: Never");
             return false;
         }
       }
