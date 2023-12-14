@@ -58,7 +58,7 @@ jobs:
           ./gradlew spotlessCheck
 
       # `make debug` works not well on Windows
-      - name: Build Debug APK
+      - name: Build debug Trime
         run: |
           ./gradlew :app:assembleDebug
 
