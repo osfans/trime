@@ -6,13 +6,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -21,16 +24,18 @@ import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
-import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.databinding.ActivityPrefBinding
+import com.osfans.trime.ime.core.RimeWrapper
+import com.osfans.trime.ime.core.Status
 import com.osfans.trime.ui.setup.SetupActivity
+import com.osfans.trime.util.ProgressBarDialogIndeterminate
 import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.briefResultLogDialog
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PrefMainActivity : AppCompatActivity() {
@@ -38,6 +43,7 @@ class PrefMainActivity : AppCompatActivity() {
     private val prefs get() = AppPrefs.defaultInstance()
 
     private lateinit var navHostFragment: NavHostFragment
+    private var loadingDialog: AlertDialog? = null
 
     private fun onNavigateUpListener(): Boolean {
         val navController = navHostFragment.navController
@@ -103,6 +109,26 @@ class PrefMainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         if (SetupActivity.shouldSetup()) {
             startActivity(Intent(this, SetupActivity::class.java))
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                RimeWrapper.statusStateFlow.collect { state ->
+                    when (state) {
+                        Status.IN_PROGRESS -> {
+                            loadingDialog?.dismiss()
+                            loadingDialog =
+                                ProgressBarDialogIndeterminate(R.string.loading).create().apply {
+                                    show()
+                                }
+                        }
+                        Status.UN_INIT -> {
+                            RimeWrapper.startup()
+                        }
+                        else -> loadingDialog?.dismiss()
+                    }
+                }
+            }
         }
     }
 
