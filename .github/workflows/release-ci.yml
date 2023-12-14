@@ -29,7 +29,7 @@ jobs:
         id: jni-cache
         with:
           path: "app/prebuilt"
-          key: jni-release-${{ steps.cache-hash.outputs.hash }}
+          key: ${{ matrix.os }}-trime-jni-debug-${{ steps.cache-hash.outputs.hash }}
 
       - name: Fetch submodules
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
