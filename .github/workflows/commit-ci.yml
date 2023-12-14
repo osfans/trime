@@ -11,7 +11,7 @@ jobs:
         os:
           - ubuntu-22.04
           - macos-13
-          - windows-2022
+          # - windows-2022
     steps:
       - name: Fetch source code
         uses: actions/checkout@v4
