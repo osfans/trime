@@ -22,7 +22,6 @@ import android.graphics.drawable.GradientDrawable
 import androidx.core.math.MathUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager.sharedDataDir
 import com.osfans.trime.data.DataManager.userDataDir
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.sound.SoundThemeManager
@@ -87,7 +86,6 @@ class Theme private constructor(isDarkMode: Boolean) {
     init {
         self = this
         ThemeManager.init()
-        Rime.getInstance(!sharedDataDir.exists())
         init(isDarkMode)
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
