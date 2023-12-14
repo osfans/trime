@@ -63,7 +63,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         
-      - name: Check code format
+      - name: Check code style
         run: |
           ./gradlew spotlessCheck
 
