@@ -66,8 +66,9 @@ jobs:
         uses: android-actions/setup-android@v3
         
       - name: Check code style
+        shell: bash
         run: |
-          ./gradlew spotlessCheck
+          make style-lint
 
       # `make debug` works not well on Windows
       - name: Build debug Trime
