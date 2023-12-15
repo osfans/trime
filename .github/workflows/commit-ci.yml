@@ -27,7 +27,7 @@ jobs:
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
       - name: Install macOS utils
-        if: startsWith(matrix.os, 'macOS')
+        if: startsWith(matrix.os, 'macos')
         run: |
           brew install coreutils clang-format
 
