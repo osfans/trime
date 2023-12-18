@@ -24,7 +24,7 @@
     android:id="@+id/candidate_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    style="@style/candidate_scrollBar"
     android:fillViewport="true">
 
     <LinearLayout
