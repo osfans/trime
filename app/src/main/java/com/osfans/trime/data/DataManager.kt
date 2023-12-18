@@ -63,7 +63,7 @@ object DataManager : DataDirectoryChangeListener.Listener {
 
     @JvmStatic
     fun sync() {
-        val newHash = Const.buildGitHash
+        val newHash = Const.buildCommitHash
         val oldHash = prefs.internal.lastBuildGitHash
 
         diff(oldHash, newHash).run {

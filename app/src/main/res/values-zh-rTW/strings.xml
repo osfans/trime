@@ -41,6 +41,7 @@
     <string name="pref_credits">貢獻代碼</string>
     <string name="about__product_prime">Win10 PRIME輸入法平臺</string>
     <string name="about__privacy_policy">隱私權政策</string>
+    <string name="about__build_info_format">建構者：%1$s\nGit 倉庫：%2$s\n建構 Git 雜湊值：%3$s\n建構時間：%4$s</string>
     <string name="pref_enable">啓用</string>
     <string name="pref_enable_summary">啓用同文輸入法平臺</string>
     <string name="pref_select">選取軟鍵盤</string>
@@ -105,7 +106,7 @@
     <string name="profile_never_sync_in_background">從未在後臺同步過</string>
     <string name="profile_enable_syncing_in_background">點擊以啟用後台同步</string>
     <string name="profile_timing_sync">定時同步</string>
-    <string name="profile_timing_sync_trigger_time">已啟用定時同步 下次同步時間: %s</string>
+    <string name="profile_timing_sync_trigger_time">已啟用定時同步 下次同步時間: %1$s</string>
     <string name="profile_enable_timing_sync">點擊以啟用定時同步</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
@@ -185,7 +186,7 @@
     <string name="keyboard__swipe_enabled">允許觸發按鍵的滑動手勢</string>
     <string name="keyboard__key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
     <string name="keyboard__key_swipe_velocity_hi">連續擊鍵時觸發滑動手勢的速度</string>
-    <string name="about__buildinfo">編譯信息</string>
+    <string name="about__build_info">建構資訊</string>
     <string name="keyboard__use_mini_keyboard_title">連接實體鍵盤時，顯示迷你軟鍵盤</string>
     <string name="pref_trime_custom_qq">修改版QQ羣</string>
     <string name="pref_keyboard__candidate">候選欄</string>
@@ -238,7 +239,7 @@
     <string name="maintenance">維護</string>
     <string name="loading">正在載入</string>
     <string name="profile_sync_in_background">後臺同步</string>
-    <string name="profile_last_sync_in_background">上次後臺同步時間：%s\n狀態：%s</string>
+    <string name="profile_last_sync_in_background">上次後臺同步時間：%1$s\n狀態：%2$s</string>
     <string name="success">成功</string>
     <string name="failure">失敗</string>
     <string name="other_managed_clipboard">剪貼板內容</string>

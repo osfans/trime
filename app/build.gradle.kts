@@ -1,61 +1,16 @@
 @file:Suppress("UnstableApiUsage")
 
-import android.databinding.tool.ext.capitalizeUS
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import com.google.common.hash.Hashing
-import com.google.common.io.Files
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import java.io.ByteArrayOutputStream
-import java.nio.charset.Charset
-import java.io.StringWriter
 import java.util.Properties
-import java.util.TimeZone
-import java.util.Date
-import java.text.SimpleDateFormat
+import org.gradle.configurationcache.extensions.capitalized
 
 plugins {
+    id("com.osfans.trime.data-checksums")
     id("com.android.application")
     kotlin("android")
     kotlin("plugin.serialization") version Versions.kotlin
     id("com.google.devtools.ksp") version Versions.ksp
     id("com.mikepenz.aboutlibraries.plugin")
-}
-
-fun exec(cmd: String): String = ByteArrayOutputStream().use {
-    project.exec {
-        commandLine = cmd.split(" ")
-        standardOutput = it
-    }
-    it.toString().trim()
-}
-fun envOrDefault(env: String, default: () -> String): String {
-    val v = System.getenv(env)
-    return if (v.isNullOrBlank()) default() else v
-}
-
-val gitUserOrCIName = envOrDefault("CI_NAME") {
-    exec("git config user.name")
-}
-val gitVersionName = exec("git describe --tags --long --always")
-val gitHashShort = exec("git rev-parse --short HEAD")
-val gitRemoteUrl = exec("git remote get-url origin")
-    .replaceFirst("^git@github\\.com:", "https://github.com/")
-    .replaceFirst("\\.git\$", "")
-
-fun buildInfo(): String {
-    val writer = StringWriter()
-    val time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }.format(Date(System.currentTimeMillis()))
-    writer.append("Builder: ${gitUserOrCIName}\\n")
-    writer.append("Build Time: $time UTC\\n")
-    writer.append("Build Version Name: ${gitVersionName}\\n")
-    writer.append("Git Hash: ${gitHashShort}\\n")
-    writer.append("Git Repo: $gitRemoteUrl")
-    val info = writer.toString()
-    println(info)
-    return info
 }
 
 android {
@@ -73,10 +28,11 @@ android {
 
         multiDexEnabled = true
         setProperty("archivesBaseName", "trime-$versionName")
-        buildConfigField("String", "BUILD_GIT_HASH", "\"${gitHashShort}\"")
-        buildConfigField("String", "BUILD_GIT_REPO", "\"${gitRemoteUrl}\"")
-        buildConfigField("String", "BUILD_VERSION_NAME", "\"${gitVersionName}\"")
-        buildConfigField("String", "BUILD_INFO", "\"${buildInfo()}\"")
+        buildConfigField("String", "BUILDER", "\"${project.builder}\"")
+        buildConfigField("long", "BUILD_TIMESTAMP", project.buildTimestamp)
+        buildConfigField("String", "BUILD_COMMIT_HASH", "\"${project.buildCommitHash}\"")
+        buildConfigField("String", "BUILD_GIT_REPO", "\"${project.buildGitRepo}\"")
+        buildConfigField("String", "BUILD_VERSION_NAME", "\"${project.buildVersionName}\"")
     }
 
     signingConfigs {
@@ -184,19 +140,12 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
-val generateDataChecksum by tasks.register<DataChecksumsTask>("generateDataChecksum") {
-    inputDir.set(file("src/main/assets"))
-    outputFile.set(file("src/main/assets/checksums.json"))
-}
-
 android.applicationVariants.all {
-    val variantName = name.capitalizeUS()
-    tasks.findByName("merge${variantName}Assets")?.dependsOn(generateDataChecksum)
+    val variantName = name.capitalized()
+    tasks.findByName("generateDataChecksums")?.also {
+        tasks.getByName("merge${variantName}Assets").dependsOn(it)
+    }
 }
-
-tasks.register<Delete>("cleanGeneratedAssets") {
-    delete(file("src/main/assets/checksums.json"))
-}.also { tasks.clean.dependsOn(it) }
 
 tasks.register<Delete>("cleanCxxIntermediates") {
     delete(file(".cxx"))
@@ -235,84 +184,4 @@ dependencies {
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("junit:junit:4.13.2")
-}
-
-abstract class DataChecksumsTask : DefaultTask() {
-    @get:Incremental
-    @get:PathSensitive(PathSensitivity.NAME_ONLY)
-    @get:InputDirectory
-    abstract val inputDir: DirectoryProperty
-
-    @get:OutputFile
-    abstract val outputFile: RegularFileProperty
-
-    private val file by lazy { outputFile.get().asFile }
-
-    private fun serialize(map: Map<String, String>) {
-        file.deleteOnExit()
-        file.writeText(
-            JsonOutput.prettyPrint(
-                JsonOutput.toJson(
-                    mapOf<Any, Any>(
-                        "sha256" to Hashing.sha256()
-                            .hashString(
-                                map.entries.joinToString { it.key + it.value },
-                                Charset.defaultCharset()
-                            )
-                            .toString(),
-                        "files" to map
-                    )
-                )
-            )
-        )
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun deserialize(): Map<String, String> =
-        ((JsonSlurper().parseText(file.readText()) as Map<Any, Any>))["files"] as Map<String, String>
-
-    companion object {
-        fun sha256(file: File): String =
-            Files.asByteSource(file).hash(Hashing.sha256()).toString()
-    }
-
-    @TaskAction
-    fun execute(inputChanges: InputChanges) {
-        val map =
-            file.exists()
-                .takeIf { it }
-                ?.runCatching {
-                    deserialize()
-                        // remove all old dirs
-                        .filterValues { it.isNotBlank() }
-                        .toMutableMap()
-                }
-                ?.getOrNull()
-                ?: mutableMapOf()
-
-        fun File.allParents(): List<File> =
-        if (parentFile == null || parentFile.path in map)
-            listOf()
-        else
-            listOf(parentFile) + parentFile.allParents()
-        inputChanges.getFileChanges(inputDir).forEach { change ->
-            if (change.file.name == file.name)
-                return@forEach
-            logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
-            val relativeFile = change.file.relativeTo(file.parentFile)
-            val key = relativeFile.path
-            if (change.changeType == ChangeType.REMOVED) {
-                map.remove(key)
-            } else {
-                map[key] = sha256(change.file)
-            }
-        }
-        // calculate dirs
-        inputDir.asFileTree.forEach {
-            it.relativeTo(file.parentFile).allParents().forEach { p ->
-                map[p.path] = ""
-            }
-        }
-        serialize(map.toSortedMap())
-    }
 }

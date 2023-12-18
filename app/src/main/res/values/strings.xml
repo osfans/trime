@@ -41,6 +41,7 @@
     <string name="pref_credits">Contribute</string>
     <string name="about__product_prime">Win10 PRIME Platform</string>
     <string name="about__privacy_policy">Privacy Policy</string>
+    <string name="about__build_info_format">Builder: %1$s\nGit Repo: %2$s\nBuild Git Hash: %3$s\nBuild Time: %4$s</string>
     <string name="pref_enable">Enable</string>
     <string name="pref_enable_summary">Enable Trime</string>
     <string name="pref_select">Change Keyboard</string>
@@ -103,11 +104,11 @@
     <string name="profile_shared_data_dir">Shared directory</string>
     <string name="profile_user_data_dir">User directory</string>
     <string name="profile_sync_in_background">Sync in background</string>
-    <string name="profile_last_sync_in_background">Last sync in background: %s\nStatus: %s</string>
+    <string name="profile_last_sync_in_background">Last sync in background: %1$s\nStatus: %2$s</string>
     <string name="profile_never_sync_in_background">Never synced in the background</string>
     <string name="profile_enable_syncing_in_background">Click to enable</string>
     <string name="profile_timing_sync">Timing sync</string>
-    <string name="profile_timing_sync_trigger_time">Timing sync is enabled Next sync at time: %s</string>
+    <string name="profile_timing_sync_trigger_time">Timing sync is enabled Next sync at time: %1$s</string>
     <string name="profile_enable_timing_sync">Click to enable</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
@@ -189,7 +190,7 @@
      <string name="keyboard__swipe_enabled">Allow swipe gestures to trigger keys</string>
      <string name="keyboard__key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
      <string name="keyboard__key_swipe_velocity_hi">The velocity of the swipe gesture on consecutive keystrokes</string>
-    <string name="about__buildinfo">Build info</string>
+    <string name="about__build_info">Build Info</string>
     <string name="keyboard__use_mini_keyboard_title">Show mini keyboard with real keyboard attached</string>
     <string name="pref_trime_custom_qq">Custom QQ Group</string>
     <string name="pref_trime_custom_qq_summary" translatable="false"> </string>
