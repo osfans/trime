@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.appcompat.app.AlertDialog
-import androidx.cardview.widget.CardView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -97,7 +96,7 @@ class FlexibleAdapter(
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
 
             // if (background != null) viewHolder.itemView.setBackground(background);
-            (itemView as CardView).background =
+            (itemView as ViewGroup).background =
                 theme.colors.getDrawable(
                     "long_text_back_color",
                     "key_border",
