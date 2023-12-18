@@ -5,12 +5,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.view.setPadding
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.blankj.utilcode.util.ScreenUtils
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.osfans.trime.R
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.SymbolHistory
@@ -99,22 +102,31 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     private fun initFixData(i: Int) {
         val tabTag = TabManager.getTag(i)
 
+        val itemWidth = context.resources.getDimensionPixelSize(R.dimen.simple_item_size)
+        val itemMargin = context.resources.getDimensionPixelSize(R.dimen.simple_key_margin_x)
+        val columnCount = ScreenUtils.getScreenWidth() / (itemWidth + itemMargin)
         val simpleAdapter =
-            SimpleAdapter(theme).apply {
+            SimpleAdapter(theme, columnCount).apply {
                 // 列表适配器的点击监听事件
                 setListener { position ->
-                    val bean = beans[position]
-                    if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                        service.inputSymbol(bean.text)
-                    } else if (tabTag.type !== SymbolKeyboardType.TABS) {
-                        service.commitText(bean.text)
-                        if (tabTag.type !== SymbolKeyboardType.HISTORY) {
-                            symbolHistory.insert(bean.text)
-                            symbolHistory.save()
+                    if (position < beans.size) {
+                        val bean = beans[position]
+                        if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+                            service.inputSymbol(bean.text)
+                            return@setListener
+                        } else if (tabTag.type !== SymbolKeyboardType.TABS) {
+                            service.commitText(bean.text)
+                            if (tabTag.type !== SymbolKeyboardType.HISTORY) {
+                                symbolHistory.insert(bean.text)
+                                symbolHistory.save()
+                            }
+                            return@setListener
                         }
-                    } else {
-                        val tag = TabManager.get().getTabSwitchTabTag(position)
-                        val truePosition = TabManager.get().getTabSwitchPosition(position)
+                    }
+
+                    val tag = TabManager.get().getTabSwitchTabTag(position)
+                    val truePosition = TabManager.get().getTabSwitchPosition(position)
+                    if (tag != null) {
                         Timber.v(
                             "TABS click: " +
                                 "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
@@ -135,8 +147,12 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 }
             }
         keyboardView.apply {
-            layoutManager = getFlexbox()
-            adapter = simpleAdapter
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            adapter =
+                simpleAdapter.apply {
+                    setHasStableIds(true)
+                    setHasFixedSize(true)
+                }
             // 添加分割线
             // 设置添加删除动画
             // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
