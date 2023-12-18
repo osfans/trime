@@ -90,7 +90,12 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             SymbolKeyboardType.VAR_LENGTH -> {
                 initVarLengthKeys(TabManager.get().select(i))
             }
-            SymbolKeyboardType.SYMBOL, SymbolKeyboardType.HISTORY, SymbolKeyboardType.TABS -> {
+            SymbolKeyboardType.TABS -> {
+                TabManager.get().select(i)
+                initVarLengthKeys(TabManager.get().tabSwitchData)
+                Timber.v("All tags in TABS: TabManager.get().tabSwitchData = ${TabManager.get().tabSwitchData}")
+            }
+            SymbolKeyboardType.SYMBOL, SymbolKeyboardType.HISTORY -> {
                 TabManager.get().select(i)
                 initFixData(i)
             }
@@ -162,10 +167,6 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
         when (tabTag.type) {
             SymbolKeyboardType.HISTORY ->
                 simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
-            SymbolKeyboardType.TABS -> {
-                simpleAdapter.updateBeans(TabManager.get().tabSwitchData)
-                Timber.v("All tags in TABS: TabManager.get().tabSwitchData = ${TabManager.get().tabSwitchData}")
-            }
             else ->
                 simpleAdapter.updateBeans(TabManager.get().select(i))
         }
