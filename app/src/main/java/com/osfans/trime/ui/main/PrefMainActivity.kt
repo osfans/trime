@@ -33,7 +33,6 @@ import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.ProgressBarDialogIndeterminate
 import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.briefResultLogDialog
-import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -143,26 +142,7 @@ class PrefMainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.preference__menu_deploy -> {
-                lifecycleScope.withLoadingDialog(
-                    context = this,
-                    titleId = R.string.deploy_progress,
-                ) {
-                    withContext(Dispatchers.IO) {
-                        Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
-                    }
-                    val deployResult =
-                        withContext(Dispatchers.Default) {
-                            // All functions that implement the DirectoryChangeListener.Listener
-                            //   interface are called here.
-                            // To refresh directory settings.
-                            return@withContext RimeWrapper.deploy()
-                        }
-                    if (deployResult) {
-                        briefResultLogDialog("rime.trime", "W", 1)
-                    } else {
-                        ToastUtils.showLong("Rime is already deploying/starting")
-                    }
-                }
+                deploy()
                 true
             }
             R.id.preference__menu_about -> {
@@ -170,6 +150,26 @@ class PrefMainActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun deploy() {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
+            }
+            val deployResult =
+                withContext(Dispatchers.Default) {
+                    // All functions that implement the DirectoryChangeListener.Listener
+                    //   interface are called here.
+                    // To refresh directory settings.
+                    return@withContext RimeWrapper.deploy()
+                }
+            if (deployResult) {
+                briefResultLogDialog("rime.trime", "W", 1)
+            } else {
+                ToastUtils.showLong("Rime is already deploying/starting")
+            }
         }
     }
 

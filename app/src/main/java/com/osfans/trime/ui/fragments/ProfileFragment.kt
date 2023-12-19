@@ -32,6 +32,7 @@ import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -70,7 +71,7 @@ class ProfileFragment :
                 registerDocumentTreeLauncher()
             }
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
-                lifecycleScope.withLoadingDialog(context, 200L, R.string.sync_progress) {
+                lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
                         Rime.syncRimeUserData()
                         RimeWrapper.deploy()

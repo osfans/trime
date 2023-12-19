@@ -18,10 +18,7 @@ import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.util.UiUtil
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
-import com.osfans.trime.util.ProgressBarDialogIndeterminate
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -101,18 +98,8 @@ fun Context.schemaPicker(
                         .filterIndexed { i, _ -> checked[i] }
                         .toTypedArray(),
                 )
-                val loading = ProgressBarDialogIndeterminate(titleId = R.string.deploy_progress).create()
-                val job =
-                    launch {
-                        delay(200L)
-                        loading.show()
-                    }
                 withContext(Dispatchers.Default) {
                     RimeWrapper.deploy()
-                    job.cancelAndJoin()
-                    if (loading.isShowing) {
-                        loading.dismiss()
-                    }
                 }
             }
         }
