@@ -117,7 +117,7 @@ class PrefMainActivity : AppCompatActivity() {
                         Status.IN_PROGRESS -> {
                             loadingDialog?.dismiss()
                             loadingDialog =
-                                ProgressBarDialogIndeterminate(R.string.loading).create().apply {
+                                ProgressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
                                     show()
                                 }
                         }
