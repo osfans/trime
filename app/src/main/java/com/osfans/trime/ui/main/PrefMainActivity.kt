@@ -178,6 +178,12 @@ class PrefMainActivity : AppCompatActivity() {
         requestExternalStoragePermission()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        loadingDialog?.dismiss()
+        loadingDialog = null
+    }
+
     private fun requestExternalStoragePermission() {
         XXPermissions.with(this)
             .permission(Permission.MANAGE_EXTERNAL_STORAGE)
