@@ -19,8 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/e37f5513239bab279a9e58cf0c9b163e0dbf5efb/app/src/main/java/org/fcitx/fcitx5/android/ui/common/Preset.kt#L60
-@Suppress("FunctionName")
-fun Context.ProgressBarDialogIndeterminate(
+fun Context.progressBarDialogIndeterminate(
     @StringRes titleId: Int,
 ): AlertDialog.Builder {
     return AlertDialog.Builder(this, Theme_AppCompat_DayNight_Dialog_Alert)
@@ -30,7 +29,7 @@ fun Context.ProgressBarDialogIndeterminate(
                 orientation = LinearLayout.VERTICAL
                 addView(
                     ProgressBar(
-                        this@ProgressBarDialogIndeterminate,
+                        this@progressBarDialogIndeterminate,
                         null,
                         android.R.attr.progressBarStyleHorizontal,
                     ).apply {
@@ -60,7 +59,7 @@ fun LifecycleCoroutineScope.withLoadingDialog(
     @StringRes titleId: Int = R.string.loading,
     action: suspend () -> Unit,
 ) {
-    val loading = context.ProgressBarDialogIndeterminate(titleId).create()
+    val loading = context.progressBarDialogIndeterminate(titleId).create()
     val job =
         launch {
             delay(thresholds)
@@ -83,7 +82,7 @@ suspend fun Context.briefResultLogDialog(
     val log =
         withContext(Dispatchers.IO) {
             Runtime.getRuntime()
-                .exec(arrayOf("logcat", "-d", "-v", "brief", "-s", "$tag:$priority"))
+                .exec(arrayOf("logcat", "-d", "-v", "time", "-s", "$tag:$priority"))
                 .inputStream
                 .bufferedReader()
                 .readLines()
@@ -105,5 +104,27 @@ suspend fun Context.briefResultLogDialog(
             .show()
     } else {
         ToastUtils.showShort(R.string.setup__done)
+    }
+}
+
+suspend fun Context.rimeActionWithResultDialog(
+    tag: String,
+    priority: String,
+    thresholds: Int,
+    action: suspend () -> Boolean,
+) {
+    withContext(Dispatchers.Main.immediate) {
+        withContext(Dispatchers.IO) {
+            Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
+        }
+        val result =
+            withContext(Dispatchers.IO) {
+                action()
+            }
+        if (result) {
+            briefResultLogDialog(tag, priority, thresholds)
+        } else {
+            ToastUtils.showLong("Failed")
+        }
     }
 }

@@ -30,6 +30,7 @@ import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
+import com.osfans.trime.util.rimeActionWithResultDialog
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,7 +73,7 @@ class ProfileFragment :
             }
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
                 lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
+                    this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
                         Rime.syncRimeUserData()
                         RimeWrapper.deploy()
                     }

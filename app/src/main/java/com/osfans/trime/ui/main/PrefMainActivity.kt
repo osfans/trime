@@ -30,12 +30,10 @@ import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Status
 import com.osfans.trime.ui.setup.SetupActivity
-import com.osfans.trime.util.ProgressBarDialogIndeterminate
 import com.osfans.trime.util.applyTranslucentSystemBars
-import com.osfans.trime.util.briefResultLogDialog
-import kotlinx.coroutines.Dispatchers
+import com.osfans.trime.util.progressBarDialogIndeterminate
+import com.osfans.trime.util.rimeActionWithResultDialog
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PrefMainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -117,7 +115,7 @@ class PrefMainActivity : AppCompatActivity() {
                         Status.IN_PROGRESS -> {
                             loadingDialog?.dismiss()
                             loadingDialog =
-                                ProgressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
+                                progressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
                                     show()
                                 }
                         }
@@ -155,20 +153,8 @@ class PrefMainActivity : AppCompatActivity() {
 
     private fun deploy() {
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
-            }
-            val deployResult =
-                withContext(Dispatchers.Default) {
-                    // All functions that implement the DirectoryChangeListener.Listener
-                    //   interface are called here.
-                    // To refresh directory settings.
-                    return@withContext RimeWrapper.deploy()
-                }
-            if (deployResult) {
-                briefResultLogDialog("rime.trime", "W", 1)
-            } else {
-                ToastUtils.showLong("Rime is already deploying/starting")
+            rimeActionWithResultDialog("rime.trime", "W", 1) {
+                RimeWrapper.deploy()
             }
         }
     }
