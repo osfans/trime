@@ -573,12 +573,14 @@ public class Trime extends LifecycleInputMethodService {
 
   /** Must be called on the UI thread */
   public void initKeyboard() {
-    reset();
-    // setNavBarColor();
-    textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
-    bindKeyboardToInputView();
-    // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
-    updateComposing(); // 切換主題時刷新候選
+    if (textInputManager != null) {
+      reset();
+      // setNavBarColor();
+      textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
+      bindKeyboardToInputView();
+      // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
+      updateComposing(); // 切換主題時刷新候選
+    }
   }
 
   public void initKeyboardDarkMode(boolean darkMode) {
@@ -723,10 +725,6 @@ public class Trime extends LifecycleInputMethodService {
     }
     // Update the caps-lock status for the current cursor position.
     dispatchCapsStateToInputView();
-
-    Timber.d(
-        "OnUpdateSelection: old: %d, %d, new: %d, %d, candidate: %d, %d",
-        oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
   }
 
   @Override
@@ -987,6 +985,9 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private boolean composeEvent(@NonNull KeyEvent event) {
+    if (textInputManager == null) {
+      return false;
+    }
     final int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_MENU) return false; // 不處理 Menu 鍵
     if (!Keycode.Companion.isStdKey(keyCode)) return false; // 只處理安卓標準按鍵
