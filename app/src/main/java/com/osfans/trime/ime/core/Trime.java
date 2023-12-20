@@ -701,20 +701,17 @@ public class Trime extends LifecycleInputMethodService {
     super.onUpdateSelection(
         oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
     if ((candidatesEnd != -1) && ((newSelStart != candidatesEnd) || (newSelEnd != candidatesEnd))) {
-      // 移動光標時，commit
-      getCurrentInputConnection().finishComposingText();
-      performEscape();
+      // 移動光標時，更新候選區
+      if ((newSelEnd < candidatesEnd) && (newSelEnd >= candidatesStart)) {
+        final int n = newSelEnd - candidatesStart;
+        Rime.setCaretPos(n);
+        updateComposing();
+      }
     }
     if ((candidatesStart == -1 && candidatesEnd == -1) && (newSelStart == 0 && newSelEnd == 0)) {
       // 上屏後，清除候選區
       performEscape();
     }
-    if (candidatesEnd < newSelEnd || candidatesStart > newSelStart) {
-      // 點擊在"輸入文字"外，上屏
-      getCurrentInputConnection().finishComposingText();
-      performEscape();
-    }
-
     // Update the caps-lock status for the current cursor position.
     dispatchCapsStateToInputView();
   }
