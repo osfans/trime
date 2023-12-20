@@ -216,7 +216,7 @@
     <string name="pref_toolkit">工具箱</string>
     <string name="system">系统</string>
     <string name="export">导出</string>
-    <string name="scroll_to_bottom">跳到最後</string>
+    <string name="scroll_to_bottom">跳到最后</string>
     <string name="clear">清除画面</string>
     <string name="crash_logs">崩溃日志</string>
     <string name="real_time_logs">实时日志</string>
