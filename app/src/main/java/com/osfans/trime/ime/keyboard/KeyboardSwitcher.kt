@@ -35,7 +35,15 @@ object KeyboardSwitcher {
         Timber.d("Switching keyboard back to .default ...")
         availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
             ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
-        availableKeyboards = availableKeyboardIds.map { Keyboard(theme.keyboards.remapKeyboardId(it)) }
+
+        availableKeyboards =
+            availableKeyboardIds.map {
+                try {
+                    Keyboard(theme.keyboards.remapKeyboardId(it))
+                } catch (e: Exception) {
+                    Keyboard("default")
+                }
+            }
     }
 
     fun switchKeyboard(name: String?) {

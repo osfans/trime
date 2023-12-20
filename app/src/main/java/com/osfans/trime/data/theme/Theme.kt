@@ -301,6 +301,8 @@ class Theme private constructor(isDarkMode: Boolean) {
                         ?: throw IllegalStateException("The default keyboard definition is missing!")
                 if (defaultMap.containsKey("import_preset")) {
                     return defaultMap["import_preset"] as? String ?: "default"
+                } else {
+                    return "default"
                 }
             }
             return remapped
