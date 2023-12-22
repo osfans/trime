@@ -773,6 +773,7 @@ public class Trime extends LifecycleInputMethodService {
           loadBackground();
 
           KeyboardSwitcher.newOrReset();
+          bindKeyboardToInputView();
 
           setInputView(inputRootBinding.inputRoot);
           Timber.d("onCreateInputView - really ended");
