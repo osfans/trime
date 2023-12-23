@@ -3,17 +3,11 @@ plugins {
     kotlin("plugin.serialization") version embeddedKotlinVersion
 }
 
-repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-}
-
 dependencies {
-    compileOnly("com.android.tools.build:gradle:8.2.0")
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
-    implementation("com.google.guava:guava:33.0.0-jre")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+    compileOnly(libs.android.gradlePlugin)
+    compileOnly(libs.kotlin.gradlePlugin)
+    implementation(libs.guava)
+    implementation(libs.kotlinx.serialization.json)
 }
 
 gradlePlugin {

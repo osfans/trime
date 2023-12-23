@@ -7,11 +7,14 @@
  */
 
 plugins {
-    id("com.android.application") version Versions.androidGradlePlugin apply false
-    id("com.android.library") version Versions.androidGradlePlugin apply false
-    kotlin("android") version Versions.kotlin apply false
-    id("com.diffplug.spotless") version "6.23.3"
-    id("com.mikepenz.aboutlibraries.plugin") version Versions.aboutlibraries apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.aboutlibraries) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.spotless)
 }
 
 spotless {
