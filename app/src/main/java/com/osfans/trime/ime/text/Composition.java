@@ -183,7 +183,7 @@ public class Composition extends AppCompatTextView {
             getText().toString().substring(n, composition_pos[1]).replace(" ", "").replace("‸", "");
         n = Rime.getRimeRawInput().length() - s.length(); // 從右側定位
         Rime.setCaretPos(n);
-        Trime.getService().updateComposing();
+        Trime.Companion.getService().updateComposing();
         return true;
       }
     } else if (!movable.contentEquals("false")
@@ -200,7 +200,7 @@ public class Composition extends AppCompatTextView {
         } else { // MotionEvent.ACTION_MOVE
           mCurrentX = (int) (event.getRawX() + mDx);
           mCurrentY = (int) (event.getRawY() + mDy);
-          Trime.getService().updatePopupWindow(mCurrentX, mCurrentY);
+          Trime.Companion.getService().updatePopupWindow(mCurrentX, mCurrentY);
         }
         return true;
       }

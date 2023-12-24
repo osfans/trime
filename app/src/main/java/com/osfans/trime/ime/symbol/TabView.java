@@ -206,7 +206,7 @@ public class TabView extends View {
           if (tag.type == SymbolKeyboardType.NO_KEY) {
             switch (tag.command) {
               case EXIT:
-                Trime.getService().selectLiquidKeyboard(-1);
+                Trime.Companion.getService().selectLiquidKeyboard(-1);
                 break;
                 // TODO liquidKeyboard中除返回按钮外，其他按键均未实装
               case DEL_LEFT:
@@ -218,7 +218,7 @@ public class TabView extends View {
           } else if (System.currentTimeMillis() - time0 < 500) {
             highlightIndex = i;
             invalidate();
-            Trime.getService().selectLiquidKeyboard(i);
+            Trime.Companion.getService().selectLiquidKeyboard(i);
           }
           Timber.d("index=" + i + " length=" + tabTags.size());
         }

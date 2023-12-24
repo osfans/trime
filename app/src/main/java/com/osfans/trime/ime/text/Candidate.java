@@ -368,7 +368,7 @@ public class Candidate extends View {
             : candidateViewHeight;
     setLayoutParams(params);
 
-    Trime.getService().setCandidateExPage(hasExButton);
+    Trime.Companion.getService().setCandidateExPage(hasExButton);
   }
 
   @Override

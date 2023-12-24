@@ -121,7 +121,7 @@ public class ScrollView extends HorizontalScrollView {
               swipeStartX = ev.getX();
             }
           } else if (swipeStartX - ev.getX() > swipeActionLimit) {
-            if (Trime.getService().hasCandidateExPage()) {
+            if (Trime.Companion.getService().hasCandidateExPage()) {
               if (pageExAction != null) pageExAction.run();
               return;
             } else if (Rime.hasRight()) {

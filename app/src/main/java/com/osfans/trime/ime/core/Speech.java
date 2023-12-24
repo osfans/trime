@@ -105,7 +105,7 @@ public class Speech implements RecognitionListener {
       speechRecognizer.destroy();
     }
     Timber.i("onResults");
-    final Trime trime = Trime.getServiceOrNull();
+    final Trime trime = Trime.Companion.getServiceOrNull();
     if (trime != null) {
       final ArrayList<String> matches =
           results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
