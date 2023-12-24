@@ -1,10 +1,10 @@
-set(BOOST_VER 1.83.0)
+set(BOOST_VER 1.84.0)
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/boost")
     message(STATUS "Downloading Boost ${BOOST_VER} ......")
     file(
         DOWNLOAD "https://github.com/boostorg/boost/releases/download/boost-${BOOST_VER}/boost-${BOOST_VER}.tar.xz" boost-${BOOST_VER}.tar.xz
-        EXPECTED_HASH SHA256=c5a0688e1f0c05f354bbd0b32244d36085d9ffc9f932e8a18983a9908096f614
+        EXPECTED_HASH SHA256=2e64e5d79a738d0fa6fb546c6e5c2bd28f88d268a2a080546f74e5ff98f29d0e
         SHOW_PROGRESS
     )
     file(ARCHIVE_EXTRACT INPUT boost-${BOOST_VER}.tar.xz
