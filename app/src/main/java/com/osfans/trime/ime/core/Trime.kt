@@ -29,11 +29,18 @@ import android.os.*
 import android.os.Build.VERSION_CODES
 import android.text.InputType
 import android.text.TextUtils
+import android.util.Size
 import android.view.*
-import android.view.inputmethod.CursorAnchorInfo
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.ExtractedTextRequest
+import android.view.inputmethod.*
+import android.widget.ImageView.ScaleType
 import android.widget.PopupWindow
+import android.widget.inline.InlinePresentationSpec
+import androidx.annotation.RequiresApi
+import androidx.autofill.inline.UiVersions
+import androidx.autofill.inline.common.ImageViewStyle
+import androidx.autofill.inline.common.TextViewStyle
+import androidx.autofill.inline.common.ViewStyle
+import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
@@ -87,6 +94,7 @@ import timber.log.Timber
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
+
 
 /** [輸入法][InputMethodService]主程序  */
 open class Trime : LifecycleInputMethodService() {
@@ -1317,11 +1325,123 @@ open class Trime : LifecycleInputMethodService() {
         this.candidateExPage = candidateExPage
     }
 
+    /**
+     * Android R introduced Inline Suggestions, which is using to show autofill suggestions in the IME.
+     *
+     * [Integrate autofill with IMEs and autofill services](https://developer.android.com/guide/topics/text/ime-autofill)
+     */
+    @RequiresApi(VERSION_CODES.R)
+    override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
+        // uiExtras: "androidx.autofill.inline.ui.version:key": "androidx.autofill.inline.ui.version:v1"
+        @RequiresApi(VERSION_CODES.R)
+        fun createStylesBundle(): Bundle? {
+            val actionIconSize = 128
+            val pinnedActionMarginEnd = 8
+
+            // We have styles builder, because it's possible that the IME can support multiple UI
+            // templates in the future.
+            val stylesBuilder = UiVersions.newStylesBuilder()
+
+            // Assuming we only want to support v1 UI template. If the provided uiExtras doesn't contain
+            // v1, then return null.
+            if (!UiVersions.getVersions(uiExtras).contains(UiVersions.INLINE_UI_VERSION_1)) {
+                return null
+            }
+
+            // Create the style for v1 template.
+            val style: InlineSuggestionUi.Style = InlineSuggestionUi.newStyleBuilder()
+                .setSingleIconChipStyle(
+                    ViewStyle.Builder()
+                        .setBackgroundColor(Color.TRANSPARENT)
+                        .setPadding(0, 0, 0, 0)
+                        .setLayoutMargin(0, 0, 0, 0)
+                        .build()
+                )
+                .setSingleIconChipIconStyle(
+                    ImageViewStyle.Builder()
+                        .setMaxWidth(actionIconSize)
+                        .setMaxHeight(actionIconSize)
+                        .setScaleType(ScaleType.FIT_CENTER)
+                        .setLayoutMargin(0, 0, pinnedActionMarginEnd, 0)
+//                    .setTintList(actionIconColor)
+                        .build()
+                )
+                .setChipStyle(
+                    ViewStyle.Builder()
+//                    .setBackground(
+//                        Icon.createWithResource(this, R.drawable.chip_background)
+//                    )
+//                    .setPadding(toPixel(13), 0, toPixel(13), 0)
+                        .setPadding(0, 0, 0, 0)
+                        .build()
+                )
+                .setStartIconStyle(
+                    ImageViewStyle.Builder()
+                        .setLayoutMargin(0, 0, 0, 0)
+//                    .setTintList(chipIconColor)
+                        .build()
+                )
+                .setTitleStyle(
+                    TextViewStyle.Builder()
+//                    .setLayoutMargin(toPixel(4), 0, toPixel(4), 0)
+                        .setLayoutMargin(16, 0, 16, 0)
+                        .setTextColor(Color.parseColor("#FF202124"))
+                        .setTextSize(16f)
+                        .build()
+                )
+                .setSubtitleStyle(
+                    TextViewStyle.Builder()
+//                    .setLayoutMargin(0, 0, toPixel(4), 0)
+                        .setLayoutMargin(0, 0, 16, 0)
+                        .setTextColor(Color.parseColor("#99202124")) // 60% opacity
+                        .setTextSize(14f)
+                        .build()
+                )
+                .setEndIconStyle(
+                    ImageViewStyle.Builder()
+                        .setLayoutMargin(0, 0, 0, 0)
+//                    .setTintList(chipIconColor)
+                        .build()
+                )
+                .build()
+
+            // Add v1 UI style to the supported styles and return.
+            stylesBuilder.addStyle(style)
+            val stylesBundle = stylesBuilder.build()
+            return stylesBundle
+        }
+
+        Timber.i("onCreateInlineSuggestionsRequest")
+        return InlineSuggestionsRequest.Builder(List(9) {
+            InlinePresentationSpec.Builder(
+                // TODO: Replace with real-world sizes
+                // In Gboard：
+                // min: w ~32dp h ~40dp
+                // max: w 240dp h ~40dp
+                Size(100, 100),
+                Size(100, 100)
+            ).apply {
+                createStylesBundle()?.let(::setStyle)
+            }.build()
+        }).apply {
+            setMaxSuggestionCount(9)
+//            setSupportedLocales()
+        }.build()
+    }
+
+    @RequiresApi(VERSION_CODES.R)
+    override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
+        Timber.i("onInlineSuggestionsResponse")
+        response.inlineSuggestions.forEach {
+            Timber.i("onInlineSuggestionsResponse: %s", it.toString())
+        }
+        return true
+    }
+
     companion object {
         private var instance: Trime? = null
         fun getServiceOrNull(): Trime? =
             instance
-
         fun getService(): Trime =
             instance ?: throw IllegalStateException("Trime not initialized")
 

@@ -25,6 +25,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0-beta02" }
+androidx-autofill = { module = "androidx.autofill:autofill", version = "1.1.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 guava = { module = "com.google.guava:guava", version = "33.0.0-jre"}
 kaml = { module = "com.charleskorn.kaml:kaml", version = "0.56.0" }
