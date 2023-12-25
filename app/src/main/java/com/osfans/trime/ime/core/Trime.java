@@ -53,6 +53,7 @@ import android.widget.PopupWindow;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.blankj.utilcode.util.BarUtils;
+import com.blankj.utilcode.util.PathUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
@@ -806,7 +807,8 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private boolean canRimeStart() {
-    return PermissionUtils.isAllGranted(this);
+    boolean mediaAvailable = !TextUtils.isEmpty(PathUtils.getExternalStoragePath());
+    return PermissionUtils.isAllGranted(this) && mediaAvailable;
   }
 
   private void setRimeStatusAndInitialKeyboard() {
