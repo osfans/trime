@@ -18,10 +18,10 @@ class InitialKeyboard(context: Context) {
 
     fun change(start: Boolean): View  {
         if (start) {
-            binding.progressBar.setVisibility(View.VISIBLE)
+            binding.progressBar.visibility = View.VISIBLE
             binding.deploying.setText(R.string.deploy_progress)
         } else {
-            binding.progressBar.setVisibility(View.INVISIBLE)
+            binding.progressBar.visibility = View.INVISIBLE
             binding.deploying.setText(R.string.external_storage_permission_not_available)
         }
         return binding.root

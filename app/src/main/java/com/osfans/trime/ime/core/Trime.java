@@ -61,13 +61,13 @@ import com.osfans.trime.data.db.DraftHelper;
 import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.CompositionRootBinding;
-import com.osfans.trime.databinding.InputLoadingBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.PopupPosition;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.ime.keyboard.InitialKeyboard;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
@@ -83,6 +83,7 @@ import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.ime.util.UiUtil;
 import com.osfans.trime.util.DimensionsKt;
+import com.osfans.trime.util.PermissionUtils;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.ViewUtils;
@@ -131,6 +132,7 @@ public class Trime extends LifecycleInputMethodService {
   private int popupMargin; // 候選窗與邊緣空隙
   private int popupMarginH; // 悬浮窗与屏幕两侧的间距
   private boolean isCursorUpdated = false; // 光標是否移動
+  private InitialKeyboard initialKeyboard; // initial keyboard display
   private int minPopupSize; // 上悬浮窗的候选词的最小词长
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
   private PopupPosition popupWindowPos; // 悬浮窗口彈出位置
@@ -363,9 +365,13 @@ public class Trime extends LifecycleInputMethodService {
       //  and lead to a crash loop
       Timber.d("onCreate");
       final InputMethodService context = this;
+
+      initialKeyboard = new InitialKeyboard(this);
+      setRimeStatusAndInitialKeyboard();
       RimeWrapper.INSTANCE.startup(
           () -> {
-            Timber.d("Back to Trime.onCreate");
+            Timber.d("Running Trime.onCreate");
+            initialKeyboard.change(true);
             textInputManager =
                 TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(context));
             activeEditorInstance = new EditorInstance(context);
@@ -736,8 +742,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public View onCreateInputView() {
     Timber.d("onCreateInputView()");
-    // 初始化键盘布局
-    super.onCreateInputView();
+    setRimeStatusAndInitialKeyboard();
     RimeWrapper.INSTANCE.runAfterStarted(
         () -> {
           inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));
@@ -776,11 +781,11 @@ public class Trime extends LifecycleInputMethodService {
           bindKeyboardToInputView();
 
           setInputView(inputRootBinding.inputRoot);
-          Timber.d("onCreateInputView - really ended");
+          Timber.d("onCreateInputView - completely ended");
         });
     Timber.i("onCreateInputView() finish");
 
-    return InputLoadingBinding.inflate(LayoutInflater.from(this)).getRoot();
+    return initialKeyboard.change(canRimeStart());
   }
 
   public void setShowComment(boolean show_comment) {
@@ -800,11 +805,24 @@ public class Trime extends LifecycleInputMethodService {
     return setDarkMode(isDarkMode);
   }
 
+  private boolean canRimeStart() {
+    return PermissionUtils.isAllGranted(this);
+  }
+
+  private void setRimeStatusAndInitialKeyboard() {
+    boolean canRimeStart = canRimeStart();
+    RimeWrapper.INSTANCE.setCanStart(canRimeStart);
+    if (initialKeyboard != null) {
+      initialKeyboard.change(canRimeStart);
+    }
+  }
+
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     Timber.d("onStartInputView: restarting=%s", restarting);
     editorInfo = attribute;
 
+    setRimeStatusAndInitialKeyboard();
     RimeWrapper.INSTANCE.runAfterStarted(
         () -> {
           if (updateDarkMode()) {
