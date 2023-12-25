@@ -120,6 +120,12 @@ android {
             isUniversalApk = false
         }
     }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 kotlin {
@@ -183,5 +189,7 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.junit)
 }
