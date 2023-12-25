@@ -16,7 +16,7 @@ import com.osfans.trime.databinding.InitialKeyboardBinding
 class InitialKeyboard(context: Context) {
     private var binding = InitialKeyboardBinding.inflate(LayoutInflater.from(context))
 
-    fun change(start: Boolean): View  {
+    fun change(start: Boolean): View {
         if (start) {
             binding.progressBar.visibility = View.VISIBLE
             binding.deploying.setText(R.string.deploy_progress)

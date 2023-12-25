@@ -56,10 +56,9 @@ object RimeWrapper {
                     mutex.unlock()
                 }
             }
-        } else
-            {
-                Timber.d("RimeWrapper shall not be started")
-            }
+        } else {
+            Timber.d("RimeWrapper shall not be started")
+        }
     }
 
     suspend fun deploy(): Boolean {
@@ -96,10 +95,9 @@ object RimeWrapper {
     fun runCheck() {
         if (isReady()) {
             notifyUnlock()
-        } else if (_statusStateFlow.value == Status.UN_INIT)
-            {
-                startup()
-            }
+        } else if (_statusStateFlow.value == Status.UN_INIT) {
+            startup()
+        }
     }
 
     fun isReady(): Boolean {
