@@ -24,35 +24,42 @@ object RimeWrapper {
     private val _statusStateFlow = MutableStateFlow(Status.UN_INIT)
     val statusStateFlow = _statusStateFlow.asStateFlow()
 
+    var canStart = false
+
     fun startup(r: Runnable? = null) {
         r.let {
             myThreadSafeList.add(it)
         }
-        if (mutex.tryLock()) {
-            if (_statusStateFlow.value == Status.UN_INIT) {
-                Timber.d("Starting in a thread")
-                _statusStateFlow.value = Status.IN_PROGRESS
-                mutex.unlock()
+        if (canStart) {
+            if (mutex.tryLock()) {
+                if (_statusStateFlow.value == Status.UN_INIT) {
+                    Timber.d("Starting in a thread")
+                    _statusStateFlow.value = Status.IN_PROGRESS
+                    mutex.unlock()
 
-                val scope = CoroutineScope(Dispatchers.IO)
-                scope.launch {
-                    measureTimeMillis {
-                        Rime.getInstance(false)
-                        Theme.get()
-                    }.also {
-                        Timber.d("Startup completed.  It takes ${it / 1000} seconds")
+                    val scope = CoroutineScope(Dispatchers.IO)
+                    scope.launch {
+                        measureTimeMillis {
+                            Rime.getInstance(false)
+                            Theme.get()
+                        }.also {
+                            Timber.d("Startup completed.  It takes ${it / 1000} seconds")
+                        }
+
+                        mutex.withLock {
+                            _statusStateFlow.value = Status.READY
+                        }
+
+                        notifyUnlock()
                     }
-
-                    mutex.withLock {
-                        _statusStateFlow.value = Status.READY
-                    }
-
-                    notifyUnlock()
+                } else {
+                    mutex.unlock()
                 }
-            } else {
-                mutex.unlock()
             }
-        }
+        } else
+            {
+                Timber.d("RimeWrapper shall not be started")
+            }
     }
 
     suspend fun deploy(): Boolean {
@@ -83,13 +90,16 @@ object RimeWrapper {
                 mainThreadHandler.post(it)
             }
         }
-        Timber.d("Unlock totally Completed")
+        Timber.d("Unlock Run Completed")
     }
 
     fun runCheck() {
         if (isReady()) {
             notifyUnlock()
-        }
+        } else if (_statusStateFlow.value == Status.UN_INIT)
+            {
+                startup()
+            }
     }
 
     fun isReady(): Boolean {
