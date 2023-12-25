@@ -12,7 +12,7 @@ class WeakHashSet<T> : MutableSet<T> {
 
     override fun iterator(): MutableIterator<T> = core.keys.iterator()
 
-    override fun add(element: T) = core.put(element, PlaceHolder) != null
+    override fun add(element: T) = core.put(element, PlaceHolder) == null
 
     override fun addAll(elements: Collection<T>) = elements.all(::add)
 
