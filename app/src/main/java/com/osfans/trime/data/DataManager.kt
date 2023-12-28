@@ -6,7 +6,7 @@ import com.osfans.trime.util.Const
 import timber.log.Timber
 import java.io.File
 
-object DataManager : DataDirectoryChangeListener.Listener {
+object DataManager {
     private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
     private val prefs get() = AppPrefs.defaultInstance()
 
@@ -19,10 +19,6 @@ object DataManager : DataDirectoryChangeListener.Listener {
     @JvmStatic
     val userDataDir
         get() = File(prefs.profile.userDataDir)
-
-    init {
-        DataDirectoryChangeListener.addDirectoryChangeListener(this)
-    }
 
     sealed class Diff {
         object New : Diff()
@@ -95,11 +91,5 @@ object DataManager : DataDirectoryChangeListener.Listener {
         }
 
         Timber.i("Synced!")
-    }
-
-    /**
-     * Update sharedDataDir and userDataDir.
-     */
-    override fun onDataDirectoryChange() {
     }
 }
