@@ -7,19 +7,18 @@ import timber.log.Timber
 import java.io.File
 
 object DataManager : DataDirectoryChangeListener.Listener {
+    private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
     private val prefs get() = AppPrefs.defaultInstance()
 
     val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
 
     @JvmStatic
-    var sharedDataDir = File(prefs.profile.sharedDataDir)
+    val sharedDataDir
+        get() = File(prefs.profile.sharedDataDir)
 
     @JvmStatic
-    var userDataDir = File(prefs.profile.userDataDir)
-    val customDefault = File(sharedDataDir, "default.custom.yaml")
-
-    private val stagingDir = File(userDataDir, "build")
-    private val prebuiltDataDir = File(sharedDataDir, "build")
+    val userDataDir
+        get() = File(prefs.profile.userDataDir)
 
     init {
         DataDirectoryChangeListener.addDirectoryChangeListener(this)
@@ -42,6 +41,9 @@ object DataManager : DataDirectoryChangeListener.Listener {
      */
     @JvmStatic
     fun resolveDeployedResourcePath(resourceId: String): String {
+        val stagingDir = File(userDataDir, "build")
+        val prebuiltDataDir = File(sharedDataDir, "build")
+
         val defaultPath = File(stagingDir, "$resourceId.yaml")
         if (!defaultPath.exists()) {
             val fallbackPath = File(prebuiltDataDir, "$resourceId.yaml")
@@ -84,9 +86,12 @@ object DataManager : DataDirectoryChangeListener.Listener {
         }
 
         // FIXME：缺失 default.custom.yaml 会导致方案列表为空
-        if (!customDefault.exists()) {
-            Timber.d("Creating empty default.custom.yaml ...")
-            customDefault.createNewFile()
+        with(File(sharedDataDir, DEFAULT_CUSTOM_FILE_NAME)) {
+            val customDefault = this
+            if (!customDefault.exists()) {
+                Timber.d("Creating empty default.custom.yaml ...")
+                customDefault.createNewFile()
+            }
         }
 
         Timber.i("Synced!")
@@ -96,7 +101,5 @@ object DataManager : DataDirectoryChangeListener.Listener {
      * Update sharedDataDir and userDataDir.
      */
     override fun onDataDirectoryChange() {
-        sharedDataDir = File(prefs.profile.sharedDataDir)
-        userDataDir = File(prefs.profile.userDataDir)
     }
 }

@@ -333,14 +333,15 @@ class AppPrefs(
             const val TIMING_SYNC_TRIGGER_TIME = "profile_timing_sync_trigger_time"
             const val LAST_SYNC_STATUS = "profile_last_sync_status"
             const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
-            val EXTERNAL_PATH_PREFIX: String = PathUtils.getExternalStoragePath()
+
+            private fun getExternalPathPrefix() = PathUtils.getExternalStoragePath()
         }
 
         var sharedDataDir: String
-            get() = prefs.getPref(SHARED_DATA_DIR, "$EXTERNAL_PATH_PREFIX/rime")
+            get() = prefs.getPref(SHARED_DATA_DIR, "${getExternalPathPrefix()}/rime")
             set(v) = prefs.setPref(SHARED_DATA_DIR, v)
         var userDataDir: String
-            get() = prefs.getPref(USER_DATA_DIR, "$EXTERNAL_PATH_PREFIX/rime")
+            get() = prefs.getPref(USER_DATA_DIR, "${getExternalPathPrefix()}/rime")
             set(v) = prefs.setPref(USER_DATA_DIR, v)
         var syncBackgroundEnabled: Boolean
             get() = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)
