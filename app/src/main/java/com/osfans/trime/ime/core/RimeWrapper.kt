@@ -62,24 +62,28 @@ object RimeWrapper {
     }
 
     suspend fun deploy(): Boolean {
-        return if (mutex.tryLock() && _statusStateFlow.value != Status.IN_PROGRESS) {
-            _statusStateFlow.value = Status.IN_PROGRESS
-            mutex.unlock()
+        if (mutex.tryLock()) {
+            if (_statusStateFlow.value != Status.IN_PROGRESS) {
+                _statusStateFlow.value = Status.IN_PROGRESS
+                mutex.unlock()
 
-            DataDirectoryChangeListener.directoryChangeListeners.forEach {
-                it.onDataDirectoryChange()
+                DataDirectoryChangeListener.directoryChangeListeners.forEach {
+                    it.onDataDirectoryChange()
+                }
+
+                Rime.deploy()
+
+                mutex.withLock {
+                    _statusStateFlow.value = Status.READY
+                }
+                Timber.d("Rime Deployed")
+
+                return true
+            } else {
+                mutex.unlock()
             }
-
-            Rime.deploy()
-
-            mutex.withLock {
-                _statusStateFlow.value = Status.READY
-            }
-            Timber.d("Rime Deployed")
-            true
-        } else {
-            false
         }
+        return false
     }
 
     private fun notifyUnlock() {
