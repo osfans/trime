@@ -7,8 +7,8 @@ echo auto generated contents >> $MAGIC
 # fetch jni relative elements
 grep ndkVersion app/build.gradle.kts >> $MAGIC
 
-elments=("buildTypes" "externalNativeBuild" "splits")
-for element in ${elments[@]}; do
+elements=("buildTypes" "externalNativeBuild" "splits")
+for element in ${elements[@]}; do
   awk "/$element/,/\}/" app/build.gradle.kts >> $MAGIC
 done
 

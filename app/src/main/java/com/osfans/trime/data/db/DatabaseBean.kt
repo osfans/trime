@@ -32,7 +32,8 @@ data class DatabaseBean(
     }
 
     enum class BeanType {
-        TEXT, HTML
+        TEXT,
+        HTML,
     }
 
     class Converters {

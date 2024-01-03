@@ -24,10 +24,10 @@ class TrimeApplication : Application() {
         private var instance: TrimeApplication? = null
         private var lastPid: Int? = null
 
-        fun getInstance() =
-            instance ?: throw IllegalStateException("Trime application is not created!")
+        fun getInstance() = instance ?: throw IllegalStateException("Trime application is not created!")
 
         fun getLastPid() = lastPid
+
         private const val MAX_STACKTRACE_SIZE = 128000
     }
 
@@ -40,13 +40,14 @@ class TrimeApplication : Application() {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         putExtra(LogActivity.FROM_CRASH, true)
                         // avoid transaction overflow
-                        val truncated = e.stackTraceToString().let {
-                            if (it.length > MAX_STACKTRACE_SIZE) {
-                                it.take(MAX_STACKTRACE_SIZE) + "<truncated>"
-                            } else {
-                                it
+                        val truncated =
+                            e.stackTraceToString().let {
+                                if (it.length > MAX_STACKTRACE_SIZE) {
+                                    it.take(MAX_STACKTRACE_SIZE) + "<truncated>"
+                                } else {
+                                    it
+                                }
                             }
-                        }
                         putExtra(LogActivity.CRASH_STACK_TRACE, truncated)
                     },
                 )
@@ -60,27 +61,41 @@ class TrimeApplication : Application() {
                 initDefaultPreferences()
             }
             if (BuildConfig.DEBUG) {
-                Timber.plant(object : Timber.DebugTree() {
-                    override fun createStackElementTag(element: StackTraceElement): String {
-                        return "${super.createStackElementTag(element)}|${element.fileName}:${element.lineNumber}"
-                    }
+                Timber.plant(
+                    object : Timber.DebugTree() {
+                        override fun createStackElementTag(element: StackTraceElement): String {
+                            return "${super.createStackElementTag(element)}|${element.fileName}:${element.lineNumber}"
+                        }
 
-                    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                        super.log(
-                            priority,
-                            "[${Thread.currentThread().name}] ${tag?.substringBefore('|')}",
-                            "${tag?.substringAfter('|')}] $message",
-                            t,
-                        )
-                    }
-                })
+                        override fun log(
+                            priority: Int,
+                            tag: String?,
+                            message: String,
+                            t: Throwable?,
+                        ) {
+                            super.log(
+                                priority,
+                                "[${Thread.currentThread().name}] ${tag?.substringBefore('|')}",
+                                "${tag?.substringAfter('|')}] $message",
+                                t,
+                            )
+                        }
+                    },
+                )
             } else {
-                Timber.plant(object : Timber.Tree() {
-                    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                        if (priority < Log.INFO) return
-                        Log.println(priority, "[${Thread.currentThread().name}]", message)
-                    }
-                })
+                Timber.plant(
+                    object : Timber.Tree() {
+                        override fun log(
+                            priority: Int,
+                            tag: String?,
+                            message: String,
+                            t: Throwable?,
+                        ) {
+                            if (priority < Log.INFO) return
+                            Log.println(priority, "[${Thread.currentThread().name}]", message)
+                        }
+                    },
+                )
             }
             // record last pid for crash logs
             val appPrefs = AppPrefs.defaultInstance()

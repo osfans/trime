@@ -43,13 +43,15 @@ class CoroutineChoiceDialog(
         return this
     }
 
-    private suspend fun init() = withContext(initDispatcher) {
-        onInitListener.onAction()
-    }
+    private suspend fun init() =
+        withContext(initDispatcher) {
+            onInitListener.onAction()
+        }
 
-    private suspend fun positive() = withContext(postiveDispatcher) {
-        onPositiveListener.onAction()
-    }
+    private suspend fun positive() =
+        withContext(postiveDispatcher) {
+            onPositiveListener.onAction()
+        }
 
     private fun build() {
         with(builder) {

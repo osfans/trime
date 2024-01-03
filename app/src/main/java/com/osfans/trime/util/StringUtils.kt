@@ -4,7 +4,10 @@ object StringUtils {
     private const val SECTION_DIVIDER = ",.?!~:，。：～？！…\t\r\n\\/"
 
     @JvmStatic
-    fun findSectionAfter(cs: CharSequence?, startIndex: Int): Int {
+    fun findSectionAfter(
+        cs: CharSequence?,
+        startIndex: Int,
+    ): Int {
         cs ?: return 0
         val index = startIndex.coerceAtLeast(0)
         for ((i, c) in cs.withIndex()) {
@@ -15,7 +18,10 @@ object StringUtils {
     }
 
     @JvmStatic
-    fun findSectionBefore(cs: CharSequence?, startIndex: Int): Int {
+    fun findSectionBefore(
+        cs: CharSequence?,
+        startIndex: Int,
+    ): Int {
         cs ?: return 0
         val index = startIndex.coerceAtMost(cs.length) - 1
         for ((i, c) in cs.withIndex().reversed()) {

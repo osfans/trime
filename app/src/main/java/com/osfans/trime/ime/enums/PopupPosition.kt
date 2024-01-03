@@ -22,16 +22,26 @@ package com.osfans.trime.ime.enums
  */
 enum class PopupPosition {
     // 跟随光标
-    LEFT, LEFT_UP, RIGHT, RIGHT_UP,
+    LEFT,
+    LEFT_UP,
+    RIGHT,
+    RIGHT_UP,
 
     // 固定位置
-    DRAG, FIXED,
+    DRAG,
+    FIXED,
 
     // 相对位置
-    BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    TOP_LEFT,
+    TOP_RIGHT,
 
     // 暂未实现的相对位置
-    TOP_CENTER, BOTTOM_CENTER, CENTER;
+    TOP_CENTER,
+    BOTTOM_CENTER,
+    CENTER,
+    ;
 
     companion object {
         @JvmStatic
@@ -42,7 +52,10 @@ enum class PopupPosition {
         }
 
         @JvmStatic
-        fun fromString(code: String, default: PopupPosition): PopupPosition {
+        fun fromString(
+            code: String,
+            default: PopupPosition,
+        ): PopupPosition {
             return runCatching {
                 valueOf(code.uppercase())
             }.getOrDefault(default)

@@ -5,10 +5,10 @@ import com.osfans.trime.data.DataManager
 import java.io.File
 
 object FontManager {
-    val fontDir = File(DataManager.userDataDir, "fonts")
-
     @JvmStatic
     fun getTypeface(fontFileName: String): Typeface {
+        val fontDir = File(DataManager.userDataDir, "fonts")
+
         val f = File(fontDir, fontFileName)
         return if (f.exists()) {
             Typeface.createFromFile(f)

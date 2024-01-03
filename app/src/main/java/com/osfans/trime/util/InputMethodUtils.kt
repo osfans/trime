@@ -12,8 +12,7 @@ object InputMethodUtils {
     private val serviceName =
         ComponentName(appContext, TrimeImeService::class.java).flattenToShortString()
 
-    private fun getSecureSettings(name: String) =
-        Settings.Secure.getString(appContext.contentResolver, name)
+    private fun getSecureSettings(name: String) = Settings.Secure.getString(appContext.contentResolver, name)
 
     fun checkIsTrimeEnabled(): Boolean {
         val activeImeIds = getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS) ?: "(none)"
@@ -27,8 +26,7 @@ object InputMethodUtils {
         return selectedImeIds == serviceName
     }
 
-    fun showImeEnablerActivity(context: Context) =
-        context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+    fun showImeEnablerActivity(context: Context) = context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
 
     fun showImePicker(): Boolean {
         inputMethodManager.showInputMethodPicker()

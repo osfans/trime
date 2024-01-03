@@ -46,6 +46,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/export" />
+
+        <Button
+            android:id="@+id/jumpToBottomButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/scroll_to_bottom" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

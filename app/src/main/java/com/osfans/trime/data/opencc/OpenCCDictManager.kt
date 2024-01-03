@@ -29,13 +29,15 @@ object OpenCCDictManager : DataDirectoryChangeListener.Listener {
         userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
     }
 
-    fun sharedDictionaries(): List<Dictionary> = sharedDir
-        .listFiles()
-        ?.mapNotNull { Dictionary.new(it) } ?: listOf()
+    fun sharedDictionaries(): List<Dictionary> =
+        sharedDir
+            .listFiles()
+            ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
-    fun userDictionaries(): List<Dictionary> = userDir
-        .listFiles()
-        ?.mapNotNull { Dictionary.new(it) } ?: listOf()
+    fun userDictionaries(): List<Dictionary> =
+        userDir
+            .listFiles()
+            ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
     fun getAllDictionaries(): List<Dictionary> =
         if (sharedDir.path == userDir.path) {
@@ -44,20 +46,21 @@ object OpenCCDictManager : DataDirectoryChangeListener.Listener {
             (sharedDictionaries() + userDictionaries())
         }
 
-    fun openCCDictionaries(): List<OpenCCDictionary> =
-        getAllDictionaries().mapNotNull { it as? OpenCCDictionary }
+    fun openCCDictionaries(): List<OpenCCDictionary> = getAllDictionaries().mapNotNull { it as? OpenCCDictionary }
 
     fun importFromFile(file: File): OpenCCDictionary {
-        val raw = Dictionary.new(file)
-            ?: throw IllegalArgumentException("${file.path} is not a opencc/text dictionary")
+        val raw =
+            Dictionary.new(file)
+                ?: throw IllegalArgumentException("${file.path} is not a opencc/text dictionary")
         // convert to opencc format in dictionaries dir
         // preserve original file name
-        val new = raw.toOpenCCDictionary(
-            File(
-                userDir,
-                file.nameWithoutExtension + ".${Dictionary.Type.OPENCC.ext}",
-            ),
-        )
+        val new =
+            raw.toOpenCCDictionary(
+                File(
+                    userDir,
+                    file.nameWithoutExtension + ".${Dictionary.Type.OPENCC.ext}",
+                ),
+            )
         Timber.d("Converted $raw to $new")
         return new
     }
@@ -77,7 +80,10 @@ object OpenCCDictManager : DataDirectoryChangeListener.Listener {
         }
     }
 
-    fun importFromInputStream(stream: InputStream, name: String): OpenCCDictionary {
+    fun importFromInputStream(
+        stream: InputStream,
+        name: String,
+    ): OpenCCDictionary {
         val tempFile = File(appContext.cacheDir, name)
         tempFile.outputStream().use {
             stream.copyTo(it)
@@ -88,7 +94,10 @@ object OpenCCDictManager : DataDirectoryChangeListener.Listener {
     }
 
     @JvmStatic
-    fun convertLine(input: String, configFileName: String): String {
+    fun convertLine(
+        input: String,
+        configFileName: String,
+    ): String {
         if (configFileName.isEmpty()) return input
         with(File(userDir, configFileName)) {
             if (exists()) return openCCLineConv(input, path)
@@ -101,10 +110,17 @@ object OpenCCDictManager : DataDirectoryChangeListener.Listener {
     }
 
     @JvmStatic
-    external fun openCCDictConv(src: String, dest: String, mode: Boolean)
+    external fun openCCDictConv(
+        src: String,
+        dest: String,
+        mode: Boolean,
+    )
 
     @JvmStatic
-    external fun openCCLineConv(input: String, configFileName: String): String
+    external fun openCCLineConv(
+        input: String,
+        configFileName: String,
+    ): String
 
     @JvmStatic
     external fun getOpenCCVersion(): String

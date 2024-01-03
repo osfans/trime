@@ -15,7 +15,10 @@ import kotlinx.coroutines.launch
 class ThemeColorFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
         addPreferencesFromResource(R.xml.theme_color_preference)
         with(preferenceScreen) {
             get<Preference>("theme_selected_theme")?.setOnPreferenceClickListener {

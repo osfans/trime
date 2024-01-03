@@ -47,10 +47,11 @@ class SetupActivity : FragmentActivity() {
             windowInsets
         }
         setContentView(binding.root)
-        val prevButton = binding.prevButton.apply {
-            text = getString(R.string.setup__prev)
-            setOnClickListener { viewPager.currentItem = viewPager.currentItem - 1 }
-        }
+        val prevButton =
+            binding.prevButton.apply {
+                text = getString(R.string.setup__prev)
+                setOnClickListener { viewPager.currentItem = viewPager.currentItem - 1 }
+            }
         binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
@@ -63,34 +64,37 @@ class SetupActivity : FragmentActivity() {
                     .show()
             }
         }
-        val nextButton = binding.nextButton.apply {
-            setOnClickListener {
-                if (viewPager.currentItem != SetupPage.values().size - 1) {
-                    viewPager.currentItem = viewPager.currentItem + 1
-                } else {
-                    finish()
+        val nextButton =
+            binding.nextButton.apply {
+                setOnClickListener {
+                    if (viewPager.currentItem != SetupPage.values().size - 1) {
+                        viewPager.currentItem = viewPager.currentItem + 1
+                    } else {
+                        finish()
+                    }
                 }
             }
-        }
         viewPager = binding.viewpager
         viewPager.adapter = Adapter()
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                // Manually call following observer when page changed
-                // intentionally before changing the text of nextButton
-                viewModel.isAllDone.value = viewModel.isAllDone.value
-                // Hide prev button for the first page
-                prevButton.visibility = if (position != 0) View.VISIBLE else View.GONE
-                nextButton.text =
-                    getString(
-                        if (position.isLastPage()) {
-                            R.string.setup__done
-                        } else {
-                            R.string.setup__next
-                        },
-                    )
-            }
-        })
+        viewPager.registerOnPageChangeCallback(
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    // Manually call following observer when page changed
+                    // intentionally before changing the text of nextButton
+                    viewModel.isAllDone.value = viewModel.isAllDone.value
+                    // Hide prev button for the first page
+                    prevButton.visibility = if (position != 0) View.VISIBLE else View.GONE
+                    nextButton.text =
+                        getString(
+                            if (position.isLastPage()) {
+                                R.string.setup__done
+                            } else {
+                                R.string.setup__next
+                            },
+                        )
+                }
+            },
+        )
         viewModel.isAllDone.observe(this) { allDone ->
             nextButton.apply {
                 // Hide next button for the last page when allDone == false

@@ -1,32 +1,54 @@
-name: pull request ci
-on: [pull_request]
+name: Pull Request
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      # pull request's head branch was updated
+      - synchronize
+
 env:
   CI_NAME: Pull Request CI
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-13
+          - windows-2022
     steps:
-      - name: Checkout last commit
-        uses: actions/checkout@v3
+      - name: Fetch source code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get branch name
         id: vars
+        shell: bash
         run: |
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
+      - name: Install macOS utils
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install coreutils clang-format
+
       - name: Calculate JNI cache hash
         id: cache-hash
+        shell: bash
         run: script/cache-hash.sh
 
       - name: Fetch JNI cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: jni-cache
         with:
           path: "app/prebuilt"
-          key: jni-debug-${{ steps.cache-hash.outputs.hash }}
+          key: ${{ matrix.os }}-trime-jni-debug-${{ steps.cache-hash.outputs.hash }}
 
       - name: Fetch submodules
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
@@ -42,22 +64,27 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
+        
+      - name: Check code style
+        if: ${{ !startsWith(matrix.os, 'windows') }}
+        run: |
+          make style-lint
 
-      - name: Install dependency
-        run: ./script/dependency.sh
-
-      - name: Build Trime
-        run: make debug
+      # `make debug` works not well on Windows
+      - name: Build debug Trime
+        run: |
+          ./gradlew :app:assembleDebug
 
       - name: Add JNI cache
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
+        shell: bash
         run: cp -R app/build/intermediates/stripped_native_libs/debug/out/lib app/prebuilt
 
-      - name: Upload Trime artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
-          name: trime.zip
-          path: app/build/outputs/apk/**/*.apk
+          name: trime-${{ matrix.os }}
+          path: app/build/outputs/apk/debug/
           # keep 30 days
           retention-days: 30

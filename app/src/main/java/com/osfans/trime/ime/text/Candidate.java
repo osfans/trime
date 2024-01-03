@@ -145,6 +145,17 @@ public class Candidate extends View {
     setWillNotDraw(false);
   }
 
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int h =
+        (shouldShowComment && isCommentOnTop)
+            ? candidateViewHeight + commentHeight
+            : candidateViewHeight;
+    setMeasuredDimension(
+        MeasureSpec.makeMeasureSpec(widthMeasureSpec, MeasureSpec.UNSPECIFIED),
+        MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
+  }
+
   public static int getMaxCandidateCount() {
     return MAX_CANDIDATE_COUNT;
   }

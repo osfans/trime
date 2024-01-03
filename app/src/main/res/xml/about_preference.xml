@@ -11,8 +11,8 @@
             app:iconSpaceReserved="false">
         </Preference>
 
-        <Preference app:key="about__buildinfo"
-            app:title="@string/about__buildinfo"
+        <Preference app:key="about__build_info"
+            app:title="@string/about__build_info"
             app:iconSpaceReserved="false"> />
         </Preference>
 

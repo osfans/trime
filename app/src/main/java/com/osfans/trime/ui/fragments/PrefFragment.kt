@@ -13,7 +13,6 @@ import com.osfans.trime.ui.main.schemaPicker
 import kotlinx.coroutines.launch
 
 class PrefFragment : PaddingPreferenceFragment() {
-
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onResume() {
@@ -27,7 +26,10 @@ class PrefFragment : PaddingPreferenceFragment() {
         super.onPause()
     }
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
         setPreferencesFromResource(R.xml.prefs, rootKey)
         with(preferenceScreen) {
             get<Preference>("pref_schemas")?.setOnPreferenceClickListener {

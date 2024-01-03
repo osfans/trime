@@ -8,17 +8,20 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
 class Schema(schemaId: String = ".default") {
-    private val config = if (schemaId == ".default") {
-        Config.create("default")
-    } else {
-        Config.create("$schemaId.schema")
-    }
+    private val config =
+        if (schemaId == ".default") {
+            Config.create("default")
+        } else {
+            Config.create("$schemaId.schema")
+        }
 
-    val switches get() = config?.getList("switches")
-        ?.decode(ListSerializer(Switch.serializer()))
+    val switches get() =
+        config?.getList("switches")
+            ?.decode(ListSerializer(Switch.serializer()))
 
-    val symbols get() = config?.getMap("punctuator/symbols")
-        ?.decode(MapSerializer(String.serializer(), ListSerializer(String.serializer())))
+    val symbols get() =
+        config?.getMap("punctuator/symbols")
+            ?.decode(MapSerializer(String.serializer(), ListSerializer(String.serializer())))
 
     val alphabet get() = config?.getString("speller/alphabet")
 

@@ -16,7 +16,6 @@ import com.osfans.trime.ime.text.TextInputManager
 import timber.log.Timber
 
 class EditorInstance(private val ims: InputMethodService) {
-
     val prefs get() = AppPrefs.defaultInstance()
     val inputConnection: InputConnection?
         get() = ims.currentInputConnection
@@ -38,7 +37,10 @@ class EditorInstance(private val ims: InputMethodService) {
     var lastCommittedText: CharSequence = ""
 
     // 直接commit不做任何处理
-    fun commitText(text: CharSequence, clearMeatKeyState: Boolean = false): Boolean {
+    fun commitText(
+        text: CharSequence,
+        clearMeatKeyState: Boolean = false,
+    ): Boolean {
         val ic = inputConnection ?: return false
         ic.commitText(text, 1)
         if (text.isNotEmpty()) {
@@ -64,12 +66,13 @@ class EditorInstance(private val ims: InputMethodService) {
 
     fun updateComposingText() {
         val ic = inputConnection ?: return
-        val composingText = when (prefs.keyboard.inlinePreedit) {
-            InlineModeType.INLINE_PREVIEW -> Rime.composingText
-            InlineModeType.INLINE_COMPOSITION -> Rime.compositionText
-            InlineModeType.INLINE_INPUT -> Rime.getRimeRawInput() ?: ""
-            else -> ""
-        }
+        val composingText =
+            when (prefs.keyboard.inlinePreedit) {
+                InlineModeType.INLINE_PREVIEW -> Rime.composingText
+                InlineModeType.INLINE_COMPOSITION -> Rime.compositionText
+                InlineModeType.INLINE_INPUT -> Rime.getRimeRawInput() ?: ""
+                else -> ""
+            }
         if (ic.getSelectedText(0).isNullOrEmpty() || composingText.isNotEmpty()) {
             ic.setComposingText(composingText, 1)
         }
@@ -167,7 +170,11 @@ class EditorInstance(private val ims: InputMethodService) {
         return metaState
     }
 
-    private fun sendDownKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int): Boolean {
+    private fun sendDownKeyEvent(
+        eventTime: Long,
+        keyEventCode: Int,
+        metaState: Int,
+    ): Boolean {
         val ic = inputConnection ?: return false
         return ic.sendKeyEvent(
             KeyEvent(
@@ -185,7 +192,11 @@ class EditorInstance(private val ims: InputMethodService) {
         )
     }
 
-    private fun sendUpKeyEvent(eventTime: Long, keyEventCode: Int, metaState: Int): Boolean {
+    private fun sendUpKeyEvent(
+        eventTime: Long,
+        keyEventCode: Int,
+        metaState: Int,
+    ): Boolean {
         val ic = inputConnection ?: return false
         return ic.sendKeyEvent(
             KeyEvent(
@@ -213,7 +224,11 @@ class EditorInstance(private val ims: InputMethodService) {
      *
      * @return True on success, false if an error occurred or the input connection is invalid.
      */
-    fun sendDownUpKeyEvent(keyEventCode: Int, metaState: Int = meta(), count: Int = 1): Boolean {
+    fun sendDownUpKeyEvent(
+        keyEventCode: Int,
+        metaState: Int = meta(),
+        count: Int = 1,
+    ): Boolean {
         if (count < 1) return false
         val ic = inputConnection ?: return false
         ic.clearMetaKeyStates(

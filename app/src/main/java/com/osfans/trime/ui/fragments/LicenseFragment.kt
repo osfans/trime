@@ -16,10 +16,12 @@ import com.osfans.trime.ui.main.MainViewModel
 import kotlinx.coroutines.launch
 
 class LicenseFragment : PaddingPreferenceFragment() {
-
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
         lifecycleScope.launch {
             val context = preferenceManager.context
             val screen = preferenceManager.createPreferenceScreen(context)
@@ -52,7 +54,10 @@ class LicenseFragment : PaddingPreferenceFragment() {
         viewModel.disableTopOptionsMenu()
     }
 
-    private fun showLicenseDialog(uniqueId: String, licenses: Set<License>): Boolean {
+    private fun showLicenseDialog(
+        uniqueId: String,
+        licenses: Set<License>,
+    ): Boolean {
         when (licenses.size) {
             0 -> {}
             1 -> showLicenseContent(licenses.first())

@@ -19,20 +19,27 @@ import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
 
-fun rippleDrawable(@ColorInt color: Int) =
-    RippleDrawable(ColorStateList.valueOf(color), null, ColorDrawable(Color.WHITE))
+fun rippleDrawable(
+    @ColorInt color: Int,
+) = RippleDrawable(ColorStateList.valueOf(color), null, ColorDrawable(Color.WHITE))
 
 @RequiresApi(Build.VERSION_CODES.M)
-fun borderlessRippleDrawable(@ColorInt color: Int, r: Int = RippleDrawable.RADIUS_AUTO) =
-    RippleDrawable(ColorStateList.valueOf(color), null, null).apply {
-        radius = r
-    }
+fun borderlessRippleDrawable(
+    @ColorInt color: Int,
+    r: Int = RippleDrawable.RADIUS_AUTO,
+) = RippleDrawable(ColorStateList.valueOf(color), null, null).apply {
+    radius = r
+}
 
-fun pressHighlightDrawable(@ColorInt color: Int) = StateListDrawable().apply {
+fun pressHighlightDrawable(
+    @ColorInt color: Int,
+) = StateListDrawable().apply {
     addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(color))
 }
 
-fun circlePressHighlightDrawable(@ColorInt color: Int) = StateListDrawable().apply {
+fun circlePressHighlightDrawable(
+    @ColorInt color: Int,
+) = StateListDrawable().apply {
     addState(
         intArrayOf(android.R.attr.state_pressed),
         ShapeDrawable(OvalShape()).apply { paint.color = color },
@@ -66,8 +73,12 @@ fun bitmapDrawable(path: String?): Drawable? {
     val bitmap = BitmapFactory.decodeFile(path) ?: return null
     if (path.endsWith(".9.png")) {
         val chunk = bitmap.ninePatchChunk
-        if (NinePatch.isNinePatchChunk(chunk)) {
-            return NinePatchDrawable(Resources.getSystem(), bitmap, chunk, Rect(), null)
+        return if (NinePatch.isNinePatchChunk(chunk)) {
+            // for compiled nine patch image
+            NinePatchDrawable(Resources.getSystem(), bitmap, chunk, Rect(), null)
+        } else {
+            // for source nine patch image
+            NinePatchBitmapFactory.createNinePatchDrawable(Resources.getSystem(), bitmap)
         }
     }
     return BitmapDrawable(Resources.getSystem(), bitmap)

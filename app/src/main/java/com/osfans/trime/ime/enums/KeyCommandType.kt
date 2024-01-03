@@ -17,9 +17,17 @@
  */
 package com.osfans.trime.ime.enums
 
-/*按键的特殊命令枚举（仅用于新增的liquidKeyboard）*/
+// 按键的特殊命令枚举（仅用于新增的liquidKeyboard）
 enum class KeyCommandType {
-    NULL, LEFT, RIGHT, EXIT, DEL_LEFT, DEL_RIGHT, UNDO, REDO;
+    NULL,
+    LEFT,
+    RIGHT,
+    EXIT,
+    DEL_LEFT,
+    DEL_RIGHT,
+    UNDO,
+    REDO,
+    ;
 
     companion object {
         @JvmStatic

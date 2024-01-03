@@ -51,10 +51,11 @@ class Rime(fullCheck: Boolean) {
         private var mContext: RimeContext? = null
         private var mStatus: RimeStatus? = null
         private var isHandlingRimeNotification = false
-        private val notificationFlow_ = MutableSharedFlow<RimeNotification>(
-            extraBufferCapacity = 15,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+        private val notificationFlow_ =
+            MutableSharedFlow<RimeNotification>(
+                extraBufferCapacity = 15,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
 
         init {
             System.loadLibrary("rime_jni")
@@ -175,13 +176,16 @@ class Rime(fullCheck: Boolean) {
 
         @JvmStatic
         fun isVoidKeycode(keycode: Int): Boolean {
-            val XK_VoidSymbol = 0xffffff
-            return keycode <= 0 || keycode == XK_VoidSymbol
+            val voidSymbol = 0xffffff
+            return keycode <= 0 || keycode == voidSymbol
         }
 
         // KeyProcess 调用JNI方法发送keycode和mask
         @JvmStatic
-        fun processKey(keycode: Int, mask: Int): Boolean {
+        fun processKey(
+            keycode: Int,
+            mask: Int,
+        ): Boolean {
             if (isVoidKeycode(keycode)) return false
             Timber.d("processKey: keyCode=$keycode, mask=$mask")
             return processRimeKey(keycode, mask).also {
@@ -250,7 +254,10 @@ class Rime(fullCheck: Boolean) {
         }
 
         @JvmStatic
-        fun setOption(option: String, value: Boolean) {
+        fun setOption(
+            option: String,
+            value: Boolean,
+        ) {
             if (isHandlingRimeNotification) return
             setRimeOption(option, value)
         }
@@ -306,7 +313,10 @@ class Rime(fullCheck: Boolean) {
 
         // input
         @JvmStatic
-        external fun processRimeKey(keycode: Int, mask: Int): Boolean
+        external fun processRimeKey(
+            keycode: Int,
+            mask: Int,
+        ): Boolean
 
         @JvmStatic
         external fun commitRimeComposition(): Boolean
@@ -326,7 +336,10 @@ class Rime(fullCheck: Boolean) {
 
         // runtime options
         @JvmStatic
-        external fun setRimeOption(option: String, value: Boolean)
+        external fun setRimeOption(
+            option: String,
+            value: Boolean,
+        )
 
         @JvmStatic
         external fun getRimeOption(option: String): Boolean
@@ -407,7 +420,10 @@ class Rime(fullCheck: Boolean) {
         external fun selectRimeSchemas(schemaIds: Array<String>): Boolean
 
         @JvmStatic
-        external fun getRimeStateLabel(optionName: String, state: Boolean): String?
+        external fun getRimeStateLabel(
+            optionName: String,
+            state: Boolean,
+        ): String?
 
         /** call from rime_jni */
         @JvmStatic

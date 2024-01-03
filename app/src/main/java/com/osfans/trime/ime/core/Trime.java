@@ -53,6 +53,7 @@ import android.widget.PopupWindow;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.blankj.utilcode.util.BarUtils;
+import com.blankj.utilcode.util.PathUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
@@ -67,6 +68,7 @@ import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.PopupPosition;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.ime.keyboard.InitialKeyboard;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
@@ -80,7 +82,9 @@ import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
 import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
+import com.osfans.trime.ime.util.UiUtil;
 import com.osfans.trime.util.DimensionsKt;
+import com.osfans.trime.util.PermissionUtils;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.ViewUtils;
@@ -129,6 +133,7 @@ public class Trime extends LifecycleInputMethodService {
   private int popupMargin; // 候選窗與邊緣空隙
   private int popupMarginH; // 悬浮窗与屏幕两侧的间距
   private boolean isCursorUpdated = false; // 光標是否移動
+  private InitialKeyboard initialKeyboard; // initial keyboard display
   private int minPopupSize; // 上悬浮窗的候选词的最小词长
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
   private PopupPosition popupWindowPos; // 悬浮窗口彈出位置
@@ -238,9 +243,8 @@ public class Trime extends LifecycleInputMethodService {
   public Trime() {
     try {
       self = this;
-      textInputManager = TextInputManager.Companion.getInstance();
     } catch (Exception e) {
-      e.fillInStackTrace();
+      Timber.e(e);
     }
   }
 
@@ -253,12 +257,14 @@ public class Trime extends LifecycleInputMethodService {
     } else {
       Timber.i("onWindowShown...");
     }
-    isWindowShown = true;
 
-    updateComposing();
+    if (RimeWrapper.INSTANCE.isReady() && activeEditorInstance != null) {
+      isWindowShown = true;
+      updateComposing();
 
-    for (EventListener listener : eventListeners) {
-      listener.onWindowShown();
+      for (EventListener listener : eventListeners) {
+        listener.onWindowShown();
+      }
     }
   }
 
@@ -339,7 +345,9 @@ public class Trime extends LifecycleInputMethodService {
               this,
               0,
               new Intent("com.osfans.trime.timing.sync"),
-              PendingIntent.FLAG_UPDATE_CURRENT);
+              VERSION.SDK_INT >= VERSION_CODES.M
+                  ? (PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
+                  : PendingIntent.FLAG_UPDATE_CURRENT);
       if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
       } else {
@@ -350,28 +358,39 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onCreate() {
+    super.onCreate();
     // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
     try {
       // Additional try..catch wrapper as the event listeners chain or the super.onCreate() method
       // could crash
       //  and lead to a crash loop
-      try {
-        Timber.d("onCreate");
-        activeEditorInstance = new EditorInstance(this);
-        inputFeedbackManager = new InputFeedbackManager(this);
-        liquidKeyboard = new LiquidKeyboard(this);
-        restartSystemStartTimingSync();
-      } catch (Exception e) {
-        e.printStackTrace();
-        super.onCreate();
-        return;
-      }
-      super.onCreate();
-      for (EventListener listener : eventListeners) {
-        listener.onCreate();
-      }
+      Timber.d("onCreate");
+      final InputMethodService context = this;
+
+      initialKeyboard = new InitialKeyboard(this);
+      setRimeStatusAndInitialKeyboard();
+      RimeWrapper.INSTANCE.startup(
+          () -> {
+            Timber.d("Running Trime.onCreate");
+            initialKeyboard.change(true);
+            textInputManager =
+                TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(context));
+            activeEditorInstance = new EditorInstance(context);
+            inputFeedbackManager = new InputFeedbackManager(context);
+            liquidKeyboard = new LiquidKeyboard(context);
+            restartSystemStartTimingSync();
+
+            try {
+              for (EventListener listener : eventListeners) {
+                listener.onCreate();
+              }
+            } catch (Exception e) {
+              Timber.e(e);
+            }
+            Timber.d("Trime.onCreate  completed");
+          });
     } catch (Exception e) {
-      e.fillInStackTrace();
+      Timber.e(e);
     }
   }
 
@@ -383,10 +402,11 @@ public class Trime extends LifecycleInputMethodService {
    */
   public boolean setDarkMode(boolean darkMode) {
     if (darkMode != this.darkMode) {
-      Timber.d("setDarkMode: %s", darkMode);
+      Timber.d("Dark mode changed: %s", darkMode);
       this.darkMode = darkMode;
       return true;
     }
+    Timber.d("Dark mode not changed: %s", darkMode);
     return false;
   }
 
@@ -548,8 +568,9 @@ public class Trime extends LifecycleInputMethodService {
     inputRootBinding.symbol.symbolInput.setVisibility(View.GONE);
     inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
     loadConfig();
-    final Theme theme = Theme.get();
-    theme.initCurrentColors();
+    updateDarkMode();
+    final Theme theme = Theme.get(darkMode);
+    theme.initCurrentColors(darkMode);
     SoundThemeManager.switchSound(theme.colors.getString("sound"));
     KeyboardSwitcher.newOrReset();
     resetCandidate();
@@ -559,12 +580,14 @@ public class Trime extends LifecycleInputMethodService {
 
   /** Must be called on the UI thread */
   public void initKeyboard() {
-    reset();
-    // setNavBarColor();
-    textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
-    bindKeyboardToInputView();
-    // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
-    updateComposing(); // 切換主題時刷新候選
+    if (textInputManager != null) {
+      reset();
+      // setNavBarColor();
+      textInputManager.setShouldUpdateRimeOption(true); // 不能在Rime.onMessage中調用set_option，會卡死
+      bindKeyboardToInputView();
+      // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
+      updateComposing(); // 切換主題時刷新候選
+    }
   }
 
   public void initKeyboardDarkMode(boolean darkMode) {
@@ -719,42 +742,51 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public View onCreateInputView() {
-    Timber.e("onCreateInputView()");
-    // 初始化键盘布局
-    super.onCreateInputView();
-    inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));
-    mainKeyboardView = inputRootBinding.main.mainKeyboardView;
+    Timber.d("onCreateInputView()");
+    setRimeStatusAndInitialKeyboard();
+    RimeWrapper.INSTANCE.runAfterStarted(
+        () -> {
+          inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));
 
-    // 初始化候选栏
-    mCandidateRoot = inputRootBinding.main.candidateView.candidateRoot;
-    mCandidate = inputRootBinding.main.candidateView.candidates;
+          mainKeyboardView = inputRootBinding.main.mainKeyboardView;
+          // 初始化候选栏
+          mCandidateRoot = inputRootBinding.main.candidateView.candidateRoot;
+          mCandidate = inputRootBinding.main.candidateView.candidates;
 
-    // 候选词悬浮窗的容器
-    compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
-    mComposition = compositionRootBinding.compositions;
-    mPopupWindow = new PopupWindow(compositionRootBinding.compositionRoot);
-    mPopupWindow.setClippingEnabled(false);
-    mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
-    }
-    hideCompositionView();
-    mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
+          // 候选词悬浮窗的容器
+          compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
+          mComposition = compositionRootBinding.compositions;
+          mPopupWindow = new PopupWindow(compositionRootBinding.compositionRoot);
+          mPopupWindow.setClippingEnabled(false);
+          mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+          if (VERSION.SDK_INT >= VERSION_CODES.M) {
+            mPopupWindow.setWindowLayoutType(
+                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
+          }
+          hideCompositionView();
+          mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
 
-    liquidKeyboard.setKeyboardView(inputRootBinding.symbol.liquidKeyboardView);
-    tabView = inputRootBinding.symbol.tabView.tabs;
+          updateDarkMode();
+          Theme.get(darkMode).initCurrentColors(darkMode);
 
-    for (EventListener listener : eventListeners) {
-      assert inputRootBinding != null;
-      listener.onInitializeInputUi(inputRootBinding);
-    }
-    Theme.get().initCurrentColors();
-    loadBackground();
+          liquidKeyboard.setKeyboardView(inputRootBinding.symbol.liquidKeyboardView);
+          tabView = inputRootBinding.symbol.tabView.tabs;
 
-    KeyboardSwitcher.newOrReset();
+          for (EventListener listener : eventListeners) {
+            assert inputRootBinding != null;
+            listener.onInitializeInputUi(inputRootBinding);
+          }
+          loadBackground();
+
+          KeyboardSwitcher.newOrReset();
+          bindKeyboardToInputView();
+
+          setInputView(inputRootBinding.inputRoot);
+          Timber.d("onCreateInputView - completely ended");
+        });
     Timber.i("onCreateInputView() finish");
 
-    return inputRootBinding.inputRoot;
+    return initialKeyboard.change(canRimeStart());
   }
 
   public void setShowComment(boolean show_comment) {
@@ -768,117 +800,141 @@ public class Trime extends LifecycleInputMethodService {
     Timber.d("onStartInput: restarting=%s", restarting);
   }
 
-  @Override
-  public void onStartInputView(EditorInfo attribute, boolean restarting) {
-    Timber.d("onStartInputView: restarting=%s", restarting);
-    editorInfo = attribute;
-    if (getPrefs().getThemeAndColor().getAutoDark()) {
-      int nightModeFlags =
-          getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-      if (setDarkMode(nightModeFlags == Configuration.UI_MODE_NIGHT_YES)) {
-        Timber.i("dark mode changed");
-        initKeyboardDarkMode(darkMode);
-      } else Timber.i("dark mode not changed");
-    } else {
-      Timber.i("auto dark off");
-    }
+  private boolean updateDarkMode() {
+    boolean isDarkMode = UiUtil.INSTANCE.isDarkMode(this);
 
-    inputFeedbackManager.resumeSoundPool();
-    inputFeedbackManager.resetPlayProgress();
-    for (EventListener listener : eventListeners) {
-      listener.onStartInputView(activeEditorInstance, restarting);
-    }
-    if (getPrefs().getOther().getShowStatusBarIcon()) {
-      showStatusIcon(R.drawable.ic_trime_status); // 狀態欄圖標
-    }
-    bindKeyboardToInputView();
-    // if (!restarting) setNavBarColor();
-    setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
+    return setDarkMode(isDarkMode);
+  }
 
-    if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION)
-        == EditorInfo.IME_FLAG_NO_ENTER_ACTION) {
-      mainKeyboardView.resetEnterLabel();
-    } else {
-      mainKeyboardView.setEnterLabel(
-          attribute.imeOptions & EditorInfo.IME_MASK_ACTION, attribute.actionLabel);
-    }
+  private boolean canRimeStart() {
+    boolean mediaAvailable = !TextUtils.isEmpty(PathUtils.getExternalStoragePath());
+    return PermissionUtils.isAllGranted(this) && mediaAvailable;
+  }
 
-    switch (attribute.inputType & InputType.TYPE_MASK_VARIATION) {
-      case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
-      case InputType.TYPE_TEXT_VARIATION_PASSWORD:
-      case InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD:
-      case InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS:
-      case InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD:
-        Timber.i(
-            "EditorInfo: private;"
-                + " packageName="
-                + attribute.packageName
-                + "; fieldName="
-                + attribute.fieldName
-                + "; actionLabel="
-                + attribute.actionLabel
-                + "; inputType="
-                + attribute.inputType
-                + "; VARIATION="
-                + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
-                + "; CLASS="
-                + (attribute.inputType & InputType.TYPE_MASK_CLASS)
-                + "; ACTION="
-                + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
-        normalTextEditor = false;
-        break;
-
-      default:
-        Timber.i(
-            "EditorInfo: normal;"
-                + " packageName="
-                + attribute.packageName
-                + "; fieldName="
-                + attribute.fieldName
-                + "; actionLabel="
-                + attribute.actionLabel
-                + "; inputType="
-                + attribute.inputType
-                + "; VARIATION="
-                + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
-                + "; CLASS="
-                + (attribute.inputType & InputType.TYPE_MASK_CLASS)
-                + "; ACTION="
-                + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
-
-        if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)
-            == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
-          //  应用程求以隐身模式打开键盘应用程序
-          normalTextEditor = false;
-          Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
-        } else if (attribute.packageName.equals(BuildConfig.APPLICATION_ID)
-            || getPrefs().getClipboard().getDraftExcludeApp().contains(attribute.packageName)) {
-          normalTextEditor = false;
-          Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName);
-        } else {
-          normalTextEditor = true;
-          DraftHelper.INSTANCE.onInputEventChanged();
-        }
+  private void setRimeStatusAndInitialKeyboard() {
+    boolean canRimeStart = canRimeStart();
+    RimeWrapper.INSTANCE.setCanStart(canRimeStart);
+    if (initialKeyboard != null) {
+      initialKeyboard.change(canRimeStart);
     }
   }
 
   @Override
+  public void onStartInputView(EditorInfo attribute, boolean restarting) {
+    Timber.d("onStartInputView: restarting=%s", restarting);
+    editorInfo = attribute;
+
+    setRimeStatusAndInitialKeyboard();
+    RimeWrapper.INSTANCE.runAfterStarted(
+        () -> {
+          if (updateDarkMode()) {
+            initKeyboardDarkMode(darkMode);
+          }
+
+          inputFeedbackManager.resumeSoundPool();
+          inputFeedbackManager.resetPlayProgress();
+          for (EventListener listener : eventListeners) {
+            listener.onStartInputView(activeEditorInstance, restarting);
+          }
+          if (getPrefs().getOther().getShowStatusBarIcon()) {
+            showStatusIcon(R.drawable.ic_trime_status); // 狀態欄圖標
+          }
+          bindKeyboardToInputView();
+          // if (!restarting) setNavBarColor();
+          setCandidatesViewShown(!Rime.isEmpty()); // 軟鍵盤出現時顯示候選欄
+
+          if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION)
+              == EditorInfo.IME_FLAG_NO_ENTER_ACTION) {
+            mainKeyboardView.resetEnterLabel();
+          } else {
+            mainKeyboardView.setEnterLabel(
+                attribute.imeOptions & EditorInfo.IME_MASK_ACTION, attribute.actionLabel);
+          }
+
+          switch (attribute.inputType & InputType.TYPE_MASK_VARIATION) {
+            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
+            case InputType.TYPE_TEXT_VARIATION_PASSWORD:
+            case InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD:
+            case InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS:
+            case InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD:
+              Timber.i(
+                  "EditorInfo: private;"
+                      + " packageName="
+                      + attribute.packageName
+                      + "; fieldName="
+                      + attribute.fieldName
+                      + "; actionLabel="
+                      + attribute.actionLabel
+                      + "; inputType="
+                      + attribute.inputType
+                      + "; VARIATION="
+                      + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
+                      + "; CLASS="
+                      + (attribute.inputType & InputType.TYPE_MASK_CLASS)
+                      + "; ACTION="
+                      + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
+              normalTextEditor = false;
+              break;
+
+            default:
+              Timber.i(
+                  "EditorInfo: normal;"
+                      + " packageName="
+                      + attribute.packageName
+                      + "; fieldName="
+                      + attribute.fieldName
+                      + "; actionLabel="
+                      + attribute.actionLabel
+                      + "; inputType="
+                      + attribute.inputType
+                      + "; VARIATION="
+                      + (attribute.inputType & InputType.TYPE_MASK_VARIATION)
+                      + "; CLASS="
+                      + (attribute.inputType & InputType.TYPE_MASK_CLASS)
+                      + "; ACTION="
+                      + (attribute.imeOptions & EditorInfo.IME_MASK_ACTION));
+
+              if ((attribute.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING)
+                  == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) {
+                //  应用程求以隐身模式打开键盘应用程序
+                normalTextEditor = false;
+                Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING");
+              } else if (attribute.packageName.equals(BuildConfig.APPLICATION_ID)
+                  || getPrefs()
+                      .getClipboard()
+                      .getDraftExcludeApp()
+                      .contains(attribute.packageName)) {
+                normalTextEditor = false;
+                Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName);
+              } else {
+                normalTextEditor = true;
+                DraftHelper.INSTANCE.onInputEventChanged();
+              }
+          }
+        });
+    RimeWrapper.INSTANCE.runCheck();
+  }
+
+  @Override
   public void onFinishInputView(boolean finishingInput) {
-    if (normalTextEditor) {
-      DraftHelper.INSTANCE.onInputEventChanged();
-    }
     super.onFinishInputView(finishingInput);
-    // Dismiss any pop-ups when the input-view is being finished and hidden.
-    mainKeyboardView.closing();
-    performEscape();
-    if (inputFeedbackManager != null) {
-      inputFeedbackManager.releaseSoundPool();
+    if (RimeWrapper.INSTANCE.isReady()) {
+      if (normalTextEditor) {
+        DraftHelper.INSTANCE.onInputEventChanged();
+      }
+      try {
+        // Dismiss any pop-ups when the input-view is being finished and hidden.
+        mainKeyboardView.closing();
+        performEscape();
+        if (inputFeedbackManager != null) {
+          inputFeedbackManager.releaseSoundPool();
+        }
+        hideCompositionView();
+      } catch (Exception e) {
+        Timber.e(e, "Failed to show the PopupWindow.");
+      }
     }
-    try {
-      hideCompositionView();
-    } catch (Exception e) {
-      Timber.e(e, "Failed to show the PopupWindow.");
-    }
+    Timber.d("OnFinishInputView");
   }
 
   @Override
@@ -911,7 +967,13 @@ public class Trime extends LifecycleInputMethodService {
     return Rime.isComposing();
   }
 
+  /**
+   * Commit the current composing text together with the new text
+   *
+   * @param text the new text to be committed
+   */
   public void commitText(String text) {
+    getCurrentInputConnection().finishComposingText();
     activeEditorInstance.commitText(text, true);
   }
 
@@ -944,6 +1006,9 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   private boolean composeEvent(@NonNull KeyEvent event) {
+    if (textInputManager == null) {
+      return false;
+    }
     final int keyCode = event.getKeyCode();
     if (keyCode == KeyEvent.KEYCODE_MENU) return false; // 不處理 Menu 鍵
     if (!Keycode.Companion.isStdKey(keyCode)) return false; // 只處理安卓標準按鍵
@@ -964,7 +1029,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     Timber.i("\t<TrimeInput>\tonKeyDown()\tkeycode=%d, event=%s", keyCode, event.toString());
-    if (composeEvent(event) && onKeyEvent(event)) return true;
+    if (composeEvent(event) && onKeyEvent(event) && isWindowShown) return true;
     return super.onKeyDown(keyCode, event);
   }
 
@@ -973,7 +1038,7 @@ public class Trime extends LifecycleInputMethodService {
     Timber.i("\t<TrimeInput>\tonKeyUp()\tkeycode=%d, event=%s", keyCode, event.toString());
     if (composeEvent(event) && textInputManager.getNeedSendUpRimeKey()) {
       textInputManager.onRelease(keyCode);
-      return true;
+      if (isWindowShown) return true;
     }
     return super.onKeyUp(keyCode, event);
   }
@@ -1245,7 +1310,7 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   /** 模擬PC鍵盤中Esc鍵的功能：清除輸入的編碼和候選項 */
-  private void performEscape() {
+  public void performEscape() {
     if (isComposing()) textInputManager.onKey(KeyEvent.KEYCODE_ESCAPE, 0);
   }
 
@@ -1258,13 +1323,16 @@ public class Trime extends LifecycleInputMethodService {
       } else {
         switch (getPrefs().getKeyboard().getFullscreenMode()) {
           case AUTO_SHOW:
+            Timber.d("FullScreen: Auto");
             final EditorInfo ei = getCurrentInputEditorInfo();
             if (ei != null && (ei.imeOptions & EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0) {
               return false;
             }
           case ALWAYS_SHOW:
+            Timber.d("FullScreen: Always");
             return true;
           case NEVER_SHOW:
+            Timber.d("FullScreen: Never");
             return false;
         }
       }

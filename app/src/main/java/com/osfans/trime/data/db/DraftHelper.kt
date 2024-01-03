@@ -32,26 +32,33 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     var lastBean: DatabaseBean? = null
 
     fun init(context: Context) {
-        dftDb = Room
-            .databaseBuilder(context, Database::class.java, "draft.db")
-            .addMigrations(Database.MIGRATION_3_4)
-            .build()
+        dftDb =
+            Room
+                .databaseBuilder(context, Database::class.java, "draft.db")
+                .addMigrations(Database.MIGRATION_3_4)
+                .build()
         dftDao = dftDb.databaseDao()
         launch { updateItemCount() }
     }
 
     suspend fun get(id: Int) = dftDao.get(id)
+
     suspend fun getAll() = dftDao.getAll()
 
     suspend fun pin(id: Int) = dftDao.updatePinned(id, true)
+
     suspend fun unpin(id: Int) = dftDao.updatePinned(id, false)
 
-    suspend fun updateText(id: Int, text: String) = dftDao.updateText(id, text)
+    suspend fun updateText(
+        id: Int,
+        text: String,
+    ) = dftDao.updateText(id, text)
 
     suspend fun delete(id: Int) {
         dftDao.delete(id)
         updateItemCount()
     }
+
     suspend fun deleteAll(skipUnpinned: Boolean = true) {
         if (skipUnpinned) {
             dftDao.deleteAllUnpinned()
@@ -92,16 +99,17 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     private suspend fun removeOutdated() {
         val all = dftDao.getAll()
         if (all.size > limit) {
-            val outdated = all
-                .map {
-                    if (it.pinned) {
-                        it.copy(id = Int.MAX_VALUE)
-                    } else {
-                        it
+            val outdated =
+                all
+                    .map {
+                        if (it.pinned) {
+                            it.copy(id = Int.MAX_VALUE)
+                        } else {
+                            it
+                        }
                     }
-                }
-                .sortedBy { it.id }
-                .subList(0, all.size - limit)
+                    .sortedBy { it.id }
+                    .subList(0, all.size - limit)
             dftDao.delete(outdated)
         }
     }

@@ -18,11 +18,17 @@ inline fun <T : Throwable> errorT(
         ),
     )
 
-fun errorState(@StringRes messageTemplate: Int, messageArg: String? = null): Nothing =
-    errorT(::IllegalStateException, messageTemplate, messageArg)
+fun errorState(
+    @StringRes messageTemplate: Int,
+    messageArg: String? = null,
+): Nothing = errorT(::IllegalStateException, messageTemplate, messageArg)
 
-fun errorArg(@StringRes messageTemplate: Int, messageArg: String? = null): Nothing =
-    errorT(::IllegalArgumentException, messageTemplate, messageArg)
+fun errorArg(
+    @StringRes messageTemplate: Int,
+    messageArg: String? = null,
+): Nothing = errorT(::IllegalArgumentException, messageTemplate, messageArg)
 
-fun errorRuntime(@StringRes messageTemplate: Int, messageArg: String? = null): Nothing =
-    errorT(::RuntimeException, messageTemplate, messageArg)
+fun errorRuntime(
+    @StringRes messageTemplate: Int,
+    messageArg: String? = null,
+): Nothing = errorT(::RuntimeException, messageTemplate, messageArg)

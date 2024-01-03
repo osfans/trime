@@ -30,11 +30,13 @@ fun convertFromYaml(node: YamlNode): ConfigItem? {
 class ConfigData {
     var root: ConfigItem? = null
 
-    private val yaml = Yaml(
-        configuration = YamlConfiguration(
-            strictMode = false,
-        ),
-    )
+    private val yaml =
+        Yaml(
+            configuration =
+                YamlConfiguration(
+                    strictMode = false,
+                ),
+        )
 
     fun loadFromFile(fileName: String): Boolean {
         val configFile = File(fileName)
@@ -44,10 +46,11 @@ class ConfigData {
         }
         Timber.i("Loading config file $fileName")
         try {
-            val doc = configFile
-                .inputStream()
-                .bufferedReader()
-                .use { it.readText() }
+            val doc =
+                configFile
+                    .inputStream()
+                    .bufferedReader()
+                    .use { it.readText() }
             val node = yaml.parseToYamlNode(doc)
             root = convertFromYaml(node)
         } catch (e: YamlException) {

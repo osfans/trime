@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
-
     private var process: java.lang.Process? = null
     private var emittingJob: Job? = null
 
@@ -34,15 +33,16 @@ class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope
     /**
      * Get a snapshot of logcat
      */
-    fun getLogAsync(): Deferred<Result<List<String>>> = async {
-        runCatching {
-            Runtime.getRuntime()
-                .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-d"))
-                .inputStream
-                .bufferedReader()
-                .readLines()
+    fun getLogAsync(): Deferred<Result<List<String>>> =
+        async {
+            runCatching {
+                Runtime.getRuntime()
+                    .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-d"))
+                    .inputStream
+                    .bufferedReader()
+                    .readLines()
+            }
         }
-    }
 
     /**
      * Clear logcat
@@ -63,7 +63,7 @@ class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope
                 runCatching {
                     Runtime
                         .getRuntime()
-                        .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "brief"))
+                        .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "time"))
                         .also { process = it }
                         .inputStream
                         .bufferedReader()

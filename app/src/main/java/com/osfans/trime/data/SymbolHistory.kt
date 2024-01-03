@@ -5,7 +5,6 @@ import com.osfans.trime.util.appContext
 class SymbolHistory(
     val capacity: Int,
 ) : LinkedHashMap<String, String>(0, .75f, true) {
-
     companion object {
         const val FILE_NAME = "symbol_history"
     }
@@ -25,8 +24,7 @@ class SymbolHistory(
         file.writeText(values.joinToString("\n"))
     }
 
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?) =
-        size > capacity
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?) = size > capacity
 
     fun insert(s: String) = put(s, s)
 

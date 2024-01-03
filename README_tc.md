@@ -15,9 +15,9 @@
 - 穩定版 <br>
 [<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
 [<img alt='Google Play 立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='酷安' src='https://static.coolapk.com/static/web/v8/img/icon.png' height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
+[<img alt='酷安' src='https://static.coolapk.com/static/web/v8/img/icon.png' height='60px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
-- 測試版 [點擊下載](https://github.com/osfans/trime/actions)
+- 測試版 [點選下載](https://github.com/osfans/trime/actions)
 
 - 配置文件 [rimerc](https://github.com/Bambooin/rimerc)
 
@@ -26,54 +26,88 @@
 - 貢獻：[boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)、[senchi96](https://github.com/senchi96)、[heiher](https://github.com/heiher)、[abay](https://github.com/a342191555)、[iovxw](https://github.com/iovxw)、[huyz-git](https://github.com/huyz-git)、[tumuyan](https://github.com/tumuyan)、[WhiredPlanck](https://github.com/WhiredPlanck)......
 - [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)......
 - 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）......
-- 鍵盤：天真可愛的滿滿、皛筱晓小笨鱼、吴琛11、熊貓阿Bo、默默ㄇㄛˋ......
+- 鍵盤：天真可愛的滿滿、皛筱曉小笨魚、吳琛11、熊貓阿Bo、默默ㄇㄛˋ......
 - 捐贈：[Releases](https://github.com/osfans/trime/releases) 中的“打賞”實時更新
-- 社區：在 [Issues](https://github.com/osfans/trime/issues)、[QQ 羣（811142286）](https://jq.qq.com/?_wv=1027&k=AXdR80HN)、[QQ 羣（458845988）](https://jq.qq.com/?_wv=1027&k=n6xT4G3q)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime) 和[貼吧](http://tieba.baidu.com/f?kw=rime)中反饋意見的網友
-- 項目：[RIME]、[OpenCC]、[注音倉頡輸入法]等開源項目
+- 社群：在 [Issues](https://github.com/osfans/trime/issues)、[QQ 群（811142286）](https://jq.qq.com/?_wv=1027&k=AXdR80HN)、[QQ 群（458845988）](https://jq.qq.com/?_wv=1027&k=n6xT4G3q)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime) 和[貼吧](http://tieba.baidu.com/f?kw=rime)中反饋意見的網友
+- 專案：[RIME]、[OpenCC]、[注音倉頡輸入法]等開源專案
 
 ## 沿革
-TRIME 是 Tongwen RIME 或是 ThaeRvInputMethod 的縮寫:
-- 最初，輸入法是寫給[泰如拼音](http://taerv.nguyoeh.com/ime/)（tae5 rv2）的，中文名爲“泰如輸入法”;
-- 然後，添加了吳語等方言碼表，做成了一個輸入法平臺，更名爲“漢字方言輸入法”;
-- 後來，兼容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名爲“[同文輸入法平臺 2.x](https://github.com/osfans/trime-legacy)”。寓意音碼形碼同臺，方言官話同文。
-- 之後，藉助 JNI 技術，享受了 [librime](https://github.com/rime/librime) 的成果，升級爲“同文輸入法平臺 3.x”，簡稱“同文輸入法”。
+TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的縮寫:
+
+- 最初，輸入法是寫給[泰如拼音](http://taerv.nguyoeh.com/ime/)（tae5 rv2）的，中文名為“泰如輸入法”;
+- 然後，添加了吳語等方言碼錶，做成了一個輸入法平臺，更名為“漢字方言輸入法”;
+- 後來，相容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名為“[同文輸入法平臺 2.x](https://github.com/osfans/trime-legacy)”。寓意音碼形碼同臺，方言官話同文。
+- 之後，藉助 JNI 技術，享受了 [librime](https://github.com/rime/librime) 的成果，升級為“同文輸入法平臺 3.x”，簡稱“同文輸入法”。
 
 現在歡迎你前來[貢獻](CONTRIBUTING.md) ～！:tada:
 
-## 入門
+## 開發入門
 
 ### 準備
 
-Android SDK 應該已經被安裝並且正確配置。如果你還不熟悉 Android 開發，建議安裝 Android Studio，它會自動安裝並配置 Android 開發環境。
+開發者應正確安裝配置好 Android SDK 和 Android NDK。如果還不熟悉 Android 開發，建議安裝 Android Studio，它會自動安裝並配置 Android 開發環境。
 
 ### 構建
 
-1. 克隆此項目，請注意由於 `boost` 子模塊很大，這會花費一些時間。同時，請確保你的磁盤有足夠空間保存源代碼（約 1.5 GB);
+<details>
+<summary>Windows 上的前提條件</summary>
 
-```bash
-cd $your_folder
-git clone --recursive https://github.com/osfans/trime.git
+當前構建配置會使構建過程中建立符號連結，開發者需要：
+
+- 啟用[開發者模式](https://learn.microsoft.com/zh-cn/windows/apps/get-started/enable-your-device-for-development) 以在無管理員許可權的情況下建立符號連結。
+
+- 啟用 `git` 的符號連結支援：
+
+    ```powershell
+    git config --global core.symlinks true
+    ```
+
+如果無法或者不想啟用上述設定也沒關係。構建系統會自動在符號連結建立失敗時使用複製代替。
+
+</details>
+
+1. 克隆此專案並拉取所有子模組。
+
+```sh
+git clone git@github.com:osfans/trime.git
+git submodule update --init --recursive
 ```
 
-2. 編譯調試版本:
+2. 編譯除錯版本:
+
+Linux 或 macOS 上可執行：
 
 ```bash
 make debug
 ```
 
+Windows 上執行：
+
+```powershell
+.\gradle :app:assembleDebug
+```
+
 3. 編譯正式版本：
 
-請創建一個名為 keystore.properties 的文件，包含以下內容，註明[簽名信息](https://developer.android.com/studio/publish/app-signing.html):
+請建立 `keystore.properties` 檔案，包含以下內容，註明[簽名信息](https://developer.android.com/studio/publish/app-signing.html)：
 
-```bash
+```gradle.properties
 storePassword=myStorePassword
 keyPassword=mykeyPassword
 keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
+之後，Linux 或 macOS 上可執行：
+
 ```bash
 make release
+```
+
+Windows 上執行：
+
+```powershell
+.\gradlew :app:assembleRelease
 ```
 
 ### 故障排除
@@ -81,12 +115,11 @@ make release
 ```
 Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 ```
+在 Linux 或 macOS 上執行 `make clean`，Windows 上執行 `.\gradlew clean`。
 
-執行 `make clean`.
-
-其它問題:
-1. 首先嘗試 `make clean`
-2. 確保你的倉庫與最新版本一致。如果你修改了一個或更多的子模塊，請確保它們與當前倉庫版本兼容。
+其他問題:
+1. 首先嚐試 `make clean`
+2. 確保你的倉庫與最新版本一致。如果你修改了一個或更多的子模組，請確保它們與當前倉庫版本相容。
 3. 如果問題依然存在（不太可能）, 嘗試進行一次新的克隆。
 4. 檢查是否有PR/issue與你的問題相關。 如果有的話，嘗試他們的解決方案。
 5. 如果以上方法都不工作，你可以提一個issue來尋求幫助(可選)。

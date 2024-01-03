@@ -19,6 +19,9 @@ spotlessCheck:
 spotlessApply:
 	./gradlew spotlessApply
 
+    cmake-format:
+	cmake-format -i app/src/main/jni/cmake/*.cmake app/src/main/jni/CMakeLists.txt
+
 clang-format-lint:
 	./script/clang-format.sh -n
 

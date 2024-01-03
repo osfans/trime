@@ -13,7 +13,7 @@
         app:iconSpaceReserved="false"
         android:title="@string/keyboard__auto_dark_title"
         android:defaultValue="false"/>
-    <SwitchPreferenceCompat android:key="looks__use_mini_keyboard"
+    <SwitchPreferenceCompat android:key="theme_use_mini_keyboard"
         app:iconSpaceReserved="false"
         android:title="@string/keyboard__use_mini_keyboard_title"
         android:defaultValue="false"/>

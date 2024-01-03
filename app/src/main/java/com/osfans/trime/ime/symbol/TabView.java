@@ -98,6 +98,14 @@ public class TabView extends View {
     setWillNotDraw(false);
   }
 
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int h = isCommentOnTop ? candidateViewHeight + commentHeight : candidateViewHeight;
+    setMeasuredDimension(
+        MeasureSpec.makeMeasureSpec(widthMeasureSpec, MeasureSpec.UNSPECIFIED),
+        MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
+  }
+
   private boolean isHighlighted(int i) {
     return shouldCandidateUseCursor && i >= 0 && i == highlightIndex;
   }

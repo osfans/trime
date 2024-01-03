@@ -11,10 +11,11 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
     private lateinit var cltDao: DatabaseDao
 
     fun init(context: Context) {
-        cltDb = Room
-            .databaseBuilder(context, Database::class.java, "collection.db")
-            .addMigrations(Database.MIGRATION_3_4)
-            .build()
+        cltDb =
+            Room
+                .databaseBuilder(context, Database::class.java, "collection.db")
+                .addMigrations(Database.MIGRATION_3_4)
+                .build()
         cltDao = cltDb.databaseDao()
     }
 
@@ -36,5 +37,8 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
         }
     }
 
-    suspend fun updateText(id: Int, text: String) = cltDao.updateText(id, text)
+    suspend fun updateText(
+        id: Int,
+        text: String,
+    ) = cltDao.updateText(id, text)
 }

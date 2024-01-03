@@ -22,7 +22,6 @@ import android.graphics.drawable.GradientDrawable
 import androidx.core.math.MathUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager.sharedDataDir
 import com.osfans.trime.data.DataManager.userDataDir
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.sound.SoundThemeManager
@@ -37,7 +36,7 @@ import java.util.Objects
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
-class Theme {
+class Theme private constructor(isDarkMode: Boolean) {
     private var currentColorSchemeId: String? = null
     private var generalStyle: Map<String, Any?>? = null
     private var fallbackColors: Map<String, String>? = null
@@ -67,24 +66,33 @@ class Theme {
 
         @JvmStatic
         fun get(): Theme {
-            if (self == null) self = Theme()
+            if (self == null) self = Theme(false)
             return self as Theme
         }
 
-        private const val defaultThemeName = "trime"
+        @JvmStatic
+        fun get(isDarkMode: Boolean): Theme {
+            if (self == null) self = Theme(isDarkMode)
+            return self as Theme
+        }
+
+        private val defaultThemeName = "trime"
+
+        fun isImageString(str: String?): Boolean {
+            return str?.contains(Regex(".(png|jpg)")) == true
+        }
     }
 
     init {
         self = this
         ThemeManager.init()
-        Rime.getInstance(!sharedDataDir.exists())
-        init()
+        init(isDarkMode)
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
         Timber.d("Initialization finished")
     }
 
-    fun init() {
+    fun init(isDarkMode: Boolean) {
         val active = ThemeManager.getActiveTheme()
         Timber.i("Initializing theme, currentThemeName=%s ...", active)
         runCatching {
@@ -109,14 +117,14 @@ class Theme {
                 liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
             }.also { Timber.d("Setting up all theme config map takes $it ms") }
             measureTimeMillis {
-                initCurrentColors()
+                initCurrentColors(isDarkMode)
             }.also { Timber.d("Initializing cache takes $it ms") }
             Timber.i("The theme is initialized")
         }.getOrElse {
             Timber.e("Failed to parse the theme: ${it.message}")
             if (ThemeManager.getActiveTheme() != defaultThemeName) {
                 ThemeManager.switchTheme(defaultThemeName)
-                init()
+                init(isDarkMode)
             }
         }
     }
@@ -168,7 +176,10 @@ class Theme {
             return if (o is Int) o else null
         }
 
-        fun getColor(m: Map<String?, Any?>, key: String?): Int? {
+        fun getColor(
+            m: Map<String?, Any?>,
+            key: String?,
+        ): Int? {
             if (m[key] == null) return null
             return ColorUtils.parseColor(m[key] as String?) ?: getColor(m[key] as String?)
         }
@@ -186,14 +197,33 @@ class Theme {
         }
 
         // API 2.0
-        fun getDrawable(m: Map<String?, Any?>, key: String): Drawable? {
+        fun getDrawable(
+            m: Map<String?, Any?>,
+            key: String,
+        ): Drawable? {
             m[key] ?: return null
             val value = m[key] as String?
             val override = ColorUtils.parseColor(value)
             if (override != null) {
                 return GradientDrawable().apply { setColor(override) }
             }
-            return if (theme.currentColors.containsKey(value)) getDrawable(value!!) else getDrawable(key)
+
+            // value maybe a color label or a image path
+            return if (isImageString(value)) {
+                val path = theme.getImagePath(value!!)
+                if (path.isNotEmpty()) {
+                    bitmapDrawable(path)
+                } else {
+                    // fallback if image not found
+                    getDrawable(key)
+                }
+            } else if (theme.currentColors.containsKey(value)) {
+                // use custom color label
+                getDrawable(value!!)
+            } else {
+                // fallback color
+                getDrawable(key)
+            }
         }
 
         //  返回图片或背景的drawable,支持null参数。 Config 2.0
@@ -206,16 +236,24 @@ class Theme {
         ): Drawable? {
             if (key == null) return null
             val o = theme.currentColors[key]
+            var color = o
             if (o is String) {
-                val bitmap = bitmapDrawable(o)
-                if (bitmap != null) {
-                    if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                        bitmap.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
+                if (isImageString(o)) {
+                    val bitmap = bitmapDrawable(o)
+                    if (bitmap != null) {
+                        if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
+                            bitmap.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
+                        }
+                        return bitmap
                     }
-                    return bitmap
+                } else {
+                    // it is html hex color string (e.g. #ff0000)
+                    color = ColorUtils.parseColor(o)
                 }
-            } else if (o is Int) {
-                val gradient = GradientDrawable().apply { setColor(o) }
+            }
+
+            if (color is Int) {
+                val gradient = GradientDrawable().apply { setColor(color) }
                 if (roundCornerKey.isNotEmpty()) {
                     gradient.cornerRadius = theme.style.getFloat(roundCornerKey)
                 }
@@ -241,35 +279,38 @@ class Theme {
         }
 
         fun remapKeyboardId(name: String): String {
-            val remapped = if (".default" == name) {
-                val currentSchemaId = Rime.getCurrentRimeSchema()
-                val shortSchemaId = currentSchemaId.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-                if (theme.presetKeyboards!!.containsKey(shortSchemaId)) {
-                    return shortSchemaId
-                } else {
-                    val alphabet = SchemaManager.getActiveSchema().alphabet
-                    val twentySix = "qwerty"
-                    if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
-                        return alphabet
+            val remapped =
+                if (".default" == name) {
+                    val currentSchemaId = Rime.getCurrentRimeSchema()
+                    if (theme.presetKeyboards!!.containsKey(currentSchemaId)) {
+                        return currentSchemaId
                     } else {
-                        if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
-                            twentySix + "_"
-                        } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
-                            twentySix + "0"
+                        val alphabet = SchemaManager.getActiveSchema().alphabet
+                        val twentySix = "qwerty"
+                        if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
+                            return alphabet
                         } else {
-                            twentySix
+                            if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
+                                twentySix + "_"
+                            } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
+                                twentySix + "0"
+                            } else {
+                                twentySix
+                            }
                         }
                     }
+                } else {
+                    name
                 }
-            } else {
-                name
-            }
             if (!theme.presetKeyboards!!.containsKey(remapped)) {
                 Timber.w("Cannot find keyboard definition %s, fallback ...", remapped)
-                val defaultMap = theme.presetKeyboards!!["default"] as Map<String, Any>?
-                    ?: throw IllegalStateException("The default keyboard definition is missing!")
+                val defaultMap =
+                    theme.presetKeyboards!!["default"] as Map<String, Any>?
+                        ?: throw IllegalStateException("The default keyboard definition is missing!")
                 if (defaultMap.containsKey("import_preset")) {
                     return defaultMap["import_preset"] as? String ?: "default"
+                } else {
+                    return "default"
                 }
             }
             return remapped
@@ -289,7 +330,11 @@ class Theme {
     }
 
     private var oneHandMode = 0
-    fun getKeyboardPadding(oneHandMode1: Int, landMode: Boolean): IntArray {
+
+    fun getKeyboardPadding(
+        oneHandMode1: Int,
+        landMode: Boolean,
+    ): IntArray {
         keyboardPadding = IntArray(3)
         this.oneHandMode = oneHandMode1
         if (landMode) {
@@ -344,25 +389,6 @@ class Theme {
         return null
     }
 
-    /**
-     * 获取配色方案名
-     *
-     * 优先级：设置>color_scheme>default
-     *
-     * 避免直接读取 default
-     *
-     * @return 首个已配置的主题方案名
-     */
-    private val colorSchemeName: String
-        get() {
-            var schemeId = appPrefs.themeAndColor.selectedColor
-            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = style.getString("color_scheme") // 主題中指定的配色
-            if (!presetColorSchemes!!.containsKey(schemeId)) schemeId = "default" // 主題中的default配色
-            val colorMap = presetColorSchemes!![schemeId]
-            if (colorMap!!.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
-            return schemeId
-        }
-
     var hasDarkLight = false
         private set
 
@@ -376,13 +402,14 @@ class Theme {
         var scheme = appPrefs.themeAndColor.selectedColor
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = style.getString("color_scheme") // 主題中指定的配色
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = "default" // 主題中的default配色
-        val colorMap = presetColorSchemes!![scheme]
+        val colorMap = presetColorSchemes!![scheme] as Map<String, Any>
+        if (colorMap.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
         if (darkMode) {
-            if (colorMap!!.containsKey("dark_scheme")) {
+            if (colorMap.containsKey("dark_scheme")) {
                 return colorMap["dark_scheme"] as String?
             }
         } else {
-            if (colorMap!!.containsKey("light_scheme")) {
+            if (colorMap.containsKey("light_scheme")) {
                 return colorMap["light_scheme"] as String?
             }
         }
@@ -408,13 +435,6 @@ class Theme {
         }
     }
 
-    // 初始化当前配色 Config 2.0
-    fun initCurrentColors() {
-        currentColorSchemeId = colorSchemeName
-        Timber.i("Caching color values (currentColorSchemeId=%s) ...", currentColorSchemeId)
-        cacheColorValues()
-    }
-
     // 当切换暗黑模式时，刷新键盘配色方案
     fun initCurrentColors(darkMode: Boolean) {
         currentColorSchemeId = getColorSchemeName(darkMode)
@@ -433,9 +453,9 @@ class Theme {
             Timber.w("Color scheme id not found: %s", currentColorSchemeId)
             return
         }
-        appPrefs.themeAndColor.selectedColor = currentColorSchemeId!!
+
         for ((key, value1) in colorMap) {
-            if (key == "name" || key == "author") continue
+            if (key == "name" || key == "author" || key == "light_scheme" || key == "dark_scheme") continue
             val value = parseColorValue(value1)
             if (value != null) currentColors[key] = value
         }
@@ -453,8 +473,7 @@ class Theme {
         value ?: return null
         if (value is String) {
             if (value.matches(".*[.\\\\/].*".toRegex())) {
-                val fullPath = joinToFullImagePath(value)
-                return if (File(fullPath).exists()) fullPath else ""
+                return getImagePath(value)
             } else {
                 runCatching {
                     return ColorUtils.parseColor(value)
@@ -464,5 +483,14 @@ class Theme {
             }
         }
         return null
+    }
+
+    private fun getImagePath(value: String): String {
+        return if (value.matches(".*[.\\\\/].*".toRegex())) {
+            val fullPath = joinToFullImagePath(value)
+            if (File(fullPath).exists()) fullPath else ""
+        } else {
+            ""
+        }
     }
 }

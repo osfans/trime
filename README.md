@@ -47,40 +47,73 @@ Benefit from the [librime](https://github.com/rime/librime) project by JNI, we a
 
 Your [contribution](CONTRIBUTING.md) are welcome ~ ! :tada:
 
-## Getting Started
+## Getting Started for developer
 
 ### Prepare
 
-Android SDK should be correctly installed and configured. If you are new to Android development, please install Android Studio.
+Android SDK and Android NDK should be correctly installed and configured. If you are new to Android development, please install Android Studio.
 
 ### Build
 
-1. Clone this project, please **pay attention** that it would take a while for large-size `boost` submodule. And make sure that you have enough available disk space to hold the source code (about 1.5 GB).
+<details>
+<summary>Prerequisites for Windows</summary>
 
-```bash
-cd $your_folder
-git clone --recursive https://github.com/osfans/trime.git
+Symbolic links will be created according to current build configurations, developers need:
+
+- Enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) so that symlinks can be created without administrator privilege.
+
+- Enable symlink support for `git`:
+
+    ```powershell
+    git config --global core.symlinks true
+    ```
+
+If you cannot or wouldn't like to enable anything, it doesn't matter. Copying will be used instead when error on creating symbolic links.
+
+</details>
+
+1. Clone this project and fetch all submodules:
+
+```sh
+git clone git@github.com:osfans/trime.git
+git submodule update --init --recursive
 ```
 
-2. Debug version without sign:
+2. Debug version without signature:
+
+On Linux or macOS, you may run:
 
 ```bash
 make debug
 ```
 
-3. Release version with sign:
+On Windows, run:
+
+```powershell
+.\gradlew assembleDebug
+```
+
+3. Release version with signture:
 
 Create `keystore.properties` file which contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
 
-```bash
+```gradle.properties
 storePassword=myStorePassword
 keyPassword=mykeyPassword
 keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
+Then, on Linux or macOS, you may run:
+
 ```bash
 make release
+```
+
+On Windows, run:
+
+```powershell
+.\gradlew assembleRelease
 ```
 
 ### Troubleshooting
@@ -89,7 +122,7 @@ make release
 Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 ```
 
-Run `make clean`.
+Run `make clean` on Linux or macOS, or run `.\gradlew clean` on Windows.
 
 Other issues:
 1. Try `make clean`

@@ -4,7 +4,9 @@ import java.io.File
 
 abstract class Dictionary {
     enum class Type(val ext: String) {
-        OPENCC("ocd2"), Text("txt");
+        OPENCC("ocd2"),
+        Text("txt"),
+        ;
 
         companion object {
             fun fromFileName(name: String): Type? {
@@ -62,10 +64,11 @@ abstract class Dictionary {
     override fun toString(): String = "${javaClass.simpleName}[$name -> ${file.path}]"
 
     companion object {
-        fun new(it: File): Dictionary? = when (Type.fromFileName(it.name)) {
-            Type.OPENCC -> OpenCCDictionary(it)
-            Type.Text -> TextDictionary(it)
-            null -> null
-        }
+        fun new(it: File): Dictionary? =
+            when (Type.fromFileName(it.name)) {
+                Type.OPENCC -> OpenCCDictionary(it)
+                Type.Text -> TextDictionary(it)
+                null -> null
+            }
     }
 }
