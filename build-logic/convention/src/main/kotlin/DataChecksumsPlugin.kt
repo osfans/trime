@@ -1,5 +1,3 @@
-import com.google.common.hash.Hashing
-import com.google.common.io.ByteSource
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import org.gradle.api.DefaultTask
@@ -18,6 +16,8 @@ import org.gradle.kotlin.dsl.task
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
+import org.jetbrains.kotlin.com.google.common.hash.Hashing
+import org.jetbrains.kotlin.com.google.common.io.ByteSource
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.collections.set

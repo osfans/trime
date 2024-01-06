@@ -3,10 +3,11 @@ plugins {
     kotlin("plugin.serialization") version embeddedKotlinVersion
 }
 
+group = "com.osfans.trime.build_logic"
+
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
-    implementation(libs.guava)
     implementation(libs.kotlinx.serialization.json)
 }
 
