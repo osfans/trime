@@ -2,7 +2,6 @@
 androidGradlePlugin = "8.2.0"
 kotlin = "1.9.20"
 ksp = "1.9.20-1.0.14"
-lifecycle = "2.6.2"
 navigation = "2.7.5"
 room = "2.6.1"
 splitties = "3.0.0"
@@ -27,7 +26,6 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0-beta02" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
-guava = { module = "com.google.guava:guava", version = "33.0.0-jre"}
 kaml = { module = "com.charleskorn.kaml:kaml", version = "0.56.0" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 utilcode = { module = "com.blankj:utilcodex", version = "1.31.1" }

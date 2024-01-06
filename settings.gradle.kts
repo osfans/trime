@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         gradlePluginPortal()
         google()
@@ -15,6 +16,6 @@ dependencyResolutionManagement {
     }
 }
 
+rootProject.name = "trime"
 include(":app")
 include(":codegen")
-rootProject.name = "trime"
