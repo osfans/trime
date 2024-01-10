@@ -441,8 +441,8 @@ public class Trime extends LifecycleInputMethodService {
       // 设置液体键盘处于隐藏状态
       TabManager.get().setTabExited();
       symbolInput.setVisibility(View.GONE);
+      updateComposing();
     }
-    updateComposing();
     mainInput.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
 
