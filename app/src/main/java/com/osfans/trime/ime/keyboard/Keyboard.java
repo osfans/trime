@@ -113,7 +113,8 @@ public class Keyboard {
 
     final Theme theme = Theme.get();
     int[] keyboardPadding = theme.getKeyboardPadding();
-    mDisplayWidth = ScreenUtils.getScreenWidth() - keyboardPadding[0] - keyboardPadding[1];
+    mDisplayWidth = ScreenUtils.getAppScreenWidth() - keyboardPadding[0] - keyboardPadding[1];
+
     /* Height of the screen */
     // final int mDisplayHeight = dm.heightPixels;
     // Log.v(TAG, "keyboard's display metrics:" + dm);
