@@ -87,15 +87,15 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 TabManager.get().select(i)
                 initCandidates()
             }
-            SymbolKeyboardType.VAR_LENGTH -> {
-                initVarLengthKeys(TabManager.get().select(i))
+            SymbolKeyboardType.VAR_LENGTH, SymbolKeyboardType.SYMBOL -> {
+                initVarLengthKeys(i, TabManager.get().select(i))
             }
             SymbolKeyboardType.TABS -> {
                 TabManager.get().select(i)
-                initVarLengthKeys(TabManager.get().tabSwitchData)
+                initVarLengthKeys(i, TabManager.get().tabSwitchData)
                 Timber.v("All tags in TABS: TabManager.get().tabSwitchData = ${TabManager.get().tabSwitchData}")
             }
-            SymbolKeyboardType.SYMBOL, SymbolKeyboardType.HISTORY -> {
+            SymbolKeyboardType.HISTORY -> {
                 TabManager.get().select(i)
                 initFixData(i)
             }
@@ -303,10 +303,22 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
         keyboardView.scrollToPosition(0)
     }
 
-    private fun initVarLengthKeys(data: List<SimpleKeyBean>) {
+    private fun initVarLengthKeys(
+        i: Int,
+        data: List<SimpleKeyBean>,
+    ) {
+        val tabTag = TabManager.getTag(i)
+
         val candidateAdapter =
             CandidateAdapter(theme).apply {
                 setListener { position ->
+                    if (position < data.size) {
+                        val bean = data[position]
+                        if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+                            service.inputSymbol(bean.text)
+                            return@setListener
+                        }
+                    }
                     service.currentInputConnection?.commitText(data[position].text, 1)
                 }
             }
@@ -316,8 +328,15 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             adapter = candidateAdapter
             keyboardView.isSelected = true
         }
+
+        val candidates =
+            if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+                data.map { b -> CandidateListItem("", b.label) }
+            } else {
+                data.map { b -> CandidateListItem("", b.text) }
+            }
         candidateAdapter.updateCandidates(
-            data.map { b -> CandidateListItem("", b.text) },
+            candidates,
         )
     }
 
