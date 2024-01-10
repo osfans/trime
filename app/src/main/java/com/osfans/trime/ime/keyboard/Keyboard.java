@@ -258,6 +258,7 @@ public class Keyboard {
     defaultWidth = (int) (oneWeightWidthPx * keyboardKeyWidth);
 
     try {
+      float rowWidthWeight = 0;
       for (Map<String, Object> mk : lm) {
         int gap = mDefaultHorizontalGap;
         float keyWidth = CollectionUtils.obtainFloat(mk, "width", keyboardKeyWidth);
@@ -267,11 +268,21 @@ public class Keyboard {
         widthPx -= gap;
         if (column >= maxColumns || x + widthPx > mDisplayWidth) {
           // new row
+          rowWidthWeight = 0;
           x = gap / 2;
           y += mDefaultVerticalGap + rowHeight;
           column = 0;
           row++;
           if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
+        }
+        rowWidthWeight += keyWidth;
+        if (isSplit && rowWidthWeight >= keyboardSize.getRowWidthTotalWeight().get(row) / 2 + 1) {
+          x +=
+              (int)
+                  (keyboardSize.getRowWidthTotalWeight().get(row)
+                      * keyboardSize.getMultiplier()
+                      * oneWeightWidthPx); // (10 * (defaultWidth));
+          rowWidthWeight = Integer.MIN_VALUE;
         }
         if (column == 0) {
           if (keyboardHeight > 0) {
