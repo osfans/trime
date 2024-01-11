@@ -64,6 +64,7 @@
     <string name="keyboard__long_click_delete_candidate_title">长按删除候选词</string>
     <string name="keyboard__show_switches_title">在候选栏中显示状态</string>
     <string name="keyboard__show_key_popup_title">按键时弹出显示字符</string>
+    <string name="keyboard__split_title">分割鍵盤</string>
     <string name="keyboard__show_window_title">显示悬浮窗</string>
     <string name="keyboard__inline_preedit_title">嵌入式编辑模式</string>
     <string-array name="keyboard__inline_entries">
@@ -71,6 +72,12 @@
         <item>编码</item>
         <item>输入码</item>
         <item>无</item>
+    </string-array>
+    <string-array name="keyboard__split_entries">
+        <item>永不</item>
+        <item>只在橫屏時</item>
+        <item>在闊螢幕或橫屏時</item>
+        <item>永遠都是</item>
     </string-array>
     <string-array name="other__ui_mode_entries" >
         <item name="auto">系统默认</item>

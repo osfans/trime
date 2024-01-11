@@ -28,6 +28,14 @@
             android:key="keyboard__show_key_popup"
             android:title="@string/keyboard__show_key_popup_title"
             app:iconSpaceReserved="false" />
+        <ListPreference
+            android:defaultValue="never"
+            android:entries="@array/keyboard__split_entries"
+            android:entryValues="@array/keyboard__split_values"
+            android:key="keyboard__split"
+            android:title="@string/keyboard__split_title"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory

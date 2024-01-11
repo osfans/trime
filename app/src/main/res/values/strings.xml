@@ -70,6 +70,7 @@
     <string name="keyboard__long_click_delete_candidate_title">Long click to delete candidate</string>
     <string name="keyboard__show_switches_title">Show switches in candidate bar</string>
     <string name="keyboard__show_key_popup_title">Popup on key press</string>
+    <string name="keyboard__split_title">Split keyboard</string>
     <string name="keyboard__show_window_title">Show floating window when composing</string>
     <string name="keyboard__inline_preedit_title">Composing text in editor</string>
     <string-array name="keyboard__inline_entries">
@@ -77,6 +78,12 @@
         <item>Composition</item>
         <item>Input</item>
         <item>None</item>
+    </string-array>
+    <string-array name="keyboard__split_entries">
+        <item>Never</item>
+        <item>Only in landscape mode</item>
+        <item>Auto (In wide screen or landscape mode)</item>
+        <item>Always</item>
     </string-array>
     <string-array name="other__ui_mode_entries" >
         <item name="auto">System Default</item>
