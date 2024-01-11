@@ -204,6 +204,8 @@ class AppPrefs(
         var switchArrowEnabled: Boolean = false
             get() = prefs.getPref(SWITCH_ARROW_ENABLED, true)
             private set
+        val splitOption: String
+            get() = prefs.getPref(SPLIT, KeyboardPrefs.SPLIT_OPTION_NEVER)
         var candidatePageSize: String = "0"
             get() = prefs.getPref(CANDIDATE_PAGE_SIZE, "0")
             private set
