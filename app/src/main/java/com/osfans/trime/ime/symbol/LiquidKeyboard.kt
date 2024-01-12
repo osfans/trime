@@ -37,6 +37,36 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     private val service: Trime = Trime.getService()
     private lateinit var keyboardView: RecyclerView
     private val symbolHistory = SymbolHistory(180)
+    private var adapterType: AdapterType = AdapterType.INIT
+    private val simpleAdapter by lazy {
+        val itemWidth = SizeUtils.dp2px(theme.liquid.getFloat("single_width"))
+        val columnCount = ScreenUtils.getAppScreenWidth() / itemWidth
+        SimpleAdapter(theme, columnCount).apply {
+            setHasStableIds(true)
+        }
+    }
+    private val dbAdapter by lazy {
+        FlexibleAdapter(theme).apply {
+        }
+    }
+    private val candidateAdapter by lazy {
+        CandidateAdapter(theme).apply {
+            setListener { position ->
+                TextInputManager.getInstance(UiUtil.isDarkMode(context))
+                    .onCandidatePressed(position)
+                if (Rime.isComposing) {
+                    updateCandidates(Rime.candidatesWithoutSwitch.toList())
+                    notifyDataSetChanged()
+                    keyboardView.scrollToPosition(0)
+                } else {
+                    service.selectLiquidKeyboard(-1)
+                }
+            }
+        }
+    }
+    private val varLengthAdapter by lazy {
+        CandidateAdapter(theme)
+    }
 
     fun setKeyboardView(view: RecyclerView) {
         keyboardView = view
@@ -45,6 +75,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             addItemDecoration(SpacesItemDecoration(space))
             setPadding(space)
         }
+        theme = Theme.get(UiUtil.isDarkMode(context))
     }
 
 // 及时更新layoutManager, 以防在旋转屏幕后打开液体键盘crash
@@ -72,9 +103,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
 
     fun select(i: Int): SymbolKeyboardType {
         val tag = TabManager.getTag(i)
-        theme = Theme.get(UiUtil.isDarkMode(context))
         symbolHistory.load()
-        keyboardView.removeAllViews()
         when (tag.type) {
             SymbolKeyboardType.CLIPBOARD,
             SymbolKeyboardType.COLLECTION,
@@ -107,60 +136,58 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     private fun initFixData(i: Int) {
         val tabTag = TabManager.getTag(i)
 
-        val itemWidth = SizeUtils.dp2px(theme.liquid.getFloat("single_width"))
-        val columnCount = ScreenUtils.getAppScreenWidth() / itemWidth
-        val simpleAdapter =
-            SimpleAdapter(theme, columnCount).apply {
-                // 列表适配器的点击监听事件
-                setListener { position ->
-                    if (position < beans.size) {
-                        val bean = beans[position]
-                        if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                            service.inputSymbol(bean.text)
-                            return@setListener
-                        } else if (tabTag.type !== SymbolKeyboardType.TABS) {
-                            service.commitText(bean.text)
-                            if (tabTag.type !== SymbolKeyboardType.HISTORY) {
-                                symbolHistory.insert(bean.text)
-                                symbolHistory.save()
-                            }
-                            return@setListener
+        simpleAdapter.apply {
+            setListener { position ->
+                if (position < beans.size) {
+                    val bean = beans[position]
+                    if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+                        service.inputSymbol(bean.text)
+                        return@setListener
+                    } else if (tabTag.type !== SymbolKeyboardType.TABS) {
+                        service.commitText(bean.text)
+                        if (tabTag.type !== SymbolKeyboardType.HISTORY) {
+                            symbolHistory.insert(bean.text)
+                            symbolHistory.save()
                         }
+                        return@setListener
                     }
+                }
 
-                    val tag = TabManager.get().getTabSwitchTabTag(position)
-                    val truePosition = TabManager.get().getTabSwitchPosition(position)
-                    if (tag != null) {
-                        Timber.v(
-                            "TABS click: " +
-                                "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
-                        )
-                        if (tag.type === SymbolKeyboardType.NO_KEY) {
-                            when (tag.command) {
-                                KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
-                                KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
-                                else -> {}
-                            }
-                        } else if (TabManager.get().isAfterTabSwitch(truePosition)) {
-                            // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                            select(truePosition)
-                        } else {
-                            service.selectLiquidKeyboard(truePosition)
+                val tag = TabManager.get().getTabSwitchTabTag(position)
+                val truePosition = TabManager.get().getTabSwitchPosition(position)
+                if (tag != null) {
+                    Timber.v(
+                        "TABS click: " +
+                            "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
+                    )
+                    if (tag.type === SymbolKeyboardType.NO_KEY) {
+                        when (tag.command) {
+                            KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
+                            KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
+                            else -> {}
                         }
+                    } else if (TabManager.get().isAfterTabSwitch(truePosition)) {
+                        // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
+                        select(truePosition)
+                    } else {
+                        service.selectLiquidKeyboard(truePosition)
                     }
                 }
             }
-        keyboardView.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            adapter =
-                simpleAdapter.apply {
-                    setHasStableIds(true)
-                    setHasFixedSize(true)
-                }
-            // 添加分割线
-            // 设置添加删除动画
-            // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
-            isSelected = true
+        }
+
+        if (adapterType != AdapterType.SIMPLE) {
+            adapterType = AdapterType.SIMPLE
+            keyboardView.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                adapter =
+                    simpleAdapter
+                setHasFixedSize(true)
+                // 添加分割线
+                // 设置添加删除动画
+                // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
+                isSelected = true
+            }
         }
 
         when (tabTag.type) {
@@ -169,90 +196,95 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             else ->
                 simpleAdapter.updateBeans(TabManager.get().select(i))
         }
+        keyboardView.scrollToPosition(0)
         Timber.d("Tab #%s with bean size %s", i, simpleAdapter.itemCount)
     }
 
     private fun initDbData(type: SymbolKeyboardType) {
-        val dbAdapter =
-            FlexibleAdapter(theme).apply {
-                setListener(
-                    object : FlexibleAdapter.Listener {
-                        override fun onPaste(bean: DatabaseBean) {
-                            service.commitText(bean.text)
-                        }
+        dbAdapter.apply {
+            setListener(
+                object : FlexibleAdapter.Listener {
+                    override fun onPaste(bean: DatabaseBean) {
+                        service.commitText(bean.text)
+                    }
 
-                        override suspend fun onPin(bean: DatabaseBean) {
+                    override suspend fun onPin(bean: DatabaseBean) {
+                        when (type) {
+                            SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.pin(bean.id)
+                            SymbolKeyboardType.COLLECTION -> CollectionHelper.pin(bean.id)
+                            SymbolKeyboardType.DRAFT -> DraftHelper.pin(bean.id)
+                            else -> return
+                        }
+                    }
+
+                    override suspend fun onUnpin(bean: DatabaseBean) {
+                        when (type) {
+                            SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.unpin(bean.id)
+                            SymbolKeyboardType.COLLECTION -> CollectionHelper.unpin(bean.id)
+                            SymbolKeyboardType.DRAFT -> DraftHelper.unpin(bean.id)
+                            else -> return
+                        }
+                    }
+
+                    override suspend fun onDelete(bean: DatabaseBean) {
+                        when (type) {
+                            SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.delete(bean.id)
+                            SymbolKeyboardType.COLLECTION -> CollectionHelper.delete(bean.id)
+                            SymbolKeyboardType.DRAFT -> DraftHelper.delete(bean.id)
+                            else -> return
+                        }
+                    }
+
+                    override suspend fun onEdit(bean: DatabaseBean) {
+                        bean.text?.let { launchLiquidKeyboardEditText(context, type, bean.id, it) }
+                    }
+
+                    // FIXME: 这个方法可能实现得比较粗糙，需要日后改进
+                    @SuppressLint("NotifyDataSetChanged")
+                    override suspend fun onDeleteAll() {
+                        if (beans.all { it.pinned }) {
+                            // 如果没有未置顶的条目，则删除所有已置顶的条目
                             when (type) {
-                                SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.pin(bean.id)
-                                SymbolKeyboardType.COLLECTION -> CollectionHelper.pin(bean.id)
-                                SymbolKeyboardType.DRAFT -> DraftHelper.pin(bean.id)
+                                SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.deleteAll(false)
+                                SymbolKeyboardType.COLLECTION -> CollectionHelper.deleteAll(false)
+                                SymbolKeyboardType.DRAFT -> DraftHelper.deleteAll(false)
                                 else -> return
                             }
-                        }
-
-                        override suspend fun onUnpin(bean: DatabaseBean) {
+                            updateBeans(emptyList())
+                        } else {
+                            // 如果有已置顶的条目，则删除所有未置顶的条目
                             when (type) {
-                                SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.unpin(bean.id)
-                                SymbolKeyboardType.COLLECTION -> CollectionHelper.unpin(bean.id)
-                                SymbolKeyboardType.DRAFT -> DraftHelper.unpin(bean.id)
-                                else -> return
-                            }
-                        }
-
-                        override suspend fun onDelete(bean: DatabaseBean) {
-                            when (type) {
-                                SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.delete(bean.id)
-                                SymbolKeyboardType.COLLECTION -> CollectionHelper.delete(bean.id)
-                                SymbolKeyboardType.DRAFT -> DraftHelper.delete(bean.id)
-                                else -> return
-                            }
-                        }
-
-                        override suspend fun onEdit(bean: DatabaseBean) {
-                            bean.text?.let { launchLiquidKeyboardEditText(context, type, bean.id, it) }
-                        }
-
-                        // FIXME: 这个方法可能实现得比较粗糙，需要日后改进
-                        @SuppressLint("NotifyDataSetChanged")
-                        override suspend fun onDeleteAll() {
-                            if (beans.all { it.pinned }) {
-                                // 如果没有未置顶的条目，则删除所有已置顶的条目
-                                when (type) {
-                                    SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.deleteAll(false)
-                                    SymbolKeyboardType.COLLECTION -> CollectionHelper.deleteAll(false)
-                                    SymbolKeyboardType.DRAFT -> DraftHelper.deleteAll(false)
-                                    else -> return
+                                SymbolKeyboardType.CLIPBOARD -> {
+                                    ClipboardHelper.deleteAll()
+                                    updateBeans(ClipboardHelper.getAll())
                                 }
-                                updateBeans(emptyList())
-                            } else {
-                                // 如果有已置顶的条目，则删除所有未置顶的条目
-                                when (type) {
-                                    SymbolKeyboardType.CLIPBOARD -> {
-                                        ClipboardHelper.deleteAll()
-                                        updateBeans(ClipboardHelper.getAll())
-                                    }
-                                    SymbolKeyboardType.COLLECTION -> {
-                                        CollectionHelper.deleteAll()
-                                        updateBeans(CollectionHelper.getAll())
-                                    }
-                                    SymbolKeyboardType.DRAFT -> {
-                                        DraftHelper.deleteAll()
-                                        updateBeans(DraftHelper.getAll())
-                                    }
-                                    else -> return
+                                SymbolKeyboardType.COLLECTION -> {
+                                    CollectionHelper.deleteAll()
+                                    updateBeans(CollectionHelper.getAll())
                                 }
+                                SymbolKeyboardType.DRAFT -> {
+                                    DraftHelper.deleteAll()
+                                    updateBeans(DraftHelper.getAll())
+                                }
+                                else -> return
                             }
                         }
+                    }
 
-                        override val showCollectButton: Boolean = type != SymbolKeyboardType.COLLECTION
-                    },
-                )
+                    override val showCollectButton: Boolean = type != SymbolKeyboardType.COLLECTION
+                },
+            )
+        }
+
+        if (adapterType != AdapterType.DB) {
+            adapterType = AdapterType.DB
+            keyboardView.apply {
+                layoutManager = getOneColumnStaggeredGrid()
+                adapter = dbAdapter
+                setHasFixedSize(false)
+                // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
+                isSelected = true
             }
-        keyboardView.apply {
-            layoutManager = getOneColumnStaggeredGrid()
-            adapter = dbAdapter
-            // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
-            isSelected = true
         }
 
         when (type) {
@@ -278,24 +310,15 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     }
 
     private fun initCandidates() {
-        val candidateAdapter =
-            CandidateAdapter(theme).apply {
-                setListener { position ->
-                    TextInputManager.getInstance(UiUtil.isDarkMode(context)).onCandidatePressed(position)
-                    if (Rime.isComposing) {
-                        updateCandidates(Rime.candidatesWithoutSwitch.toList())
-                        notifyDataSetChanged()
-                        keyboardView.scrollToPosition(0)
-                    } else {
-                        service.selectLiquidKeyboard(-1)
-                    }
-                }
+        if (adapterType != AdapterType.CANDIDATE) {
+            adapterType = AdapterType.CANDIDATE
+            // 设置布局管理器
+            keyboardView.apply {
+                layoutManager = getFlexbox()
+                adapter = candidateAdapter
+                setHasFixedSize(false)
+                isSelected = true
             }
-        // 设置布局管理器
-        keyboardView.apply {
-            layoutManager = getFlexbox()
-            adapter = candidateAdapter
-            isSelected = true
         }
 
         candidateAdapter.updateCandidates(Rime.candidatesWithoutSwitch.toList())
@@ -308,24 +331,28 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     ) {
         val tabTag = TabManager.getTag(i)
 
-        val candidateAdapter =
-            CandidateAdapter(theme).apply {
-                setListener { position ->
-                    if (position < data.size) {
-                        val bean = data[position]
-                        if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                            service.inputSymbol(bean.text)
-                            return@setListener
-                        }
+        varLengthAdapter.apply {
+            setListener { position ->
+                if (position < data.size) {
+                    val bean = data[position]
+                    if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+                        service.inputSymbol(bean.text)
+                        return@setListener
                     }
-                    service.currentInputConnection?.commitText(data[position].text, 1)
                 }
+                service.currentInputConnection?.commitText(data[position].text, 1)
             }
-        // 设置布局管理器
-        keyboardView.apply {
-            layoutManager = getFlexbox()
-            adapter = candidateAdapter
-            keyboardView.isSelected = true
+        }
+
+        if (adapterType != AdapterType.VAR_LENGTH) {
+            adapterType = AdapterType.VAR_LENGTH
+            // 设置布局管理器
+            keyboardView.apply {
+                layoutManager = getFlexbox()
+                adapter = varLengthAdapter
+                setHasFixedSize(false)
+                keyboardView.isSelected = true
+            }
         }
 
         val candidates =
@@ -334,7 +361,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             } else {
                 data.map { b -> CandidateListItem("", b.text) }
             }
-        candidateAdapter.updateCandidates(
+        varLengthAdapter.updateCandidates(
             candidates,
         )
     }
@@ -371,5 +398,13 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                 putExtra(LiquidKeyboardEditActivity.LIQUID_KEYBOARD_TYPE, type.name)
             },
         )
+    }
+
+    private enum class AdapterType {
+        INIT,
+        SIMPLE,
+        DB,
+        CANDIDATE,
+        VAR_LENGTH,
     }
 }
