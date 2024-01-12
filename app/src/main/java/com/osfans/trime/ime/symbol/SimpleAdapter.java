@@ -49,6 +49,8 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     if (!t.isEmpty()) {
       mBeansByRows.add(t);
     }
+
+    notifyDataSetChanged();
   }
 
   @Override
