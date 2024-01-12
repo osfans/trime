@@ -1,12 +1,10 @@
 @file:Suppress("UnstableApiUsage")
 
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-import java.util.Properties
 import org.gradle.configurationcache.extensions.capitalized
 
 plugins {
+    id("com.osfans.trime.native-app-convention")
     id("com.osfans.trime.data-checksums")
-    alias(libs.plugins.android.application)
     alias(libs.plugins.aboutlibraries)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
@@ -17,7 +15,6 @@ android {
     namespace = "com.osfans.trime"
     compileSdk = 34
     buildToolsVersion = "34.0.0"
-    ndkVersion = "25.2.9519653"
 
     defaultConfig {
         applicationId  = "com.osfans.trime"
@@ -35,26 +32,20 @@ android {
         buildConfigField("String", "BUILD_VERSION_NAME", "\"${project.buildVersionName}\"")
     }
 
-    signingConfigs {
-        create("release") {
-            val keyPropFile = rootProject.file("keystore.properties")
-            if (keyPropFile.exists()) {
-                val props = Properties()
-                props.load(keyPropFile.inputStream())
-
-                storeFile = rootProject.file(props["storeFile"]!!)
-                storePassword = props["storePassword"] as? String
-                keyAlias = props["keyAlias"] as? String
-                keyPassword = props["keyPassword"] as? String
-            }
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
             //proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-android.txt"
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = with(ApkRelease) {
+                if (project.buildApkRelease) {
+                    signingConfigs.create("release") {
+                        storeFile = file(project.storeFile!!)
+                        storePassword = project.storePassword
+                        keyAlias = project.keyAlias
+                        keyPassword = project.keyPassword
+                    }
+                } else null
+            }
 
             resValue("string", "trime_app_name", "@string/app_name_release")
         }
@@ -63,17 +54,6 @@ android {
 
             resValue("string", "trime_app_name", "@string/app_name_debug")
         }
-    }
-
-    // Use prebuilt JNI library if the "app/prebuilt" exists
-    //
-    // Steps to generate the prebuilt directory:
-    // $ ./gradlew app:assembleRelease
-    // $ cp --recursive app/build/intermediates/stripped_native_libs/universalRelease/out/lib app/prebuilt
-    if (file("prebuilt").exists()) {
-        sourceSets.getByName("main").jniLibs.srcDirs(setOf("prebuilt"))
-    } else {
-        externalNativeBuild.cmake.path("src/main/jni/CMakeLists.txt")
     }
 
     buildFeatures {
@@ -93,32 +73,6 @@ android {
     // hack workaround lint gradle 8.0.2
     lint {
         checkReleaseBuilds = false
-    }
-
-    externalNativeBuild {
-        cmake {
-            version = "3.22.1"
-        }
-    }
-
-    splits {
-        // Configures multiple APKs based on ABI.
-        abi {
-            // Enables building multiple APKs per ABI.
-            isEnable = true
-
-            // By default all ABIs are included, so use reset() and include to specify that we only
-            // want APKs for x86 and x86_64.
-
-            // Resets the list of ABIs that Gradle should create APKs for to none.
-            reset()
-
-            // Specifies a list of ABIs that Gradle should create APKs for.
-            include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
-
-            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            isUniversalApk = false
-        }
     }
 
     testOptions {
@@ -152,10 +106,6 @@ android.applicationVariants.all {
         tasks.getByName("merge${variantName}Assets").dependsOn(it)
     }
 }
-
-tasks.register<Delete>("cleanCxxIntermediates") {
-    delete(file(".cxx"))
-}.also { tasks.clean.dependsOn(it) }
 
 dependencies {
     ksp(project(":codegen"))

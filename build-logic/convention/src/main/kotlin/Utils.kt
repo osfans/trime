@@ -43,6 +43,16 @@ val Project.assetsDir: File
 val Project.cleanTask: Task
     get() = tasks.getByName("clean")
 
+// Change default ABI here
+val Project.buildABI
+    get() =
+        envOrProp("BUILD_ABI", "buildABI") {
+//        "armeabi-v7a"
+            "arm64-v8a"
+//        "x86"
+//        "x86_64"
+        }
+
 val Project.builder
     get() =
         envOrProp("CI_NAME", "ciName") {
