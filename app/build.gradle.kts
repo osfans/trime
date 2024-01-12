@@ -25,7 +25,7 @@ android {
         versionName = "3.2.17"
 
         multiDexEnabled = true
-        setProperty("archivesBaseName", "trime-$versionName")
+        setProperty("archivesBaseName", "$applicationId-$buildVersionName")
         buildConfigField("String", "BUILDER", "\"${project.builder}\"")
         buildConfigField("long", "BUILD_TIMESTAMP", project.buildTimestamp)
         buildConfigField("String", "BUILD_COMMIT_HASH", "\"${project.buildCommitHash}\"")
