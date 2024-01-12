@@ -39,6 +39,7 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
   public void updateCandidates(List<CandidateListItem> candidates) {
     mCandidates.clear();
     mCandidates.addAll(candidates);
+    notifyDataSetChanged();
   }
 
   @Override
