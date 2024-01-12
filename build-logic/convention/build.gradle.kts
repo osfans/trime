@@ -17,5 +17,9 @@ gradlePlugin {
             id = "com.osfans.trime.data-checksums"
             implementationClass = "DataChecksumsPlugin"
         }
+        register("nativeAppConvention") {
+            id = "com.osfans.trime.native-app-convention"
+            implementationClass = "NativeAppConventionPlugin"
+        }
     }
 }

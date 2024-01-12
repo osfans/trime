@@ -13,6 +13,13 @@ jobs:
           - ubuntu-22.04
           - macos-13
           - windows-2022
+        abi:
+          - armeabi-v7a
+          - arm64-v8a
+          - x86
+          - x86_64
+    env:
+      BUILD_ABI: ${{ matrix.abi }}
     steps:
       - name: Fetch source code
         uses: actions/checkout@v4
