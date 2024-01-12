@@ -9,11 +9,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.blankj.utilcode.util.ScreenUtils
+import com.blankj.utilcode.util.SizeUtils
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-import com.osfans.trime.R
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.SymbolHistory
@@ -107,9 +107,8 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     private fun initFixData(i: Int) {
         val tabTag = TabManager.getTag(i)
 
-        val itemWidth = context.resources.getDimensionPixelSize(R.dimen.simple_item_size)
-        val itemMargin = context.resources.getDimensionPixelSize(R.dimen.simple_key_margin_x)
-        val columnCount = ScreenUtils.getScreenWidth() / (itemWidth + itemMargin)
+        val itemWidth = SizeUtils.dp2px(theme.liquid.getFloat("single_width"))
+        val columnCount = ScreenUtils.getAppScreenWidth() / itemWidth
         val simpleAdapter =
             SimpleAdapter(theme, columnCount).apply {
                 // 列表适配器的点击监听事件

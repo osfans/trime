@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.osfans.trime.R;
+import com.blankj.utilcode.util.SizeUtils;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.SimpleItemOneBinding;
@@ -66,7 +66,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     final SimpleItemRowBinding binding =
         SimpleItemRowBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-    int size = parent.getResources().getDimensionPixelSize(R.dimen.simple_item_size);
+    int size = SizeUtils.dp2px(theme.liquid.getFloat("single_width"));
     ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(size, size);
 
     List<SimpleItemOneBinding> bindings = new ArrayList<>();
