@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.18.0)
 
 project(trime-lib VERSION 3.0.0)
 
+# for reproducible build
+add_link_options("LINKER:--hash-style=gnu,--build-id=none")
+
 set(ANDROID_STL c++_shared)
 set(CMAKE_CXX_STANDARD 14)
 
@@ -22,6 +25,7 @@ option(WITH_GFLAGS "Use gflags" OFF)
 option(WITH_GTEST "Use googletest" OFF)
 option(WITH_UNWIND "Enable libunwind support" OFF)
 add_subdirectory(librime/deps/glog)
+target_compile_options(glogbase PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 
 option(YAML_CPP_BUILD_TOOLS "" OFF)
 option(YAML_CPP_BUILD_TESTS "" OFF)
@@ -41,6 +45,7 @@ option(LEVELDB_INSTALL "" OFF)
 add_subdirectory(librime/deps/leveldb)
 
 add_subdirectory(librime/deps/marisa-trie)
+target_compile_options(marisa PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
 
 set(LIBMARISA marisa)
 option(USE_SYSTEM_MARISA "" ON)
