@@ -6,6 +6,6 @@
     android:id="@+id/wrapper"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:justifyContent="space_between"
+    app:justifyContent="space_around"
 
     />
