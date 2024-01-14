@@ -44,7 +44,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                     abi {
                         isEnable = true
                         reset()
-                        include(target.buildABI)
+                        include(*target.buildABI.split(',').toTypedArray())
                         isUniversalApk = false
                     }
                 }
