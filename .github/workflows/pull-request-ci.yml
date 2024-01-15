@@ -40,23 +40,6 @@ jobs:
         run: |
           brew install coreutils clang-format
 
-      - name: Calculate JNI cache hash
-        id: cache-hash
-        shell: bash
-        run: script/cache-hash.sh
-
-      - name: Fetch JNI cache
-        uses: actions/cache@v3
-        id: jni-cache
-        with:
-          path: "app/prebuilt"
-          key: ${{ matrix.os }}-trime-jni-debug-${{ steps.cache-hash.outputs.hash }}
-
-      - name: Fetch submodules
-        if: ${{ !steps.jni-cache.outputs.cache-hit }}
-        run: |
-          git submodule update --init --recursive
-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -64,6 +47,23 @@ jobs:
           java-version: 17
           # will restore cache of dependencies and wrappers
           cache: 'gradle'
+
+      - name: Calculate JNI cache hash
+        id: cache-hash
+        run: |
+            ./gradlew :app:calculateNativeCacheHash
+
+      - name: Fetch JNI cache
+        uses: actions/cache@v3
+        id: jni-cache
+        with:
+          path: "app/prebuilt"
+          key: ${{ matrix.os }}-trime-jni-debug-${{ steps.cache-hash.outputs.native-cache-hash }}
+
+      - name: Fetch submodules
+        if: ${{ !steps.jni-cache.outputs.cache-hit }}
+        run: |
+          git submodule update --init --recursive
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
