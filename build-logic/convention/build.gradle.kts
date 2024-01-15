@@ -21,5 +21,9 @@ gradlePlugin {
             id = "com.osfans.trime.native-app-convention"
             implementationClass = "NativeAppConventionPlugin"
         }
+        register("nativeCacheHash") {
+            id = "com.osfans.trime.native-cache-hash"
+            implementationClass = "NativeCacheHashPlugin"
+        }
     }
 }
