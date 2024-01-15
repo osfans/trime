@@ -28,25 +28,16 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                 }
             }
 
-            if (ApkRelease.run { target.buildApkRelease }) {
-                // in this case, the version code of arm64-v8a will be used for the single production,
-                // unless `buildABI` is specified
-                defaultConfig {
-                    ndk {
-                        abiFilters.add("armeabi-v7a")
-                        abiFilters.add("arm64-v8a")
-                        abiFilters.add("x86")
-                        abiFilters.add("x86_64")
-                    }
-                }
-            } else {
-                splits {
-                    abi {
-                        isEnable = true
-                        reset()
+            splits {
+                abi {
+                    isEnable = true
+                    reset()
+                    if (ApkRelease.run { target.buildApkRelease }) {
+                        include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
+                    } else {
                         include(*target.buildABI.split(',').toTypedArray())
-                        isUniversalApk = false
                     }
+                    isUniversalApk = false
                 }
             }
         }
