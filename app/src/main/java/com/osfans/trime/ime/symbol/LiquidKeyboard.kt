@@ -143,7 +143,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                     if (tabTag.type === SymbolKeyboardType.SYMBOL) {
                         service.inputSymbol(bean.text)
                         return@setListener
-                    } else if (tabTag.type !== SymbolKeyboardType.TABS) {
+                    } else {
                         service.commitText(bean.text)
                         if (tabTag.type !== SymbolKeyboardType.HISTORY) {
                             symbolHistory.insert(bean.text)
