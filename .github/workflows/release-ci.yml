@@ -1,4 +1,4 @@
-name: release ci
+name: Release
 on:
   push:
     tags:
@@ -20,22 +20,6 @@ jobs:
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
-      - name: Calculate JNI cache hash
-        id: cache-hash
-        run: script/cache-hash.sh
-
-      - name: Fetch JNI cache
-        uses: actions/cache@v3
-        id: jni-cache
-        with:
-          path: "app/prebuilt"
-          key: ${{ runner.os }}-trime-jni-debug-${{ steps.cache-hash.outputs.hash }}
-
-      - name: Fetch submodules
-        if: ${{ !steps.jni-cache.outputs.cache-hit }}
-        run: |
-          git submodule update --init --recursive
-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -44,24 +28,42 @@ jobs:
           # will restore cache of dependencies and wrappers
           cache: 'gradle'
 
+      - name: Calculate JNI cache hash
+        id: cache-hash
+        run: |
+            ./gradlew :app:calculateNativeCacheHash
+
+      - name: Fetch JNI cache
+        uses: actions/cache@v3
+        id: jni-cache
+        with:
+          path: "app/prebuilt"
+          key: ${{ runner.os }}-trime-jni-release-${{ steps.cache-hash.outputs.native-cache-hash }}
+
+      - name: Fetch submodules
+        if: ${{ !steps.jni-cache.outputs.cache-hit }}
+        run: |
+          git submodule update --init --recursive
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Setup keystore
         run: |
-          echo "set up keystore for release"
-          echo "need help!!"
-
-      - name: Install dependency
-        run: ./script/dependency.sh
+          echo ${{ secrets.SIGNING_KEY }} | base64 --decode | cat >> signingkey.jks
+          cat << EOF > keystore.properties
+          storeFile=signingkey.jks
+          storePassword=${{ secrets.KEY_STORE_PASSWORD }}
+          keyAlias=${{ secrets.ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
 
       - name: Build Trime
-        run: make debug
+        run: make release
 
       - name: Add JNI cache
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
-        # TODO: replace debug with release after we switched to "make release"
-        run: cp -R app/build/intermediates/stripped_native_libs/debug/out/lib app/prebuilt
+        run: cp -R app/build/intermediates/stripped_native_libs/release/out/lib app/prebuilt
 
       - name: Build changelog
         id: build_changelog
@@ -79,7 +81,7 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "app/build/outputs/apk/**/*.apk"
+          artifacts: "app/build/outputs/apk/release/*.apk"
           body: |
             ${{ steps.build_changelog.outputs.changelog }}
           token: ${{ secrets.GITHUB_TOKEN }}
