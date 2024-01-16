@@ -5,11 +5,11 @@ import java.util.Properties
 object ApkRelease {
     private const val KEYSTORE_PROPERTIES = "keystore.properties"
 
-    private val props by lazy {
-        File(KEYSTORE_PROPERTIES).takeIf { it.exists() }
-            ?.let { Properties().apply { load(it.inputStream()) } }
-            ?: Properties()
-    }
+    private val Project.props: Properties
+        get() =
+            rootProject.file(KEYSTORE_PROPERTIES).takeIf { it.exists() }
+                ?.let { Properties().apply { load(it.inputStream()) } }
+                ?: Properties()
 
     val Project.storeFile
         get() = props["storeFile"] as? String
