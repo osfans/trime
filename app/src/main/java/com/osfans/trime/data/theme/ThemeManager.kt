@@ -19,7 +19,6 @@ object ThemeManager : DataDirectoryChangeListener.Listener {
 
     @JvmStatic
     fun switchTheme(theme: String) {
-        currentThemeName = theme
         AppPrefs.defaultInstance().themeAndColor.selectedTheme = theme
     }
 
@@ -27,18 +26,12 @@ object ThemeManager : DataDirectoryChangeListener.Listener {
 
     var userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
 
-    private lateinit var currentThemeName: String
-
     /**
      * Update sharedThemes and userThemes.
      */
     override fun onDataDirectoryChange() {
         sharedThemes = listThemes(DataManager.sharedDataDir)
         userThemes = listThemes(DataManager.userDataDir)
-    }
-
-    fun init() {
-        currentThemeName = AppPrefs.defaultInstance().themeAndColor.selectedTheme
     }
 
     @JvmStatic
@@ -50,5 +43,5 @@ object ThemeManager : DataDirectoryChangeListener.Listener {
     }
 
     @JvmStatic
-    fun getActiveTheme() = currentThemeName
+    fun getActiveTheme() = AppPrefs.defaultInstance().themeAndColor.selectedTheme
 }
