@@ -55,6 +55,8 @@ Your [contribution](CONTRIBUTING.md) are welcome ~ ! :tada:
 
 Android SDK and Android NDK should be correctly installed and configured. If you are new to Android development, please install Android Studio.
 
+The needed version of JDK (OpenJDK) is 17 or 21.
+
 ### Build
 
 <details>

@@ -49,6 +49,8 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 开发者应正确安装配置好 Android SDK 和 Android NDK。如果还不熟悉 Android 开发，建议安装 Android Studio，它会自动安装并配置 Android 开发环境。
 
+对 JDK（OpenJDK）版本的要求是 17 或 21。
+
 ### 构建
 
 <details>
