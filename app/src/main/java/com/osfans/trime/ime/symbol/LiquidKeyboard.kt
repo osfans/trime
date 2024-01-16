@@ -152,27 +152,6 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                         return@setListener
                     }
                 }
-
-                val tag = TabManager.get().getTabSwitchTabTag(position)
-                val truePosition = TabManager.get().getTabSwitchPosition(position)
-                if (tag != null) {
-                    Timber.v(
-                        "TABS click: " +
-                            "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
-                    )
-                    if (tag.type === SymbolKeyboardType.NO_KEY) {
-                        when (tag.command) {
-                            KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
-                            KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
-                            else -> {}
-                        }
-                    } else if (TabManager.get().isAfterTabSwitch(truePosition)) {
-                        // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                        select(truePosition)
-                    } else {
-                        service.selectLiquidKeyboard(truePosition)
-                    }
-                }
             }
         }
 
@@ -337,6 +316,27 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
                     val bean = data[position]
                     if (tabTag.type === SymbolKeyboardType.SYMBOL) {
                         service.inputSymbol(bean.text)
+                        return@setListener
+                    } else if (tabTag.type === SymbolKeyboardType.TABS) {
+                        val tag = TabManager.get().getTabSwitchTabTag(position)
+                        val truePosition = TabManager.get().getTabSwitchPosition(position)
+                        if (tag != null) {
+                            Timber.v(
+                                "TABS click: " + "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
+                            )
+                            if (tag.type === SymbolKeyboardType.NO_KEY) {
+                                when (tag.command) {
+                                    KeyCommandType.EXIT -> service.selectLiquidKeyboard(-1)
+                                    KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
+                                    else -> {}
+                                }
+                            } else if (TabManager.get().isAfterTabSwitch(truePosition)) {
+                                // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
+                                select(truePosition)
+                            } else {
+                                service.selectLiquidKeyboard(truePosition)
+                            }
+                        }
                         return@setListener
                     }
                 }
