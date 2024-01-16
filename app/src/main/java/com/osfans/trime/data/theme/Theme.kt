@@ -85,7 +85,6 @@ class Theme private constructor(isDarkMode: Boolean) {
 
     init {
         self = this
-        ThemeManager.init()
         init(isDarkMode)
         Timber.d("Setting sound from color ...")
         SoundThemeManager.switchSound(colors.getString("sound"))
