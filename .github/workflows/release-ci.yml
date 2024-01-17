@@ -89,8 +89,7 @@ jobs:
           artifacts: "app/build/outputs/apk/release/*.apk"
           name: "Nightly Build"
           tag: nightly
-          body: |
-            ${{ steps.build_changelog.outputs.changelog }}
+          generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Stable release
