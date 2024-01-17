@@ -17,6 +17,8 @@
 [<img alt='Google Play 立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
 [<img alt='酷安' src='https://static.coolapk.com/static/web/v8/img/icon.png' height='60px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
+- 每夜版 [點選下載](https://github.com/osfans/trime/releases/tag/nightly)
+
 - 測試版 [點選下載](https://github.com/osfans/trime/actions)
 
 - 配置文件 [rimerc](https://github.com/Bambooin/rimerc)

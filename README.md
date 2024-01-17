@@ -20,6 +20,8 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME],
 [<img alt='Google Play Download Now' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
 [<img alt='Coolapk' src='https://static.coolapk.com/static/web/v8/img/icon.png' height='80px'/>](https://www.coolapk.com/apk/com.osfans.trime)
 
+- Nightly Channel [Download](https://github.com/osfans/trime/releases/tag/nightly)
+
 - Canary Channel [Download](https://github.com/osfans/trime/actions)
 
 - Configurations [rimerc](https://github.com/Bambooin/rimerc)
