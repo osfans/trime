@@ -81,6 +81,8 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
           artifacts: "app/build/outputs/apk/release/*.apk"
           body: |
             ${{ steps.build_changelog.outputs.changelog }}
