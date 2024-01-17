@@ -76,6 +76,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             setPadding(space)
         }
         theme = Theme.get(UiUtil.isDarkMode(context))
+        adapterType = AdapterType.INIT
     }
 
 // 及时更新layoutManager, 以防在旋转屏幕后打开液体键盘crash
@@ -155,7 +156,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             }
         }
 
-        if (adapterType != AdapterType.SIMPLE) {
+        if (shouldChangeAdapter(AdapterType.SIMPLE)) {
             adapterType = AdapterType.SIMPLE
             keyboardView.apply {
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -255,7 +256,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             )
         }
 
-        if (adapterType != AdapterType.DB) {
+        if (shouldChangeAdapter(AdapterType.DB)) {
             adapterType = AdapterType.DB
             keyboardView.apply {
                 layoutManager = getOneColumnStaggeredGrid()
@@ -289,7 +290,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     }
 
     private fun initCandidates() {
-        if (adapterType != AdapterType.CANDIDATE) {
+        if (shouldChangeAdapter(AdapterType.CANDIDATE)) {
             adapterType = AdapterType.CANDIDATE
             // 设置布局管理器
             keyboardView.apply {
@@ -344,7 +345,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             }
         }
 
-        if (adapterType != AdapterType.VAR_LENGTH) {
+        if (shouldChangeAdapter(AdapterType.VAR_LENGTH)) {
             adapterType = AdapterType.VAR_LENGTH
             // 设置布局管理器
             keyboardView.apply {
@@ -399,6 +400,10 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             },
         )
     }
+
+    private fun shouldChangeAdapter(type: AdapterType) =
+        adapterType != type ||
+            adapterType == AdapterType.INIT
 
     private enum class AdapterType {
         INIT,
