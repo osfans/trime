@@ -26,7 +26,6 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
@@ -49,10 +48,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.widget.PopupWindow;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.blankj.utilcode.util.BarUtils;
 import com.blankj.utilcode.util.PathUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
@@ -65,7 +62,6 @@ import com.osfans.trime.databinding.CompositionRootBinding;
 import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
-import com.osfans.trime.ime.enums.PopupPosition;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
 import com.osfans.trime.ime.keyboard.InitialKeyboard;
@@ -80,6 +76,7 @@ import com.osfans.trime.ime.symbol.TabManager;
 import com.osfans.trime.ime.symbol.TabView;
 import com.osfans.trime.ime.text.Candidate;
 import com.osfans.trime.ime.text.Composition;
+import com.osfans.trime.ime.text.CompositionPopupWindow;
 import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.ime.util.UiUtil;
@@ -127,98 +124,10 @@ public class Trime extends LifecycleInputMethodService {
   public EditorInstance activeEditorInstance;
   public TextInputManager textInputManager; // 文字输入管理器
 
-  private boolean isPopupWindowEnabled = true; // 顯示懸浮窗口
-  private String isPopupWindowMovable; // 悬浮窗口是否可移動
-  private int popupWindowX, popupWindowY; // 悬浮床移动座標
-  private int popupMargin; // 候選窗與邊緣空隙
-  private int popupMarginH; // 悬浮窗与屏幕两侧的间距
-  private boolean isCursorUpdated = false; // 光標是否移動
   private InitialKeyboard initialKeyboard; // initial keyboard display
   private int minPopupSize; // 上悬浮窗的候选词的最小词长
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
-  private PopupPosition popupWindowPos; // 悬浮窗口彈出位置
-  private PopupWindow mPopupWindow;
-  private final RectF mPopupRectF = new RectF();
-  private final Handler mPopupHandler = new Handler(Looper.getMainLooper());
-  private final Runnable mPopupTimer =
-      new Runnable() {
-        @Override
-        public void run() {
-          if (mCandidateRoot == null || mCandidateRoot.getWindowToken() == null) return;
-          if (!isPopupWindowEnabled) return;
-          int x = 0, y = 0;
-          final int[] candidateLocation = new int[2];
-          mCandidateRoot.getLocationOnScreen(candidateLocation);
-          final int minX = popupMarginH;
-          final int minY = popupMargin;
-          final int maxX = mCandidateRoot.getWidth() - mPopupWindow.getWidth() - minX;
-          final int maxY = candidateLocation[1] - mPopupWindow.getHeight() - minY;
-          if (isWinFixed() || !isCursorUpdated) {
-            // setCandidatesViewShown(true);
-            switch (popupWindowPos) {
-              case TOP_RIGHT:
-                x = maxX;
-                y = minY;
-                break;
-              case TOP_LEFT:
-                x = minX;
-                y = minY;
-                break;
-              case BOTTOM_RIGHT:
-                x = maxX;
-                y = maxY;
-                break;
-              case DRAG:
-                x = popupWindowX;
-                y = popupWindowY;
-                break;
-              case FIXED:
-              case BOTTOM_LEFT:
-              default:
-                x = minX;
-                y = maxY;
-                break;
-            }
-          } else {
-            // setCandidatesViewShown(false);
-            switch (popupWindowPos) {
-              case LEFT:
-              case LEFT_UP:
-                x = (int) mPopupRectF.left;
-                break;
-              case RIGHT:
-              case RIGHT_UP:
-                x = (int) mPopupRectF.right;
-                break;
-              default:
-                Timber.wtf("UNREACHABLE BRANCH");
-            }
-            x = Math.min(maxX, x);
-            x = Math.max(minX, x);
-            switch (popupWindowPos) {
-              case LEFT:
-              case RIGHT:
-                y = (int) mPopupRectF.bottom + popupMargin;
-                break;
-              case LEFT_UP:
-              case RIGHT_UP:
-                y = (int) mPopupRectF.top - mPopupWindow.getHeight() - popupMargin;
-                break;
-              default:
-                Timber.wtf("UNREACHABLE BRANCH");
-            }
-            y = Math.min(maxY, y);
-            y = Math.max(minY, y);
-          }
-          y -= BarUtils.getStatusBarHeight(); // 不包含狀態欄
-
-          if (!mPopupWindow.isShowing()) {
-            mPopupWindow.showAtLocation(mCandidateRoot, Gravity.START | Gravity.TOP, x, y);
-          } else {
-            mPopupWindow.update(x, y, mPopupWindow.getWidth(), mPopupWindow.getHeight());
-          }
-        }
-      };
+  private CompositionPopupWindow mCompositionPopupWindow;
 
   public static Trime getService() {
     return self;
@@ -290,35 +199,19 @@ public class Trime extends LifecycleInputMethodService {
     }
   }
 
-  private boolean isWinFixed() {
-    return VERSION.SDK_INT <= VERSION_CODES.LOLLIPOP
-        || (popupWindowPos != PopupPosition.LEFT
-            && popupWindowPos != PopupPosition.RIGHT
-            && popupWindowPos != PopupPosition.LEFT_UP
-            && popupWindowPos != PopupPosition.RIGHT_UP);
-  }
-
   public void updatePopupWindow(final int offsetX, final int offsetY) {
-    Timber.d("updatePopupWindow: winX = %s, winY = %s", offsetX, offsetY);
-    popupWindowPos = PopupPosition.DRAG;
-    popupWindowX = offsetX;
-    popupWindowY = offsetY;
-    mPopupWindow.update(popupWindowX, popupWindowY, -1, -1, true);
+    mCompositionPopupWindow.updatePopupWindow(offsetX, offsetY);
   }
 
   public void loadConfig() {
     final Theme theme = Theme.get();
-    popupWindowPos = PopupPosition.fromString(theme.style.getString("layout/position"));
-    isPopupWindowMovable = theme.style.getString("layout/movable");
-    popupMargin = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/spacing"));
     minPopupSize = theme.style.getInt("layout/min_length");
     minPopupCheckSize = theme.style.getInt("layout/min_check");
-    popupMarginH = (int) DimensionsKt.dp2px(theme.style.getFloat("layout/real_margin"));
     textInputManager.setShouldResetAsciiMode(theme.style.getBoolean("reset_ascii_mode"));
     isAutoCaps = theme.style.getBoolean("auto_caps");
-    isPopupWindowEnabled =
-        getPrefs().getKeyboard().getPopupWindowEnabled() && theme.style.getObject("window") != null;
     textInputManager.setShouldUpdateRimeOption(true);
+
+    mCompositionPopupWindow.loadConfig(theme, getPrefs());
   }
 
   @SuppressWarnings("UnusedReturnValue")
@@ -378,6 +271,7 @@ public class Trime extends LifecycleInputMethodService {
             activeEditorInstance = new EditorInstance(context);
             inputFeedbackManager = new InputFeedbackManager(context);
             liquidKeyboard = new LiquidKeyboard(context);
+            mCompositionPopupWindow = new CompositionPopupWindow();
             restartSystemStartTimingSync();
 
             try {
@@ -468,44 +362,31 @@ public class Trime extends LifecycleInputMethodService {
     textInputManager.setShouldUpdateRimeOption(true);
   }
 
-  private void hideCompositionView() {
-    if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
-      popupWindowPos = PopupPosition.fromString(Theme.get().style.getString("layout/position"));
-    }
-
-    if (mPopupWindow != null && mPopupWindow.isShowing()) {
-      mPopupWindow.dismiss();
-      mPopupHandler.removeCallbacks(mPopupTimer);
-    }
-  }
-
   private void showCompositionView(boolean isCandidate) {
     if (TextUtils.isEmpty(Rime.getCompositionText()) && isCandidate) {
-      hideCompositionView();
+      mCompositionPopupWindow.hideCompositionView();
       return;
     }
     compositionRootBinding.compositionRoot.measure(
         ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    mPopupWindow.setWidth(compositionRootBinding.compositionRoot.getMeasuredWidth());
-    mPopupWindow.setHeight(compositionRootBinding.compositionRoot.getMeasuredHeight());
-    mPopupHandler.post(mPopupTimer);
+    mCompositionPopupWindow.updateCompositionView(
+        compositionRootBinding.compositionRoot.getMeasuredWidth(),
+        compositionRootBinding.compositionRoot.getMeasuredHeight());
   }
 
   public void loadBackground() {
     final Theme theme = Theme.get();
     final int orientation = getResources().getConfiguration().orientation;
 
-    if (mPopupWindow != null) {
-      final Drawable textBackground =
-          theme.colors.getDrawable(
-              "text_back_color",
-              "layout/border",
-              "border_color",
-              "layout/round_corner",
-              "layout/alpha");
-      if (textBackground != null) mPopupWindow.setBackgroundDrawable(textBackground);
-      mPopupWindow.setElevation((int) DimensionsKt.dp2px(theme.style.getFloat("layout/elevation")));
-    }
+    final Drawable textBackground =
+        theme.colors.getDrawable(
+            "text_back_color",
+            "layout/border",
+            "border_color",
+            "layout/round_corner",
+            "layout/alpha");
+    mCompositionPopupWindow.setThemeStyle(
+        (int) DimensionsKt.dp2px(theme.style.getFloat("layout/elevation")), textBackground);
 
     if (mCandidateRoot != null) {
       final Drawable candidateBackground =
@@ -554,10 +435,11 @@ public class Trime extends LifecycleInputMethodService {
       setShowComment(!Rime.getOption("_hide_comment"));
       mCandidateRoot.setVisibility(!Rime.getOption("_hide_candidate") ? View.VISIBLE : View.GONE);
       mCandidate.reset();
-      isPopupWindowEnabled =
+      mCompositionPopupWindow.setPopupWindowEnabled(
           getPrefs().getKeyboard().getPopupWindowEnabled()
-              && Theme.get().style.getObject("window") != null;
-      mComposition.setVisibility(isPopupWindowEnabled ? View.VISIBLE : View.GONE);
+              && Theme.get().style.getObject("window") != null);
+      mComposition.setVisibility(
+          mCompositionPopupWindow.isPopupWindowEnabled() ? View.VISIBLE : View.GONE);
       mComposition.reset();
     }
   }
@@ -574,7 +456,7 @@ public class Trime extends LifecycleInputMethodService {
     SoundThemeManager.switchSound(theme.colors.getString("sound"));
     KeyboardSwitcher.newOrReset();
     resetCandidate();
-    hideCompositionView();
+    mCompositionPopupWindow.hideCompositionView();
     resetKeyboard();
   }
 
@@ -598,7 +480,7 @@ public class Trime extends LifecycleInputMethodService {
       SoundThemeManager.switchSound(theme.colors.getString("sound"));
       KeyboardSwitcher.newOrReset();
       resetCandidate();
-      hideCompositionView();
+      mCompositionPopupWindow.hideCompositionView();
       resetKeyboard();
 
       // setNavBarColor();
@@ -621,6 +503,7 @@ public class Trime extends LifecycleInputMethodService {
       listener.onDestroy();
     }
     eventListeners.clear();
+    mCompositionPopupWindow.destroy();
     super.onDestroy();
 
     self = null;
@@ -674,35 +557,7 @@ public class Trime extends LifecycleInputMethodService {
 
   @Override
   public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
-    if (!isWinFixed()) {
-      final CharSequence composingText = cursorAnchorInfo.getComposingText();
-      // update mPopupRectF
-      if (composingText == null) {
-        // composing is disabled in target app or trime settings
-        // use the position of the insertion marker instead
-        mPopupRectF.top = cursorAnchorInfo.getInsertionMarkerTop();
-        mPopupRectF.left = cursorAnchorInfo.getInsertionMarkerHorizontal();
-        mPopupRectF.bottom = cursorAnchorInfo.getInsertionMarkerBottom();
-        mPopupRectF.right = mPopupRectF.left;
-      } else {
-        final int startPos = cursorAnchorInfo.getComposingTextStart();
-        final int endPos = startPos + composingText.length() - 1;
-        final RectF startCharRectF = cursorAnchorInfo.getCharacterBounds(startPos);
-        final RectF endCharRectF = cursorAnchorInfo.getCharacterBounds(endPos);
-        if (startCharRectF == null || endCharRectF == null) {
-          // composing text has been changed, the next onUpdateCursorAnchorInfo is on the road
-          // ignore this outdated update
-          return;
-        }
-        // for different writing system (e.g. right to left languages),
-        // we have to calculate the correct RectF
-        mPopupRectF.top = Math.min(startCharRectF.top, endCharRectF.top);
-        mPopupRectF.left = Math.min(startCharRectF.left, endCharRectF.left);
-        mPopupRectF.bottom = Math.max(startCharRectF.bottom, endCharRectF.bottom);
-        mPopupRectF.right = Math.max(startCharRectF.right, endCharRectF.right);
-      }
-      cursorAnchorInfo.getMatrix().mapRect(mPopupRectF);
-    }
+    mCompositionPopupWindow.updateCursorAnchorInfo(cursorAnchorInfo);
     if (mCandidateRoot != null) {
       showCompositionView(true);
     }
@@ -756,14 +611,7 @@ public class Trime extends LifecycleInputMethodService {
           // 候选词悬浮窗的容器
           compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
           mComposition = compositionRootBinding.compositions;
-          mPopupWindow = new PopupWindow(compositionRootBinding.compositionRoot);
-          mPopupWindow.setClippingEnabled(false);
-          mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-          if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            mPopupWindow.setWindowLayoutType(
-                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
-          }
-          hideCompositionView();
+          mCompositionPopupWindow.init(compositionRootBinding.compositionRoot, mCandidateRoot);
           mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
 
           updateDarkMode();
@@ -929,7 +777,7 @@ public class Trime extends LifecycleInputMethodService {
         if (inputFeedbackManager != null) {
           inputFeedbackManager.releaseSoundPool();
         }
-        hideCompositionView();
+        mCompositionPopupWindow.hideCompositionView();
       } catch (Exception e) {
         Timber.e(e, "Failed to show the PopupWindow.");
       }
@@ -1252,10 +1100,12 @@ public class Trime extends LifecycleInputMethodService {
   public int updateComposing() {
     final @Nullable InputConnection ic = getCurrentInputConnection();
     activeEditorInstance.updateComposingText();
-    if (ic != null && !isWinFixed()) isCursorUpdated = ic.requestCursorUpdates(1);
+    if (ic != null && !mCompositionPopupWindow.isWinFixed()) {
+      mCompositionPopupWindow.setCursorUpdated(ic.requestCursorUpdates(1));
+    }
     int startNum = 0;
     if (mCandidateRoot != null) {
-      if (isPopupWindowEnabled) {
+      if (mCompositionPopupWindow.isPopupWindowEnabled()) {
         Timber.d("updateComposing() SymbolKeyboardType=%s", symbolKeyboardType.toString());
         if (symbolKeyboardType != SymbolKeyboardType.NO_KEY
             && symbolKeyboardType != SymbolKeyboardType.CANDIDATE) {
@@ -1267,7 +1117,7 @@ public class Trime extends LifecycleInputMethodService {
           mCandidate.setText(startNum);
           // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
           // otherwise we need to call it here
-          if (!isCursorUpdated) showCompositionView(true);
+          if (!mCompositionPopupWindow.isCursorUpdated()) showCompositionView(true);
         }
       } else {
         mCandidate.setText(0);
