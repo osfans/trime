@@ -4,14 +4,17 @@
     android:id="@+id/symbol_input"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone"
+    >
 
     <include
         android:id="@+id/tab_view"
         layout="@layout/tab_bar"
         app:layout_constraintBottom_toTopOf="@id/liquid_keyboard_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/liquid_keyboard_view"
@@ -21,6 +24,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tab_view" />
+        app:layout_constraintTop_toBottomOf="@id/tab_view"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
