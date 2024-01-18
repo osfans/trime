@@ -1,8 +1,6 @@
 name: Release
 on:
   push:
-    branches:
-      - develop
     tags:
       - '*'
 env:
@@ -80,24 +78,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Nightly release
-        if: ${{ github.ref == 'refs/heads/develop' }}
+      - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: true
-          prerelease: true
-          artifacts: "app/build/outputs/apk/release/*.apk"
-          name: "Nightly Build"
-          tag: nightly
-          generateReleaseNotes: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Stable release
-        if: ${{ github.ref != 'refs/heads/develop' }}
-        uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: true
-          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
           artifacts: "app/build/outputs/apk/release/*.apk"
           body: |
             ${{ steps.build_changelog.outputs.changelog }}
