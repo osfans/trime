@@ -330,6 +330,7 @@ public class Trime extends LifecycleInputMethodService {
         mTabRoot.setBackground(mCandidateRoot.getBackground());
         mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
       }
+      showLiquidKeyboardToolbar();
     } else {
       symbolKeyboardType = SymbolKeyboardType.NO_KEY;
       // 设置液体键盘处于隐藏状态
@@ -1109,8 +1110,7 @@ public class Trime extends LifecycleInputMethodService {
         Timber.d("updateComposing() SymbolKeyboardType=%s", symbolKeyboardType.toString());
         if (symbolKeyboardType != SymbolKeyboardType.NO_KEY
             && symbolKeyboardType != SymbolKeyboardType.CANDIDATE) {
-          mComposition.setWindow();
-          showCompositionView(false);
+          showLiquidKeyboardToolbar();
         } else {
           mComposition.setVisibility(View.VISIBLE);
           startNum = mComposition.setWindow(minPopupSize, minPopupCheckSize, Integer.MAX_VALUE);
@@ -1131,6 +1131,11 @@ public class Trime extends LifecycleInputMethodService {
       setCandidatesViewShown(textInputManager.isComposable()); // 實體鍵盤打字時顯示候選欄
 
     return startNum;
+  }
+
+  private void showLiquidKeyboardToolbar() {
+    mComposition.changeToLiquidKeyboardToolbar();
+    showCompositionView(false);
   }
 
   public void showDialogAboveInputView(@NonNull final Dialog dialog) {

@@ -581,7 +581,7 @@ public class Composition extends AppCompatTextView {
   }
 
   /** 设置悬浮窗, 用于liquidKeyboard的悬浮窗工具栏 */
-  public void setWindow() {
+  public void changeToLiquidKeyboardToolbar() {
     if (getVisibility() != View.VISIBLE) return;
     if (liquid_keyboard_window_comp.isEmpty()) {
       this.setVisibility(GONE);
