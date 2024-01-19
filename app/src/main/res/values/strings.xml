@@ -70,7 +70,6 @@
     <string name="keyboard__long_click_delete_candidate_title">Long click to delete candidate</string>
     <string name="keyboard__show_switches_title">Show switches in candidate bar</string>
     <string name="keyboard__show_key_popup_title">Popup on key press</string>
-    <string name="keyboard__split_title">Split keyboard</string>
     <string name="keyboard__show_window_title">Show floating window when composing</string>
     <string name="keyboard__inline_preedit_title">Composing text in editor</string>
     <string-array name="keyboard__inline_entries">
@@ -278,4 +277,8 @@
     <string name="pref_clipboard_summary">Collection and draft are also managed here</string>
     <string name="a_regular_expression_per_line">A regular expression per line</string>
     <string name="keyboard__custom_key_sound">Use custom key sound</string>
+
+    <string name="pref_keyboard__landscape">Landscape Mode</string>
+    <string name="keyboard__split_title">Change to Landscape keyboard</string>
+    <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
 </resources>

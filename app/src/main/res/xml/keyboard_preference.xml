@@ -28,6 +28,11 @@
             android:key="keyboard__show_key_popup"
             android:title="@string/keyboard__show_key_popup_title"
             app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/pref_keyboard__landscape">
         <ListPreference
             android:defaultValue="never"
             android:entries="@array/keyboard__split_entries"
@@ -35,6 +40,18 @@
             android:key="keyboard__split"
             android:title="@string/keyboard__split_title"
             app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <com.osfans.trime.ui.components.DialogSeekBarPreference
+            android:defaultValue="80"
+            android:key="keyboard__split_space"
+            android:title="@string/keyboard__split_space_title"
+            app:allowDividerAbove="false"
+            app:iconSpaceReserved="false"
+            app:max="200"
+            app:min="0"
+            app:seekBarIncrement="10"
+            app:unit="%"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

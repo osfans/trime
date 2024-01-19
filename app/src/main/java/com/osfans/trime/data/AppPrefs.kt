@@ -144,6 +144,7 @@ class AppPrefs(
             const val POPUP_KEY_PRESS_ENABLED = "keyboard__show_key_popup"
             const val SWITCHES_ENABLED = "keyboard__show_switches"
             const val SPLIT = "keyboard__split"
+            const val SPLIT_SPACE_PERCENT = "keyboard__split_space"
             const val SWITCH_ARROW_ENABLED = "keyboard__show_switch_arrow"
             const val FULLSCREEN_MODE = "keyboard__fullscreen_mode"
             const val CANDIDATE_PAGE_SIZE = "keyboard__candidate_page_size"
@@ -206,6 +207,8 @@ class AppPrefs(
             private set
         val splitOption: String
             get() = prefs.getPref(SPLIT, KeyboardPrefs.SPLIT_OPTION_NEVER)
+        val splitSpacePercent: Int
+            get() = prefs.getPref(SPLIT_SPACE_PERCENT, 100)
         var candidatePageSize: String = "0"
             get() = prefs.getPref(CANDIDATE_PAGE_SIZE, "0")
             private set

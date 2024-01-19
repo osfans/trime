@@ -64,7 +64,6 @@
     <string name="keyboard__long_click_delete_candidate_title">长按删除候选词</string>
     <string name="keyboard__show_switches_title">在候选栏中显示状态</string>
     <string name="keyboard__show_key_popup_title">按键时弹出显示字符</string>
-    <string name="keyboard__split_title">分割鍵盤</string>
     <string name="keyboard__show_window_title">显示悬浮窗</string>
     <string name="keyboard__inline_preedit_title">嵌入式编辑模式</string>
     <string-array name="keyboard__inline_entries">
@@ -274,4 +273,8 @@
     <string name="pref_clipboard_summary">收藏夹和草稿箱也在这里管理</string>
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
     <string name="keyboard__custom_key_sound">使用自定义按键音</string>
+
+    <string name="pref_keyboard__landscape">橫屏模式</string>
+    <string name="keyboard__split_title">轉換到橫屏鍵盤</string>
+    <string name="keyboard__split_space_title">自動分割鍵盤比例</string>
 </resources>
