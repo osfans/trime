@@ -504,7 +504,9 @@ public class Trime extends LifecycleInputMethodService {
       listener.onDestroy();
     }
     eventListeners.clear();
-    mCompositionPopupWindow.destroy();
+    if (mCompositionPopupWindow != null) {
+      mCompositionPopupWindow.destroy();
+    }
     super.onDestroy();
 
     self = null;
