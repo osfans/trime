@@ -90,6 +90,9 @@ public class Keyboard {
 
   private boolean resetAsciiMode;
 
+  private String mLandscapeKeyboard;
+  private int mLandscapePercent;
+
   // Variables for pre-computing nearest keys.
   private String mLabelTransform;
   private int mCellWidth;
@@ -192,6 +195,12 @@ public class Keyboard {
     if (mAsciiMode == 0)
       mAsciiKeyboard = CollectionUtils.obtainString(keyboardConfig, "ascii_keyboard", "");
     resetAsciiMode = CollectionUtils.obtainBoolean(keyboardConfig, "reset_ascii_mode", false);
+    mLandscapeKeyboard = CollectionUtils.obtainString(keyboardConfig, "landscape_keyboard", "");
+    mLandscapePercent =
+        CollectionUtils.obtainInt(
+            keyboardConfig,
+            "landscape_split_percent",
+            AppPrefs.defaultInstance().getKeyboard().getSplitSpacePercent());
     mLock = CollectionUtils.obtainBoolean(keyboardConfig, "lock", false);
     int columns = CollectionUtils.obtainInt(keyboardConfig, "columns", 30);
     int defaultWidth =
@@ -240,12 +249,12 @@ public class Keyboard {
     int column = 0;
     mTotalWidth = 0;
 
-    Boolean isSplit = new KeyboardPrefs().isSplit();
+    Boolean isSplit = new KeyboardPrefs().isSplit() && isLandscapeSplit();
     KeyboardSize keyboardSize =
         new KeyboardSizeCalculator(
                 name,
                 isSplit,
-                AppPrefs.defaultInstance().getKeyboard().getSplitSpacePercent(),
+                mLandscapePercent,
                 maxColumns,
                 mDisplayWidth,
                 keyboardHeight,
@@ -785,6 +794,14 @@ public class Keyboard {
 
   public String getAsciiKeyboard() {
     return mAsciiKeyboard;
+  }
+
+  public boolean isLandscapeSplit() {
+    return mLandscapePercent > 0;
+  }
+
+  public String getLandscapeKeyboard() {
+    return mLandscapeKeyboard;
   }
 
   public boolean isLabelUppercase() {
