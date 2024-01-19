@@ -6,7 +6,7 @@ import com.osfans.trime.data.AppPrefs
 class KeyboardPrefs {
     private val prefs = AppPrefs.defaultInstance()
 
-    fun isSplit(): Boolean {
+    fun isLandscapeMode(): Boolean {
         return when (prefs.keyboard.splitOption) {
             SPLIT_OPTION_AUTO -> isWideScreen()
             SPLIT_OPTION_LANDSCAPE -> ScreenUtils.isLandscape()

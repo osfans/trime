@@ -249,7 +249,7 @@ public class Keyboard {
     int column = 0;
     mTotalWidth = 0;
 
-    Boolean isSplit = new KeyboardPrefs().isSplit() && isLandscapeSplit();
+    Boolean isSplit = new KeyboardPrefs().isLandscapeMode() && isLandscapeSplit();
     KeyboardSize keyboardSize =
         new KeyboardSizeCalculator(
                 name,
