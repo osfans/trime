@@ -5,19 +5,19 @@ import com.osfans.trime.util.sp2px
 import kotlin.math.abs
 
 class KeyboardSizeCalculator(
-    private val isSplit: Boolean,
     val name: String,
+    isSplit: Boolean,
+    splitPercent: Int,
     private val maxColumns: Int,
     private val mAllowedWidth: Int,
     private val keyboardHeight: Int,
     private val keyboardKeyWidth: Float,
-    private val themeKeyWidthPx: Int,
     private val keyHeight: Int,
     private val mDefaultHorizontalGap: Int,
     private val mDefaultVerticalGap: Int,
     private val autoHeightIndex: Int,
 ) {
-    val splitSpaceRatio: Float = if (isSplit) 1f else 0f
+    private val splitSpaceRatio: Float = if (isSplit) (splitPercent / 100f) else 0f
 
     fun calc(lm: List<Map<String, Any>>): KeyboardSize {
         var x = mDefaultHorizontalGap / 2

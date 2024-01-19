@@ -21,6 +21,7 @@ package com.osfans.trime.ime.keyboard;
 import android.graphics.drawable.Drawable;
 import android.view.KeyEvent;
 import com.blankj.utilcode.util.ScreenUtils;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
@@ -242,13 +243,13 @@ public class Keyboard {
     Boolean isSplit = new KeyboardPrefs().isSplit();
     KeyboardSize keyboardSize =
         new KeyboardSizeCalculator(
-                isSplit,
                 name,
+                isSplit,
+                AppPrefs.defaultInstance().getKeyboard().getSplitSpacePercent(),
                 maxColumns,
                 mDisplayWidth,
                 keyboardHeight,
                 keyboardKeyWidth,
-                (int) (mDisplayWidth * theme.style.getFloat("key_width")),
                 defaultHeight,
                 horizontalGap,
                 verticalGap,
