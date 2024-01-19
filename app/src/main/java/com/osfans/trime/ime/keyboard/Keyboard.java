@@ -278,12 +278,23 @@ public class Keyboard {
         }
         rowWidthWeight += keyWidth;
         if (isSplit && rowWidthWeight >= keyboardSize.getRowWidthTotalWeight().get(row) / 2 + 1) {
-          x +=
-              (int)
-                  (keyboardSize.getRowWidthTotalWeight().get(row)
-                      * keyboardSize.getMultiplier()
-                      * oneWeightWidthPx); // (10 * (defaultWidth));
           rowWidthWeight = Integer.MIN_VALUE;
+
+          if (keyWidth > 20) {
+            // enlarge the key if this key is a long key
+            widthPx =
+                (int)
+                        ((keyboardSize.getRowWidthTotalWeight().get(row)
+                                * keyboardSize.getMultiplier())
+                            * oneWeightWidthPx)
+                    + widthPx;
+          } else {
+            x +=
+                (int)
+                    (keyboardSize.getRowWidthTotalWeight().get(row)
+                        * keyboardSize.getMultiplier()
+                        * oneWeightWidthPx); // (10 * (defaultWidth));
+          }
         }
         if (column == 0) {
           if (keyboardHeight > 0) {
