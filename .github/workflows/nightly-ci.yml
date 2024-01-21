@@ -1,13 +1,14 @@
-name: Release
+name: Nightly
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '^v*'
+  schedule:
+    - cron: '0 16 * * *' # UTC 16:00 / GMT+8 0:00, daily
+
 env:
-  CI_NAME: Release CI
+  CI_NAME: Nightly CI
 jobs:
   build:
+    if: ${{ github.repository == 'osfans/trime' && github.ref == 'refs/heads/develop' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -70,12 +71,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Stable release
+      - name: Create Nightly release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
+          prerelease: true
           artifacts: "app/build/outputs/apk/release/*.apk"
+          removeArtifacts: true
+          name: "Nightly Build"
+          tag: nightly
           body: |
             ${{ steps.build_changelog.outputs.changelog }}
           token: ${{ secrets.GITHUB_TOKEN }}
