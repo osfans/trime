@@ -74,9 +74,9 @@
     </string-array>
     <string-array name="keyboard__split_entries">
         <item>永不</item>
-        <item>只在橫屏時</item>
-        <item>在闊螢幕或橫屏時</item>
-        <item>永遠都是</item>
+        <item>只在横屏时</item>
+        <item>在阔萤幕或横屏时</item>
+        <item>永远都是</item>
     </string-array>
     <string-array name="other__ui_mode_entries" >
         <item name="auto">系统默认</item>
@@ -274,7 +274,7 @@
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
     <string name="keyboard__custom_key_sound">使用自定义按键音</string>
 
-    <string name="pref_keyboard__landscape">橫屏模式</string>
-    <string name="keyboard__split_title">轉換到橫屏鍵盤</string>
-    <string name="keyboard__split_space_title">自動分割鍵盤比例</string>
+    <string name="pref_keyboard__landscape">横屏模式</string>
+    <string name="keyboard__split_title">转换到横屏键盘</string>
+    <string name="keyboard__split_space_title">自动分割键盘比例</string>
 </resources>
