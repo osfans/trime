@@ -82,6 +82,8 @@ public class Composition extends AppCompatTextView {
   private Integer hilited_label_color;
   private TextInputManager textInputManager;
 
+  private boolean isToolbarMode;
+
   private class CompositionSpan extends UnderlineSpan {
     public CompositionSpan() {
       super();
@@ -176,33 +178,39 @@ public class Composition extends AppCompatTextView {
   @Override
   public boolean onTouchEvent(@NonNull MotionEvent event) {
     int action = event.getAction();
-    if (action == MotionEvent.ACTION_UP) {
-      int n = getOffsetForPosition(event.getX(), event.getY());
-      if (composition_pos[0] <= n && n <= composition_pos[1]) {
-        String s =
-            getText().toString().substring(n, composition_pos[1]).replace(" ", "").replace("‸", "");
-        n = Rime.getRimeRawInput().length() - s.length(); // 從右側定位
-        Rime.setCaretPos(n);
-        Trime.getService().updateComposing();
-        return true;
-      }
-    } else if (!movable.contentEquals("false")
-        && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
-      int n = getOffsetForPosition(event.getX(), event.getY());
-      if (move_pos[0] <= n && n <= move_pos[1]) {
-        if (action == MotionEvent.ACTION_DOWN) {
-          if (first_move || movable.contentEquals("once")) {
-            first_move = false;
-            this.getLocationOnScreen(new int[] {mCurrentX, mCurrentY});
-          }
-          mDx = mCurrentX - event.getRawX();
-          mDy = mCurrentY - event.getRawY();
-        } else { // MotionEvent.ACTION_MOVE
-          mCurrentX = (int) (event.getRawX() + mDx);
-          mCurrentY = (int) (event.getRawY() + mDy);
-          Trime.getService().updatePopupWindow(mCurrentX, mCurrentY);
+    if (!isToolbarMode) {
+      if (action == MotionEvent.ACTION_UP) {
+        int n = getOffsetForPosition(event.getX(), event.getY());
+        if (composition_pos[0] <= n && n <= composition_pos[1]) {
+          String s =
+              getText()
+                  .toString()
+                  .substring(n, composition_pos[1])
+                  .replace(" ", "")
+                  .replace("‸", "");
+          n = Rime.getRimeRawInput().length() - s.length(); // 從右側定位
+          Rime.setCaretPos(n);
+          Trime.getService().updateComposing();
+          return true;
         }
-        return true;
+      } else if (!movable.contentEquals("false")
+          && (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)) {
+        int n = getOffsetForPosition(event.getX(), event.getY());
+        if (move_pos[0] <= n && n <= move_pos[1]) {
+          if (action == MotionEvent.ACTION_DOWN) {
+            if (first_move || movable.contentEquals("once")) {
+              first_move = false;
+              this.getLocationOnScreen(new int[] {mCurrentX, mCurrentY});
+            }
+            mDx = mCurrentX - event.getRawX();
+            mDy = mCurrentY - event.getRawY();
+          } else { // MotionEvent.ACTION_MOVE
+            mCurrentX = (int) (event.getRawX() + mDx);
+            mCurrentY = (int) (event.getRawY() + mDy);
+            Trime.getService().updatePopupWindow(mCurrentX, mCurrentY);
+          }
+          return true;
+        }
       }
     }
     return super.onTouchEvent(event);
@@ -577,6 +585,9 @@ public class Composition extends AppCompatTextView {
     if (candidate_num > 0 || ss.toString().contains("\n")) setSingleLine(false); // 設置單行
     setText(ss);
     setMovementMethod(LinkMovementMethod.getInstance());
+
+    isToolbarMode = false;
+
     return start_num;
   }
 
@@ -598,5 +609,7 @@ public class Composition extends AppCompatTextView {
 
     setText(ss);
     setMovementMethod(LinkMovementMethod.getInstance());
+
+    isToolbarMode = true;
   }
 }
