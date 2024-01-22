@@ -14,7 +14,7 @@ object CollectionUtils {
         map: Map<String, Any?>?,
         vararg: String?,
     ): Any? {
-        if (map.isNullOrEmpty() || vararg == null) return null
+        if (map.isNullOrEmpty() || vararg == null || !map.containsKey(vararg)) return null
         val keys = vararg.split('/')
         var v: Any? = map
         for (key in keys) {
@@ -34,7 +34,7 @@ object CollectionUtils {
         key: String,
         defValue: String = "",
     ): String {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue
         val v = obtainValue(map, key)
         return v?.toString() ?: defValue
     }
@@ -45,11 +45,10 @@ object CollectionUtils {
         key: String,
         defValue: Int = 0,
     ): Int {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue
         val nm = obtainString(map, key)
-        return runCatching {
-            if (nm.isNotEmpty()) java.lang.Long.decode(nm).toInt() else defValue
-        }.getOrDefault(defValue)
+        return runCatching { if (nm.isNotEmpty()) java.lang.Long.decode(nm).toInt() else defValue }
+            .getOrDefault(defValue)
     }
 
     @JvmStatic
@@ -58,11 +57,9 @@ object CollectionUtils {
         key: String,
         defValue: Float = 0f,
     ): Float {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue
         val s = obtainString(map, key)
-        return runCatching {
-            if (s.isNotEmpty()) s.toFloat() else defValue
-        }.getOrDefault(defValue)
+        return runCatching { if (s.isNotEmpty()) s.toFloat() else defValue }.getOrDefault(defValue)
     }
 
     @JvmStatic
@@ -71,6 +68,10 @@ object CollectionUtils {
         key: String,
         defValue: Boolean = false,
     ): Boolean {
-        return if (map.isNullOrEmpty() || key.isEmpty()) defValue else obtainString(map, key).toBoolean()
+        return if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) {
+            defValue
+        } else {
+            obtainString(map, key).toBoolean()
+        }
     }
 }
