@@ -329,23 +329,31 @@ public class Key {
     return pressed ? key_press_offset_y : 0;
   }
 
-  private boolean isNormal(int[] drawableState) {
-    return (drawableState == KEY_STATE_NORMAL || drawableState == KEY_STATE_NORMAL_OFF);
-  }
-
   public Drawable getBackColorForState(int[] drawableState) {
-    if (isNormal(drawableState)) return key_back_color;
-    else return hilited_key_back_color;
+    if (drawableState == KEY_STATE_NORMAL) {
+      return key_back_color;
+    } else if (drawableState == KEY_STATE_PRESSED) {
+      return hilited_key_back_color;
+    }
+    return null;
   }
 
   public Integer getTextColorForState(int[] drawableState) {
-    if (isNormal(drawableState)) return key_text_color;
-    else return hilited_key_text_color;
+    if (drawableState == KEY_STATE_NORMAL) {
+      return key_text_color;
+    } else if (drawableState == KEY_STATE_PRESSED) {
+      return hilited_key_text_color;
+    }
+    return null;
   }
 
   public Integer getSymbolColorForState(int[] drawableState) {
-    if (isNormal(drawableState)) return key_symbol_color;
-    else return hilited_key_symbol_color;
+    if (drawableState == KEY_STATE_NORMAL) {
+      return key_symbol_color;
+    } else if (drawableState == KEY_STATE_PRESSED) {
+      return hilited_key_symbol_color;
+    }
+    return null;
   }
 
   /**
