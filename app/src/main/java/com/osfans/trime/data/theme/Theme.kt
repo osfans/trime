@@ -78,8 +78,8 @@ class Theme private constructor(isDarkMode: Boolean) {
 
         private val defaultThemeName = "trime"
 
-        fun isImageString(str: String?): Boolean {
-            return str?.contains(Regex(".(png|jpg)")) == true
+        fun isFileString(str: String?): Boolean {
+            return str?.contains(Regex("""\.[a-z]{3,4}$""")) == true
         }
     }
 
@@ -179,8 +179,10 @@ class Theme private constructor(isDarkMode: Boolean) {
             m: Map<String?, Any?>,
             key: String?,
         ): Int? {
-            if (m[key] == null) return null
-            return ColorUtils.parseColor(m[key] as String?) ?: getColor(m[key] as String?)
+            var value = theme.getColorValue(m[key] as String?)
+            // 回退到配色
+            if (value == null) value = theme.currentColors[key]
+            return if (value is Int) value else null
         }
 
         //  返回drawable。  Config 2.0
@@ -200,29 +202,15 @@ class Theme private constructor(isDarkMode: Boolean) {
             m: Map<String?, Any?>,
             key: String,
         ): Drawable? {
-            m[key] ?: return null
-            val value = m[key] as String?
-            val override = ColorUtils.parseColor(value)
-            if (override != null) {
-                return GradientDrawable().apply { setColor(override) }
+            var value = theme.getColorValue(m[key] as String?)
+            // 回退到配色
+            if (value == null) value = theme.currentColors[key]
+            if (value is Int) {
+                return GradientDrawable().apply { setColor(value) }
+            } else if (value is String) {
+                return bitmapDrawable(value)
             }
-
-            // value maybe a color label or a image path
-            return if (isImageString(value)) {
-                val path = theme.getImagePath(value!!)
-                if (path.isNotEmpty()) {
-                    bitmapDrawable(path)
-                } else {
-                    // fallback if image not found
-                    getDrawable(key)
-                }
-            } else if (theme.currentColors.containsKey(value)) {
-                // use custom color label
-                getDrawable(value!!)
-            } else {
-                // fallback color
-                getDrawable(key)
-            }
+            return null
         }
 
         //  返回图片或背景的drawable,支持null参数。 Config 2.0
@@ -233,26 +221,19 @@ class Theme private constructor(isDarkMode: Boolean) {
             roundCornerKey: String,
             alphaKey: String?,
         ): Drawable? {
-            if (key == null) return null
-            val o = theme.currentColors[key]
-            var color = o
-            if (o is String) {
-                if (isImageString(o)) {
-                    val bitmap = bitmapDrawable(o)
-                    if (bitmap != null) {
-                        if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                            bitmap.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
-                        }
-                        return bitmap
+            val value = theme.getColorValue(key)
+            if (value is String) {
+                val bitmap = bitmapDrawable(value)
+                if (bitmap != null) {
+                    if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
+                        bitmap.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
                     }
-                } else {
-                    // it is html hex color string (e.g. #ff0000)
-                    color = ColorUtils.parseColor(o)
+                    return bitmap
                 }
             }
 
-            if (color is Int) {
-                val gradient = GradientDrawable().apply { setColor(color) }
+            if (value is Int) {
+                val gradient = GradientDrawable().apply { setColor(value) }
                 if (roundCornerKey.isNotEmpty()) {
                     gradient.cornerRadius = theme.style.getFloat(roundCornerKey)
                 }
@@ -374,20 +355,6 @@ class Theme private constructor(isDarkMode: Boolean) {
         return keyboardPadding
     }
 
-    //  获取当前配色方案的key的value，或者从fallback获取值。
-    private fun getColorValue(key: String?): Any? {
-        val map = presetColorSchemes!![currentColorSchemeId] ?: return null
-        var value: Any?
-        var newKey = key
-        val limit = fallbackColors!!.size * 2
-        for (i in 0 until limit) {
-            value = map[newKey]
-            if (value != null || !fallbackColors!!.containsKey(newKey)) return value
-            newKey = fallbackColors!![newKey]
-        }
-        return null
-    }
-
     var hasDarkLight = false
         private set
 
@@ -442,10 +409,10 @@ class Theme private constructor(isDarkMode: Boolean) {
             currentColorSchemeId,
             darkMode,
         )
-        cacheColorValues()
+        refreshColorValues()
     }
 
-    private fun cacheColorValues() {
+    private fun refreshColorValues() {
         currentColors.clear()
         val colorMap = presetColorSchemes!![currentColorSchemeId]
         if (colorMap == null) {
@@ -453,43 +420,64 @@ class Theme private constructor(isDarkMode: Boolean) {
             return
         }
 
-        for ((key, value1) in colorMap) {
+        for ((key, value) in colorMap) {
             if (key == "name" || key == "author" || key == "light_scheme" || key == "dark_scheme") continue
-            val value = parseColorValue(value1)
-            if (value != null) currentColors[key] = value
+            currentColors[key] = value
         }
-        for ((key) in fallbackColors!!) {
+        for ((key, value) in fallbackColors!!) {
             if (!currentColors.containsKey(key)) {
-                val value = parseColorValue(getColorValue(key))
-                if (value != null) currentColors[key] = value
+                currentColors[key] = value
             }
         }
+
+        for ((key, value) in currentColors) {
+            val parsedValue = getColorValue(value)
+            if (parsedValue != null) {
+                currentColors[key] = parsedValue
+            } else {
+                Timber.w("Cannot parse color key: %s, value: %s", key, value)
+            }
+        }
+    }
+
+    // 处理 value 值，转为颜色(Int)或图片path string 或者 fallback
+    // 处理失败返回 null
+    private fun getColorValue(value: Any?): Any? {
+        val parsedValue = parseColorValue(value)
+        if (parsedValue != null) {
+            return parsedValue
+        }
+        var newKey = value
+        var newValue: Any?
+        val limit = currentColors.size
+        for (i in 0 until limit) {
+            newValue = currentColors[newKey]
+            if (newValue == null) return null
+            if (newValue is Int) return newValue
+            if (isFileString(newValue as String)) return newValue
+
+            val parsedNewValue = parseColorValue(newValue)
+            if (parsedNewValue != null) {
+                return parsedNewValue
+            }
+            newKey = newValue
+        }
+        return null
     }
 
     // 获取参数的真实value，Config 2.0
     // 如果是色彩返回int，如果是背景图返回path string，如果处理失败返回null
     private fun parseColorValue(value: Any?): Any? {
-        value ?: return null
         if (value is String) {
-            if (value.matches(".*[.\\\\/].*".toRegex())) {
-                return getImagePath(value)
-            } else {
-                runCatching {
-                    return ColorUtils.parseColor(value)
-                }.getOrElse {
-                    Timber.e("Unknown color value $value: ${it.message}")
+            if (isFileString(value)) {
+                // 获取图片的真实地址
+                val fullPath = joinToFullImagePath(value)
+                if (File(fullPath).exists()) {
+                    return fullPath
                 }
             }
+            return ColorUtils.parseColor(value)
         }
         return null
-    }
-
-    private fun getImagePath(value: String): String {
-        return if (value.matches(".*[.\\\\/].*".toRegex())) {
-            val fullPath = joinToFullImagePath(value)
-            if (File(fullPath).exists()) fullPath else ""
-        } else {
-            ""
-        }
     }
 }
