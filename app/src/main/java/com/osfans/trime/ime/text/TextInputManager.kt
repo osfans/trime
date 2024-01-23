@@ -15,9 +15,9 @@ import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.databinding.InputRootBinding
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
+import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.Keycode
@@ -134,11 +134,11 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
             trime.loadConfig()
         }
 
-        override fun onInitializeInputUi(uiBinding: InputRootBinding) {
-            super.onInitializeInputUi(uiBinding)
+        override fun onInitializeInputUi(inputView: InputView) {
+            super.onInitializeInputUi(inputView)
             // Initialize main keyboard view
             mainKeyboardView =
-                uiBinding.main.mainKeyboardView.also {
+                inputView.oldMainInputView.mainKeyboardView.also {
                     it.setOnKeyboardActionListener(this)
                     it.setShowHint(!Rime.getOption("_hide_key_hint"))
                     it.setShowSymbol(!Rime.getOption("_hide_key_symbol"))
@@ -146,7 +146,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                 }
             // Initialize candidate bar
             candidateRoot =
-                uiBinding.main.candidateView.candidateRoot.also {
+                inputView.oldMainInputView.candidateView.root.also {
                     it.setPageStr(
                         Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0) },
                         Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) },
@@ -156,7 +156,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                 }
 
             candidateView =
-                uiBinding.main.candidateView.candidates.also {
+                inputView.oldMainInputView.candidateView.candidates.also {
                     it.setCandidateListener(this)
                     it.setShowComment(!Rime.getOption("_hide_comment"))
                     it.reset()
@@ -410,19 +410,19 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                     trime.lifecycleScope.launch {
                         when (event.option) {
                             "theme" ->
-                                trime.showDialogAboveInputView(
+                                trime.inputView?.showDialog(
                                     trime.themePicker(Theme_AppCompat_DayNight_Dialog_Alert),
                                 )
                             "color" ->
-                                trime.showDialogAboveInputView(
+                                trime.inputView?.showDialog(
                                     trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                                 )
                             "schema" ->
-                                trime.showDialogAboveInputView(
+                                trime.inputView?.showDialog(
                                     trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                                 )
                             "sound" ->
-                                trime.showDialogAboveInputView(
+                                trime.inputView?.showDialog(
                                     trime.soundPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                                 )
                             else -> ShortcutUtils.launchMainActivity(trime)
@@ -431,7 +431,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                 }
                 KeyEvent.KEYCODE_PROG_RED ->
                     trime.lifecycleScope.launch {
-                        trime.showDialogAboveInputView(
+                        trime.inputView?.showDialog(
                             trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                         )
                     }
@@ -591,7 +591,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                         R.string.pref_select_schemas,
                     ) { dialog, _ ->
                         dialog.dismiss()
-                        trime.showDialogAboveInputView(trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert))
+                        trime.inputView?.showDialog(trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert))
                     }
                     .setSingleChoiceItems(
                         schemaNameList,
@@ -604,6 +604,6 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                         shouldUpdateRimeOption = true
                     }
             }
-            trime.showDialogAboveInputView(builder.create())
+            trime.inputView?.showDialog(builder.create())
         }
     }

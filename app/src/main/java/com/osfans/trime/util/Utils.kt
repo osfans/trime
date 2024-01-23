@@ -6,9 +6,13 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
+import android.view.View
+import androidx.annotation.AttrRes
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ToastUtils
@@ -16,6 +20,8 @@ import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import splitties.experimental.InternalSplittiesApi
+import splitties.resources.withResolvedThemeAttribute
 import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -48,6 +54,26 @@ suspend fun <T> Result<T>.toast() =
             ToastUtils.showShort(it.message)
         }
     }
+
+@OptIn(InternalSplittiesApi::class)
+fun Context.styledFloat(
+    @AttrRes attrRes: Int,
+) = withResolvedThemeAttribute(attrRes) {
+    when (type) {
+        TypedValue.TYPE_FLOAT -> float
+        else -> throw IllegalArgumentException("float attribute expected")
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun View.styledFloat(
+    @AttrRes attrRes: Int,
+) = context.styledFloat(attrRes)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Fragment.styledFloat(
+    @AttrRes attrRes: Int,
+) = context!!.styledFloat(attrRes)
 
 fun formatDateTime(timeMillis: Long? = null): String = SimpleDateFormat.getDateTimeInstance().format(timeMillis?.let { Date(it) } ?: Date())
 

@@ -13,8 +13,8 @@ import com.osfans.trime.databinding.InitialKeyboardBinding
  *
  * TODO: Add a help or info button to show what's problem is behind the scene.
  */
-class InitialKeyboard(context: Context) {
-    private var binding = InitialKeyboardBinding.inflate(LayoutInflater.from(context))
+class InitialKeyboardUi(context: Context) {
+    private val binding = InitialKeyboardBinding.inflate(LayoutInflater.from(context))
 
     fun change(start: Boolean): View {
         if (start) {

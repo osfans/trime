@@ -220,7 +220,7 @@ class FlexibleAdapter(
                     }
                 }.setNegativeButton(R.string.cancel) { dialog, which ->
                 }.create()
-        service.showDialogAboveInputView(askDialog)
+        service.inputView?.showDialog(askDialog)
     }
 
     // 添加回调
