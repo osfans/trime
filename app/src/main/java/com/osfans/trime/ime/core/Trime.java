@@ -18,10 +18,7 @@
 
 package com.osfans.trime.ime.core;
 
-import static android.graphics.Color.parseColor;
-
 import android.app.AlarmManager;
-import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -31,7 +28,6 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.InputType;
@@ -48,8 +44,10 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.PathUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
@@ -59,12 +57,11 @@ import com.osfans.trime.data.db.DraftHelper;
 import com.osfans.trime.data.sound.SoundThemeManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.databinding.CompositionRootBinding;
-import com.osfans.trime.databinding.InputRootBinding;
 import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
-import com.osfans.trime.ime.keyboard.InitialKeyboard;
+import com.osfans.trime.ime.keyboard.InitialKeyboardUi;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
@@ -110,7 +107,8 @@ public class Trime extends LifecycleInputMethodService {
   private CompositionRootBinding compositionRootBinding = null;
   private ScrollView mCandidateRoot, mTabRoot;
   private TabView tabView;
-  public InputRootBinding inputRootBinding = null;
+
+  @Nullable public InputView inputView = null;
   public WeakHashSet<EventListener> eventListeners = new WeakHashSet<>();
   public InputFeedbackManager inputFeedbackManager = null; // 效果管理器
   private IntentReceiver mIntentReceiver = null;
@@ -124,7 +122,7 @@ public class Trime extends LifecycleInputMethodService {
   public EditorInstance activeEditorInstance;
   public TextInputManager textInputManager; // 文字输入管理器
 
-  private InitialKeyboard initialKeyboard; // initial keyboard display
+  private InitialKeyboardUi initialKeyboardUi; // initial keyboard display
   private int minPopupSize; // 上悬浮窗的候选词的最小词长
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
   private CompositionPopupWindow mCompositionPopupWindow;
@@ -260,12 +258,12 @@ public class Trime extends LifecycleInputMethodService {
       Timber.d("onCreate");
       final InputMethodService context = this;
 
-      initialKeyboard = new InitialKeyboard(this);
+      initialKeyboardUi = new InitialKeyboardUi(this);
       setRimeStatusAndInitialKeyboard();
       RimeWrapper.INSTANCE.startup(
           () -> {
             Timber.d("Running Trime.onCreate");
-            initialKeyboard.change(true);
+            initialKeyboardUi.change(true);
             textInputManager =
                 TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(context));
             activeEditorInstance = new EditorInstance(context);
@@ -317,19 +315,18 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   public void selectLiquidKeyboard(final int tabIndex) {
-    if (inputRootBinding == null) return;
-    final View symbolInput = inputRootBinding.symbol.symbolInput;
-    final View mainInput = inputRootBinding.main.mainInput;
+    if (inputView == null) return;
+    final View symbolInput = inputView.getOldSymbolInputView().getRoot();
+    final View mainInput = inputView.getOldMainInputView().getRoot();
     if (tabIndex >= 0) {
       symbolInput.getLayoutParams().height = mainInput.getHeight();
       symbolInput.setVisibility(View.VISIBLE);
 
       symbolKeyboardType = liquidKeyboard.select(tabIndex);
       tabView.updateTabWidth();
-      if (inputRootBinding != null) {
-        mTabRoot.setBackground(mCandidateRoot.getBackground());
-        mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
-      }
+
+      mTabRoot.setBackground(mCandidateRoot.getBackground());
+      mTabRoot.move(tabView.getHightlightLeft(), tabView.getHightlightRight());
       showLiquidKeyboardToolbar();
     } else {
       symbolKeyboardType = SymbolKeyboardType.NO_KEY;
@@ -400,7 +397,7 @@ public class Trime extends LifecycleInputMethodService {
       if (candidateBackground != null) mCandidateRoot.setBackground(candidateBackground);
     }
 
-    if (inputRootBinding == null) return;
+    if (inputView == null) return;
 
     // 单手键盘模式
     int oneHandMode = 0;
@@ -413,10 +410,10 @@ public class Trime extends LifecycleInputMethodService {
 
     final Drawable inputRootBackground = theme.colors.getDrawable("root_background");
     if (inputRootBackground != null) {
-      inputRootBinding.inputRoot.setBackground(inputRootBackground);
+      inputView.getKeyboardView().setBackground(inputRootBackground);
     } else {
       // 避免因为键盘整体透明而造成的异常
-      inputRootBinding.inputRoot.setBackgroundColor(Color.BLACK);
+      inputView.getKeyboardView().setBackgroundColor(Color.BLACK);
     }
 
     tabView.reset();
@@ -447,9 +444,9 @@ public class Trime extends LifecycleInputMethodService {
 
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
   private void reset() {
-    if (inputRootBinding == null) return;
-    inputRootBinding.symbol.symbolInput.setVisibility(View.GONE);
-    inputRootBinding.main.mainInput.setVisibility(View.VISIBLE);
+    if (inputView == null) return;
+    inputView.getOldSymbolInputView().getRoot().setVisibility(View.GONE);
+    inputView.getOldMainInputView().getRoot().setVisibility(View.VISIBLE);
     loadConfig();
     updateDarkMode();
     final Theme theme = Theme.get(darkMode);
@@ -498,7 +495,7 @@ public class Trime extends LifecycleInputMethodService {
     mIntentReceiver = null;
     if (inputFeedbackManager != null) inputFeedbackManager.destroy();
     inputFeedbackManager = null;
-    inputRootBinding = null;
+    inputView = null;
 
     for (EventListener listener : eventListeners) {
       listener.onDestroy();
@@ -593,51 +590,79 @@ public class Trime extends LifecycleInputMethodService {
   }
 
   @Override
-  public void onComputeInsets(InputMethodService.Insets outInsets) {
-    super.onComputeInsets(outInsets);
-    outInsets.contentTopInsets = outInsets.visibleTopInsets;
+  public void onComputeInsets(@NonNull InputMethodService.Insets outInsets) {
+    int[] location = new int[] {0, 0};
+    if (inputView != null) {
+      inputView.getKeyboardView().getLocationInWindow(location);
+    }
+    int y = location[1];
+    outInsets.contentTopInsets = y;
+    outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT;
+    outInsets.touchableRegion.setEmpty();
+    outInsets.visibleTopInsets = y;
   }
 
   @Override
   public View onCreateInputView() {
     Timber.d("onCreateInputView()");
-    setRimeStatusAndInitialKeyboard();
+    setInputView(initialKeyboardUi.change(canRimeStart()));
     RimeWrapper.INSTANCE.runAfterStarted(
         () -> {
-          inputRootBinding = InputRootBinding.inflate(LayoutInflater.from(this));
+          inputView = new InputView(this);
 
-          mainKeyboardView = inputRootBinding.main.mainKeyboardView;
+          mainKeyboardView = inputView.getOldMainInputView().mainKeyboardView;
           // 初始化候选栏
-          mCandidateRoot = inputRootBinding.main.candidateView.candidateRoot;
-          mCandidate = inputRootBinding.main.candidateView.candidates;
+          mCandidateRoot = inputView.getOldMainInputView().candidateView.getRoot();
+          mCandidate = inputView.getOldMainInputView().candidateView.candidates;
 
           // 候选词悬浮窗的容器
           compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
           mComposition = compositionRootBinding.compositions;
           mCompositionPopupWindow.init(compositionRootBinding.compositionRoot, mCandidateRoot);
-          mTabRoot = inputRootBinding.symbol.tabView.tabRoot;
+          mTabRoot = inputView.getOldSymbolInputView().tabView.getRoot();
 
           updateDarkMode();
           Theme.get(darkMode).initCurrentColors(darkMode);
 
-          liquidKeyboard.setKeyboardView(inputRootBinding.symbol.liquidKeyboardView);
-          tabView = inputRootBinding.symbol.tabView.tabs;
+          liquidKeyboard.setKeyboardView(
+              (RecyclerView) inputView.getOldSymbolInputView().liquidKeyboardView);
+          tabView = inputView.getOldSymbolInputView().tabView.tabs;
 
           for (EventListener listener : eventListeners) {
-            assert inputRootBinding != null;
-            listener.onInitializeInputUi(inputRootBinding);
+            listener.onInitializeInputUi(inputView);
           }
           loadBackground();
 
           KeyboardSwitcher.newOrReset();
           bindKeyboardToInputView();
 
-          setInputView(inputRootBinding.inputRoot);
+          setInputView(inputView);
           Timber.d("onCreateInputView - completely ended");
         });
-    Timber.i("onCreateInputView() finish");
+    Timber.d("onCreateInputView() finish");
 
-    return initialKeyboard.change(canRimeStart());
+    return inputView;
+  }
+
+  @Override
+  public void setInputView(View view) {
+    final FrameLayout inputArea =
+        Objects.requireNonNull(getWindow().getWindow())
+            .getDecorView()
+            .findViewById(android.R.id.inputArea);
+    ViewGroup.LayoutParams lP1 = inputArea.getLayoutParams();
+    lP1.height = ViewGroup.LayoutParams.MATCH_PARENT;
+    inputArea.setLayoutParams(lP1);
+    super.setInputView(view);
+    ViewGroup.LayoutParams lP2 = view.getLayoutParams();
+    lP2.height = ViewGroup.LayoutParams.MATCH_PARENT;
+    view.setLayoutParams(lP2);
+  }
+
+  @Override
+  public void onConfigureWindow(
+      @NonNull Window win, boolean isFullscreen, boolean isCandidatesOnly) {
+    win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
   }
 
   public void setShowComment(boolean show_comment) {
@@ -665,8 +690,8 @@ public class Trime extends LifecycleInputMethodService {
   private void setRimeStatusAndInitialKeyboard() {
     boolean canRimeStart = canRimeStart();
     RimeWrapper.INSTANCE.setCanStart(canRimeStart);
-    if (initialKeyboard != null) {
-      initialKeyboard.change(canRimeStart);
+    if (initialKeyboardUi != null) {
+      initialKeyboardUi.change(canRimeStart);
     }
   }
 
@@ -784,6 +809,9 @@ public class Trime extends LifecycleInputMethodService {
       } catch (Exception e) {
         Timber.e(e, "Failed to show the PopupWindow.");
       }
+    }
+    if (inputView != null) {
+      inputView.finishInput();
     }
     Timber.d("OnFinishInputView");
   }
@@ -1140,17 +1168,6 @@ public class Trime extends LifecycleInputMethodService {
     showCompositionView(false);
   }
 
-  public void showDialogAboveInputView(@NonNull final Dialog dialog) {
-    final IBinder token = inputRootBinding.inputRoot.getWindowToken();
-    final Window window = dialog.getWindow();
-    final WindowManager.LayoutParams lp = window.getAttributes();
-    lp.token = Objects.requireNonNull(token, "InputRoot token is null.");
-    lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-    window.setAttributes(lp);
-    window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-    dialog.show();
-  }
-
   /**
    * 如果爲{@link KeyEvent#KEYCODE_ENTER 回車鍵}，則換行
    *
@@ -1207,29 +1224,28 @@ public class Trime extends LifecycleInputMethodService {
   private void updateSoftInputWindowLayoutParameters() {
     final Window w = getWindow().getWindow();
     if (w == null) return;
-    final View inputRoot = inputRootBinding != null ? inputRootBinding.inputRoot : null;
-    if (inputRoot != null) {
+    if (inputView != null) {
       final int layoutHeight =
           isFullscreenMode()
               ? WindowManager.LayoutParams.WRAP_CONTENT
               : WindowManager.LayoutParams.MATCH_PARENT;
       final View inputArea = w.findViewById(android.R.id.inputArea);
       // TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
-      if (isFullscreenMode()) {
-        Timber.i("isFullscreenMode");
-        /* In Fullscreen mode, when layout contains transparent color,
-         * the background under input area will disturb users' typing,
-         * so set the input area as light pink */
-        inputArea.setBackgroundColor(parseColor("#ff660000"));
-      } else {
-        Timber.i("NotFullscreenMode");
-        /* Otherwise, set it as light gray to avoid potential issue */
-        inputArea.setBackgroundColor(parseColor("#dddddddd"));
-      }
+      //      if (isFullscreenMode()) {
+      //        Timber.d("isFullscreenMode");
+      //        /* In Fullscreen mode, when layout contains transparent color,
+      //         * the background under input area will disturb users' typing,
+      //         * so set the input area as light pink */
+      //        inputArea.setBackgroundColor(parseColor("#ff660000"));
+      //      } else {
+      //        Timber.d("NotFullscreenMode");
+      //        /* Otherwise, set it as light gray to avoid potential issue */
+      //        inputArea.setBackgroundColor(parseColor("#dddddddd"));
+      //      }
 
       ViewUtils.updateLayoutHeightOf(inputArea, layoutHeight);
       ViewUtils.updateLayoutGravityOf(inputArea, Gravity.BOTTOM);
-      ViewUtils.updateLayoutHeightOf(inputRoot, layoutHeight);
+      ViewUtils.updateLayoutHeightOf(inputView, layoutHeight);
     }
   }
 
@@ -1244,7 +1260,7 @@ public class Trime extends LifecycleInputMethodService {
   public interface EventListener {
     default void onCreate() {}
 
-    default void onInitializeInputUi(@NonNull InputRootBinding uiBinding) {}
+    default void onInitializeInputUi(@NonNull InputView inputView) {}
 
     default void onDestroy() {}
 
