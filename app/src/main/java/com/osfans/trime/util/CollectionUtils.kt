@@ -5,8 +5,8 @@ object CollectionUtils {
     fun <K, V> getOrDefault(
         map: Map<K, V>,
         key: K,
-        defaultValue: V,
-    ): V = map[key] ?: defaultValue
+        defValue: V,
+    ): V = map[key] ?: defValue
 
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
@@ -14,7 +14,7 @@ object CollectionUtils {
         map: Map<String, Any?>?,
         vararg: String?,
     ): Any? {
-        if (map.isNullOrEmpty() || vararg == null || !map.containsKey(vararg)) return null
+        if (map.isNullOrEmpty() || vararg.isNullOrEmpty()) return null
         val keys = vararg.split('/')
         var v: Any? = map
         for (key in keys) {
@@ -34,7 +34,7 @@ object CollectionUtils {
         key: String,
         defValue: String = "",
     ): String {
-        if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val v = obtainValue(map, key)
         return v?.toString() ?: defValue
     }
@@ -45,10 +45,11 @@ object CollectionUtils {
         key: String,
         defValue: Int = 0,
     ): Int {
-        if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val nm = obtainString(map, key)
-        return runCatching { if (nm.isNotEmpty()) java.lang.Long.decode(nm).toInt() else defValue }
-            .getOrDefault(defValue)
+        return runCatching {
+            if (nm.isNotEmpty()) java.lang.Long.decode(nm).toInt() else defValue
+        }.getOrDefault(defValue)
     }
 
     @JvmStatic
@@ -57,9 +58,11 @@ object CollectionUtils {
         key: String,
         defValue: Float = 0f,
     ): Float {
-        if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) return defValue
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val s = obtainString(map, key)
-        return runCatching { if (s.isNotEmpty()) s.toFloat() else defValue }.getOrDefault(defValue)
+        return runCatching {
+            if (s.isNotEmpty()) s.toFloat() else defValue
+        }.getOrDefault(defValue)
     }
 
     @JvmStatic
@@ -68,10 +71,8 @@ object CollectionUtils {
         key: String,
         defValue: Boolean = false,
     ): Boolean {
-        return if (map.isNullOrEmpty() || key.isEmpty() || !map.containsKey(key)) {
-            defValue
-        } else {
-            obtainString(map, key).toBoolean()
-        }
+        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
+        val s = obtainString(map, key)
+        return if (s.isNotEmpty()) s.toBoolean() else defValue
     }
 }
