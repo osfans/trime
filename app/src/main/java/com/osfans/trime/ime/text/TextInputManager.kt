@@ -34,7 +34,6 @@ import com.osfans.trime.ui.main.themePicker
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -66,7 +65,6 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
 
         private var mainKeyboardView: KeyboardView? = null
         var candidateRoot: ScrollView? = null
-        var candidateView: Candidate? = null
 
         val locales = Array(2) { Locale.getDefault() }
 
@@ -144,23 +142,6 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                     it.setShowSymbol(!Rime.getOption("_hide_key_symbol"))
                     it.reset()
                 }
-            // Initialize candidate bar
-            candidateRoot =
-                inputView.oldMainInputView.candidateView.root.also {
-                    it.setPageStr(
-                        Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0) },
-                        Runnable { trime.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) },
-                        Runnable { trime.selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE) },
-                    )
-                    it.visibility = if (Rime.getOption("_hide_candidate")) View.GONE else View.VISIBLE
-                }
-
-            candidateView =
-                inputView.oldMainInputView.candidateView.candidates.also {
-                    it.setCandidateListener(this)
-                    it.setShowComment(!Rime.getOption("_hide_comment"))
-                    it.reset()
-                }
         }
 
         /**
@@ -169,9 +150,6 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
         override fun onDestroy() {
             intentReceiver?.unregisterReceiver(trime)
             intentReceiver = null
-
-            candidateView?.setCandidateListener(null)
-            candidateView = null
 
             candidateRoot = null
 
@@ -557,7 +535,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
             when (arrow) {
                 Candidate.PAGE_UP_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_UP, 0)
                 Candidate.PAGE_DOWN_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
-                Candidate.PAGE_EX_BUTTON -> Trime.getService().selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE)
+                Candidate.PAGE_EX_BUTTON -> trime.selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE)
             }
         }
 

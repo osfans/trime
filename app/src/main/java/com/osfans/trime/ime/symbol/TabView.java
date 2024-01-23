@@ -119,8 +119,7 @@ public class TabView extends View {
   }
 
   @Override
-  protected void onDraw(Canvas canvas) {
-    if (canvas == null) return;
+  protected void onDraw(@NonNull Canvas canvas) {
     if (tabTags == null) return;
     super.onDraw(canvas);
 
@@ -165,14 +164,12 @@ public class TabView extends View {
       computedTab.geometry = new Rect(x, 0, (int) (x + getTabWidth(i)), getHeight());
       x += getTabWidth(i) + candidateSpacing;
     }
-    LayoutParams params = getLayoutParams();
-    Timber.i("update, from Height=" + params.height + " width=" + params.width);
+    final LayoutParams params = getLayoutParams();
+    Timber.d("update, from Height=" + params.height + " width=" + params.width);
     params.width = x;
     params.height = isCommentOnTop ? candidateViewHeight + commentHeight : candidateViewHeight;
-    Timber.i("update, to Height=" + candidateViewHeight + " width=" + x);
+    Timber.d("update, reload Height=" + params.height + " width=" + params.width);
     setLayoutParams(params);
-    params = getLayoutParams();
-    Timber.i("update, reload Height=" + params.height + " width=" + params.width);
     invalidate();
   }
 
@@ -180,7 +177,7 @@ public class TabView extends View {
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
     updateTabWidth();
-    Timber.i("onSizeChanged() w=" + w + ", Height=" + oldh + "=>" + h);
+    Timber.d("onSizeChanged() w=" + w + ", Height=" + oldh + "=>" + h);
   }
 
   @Override

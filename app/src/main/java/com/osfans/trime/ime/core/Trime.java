@@ -321,6 +321,8 @@ public class Trime extends LifecycleInputMethodService {
     if (tabIndex >= 0) {
       symbolInput.getLayoutParams().height = mainInput.getHeight();
       symbolInput.setVisibility(View.VISIBLE);
+      mainInput.setVisibility(View.GONE);
+      inputView.getQuickBar().switchUiByIndex(1);
 
       symbolKeyboardType = liquidKeyboard.select(tabIndex);
       tabView.updateTabWidth();
@@ -333,9 +335,10 @@ public class Trime extends LifecycleInputMethodService {
       // 设置液体键盘处于隐藏状态
       TabManager.get().setTabExited();
       symbolInput.setVisibility(View.GONE);
+      mainInput.setVisibility(View.VISIBLE);
+      inputView.getQuickBar().switchUiByIndex(0);
       updateComposing();
     }
-    mainInput.setVisibility(tabIndex >= 0 ? View.GONE : View.VISIBLE);
   }
 
   // 按键需要通过tab name来打开liquidKeyboard的指定tab
@@ -612,21 +615,21 @@ public class Trime extends LifecycleInputMethodService {
 
           mainKeyboardView = inputView.getOldMainInputView().mainKeyboardView;
           // 初始化候选栏
-          mCandidateRoot = inputView.getOldMainInputView().candidateView.getRoot();
-          mCandidate = inputView.getOldMainInputView().candidateView.candidates;
+          mCandidateRoot = inputView.getQuickBar().getOldCandidateBar().getRoot();
+          mCandidate = inputView.getQuickBar().getOldCandidateBar().candidates;
 
           // 候选词悬浮窗的容器
           compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this));
           mComposition = compositionRootBinding.compositions;
           mCompositionPopupWindow.init(compositionRootBinding.compositionRoot, mCandidateRoot);
-          mTabRoot = inputView.getOldSymbolInputView().tabView.getRoot();
+          mTabRoot = inputView.getQuickBar().getOldTabBar().getRoot();
 
           updateDarkMode();
           Theme.get(darkMode).initCurrentColors(darkMode);
 
           liquidKeyboard.setKeyboardView(
               (RecyclerView) inputView.getOldSymbolInputView().liquidKeyboardView);
-          tabView = inputView.getOldSymbolInputView().tabView.tabs;
+          tabView = inputView.getQuickBar().getOldTabBar().tabs;
 
           for (EventListener listener : eventListeners) {
             listener.onInitializeInputUi(inputView);
