@@ -47,7 +47,6 @@ import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.PathUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
@@ -316,13 +315,8 @@ public class Trime extends LifecycleInputMethodService {
 
   public void selectLiquidKeyboard(final int tabIndex) {
     if (inputView == null) return;
-    final View symbolInput = inputView.getOldSymbolInputView().getRoot();
-    final View mainInput = inputView.getOldMainInputView().getRoot();
     if (tabIndex >= 0) {
-      symbolInput.getLayoutParams().height = mainInput.getHeight();
-      symbolInput.setVisibility(View.VISIBLE);
-      mainInput.setVisibility(View.GONE);
-      inputView.getQuickBar().switchUiByIndex(1);
+      inputView.switchUiByIndex(1);
 
       symbolKeyboardType = liquidKeyboard.select(tabIndex);
       tabView.updateTabWidth();
@@ -334,9 +328,7 @@ public class Trime extends LifecycleInputMethodService {
       symbolKeyboardType = SymbolKeyboardType.NO_KEY;
       // 设置液体键盘处于隐藏状态
       TabManager.get().setTabExited();
-      symbolInput.setVisibility(View.GONE);
-      mainInput.setVisibility(View.VISIBLE);
-      inputView.getQuickBar().switchUiByIndex(0);
+      inputView.switchUiByIndex(0);
       updateComposing();
     }
   }
@@ -448,8 +440,7 @@ public class Trime extends LifecycleInputMethodService {
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
   private void reset() {
     if (inputView == null) return;
-    inputView.getOldSymbolInputView().getRoot().setVisibility(View.GONE);
-    inputView.getOldMainInputView().getRoot().setVisibility(View.VISIBLE);
+    inputView.switchUiByIndex(0);
     loadConfig();
     updateDarkMode();
     final Theme theme = Theme.get(darkMode);
@@ -613,7 +604,7 @@ public class Trime extends LifecycleInputMethodService {
         () -> {
           inputView = new InputView(this);
 
-          mainKeyboardView = inputView.getOldMainInputView().mainKeyboardView;
+          mainKeyboardView = inputView.getKeyboardWindow().getOldMainInputView().mainKeyboardView;
           // 初始化候选栏
           mCandidateRoot = inputView.getQuickBar().getOldCandidateBar().getRoot();
           mCandidate = inputView.getQuickBar().getOldCandidateBar().candidates;
@@ -628,7 +619,7 @@ public class Trime extends LifecycleInputMethodService {
           Theme.get(darkMode).initCurrentColors(darkMode);
 
           liquidKeyboard.setKeyboardView(
-              (RecyclerView) inputView.getOldSymbolInputView().liquidKeyboardView);
+              inputView.getKeyboardWindow().getOldSymbolInputView().liquidKeyboardView);
           tabView = inputView.getQuickBar().getOldTabBar().tabs;
 
           for (EventListener listener : eventListeners) {

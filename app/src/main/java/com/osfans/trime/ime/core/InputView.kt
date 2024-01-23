@@ -2,13 +2,11 @@ package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.osfans.trime.databinding.MainInputLayoutBinding
-import com.osfans.trime.databinding.SymbolInputLayoutBinding
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.util.styledFloat
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -30,9 +28,7 @@ class InputView(
 ) : ConstraintLayout(service) {
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     val quickBar = QuickBar(context, service)
-
-    val oldMainInputView = MainInputLayoutBinding.inflate(LayoutInflater.from(context))
-    val oldSymbolInputView = SymbolInputLayoutBinding.inflate(LayoutInflater.from(context))
+    val keyboardWindow = KeyboardWindow(context, service)
 
     val keyboardView: View
 
@@ -48,15 +44,7 @@ class InputView(
                     },
                 )
                 add(
-                    oldMainInputView.root,
-                    lParams(matchParent, wrapContent) {
-                        below(quickBar.view)
-                        centerHorizontally()
-                        bottomOfParent()
-                    },
-                )
-                add(
-                    oldSymbolInputView.root,
+                    keyboardWindow.view,
                     lParams(matchParent, wrapContent) {
                         below(quickBar.view)
                         centerHorizontally()
@@ -72,6 +60,11 @@ class InputView(
                 bottomOfParent()
             },
         )
+    }
+
+    fun switchUiByIndex(index: Int) {
+        keyboardWindow.switchUiByIndex(index)
+        quickBar.switchUiByIndex(index)
     }
 
     private var showingDialog: Dialog? = null
