@@ -6,14 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.osfans.trime.R
 import com.osfans.trime.databinding.MainInputLayoutBinding
 import com.osfans.trime.databinding.SymbolInputLayoutBinding
+import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.util.styledFloat
+import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.withTheme
@@ -27,6 +29,7 @@ class InputView(
     val service: Trime,
 ) : ConstraintLayout(service) {
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
+    val quickBar = QuickBar(context, service)
 
     val oldMainInputView = MainInputLayoutBinding.inflate(LayoutInflater.from(context))
     val oldSymbolInputView = SymbolInputLayoutBinding.inflate(LayoutInflater.from(context))
@@ -38,8 +41,16 @@ class InputView(
             constraintLayout {
                 isMotionEventSplittingEnabled = true
                 add(
+                    quickBar.view,
+                    lParams(matchParent, wrapContent) {
+                        topOfParent()
+                        centerHorizontally()
+                    },
+                )
+                add(
                     oldMainInputView.root,
                     lParams(matchParent, wrapContent) {
+                        below(quickBar.view)
                         centerHorizontally()
                         bottomOfParent()
                     },
@@ -47,6 +58,7 @@ class InputView(
                 add(
                     oldSymbolInputView.root,
                     lParams(matchParent, wrapContent) {
+                        below(quickBar.view)
                         centerHorizontally()
                         bottomOfParent()
                     },
