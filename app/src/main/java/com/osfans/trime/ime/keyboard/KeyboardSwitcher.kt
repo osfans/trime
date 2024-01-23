@@ -1,7 +1,6 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
-import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.util.appContext
@@ -14,6 +13,7 @@ object KeyboardSwitcher {
     var lastLockId: Int = 0
 
     private var currentDisplayWidth: Int = 0
+    private val keyboardPrefs = KeyboardPrefs()
 
     private val theme = Theme.get()
     lateinit var availableKeyboardIds: List<String>
@@ -31,7 +31,7 @@ object KeyboardSwitcher {
     @JvmStatic
     fun newOrReset() {
         Timber.d("Refreshing keyboard padding ...")
-        theme.getKeyboardPadding(ScreenUtils.isLandscape())
+        theme.getKeyboardPadding(keyboardPrefs.isLandscapeMode())
         Timber.d("Switching keyboard back to .default ...")
         availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
             ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
@@ -47,7 +47,7 @@ object KeyboardSwitcher {
     }
 
     fun switchKeyboard(name: String?) {
-        val i =
+        val idx =
             when (name) {
                 ".default" -> 0
                 ".prior" -> currentId - 1
@@ -70,6 +70,14 @@ object KeyboardSwitcher {
                     }
                 }
             }
+        val i =
+            if (keyboardPrefs.isLandscapeMode()) {
+                mapToLandscapeKeyboardIdx(idx)
+            } else {
+                idx
+            }
+
+        Timber.d("Mapped from %d to %d", idx, i)
 
         val deviceKeyboard = appContext.resources.configuration.keyboard
         if (currentId >= 0 && availableKeyboards[currentId].isLock) {
@@ -77,7 +85,7 @@ object KeyboardSwitcher {
         }
         lastId = currentId
 
-        currentId = if (i >= availableKeyboardIds.size) 0 else i
+        currentId = if (i >= availableKeyboardIds.size || i < 0) 0 else i
         if ("mini" in availableKeyboardIds) {
             val mini = availableKeyboardIds.indexOf("mini")
             currentId =
@@ -92,6 +100,16 @@ object KeyboardSwitcher {
             "Switched keyboard from ${availableKeyboardIds[lastId]} " +
                 "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard).",
         )
+    }
+
+    private fun mapToLandscapeKeyboardIdx(idx: Int): Int {
+        if (idx < 0 || idx > availableKeyboards.size) return idx
+        val landscapeKeyboard = availableKeyboards[idx].landscapeKeyboard
+        return if (landscapeKeyboard.isNullOrBlank()) {
+            idx
+        } else {
+            availableKeyboardIds.indexOf(landscapeKeyboard)
+        }
     }
 
     /**

@@ -46,6 +46,9 @@ class KeyboardFragment :
             -> {
                 trime?.resetKeyboard()
             }
+            AppPrefs.Keyboard.SPLIT, AppPrefs.Keyboard.SPLIT_SPACE_PERCENT -> {
+                trime?.initKeyboard()
+            }
             "keyboard__show_window" -> {
                 trime?.resetCandidate()
             }

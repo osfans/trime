@@ -21,6 +21,7 @@ package com.osfans.trime.ime.keyboard;
 import android.graphics.drawable.Drawable;
 import android.view.KeyEvent;
 import com.blankj.utilcode.util.ScreenUtils;
+import com.osfans.trime.data.AppPrefs;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
@@ -89,6 +90,9 @@ public class Keyboard {
 
   private boolean resetAsciiMode;
 
+  private String mLandscapeKeyboard;
+  private int mLandscapePercent;
+
   // Variables for pre-computing nearest keys.
   private String mLabelTransform;
   private int mCellWidth;
@@ -99,13 +103,6 @@ public class Keyboard {
   private boolean mLock; // 切換程序時記憶鍵盤
   private String mAsciiKeyboard; // 英文鍵盤
 
-  // 定义 新的键盘尺寸计算方式， 避免尺寸计算不恰当，导致切换键盘时键盘高度发生变化，UI闪烁的问题。同时可以快速调整整个键盘的尺寸
-  // 1. default键盘的高度 = 其他键盘的高度
-  // 2. 当键盘高度(不含padding)与keyboard_height不一致时，每行按键等比例缩放按键高度高度，行之间的间距向上取整数、padding不缩放；
-  // 3. 由于高度只能取整数，缩放后仍然存在余数的，由 auto_height_index 指定的行吸收（遵循四舍五入）
-  //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
-  private int autoHeightIndex, keyboardHeight;
-
   /** Creates a keyboard from the given xml key layout file. */
   public Keyboard() {
 
@@ -113,7 +110,8 @@ public class Keyboard {
 
     final Theme theme = Theme.get();
     int[] keyboardPadding = theme.getKeyboardPadding();
-    mDisplayWidth = ScreenUtils.getScreenWidth() - keyboardPadding[0] - keyboardPadding[1];
+    mDisplayWidth = ScreenUtils.getAppScreenWidth() - keyboardPadding[0] - keyboardPadding[1];
+
     /* Height of the screen */
     // final int mDisplayHeight = dm.heightPixels;
     // Log.v(TAG, "keyboard's display metrics:" + dm);
@@ -128,13 +126,6 @@ public class Keyboard {
     mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
     mRoundCorner = theme.style.getFloat("round_corner");
     mBackground = theme.colors.getDrawable("keyboard_back_color");
-
-    keyboardHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("keyboard_height"));
-    if (ScreenUtils.isLandscape()) {
-      int keyBoardHeightLand =
-          (int) DimensionsKt.dp2px(theme.style.getFloat("keyboard_height_land"));
-      if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand;
-    }
 
     mKeys = new ArrayList<>();
     mComposingKeys = new ArrayList<>();
@@ -204,6 +195,12 @@ public class Keyboard {
     if (mAsciiMode == 0)
       mAsciiKeyboard = CollectionUtils.obtainString(keyboardConfig, "ascii_keyboard", "");
     resetAsciiMode = CollectionUtils.obtainBoolean(keyboardConfig, "reset_ascii_mode", false);
+    mLandscapeKeyboard = CollectionUtils.obtainString(keyboardConfig, "landscape_keyboard", "");
+    mLandscapePercent =
+        CollectionUtils.obtainInt(
+            keyboardConfig,
+            "landscape_split_percent",
+            AppPrefs.defaultInstance().getKeyboard().getSplitSpacePercent());
     mLock = CollectionUtils.obtainBoolean(keyboardConfig, "lock", false);
     int columns = CollectionUtils.obtainInt(keyboardConfig, "columns", 30);
     int defaultWidth =
@@ -215,7 +212,12 @@ public class Keyboard {
     int height = (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(keyboardConfig, "height", 0));
     int defaultHeight = (height > 0) ? height : mDefaultHeight;
     int rowHeight = defaultHeight;
-    autoHeightIndex = CollectionUtils.obtainInt(keyboardConfig, "auto_height_index", -1);
+    // 定义 新的键盘尺寸计算方式， 避免尺寸计算不恰当，导致切换键盘时键盘高度发生变化，UI闪烁的问题。同时可以快速调整整个键盘的尺寸
+    // 1. default键盘的高度 = 其他键盘的高度
+    // 2. 当键盘高度(不含padding)与keyboard_height不一致时，每行按键等比例缩放按键高度高度，行之间的间距向上取整数、padding不缩放；
+    // 3. 由于高度只能取整数，缩放后仍然存在余数的，由 auto_height_index 指定的行吸收（遵循四舍五入）
+    //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
+    int autoHeightIndex = CollectionUtils.obtainInt(keyboardConfig, "auto_height_index", -1);
     List<Map<String, Object>> lm = (List<Map<String, Object>>) keyboardConfig.get("keys");
 
     mDefaultHorizontalGap =
@@ -232,6 +234,12 @@ public class Keyboard {
         CollectionUtils.obtainFloat(
             keyboardConfig, "round_corner", theme.style.getFloat("round_corner"));
 
+    final int horizontalGap = mDefaultHorizontalGap;
+    final int verticalGap = mDefaultVerticalGap;
+    final int keyboardHeight = getKeyboardHeight(theme, keyboardConfig);
+    final float keyboardKeyWidth = CollectionUtils.obtainFloat(keyboardConfig, "width", 0f);
+    final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
+
     Drawable background = theme.colors.getDrawable(keyboardConfig, "keyboard_back_color");
     if (background != null) mBackground = background;
 
@@ -241,132 +249,72 @@ public class Keyboard {
     int column = 0;
     mTotalWidth = 0;
 
-    final int maxColumns = columns == -1 ? Integer.MAX_VALUE : columns;
-    float scale;
-    int[] newHeight = new int[0];
-
-    if (keyboardHeight > 0) {
-      int mkeyboardHeight =
-          (int)
-              DimensionsKt.sp2px(CollectionUtils.obtainFloat(keyboardConfig, "keyboard_height", 0));
-      if (ScreenUtils.isLandscape()) {
-        int mkeyBoardHeightLand =
-            (int)
-                DimensionsKt.sp2px(
-                    CollectionUtils.obtainFloat(keyboardConfig, "keyboard_height_land", 0));
-        if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand;
-      }
-
-      if (mkeyboardHeight > 0) keyboardHeight = mkeyboardHeight;
-
-      int rawSumHeight = 0;
-      List<Integer> rawHeight = new ArrayList<>();
-      for (Map<String, Object> mk : lm) {
-        int gap = mDefaultHorizontalGap;
-        int w = (int) (CollectionUtils.obtainFloat(mk, "width", 0) * mDisplayWidth / 100);
-        if (w == 0 && mk.containsKey("click")) w = defaultWidth;
-        w -= gap;
-        if (column >= maxColumns || x + w > mDisplayWidth) {
-          x = gap / 2;
-          y += mDefaultVerticalGap + rowHeight;
-          column = 0;
-          row++;
-          rawSumHeight += rowHeight;
-          rawHeight.add(rowHeight);
-        }
-        if (column == 0) {
-          int heightK = (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(mk, "height", 0));
-          rowHeight = (heightK > 0) ? heightK : defaultHeight;
-        }
-        if (!mk.containsKey("click")) { // 無按鍵事件
-          x += w + gap;
-          continue; // 縮進
-        }
-        column++;
-        int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
-        x += ((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w) + gap;
-      }
-
-      rawSumHeight += rowHeight;
-      rawHeight.add(rowHeight);
-
-      scale =
-          (float) keyboardHeight / (rawSumHeight + mDefaultVerticalGap * (rawHeight.size() + 1));
-
-      Timber.d(
-          "name="
-              + name
-              + ", yGap "
-              + mDefaultVerticalGap
-              + " keyboardHeight="
-              + keyboardHeight
-              + " rawSumHeight="
-              + rawSumHeight);
-      mDefaultVerticalGap = (int) Math.ceil(mDefaultVerticalGap * scale);
-
-      Timber.d("scale=" + scale + ", yGap > " + mDefaultVerticalGap);
-
-      int autoHeight = keyboardHeight - mDefaultVerticalGap * (rawHeight.size() + 1);
-
-      scale = ((float) autoHeight) / rawSumHeight;
-
-      if (autoHeightIndex < 0) {
-        autoHeightIndex = rawHeight.size() + autoHeightIndex;
-        if (autoHeightIndex < 0) autoHeightIndex = 0;
-      } else if (autoHeightIndex >= rawHeight.size()) {
-        autoHeightIndex = rawHeight.size() - 1;
-      }
-
-      newHeight = new int[rawHeight.size()];
-      for (int i = 0; i < rawHeight.size(); i++) {
-        if (i != autoHeightIndex) {
-          int h = (int) (rawHeight.get(i) * scale);
-          newHeight[i] = h;
-          autoHeight -= h;
-        }
-      }
-      if (autoHeight < 1) {
-        if (rawHeight.get(autoHeight) > 0) autoHeight = 1;
-      }
-      newHeight[autoHeightIndex] = autoHeight;
-
-      for (int h : rawHeight) System.out.print(" " + h);
-      System.out.print('\n');
-
-      Timber.d("scale=" + scale + " keyboardHeight: ");
-      for (int h : newHeight) System.out.print(" " + h);
-      System.out.print('\n');
-
-      x = mDefaultHorizontalGap / 2;
-      y = mDefaultVerticalGap;
-      row = 0;
-      column = 0;
-      mTotalWidth = 0;
-    }
+    Boolean isSplit = new KeyboardPrefs().isLandscapeMode() && isLandscapeSplit();
+    KeyboardSize keyboardSize =
+        new KeyboardSizeCalculator(
+                name,
+                isSplit,
+                mLandscapePercent,
+                maxColumns,
+                mDisplayWidth,
+                keyboardHeight,
+                keyboardKeyWidth,
+                defaultHeight,
+                horizontalGap,
+                verticalGap,
+                autoHeightIndex)
+            .calc(lm);
+    float oneWeightWidthPx = keyboardSize.getDefaultWidth();
+    defaultWidth = (int) (oneWeightWidthPx * keyboardKeyWidth);
 
     try {
+      float rowWidthWeight = 0;
       for (Map<String, Object> mk : lm) {
         int gap = mDefaultHorizontalGap;
-        int w = (int) (CollectionUtils.obtainFloat(mk, "width", 0) * mDisplayWidth / 100);
-        if (w == 0 && mk.containsKey("click")) w = defaultWidth;
-        w -= gap;
-        if (column >= maxColumns || x + w > mDisplayWidth) {
+        float keyWidth = CollectionUtils.obtainFloat(mk, "width", keyboardKeyWidth);
+
+        int widthPx = (int) (keyWidth * oneWeightWidthPx);
+        if (widthPx == 0 && mk.containsKey("click")) widthPx = defaultWidth;
+        widthPx -= gap;
+        if (column >= maxColumns || x + widthPx > mDisplayWidth) {
+          // new row
+          rowWidthWeight = 0;
           x = gap / 2;
           y += mDefaultVerticalGap + rowHeight;
           column = 0;
           row++;
           if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
         }
+        rowWidthWeight += keyWidth;
+        if (isSplit && rowWidthWeight >= keyboardSize.getRowWidthTotalWeight().get(row) / 2 + 1) {
+          rowWidthWeight = Integer.MIN_VALUE;
+
+          if (keyWidth > 20) {
+            // enlarge the key if this key is a long key
+            widthPx =
+                (int)
+                        ((keyboardSize.getRowWidthTotalWeight().get(row)
+                                * keyboardSize.getMultiplier())
+                            * oneWeightWidthPx)
+                    + widthPx;
+          } else {
+            x +=
+                (int)
+                    (keyboardSize.getRowWidthTotalWeight().get(row)
+                        * keyboardSize.getMultiplier()
+                        * oneWeightWidthPx); // (10 * (defaultWidth));
+          }
+        }
         if (column == 0) {
           if (keyboardHeight > 0) {
-            rowHeight = newHeight[row];
+            rowHeight = keyboardSize.getHeight().get(row);
           } else {
             int heightK = (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(mk, "height", 0));
             rowHeight = (heightK > 0) ? heightK : defaultHeight;
           }
         }
         if (!mk.containsKey("click")) { // 無按鍵事件
-          x += w + gap;
+          x += widthPx + gap;
           continue; // 縮進
         }
 
@@ -453,9 +401,9 @@ public class Keyboard {
 
         key.setX(x);
         key.setY(y);
-        int right_gap = Math.abs(mDisplayWidth - x - w - gap / 2);
+        int right_gap = Math.abs(mDisplayWidth - x - widthPx - gap / 2);
         // 右側不留白
-        key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : w);
+        key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : widthPx);
         key.setHeight(rowHeight);
         key.setGap(gap);
         key.setRow(row);
@@ -475,7 +423,40 @@ public class Keyboard {
         if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      Timber.e(e, "name is %s, row: %d, column %d", name, row, column);
+    }
+  }
+
+  private int getKeyboardHeightFromTheme(Theme theme) {
+    int keyboardHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("keyboard_height"));
+    if (ScreenUtils.isLandscape()) {
+      int keyBoardHeightLand =
+          (int) DimensionsKt.dp2px(theme.style.getFloat("keyboard_height_land"));
+      if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand;
+    }
+
+    return keyboardHeight;
+  }
+
+  private int getKeyboardHeightFromKeyboardConfig(Map<String, Object> keyboardConfig) {
+    int mkeyboardHeight =
+        (int) DimensionsKt.sp2px(CollectionUtils.obtainFloat(keyboardConfig, "keyboard_height", 0));
+    if (ScreenUtils.isLandscape()) {
+      int mkeyBoardHeightLand =
+          (int)
+              DimensionsKt.sp2px(
+                  CollectionUtils.obtainFloat(keyboardConfig, "keyboard_height_land", 0));
+      if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand;
+    }
+    return mkeyboardHeight;
+  }
+
+  private int getKeyboardHeight(Theme theme, Map<String, Object> keyboardConfig) {
+    int keyboardHeight = getKeyboardHeightFromKeyboardConfig(keyboardConfig);
+    if (keyboardHeight == 0) {
+      return getKeyboardHeightFromTheme(theme);
+    } else {
+      return keyboardHeight;
     }
   }
 
@@ -813,6 +794,14 @@ public class Keyboard {
 
   public String getAsciiKeyboard() {
     return mAsciiKeyboard;
+  }
+
+  public boolean isLandscapeSplit() {
+    return mLandscapePercent > 0;
+  }
+
+  public String getLandscapeKeyboard() {
+    return mLandscapeKeyboard;
   }
 
   public boolean isLabelUppercase() {

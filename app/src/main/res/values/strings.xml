@@ -78,6 +78,12 @@
         <item>Input</item>
         <item>None</item>
     </string-array>
+    <string-array name="keyboard__split_entries">
+        <item>Never</item>
+        <item>Only in landscape mode</item>
+        <item>Auto (In wide screen or landscape mode)</item>
+        <item>Always</item>
+    </string-array>
     <string-array name="other__ui_mode_entries" >
         <item name="auto">System Default</item>
         <item name="light">Light</item>
@@ -271,4 +277,8 @@
     <string name="pref_clipboard_summary">Collection and draft are also managed here</string>
     <string name="a_regular_expression_per_line">A regular expression per line</string>
     <string name="keyboard__custom_key_sound">Use custom key sound</string>
+
+    <string name="pref_keyboard__landscape">Landscape Mode</string>
+    <string name="keyboard__split_title">Change to Landscape keyboard</string>
+    <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
 </resources>

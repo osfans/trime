@@ -72,6 +72,12 @@
         <item>输入码</item>
         <item>无</item>
     </string-array>
+    <string-array name="keyboard__split_entries">
+        <item>永不</item>
+        <item>只在横屏时</item>
+        <item>在阔萤幕或横屏时</item>
+        <item>永远都是</item>
+    </string-array>
     <string-array name="other__ui_mode_entries" >
         <item name="auto">系统默认</item>
         <item name="light">亮色</item>
@@ -267,4 +273,8 @@
     <string name="pref_clipboard_summary">收藏夹和草稿箱也在这里管理</string>
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
     <string name="keyboard__custom_key_sound">使用自定义按键音</string>
+
+    <string name="pref_keyboard__landscape">横屏模式</string>
+    <string name="keyboard__split_title">转换到横屏键盘</string>
+    <string name="keyboard__split_space_title">自动分割键盘比例</string>
 </resources>

@@ -25,6 +25,12 @@
         <item>input</item>
         <item>none</item>
     </string-array>
+    <string-array name="keyboard__split_values">
+        <item>never</item>
+        <item>landscape</item>
+        <item>auto</item>
+        <item>always</item>
+    </string-array>
     <string-array name="other__ui_mode_values">
         <item>auto</item>
         <item>light</item>
