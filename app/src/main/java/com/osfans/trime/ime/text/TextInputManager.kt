@@ -64,7 +64,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
         private var rimeNotiHandlerJob: Job? = null
 
         private var mainKeyboardView: KeyboardView? = null
-        var candidateRoot: ScrollView? = null
+        private var candidateRoot: ScrollView? = null
 
         val locales = Array(2) { Locale.getDefault() }
 
@@ -135,13 +135,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
         override fun onInitializeInputUi(inputView: InputView) {
             super.onInitializeInputUi(inputView)
             // Initialize main keyboard view
-            mainKeyboardView =
-                inputView.oldMainInputView.mainKeyboardView.also {
-                    it.setOnKeyboardActionListener(this)
-                    it.setShowHint(!Rime.getOption("_hide_key_hint"))
-                    it.setShowSymbol(!Rime.getOption("_hide_key_symbol"))
-                    it.reset()
-                }
+            mainKeyboardView = inputView.keyboardWindow.oldMainInputView.mainKeyboardView
         }
 
         /**
