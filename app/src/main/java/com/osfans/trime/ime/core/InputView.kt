@@ -8,6 +8,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.util.styledFloat
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
@@ -27,12 +31,27 @@ class InputView(
     val service: Trime,
 ) : ConstraintLayout(service) {
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    val quickBar = QuickBar(context, service)
-    val keyboardWindow = KeyboardWindow(context, service)
+    val quickBar = QuickBar()
+    val keyboardWindow = KeyboardWindow()
+
+    private val module =
+        module {
+            single { this@InputView }
+            single { themedContext }
+            single { service }
+            single { keyboardWindow }
+            single { quickBar }
+        }
 
     val keyboardView: View
 
     init {
+        startKoin {
+            androidLogger()
+            androidContext(context)
+            modules(module)
+        }
+
         keyboardView =
             constraintLayout {
                 isMotionEventSplittingEnabled = true
