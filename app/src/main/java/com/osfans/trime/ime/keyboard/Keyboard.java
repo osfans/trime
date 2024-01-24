@@ -164,14 +164,14 @@ public class Keyboard {
         column = 0;
       }
       final Key key = new Key(this);
-      key.setX(x);
-      key.setY(y);
-      key.setWidth(mDefaultWidth);
-      key.setHeight(mDefaultHeight);
-      key.setGap(mDefaultHorizontalGap);
+      key.x = x;
+      key.y = y;
+      key.width = mDefaultWidth;
+      key.height = mDefaultHeight;
+      key.gap = mDefaultHorizontalGap;
       key.events[0] = new Event(this, String.valueOf(c));
       column++;
-      x += key.getWidth() + key.getGap();
+      x += key.width + key.gap;
       mKeys.add(key);
       if (x > mTotalWidth) {
         mTotalWidth = x;
@@ -399,17 +399,17 @@ public class Keyboard {
         key.setKey_press_offset_y(
             CollectionUtils.obtainInt(mk, "key_press_offset_y", defaultKeyPressOffsetY));
 
-        key.setX(x);
-        key.setY(y);
+        key.x = x;
+        key.y = y;
         int right_gap = Math.abs(mDisplayWidth - x - widthPx - gap / 2);
         // 右側不留白
-        key.setWidth((right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : widthPx);
-        key.setHeight(rowHeight);
-        key.setGap(gap);
-        key.setRow(row);
-        key.setColumn(column);
+        key.width = (right_gap <= mDisplayWidth / 100) ? mDisplayWidth - x - gap / 2 : widthPx;
+        key.height = rowHeight;
+        key.gap = gap;
+        key.row = row;
+        key.column = column;
         column++;
-        x += key.getWidth() + key.getGap();
+        x += key.width + key.gap;
         mKeys.add(key);
         if (x > mTotalWidth) {
           mTotalWidth = x;
@@ -418,9 +418,9 @@ public class Keyboard {
       if (mKeys.size() > 0) mKeys.get(mKeys.size() - 1).edgeFlags |= Keyboard.EDGE_RIGHT;
       mTotalHeight = y + rowHeight + mDefaultVerticalGap;
       for (Key key : mKeys) {
-        if (key.getColumn() == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
-        if (key.getRow() == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
-        if (key.getRow() == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
+        if (key.column == 0) key.edgeFlags |= Keyboard.EDGE_LEFT;
+        if (key.row == 0) key.edgeFlags |= Keyboard.EDGE_TOP;
+        if (key.row == row) key.edgeFlags |= Keyboard.EDGE_BOTTOM;
       }
     } catch (Exception e) {
       Timber.e(e, "name is %s, row: %d, column %d", name, row, column);

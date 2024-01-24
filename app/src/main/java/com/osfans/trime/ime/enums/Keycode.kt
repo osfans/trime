@@ -484,14 +484,14 @@ enum class Keycode {
         ): String =
             if (isStdKey(keyCode)) {
                 // Android keycode区域
-                if (Key.getKcm().isPrintingKey(keyCode)) {
+                if (Key.kcm.isPrintingKey(keyCode)) {
                     val event = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, mask)
                     val charCode = event.getUnicodeChar(mask)
                     Timber.d("getDisplayLabel(): keycode=$keyCode, mask=$mask, charCode=$charCode")
                     if (charCode > 0) {
                         charCode.toChar().toString()
                     } else {
-                        Key.getKcm().getDisplayLabel(keyCode).lowercase()
+                        Key.kcm.getDisplayLabel(keyCode).lowercase()
                     }
                 } else {
                     keyNameOf(keyCode)

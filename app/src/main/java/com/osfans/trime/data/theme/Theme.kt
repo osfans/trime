@@ -110,7 +110,7 @@ class Theme private constructor(isDarkMode: Boolean) {
                 Timber.d("Fetching done")
                 generalStyle = fullThemeConfigMap!!["style"] as Map<String, Any?>?
                 fallbackColors = fullThemeConfigMap!!["fallback_colors"] as Map<String, String>?
-                Key.presetKeys = fullThemeConfigMap!!["preset_keys"] as Map<String?, Map<String?, Any?>?>?
+                Key.presetKeys = fullThemeConfigMap!!["preset_keys"] as Map<String, Map<String, Any?>?>?
                 presetColorSchemes = fullThemeConfigMap!!["preset_color_schemes"] as Map<String, Map<String, Any>?>?
                 presetKeyboards = fullThemeConfigMap!!["preset_keyboards"] as Map<String, Any?>?
                 liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
@@ -176,7 +176,7 @@ class Theme private constructor(isDarkMode: Boolean) {
         }
 
         fun getColor(
-            m: Map<String?, Any?>,
+            m: Map<String, Any?>,
             key: String?,
         ): Int? {
             var value = theme.getColorValue(m[key] as String?)
@@ -199,7 +199,7 @@ class Theme private constructor(isDarkMode: Boolean) {
 
         // API 2.0
         fun getDrawable(
-            m: Map<String?, Any?>,
+            m: Map<String, Any?>,
             key: String,
         ): Drawable? {
             var value = theme.getColorValue(m[key] as String?)
