@@ -24,7 +24,7 @@ import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
-import com.osfans.trime.ime.keyboard.Keyboard.printModifierKeyState
+import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ui.main.colorPicker
@@ -439,7 +439,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
             keyEventCode: Int,
             metaState: Int,
         ) {
-            printModifierKeyState(metaState, "keyEventCode=$keyEventCode")
+            Keyboard.printModifierKeyState(metaState, "keyEventCode=$keyEventCode")
 
             // 优先由librime处理按键事件
             if (trime.handleKey(keyEventCode, metaState)) return
