@@ -42,9 +42,14 @@ class QuickBar : KoinComponent {
         TabBarBinding.inflate(LayoutInflater.from(context))
     }
 
-    fun switchUiByIndex(index: Int) {
-        if (view.displayedChild == index) return
-        view.displayedChild = index
+    enum class State {
+        Candidate,
+        Tab,
+    }
+
+    fun switchUiByState(state: State) {
+        if (view.displayedChild == state.ordinal) return
+        view.displayedChild = state.ordinal
     }
 
     val view by lazy {
