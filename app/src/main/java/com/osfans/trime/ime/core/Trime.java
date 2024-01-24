@@ -66,6 +66,7 @@ import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.ime.keyboard.KeyboardView;
+import com.osfans.trime.ime.keyboard.KeyboardWindow;
 import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService;
 import com.osfans.trime.ime.symbol.LiquidKeyboard;
 import com.osfans.trime.ime.symbol.TabManager;
@@ -316,7 +317,7 @@ public class Trime extends LifecycleInputMethodService {
   public void selectLiquidKeyboard(final int tabIndex) {
     if (inputView == null) return;
     if (tabIndex >= 0) {
-      inputView.switchUiByIndex(1);
+      inputView.switchUiByState(KeyboardWindow.State.Symbol);
 
       symbolKeyboardType = liquidKeyboard.select(tabIndex);
       tabView.updateTabWidth();
@@ -328,7 +329,7 @@ public class Trime extends LifecycleInputMethodService {
       symbolKeyboardType = SymbolKeyboardType.NO_KEY;
       // 设置液体键盘处于隐藏状态
       TabManager.get().setTabExited();
-      inputView.switchUiByIndex(0);
+      inputView.switchUiByState(KeyboardWindow.State.Main);
       updateComposing();
     }
   }
@@ -440,7 +441,7 @@ public class Trime extends LifecycleInputMethodService {
   /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住 */
   private void reset() {
     if (inputView == null) return;
-    inputView.switchUiByIndex(0);
+    inputView.switchUiByState(KeyboardWindow.State.Main);
     loadConfig();
     updateDarkMode();
     final Theme theme = Theme.get(darkMode);

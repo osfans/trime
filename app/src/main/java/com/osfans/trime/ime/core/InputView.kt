@@ -81,9 +81,9 @@ class InputView(
         )
     }
 
-    fun switchUiByIndex(index: Int) {
-        keyboardWindow.switchUiByIndex(index)
-        quickBar.switchUiByIndex(index)
+    fun switchUiByState(state: KeyboardWindow.State) {
+        keyboardWindow.switchUiByState(state)
+        quickBar.switchUiByState(QuickBar.State.entries[state.ordinal])
     }
 
     private var showingDialog: Dialog? = null
