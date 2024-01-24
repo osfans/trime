@@ -72,7 +72,7 @@ public class Event {
     }
     if (Key.presetKeys.containsKey(s)) {
       // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
-      Map<String, Object> presetKey = Key.presetKeys.get(s);
+      Map<String, Object> presetKey = (Map<String, Object>) Key.presetKeys.get(s);
       command = CollectionUtils.obtainString(presetKey, "command", "");
       option = CollectionUtils.obtainString(presetKey, "option", "");
       select = CollectionUtils.obtainString(presetKey, "select", "");
@@ -104,7 +104,7 @@ public class Event {
 
     shiftLabel = label;
     if (Keycode.Companion.isStdKey(code)) { // Android keycode区域
-      if (Key.getKcm().isPrintingKey(code)) {
+      if (Key.kcm.isPrintingKey(code)) {
         int mMask = KeyEvent.META_SHIFT_ON | mask;
         KeyEvent event = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, code, 0, mMask);
         int k = event.getUnicodeChar(mMask);
