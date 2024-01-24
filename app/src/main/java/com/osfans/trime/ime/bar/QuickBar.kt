@@ -10,11 +10,16 @@ import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.databinding.TabBarBinding
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.SymbolKeyboardType
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 
-class QuickBar(private val context: Context, private val service: Trime) {
+class QuickBar : KoinComponent {
+    private val context: Context by inject()
+    private val service: Trime by inject()
+
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
             with(root) {

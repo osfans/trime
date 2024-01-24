@@ -160,7 +160,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
             restarting: Boolean,
         ) {
             super.onStartInputView(instance, restarting)
-            Trime.getService().selectLiquidKeyboard(-1)
+            trime.selectLiquidKeyboard(-1)
             if (restarting) {
                 trime.performEscape()
             }

@@ -7,11 +7,16 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.databinding.MainInputLayoutBinding
 import com.osfans.trime.databinding.SymbolInputLayoutBinding
 import com.osfans.trime.ime.core.Trime
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 
-class KeyboardWindow(private val context: Context, private val service: Trime) {
+class KeyboardWindow : KoinComponent {
+    private val context: Context by inject()
+    private val service: Trime by inject()
+
     val oldMainInputView by lazy {
         MainInputLayoutBinding.inflate(LayoutInflater.from(context)).apply {
             with(mainKeyboardView) {
