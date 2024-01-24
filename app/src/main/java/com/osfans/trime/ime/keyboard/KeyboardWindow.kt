@@ -20,7 +20,7 @@ class KeyboardWindow : KoinComponent {
     val oldMainInputView by lazy {
         MainInputLayoutBinding.inflate(LayoutInflater.from(context)).apply {
             with(mainKeyboardView) {
-                onKeyboardActionListener = service.textInputManager
+                setOnKeyboardActionListener(service.textInputManager)
                 setShowHint(!Rime.getOption("_hide_key_hint"))
                 setShowSymbol(!Rime.getOption("_hide_key_symbol"))
                 reset()
