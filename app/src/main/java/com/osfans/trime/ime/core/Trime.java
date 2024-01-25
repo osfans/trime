@@ -47,7 +47,6 @@ import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.blankj.utilcode.util.PathUtils;
 import com.osfans.trime.BuildConfig;
 import com.osfans.trime.R;
 import com.osfans.trime.core.Rime;
@@ -60,7 +59,7 @@ import com.osfans.trime.ime.broadcast.IntentReceiver;
 import com.osfans.trime.ime.enums.Keycode;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.ime.keyboard.Event;
-import com.osfans.trime.ime.keyboard.InitialKeyboardUi;
+import com.osfans.trime.ime.keyboard.InitializationUi;
 import com.osfans.trime.ime.keyboard.InputFeedbackManager;
 import com.osfans.trime.ime.keyboard.Key;
 import com.osfans.trime.ime.keyboard.Keyboard;
@@ -78,7 +77,6 @@ import com.osfans.trime.ime.text.ScrollView;
 import com.osfans.trime.ime.text.TextInputManager;
 import com.osfans.trime.ime.util.UiUtil;
 import com.osfans.trime.util.DimensionsKt;
-import com.osfans.trime.util.PermissionUtils;
 import com.osfans.trime.util.ShortcutUtils;
 import com.osfans.trime.util.StringUtils;
 import com.osfans.trime.util.ViewUtils;
@@ -122,7 +120,6 @@ public class Trime extends LifecycleInputMethodService {
   public EditorInstance activeEditorInstance;
   public TextInputManager textInputManager; // 文字输入管理器
 
-  private InitialKeyboardUi initialKeyboardUi; // initial keyboard display
   private int minPopupSize; // 上悬浮窗的候选词的最小词长
   private int minPopupCheckSize; // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
   private CompositionPopupWindow mCompositionPopupWindow;
@@ -165,7 +162,7 @@ public class Trime extends LifecycleInputMethodService {
       Timber.i("onWindowShown...");
     }
 
-    if (RimeWrapper.INSTANCE.isReady() && activeEditorInstance != null) {
+    if (RimeWrapper.isReady() && activeEditorInstance != null) {
       isWindowShown = true;
       updateComposing();
 
@@ -257,13 +254,9 @@ public class Trime extends LifecycleInputMethodService {
       //  and lead to a crash loop
       Timber.d("onCreate");
       final InputMethodService context = this;
-
-      initialKeyboardUi = new InitialKeyboardUi(this);
-      setRimeStatusAndInitialKeyboard();
       RimeWrapper.INSTANCE.startup(
           () -> {
             Timber.d("Running Trime.onCreate");
-            initialKeyboardUi.change(true);
             textInputManager =
                 TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(context));
             activeEditorInstance = new EditorInstance(context);
@@ -600,8 +593,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public View onCreateInputView() {
     Timber.d("onCreateInputView()");
-    setInputView(initialKeyboardUi.change(canRimeStart()));
-    RimeWrapper.INSTANCE.runAfterStarted(
+    RimeWrapper.runAfterStarted(
         () -> {
           inputView = new InputView(this);
 
@@ -636,7 +628,7 @@ public class Trime extends LifecycleInputMethodService {
         });
     Timber.d("onCreateInputView() finish");
 
-    return inputView;
+    return new InitializationUi(this).getRoot();
   }
 
   @Override
@@ -677,26 +669,12 @@ public class Trime extends LifecycleInputMethodService {
     return setDarkMode(isDarkMode);
   }
 
-  private boolean canRimeStart() {
-    boolean mediaAvailable = !TextUtils.isEmpty(PathUtils.getExternalStoragePath());
-    return PermissionUtils.isAllGranted(this) && mediaAvailable;
-  }
-
-  private void setRimeStatusAndInitialKeyboard() {
-    boolean canRimeStart = canRimeStart();
-    RimeWrapper.INSTANCE.setCanStart(canRimeStart);
-    if (initialKeyboardUi != null) {
-      initialKeyboardUi.change(canRimeStart);
-    }
-  }
-
   @Override
   public void onStartInputView(EditorInfo attribute, boolean restarting) {
     Timber.d("onStartInputView: restarting=%s", restarting);
     editorInfo = attribute;
 
-    setRimeStatusAndInitialKeyboard();
-    RimeWrapper.INSTANCE.runAfterStarted(
+    RimeWrapper.runAfterStarted(
         () -> {
           if (updateDarkMode()) {
             initKeyboardDarkMode(darkMode);
@@ -789,7 +767,7 @@ public class Trime extends LifecycleInputMethodService {
   @Override
   public void onFinishInputView(boolean finishingInput) {
     super.onFinishInputView(finishingInput);
-    if (RimeWrapper.INSTANCE.isReady()) {
+    if (RimeWrapper.isReady()) {
       if (normalTextEditor) {
         DraftHelper.INSTANCE.onInputEventChanged();
       }
