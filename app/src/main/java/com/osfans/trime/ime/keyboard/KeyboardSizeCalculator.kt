@@ -37,7 +37,7 @@ class KeyboardSizeCalculator(
         for (mk in lm) {
             val weight = obtainFloat(mk, "width", 0f)
             val keyWidthWeight =
-                if (weight == 0f) {
+                if (weight == 0f && mk.contains("click")) {
                     keyboardKeyWidth
                 } else {
                     weight
