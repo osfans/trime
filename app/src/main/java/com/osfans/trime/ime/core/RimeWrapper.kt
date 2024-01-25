@@ -5,6 +5,8 @@ import androidx.core.os.HandlerCompat
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
@@ -24,13 +26,11 @@ object RimeWrapper {
     private val _statusStateFlow = MutableStateFlow(Status.UN_INIT)
     val statusStateFlow = _statusStateFlow.asStateFlow()
 
-    var canStart = false
-
     fun startup(r: Runnable? = null) {
         r.let {
             myThreadSafeList.add(it)
         }
-        if (canStart) {
+        if (appContext.isStorageAvailable()) {
             if (mutex.tryLock()) {
                 if (_statusStateFlow.value == Status.UN_INIT) {
                     Timber.d("Starting in a thread")
@@ -97,17 +97,19 @@ object RimeWrapper {
     }
 
     fun runCheck() {
-        if (isReady()) {
-            notifyUnlock()
-        } else if (_statusStateFlow.value == Status.UN_INIT) {
-            startup()
+        when (_statusStateFlow.value) {
+            Status.UN_INIT -> startup()
+            Status.READY -> notifyUnlock()
+            else -> return
         }
     }
 
+    @JvmStatic
     fun isReady(): Boolean {
         return _statusStateFlow.value == Status.READY
     }
 
+    @JvmStatic
     fun runAfterStarted(r: Runnable) {
         myThreadSafeList.add(r)
         runCheck()

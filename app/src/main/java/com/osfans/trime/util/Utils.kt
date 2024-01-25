@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.TypedValue
 import android.view.View
 import androidx.annotation.AttrRes
@@ -16,6 +17,8 @@ import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ToastUtils
+import com.hjq.permissions.Permission
+import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import kotlinx.coroutines.Dispatchers
@@ -137,4 +140,10 @@ fun Preference.thirdPartySummary(versionCode: String) {
 
 fun Preference.optionalPreference() {
     isVisible = summary.isNullOrBlank() || intent?.data == null
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Context.isStorageAvailable(): Boolean {
+    return XXPermissions.isGranted(this, Permission.MANAGE_EXTERNAL_STORAGE) &&
+        Environment.getExternalStorageDirectory().absolutePath.isNotEmpty()
 }

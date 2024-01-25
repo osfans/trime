@@ -181,7 +181,6 @@ class PrefMainActivity : AppCompatActivity() {
                     ) {
                         if (all) {
                             ToastUtils.showShort(R.string.external_storage_permission_granted)
-                            RimeWrapper.canStart = true
                             SoundThemeManager.init()
                         }
                     }
@@ -190,7 +189,6 @@ class PrefMainActivity : AppCompatActivity() {
                         permissions: List<String>,
                         never: Boolean,
                     ) {
-                        RimeWrapper.canStart = false
                         if (never) {
                             ToastUtils.showShort(R.string.external_storage_permission_denied)
                             XXPermissions.startPermissionActivity(

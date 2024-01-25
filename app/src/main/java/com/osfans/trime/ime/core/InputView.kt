@@ -5,12 +5,12 @@ import android.app.Dialog
 import android.view.View
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.util.styledFloat
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.startKoin
+import org.koin.core.context.loadKoinModules
+import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -46,11 +46,8 @@ class InputView(
     val keyboardView: View
 
     init {
-        startKoin {
-            androidLogger()
-            androidContext(context)
-            modules(module)
-        }
+        // MUST call before any other operations
+        loadKoinModules(module)
 
         keyboardView =
             constraintLayout {
@@ -111,5 +108,14 @@ class InputView(
 
     fun finishInput() {
         showingDialog?.dismiss()
+    }
+
+    override fun onDetachedFromWindow() {
+        ViewCompat.setOnApplyWindowInsetsListener(this, null)
+        showingDialog?.dismiss()
+        // unload the Koin module,
+        // implies that InputView should not be attached again after detached.
+        unloadKoinModules(module)
+        super.onDetachedFromWindow()
     }
 }
