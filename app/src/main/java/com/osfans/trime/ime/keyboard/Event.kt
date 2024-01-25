@@ -69,8 +69,9 @@ class Event(keyboard: Keyboard?, var s: String) {
         get() {
             val state = states?.get(if (getOption(toggle)) 1 else 0)
             if (state != null) return state
+            if (mKeyboard == null) return adjustCase(field)
 
-            if (mKeyboard!!.isOnlyShiftOn) {
+            if (mKeyboard.isOnlyShiftOn) {
                 if (code >= KeyEvent.KEYCODE_0 && code <= KeyEvent.KEYCODE_9 && !defaultInstance().keyboard.hookShiftNum) {
                     return adjustCase(
                         shiftLabel,

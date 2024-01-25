@@ -58,11 +58,11 @@ class Keyboard() {
     // private boolean mShifted;
 
     /** 鍵盤的Shift鍵  */
-    private var mShiftKey: Key? = null
-    private var mCtrlKey: Key? = null
-    private var mAltKey: Key? = null
-    private var mMetaKey: Key? = null
-    private var mSymKey: Key? = null
+    var mShiftKey: Key? = null
+    var mCtrlKey: Key? = null
+    var mAltKey: Key? = null
+    var mMetaKey: Key? = null
+    var mSymKey: Key? = null
 
     /**
      * Total height of the keyboard, including the padding and keys
@@ -438,26 +438,6 @@ class Keyboard() {
         }
     }
 
-    fun getmShiftKey(): Key? {
-        return mShiftKey
-    }
-
-    fun getmAltKey(): Key? {
-        return mAltKey
-    }
-
-    fun getmMetaKey(): Key? {
-        return mMetaKey
-    }
-
-    fun getmSymKey(): Key? {
-        return mSymKey
-    }
-
-    fun getmCtrlKey(): Key? {
-        return mCtrlKey
-    }
-
     fun setModiferKey(
         c: Int,
         key: Key?,
@@ -614,7 +594,6 @@ class Keyboard() {
     //    if (mFunctionKey != null) mFunctionKey.setOn(on);
     //    return setModifier(KeyEvent.META_FUNCTION_ON, on || keyDown);
     //  }
-    enum class Mask
 
     private val MASK_META_WITHOUT_SHIFT = KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON or KeyEvent.META_SYM_ON or KeyEvent.META_META_ON
     private val MASK_META_WITHOUT_CTRL = KeyEvent.META_SHIFT_ON or KeyEvent.META_ALT_ON or KeyEvent.META_SYM_ON or KeyEvent.META_META_ON
