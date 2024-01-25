@@ -476,7 +476,10 @@ class Theme private constructor(isDarkMode: Boolean) {
                     return fullPath
                 }
             }
-            return ColorUtils.parseColor(value)
+            // 不包含下划线才进行颜色解析
+            if (!value.contains("_")) {
+                return ColorUtils.parseColor(value)
+            }
         }
         return null
     }
