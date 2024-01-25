@@ -712,23 +712,22 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
             } else {
                 false
             }
+
+    /**
+     * 返回鍵盤是否爲大寫狀態
+     */
     val isCapsOn: Boolean
-        /**
-         * 返回鍵盤是否爲大寫狀態
-         *
-         * @return true 如果大寫
-         */
-        get() = if (mKeyboard != null && mKeyboard!!.getmShiftKey() != null) mKeyboard!!.getmShiftKey()!!.isOn else false
+        get() = if (mKeyboard != null && mKeyboard!!.mShiftKey != null) mKeyboard!!.mShiftKey!!.isOn else false
     val isShiftOn: Boolean
-        get() = if (mKeyboard != null && mKeyboard!!.getmShiftKey() != null) mKeyboard!!.getmShiftKey()!!.isOn else false
+        get() = if (mKeyboard != null && mKeyboard!!.mShiftKey != null) mKeyboard!!.mShiftKey!!.isOn else false
     val isAltOn: Boolean
-        get() = if (mKeyboard != null && mKeyboard!!.getmAltKey() != null) mKeyboard!!.getmAltKey()!!.isOn else false
+        get() = if (mKeyboard != null && mKeyboard!!.mAltKey != null) mKeyboard!!.mAltKey!!.isOn else false
     val isSysOn: Boolean
-        get() = if (mKeyboard != null && mKeyboard!!.getmSymKey() != null) mKeyboard!!.getmSymKey()!!.isOn else false
+        get() = if (mKeyboard != null && mKeyboard!!.mSymKey != null) mKeyboard!!.mSymKey!!.isOn else false
     val isCtrlOn: Boolean
-        get() = if (mKeyboard != null && mKeyboard!!.getmCtrlKey() != null) mKeyboard!!.getmCtrlKey()!!.isOn else false
+        get() = if (mKeyboard != null && mKeyboard!!.mCtrlKey != null) mKeyboard!!.mCtrlKey!!.isOn else false
     val isMetaOn: Boolean
-        get() = if (mKeyboard != null && mKeyboard!!.getmMetaKey() != null) mKeyboard!!.getmMetaKey()!!.isOn else false
+        get() = if (mKeyboard != null && mKeyboard!!.mMetaKey != null) mKeyboard!!.mMetaKey!!.isOn else false
 
     // public void setVerticalCorrection(int verticalOffset) {}
 
