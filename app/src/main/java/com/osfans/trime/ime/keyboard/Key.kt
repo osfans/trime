@@ -124,7 +124,7 @@ class Key(private val mKeyboard: Keyboard) {
             for (type in KeyEventType.entries) {
                 val typeStr = type.toString().lowercase()
                 s = obtainString(mk, typeStr, "")
-                if (!TextUtils.isEmpty(s)) {
+                if (s.isNotEmpty()) {
                     events[type.ordinal] = Event(mKeyboard, s)
                     if (type.ordinal < KeyEventType.COMBO.ordinal) hasComposingKey = true
                 } else if (type == KeyEventType.CLICK) {
