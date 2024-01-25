@@ -330,7 +330,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                         event.select!!.contentEquals(".next") -> {
                             trime.switchToNextIme()
                         }
-                        event.select.isNotEmpty() -> {
+                        !event.select.isNullOrEmpty() -> {
                             trime.switchToPrevIme()
                         }
                         else -> {
