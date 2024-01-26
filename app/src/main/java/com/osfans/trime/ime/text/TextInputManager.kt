@@ -59,7 +59,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
         private val trime get() = Trime.getService()
         private val prefs get() = AppPrefs.defaultInstance()
         private val activeEditorInstance: EditorInstance
-            get() = trime.activeEditorInstance
+            get() = trime.activeEditorInstance as EditorInstance
         private var intentReceiver: IntentReceiver? = null
         private var rimeNotiHandlerJob: Job? = null
 
@@ -243,7 +243,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                 val value = notification.value
                 when (val option = notification.option) {
                     "ascii_mode" -> {
-                        trime.inputFeedbackManager.ttsLanguage =
+                        trime.inputFeedbackManager?.ttsLanguage =
                             locales[if (value) 1 else 0]
                     }
                     "_hide_comment" -> trime.setShowComment(!value)

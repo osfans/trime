@@ -32,7 +32,7 @@ class EditorInstance(private val ims: InputMethodService) {
             }
         }
     val textInputManager: TextInputManager
-        get() = (ims as Trime).textInputManager
+        get() = (ims as Trime).textInputManager ?: error("TextInputManager is null")
 
     var lastCommittedText: CharSequence = ""
 
