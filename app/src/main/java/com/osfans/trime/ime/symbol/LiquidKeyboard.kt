@@ -128,8 +128,8 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
             }
             SymbolKeyboardType.TABS -> {
                 TabManager.get().select(i)
-                initVarLengthKeys(i, TabManager.get().tabSwitchData)
-                Timber.v("All tags in TABS: TabManager.get().tabSwitchData = ${TabManager.get().tabSwitchData}")
+                initVarLengthKeys(i, TabManager.get().getTabSwitchData())
+                Timber.v("All tags in TABS: TabManager.get().tabSwitchData = ${TabManager.get().getTabSwitchData()}")
             }
             SymbolKeyboardType.HISTORY -> {
                 TabManager.get().select(i)
@@ -364,7 +364,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
 
         val candidates =
             if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                data.map { b -> CandidateListItem("", b.label) }
+                data.map { b -> CandidateListItem("", b.getLabel()) }
             } else {
                 data.map { b -> CandidateListItem("", b.text) }
             }
