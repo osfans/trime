@@ -21,7 +21,11 @@ object KeyboardSwitcher {
 
     /** To get current keyboard instance. **/
     @JvmStatic
-    val currentKeyboard: Keyboard get() = availableKeyboards[currentId]
+    val currentKeyboard: Keyboard
+        get() {
+            if (currentId >= availableKeyboards.size) currentId = 0
+            return availableKeyboards[currentId]
+        }
 
     init {
         newOrReset()
