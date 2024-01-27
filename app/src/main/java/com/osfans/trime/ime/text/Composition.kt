@@ -223,7 +223,7 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
             ?: ArrayList()
 
         if (theme.style.getInt("layout/max_entries").also { max_entries = it } == 0) {
-            max_entries = Candidate.getMaxCandidateCount()
+            max_entries = Candidate.maxCandidateCount
         }
         candidate_use_cursor = theme.style.getBoolean("candidate_use_cursor")
         text_size = sp2px(theme.style.getFloat("text_size")).toInt()
