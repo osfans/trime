@@ -1,14 +1,26 @@
 package com.osfans.trime.data.theme
 
+import androidx.annotation.Keep
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataDirectoryChangeListener
 import com.osfans.trime.data.DataManager
 import java.io.File
 
-object ThemeManager : DataDirectoryChangeListener.Listener {
+object ThemeManager {
+    /**
+     * Update sharedThemes and userThemes.
+     */
+    @Keep
+    private val onDataDirChange =
+        DataManager.OnDataDirChangeListener {
+            sharedThemes.clear()
+            userThemes.clear()
+            sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
+            userThemes.addAll(listThemes(DataManager.userDataDir))
+        }
+
     init {
         // register listener
-        DataDirectoryChangeListener.addDirectoryChangeListener(this)
+        DataManager.addOnChangedListener(onDataDirChange)
     }
 
     private fun listThemes(path: File): MutableList<String> {
@@ -22,17 +34,9 @@ object ThemeManager : DataDirectoryChangeListener.Listener {
         AppPrefs.defaultInstance().themeAndColor.selectedTheme = theme
     }
 
-    var sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
+    val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
 
-    var userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
-
-    /**
-     * Update sharedThemes and userThemes.
-     */
-    override fun onDataDirectoryChange() {
-        sharedThemes = listThemes(DataManager.sharedDataDir)
-        userThemes = listThemes(DataManager.userDataDir)
-    }
+    val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
 
     @JvmStatic
     fun getAllThemes(): List<String> {
