@@ -3,7 +3,7 @@ package com.osfans.trime.ime.core
 import android.os.Looper
 import androidx.core.os.HandlerCompat
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.DataDirectoryChangeListener
+import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.isStorageAvailable
@@ -67,9 +67,7 @@ object RimeWrapper {
                 _statusStateFlow.value = Status.IN_PROGRESS
                 mutex.unlock()
 
-                DataDirectoryChangeListener.directoryChangeListeners.forEach {
-                    it.onDataDirectoryChange()
-                }
+                DataManager.dirFireChange()
 
                 Rime.deploy()
 

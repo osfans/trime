@@ -1,6 +1,6 @@
 package com.osfans.trime.data.opencc
 
-import com.osfans.trime.data.DataDirectoryChangeListener
+import androidx.annotation.Keep
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.opencc.dict.Dictionary
 import com.osfans.trime.data.opencc.dict.OpenCCDictionary
@@ -11,23 +11,25 @@ import java.io.File
 import java.io.InputStream
 import kotlin.system.measureTimeMillis
 
-object OpenCCDictManager : DataDirectoryChangeListener.Listener {
+object OpenCCDictManager {
+    /**
+     * Update sharedDir and userDir.
+     */
+    @Keep
+    private val onDataDirChange =
+        DataManager.OnDataDirChangeListener {
+            sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
+            userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
+        }
+
     init {
         System.loadLibrary("rime_jni")
         // register listener
-        DataDirectoryChangeListener.addDirectoryChangeListener(this)
+        DataManager.addOnChangedListener(onDataDirChange)
     }
 
     var sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
     var userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
-
-    /**
-     * Update sharedDir and userDir.
-     */
-    override fun onDataDirectoryChange() {
-        sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
-        userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
-    }
 
     fun sharedDictionaries(): List<Dictionary> =
         sharedDir

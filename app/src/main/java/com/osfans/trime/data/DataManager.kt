@@ -3,6 +3,7 @@ package com.osfans.trime.data
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ResourceUtils
 import com.osfans.trime.util.Const
+import com.osfans.trime.util.WeakHashSet
 import timber.log.Timber
 import java.io.File
 
@@ -11,6 +12,24 @@ object DataManager {
     private val prefs get() = AppPrefs.defaultInstance()
 
     val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
+
+    private val onDataDirChangeListeners = WeakHashSet<OnDataDirChangeListener>()
+
+    fun interface OnDataDirChangeListener {
+        fun onDataDirChange()
+    }
+
+    fun addOnChangedListener(listener: OnDataDirChangeListener) {
+        onDataDirChangeListeners.add(listener)
+    }
+
+    fun removeOnChangedListener(listener: OnDataDirChangeListener) {
+        onDataDirChangeListeners.remove(listener)
+    }
+
+    fun dirFireChange() {
+        onDataDirChangeListeners.forEach { it.onDataDirChange() }
+    }
 
     @JvmStatic
     val sharedDataDir
