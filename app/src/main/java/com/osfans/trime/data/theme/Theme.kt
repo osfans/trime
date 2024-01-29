@@ -36,7 +36,7 @@ import java.util.Objects
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
-class Theme(private val isDarkMode: Boolean) {
+class Theme(private var isDarkMode: Boolean) {
     private var currentColorSchemeId: String? = null
     private var generalStyle: Map<String, Any?>? = null
     private var fallbackColors: Map<String, String>? = null
@@ -292,7 +292,7 @@ class Theme(private val isDarkMode: Boolean) {
      * @param isDarkMode 是否暗黑模式
      * @return 配色方案名称
      */
-    private fun getColorSchemeName(isDarkMode: Boolean): String? {
+    private fun getColorSchemeName(): String? {
         var scheme = appPrefs.themeAndColor.selectedColor
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = style.getString("color_scheme") // 主題中指定的配色
         if (!presetColorSchemes!!.containsKey(scheme)) scheme = "default" // 主題中的default配色
@@ -331,11 +331,10 @@ class Theme(private val isDarkMode: Boolean) {
 
     // 当切换暗黑模式时，刷新键盘配色方案
     fun refreshColorCaches(isDarkMode: Boolean) {
-        currentColorSchemeId = getColorSchemeName(isDarkMode)
+        this.isDarkMode = isDarkMode
+        currentColorSchemeId = getColorSchemeName()
         Timber.d(
-            "Caching color values (currentColorSchemeId=%s, isDarkMode=%s) ...",
-            currentColorSchemeId,
-            isDarkMode,
+            "Caching color values (currentColorSchemeId=$currentColorSchemeId, isDarkMode=$isDarkMode) ...",
         )
         refreshColorValues()
     }
