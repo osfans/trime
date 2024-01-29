@@ -19,10 +19,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.blankj.utilcode.util.ToastUtils
-import com.hjq.permissions.OnPermissionCallback
-import com.hjq.permissions.Permission
-import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundThemeManager
@@ -31,6 +27,7 @@ import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Status
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.applyTranslucentSystemBars
+import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
 import kotlinx.coroutines.launch
@@ -161,45 +158,14 @@ class PrefMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        requestExternalStoragePermission()
+        if (isStorageAvailable()) {
+            SoundThemeManager.init()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         loadingDialog?.dismiss()
         loadingDialog = null
-    }
-
-    private fun requestExternalStoragePermission() {
-        XXPermissions.with(this)
-            .permission(Permission.MANAGE_EXTERNAL_STORAGE)
-            .request(
-                object : OnPermissionCallback {
-                    override fun onGranted(
-                        permissions: List<String>,
-                        all: Boolean,
-                    ) {
-                        if (all) {
-                            ToastUtils.showShort(R.string.external_storage_permission_granted)
-                            SoundThemeManager.init()
-                        }
-                    }
-
-                    override fun onDenied(
-                        permissions: List<String>,
-                        never: Boolean,
-                    ) {
-                        if (never) {
-                            ToastUtils.showShort(R.string.external_storage_permission_denied)
-                            XXPermissions.startPermissionActivity(
-                                this@PrefMainActivity,
-                                permissions,
-                            )
-                        } else {
-                            ToastUtils.showShort(R.string.external_storage_permission_denied)
-                        }
-                    }
-                },
-            )
     }
 }

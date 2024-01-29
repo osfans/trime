@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ToastUtils
+import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
@@ -146,4 +147,36 @@ fun Preference.optionalPreference() {
 inline fun Context.isStorageAvailable(): Boolean {
     return XXPermissions.isGranted(this, Permission.MANAGE_EXTERNAL_STORAGE) &&
         Environment.getExternalStorageDirectory().absolutePath.isNotEmpty()
+}
+
+fun Context.requestExternalStoragePermission() {
+    XXPermissions.with(this)
+        .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+        .request(
+            object : OnPermissionCallback {
+                override fun onGranted(
+                    permissions: List<String>,
+                    all: Boolean,
+                ) {
+                    if (all) {
+                        ToastUtils.showShort(R.string.external_storage_permission_granted)
+                    }
+                }
+
+                override fun onDenied(
+                    permissions: List<String>,
+                    never: Boolean,
+                ) {
+                    if (never) {
+                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                        XXPermissions.startPermissionActivity(
+                            this@requestExternalStoragePermission,
+                            permissions,
+                        )
+                    } else {
+                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                    }
+                }
+            },
+        )
 }
