@@ -281,4 +281,7 @@
     <string name="pref_keyboard__landscape">Landscape Mode</string>
     <string name="keyboard__split_title">Change to Landscape keyboard</string>
     <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
+    <string name="setup__step_three">Setup 3</string>
+    <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>
+    <string name="setup__request_permmision">Request storage permmision</string>
 </resources>

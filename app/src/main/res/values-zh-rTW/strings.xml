@@ -278,4 +278,7 @@
     <string name="pref_keyboard__landscape">橫向模式</string>
     <string name="keyboard__split_title">轉換到橫屏鍵盤</string>
     <string name="keyboard__split_space_title">自動分割鍵盤比例</string>
+    <string name="setup__step_three">第 3 步</string>
+    <string name="setup__request_permmision_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>
+    <string name="setup__request_permmision">请求存储权限</string>
 </resources>
