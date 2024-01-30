@@ -1,8 +1,10 @@
 package com.osfans.trime.data.theme
 
+import android.content.res.Configuration
 import androidx.annotation.Keep
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
+import com.osfans.trime.util.isNightMode
 import java.io.File
 
 object ThemeManager {
@@ -12,10 +14,7 @@ object ThemeManager {
     @Keep
     private val onDataDirChange =
         DataManager.OnDataDirChangeListener {
-            sharedThemes.clear()
-            userThemes.clear()
-            sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
-            userThemes.addAll(listThemes(DataManager.userDataDir))
+            refreshThemes()
         }
 
     init {
@@ -46,6 +45,53 @@ object ThemeManager {
         return sharedThemes + userThemes
     }
 
+    fun refreshThemes() {
+        sharedThemes.clear()
+        userThemes.clear()
+        sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
+        userThemes.addAll(listThemes(DataManager.userDataDir))
+    }
+
+    private lateinit var _activeTheme: Theme
+
     @JvmStatic
-    fun getActiveTheme() = AppPrefs.defaultInstance().themeAndColor.selectedTheme
+    var activeTheme: Theme
+        get() = _activeTheme
+        private set(value) {
+            if (_activeTheme == value) return
+            _activeTheme = value
+        }
+
+    private var isNightMode = false
+
+    val prefs = AppPrefs.defaultInstance().themeAndColor
+
+    fun setNormalTheme(name: String) {
+        AppPrefs.defaultInstance().themeAndColor.selectedTheme = name
+        _activeTheme = evalActiveTheme()
+    }
+
+    private fun evalActiveTheme(): Theme {
+        return if (prefs.autoDark) {
+            Theme(isNightMode)
+        } else {
+            Theme(false)
+        }
+    }
+
+    @JvmStatic
+    fun init(configuration: Configuration) {
+        isNightMode = configuration.isNightMode()
+        _activeTheme = evalActiveTheme()
+    }
+
+    @JvmStatic
+    fun onSystemNightModeChange(isNight: Boolean) {
+        isNightMode = isNight
+        if (::_activeTheme.isInitialized) {
+            activeTheme.refreshColorCaches(isNightMode)
+        } else {
+            activeTheme = evalActiveTheme()
+        }
+    }
 }

@@ -14,13 +14,13 @@ import android.widget.PopupWindow
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.data.theme.Theme.Companion.get
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.PopupPosition
 import com.osfans.trime.ime.enums.PopupPosition.Companion.fromString
 import com.osfans.trime.util.dp2px
 import timber.log.Timber
 
-class CompositionPopupWindow() {
+class CompositionPopupWindow {
     var isPopupWindowEnabled = true // 顯示懸浮窗口
 
     private var isPopupWindowMovable: String? = null // 悬浮窗口是否可移動
@@ -170,7 +170,7 @@ class CompositionPopupWindow() {
 
     fun hideCompositionView() {
         if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
-            popupWindowPos = fromString(get().style.getString("layout/position"))
+            popupWindowPos = fromString(ThemeManager.activeTheme.style.getString("layout/position"))
         }
         mPopupWindow?.let {
             if (it.isShowing) {

@@ -41,13 +41,14 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.ExtractedTextRequest
 import android.widget.FrameLayout
+import androidx.core.view.updateLayoutParams
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.sound.SoundThemeManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.CompositionRootBinding
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.Keycode
@@ -69,12 +70,12 @@ import com.osfans.trime.ime.text.Composition
 import com.osfans.trime.ime.text.CompositionPopupWindow
 import com.osfans.trime.ime.text.ScrollView
 import com.osfans.trime.ime.text.TextInputManager
-import com.osfans.trime.ime.util.UiUtil
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.StringUtils
 import com.osfans.trime.util.ViewUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.dp2px
+import com.osfans.trime.util.isNightMode
 import splitties.bitflags.hasFlag
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
@@ -88,7 +89,6 @@ open class Trime : LifecycleInputMethodService() {
     private var normalTextEditor = false
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
-    private var darkMode = false // 当前键盘主题是否处于暗黑模式
     private var mainKeyboardView: KeyboardView? = null // 主軟鍵盤
     private var mCandidate: Candidate? = null // 候選
     private var mComposition: Composition? = null // 編碼
@@ -171,7 +171,7 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     fun loadConfig() {
-        val theme = Theme.get()
+        val theme = ThemeManager.activeTheme
         minPopupSize = theme.style.getInt("layout/min_length")
         minPopupCheckSize = theme.style.getInt("layout/min_check")
         textInputManager!!.shouldResetAsciiMode = theme.style.getBoolean("reset_ascii_mode")
@@ -184,7 +184,7 @@ open class Trime : LifecycleInputMethodService() {
         try {
             if (textInputManager!!.shouldUpdateRimeOption) {
                 Rime.setOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
-                Rime.setOption("_horizontal", Theme.get().style.getBoolean("horizontal")) // 水平模式
+                Rime.setOption("_horizontal", ThemeManager.activeTheme.style.getBoolean("horizontal")) // 水平模式
                 textInputManager!!.shouldUpdateRimeOption = false
             }
         } catch (e: Exception) {
@@ -232,7 +232,8 @@ open class Trime : LifecycleInputMethodService() {
             val context: InputMethodService = this
             RimeWrapper.startup {
                 Timber.d("Running Trime.onCreate")
-                textInputManager = TextInputManager.getInstance(UiUtil.isDarkMode(context))
+                ThemeManager.init(resources.configuration)
+                textInputManager = TextInputManager.getInstance()
                 activeEditorInstance = EditorInstance(context)
                 inputFeedbackManager = InputFeedbackManager(context)
                 liquidKeyboard = LiquidKeyboard(context)
@@ -250,22 +251,6 @@ open class Trime : LifecycleInputMethodService() {
         } catch (e: Exception) {
             Timber.e(e)
         }
-    }
-
-    /**
-     * 变更配置的暗黑模式开关
-     *
-     * @param darkMode 设置为暗黑模式
-     * @return 模式实际上是否有发生变更
-     */
-    private fun setDarkMode(darkMode: Boolean): Boolean {
-        if (darkMode != this.darkMode) {
-            Timber.d("Dark mode changed: %s", darkMode)
-            this.darkMode = darkMode
-            return true
-        }
-        Timber.d("Dark mode not changed: %s", darkMode)
-        return false
     }
 
     private var symbolKeyboardType = SymbolKeyboardType.NO_KEY
@@ -317,13 +302,6 @@ open class Trime : LifecycleInputMethodService() {
         commitTextByChar(Objects.requireNonNull(ShortcutUtils.pasteFromClipboard(this)).toString())
     }
 
-    fun invalidate() {
-        Rime.getInstance(false)
-        Theme.get().destroy()
-        reset()
-        textInputManager!!.shouldUpdateRimeOption = true
-    }
-
     private fun showCompositionView(isCandidate: Boolean) {
         if (TextUtils.isEmpty(Rime.compositionText) && isCandidate) {
             mCompositionPopupWindow!!.hideCompositionView()
@@ -340,7 +318,7 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     private fun loadBackground() {
-        val theme = Theme.get()
+        val theme = ThemeManager.activeTheme
         val orientation = resources.configuration.orientation
         val textBackground =
             theme.colors.getDrawable(
@@ -404,7 +382,7 @@ open class Trime : LifecycleInputMethodService() {
             mCandidate!!.reset()
             mCompositionPopupWindow!!.isPopupWindowEnabled = (
                 prefs.keyboard.popupWindowEnabled &&
-                    Theme.get().style.getObject("window") != null
+                    ThemeManager.activeTheme.style.getObject("window") != null
             )
             mComposition!!.visibility = if (mCompositionPopupWindow!!.isPopupWindowEnabled) View.VISIBLE else View.GONE
             mComposition!!.reset()
@@ -416,12 +394,10 @@ open class Trime : LifecycleInputMethodService() {
         if (inputView == null) return
         inputView!!.switchUiByState(KeyboardWindow.State.Main)
         loadConfig()
-        updateDarkMode()
-        val theme = Theme.get(darkMode)
-        theme.initCurrentColors(darkMode)
+        val theme = ThemeManager.activeTheme
         SoundThemeManager.switchSound(theme.colors.getString("sound"))
-        KeyboardSwitcher.newOrReset()
         resetCandidate()
+        KeyboardSwitcher.newOrReset()
         mCompositionPopupWindow!!.hideCompositionView()
         resetKeyboard()
     }
@@ -430,25 +406,6 @@ open class Trime : LifecycleInputMethodService() {
     fun initKeyboard() {
         if (textInputManager != null) {
             reset()
-            // setNavBarColor();
-            textInputManager!!.shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
-            bindKeyboardToInputView()
-            // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
-            updateComposing() // 切換主題時刷新候選
-        }
-    }
-
-    private fun initKeyboardDarkMode(darkMode: Boolean) {
-        val theme = Theme.get()
-        if (theme.hasDarkLight) {
-            loadConfig()
-            theme.initCurrentColors(darkMode)
-            SoundThemeManager.switchSound(theme.colors.getString("sound"))
-            KeyboardSwitcher.newOrReset()
-            resetCandidate()
-            mCompositionPopupWindow!!.hideCompositionView()
-            resetKeyboard()
-
             // setNavBarColor();
             textInputManager!!.shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
             bindKeyboardToInputView()
@@ -505,14 +462,14 @@ open class Trime : LifecycleInputMethodService() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         val config = resources.configuration
-        if (config != null) {
-            if (config.orientation != newConfig.orientation) {
-                // Clear composing text and candidates for orientation change.
-                performEscape()
-                config.orientation = newConfig.orientation
-            }
+        if (config.orientation != newConfig.orientation) {
+            // Clear composing text and candidates for orientation change.
+            performEscape()
+            config.orientation = newConfig.orientation
         }
         super.onConfigurationChanged(newConfig)
+        ThemeManager.onSystemNightModeChange(newConfig.isNightMode())
+        initKeyboard()
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
@@ -580,8 +537,7 @@ open class Trime : LifecycleInputMethodService() {
             mComposition = compositionRootBinding!!.compositions
             mCompositionPopupWindow!!.init(compositionRootBinding!!.compositionRoot, mCandidateRoot!!)
             mTabRoot = inputView!!.quickBar.oldTabBar.root
-            updateDarkMode()
-            Theme.get(darkMode).initCurrentColors(darkMode)
+
             liquidKeyboard!!.setKeyboardView(
                 inputView!!.keyboardWindow.oldSymbolInputView.liquidKeyboardView,
             )
@@ -603,13 +559,13 @@ open class Trime : LifecycleInputMethodService() {
         val inputArea =
             window.window!!.decorView
                 .findViewById<FrameLayout>(android.R.id.inputArea)
-        val lP1 = inputArea.layoutParams
-        lP1.height = ViewGroup.LayoutParams.MATCH_PARENT
-        inputArea.layoutParams = lP1
+        inputArea.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
         super.setInputView(view)
-        val lP2 = view.layoutParams
-        lP2.height = ViewGroup.LayoutParams.MATCH_PARENT
-        view.layoutParams = lP2
+        view.updateLayoutParams<ViewGroup.LayoutParams> {
+            height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
     }
 
     override fun onConfigureWindow(
@@ -633,11 +589,6 @@ open class Trime : LifecycleInputMethodService() {
         Timber.d("onStartInput: restarting=%s", restarting)
     }
 
-    private fun updateDarkMode(): Boolean {
-        val isDarkMode = UiUtil.isDarkMode(this)
-        return setDarkMode(isDarkMode)
-    }
-
     override fun onStartInputView(
         attribute: EditorInfo,
         restarting: Boolean,
@@ -645,9 +596,6 @@ open class Trime : LifecycleInputMethodService() {
         Timber.d("onStartInputView: restarting=%s", restarting)
         editorInfo = attribute
         RimeWrapper.runAfterStarted {
-            if (updateDarkMode()) {
-                initKeyboardDarkMode(darkMode)
-            }
             inputFeedbackManager!!.resumeSoundPool()
             inputFeedbackManager!!.resetPlayProgress()
             for (listener in eventListeners) {

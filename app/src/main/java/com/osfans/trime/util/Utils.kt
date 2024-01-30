@@ -2,6 +2,7 @@ package com.osfans.trime.util
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -180,3 +181,5 @@ fun Context.requestExternalStoragePermission() {
             },
         )
 }
+
+fun Configuration.isNightMode() = uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES

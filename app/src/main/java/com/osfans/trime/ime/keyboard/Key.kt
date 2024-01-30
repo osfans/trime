@@ -26,7 +26,7 @@ import com.osfans.trime.core.Rime.Companion.hasMenu
 import com.osfans.trime.core.Rime.Companion.isAsciiMode
 import com.osfans.trime.core.Rime.Companion.isComposing
 import com.osfans.trime.core.Rime.Companion.showAsciiPunch
-import com.osfans.trime.data.theme.Theme.Companion.get
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
@@ -118,7 +118,7 @@ class Key(private val mKeyboard: Keyboard) {
      */
     constructor(parent: Keyboard, mk: Map<String, Any?>) : this(parent) {
         var s: String
-        val theme = get()
+        val theme = ThemeManager.activeTheme
         run {
             var hasComposingKey = false
             for (type in KeyEventType.entries) {
