@@ -8,11 +8,16 @@ import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
+import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.util.styledFloat
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
@@ -40,6 +45,7 @@ import splitties.views.dsl.core.wrapContent
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: Trime,
+    val rime: Rime,
     val theme: Theme,
 ) : ConstraintLayout(service) {
     private val placeholderListener = OnClickListener { }
@@ -58,6 +64,8 @@ class InputView(
         view(::View) {
             setOnClickListener { placeholderListener }
         }
+
+    private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     val quickBar = QuickBar()
@@ -105,6 +113,13 @@ class InputView(
     init {
         // MUST call before any other operations
         loadKoinModules(module)
+
+        notificationHandlerJob =
+            service.lifecycleScope.launch {
+                rime.notificationFlow.collect {
+                    handleRimeNotification(it)
+                }
+            }
 
         liquidKeyboard.setKeyboardView(keyboardWindow.oldSymbolInputView.liquidKeyboardView)
 
@@ -196,6 +211,26 @@ class InputView(
             }
         }
         quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+    }
+
+    private fun handleRimeNotification(it: RimeNotification) {
+        when (it) {
+            is RimeNotification.OptionNotification -> {
+                when (it.option) {
+                    "_hide_comment" -> {
+                        quickBar.oldCandidateBar.candidates.setShowComment(!it.value)
+                    }
+                    "_hide_candidate" -> {
+                        quickBar.oldCandidateBar.root.visibility =
+                            if (it.value) View.GONE else View.VISIBLE
+                    }
+                    "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowHint(!it.value)
+                    "_hide_key_symbol" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowSymbol(!it.value)
+                }
+                keyboardWindow.oldMainInputView.mainKeyboardView.invalidateAllKeys()
+            }
+            else -> {}
+        }
     }
 
     fun switchUiByState(state: KeyboardWindow.State) {
