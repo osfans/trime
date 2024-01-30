@@ -45,7 +45,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.FontManager.getTypeface
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.data.theme.Theme.Companion.get
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.ime.keyboard.Key.Companion.isTrimeModifierKey
@@ -329,7 +329,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     }
 
     fun reset() {
-        val theme = get()
+        val theme = ThemeManager.activeTheme
         key_symbol_color = theme.colors.getColor("key_symbol_color")!!
         hilited_key_symbol_color = theme.colors.getColor("hilited_key_symbol_color")!!
         mShadowColor = theme.colors.getColor("shadow_color")!!

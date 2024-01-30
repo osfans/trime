@@ -22,11 +22,11 @@ import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
-import com.osfans.trime.ime.util.UiUtil
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
@@ -52,7 +52,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     private val candidateAdapter by lazy {
         CandidateAdapter(theme).apply {
             setListener { position ->
-                TextInputManager.getInstance(UiUtil.isDarkMode(context))
+                TextInputManager.getInstance()
                     .onCandidatePressed(position)
                 if (Rime.isComposing) {
                     updateCandidates(Rime.candidatesWithoutSwitch.toList())
@@ -75,7 +75,7 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
             addItemDecoration(SpacesItemDecoration(space))
             setPadding(space)
         }
-        theme = Theme.get(UiUtil.isDarkMode(context))
+        theme = ThemeManager.activeTheme
         adapterType = AdapterType.INIT
     }
 

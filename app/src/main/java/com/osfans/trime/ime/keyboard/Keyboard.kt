@@ -22,7 +22,7 @@ import android.view.KeyEvent
 import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.data.theme.Theme.Companion.get
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainInt
@@ -152,7 +152,7 @@ class Keyboard() {
     }
 
     constructor(name: String?) : this() {
-        val theme = get()
+        val theme = ThemeManager.activeTheme
         val keyboardConfig: Map<String, Any?>?
         val v = theme.keyboards.getObject(name!!)
         keyboardConfig =
@@ -612,7 +612,7 @@ class Keyboard() {
     init {
 
         // 橫屏模式下，键盘左右两侧到屏幕边缘的距离
-        val theme = get()
+        val theme = ThemeManager.activeTheme
         val keyboardPadding = theme.keyboardPadding
         mDisplayWidth = ScreenUtils.getAppScreenWidth() - keyboardPadding[0] - keyboardPadding[1]
 

@@ -11,12 +11,10 @@ import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundTheme
 import com.osfans.trime.data.sound.SoundThemeManager
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.symbol.TabManager
-import com.osfans.trime.ime.util.UiUtil
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,15 +31,15 @@ suspend fun Context.themePicker(
                 ThemeManager.getAllThemes()
                     .map { it.substringBeforeLast('.') }
                     .toTypedArray()
-            val current = ThemeManager.getActiveTheme().substringBeforeLast('.')
+            val current =
+                AppPrefs.defaultInstance().themeAndColor.selectedTheme
+                    .substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             with(items[checkedItem].toString()) {
-                ThemeManager.switchTheme(if (this == "trime") this else "$this.trime")
-                Theme.get(UiUtil.isDarkMode(this@themePicker))
-                    .init(UiUtil.isDarkMode(this@themePicker))
+                ThemeManager.setNormalTheme(if (this == "trime") this else "$this.trime")
                 TabManager.updateSelf()
             }
             launch {
@@ -58,8 +56,8 @@ suspend fun Context.colorPicker(
     return CoroutineChoiceDialog(this, themeResId).apply {
         title = getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
+        val all by lazy { ThemeManager.activeTheme.getPresetColorSchemes() }
         onInit {
-            val all = Theme.get().getPresetColorSchemes()
             items = all.map { it.second }.toTypedArray()
             val current = prefs.themeAndColor.selectedColor
             val schemeIds = all.map { it.first }
@@ -67,7 +65,6 @@ suspend fun Context.colorPicker(
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            val all = Theme.get().getPresetColorSchemes()
             val schemeIds = all.map { it.first }
             prefs.themeAndColor.selectedColor = schemeIds[checkedItem]
             launch {

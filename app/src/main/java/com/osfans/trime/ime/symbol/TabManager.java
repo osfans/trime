@@ -3,6 +3,7 @@ package com.osfans.trime.ime.symbol;
 import androidx.annotation.NonNull;
 import com.osfans.trime.data.schema.SchemaManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.enums.KeyCommandType;
 import com.osfans.trime.ime.enums.SymbolKeyboardType;
 import com.osfans.trime.util.CollectionUtils;
@@ -100,7 +101,7 @@ public class TabManager {
   }
 
   private TabManager() {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
     final List<String> availables = (List<String>) theme.liquid.getObject("keyboards");
     if (availables != null) {
       for (final String id : availables) {

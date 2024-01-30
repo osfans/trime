@@ -27,7 +27,7 @@ import androidx.annotation.StringRes
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.opencc.OpenCCDictManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import timber.log.Timber
 import java.util.Arrays
 
@@ -97,7 +97,7 @@ class Speech(context: Context) : RecognitionListener {
         val trime = Trime.getServiceOrNull()
         if (trime != null) {
             val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            val openccConfig = Theme.get().style.getString("speech_opencc_config")
+            val openccConfig = ThemeManager.activeTheme.style.getString("speech_opencc_config")
             for (result in matches!!) trime.commitText(OpenCCDictManager.convertLine(result!!, openccConfig))
         }
     }

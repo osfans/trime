@@ -14,7 +14,7 @@ import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.InputView
@@ -52,7 +52,7 @@ import java.util.Locale
  * TextInputManager is also the hub in the communication between the system, the active editor
  * instance and the CandidateView.
  */
-class TextInputManager private constructor(private val isDarkMode: Boolean) :
+class TextInputManager private constructor() :
     Trime.EventListener,
     KeyboardView.OnKeyboardActionListener,
     Candidate.EventListener {
@@ -84,9 +84,9 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
             private val DELIMITER_SPLITTER = """[-_]""".toRegex()
             private var instance: TextInputManager? = null
 
-            fun getInstance(isDarkMode: Boolean): TextInputManager {
+            fun getInstance(): TextInputManager {
                 if (instance == null) {
-                    instance = TextInputManager(isDarkMode)
+                    instance = TextInputManager()
                 }
                 return instance!!
             }
@@ -112,7 +112,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
                     .onEach(::handleRimeNotification)
                     .launchIn(trime.lifecycleScope)
 
-            val theme = Theme.get(isDarkMode)
+            val theme = ThemeManager.activeTheme
             val defaultLocale = theme.style.getString("locale").split(DELIMITER_SPLITTER)
             locales[0] =
                 when (defaultLocale.size) {
@@ -288,7 +288,7 @@ class TextInputManager private constructor(private val isDarkMode: Boolean) :
             if (needSendUpRimeKey) {
                 if (shouldUpdateRimeOption) {
                     Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                    Rime.setOption("_horizontal", Theme.get().style.getBoolean("horizontal"))
+                    Rime.setOption("_horizontal", ThemeManager.activeTheme.style.getBoolean("horizontal"))
                     shouldUpdateRimeOption = false
                 }
                 // todo 释放按键可能不对

@@ -44,9 +44,9 @@ import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeComposition;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
+import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
-import com.osfans.trime.ime.util.UiUtil;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
@@ -169,7 +169,7 @@ public class Composition extends AppCompatTextView {
 
   public Composition(Context context, AttributeSet attrs) {
     super(context, attrs);
-    textInputManager = TextInputManager.Companion.getInstance(UiUtil.INSTANCE.isDarkMode(context));
+    textInputManager = TextInputManager.Companion.getInstance();
     setShowComment(!Rime.getOption("_hide_comment"));
     reset();
   }
@@ -221,7 +221,7 @@ public class Composition extends AppCompatTextView {
   }
 
   public void reset() {
-    final Theme theme = Theme.get();
+    final Theme theme = ThemeManager.getActiveTheme();
 
     if ((windows_comps = (List<Map<String, Object>>) theme.style.getObject("window")) == null) {
       windows_comps = new ArrayList<>();
