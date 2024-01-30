@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ViewAnimator
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.databinding.TabBarBinding
 import com.osfans.trime.ime.core.Trime
@@ -19,6 +20,7 @@ import splitties.views.dsl.core.matchParent
 class QuickBar : KoinComponent {
     private val context: Context by inject()
     private val service: Trime by inject()
+    private val theme: Theme by inject()
 
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
@@ -39,7 +41,9 @@ class QuickBar : KoinComponent {
     }
 
     val oldTabBar by lazy {
-        TabBarBinding.inflate(LayoutInflater.from(context))
+        TabBarBinding.inflate(LayoutInflater.from(context)).apply {
+            tabs.reset()
+        }
     }
 
     enum class State {
@@ -54,7 +58,14 @@ class QuickBar : KoinComponent {
 
     val view by lazy {
         ViewAnimator(context).apply {
-            background = oldCandidateBar.root.background
+            background =
+                theme.colors.getDrawable(
+                    "candidate_background",
+                    "candidate_border",
+                    "candidate_border_color",
+                    "candidate_border_round",
+                    null,
+                )
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
             add(oldTabBar.root, lParams(matchParent, matchParent))
         }

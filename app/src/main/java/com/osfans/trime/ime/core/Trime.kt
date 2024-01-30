@@ -22,7 +22,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.Handler
@@ -74,9 +73,9 @@ import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.StringUtils
 import com.osfans.trime.util.ViewUtils
 import com.osfans.trime.util.WeakHashSet
-import com.osfans.trime.util.dp2px
 import com.osfans.trime.util.isNightMode
 import splitties.bitflags.hasFlag
+import splitties.dimensions.dp
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
 import java.util.Objects
@@ -271,7 +270,6 @@ open class Trime : LifecycleInputMethodService() {
             inputView!!.switchUiByState(KeyboardWindow.State.Symbol)
             symbolKeyboardType = liquidKeyboard!!.select(tabIndex)
             tabView!!.updateTabWidth()
-            mTabRoot!!.background = mCandidateRoot!!.background
             mTabRoot!!.move(tabView!!.hightlightLeft, tabView!!.hightlightRight)
             showLiquidKeyboardToolbar()
         } else {
@@ -317,9 +315,8 @@ open class Trime : LifecycleInputMethodService() {
         )
     }
 
-    private fun loadBackground() {
+    private fun loadBackground(recreate: Boolean) {
         val theme = ThemeManager.activeTheme
-        val orientation = resources.configuration.orientation
         val textBackground =
             theme.colors.getDrawable(
                 "text_back_color",
@@ -329,40 +326,23 @@ open class Trime : LifecycleInputMethodService() {
                 "layout/alpha",
             )
         mCompositionPopupWindow!!.setThemeStyle(
-            dp2px(theme.style.getFloat("layout/elevation")).toInt().toFloat(),
+            dp(theme.style.getFloat("layout/elevation")),
             textBackground,
         )
-        if (mCandidateRoot != null) {
-            val candidateBackground =
-                theme.colors.getDrawable(
-                    "candidate_background",
-                    "candidate_border",
-                    "candidate_border_color",
-                    "candidate_border_round",
-                    null,
-                )
-            if (candidateBackground != null) mCandidateRoot!!.background = candidateBackground
-        }
-        if (inputView == null) return
 
-        // 单手键盘模式
-        val oneHandMode = 0
-        val padding = theme.getKeyboardPadding(oneHandMode, orientation == Configuration.ORIENTATION_LANDSCAPE)
-        Timber.i(
-            "update KeyboardPadding: Trime.loadBackground, padding= %s %s %s, orientation=%s",
-            padding[0],
-            padding[1],
-            padding[2],
-            orientation,
-        )
-        mainKeyboardView!!.setPadding(padding[0], 0, padding[1], padding[2])
-        val inputRootBackground = theme.colors.getDrawable("root_background")
-        if (inputRootBackground != null) {
-            inputView!!.keyboardView.background = inputRootBackground
-        } else {
-            // 避免因为键盘整体透明而造成的异常
-            inputView!!.keyboardView.setBackgroundColor(Color.BLACK)
-        }
+        if (inputView == null || !recreate) return
+
+        inputView?.quickBar?.view?.background =
+            theme.colors.getDrawable(
+                "candidate_background",
+                "candidate_border",
+                "candidate_border_color",
+                "candidate_border_round",
+                null,
+            )
+
+        inputView?.background = theme.colors.getDrawable("root_background")
+
         tabView!!.reset()
     }
 
@@ -376,7 +356,7 @@ open class Trime : LifecycleInputMethodService() {
 
     fun resetCandidate() {
         if (mCandidateRoot != null) {
-            loadBackground()
+            loadBackground(true)
             setShowComment(!Rime.getOption("_hide_comment"))
             mCandidateRoot!!.visibility = if (!Rime.getOption("_hide_candidate")) View.VISIBLE else View.GONE
             mCandidate!!.reset()
@@ -512,21 +492,19 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     override fun onComputeInsets(outInsets: Insets) {
-        val location = intArrayOf(0, 0)
-        if (inputView != null) {
-            inputView!!.keyboardView.getLocationInWindow(location)
+        val (_, y) = intArrayOf(0, 0).also { inputView?.keyboardView?.getLocationInWindow(it) }
+        outInsets.apply {
+            contentTopInsets = y
+            touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
+            touchableRegion.setEmpty()
+            visibleTopInsets = y
         }
-        val y = location[1]
-        outInsets.contentTopInsets = y
-        outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
-        outInsets.touchableRegion.setEmpty()
-        outInsets.visibleTopInsets = y
     }
 
     override fun onCreateInputView(): View {
         Timber.d("onCreateInputView()")
         RimeWrapper.runAfterStarted {
-            inputView = InputView(this)
+            inputView = InputView(this, ThemeManager.activeTheme)
             mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
             // 初始化候选栏
             mCandidateRoot = inputView!!.quickBar.oldCandidateBar.root
@@ -545,7 +523,7 @@ open class Trime : LifecycleInputMethodService() {
             for (listener in eventListeners) {
                 listener.onInitializeInputUi(inputView!!)
             }
-            loadBackground()
+            loadBackground(false)
             KeyboardSwitcher.newOrReset()
             bindKeyboardToInputView()
             setInputView(inputView!!)

@@ -2,24 +2,34 @@ package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.res.Configuration
 import android.view.View
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.updateLayoutParams
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.util.styledFloat
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
+import splitties.dimensions.dp
+import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.endToStartOf
 import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.startToEndOf
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 
@@ -29,7 +39,25 @@ import splitties.views.dsl.core.wrapContent
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: Trime,
+    val theme: Theme,
 ) : ConstraintLayout(service) {
+    private val placeholderListener = OnClickListener { }
+
+    private val leftPaddingSpace =
+        view(::View) {
+            setOnClickListener { placeholderListener }
+        }
+
+    private val rightPaddingSpace =
+        view(::View) {
+            setOnClickListener { placeholderListener }
+        }
+
+    private val bottomPaddingSpace =
+        view(::View) {
+            setOnClickListener { placeholderListener }
+        }
+
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     val quickBar = QuickBar()
     val keyboardWindow = KeyboardWindow()
@@ -37,10 +65,36 @@ class InputView(
     private val module =
         module {
             single { this@InputView }
+            single { theme }
             single { themedContext }
             single { service }
             single { keyboardWindow }
             single { quickBar }
+        }
+
+    private val keyboardSidePadding = theme.style.getInt("keyboard_padding")
+    private val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
+    private val keyboardBottomPadding = theme.style.getInt("keyboard_padding_bottom")
+    private val keyboardBottomPaddingLandscape = theme.style.getInt("keyboard_padding_land_bottom")
+
+    private val keyboardSidePaddingPx: Int
+        get() {
+            val value =
+                when (resources.configuration.orientation) {
+                    Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
+                    else -> keyboardSidePadding
+                }
+            return dp(value)
+        }
+
+    private val keyboardBottomPaddingPx: Int
+        get() {
+            val value =
+                when (resources.configuration.orientation) {
+                    Configuration.ORIENTATION_LANDSCAPE -> keyboardBottomPaddingLandscape
+                    else -> keyboardBottomPadding
+                }
+            return dp(value)
         }
 
     val keyboardView: View
@@ -52,6 +106,7 @@ class InputView(
         keyboardView =
             constraintLayout {
                 isMotionEventSplittingEnabled = true
+                background = theme.colors.getDrawable("root_background")
                 add(
                     quickBar.view,
                     lParams(matchParent, wrapContent) {
@@ -60,14 +115,39 @@ class InputView(
                     },
                 )
                 add(
+                    leftPaddingSpace,
+                    lParams {
+                        below(quickBar.view)
+                        startOfParent()
+                        bottomOfParent()
+                    },
+                )
+                add(
+                    rightPaddingSpace,
+                    lParams {
+                        below(quickBar.view)
+                        endOfParent()
+                        bottomOfParent()
+                    },
+                )
+                add(
                     keyboardWindow.view,
                     lParams(matchParent, wrapContent) {
                         below(quickBar.view)
-                        centerHorizontally()
+                        above(bottomPaddingSpace)
+                    },
+                )
+                add(
+                    bottomPaddingSpace,
+                    lParams {
+                        startToEndOf(leftPaddingSpace)
+                        endToStartOf(rightPaddingSpace)
                         bottomOfParent()
                     },
                 )
             }
+
+        updateKeyboardSize()
 
         add(
             keyboardView,
@@ -76,6 +156,41 @@ class InputView(
                 bottomOfParent()
             },
         )
+    }
+
+    private fun updateKeyboardSize() {
+        bottomPaddingSpace.updateLayoutParams {
+            height = keyboardBottomPaddingPx
+        }
+        val sidePadding = keyboardSidePaddingPx
+        val unset = LayoutParams.UNSET
+        if (sidePadding == 0) {
+            // hide side padding space views when unnecessary
+            leftPaddingSpace.visibility = View.GONE
+            rightPaddingSpace.visibility = View.GONE
+            keyboardWindow.view.updateLayoutParams<LayoutParams> {
+                startToEnd = unset
+                endToStart = unset
+                startOfParent()
+                endOfParent()
+            }
+        } else {
+            leftPaddingSpace.visibility = View.VISIBLE
+            rightPaddingSpace.visibility = View.VISIBLE
+            leftPaddingSpace.updateLayoutParams {
+                width = sidePadding
+            }
+            rightPaddingSpace.updateLayoutParams {
+                width = sidePadding
+            }
+            keyboardWindow.view.updateLayoutParams<LayoutParams> {
+                startToStart = unset
+                endToEnd = unset
+                startToEndOf(leftPaddingSpace)
+                endToStartOf(rightPaddingSpace)
+            }
+        }
+        quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
     fun switchUiByState(state: KeyboardWindow.State) {
