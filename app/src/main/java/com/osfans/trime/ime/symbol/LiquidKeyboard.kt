@@ -22,7 +22,6 @@ import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -30,11 +29,15 @@ import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
-class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboardUpdateListener {
-    private lateinit var theme: Theme
-    private val service: Trime = Trime.getService()
+class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener {
+    private val context: Context by inject()
+    private val service: Trime by inject()
+    private val theme: Theme by inject()
+
     private lateinit var keyboardView: RecyclerView
     private val symbolHistory = SymbolHistory(180)
     private var adapterType: AdapterType = AdapterType.INIT
@@ -69,14 +72,12 @@ class LiquidKeyboard(private val context: Context) : ClipboardHelper.OnClipboard
     }
 
     fun setKeyboardView(view: RecyclerView) {
-        keyboardView = view
-        keyboardView.apply {
-            val space = dp2px(3)
-            addItemDecoration(SpacesItemDecoration(space))
-            setPadding(space)
-        }
-        theme = ThemeManager.activeTheme
-        adapterType = AdapterType.INIT
+        keyboardView =
+            view.apply {
+                val space = dp2px(3)
+                addItemDecoration(SpacesItemDecoration(space))
+                setPadding(space)
+            }
     }
 
 // 及时更新layoutManager, 以防在旋转屏幕后打开液体键盘crash
