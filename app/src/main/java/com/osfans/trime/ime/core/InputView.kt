@@ -11,6 +11,7 @@ import androidx.core.view.updateLayoutParams
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
+import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.util.styledFloat
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
@@ -61,6 +62,7 @@ class InputView(
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     val quickBar = QuickBar()
     val keyboardWindow = KeyboardWindow()
+    val liquidKeyboard = LiquidKeyboard()
 
     private val module =
         module {
@@ -69,6 +71,7 @@ class InputView(
             single { themedContext }
             single { service }
             single { keyboardWindow }
+            single { liquidKeyboard }
             single { quickBar }
         }
 
@@ -102,6 +105,8 @@ class InputView(
     init {
         // MUST call before any other operations
         loadKoinModules(module)
+
+        liquidKeyboard.setKeyboardView(keyboardWindow.oldSymbolInputView.liquidKeyboardView)
 
         keyboardView =
             constraintLayout {

@@ -61,7 +61,6 @@ import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService
-import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.symbol.TabView
 import com.osfans.trime.ime.text.Candidate
@@ -84,7 +83,6 @@ import java.util.Objects
 
 @Suppress("ktlint:standard:property-naming")
 open class Trime : LifecycleInputMethodService() {
-    private var liquidKeyboard: LiquidKeyboard? = null
     private var normalTextEditor = false
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
@@ -235,7 +233,6 @@ open class Trime : LifecycleInputMethodService() {
                 textInputManager = TextInputManager.getInstance()
                 activeEditorInstance = EditorInstance(context)
                 inputFeedbackManager = InputFeedbackManager(context)
-                liquidKeyboard = LiquidKeyboard(context)
                 mCompositionPopupWindow = CompositionPopupWindow()
                 restartSystemStartTimingSync()
                 try {
@@ -268,7 +265,7 @@ open class Trime : LifecycleInputMethodService() {
         if (inputView == null) return
         if (tabIndex >= 0) {
             inputView!!.switchUiByState(KeyboardWindow.State.Symbol)
-            symbolKeyboardType = liquidKeyboard!!.select(tabIndex)
+            symbolKeyboardType = inputView!!.liquidKeyboard.select(tabIndex)
             tabView!!.updateTabWidth()
             mTabRoot!!.move(tabView!!.hightlightLeft, tabView!!.hightlightRight)
             showLiquidKeyboardToolbar()
@@ -516,9 +513,6 @@ open class Trime : LifecycleInputMethodService() {
             mCompositionPopupWindow!!.init(compositionRootBinding!!.compositionRoot, mCandidateRoot!!)
             mTabRoot = inputView!!.quickBar.oldTabBar.root
 
-            liquidKeyboard!!.setKeyboardView(
-                inputView!!.keyboardWindow.oldSymbolInputView.liquidKeyboardView,
-            )
             tabView = inputView!!.quickBar.oldTabBar.tabs
             for (listener in eventListeners) {
                 listener.onInitializeInputUi(inputView!!)
