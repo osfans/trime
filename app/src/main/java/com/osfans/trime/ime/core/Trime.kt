@@ -40,6 +40,7 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.ExtractedTextRequest
 import android.widget.FrameLayout
+import androidx.annotation.Keep
 import androidx.core.view.updateLayoutParams
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
@@ -106,6 +107,12 @@ open class Trime : LifecycleInputMethodService() {
     private var minPopupCheckSize = 0 // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
     private var mCompositionPopupWindow: CompositionPopupWindow? = null
     private var candidateExPage = false
+
+    @Keep
+    private val onThemeChangeListener =
+        ThemeManager.OnThemeChangeListener {
+            initKeyboard()
+        }
 
     fun hasCandidateExPage(): Boolean {
         return candidateExPage
@@ -227,6 +234,7 @@ open class Trime : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             val context: InputMethodService = this
+            ThemeManager.addOnChangedListener(onThemeChangeListener)
             RimeWrapper.startup {
                 Timber.d("Running Trime.onCreate")
                 ThemeManager.init(resources.configuration)
@@ -405,6 +413,7 @@ open class Trime : LifecycleInputMethodService() {
         if (mCompositionPopupWindow != null) {
             mCompositionPopupWindow!!.destroy()
         }
+        ThemeManager.removeOnChangedListener(onThemeChangeListener)
         super.onDestroy()
         self = null
     }

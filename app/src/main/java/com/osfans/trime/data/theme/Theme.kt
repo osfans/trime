@@ -108,7 +108,7 @@ class Theme(private var isDarkMode: Boolean) {
         }.getOrElse {
             Timber.e("Failed to parse the theme: ${it.message}")
             if (appPrefs.themeAndColor.selectedTheme != DEFAULT_THEME_NAME) {
-                ThemeManager.switchTheme(DEFAULT_THEME_NAME)
+                appPrefs.themeAndColor.selectedTheme = DEFAULT_THEME_NAME
                 init()
             }
         }

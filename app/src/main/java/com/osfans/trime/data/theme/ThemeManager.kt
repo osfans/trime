@@ -4,10 +4,15 @@ import android.content.res.Configuration
 import androidx.annotation.Keep
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
+import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
 import java.io.File
 
 object ThemeManager {
+    fun interface OnThemeChangeListener {
+        fun onThemeChange(theme: Theme)
+    }
+
     /**
      * Update sharedThemes and userThemes.
      */
@@ -26,11 +31,6 @@ object ThemeManager {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
             ?.map { f -> f.nameWithoutExtension }
             ?.toMutableList() ?: mutableListOf()
-    }
-
-    @JvmStatic
-    fun switchTheme(theme: String) {
-        AppPrefs.defaultInstance().themeAndColor.selectedTheme = theme
     }
 
     val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
@@ -60,15 +60,32 @@ object ThemeManager {
         private set(value) {
             if (_activeTheme == value) return
             _activeTheme = value
+            fireChange()
         }
 
     private var isNightMode = false
+
+    private val onChangeListeners = WeakHashSet<OnThemeChangeListener>()
+
+    @JvmStatic
+    fun addOnChangedListener(listener: OnThemeChangeListener) {
+        onChangeListeners.add(listener)
+    }
+
+    @JvmStatic
+    fun removeOnChangedListener(listener: OnThemeChangeListener) {
+        onChangeListeners.remove(listener)
+    }
+
+    private fun fireChange() {
+        onChangeListeners.forEach { it.onThemeChange(_activeTheme) }
+    }
 
     val prefs = AppPrefs.defaultInstance().themeAndColor
 
     fun setNormalTheme(name: String) {
         AppPrefs.defaultInstance().themeAndColor.selectedTheme = name
-        _activeTheme = evalActiveTheme()
+        activeTheme = evalActiveTheme()
     }
 
     private fun evalActiveTheme(): Theme {
@@ -87,11 +104,9 @@ object ThemeManager {
 
     @JvmStatic
     fun onSystemNightModeChange(isNight: Boolean) {
+        if (isNightMode == isNight) return
         isNightMode = isNight
-        if (::_activeTheme.isInitialized) {
-            activeTheme.systemChangeColor(isNightMode)
-        } else {
-            activeTheme = evalActiveTheme()
-        }
+        _activeTheme.systemChangeColor(isNightMode)
+        fireChange()
     }
 }
