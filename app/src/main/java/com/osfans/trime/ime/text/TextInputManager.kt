@@ -3,7 +3,6 @@ package com.osfans.trime.ime.text
 import android.content.DialogInterface
 import android.text.InputType
 import android.view.KeyEvent
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
 import androidx.appcompat.app.AlertDialog
@@ -17,7 +16,6 @@ import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
-import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.Keycode
@@ -64,7 +62,6 @@ class TextInputManager private constructor() :
         private var rimeNotiHandlerJob: Job? = null
 
         private var mainKeyboardView: KeyboardView? = null
-        private var candidateRoot: ScrollView? = null
 
         val locales = Array(2) { Locale.getDefault() }
 
@@ -132,23 +129,12 @@ class TextInputManager private constructor() :
             trime.loadConfig()
         }
 
-        override fun onInitializeInputUi(inputView: InputView) {
-            super.onInitializeInputUi(inputView)
-            // Initialize main keyboard view
-            mainKeyboardView = inputView.keyboardWindow.oldMainInputView.mainKeyboardView
-        }
-
         /**
          * Cancels all coroutines and cleans up.
          */
         override fun onDestroy() {
             intentReceiver?.unregisterReceiver(trime)
             intentReceiver = null
-
-            candidateRoot = null
-
-            mainKeyboardView?.setOnKeyboardActionListener(null)
-            mainKeyboardView = null
 
             rimeNotiHandlerJob?.cancel()
             rimeNotiHandlerJob = null
@@ -246,14 +232,10 @@ class TextInputManager private constructor() :
                         trime.inputFeedbackManager?.ttsLanguage =
                             locales[if (value) 1 else 0]
                     }
-                    "_hide_comment" -> trime.setShowComment(!value)
                     "_hide_candidate" -> {
-                        candidateRoot?.visibility = if (!value) View.VISIBLE else View.GONE
                         trime.setCandidatesViewShown(isComposable && !value)
                     }
                     "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
-                    "_hide_key_hint" -> mainKeyboardView?.setShowHint(!value)
-                    "_hide_key_symbol" -> mainKeyboardView?.setShowSymbol(!value)
                     else ->
                         if (option.startsWith("_keyboard_") &&
                             option.length > 10 && value
@@ -268,7 +250,6 @@ class TextInputManager private constructor() :
                             shouldUpdateRimeOption = true
                         }
                 }
-                mainKeyboardView?.invalidateAllKeys()
             }
         }
 

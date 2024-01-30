@@ -501,7 +501,7 @@ open class Trime : LifecycleInputMethodService() {
     override fun onCreateInputView(): View {
         Timber.d("onCreateInputView()")
         RimeWrapper.runAfterStarted {
-            inputView = InputView(this, ThemeManager.activeTheme)
+            inputView = InputView(this, Rime.getInstance(false), ThemeManager.activeTheme)
             mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
             // 初始化候选栏
             mCandidateRoot = inputView!!.quickBar.oldCandidateBar.root
