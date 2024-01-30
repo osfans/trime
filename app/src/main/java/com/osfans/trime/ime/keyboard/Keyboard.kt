@@ -17,6 +17,7 @@
  */
 package com.osfans.trime.ime.keyboard
 
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import com.blankj.utilcode.util.ScreenUtils
@@ -27,8 +28,10 @@ import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainInt
 import com.osfans.trime.util.CollectionUtils.obtainString
+import com.osfans.trime.util.appContext
 import com.osfans.trime.util.dp2px
 import com.osfans.trime.util.sp2px
+import splitties.dimensions.dp
 import timber.log.Timber
 import kotlin.math.abs
 
@@ -613,8 +616,16 @@ class Keyboard() {
 
         // 橫屏模式下，键盘左右两侧到屏幕边缘的距离
         val theme = ThemeManager.activeTheme
-        val keyboardPadding = theme.keyboardPadding
-        mDisplayWidth = ScreenUtils.getAppScreenWidth() - keyboardPadding[0] - keyboardPadding[1]
+        val keyboardSidePadding = theme.style.getInt("keyboard_padding")
+        val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
+
+        val keyboardSidePaddingPx =
+            when (appContext.resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
+                else -> keyboardSidePadding
+            }.apply { appContext.dp(this) }
+
+        mDisplayWidth = ScreenUtils.getAppScreenWidth() - 2 * keyboardSidePaddingPx
 
         // Height of the screen
         // final int mDisplayHeight = dm.heightPixels;

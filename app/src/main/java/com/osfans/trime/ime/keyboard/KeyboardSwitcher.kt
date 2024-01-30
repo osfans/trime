@@ -34,8 +34,6 @@ object KeyboardSwitcher {
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun newOrReset() {
-        Timber.d("Refreshing keyboard padding ...")
-        theme.getKeyboardPadding(keyboardPrefs.isLandscapeMode())
         Timber.d("Switching keyboard back to .default ...")
         availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
             ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()

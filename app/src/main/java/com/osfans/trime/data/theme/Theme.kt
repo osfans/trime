@@ -283,60 +283,6 @@ class Theme(private val isDarkMode: Boolean) {
         }
     }
 
-    lateinit var keyboardPadding: IntArray
-        private set
-
-    fun getKeyboardPadding(landMode: Boolean): IntArray {
-        Timber.i("update KeyboardPadding: getKeyboardPadding(boolean land_mode) ")
-        return getKeyboardPadding(oneHandMode, landMode)
-    }
-
-    private var oneHandMode = 0
-
-    fun getKeyboardPadding(
-        oneHandMode1: Int,
-        landMode: Boolean,
-    ): IntArray {
-        keyboardPadding = IntArray(3)
-        this.oneHandMode = oneHandMode1
-        if (landMode) {
-            keyboardPadding[0] = dp2px(style.getFloat("keyboard_padding_land")).toInt()
-            keyboardPadding[1] = keyboardPadding[0]
-            keyboardPadding[2] = dp2px(style.getFloat("keyboard_padding_land_bottom")).toInt()
-        } else {
-            when (oneHandMode1) {
-                0 -> {
-                    // 普通键盘 预留，目前未实装
-                    keyboardPadding[0] = dp2px(style.getFloat("keyboard_padding")).toInt()
-                    keyboardPadding[1] = keyboardPadding[0]
-                    keyboardPadding[2] = dp2px(style.getFloat("keyboard_padding_bottom")).toInt()
-                }
-
-                1 -> {
-                    // 左手键盘
-                    keyboardPadding[0] = dp2px(style.getFloat("keyboard_padding_left")).toInt()
-                    keyboardPadding[1] = dp2px(style.getFloat("keyboard_padding_right")).toInt()
-                    keyboardPadding[2] = dp2px(style.getFloat("keyboard_padding_bottom")).toInt()
-                }
-
-                2 -> {
-                    // 右手键盘
-                    keyboardPadding[1] = dp2px(style.getFloat("keyboard_padding_left")).toInt()
-                    keyboardPadding[0] = dp2px(style.getFloat("keyboard_padding_right")).toInt()
-                    keyboardPadding[2] = dp2px(style.getFloat("keyboard_padding_bottom")).toInt()
-                }
-            }
-        }
-        Timber.d(
-            "update KeyboardPadding: %s %s %s one_hand_mode=%s",
-            keyboardPadding[0],
-            keyboardPadding[1],
-            keyboardPadding[2],
-            oneHandMode1,
-        )
-        return keyboardPadding
-    }
-
     var hasDarkLight = false
         private set
 
