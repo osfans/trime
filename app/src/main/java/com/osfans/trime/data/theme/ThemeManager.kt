@@ -89,7 +89,7 @@ object ThemeManager {
     fun onSystemNightModeChange(isNight: Boolean) {
         isNightMode = isNight
         if (::_activeTheme.isInitialized) {
-            activeTheme.refreshColorCaches(isNightMode)
+            activeTheme.systemChangeColor(isNightMode)
         } else {
             activeTheme = evalActiveTheme()
         }

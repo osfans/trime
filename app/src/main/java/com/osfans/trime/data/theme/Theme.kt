@@ -102,7 +102,7 @@ class Theme(private var isDarkMode: Boolean) {
                 liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
             }.also { Timber.d("Setting up all theme config map takes $it ms") }
             measureTimeMillis {
-                refreshColorCaches(isDarkMode)
+                systemChangeColor(isDarkMode)
             }.also { Timber.d("Initializing cache takes $it ms") }
             Timber.i("The theme is initialized")
         }.getOrElse {
@@ -330,12 +330,18 @@ class Theme(private var isDarkMode: Boolean) {
     }
 
     // 当切换暗黑模式时，刷新键盘配色方案
-    fun refreshColorCaches(isDarkMode: Boolean) {
+    fun systemChangeColor(isDarkMode: Boolean) {
         this.isDarkMode = isDarkMode
         currentColorSchemeId = getColorSchemeName()
         Timber.d(
-            "Caching color values (currentColorSchemeId=$currentColorSchemeId, isDarkMode=$isDarkMode) ...",
+            "System changing color, current ColorScheme: $currentColorSchemeId, isDarkMode=$isDarkMode",
         )
+        refreshColorValues()
+    }
+
+    fun fireChangeColor() {
+        currentColorSchemeId = getColorSchemeName()
+        Timber.d("Fire changing color, current color scheme: $currentColorSchemeId")
         refreshColorValues()
     }
 
