@@ -42,6 +42,7 @@ import android.view.inputmethod.ExtractedTextRequest
 import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -74,6 +75,8 @@ import com.osfans.trime.util.StringUtils
 import com.osfans.trime.util.ViewUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.systemservices.inputMethodManager
@@ -111,7 +114,9 @@ open class Trime : LifecycleInputMethodService() {
     @Keep
     private val onThemeChangeListener =
         ThemeManager.OnThemeChangeListener {
-            initKeyboard()
+            lifecycleScope.launch(Dispatchers.Main) {
+                initKeyboard()
+            }
         }
 
     fun hasCandidateExPage(): Boolean {
@@ -346,7 +351,7 @@ open class Trime : LifecycleInputMethodService() {
                 null,
             )
 
-        inputView?.background = theme.colors.getDrawable("root_background")
+        inputView?.keyboardView?.background = theme.colors.getDrawable("root_background")
 
         tabView!!.reset()
     }
