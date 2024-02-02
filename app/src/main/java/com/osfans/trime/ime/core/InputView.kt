@@ -220,8 +220,10 @@ class InputView(
                     "_hide_comment" -> {
                         quickBar.oldCandidateBar.candidates.setShowComment(!it.value)
                     }
-                    "_hide_candidate" -> {
-                        quickBar.oldCandidateBar.root.visibility =
+                    "_hide_bar",
+                    "_hide_candidate",
+                    -> {
+                        quickBar.view.visibility =
                             if (it.value) View.GONE else View.VISIBLE
                     }
                     "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowHint(!it.value)

@@ -232,7 +232,9 @@ class TextInputManager private constructor() :
                         trime.inputFeedbackManager?.ttsLanguage =
                             locales[if (value) 1 else 0]
                     }
-                    "_hide_candidate" -> {
+                    "_hide_bar",
+                    "_hide_candidate",
+                    -> {
                         trime.setCandidatesViewShown(isComposable && !value)
                     }
                     "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)

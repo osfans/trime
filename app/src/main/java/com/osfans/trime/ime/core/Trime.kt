@@ -368,7 +368,12 @@ open class Trime : LifecycleInputMethodService() {
         if (mCandidateRoot != null) {
             loadBackground(true)
             setShowComment(!Rime.getOption("_hide_comment"))
-            mCandidateRoot!!.visibility = if (!Rime.getOption("_hide_candidate")) View.VISIBLE else View.GONE
+            inputView?.quickBar?.view?.visibility =
+                if (!Rime.getOption("_hide_candidate") || !Rime.getOption("_hide_bar")) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             mCandidate!!.reset()
             mCompositionPopupWindow!!.isPopupWindowEnabled = (
                 prefs.keyboard.popupWindowEnabled &&
