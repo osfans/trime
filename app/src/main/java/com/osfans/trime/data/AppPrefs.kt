@@ -22,7 +22,7 @@ class AppPrefs(
 
     val internal = Internal(this)
     val keyboard = Keyboard(this)
-    val themeAndColor = ThemeAndColor(this)
+    val theme = Theme(this)
     val profile = Profile(this)
     val clipboard = Clipboard(this)
     val other = Other(this)
@@ -306,7 +306,7 @@ class AppPrefs(
     /**
      *  Wrapper class of theme and color settings.
      */
-    class ThemeAndColor(private val prefs: AppPrefs) {
+    class Theme(private val prefs: AppPrefs) {
         companion object {
             const val SELECTED_THEME = "theme_selected_theme"
             const val SELECTED_COLOR = "theme_selected_color"

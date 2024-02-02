@@ -32,7 +32,7 @@ suspend fun Context.themePicker(
                     .map { it.substringBeforeLast('.') }
                     .toTypedArray()
             val current =
-                AppPrefs.defaultInstance().themeAndColor.selectedTheme
+                AppPrefs.defaultInstance().theme.selectedTheme
                     .substringBeforeLast('.')
             checkedItem = items.indexOf(current)
         }
@@ -59,14 +59,14 @@ suspend fun Context.colorPicker(
         val all by lazy { ThemeManager.activeTheme.getPresetColorSchemes() }
         onInit {
             items = all.map { it.second }.toTypedArray()
-            val current = prefs.themeAndColor.selectedColor
+            val current = prefs.theme.selectedColor
             val schemeIds = all.map { it.first }
             checkedItem = schemeIds.indexOf(current).takeIf { it > -1 } ?: 1
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             val schemeIds = all.map { it.first }
-            prefs.themeAndColor.selectedColor = schemeIds[checkedItem]
+            prefs.theme.selectedColor = schemeIds[checkedItem]
             launch {
                 Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
             }

@@ -78,7 +78,7 @@ class Theme(private var isDarkMode: Boolean) {
     }
 
     fun init() {
-        val active = appPrefs.themeAndColor.selectedTheme
+        val active = appPrefs.theme.selectedTheme
         Timber.i("Initializing theme, currentThemeName=%s ...", active)
         runCatching {
             val themeFileName = "$active.yaml"
@@ -107,8 +107,8 @@ class Theme(private var isDarkMode: Boolean) {
             Timber.i("The theme is initialized")
         }.getOrElse {
             Timber.e("Failed to parse the theme: ${it.message}")
-            if (appPrefs.themeAndColor.selectedTheme != DEFAULT_THEME_NAME) {
-                appPrefs.themeAndColor.selectedTheme = DEFAULT_THEME_NAME
+            if (appPrefs.theme.selectedTheme != DEFAULT_THEME_NAME) {
+                appPrefs.theme.selectedTheme = DEFAULT_THEME_NAME
                 init()
             }
         }
@@ -283,31 +283,33 @@ class Theme(private var isDarkMode: Boolean) {
         }
     }
 
-    var hasDarkLight = false
-        private set
-
     /**
      * 获取暗黑模式/明亮模式下配色方案的名称
      *
-     * @param isDarkMode 是否暗黑模式
      * @return 配色方案名称
      */
     private fun getColorSchemeName(): String? {
-        var scheme = appPrefs.themeAndColor.selectedColor
-        if (!presetColorSchemes!!.containsKey(scheme)) scheme = style.getString("color_scheme") // 主題中指定的配色
-        if (!presetColorSchemes!!.containsKey(scheme)) scheme = "default" // 主題中的default配色
-        val colorMap = presetColorSchemes!![scheme] as Map<String, Any>
-        if (colorMap.containsKey("dark_scheme") || colorMap.containsKey("light_scheme")) hasDarkLight = true
+        val final =
+            appPrefs.theme.selectedColor
+                .takeIf { presetColorSchemes!!.containsKey(it) }
+                ?: style.getString("color_scheme") // 主題中指定的配色
+                    .takeIf { presetColorSchemes!!.containsKey(it) }
+                ?: "default" // 主題中的default配色
+        val colorMap = presetColorSchemes!![final] as Map<String, Any>
         if (isDarkMode) {
             if (colorMap.containsKey("dark_scheme")) {
-                return colorMap["dark_scheme"] as String?
+                return (colorMap["dark_scheme"] as String?).also {
+                    if (!it.isNullOrEmpty()) appPrefs.theme.selectedColor = it
+                }
             }
         } else {
             if (colorMap.containsKey("light_scheme")) {
-                return colorMap["light_scheme"] as String?
+                return (colorMap["light_scheme"] as String?).also {
+                    if (!it.isNullOrEmpty()) appPrefs.theme.selectedColor = it
+                }
             }
         }
-        return scheme
+        return final
     }
 
     private fun joinToFullImagePath(value: String): String {
