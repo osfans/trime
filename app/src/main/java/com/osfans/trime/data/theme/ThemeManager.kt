@@ -106,7 +106,7 @@ object ThemeManager {
     fun onSystemNightModeChange(isNight: Boolean) {
         if (isNightMode == isNight) return
         isNightMode = isNight
-        _activeTheme.systemChangeColor(isNightMode)
+        _activeTheme.switchDarkMode(isNightMode)
         fireChange()
     }
 }

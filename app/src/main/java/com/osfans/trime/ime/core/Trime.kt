@@ -385,7 +385,7 @@ open class Trime : LifecycleInputMethodService() {
         inputView!!.switchUiByState(KeyboardWindow.State.Main)
         loadConfig()
         val theme = ThemeManager.activeTheme
-        theme.fireChangeColor()
+        theme.refreshColorValues()
         SoundThemeManager.switchSound(theme.colors.getString("sound"))
         resetCandidate()
         KeyboardSwitcher.newOrReset()

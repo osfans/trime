@@ -42,9 +42,6 @@ suspend fun Context.themePicker(
                 ThemeManager.setNormalTheme(if (this == "trime") this else "$this.trime")
                 TabManager.updateSelf()
             }
-            launch {
-                Trime.getServiceOrNull()?.initKeyboard()
-            }
         }
     }.create()
 }
@@ -52,21 +49,20 @@ suspend fun Context.themePicker(
 suspend fun Context.colorPicker(
     @StyleRes themeResId: Int = 0,
 ): AlertDialog {
-    val prefs by lazy { AppPrefs.defaultInstance() }
     return CoroutineChoiceDialog(this, themeResId).apply {
         title = getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
         val all by lazy { ThemeManager.activeTheme.getPresetColorSchemes() }
         onInit {
             items = all.map { it.second }.toTypedArray()
-            val current = prefs.theme.selectedColor
+            val current = ThemeManager.activeTheme.currentColorSchemeId
             val schemeIds = all.map { it.first }
             checkedItem = schemeIds.indexOf(current).takeIf { it > -1 } ?: 1
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             val schemeIds = all.map { it.first }
-            prefs.theme.selectedColor = schemeIds[checkedItem]
+            ThemeManager.activeTheme.setColorScheme(schemeIds[checkedItem])
             launch {
                 Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
             }

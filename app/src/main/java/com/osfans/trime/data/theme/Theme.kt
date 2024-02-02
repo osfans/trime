@@ -32,20 +32,29 @@ import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.dp2px
 import timber.log.Timber
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.util.Objects
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
 class Theme(private var isDarkMode: Boolean) {
-    private var currentColorSchemeId: String? = null
     private var generalStyle: Map<String, Any?>? = null
     private var fallbackColors: Map<String, String>? = null
     private var presetColorSchemes: Map<String, Map<String, Any>?>? = null
     private var presetKeyboards: Map<String, Any?>? = null
     private var liquidKeyboard: Map<String, Any?>? = null
 
+    // 当前配色 id
+    lateinit var currentColorSchemeId: String
+
     // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
     private val currentColors: MutableMap<String, Any> = hashMapOf()
+
+    // 上一个 light 配色
+    private var lastLightColorSchemeId: String? = null
+
+    // 上一个 dark 配色
+    private var lastDarkColorSchemeId: String? = null
 
     @JvmField
     val style = Style(this)
@@ -102,7 +111,7 @@ class Theme(private var isDarkMode: Boolean) {
                 liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
             }.also { Timber.d("Setting up all theme config map takes $it ms") }
             measureTimeMillis {
-                systemChangeColor(isDarkMode)
+                initColorScheme()
             }.also { Timber.d("Initializing cache takes $it ms") }
             Timber.i("The theme is initialized")
         }.getOrElse {
@@ -284,32 +293,75 @@ class Theme(private var isDarkMode: Boolean) {
     }
 
     /**
-     * 获取暗黑模式/明亮模式下配色方案的名称
-     *
-     * @return 配色方案名称
+     * 第一次载入主题，初始化默认配色
+     * */
+    private fun initColorScheme() {
+        var colorScheme = appPrefs.theme.selectedColor
+        if (!presetColorSchemes!!.containsKey(colorScheme)) colorScheme = style.getString("color_scheme") // 主題中指定的配色
+        if (!presetColorSchemes!!.containsKey(colorScheme)) colorScheme = "default" // 主題中的default配色
+        currentColorSchemeId = colorScheme
+        // 配色表中没有这个 id
+        if (!presetColorSchemes!!.containsKey(currentColorSchemeId)) {
+            Timber.e("Color scheme %s not found", currentColorSchemeId)
+            throw IllegalArgumentException("Color scheme $currentColorSchemeId not found!")
+        }
+        switchDarkMode(isDarkMode)
+    }
+
+    /**
+     * 切换到指定配色，切换成功后写入 AppPrefs
+     * @param colorSchemeId 配色 id
+     * */
+    fun setColorScheme(colorSchemeId: String) {
+        if (!presetColorSchemes!!.containsKey(colorSchemeId)) {
+            Timber.w("Color scheme %s not found", colorSchemeId)
+            return
+        }
+        if (currentColorSchemeId == colorSchemeId && currentColors.isNotEmpty()) return
+        Timber.d("switch color scheme from %s to %s", currentColorSchemeId, colorSchemeId)
+        currentColorSchemeId = colorSchemeId
+        refreshColorValues()
+        if (isDarkMode) {
+            lastDarkColorSchemeId = colorSchemeId
+        } else {
+            lastLightColorSchemeId = colorSchemeId
+        }
+        AppPrefs.defaultInstance().theme.selectedColor = colorSchemeId
+    }
+
+    /**
+     * 切换深色/亮色模式
+     * */
+    fun switchDarkMode(isDarkMode: Boolean) {
+        this.isDarkMode = isDarkMode
+        val newId = getColorSchemeId()
+        if (newId != null) setColorScheme(newId)
+        Timber.d(
+            "System changing color, current ColorScheme: $currentColorSchemeId, isDarkMode=$isDarkMode",
+        )
+    }
+
+    /**
+     * @return 切换深色/亮色模式后配色的 id
      */
-    private fun getColorSchemeName(): String? {
-        val final =
-            appPrefs.theme.selectedColor
-                .takeIf { presetColorSchemes!!.containsKey(it) }
-                ?: style.getString("color_scheme") // 主題中指定的配色
-                    .takeIf { presetColorSchemes!!.containsKey(it) }
-                ?: "default" // 主題中的default配色
-        val colorMap = presetColorSchemes!![final] as Map<String, Any>
+    private fun getColorSchemeId(): String? {
+        val colorMap = presetColorSchemes!![currentColorSchemeId] as Map<String, Any>
         if (isDarkMode) {
             if (colorMap.containsKey("dark_scheme")) {
-                return (colorMap["dark_scheme"] as String?).also {
-                    if (!it.isNullOrEmpty()) appPrefs.theme.selectedColor = it
-                }
+                return colorMap["dark_scheme"] as String?
+            }
+            if (lastDarkColorSchemeId != null) {
+                return lastDarkColorSchemeId
             }
         } else {
             if (colorMap.containsKey("light_scheme")) {
-                return (colorMap["light_scheme"] as String?).also {
-                    if (!it.isNullOrEmpty()) appPrefs.theme.selectedColor = it
-                }
+                return colorMap["light_scheme"] as String?
+            }
+            if (lastLightColorSchemeId != null) {
+                return lastLightColorSchemeId
             }
         }
-        return final
+        return currentColorSchemeId
     }
 
     private fun joinToFullImagePath(value: String): String {
@@ -331,23 +383,7 @@ class Theme(private var isDarkMode: Boolean) {
         }
     }
 
-    // 当切换暗黑模式时，刷新键盘配色方案
-    fun systemChangeColor(isDarkMode: Boolean) {
-        this.isDarkMode = isDarkMode
-        currentColorSchemeId = getColorSchemeName()
-        Timber.d(
-            "System changing color, current ColorScheme: $currentColorSchemeId, isDarkMode=$isDarkMode",
-        )
-        refreshColorValues()
-    }
-
-    fun fireChangeColor() {
-        currentColorSchemeId = getColorSchemeName()
-        Timber.d("Fire changing color, current color scheme: $currentColorSchemeId")
-        refreshColorValues()
-    }
-
-    private fun refreshColorValues() {
+    fun refreshColorValues() {
         currentColors.clear()
         val colorMap = presetColorSchemes!![currentColorSchemeId]
         if (colorMap == null) {
@@ -373,6 +409,7 @@ class Theme(private var isDarkMode: Boolean) {
                 Timber.w("Cannot parse color key: %s, value: %s", key, value)
             }
         }
+        Timber.d("Refresh color scheme, current color scheme: $currentColorSchemeId")
     }
 
     // 处理 value 值，转为颜色(Int)或图片path string 或者 fallback
