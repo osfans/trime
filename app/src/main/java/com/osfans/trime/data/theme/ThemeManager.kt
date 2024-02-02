@@ -81,10 +81,10 @@ object ThemeManager {
         onChangeListeners.forEach { it.onThemeChange(_activeTheme) }
     }
 
-    val prefs = AppPrefs.defaultInstance().themeAndColor
+    val prefs = AppPrefs.defaultInstance().theme
 
     fun setNormalTheme(name: String) {
-        AppPrefs.defaultInstance().themeAndColor.selectedTheme = name
+        AppPrefs.defaultInstance().theme.selectedTheme = name
         activeTheme = evalActiveTheme()
     }
 

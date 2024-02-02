@@ -8,16 +8,16 @@ import timber.log.Timber
 
 /** Manages [Keyboard]s and their status. **/
 object KeyboardSwitcher {
-    var currentId: Int = 0
-    var lastId: Int = 0
-    var lastLockId: Int = 0
+    private var currentId: Int = 0
+    private var lastId: Int = 0
+    private var lastLockId: Int = 0
 
     private var currentDisplayWidth: Int = 0
     private val keyboardPrefs = KeyboardPrefs()
 
-    private val theme = ThemeManager.activeTheme
-    lateinit var availableKeyboardIds: List<String>
-    lateinit var availableKeyboards: List<Keyboard>
+    private val theme get() = ThemeManager.activeTheme
+    private lateinit var availableKeyboardIds: List<String>
+    private lateinit var availableKeyboards: List<Keyboard>
 
     /** To get current keyboard instance. **/
     @JvmStatic
@@ -46,6 +46,11 @@ object KeyboardSwitcher {
                     Keyboard("default")
                 }
             }
+
+        currentId = 0
+        lastId = 0
+        lastLockId = 0
+        currentDisplayWidth = 0
     }
 
     fun switchKeyboard(name: String?) {
@@ -91,7 +96,7 @@ object KeyboardSwitcher {
         if ("mini" in availableKeyboardIds) {
             val mini = availableKeyboardIds.indexOf("mini")
             currentId =
-                if (AppPrefs.defaultInstance().themeAndColor.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
+                if (AppPrefs.defaultInstance().theme.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
                     if (currentId == 0) mini else currentId
                 } else {
                     if (currentId == mini) 0 else currentId
