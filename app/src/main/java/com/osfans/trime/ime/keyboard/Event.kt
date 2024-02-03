@@ -17,90 +17,32 @@
  */
 package com.osfans.trime.ime.keyboard
 
-import android.text.TextUtils
 import android.view.KeyEvent
 import com.osfans.trime.core.Rime
-import com.osfans.trime.core.Rime.Companion.currentSchemaName
-import com.osfans.trime.core.Rime.Companion.getOption
-import com.osfans.trime.core.Rime.Companion.getRimeKeycodeByName
-import com.osfans.trime.core.Rime.Companion.isAsciiMode
-import com.osfans.trime.core.RimeKeyMapping.keyCodeToVal
-import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
+import com.osfans.trime.core.RimeKeyMapping
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.enums.Keycode
-import com.osfans.trime.ime.enums.Keycode.Companion.fromString
-import com.osfans.trime.ime.enums.Keycode.Companion.getDisplayLabel
-import com.osfans.trime.ime.enums.Keycode.Companion.isStdKey
-import com.osfans.trime.ime.enums.Keycode.Companion.keyCodeOf
-import com.osfans.trime.ime.enums.Keycode.Companion.keyNameOf
-import com.osfans.trime.ime.enums.Keycode.Companion.parseSend
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainString
 import timber.log.Timber
 import java.util.Locale
 
-/** [按鍵][Key]的各種事件（單擊、長按、滑動等）
- *
- * @param keyboard 按键所在的键盘
- * @param s 具体事件要发送的字符串或者预设键，如 'q' '{Ctrl+F}' Return
- *
- * */
+/** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
 class Event(keyboard: Keyboard?, var s: String) {
     // private String TAG = "Event";
     private val mKeyboard: Keyboard?
 
-    /** 定义在 [Keycode] */
     var code = 0
-
-    /** 修饰键掩码 */
     var mask = 0
-    var text: String = ""
-        get() {
-            if (field.isNotEmpty()) return adjustCase(s)
-            if (mKeyboard != null && mKeyboard.needUpCase() &&
-                mask == 0 && code >= KeyEvent.KEYCODE_A &&
-                code <= KeyEvent.KEYCODE_Z
-            ) {
-                return adjustCase(label)
-            }
-            return field
-        }
-
-    var label: String = ""
-        get() {
-            val state = states?.get(if (getOption(toggle)) 1 else 0)
-            if (state != null) return state
-            if (mKeyboard == null) return adjustCase(field)
-
-            if (mKeyboard.isOnlyShiftOn) {
-                if (code >= KeyEvent.KEYCODE_0 && code <= KeyEvent.KEYCODE_9 && !defaultInstance().keyboard.hookShiftNum) {
-                    return adjustCase(
-                        shiftLabel,
-                    )
-                }
-                if (code >= KeyEvent.KEYCODE_GRAVE &&
-                    code <= KeyEvent.KEYCODE_SLASH ||
-                    code == KeyEvent.KEYCODE_COMMA ||
-                    code == KeyEvent.KEYCODE_PERIOD
-                ) {
-                    if (!defaultInstance().keyboard.hookShiftSymbol) return adjustCase(shiftLabel)
-                }
-            } else if (mKeyboard.modifer or mask and KeyEvent.META_SHIFT_ON != 0) {
-                return adjustCase(shiftLabel)
-            }
-            return adjustCase(field)
-        }
-
-    private var shiftLabel: String = ""
+    private var text: String = ""
+    private var label: String = ""
+    private var shiftLabel = ""
     private var preview: String = ""
     private var states: List<String>? = null
     var command: String = ""
     var option: String = ""
     var select: String? = null
-    var toggle: String = ""
-        get() {
-            return field.ifEmpty { "ascii_mode" }
-        }
-
+    private var toggle: String = ""
     var commit: String = ""
         private set
     var shiftLock: String? = null
@@ -132,28 +74,65 @@ class Event(keyboard: Keyboard?, var s: String) {
 
     // TODO 进一步解耦，在Event中去除mKeyboard
     private fun adjustCase(s: String): String {
-        var s = s
-        if (TextUtils.isEmpty(s)) return ""
-        if (s.length == 1 && mKeyboard != null && mKeyboard.needUpCase()) {
-            s = s.uppercase(Locale.getDefault())
-        } else if (s.length == 1 && mKeyboard != null && !isAsciiMode &&
+        var str = s
+        if (str.isEmpty()) return ""
+        if (str.length == 1 && mKeyboard != null && mKeyboard.needUpCase()) {
+            str = str.uppercase(Locale.getDefault())
+        } else if (str.length == 1 && mKeyboard != null && !Rime.isAsciiMode &&
             mKeyboard.isLabelUppercase
         ) {
-            s = s.uppercase(Locale.getDefault())
+            str = str.uppercase(Locale.getDefault())
         }
-        return s
+        return str
+    }
+
+    fun getLabel(): String {
+        val state = states?.get(if (Rime.getOption(toggle)) 1 else 0)
+        if (state != null) return state
+        if (mKeyboard == null) return adjustCase(label)
+        if (mKeyboard.isOnlyShiftOn) {
+            if (code >= KeyEvent.KEYCODE_0 && code <= KeyEvent.KEYCODE_9 &&
+                !AppPrefs.defaultInstance().keyboard.hookShiftNum
+            ) {
+                return adjustCase(shiftLabel)
+            }
+            if (code >= KeyEvent.KEYCODE_GRAVE &&
+                code <= KeyEvent.KEYCODE_SLASH ||
+                code == KeyEvent.KEYCODE_COMMA ||
+                code == KeyEvent.KEYCODE_PERIOD
+            ) {
+                if (!AppPrefs.defaultInstance().keyboard.hookShiftSymbol) return adjustCase(shiftLabel)
+            }
+        } else if (mKeyboard.modifer or mask and KeyEvent.META_SHIFT_ON != 0) {
+            return adjustCase(shiftLabel)
+        }
+        return adjustCase(label)
+    }
+
+    fun getText(): String {
+        if (text.isNotEmpty()) return adjustCase(text)
+        if (mKeyboard != null && mKeyboard.needUpCase() && mask == 0 &&
+            code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z
+        ) {
+            return adjustCase(label)
+        }
+        return ""
     }
 
     val previewText: String
-        get() = if (!TextUtils.isEmpty(preview)) preview else label
+        get() = preview.ifEmpty { getLabel() }
+
+    fun getToggle(): String {
+        return toggle.ifEmpty { "ascii_mode" }
+    }
 
     private fun parseLabel() {
         if (label.isNotEmpty()) return
         val c = code
         if (c == KeyEvent.KEYCODE_SPACE) {
-            label = currentSchemaName
+            label = Rime.currentSchemaName
         } else {
-            if (c > 0) label = getDisplayLabel(c, mask)
+            if (c > 0) label = Keycode.getDisplayLabel(c, mask)
         }
     }
 
@@ -172,24 +151,21 @@ class Event(keyboard: Keyboard?, var s: String) {
 
     init {
         mKeyboard = keyboard
-        // 组合键 {Ctrl+F}
-        if (s.matches(sendPattern)) {
-            val keys = s.substring(1, s.length - 1) // 去除两边的大括号
-            val sends = parseSend(keys) // send
-            code = sends[0]
-            mask = sends[1]
-            /** 解析成功 */
-            if (code > 0 || mask > 0 && parseAction(keys)) {
-                s = keys
-            } else {
-                initHelper()
-            }
-        } else {
-            initHelper()
-        }
+        initHelper()
     }
 
     private fun initHelper() {
+        // {send|key} {Ctrl+F}
+        if (s.matches(sendPattern)) {
+            val label = s.substring(1, s.length - 1) // 去除两边的大括号
+            val sends = Keycode.parseSend(label) // send
+            code = sends[0]
+            mask = sends[1]
+            /** 解析成功 */
+            if (code > 0 || mask > 0) return
+            if (parseAction(label)) return
+            s = label
+        }
         // 预设按键，如 Return BackSpace
         if (Key.presetKeys!!.containsKey(s)) {
             // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
@@ -204,13 +180,13 @@ class Event(keyboard: Keyboard?, var s: String) {
             commit = obtainString(presetKey, "commit", "")
             var send = obtainString(presetKey, "send", "")
             if (send.isEmpty() && command.isNotEmpty()) send = "function" // command默認發function
-            val sends = parseSend(send)
+            val sends = Keycode.parseSend(send)
             code = sends[0]
             mask = sends[1]
             parseLabel()
-            text = obtainString(presetKey, "text", "")
-            if (code < 0 && TextUtils.isEmpty(text)) text = s
-            if (presetKey?.containsKey("states") == true) states = presetKey["states"] as List<String>?
+            if (presetKey!!.containsKey("text")) text = presetKey["text"] as String
+            if (code < 0 && text.isEmpty()) text = s
+            if (presetKey.containsKey("states")) states = presetKey["states"] as List<String>?
             isSticky = obtainBoolean(presetKey, "sticky", false)
             isRepeatable = obtainBoolean(presetKey, "repeatable", false)
             isFunctional = obtainBoolean(presetKey, "functional", true)
@@ -224,7 +200,7 @@ class Event(keyboard: Keyboard?, var s: String) {
             label = text.replace(labelPattern, "")
         }
         shiftLabel = label
-        if (isStdKey(code)) { // Android keycode区域
+        if (Keycode.isStdKey(code)) { // Android keycode区域
             if (Key.kcm.isPrintingKey(code)) {
                 val mMask = KeyEvent.META_SHIFT_ON or mask
                 val event = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, code, 0, mMask)
@@ -247,15 +223,15 @@ class Event(keyboard: Keyboard?, var s: String) {
         @JvmStatic
         fun getClickCode(s: String?): Int {
             var keyCode = -1
-            if (TextUtils.isEmpty(s)) { // 空鍵
+            if (s.isNullOrEmpty()) { // 空鍵
                 keyCode = 0
-            } else if (fromString(s!!) != Keycode.VoidSymbol) {
-                keyCode = keyCodeOf(s)
+            } else if (Keycode.fromString(s) != Keycode.VoidSymbol) {
+                keyCode = Keycode.keyCodeOf(s)
             }
             return keyCode
         }
 
-        fun hasModifier(
+        private fun hasModifier(
             mask: Int,
             modifier: Int,
         ): Boolean {
@@ -268,10 +244,10 @@ class Event(keyboard: Keyboard?, var s: String) {
             code: Int,
             mask: Int,
         ): IntArray {
-            var i = keyCodeToVal(code)
+            var i = RimeKeyMapping.keyCodeToVal(code)
             if (i == 0xffffff) { // 如果不是Android keycode, 则直接使用获取rimekeycode
-                val s = keyNameOf(code)
-                i = getRimeKeycodeByName(s)
+                val s = Keycode.keyNameOf(code)
+                i = Rime.getRimeKeycodeByName(s)
             }
             var m = 0
             if (hasModifier(mask, KeyEvent.META_SHIFT_ON)) m = m or Rime.META_SHIFT_ON
@@ -284,7 +260,7 @@ class Event(keyboard: Keyboard?, var s: String) {
                 "<Event> getRimeEvent()\tcode=%d, mask=%d, name=%s\toutput key=%d, meta=%d",
                 code,
                 mask,
-                keyNameOf(code),
+                Keycode.keyNameOf(code),
                 i,
                 m,
             )

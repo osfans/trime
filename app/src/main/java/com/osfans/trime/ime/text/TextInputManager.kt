@@ -285,18 +285,18 @@ class TextInputManager private constructor() :
         // KeyboardEvent 处理软键盘事件
         override fun onEvent(event: Event?) {
             event ?: return
-            if (!event.commit.isNullOrEmpty()) {
+            if (event.commit.isNotEmpty()) {
                 // Directly commit the text and don't dispatch to Rime
                 activeEditorInstance.commitText(event.commit, true)
                 return
             }
-            if (!event.text.isNullOrEmpty()) {
-                onText(event.text)
+            if (event.getText().isNotEmpty()) {
+                onText(event.getText())
                 return
             }
             when (event.code) {
                 KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
-                    Rime.toggleOption(event.toggle)
+                    Rime.toggleOption(event.getToggle())
                     activeEditorInstance.commitRimeText()
                 }
                 KeyEvent.KEYCODE_EISU -> { // Switch keyboard
