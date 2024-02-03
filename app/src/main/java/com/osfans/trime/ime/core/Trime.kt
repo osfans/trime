@@ -29,7 +29,6 @@ import android.os.Looper
 import android.os.Message
 import android.text.InputType
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -49,7 +48,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.databinding.CompositionRootBinding
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -65,7 +63,6 @@ import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.symbol.TabView
 import com.osfans.trime.ime.text.Candidate
-import com.osfans.trime.ime.text.Composition
 import com.osfans.trime.ime.text.CompositionPopupWindow
 import com.osfans.trime.ime.text.ScrollView
 import com.osfans.trime.ime.text.TextInputManager
@@ -76,7 +73,6 @@ import com.osfans.trime.util.isNightMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import splitties.bitflags.hasFlag
-import splitties.dimensions.dp
 import splitties.systemservices.inputMethodManager
 import splitties.views.gravityBottom
 import timber.log.Timber
@@ -90,8 +86,6 @@ open class Trime : LifecycleInputMethodService() {
         get() = AppPrefs.defaultInstance()
     private var mainKeyboardView: KeyboardView? = null // 主軟鍵盤
     private var mCandidate: Candidate? = null // 候選
-    private var mComposition: Composition? = null // 編碼
-    private var compositionRootBinding: CompositionRootBinding? = null
     private var mCandidateRoot: ScrollView? = null
     private var mTabRoot: ScrollView? = null
     private var tabView: TabView? = null
@@ -104,8 +98,6 @@ open class Trime : LifecycleInputMethodService() {
     private var isAutoCaps = false // 句首自動大寫
     var activeEditorInstance: EditorInstance? = null
     var textInputManager: TextInputManager? = null // 文字输入管理器
-    private var minPopupSize = 0 // 上悬浮窗的候选词的最小词长
-    private var minPopupCheckSize = 0 // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
     private var mCompositionPopupWindow: CompositionPopupWindow? = null
     var candidateExPage = false
 
@@ -171,12 +163,9 @@ open class Trime : LifecycleInputMethodService() {
 
     fun loadConfig() {
         val theme = ThemeManager.activeTheme
-        minPopupSize = theme.style.getInt("layout/min_length")
-        minPopupCheckSize = theme.style.getInt("layout/min_check")
         textInputManager!!.shouldResetAsciiMode = theme.style.getBoolean("reset_ascii_mode")
         isAutoCaps = theme.style.getBoolean("auto_caps")
         textInputManager!!.shouldUpdateRimeOption = true
-        mCompositionPopupWindow!!.loadConfig(theme, prefs)
     }
 
     private fun updateRimeOption(): Boolean {
@@ -236,7 +225,6 @@ open class Trime : LifecycleInputMethodService() {
                 textInputManager = TextInputManager.getInstance()
                 activeEditorInstance = EditorInstance(context)
                 inputFeedbackManager = InputFeedbackManager(context)
-                mCompositionPopupWindow = CompositionPopupWindow()
                 restartSystemStartTimingSync()
                 try {
                     for (listener in eventListeners) {
@@ -271,7 +259,8 @@ open class Trime : LifecycleInputMethodService() {
             symbolKeyboardType = inputView!!.liquidKeyboard.select(tabIndex)
             tabView!!.updateTabWidth()
             mTabRoot!!.move(tabView!!.hightlightLeft, tabView!!.hightlightRight)
-            showLiquidKeyboardToolbar()
+            mCompositionPopupWindow?.composition?.compositionView?.changeToLiquidKeyboardToolbar()
+            showCompositionView(false)
         } else {
             symbolKeyboardType = SymbolKeyboardType.NO_KEY
             // 设置液体键盘处于隐藏状态
@@ -305,31 +294,11 @@ open class Trime : LifecycleInputMethodService() {
             mCompositionPopupWindow!!.hideCompositionView()
             return
         }
-        compositionRootBinding!!.compositionRoot.measure(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-        )
-        mCompositionPopupWindow!!.updateCompositionView(
-            compositionRootBinding!!.compositionRoot.measuredWidth,
-            compositionRootBinding!!.compositionRoot.measuredHeight,
-        )
+        mCompositionPopupWindow?.updateCompositionView()
     }
 
     private fun loadBackground(recreate: Boolean) {
         val theme = ThemeManager.activeTheme
-        val textBackground =
-            theme.colors.getDrawable(
-                "text_back_color",
-                "layout/border",
-                "border_color",
-                "layout/round_corner",
-                "layout/alpha",
-            )
-        mCompositionPopupWindow!!.setThemeStyle(
-            dp(theme.style.getFloat("layout/elevation")),
-            textBackground,
-        )
-
         if (inputView == null || !recreate) return
 
         inputView?.quickBar?.view?.background =
@@ -365,12 +334,10 @@ open class Trime : LifecycleInputMethodService() {
                     View.GONE
                 }
             mCandidate!!.reset()
-            mCompositionPopupWindow!!.isPopupWindowEnabled = (
-                prefs.keyboard.popupWindowEnabled &&
-                    ThemeManager.activeTheme.style.getObject("window") != null
-            )
-            mComposition!!.visibility = if (mCompositionPopupWindow!!.isPopupWindowEnabled) View.VISIBLE else View.GONE
-            mComposition!!.reset()
+            mCompositionPopupWindow =
+                CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
+                    anchorView = inputView?.quickBar?.view
+                }
         }
     }
 
@@ -410,9 +377,7 @@ open class Trime : LifecycleInputMethodService() {
             listener.onDestroy()
         }
         eventListeners.clear()
-        if (mCompositionPopupWindow != null) {
-            mCompositionPopupWindow!!.destroy()
-        }
+        mCompositionPopupWindow?.finishInput()
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         super.onDestroy()
         self = null
@@ -511,15 +476,15 @@ open class Trime : LifecycleInputMethodService() {
         Timber.d("onCreateInputView()")
         RimeWrapper.runAfterStarted {
             inputView = InputView(this, Rime.getInstance(false), ThemeManager.activeTheme)
+            mCompositionPopupWindow =
+                CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
+                    anchorView = inputView!!.quickBar.view
+                }
             mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
             // 初始化候选栏
             mCandidateRoot = inputView!!.quickBar.oldCandidateBar.root
             mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
 
-            // 候选词悬浮窗的容器
-            compositionRootBinding = CompositionRootBinding.inflate(LayoutInflater.from(this))
-            mComposition = compositionRootBinding!!.compositions
-            mCompositionPopupWindow!!.init(compositionRootBinding!!.compositionRoot, mCandidateRoot!!)
             mTabRoot = inputView!!.quickBar.oldTabBar.root
 
             tabView = inputView!!.quickBar.oldTabBar.tabs
@@ -559,7 +524,6 @@ open class Trime : LifecycleInputMethodService() {
 
     fun setShowComment(showComment: Boolean) {
         if (mCandidateRoot != null) mCandidate!!.setShowComment(showComment)
-        mComposition!!.setShowComment(showComment)
     }
 
     override fun onStartInput(
@@ -1013,13 +977,15 @@ open class Trime : LifecycleInputMethodService() {
         if (mCandidateRoot != null) {
             if (mCompositionPopupWindow!!.isPopupWindowEnabled) {
                 Timber.d("updateComposing() SymbolKeyboardType=%s", symbolKeyboardType.toString())
+                val composition = mCompositionPopupWindow?.composition
                 if (symbolKeyboardType != SymbolKeyboardType.NO_KEY &&
                     symbolKeyboardType != SymbolKeyboardType.CANDIDATE
                 ) {
-                    showLiquidKeyboardToolbar()
+                    composition?.compositionView?.changeToLiquidKeyboardToolbar()
+                    showCompositionView(false)
                 } else {
-                    mComposition!!.visibility = View.VISIBLE
-                    startNum = mComposition!!.setWindow(minPopupSize, minPopupCheckSize, Int.MAX_VALUE)
+                    composition?.root?.visibility = View.VISIBLE
+                    startNum = composition?.compositionView?.setWindowContent() ?: 0
                     mCandidate!!.setText(startNum)
                     // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
                     // otherwise we need to call it here
@@ -1034,11 +1000,6 @@ open class Trime : LifecycleInputMethodService() {
         if (mainKeyboardView != null) mainKeyboardView!!.invalidateComposingKeys()
         if (!onEvaluateInputViewShown()) setCandidatesViewShown(textInputManager!!.isComposable) // 實體鍵盤打字時顯示候選欄
         return startNum
-    }
-
-    private fun showLiquidKeyboardToolbar() {
-        mComposition!!.changeToLiquidKeyboardToolbar()
-        showCompositionView(false)
     }
 
     /**
