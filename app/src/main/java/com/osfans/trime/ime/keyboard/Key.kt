@@ -467,7 +467,7 @@ class Key(private val mKeyboard: Keyboard) {
         ) {
             label
         } else {
-            event!!.label // 中文狀態顯示標籤
+            event!!.getLabel() // 中文狀態顯示標籤
         }
     }
 
@@ -483,7 +483,7 @@ class Key(private val mKeyboard: Keyboard) {
         get() {
             if (labelSymbol!!.isEmpty()) {
                 val longClick = longClick
-                if (longClick != null) return longClick.label
+                if (longClick != null) return longClick.getLabel()
             }
             return labelSymbol
         }
