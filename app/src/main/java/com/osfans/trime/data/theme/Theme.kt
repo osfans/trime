@@ -23,7 +23,6 @@ import androidx.core.math.MathUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager.userDataDir
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.util.CollectionUtils
@@ -43,6 +42,7 @@ class Theme(private var isDarkMode: Boolean) {
     private var presetColorSchemes: Map<String, Map<String, Any>?>? = null
     private var presetKeyboards: Map<String, Any?>? = null
     private var liquidKeyboard: Map<String, Any?>? = null
+    lateinit var allKeyboardIds: List<String>
 
     // 当前配色 id
     lateinit var currentColorSchemeId: String
@@ -109,10 +109,16 @@ class Theme(private var isDarkMode: Boolean) {
                 presetColorSchemes = fullThemeConfigMap!!["preset_color_schemes"] as Map<String, Map<String, Any>?>?
                 presetKeyboards = fullThemeConfigMap!!["preset_keyboards"] as Map<String, Any?>?
                 liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
-            }.also { Timber.d("Setting up all theme config map takes $it ms") }
+                // 将 presetKeyboards 的所有 key 转为 allKeyboardIds
+                allKeyboardIds = presetKeyboards!!.keys.toList()
+            }.also {
+                Timber.d("Setting up all theme config map takes $it ms")
+            }
             measureTimeMillis {
                 initColorScheme()
-            }.also { Timber.d("Initializing cache takes $it ms") }
+            }.also {
+                Timber.d("Initializing cache takes $it ms")
+            }
             Timber.i("The theme is initialized")
         }.getOrElse {
             Timber.e("Failed to parse the theme: ${it.message}")
@@ -244,44 +250,6 @@ class Theme(private var isDarkMode: Boolean) {
     class Keyboards(private val theme: Theme) {
         fun getObject(key: String): Any? {
             return CollectionUtils.obtainValue(theme.presetKeyboards, key)
-        }
-
-        fun remapKeyboardId(name: String): String {
-            val remapped =
-                if (".default" == name) {
-                    val currentSchemaId = Rime.getCurrentRimeSchema()
-                    if (theme.presetKeyboards!!.containsKey(currentSchemaId)) {
-                        return currentSchemaId
-                    } else {
-                        val alphabet = SchemaManager.getActiveSchema().alphabet
-                        val twentySix = "qwerty"
-                        if (!alphabet.isNullOrEmpty() && theme.presetKeyboards!!.containsKey(alphabet)) {
-                            return alphabet
-                        } else {
-                            if (!alphabet.isNullOrEmpty() && (alphabet.contains(",") || alphabet.contains(";"))) {
-                                twentySix + "_"
-                            } else if (!alphabet.isNullOrEmpty() && (alphabet.contains("0") || alphabet.contains("1"))) {
-                                twentySix + "0"
-                            } else {
-                                twentySix
-                            }
-                        }
-                    }
-                } else {
-                    name
-                }
-            if (!theme.presetKeyboards!!.containsKey(remapped)) {
-                Timber.w("Cannot find keyboard definition %s, fallback ...", remapped)
-                val defaultMap =
-                    theme.presetKeyboards!!["default"] as Map<String, Any>?
-                        ?: throw IllegalStateException("The default keyboard definition is missing!")
-                return if (defaultMap.containsKey("import_preset")) {
-                    defaultMap["import_preset"] as? String ?: "default"
-                } else {
-                    "default"
-                }
-            }
-            return remapped
         }
     }
 

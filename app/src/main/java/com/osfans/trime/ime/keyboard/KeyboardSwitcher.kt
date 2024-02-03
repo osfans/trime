@@ -1,130 +1,149 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.util.appContext
 import timber.log.Timber
 
 /** Manages [Keyboard]s and their status. **/
 object KeyboardSwitcher {
-    private var currentId: Int = 0
-    private var lastId: Int = 0
-    private var lastLockId: Int = 0
-
+    private val theme get() = ThemeManager.activeTheme
+    private val allKeyboardIds get() = theme.allKeyboardIds
+    private val keyboardCache: MutableMap<String, Keyboard> = mutableMapOf()
+    private var currentKeyboardId = ".default"
+    private var lastKeyboardId = ".default"
+    private var lastLockKeyboardId = ".default"
     private var currentDisplayWidth: Int = 0
     private val keyboardPrefs = KeyboardPrefs()
 
-    private val theme get() = ThemeManager.activeTheme
-    private lateinit var availableKeyboardIds: List<String>
-    private lateinit var availableKeyboards: List<Keyboard>
+    lateinit var currentKeyboard: Keyboard
 
-    /** To get current keyboard instance. **/
-    @JvmStatic
-    val currentKeyboard: Keyboard
-        get() {
-            if (currentId >= availableKeyboards.size) currentId = 0
-            return availableKeyboards[currentId]
+    private fun getKeyboard(name: String): Keyboard {
+        if (keyboardCache.containsKey(name)) {
+            return keyboardCache[name]!!
         }
+        val keyboard = Keyboard(name)
+        keyboardCache[name] = keyboard
+        return keyboard
+    }
 
     init {
         newOrReset()
     }
 
-    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun newOrReset() {
         Timber.d("Switching keyboard back to .default ...")
-        availableKeyboardIds = (theme.style.getObject("keyboards") as? List<String>)
-            ?.map { theme.keyboards.remapKeyboardId(it) }?.distinct() ?: listOf()
-
-        availableKeyboards =
-            availableKeyboardIds.map {
-                try {
-                    Keyboard(theme.keyboards.remapKeyboardId(it))
-                } catch (e: Exception) {
-                    Keyboard("default")
-                }
-            }
-
-        currentId = 0
-        lastId = 0
-        lastLockId = 0
+        currentKeyboardId = ".default"
+        lastKeyboardId = ".default"
+        lastLockKeyboardId = ".default"
         currentDisplayWidth = 0
+        keyboardCache.clear()
+        switchKeyboard(currentKeyboardId)
     }
 
     fun switchKeyboard(name: String?) {
-        val idx =
+        val currentIdx = theme.allKeyboardIds.indexOf(currentKeyboardId)
+        var mappedName =
             when (name) {
-                ".default" -> 0
-                ".prior" -> currentId - 1
-                ".next" -> currentId + 1
-                ".last" -> lastId
-                ".last_lock" -> lastLockId
+                ".default" -> autoMatch(name)
+                ".prior" ->
+                    try {
+                        theme.allKeyboardIds[currentIdx - 1]
+                    } catch (e: IndexOutOfBoundsException) {
+                        currentKeyboardId
+                    }
+                ".next" ->
+                    try {
+                        theme.allKeyboardIds[currentIdx + 1]
+                    } catch (e: IndexOutOfBoundsException) {
+                        currentKeyboardId
+                    }
+                ".last" -> lastKeyboardId
+                ".last_lock" -> lastLockKeyboardId
                 ".ascii" -> {
-                    val asciiKeyboard = availableKeyboards[currentId].asciiKeyboard
-                    if (asciiKeyboard.isNullOrEmpty()) {
-                        currentId
+                    val asciiKeyboard = currentKeyboard.asciiKeyboard
+                    if (asciiKeyboard != null && asciiKeyboard in allKeyboardIds) {
+                        asciiKeyboard
                     } else {
-                        availableKeyboardIds.indexOf(asciiKeyboard)
+                        currentKeyboardId
                     }
                 }
                 else -> {
                     if (name.isNullOrEmpty()) {
-                        if (availableKeyboards[currentId].isLock) currentId else lastLockId
+                        if (currentKeyboard.isLock) currentKeyboardId else lastLockKeyboardId
                     } else {
-                        availableKeyboardIds.indexOf(name)
+                        name
                     }
                 }
             }
-        val i =
-            if (keyboardPrefs.isLandscapeMode()) {
-                mapToLandscapeKeyboardIdx(idx)
-            } else {
-                idx
-            }
 
-        Timber.d("Mapped from %d to %d", idx, i)
-
+        // 切换到 mini 键盘
         val deviceKeyboard = appContext.resources.configuration.keyboard
-        if (currentId >= 0 && availableKeyboards[currentId].isLock) {
-            lastLockId = currentId
+        if (AppPrefs.defaultInstance().theme.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
+            if ("mini" in allKeyboardIds) mappedName = "mini"
         }
-        lastId = currentId
-
-        currentId = if (i >= availableKeyboardIds.size || i < 0) 0 else i
-        if ("mini" in availableKeyboardIds) {
-            val mini = availableKeyboardIds.indexOf("mini")
-            currentId =
-                if (AppPrefs.defaultInstance().theme.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS) {
-                    if (currentId == 0) mini else currentId
-                } else {
-                    if (currentId == mini) 0 else currentId
-                }
+        // 切换到横屏布局
+        if (keyboardPrefs.isLandscapeMode()) {
+            val landscapeKeyboard = getKeyboard(mappedName).landscapeKeyboard
+            if (landscapeKeyboard != null && landscapeKeyboard in allKeyboardIds) {
+                mappedName = landscapeKeyboard
+            }
         }
-
+        // 应用键盘布局
         Timber.i(
-            "Switched keyboard from ${availableKeyboardIds[lastId]} " +
-                "to ${availableKeyboardIds[currentId]} (deviceKeyboard=$deviceKeyboard).",
+            "Switched keyboard from $currentKeyboardId " +
+                "to $mappedName (deviceKeyboard=$deviceKeyboard).",
         )
+        currentKeyboardId = mappedName
+        currentKeyboard = getKeyboard(currentKeyboardId)
+
+        if (currentKeyboard.isLock) {
+            lastLockKeyboardId = currentKeyboardId
+        }
+        lastKeyboardId = currentKeyboardId
     }
 
-    private fun mapToLandscapeKeyboardIdx(idx: Int): Int {
-        if (idx < 0 || idx > availableKeyboards.size) return idx
-        val landscapeKeyboard = availableKeyboards[idx].landscapeKeyboard
-        return if (landscapeKeyboard.isNullOrBlank()) {
-            idx
-        } else {
-            availableKeyboardIds.indexOf(landscapeKeyboard)
+    /**
+     * .default 自动匹配键盘布局
+     * */
+    private fun autoMatch(name: String): String {
+        // 主题的布局中包含方案id，直接采用
+        val currentSchemaId = Rime.getCurrentRimeSchema()
+        if (currentSchemaId in allKeyboardIds) {
+            return currentSchemaId
         }
+        // 获取方案中的 alphabet（包含所有用到的按键
+        val alphabet = SchemaManager.getActiveSchema().alphabet
+        if (alphabet.isNullOrEmpty()) return "default"
+
+        val layout =
+            if (alphabet.matches(Regex("^[a-z]+$"))) {
+                // 包含 26 个字母
+                "qwerty"
+            } else if (alphabet.matches(Regex("^[a-z,./;]+$"))) {
+                // 包含 26 个字母和,./;
+                "qwerty_"
+            } else if (alphabet.matches(Regex("^[a-z0-9]+$"))) {
+                // 包含 26 个字母和数字键
+                "qwerty0"
+            } else {
+                null
+            }
+        if (layout != null && layout in allKeyboardIds) return layout
+
+        Timber.d("Could not find keyboard layout $layout, fallback to default")
+        return "default"
     }
 
     /**
      * Change current display width when e.g. rotate the screen.
      */
     fun resize(displayWidth: Int) {
-        if (currentId >= 0 && (displayWidth == currentDisplayWidth)) return
-
+        if (displayWidth == currentDisplayWidth) return
         currentDisplayWidth = displayWidth
         newOrReset()
     }
