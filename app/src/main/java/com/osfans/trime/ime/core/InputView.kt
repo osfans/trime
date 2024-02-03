@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.res.Configuration
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
@@ -213,6 +214,10 @@ class InputView(
         quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
+    fun startInput(info: EditorInfo) {
+        keyboardWindow.oldMainInputView.mainKeyboardView.updateEnterLabelOnEditorInfo(info)
+    }
+
     private fun handleRimeNotification(it: RimeNotification) {
         when (it) {
             is RimeNotification.OptionNotification -> {
@@ -265,6 +270,7 @@ class InputView(
 
     fun finishInput() {
         showingDialog?.dismiss()
+        keyboardWindow.oldMainInputView.mainKeyboardView.finishInput()
     }
 
     override fun onDetachedFromWindow() {
