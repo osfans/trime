@@ -28,8 +28,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.text.InputType
-import android.text.TextUtils
-import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -40,6 +38,7 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.ExtractedTextRequest
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.annotation.Keep
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -72,7 +71,6 @@ import com.osfans.trime.ime.text.ScrollView
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.StringUtils
-import com.osfans.trime.util.ViewUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
 import kotlinx.coroutines.Dispatchers
@@ -80,8 +78,8 @@ import kotlinx.coroutines.launch
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.systemservices.inputMethodManager
+import splitties.views.gravityBottom
 import timber.log.Timber
-import java.util.Objects
 
 /** [輸入法][InputMethodService]主程序  */
 
@@ -109,7 +107,7 @@ open class Trime : LifecycleInputMethodService() {
     private var minPopupSize = 0 // 上悬浮窗的候选词的最小词长
     private var minPopupCheckSize = 0 // 第一屏候选词数量少于设定值，则候选词上悬浮窗。（也就是说，第一屏存在长词）此选项大于1时，min_length等参数失效
     private var mCompositionPopupWindow: CompositionPopupWindow? = null
-    private var candidateExPage = false
+    var candidateExPage = false
 
     @Keep
     private val onThemeChangeListener =
@@ -118,14 +116,6 @@ open class Trime : LifecycleInputMethodService() {
                 initKeyboard()
             }
         }
-
-    fun hasCandidateExPage(): Boolean {
-        return candidateExPage
-    }
-
-    fun setCandidateExPage(value: Boolean) {
-        candidateExPage = value
-    }
 
     init {
         try {
@@ -307,11 +297,11 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     fun pasteByChar() {
-        commitTextByChar(Objects.requireNonNull(ShortcutUtils.pasteFromClipboard(this)).toString())
+        commitTextByChar(checkNotNull(ShortcutUtils.pasteFromClipboard(this)).toString())
     }
 
     private fun showCompositionView(isCandidate: Boolean) {
-        if (TextUtils.isEmpty(Rime.compositionText) && isCandidate) {
+        if (Rime.compositionText.isEmpty() && isCandidate) {
             mCompositionPopupWindow!!.hideCompositionView()
             return
         }
@@ -442,7 +432,7 @@ open class Trime : LifecycleInputMethodService() {
             ic?.commitText("\n", 1)
             return
         }
-        if (!TextUtils.isEmpty(editorInfo!!.actionLabel) &&
+        if (!editorInfo!!.actionLabel.isNullOrEmpty() &&
             editorInfo!!.actionId != EditorInfo.IME_ACTION_UNSPECIFIED
         ) {
             val ic = currentInputConnection
@@ -1038,7 +1028,6 @@ open class Trime : LifecycleInputMethodService() {
             } else {
                 mCandidate!!.setText(0)
             }
-            mCandidate!!.setExpectWidth(mainKeyboardView!!.width)
             // 刷新候选词后，如果候选词超出屏幕宽度，滚动候选栏
             mTabRoot!!.move(mCandidate!!.highlightLeft, mCandidate!!.highlightRight)
         }
@@ -1113,22 +1102,18 @@ open class Trime : LifecycleInputMethodService() {
                 } else {
                     WindowManager.LayoutParams.MATCH_PARENT
                 }
-            val inputArea = w.findViewById<View>(android.R.id.inputArea)
-            // TODO: 需要获取到文本编辑框、完成按钮，设置其色彩和尺寸。
-            //      if (isFullscreenMode()) {
-            //        Timber.d("isFullscreenMode");
-            //        /* In Fullscreen mode, when layout contains transparent color,
-            //         * the background under input area will disturb users' typing,
-            //         * so set the input area as light pink */
-            //        inputArea.setBackgroundColor(parseColor("#ff660000"));
-            //      } else {
-            //        Timber.d("NotFullscreenMode");
-            //        /* Otherwise, set it as light gray to avoid potential issue */
-            //        inputArea.setBackgroundColor(parseColor("#dddddddd"));
-            //      }
-            ViewUtils.updateLayoutHeightOf(inputArea, layoutHeight)
-            ViewUtils.updateLayoutGravityOf(inputArea, Gravity.BOTTOM)
-            ViewUtils.updateLayoutHeightOf(inputView!!, layoutHeight)
+            val inputArea = w.decorView.findViewById<FrameLayout>(android.R.id.inputArea)
+            inputArea.updateLayoutParams {
+                height = layoutHeight
+                if (this is FrameLayout.LayoutParams) {
+                    this.gravity = inputArea.gravityBottom
+                } else if (this is LinearLayout.LayoutParams) {
+                    this.gravity = inputArea.gravityBottom
+                }
+            }
+            inputView?.updateLayoutParams {
+                height = layoutHeight
+            }
         }
     }
 
