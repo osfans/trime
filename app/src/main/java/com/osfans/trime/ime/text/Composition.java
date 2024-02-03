@@ -37,8 +37,8 @@ import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatTextView;
 import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeComposition;
@@ -55,7 +55,7 @@ import java.util.Map;
 import timber.log.Timber;
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置 */
-public class Composition extends AppCompatTextView {
+public class Composition extends TextView {
   private int key_text_size, text_size, label_text_size, candidate_text_size, comment_text_size;
   private int key_text_color, text_color, label_color, candidate_text_color, comment_text_color;
   private int hilited_text_color, hilited_candidate_text_color, hilited_comment_text_color;
@@ -536,23 +536,12 @@ public class Composition extends AppCompatTextView {
   /**
    * 设置悬浮窗文本
    *
-   * @param charLength 候选词长度大于设定，才会显示到悬浮窗中
-   * @param minCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-   * @param maxPopup 最多在悬浮窗显示多少个候选词
    * @return 悬浮窗显示的候选词数量
    */
-  public int setWindow(int charLength, int minCheck, int maxPopup) {
-    return setWindow(charLength, minCheck);
-  }
-
-  /**
-   * 设置悬浮窗文本
-   *
-   * @param stringMinLength 候选词长度大于设定，才会显示到悬浮窗中
-   * @param candidateMinCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-   * @return 悬浮窗显示的候选词数量
-   */
-  public int setWindow(int stringMinLength, int candidateMinCheck) {
+  public int setWindowContent() {
+    final Theme theme = ThemeManager.getActiveTheme();
+    int minLen = theme.style.getInt("layout/min_length"); // 候选词长度大于设定，才会显示到悬浮窗中
+    int minCheck = theme.style.getInt("layout/min_check"); // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
     if (getVisibility() != View.VISIBLE) return 0;
     StackTraceElement[] stacks = new Throwable().getStackTrace();
     Timber.d(
@@ -574,11 +563,9 @@ public class Composition extends AppCompatTextView {
     for (Map<String, Object> m : windows_comps) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
-        start_num = calcStartNum(stringMinLength, candidateMinCheck);
-        Timber.d(
-            "start_num = %s, min_length = %s, min_check = %s",
-            start_num, stringMinLength, candidateMinCheck);
-        appendCandidates(m, stringMinLength, start_num);
+        start_num = calcStartNum(minLen, minCheck);
+        Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, minLen, minCheck);
+        appendCandidates(m, minLen, start_num);
       } else if (m.containsKey("click")) appendButton(m);
       else if (m.containsKey("move")) appendMove(m);
     }

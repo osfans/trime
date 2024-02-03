@@ -1,40 +1,80 @@
 package com.osfans.trime.ime.text
 
+import android.content.Context
 import android.graphics.RectF
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import com.blankj.utilcode.util.BarUtils
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.databinding.CompositionRootBinding
 import com.osfans.trime.ime.enums.PopupPosition
-import com.osfans.trime.ime.enums.PopupPosition.Companion.fromString
-import com.osfans.trime.util.dp2px
+import splitties.dimensions.dp
 import timber.log.Timber
 
-class CompositionPopupWindow {
-    var isPopupWindowEnabled = true // 顯示懸浮窗口
+class CompositionPopupWindow(
+    private val ctx: Context,
+    private val theme: Theme,
+) {
+    // 顯示懸浮窗口
+    val isPopupWindowEnabled =
+        AppPrefs.defaultInstance().keyboard.popupWindowEnabled &&
+            theme.style.getObject("window") != null
 
-    private var isPopupWindowMovable: String? = null // 悬浮窗口是否可移動
+    val composition =
+        CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
+            root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
+            with(compositionView) {
+                reset()
+                setShowComment(!Rime.getOption("_hide_comment"))
+            }
+        }
+
+    // 悬浮窗口是否可移動
+    private val isPopupWindowMovable = theme.style.getString("layout/movable")
 
     private var popupWindowX = 0
     private var popupWindowY = 0 // 悬浮床移动座標
 
-    private var popupMargin = 0 // 候選窗與邊緣空隙
+    // 候選窗與邊緣空隙
+    private val popupMargin = theme.style.getInt("layout/spacing")
 
-    private var popupMarginH = 0 // 悬浮窗与屏幕两侧的间距
+    // 悬浮窗与屏幕两侧的间距
+    private val popupMarginH = theme.style.getInt("layout/real_margin")
 
-    private var popupWindowPos: PopupPosition? = null // 悬浮窗口彈出位置
+    // 悬浮窗口彈出位置
+    private var popupWindowPos = PopupPosition.fromString(theme.style.getString("layout/position"))
 
-    private var mPopupWindow: PopupWindow? = null
+    private val mPopupWindow =
+        PopupWindow(composition.root).apply {
+            isClippingEnabled = false
+            inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                windowLayoutType =
+                    WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            }
+            setBackgroundDrawable(
+                theme.colors.getDrawable(
+                    "text_back_color",
+                    "layout/border",
+                    "border_color",
+                    "layout/round_corner",
+                    "layout/alpha",
+                ),
+            )
+            elevation = ctx.dp(theme.style.getFloat("layout/elevation"))
+        }
 
     var isCursorUpdated = false // 光標是否移動
 
@@ -53,10 +93,10 @@ class CompositionPopupWindow {
                 val candidateLocation = IntArray(2)
                 anchor.getLocationOnScreen(candidateLocation)
 
-                val minX: Int = popupMarginH
-                val minY: Int = popupMargin
-                val maxX: Int = anchor.getWidth() - mPopupWindow!!.width - minX
-                val maxY = candidateLocation[1] - mPopupWindow!!.height - minY
+                val minX: Int = anchor.dp(popupMarginH)
+                val minY: Int = anchor.dp(popupMargin)
+                val maxX: Int = anchor.width - mPopupWindow.width - minX
+                val maxY = candidateLocation[1] - mPopupWindow.height - minY
                 if (isWinFixed() || !isCursorUpdated) {
                     // setCandidatesViewShown(true);
                     when (popupWindowPos) {
@@ -64,27 +104,22 @@ class CompositionPopupWindow {
                             x = maxX
                             y = minY
                         }
-
                         PopupPosition.TOP_LEFT -> {
                             x = minX
                             y = minY
                         }
-
                         PopupPosition.BOTTOM_RIGHT -> {
                             x = maxX
                             y = maxY
                         }
-
                         PopupPosition.DRAG -> {
                             x = popupWindowX
                             y = popupWindowY
                         }
-
                         PopupPosition.FIXED, PopupPosition.BOTTOM_LEFT -> {
                             x = minX
                             y = maxY
                         }
-
                         else -> {
                             x = minX
                             y = maxY
@@ -97,59 +132,24 @@ class CompositionPopupWindow {
                         PopupPosition.RIGHT, PopupPosition.RIGHT_UP -> x = mPopupRectF.right.toInt()
                         else -> Timber.wtf("UNREACHABLE BRANCH")
                     }
-                    x = Math.min(maxX, x)
-                    x = Math.max(minX, x)
+                    x = x.coerceIn(minX, maxX)
                     when (popupWindowPos) {
                         PopupPosition.LEFT, PopupPosition.RIGHT ->
-                            y =
-                                mPopupRectF.bottom.toInt() + popupMargin
-
+                            y = mPopupRectF.bottom.toInt() + popupMargin
                         PopupPosition.LEFT_UP, PopupPosition.RIGHT_UP ->
-                            y =
-                                mPopupRectF.top.toInt() - mPopupWindow!!.height - popupMargin
-
+                            y = mPopupRectF.top.toInt() - mPopupWindow.height - popupMargin
                         else -> Timber.wtf("UNREACHABLE BRANCH")
                     }
-                    y = Math.min(maxY, y)
-                    y = Math.max(minY, y)
+                    y = y.coerceIn(minY, maxY)
                 }
-                y -= BarUtils.getStatusBarHeight() // 不包含狀態欄
-                if (!mPopupWindow!!.isShowing) {
-                    mPopupWindow!!.showAtLocation(anchorView, Gravity.START or Gravity.TOP, x, y)
+                y -= BarUtils.getStatusBarHeight()
+                if (!mPopupWindow.isShowing) {
+                    mPopupWindow.showAtLocation(anchorView, Gravity.START or Gravity.TOP, x, y)
                 } else {
-                    mPopupWindow!!.update(x, y, mPopupWindow!!.width, mPopupWindow!!.height)
+                    mPopupWindow.update(x, y, composition.root.measuredWidth, composition.root.measuredHeight)
                 }
             }
         }
-
-    fun init(
-        view: View,
-        anchorView: View,
-    ) {
-        destroy()
-        mPopupWindow = PopupWindow(view)
-        mPopupWindow!!.isClippingEnabled = false
-        mPopupWindow!!.inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-            mPopupWindow!!.windowLayoutType =
-                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
-        }
-
-        this.anchorView = anchorView
-        hideCompositionView()
-    }
-
-    fun loadConfig(
-        theme: Theme,
-        appPrefs: AppPrefs,
-    ) {
-        popupWindowPos = fromString(theme.style.getString("layout/position"))
-        isPopupWindowMovable = theme.style.getString("layout/movable")
-        popupMargin = dp2px(theme.style.getFloat("layout/spacing")).toInt()
-        popupMarginH = dp2px(theme.style.getFloat("layout/real_margin")).toInt()
-        isPopupWindowEnabled =
-            appPrefs.keyboard.popupWindowEnabled && theme.style.getObject("window") != null
-    }
 
     fun isWinFixed(): Boolean {
         return Build.VERSION.SDK_INT <= VERSION_CODES.LOLLIPOP ||
@@ -165,36 +165,25 @@ class CompositionPopupWindow {
         popupWindowPos = PopupPosition.DRAG
         popupWindowX = offsetX
         popupWindowY = offsetY
-        mPopupWindow!!.update(popupWindowX, popupWindowY, -1, -1, true)
+        mPopupWindow.update(popupWindowX, popupWindowY, -1, -1, true)
     }
 
     fun hideCompositionView() {
-        if (isPopupWindowMovable != null && isPopupWindowMovable.equals("once")) {
-            popupWindowPos = fromString(ThemeManager.activeTheme.style.getString("layout/position"))
-        }
-        mPopupWindow?.let {
-            if (it.isShowing) {
-                it.dismiss()
-                mPopupHandler.removeCallbacks(mPopupTimer)
-            }
-        }
+        mPopupWindow.dismiss()
+        mPopupHandler.removeCallbacks(mPopupTimer)
     }
 
-    fun updateCompositionView(
-        width: Int,
-        height: Int,
-    ) {
-        mPopupWindow?.width = width
-        mPopupWindow?.height = height
+    fun updateCompositionView() {
+        if (isPopupWindowMovable == "once") {
+            popupWindowPos = PopupPosition.fromString(ThemeManager.activeTheme.style.getString("layout/position"))
+        }
+        composition.root.measure(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+        mPopupWindow.width = composition.root.measuredWidth
+        mPopupWindow.height = composition.root.measuredHeight
         mPopupHandler.post(mPopupTimer)
-    }
-
-    fun setThemeStyle(
-        elevation: Float,
-        drawable: Drawable?,
-    ) {
-        if (drawable != null) mPopupWindow?.setBackgroundDrawable(drawable)
-        mPopupWindow?.elevation = elevation
     }
 
     fun updateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
@@ -220,18 +209,17 @@ class CompositionPopupWindow {
                 }
                 // for different writing system (e.g. right to left languages),
                 // we have to calculate the correct RectF
-                mPopupRectF.top = Math.min(startCharRectF.top, endCharRectF.top)
-                mPopupRectF.left = Math.min(startCharRectF.left, endCharRectF.left)
-                mPopupRectF.bottom = Math.max(startCharRectF.bottom, endCharRectF.bottom)
-                mPopupRectF.right = Math.max(startCharRectF.right, endCharRectF.right)
+                mPopupRectF.top = startCharRectF.top.coerceAtMost(endCharRectF.top)
+                mPopupRectF.left = startCharRectF.left.coerceAtMost(endCharRectF.left)
+                mPopupRectF.bottom = startCharRectF.bottom.coerceAtLeast(endCharRectF.bottom)
+                mPopupRectF.right = startCharRectF.right.coerceAtLeast(endCharRectF.right)
             }
             cursorAnchorInfo.matrix.mapRect(mPopupRectF)
         }
     }
 
-    fun destroy() {
-        mPopupWindow?.dismiss()
-        mPopupWindow = null
+    fun finishInput() {
+        hideCompositionView()
         anchorView = null
     }
 }
