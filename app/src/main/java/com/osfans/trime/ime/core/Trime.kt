@@ -599,16 +599,7 @@ open class Trime : LifecycleInputMethodService() {
             bindKeyboardToInputView()
             // if (!restarting) setNavBarColor();
             setCandidatesViewShown(!Rime.isEmpty) // 軟鍵盤出現時顯示候選欄
-            if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION
-                == EditorInfo.IME_FLAG_NO_ENTER_ACTION
-            ) {
-                mainKeyboardView!!.resetEnterLabel()
-            } else {
-                mainKeyboardView!!.setEnterLabel(
-                    attribute.imeOptions and EditorInfo.IME_MASK_ACTION,
-                    attribute.actionLabel,
-                )
-            }
+            inputView?.startInput(attribute)
             when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
                 InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
                 InputType.TYPE_TEXT_VARIATION_PASSWORD,
@@ -685,8 +676,6 @@ open class Trime : LifecycleInputMethodService() {
                 DraftHelper.onInputEventChanged()
             }
             try {
-                // Dismiss any pop-ups when the input-view is being finished and hidden.
-                mainKeyboardView!!.closing()
                 performEscape()
                 if (inputFeedbackManager != null) {
                     inputFeedbackManager!!.releaseSoundPool()
@@ -696,9 +685,7 @@ open class Trime : LifecycleInputMethodService() {
                 Timber.e(e, "Failed to show the PopupWindow.")
             }
         }
-        if (inputView != null) {
-            inputView!!.finishInput()
-        }
+        inputView?.finishInput()
         Timber.d("OnFinishInputView")
     }
 
