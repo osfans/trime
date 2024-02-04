@@ -200,7 +200,6 @@ class TextInputManager private constructor() :
                 }
 
             KeyboardSwitcher.run {
-                resize(trime.maxWidth)
                 // Select a keyboard based on the input type of the editing field.
                 switchKeyboard(keyboardType)
             }

@@ -640,10 +640,12 @@ class Keyboard() {
         val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
 
         val keyboardSidePaddingPx =
-            when (appContext.resources.configuration.orientation) {
-                Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
-                else -> keyboardSidePadding
-            }.apply { appContext.dp(this) }
+            appContext.dp(
+                when (appContext.resources.configuration.orientation) {
+                    Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
+                    else -> keyboardSidePadding
+                },
+            )
 
         mDisplayWidth = ScreenUtils.getAppScreenWidth() - 2 * keyboardSidePaddingPx
 

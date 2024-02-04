@@ -16,7 +16,6 @@ object KeyboardSwitcher {
     private var currentKeyboardId = ".default"
     private var lastKeyboardId = ".default"
     private var lastLockKeyboardId = ".default"
-    private var currentDisplayWidth: Int = 0
     private val keyboardPrefs = KeyboardPrefs()
 
     lateinit var currentKeyboard: Keyboard
@@ -40,7 +39,6 @@ object KeyboardSwitcher {
         currentKeyboardId = ".default"
         lastKeyboardId = ".default"
         lastLockKeyboardId = ".default"
-        currentDisplayWidth = 0
         keyboardCache.clear()
         switchKeyboard(currentKeyboardId)
     }
@@ -137,14 +135,5 @@ object KeyboardSwitcher {
 
         Timber.d("Could not find keyboard layout $layout, fallback to default")
         return "default"
-    }
-
-    /**
-     * Change current display width when e.g. rotate the screen.
-     */
-    fun resize(displayWidth: Int) {
-        if (displayWidth == currentDisplayWidth) return
-        currentDisplayWidth = displayWidth
-        newOrReset()
     }
 }
