@@ -459,14 +459,13 @@ open class Trime : LifecycleInputMethodService() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         val config = resources.configuration
+        // 屏幕方向改变时会重置 inputView，不用在这里重置键盘
         if (config.orientation != newConfig.orientation) {
             // Clear composing text and candidates for orientation change.
             performEscape()
-            config.orientation = newConfig.orientation
         }
         super.onConfigurationChanged(newConfig)
         ThemeManager.onSystemNightModeChange(newConfig.isNightMode())
-        initKeyboard()
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {

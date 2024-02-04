@@ -199,10 +199,8 @@ class TextInputManager private constructor() :
                     }
                 }
 
-            KeyboardSwitcher.run {
-                // Select a keyboard based on the input type of the editing field.
-                switchKeyboard(keyboardType)
-            }
+            // Select a keyboard based on the input type of the editing field.
+            KeyboardSwitcher.switchKeyboard(keyboardType)
             Rime.getInstance()
 
             // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
