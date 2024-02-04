@@ -64,7 +64,7 @@ suspend fun Context.colorPicker(
             val schemeIds = all.map { it.first }
             ThemeManager.activeTheme.setColorScheme(schemeIds[checkedItem])
             launch {
-                Trime.getServiceOrNull()?.initKeyboard() // 立刻重初始化键盘生效
+                Trime.getServiceOrNull()?.recreateInputView(ThemeManager.activeTheme) // 立刻重初始化生效
             }
         }
     }.create()
