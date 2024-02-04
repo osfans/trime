@@ -47,6 +47,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.sound.SoundThemeManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.Keycode
@@ -105,7 +106,7 @@ open class Trime : LifecycleInputMethodService() {
     private val onThemeChangeListener =
         ThemeManager.OnThemeChangeListener {
             lifecycleScope.launch(Dispatchers.Main) {
-                initKeyboard()
+                recreateInputView(it)
             }
         }
 
@@ -297,74 +298,34 @@ open class Trime : LifecycleInputMethodService() {
         mCompositionPopupWindow?.updateCompositionView()
     }
 
-    private fun loadBackground(recreate: Boolean) {
-        val theme = ThemeManager.activeTheme
-        if (inputView == null || !recreate) return
+    /** Must be called on the UI thread
+     *
+     * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
+    fun recreateInputView(theme: Theme) {
+        inputView = InputView(this, Rime.getInstance(false), theme)
+        mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
+        // 初始化候选栏
+        mCandidateRoot = inputView!!.quickBar.oldCandidateBar.root
+        mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
+        mTabRoot = inputView!!.quickBar.oldTabBar.root
+        tabView = inputView!!.quickBar.oldTabBar.tabs
 
-        inputView?.quickBar?.view?.background =
-            theme.colors.getDrawable(
-                "candidate_background",
-                "candidate_border",
-                "candidate_border_color",
-                "candidate_border_round",
-                null,
-            )
+        mCompositionPopupWindow =
+            CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
+                anchorView = inputView?.quickBar?.view
+            }.apply { hideCompositionView() }
 
-        inputView?.keyboardView?.background = theme.colors.getDrawable("root_background")
-
-        tabView!!.reset()
-    }
-
-    fun resetKeyboard() {
-        if (mainKeyboardView != null) {
-            mainKeyboardView!!.setShowHint(!Rime.getOption("_hide_key_hint"))
-            mainKeyboardView!!.setShowSymbol(!Rime.getOption("_hide_key_symbol"))
-            mainKeyboardView!!.reset() // 實體鍵盤無軟鍵盤
-        }
-    }
-
-    fun resetCandidate() {
-        if (mCandidateRoot != null) {
-            loadBackground(true)
-            setShowComment(!Rime.getOption("_hide_comment"))
-            inputView?.quickBar?.view?.visibility =
-                if (!Rime.getOption("_hide_candidate") || !Rime.getOption("_hide_bar")) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
-            mCandidate!!.reset()
-            mCompositionPopupWindow =
-                CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
-                    anchorView = inputView?.quickBar?.view
-                }
-        }
-    }
-
-    /** 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
-    private fun reset() {
-        if (inputView == null) return
-        inputView!!.switchUiByState(KeyboardWindow.State.Main)
         loadConfig()
-        val theme = ThemeManager.activeTheme
-        theme.refreshColorValues()
-        SoundThemeManager.switchSound(theme.colors.getString("sound"))
-        resetCandidate()
         KeyboardSwitcher.newOrReset()
-        mCompositionPopupWindow!!.hideCompositionView()
-        resetKeyboard()
-    }
-
-    /** Must be called on the UI thread  */
-    fun initKeyboard() {
+        SoundThemeManager.switchSound(theme.colors.getString("sound"))
         if (textInputManager != null) {
-            reset()
             // setNavBarColor();
             textInputManager!!.shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
             bindKeyboardToInputView()
             // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
             updateComposing() // 切換主題時刷新候選
         }
+        setInputView(inputView!!)
     }
 
     override fun onDestroy() {
@@ -421,7 +382,6 @@ open class Trime : LifecycleInputMethodService() {
         }
         super.onConfigurationChanged(newConfig)
         ThemeManager.onSystemNightModeChange(newConfig.isNightMode())
-        initKeyboard()
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
@@ -476,26 +436,7 @@ open class Trime : LifecycleInputMethodService() {
     override fun onCreateInputView(): View {
         Timber.d("onCreateInputView()")
         RimeWrapper.runAfterStarted {
-            inputView = InputView(this, Rime.getInstance(false), ThemeManager.activeTheme)
-            mCompositionPopupWindow =
-                CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
-                    anchorView = inputView!!.quickBar.view
-                }
-            mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
-            // 初始化候选栏
-            mCandidateRoot = inputView!!.quickBar.oldCandidateBar.root
-            mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
-
-            mTabRoot = inputView!!.quickBar.oldTabBar.root
-
-            tabView = inputView!!.quickBar.oldTabBar.tabs
-            for (listener in eventListeners) {
-                listener.onInitializeInputUi(inputView!!)
-            }
-            loadBackground(false)
-            KeyboardSwitcher.newOrReset()
-            bindKeyboardToInputView()
-            setInputView(inputView!!)
+            recreateInputView(ThemeManager.activeTheme)
             Timber.d("onCreateInputView - completely ended")
         }
         Timber.d("onCreateInputView() finish")

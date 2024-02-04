@@ -9,6 +9,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
@@ -38,22 +39,15 @@ class KeyboardFragment :
         sharedPreferences: SharedPreferences?,
         key: String?,
     ) {
-        val trime = Trime.getServiceOrNull()
         when (key) {
             "keyboard__key_long_press_timeout",
             "keyboard__key_repeat_interval",
             "keyboard__show_key_popup",
+            AppPrefs.Keyboard.SPLIT, AppPrefs.Keyboard.SPLIT_SPACE_PERCENT,
+            "keyboard__show_window",
+            "keyboard__inline_preedit", "keyboard__soft_cursor",
             -> {
-                trime?.resetKeyboard()
-            }
-            AppPrefs.Keyboard.SPLIT, AppPrefs.Keyboard.SPLIT_SPACE_PERCENT -> {
-                trime?.initKeyboard()
-            }
-            "keyboard__show_window" -> {
-                trime?.resetCandidate()
-            }
-            "keyboard__inline_preedit", "keyboard__soft_cursor" -> {
-                trime?.loadConfig()
+                Trime.getServiceOrNull()?.recreateInputView(ThemeManager.activeTheme)
             }
             "keyboard__candidate_page_size" -> {
                 val pageSize = AppPrefs.defaultInstance().keyboard.candidatePageSize.toInt()
