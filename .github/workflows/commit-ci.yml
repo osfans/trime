@@ -34,7 +34,7 @@ jobs:
           brew install coreutils clang-format
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: 17
@@ -47,7 +47,7 @@ jobs:
             ./gradlew :app:calculateNativeCacheHash
 
       - name: Fetch JNI cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: jni-cache
         with:
           path: "app/prebuilt"
@@ -77,7 +77,7 @@ jobs:
         run: cp -R app/build/intermediates/stripped_native_libs/debug/out/lib app/prebuilt
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trime-${{ matrix.os }}
           path: app/build/outputs/apk/debug/
@@ -85,7 +85,7 @@ jobs:
           retention-days: 90
 
       - name: Upload APK artifact (ARM64_V8A only)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trime-arm64-v8a-${{ matrix.os }}
           path: app/build/outputs/apk/debug/*arm64-v8a-*.apk
@@ -93,7 +93,7 @@ jobs:
           retention-days: 90
 
       - name: Upload JNI artifact (librime_jni.so)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: librime_jni
           path: app/build/intermediates/stripped_native_libs/debug/out/lib/*

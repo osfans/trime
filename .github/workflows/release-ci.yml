@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: 21
@@ -30,7 +30,7 @@ jobs:
             ./gradlew :app:calculateNativeCacheHash
 
       - name: Fetch JNI cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: jni-cache
         with:
           path: "app/prebuilt"
