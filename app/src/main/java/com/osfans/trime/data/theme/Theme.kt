@@ -186,8 +186,8 @@ class Theme(private var isDarkMode: Boolean) {
             val o = theme.currentColors[key]
             if (o is Int) {
                 return GradientDrawable().apply { setColor(o) }
-            } else if (o is String) {
-                return bitmapDrawable(o)
+            } else if (o is Drawable) {
+                return o
             }
             return null
         }
@@ -202,8 +202,8 @@ class Theme(private var isDarkMode: Boolean) {
             if (value == null) value = theme.currentColors[key]
             if (value is Int) {
                 return GradientDrawable().apply { setColor(value) }
-            } else if (value is String) {
-                return bitmapDrawable(value)
+            } else if (value is Drawable) {
+                return value
             }
             return null
         }
@@ -217,14 +217,11 @@ class Theme(private var isDarkMode: Boolean) {
             alphaKey: String?,
         ): Drawable? {
             val value = theme.getColorValue(key)
-            if (value is String) {
-                val bitmap = bitmapDrawable(value)
-                if (bitmap != null) {
-                    if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                        bitmap.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
-                    }
-                    return bitmap
+            if (value is Drawable) {
+                if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
+                    value.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
                 }
+                return value
             }
 
             if (value is Int) {
@@ -282,10 +279,10 @@ class Theme(private var isDarkMode: Boolean) {
                 val defaultMap =
                     theme.presetKeyboards!!["default"] as Map<String, Any>?
                         ?: throw IllegalStateException("The default keyboard definition is missing!")
-                if (defaultMap.containsKey("import_preset")) {
-                    return defaultMap["import_preset"] as? String ?: "default"
+                return if (defaultMap.containsKey("import_preset")) {
+                    defaultMap["import_preset"] as? String ?: "default"
                 } else {
-                    return "default"
+                    "default"
                 }
             }
             return remapped
@@ -401,7 +398,18 @@ class Theme(private var isDarkMode: Boolean) {
             }
         }
 
+        // 先遍历一次，处理一下颜色和图片
+        // 防止回退时获取到错误值
         for ((key, value) in currentColors) {
+            val parsedValue = parseColorValue(value)
+            if (parsedValue != null) {
+                currentColors[key] = parsedValue
+            }
+        }
+
+        // fallback
+        for ((key, value) in currentColors) {
+            if (value is Int || value is Drawable) continue
             val parsedValue = getColorValue(value)
             if (parsedValue != null) {
                 currentColors[key] = parsedValue
@@ -412,8 +420,9 @@ class Theme(private var isDarkMode: Boolean) {
         Timber.d("Refresh color scheme, current color scheme: $currentColorSchemeId")
     }
 
-    // 处理 value 值，转为颜色(Int)或图片path string 或者 fallback
-    // 处理失败返回 null
+    /** 获取参数的真实value，如果是色彩返回int，如果是背景图返回drawable，都不是则进行 fallback
+     * @return Int/Drawable/null
+     * */
     private fun getColorValue(value: Any?): Any? {
         val parsedValue = parseColorValue(value)
         if (parsedValue != null) {
@@ -424,10 +433,8 @@ class Theme(private var isDarkMode: Boolean) {
         val limit = currentColors.size
         for (i in 0 until limit) {
             newValue = currentColors[newKey]
-            if (newValue == null) return null
-            if (newValue is Int) return newValue
-            if (isFileString(newValue as String)) return newValue
-
+            if (newValue !is String) return newValue
+            // fallback
             val parsedNewValue = parseColorValue(newValue)
             if (parsedNewValue != null) {
                 return parsedNewValue
@@ -437,21 +444,21 @@ class Theme(private var isDarkMode: Boolean) {
         return null
     }
 
-    // 获取参数的真实value，Config 2.0
-    // 如果是色彩返回int，如果是背景图返回path string，如果处理失败返回null
+    /** 获取参数的真实value，如果是色彩返回int，如果是背景图返回drawable，如果处理失败返回null
+     * @return Int/Drawable/null
+     * */
     private fun parseColorValue(value: Any?): Any? {
-        if (value is String) {
-            if (isFileString(value)) {
-                // 获取图片的真实地址
-                val fullPath = joinToFullImagePath(value)
-                if (File(fullPath).exists()) {
-                    return fullPath
-                }
+        if (value !is String) return null
+        if (isFileString(value)) {
+            // 获取图片的真实地址
+            val fullPath = joinToFullImagePath(value)
+            if (File(fullPath).exists()) {
+                return bitmapDrawable(fullPath)
             }
-            // 不包含下划线才进行颜色解析
-            if (!value.contains("_")) {
-                return ColorUtils.parseColor(value)
-            }
+        }
+        // 只对不包含下划线的字符串进行颜色解析
+        if (!value.contains("_")) {
+            return ColorUtils.parseColor(value)
         }
         return null
     }
