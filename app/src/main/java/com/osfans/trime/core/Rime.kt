@@ -21,6 +21,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.schema.SchemaManager
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -259,7 +260,13 @@ class Rime(fullCheck: Boolean) {
             value: Boolean,
         ) {
             if (isHandlingRimeNotification) return
-            setRimeOption(option, value)
+            if (option == "ascii_mode") {
+                KeyboardSwitcher.currentKeyboard.currentAsciiMode = value
+                if (isAsciiMode == value) return
+            }
+            measureTimeMillis {
+                setRimeOption(option, value)
+            }.also { Timber.d("Took $it ms to set $option to $value") }
         }
 
         @JvmStatic
