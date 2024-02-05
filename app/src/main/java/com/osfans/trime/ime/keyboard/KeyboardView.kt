@@ -345,31 +345,19 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         mShadowRadius = theme.style.getFloat("shadow_radius")
         val mRoundCorner = theme.style.getFloat("round_corner")
         mKeyBackColor = StateListDrawable()
-        mKeyBackColor!!.addState(
-            Key.KEY_STATE_PRESSED_ON,
-            theme.colors.getDrawable("hilited_on_key_back_color"),
-        )
-        mKeyBackColor!!.addState(
-            Key.KEY_STATE_PRESSED_OFF,
-            theme.colors.getDrawable("hilited_off_key_back_color"),
-        )
-        mKeyBackColor!!.addState(Key.KEY_STATE_NORMAL_ON, theme.colors.getDrawable("on_key_back_color"))
-        mKeyBackColor!!.addState(
-            Key.KEY_STATE_NORMAL_OFF,
-            theme.colors.getDrawable("off_key_back_color"),
-        )
-        mKeyBackColor!!.addState(
-            Key.KEY_STATE_PRESSED,
-            theme.colors.getDrawable("hilited_key_back_color"),
-        )
+        mKeyBackColor!!.addState(Key.KEY_STATE_ON_PRESSED, theme.colors.getDrawable("hilited_on_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_ON_NORMAL, theme.colors.getDrawable("on_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_OFF_PRESSED, theme.colors.getDrawable("hilited_off_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_OFF_NORMAL, theme.colors.getDrawable("off_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_PRESSED, theme.colors.getDrawable("hilited_key_back_color"))
         mKeyBackColor!!.addState(Key.KEY_STATE_NORMAL, theme.colors.getDrawable("key_back_color"))
         mKeyTextColor =
             ColorStateList(
                 Key.KEY_STATES,
                 intArrayOf(
                     theme.colors.getColor("hilited_on_key_text_color")!!,
-                    theme.colors.getColor("hilited_off_key_text_color")!!,
                     theme.colors.getColor("on_key_text_color")!!,
+                    theme.colors.getColor("hilited_off_key_text_color")!!,
                     theme.colors.getColor("off_key_text_color")!!,
                     theme.colors.getColor("hilited_key_text_color")!!,
                     theme.colors.getColor("key_text_color")!!,
@@ -550,7 +538,10 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
                         } else {
                             Timber.d(
                                 "swipeDebug.onFling fail , dY=%f, vY=%f, eVY=%f, travel=%d",
-                                deltaY, velocityY, endingVelocityY, travel,
+                                deltaY,
+                                velocityY,
+                                endingVelocityY,
+                                travel,
                             )
                         }
                         if (sendDownKey) {

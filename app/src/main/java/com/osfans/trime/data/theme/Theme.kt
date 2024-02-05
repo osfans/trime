@@ -174,9 +174,7 @@ class Theme(private var isDarkMode: Boolean) {
             m: Map<String, Any?>,
             key: String?,
         ): Int? {
-            var value = theme.getColorValue(m[key] as String?)
-            // 回退到配色
-            if (value == null) value = theme.currentColors[key]
+            val value = theme.getColorValue(m[key] as String?)
             return if (value is Int) value else null
         }
 
@@ -197,9 +195,7 @@ class Theme(private var isDarkMode: Boolean) {
             m: Map<String, Any?>,
             key: String,
         ): Drawable? {
-            var value = theme.getColorValue(m[key] as String?)
-            // 回退到配色
-            if (value == null) value = theme.currentColors[key]
+            val value = theme.getColorValue(m[key] as String?)
             if (value is Int) {
                 return GradientDrawable().apply { setColor(value) }
             } else if (value is Drawable) {

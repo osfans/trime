@@ -164,30 +164,27 @@ class Key(private val mKeyboard: Keyboard) {
         get() = if (isPressed) key_press_offset_y else 0
 
     fun getBackColorForState(drawableState: IntArray): Drawable? {
-        if (drawableState.contentEquals(KEY_STATE_NORMAL)) {
-            return key_back_color
-        } else if (drawableState.contentEquals(KEY_STATE_PRESSED)) {
-            return hilited_key_back_color
+        return when (drawableState) {
+            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> key_back_color
+            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilited_key_back_color
+            else -> null
         }
-        return null
     }
 
     fun getTextColorForState(drawableState: IntArray): Int? {
-        if (drawableState.contentEquals(KEY_STATE_NORMAL)) {
-            return key_text_color
-        } else if (drawableState.contentEquals(KEY_STATE_PRESSED)) {
-            return hilited_key_text_color
+        return when (drawableState) {
+            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> key_text_color
+            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilited_key_text_color
+            else -> null
         }
-        return null
     }
 
     fun getSymbolColorForState(drawableState: IntArray): Int? {
-        if (drawableState.contentEquals(KEY_STATE_NORMAL)) {
-            return key_symbol_color
-        } else if (drawableState.contentEquals(KEY_STATE_PRESSED)) {
-            return hilited_key_symbol_color
+        return when (drawableState) {
+            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> key_symbol_color
+            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilited_key_symbol_color
+            else -> null
         }
-        return null
     }
 
     /**
@@ -287,29 +284,15 @@ class Key(private val mKeyboard: Keyboard) {
          * @see android.graphics.drawable.StateListDrawable.setState
          */
         get() {
-            var states = KEY_STATE_NORMAL
             val isShifted = isTrimeModifierKey && mKeyboard.hasModifier(modifierKeyOnMask)
-            if (isShifted || isOn) {
-                states =
-                    if (isPressed) {
-                        KEY_STATE_PRESSED_ON
-                    } else {
-                        KEY_STATE_NORMAL_ON
-                    }
-            } else {
-                if (click!!.isSticky || click!!.isFunctional) {
-                    states =
-                        if (isPressed) {
-                            KEY_STATE_PRESSED_OFF
-                        } else {
-                            KEY_STATE_NORMAL_OFF
-                        }
+            val states =
+                if (isShifted || isOn) {
+                    if (isPressed) KEY_STATE_ON_PRESSED else KEY_STATE_ON_NORMAL
+                } else if (click!!.isSticky || click!!.isFunctional) {
+                    if (isPressed) KEY_STATE_OFF_PRESSED else KEY_STATE_OFF_NORMAL
                 } else {
-                    if (isPressed) {
-                        states = KEY_STATE_PRESSED
-                    }
+                    if (isPressed) KEY_STATE_PRESSED else KEY_STATE_NORMAL
                 }
-            }
 
             // only for modiferKey debug
             if (isTrimeModifierKey) {
@@ -490,14 +473,14 @@ class Key(private val mKeyboard: Keyboard) {
 
     companion object {
         @JvmField
-        val KEY_STATE_NORMAL_ON =
+        val KEY_STATE_ON_NORMAL =
             intArrayOf(
                 android.R.attr.state_checkable,
                 android.R.attr.state_checked,
             )
 
         @JvmField
-        val KEY_STATE_PRESSED_ON =
+        val KEY_STATE_ON_PRESSED =
             intArrayOf(
                 android.R.attr.state_pressed,
                 android.R.attr.state_checkable,
@@ -505,10 +488,10 @@ class Key(private val mKeyboard: Keyboard) {
             )
 
         @JvmField
-        val KEY_STATE_NORMAL_OFF = intArrayOf(android.R.attr.state_checkable)
+        val KEY_STATE_OFF_NORMAL = intArrayOf(android.R.attr.state_checkable)
 
         @JvmField
-        val KEY_STATE_PRESSED_OFF =
+        val KEY_STATE_OFF_PRESSED =
             intArrayOf(
                 android.R.attr.state_pressed,
                 android.R.attr.state_checkable,
@@ -523,10 +506,10 @@ class Key(private val mKeyboard: Keyboard) {
         @JvmField
         val KEY_STATES =
             arrayOf(
-                KEY_STATE_PRESSED_ON, // 0    "hilited_on_key_back_color"   锁定时按下的背景
-                KEY_STATE_PRESSED_OFF, // 1   "hilited_off_key_back_color"  功能键按下的背景
-                KEY_STATE_NORMAL_ON, // 2     "on_key_back_color"           锁定时背景
-                KEY_STATE_NORMAL_OFF, // 3    "off_key_back_color"          功能键背景
+                KEY_STATE_ON_PRESSED, // 0    "hilited_on_key_back_color"   锁定时按下的背景
+                KEY_STATE_ON_NORMAL, // 1     "on_key_back_color"           锁定时背景
+                KEY_STATE_OFF_PRESSED, // 2   "hilited_off_key_back_color"  功能键按下的背景
+                KEY_STATE_OFF_NORMAL, // 3    "off_key_back_color"          功能键背景
                 KEY_STATE_PRESSED, // 4       "hilited_key_back_color"      按键按下的背景
                 KEY_STATE_NORMAL, // 5         "key_back_color"              按键背景
             )
