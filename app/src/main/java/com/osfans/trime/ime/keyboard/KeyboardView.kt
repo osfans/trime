@@ -52,6 +52,7 @@ import com.osfans.trime.ime.keyboard.Key.Companion.isTrimeModifierKey
 import com.osfans.trime.util.LeakGuardHandlerWrapper
 import com.osfans.trime.util.dp2px
 import com.osfans.trime.util.sp2px
+import splitties.bitflags.hasFlag
 import splitties.systemservices.layoutInflater
 import timber.log.Timber
 import java.lang.reflect.Method
@@ -103,6 +104,20 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
          * @param text the sequence of characters to be displayed.
          */
         fun onText(text: CharSequence?)
+    }
+
+    enum class EnterLabelMode {
+        ACTION_LABEL_NEVER,
+        ACTION_LABEL_ONLY,
+        ACTION_LABEL_PREFERRED,
+        CUSTOM_PREFERRED,
+        ;
+
+        companion object {
+            fun fromOrdinal(ordinal: Int) =
+                runCatching { entries[ordinal] }
+                    .getOrDefault(ACTION_LABEL_NEVER)
+        }
     }
 
     private var mKeyboard: Keyboard? = null
@@ -224,9 +239,9 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     private var mShowSymbol = true
     private var findStateDrawableIndex: Method? = null
     private var getStateDrawable: Method? = null
-    private var labelEnter: String? = ""
+    private var labelEnter: String? = "⏎"
     private var mEnterLabels: MutableMap<String, String?>? = null
-    private var enterLabelMode = 0
+    private var enterLabelMode = EnterLabelMode.ACTION_LABEL_NEVER
 
     fun setShowHint(value: Boolean) {
         mShowHint = value
@@ -243,60 +258,55 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     private fun handleEnterLabel(theme: Theme) {
         mEnterLabels = theme.style.getObject("enter_labels") as MutableMap<String, String?>?
             ?: hashMapOf()
-        val defaultEnterLabel = mEnterLabels!!["default"] ?: "Enter".also { mEnterLabels!!["default"] = it }
+        labelEnter = mEnterLabels!!["default"] ?: "⏎".also { mEnterLabels!!["default"] = it }
         for (label in arrayOf("done", "go", "next", "none", "pre", "search", "send")) {
             if (!mEnterLabels!!.containsKey(label)) {
-                mEnterLabels!![label] = defaultEnterLabel
+                mEnterLabels!![label] = labelEnter
             }
         }
     }
 
     fun updateEnterLabelOnEditorInfo(info: EditorInfo) {
-        if (info.imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION
-            == EditorInfo.IME_FLAG_NO_ENTER_ACTION
-        ) {
+        if (info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
             labelEnter = mEnterLabels!!["default"]
         } else {
             val action = info.imeOptions and EditorInfo.IME_MASK_ACTION
             val actionLabel = info.actionLabel
-            // enter_label_mode 取值：
-            // 0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel
-            if (enterLabelMode == 1) {
-                labelEnter = if (!actionLabel.isNullOrEmpty()) actionLabel.toString() else mEnterLabels!!["default"]
-                return
-            }
-            if (enterLabelMode == 2) {
-                if (!actionLabel.isNullOrEmpty()) {
+            when (enterLabelMode) {
+                EnterLabelMode.ACTION_LABEL_ONLY -> {
                     labelEnter = actionLabel.toString()
-                    return
                 }
-            }
-            when (action) {
-                EditorInfo.IME_ACTION_DONE -> labelEnter = mEnterLabels!!["done"]
-                EditorInfo.IME_ACTION_GO -> labelEnter = mEnterLabels!!["go"]
-                EditorInfo.IME_ACTION_NEXT -> labelEnter = mEnterLabels!!["next"]
-                EditorInfo.IME_ACTION_PREVIOUS -> labelEnter = mEnterLabels!!["pre"]
-                EditorInfo.IME_ACTION_SEARCH -> labelEnter = mEnterLabels!!["search"]
-                EditorInfo.IME_ACTION_SEND -> labelEnter = mEnterLabels!!["send"]
-                EditorInfo.IME_ACTION_NONE -> {
-                    labelEnter = mEnterLabels!!["none"]
-                    if (enterLabelMode == 3) {
+                EnterLabelMode.ACTION_LABEL_PREFERRED -> {
+                    labelEnter =
                         if (!actionLabel.isNullOrEmpty()) {
-                            labelEnter = actionLabel.toString()
-                            return
+                            actionLabel.toString()
+                        } else {
+                            mEnterLabels!!["default"]
                         }
-                    }
-                    labelEnter = mEnterLabels!!["default"]
                 }
-
-                else -> {
-                    if (enterLabelMode == 3) {
-                        if (!actionLabel.isNullOrEmpty()) {
-                            labelEnter = actionLabel.toString()
-                            return
+                EnterLabelMode.CUSTOM_PREFERRED,
+                EnterLabelMode.ACTION_LABEL_NEVER,
+                -> {
+                    labelEnter =
+                        when (action) {
+                            EditorInfo.IME_ACTION_DONE -> mEnterLabels!!["done"]
+                            EditorInfo.IME_ACTION_GO -> mEnterLabels!!["go"]
+                            EditorInfo.IME_ACTION_NEXT -> mEnterLabels!!["next"]
+                            EditorInfo.IME_ACTION_PREVIOUS -> mEnterLabels!!["pre"]
+                            EditorInfo.IME_ACTION_SEARCH -> mEnterLabels!!["search"]
+                            EditorInfo.IME_ACTION_SEND -> mEnterLabels!!["send"]
+                            else -> {
+                                if (enterLabelMode == EnterLabelMode.ACTION_LABEL_NEVER) {
+                                    mEnterLabels!!["default"]
+                                } else {
+                                    if (!actionLabel.isNullOrEmpty()) {
+                                        actionLabel.toString()
+                                    } else {
+                                        mEnterLabels!!["default"]
+                                    }
+                                }
+                            }
                         }
-                    }
-                    labelEnter = mEnterLabels!!["default"]
                 }
             }
         }
@@ -374,7 +384,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         mPaintSymbol.textSize = mSymbolSize.toFloat()
         mPreviewText.typeface = getTypeface(theme.style.getString("preview_font"))
         handleEnterLabel(theme)
-        enterLabelMode = theme.style.getInt("enter_label_mode")
+        enterLabelMode = EnterLabelMode.fromOrdinal(theme.style.getInt("enter_label_mode"))
         invalidateAllKeys()
     }
 
