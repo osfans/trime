@@ -146,7 +146,9 @@ class CompositionPopupWindow(
                 if (!mPopupWindow.isShowing) {
                     mPopupWindow.showAtLocation(anchorView, Gravity.START or Gravity.TOP, x, y)
                 } else {
-                    mPopupWindow.update(x, y, composition.root.measuredWidth, composition.root.measuredHeight)
+                    /* must use the width and height of popup window itself here directly,
+                     * otherwise the width and height cannot be updated! */
+                    mPopupWindow.update(x, y, mPopupWindow.width, mPopupWindow.height)
                 }
             }
         }
