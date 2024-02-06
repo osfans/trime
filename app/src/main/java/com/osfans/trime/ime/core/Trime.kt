@@ -386,9 +386,7 @@ open class Trime : LifecycleInputMethodService() {
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
         mCompositionPopupWindow!!.updateCursorAnchorInfo(cursorAnchorInfo)
-        if (mCandidateRoot != null) {
-            showCompositionView(true)
-        }
+        showCompositionView(true)
     }
 
     override fun onUpdateSelection(

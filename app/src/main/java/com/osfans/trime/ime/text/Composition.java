@@ -84,6 +84,8 @@ public class Composition extends TextView {
 
   private boolean isToolbarMode;
 
+  private int minLength, minCheck;
+
   private class CompositionSpan extends UnderlineSpan {
     public CompositionSpan() {
       super();
@@ -289,6 +291,8 @@ public class Composition extends TextView {
     tfText = FontManager.getTypeface(theme.style.getString("text_font"));
     tfCandidate = FontManager.getTypeface(theme.style.getString("candidate_font"));
     tfComment = FontManager.getTypeface(theme.style.getString("comment_font"));
+    minLength = theme.style.getInt("layout/min_length"); // 候选词长度大于设定，才会显示到悬浮窗中
+    minCheck = theme.style.getInt("layout/min_check"); // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
   }
 
   private Object getAlign(Map<String, Object> m) {
@@ -539,9 +543,6 @@ public class Composition extends TextView {
    * @return 悬浮窗显示的候选词数量
    */
   public int setWindowContent() {
-    final Theme theme = ThemeManager.getActiveTheme();
-    int minLen = theme.style.getInt("layout/min_length"); // 候选词长度大于设定，才会显示到悬浮窗中
-    int minCheck = theme.style.getInt("layout/min_check"); // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
     if (getVisibility() != View.VISIBLE) return 0;
     StackTraceElement[] stacks = new Throwable().getStackTrace();
     Timber.d(
@@ -563,9 +564,9 @@ public class Composition extends TextView {
     for (Map<String, Object> m : windows_comps) {
       if (m.containsKey("composition")) appendComposition(m);
       else if (m.containsKey("candidate")) {
-        start_num = calcStartNum(minLen, minCheck);
-        Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, minLen, minCheck);
-        appendCandidates(m, minLen, start_num);
+        start_num = calcStartNum(minLength, minCheck);
+        Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, minLength, minCheck);
+        appendCandidates(m, minLength, start_num);
       } else if (m.containsKey("click")) appendButton(m);
       else if (m.containsKey("move")) appendMove(m);
     }
