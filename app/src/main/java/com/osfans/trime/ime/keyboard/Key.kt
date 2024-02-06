@@ -125,10 +125,10 @@ class Key(private val mKeyboard: Keyboard) {
                 val typeStr = type.toString().lowercase()
                 s = obtainString(mk, typeStr, "")
                 if (s.isNotEmpty()) {
-                    events[type.ordinal] = Event(mKeyboard, s)
+                    events[type.ordinal] = Event(s)
                     if (type.ordinal < KeyEventType.COMBO.ordinal) hasComposingKey = true
                 } else if (type == KeyEventType.CLICK) {
-                    events[type.ordinal] = Event(mKeyboard, "")
+                    events[type.ordinal] = Event("")
                 }
             }
             if (hasComposingKey) mKeyboard.composingKeys.add(this)
@@ -450,15 +450,15 @@ class Key(private val mKeyboard: Keyboard) {
         ) {
             label
         } else {
-            event!!.getLabel() // 中文狀態顯示標籤
+            event!!.getLabel(mKeyboard) // 中文狀態顯示標籤
         }
     }
 
     fun getPreviewText(type: Int): String {
         return if (type == KeyEventType.CLICK.ordinal) {
-            event!!.previewText
+            event!!.getPreviewText(mKeyboard)
         } else {
-            getEvent(type)!!.previewText
+            getEvent(type)!!.getPreviewText(mKeyboard)
         }
     }
 
@@ -466,7 +466,7 @@ class Key(private val mKeyboard: Keyboard) {
         get() {
             if (labelSymbol!!.isEmpty()) {
                 val longClick = longClick
-                if (longClick != null) return longClick.getLabel()
+                if (longClick != null) return longClick.getLabel(mKeyboard)
             }
             return labelSymbol
         }

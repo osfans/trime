@@ -287,8 +287,8 @@ class TextInputManager private constructor() :
                 activeEditorInstance.commitText(event.commit, true)
                 return
             }
-            if (event.getText().isNotEmpty()) {
-                onText(event.getText())
+            if (event.getText(KeyboardSwitcher.currentKeyboard).isNotEmpty()) {
+                onText(event.getText(KeyboardSwitcher.currentKeyboard))
                 return
             }
             when (event.code) {

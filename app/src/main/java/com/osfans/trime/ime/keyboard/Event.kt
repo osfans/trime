@@ -28,10 +28,7 @@ import timber.log.Timber
 import java.util.Locale
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
-class Event(keyboard: Keyboard?, var s: String) {
-    // private String TAG = "Event";
-    private val mKeyboard: Keyboard?
-
+class Event(var s: String) {
     var code = 0
     var mask = 0
     private var text: String = ""
@@ -72,55 +69,58 @@ class Event(keyboard: Keyboard?, var s: String) {
         return result
     }
 
-    // TODO 进一步解耦，在Event中去除mKeyboard
-    private fun adjustCase(s: String): String {
+    private fun adjustCase(
+        s: String,
+        kb: Keyboard?,
+    ): String {
         var str = s
         if (str.isEmpty()) return ""
-        if (str.length == 1 && mKeyboard != null && mKeyboard.needUpCase()) {
+        if (str.length == 1 && kb != null && kb.needUpCase()) {
             str = str.uppercase(Locale.getDefault())
-        } else if (str.length == 1 && mKeyboard != null && !Rime.isAsciiMode &&
-            mKeyboard.isLabelUppercase
+        } else if (str.length == 1 && kb != null && !Rime.isAsciiMode &&
+            kb.isLabelUppercase
         ) {
             str = str.uppercase(Locale.getDefault())
         }
         return str
     }
 
-    fun getLabel(): String {
+    fun getLabel(kb: Keyboard?): String {
         val state = states?.get(if (Rime.getOption(toggle)) 1 else 0)
         if (state != null) return state
-        if (mKeyboard == null) return adjustCase(label)
-        if (mKeyboard.isOnlyShiftOn) {
+        if (kb == null) return adjustCase(label, null)
+        if (kb.isOnlyShiftOn) {
             if (code >= KeyEvent.KEYCODE_0 && code <= KeyEvent.KEYCODE_9 &&
                 !AppPrefs.defaultInstance().keyboard.hookShiftNum
             ) {
-                return adjustCase(shiftLabel)
+                return adjustCase(shiftLabel, kb)
             }
             if (code >= KeyEvent.KEYCODE_GRAVE &&
                 code <= KeyEvent.KEYCODE_SLASH ||
                 code == KeyEvent.KEYCODE_COMMA ||
                 code == KeyEvent.KEYCODE_PERIOD
             ) {
-                if (!AppPrefs.defaultInstance().keyboard.hookShiftSymbol) return adjustCase(shiftLabel)
+                if (!AppPrefs.defaultInstance().keyboard.hookShiftSymbol) return adjustCase(shiftLabel, kb)
             }
-        } else if (mKeyboard.modifer or mask and KeyEvent.META_SHIFT_ON != 0) {
-            return adjustCase(shiftLabel)
+        } else if (kb.modifer or mask and KeyEvent.META_SHIFT_ON != 0) {
+            return adjustCase(shiftLabel, kb)
         }
-        return adjustCase(label)
+        return adjustCase(label, kb)
     }
 
-    fun getText(): String {
-        if (text.isNotEmpty()) return adjustCase(text)
-        if (mKeyboard != null && mKeyboard.needUpCase() && mask == 0 &&
+    fun getText(kb: Keyboard?): String {
+        if (text.isNotEmpty()) return adjustCase(text, kb)
+        if (kb != null && kb.needUpCase() && mask == 0 &&
             code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z
         ) {
-            return adjustCase(label)
+            return adjustCase(label, kb)
         }
         return ""
     }
 
-    val previewText: String
-        get() = preview.ifEmpty { getLabel() }
+    fun getPreviewText(kb: Keyboard?): String {
+        return preview.ifEmpty { getLabel(kb) }
+    }
 
     fun getToggle(): String {
         return toggle.ifEmpty { "ascii_mode" }
@@ -147,10 +147,7 @@ class Event(keyboard: Keyboard?, var s: String) {
             return c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT
         }
 
-    constructor(s: String) : this(null, s)
-
     init {
-        mKeyboard = keyboard
         initHelper()
     }
 

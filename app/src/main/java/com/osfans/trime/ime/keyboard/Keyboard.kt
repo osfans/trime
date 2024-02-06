@@ -143,7 +143,7 @@ class Keyboard() {
             key.width = keyWidth
             key.height = keyHeight
             key.gap = horizontalGap
-            key.events[0] = Event(this, element.toString())
+            key.events[0] = Event(element.toString())
             column++
             x += key.width + key.gap
             mKeys.add(key)

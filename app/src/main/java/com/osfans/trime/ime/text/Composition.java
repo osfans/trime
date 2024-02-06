@@ -47,6 +47,7 @@ import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.data.theme.ThemeManager;
 import com.osfans.trime.ime.core.Trime;
 import com.osfans.trime.ime.keyboard.Event;
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher;
 import com.osfans.trime.util.CollectionUtils;
 import com.osfans.trime.util.DimensionsKt;
 import java.util.ArrayList;
@@ -491,7 +492,7 @@ public class Composition extends AppCompatTextView {
     final String label;
     final Event e = new Event(CollectionUtils.obtainString(m, "click", ""));
     if (m.containsKey("label")) label = CollectionUtils.obtainString(m, "label", "");
-    else label = e.getLabel();
+    else label = e.getLabel(KeyboardSwitcher.currentKeyboard);
     int start, end;
     String sep = null;
     if (m.containsKey("start")) sep = CollectionUtils.obtainString(m, "start", "");
