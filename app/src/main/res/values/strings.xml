@@ -30,7 +30,6 @@
     <string name="pref_trime_qq2">Trime QQ Group 2</string>
     <string name="pref_rime_qq">Rime QQ Group</string>
     <string name="pref_market">Google Play</string>
-    <string name="pref_coolmarket">Cool Market</string>
     <string name="about__donation_title">Donate</string>
     <string name="about__donation_summary">Use Alipay to support Trime and PRIME</string>
     <string name="settings__about_title">About</string>
@@ -198,9 +197,7 @@
      <string name="keyboard__key_swipe_velocity_hi">The velocity of the swipe gesture on consecutive keystrokes</string>
     <string name="about__build_info">Build Info</string>
     <string name="keyboard__use_mini_keyboard_title">Show mini keyboard with real keyboard attached</string>
-    <string name="pref_trime_custom_qq">Custom QQ Group</string>
-    <string name="pref_trime_custom_qq_summary" translatable="false"> </string>
-    <string name="pref_trime_custom_qq_data" translatable="false"> </string>
+    <string name="pref_trime_telegram">Telegram Group</string>
     <string name="pref_keyboard__candidate">Candidate</string>
     <string name="keyboard__candidate_page_size">Candidate item count for each page</string>
     <string name="copy_done">Copied to clipboard!</string>

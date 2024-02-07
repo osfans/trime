@@ -16,7 +16,6 @@ import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.Const
 import com.osfans.trime.util.formatDateTime
-import com.osfans.trime.util.optionalPreference
 import com.osfans.trime.util.thirdPartySummary
 import splitties.systemservices.clipboardManager
 
@@ -58,7 +57,6 @@ class AboutFragment : PaddingPreferenceFragment() {
                 ?.thirdPartySummary(Rime.getLibrimeVersion())
             get<Preference>("about__opencc_version")
                 ?.thirdPartySummary(OpenCCDictManager.getOpenCCVersion())
-            get<Preference>("pref_trime_custom_qq")?.optionalPreference()
             get<Preference>("about__open_source_licenses")?.apply {
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_aboutFragment_to_licenseFragment)

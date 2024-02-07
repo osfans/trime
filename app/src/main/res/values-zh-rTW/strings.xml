@@ -30,7 +30,6 @@
     <string name="pref_trime_qq2">同文QQ羣 2</string>
     <string name="pref_rime_qq">中州韻QQ羣</string>
     <string name="pref_market">谷歌市場</string>
-    <string name="pref_coolmarket">酷安市場</string>
     <string name="about__donation_title">捐贈</string>
     <string name="about__donation_summary">自願用支付寶捐助同文和PRIME的開發</string>
     <string name="settings__about_title">關於</string>
@@ -194,7 +193,7 @@
     <string name="keyboard__key_swipe_velocity_hi">連續擊鍵時觸發滑動手勢的速度</string>
     <string name="about__build_info">建構資訊</string>
     <string name="keyboard__use_mini_keyboard_title">連接實體鍵盤時，顯示迷你軟鍵盤</string>
-    <string name="pref_trime_custom_qq">修改版QQ羣</string>
+    <string name="pref_trime_telegram">Telegram群組</string>
     <string name="pref_keyboard__candidate">候選欄</string>
     <string name="keyboard__candidate_page_size">每頁顯示候選詞數量</string>
     <string name="copy_done">已複製</string>
