@@ -344,7 +344,7 @@ class Theme(private var isDarkMode: Boolean) {
         }
     }
 
-    fun refreshColorValues() {
+    private fun refreshColorValues() {
         currentColors.clear()
         val colorMap = presetColorSchemes!![currentColorSchemeId]
         if (colorMap == null) {

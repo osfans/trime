@@ -106,9 +106,9 @@ public class Candidate extends View {
     candidateViewHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("candidate_view_height"));
     commentHeight = (int) DimensionsKt.dp2px(theme.style.getFloat("comment_height"));
 
-    candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
-    commentFont = FontManager.getTypeface(theme.style.getString("comment_font"));
-    symbolFont = FontManager.getTypeface(theme.style.getString("symbol_font"));
+    candidateFont = FontManager.getTypeface("candidate_font");
+    commentFont = FontManager.getTypeface("comment_font");
+    symbolFont = FontManager.getTypeface("symbol_font");
 
     candidatePaint.setTextSize(candidate_text_size);
     candidatePaint.setTypeface(candidateFont);

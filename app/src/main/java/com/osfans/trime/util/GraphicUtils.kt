@@ -3,27 +3,21 @@ package com.osfans.trime.util
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Build
 import com.osfans.trime.data.theme.FontManager
-import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.util.GraphicUtils.measureText
 
 object GraphicUtils {
-    const val HAN_B_FONT = "hanb_font"
-    const val LATIN_FONT = "latin_font"
-    private val theme = ThemeManager.activeTheme
-    private val hanBFont = FontManager.getTypeface(theme.style.getString(HAN_B_FONT))
-    private val latinFont = FontManager.getTypeface(theme.style.getString(LATIN_FONT))
-
     private fun determineTypeface(
         codePoint: Int,
         font: Typeface,
     ): Typeface {
-        return if (hanBFont != Typeface.DEFAULT && Character.isSupplementaryCodePoint(codePoint)) {
-            hanBFont
-        } else if (latinFont != Typeface.DEFAULT && codePoint < 0x2E80) {
-            latinFont
-        } else {
-            font
+        if (Character.isSupplementaryCodePoint(codePoint)) {
+            FontManager.hanBFont.let { if (it != Typeface.DEFAULT) return@determineTypeface it }
+        } else if (codePoint < 0x2E80) {
+            FontManager.latinFont.let { if (it != Typeface.DEFAULT) return@determineTypeface it }
         }
+        return font
     }
 
     @JvmStatic
@@ -32,10 +26,15 @@ object GraphicUtils {
         font: Typeface,
     ): Float {
         if (text.isEmpty()) return 0.0f
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && font != Typeface.DEFAULT) {
+            this.typeface = font
+            return this.measureText(text)
+        }
+
         val codePoints = text.codePointCount(0, text.length)
         var x = 0.0f
-        if (latinFont != Typeface.DEFAULT ||
-            (hanBFont != Typeface.DEFAULT && text.length > codePoints)
+        if (FontManager.latinFont != Typeface.DEFAULT ||
+            (FontManager.hanBFont != Typeface.DEFAULT && text.length > codePoints)
         ) {
             var offset = 0
             while (offset < text.length) {
@@ -62,10 +61,16 @@ object GraphicUtils {
         font: Typeface,
     ) {
         if (text.isEmpty()) return
-        val codePoints = text.codePointCount(0, text.length)
         var x = centerX - paint.measureText(text, font) / 2
-        if (latinFont != Typeface.DEFAULT ||
-            (hanBFont != Typeface.DEFAULT && text.length > codePoints)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && font != Typeface.DEFAULT) {
+            paint.typeface = font
+            this.drawText(text, x, y, paint)
+            return
+        }
+
+        val codePoints = text.codePointCount(0, text.length)
+        if (FontManager.latinFont != Typeface.DEFAULT ||
+            (FontManager.hanBFont != Typeface.DEFAULT && text.length > codePoints)
         ) {
             var offset = 0
             while (offset < text.length) {

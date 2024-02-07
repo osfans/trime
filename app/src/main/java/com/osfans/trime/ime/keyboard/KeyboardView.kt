@@ -43,7 +43,7 @@ import android.widget.TextView
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
-import com.osfans.trime.data.theme.FontManager.getTypeface
+import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding
@@ -378,11 +378,11 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         val mPreviewTextSizeLarge = theme.style.getInt("preview_text_size")
         mPreviewText.textSize = mPreviewTextSizeLarge.toFloat()
         showPreview = prefs.keyboard.popupKeyPressEnabled
-        mPaint.setTypeface(getTypeface(theme.style.getString("key_font")))
-        mPaintSymbol.setTypeface(getTypeface(theme.style.getString("symbol_font")))
+        mPaint.setTypeface(FontManager.getTypeface("key_font"))
+        mPaintSymbol.setTypeface(FontManager.getTypeface("symbol_font"))
         mPaintSymbol.color = key_symbol_color
         mPaintSymbol.textSize = mSymbolSize.toFloat()
-        mPreviewText.typeface = getTypeface(theme.style.getString("preview_font"))
+        mPreviewText.typeface = FontManager.getTypeface("preview_font")
         handleEnterLabel(theme)
         enterLabelMode = EnterLabelMode.fromOrdinal(theme.style.getInt("enter_label_mode"))
         invalidateAllKeys()

@@ -288,10 +288,10 @@ public class Composition extends TextView {
     sticky_lines_land = theme.style.getInt("layout/sticky_lines_land");
     movable = theme.style.getString("layout/movable");
     all_phrases = theme.style.getBoolean("layout/all_phrases");
-    tfLabel = FontManager.getTypeface(theme.style.getString("label_font"));
-    tfText = FontManager.getTypeface(theme.style.getString("text_font"));
-    tfCandidate = FontManager.getTypeface(theme.style.getString("candidate_font"));
-    tfComment = FontManager.getTypeface(theme.style.getString("comment_font"));
+    tfLabel = FontManager.getTypeface("label_font");
+    tfText = FontManager.getTypeface("text_font");
+    tfCandidate = FontManager.getTypeface("candidate_font");
+    tfComment = FontManager.getTypeface("comment_font");
     minLength = theme.style.getInt("layout/min_length"); // 候选词长度大于设定，才会显示到悬浮窗中
     minCheck = theme.style.getInt("layout/min_check"); // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
   }

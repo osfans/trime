@@ -86,7 +86,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
       TextView textView = holder.simpleKeyTexts.get(i);
 
       textView.setTextColor(theme.colors.getColor("key_text_color"));
-      textView.setTypeface(FontManager.getTypeface(theme.style.getString("key_font")));
+      textView.setTypeface(FontManager.getTypeface("key_font"));
       textView.setGravity(Gravity.CENTER);
       textView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
 

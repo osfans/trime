@@ -113,8 +113,8 @@ public class CandidateAdapter extends RecyclerView.Adapter<CandidateAdapter.View
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     final CandidateListItem candidate = mCandidates.get(position);
 
-    final Typeface candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"));
-    final Typeface commentFont = FontManager.getTypeface(theme.style.getString("comment_font"));
+    final Typeface candidateFont = FontManager.getTypeface("candidate_font");
+    final Typeface commentFont = FontManager.getTypeface("comment_font");
     holder.candidate.setTypeface(candidateFont);
     holder.comment.setTypeface(commentFont);
 
