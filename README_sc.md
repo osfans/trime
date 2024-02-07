@@ -26,14 +26,6 @@
 
 - 配置文档 [rimerc](https://github.com/Bambooin/rimerc)
 
-## 社区
-
-- [Issues](https://github.com/osfans/trime/issues)
-- [QQ 群 (811142286)](https://jq.qq.com/?_wv=1027&k=AXdR80HN)
-- [QQ 群 (224230445)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=pg_q7UVumWYLq1Rk8kIAqkK1xGt64VnX&authKey=04m9l7OBO5H5vgrEL8IbpsmtnptWM60xy%2FUwYCfyvw9VcRhe8zRzAS1ezoemZdFr&noverify=0&group_code=224230445)
-- [贴吧](http://tieba.baidu.com/f?kw=rime)
-- [Telegram](https://t.me/trime_dev)
-
 ## 沿革
 
 TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
@@ -53,10 +45,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 对 JDK（OpenJDK）版本的要求是 17 或 21。
 
-### 构建
-
-<details>
-<summary><b>Windows 上的前提条件</b></summary>
+#### Windows 上的前提条件
 
 当前构建配置会使构建过程中创建符号链接，开发者需要：
 
@@ -70,30 +59,26 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 如果无法或者不想启用上述设置也没关系。构建系统会自动在符号链接创建失败时使用复制代替。
 
-</details>
+### 构建
 
-1. 克隆此项目并拉取所有子模块。
+#### 1. 克隆此项目并拉取所有子模块。
 
 ```sh
 git clone git@github.com:osfans/trime.git
 git submodule update --init --recursive
 ```
 
-2. 编译调试版本:
+#### 2. 编译调试版本:
 
-Linux 或 macOS 上可执行：
-
-```bash
+```sh
+# On Linux or macOS
 make debug
+
+# On Windows
+.\gradlew assembleDebug
 ```
 
-Windows 上执行：
-
-```powershell
-.\gradle :app:assembleDebug
-```
-
-3. 编译正式版本：
+#### 3. 编译正式版本：
 
 请创建 `keystore.properties` 文件，包含以下内容，注明[签名信息](https://developer.android.com/studio/publish/app-signing.html)：
 
@@ -104,16 +89,14 @@ keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
-之后，Linux 和 macOS 上可执行：
+然后执行：
 
-```bash
+```sh
+# On Linux or macOS
 make release
-```
 
-Windows 上执行：
-
-```powershell
-.\gradlew :app:assembleRelease
+# On Windows
+.\gradlew assembleRelease
 ```
 
 ### 故障排除
@@ -140,7 +123,7 @@ Target "boost_log_setup" links to target "Boost::coroutine" but the target was n
 - 翻译：天真可爱的满满（繁体中文）、点解（英文）......
 - 键盘：天真可爱的满满、皛筱晓小笨鱼、吴琛 11、熊猫阿 Bo、默默ㄇㄛ ˋ......
 - 捐赠：[Releases](https://github.com/osfans/trime/releases) 中的“打赏”实时更新
-- 社区：在[社区](#社区)中反馈意见的网友
+- 社区：在 [Issues](https://github.com/osfans/trime/issues)、[QQ 群 (811142286)](https://jq.qq.com/?_wv=1027&k=AXdR80HN)、[QQ 群 (224230445)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=pg_q7UVumWYLq1Rk8kIAqkK1xGt64VnX&authKey=04m9l7OBO5H5vgrEL8IbpsmtnptWM60xy%2FUwYCfyvw9VcRhe8zRzAS1ezoemZdFr&noverify=0&group_code=224230445)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime)、[贴吧](http://tieba.baidu.com/f?kw=rime)、[Telegram](https://t.me/trime_dev) 中反馈意见的网友
 - 项目：[RIME]、[OpenCC]、[注音仓颉输入法]等开源项目
 
 ## 第三方库
