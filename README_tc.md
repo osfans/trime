@@ -1,21 +1,24 @@
 # 同文 Android 輸入法平臺
+
 ![build](https://github.com/osfans/trime/actions/workflows/commit-ci.yml/badge.svg?branch=develop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![GitHub release](https://img.shields.io/github/release/osfans/trime.svg)](https://github.com/osfans/trime/releases)
 [![F-Droid release](https://img.shields.io/f-droid/v/com.osfans.trime.svg)](https://f-droid.org/packages/com.osfans.trime)
 [![Latest build](https://img.shields.io/github/last-commit/osfans/trime.svg)](http://osfans.github.io/trime/)
 
-[English](README.md) | [简体中文](README_sc.md) | [繁體中文](README_tc.md)
+[English](README.md) | [简体中文](README_sc.md) | 繁體中文
 
 ## 關於
 
 源於開源的[注音倉頡輸入法]前端，基於著名的 [RIME] 輸入法框架，使用 JNI 的 C 語言和 Android 的 Java/Kotlin 語言書寫，旨在保護漢語各地方言母語，音碼、形碼通用的輸入法平臺。
 
+[查看文檔](https://github.com/osfans/trime/wiki)
+
 ## 下載
+
 - 穩定版 <br>
-[<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
-[<img alt='Google Play 立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
-[<img alt='酷安' src='https://static.coolapk.com/static/web/v8/img/icon.png' height='60px'/>](https://www.coolapk.com/apk/com.osfans.trime)
+  [<img alt='Get it on F-Droid' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' height='80px'/>](https://f-droid.org/packages/com.osfans.trime)
+  [<img alt='Google Play 立即下載' src='https://play.google.com/intl/en_us/badges/images/generic/zh-tw_badge_web_generic.png' height='80px'/>](https://play.google.com/store/apps/details?id=com.osfans.trime)
 
 - 每夜版 [點選下載](https://github.com/osfans/trime/releases/tag/nightly)
 
@@ -23,17 +26,16 @@
 
 - 配置文件 [rimerc](https://github.com/Bambooin/rimerc)
 
-## 鳴謝
-- 開發：[osfans](https://github.com/osfans)
-- 貢獻：[boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)、[senchi96](https://github.com/senchi96)、[heiher](https://github.com/heiher)、[abay](https://github.com/a342191555)、[iovxw](https://github.com/iovxw)、[huyz-git](https://github.com/huyz-git)、[tumuyan](https://github.com/tumuyan)、[WhiredPlanck](https://github.com/WhiredPlanck)......
-- [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)......
-- 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）......
-- 鍵盤：天真可愛的滿滿、皛筱曉小笨魚、吳琛11、熊貓阿Bo、默默ㄇㄛˋ......
-- 捐贈：[Releases](https://github.com/osfans/trime/releases) 中的“打賞”實時更新
-- 社群：在 [Issues](https://github.com/osfans/trime/issues)、[QQ 群（811142286）](https://jq.qq.com/?_wv=1027&k=AXdR80HN)、[QQ 群（458845988）](https://jq.qq.com/?_wv=1027&k=n6xT4G3q)、[酷安](http://www.coolapk.com/apk/com.osfans.trime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime) 和[貼吧](http://tieba.baidu.com/f?kw=rime)中反饋意見的網友
-- 專案：[RIME]、[OpenCC]、[注音倉頡輸入法]等開源專案
+## 社區
+
+- [Issues](https://github.com/osfans/trime/issues)
+- [QQ 群 (811142286)](https://jq.qq.com/?_wv=1027&k=AXdR80HN)
+- [QQ 群 (224230445)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=pg_q7UVumWYLq1Rk8kIAqkK1xGt64VnX&authKey=04m9l7OBO5H5vgrEL8IbpsmtnptWM60xy%2FUwYCfyvw9VcRhe8zRzAS1ezoemZdFr&noverify=0&group_code=224230445)
+- [贴吧](http://tieba.baidu.com/f?kw=rime)
+- [Telegram](https://t.me/trime_dev)
 
 ## 沿革
+
 TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的縮寫:
 
 - 最初，輸入法是寫給[泰如拼音](http://taerv.nguyoeh.com/ime/)（tae5 rv2）的，中文名為“泰如輸入法”;
@@ -41,7 +43,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的縮寫:
 - 後來，相容了五筆、兩筆等形碼，在太空衛士、徵羽的建議下，更名為“[同文輸入法平臺 2.x](https://github.com/osfans/trime-legacy)”。寓意音碼形碼同臺，方言官話同文。
 - 之後，藉助 JNI 技術，享受了 [librime](https://github.com/rime/librime) 的成果，升級為“同文輸入法平臺 3.x”，簡稱“同文輸入法”。
 
-現在歡迎你前來[貢獻](CONTRIBUTING.md) ～！:tada:
+現在歡迎你前來[貢獻](CONTRIBUTING.md) ～！
 
 ## 開發入門
 
@@ -54,7 +56,7 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的縮寫:
 ### 構建
 
 <details>
-<summary>Windows 上的前提條件</summary>
+<summary><b>Windows 上的前提條件</b></summary>
 
 當前構建配置會使構建過程中建立符號連結，開發者需要：
 
@@ -62,9 +64,9 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的縮寫:
 
 - 啟用 `git` 的符號連結支援：
 
-    ```powershell
-    git config --global core.symlinks true
-    ```
+  ```powershell
+  git config --global core.symlinks true
+  ```
 
 如果無法或者不想啟用上述設定也沒關係。構建系統會自動在符號連結建立失敗時使用複製代替。
 
@@ -119,16 +121,30 @@ Windows 上執行：
 ```
 Target "boost_log_setup" links to target "Boost::coroutine" but the target was not found.
 ```
+
 在 Linux 或 macOS 上執行 `make clean`，Windows 上執行 `.\gradlew clean`。
 
 其他問題:
+
 1. 首先嚐試 `make clean`
 2. 確保你的倉庫與最新版本一致。如果你修改了一個或更多的子模組，請確保它們與當前倉庫版本相容。
 3. 如果問題依然存在（不太可能）, 嘗試進行一次新的克隆。
-4. 檢查是否有PR/issue與你的問題相關。 如果有的話，嘗試他們的解決方案。
-5. 如果以上方法都不工作，你可以提一個issue來尋求幫助(可選)。
+4. 檢查是否有 PR/issue 與你的問題相關。 如果有的話，嘗試他們的解決方案。
+5. 如果以上方法都不工作，你可以提一個 issue 來尋求幫助(可選)。
+
+## 鳴謝
+
+- 開發：[osfans](https://github.com/osfans)
+- 貢獻：[boboIqiqi](https://github.com/boboIqiqi)、[Bambooin](https://github.com/Bambooin)、[senchi96](https://github.com/senchi96)、[heiher](https://github.com/heiher)、[abay](https://github.com/a342191555)、[iovxw](https://github.com/iovxw)、[huyz-git](https://github.com/huyz-git)、[tumuyan](https://github.com/tumuyan)、[WhiredPlanck](https://github.com/WhiredPlanck)、[nopdan](https://github.com/nopdan)......
+- [維基](https://github.com/osfans/trime/wiki)：[xiaoqun2016](https://github.com/xiaoqun2016)、[boboIqiqi](https://github.com/boboIqiqi)......
+- 翻譯：天真可愛的滿滿（繁體中文）、點解（英文）......
+- 鍵盤：天真可愛的滿滿、皛筱曉小笨魚、吳琛 11、熊貓阿 Bo、默默ㄇㄛ ˋ......
+- 捐贈：[Releases](https://github.com/osfans/trime/releases) 中的“打賞”實時更新
+- 社群：在 [社區](#社區)中反饋意見的網友
+- 專案：[RIME]、[OpenCC]、[注音倉頡輸入法]等開源專案
 
 ## 第三方庫
+
 - [Boost C++ Libraries](https://www.boost.org/) (Boost Software License)
 - [darts-clone](https://github.com/s-yata/darts-clone) (New BSD License)
 - [LevelDB](https://github.com/google/leveldb) (New BSD License)
