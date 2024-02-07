@@ -58,10 +58,7 @@ Android SDK and Android NDK should be correctly installed and configured. If you
 
 The needed version of JDK (OpenJDK) is 17 or 21.
 
-### Build
-
-<details>
-<summary><b>Prerequisites for Windows</b></summary>
+#### Prerequisites for Windows
 
 Symbolic links will be created according to current build configurations, developers need:
 
@@ -75,30 +72,26 @@ Symbolic links will be created according to current build configurations, develo
 
 If you cannot or wouldn't like to enable anything, it doesn't matter. Copying will be used instead when error on creating symbolic links.
 
-</details>
+### Build
 
-1. Clone this project and fetch all submodules:
+#### 1. Clone this project and fetch all submodules:
 
 ```sh
 git clone git@github.com:osfans/trime.git
 git submodule update --init --recursive
 ```
 
-2. Debug version without signature:
+#### 2. Debug version without signature:
 
-On Linux or macOS, you may run:
-
-```bash
+```sh
+# On Linux or macOS
 make debug
-```
 
-On Windows, run:
-
-```powershell
+# On Windows
 .\gradlew assembleDebug
 ```
 
-3. Release version with signture:
+#### 3. Release version with signture:
 
 Create `keystore.properties` file which contains following contents for [signing information](https://developer.android.com/studio/publish/app-signing.html):
 
@@ -109,15 +102,13 @@ keyAlias=myKeyAlias
 storeFile=myStoreFileLocation
 ```
 
-Then, on Linux or macOS, you may run:
+Then, you may run:
 
-```bash
+```sh
+# On Linux or macOS
 make release
-```
 
-On Windows, run:
-
-```powershell
+# On Windows
 .\gradlew assembleRelease
 ```
 
@@ -145,7 +136,7 @@ Other issues:
 - Translators: 天真可爱的满满 (Chinese Traditional), 点解 (English) ...
 - Keyboard Designers: 天真可爱的满满、皛筱晓小笨鱼、吴琛 11、熊猫阿 Bo、默默ㄇㄛ ˋ...
 - Donations: See QR Code in [Releases](https://github.com/osfans/trime/releases)
-- Community: Netizens who feedback in [Community](#Community)
+- Community: Netizens who feedback in [Issues](https://github.com/osfans/trime/issues)、[QQ Group (811142286)](https://jq.qq.com/?_wv=1027&k=AXdR80HN)、[QQ Group (224230445)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=pg_q7UVumWYLq1Rk8kIAqkK1xGt64VnX&authKey=04m9l7OBO5H5vgrEL8IbpsmtnptWM60xy%2FUwYCfyvw9VcRhe8zRzAS1ezoemZdFr&noverify=0&group_code=224230445)、[Tieba](http://tieba.baidu.com/f?kw=rime)、[Google Play](https://play.google.com/store/apps/details?id=com.osfans.trime)、[Telegram](https://t.me/trime_dev)...
 - Projects: [RIME]、[OpenCC]、[Android Traditional Chinese IME] and so on.
 
 ## Third Party Libraries
