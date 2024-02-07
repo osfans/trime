@@ -76,15 +76,6 @@
     <PreferenceCategory app:iconSpaceReserved="false"
         app:title="@string/pref_help__user_community"
         app:key="pref_help__user_community" >
-
-        <Preference android:key="pref_trime_custom_qq"
-            app:iconSpaceReserved="false"
-            android:title="@string/pref_trime_custom_qq"
-            android:summary="@string/pref_trime_custom_qq_summary">
-            <intent android:action="android.intent.action.VIEW"
-                android:data="@string/pref_trime_custom_qq_data" />
-        </Preference>
-
         <Preference android:key="pref_trime_qq"
             app:iconSpaceReserved="false"
             android:title="@string/pref_trime_qq"
@@ -106,6 +97,13 @@
             <intent android:action="android.intent.action.VIEW"
                 android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3Dm505aYSeLZjOwWeMNAViWylZZDYqMrxV" />
         </Preference>
+        <Preference android:key="pref_trime_telegram"
+            app:iconSpaceReserved="false"
+            android:title="@string/pref_trime_telegram"
+            android:summary="\@trime_dev">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://t.me/trime_dev" />
+        </Preference>
     </PreferenceCategory>
 
 
@@ -116,11 +114,6 @@
             app:iconSpaceReserved="false">
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.osfans.trime" />
-        </Preference>
-        <Preference android:key="pref_coolmarket" android:title="@string/pref_coolmarket"
-            app:iconSpaceReserved="false">
-            <intent android:action="android.intent.action.VIEW"
-                android:data="https://www.coolapk.com/apk/com.osfans.trime" />
         </Preference>
     </PreferenceCategory>
 
