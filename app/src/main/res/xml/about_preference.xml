@@ -115,6 +115,11 @@
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.osfans.trime" />
         </Preference>
+        <Preference android:key="pref_fdroid" android:title="F-Droid"
+            app:iconSpaceReserved="false">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://f-droid.org/packages/com.osfans.trime" />
+        </Preference>
     </PreferenceCategory>
 
 
