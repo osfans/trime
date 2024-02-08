@@ -3,11 +3,16 @@ package com.osfans.trime.ime.core
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.res.Configuration
+import android.graphics.Color
+import android.os.Build
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.Rime
@@ -16,6 +21,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
+import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -122,6 +128,24 @@ class InputView(
                 }
             }
 
+        service.window.window!!.also { it ->
+            // allow draw behind navigation bar
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+            it.navigationBarColor = Color.TRANSPARENT
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // don't apply scrim to transparent navigation bar
+                it.isNavigationBarContrastEnforced = false
+            }
+            ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+                insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                    bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                        bottomMargin = it.bottom
+                    }
+                }
+                WindowInsetsCompat.CONSUMED
+            }
+        }
+
         liquidKeyboard.setKeyboardView(keyboardWindow.oldSymbolInputView.liquidKeyboardView)
 
         keyboardView =
@@ -214,7 +238,17 @@ class InputView(
         quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
-    fun startInput(info: EditorInfo) {
+    fun startInput(
+        info: EditorInfo,
+        restarting: Boolean = false,
+    ) {
+        if (!restarting) {
+            service.window.window!!.also {
+                WindowCompat.getInsetsController(it, it.decorView)
+                    .isAppearanceLightNavigationBars =
+                    ColorUtils.isDark(theme.colors.getColor("key_text_color")!!)
+            }
+        }
         keyboardWindow.oldMainInputView.mainKeyboardView.updateEnterLabelOnEditorInfo(info)
     }
 

@@ -19,6 +19,7 @@ package com.osfans.trime.data.theme
 
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import androidx.annotation.ColorInt
 import androidx.core.math.MathUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
@@ -171,11 +172,13 @@ class Theme(private var isDarkMode: Boolean) {
         }
 
         // API 2.0
+        @ColorInt
         fun getColor(key: String?): Int? {
             val o = theme.currentColors[key]
             return if (o is Int) o else null
         }
 
+        @ColorInt
         fun getColor(
             m: Map<String, Any?>,
             key: String?,
