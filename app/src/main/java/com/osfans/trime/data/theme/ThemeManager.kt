@@ -33,9 +33,9 @@ object ThemeManager {
             ?.toMutableList() ?: mutableListOf()
     }
 
-    val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
+    private val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
 
-    val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
+    private val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
 
     @JvmStatic
     fun getAllThemes(): List<String> {
@@ -45,7 +45,7 @@ object ThemeManager {
         return sharedThemes + userThemes
     }
 
-    fun refreshThemes() {
+    private fun refreshThemes() {
         sharedThemes.clear()
         userThemes.clear()
         sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
@@ -61,6 +61,7 @@ object ThemeManager {
             if (_activeTheme == value) return
             _activeTheme = value
             fireChange()
+            FontManager.reload()
         }
 
     private var isNightMode = false
