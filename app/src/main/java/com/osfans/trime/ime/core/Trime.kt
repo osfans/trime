@@ -492,7 +492,7 @@ open class Trime : LifecycleInputMethodService() {
             bindKeyboardToInputView()
             // if (!restarting) setNavBarColor();
             setCandidatesViewShown(!Rime.isEmpty) // 軟鍵盤出現時顯示候選欄
-            inputView?.startInput(attribute)
+            inputView?.startInput(attribute, restarting)
             when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
                 InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
                 InputType.TYPE_TEXT_VARIATION_PASSWORD,

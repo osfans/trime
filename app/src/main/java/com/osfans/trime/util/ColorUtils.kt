@@ -34,4 +34,11 @@ object ColorUtils {
             null
         }
     }
+
+    fun isDark(color: Int): Boolean {
+        val r = Color.red(color)
+        val g = Color.green(color)
+        val b = Color.blue(color)
+        return (r * 0.299 + g * 0.587 + b * 0.114) < 128
+    }
 }
