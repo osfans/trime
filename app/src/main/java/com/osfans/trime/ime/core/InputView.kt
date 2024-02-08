@@ -9,6 +9,7 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -33,6 +34,7 @@ import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.endToStartOf
@@ -41,10 +43,12 @@ import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.startToEndOf
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.add
+import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
+import splitties.views.imageDrawable
 
 /**
  * Successor of the old InputRoot
@@ -55,6 +59,10 @@ class InputView(
     val rime: Rime,
     val theme: Theme,
 ) : ConstraintLayout(service) {
+    private val keyboardBackground =
+        imageView {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+        }
     private val placeholderListener = OnClickListener { }
 
     private val leftPaddingSpace =
@@ -148,10 +156,18 @@ class InputView(
 
         liquidKeyboard.setKeyboardView(keyboardWindow.oldSymbolInputView.liquidKeyboardView)
 
+        keyboardBackground.imageDrawable = theme.colors.getDrawable("keyboard_background")
+            ?: theme.colors.getDrawable("keyboard_back_color")
+
         keyboardView =
             constraintLayout {
                 isMotionEventSplittingEnabled = true
-                background = theme.colors.getDrawable("root_background")
+                add(
+                    keyboardBackground,
+                    lParams {
+                        centerInParent()
+                    },
+                )
                 add(
                     quickBar.view,
                     lParams(matchParent, wrapContent) {

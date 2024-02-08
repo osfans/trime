@@ -18,7 +18,6 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
-import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
@@ -54,9 +53,6 @@ class Keyboard() {
     var roundCorner: Float
         private set
 
-    /** 鍵盤背景  */
-    var background: Drawable?
-        private set
     // 鍵盤的Shift鍵是否按住
     // private boolean mShifted;
 
@@ -229,8 +225,6 @@ class Keyboard() {
         val keyboardHeight = getKeyboardHeight(theme, keyboardConfig)
         val keyboardKeyWidth = obtainFloat(keyboardConfig, "width", 0f)
         val maxColumns = if (columns == -1) Int.MAX_VALUE else columns
-        val background = theme.colors.getDrawable(keyboardConfig, "keyboard_back_color")
-        if (background != null) this.background = background
         var x = this.horizontalGap / 2
         var y = this.verticalGap
         var row = 0
@@ -659,7 +653,6 @@ class Keyboard() {
         mProximityThreshold = (keyWidth * SEARCH_DISTANCE).toInt()
         mProximityThreshold *= mProximityThreshold // Square it for comparison
         roundCorner = theme.style.getFloat("round_corner")
-        background = theme.colors.getDrawable("keyboard_back_color")
         mKeys = ArrayList()
         composingKeys = ArrayList()
     }
