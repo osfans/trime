@@ -10,13 +10,26 @@ import timber.log.Timber
 import java.io.File
 
 object FontManager {
-    private val fontDir = File(DataManager.userDataDir, "fonts")
-    private val theme get() = ThemeManager.activeTheme
-    val hanBFont: Typeface get() = getTypefaceOrNull("hanb_font") ?: Typeface.DEFAULT
-    val latinFont: Typeface get() = getTypefaceOrNull("latin_font") ?: Typeface.DEFAULT
+    private val fontDir get() = File(DataManager.userDataDir, "fonts")
+    var hanBFont: Typeface = getTypefaceOrDefault("hanb_font")
+        private set
+    var latinFont: Typeface = getTypefaceOrDefault("latin_font")
+        private set
+    private val typefaceCache = mutableMapOf<String, Typeface>()
+
+    fun reload() {
+        typefaceCache.clear()
+        fontFamiliyCache.clear()
+        hanBFont = getTypefaceOrDefault("hanb_font")
+        latinFont = getTypefaceOrDefault("latin_font")
+    }
 
     @JvmStatic
     fun getTypeface(key: String): Typeface {
+        if (typefaceCache.containsKey(key)) {
+            return typefaceCache[key]!!
+        }
+        Timber.d("getTypeface() key=%s", key)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val fontFamilies = mutableListOf<FontFamily>()
             getFontFamilies(key).let {
@@ -25,9 +38,15 @@ object FontManager {
                 fontFamilies.addAll(it)
                 fontFamilies.addAll(getFontFamilies("hanb_font"))
             }
-            return buildTypeface(fontFamilies)
+            buildTypeface(fontFamilies).let {
+                typefaceCache[key] = it
+                return@getTypeface it
+            }
         }
-        return getTypefaceOrNull(key) ?: Typeface.DEFAULT
+        getTypefaceOrDefault(key).let {
+            typefaceCache[key] = it
+            return@getTypeface it
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -40,8 +59,8 @@ object FontManager {
         return builder.setSystemFallback("sans-serif").build()
     }
 
-    private fun getTypefaceOrNull(key: String): Typeface? {
-        val fonts = theme.style.getObject(key)
+    private fun getTypefaceOrDefault(key: String): Typeface {
+        val fonts = ThemeManager.activeTheme.style.getObject(key)
 
         fun handler(fontName: String): Typeface? {
             val fontFile = File(fontDir, fontName)
@@ -52,7 +71,7 @@ object FontManager {
             return null
         }
 
-        if (fonts is String) return handler(fonts)
+        if (fonts is String) return handler(fonts) ?: Typeface.DEFAULT
         if (fonts is List<*>) {
             for (font in fonts as List<String>) {
                 handler(font).let {
@@ -60,21 +79,33 @@ object FontManager {
                 }
             }
         }
+        return Typeface.DEFAULT
+    }
+
+    private val fontFamiliyCache = mutableMapOf<String, FontFamily>()
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun getFontFamily(fontName: String): FontFamily? {
+        if (fontFamiliyCache.containsKey(fontName)) {
+            return fontFamiliyCache[fontName]!!
+        }
+        val fontFile = File(fontDir, fontName)
+        if (fontFile.exists()) {
+            return FontFamily.Builder(Font.Builder(fontFile).build()).build()
+        }
+        Timber.w("font %s not found", fontFile)
         return null
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    fun getFontFamilies(key: String): List<FontFamily> {
-        val fonts = theme.style.getObject(key)
+    private fun getFontFamilies(key: String): List<FontFamily> {
+        val fonts = ThemeManager.activeTheme.style.getObject(key)
         val fontFamilies = mutableListOf<FontFamily>()
 
         fun handler(fontName: String) {
-            val fontFile = File(fontDir, fontName)
-            if (fontFile.exists()) {
-                fontFamilies.add(FontFamily.Builder(Font.Builder(fontFile).build()).build())
-                return
+            getFontFamily(fontName)?.let {
+                fontFamilies.add(it)
             }
-            Timber.w("font %s not found", fontFile)
         }
 
         if (fonts is String) handler(fonts)
