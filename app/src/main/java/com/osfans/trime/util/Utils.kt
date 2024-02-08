@@ -1,9 +1,7 @@
 package com.osfans.trime.util
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,7 +10,6 @@ import android.util.TypedValue
 import android.view.View
 import androidx.annotation.AttrRes
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
@@ -94,18 +91,6 @@ fun iso8601UTCDateTime(timeMillis: Long? = null): String = iso8601DateFormat.for
 inline fun CharSequence.startsWithAsciiChar(): Boolean {
     val firstCodePoint = this.toString().codePointAt(0)
     return firstCodePoint in 0x20 until 0x80
-}
-
-fun Activity.applyTranslucentSystemBars() {
-    WindowCompat.setDecorFitsSystemWindows(window, false)
-    // windowLightNavigationBar is available for 27+
-    window.navigationBarColor =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            Color.TRANSPARENT
-        } else {
-            // com.android.internal.R.color.system_bar_background_semi_transparent
-            0x66000000
-        }
 }
 
 fun RecyclerView.applyNavBarInsetsBottomPadding() {

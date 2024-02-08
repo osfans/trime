@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="toolbarForegroundColor">#FFFFFF</color>  <!-- 工具栏前景色 -->
-    <color name="windowBackground">#202020</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorBackground">#1E2B38</color>
 </resources>
