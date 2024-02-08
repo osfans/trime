@@ -564,13 +564,11 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
 
     private fun setKeyboardBackground() {
         if (mKeyboard == null) return
-        var d = mPreviewText.background
+        val d = mPreviewText.background
         if (d is GradientDrawable) {
             d.cornerRadius = mKeyboard!!.roundCorner
             mPreviewText.background = d
         }
-        d = mKeyboard!!.background
-        background = d
     }
 
     var keyboard: Keyboard?
