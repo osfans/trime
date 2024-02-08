@@ -31,6 +31,7 @@ import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
 import kotlinx.coroutines.launch
+import splitties.views.topPadding
 
 class PrefMainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -67,17 +68,11 @@ class PrefMainActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            binding.prefToolbar.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = navBars.left
                 rightMargin = navBars.right
             }
-            binding.prefToolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBars.top
-            }
-            binding.navHostFragment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = navBars.left
-                rightMargin = navBars.right
-            }
+            binding.prefToolbar.root.topPadding = statusBars.top
             windowInsets
         }
 
