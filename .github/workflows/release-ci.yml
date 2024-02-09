@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '^v*'
+      - 'v*'
 env:
   CI_NAME: Release CI
 jobs:
