@@ -95,7 +95,7 @@ jobs:
       - name: Upload JNI artifact (librime_jni.so)
         uses: actions/upload-artifact@v4
         with:
-          name: librime_jni
+          name: librime_jni-${{ matrix.os }}
           path: app/build/intermediates/stripped_native_libs/debug/out/lib/*
           # keep 90 days
           retention-days: 90
