@@ -22,6 +22,7 @@ import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -36,7 +37,11 @@ import timber.log.Timber
 class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener {
     private val context: Context by inject()
     private val service: Trime by inject()
-    private val theme: Theme by inject()
+
+    /* FIXME: At this moment we cannot use Koin to inject theme here.
+     *  After changing theme, showing LiquidKeyboard will call lazy-by varLengthAdapter first,
+     *  while theme has not been injected. */
+    private val theme: Theme get() = ThemeManager.activeTheme
 
     private lateinit var keyboardView: RecyclerView
     private val symbolHistory = SymbolHistory(180)
