@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorOnSurface">#000000</color>
-    <color name="colorBackground">#1E2B38</color>
+    <color name="colorSurface">#000000</color>
+    <color name="colorBackground">#121212</color>
+    <color name="colorError">#F44336</color>
+    <color name="colorOnSurface">#FFFFFF</color>
+    <color name="colorOnBackground">#FFFFFF</color>
+    <color name="colorOnError">#FFFFFF</color>
 </resources>

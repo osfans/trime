@@ -13,7 +13,15 @@
     <color name="colorPrimaryDark">#1E2B38</color> <!-- 深主题色 -->
     <color name="colorAccent">#009BD1</color>  <!-- 浅强调色 -->
     <color name="colorAccentDark">#006C92</color> <!-- 深强调色 -->
-    <color name="colorBackground">#FAFAFA</color>
+    <color name="colorBackground">#FFFFFF</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorError">#D32F2F</color>
+    
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorOnBackground">#000000</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorOnError">#FFFFFF</color>
     <color name="toolbarForegroundColor">#FFFFFF</color>  <!-- 工具栏前景色 -->
 
 </resources>
