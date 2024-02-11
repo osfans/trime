@@ -3,11 +3,13 @@ package com.osfans.trime.ui.main
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +19,6 @@ import com.osfans.trime.databinding.ActivityLogBinding
 import com.osfans.trime.ui.components.log.LogView
 import com.osfans.trime.util.DeviceInfo
 import com.osfans.trime.util.Logcat
-import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.iso8601UTCDateTime
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.Dispatchers
@@ -57,21 +58,22 @@ class LogActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        applyTranslucentSystemBars()
+        enableEdgeToEdge()
         val binding = ActivityLogBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
-            val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = navBars.left
-                rightMargin = navBars.right
-                bottomMargin = navBars.bottom
+                leftMargin = systemBars.left
+                rightMargin = systemBars.right
+                bottomMargin = systemBars.bottom
             }
             binding.logToolbar.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBars.top
+                topMargin = systemBars.top
             }
             windowInsets
         }
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
         with(binding) {

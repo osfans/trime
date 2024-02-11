@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
@@ -19,7 +20,6 @@ import com.osfans.trime.R
 import com.osfans.trime.databinding.ActivitySetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
-import com.osfans.trime.util.applyTranslucentSystemBars
 
 class SetupActivity : FragmentActivity() {
     private lateinit var viewPager: ViewPager2
@@ -34,7 +34,7 @@ class SetupActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        applyTranslucentSystemBars()
+        enableEdgeToEdge()
         val binding = ActivitySetupBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
