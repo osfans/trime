@@ -28,14 +28,6 @@ Trime is originally a frontend of open-source [Android Traditional Chinese IME],
 
 - Configurations [rimerc](https://github.com/Bambooin/rimerc)
 
-## Community
-
-- [Issues](https://github.com/osfans/trime/issues)
-- [QQ Group (811142286)](https://jq.qq.com/?_wv=1027&k=AXdR80HN)
-- [QQ Group (224230445)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=pg_q7UVumWYLq1Rk8kIAqkK1xGt64VnX&authKey=04m9l7OBO5H5vgrEL8IbpsmtnptWM60xy%2FUwYCfyvw9VcRhe8zRzAS1ezoemZdFr&noverify=0&group_code=224230445)
-- [Tieba](http://tieba.baidu.com/f?kw=rime)
-- [Telegram](https://t.me/trime_dev)
-
 ## History
 
 TRIME is the abbreviation of _Tongwen RIME_ or _ThaeRv Input Method_.
