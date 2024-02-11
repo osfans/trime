@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
@@ -26,7 +28,6 @@ import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Status
 import com.osfans.trime.ui.setup.SetupActivity
-import com.osfans.trime.util.applyTranslucentSystemBars
 import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
@@ -63,18 +64,19 @@ class PrefMainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(uiMode)
 
         super.onCreate(savedInstanceState)
-        applyTranslucentSystemBars()
+        enableEdgeToEdge()
         val binding = ActivityPrefBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
-            val statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = navBars.left
-                rightMargin = navBars.right
+                leftMargin = systemBars.left
+                rightMargin = systemBars.right
             }
-            binding.prefToolbar.root.topPadding = statusBars.top
+            binding.prefToolbar.root.topPadding = systemBars.top
             windowInsets
         }
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
         setSupportActionBar(binding.prefToolbar.toolbar)
