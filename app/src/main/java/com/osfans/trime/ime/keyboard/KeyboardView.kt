@@ -326,7 +326,10 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
                         sendMessageDelayed(repeat, prefs.keyboard.repeatInterval.toLong())
                     }
 
-                MSG_LONGPRESS -> mKeyboardView.openPopupIfRequired(msg.obj as MotionEvent)
+                MSG_LONGPRESS -> {
+                    InputFeedbackManager.keyPressVibrate(mKeyboardView, true)
+                    mKeyboardView.openPopupIfRequired(msg.obj as MotionEvent)
+                }
             }
         }
     }
