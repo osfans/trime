@@ -62,8 +62,6 @@ class TextInputManager private constructor() :
         private var intentReceiver: IntentReceiver? = null
         private var rimeNotiHandlerJob: Job? = null
 
-        private var mainKeyboardView: KeyboardView? = null
-
         val locales = Array(2) { Locale.getDefault() }
 
         var needSendUpRimeKey: Boolean = false
