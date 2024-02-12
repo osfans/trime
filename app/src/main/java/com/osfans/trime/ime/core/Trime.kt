@@ -46,7 +46,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
-import com.osfans.trime.data.sound.SoundThemeManager
+import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
@@ -91,7 +91,6 @@ open class Trime : LifecycleInputMethodService() {
     private var tabView: TabView? = null
     var inputView: InputView? = null
     private var eventListeners = WeakHashSet<EventListener>()
-    var inputFeedbackManager: InputFeedbackManager? = null // 效果管理器
     private var mIntentReceiver: IntentReceiver? = null
     private var editorInfo: EditorInfo? = null
     private var isWindowShown = false // 键盘窗口是否已显示
@@ -225,7 +224,7 @@ open class Trime : LifecycleInputMethodService() {
                 ThemeManager.init(resources.configuration)
                 textInputManager = TextInputManager.getInstance()
                 activeEditorInstance = EditorInstance(context)
-                inputFeedbackManager = InputFeedbackManager(context)
+                InputFeedbackManager.init(this)
                 restartSystemStartTimingSync()
                 try {
                     for (listener in eventListeners) {
@@ -316,7 +315,7 @@ open class Trime : LifecycleInputMethodService() {
 
         loadConfig()
         KeyboardSwitcher.newOrReset()
-        SoundThemeManager.switchSound(theme.colors.getString("sound"))
+        SoundEffectManager.switchSound(theme.colors.getString("sound"))
         if (textInputManager != null) {
             // setNavBarColor();
             textInputManager!!.shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
@@ -330,8 +329,7 @@ open class Trime : LifecycleInputMethodService() {
     override fun onDestroy() {
         if (mIntentReceiver != null) mIntentReceiver!!.unregisterReceiver(this)
         mIntentReceiver = null
-        if (inputFeedbackManager != null) inputFeedbackManager!!.destroy()
-        inputFeedbackManager = null
+        InputFeedbackManager.destroy()
         inputView = null
         for (listener in eventListeners) {
             listener.onDestroy()
@@ -475,8 +473,8 @@ open class Trime : LifecycleInputMethodService() {
         Timber.d("onStartInputView: restarting=%s", restarting)
         editorInfo = attribute
         RimeWrapper.runAfterStarted {
-            inputFeedbackManager!!.resumeSoundPool()
-            inputFeedbackManager!!.resetPlayProgress()
+            InputFeedbackManager.loadSoundEffects()
+            InputFeedbackManager.resetPlayProgress()
             for (listener in eventListeners) {
                 listener.onStartInputView(activeEditorInstance!!, restarting)
             }
@@ -563,14 +561,12 @@ open class Trime : LifecycleInputMethodService() {
             }
             try {
                 performEscape()
-                if (inputFeedbackManager != null) {
-                    inputFeedbackManager!!.releaseSoundPool()
-                }
                 mCompositionPopupWindow!!.hideCompositionView()
             } catch (e: Exception) {
                 Timber.e(e, "Failed to show the PopupWindow.")
             }
         }
+        InputFeedbackManager.finishInput()
         inputView?.finishInput()
         Timber.d("OnFinishInputView")
     }

@@ -8,8 +8,8 @@ import com.osfans.trime.data.DataManager
 import timber.log.Timber
 import java.io.File
 
-object SoundThemeManager {
-    var userDir = File(DataManager.userDataDir, "sound")
+object SoundEffectManager {
+    private var userDir = File(DataManager.userDataDir, "sound")
 
     /**
      * Update userDir.
@@ -28,14 +28,14 @@ object SoundThemeManager {
                 ),
         )
 
-    private fun listSounds(): MutableList<SoundTheme> {
+    private fun listSounds(): MutableList<SoundEffect> {
         val files = userDir.listFiles { f -> f.name.endsWith("sound.yaml") }
         return files
             ?.mapNotNull decode@{ f ->
                 val theme =
                     runCatching {
-                        yaml.decodeFromString(SoundTheme.serializer(), f.readText()).also {
-                            it.name = f.name.substringBefore('.')
+                        yaml.decodeFromString(SoundEffect.serializer(), f.readText()).also {
+                            if (it.name.isNullOrEmpty()) it.name = f.name.substringBefore('.')
                         }
                     }.getOrElse { e ->
                         Timber.w("Failed to decode sound theme file ${f.absolutePath}: ${e.message}")
@@ -48,7 +48,7 @@ object SoundThemeManager {
 
     private fun getSound(name: String) = userSounds.find { it.name == name }
 
-    val userSounds: MutableList<SoundTheme> = listSounds()
+    private val userSounds: MutableList<SoundEffect> = listSounds()
 
     @JvmStatic
     fun switchSound(name: String) {
@@ -57,23 +57,23 @@ object SoundThemeManager {
             return
         }
         AppPrefs.defaultInstance().keyboard.customSoundPackage = name
-        currentSoundTheme = getSound(name)!!
+        currentSoundEffect = getSound(name)!!
     }
 
     fun init() {
         // register listener
         DataManager.addOnChangedListener(onDataDirChange)
-        currentSoundTheme = getSound(AppPrefs.defaultInstance().keyboard.customSoundPackage) ?: return
+        currentSoundEffect = getSound(AppPrefs.defaultInstance().keyboard.customSoundPackage) ?: return
     }
 
-    private lateinit var currentSoundTheme: SoundTheme
+    private lateinit var currentSoundEffect: SoundEffect
 
-    fun getAllSoundThemes(): List<SoundTheme> = userSounds
+    fun getAllSoundEffects(): List<SoundEffect> = userSounds
 
-    fun getActiveSoundTheme() = runCatching { currentSoundTheme }
+    fun getActiveSoundEffect() = runCatching { currentSoundEffect }
 
     fun getActiveSoundFilePaths() =
         runCatching {
-            currentSoundTheme.let { t -> t.sound.map { "${userDir.path}/${t.folder}/$it" } }
+            currentSoundEffect.let { t -> t.sound.map { "${userDir.path}/${t.folder}/$it" } }
         }
 }

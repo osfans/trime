@@ -23,7 +23,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.sound.SoundThemeManager
+import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.Status
@@ -156,7 +156,7 @@ class PrefMainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (isStorageAvailable()) {
-            SoundThemeManager.init()
+            SoundEffectManager.init()
         }
     }
 

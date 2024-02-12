@@ -22,6 +22,7 @@ import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
+import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
@@ -226,7 +227,7 @@ class TextInputManager private constructor() :
                 val value = notification.value
                 when (val option = notification.option) {
                     "ascii_mode" -> {
-                        trime.inputFeedbackManager?.ttsLanguage =
+                        InputFeedbackManager.ttsLanguage =
                             locales[if (value) 1 else 0]
                     }
                     "_hide_bar",
@@ -253,8 +254,8 @@ class TextInputManager private constructor() :
         }
 
         override fun onPress(keyEventCode: Int) {
-            trime.inputFeedbackManager?.let {
-                it.keyPressVibrate()
+            InputFeedbackManager.let {
+                it.keyPressVibrate(trime.window.window!!.decorView)
                 it.keyPressSound(keyEventCode)
                 it.keyPressSpeak(keyEventCode)
             }
