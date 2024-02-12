@@ -13,7 +13,6 @@ import com.osfans.trime.data.sound.SoundTheme
 import com.osfans.trime.data.sound.SoundThemeManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.RimeWrapper
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
@@ -62,10 +61,7 @@ suspend fun Context.colorPicker(
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             val schemeIds = all.map { it.first }
-            ThemeManager.activeTheme.setColorScheme(schemeIds[checkedItem])
-            launch {
-                Trime.getServiceOrNull()?.recreateInputView(ThemeManager.activeTheme) // 立刻重初始化生效
-            }
+            ThemeManager.setColorScheme(schemeIds[checkedItem])
         }
     }.create()
 }

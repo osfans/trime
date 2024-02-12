@@ -106,6 +106,7 @@ open class Trime : LifecycleInputMethodService() {
         ThemeManager.OnThemeChangeListener {
             lifecycleScope.launch(Dispatchers.Main) {
                 recreateInputView(it)
+                inputView?.startInput(currentInputEditorInfo)
             }
         }
 
@@ -430,10 +431,9 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        Timber.d("onCreateInputView()")
+        Timber.d("onCreateInputView")
         RimeWrapper.runAfterStarted {
             recreateInputView(ThemeManager.activeTheme)
-            Timber.d("onCreateInputView - completely ended")
         }
         Timber.d("onCreateInputView() finish")
         return InitializationUi(this).root
@@ -484,7 +484,6 @@ open class Trime : LifecycleInputMethodService() {
                 showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
             }
             bindKeyboardToInputView()
-            // if (!restarting) setNavBarColor();
             setCandidatesViewShown(!Rime.isEmpty) // 軟鍵盤出現時顯示候選欄
             inputView?.startInput(attribute, restarting)
             when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
