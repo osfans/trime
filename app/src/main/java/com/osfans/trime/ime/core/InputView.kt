@@ -59,6 +59,9 @@ class InputView(
     val rime: Rime,
     val theme: Theme,
 ) : ConstraintLayout(service) {
+    private var shouldUpdateNavbarForeground = false
+    private var shouldUpdateNavbarBackground = false
+
     private val keyboardBackground =
         imageView {
             scaleType = ImageView.ScaleType.CENTER_CROP
@@ -137,20 +140,30 @@ class InputView(
             }
 
         service.window.window!!.also { it ->
-            // allow draw behind navigation bar
-            WindowCompat.setDecorFitsSystemWindows(it, false)
-            it.navigationBarColor = Color.TRANSPARENT
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                shouldUpdateNavbarForeground = true
+                // allow draw behind navigation bar
+                WindowCompat.setDecorFitsSystemWindows(it, false)
+                it.navigationBarColor = Color.TRANSPARENT
                 // don't apply scrim to transparent navigation bar
                 it.isNavigationBarContrastEnforced = false
-            }
-            ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-                insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                    bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                        bottomMargin = it.bottom
+                ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+                    insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                        bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                            bottomMargin = it.bottom
+                        }
                     }
+                    WindowInsetsCompat.CONSUMED
                 }
-                WindowInsetsCompat.CONSUMED
+            } else {
+                shouldUpdateNavbarForeground = true
+                shouldUpdateNavbarBackground = true
+                // don't draw behind navigation bar
+                WindowCompat.setDecorFitsSystemWindows(it, true)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // don't apply scrim to transparent navigation bar
+                    it.isNavigationBarContrastEnforced = false
+                }
             }
         }
 
@@ -259,10 +272,17 @@ class InputView(
         restarting: Boolean = false,
     ) {
         if (!restarting) {
-            service.window.window!!.also {
-                WindowCompat.getInsetsController(it, it.decorView)
-                    .isAppearanceLightNavigationBars =
-                    ColorUtils.isDark(theme.colors.getColor("key_text_color")!!)
+            if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
+                service.window.window!!.also {
+                    val backColor = theme.colors.getColor("back_color") ?: Color.BLACK
+                    if (shouldUpdateNavbarForeground) {
+                        WindowCompat.getInsetsController(it, it.decorView)
+                            .isAppearanceLightNavigationBars = ColorUtils.isContrastedDark(backColor)
+                    }
+                    if (shouldUpdateNavbarBackground) {
+                        it.navigationBarColor = backColor
+                    }
+                }
             }
         }
         keyboardWindow.oldMainInputView.mainKeyboardView.updateEnterLabelOnEditorInfo(info)

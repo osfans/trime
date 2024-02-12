@@ -89,6 +89,11 @@ object ThemeManager {
         activeTheme = evalActiveTheme()
     }
 
+    fun setColorScheme(name: String) {
+        _activeTheme.setColorScheme(name)
+        fireChange()
+    }
+
     private fun evalActiveTheme(): Theme {
         return if (prefs.autoDark) {
             Theme(isNightMode)
