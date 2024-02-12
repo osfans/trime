@@ -2,11 +2,10 @@ package com.osfans.trime.data.sound
 
 import android.view.KeyEvent
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
-data class SoundTheme(
-    @Transient var name: String? = null,
+data class SoundEffect(
+    var name: String? = null,
     val sound: List<String>,
     val folder: String,
     val melody: List<String>? = null,
@@ -20,7 +19,7 @@ data class SoundTheme(
         val inOrder: Boolean,
         val sounds: List<Int>,
     ) {
-        val sysKeys = keys?.map(String::uppercase)?.map(KeyEvent::keyCodeFromString)
+        private val sysKeys = keys?.map(String::uppercase)?.map(KeyEvent::keyCodeFromString)
 
         fun soundId(keycode: Int): Int {
             if (sounds.isEmpty()) return -1
