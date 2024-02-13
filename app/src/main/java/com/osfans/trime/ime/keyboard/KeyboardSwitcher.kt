@@ -44,7 +44,6 @@ object KeyboardSwitcher {
     }
 
     fun switchKeyboard(name: String?) {
-        if (name == null) return
         val currentIdx = theme.allKeyboardIds.indexOf(currentKeyboardId)
         var mappedName =
             when (name) {
