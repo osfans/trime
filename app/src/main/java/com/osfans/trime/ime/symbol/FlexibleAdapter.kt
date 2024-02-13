@@ -1,6 +1,5 @@
 package com.osfans.trime.ime.symbol
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -32,7 +31,6 @@ class FlexibleAdapter(
     val beans: List<DatabaseBean>
         get() = mBeans
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateBeans(beans: List<DatabaseBean>) {
         val sorted =
             beans.sortedWith { b1, b2 ->
@@ -52,7 +50,7 @@ class FlexibleAdapter(
             mBeansId[id] = index
         }
         // 更新视图
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, mBeans.size)
     }
 
     override fun getItemCount(): Int = mBeans.size
@@ -79,24 +77,19 @@ class FlexibleAdapter(
             simpleKeyText.apply {
                 text = bean.text
                 typeface = FontManager.getTypeface("long_text_font")
-                when (val textColor = theme.colors.getColor("long_text_color")) {
-                    null -> theme.colors.getColor("key_text_color")?.let { setTextColor(it) }
-                    else -> setTextColor(textColor)
-                }
+                (
+                    theme.colors.getColor("long_text_color")
+                        ?: theme.colors.getColor("key_text_color")
+                )
+                    ?.let { setTextColor(it) }
 
-                val longTextSize = theme.style.getFloat("key_long_text_size")
-                val labelTextSize = theme.style.getFloat("label_text_size")
-                textSize =
-                    when {
-                        longTextSize > 0 -> longTextSize
-                        labelTextSize > 0 -> labelTextSize
-                        else -> textSize
-                    }
+                theme.style.getFloat("key_long_text_size").takeIf { it > 0f }
+                    ?: theme.style.getFloat("label_text_size").takeIf { it > 0f }
+                        ?.let { textSize = it }
             }
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
 
-            // if (background != null) viewHolder.itemView.setBackground(background);
-            (itemView as ViewGroup).background =
+            itemView.background =
                 theme.colors.getDrawable(
                     "long_text_back_color",
                     "key_border",
@@ -214,11 +207,11 @@ class FlexibleAdapter(
                 appContext,
                 androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert,
             ).setTitle(R.string.liquid_keyboard_ask_to_delete_all)
-                .setPositiveButton(R.string.ok) { dialog, which ->
+                .setPositiveButton(R.string.ok) { _, _ ->
                     service.lifecycleScope.launch {
                         listener.onDeleteAll()
                     }
-                }.setNegativeButton(R.string.cancel) { dialog, which ->
+                }.setNegativeButton(R.string.cancel) { _, _ ->
                 }.create()
         service.inputView?.showDialog(askDialog)
     }
