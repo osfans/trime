@@ -137,8 +137,8 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     fun updateTabWidth() {
-        tabTags = TabManager.get().tabCandidates
-        highlightIndex = TabManager.get().selectedOrZero
+        tabTags = TabManager.tabCandidates
+        highlightIndex = TabManager.selectedOrZero
         var x = 0
         for ((i, computedTab) in tabTags!!.withIndex()) {
             computedTab.geometry.set(x, 0, (x + getTabWidth(i)).toInt(), height)
@@ -197,7 +197,7 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
                 val i = getTabIndex(x, y)
                 if (i > -1) {
                     performClick()
-                    val tag = TabManager.getTag(i)
+                    val tag = TabManager.tabTags[i]
                     if (tag.type == SymbolKeyboardType.NO_KEY) {
                         when (tag.command) {
                             KeyCommandType.EXIT -> Trime.getService().selectLiquidKeyboard(-1)

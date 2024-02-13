@@ -1,47 +1,23 @@
 package com.osfans.trime.ime.symbol
 
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.CollectionUtils.getOrDefault
 import timber.log.Timber
 
-// 使用TabManager时，不应该使用变量保存TabManager实例，应该使用TabManager.get()方法获取
-class TabManager private constructor() {
-    var selected = 0
+object TabManager {
+    var currentTabIndex = 0
         private set
-    private val keyboardData: List<SimpleKeyBean> = ArrayList()
-    private val tabSwitchData: MutableList<SimpleKeyBean> = ArrayList()
-    private val tabTags = ArrayList<TabTag>()
     private var tabSwitchPosition = 0
-    private val keyboards: MutableList<List<SimpleKeyBean>> = ArrayList()
-    private val notKeyboard: List<SimpleKeyBean> = ArrayList()
+
+    val tabTags = arrayListOf<TabTag>()
+    val tabSwitchData = mutableListOf<SimpleKeyBean>()
+    private val keyboards = mutableListOf<List<SimpleKeyBean>>()
+    private val notKeyboard = mutableListOf<SimpleKeyBean>()
+
     private val tagExit = TabTag("返回", SymbolKeyboardType.NO_KEY, KeyCommandType.EXIT)
-
-    fun getTabSwitchData(): List<SimpleKeyBean> {
-        if (tabSwitchData.size > 0) return tabSwitchData
-        for (tag in tabTags) {
-            if (SymbolKeyboardType.hasKey(tag.type)) tabSwitchData.add(SimpleKeyBean(tag.text))
-        }
-        return tabSwitchData
-    }
-
-    /**
-     * 得到TABS中对应的TabTag 去除不显示的tagTab(没有keys列表的tagTab)之后按顺序排列tagTab,再从中获取TabTag
-     *
-     * @param position 位置（索引）
-     * @return TabTag
-     */
-    fun getTabSwitchTabTag(position: Int): TabTag? {
-        var i = 0
-        for (tag in tabTags) {
-            if (SymbolKeyboardType.hasKey(tag.type)) {
-                if (i++ == position) return tag
-            }
-        }
-        return null
-    }
 
     /**
      * 得到TABS中对应的真实索引 真实的索引是去除 没有keys列表的tagTab 之后按顺序排列的tagTab索引
@@ -62,27 +38,22 @@ class TabManager private constructor() {
         return i
     }
 
-    init {
-        initLiquidKboards()
-    }
-
-    private fun initLiquidKboards() {
-        val theme = ThemeManager.activeTheme
-        Timber.i("TabManager init")
-        // 获取 tab 列表
-        val availables =
-            theme.liquid.getObject("keyboards") as List<String>?
-                ?: return
-        for (id in availables) {
-            Timber.i("add liquidKboard tab id=$id")
-            val keyboard: Map<String, Any> = theme.liquid.getObject(id) as Map<String, Any>? ?: continue
-            val name = getOrDefault(keyboard, "name", id) as String
+    fun init(theme: Theme) {
+        val available = theme.liquid.getObject("keyboards") as List<String>? ?: return
+        for (id in available) {
+            Timber.d("preparing data for tab #$id")
+            val keyboard = theme.liquid.getObject(id) as Map<String, Any>? ?: continue
             if (!keyboard.containsKey("type")) continue
-
+            val name = getOrDefault(keyboard, "name", id) as String
             val type = SymbolKeyboardType.fromString(keyboard["type"] as String?)
             val keys = keyboard["keys"] ?: "1"
             addTabHasKeys(name, type, keys)
         }
+        tabSwitchData.clear()
+        tabSwitchData.addAll(
+            tabTags.filter { SymbolKeyboardType.hasKeys(it.type) }
+                .map { SimpleKeyBean(it.text) },
+        )
     }
 
     private fun addListTab(
@@ -150,19 +121,19 @@ class TabManager private constructor() {
         addListTab(name, type, keysList)
     }
 
-    fun select(tabIndex: Int): List<SimpleKeyBean> {
-        selected = tabIndex
-        if (tabIndex >= tabTags.size) return keyboardData
-        val tag = tabTags[tabIndex]
-        if (tag.type == SymbolKeyboardType.TABS) tabSwitchPosition = selected
-        return keyboards[tabIndex]
+    fun selectTabByIndex(index: Int): List<SimpleKeyBean> {
+        currentTabIndex = index
+        if (index >= tabTags.size) return listOf()
+        val tag = tabTags[index]
+        if (tag.type == SymbolKeyboardType.TABS) tabSwitchPosition = currentTabIndex
+        return keyboards[index]
     }
 
     val selectedOrZero: Int
-        get() = if (selected == -1) 0 else selected
+        get() = if (currentTabIndex == -1) 0 else currentTabIndex
 
     fun setTabExited() {
-        selected = -1
+        currentTabIndex = -1
     }
 
     fun isAfterTabSwitch(position: Int): Boolean {
@@ -184,48 +155,4 @@ class TabManager private constructor() {
             }
             return tabTags
         }
-
-    companion object {
-        private var self: TabManager? = null
-            get() {
-                if (field == null) {
-                    field = TabManager()
-                }
-                return field
-            }
-
-        fun get(): TabManager {
-            return self!!
-        }
-
-        fun updateSelf() {
-            self = TabManager()
-        }
-
-        fun getTag(i: Int): TabTag {
-            return self!!.tabTags[i]
-        }
-
-        fun getTagIndex(name: String?): Int {
-            if (name.isNullOrEmpty()) return 0
-            for (i in self!!.tabTags.indices) {
-                val tag = self!!.tabTags[i]
-                if (tag.text == name) {
-                    return i
-                }
-            }
-            return 0
-        }
-
-        fun getTagIndex(type: SymbolKeyboardType?): Int {
-            if (type == null) return 0
-            for (i in self!!.tabTags.indices) {
-                val tag = self!!.tabTags[i]
-                if (tag.type == type) {
-                    return i
-                }
-            }
-            return 0
-        }
-    }
 }

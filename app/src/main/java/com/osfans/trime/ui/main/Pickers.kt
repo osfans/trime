@@ -39,7 +39,7 @@ suspend fun Context.themePicker(
         onOKButton {
             with(items[checkedItem].toString()) {
                 ThemeManager.setNormalTheme(if (this == "trime") this else "$this.trime")
-                TabManager.updateSelf()
+                TabManager.init(ThemeManager.activeTheme)
             }
         }
     }.create()
