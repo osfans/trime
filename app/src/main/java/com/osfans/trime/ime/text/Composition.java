@@ -42,6 +42,7 @@ import androidx.annotation.NonNull;
 import com.osfans.trime.core.CandidateListItem;
 import com.osfans.trime.core.Rime;
 import com.osfans.trime.core.RimeComposition;
+import com.osfans.trime.data.theme.EventManager;
 import com.osfans.trime.data.theme.FontManager;
 import com.osfans.trime.data.theme.Theme;
 import com.osfans.trime.data.theme.ThemeManager;
@@ -494,7 +495,7 @@ public class Composition extends TextView {
       if (when.contentEquals("has_menu") && !Rime.hasMenu()) return;
     }
     final String label;
-    final Event e = new Event(CollectionUtils.obtainString(m, "click", ""));
+    final Event e = EventManager.getEvent(CollectionUtils.obtainString(m, "click", ""));
     if (m.containsKey("label")) label = CollectionUtils.obtainString(m, "label", "");
     else label = e.getLabel(KeyboardSwitcher.currentKeyboard);
     int start, end;

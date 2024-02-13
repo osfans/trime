@@ -26,6 +26,7 @@ import com.osfans.trime.core.Rime.Companion.hasMenu
 import com.osfans.trime.core.Rime.Companion.isAsciiMode
 import com.osfans.trime.core.Rime.Companion.isComposing
 import com.osfans.trime.core.Rime.Companion.showAsciiPunch
+import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
@@ -65,13 +66,16 @@ class Key(private val mKeyboard: Keyboard) {
     private var label: String? = null
     var hint: String? = null
         private set
-    private var key_back_color: Drawable? = null
-    private var hilited_key_back_color: Drawable? = null
 
-    private var key_text_color: Int? = null
-    private var key_symbol_color: Int? = null
-    private var hilited_key_text_color: Int? = null
-    private var hilited_key_symbol_color: Int? = null
+    private lateinit var keyConfig: Map<String, Any?>
+    private val theme get() = ThemeManager.activeTheme
+    private val key_back_color get() = theme.colors.getDrawable(keyConfig, "key_back_color")
+    private val hilited_key_back_color get() = theme.colors.getDrawable(keyConfig, "hilited_key_back_color")
+
+    private val key_text_color get() = theme.colors.getColor(keyConfig, "key_text_color")
+    private val key_symbol_color get() = theme.colors.getColor(keyConfig, "key_symbol_color")
+    private val hilited_key_text_color get() = theme.colors.getColor(keyConfig, "hilited_key_text_color")
+    private val hilited_key_symbol_color get() = theme.colors.getColor(keyConfig, "hilited_key_symbol_color")
     var key_text_size: Int? = null
         private set
     var symbol_text_size: Int? = null
@@ -118,17 +122,17 @@ class Key(private val mKeyboard: Keyboard) {
      */
     constructor(parent: Keyboard, mk: Map<String, Any?>) : this(parent) {
         var s: String
-        val theme = ThemeManager.activeTheme
         run {
+            keyConfig = mk
             var hasComposingKey = false
             for (type in KeyEventType.entries) {
                 val typeStr = type.toString().lowercase()
                 s = obtainString(mk, typeStr, "")
                 if (s.isNotEmpty()) {
-                    events[type.ordinal] = Event(s)
+                    events[type.ordinal] = EventManager.getEvent(s)
                     if (type.ordinal < KeyEventType.COMBO.ordinal) hasComposingKey = true
                 } else if (type == KeyEventType.CLICK) {
-                    events[type.ordinal] = Event("")
+                    events[type.ordinal] = EventManager.getEvent("")
                 }
             }
             if (hasComposingKey) mKeyboard.composingKeys.add(this)
@@ -144,12 +148,6 @@ class Key(private val mKeyboard: Keyboard) {
         mKeyboard.setModiferKey(this.code, this)
         key_text_size = sp2px(obtainFloat(mk, "key_text_size", 0f)).toInt()
         symbol_text_size = sp2px(obtainFloat(mk, "symbol_text_size", 0f)).toInt()
-        key_text_color = theme.colors.getColor(mk, "key_text_color")
-        hilited_key_text_color = theme.colors.getColor(mk, "hilited_key_text_color")
-        key_back_color = theme.colors.getDrawable(mk, "key_back_color")
-        hilited_key_back_color = theme.colors.getDrawable(mk, "hilited_key_back_color")
-        key_symbol_color = theme.colors.getColor(mk, "key_symbol_color")
-        hilited_key_symbol_color = theme.colors.getColor(mk, "hilited_key_symbol_color")
         round_corner = obtainFloat(mk, "round_corner", 0f)
     }
 

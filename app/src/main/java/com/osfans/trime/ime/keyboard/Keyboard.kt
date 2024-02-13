@@ -21,6 +21,7 @@ import android.content.res.Configuration
 import android.view.KeyEvent
 import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
+import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
@@ -139,7 +140,7 @@ class Keyboard() {
             key.width = keyWidth
             key.height = keyHeight
             key.gap = horizontalGap
-            key.events[0] = Event(element.toString())
+            key.events[0] = EventManager.getEvent(element.toString())
             column++
             x += key.width + key.gap
             mKeys.add(key)
