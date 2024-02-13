@@ -102,7 +102,7 @@ class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : Rec
             holder.simpleKeyTexts[i].text = ""
             if (i < bean.size) {
                 holder.wrappers[i].visibility = View.VISIBLE
-                holder.simpleKeyTexts[i].text = bean[i].getLabel()
+                holder.simpleKeyTexts[i].text = bean[i].label
             } else {
                 holder.wrappers[i].visibility = View.INVISIBLE
             }

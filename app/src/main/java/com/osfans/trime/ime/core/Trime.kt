@@ -258,7 +258,7 @@ open class Trime : LifecycleInputMethodService() {
             inputView!!.switchUiByState(KeyboardWindow.State.Symbol)
             symbolKeyboardType = inputView!!.liquidKeyboard.select(tabIndex)
             tabView!!.updateTabWidth()
-            mTabRoot!!.move(tabView!!.hightlightLeft, tabView!!.hightlightRight)
+            mTabRoot!!.move(tabView!!.highlightLeft, tabView!!.highlightRight)
             mCompositionPopupWindow?.composition?.compositionView?.changeToLiquidKeyboardToolbar()
             showCompositionView(false)
         } else {

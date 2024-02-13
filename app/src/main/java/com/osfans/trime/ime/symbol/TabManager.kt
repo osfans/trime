@@ -100,7 +100,7 @@ class TabManager private constructor() {
                 }
             }
         }
-        tabTags.add(TabTag(name, type, ""))
+        tabTags.add(TabTag(name, type))
         keyboards.add(keyBeans)
     }
 
@@ -133,9 +133,9 @@ class TabManager private constructor() {
             val p = o as Map<String, String>
             if (p.containsKey("click")) {
                 if (p.containsKey("label")) {
-                    keysList.add(SimpleKeyBean(p["click"], p["label"]))
+                    keysList.add(SimpleKeyBean(p["click"]!!, p["label"]!!))
                 } else {
-                    keysList.add(SimpleKeyBean(p["click"]))
+                    keysList.add(SimpleKeyBean(p["click"]!!))
                 }
                 continue
             }
