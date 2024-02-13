@@ -21,12 +21,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.PaintDrawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.view.updateLayoutParams
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
@@ -92,10 +92,10 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
         return shouldCandidateUseCursor && i >= 0 && i == highlightIndex
     }
 
-    val hightlightLeft: Int
-        get() = tabTags!![highlightIndex].geometry!!.left
-    val hightlightRight: Int
-        get() = tabTags!![highlightIndex].geometry!!.right
+    val highlightLeft: Int
+        get() = tabTags!![highlightIndex].geometry.left
+    val highlightRight: Int
+        get() = tabTags!![highlightIndex].geometry.right
 
     override fun onDraw(canvas: Canvas) {
         if (tabTags == null) return
@@ -103,7 +103,7 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
         // Draw highlight background
         if (isHighlighted(highlightIndex)) {
-            candidateHighlight!!.bounds = tabTags!![highlightIndex].geometry!!
+            candidateHighlight!!.bounds = tabTags!![highlightIndex].geometry
             candidateHighlight!!.draw(canvas)
         }
         // Draw tab text
@@ -113,25 +113,24 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
             - (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f
             + commentHeight / 2.0f
         : */
-            tabTags!![0].geometry!!.centerY() -
+            tabTags!![0].geometry.centerY() -
                 (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f
         )
-        for (computedTab in tabTags!!) {
-            val i = tabTags!!.indexOf(computedTab)
+        for ((i, computedTab) in tabTags!!.withIndex()) {
             // Calculate a position where the text could be centered in the rectangle.
-            val tabX = computedTab.geometry!!.centerX().toFloat()
+            val tabX = computedTab.geometry.centerX().toFloat()
             candidatePaint.color = if (isHighlighted(i)) hilitedCandidateTextColor else candidateTextColor
             canvas.drawText(computedTab.text, tabX, tabY, candidatePaint, candidateFont!!)
             // Draw the separator at the right edge of each candidate.
             canvas.drawRect(
                 (
-                    computedTab.geometry!!.right - candidateSpacing
+                    computedTab.geometry.right - candidateSpacing
                 ).toFloat(),
-                computedTab.geometry!!.top.toFloat(),
+                computedTab.geometry.top.toFloat(),
                 (
-                    computedTab.geometry!!.right + candidateSpacing
+                    computedTab.geometry.right + candidateSpacing
                 ).toFloat(),
-                computedTab.geometry!!.bottom.toFloat(),
+                computedTab.geometry.bottom.toFloat(),
                 separatorPaint,
             )
         }
@@ -141,17 +140,16 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
         tabTags = TabManager.get().tabCandidates
         highlightIndex = TabManager.get().selectedOrZero
         var x = 0
-        for (computedTab in tabTags!!) {
-            val i = tabTags!!.indexOf(computedTab)
-            computedTab.geometry = Rect(x, 0, (x + getTabWidth(i)).toInt(), height)
+        for ((i, computedTab) in tabTags!!.withIndex()) {
+            computedTab.geometry.set(x, 0, (x + getTabWidth(i)).toInt(), height)
             x = (x + (getTabWidth(i) + candidateSpacing)).toInt()
         }
-        val params = layoutParams
-        Timber.d("update, from Height=" + params.height + " width=" + params.width)
-        params.width = x
-        params.height = if (isCommentOnTop) candidateViewHeight + commentHeight else candidateViewHeight
-        Timber.d("update, reload Height=" + params.height + " width=" + params.width)
-        layoutParams = params
+        updateLayoutParams {
+            Timber.d("updateTabWidth: layoutPrams from: height=$height, width=$width")
+            width = x
+            height = if (isCommentOnTop) candidateViewHeight + commentHeight else candidateViewHeight
+            Timber.d("updateTabWidth: layoutPrams to: height=$height, width=$width")
+        }
         invalidate()
     }
 
@@ -235,7 +233,7 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
             /* Enlarge the rectangle to be more responsive to user clicks.
       // r.set(tabGeometries[j++]);
       //r.inset(0, CANDIDATE_TOUCH_OFFSET); */
-            if (computedTab.geometry!!.contains(x, y)) {
+            if (computedTab.geometry.contains(x, y)) {
                 retIndex = tabTags!!.indexOf(computedTab)
             }
         }

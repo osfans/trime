@@ -364,7 +364,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
 
         val candidates =
             if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                data.map { b -> CandidateListItem("", b.getLabel()) }
+                data.map { b -> CandidateListItem("", b.label) }
             } else {
                 data.map { b -> CandidateListItem("", b.text) }
             }
