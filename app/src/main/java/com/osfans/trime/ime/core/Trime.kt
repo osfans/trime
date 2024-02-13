@@ -264,7 +264,7 @@ open class Trime : LifecycleInputMethodService() {
         } else {
             symbolKeyboardType = SymbolKeyboardType.NO_KEY
             // 设置液体键盘处于隐藏状态
-            TabManager.get().setTabExited()
+            TabManager.setTabExited()
             inputView!!.switchUiByState(KeyboardWindow.State.Main)
             updateComposing()
         }
@@ -277,12 +277,12 @@ open class Trime : LifecycleInputMethodService() {
         } else if (name.matches("[A-Z]+".toRegex())) {
             selectLiquidKeyboard(SymbolKeyboardType.valueOf(name))
         } else {
-            selectLiquidKeyboard(TabManager.getTagIndex(name))
+            selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.text == name })
         }
     }
 
-    fun selectLiquidKeyboard(type: SymbolKeyboardType?) {
-        selectLiquidKeyboard(TabManager.getTagIndex(type))
+    fun selectLiquidKeyboard(type: SymbolKeyboardType) {
+        selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.type == type })
     }
 
     fun pasteByChar() {

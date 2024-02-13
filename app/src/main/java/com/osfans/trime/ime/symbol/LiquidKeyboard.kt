@@ -28,10 +28,10 @@ import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
-import com.osfans.trime.util.dp2px
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import splitties.dimensions.dp
 import timber.log.Timber
 
 class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener {
@@ -63,8 +63,9 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
                 TextInputManager.getInstance()
                     .onCandidatePressed(position)
                 if (Rime.isComposing) {
-                    updateCandidates(Rime.candidatesWithoutSwitch.toList())
-                    notifyDataSetChanged()
+                    val candidates = Rime.candidatesWithoutSwitch
+                    updateCandidates(candidates.toList())
+                    notifyItemRangeChanged(0, candidates.size)
                     keyboardView.scrollToPosition(0)
                 } else {
                     service.selectLiquidKeyboard(-1)
@@ -76,10 +77,14 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
         CandidateAdapter(theme)
     }
 
+    init {
+        TabManager.init(theme)
+    }
+
     fun setKeyboardView(view: RecyclerView) {
         keyboardView =
             view.apply {
-                val space = dp2px(3)
+                val space = view.dp(3)
                 addItemDecoration(SpacesItemDecoration(space))
                 setPadding(space)
             }
@@ -109,30 +114,30 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
     }
 
     fun select(i: Int): SymbolKeyboardType {
-        val tag = TabManager.getTag(i)
+        val tag = TabManager.tabTags[i]
         symbolHistory.load()
         when (tag.type) {
             SymbolKeyboardType.CLIPBOARD,
             SymbolKeyboardType.COLLECTION,
             SymbolKeyboardType.DRAFT,
             -> {
-                TabManager.get().select(i)
+                TabManager.selectTabByIndex(i)
                 initDbData(tag.type)
             }
             SymbolKeyboardType.CANDIDATE -> {
-                TabManager.get().select(i)
+                TabManager.selectTabByIndex(i)
                 initCandidates()
             }
             SymbolKeyboardType.VAR_LENGTH, SymbolKeyboardType.SYMBOL -> {
-                initVarLengthKeys(i, TabManager.get().select(i))
+                initVarLengthKeys(i, TabManager.selectTabByIndex(i))
             }
             SymbolKeyboardType.TABS -> {
-                TabManager.get().select(i)
-                initVarLengthKeys(i, TabManager.get().getTabSwitchData())
-                Timber.v("All tags in TABS: TabManager.get().tabSwitchData = ${TabManager.get().getTabSwitchData()}")
+                TabManager.selectTabByIndex(i)
+                initVarLengthKeys(i, TabManager.tabSwitchData)
+                Timber.d("All tags in TABS: TabManager.tabSwitchData = ${TabManager.tabSwitchData}")
             }
             SymbolKeyboardType.HISTORY -> {
-                TabManager.get().select(i)
+                TabManager.selectTabByIndex(i)
                 initFixData(i)
             }
             else -> initFixData(i)
@@ -141,7 +146,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
     }
 
     private fun initFixData(i: Int) {
-        val tabTag = TabManager.getTag(i)
+        val tabTag = TabManager.tabTags[i]
 
         simpleAdapter.apply {
             setListener { position ->
@@ -180,7 +185,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
             SymbolKeyboardType.HISTORY ->
                 simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
             else ->
-                simpleAdapter.updateBeans(TabManager.get().select(i))
+                simpleAdapter.updateBeans(TabManager.selectTabByIndex(i))
         }
         keyboardView.scrollToPosition(0)
         Timber.d("Tab #%s with bean size %s", i, simpleAdapter.itemCount)
@@ -315,7 +320,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
         i: Int,
         data: List<SimpleKeyBean>,
     ) {
-        val tabTag = TabManager.getTag(i)
+        val tabTag = TabManager.tabTags[i]
 
         varLengthAdapter.apply {
             setListener { position ->
@@ -325,8 +330,8 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
                         service.inputSymbol(bean.text)
                         return@setListener
                     } else if (tabTag.type === SymbolKeyboardType.TABS) {
-                        val tag = TabManager.get().getTabSwitchTabTag(position)
-                        val truePosition = TabManager.get().getTabSwitchPosition(position)
+                        val tag = TabManager.tabTags.find { SymbolKeyboardType.hasKey(it.type) }
+                        val truePosition = TabManager.getTabSwitchPosition(position)
                         if (tag != null) {
                             Timber.v(
                                 "TABS click: " + "position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
@@ -337,7 +342,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
                                     KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
                                     else -> {}
                                 }
-                            } else if (TabManager.get().isAfterTabSwitch(truePosition)) {
+                            } else if (TabManager.isAfterTabSwitch(truePosition)) {
                                 // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
                                 select(truePosition)
                             } else {
@@ -378,10 +383,10 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
      * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
      */
     override fun onUpdate(text: String) {
-        val selected = TabManager.get().selected
+        val selected = TabManager.currentTabIndex
         // 判断液体键盘视图是否已开启，-1为未开启
         if (selected >= 0) {
-            val tag = TabManager.getTag(selected)
+            val tag = TabManager.tabTags[selected]
             if (tag.type == SymbolKeyboardType.CLIPBOARD) {
                 Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
                 service.lifecycleScope.launch {
