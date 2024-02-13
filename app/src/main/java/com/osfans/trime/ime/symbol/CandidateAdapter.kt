@@ -32,9 +32,11 @@ class CandidateAdapter(private val theme: Theme) : RecyclerView.Adapter<Candidat
     }
 
     fun updateCandidates(candidates: List<CandidateListItem>) {
+        val prevSize = mCandidates.size
         mCandidates.clear()
+        notifyItemRangeRemoved(0, prevSize)
         mCandidates.addAll(candidates)
-        notifyItemRangeChanged(0, candidates.size)
+        notifyItemRangeInserted(0, candidates.size)
     }
 
     override fun getItemCount(): Int {
