@@ -21,11 +21,13 @@ class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : Rec
         get() = mBeans
 
     fun updateBeans(beans: List<SimpleKeyBean>) {
+        val prevSize = mBeans.size
         mBeans.clear()
+        notifyItemRangeRemoved(0, prevSize)
         mBeans.addAll(beans)
+        notifyItemRangeInserted(0, beans.size)
         mBeansByRows.clear()
         mBeansByRows.addAll(beans.chunked(columnSize))
-        notifyItemRangeChanged(0, mBeans.size)
     }
 
     override fun getItemCount(): Int {

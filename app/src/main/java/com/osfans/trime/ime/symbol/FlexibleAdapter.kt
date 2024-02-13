@@ -43,14 +43,15 @@ class FlexibleAdapter(
                     else -> b2.id.compareTo(b1.id)
                 }
             }
+        val prevSize = mBeans.size
         mBeans.clear()
+        notifyItemRangeRemoved(0, prevSize)
         mBeans.addAll(sorted)
+        notifyItemRangeChanged(0, sorted.size)
         mBeansId.clear()
         mBeans.forEachIndexed { index: Int, (id): DatabaseBean ->
             mBeansId[id] = index
         }
-        // 更新视图
-        notifyItemRangeChanged(0, mBeans.size)
     }
 
     override fun getItemCount(): Int = mBeans.size
