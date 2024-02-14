@@ -34,7 +34,7 @@ class QuickBar : KoinComponent {
             }
             with(candidates) {
                 setCandidateListener(service.textInputManager)
-                setShowComment(!Rime.getOption("_hide_comment"))
+                shouldShowComment = !Rime.getOption("_hide_comment")
                 reset()
             }
         }

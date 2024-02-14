@@ -37,7 +37,7 @@ class CompositionPopupWindow(
             root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
             with(compositionView) {
                 reset()
-                setShowComment(!Rime.getOption("_hide_comment"))
+                showComment = !Rime.getOption("_hide_comment")
             }
         }
 
