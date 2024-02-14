@@ -36,22 +36,13 @@ import android.text.style.UnderlineSpan
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.widget.AppCompatTextView
-import com.osfans.trime.core.Rime.Companion.candHighlightIndex
-import com.osfans.trime.core.Rime.Companion.candidatesOrStatusSwitches
-import com.osfans.trime.core.Rime.Companion.composition
-import com.osfans.trime.core.Rime.Companion.getOption
-import com.osfans.trime.core.Rime.Companion.getRimeRawInput
-import com.osfans.trime.core.Rime.Companion.hasLeft
-import com.osfans.trime.core.Rime.Companion.hasMenu
-import com.osfans.trime.core.Rime.Companion.selectLabels
-import com.osfans.trime.core.Rime.Companion.setCaretPos
-import com.osfans.trime.data.theme.FontManager.getTypeface
-import com.osfans.trime.data.theme.Theme.Companion.get
-import com.osfans.trime.ime.core.Trime.Companion.getService
+import android.widget.TextView
+import com.osfans.trime.core.Rime
+import com.osfans.trime.data.theme.FontManager
+import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
-import com.osfans.trime.ime.text.TextInputManager.Companion.getInstance
-import com.osfans.trime.ime.util.UiUtil.isDarkMode
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.dp2px
@@ -59,8 +50,9 @@ import com.osfans.trime.util.sp2px
 import timber.log.Timber
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置  */
+@SuppressLint("AppCompatCustomView")
 @Suppress("ktlint:standard:property-naming")
-class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(context!!, attrs) {
+class Composition(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
     private var key_text_size = 0
     private var text_size = 0
     private var label_text_size = 0
@@ -88,7 +80,7 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
     private var sticky_lines_land = 0
     private var max_entries = 0
     private var candidate_use_cursor = false
-    private var show_comment = false
+    var showComment = false
     private var highlightIndex = 0
     private var windows_comps: List<Map<String, Any?>>? = null
     private var liquid_keyboard_window_comp: List<Map<String, Any?>>? = null
@@ -107,8 +99,10 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
     // private View mInputRoot;
     // 候选高亮序号颜色
     private var hilited_label_color: Int? = null
-    private val textInputManager: TextInputManager
+    private val textInputManager: TextInputManager = TextInputManager.getInstance()
     private var isToolbarMode = false
+    private var minLength = 0
+    private var minCheck = 0
 
     private inner class CompositionSpan : UnderlineSpan() {
         override fun updateDrawState(ds: TextPaint) {
@@ -164,64 +158,59 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
     }
 
     init {
-        textInputManager = getInstance(isDarkMode(context!!))
-        setShowComment(!getOption("_hide_comment"))
+        showComment = !Rime.getOption("_hide_comment")
         reset()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.action
-        if (!isToolbarMode) {
-            if (action == MotionEvent.ACTION_UP) {
-                var n = getOffsetForPosition(event.x, event.y)
-                if (composition_pos[0] <= n && n <= composition_pos[1]) {
-                    val s =
-                        text
-                            .toString()
-                            .substring(n, composition_pos[1])
-                            .replace(" ", "")
-                            .replace("‸", "")
-                    n = getRimeRawInput()!!.length - s.length // 從右側定位
-                    setCaretPos(n)
-                    getService().updateComposing()
-                    return true
-                }
-            } else if (!movable.contentEquals("false") &&
-                (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)
-            ) {
-                val n = getOffsetForPosition(event.x, event.y)
-                if (move_pos[0] <= n && n <= move_pos[1]) {
-                    if (action == MotionEvent.ACTION_DOWN) {
-                        if (first_move || movable.contentEquals("once")) {
-                            first_move = false
-                            getLocationOnScreen(intArrayOf(mCurrentX, mCurrentY))
-                        }
-                        mDx = mCurrentX - event.rawX
-                        mDy = mCurrentY - event.rawY
-                    } else { // MotionEvent.ACTION_MOVE
-                        mCurrentX = (event.rawX + mDx).toInt()
-                        mCurrentY = (event.rawY + mDy).toInt()
-                        getService().updatePopupWindow(mCurrentX, mCurrentY)
+        if (isToolbarMode) return super.onTouchEvent(event)
+
+        if (action == MotionEvent.ACTION_UP) {
+            var n = getOffsetForPosition(event.x, event.y)
+            if (composition_pos[0] <= n && n <= composition_pos[1]) {
+                val s =
+                    text
+                        .toString()
+                        .substring(n, composition_pos[1])
+                        .replace(" ", "")
+                        .replace("‸", "")
+                n = Rime.getRimeRawInput()!!.length - s.length // 從右側定位
+                Rime.setCaretPos(n)
+                Trime.getService().updateComposing()
+                return true
+            }
+        } else if (!movable.contentEquals("false") &&
+            (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)
+        ) {
+            val n = getOffsetForPosition(event.x, event.y)
+            if (move_pos[0] <= n && n <= move_pos[1]) {
+                if (action == MotionEvent.ACTION_DOWN) {
+                    if (first_move || movable.contentEquals("once")) {
+                        first_move = false
+                        getLocationOnScreen(intArrayOf(mCurrentX, mCurrentY))
                     }
-                    return true
+                    mDx = mCurrentX - event.rawX
+                    mDy = mCurrentY - event.rawY
+                } else { // MotionEvent.ACTION_MOVE
+                    mCurrentX = (event.rawX + mDx).toInt()
+                    mCurrentY = (event.rawY + mDy).toInt()
+                    Trime.getService().updatePopupWindow(mCurrentX, mCurrentY)
                 }
+                return true
             }
         }
+
         return super.onTouchEvent(event)
     }
 
-    fun setShowComment(value: Boolean) {
-        show_comment = value
-    }
-
     fun reset() {
-        val theme = get()
+        val theme = ThemeManager.activeTheme
         windows_comps = theme.style.getObject("window") as List<Map<String, Any?>>?
             ?: ArrayList()
         liquid_keyboard_window_comp = theme.style.getObject("liquid_keyboard_window") as List<Map<String, Any?>>?
             ?: ArrayList()
-
         if (theme.style.getInt("layout/max_entries").also { max_entries = it } == 0) {
             max_entries = Candidate.maxCandidateCount
         }
@@ -268,17 +257,18 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
         sticky_lines_land = theme.style.getInt("layout/sticky_lines_land")
         movable = theme.style.getString("layout/movable")
         all_phrases = theme.style.getBoolean("layout/all_phrases")
-        tfLabel = getTypeface(theme.style.getString("label_font"))
-        tfText = getTypeface(theme.style.getString("text_font"))
-        tfCandidate = getTypeface(theme.style.getString("candidate_font"))
-        tfComment = getTypeface(theme.style.getString("comment_font"))
+        tfLabel = FontManager.getTypeface("label_font")
+        tfText = FontManager.getTypeface("text_font")
+        tfCandidate = FontManager.getTypeface("candidate_font")
+        tfComment = FontManager.getTypeface("comment_font")
+        minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
+        minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
     }
 
     private fun getAlign(m: Map<String, Any?>): Any {
         var i = Layout.Alignment.ALIGN_NORMAL
         if (m.containsKey("align")) {
-            val align = obtainString(m, "align", "")
-            when (align) {
+            when (obtainString(m, "align", "")) {
                 "left", "normal" -> i = Layout.Alignment.ALIGN_NORMAL
                 "right", "opposite" -> i = Layout.Alignment.ALIGN_OPPOSITE
                 "center" -> i = Layout.Alignment.ALIGN_CENTER
@@ -288,7 +278,7 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
     }
 
     private fun appendComposition(m: Map<String, Any?>) {
-        val r = composition!!
+        val r = Rime.composition!!
         val s = r.preedit
         var start: Int
         var end: Int
@@ -331,7 +321,7 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
         min_check: Int,
     ): Int {
         Timber.d("setWindow calcStartNum() getCandidates")
-        val candidates = candidatesOrStatusSwitches
+        val candidates = Rime.candidatesOrStatusSwitches
         if (candidates.isEmpty()) return 0
         Timber.d("setWindow calcStartNum() getCandidates finish, size=%s", candidates.size)
         var j = if (min_check > max_entries) max_entries - 1 else min_check - 1
@@ -361,10 +351,10 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
         Timber.d("appendCandidates(): length = %s", length)
         var start: Int
         var end: Int
-        val candidates = candidatesOrStatusSwitches
+        val candidates = Rime.candidatesOrStatusSwitches
         if (candidates.isEmpty()) return
         var sep = obtainString(m, "start", "")
-        highlightIndex = if (candidate_use_cursor) candHighlightIndex else -1
+        highlightIndex = if (candidate_use_cursor) Rime.candHighlightIndex else -1
         val label_format = obtainString(m, "label", "")
         val candidate_format = obtainString(m, "candidate", "")
         val comment_format = obtainString(m, "comment", "")
@@ -374,8 +364,8 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             sticky_lines_now = sticky_lines_land
         }
-        //    Timber.d("sticky_lines_now = %d", sticky_lines_now);
-        val labels = selectLabels
+//        Timber.d("sticky_lines_now = %d", sticky_lines_now);
+        val labels = Rime.selectLabels
         var i = -1
         candidate_num = 0
         for (o in candidates) {
@@ -441,7 +431,7 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
             )
             ss!!.setSpan(AbsoluteSizeSpan(candidate_text_size), start, end, span)
             var comment = o.comment
-            if (show_comment && !TextUtils.isEmpty(comment_format) && !TextUtils.isEmpty(comment)) {
+            if (showComment && !TextUtils.isEmpty(comment_format) && !TextUtils.isEmpty(comment)) {
                 comment = String.format(comment_format, comment)
                 start = ss!!.length
                 ss!!.append(comment)
@@ -471,12 +461,12 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
     private fun appendButton(m: Map<String, Any?>) {
         if (m.containsKey("when")) {
             val `when` = obtainString(m, "when", "")
-            if (`when`.contentEquals("paging") && !hasLeft()) return
-            if (`when`.contentEquals("has_menu") && !hasMenu()) return
+            if (`when`.contentEquals("paging") && !Rime.hasLeft()) return
+            if (`when`.contentEquals("has_menu") && !Rime.hasMenu()) return
         }
         val label: String
         val e = Event(obtainString(m, "click", ""))
-        label = if (m.containsKey("label")) obtainString(m, "label", "") else e.label
+        label = if (m.containsKey("label")) obtainString(m, "label", "") else e.getLabel(KeyboardSwitcher.currentKeyboard)
         var start: Int
         var end: Int
         var sep: String? = null
@@ -523,30 +513,9 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
     /**
      * 设置悬浮窗文本
      *
-     * @param charLength 候选词长度大于设定，才会显示到悬浮窗中
-     * @param minCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-     * @param maxPopup 最多在悬浮窗显示多少个候选词
      * @return 悬浮窗显示的候选词数量
      */
-    fun setWindow(
-        charLength: Int,
-        minCheck: Int,
-        maxPopup: Int,
-    ): Int {
-        return setWindow(charLength, minCheck)
-    }
-
-    /**
-     * 设置悬浮窗文本
-     *
-     * @param stringMinLength 候选词长度大于设定，才会显示到悬浮窗中
-     * @param candidateMinCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-     * @return 悬浮窗显示的候选词数量
-     */
-    private fun setWindow(
-        stringMinLength: Int,
-        candidateMinCheck: Int,
-    ): Int {
+    fun setWindowContent(): Int {
         if (visibility != VISIBLE) return 0
         val stacks = Throwable().stackTrace
         Timber.d(
@@ -558,7 +527,7 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
                 ", [3]" +
                 stacks[3].toString(),
         )
-        val (_, _, _, _, s) = composition ?: return 0
+        val (_, _, _, _, s) = Rime.composition ?: return 0
         if (TextUtils.isEmpty(s)) return 0
         isSingleLine = true // 設置單行
         ss = SpannableStringBuilder()
@@ -567,14 +536,9 @@ class Composition(context: Context?, attrs: AttributeSet?) : AppCompatTextView(c
             if (m.containsKey("composition")) {
                 appendComposition(m)
             } else if (m.containsKey("candidate")) {
-                start_num = calcStartNum(stringMinLength, candidateMinCheck)
-                Timber.d(
-                    "start_num = %s, min_length = %s, min_check = %s",
-                    start_num,
-                    stringMinLength,
-                    candidateMinCheck,
-                )
-                appendCandidates(m, stringMinLength, start_num)
+                start_num = calcStartNum(minLength, minCheck)
+                Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, minLength, minCheck)
+                appendCandidates(m, minLength, start_num)
             } else if (m.containsKey("click")) {
                 appendButton(m)
             } else if (m.containsKey("move")) {

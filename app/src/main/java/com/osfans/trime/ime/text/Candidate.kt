@@ -65,7 +65,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var timeMove: Long = 0
     private var candidateHighlight: PaintDrawable? = null
     private val separatorPaint: Paint
-    private val candidatePaint: Paint = Paint()
+    private val candidatePaint: Paint
     private val symbolPaint: Paint
     private val commentPaint: Paint
     private var candidateFont: Typeface? = null
@@ -79,11 +79,10 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var commentHeight = 0
     private var candidateSpacing = 0
     private var candidatePadding = 0
-    private var shouldShowComment = true
+    var shouldShowComment = true
     private var isCommentOnTop = false
     private var candidateUseCursor = false
-    private val appPrefs: AppPrefs
-        get() = AppPrefs.defaultInstance()
+    private val appPrefs get() = AppPrefs.defaultInstance()
 
     fun reset() {
         val theme = ThemeManager.activeTheme
@@ -100,9 +99,9 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         val commentTextSize = sp2px(theme.style.getFloat("comment_text_size")).toInt()
         candidateViewHeight = dp2px(theme.style.getFloat("candidate_view_height")).toInt()
         commentHeight = dp2px(theme.style.getFloat("comment_height")).toInt()
-        candidateFont = FontManager.getTypeface(theme.style.getString("candidate_font"))
-        commentFont = FontManager.getTypeface(theme.style.getString("comment_font"))
-        symbolFont = FontManager.getTypeface(theme.style.getString("symbol_font"))
+        candidateFont = FontManager.getTypeface("candidate_font")
+        commentFont = FontManager.getTypeface("comment_font")
+        symbolFont = FontManager.getTypeface("symbol_font")
         candidatePaint.textSize = candidateTextSize.toFloat()
         candidatePaint.setTypeface(candidateFont)
         symbolPaint.textSize = candidateTextSize.toFloat()
@@ -114,11 +113,8 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         invalidate()
     }
 
-    fun setShowComment(value: Boolean) {
-        shouldShowComment = value
-    }
-
     init {
+        candidatePaint = Paint()
         candidatePaint.isAntiAlias = true
         candidatePaint.strokeWidth = 0f
         symbolPaint = Paint()
@@ -168,10 +164,6 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         }
     }
 
-    fun setExpectWidth(expectWidth: Int) {
-        this.expectWidth = expectWidth
-    }
-
     /**
      * 選取候選項
      *
@@ -183,7 +175,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     ) {
         if (index < 0 || index >= computedCandidates.size) return
 
-        val candidate: ComputedCandidate = computedCandidates[index]
+        val candidate = computedCandidates[index]
         if (candidate is ComputedCandidate.Word) {
             if (listener.get() != null) {
                 if (isLongClick && appPrefs.keyboard.shouldLongClickDeleteCandidate) {
@@ -304,8 +296,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         val pageBottonWidth =
             candidateSpacing + 2 * candidatePadding +
                 symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont!!).toInt()
-
-        val minWidth: Int =
+        val minWidth =
             if (pageEx > 2) {
                 (expectWidth * (pageEx / 10f + 1) - pageBottonWidth).toInt()
             } else if (pageEx == 2) {
@@ -382,7 +373,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         params.width = x
         params.height = if ((shouldShowComment && isCommentOnTop)) candidateViewHeight + commentHeight else candidateViewHeight
         layoutParams = params
-        Trime.getService().setCandidateExPage(hasExButton)
+        Trime.getService().candidateExPage = hasExButton
     }
 
     override fun onSizeChanged(

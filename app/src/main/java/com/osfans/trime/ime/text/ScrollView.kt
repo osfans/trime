@@ -58,10 +58,9 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        /*
-    if (ev.getAction() == MotionEvent.ACTION_UP) {
-        if (views != null) { }
-    } **/
+        /*if (ev.getAction() == MotionEvent.ACTION_UP) {
+            if (views != null) { }
+        }*/
         return super.onInterceptTouchEvent(ev)
     }
 
@@ -75,15 +74,7 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
             MotionEvent.ACTION_DOWN -> {
                 swipeActionLimit = min(width / 4, height * 10)
                 Timber.i(
-                    (
-                        "commOnTouchEvent limit = " +
-                            swipeActionLimit +
-                            ", " +
-                            (
-                                width / 4
-                            ) + ", " +
-                            (height * 4)
-                    ),
+                    "commOnTouchEvent limit = " + swipeActionLimit + ", " + (width / 4) + ", " + (height * 4),
                 )
                 if (swipeActionLimit < 50) swipeActionLimit = 100
             }
@@ -110,7 +101,7 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
                     if (pageUpAction != null) pageUpAction!!.run()
                     if (inner!!.width > this.width) scrollTo(this.width - inner!!.width + 400, 0)
                 } else {
-                    //          Timber.d("commOnTouchEvent "+getWidth() + "-" + inner.getWidth() +"+" +
+                    // Timber.d("commOnTouchEvent "+getWidth() + "-" + inner.getWidth() +"+" +
                     // getScrollX()+", p=" +scrollEndPosition+", x="+ev.getX());
                     Timber.d(
                         "commOnTouchEvent dif=" + (swipeStartX - ev.x) + " limit=" + swipeActionLimit,
@@ -120,7 +111,7 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
                             swipeStartX = ev.x
                         }
                     } else if (swipeStartX - ev.x > swipeActionLimit) {
-                        if (Trime.getService().hasCandidateExPage()) {
+                        if (Trime.getService().candidateExPage) {
                             if (pageExAction != null) pageExAction!!.run()
                             return
                         } else if (Rime.hasRight()) {

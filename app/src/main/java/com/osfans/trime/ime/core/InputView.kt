@@ -293,7 +293,7 @@ class InputView(
             is RimeNotification.OptionNotification -> {
                 when (it.option) {
                     "_hide_comment" -> {
-                        quickBar.oldCandidateBar.candidates.setShowComment(!it.value)
+                        quickBar.oldCandidateBar.candidates.shouldShowComment = !it.value
                     }
                     "_hide_bar",
                     "_hide_candidate",
