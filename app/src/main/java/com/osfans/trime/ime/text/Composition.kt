@@ -20,12 +20,10 @@ package com.osfans.trime.ime.text
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.Layout
 import android.text.SpannableStringBuilder
 import android.text.TextPaint
-import android.text.TextUtils
 import android.text.method.LinkMovementMethod
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.AlignmentSpan
@@ -43,81 +41,91 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.util.CollectionUtils.obtainFloat
-import com.osfans.trime.util.CollectionUtils.obtainString
-import com.osfans.trime.util.dp2px
-import com.osfans.trime.util.sp2px
+import com.osfans.trime.util.CollectionUtils
+import splitties.dimensions.dp
 import timber.log.Timber
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置  */
 @SuppressLint("AppCompatCustomView")
-@Suppress("ktlint:standard:property-naming")
 class Composition(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
-    private var key_text_size = 0
-    private var text_size = 0
-    private var label_text_size = 0
-    private var candidate_text_size = 0
-    private var comment_text_size = 0
-    private var key_text_color = 0
-    private var text_color = 0
-    private var label_color = 0
-    private var candidate_text_color = 0
-    private var comment_text_color = 0
-    private var hilited_text_color = 0
-    private var hilited_candidate_text_color = 0
-    private var hilited_comment_text_color = 0
-    private var back_color = 0
-    private var hilited_back_color = 0
-    private var hilited_candidate_back_color = 0
-    private var key_back_color: Int? = null
-    private var tfText: Typeface? = null
-    private var tfLabel: Typeface? = null
-    private var tfCandidate: Typeface? = null
-    private var tfComment: Typeface? = null
-    private val composition_pos = IntArray(2)
-    private var max_length = 0
-    private var sticky_lines = 0
-    private var sticky_lines_land = 0
-    private var max_entries = 0
-    private var candidate_use_cursor = false
-    var showComment = false
+    private val theme = ThemeManager.activeTheme
+    private val textInputManager = TextInputManager.getInstance()
+
+    private val keyTextSize = theme.style.getInt("key_text_size")
+    private val keyTextColor = theme.colors.getColor("key_text_color")!!
+    private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
+    private val movable = Movable.fromString(theme.style.getString("layout/movable"))
+    private val showComment = !Rime.getOption("_hide_comment")
+    private val maxEntries =
+        theme.style.getInt("layout/max_entries").takeIf { it > 0 }
+            ?: Candidate.MAX_CANDIDATE_COUNT
+
+    @Suppress("UNCHECKED_CAST")
+    private val windowComponents =
+        theme.style.getObject("window") as List<Map<String, Any?>>?
+            ?: listOf()
+
+    @Suppress("UNCHECKED_CAST")
+    private val liquidWindowComponents =
+        theme.style.getObject("liquid_keyboard_window") as List<Map<String, Any?>>?
+            ?: listOf()
+
     private var highlightIndex = 0
-    private var windows_comps: List<Map<String, Any?>>? = null
-    private var liquid_keyboard_window_comp: List<Map<String, Any?>>? = null
+    private val compositionPos = IntArray(2)
+    private val movePos = IntArray(2)
+
     private var ss: SpannableStringBuilder? = null
-    private val span = 0
-    private var movable: String? = null
-    private val move_pos = IntArray(2)
-    private var first_move = true
+    private var firstMove = true
     private var mDx = 0f
     private var mDy = 0f
     private var mCurrentX = 0
     private var mCurrentY = 0
-    private var candidate_num = 0
-    private var all_phrases = false
+    private var candidateNum = 0
+    private val allPhrases = theme.style.getBoolean("layout/all_phrases")
 
-    // private View mInputRoot;
-    // 候选高亮序号颜色
-    private var hilited_label_color: Int? = null
-    private val textInputManager: TextInputManager = TextInputManager.getInstance()
     private var isToolbarMode = false
-    private var minLength = 0
-    private var minCheck = 0
+
+    private val stickyLines: Int
+        get() =
+            when (resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> theme.style.getInt("layout/sticky_lines_land")
+                else -> theme.style.getInt("layout/sticky_lines")
+            }
+
+    private enum class Movable {
+        ALWAYS,
+        NEVER,
+        ONCE,
+        ;
+
+        companion object {
+            fun fromString(string: String): Movable {
+                return runCatching {
+                    when (string) {
+                        "true" -> ALWAYS
+                        "false" -> NEVER
+                        "once" -> ONCE
+                        else -> valueOf(string)
+                    }
+                }.getOrDefault(NEVER)
+            }
+        }
+    }
 
     private inner class CompositionSpan : UnderlineSpan() {
         override fun updateDrawState(ds: TextPaint) {
-            ds.setTypeface(tfText)
-            ds.color = text_color
-            ds.bgColor = back_color
+            ds.typeface = FontManager.getTypeface("text_font")
+            ds.color = theme.colors.getColor("text_color")!!
+            ds.bgColor = theme.colors.getColor("back_color")!!
         }
     }
 
     private inner class CandidateSpan(
-        var index: Int,
-        var tf: Typeface?,
-        var hi_text: Int,
-        var hi_back: Int,
-        var text: Int,
+        private val index: Int,
+        private val typeface: Typeface?,
+        private val highlightTextColor: Int,
+        private val highlightBackColor: Int,
+        private val textColor: Int,
     ) : ClickableSpan() {
         override fun onClick(tv: View) {
             textInputManager.onCandidatePressed(index)
@@ -125,17 +133,17 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
         override fun updateDrawState(ds: TextPaint) {
             ds.isUnderlineText = false
-            ds.setTypeface(tf)
+            ds.typeface = typeface
             if (index == highlightIndex) {
-                ds.color = hi_text
-                ds.bgColor = hi_back
+                ds.color = highlightTextColor
+                ds.bgColor = highlightBackColor
             } else {
-                ds.color = text
+                ds.color = textColor
             }
         }
     }
 
-    private inner class EventSpan(var event: Event) : ClickableSpan() {
+    private inner class EventSpan(private val event: Event) : ClickableSpan() {
         override fun onClick(tv: View) {
             textInputManager.onPress(event.code)
             textInputManager.onEvent(event)
@@ -143,8 +151,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
         override fun updateDrawState(ds: TextPaint) {
             ds.isUnderlineText = false
-            ds.color = key_text_color
-            if (key_back_color != null) ds.bgColor = key_back_color as Int
+            ds.color = keyTextColor
+            ds.bgColor = theme.colors.getColor("key_back_color")!!
         }
     }
 
@@ -158,8 +166,24 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     }
 
     init {
-        showComment = !Rime.getOption("_hide_comment")
-        reset()
+        setLineSpacing(
+            theme.style.getFloat("layout/line_spacing"),
+            theme.style.getFloat("layout/line_spacing_multiplier").coerceAtLeast(1f),
+        )
+        val marginX = dp(theme.style.getInt("layout/margin_x"))
+        val marginY = dp(theme.style.getInt("layout/margin_y"))
+        val marginBottom = dp(theme.style.getInt("layout/margin_bottom"))
+        setPadding(marginX, marginY, marginX, marginBottom)
+
+        minWidth = dp(theme.style.getInt("layout/min_width"))
+        minHeight = dp(theme.style.getInt("layout/min_height"))
+        val displayMetrics = resources.displayMetrics
+        val realMargin = dp(theme.style.getInt("layout/real_margin"))
+        maxWidth = dp(theme.style.getInt("layout/max_width"))
+            .coerceAtMost(displayMetrics.widthPixels) - realMargin * 2
+        maxHeight =
+            dp(theme.style.getInt("layout/max_height"))
+                .coerceAtMost(displayMetrics.heightPixels)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -169,11 +193,11 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
         if (action == MotionEvent.ACTION_UP) {
             var n = getOffsetForPosition(event.x, event.y)
-            if (composition_pos[0] <= n && n <= composition_pos[1]) {
+            if (n in compositionPos[0]..compositionPos[1]) {
                 val s =
                     text
                         .toString()
-                        .substring(n, composition_pos[1])
+                        .substring(n, compositionPos[1])
                         .replace(" ", "")
                         .replace("‸", "")
                 n = Rime.getRimeRawInput()!!.length - s.length // 從右側定位
@@ -181,14 +205,14 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 Trime.getService().updateComposing()
                 return true
             }
-        } else if (!movable.contentEquals("false") &&
+        } else if (movable != Movable.NEVER &&
             (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)
         ) {
             val n = getOffsetForPosition(event.x, event.y)
-            if (move_pos[0] <= n && n <= move_pos[1]) {
+            if (n in movePos[0]..movePos[1]) {
                 if (action == MotionEvent.ACTION_DOWN) {
-                    if (first_move || movable.contentEquals("once")) {
-                        first_move = false
+                    if (firstMove || movable == Movable.ONCE) {
+                        firstMove = false
                         getLocationOnScreen(intArrayOf(mCurrentX, mCurrentY))
                     }
                     mDx = mCurrentX - event.rawX
@@ -205,70 +229,10 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         return super.onTouchEvent(event)
     }
 
-    fun reset() {
-        val theme = ThemeManager.activeTheme
-        windows_comps = theme.style.getObject("window") as List<Map<String, Any?>>?
-            ?: ArrayList()
-        liquid_keyboard_window_comp = theme.style.getObject("liquid_keyboard_window") as List<Map<String, Any?>>?
-            ?: ArrayList()
-        if (theme.style.getInt("layout/max_entries").also { max_entries = it } == 0) {
-            max_entries = Candidate.maxCandidateCount
-        }
-        candidate_use_cursor = theme.style.getBoolean("candidate_use_cursor")
-        text_size = sp2px(theme.style.getFloat("text_size")).toInt()
-        candidate_text_size = sp2px(theme.style.getFloat("candidate_text_size")).toInt()
-        comment_text_size = sp2px(theme.style.getFloat("comment_text_size")).toInt()
-        label_text_size = sp2px(theme.style.getFloat("label_text_size")).toInt()
-        text_color = theme.colors.getColor("text_color")!!
-        candidate_text_color = theme.colors.getColor("candidate_text_color")!!
-        comment_text_color = theme.colors.getColor("comment_text_color")!!
-        hilited_text_color = theme.colors.getColor("hilited_text_color")!!
-        hilited_candidate_text_color = theme.colors.getColor("hilited_candidate_text_color")!!
-        hilited_comment_text_color = theme.colors.getColor("hilited_comment_text_color")!!
-        label_color = theme.colors.getColor("label_color")!!
-        hilited_label_color = theme.colors.getColor("hilited_label_color")
-        if (hilited_label_color == null) {
-            hilited_label_color = hilited_candidate_text_color
-        }
-        back_color = theme.colors.getColor("back_color")!!
-        hilited_back_color = theme.colors.getColor("hilited_back_color")!!
-        hilited_candidate_back_color = theme.colors.getColor("hilited_candidate_back_color")!!
-        key_text_size = sp2px(theme.style.getFloat("key_text_size")).toInt()
-        key_text_color = theme.colors.getColor("key_text_color")!!
-        key_back_color = theme.colors.getColor("key_back_color")
-        var line_spacing_multiplier = theme.style.getFloat("layout/line_spacing_multiplier")
-        if (line_spacing_multiplier == 0f) line_spacing_multiplier = 1f
-        setLineSpacing(theme.style.getFloat("layout/line_spacing"), line_spacing_multiplier)
-        minWidth = dp2px(theme.style.getFloat("layout/min_width")).toInt()
-        minHeight = dp2px(theme.style.getFloat("layout/min_height")).toInt()
-        var max_width = dp2px(theme.style.getFloat("layout/max_width")).toInt()
-        val real_margin = dp2px(theme.style.getFloat("layout/real_margin")).toInt()
-        val displayWidth = Resources.getSystem().displayMetrics.widthPixels
-        Timber.d("max_width = %s, displayWidth = %s ", max_width, displayWidth)
-        if (max_width > displayWidth) max_width = displayWidth
-        maxWidth = max_width - real_margin * 2
-        maxHeight = dp2px(theme.style.getFloat("layout/max_height")).toInt()
-        val margin_x: Int = dp2px(theme.style.getFloat("layout/margin_x")).toInt()
-        val margin_y: Int = dp2px(theme.style.getFloat("layout/margin_y")).toInt()
-        val margin_bottom: Int = dp2px(theme.style.getFloat("layout/margin_bottom")).toInt()
-        setPadding(margin_x, margin_y, margin_x, margin_bottom)
-        max_length = theme.style.getInt("layout/max_length")
-        sticky_lines = theme.style.getInt("layout/sticky_lines")
-        sticky_lines_land = theme.style.getInt("layout/sticky_lines_land")
-        movable = theme.style.getString("layout/movable")
-        all_phrases = theme.style.getBoolean("layout/all_phrases")
-        tfLabel = FontManager.getTypeface("label_font")
-        tfText = FontManager.getTypeface("text_font")
-        tfCandidate = FontManager.getTypeface("candidate_font")
-        tfComment = FontManager.getTypeface("comment_font")
-        minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
-        minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-    }
-
     private fun getAlign(m: Map<String, Any?>): Any {
         var i = Layout.Alignment.ALIGN_NORMAL
         if (m.containsKey("align")) {
-            when (obtainString(m, "align", "")) {
+            when (CollectionUtils.obtainString(m, "align")) {
                 "left", "normal" -> i = Layout.Alignment.ALIGN_NORMAL
                 "right", "opposite" -> i = Layout.Alignment.ALIGN_OPPOSITE
                 "center" -> i = Layout.Alignment.ALIGN_CENTER
@@ -282,59 +246,58 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         val s = r.preedit
         var start: Int
         var end: Int
-        var sep = obtainString(m, "start", "")
-        if (!TextUtils.isEmpty(sep)) {
+        var sep = CollectionUtils.obtainString(m, "start", "")
+        if (sep.isNotEmpty()) {
             start = ss!!.length
             ss!!.append(sep)
             end = ss!!.length
-            ss!!.setSpan(getAlign(m), start, end, span)
+            ss!!.setSpan(getAlign(m), start, end, 0)
         }
         start = ss!!.length
         ss!!.append(s)
         end = ss!!.length
-        ss!!.setSpan(getAlign(m), start, end, span)
-        composition_pos[0] = start
-        composition_pos[1] = end
-        ss!!.setSpan(CompositionSpan(), start, end, span)
-        ss!!.setSpan(AbsoluteSizeSpan(text_size), start, end, span)
-        if (m.containsKey("letter_spacing")) {
-            val size = obtainFloat(m, "letter_spacing", 0f)
-            if (size != 0f) ss!!.setSpan(LetterSpacingSpan(size), start, end, span)
-        }
-        start = composition_pos[0] + r.selStartPos
-        end = composition_pos[0] + r.selEndPos
-        ss!!.setSpan(ForegroundColorSpan(hilited_text_color), start, end, span)
-        ss!!.setSpan(BackgroundColorSpan(hilited_back_color), start, end, span)
-        sep = obtainString(m, "end", "")
-        if (!TextUtils.isEmpty(sep)) ss!!.append(sep)
+        ss!!.setSpan(getAlign(m), start, end, 0)
+        compositionPos[0] = start
+        compositionPos[1] = end
+        ss!!.setSpan(CompositionSpan(), start, end, 0)
+        val textSize = theme.style.getInt("text_size")
+        ss!!.setSpan(AbsoluteSizeSpan(textSize), start, end, 0)
+        CollectionUtils.obtainFloat(m, "letter_spacing").takeIf { it > 0 }
+            ?.let { ss?.setSpan(LetterSpacingSpan(it), start, end, 0) }
+        start = compositionPos[0] + r.selStartPos
+        end = compositionPos[0] + r.selEndPos
+        ss!!.setSpan(ForegroundColorSpan(theme.colors.getColor("hilited_text_color")!!), start, end, 0)
+        ss!!.setSpan(BackgroundColorSpan(theme.colors.getColor("hilited_back_color")!!), start, end, 0)
+        sep = CollectionUtils.obtainString(m, "end", "")
+        if (sep.isNotEmpty()) ss!!.append(sep)
     }
 
     /**
      * 计算悬浮窗显示候选词后，候选栏从第几个候选词开始展示 注意当 all_phrases==true 时，悬浮窗显示的候选词数量和候选栏从第几个开始，是不一致的
      *
-     * @param min_length 候选词长度大于设定，才会显示到悬浮窗中
-     * @param min_check 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
+     * @param minLength 候选词长度大于设定，才会显示到悬浮窗中
+     * @param minCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
      * @return j
      */
     private fun calcStartNum(
-        min_length: Int,
-        min_check: Int,
+        minLength: Int,
+        minCheck: Int,
     ): Int {
         Timber.d("setWindow calcStartNum() getCandidates")
         val candidates = Rime.candidatesOrStatusSwitches
         if (candidates.isEmpty()) return 0
         Timber.d("setWindow calcStartNum() getCandidates finish, size=%s", candidates.size)
-        var j = if (min_check > max_entries) max_entries - 1 else min_check - 1
+        var j = if (minCheck > maxEntries) maxEntries - 1 else minCheck - 1
         if (j >= candidates.size) j = candidates.size - 1
         while (j >= 0) {
             val cand = candidates[j].text
-            if (cand.length >= min_length) break
+            if (cand.length >= minLength) break
             j--
         }
         if (j < 0) j = 0
-        while (j < max_entries && j < candidates.size) {
+        while (j < maxEntries && j < candidates.size) {
             val cand = candidates[j].text
-            if (cand.length < min_length) {
+            if (cand.length < minLength) {
                 return j
             }
             j++
@@ -346,168 +309,168 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private fun appendCandidates(
         m: Map<String, Any?>,
         length: Int,
-        end_num: Int,
+        endNum: Int,
     ) {
         Timber.d("appendCandidates(): length = %s", length)
         var start: Int
         var end: Int
         val candidates = Rime.candidatesOrStatusSwitches
         if (candidates.isEmpty()) return
-        var sep = obtainString(m, "start", "")
-        highlightIndex = if (candidate_use_cursor) Rime.candHighlightIndex else -1
-        val label_format = obtainString(m, "label", "")
-        val candidate_format = obtainString(m, "candidate", "")
-        val comment_format = obtainString(m, "comment", "")
-        val line = obtainString(m, "sep", "")
-        var line_length = 0
-        var sticky_lines_now = sticky_lines
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            sticky_lines_now = sticky_lines_land
-        }
-//        Timber.d("sticky_lines_now = %d", sticky_lines_now);
+        val prefix = CollectionUtils.obtainString(m, "start")
+        highlightIndex = if (candidateUseCursor) Rime.candHighlightIndex else -1
+        val labelFormat = CollectionUtils.obtainString(m, "label")
+        val candidateFormat = CollectionUtils.obtainString(m, "candidate")
+        val commentFormat = CollectionUtils.obtainString(m, "comment")
+        val line = CollectionUtils.obtainString(m, "sep")
+        var lineLength = 0
         val labels = Rime.selectLabels
         var i = -1
-        candidate_num = 0
+        candidateNum = 0
+        val maxLength = theme.style.getInt("layout/max_length")
+        val hilitedCandidateBackColor = theme.colors.getColor("hilited_candidate_back_color")!!
         for (o in candidates) {
             var cand = o.text
-            if (TextUtils.isEmpty(cand)) cand = ""
             i++
-            if (candidate_num >= max_entries) break
-            if (!all_phrases && candidate_num >= end_num) break
-            if (all_phrases && cand.length < length) {
+            if (candidateNum >= maxEntries) break
+            if (!allPhrases && candidateNum >= endNum) break
+            if (allPhrases && cand.length < length) {
                 continue
             }
-            cand = String.format(candidate_format, cand)
-            val line_sep: String
-            if (candidate_num == 0) {
-                line_sep = sep
-            } else if (sticky_lines_now > 0 && sticky_lines_now >= i || max_length > 0 && line_length + cand.length > max_length) {
-                line_sep = "\n"
-                line_length = 0
-            } else {
-                line_sep = line
-            }
-            if (!TextUtils.isEmpty(line_sep)) {
+            cand = String.format(candidateFormat, cand)
+            val lineSep =
+                if (candidateNum == 0) {
+                    prefix
+                } else if (stickyLines > 0 && stickyLines >= i || maxLength > 0 && lineLength + cand.length > maxLength) {
+                    "\n".also { lineLength = 0 }
+                } else {
+                    line
+                }
+            if (lineSep.isNotEmpty()) {
                 start = ss!!.length
-                ss!!.append(line_sep)
+                ss!!.append(lineSep)
                 end = ss!!.length
-                ss!!.setSpan(getAlign(m), start, end, span)
+                ss!!.setSpan(getAlign(m), start, end, 0)
             }
-            if (!TextUtils.isEmpty(label_format) && labels.isNotEmpty()) {
-                val label = String.format(label_format, labels[i])
+            if (labelFormat.isNotEmpty() && labels.isNotEmpty()) {
+                val label = String.format(labelFormat, labels[i])
                 start = ss!!.length
                 ss!!.append(label)
                 end = ss!!.length
                 ss!!.setSpan(
                     CandidateSpan(
                         i,
-                        tfLabel,
-                        hilited_label_color!!,
-                        hilited_candidate_back_color,
-                        label_color,
+                        FontManager.getTypeface("label_font"),
+                        theme.colors.getColor("hilited_label_color")!!,
+                        hilitedCandidateBackColor,
+                        theme.colors.getColor("label_color")!!,
                     ),
                     start,
                     end,
-                    span,
+                    0,
                 )
-                ss!!.setSpan(AbsoluteSizeSpan(label_text_size), start, end, span)
+                val labelTextSize = theme.style.getInt("label_text_size")
+                ss!!.setSpan(AbsoluteSizeSpan(labelTextSize), start, end, 0)
             }
             start = ss!!.length
             ss!!.append(cand)
             end = ss!!.length
-            line_length += cand.length
-            ss!!.setSpan(getAlign(m), start, end, span)
+            lineLength += cand.length
+            ss!!.setSpan(getAlign(m), start, end, 0)
             ss!!.setSpan(
                 CandidateSpan(
                     i,
-                    tfCandidate,
-                    hilited_candidate_text_color,
-                    hilited_candidate_back_color,
-                    candidate_text_color,
+                    FontManager.getTypeface("candidate_font"),
+                    theme.colors.getColor("hilited_candidate_text_color")!!,
+                    hilitedCandidateBackColor,
+                    theme.colors.getColor("candidate_text_color")!!,
                 ),
                 start,
                 end,
-                span,
+                0,
             )
-            ss!!.setSpan(AbsoluteSizeSpan(candidate_text_size), start, end, span)
-            var comment = o.comment
-            if (showComment && !TextUtils.isEmpty(comment_format) && !TextUtils.isEmpty(comment)) {
-                comment = String.format(comment_format, comment)
+            val candidateTextSize = theme.style.getInt("candidate_text_size")
+            ss!!.setSpan(AbsoluteSizeSpan(candidateTextSize), start, end, 0)
+            if (showComment && commentFormat.isNotEmpty() && o.comment.isNotEmpty()) {
+                val comment = String.format(commentFormat, o.comment)
                 start = ss!!.length
                 ss!!.append(comment)
                 end = ss!!.length
-                ss!!.setSpan(getAlign(m), start, end, span)
+                ss!!.setSpan(getAlign(m), start, end, 0)
                 ss!!.setSpan(
                     CandidateSpan(
                         i,
-                        tfComment,
-                        hilited_comment_text_color,
-                        hilited_candidate_back_color,
-                        comment_text_color,
+                        FontManager.getTypeface("comment_font"),
+                        theme.colors.getColor("hilited_comment_text_color")!!,
+                        hilitedCandidateBackColor,
+                        theme.colors.getColor("comment_text_color")!!,
                     ),
                     start,
                     end,
-                    span,
+                    0,
                 )
-                ss!!.setSpan(AbsoluteSizeSpan(comment_text_size), start, end, span)
-                line_length += comment.length
+                val commentTextSize = theme.style.getInt("comment_text_size")
+                ss!!.setSpan(AbsoluteSizeSpan(commentTextSize), start, end, 0)
+                lineLength += comment.length
             }
-            candidate_num++
+            candidateNum++
         }
-        sep = obtainString(m, "end", "")
-        if (!TextUtils.isEmpty(sep)) ss!!.append(sep)
+        val suffix = CollectionUtils.obtainString(m, "end", "")
+        if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
 
     private fun appendButton(m: Map<String, Any?>) {
         if (m.containsKey("when")) {
-            val `when` = obtainString(m, "when", "")
+            val `when` = CollectionUtils.obtainString(m, "when", "")
             if (`when`.contentEquals("paging") && !Rime.hasLeft()) return
             if (`when`.contentEquals("has_menu") && !Rime.hasMenu()) return
         }
-        val label: String
-        val e = Event(obtainString(m, "click", ""))
-        label = if (m.containsKey("label")) obtainString(m, "label", "") else e.getLabel(KeyboardSwitcher.currentKeyboard)
+        val e = Event(CollectionUtils.obtainString(m, "click"))
+        val label =
+            if (m.containsKey("label")) {
+                CollectionUtils.obtainString(m, "label", "")
+            } else {
+                e.getLabel(KeyboardSwitcher.currentKeyboard)
+            }
         var start: Int
         var end: Int
-        var sep: String? = null
-        if (m.containsKey("start")) sep = obtainString(m, "start", "")
-        if (!TextUtils.isEmpty(sep)) {
+        val prefix = CollectionUtils.obtainString(m, "start")
+        if (prefix.isNotEmpty()) {
             start = ss!!.length
-            ss!!.append(sep)
+            ss!!.append(prefix)
             end = ss!!.length
-            ss!!.setSpan(getAlign(m), start, end, span)
+            ss!!.setSpan(getAlign(m), start, end, 0)
         }
         start = ss!!.length
         ss!!.append(label)
         end = ss!!.length
-        ss!!.setSpan(getAlign(m), start, end, span)
-        ss!!.setSpan(EventSpan(e), start, end, span)
-        ss!!.setSpan(AbsoluteSizeSpan(key_text_size), start, end, span)
-        sep = obtainString(m, "end", "")
-        if (!TextUtils.isEmpty(sep)) ss!!.append(sep)
+        ss!!.setSpan(getAlign(m), start, end, 0)
+        ss!!.setSpan(EventSpan(e), start, end, 0)
+        ss!!.setSpan(AbsoluteSizeSpan(keyTextSize), start, end, 0)
+        val suffix = CollectionUtils.obtainString(m, "end")
+        if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
 
     private fun appendMove(m: Map<String, Any?>) {
-        val s = obtainString(m, "move", "")
+        val s = CollectionUtils.obtainString(m, "move", "")
         var start: Int
         var end: Int
-        var sep = obtainString(m, "start", "")
-        if (!TextUtils.isEmpty(sep)) {
+        val prefix = CollectionUtils.obtainString(m, "start")
+        if (prefix.isNotEmpty()) {
             start = ss!!.length
-            ss!!.append(sep)
+            ss!!.append(prefix)
             end = ss!!.length
-            ss!!.setSpan(getAlign(m), start, end, span)
+            ss!!.setSpan(getAlign(m), start, end, 0)
         }
         start = ss!!.length
         ss!!.append(s)
         end = ss!!.length
-        ss!!.setSpan(getAlign(m), start, end, span)
-        move_pos[0] = start
-        move_pos[1] = end
-        ss!!.setSpan(AbsoluteSizeSpan(key_text_size), start, end, span)
-        ss!!.setSpan(ForegroundColorSpan(key_text_color), start, end, span)
-        sep = obtainString(m, "end", "")
-        if (!TextUtils.isEmpty(sep)) ss!!.append(sep)
+        ss!!.setSpan(getAlign(m), start, end, 0)
+        movePos[0] = start
+        movePos[1] = end
+        ss!!.setSpan(AbsoluteSizeSpan(keyTextSize), start, end, 0)
+        ss!!.setSpan(ForegroundColorSpan(keyTextColor), start, end, 0)
+        val suffix = CollectionUtils.obtainString(m, "end")
+        if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
 
     /**
@@ -518,49 +481,43 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     fun setWindowContent(): Int {
         if (visibility != VISIBLE) return 0
         val stacks = Throwable().stackTrace
-        Timber.d(
-            "setWindow Rime.getComposition()" +
-                ", [1]" +
-                stacks[1].toString() +
-                ", [2]" +
-                stacks[2].toString() +
-                ", [3]" +
-                stacks[3].toString(),
-        )
+        Timber.d("setWindow Rime.getComposition(), [1]${stacks[1]}, [2]${stacks[2]}, [3]${stacks[3]}")
         val (_, _, _, _, s) = Rime.composition ?: return 0
-        if (TextUtils.isEmpty(s)) return 0
+        if (s.isNullOrEmpty()) return 0
         isSingleLine = true // 設置單行
         ss = SpannableStringBuilder()
-        var start_num = 0
-        for (m in windows_comps!!) {
+        var startNum = 0
+        val minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
+        val minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
+        for (m in windowComponents) {
             if (m.containsKey("composition")) {
                 appendComposition(m)
             } else if (m.containsKey("candidate")) {
-                start_num = calcStartNum(minLength, minCheck)
-                Timber.d("start_num = %s, min_length = %s, min_check = %s", start_num, minLength, minCheck)
-                appendCandidates(m, minLength, start_num)
+                startNum = calcStartNum(minLength, minCheck)
+                Timber.d("start_num = %s, min_length = %s, min_check = %s", startNum, minLength, minCheck)
+                appendCandidates(m, minLength, startNum)
             } else if (m.containsKey("click")) {
                 appendButton(m)
             } else if (m.containsKey("move")) {
                 appendMove(m)
             }
         }
-        if (candidate_num > 0 || ss.toString().contains("\n")) isSingleLine = false // 設置單行
+        if (candidateNum > 0 || ss.toString().contains("\n")) isSingleLine = false // 設置單行
         text = ss
         movementMethod = LinkMovementMethod.getInstance()
         isToolbarMode = false
-        return start_num
+        return startNum
     }
 
     /** 设置悬浮窗, 用于liquidKeyboard的悬浮窗工具栏  */
     fun changeToLiquidKeyboardToolbar() {
         if (visibility != VISIBLE) return
-        if (liquid_keyboard_window_comp!!.isEmpty()) {
+        if (liquidWindowComponents.isEmpty()) {
             this.visibility = GONE
             return
         }
         ss = SpannableStringBuilder()
-        for (m in liquid_keyboard_window_comp!!) {
+        for (m in liquidWindowComponents) {
             if (m.containsKey("composition")) {
                 appendComposition(m)
             } else if (m.containsKey("click")) {
