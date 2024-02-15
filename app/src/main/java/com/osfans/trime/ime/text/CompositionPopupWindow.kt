@@ -14,7 +14,6 @@ import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import com.blankj.utilcode.util.BarUtils
-import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
@@ -35,10 +34,6 @@ class CompositionPopupWindow(
     val composition =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
             root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
-            with(compositionView) {
-                reset()
-                showComment = !Rime.getOption("_hide_comment")
-            }
         }
 
     // 悬浮窗口是否可移動
