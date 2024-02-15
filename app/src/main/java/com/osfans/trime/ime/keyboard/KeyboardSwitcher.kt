@@ -17,6 +17,9 @@ object KeyboardSwitcher {
     private var lastKeyboardId = ".default"
     private var lastLockKeyboardId = ".default"
     private val keyboardPrefs = KeyboardPrefs()
+    private var currentTheme = ""
+    private var currentColor = ""
+    private val prefs get() = AppPrefs.defaultInstance()
 
     lateinit var currentKeyboard: Keyboard
 
@@ -39,7 +42,13 @@ object KeyboardSwitcher {
         currentKeyboardId = ".default"
         lastKeyboardId = ".default"
         lastLockKeyboardId = ".default"
-        keyboardCache.clear()
+        if (currentTheme != prefs.theme.selectedTheme ||
+            currentColor != prefs.theme.selectedColor
+        ) {
+            currentTheme = prefs.theme.selectedTheme
+            currentColor = prefs.theme.selectedColor
+            keyboardCache.clear()
+        }
         switchKeyboard(currentKeyboardId)
     }
 
@@ -47,7 +56,7 @@ object KeyboardSwitcher {
         val currentIdx = theme.allKeyboardIds.indexOf(currentKeyboardId)
         var mappedName =
             when (name) {
-                ".default" -> autoMatch(name)
+                ".default" -> autoMatch()
                 ".prior" ->
                     try {
                         theme.allKeyboardIds[currentIdx - 1]
@@ -91,6 +100,10 @@ object KeyboardSwitcher {
                 mappedName = landscapeKeyboard
             }
         }
+        if (mappedName == currentKeyboardId) {
+            Timber.d("Keyboard is already $mappedName, no need to switch.")
+            return
+        }
         // 应用键盘布局
         Timber.i(
             "Switched keyboard from $currentKeyboardId " +
@@ -108,7 +121,7 @@ object KeyboardSwitcher {
     /**
      * .default 自动匹配键盘布局
      * */
-    private fun autoMatch(name: String): String {
+    private fun autoMatch(): String {
         // 主题的布局中包含方案id，直接采用
         val currentSchemaId = Rime.getCurrentRimeSchema()
         if (currentSchemaId in allKeyboardIds) {

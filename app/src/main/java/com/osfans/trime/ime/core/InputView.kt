@@ -289,25 +289,17 @@ class InputView(
     }
 
     private fun handleRimeNotification(it: RimeNotification) {
-        when (it) {
-            is RimeNotification.OptionNotification -> {
-                when (it.option) {
-                    "_hide_comment" -> {
-                        quickBar.oldCandidateBar.candidates.setShowComment(!it.value)
-                    }
-                    "_hide_bar",
-                    "_hide_candidate",
-                    -> {
-                        quickBar.view.visibility =
-                            if (it.value) View.GONE else View.VISIBLE
-                    }
-                    "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowHint(!it.value)
-                    "_hide_key_symbol" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowSymbol(!it.value)
-                }
-                keyboardWindow.oldMainInputView.mainKeyboardView.invalidateAllKeys()
+        if (it !is RimeNotification.OptionNotification) return
+
+        when (it.option) {
+            "_hide_comment" -> quickBar.oldCandidateBar.candidates.setShowComment(!it.value)
+            "_hide_bar", "_hide_candidate" -> {
+                quickBar.view.visibility = if (it.value) View.GONE else View.VISIBLE
             }
-            else -> {}
+            "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowHint(!it.value)
+            "_hide_key_symbol" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowSymbol(!it.value)
         }
+        keyboardWindow.oldMainInputView.mainKeyboardView.invalidateAllKeys()
     }
 
     fun switchUiByState(state: KeyboardWindow.State) {

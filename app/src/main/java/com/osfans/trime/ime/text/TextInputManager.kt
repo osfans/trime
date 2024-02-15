@@ -203,11 +203,12 @@ class TextInputManager private constructor() :
             Rime.getInstance()
 
             // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
-            // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。
-            if (shouldResetAsciiMode && KeyboardSwitcher.currentKeyboard.isResetAsciiMode) {
-                tempAsciiMode = KeyboardSwitcher.currentKeyboard.asciiMode
+            KeyboardSwitcher.currentKeyboard.let {
+                if (it.mAsciiMode != it.currentAsciiMode && it.resetAsciiMode) {
+                    it.currentAsciiMode = it.mAsciiMode
+                }
+                Rime.setOption("ascii_mode", it.currentAsciiMode)
             }
-            tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
             isComposable = isComposable && !Rime.isEmpty
             if (!trime.onEvaluateInputViewShown()) {
                 // Show candidate view when using physical keyboard
@@ -298,8 +299,11 @@ class TextInputManager private constructor() :
                 KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                     KeyboardSwitcher.switchKeyboard(event.select)
                     /** Set ascii mode according to keyboard's settings, can not place into [Rime.handleRimeNotification] */
-                    if (shouldResetAsciiMode && KeyboardSwitcher.currentKeyboard.isResetAsciiMode) {
-                        Rime.setOption("ascii_mode", KeyboardSwitcher.currentKeyboard.asciiMode)
+                    KeyboardSwitcher.currentKeyboard.let {
+                        if (it.mAsciiMode != it.currentAsciiMode && it.resetAsciiMode) {
+                            it.currentAsciiMode = it.mAsciiMode
+                        }
+                        Rime.setOption("ascii_mode", it.currentAsciiMode)
                     }
                     trime.bindKeyboardToInputView()
                     trime.updateComposing()
