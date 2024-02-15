@@ -20,12 +20,9 @@ package com.osfans.trime.ime.text
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.graphics.Typeface
 import android.graphics.drawable.PaintDrawable
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -37,13 +34,11 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.util.GraphicUtils.drawText
 import com.osfans.trime.util.GraphicUtils.measureText
-import com.osfans.trime.util.dp2px
-import com.osfans.trime.util.sp2px
+import splitties.dimensions.dp
 import java.lang.ref.WeakReference
 import kotlin.math.max
 
 /** 顯示候選字詞  */
-@Suppress("ktlint:standard:property-naming")
 class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     /** 處理候選條選字事件  */
     interface EventListener {
@@ -54,81 +49,61 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         fun onCandidateLongClicked(index: Int)
     }
 
+    private val theme = ThemeManager.activeTheme
+
     private var expectWidth = 0
     private var listener = WeakReference<EventListener?>(null)
     private var highlightIndex = -1
     private var candidates: Array<CandidateListItem>? = null
-    private val computedCandidates = ArrayList<ComputedCandidate>(maxCandidateCount)
+    private val computedCandidates = ArrayList<ComputedCandidate>(MAX_CANDIDATE_COUNT)
     private var numCandidates = 0
     private var startNum = 0
     private var timeDown: Long = 0
     private var timeMove: Long = 0
-    private var candidateHighlight: PaintDrawable? = null
-    private val separatorPaint: Paint
-    private val candidatePaint: Paint
-    private val symbolPaint: Paint
-    private val commentPaint: Paint
-    private var candidateFont: Typeface? = null
-    private var symbolFont: Typeface? = null
-    private var commentFont: Typeface? = null
-    private var candidateTextColor = 0
-    private var hilitedCandidateTextColor = 0
-    private var commentTextColor = 0
-    private var hilitedCommentTextColor = 0
-    private var candidateViewHeight = 0
-    private var commentHeight = 0
-    private var candidateSpacing = 0
-    private var candidatePadding = 0
+    private val candidateHighlight =
+        PaintDrawable(theme.colors.getColor("hilited_candidate_back_color")!!).apply {
+            setCornerRadius(theme.style.getFloat("layout/round_corner"))
+        }
+    private val separatorPaint =
+        Paint().apply {
+            color = theme.colors.getColor("candidate_separator_color")!!
+        }
+    private val candidatePaint =
+        Paint().apply {
+            typeface = candidateFont
+            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = it }
+            isAntiAlias = true
+            strokeWidth = 0f
+        }
+    private val symbolPaint =
+        Paint().apply {
+            typeface = symbolFont
+            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = it }
+            isAntiAlias = true
+            strokeWidth = 0f
+        }
+    private val commentPaint =
+        Paint().apply {
+            typeface = commentFont
+            theme.style.getFloat("comment_text_size").takeIf { it > 0 }?.let { textSize = it }
+            isAntiAlias = true
+            strokeWidth = 0f
+        }
+    private val candidateFont = FontManager.getTypeface("candidate_font")
+    private val symbolFont = FontManager.getTypeface("symbol_font")
+    private val commentFont = FontManager.getTypeface("comment_font")
+    private val candidateTextColor = theme.colors.getColor("candidate_text_color")!!
+    private val hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color")!!
+    private val commentTextColor = theme.colors.getColor("comment_text_color")!!
+    private val hilitedCommentTextColor = theme.colors.getColor("hilited_comment_text_color")!!
+    private val candidateViewHeight = dp(theme.style.getInt("candidate_view_height"))
+    private val commentHeight = dp(theme.style.getInt("comment_height"))
+    private val candidateSpacing = dp(theme.style.getFloat("candidate_spacing")).toInt()
+    private val candidatePadding = dp(theme.style.getInt("candidate_padding"))
     var shouldShowComment = true
-    private var isCommentOnTop = false
-    private var candidateUseCursor = false
+    private val isCommentOnTop = theme.style.getBoolean("comment_on_top")
+    private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
     private val appPrefs get() = AppPrefs.defaultInstance()
-
-    fun reset() {
-        val theme = ThemeManager.activeTheme
-        candidateHighlight = PaintDrawable(theme.colors.getColor("hilited_candidate_back_color")!!)
-        candidateHighlight!!.setCornerRadius(theme.style.getFloat("layout/round_corner"))
-        separatorPaint.color = (theme.colors.getColor("candidate_separator_color"))!!
-        candidateSpacing = dp2px(theme.style.getFloat("candidate_spacing")).toInt()
-        candidatePadding = dp2px(theme.style.getFloat("candidate_padding")).toInt()
-        candidateTextColor = theme.colors.getColor("candidate_text_color")!!
-        commentTextColor = theme.colors.getColor("comment_text_color")!!
-        hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color")!!
-        hilitedCommentTextColor = theme.colors.getColor("hilited_comment_text_color")!!
-        val candidateTextSize = sp2px(theme.style.getFloat("candidate_text_size")).toInt()
-        val commentTextSize = sp2px(theme.style.getFloat("comment_text_size")).toInt()
-        candidateViewHeight = dp2px(theme.style.getFloat("candidate_view_height")).toInt()
-        commentHeight = dp2px(theme.style.getFloat("comment_height")).toInt()
-        candidateFont = FontManager.getTypeface("candidate_font")
-        commentFont = FontManager.getTypeface("comment_font")
-        symbolFont = FontManager.getTypeface("symbol_font")
-        candidatePaint.textSize = candidateTextSize.toFloat()
-        candidatePaint.setTypeface(candidateFont)
-        symbolPaint.textSize = candidateTextSize.toFloat()
-        symbolPaint.setTypeface(symbolFont)
-        commentPaint.textSize = commentTextSize.toFloat()
-        commentPaint.setTypeface(commentFont)
-        isCommentOnTop = theme.style.getBoolean("comment_on_top")
-        candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
-        invalidate()
-    }
-
-    init {
-        candidatePaint = Paint()
-        candidatePaint.isAntiAlias = true
-        candidatePaint.strokeWidth = 0f
-        symbolPaint = Paint()
-        symbolPaint.isAntiAlias = true
-        symbolPaint.strokeWidth = 0f
-        commentPaint = Paint()
-        commentPaint.isAntiAlias = true
-        commentPaint.strokeWidth = 0f
-        separatorPaint = Paint()
-        separatorPaint.color = Color.BLACK
-
-        // reset(context);
-        setWillNotDraw(false)
-    }
 
     override fun onMeasure(
         widthMeasureSpec: Int,
@@ -205,7 +180,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     val highlightLeft: Int
         get() {
-            return if (highlightIndex < computedCandidates.size && highlightIndex >= 0) {
+            return if (highlightIndex in computedCandidates.indices) {
                 computedCandidates[highlightIndex].geometry.left
             } else {
                 0
@@ -213,7 +188,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         }
     val highlightRight: Int
         get() {
-            return if (highlightIndex < computedCandidates.size && highlightIndex >= 0) {
+            return if (highlightIndex in computedCandidates.indices) {
                 computedCandidates[highlightIndex].geometry.right
             } else {
                 0
@@ -228,8 +203,8 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             val i = computedCandidates.indexOf(computedCandidate)
             // Draw highlight
             if (candidateUseCursor && i == highlightIndex) {
-                candidateHighlight!!.bounds = computedCandidates[i].geometry
-                candidateHighlight!!.draw(canvas)
+                candidateHighlight.bounds = computedCandidates[i].geometry
+                candidateHighlight.draw(canvas)
             }
             // Draw candidates
             if (computedCandidate is ComputedCandidate.Word) {
@@ -246,25 +221,25 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         var commentX = computedCandidate.geometry.centerX().toFloat()
                         var commentY = commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2
                         if (!isCommentOnTop) {
-                            val commentWidth = commentPaint.measureText(comment, commentFont!!)
+                            val commentWidth = commentPaint.measureText(comment, commentFont)
                             commentX = computedCandidate.geometry.right - commentWidth / 2
                             commentY += (computedCandidates[0].geometry.bottom - commentHeight).toFloat()
                             wordX -= commentWidth / 2.0f
                             wordY -= commentHeight / 2.0f
                         }
                         commentPaint.color = if (isHighlighted(i)) hilitedCommentTextColor else commentTextColor
-                        canvas.drawText(comment, commentX, commentY, commentPaint, commentFont!!)
+                        canvas.drawText(comment, commentX, commentY, commentPaint, commentFont)
                     }
                 }
                 val word = computedCandidate.word
                 candidatePaint.color = if (isHighlighted(i)) hilitedCandidateTextColor else candidateTextColor
-                canvas.drawText(word, wordX, wordY, candidatePaint, candidateFont!!)
+                canvas.drawText(word, wordX, wordY, candidatePaint, candidateFont)
             } else if (computedCandidate is ComputedCandidate.Symbol) {
                 // Draw page up / down buttons
                 val arrow = computedCandidate.arrow
                 val arrowX = (
                     computedCandidate.geometry.centerX() -
-                        symbolPaint.measureText(arrow, symbolFont!!) / 2
+                        symbolPaint.measureText(arrow, symbolFont) / 2
                 )
                 val arrowY = (
                     computedCandidates[0].geometry.centerY() -
@@ -293,40 +268,39 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun updateCandidateWidth() {
         var hasExButton = false
         val pageEx = appPrefs.keyboard.candidatePageSize.toInt() - 10000
-        val pageBottonWidth =
+        val pageButtonWidth =
             candidateSpacing + 2 * candidatePadding +
-                symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont!!).toInt()
+                symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont).toInt()
         val minWidth =
             if (pageEx > 2) {
-                (expectWidth * (pageEx / 10f + 1) - pageBottonWidth).toInt()
+                (expectWidth * (pageEx / 10f + 1) - pageButtonWidth).toInt()
             } else if (pageEx == 2) {
-                (expectWidth - pageBottonWidth * 2)
+                (expectWidth - pageButtonWidth * 2)
             } else {
-                expectWidth - pageBottonWidth
+                expectWidth - pageButtonWidth
             }
         computedCandidates.clear()
         updateCandidates()
-        var x = if ((!Rime.hasLeft())) 0 else pageBottonWidth
+        var x = if ((!Rime.hasLeft())) 0 else pageButtonWidth
         for (i in 0 until numCandidates) {
             val n = i + startNum
             if (pageEx >= 0 && x >= minWidth) {
                 computedCandidates.add(
                     ComputedCandidate.Symbol(
                         PAGE_EX_BUTTON,
-                        Rect(x, 0, (x + pageBottonWidth), measuredHeight),
+                        Rect(x, 0, (x + pageButtonWidth), measuredHeight),
                     ),
                 )
-                x += pageBottonWidth
+                x += pageButtonWidth
                 hasExButton = true
                 break
             }
-            var comment: String? = null
             val text = candidates!![n].text
-            var candidateWidth = candidatePaint.measureText(text, (candidateFont)!!) + 2 * candidatePadding
+            val comment = candidates!![n].comment
+            var candidateWidth = candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding
             if (shouldShowComment) {
-                comment = candidates!![n].comment
-                if (!TextUtils.isEmpty(comment)) {
-                    val commentWidth = commentPaint.measureText(comment, (commentFont)!!)
+                if (comment.isNotEmpty()) {
+                    val commentWidth = commentPaint.measureText(comment, (commentFont))
                     candidateWidth = if (isCommentOnTop) max(candidateWidth, commentWidth) else candidateWidth + commentWidth
                 }
             }
@@ -336,10 +310,10 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 computedCandidates.add(
                     ComputedCandidate.Symbol(
                         PAGE_EX_BUTTON,
-                        Rect(x, 0, (x + pageBottonWidth), measuredHeight),
+                        Rect(x, 0, (x + pageButtonWidth), measuredHeight),
                     ),
                 )
-                x += pageBottonWidth
+                x += pageButtonWidth
                 hasExButton = true
                 break
             }
@@ -356,7 +330,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             computedCandidates.add(
                 ComputedCandidate.Symbol(
                     PAGE_UP_BUTTON,
-                    Rect(0, 0, pageBottonWidth, measuredHeight),
+                    Rect(0, 0, pageButtonWidth, measuredHeight),
                 ),
             )
         }
@@ -364,10 +338,10 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             computedCandidates.add(
                 ComputedCandidate.Symbol(
                     PAGE_DOWN_BUTTON,
-                    Rect(x, 0, (x + pageBottonWidth), measuredHeight),
+                    Rect(x, 0, (x + pageButtonWidth), measuredHeight),
                 ),
             )
-            x += pageBottonWidth
+            x += pageButtonWidth
         }
         val params = layoutParams
         params.width = x
@@ -457,7 +431,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     }
 
     companion object {
-        const val maxCandidateCount = 30
+        const val MAX_CANDIDATE_COUNT = 30
         const val PAGE_UP_BUTTON = "◀"
         const val PAGE_DOWN_BUTTON = "▶"
         const val PAGE_EX_BUTTON = "▼"
