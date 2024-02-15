@@ -52,7 +52,7 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         if (inner != null) {
-            commOnTouchEvent(ev)
+            onTouchEventInternal(ev)
         }
         return super.onTouchEvent(ev)
     }
@@ -69,13 +69,11 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
         super.fling(velocityY / 2)
     }
 
-    private fun commOnTouchEvent(ev: MotionEvent) {
+    private fun onTouchEventInternal(ev: MotionEvent) {
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
                 swipeActionLimit = min(width / 4, height * 10)
-                Timber.i(
-                    "commOnTouchEvent limit = " + swipeActionLimit + ", " + (width / 4) + ", " + (height * 4),
-                )
+                Timber.d("onTouchEvent: limit=$swipeActionLimit, ${(width / 4)}, ${(height * 4)}")
                 if (swipeActionLimit < 50) swipeActionLimit = 100
             }
 
@@ -98,24 +96,22 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
 
                 // TODO: 翻页后、手指抬起前，降低滑动速度增加阻尼感
                 if (inner!!.left > swipeActionLimit && Rime.hasLeft()) {
-                    if (pageUpAction != null) pageUpAction!!.run()
+                    pageUpAction?.run()
                     if (inner!!.width > this.width) scrollTo(this.width - inner!!.width + 400, 0)
                 } else {
                     // Timber.d("commOnTouchEvent "+getWidth() + "-" + inner.getWidth() +"+" +
                     // getScrollX()+", p=" +scrollEndPosition+", x="+ev.getX());
-                    Timber.d(
-                        "commOnTouchEvent dif=" + (swipeStartX - ev.x) + " limit=" + swipeActionLimit,
-                    )
+                    Timber.d("onTouchEvent: dif=${(swipeStartX - ev.x)}, limit=$swipeActionLimit")
                     if (swipeStartX < 0) {
                         if (width - inner!!.width + scrollX >= 0) {
                             swipeStartX = ev.x
                         }
                     } else if (swipeStartX - ev.x > swipeActionLimit) {
                         if (Trime.getService().candidateExPage) {
-                            if (pageExAction != null) pageExAction!!.run()
+                            pageExAction?.run()
                             return
                         } else if (Rime.hasRight()) {
-                            if (pageDownAction != null) pageDownAction!!.run()
+                            pageDownAction?.run()
                             swipeStartX = -1f
                             if (inner!!.width > this.width) {
                                 scrollTo(-swipeActionLimit, 0)
@@ -160,11 +156,11 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
 
     /** Retract animation  */
     fun animation() {
-        val taa = TranslateAnimation(0f, 0f, (left + 200).toFloat(), 200f)
-        taa.duration = 200
         // Turn on moving animation
-        val ta = TranslateAnimation(inner!!.left.toFloat(), normal.left.toFloat(), 0f, 0f)
-        ta.duration = 200
+        val ta =
+            TranslateAnimation(inner!!.left.toFloat(), normal.left.toFloat(), 0f, 0f).apply {
+                duration = 200
+            }
         inner!!.startAnimation(ta)
         // Set back to the normal layout position
         inner!!.layout(normal.left, normal.top, normal.right, normal.bottom)
@@ -187,7 +183,7 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
         left: Int,
         right: Int,
     ) {
-        Timber.i("ScroolView move(%s %s), scroll=%s", left, right, scrollX)
+        Timber.d("move: ($left $right), scrollX=$scrollX")
         if (right > scrollX + width) {
             scrollTo(right - width, 0)
         } else if (left < scrollX) {
