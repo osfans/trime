@@ -35,6 +35,7 @@ import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.GraphicUtils.drawText
 import com.osfans.trime.util.GraphicUtils.measureText
 import com.osfans.trime.util.dp2px
+import com.osfans.trime.util.sp
 import timber.log.Timber
 import kotlin.math.abs
 
@@ -67,10 +68,9 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
         candidateTextColor = theme.colors.getColor("candidate_text_color")!!
         hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color")!!
         commentHeight = dp2px(theme.style.getFloat("comment_height")).toInt()
-        val candidateTextSize = dp2px(theme.style.getFloat("candidate_text_size")).toInt()
         candidateViewHeight = dp2px(theme.style.getFloat("candidate_view_height")).toInt()
         candidateFont = FontManager.getTypeface("candidate_font")
-        candidatePaint.textSize = candidateTextSize.toFloat()
+        candidatePaint.textSize = sp(theme.style.getFloat("candidate_text_size"))
         candidatePaint.setTypeface(candidateFont)
         isCommentOnTop = theme.style.getBoolean("comment_on_top")
         shouldCandidateUseCursor = theme.style.getBoolean("candidate_use_cursor")

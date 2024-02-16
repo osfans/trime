@@ -34,6 +34,7 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.util.GraphicUtils.drawText
 import com.osfans.trime.util.GraphicUtils.measureText
+import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import java.lang.ref.WeakReference
 import kotlin.math.max
@@ -71,21 +72,21 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private val candidatePaint =
         Paint().apply {
             typeface = candidateFont
-            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = it }
+            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
     private val symbolPaint =
         Paint().apply {
             typeface = symbolFont
-            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = it }
+            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
     private val commentPaint =
         Paint().apply {
             typeface = commentFont
-            theme.style.getFloat("comment_text_size").takeIf { it > 0 }?.let { textSize = it }
+            theme.style.getFloat("comment_text_size").takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
