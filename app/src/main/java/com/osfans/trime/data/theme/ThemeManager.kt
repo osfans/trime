@@ -62,6 +62,7 @@ object ThemeManager {
             _activeTheme = value
             fireChange()
             FontManager.reload()
+            EventManager.clearCache()
         }
 
     private var isNightMode = false
