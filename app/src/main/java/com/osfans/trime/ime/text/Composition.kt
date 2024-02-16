@@ -36,6 +36,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
@@ -425,7 +426,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             if (`when`.contentEquals("paging") && !Rime.hasLeft()) return
             if (`when`.contentEquals("has_menu") && !Rime.hasMenu()) return
         }
-        val e = Event(CollectionUtils.obtainString(m, "click"))
+        val e = EventManager.getEvent(CollectionUtils.obtainString(m, "click"))
         val label =
             if (m.containsKey("label")) {
                 CollectionUtils.obtainString(m, "label", "")

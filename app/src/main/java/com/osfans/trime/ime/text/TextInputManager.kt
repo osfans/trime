@@ -13,6 +13,7 @@ import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
+import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
@@ -244,7 +245,7 @@ class TextInputManager private constructor() :
                         } else if (option.startsWith("_key_") && option.length > 5 && value) {
                             shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
                             val key = option.substring(5)
-                            onEvent(Event(key))
+                            onEvent(EventManager.getEvent(key))
                             shouldUpdateRimeOption = true
                         }
                 }
@@ -465,11 +466,11 @@ class TextInputManager private constructor() :
                     }
                     propertyGroupMatcher.matches() -> {
                         target = propertyGroupMatcher.group(1) ?: ""
-                        onEvent(Event(target))
+                        onEvent(EventManager.getEvent(target))
                     }
                     else -> {
                         target = textToParse.substring(0, 1)
-                        onEvent(Event(target))
+                        onEvent(EventManager.getEvent(target))
                     }
                 }
                 textToParse = textToParse.substring(target.length)
