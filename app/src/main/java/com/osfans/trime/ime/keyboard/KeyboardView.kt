@@ -43,6 +43,7 @@ import android.widget.TextView
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
@@ -336,9 +337,9 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
 
     fun reset() {
         val theme = ThemeManager.activeTheme
-        key_symbol_color = theme.colors.getColor("key_symbol_color")!!
-        hilited_key_symbol_color = theme.colors.getColor("hilited_key_symbol_color")!!
-        mShadowColor = theme.colors.getColor("shadow_color")!!
+        key_symbol_color = ColorManager.getColor("key_symbol_color")!!
+        hilited_key_symbol_color = ColorManager.getColor("hilited_key_symbol_color")!!
+        mShadowColor = ColorManager.getColor("shadow_color")!!
         mSymbolSize = sp2px(theme.style.getFloat("symbol_text_size")).toInt()
         mKeyTextSize = sp2px(theme.style.getFloat("key_text_size")).toInt()
         mVerticalCorrection = dp2px(theme.style.getFloat("vertical_correction")).toInt()
@@ -351,27 +352,27 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         mShadowRadius = theme.style.getFloat("shadow_radius")
         val mRoundCorner = theme.style.getFloat("round_corner")
         mKeyBackColor = StateListDrawable()
-        mKeyBackColor!!.addState(Key.KEY_STATE_ON_PRESSED, theme.colors.getDrawable("hilited_on_key_back_color"))
-        mKeyBackColor!!.addState(Key.KEY_STATE_ON_NORMAL, theme.colors.getDrawable("on_key_back_color"))
-        mKeyBackColor!!.addState(Key.KEY_STATE_OFF_PRESSED, theme.colors.getDrawable("hilited_off_key_back_color"))
-        mKeyBackColor!!.addState(Key.KEY_STATE_OFF_NORMAL, theme.colors.getDrawable("off_key_back_color"))
-        mKeyBackColor!!.addState(Key.KEY_STATE_PRESSED, theme.colors.getDrawable("hilited_key_back_color"))
-        mKeyBackColor!!.addState(Key.KEY_STATE_NORMAL, theme.colors.getDrawable("key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_ON_PRESSED, ColorManager.getDrawable("hilited_on_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_ON_NORMAL, ColorManager.getDrawable("on_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_OFF_PRESSED, ColorManager.getDrawable("hilited_off_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_OFF_NORMAL, ColorManager.getDrawable("off_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_PRESSED, ColorManager.getDrawable("hilited_key_back_color"))
+        mKeyBackColor!!.addState(Key.KEY_STATE_NORMAL, ColorManager.getDrawable("key_back_color"))
         mKeyTextColor =
             ColorStateList(
                 Key.KEY_STATES,
                 intArrayOf(
-                    theme.colors.getColor("hilited_on_key_text_color")!!,
-                    theme.colors.getColor("on_key_text_color")!!,
-                    theme.colors.getColor("hilited_off_key_text_color")!!,
-                    theme.colors.getColor("off_key_text_color")!!,
-                    theme.colors.getColor("hilited_key_text_color")!!,
-                    theme.colors.getColor("key_text_color")!!,
+                    ColorManager.getColor("hilited_on_key_text_color")!!,
+                    ColorManager.getColor("on_key_text_color")!!,
+                    ColorManager.getColor("hilited_off_key_text_color")!!,
+                    ColorManager.getColor("off_key_text_color")!!,
+                    ColorManager.getColor("hilited_key_text_color")!!,
+                    ColorManager.getColor("key_text_color")!!,
                 ),
             )
-        val color = theme.colors.getColor("preview_text_color")
+        val color = ColorManager.getColor("preview_text_color")
         if (color != null) mPreviewText.setTextColor(color)
-        val previewBackColor = theme.colors.getColor("preview_back_color")
+        val previewBackColor = ColorManager.getColor("preview_back_color")
         if (previewBackColor != null) {
             val background = GradientDrawable()
             background.setColor(previewBackColor)

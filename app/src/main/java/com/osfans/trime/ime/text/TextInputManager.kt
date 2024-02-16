@@ -220,7 +220,7 @@ class TextInputManager private constructor() :
             if (notification is RimeNotification.SchemaNotification) {
                 SchemaManager.init(notification.schemaId)
                 Rime.updateStatus()
-                trime.recreateInputView(ThemeManager.activeTheme)
+                trime.recreateInputView()
             } else if (notification is RimeNotification.OptionNotification) {
                 Rime.updateContext() // 切換中英文、簡繁體時更新候選
                 val value = notification.value

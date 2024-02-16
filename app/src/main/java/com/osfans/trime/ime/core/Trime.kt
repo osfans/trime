@@ -46,8 +46,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
-import com.osfans.trime.data.sound.SoundEffectManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.Keycode
@@ -100,10 +99,10 @@ open class Trime : LifecycleInputMethodService() {
     var candidateExPage = false
 
     @Keep
-    private val onThemeChangeListener =
-        ThemeManager.OnThemeChangeListener {
+    private val onColorChangeListener =
+        ColorManager.OnColorChangeListener {
             lifecycleScope.launch(Dispatchers.Main) {
-                recreateInputView(it)
+                recreateInputView()
                 inputView?.startInput(currentInputEditorInfo)
             }
         }
@@ -217,10 +216,10 @@ open class Trime : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             val context: InputMethodService = this
-            ThemeManager.addOnChangedListener(onThemeChangeListener)
+            ColorManager.addOnChangedListener(onColorChangeListener)
             RimeWrapper.startup {
                 Timber.d("Running Trime.onCreate")
-                ThemeManager.init(resources.configuration)
+                ColorManager.init(resources.configuration)
                 textInputManager = TextInputManager.getInstance()
                 activeEditorInstance = EditorInstance(context)
                 InputFeedbackManager.init(this)
@@ -299,8 +298,8 @@ open class Trime : LifecycleInputMethodService() {
     /** Must be called on the UI thread
      *
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
-    fun recreateInputView(theme: Theme) {
-        inputView = InputView(this, Rime.getInstance(false), theme)
+    fun recreateInputView() {
+        inputView = InputView(this, Rime.getInstance(false))
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
         // 初始化候选栏
         mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
@@ -314,7 +313,6 @@ open class Trime : LifecycleInputMethodService() {
 
         loadConfig()
         KeyboardSwitcher.newOrReset()
-        SoundEffectManager.switchSound(theme.colors.getString("sound"))
         if (textInputManager != null) {
             // setNavBarColor();
             textInputManager!!.shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
@@ -335,7 +333,7 @@ open class Trime : LifecycleInputMethodService() {
         }
         eventListeners.clear()
         mCompositionPopupWindow?.finishInput()
-        ThemeManager.removeOnChangedListener(onThemeChangeListener)
+        ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
         self = null
     }
@@ -371,7 +369,7 @@ open class Trime : LifecycleInputMethodService() {
             performEscape()
         }
         super.onConfigurationChanged(newConfig)
-        ThemeManager.onSystemNightModeChange(newConfig.isNightMode())
+        ColorManager.onSystemNightModeChange(newConfig.isNightMode())
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
@@ -424,7 +422,7 @@ open class Trime : LifecycleInputMethodService() {
     override fun onCreateInputView(): View {
         Timber.d("onCreateInputView")
         RimeWrapper.runAfterStarted {
-            recreateInputView(ThemeManager.activeTheme)
+            recreateInputView()
         }
         Timber.d("onCreateInputView() finish")
         return InitializationUi(this).root

@@ -27,6 +27,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.updateLayoutParams
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
@@ -60,13 +61,13 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
     fun reset() {
         val theme = ThemeManager.activeTheme
-        candidateHighlight = PaintDrawable(theme.colors.getColor("hilited_candidate_back_color")!!)
+        candidateHighlight = PaintDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
         candidateHighlight!!.setCornerRadius(theme.style.getFloat("layout/round_corner"))
-        separatorPaint.color = theme.colors.getColor("candidate_separator_color")!!
+        separatorPaint.color = ColorManager.getColor("candidate_separator_color")!!
         candidateSpacing = dp2px(theme.style.getFloat("candidate_spacing")).toInt()
         candidatePadding = dp2px(theme.style.getFloat("candidate_padding")).toInt()
-        candidateTextColor = theme.colors.getColor("candidate_text_color")!!
-        hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color")!!
+        candidateTextColor = ColorManager.getColor("candidate_text_color")!!
+        hilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
         commentHeight = dp2px(theme.style.getFloat("comment_height")).toInt()
         candidateViewHeight = dp2px(theme.style.getFloat("candidate_view_height")).toInt()
         candidateFont = FontManager.getTypeface("candidate_font")

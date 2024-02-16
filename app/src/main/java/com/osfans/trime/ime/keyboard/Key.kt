@@ -26,8 +26,8 @@ import com.osfans.trime.core.Rime.Companion.hasMenu
 import com.osfans.trime.core.Rime.Companion.isAsciiMode
 import com.osfans.trime.core.Rime.Companion.isComposing
 import com.osfans.trime.core.Rime.Companion.showAsciiPunch
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
-import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
@@ -67,14 +67,13 @@ class Key(private val mKeyboard: Keyboard) {
     var hint: String? = null
         private set
     private lateinit var keyConfig: Map<String, Any?>
-    private val theme get() = ThemeManager.activeTheme
-    private val key_back_color get() = theme.colors.getDrawable(keyConfig, "key_back_color")
-    private val hilited_key_back_color get() = theme.colors.getDrawable(keyConfig, "hilited_key_back_color")
+    private val key_back_color get() = ColorManager.getDrawable(keyConfig, "key_back_color")
+    private val hilited_key_back_color get() = ColorManager.getDrawable(keyConfig, "hilited_key_back_color")
 
-    private val key_text_color get() = theme.colors.getColor(keyConfig, "key_text_color")
-    private val key_symbol_color get() = theme.colors.getColor(keyConfig, "key_symbol_color")
-    private val hilited_key_text_color get() = theme.colors.getColor(keyConfig, "hilited_key_text_color")
-    private val hilited_key_symbol_color get() = theme.colors.getColor(keyConfig, "hilited_key_symbol_color")
+    private val key_text_color get() = ColorManager.getColor(keyConfig, "key_text_color")
+    private val key_symbol_color get() = ColorManager.getColor(keyConfig, "key_symbol_color")
+    private val hilited_key_text_color get() = ColorManager.getColor(keyConfig, "hilited_key_text_color")
+    private val hilited_key_symbol_color get() = ColorManager.getColor(keyConfig, "hilited_key_symbol_color")
 
     var key_text_size: Int? = null
         private set
@@ -512,8 +511,6 @@ class Key(private val mKeyboard: Keyboard) {
                 KEY_STATE_NORMAL, // 5         "key_back_color"              按键背景
             )
 
-        @JvmField
-        var presetKeys: Map<String, Map<String, Any?>?>? = null
         private val EVENT_NUM = KeyEventType.entries.size
 
         @JvmField

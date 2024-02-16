@@ -17,7 +17,7 @@ object FontManager {
         private set
     private val typefaceCache = mutableMapOf<String, Typeface>()
 
-    fun reload() {
+    fun refresh() {
         typefaceCache.clear()
         fontFamiliyCache.clear()
         hanBFont = getTypefaceOrDefault("hanb_font")
