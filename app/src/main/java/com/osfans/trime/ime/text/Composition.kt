@@ -42,6 +42,7 @@ import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.util.CollectionUtils
+import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
 
@@ -260,7 +261,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         compositionPos[0] = start
         compositionPos[1] = end
         ss!!.setSpan(CompositionSpan(), start, end, 0)
-        val textSize = theme.style.getInt("text_size")
+        val textSize = sp(theme.style.getInt("text_size"))
         ss!!.setSpan(AbsoluteSizeSpan(textSize), start, end, 0)
         CollectionUtils.obtainFloat(m, "letter_spacing").takeIf { it > 0 }
             ?.let { ss?.setSpan(LetterSpacingSpan(it), start, end, 0) }
@@ -368,7 +369,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     end,
                     0,
                 )
-                val labelTextSize = theme.style.getInt("label_text_size")
+                val labelTextSize = sp(theme.style.getInt("label_text_size"))
                 ss!!.setSpan(AbsoluteSizeSpan(labelTextSize), start, end, 0)
             }
             start = ss!!.length
@@ -388,7 +389,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 end,
                 0,
             )
-            val candidateTextSize = theme.style.getInt("candidate_text_size")
+            val candidateTextSize = sp(theme.style.getInt("candidate_text_size"))
             ss!!.setSpan(AbsoluteSizeSpan(candidateTextSize), start, end, 0)
             if (showComment && commentFormat.isNotEmpty() && o.comment.isNotEmpty()) {
                 val comment = String.format(commentFormat, o.comment)
@@ -408,7 +409,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     end,
                     0,
                 )
-                val commentTextSize = theme.style.getInt("comment_text_size")
+                val commentTextSize = sp(theme.style.getInt("comment_text_size"))
                 ss!!.setSpan(AbsoluteSizeSpan(commentTextSize), start, end, 0)
                 lineLength += comment.length
             }
@@ -445,7 +446,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         end = ss!!.length
         ss!!.setSpan(getAlign(m), start, end, 0)
         ss!!.setSpan(EventSpan(e), start, end, 0)
-        ss!!.setSpan(AbsoluteSizeSpan(keyTextSize), start, end, 0)
+        ss!!.setSpan(AbsoluteSizeSpan(sp(keyTextSize)), start, end, 0)
         val suffix = CollectionUtils.obtainString(m, "end")
         if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
