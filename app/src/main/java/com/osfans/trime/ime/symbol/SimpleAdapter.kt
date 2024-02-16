@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleItemOneBinding
@@ -55,12 +56,12 @@ class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : Rec
             holder.wrappers[i].tag = i
             textView.apply {
                 theme.style.getFloat("label_text_size").takeIf { it > 0f }?.let { textSize = it }
-                theme.colors.getColor("key_text_color")?.let { setTextColor(it) }
+                ColorManager.getColor("key_text_color")?.let { setTextColor(it) }
                 typeface = FontManager.getTypeface("key_font")
                 gravity = Gravity.CENTER
                 ellipsize = TextUtils.TruncateAt.MARQUEE
                 background =
-                    theme.colors.getDrawable(
+                    ColorManager.getDrawable(
                         "key_back_color",
                         "key_border",
                         "key_border_color",

@@ -11,9 +11,9 @@ import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffect
 import com.osfans.trime.data.sound.SoundEffectManager
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.RimeWrapper
-import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +39,6 @@ suspend fun Context.themePicker(
         onOKButton {
             with(items[checkedItem].toString()) {
                 ThemeManager.setNormalTheme(if (this == "trime") this else "$this.trime")
-                TabManager.init(ThemeManager.activeTheme)
             }
         }
     }.create()
@@ -51,17 +50,17 @@ suspend fun Context.colorPicker(
     return CoroutineChoiceDialog(this, themeResId).apply {
         title = getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
-        val all by lazy { ThemeManager.activeTheme.getPresetColorSchemes() }
+        val all by lazy { ColorManager.getPresetColorSchemes() }
         onInit {
             items = all.map { it.second }.toTypedArray()
-            val current = ThemeManager.activeTheme.currentColorSchemeId
+            val current = ColorManager.selectedColor
             val schemeIds = all.map { it.first }
             checkedItem = schemeIds.indexOf(current).takeIf { it > -1 } ?: 1
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
             val schemeIds = all.map { it.first }
-            ThemeManager.setColorScheme(schemeIds[checkedItem])
+            ColorManager.setColorScheme(schemeIds[checkedItem])
         }
     }.create()
 }

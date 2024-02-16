@@ -15,6 +15,7 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.CompositionRootBinding
@@ -60,7 +61,7 @@ class CompositionPopupWindow(
                     WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
             }
             setBackgroundDrawable(
-                theme.colors.getDrawable(
+                ColorManager.getDrawable(
                     "text_back_color",
                     "layout/border",
                     "border_color",

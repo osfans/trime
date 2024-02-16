@@ -36,6 +36,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
@@ -54,7 +55,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private val textInputManager = TextInputManager.getInstance()
 
     private val keyTextSize = theme.style.getInt("key_text_size")
-    private val keyTextColor = theme.colors.getColor("key_text_color")!!
+    private val keyTextColor = ColorManager.getColor("key_text_color")!!
     private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
     private val movable = Movable.fromString(theme.style.getString("layout/movable"))
     private val showComment = !Rime.getOption("_hide_comment")
@@ -117,8 +118,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private inner class CompositionSpan : UnderlineSpan() {
         override fun updateDrawState(ds: TextPaint) {
             ds.typeface = FontManager.getTypeface("text_font")
-            ds.color = theme.colors.getColor("text_color")!!
-            ds.bgColor = theme.colors.getColor("back_color")!!
+            ds.color = ColorManager.getColor("text_color")!!
+            ds.bgColor = ColorManager.getColor("back_color")!!
         }
     }
 
@@ -154,7 +155,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         override fun updateDrawState(ds: TextPaint) {
             ds.isUnderlineText = false
             ds.color = keyTextColor
-            ds.bgColor = theme.colors.getColor("key_back_color")!!
+            ds.bgColor = ColorManager.getColor("key_back_color")!!
         }
     }
 
@@ -268,8 +269,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             ?.let { ss?.setSpan(LetterSpacingSpan(it), start, end, 0) }
         start = compositionPos[0] + r.selStartPos
         end = compositionPos[0] + r.selEndPos
-        ss!!.setSpan(ForegroundColorSpan(theme.colors.getColor("hilited_text_color")!!), start, end, 0)
-        ss!!.setSpan(BackgroundColorSpan(theme.colors.getColor("hilited_back_color")!!), start, end, 0)
+        ss!!.setSpan(ForegroundColorSpan(ColorManager.getColor("hilited_text_color")!!), start, end, 0)
+        ss!!.setSpan(BackgroundColorSpan(ColorManager.getColor("hilited_back_color")!!), start, end, 0)
         sep = CollectionUtils.obtainString(m, "end", "")
         if (sep.isNotEmpty()) ss!!.append(sep)
     }
@@ -329,7 +330,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         var i = -1
         candidateNum = 0
         val maxLength = theme.style.getInt("layout/max_length")
-        val hilitedCandidateBackColor = theme.colors.getColor("hilited_candidate_back_color")!!
+        val hilitedCandidateBackColor = ColorManager.getColor("hilited_candidate_back_color")!!
         for (o in candidates) {
             var cand = o.text
             i++
@@ -362,9 +363,9 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     CandidateSpan(
                         i,
                         FontManager.getTypeface("label_font"),
-                        theme.colors.getColor("hilited_label_color")!!,
+                        ColorManager.getColor("hilited_label_color")!!,
                         hilitedCandidateBackColor,
-                        theme.colors.getColor("label_color")!!,
+                        ColorManager.getColor("label_color")!!,
                     ),
                     start,
                     end,
@@ -382,9 +383,9 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 CandidateSpan(
                     i,
                     FontManager.getTypeface("candidate_font"),
-                    theme.colors.getColor("hilited_candidate_text_color")!!,
+                    ColorManager.getColor("hilited_candidate_text_color")!!,
                     hilitedCandidateBackColor,
-                    theme.colors.getColor("candidate_text_color")!!,
+                    ColorManager.getColor("candidate_text_color")!!,
                 ),
                 start,
                 end,
@@ -402,9 +403,9 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     CandidateSpan(
                         i,
                         FontManager.getTypeface("comment_font"),
-                        theme.colors.getColor("hilited_comment_text_color")!!,
+                        ColorManager.getColor("hilited_comment_text_color")!!,
                         hilitedCandidateBackColor,
-                        theme.colors.getColor("comment_text_color")!!,
+                        ColorManager.getColor("comment_text_color")!!,
                     ),
                     start,
                     end,

@@ -29,6 +29,7 @@ import android.view.View
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
@@ -62,12 +63,12 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var timeDown: Long = 0
     private var timeMove: Long = 0
     private val candidateHighlight =
-        PaintDrawable(theme.colors.getColor("hilited_candidate_back_color")!!).apply {
+        PaintDrawable(ColorManager.getColor("hilited_candidate_back_color")!!).apply {
             setCornerRadius(theme.style.getFloat("layout/round_corner"))
         }
     private val separatorPaint =
         Paint().apply {
-            color = theme.colors.getColor("candidate_separator_color")!!
+            color = ColorManager.getColor("candidate_separator_color")!!
         }
     private val candidatePaint =
         Paint().apply {
@@ -93,10 +94,10 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private val candidateFont = FontManager.getTypeface("candidate_font")
     private val symbolFont = FontManager.getTypeface("symbol_font")
     private val commentFont = FontManager.getTypeface("comment_font")
-    private val candidateTextColor = theme.colors.getColor("candidate_text_color")!!
-    private val hilitedCandidateTextColor = theme.colors.getColor("hilited_candidate_text_color")!!
-    private val commentTextColor = theme.colors.getColor("comment_text_color")!!
-    private val hilitedCommentTextColor = theme.colors.getColor("hilited_comment_text_color")!!
+    private val candidateTextColor = ColorManager.getColor("candidate_text_color")!!
+    private val hilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
+    private val commentTextColor = ColorManager.getColor("comment_text_color")!!
+    private val hilitedCommentTextColor = ColorManager.getColor("hilited_comment_text_color")!!
     private val candidateViewHeight = dp(theme.style.getInt("candidate_view_height"))
     private val commentHeight = dp(theme.style.getInt("comment_height"))
     private val candidateSpacing = dp(theme.style.getFloat("candidate_spacing")).toInt()

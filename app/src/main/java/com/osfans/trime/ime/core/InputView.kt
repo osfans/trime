@@ -19,7 +19,9 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
@@ -60,8 +62,8 @@ import splitties.views.imageDrawable
 class InputView(
     val service: Trime,
     val rime: Rime,
-    val theme: Theme,
 ) : ConstraintLayout(service), KoinComponent {
+    private val theme get() = ThemeManager.activeTheme
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
 
@@ -178,8 +180,8 @@ class InputView(
 
         liquidKeyboard.setKeyboardView(keyboardWindow.oldSymbolInputView.liquidKeyboardView)
 
-        keyboardBackground.imageDrawable = theme.colors.getDrawable("keyboard_background")
-            ?: theme.colors.getDrawable("keyboard_back_color")
+        keyboardBackground.imageDrawable = ColorManager.getDrawable("keyboard_background")
+            ?: ColorManager.getDrawable("keyboard_back_color")
 
         keyboardView =
             constraintLayout {
@@ -283,7 +285,7 @@ class InputView(
         if (!restarting) {
             if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
                 service.window.window!!.also {
-                    val backColor = theme.colors.getColor("back_color") ?: Color.BLACK
+                    val backColor = ColorManager.getColor("back_color") ?: Color.BLACK
                     if (shouldUpdateNavbarForeground) {
                         WindowCompat.getInsetsController(it, it.decorView)
                             .isAppearanceLightNavigationBars = ColorUtils.isContrastedDark(backColor)

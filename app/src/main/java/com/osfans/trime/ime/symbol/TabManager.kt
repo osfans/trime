@@ -1,7 +1,7 @@
 package com.osfans.trime.ime.symbol
 
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.CollectionUtils.getOrDefault
@@ -12,6 +12,7 @@ object TabManager {
         private set
     private var tabSwitchPosition = 0
 
+    val theme get() = ThemeManager.activeTheme
     val tabTags = arrayListOf<TabTag>()
     val tabSwitchData = mutableListOf<SimpleKeyBean>()
     private val keyboards = mutableListOf<List<SimpleKeyBean>>()
@@ -38,7 +39,7 @@ object TabManager {
         return i
     }
 
-    fun init(theme: Theme) {
+    fun refresh() {
         val available = theme.liquid.getObject("keyboards") as List<String>? ?: return
         for (id in available) {
             Timber.d("preparing data for tab #$id")

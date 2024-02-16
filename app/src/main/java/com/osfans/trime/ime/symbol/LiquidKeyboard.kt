@@ -72,10 +72,6 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
         CandidateAdapter(theme)
     }
 
-    init {
-        TabManager.init(theme)
-    }
-
     fun setKeyboardView(view: RecyclerView) {
         keyboardView =
             view.apply {

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.R
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleKeyItemBinding
@@ -79,8 +80,8 @@ class FlexibleAdapter(
                 text = bean.text
                 typeface = FontManager.getTypeface("long_text_font")
                 (
-                    theme.colors.getColor("long_text_color")
-                        ?: theme.colors.getColor("key_text_color")
+                    ColorManager.getColor("long_text_color")
+                        ?: ColorManager.getColor("key_text_color")
                 )
                     ?.let { setTextColor(it) }
 
@@ -91,7 +92,7 @@ class FlexibleAdapter(
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
 
             itemView.background =
-                theme.colors.getDrawable(
+                ColorManager.getDrawable(
                     "long_text_back_color",
                     "key_border",
                     "key_long_text_border",

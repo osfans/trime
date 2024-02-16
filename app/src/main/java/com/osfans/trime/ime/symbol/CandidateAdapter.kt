@@ -11,6 +11,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.LiquidEntryViewBinding
@@ -95,19 +96,19 @@ class CandidateAdapter(private val theme: Theme) : RecyclerView.Adapter<Candidat
             this.text = text
             textSize = theme.style.getFloat("candidate_text_size").coerceAtLeast(1f)
             typeface = FontManager.getTypeface("candidate_font")
-            theme.colors.getColor("candidate_text_color")?.let { setTextColor(it) }
+            ColorManager.getColor("candidate_text_color")?.let { setTextColor(it) }
         }
         holder.comment.apply {
             this.text = comment
             textSize = theme.style.getFloat("comment_text_size").coerceAtLeast(1f)
             typeface = FontManager.getTypeface("comment_font")
-            theme.colors.getColor("comment_text_color")?.let { setTextColor(it) }
+            ColorManager.getColor("comment_text_color")?.let { setTextColor(it) }
         }
 
         //  点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
         // 如果直接使用background，会造成滚动时部分内容的背景填充错误的问题
         holder.itemView.background =
-            theme.colors.getDrawable(
+            ColorManager.getDrawable(
                 "key_back_color",
                 "key_border",
                 "key_border_color",
@@ -120,7 +121,7 @@ class CandidateAdapter(private val theme: Theme) : RecyclerView.Adapter<Candidat
 
         // 点击时产生背景变色效果
         holder.itemView.setOnTouchListener { _, motionEvent: MotionEvent ->
-            val hilited = theme.colors.getColor("hilited_candidate_text_color")
+            val hilited = ColorManager.getColor("hilited_candidate_text_color")
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 hilited?.let { holder.candidate.setTextColor(it) }
             }

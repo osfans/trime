@@ -47,7 +47,7 @@ object KeyboardSwitcher {
         val currentIdx = theme.allKeyboardIds.indexOf(currentKeyboardId)
         var mappedName =
             when (name) {
-                ".default" -> autoMatch(name)
+                ".default" -> autoMatch()
                 ".prior" ->
                     try {
                         theme.allKeyboardIds[currentIdx - 1]
@@ -108,7 +108,7 @@ object KeyboardSwitcher {
     /**
      * .default 自动匹配键盘布局
      * */
-    private fun autoMatch(name: String): String {
+    private fun autoMatch(): String {
         // 主题的布局中包含方案id，直接采用
         val currentSchemaId = Rime.getCurrentRimeSchema()
         if (currentSchemaId in allKeyboardIds) {

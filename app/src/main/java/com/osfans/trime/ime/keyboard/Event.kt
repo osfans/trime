@@ -21,6 +21,7 @@ import android.view.KeyEvent
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainString
@@ -163,10 +164,10 @@ class Event(var s: String) {
             if (parseAction(label)) return
             s = label
         }
+        val theme = ThemeManager.activeTheme
         // 预设按键，如 Return BackSpace
-        if (Key.presetKeys!!.containsKey(s)) {
-            // todo 把presetKeys缓存为presetKeyEvents，减少重新载入
-            val presetKey = Key.presetKeys!![s]
+        if (theme.presetKeys!!.containsKey(s)) {
+            val presetKey = theme.presetKeys!![s]
             command = obtainString(presetKey, "command", "")
             option = obtainString(presetKey, "option", "")
             select = obtainString(presetKey, "select", "")
