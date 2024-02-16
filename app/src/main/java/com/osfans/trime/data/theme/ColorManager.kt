@@ -95,6 +95,7 @@ object ColorManager {
         Timber.d("switch color scheme from %s to %s", selectedColor, colorSchemeId)
         selectedColor = colorSchemeId
         // 刷新配色
+        val isFirst = currentColors.isEmpty()
         refreshColorValues()
         if (isNightMode) {
             lastDarkColorSchemeId = colorSchemeId
@@ -110,7 +111,7 @@ object ColorManager {
             }
         }
         prefs.selectedColor = colorSchemeId
-        fireChange()
+        if (!isFirst) fireChange()
     }
 
     /** 切换深色/亮色模式 */

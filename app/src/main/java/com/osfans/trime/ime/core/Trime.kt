@@ -314,10 +314,8 @@ open class Trime : LifecycleInputMethodService() {
         loadConfig()
         KeyboardSwitcher.newOrReset()
         if (textInputManager != null) {
-            // setNavBarColor();
             textInputManager!!.shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
             bindKeyboardToInputView()
-            // loadBackground(); // reset()调用过resetCandidate()，resetCandidate()一键调用过loadBackground();
             updateComposing() // 切換主題時刷新候選
         }
         setInputView(inputView!!)
@@ -554,10 +552,12 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     fun bindKeyboardToInputView() {
-        if (mainKeyboardView != null) {
+        if (mainKeyboardView == null) return
+        KeyboardSwitcher.currentKeyboard.let {
             // Bind the selected keyboard to the input view.
-            val sk = KeyboardSwitcher.currentKeyboard
-            mainKeyboardView!!.keyboard = sk
+            if (it != mainKeyboardView!!.keyboard) {
+                mainKeyboardView!!.keyboard = it
+            }
             dispatchCapsStateToInputView()
         }
     }
