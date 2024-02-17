@@ -92,7 +92,6 @@ open class Trime : LifecycleInputMethodService() {
     var inputView: InputView? = null
     private var eventListeners = WeakHashSet<EventListener>()
     private var mIntentReceiver: IntentReceiver? = null
-    private var editorInfo: EditorInfo? = null
     private var isWindowShown = false // 键盘窗口是否已显示
     private var isAutoCaps = false // 句首自動大寫
     var activeEditorInstance: EditorInstance? = null
@@ -342,31 +341,25 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     private fun handleReturnKey() {
-        if (editorInfo == null) {
-            sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-            return
-        }
-        if (editorInfo!!.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
-            sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-            return
-        }
-        if (editorInfo!!.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-            val ic = currentInputConnection
-            ic?.commitText("\n", 1)
-            return
-        }
-        if (!editorInfo!!.actionLabel.isNullOrEmpty() &&
-            editorInfo!!.actionId != EditorInfo.IME_ACTION_UNSPECIFIED
-        ) {
-            val ic = currentInputConnection
-            ic?.performEditorAction(editorInfo!!.actionId)
-            return
-        }
-        val action = editorInfo!!.imeOptions and EditorInfo.IME_MASK_ACTION
-        val ic = currentInputConnection
-        when (action) {
-            EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_NONE -> ic?.commitText("\n", 1)
-            else -> ic?.performEditorAction(action)
+        currentInputEditorInfo.run {
+            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+                sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+                return
+            }
+            if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
+                val ic = currentInputConnection
+                ic?.commitText("\n", 1)
+                return
+            }
+            if (!actionLabel.isNullOrEmpty() && actionId != EditorInfo.IME_ACTION_UNSPECIFIED
+            ) {
+                currentInputConnection.performEditorAction(actionId)
+                return
+            }
+            when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
+                EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_NONE -> currentInputConnection.commitText("\n", 1)
+                else -> currentInputConnection.performEditorAction(action)
+            }
         }
     }
 
@@ -458,20 +451,11 @@ open class Trime : LifecycleInputMethodService() {
         win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     }
 
-    override fun onStartInput(
-        attribute: EditorInfo,
-        restarting: Boolean,
-    ) {
-        editorInfo = attribute
-        Timber.d("onStartInput: restarting=%s", restarting)
-    }
-
     override fun onStartInputView(
         attribute: EditorInfo,
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=%s", restarting)
-        editorInfo = attribute
         RimeWrapper.runAfterStarted {
             InputFeedbackManager.loadSoundEffects()
             InputFeedbackManager.resetPlayProgress()
@@ -569,11 +553,6 @@ open class Trime : LifecycleInputMethodService() {
         InputFeedbackManager.finishInput()
         inputView?.finishInput()
         Timber.d("OnFinishInputView")
-    }
-
-    override fun onFinishInput() {
-        editorInfo = null
-        super.onFinishInput()
     }
 
     fun bindKeyboardToInputView() {
