@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
@@ -26,6 +27,8 @@ import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
@@ -58,7 +61,7 @@ class InputView(
     val service: Trime,
     val rime: Rime,
     val theme: Theme,
-) : ConstraintLayout(service) {
+) : ConstraintLayout(service), KoinComponent {
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
 
@@ -86,19 +89,25 @@ class InputView(
     private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    val quickBar = QuickBar()
-    val keyboardWindow = KeyboardWindow()
-    val liquidKeyboard = LiquidKeyboard()
+    val quickBar: QuickBar by inject()
+    val keyboardWindow: KeyboardWindow by inject()
+    val liquidKeyboard: LiquidKeyboard by inject()
 
     private val module =
         module {
-            single { this@InputView }
-            single { theme }
-            single { themedContext }
-            single { service }
-            single { keyboardWindow }
-            single { liquidKeyboard }
-            single { quickBar }
+            // the basic dependencies for the components to be injected
+            // provided by InputView (including itself)
+            single<InputView> { this@InputView }
+            single<Theme> { theme }
+            single<ContextThemeWrapper> { themedContext }
+            single<Trime> { service }
+            // the components need to be injected
+            // Note: these components can be injected into other components,
+            // but you must construct them there, otherwise Koin cannot
+            // inject them automatically.
+            single { KeyboardWindow() }
+            single { LiquidKeyboard() }
+            single { QuickBar() }
         }
 
     private val keyboardSidePadding = theme.style.getInt("keyboard_padding")
@@ -346,8 +355,9 @@ class InputView(
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         showingDialog?.dismiss()
-        // unload the Koin module,
+        // cancel the notification job and unload the Koin module,
         // implies that InputView should not be attached again after detached.
+        notificationHandlerJob.cancel()
         unloadKoinModules(module)
         super.onDetachedFromWindow()
     }
