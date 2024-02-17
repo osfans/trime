@@ -470,7 +470,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         ss!!.setSpan(getAlign(m), start, end, 0)
         movePos[0] = start
         movePos[1] = end
-        ss!!.setSpan(AbsoluteSizeSpan(keyTextSize), start, end, 0)
+        ss!!.setSpan(AbsoluteSizeSpan(sp(keyTextSize)), start, end, 0)
         ss!!.setSpan(ForegroundColorSpan(keyTextColor), start, end, 0)
         val suffix = CollectionUtils.obtainString(m, "end")
         if (suffix.isNotEmpty()) ss!!.append(suffix)
