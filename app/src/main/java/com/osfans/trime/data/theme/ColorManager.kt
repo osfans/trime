@@ -100,6 +100,7 @@ object ColorManager {
     }
 
     fun onSystemNightModeChange(isNight: Boolean) {
+        if (!prefs.autoDark) return
         if (isNightMode == isNight) return
         isNightMode = isNight
         switchNightMode(isNightMode)
