@@ -27,6 +27,45 @@ object ColorManager {
     private var lastDarkColorSchemeId: String? = null // 上一个 dark 配色
     private var isNightMode = false
 
+    private val defaultFallbackColors =
+        hashMapOf(
+            "candidate_text_color" to "text_color",
+            "comment_text_color" to "candidate_text_color",
+            "border_color" to "back_color",
+            "candidate_separator_color" to "border_color",
+            "hilited_text_color" to "text_color",
+            "hilited_back_color" to "back_color",
+            "hilited_candidate_text_color" to "hilited_text_color",
+            "hilited_candidate_back_color" to "hilited_back_color",
+            "hilited_label_color" to "hilited_candidate_text_color",
+            "hilited_comment_text_color" to "comment_text_color",
+            "hilited_key_back_color" to "hilited_candidate_back_color",
+            "hilited_key_text_color" to "hilited_candidate_text_color",
+            "hilited_key_symbol_color" to "hilited_comment_text_color",
+            "hilited_off_key_back_color" to "hilited_key_back_color",
+            "hilited_on_key_back_color" to "hilited_key_back_color",
+            "hilited_off_key_text_color" to "hilited_key_text_color",
+            "hilited_on_key_text_color" to "hilited_key_text_color",
+            "key_back_color" to "back_color",
+            "key_border_color" to "border_color",
+            "key_text_color" to "candidate_text_color",
+            "key_symbol_color" to "comment_text_color",
+            "label_color" to "candidate_text_color",
+            "off_key_back_color" to "key_back_color",
+            "off_key_text_color" to "key_text_color",
+            "on_key_back_color" to "hilited_key_back_color",
+            "on_key_text_color" to "hilited_key_text_color",
+            "preview_back_color" to "key_back_color",
+            "preview_text_color" to "key_text_color",
+            "shadow_color" to "border_color",
+            "root_background" to "back_color",
+            "candidate_background" to "back_color",
+            "keyboard_back_color" to "border_color",
+            "liquid_keyboard_background" to "keyboard_back_color",
+            "text_back_color" to "back_color",
+            "long_text_back_color" to "key_back_color",
+        )
+
     // 遍历当前配色方案的值、fallback的值，从而获得当前方案的全部配色Map
     private val currentColors: MutableMap<String, Any> = hashMapOf()
 
@@ -150,21 +189,26 @@ object ColorManager {
     private fun refreshColorValues() {
         currentColors.clear()
         val colorMap = theme.presetColorSchemes[selectedColor] as Map<String, Any>
-        for ((key, value) in colorMap) {
+        colorMap.forEach { (key, value) ->
             when (key) {
-                "name", "author", "light_scheme", "dark_scheme", "sound" -> continue
+                "name", "author", "light_scheme", "dark_scheme", "sound" -> {}
                 else -> currentColors[key] = value
             }
         }
-        for ((key, value) in theme.fallbackColors!!) {
+        theme.fallbackColors?.forEach { (key, value) ->
             if (!currentColors.containsKey(key)) {
                 if (value != null) currentColors[key] = value
+            }
+        }
+        defaultFallbackColors.forEach { (key, value) ->
+            if (!currentColors.containsKey(key)) {
+                currentColors[key] = value
             }
         }
 
         // 先遍历一次，处理一下颜色和图片
         // 防止回退时获取到错误值
-        for ((key, value) in currentColors) {
+        currentColors.forEach { (key, value) ->
             val parsedValue = parseColorValue(value)
             if (parsedValue != null) {
                 currentColors[key] = parsedValue
@@ -172,8 +216,8 @@ object ColorManager {
         }
 
         // fallback
-        for ((key, value) in currentColors) {
-            if (value is Int || value is Drawable) continue
+        currentColors.forEach { (key, value) ->
+            if (value is Int || value is Drawable) return@forEach
             val parsedValue = getColorValue(value)
             if (parsedValue != null) {
                 currentColors[key] = parsedValue
