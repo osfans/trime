@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.osfans.trime.ime.text
+package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -43,6 +43,8 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.ime.text.Candidate
+import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.CollectionUtils
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp

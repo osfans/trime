@@ -49,6 +49,7 @@ import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
+import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
@@ -63,7 +64,6 @@ import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.symbol.TabView
 import com.osfans.trime.ime.text.Candidate
-import com.osfans.trime.ime.text.CompositionPopupWindow
 import com.osfans.trime.ime.text.ScrollView
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
