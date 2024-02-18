@@ -32,7 +32,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.util.GraphicUtils.drawText
 import com.osfans.trime.util.GraphicUtils.measureText
 import com.osfans.trime.util.sp
@@ -53,12 +52,11 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     private val theme = ThemeManager.activeTheme
 
-    private var expectWidth = 0
+    // private var expectWidth = 0
     private var listener = WeakReference<EventListener?>(null)
     private var highlightIndex = -1
     private var candidates: Array<CandidateListItem>? = null
     private val computedCandidates = ArrayList<ComputedCandidate>(MAX_CANDIDATE_COUNT)
-    private var numCandidates = 0
     private var startNum = 0
     private var timeDown: Long = 0
     private var timeMove: Long = 0
@@ -105,7 +103,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     var shouldShowComment = true
     private val isCommentOnTop = theme.style.getBoolean("comment_on_top")
     private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
-    private val appPrefs get() = AppPrefs.defaultInstance()
+    private val prefs = AppPrefs.defaultInstance().keyboard
 
     override fun onMeasure(
         widthMeasureSpec: Int,
@@ -135,10 +133,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     fun setText(start: Int) {
         startNum = start
         removeHighlight()
-        updateCandidateWidth()
-        if (updateCandidates() > 0) {
-            invalidate()
-        }
+        updateCandidateData()
     }
 
     /**
@@ -155,7 +150,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         val candidate = computedCandidates[index]
         if (candidate is ComputedCandidate.Word) {
             if (listener.get() != null) {
-                if (isLongClick && appPrefs.keyboard.shouldLongClickDeleteCandidate) {
+                if (isLongClick && prefs.shouldLongClickDeleteCandidate) {
                     listener.get()!!.onCandidateLongClicked(index + startNum)
                 } else {
                     listener.get()!!.onCandidatePressed(index + startNum)
@@ -200,12 +195,20 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     override fun onDraw(canvas: Canvas) {
         if (candidates == null) return
         super.onDraw(canvas)
-        var moveAllCandidatesDown = false
-        for (computedCandidate: ComputedCandidate in computedCandidates) {
-            val i = computedCandidates.indexOf(computedCandidate)
+        // 是否水平居中显示(不带编码提示的)候选项
+        var isAlign = true
+        if (isCommentOnTop) {
+            candidates?.forEachIndexed { index, candidate ->
+                if (index < startNum) return@forEachIndexed
+                val comment = candidate.comment
+                // 只要有一个候选项有编码提示就不会居中
+                if (comment.isNotEmpty()) isAlign = false
+            }
+        }
+        computedCandidates.forEachIndexed { index, computedCandidate ->
             // Draw highlight
-            if (candidateUseCursor && i == highlightIndex) {
-                candidateHighlight.bounds = computedCandidates[i].geometry
+            if (candidateUseCursor && index == highlightIndex) {
+                candidateHighlight.bounds = computedCandidate.geometry
                 candidateHighlight.draw(canvas)
             }
             // Draw candidates
@@ -215,26 +218,24 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                     computedCandidates[0].geometry.centerY() -
                         (candidatePaint.ascent() + candidatePaint.descent()) / 2
                 )
-                if (shouldShowComment) {
-                    val comment = computedCandidate.comment
-                    moveAllCandidatesDown = moveAllCandidatesDown or !comment.isNullOrEmpty()
-                    if (moveAllCandidatesDown) wordY += commentHeight / 2.0f
-                    if (!comment.isNullOrEmpty()) {
-                        var commentX = computedCandidate.geometry.centerX().toFloat()
-                        var commentY = commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2
-                        if (!isCommentOnTop) {
-                            val commentWidth = commentPaint.measureText(comment, commentFont)
-                            commentX = computedCandidate.geometry.right - commentWidth / 2
-                            commentY += (computedCandidates[0].geometry.bottom - commentHeight).toFloat()
-                            wordX -= commentWidth / 2.0f
-                            wordY -= commentHeight / 2.0f
-                        }
-                        commentPaint.color = if (isHighlighted(i)) hilitedCommentTextColor else commentTextColor
-                        canvas.drawText(comment, commentX, commentY, commentPaint, commentFont)
+                if (!isAlign) wordY += commentHeight / 2.0f
+                // 绘制编码提示
+                val comment = computedCandidate.comment
+                if (shouldShowComment && !comment.isNullOrEmpty()) {
+                    var commentX = computedCandidate.geometry.centerX().toFloat()
+                    var commentY = commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2
+                    if (!isCommentOnTop) {
+                        val commentWidth = commentPaint.measureText(comment, commentFont)
+                        commentX = computedCandidate.geometry.right - commentWidth / 2
+                        commentY += (computedCandidates[0].geometry.bottom - commentHeight).toFloat()
+                        wordX -= commentWidth / 2.0f
                     }
+                    commentPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
+                    canvas.drawText(comment, commentX, commentY, commentPaint, commentFont)
                 }
+                // 绘制候选项
                 val word = computedCandidate.word
-                candidatePaint.color = if (isHighlighted(i)) hilitedCandidateTextColor else candidateTextColor
+                candidatePaint.color = if (isHighlighted(index)) hilitedCandidateTextColor else candidateTextColor
                 canvas.drawText(word, wordX, wordY, candidatePaint, candidateFont)
             } else if (computedCandidate is ComputedCandidate.Symbol) {
                 // Draw page up / down buttons
@@ -247,19 +248,15 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                     computedCandidates[0].geometry.centerY() -
                         (candidatePaint.ascent() + candidatePaint.descent()) / 2
                 )
-                symbolPaint.color = if (isHighlighted(i)) hilitedCommentTextColor else commentTextColor
+                symbolPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
                 canvas.drawText(arrow, arrowX, arrowY, symbolPaint)
             }
             // Draw separators
-            if (i + 1 < computedCandidates.size) {
+            if (index + 1 < computedCandidates.size) {
                 canvas.drawRect(
-                    (
-                        computedCandidate.geometry.right - candidateSpacing
-                    ).toFloat(),
+                    (computedCandidate.geometry.right - candidateSpacing).toFloat(),
                     computedCandidate.geometry.height() * 0.2f,
-                    (
-                        computedCandidate.geometry.right + candidateSpacing
-                    ).toFloat(),
+                    (computedCandidate.geometry.right + candidateSpacing).toFloat(),
                     computedCandidate.geometry.height() * 0.8f,
                     separatorPaint,
                 )
@@ -267,58 +264,58 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         }
     }
 
-    private fun updateCandidateWidth() {
-        var hasExButton = false
-        val pageEx = appPrefs.keyboard.candidatePageSize - 10000
+    private fun updateCandidateData() {
+        // TODO 暂时搁置设置里关于候选数量的设定
+        // 之后根据 Rime 新的 api 写一个候选管理器再重新启用
+        // var hasExButton = false
+        // val pageEx = appPrefs.keyboard.candidatePageSize - 10000
         val pageButtonWidth =
             candidateSpacing + 2 * candidatePadding +
                 symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont).toInt()
-        val minWidth =
-            if (pageEx > 2) {
-                (expectWidth * (pageEx / 10f + 1) - pageButtonWidth).toInt()
-            } else if (pageEx == 2) {
-                (expectWidth - pageButtonWidth * 2)
-            } else {
-                expectWidth - pageButtonWidth
-            }
+        // val minWidth =
+        //     if (pageEx > 2) {
+        //         (expectWidth * (pageEx / 10f + 1) - pageButtonWidth).toInt()
+        //     } else if (pageEx == 2) {
+        //         (expectWidth - pageButtonWidth * 2)
+        //     } else {
+        //         expectWidth - pageButtonWidth
+        //     }
         computedCandidates.clear()
         updateCandidates()
         var x = if ((!Rime.hasLeft())) 0 else pageButtonWidth
-        for (i in 0 until numCandidates) {
-            val n = i + startNum
-            if (pageEx >= 0 && x >= minWidth) {
-                computedCandidates.add(
-                    ComputedCandidate.Symbol(
-                        PAGE_EX_BUTTON,
-                        Rect(x, 0, (x + pageButtonWidth), measuredHeight),
-                    ),
-                )
-                x += pageButtonWidth
-                hasExButton = true
-                break
-            }
-            val text = candidates!![n].text
-            val comment = candidates!![n].comment
+        candidates?.forEachIndexed { index, candidate ->
+            if (index < startNum) return@forEachIndexed
+            // if (pageEx >= 0 && x >= minWidth) {
+            //     computedCandidates.add(
+            //         ComputedCandidate.Symbol(
+            //             PAGE_EX_BUTTON,
+            //             Rect(x, 0, (x + pageButtonWidth), measuredHeight),
+            //         ),
+            //     )
+            //     x += pageButtonWidth
+            //     hasExButton = true
+            //     break
+            // }
+            val text = candidate.text
+            val comment = candidate.comment
             var candidateWidth = candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding
-            if (shouldShowComment) {
-                if (comment.isNotEmpty()) {
-                    val commentWidth = commentPaint.measureText(comment, (commentFont))
-                    candidateWidth = if (isCommentOnTop) max(candidateWidth, commentWidth) else candidateWidth + commentWidth
-                }
+            if (shouldShowComment && comment.isNotEmpty()) {
+                val commentWidth = commentPaint.measureText(comment, (commentFont))
+                candidateWidth = if (isCommentOnTop) max(candidateWidth, commentWidth) else candidateWidth + commentWidth
             }
 
             // 自动填满候选栏，并保障展开候选按钮显示出来
-            if (pageEx == 0 && x + candidateWidth + candidateSpacing > minWidth) {
-                computedCandidates.add(
-                    ComputedCandidate.Symbol(
-                        PAGE_EX_BUTTON,
-                        Rect(x, 0, (x + pageButtonWidth), measuredHeight),
-                    ),
-                )
-                x += pageButtonWidth
-                hasExButton = true
-                break
-            }
+            // if (pageEx == 0 && x + candidateWidth + candidateSpacing > minWidth) {
+            //     computedCandidates.add(
+            //         ComputedCandidate.Symbol(
+            //             PAGE_EX_BUTTON,
+            //             Rect(x, 0, (x + pageButtonWidth), measuredHeight),
+            //         ),
+            //     )
+            //     x += pageButtonWidth
+            //     hasExButton = true
+            //     break
+            // }
             computedCandidates.add(
                 ComputedCandidate.Word(
                     text,
@@ -326,7 +323,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                     Rect(x, 0, (x + candidateWidth).toInt(), measuredHeight),
                 ),
             )
-            x = (x + (candidateWidth + candidateSpacing)).toInt()
+            x += (candidateWidth + candidateSpacing).toInt()
         }
         if (Rime.hasLeft()) {
             computedCandidates.add(
@@ -349,7 +346,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         params.width = x
         params.height = if ((shouldShowComment && isCommentOnTop)) candidateViewHeight + commentHeight else candidateViewHeight
         layoutParams = params
-        Trime.getService().candidateExPage = hasExButton
+        // Trime.getService().candidateExPage = hasExButton
     }
 
     override fun onSizeChanged(
@@ -359,7 +356,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         oldh: Int,
     ) {
         super.onSizeChanged(w, h, oldw, oldh)
-        updateCandidateWidth()
+        updateCandidateData()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -387,7 +384,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 if (me.actionMasked == MotionEvent.ACTION_UP) {
                     onCandidateClick(
                         highlightIndex,
-                        durationMs >= appPrefs.keyboard.deleteCandidateTimeout,
+                        durationMs >= prefs.deleteCandidateTimeout,
                     )
                 }
                 highlightIndex = -1
@@ -409,27 +406,17 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         x: Int,
         y: Int,
     ): Int {
-        // Rect r = new Rect();
-        var retIndex = -1
-        for (computedCandidate: ComputedCandidate in computedCandidates) {
-        /*
-         * Enlarge the rectangle to be more responsive to user clicks.
-         * r.set(candidateRect[j++]);
-         * r.inset(0, CANDIDATE_TOUCH_OFFSET);
-         */
+        computedCandidates.forEachIndexed { index, computedCandidate ->
             if (computedCandidate.geometry.contains(x, y)) {
-                retIndex = computedCandidates.indexOf(computedCandidate)
-                break
+                return@getCandidateIndex index
             }
         }
-        return retIndex
+        return -1
     }
 
-    private fun updateCandidates(): Int {
+    private fun updateCandidates() {
         candidates = Rime.candidatesOrStatusSwitches
         highlightIndex = Rime.candHighlightIndex - startNum
-        numCandidates = if (candidates == null) 0 else candidates!!.size - startNum
-        return numCandidates
     }
 
     companion object {
