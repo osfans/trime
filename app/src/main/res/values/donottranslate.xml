@@ -56,6 +56,7 @@
     <string-array name="keyboard__candidate_page_size_values">
         <item>10000</item>
         <item>10001</item>
+        <item>10002</item>
         <item>10005</item>
         <item>10010</item>
         <item>10020</item>
