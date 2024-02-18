@@ -269,7 +269,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
 
     private fun updateCandidateWidth() {
         var hasExButton = false
-        val pageEx = appPrefs.keyboard.candidatePageSize.toInt() - 10000
+        val pageEx = appPrefs.keyboard.candidatePageSize - 10000
         val pageButtonWidth =
             candidateSpacing + 2 * candidatePadding +
                 symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont).toInt()

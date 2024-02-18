@@ -74,7 +74,7 @@ Java_com_osfans_trime_core_Rime_setRimeCustomConfigInt(
     auto key = CString(
         env, (jstring)env->CallObjectMethod(pair, GlobalRef->PairFirst));
     auto value =
-        (jint)(size_t)env->CallObjectMethod(pair, GlobalRef->PairSecond);
+        extract_int(env, env->CallObjectMethod(pair, GlobalRef->PairSecond));
     levers->customize_int(custom, key, value);
     levers->save_settings(custom);
   }
