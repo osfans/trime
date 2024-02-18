@@ -11,6 +11,12 @@ static inline void throwJavaException(JNIEnv *env, const char *msg) {
   env->DeleteLocalRef(c);
 }
 
+static inline jint extract_int(JNIEnv *env, jobject f) {
+  return env->CallIntMethod(
+      f,
+      env->GetMethodID(env->FindClass("java/lang/Integer"), "intValue", "()I"));
+}
+
 class CString {
  private:
   JNIEnv *env_;

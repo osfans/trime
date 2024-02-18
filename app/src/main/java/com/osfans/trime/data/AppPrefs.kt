@@ -209,8 +209,8 @@ class AppPrefs(
             get() = prefs.getPref(SPLIT, KeyboardPrefs.SPLIT_OPTION_NEVER)
         val splitSpacePercent: Int
             get() = prefs.getPref(SPLIT_SPACE_PERCENT, 100)
-        var candidatePageSize: String = "0"
-            get() = prefs.getPref(CANDIDATE_PAGE_SIZE, "0")
+        var candidatePageSize: Int = 0
+            get() = prefs.getPref(CANDIDATE_PAGE_SIZE, "0").toInt()
             private set
 
         var hookFastInput: Boolean = false
