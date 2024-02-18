@@ -22,7 +22,7 @@ import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.topOfParent
 
 // 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR_LENGTH
-class CandidateAdapter(private val theme: Theme) : RecyclerView.Adapter<CandidateAdapter.ViewHolder>() {
+class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.ViewHolder>() {
     private val mCandidates = mutableListOf<CandidateListItem>()
 
     internal enum class CommentPosition {
@@ -44,40 +44,69 @@ class CandidateAdapter(private val theme: Theme) : RecyclerView.Adapter<Candidat
         return mCandidates.size
     }
 
+    private val mCandidateTextSize = theme.style.getFloat("candidate_text_size").coerceAtLeast(1f)
+    private val mCandidateFont = FontManager.getTypeface("candidate_font")
+    private val mCandidateTextColor = ColorManager.getColor("candidate_text_color")
+    private val mHilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")
+    private val mCommentPosition = theme.style.getInt("comment_position")
+    private val mCommentTextSize = theme.style.getFloat("comment_text_size").coerceAtLeast(1f)
+    private val mCommentFont = FontManager.getTypeface("comment_font")
+    private val mCommentTextColor = ColorManager.getColor("comment_text_color")
+    private val mBackgroud =
+        ColorManager.getDrawable(
+            "key_back_color",
+            "key_border",
+            "key_border_color",
+            "round_corner",
+            null,
+        )
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = LiquidEntryViewBinding.inflate(LayoutInflater.from(parent.context))
+        binding.candidate.apply {
+            textSize = mCandidateTextSize
+            typeface = mCandidateFont
+            mCandidateTextColor?.let { setTextColor(it) }
+        }
+        val isCommentHidden = Rime.getRimeOption("_hide_comment")
+        if (isCommentHidden) return ViewHolder(binding)
+
+        binding.comment.apply {
+            visibility = View.GONE
+            textSize = mCommentTextSize
+            typeface = mCommentFont
+            mCommentTextColor?.let { setTextColor(it) }
+        }
         val candidate = binding.candidate
         val comment = binding.comment
-        val isCommentHidden = Rime.getRimeOption("_hide_comment")
-        if (!isCommentHidden) {
-            when (CommentPosition.entries[theme.style.getInt("comment_position")]) {
-                CommentPosition.BOTTOM -> {
-                    candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                        centerHorizontally()
-                    }
-                    comment.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                        below(candidate)
-                        centerHorizontally()
-                        bottomOfParent()
-                    }
+        when (CommentPosition.entries[mCommentPosition]) {
+            CommentPosition.BOTTOM -> {
+                candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    centerHorizontally()
                 }
-                CommentPosition.TOP -> {
-                    candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                        centerHorizontally()
-                    }
-                    comment.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                        topOfParent()
-                        above(candidate)
-                        centerHorizontally()
-                    }
+                comment.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    below(candidate)
+                    centerHorizontally()
+                    bottomOfParent()
                 }
-                CommentPosition.RIGHT, CommentPosition.UNKNOWN -> {}
             }
+
+            CommentPosition.TOP -> {
+                candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    centerHorizontally()
+                }
+                comment.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    topOfParent()
+                    above(candidate)
+                    centerHorizontally()
+                }
+            }
+
+            CommentPosition.RIGHT, CommentPosition.UNKNOWN -> {}
         }
-        binding.comment.visibility = View.GONE
         return ViewHolder(binding)
     }
 
@@ -92,44 +121,26 @@ class CandidateAdapter(private val theme: Theme) : RecyclerView.Adapter<Candidat
         position: Int,
     ) {
         val (comment, text) = mCandidates[position]
-        holder.candidate.apply {
-            this.text = text
-            textSize = theme.style.getFloat("candidate_text_size").coerceAtLeast(1f)
-            typeface = FontManager.getTypeface("candidate_font")
-            ColorManager.getColor("candidate_text_color")?.let { setTextColor(it) }
-        }
-        holder.comment.apply {
-            this.text = comment
-            textSize = theme.style.getFloat("comment_text_size").coerceAtLeast(1f)
-            typeface = FontManager.getTypeface("comment_font")
-            ColorManager.getColor("comment_text_color")?.let { setTextColor(it) }
-        }
+        holder.candidate.text = text
+        holder.comment.text = comment
 
-        //  点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
+        // 点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
         // 如果直接使用background，会造成滚动时部分内容的背景填充错误的问题
-        holder.itemView.background =
-            ColorManager.getDrawable(
-                "key_back_color",
-                "key_border",
-                "key_border_color",
-                "round_corner",
-                null,
-            )
+        holder.itemView.background = mBackgroud
 
         // 如果设置了回调，则设置点击事件
         holder.itemView.setOnClickListener { listener?.invoke(position) }
 
         // 点击时产生背景变色效果
         holder.itemView.setOnTouchListener { _, motionEvent: MotionEvent ->
-            val hilited = ColorManager.getColor("hilited_candidate_text_color")
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                hilited?.let { holder.candidate.setTextColor(it) }
+                mHilitedCandidateTextColor?.let { holder.candidate.setTextColor(it) }
             }
             false
         }
     }
 
-    /** 添加 候选点击事件 Listener 回调 *  */
+    /** 添加 候选点击事件 Listener 回调 */
     private var listener: ((Int) -> Unit)? = null
 
     /** @param listener position

@@ -33,7 +33,10 @@ object FontManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val fontFamilies = mutableListOf<FontFamily>()
             getFontFamilies(key).let {
-                if (it.isEmpty()) return@getTypeface Typeface.DEFAULT
+                if (it.isEmpty()) {
+                    typefaceCache[key] = Typeface.DEFAULT
+                    return@getTypeface Typeface.DEFAULT
+                }
                 fontFamilies.addAll(getFontFamilies("latin_font"))
                 fontFamilies.addAll(it)
                 fontFamilies.addAll(getFontFamilies("hanb_font"))

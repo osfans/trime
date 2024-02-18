@@ -13,13 +13,11 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleItemOneBinding
 import com.osfans.trime.databinding.SimpleItemRowBinding
 import splitties.dimensions.dp
-import splitties.views.dsl.core.add
 
-class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
+class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<SimpleKeyBean>()
     private val mBeansByRows = mutableListOf<List<SimpleKeyBean>>()
-    val beans: List<SimpleKeyBean>
-        get() = mBeans
+    val beans get() = mBeans
 
     fun updateBeans(beans: List<SimpleKeyBean>) {
         val prevSize = mBeans.size
@@ -39,12 +37,25 @@ class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : Rec
         return position * 1000L
     }
 
+    private val mSingleWidth = theme.liquid.getInt("single_width")
+    private val mTextSize = theme.style.getFloat("label_text_size")
+    private val mTextColor = ColorManager.getColor("key_text_color")
+    private val mTypeface = FontManager.getTypeface("key_font")
+    private val mBackground =
+        ColorManager.getDrawable(
+            "key_back_color",
+            "key_border",
+            "key_border_color",
+            "round_corner",
+            null,
+        )
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = SimpleItemRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val size = parent.dp(theme.liquid.getInt("single_width"))
+        val size = parent.dp(mSingleWidth)
         val bindings = mutableListOf<SimpleItemOneBinding>()
         for (i in 0 until columnSize) {
             val sub = SimpleItemOneBinding.inflate(LayoutInflater.from(parent.context), null, false)
@@ -52,22 +63,15 @@ class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : Rec
             binding.wrapper.addView(sub.root, size, size)
         }
         val holder = ViewHolder(binding, bindings)
-        for ((i, textView) in holder.simpleKeyTexts.withIndex()) {
-            holder.wrappers[i].tag = i
+        holder.simpleKeyTexts.forEachIndexed { index, textView ->
+            holder.wrappers[index].tag = index
             textView.apply {
-                theme.style.getFloat("label_text_size").takeIf { it > 0f }?.let { textSize = it }
-                ColorManager.getColor("key_text_color")?.let { setTextColor(it) }
-                typeface = FontManager.getTypeface("key_font")
-                gravity = Gravity.CENTER
-                ellipsize = TextUtils.TruncateAt.MARQUEE
-                background =
-                    ColorManager.getDrawable(
-                        "key_back_color",
-                        "key_border",
-                        "key_border_color",
-                        "round_corner",
-                        null,
-                    )
+                mTextSize.takeIf { it > 0f }?.let { this.textSize = it }
+                mTextColor?.let { setTextColor(it) }
+                this.typeface = mTypeface
+                this.gravity = Gravity.CENTER
+                this.ellipsize = TextUtils.TruncateAt.MARQUEE
+                this.background = mBackground
             }
         }
         return holder
@@ -83,15 +87,15 @@ class SimpleAdapter(private val theme: Theme, private val columnSize: Int) : Rec
         position: Int,
     ) {
         val bean = mBeansByRows[position]
-        for ((i, keyText) in holder.simpleKeyTexts.withIndex()) {
-            keyText.text = ""
-            if (i < bean.size) {
-                holder.wrappers[i].visibility = View.VISIBLE
-                keyText.text = bean[i].label
+        holder.simpleKeyTexts.forEachIndexed { index, textView ->
+            textView.text = ""
+            if (index < bean.size) {
+                holder.wrappers[index].visibility = View.VISIBLE
+                textView.text = bean[index].label
             } else {
-                holder.wrappers[i].visibility = View.INVISIBLE
+                holder.wrappers[index].visibility = View.INVISIBLE
             }
-            holder.wrappers[i]
+            holder.wrappers[index]
                 .setOnClickListener { view: View ->
                     if (view.tag != null) {
                         listener?.invoke(position * columnSize + view.tag as Int)
