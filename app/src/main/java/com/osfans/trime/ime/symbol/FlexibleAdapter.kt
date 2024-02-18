@@ -20,17 +20,14 @@ import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.util.appContext
 import kotlinx.coroutines.launch
 
-class FlexibleAdapter(
-    private val theme: Theme,
-) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
+class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
 
     // 映射条目的 id 和其在视图中位置的关系
     // 以应对增删条目时 id 和其位置的相对变化
     // [<id, position>, ...]
     private val mBeansId = mutableMapOf<Int, Int>()
-    val beans: List<DatabaseBean>
-        get() = mBeans
+    val beans get() = mBeans
 
     fun updateBeans(beans: List<DatabaseBean>) {
         val sorted =
@@ -57,12 +54,36 @@ class FlexibleAdapter(
 
     override fun getItemCount(): Int = mBeans.size
 
+    private val mTypeface = FontManager.getTypeface("long_text_font")
+    private val mLongTextColor = ColorManager.getColor("long_text_color")
+    private val mKeyTextColor = ColorManager.getColor("key_text_color")
+    private val mKeyLongTextSize = theme.style.getFloat("key_long_text_size")
+    private val mLabelTextSize = theme.style.getFloat("label_text_size")
+
+    // 这里不用 get() 会导致快速滑动时背景填充错误
+    private val mBackground
+        get() =
+            ColorManager.getDrawable(
+                "long_text_back_color",
+                "key_border",
+                "key_long_text_border",
+                "round_corner",
+                null,
+            )
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = SimpleKeyItemBinding.inflate(LayoutInflater.from(parent.context))
-        return ViewHolder(binding)
+        val holder = ViewHolder(binding)
+        holder.simpleKeyText.apply {
+            typeface = mTypeface
+            (mLongTextColor ?: mKeyTextColor)?.let { setTextColor(it) }
+            (mKeyLongTextSize.takeIf { it > 0f } ?: mLabelTextSize.takeIf { it > 0f })
+                ?.let { textSize = it }
+        }
+        return holder
     }
 
     inner class ViewHolder(binding: SimpleKeyItemBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -76,108 +97,87 @@ class FlexibleAdapter(
     ) {
         with(viewHolder) {
             val bean = mBeans[position]
-            simpleKeyText.apply {
-                text = bean.text
-                typeface = FontManager.getTypeface("long_text_font")
-                (
-                    ColorManager.getColor("long_text_color")
-                        ?: ColorManager.getColor("key_text_color")
-                )
-                    ?.let { setTextColor(it) }
-
-                theme.style.getFloat("key_long_text_size").takeIf { it > 0f }
-                    ?: theme.style.getFloat("label_text_size").takeIf { it > 0f }
-                        ?.let { textSize = it }
-            }
+            simpleKeyText.text = bean.text
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
-
-            itemView.background =
-                ColorManager.getDrawable(
-                    "long_text_back_color",
-                    "key_border",
-                    "key_long_text_border",
-                    "round_corner",
-                    null,
-                )
-
+            itemView.background = mBackground
+            if (!this@FlexibleAdapter::listener.isInitialized) return
             // 如果设置了回调，则设置点击事件
-            if (this@FlexibleAdapter::listener.isInitialized) {
-                itemView.setOnClickListener {
-                    listener.onPaste(bean)
-                }
-                itemView.setOnLongClickListener {
-                    val menu = PopupMenu(it.context, it)
-                    val scope = it.findViewTreeLifecycleOwner()!!.lifecycleScope
-                    menu.menu.apply {
-                        add(R.string.edit).apply {
-                            setIcon(R.drawable.ic_baseline_edit_24)
+            itemView.setOnClickListener {
+                listener.onPaste(bean)
+            }
+            itemView.setOnLongClickListener {
+                val menu = PopupMenu(it.context, it)
+                val scope = it.findViewTreeLifecycleOwner()!!.lifecycleScope
+                menu.menu.apply {
+                    add(R.string.edit).apply {
+                        setIcon(R.drawable.ic_baseline_edit_24)
+                        setOnMenuItemClickListener {
+                            scope.launch {
+                                listener.onEdit(bean)
+                            }
+                            true
+                        }
+                    }
+                    if (bean.pinned) {
+                        add(R.string.simple_key_unpin).apply {
+                            setIcon(R.drawable.ic_outline_push_pin_24)
                             setOnMenuItemClickListener {
                                 scope.launch {
-                                    listener.onEdit(bean)
+                                    listener.onUnpin(bean)
+                                    setPinStatus(bean.id, false)
                                 }
                                 true
                             }
                         }
-                        if (bean.pinned) {
-                            add(R.string.simple_key_unpin).apply {
-                                setIcon(R.drawable.ic_outline_push_pin_24)
-                                setOnMenuItemClickListener {
-                                    scope.launch {
-                                        listener.onUnpin(bean)
-                                        setPinStatus(bean.id, false)
-                                    }
-                                    true
-                                }
-                            }
-                        } else {
-                            add(R.string.simple_key_pin).apply {
-                                setIcon(R.drawable.ic_baseline_push_pin_24)
-                                setOnMenuItemClickListener {
-                                    scope.launch {
-                                        listener.onPin(bean)
-                                        setPinStatus(bean.id, true)
-                                    }
-                                    true
-                                }
-                            }
-                        }
-                        if (listener.showCollectButton) {
-                            add(R.string.collect).apply {
-                                setIcon(R.drawable.ic_baseline_star_24)
-                                setOnMenuItemClickListener {
-                                    scope.launch { CollectionHelper.insert(DatabaseBean(text = bean.text)) }
-                                    true
-                                }
-                            }
-                        }
-                        add(R.string.delete).apply {
-                            setIcon(R.drawable.ic_baseline_delete_24)
+                    } else {
+                        add(R.string.simple_key_pin).apply {
+                            setIcon(R.drawable.ic_baseline_push_pin_24)
                             setOnMenuItemClickListener {
                                 scope.launch {
-                                    listener.onDelete(bean)
-                                    delete(bean.id)
+                                    listener.onPin(bean)
+                                    setPinStatus(bean.id, true)
                                 }
                                 true
                             }
                         }
-                        if (beans.isNotEmpty()) {
-                            add(R.string.delete_all).apply {
-                                setIcon(R.drawable.ic_baseline_delete_sweep_24)
-                                setOnMenuItemClickListener {
-                                    scope.launch {
-                                        askToDeleteAll()
-                                    }
-                                    true
-                                }
+                    }
+                    if (listener.showCollectButton) {
+                        add(R.string.collect).apply {
+                            setIcon(R.drawable.ic_baseline_star_24)
+                            setOnMenuItemClickListener {
+                                scope.launch { CollectionHelper.insert(DatabaseBean(text = bean.text)) }
+                                true
                             }
                         }
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        menu.setForceShowIcon(true)
+
+                    add(R.string.delete).apply {
+                        setIcon(R.drawable.ic_baseline_delete_24)
+                        setOnMenuItemClickListener {
+                            scope.launch {
+                                listener.onDelete(bean)
+                                delete(bean.id)
+                            }
+                            true
+                        }
                     }
-                    menu.show()
-                    true
+                    if (beans.isNotEmpty()) {
+                        add(R.string.delete_all).apply {
+                            setIcon(R.drawable.ic_baseline_delete_sweep_24)
+                            setOnMenuItemClickListener {
+                                scope.launch {
+                                    askToDeleteAll()
+                                }
+                                true
+                            }
+                        }
+                    }
                 }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    menu.setForceShowIcon(true)
+                }
+                menu.show()
+                true
             }
         }
     }
