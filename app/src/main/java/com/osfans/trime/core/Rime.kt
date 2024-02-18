@@ -48,7 +48,8 @@ class Rime(fullCheck: Boolean) {
             return instance!!
         }
 
-        private var mContext: RimeContext? = null
+        var currentContext: RimeContext = RimeContext()
+            private set
         private var mStatus: RimeStatus? = null
         private var isHandlingRimeNotification = false
         private val notificationFlow_ =
@@ -98,7 +99,7 @@ class Rime(fullCheck: Boolean) {
         fun updateContext() {
             Timber.d("Update Rime context ...")
             measureTimeMillis {
-                mContext = getRimeContext() ?: RimeContext()
+                currentContext = getRimeContext() ?: RimeContext()
             }.also { Timber.d("Took $it ms to get context") }
             updateStatus()
         }
@@ -140,17 +141,17 @@ class Rime(fullCheck: Boolean) {
 
         @JvmStatic
         fun hasMenu(): Boolean {
-            return isComposing && mContext?.menu?.numCandidates != 0
+            return isComposing && currentContext.menu?.numCandidates != 0
         }
 
         @JvmStatic
         fun hasLeft(): Boolean {
-            return hasMenu() && mContext?.menu?.pageNo != 0
+            return hasMenu() && currentContext.menu?.pageNo != 0
         }
 
         @JvmStatic
         fun hasRight(): Boolean {
-            return hasMenu() && mContext?.menu?.isLastPage == false
+            return hasMenu() && currentContext.menu?.isLastPage == false
         }
 
         @JvmStatic
@@ -160,7 +161,7 @@ class Rime(fullCheck: Boolean) {
 
         @JvmStatic
         val composition: RimeComposition?
-            get() = mContext?.composition
+            get() = currentContext.composition
 
         @JvmStatic
         val compositionText: String
@@ -168,11 +169,11 @@ class Rime(fullCheck: Boolean) {
 
         @JvmStatic
         val composingText: String
-            get() = mContext?.commitTextPreview ?: ""
+            get() = currentContext.commitTextPreview ?: ""
 
         @JvmStatic
         val selectLabels: Array<String>
-            get() = mContext?.selectLabels ?: arrayOf()
+            get() = currentContext.selectLabels
 
         @JvmStatic
         fun isVoidKeycode(keycode: Int): Boolean {
@@ -219,16 +220,16 @@ class Rime(fullCheck: Boolean) {
                 return if (!isComposing && showSwitches) {
                     SchemaManager.getStatusSwitches()
                 } else {
-                    mContext?.candidates ?: arrayOf()
+                    currentContext.candidates
                 }
             }
 
         val candidatesWithoutSwitch: Array<CandidateListItem>
-            get() = if (isComposing) mContext?.candidates ?: arrayOf() else arrayOf()
+            get() = if (isComposing) currentContext.candidates else arrayOf()
 
         @JvmStatic
         val candHighlightIndex: Int
-            get() = if (isComposing) mContext?.menu?.highlightedCandidateIndex ?: -1 else -1
+            get() = if (isComposing) currentContext.menu!!.highlightedCandidateIndex else -1
 
         fun commitComposition(): Boolean {
             return commitRimeComposition().also {
