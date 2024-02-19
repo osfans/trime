@@ -13,11 +13,10 @@ object KeyboardSwitcher {
     private val theme get() = ThemeManager.activeTheme
     private val allKeyboardIds get() = theme.allKeyboardIds
     private val keyboardCache: MutableMap<String, Keyboard> = mutableMapOf()
-    private var currentKeyboardId = ".default"
-    private var lastKeyboardId = ".default"
-    private var lastLockKeyboardId = ".default"
+    private var currentKeyboardId: String? = null
+    private var lastKeyboardId: String? = null
+    private var lastLockKeyboardId: String? = null
     private val keyboardPrefs = KeyboardPrefs()
-
     lateinit var currentKeyboard: Keyboard
 
     private fun getKeyboard(name: String): Keyboard {
@@ -36,11 +35,11 @@ object KeyboardSwitcher {
     @JvmStatic
     fun newOrReset() {
         Timber.d("Switching keyboard back to .default ...")
-        currentKeyboardId = ".default"
-        lastKeyboardId = ".default"
-        lastLockKeyboardId = ".default"
+        currentKeyboardId = null
+        lastKeyboardId = null
+        lastLockKeyboardId = null
         keyboardCache.clear()
-        switchKeyboard(currentKeyboardId)
+        switchKeyboard(".default")
     }
 
     fun switchKeyboard(name: String?) {
@@ -63,11 +62,8 @@ object KeyboardSwitcher {
                 ".last" -> lastKeyboardId
                 ".last_lock" -> lastLockKeyboardId
                 ".ascii" -> {
-                    val asciiKeyboard = currentKeyboard.asciiKeyboard
-                    if (asciiKeyboard != null && asciiKeyboard in allKeyboardIds) {
-                        asciiKeyboard
-                    } else {
-                        currentKeyboardId
+                    with(currentKeyboard.asciiKeyboard) {
+                        if (this in allKeyboardIds) this else currentKeyboardId
                     }
                 }
                 else -> {
@@ -78,6 +74,8 @@ object KeyboardSwitcher {
                     }
                 }
             }
+
+        if (mappedName.isNullOrEmpty()) mappedName = autoMatch()
 
         // 切换到 mini 键盘
         val deviceKeyboard = appContext.resources.configuration.keyboard
@@ -96,13 +94,12 @@ object KeyboardSwitcher {
             "Switched keyboard from $currentKeyboardId " +
                 "to $mappedName (deviceKeyboard=$deviceKeyboard).",
         )
-        currentKeyboardId = mappedName
-        currentKeyboard = getKeyboard(currentKeyboardId)
-
-        if (currentKeyboard.isLock) {
-            lastLockKeyboardId = currentKeyboardId
-        }
-        lastKeyboardId = currentKeyboardId
+        currentKeyboardId =
+            mappedName.apply {
+                currentKeyboard = getKeyboard(this)
+                lastKeyboardId = this
+                if (currentKeyboard.isLock) lastLockKeyboardId = this
+            }
     }
 
     /**
