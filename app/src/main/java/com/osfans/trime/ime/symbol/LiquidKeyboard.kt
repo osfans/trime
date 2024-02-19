@@ -162,8 +162,8 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
             adapterType = AdapterType.SIMPLE
             keyboardView.apply {
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-                adapter =
-                    simpleAdapter
+                adapter = simpleAdapter
+                setItemViewCacheSize(10)
                 setHasFixedSize(true)
                 // 添加分割线
                 // 设置添加删除动画
@@ -263,6 +263,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
             keyboardView.apply {
                 layoutManager = getOneColumnStaggeredGrid()
                 adapter = dbAdapter
+                setItemViewCacheSize(10)
                 setHasFixedSize(false)
                 // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
                 isSelected = true
@@ -298,6 +299,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
             keyboardView.apply {
                 layoutManager = getFlexbox()
                 adapter = candidateAdapter
+                setItemViewCacheSize(50)
                 setHasFixedSize(false)
                 isSelected = true
             }
@@ -353,6 +355,7 @@ class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener 
             keyboardView.apply {
                 layoutManager = getFlexbox()
                 adapter = varLengthAdapter
+                setItemViewCacheSize(50)
                 setHasFixedSize(false)
                 keyboardView.isSelected = true
             }
