@@ -107,10 +107,11 @@ style:
     send: 发送
     default: Enter   # 定义默认Enter键的文本
 
+# 最好保留一项，防止其他主题使用 __include 时无法加载
 fallback_colors:
+  candidate_text_color: text_color
 # 以下值是程序内置的，你也可以在这里自定义，这会覆盖默认值
 #
-#  candidate_text_color: text_color
 #  comment_text_color: candidate_text_color
 #  border_color: back_color
 #  candidate_separator_color: border_color

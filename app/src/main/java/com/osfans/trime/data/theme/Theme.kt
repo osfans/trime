@@ -21,11 +21,10 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.util.CollectionUtils
 import timber.log.Timber
-import java.util.Objects
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
-class Theme() {
+class Theme(var name: String) {
     private var generalStyle: Map<String, Any?>? = null
     private var presetKeyboards: Map<String, Any?>? = null
     private var liquidKeyboard: Map<String, Any?>? = null
@@ -50,45 +49,50 @@ class Theme() {
     }
 
     init {
-        init()
+        if (name.isEmpty()) {
+            name = prefs.selectedTheme
+        }
+        init(name)
     }
 
-    fun init() {
-        val active = prefs.selectedTheme
+    fun init(active: String) {
         Timber.i("Initializing theme, currentThemeName=%s ...", active)
-        runCatching {
-            val themeFileName = "$active.yaml"
-            Timber.i("Deploying theme '%s' ...", themeFileName)
-            if (!Rime.deployRimeConfigFile(themeFileName, VERSION_KEY)) {
-                Timber.w("Deploying theme '%s' failed", themeFileName)
-            }
-            Timber.d("Fetching global theme config map ...")
-            measureTimeMillis {
-                var fullThemeConfigMap: Map<String, Any>?
-                if (Rime.getRimeConfigMap(active, "").also { fullThemeConfigMap = it } == null) {
-                    fullThemeConfigMap = Rime.getRimeConfigMap(DEFAULT_THEME_NAME, "")
-                }
-                Objects.requireNonNull(fullThemeConfigMap, "The theme file cannot be empty!")
-                Timber.d("Fetching done")
-                generalStyle = fullThemeConfigMap!!["style"] as Map<String, Any?>?
-                fallbackColors = fullThemeConfigMap!!["fallback_colors"] as Map<String, String?>?
-                presetKeys = fullThemeConfigMap!!["preset_keys"] as Map<String, Map<String, Any?>?>?
-                presetColorSchemes = fullThemeConfigMap!!["preset_color_schemes"] as Map<String, Map<String, Any>?>
-                presetKeyboards = fullThemeConfigMap!!["preset_keyboards"] as Map<String, Any?>?
-                liquidKeyboard = fullThemeConfigMap!!["liquid_keyboard"] as Map<String, Any?>?
-                // 将 presetKeyboards 的所有 key 转为 allKeyboardIds
-                allKeyboardIds = presetKeyboards?.keys?.toList()!!
-            }.also {
-                Timber.d("Setting up all theme config map takes $it ms")
-            }
-            Timber.i("The theme is initialized")
-        }.getOrElse {
-            Timber.e("Failed to parse the theme: ${it.message}")
-            if (prefs.selectedTheme != DEFAULT_THEME_NAME) {
-                prefs.selectedTheme = DEFAULT_THEME_NAME
-                init()
+        val themeFileName = "$active.yaml"
+        Timber.i("Deploying theme '%s' ...", themeFileName)
+        var isDeployed: Boolean
+        measureTimeMillis {
+            isDeployed = Rime.deployRimeConfigFile(themeFileName, VERSION_KEY)
+        }.also {
+            if (isDeployed) {
+                Timber.i("Deployed theme '%s' in %dms", themeFileName, it)
+            } else {
+                Timber.w("Failed to deploy theme: '%s'", themeFileName)
             }
         }
+
+        Timber.d("Fetching global theme config map ...")
+        val fullThemeConfigMap = Rime.getRimeConfigMap(themeFileName, "")
+        if (fullThemeConfigMap == null) {
+            if (active != DEFAULT_THEME_NAME) {
+                Timber.w("Failed to parse the theme: '%s', fallback to trime.yaml", active)
+                init(DEFAULT_THEME_NAME)
+                return
+            }
+            Timber.e("Failed to parse default theme: trime.yaml")
+            return
+        }
+        Timber.d("Fetching done")
+
+        generalStyle = fullThemeConfigMap["style"] as Map<String, Any?>?
+        fallbackColors = fullThemeConfigMap["fallback_colors"] as Map<String, String?>?
+        presetKeys = fullThemeConfigMap["preset_keys"] as Map<String, Map<String, Any?>?>?
+        presetColorSchemes = fullThemeConfigMap["preset_color_schemes"] as Map<String, Map<String, Any>?>
+        presetKeyboards = fullThemeConfigMap["preset_keyboards"] as Map<String, Any?>?
+        liquidKeyboard = fullThemeConfigMap["liquid_keyboard"] as Map<String, Any?>?
+        // 将 presetKeyboards 的所有 key 转为 allKeyboardIds
+        allKeyboardIds = presetKeyboards?.keys?.toList()!!
+        Timber.i("The theme is initialized")
+        prefs.selectedTheme = active
     }
 
     class Style(private val theme: Theme) {

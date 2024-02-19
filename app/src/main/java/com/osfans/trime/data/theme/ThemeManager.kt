@@ -1,7 +1,6 @@
 package com.osfans.trime.data.theme
 
 import androidx.annotation.Keep
-import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.ime.symbol.TabManager
 import java.io.File
@@ -49,8 +48,6 @@ object ThemeManager {
         userThemes.addAll(listThemes(DataManager.userDataDir))
     }
 
-    val prefs = AppPrefs.defaultInstance().theme
-
     // 在初始化 ColorManager 时会被赋值
     lateinit var activeTheme: Theme
         private set
@@ -58,8 +55,7 @@ object ThemeManager {
     fun init() = setNormalTheme()
 
     fun setNormalTheme(name: String = "") {
-        if (name.isNotEmpty()) prefs.selectedTheme = name
-        Theme().let {
+        Theme(name).let {
             if (::activeTheme.isInitialized) {
                 if (it == activeTheme) return
             }
