@@ -36,6 +36,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeContext
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
@@ -65,6 +66,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
     private val movable = Movable.fromString(theme.style.getString("layout/movable"))
     private val showComment = !Rime.getOption("_hide_comment")
+    private val minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
+    private val minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
     private val maxEntries =
         theme.style.getInt("layout/max_entries").takeIf { it > 0 }
             ?: Candidate.MAX_CANDIDATE_COUNT
@@ -248,9 +251,12 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         return AlignmentSpan.Standard(i)
     }
 
-    private fun appendComposition(c: WindowComponent.Composition) {
-        val r = Rime.composition!!
-        val s = r.preedit
+    private fun appendComposition(
+        c: WindowComponent.Composition,
+        context: RimeContext,
+    ) {
+        val composition = context.composition!!
+        val preedit = composition.preedit
         var start: Int
         var end: Int
         val alignSpan = getAlignSpan(c.alignment)
@@ -262,7 +268,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             ss!!.setSpan(alignSpan, start, end, 0)
         }
         start = ss!!.length
-        ss!!.append(s)
+        ss!!.append(preedit)
         end = ss!!.length
         ss!!.setSpan(alignSpan, start, end, 0)
         compositionPos[0] = start
@@ -272,8 +278,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         ss!!.setSpan(AbsoluteSizeSpan(textSize), start, end, 0)
         c.letterSpacing.takeIf { it > 0f }
             ?.let { ss?.setSpan(LetterSpacingSpan(it), start, end, 0) }
-        start = compositionPos[0] + r.selStartPos
-        end = compositionPos[0] + r.selEndPos
+        start = compositionPos[0] + composition.selStart
+        end = compositionPos[0] + composition.selEnd
         ss!!.setSpan(ForegroundColorSpan(ColorManager.getColor("hilited_text_color")!!), start, end, 0)
         ss!!.setSpan(BackgroundColorSpan(ColorManager.getColor("hilited_back_color")!!), start, end, 0)
         sep = c.suffix
@@ -287,10 +293,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      * @param minCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
      * @return j
      */
-    private fun calcStartNum(
-        minLength: Int,
-        minCheck: Int,
-    ): Int {
+    private fun calcStartNum(): Int {
         Timber.d("setWindow calcStartNum() getCandidates")
         val candidates = Rime.candidatesOrStatusSwitches
         if (candidates.isEmpty()) return 0
@@ -316,14 +319,13 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     /** 生成悬浮窗内的文本  */
     private fun appendCandidates(
         c: WindowComponent.Candidate,
-        length: Int,
         endNum: Int,
+        context: RimeContext,
     ) {
-        Timber.d("appendCandidates(): length = %s", length)
         var start: Int
         var end: Int
         val alignSpan = getAlignSpan(c.alignment)
-        val candidates = Rime.candidatesOrStatusSwitches
+        val candidates = context.menu!!.candidates
         if (candidates.isEmpty()) return
         val prefix = c.prefix
         highlightIndex = if (candidateUseCursor) Rime.candHighlightIndex else -1
@@ -332,7 +334,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         val commentFormat = c.commentFormat
         val line = c.separator
         var lineLength = 0
-        val labels = Rime.selectLabels
+        val labels = context.selectLabels
         var i = -1
         candidateNum = 0
         val maxLength = theme.style.getInt("layout/max_length")
@@ -341,7 +343,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             i++
             if (candidateNum >= maxEntries) break
             if (!allPhrases && candidateNum >= endNum) break
-            if (allPhrases && cand.length < length) {
+            if (allPhrases && cand.length < minLength) {
                 continue
             }
             cand = String.format(candidateFormat, cand)
@@ -482,23 +484,18 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      *
      * @return 悬浮窗显示的候选词数量
      */
-    fun setWindowContent(): Int {
+    fun update(context: RimeContext): Int {
         if (visibility != VISIBLE) return 0
-        val stacks = Throwable().stackTrace
-        Timber.d("setWindow Rime.getComposition(), [1]${stacks[1]}, [2]${stacks[2]}, [3]${stacks[3]}")
-        val (_, _, _, _, s) = Rime.composition ?: return 0
-        if (s.isNullOrEmpty()) return 0
+        if (context.composition?.preedit.isNullOrEmpty()) return 0
         isSingleLine = true // 設置單行
         ss = SpannableStringBuilder()
-        val minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
-        val minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-        val startNum = calcStartNum(minLength, minCheck)
-        Timber.d("start_num = %s, min_length = %s, min_check = %s", startNum, minLength, minCheck)
+        val startNum = calcStartNum()
+        Timber.d("startNum=$startNum, minLength=$minLength, minCheck=$minCheck")
         windowComponents.forEach {
             when (it) {
                 is WindowComponent.Move -> appendMove(it)
-                is WindowComponent.Composition -> appendComposition(it)
-                is WindowComponent.Candidate -> appendCandidates(it, minLength, startNum)
+                is WindowComponent.Composition -> appendComposition(it, context)
+                is WindowComponent.Candidate -> appendCandidates(it, startNum, context)
                 is WindowComponent.Button -> appendButton(it)
             }
         }

@@ -892,7 +892,7 @@ open class Trime : LifecycleInputMethodService() {
                     showCompositionView(false)
                 } else {
                     composition.root.visibility = View.VISIBLE
-                    startNum = composition.compositionView.setWindowContent()
+                    startNum = composition.compositionView.update(Rime.currentContext)
                     mCandidate!!.setText(startNum)
                     // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
                     // otherwise we need to call it here
