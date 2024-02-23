@@ -56,7 +56,7 @@ val Project.buildABI
 val Project.builder
     get() =
         envOrProp("CI_NAME", "ciName") {
-            runCmd("git config user.name")
+            runCatching { runCmd("git config user.name").ifEmpty { "(Unknown)" } }.getOrElse { "(Unknown)" }
         }
 
 val Project.buildGitRepo
