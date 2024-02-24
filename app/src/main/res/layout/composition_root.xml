@@ -24,7 +24,7 @@
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
 
-  <com.osfans.trime.ime.text.Composition
+  <com.osfans.trime.ime.composition.Composition
     android:id="@+id/compositionView"
     android:ellipsize="none"
     android:layout_width="wrap_content"

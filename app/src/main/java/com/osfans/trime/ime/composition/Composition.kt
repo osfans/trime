@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.osfans.trime.ime.text
+package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -36,6 +36,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeContext
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
@@ -43,7 +44,8 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Trime
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.util.CollectionUtils
+import com.osfans.trime.ime.text.Candidate
+import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -56,22 +58,29 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     private val keyTextSize = theme.style.getInt("key_text_size")
     private val keyTextColor = ColorManager.getColor("key_text_color")!!
+    private val highlightCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
+    private val highlightCandidateBackColor = ColorManager.getColor("hilited_candidate_back_color")!!
+    private val highlightLabelColor =
+        ColorManager.getColor("hilited_label_color")
+            ?: highlightCandidateTextColor
     private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
     private val movable = Movable.fromString(theme.style.getString("layout/movable"))
     private val showComment = !Rime.getOption("_hide_comment")
+    private val minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
+    private val minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
     private val maxEntries =
         theme.style.getInt("layout/max_entries").takeIf { it > 0 }
             ?: Candidate.MAX_CANDIDATE_COUNT
 
     @Suppress("UNCHECKED_CAST")
     private val windowComponents =
-        theme.style.getObject("window") as List<Map<String, Any?>>?
-            ?: listOf()
+        WindowComponent
+            .decodeFromList(theme.style.getObject("window") as List<Map<String, String?>>? ?: listOf())
 
     @Suppress("UNCHECKED_CAST")
     private val liquidWindowComponents =
-        theme.style.getObject("liquid_keyboard_window") as List<Map<String, Any?>>?
-            ?: listOf()
+        WindowComponent
+            .decodeFromList(theme.style.getObject("liquid_keyboard_window") as List<Map<String, String?>>? ?: listOf())
 
     private var highlightIndex = 0
     private val compositionPos = IntArray(2)
@@ -232,46 +241,48 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         return super.onTouchEvent(event)
     }
 
-    private fun getAlign(m: Map<String, Any?>): Any {
-        var i = Layout.Alignment.ALIGN_NORMAL
-        if (m.containsKey("align")) {
-            when (CollectionUtils.obtainString(m, "align")) {
-                "left", "normal" -> i = Layout.Alignment.ALIGN_NORMAL
-                "right", "opposite" -> i = Layout.Alignment.ALIGN_OPPOSITE
-                "center" -> i = Layout.Alignment.ALIGN_CENTER
+    private fun getAlignSpan(align: String): Any {
+        val i =
+            when (align) {
+                "right", "opposite" -> Layout.Alignment.ALIGN_OPPOSITE
+                "center" -> Layout.Alignment.ALIGN_CENTER
+                else -> Layout.Alignment.ALIGN_NORMAL // left, normal and else
             }
-        }
         return AlignmentSpan.Standard(i)
     }
 
-    private fun appendComposition(m: Map<String, Any?>) {
-        val r = Rime.composition!!
-        val s = r.preedit
+    private fun appendComposition(
+        c: WindowComponent.Composition,
+        context: RimeContext,
+    ) {
+        val composition = context.composition!!
+        val preedit = composition.preedit
         var start: Int
         var end: Int
-        var sep = CollectionUtils.obtainString(m, "start", "")
+        val alignSpan = getAlignSpan(c.alignment)
+        var sep = c.prefix
         if (sep.isNotEmpty()) {
             start = ss!!.length
             ss!!.append(sep)
             end = ss!!.length
-            ss!!.setSpan(getAlign(m), start, end, 0)
+            ss!!.setSpan(alignSpan, start, end, 0)
         }
         start = ss!!.length
-        ss!!.append(s)
+        ss!!.append(preedit)
         end = ss!!.length
-        ss!!.setSpan(getAlign(m), start, end, 0)
+        ss!!.setSpan(alignSpan, start, end, 0)
         compositionPos[0] = start
         compositionPos[1] = end
         ss!!.setSpan(CompositionSpan(), start, end, 0)
         val textSize = sp(theme.style.getInt("text_size"))
         ss!!.setSpan(AbsoluteSizeSpan(textSize), start, end, 0)
-        CollectionUtils.obtainFloat(m, "letter_spacing").takeIf { it > 0 }
+        c.letterSpacing.takeIf { it > 0f }
             ?.let { ss?.setSpan(LetterSpacingSpan(it), start, end, 0) }
-        start = compositionPos[0] + r.selStartPos
-        end = compositionPos[0] + r.selEndPos
+        start = compositionPos[0] + composition.selStart
+        end = compositionPos[0] + composition.selEnd
         ss!!.setSpan(ForegroundColorSpan(ColorManager.getColor("hilited_text_color")!!), start, end, 0)
         ss!!.setSpan(BackgroundColorSpan(ColorManager.getColor("hilited_back_color")!!), start, end, 0)
-        sep = CollectionUtils.obtainString(m, "end", "")
+        sep = c.suffix
         if (sep.isNotEmpty()) ss!!.append(sep)
     }
 
@@ -282,10 +293,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      * @param minCheck 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
      * @return j
      */
-    private fun calcStartNum(
-        minLength: Int,
-        minCheck: Int,
-    ): Int {
+    private fun calcStartNum(): Int {
         Timber.d("setWindow calcStartNum() getCandidates")
         val candidates = Rime.candidatesOrStatusSwitches
         if (candidates.isEmpty()) return 0
@@ -310,33 +318,32 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     /** 生成悬浮窗内的文本  */
     private fun appendCandidates(
-        m: Map<String, Any?>,
-        length: Int,
+        c: WindowComponent.Candidate,
         endNum: Int,
+        context: RimeContext,
     ) {
-        Timber.d("appendCandidates(): length = %s", length)
         var start: Int
         var end: Int
-        val candidates = Rime.candidatesOrStatusSwitches
+        val alignSpan = getAlignSpan(c.alignment)
+        val candidates = context.menu!!.candidates
         if (candidates.isEmpty()) return
-        val prefix = CollectionUtils.obtainString(m, "start")
+        val prefix = c.prefix
         highlightIndex = if (candidateUseCursor) Rime.candHighlightIndex else -1
-        val labelFormat = CollectionUtils.obtainString(m, "label")
-        val candidateFormat = CollectionUtils.obtainString(m, "candidate")
-        val commentFormat = CollectionUtils.obtainString(m, "comment")
-        val line = CollectionUtils.obtainString(m, "sep")
+        val labelFormat = c.labelFormat
+        val candidateFormat = c.candidateFormat
+        val commentFormat = c.commentFormat
+        val line = c.separator
         var lineLength = 0
-        val labels = Rime.selectLabels
+        val labels = context.selectLabels
         var i = -1
         candidateNum = 0
         val maxLength = theme.style.getInt("layout/max_length")
-        val hilitedCandidateBackColor = ColorManager.getColor("hilited_candidate_back_color")!!
         for (o in candidates) {
             var cand = o.text
             i++
             if (candidateNum >= maxEntries) break
             if (!allPhrases && candidateNum >= endNum) break
-            if (allPhrases && cand.length < length) {
+            if (allPhrases && cand.length < minLength) {
                 continue
             }
             cand = String.format(candidateFormat, cand)
@@ -352,7 +359,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 start = ss!!.length
                 ss!!.append(lineSep)
                 end = ss!!.length
-                ss!!.setSpan(getAlign(m), start, end, 0)
+                ss!!.setSpan(alignSpan, start, end, 0)
             }
             if (labelFormat.isNotEmpty() && labels.isNotEmpty()) {
                 val label = String.format(labelFormat, labels[i])
@@ -363,8 +370,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     CandidateSpan(
                         i,
                         FontManager.getTypeface("label_font"),
-                        ColorManager.getColor("hilited_label_color")!!,
-                        hilitedCandidateBackColor,
+                        highlightLabelColor,
+                        highlightCandidateBackColor,
                         ColorManager.getColor("label_color")!!,
                     ),
                     start,
@@ -378,13 +385,13 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             ss!!.append(cand)
             end = ss!!.length
             lineLength += cand.length
-            ss!!.setSpan(getAlign(m), start, end, 0)
+            ss!!.setSpan(alignSpan, start, end, 0)
             ss!!.setSpan(
                 CandidateSpan(
                     i,
                     FontManager.getTypeface("candidate_font"),
-                    ColorManager.getColor("hilited_candidate_text_color")!!,
-                    hilitedCandidateBackColor,
+                    highlightCandidateTextColor,
+                    highlightCandidateBackColor,
                     ColorManager.getColor("candidate_text_color")!!,
                 ),
                 start,
@@ -398,13 +405,13 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 start = ss!!.length
                 ss!!.append(comment)
                 end = ss!!.length
-                ss!!.setSpan(getAlign(m), start, end, 0)
+                ss!!.setSpan(alignSpan, start, end, 0)
                 ss!!.setSpan(
                     CandidateSpan(
                         i,
                         FontManager.getTypeface("comment_font"),
                         ColorManager.getColor("hilited_comment_text_color")!!,
-                        hilitedCandidateBackColor,
+                        highlightCandidateBackColor,
                         ColorManager.getColor("comment_text_color")!!,
                     ),
                     start,
@@ -417,62 +424,58 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             }
             candidateNum++
         }
-        val suffix = CollectionUtils.obtainString(m, "end", "")
+        val suffix = c.suffix
         if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
 
-    private fun appendButton(m: Map<String, Any?>) {
-        if (m.containsKey("when")) {
-            val `when` = CollectionUtils.obtainString(m, "when", "")
-            if (`when`.contentEquals("paging") && !Rime.hasLeft()) return
-            if (`when`.contentEquals("has_menu") && !Rime.hasMenu()) return
-        }
-        val e = EventManager.getEvent(CollectionUtils.obtainString(m, "click"))
+    private fun appendButton(c: WindowComponent.Button) {
+        if (c.`when` == "has_menu" && !Rime.hasMenu()) return
+        if (c.`when` == "paging" && !Rime.hasLeft()) return
+        val ev = EventManager.getEvent(c.click)
         val label =
-            if (m.containsKey("label")) {
-                CollectionUtils.obtainString(m, "label", "")
-            } else {
-                e.getLabel(KeyboardSwitcher.currentKeyboard)
+            c.label.ifEmpty {
+                ev.getLabel(KeyboardSwitcher.currentKeyboard)
             }
         var start: Int
         var end: Int
-        val prefix = CollectionUtils.obtainString(m, "start")
+        val alignSpan = getAlignSpan(c.alignment)
+        val prefix = c.prefix
         if (prefix.isNotEmpty()) {
             start = ss!!.length
             ss!!.append(prefix)
             end = ss!!.length
-            ss!!.setSpan(getAlign(m), start, end, 0)
+            ss!!.setSpan(alignSpan, start, end, 0)
         }
         start = ss!!.length
         ss!!.append(label)
         end = ss!!.length
-        ss!!.setSpan(getAlign(m), start, end, 0)
-        ss!!.setSpan(EventSpan(e), start, end, 0)
+        ss!!.setSpan(alignSpan, start, end, 0)
+        ss!!.setSpan(EventSpan(ev), start, end, 0)
         ss!!.setSpan(AbsoluteSizeSpan(sp(keyTextSize)), start, end, 0)
-        val suffix = CollectionUtils.obtainString(m, "end")
+        val suffix = c.suffix
         if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
 
-    private fun appendMove(m: Map<String, Any?>) {
-        val s = CollectionUtils.obtainString(m, "move", "")
+    private fun appendMove(c: WindowComponent.Move) {
+        val s = c.move
         var start: Int
         var end: Int
-        val prefix = CollectionUtils.obtainString(m, "start")
+        val prefix = c.prefix
         if (prefix.isNotEmpty()) {
             start = ss!!.length
             ss!!.append(prefix)
             end = ss!!.length
-            ss!!.setSpan(getAlign(m), start, end, 0)
+            ss!!.setSpan(getAlignSpan(c.alignment), start, end, 0)
         }
         start = ss!!.length
         ss!!.append(s)
         end = ss!!.length
-        ss!!.setSpan(getAlign(m), start, end, 0)
+        ss!!.setSpan(getAlignSpan(c.alignment), start, end, 0)
         movePos[0] = start
         movePos[1] = end
-        ss!!.setSpan(AbsoluteSizeSpan(keyTextSize), start, end, 0)
+        ss!!.setSpan(AbsoluteSizeSpan(sp(keyTextSize)), start, end, 0)
         ss!!.setSpan(ForegroundColorSpan(keyTextColor), start, end, 0)
-        val suffix = CollectionUtils.obtainString(m, "end")
+        val suffix = c.suffix
         if (suffix.isNotEmpty()) ss!!.append(suffix)
     }
 
@@ -481,28 +484,19 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      *
      * @return 悬浮窗显示的候选词数量
      */
-    fun setWindowContent(): Int {
+    fun update(context: RimeContext): Int {
         if (visibility != VISIBLE) return 0
-        val stacks = Throwable().stackTrace
-        Timber.d("setWindow Rime.getComposition(), [1]${stacks[1]}, [2]${stacks[2]}, [3]${stacks[3]}")
-        val (_, _, _, _, s) = Rime.composition ?: return 0
-        if (s.isNullOrEmpty()) return 0
+        if (context.composition?.preedit.isNullOrEmpty()) return 0
         isSingleLine = true // 設置單行
         ss = SpannableStringBuilder()
-        var startNum = 0
-        val minLength = theme.style.getInt("layout/min_length") // 候选词长度大于设定，才会显示到悬浮窗中
-        val minCheck = theme.style.getInt("layout/min_check") // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
-        for (m in windowComponents) {
-            if (m.containsKey("composition")) {
-                appendComposition(m)
-            } else if (m.containsKey("candidate")) {
-                startNum = calcStartNum(minLength, minCheck)
-                Timber.d("start_num = %s, min_length = %s, min_check = %s", startNum, minLength, minCheck)
-                appendCandidates(m, minLength, startNum)
-            } else if (m.containsKey("click")) {
-                appendButton(m)
-            } else if (m.containsKey("move")) {
-                appendMove(m)
+        val startNum = calcStartNum()
+        Timber.d("startNum=$startNum, minLength=$minLength, minCheck=$minCheck")
+        windowComponents.forEach {
+            when (it) {
+                is WindowComponent.Move -> appendMove(it)
+                is WindowComponent.Composition -> appendComposition(it, context)
+                is WindowComponent.Candidate -> appendCandidates(it, startNum, context)
+                is WindowComponent.Button -> appendButton(it)
             }
         }
         if (candidateNum > 0 || ss.toString().contains("\n")) isSingleLine = false // 設置單行
@@ -520,13 +514,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             return
         }
         ss = SpannableStringBuilder()
-        for (m in liquidWindowComponents) {
-            if (m.containsKey("composition")) {
-                appendComposition(m)
-            } else if (m.containsKey("click")) {
-                appendButton(m)
-            }
-        }
+        liquidWindowComponents.filterIsInstance<WindowComponent.Button>()
+            .forEach { appendButton(it) }
         isSingleLine = !ss.toString().contains("\n")
         text = ss
         movementMethod = LinkMovementMethod.getInstance()
