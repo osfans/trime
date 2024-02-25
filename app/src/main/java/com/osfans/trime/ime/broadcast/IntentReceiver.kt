@@ -21,12 +21,10 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.os.PowerManager
 import android.os.PowerManager.PARTIAL_WAKE_LOCK
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
@@ -38,6 +36,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import splitties.systemservices.alarmManager
+import splitties.systemservices.powerManager
 import timber.log.Timber
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -69,7 +69,6 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                 launch {
                     withContext(Dispatchers.IO) {
                         // 获取唤醒锁
-                        val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
                         val wakeLock =
                             powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "com.osfans.trime:WakeLock")
                         wakeLock.acquire(600000) // 10分钟超时
@@ -77,8 +76,6 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                         val triggerTime = cal.timeInMillis + TimeUnit.DAYS.toMillis(1) // 下次同步时间
                         AppPrefs.defaultInstance().profile.timingSyncTriggerTime =
                             triggerTime // 更新定时同步偏好值
-                        val alarmManager =
-                            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                         // 设置待发送的同步事件
                         val pendingIntent =
                             PendingIntent.getBroadcast(
@@ -91,19 +88,22 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                                     PendingIntent.FLAG_UPDATE_CURRENT
                                 },
                             )
-                        if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
-                            alarmManager.setExactAndAllowWhileIdle(
-                                AlarmManager.RTC_WAKEUP,
-                                triggerTime,
-                                pendingIntent,
-                            )
-                        } else {
-                            alarmManager.setExact(
-                                AlarmManager.RTC_WAKEUP,
-                                triggerTime,
-                                pendingIntent,
-                            )
+                        if (VERSION.SDK_INT < VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                            if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据SDK设置alarm任务
+                                alarmManager.setExactAndAllowWhileIdle(
+                                    AlarmManager.RTC_WAKEUP,
+                                    triggerTime,
+                                    pendingIntent,
+                                )
+                            } else {
+                                alarmManager.setExact(
+                                    AlarmManager.RTC_WAKEUP,
+                                    triggerTime,
+                                    pendingIntent,
+                                )
+                            }
                         }
+
                         Rime.syncRimeUserData()
                         RimeWrapper.deploy()
                         wakeLock.release() // 释放唤醒锁

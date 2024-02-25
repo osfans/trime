@@ -281,4 +281,7 @@
     <string name="setup__step_three">Setup 3</string>
     <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>
     <string name="setup__request_permmision">Request storage permmision</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="schedule_exact_alarm_permission_title">No Schedule Exact Alarm Permmision</string>
+    <string name="schedule_exact_alarm_permission_message">Without the permmission to schedule exact alarm, we are not able to sync your profile in time when you enable syncing on schedule.</string>
 </resources>
