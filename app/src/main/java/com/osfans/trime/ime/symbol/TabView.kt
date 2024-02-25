@@ -30,7 +30,7 @@ import androidx.core.view.updateLayoutParams
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.GraphicUtils.drawText
@@ -201,14 +201,14 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
                     val tag = TabManager.tabTags[i]
                     if (tag.type == SymbolKeyboardType.NO_KEY) {
                         when (tag.command) {
-                            KeyCommandType.EXIT -> Trime.getService().selectLiquidKeyboard(-1)
+                            KeyCommandType.EXIT -> TrimeInputMethodService.getService().selectLiquidKeyboard(-1)
                             KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
                             else -> {}
                         }
                     } else if (System.currentTimeMillis() - time0 < 500) {
                         highlightIndex = i
                         invalidate()
-                        Trime.getService().selectLiquidKeyboard(i)
+                        TrimeInputMethodService.getService().selectLiquidKeyboard(i)
                     }
                     Timber.d("index=" + i + " length=" + tabTags!!.size)
                 }

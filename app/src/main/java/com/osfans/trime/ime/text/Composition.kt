@@ -40,7 +40,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.util.CollectionUtils
@@ -205,7 +205,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                         .replace("‸", "")
                 n = Rime.getRimeRawInput()!!.length - s.length // 從右側定位
                 Rime.setCaretPos(n)
-                Trime.getService().updateComposing()
+                TrimeInputMethodService.getService().updateComposing()
                 return true
             }
         } else if (movable != Movable.NEVER &&
@@ -223,7 +223,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 } else { // MotionEvent.ACTION_MOVE
                     mCurrentX = (event.rawX + mDx).toInt()
                     mCurrentY = (event.rawY + mDy).toInt()
-                    Trime.getService().updatePopupWindow(mCurrentX, mCurrentY)
+                    TrimeInputMethodService.getService().updatePopupWindow(mCurrentX, mCurrentY)
                 }
                 return true
             }

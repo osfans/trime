@@ -18,7 +18,7 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -46,17 +46,17 @@ import java.util.Locale
  * the following count as text input: character, numeric (+advanced), phone and symbol layouts.
  *
  * All of the UI for the different keyboard layouts are kept under the same container element and
- * are separated from media-related UI. The core [Trime] will pass any event defined in
- * [Trime.EventListener] through to this class.
+ * are separated from media-related UI. The core [TrimeInputMethodService] will pass any event defined in
+ * [TrimeInputMethodService.EventListener] through to this class.
  *
  * TextInputManager is also the hub in the communication between the system, the active editor
  * instance and the CandidateView.
  */
 class TextInputManager private constructor() :
-    Trime.EventListener,
+    TrimeInputMethodService.EventListener,
     KeyboardView.OnKeyboardActionListener,
     Candidate.EventListener {
-        private val trime get() = Trime.getService()
+        private val trime get() = TrimeInputMethodService.getService()
         private val prefs get() = AppPrefs.defaultInstance()
         private val activeEditorInstance: EditorInstance
             get() = trime.activeEditorInstance as EditorInstance

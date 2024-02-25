@@ -16,7 +16,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleKeyItemBinding
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.util.appContext
 import kotlinx.coroutines.launch
 
@@ -203,7 +203,7 @@ class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewH
     }
 
     private fun askToDeleteAll() {
-        val service = Trime.getService()
+        val service = TrimeInputMethodService.getService()
         val askDialog =
             AlertDialog.Builder(
                 appContext,

@@ -9,7 +9,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.databinding.TabBarBinding
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -19,7 +19,7 @@ import splitties.views.dsl.core.matchParent
 
 class QuickBar : KoinComponent {
     private val context: Context by inject()
-    private val service: Trime by inject()
+    private val service: TrimeInputMethodService by inject()
 
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {

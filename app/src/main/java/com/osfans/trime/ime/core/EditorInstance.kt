@@ -32,7 +32,7 @@ class EditorInstance(private val ims: InputMethodService) {
             }
         }
     val textInputManager: TextInputManager
-        get() = (ims as Trime).textInputManager ?: error("TextInputManager is null")
+        get() = (ims as TrimeInputMethodService).textInputManager ?: error("TextInputManager is null")
 
     var lastCommittedText: CharSequence = ""
 
@@ -60,7 +60,7 @@ class EditorInstance(private val ims: InputMethodService) {
         val commit = Rime.getRimeCommit()
         commit?.let { commitText(it.commitText) }
         Timber.i("\t<TrimeInput>\tcommitRimeText()\tupdateComposing")
-        (ims as Trime).updateComposing()
+        (ims as TrimeInputMethodService).updateComposing()
         return commit != null
     }
 

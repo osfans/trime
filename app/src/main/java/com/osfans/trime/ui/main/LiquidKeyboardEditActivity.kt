@@ -10,13 +10,13 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.databinding.ActivityLiquidKeyboardEditBinding
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LiquidKeyboardEditActivity : AppCompatActivity() {
-    private val service: Trime = Trime.getService()
+    private val service: TrimeInputMethodService = TrimeInputMethodService.getService()
     private var id: Int? = null
     private lateinit var editText: EditText
     private var type: SymbolKeyboardType? = null

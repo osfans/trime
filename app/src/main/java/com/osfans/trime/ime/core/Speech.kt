@@ -94,7 +94,7 @@ class Speech(context: Context) : RecognitionListener {
             speechRecognizer.destroy()
         }
         Timber.i("onResults")
-        val trime = Trime.getServiceOrNull()
+        val trime = TrimeInputMethodService.getServiceOrNull()
         if (trime != null) {
             val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             val openccConfig = ThemeManager.activeTheme.style.getString("speech_opencc_config")

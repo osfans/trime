@@ -9,7 +9,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.ui.main.soundPicker
@@ -46,7 +46,7 @@ class KeyboardFragment :
             "keyboard__show_window",
             "keyboard__inline_preedit", "keyboard__soft_cursor",
             -> {
-                Trime.getServiceOrNull()?.recreateInputView()
+                TrimeInputMethodService.getServiceOrNull()?.recreateInputView()
             }
             "keyboard__candidate_page_size" -> {
                 val pageSize = AppPrefs.defaultInstance().keyboard.candidatePageSize

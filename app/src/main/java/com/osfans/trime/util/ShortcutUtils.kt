@@ -17,7 +17,7 @@ import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.RimeWrapper
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +45,8 @@ object ShortcutUtils {
             "date" -> return getDate(option)
             "commit" -> return option
             "run" -> startIntent(option)
-            "share_text" -> Trime.getService().shareText()
-            "liquid_keyboard" -> Trime.getService().selectLiquidKeyboard(option)
+            "share_text" -> TrimeInputMethodService.getService().shareText()
+            "liquid_keyboard" -> TrimeInputMethodService.getService().selectLiquidKeyboard(option)
             else -> startIntent(command, option)
         }
         return null
