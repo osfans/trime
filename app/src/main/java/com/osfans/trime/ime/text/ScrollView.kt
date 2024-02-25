@@ -9,7 +9,7 @@ import android.view.View
 import android.view.animation.TranslateAnimation
 import android.widget.HorizontalScrollView
 import com.osfans.trime.core.Rime
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import timber.log.Timber
 import kotlin.math.min
 
@@ -107,7 +107,7 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
                             swipeStartX = ev.x
                         }
                     } else if (swipeStartX - ev.x > swipeActionLimit) {
-                        if (Trime.getService().candidateExPage) {
+                        if (TrimeInputMethodService.getService().candidateExPage) {
                             pageExAction?.run()
                             return
                         } else if (Rime.hasRight()) {

@@ -3,7 +3,7 @@ package com.osfans.trime.data.db
 import android.content.Context
 import androidx.room.Room
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.ime.core.Trime
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.util.StringUtils.matches
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +70,7 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     fun onInputEventChanged() {
         if (!(limit != 0 && this::dftDao.isInitialized)) return
 
-        Trime.getService()
+        TrimeInputMethodService.getService()
             .currentInputConnection
             ?.let { DatabaseBean.fromInputConnection(it) }
             ?.takeIf {

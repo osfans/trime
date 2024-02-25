@@ -60,7 +60,7 @@ import splitties.views.imageDrawable
  */
 @SuppressLint("ViewConstructor")
 class InputView(
-    val service: Trime,
+    val service: TrimeInputMethodService,
     val rime: Rime,
 ) : ConstraintLayout(service), KoinComponent {
     private val theme get() = ThemeManager.activeTheme
@@ -102,7 +102,7 @@ class InputView(
             single<InputView> { this@InputView }
             single<Theme> { theme }
             single<ContextThemeWrapper> { themedContext }
-            single<Trime> { service }
+            single<TrimeInputMethodService> { service }
             // the components need to be injected
             // Note: these components can be injected into other components,
             // but you must construct them there, otherwise Koin cannot

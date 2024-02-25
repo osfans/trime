@@ -40,7 +40,7 @@
         android:theme="@style/Theme.TrimeAppTheme">
 
         <service
-            android:name=".TrimeImeService"
+            android:name=".ime.core.TrimeInputMethodService"
             android:exported="true"
             android:label="@string/trime_app_name"
             android:permission="android.permission.BIND_INPUT_METHOD">

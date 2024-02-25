@@ -80,7 +80,7 @@ import timber.log.Timber
 /** [輸入法][InputMethodService]主程序  */
 
 @Suppress("ktlint:standard:property-naming")
-open class Trime : LifecycleInputMethodService() {
+open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var normalTextEditor = false
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
@@ -1015,14 +1015,14 @@ open class Trime : LifecycleInputMethodService() {
     }
 
     companion object {
-        var self: Trime? = null
+        var self: TrimeInputMethodService? = null
 
         @JvmStatic
-        fun getService(): Trime {
+        fun getService(): TrimeInputMethodService {
             return self ?: throw IllegalStateException("Trime not initialized")
         }
 
-        fun getServiceOrNull(): Trime? {
+        fun getServiceOrNull(): TrimeInputMethodService? {
             return self
         }
 
@@ -1031,9 +1031,9 @@ open class Trime : LifecycleInputMethodService() {
                 Looper.getMainLooper(),
             ) { msg: Message ->
                 // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-                if (!(msg.obj as Trime).isShowInputRequested) {
+                if (!(msg.obj as TrimeInputMethodService).isShowInputRequested) {
                     ShortcutUtils.syncInBackground()
-                    (msg.obj as Trime).loadConfig()
+                    (msg.obj as TrimeInputMethodService).loadConfig()
                 }
                 false
             }

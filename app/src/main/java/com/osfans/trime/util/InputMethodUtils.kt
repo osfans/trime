@@ -4,13 +4,13 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import com.osfans.trime.TrimeImeService
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
 
 object InputMethodUtils {
     private val serviceName =
-        ComponentName(appContext, TrimeImeService::class.java).flattenToShortString()
+        ComponentName(appContext, TrimeInputMethodService::class.java).flattenToShortString()
 
     private fun getSecureSettings(name: String) = Settings.Secure.getString(appContext.contentResolver, name)
 
