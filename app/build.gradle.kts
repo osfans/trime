@@ -20,7 +20,7 @@ android {
     defaultConfig {
         applicationId  = "com.osfans.trime"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 20240301
         versionName = "3.2.17"
 
