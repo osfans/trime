@@ -26,6 +26,7 @@ import android.content.IntentFilter
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.PowerManager.PARTIAL_WAKE_LOCK
+import androidx.core.content.ContextCompat
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -81,7 +82,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                             PendingIntent.getBroadcast(
                                 context,
                                 0,
-                                Intent("com.osfans.trime.timing.sync"),
+                                Intent(COMMAND_TIMING_SYNC),
                                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
                                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                                 } else {
@@ -114,9 +115,24 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
     }
 
     fun registerReceiver(context: Context) {
-        context.registerReceiver(this, IntentFilter(COMMAND_DEPLOY))
-        context.registerReceiver(this, IntentFilter(COMMAND_SYNC))
-        context.registerReceiver(this, IntentFilter(COMMAND_TIMING_SYNC))
+        ContextCompat.registerReceiver(
+            context,
+            this,
+            IntentFilter(COMMAND_DEPLOY),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        ContextCompat.registerReceiver(
+            context,
+            this,
+            IntentFilter(COMMAND_SYNC),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        ContextCompat.registerReceiver(
+            context,
+            this,
+            IntentFilter(COMMAND_TIMING_SYNC),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         context.registerReceiver(this, IntentFilter(Intent.ACTION_SHUTDOWN))
     }
 

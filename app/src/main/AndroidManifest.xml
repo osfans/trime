@@ -41,7 +41,7 @@
 
         <service
             android:name=".TrimeImeService"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/trime_app_name"
             android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
@@ -66,6 +66,7 @@
         <!-- Settings activity -->
         <activity
             android:name=".ui.main.PrefMainActivity"
+            android:exported="true"
             android:launchMode="singleTask" />
 
         <activity
@@ -85,7 +86,7 @@
             android:label="@string/edit"
             android:launchMode="singleInstance"
             android:taskAffinity=".ui.main.LiquidKeyboardEditActivity"
-            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog"
             android:windowSoftInputMode="stateAlwaysVisible|adjustPan" />
 
         <!-- Using an activity alias to disable/enable the app icon in the launcher -->
