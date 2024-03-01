@@ -21,8 +21,8 @@ android {
         applicationId  = "com.osfans.trime"
         minSdk = 21
         targetSdk = 34
-        versionCode = 20240301
-        versionName = "3.2.17"
+        versionCode = 20240501
+        versionName = "3.2.18"
 
         multiDexEnabled = true
         setProperty("archivesBaseName", "$applicationId-$buildVersionName")
