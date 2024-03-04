@@ -891,7 +891,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     composition.compositionView.changeToLiquidKeyboardToolbar()
                     showCompositionView(false)
                 } else {
-                    composition.root.visibility = View.VISIBLE
+                    composition.compositionView.visibility = View.VISIBLE
                     startNum = composition.compositionView.setWindowContent()
                     mCandidate!!.setText(startNum)
                     // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
