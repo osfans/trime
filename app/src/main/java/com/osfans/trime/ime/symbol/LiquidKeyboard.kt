@@ -8,8 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.blankj.utilcode.util.ScreenUtils
-import com.blankj.utilcode.util.SizeUtils
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -27,6 +25,7 @@ import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
+import com.osfans.trime.util.ShortcutUtils
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -40,8 +39,8 @@ class LiquidKeyboard(
     private val symbolHistory = SymbolHistory(180)
     private var adapterType: AdapterType = AdapterType.INIT
     private val simpleAdapter by lazy {
-        val itemWidth = SizeUtils.dp2px(theme.liquid.getFloat("single_width"))
-        val columnCount = ScreenUtils.getAppScreenWidth() / itemWidth
+        val itemWidth = context.dp(theme.liquid.getInt("single_width"))
+        val columnCount = context.resources.displayMetrics.widthPixels / itemWidth
         SimpleAdapter(theme, columnCount).apply {
             setHasStableIds(true)
         }
@@ -216,7 +215,7 @@ class LiquidKeyboard(
                     }
 
                     override suspend fun onEdit(bean: DatabaseBean) {
-                        bean.text?.let { launchLiquidKeyboardEditText(context, type, bean.id, it) }
+                        bean.text?.let { ShortcutUtils.launchLiquidKeyboardEdit(context, type, bean.id, it) }
                     }
 
                     // FIXME: 这个方法可能实现得比较粗糙，需要日后改进

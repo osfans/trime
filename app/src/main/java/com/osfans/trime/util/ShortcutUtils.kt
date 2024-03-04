@@ -18,6 +18,8 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -180,6 +182,22 @@ object ShortcutUtils {
     fun launchLogActivity(context: Context) {
         context.startActivity(
             Intent(context, LogActivity::class.java),
+        )
+    }
+
+    fun launchLiquidKeyboardEdit(
+        context: Context,
+        type: SymbolKeyboardType,
+        id: Int,
+        text: String,
+    ) {
+        context.startActivity(
+            Intent(context, LiquidKeyboardEditActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(LiquidKeyboardEditActivity.DB_BEAN_ID, id)
+                putExtra(LiquidKeyboardEditActivity.DB_BEAN_TEXT, text)
+                putExtra(LiquidKeyboardEditActivity.LIQUID_KEYBOARD_TYPE, type.name)
+            },
         )
     }
 }
