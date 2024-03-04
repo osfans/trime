@@ -24,7 +24,6 @@ class QuickBar(context: Context, service: TrimeInputMethodService) {
                     { service.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) },
                     { service.selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE) },
                 )
-                visibility = if (Rime.getOption("_hide_candidate")) View.GONE else View.VISIBLE
             }
             with(candidates) {
                 setCandidateListener(service.textInputManager)
@@ -51,6 +50,14 @@ class QuickBar(context: Context, service: TrimeInputMethodService) {
 
     val view by lazy {
         ViewAnimator(context).apply {
+            visibility =
+                if (Rime.getOption("_hide_candidate") ||
+                    Rime.getOption("_hide_bar")
+                ) {
+                    View.GONE
+                } else {
+                    View.VISIBLE
+                }
             background =
                 ColorManager.getDrawable(
                     "candidate_background",
