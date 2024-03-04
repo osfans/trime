@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
-import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
@@ -20,7 +19,6 @@ import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -29,11 +27,6 @@ import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.unloadKoinModules
-import org.koin.dsl.module
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
@@ -62,7 +55,7 @@ import splitties.views.imageDrawable
 class InputView(
     val service: TrimeInputMethodService,
     val rime: Rime,
-) : ConstraintLayout(service), KoinComponent {
+) : ConstraintLayout(service) {
     private val theme get() = ThemeManager.activeTheme
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
@@ -91,26 +84,9 @@ class InputView(
     private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    val quickBar: QuickBar by inject()
-    val keyboardWindow: KeyboardWindow by inject()
-    val liquidKeyboard: LiquidKeyboard by inject()
-
-    private val module =
-        module {
-            // the basic dependencies for the components to be injected
-            // provided by InputView (including itself)
-            single<InputView> { this@InputView }
-            single<Theme> { theme }
-            single<ContextThemeWrapper> { themedContext }
-            single<TrimeInputMethodService> { service }
-            // the components need to be injected
-            // Note: these components can be injected into other components,
-            // but you must construct them there, otherwise Koin cannot
-            // inject them automatically.
-            single { KeyboardWindow() }
-            single { LiquidKeyboard() }
-            single { QuickBar() }
-        }
+    val quickBar = QuickBar(themedContext, service)
+    val keyboardWindow = KeyboardWindow(themedContext, service)
+    val liquidKeyboard = LiquidKeyboard(themedContext, service, theme)
 
     private val keyboardSidePadding = theme.style.getInt("keyboard_padding")
     private val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
@@ -140,9 +116,6 @@ class InputView(
     val keyboardView: View
 
     init {
-        // MUST call before any other operations
-        loadKoinModules(module)
-
         notificationHandlerJob =
             service.lifecycleScope.launch {
                 rime.notificationFlow.collect {
@@ -360,7 +333,6 @@ class InputView(
         // cancel the notification job and unload the Koin module,
         // implies that InputView should not be attached again after detached.
         notificationHandlerJob.cancel()
-        unloadKoinModules(module)
         super.onDetachedFromWindow()
     }
 }

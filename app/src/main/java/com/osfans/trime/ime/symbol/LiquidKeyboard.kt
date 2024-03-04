@@ -28,16 +28,14 @@ import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import splitties.dimensions.dp
 import timber.log.Timber
 
-class LiquidKeyboard : KoinComponent, ClipboardHelper.OnClipboardUpdateListener {
-    private val context: Context by inject()
-    private val service: TrimeInputMethodService by inject()
-    private val theme: Theme by inject()
-
+class LiquidKeyboard(
+    private val context: Context,
+    private val service: TrimeInputMethodService,
+    private val theme: Theme,
+) : ClipboardHelper.OnClipboardUpdateListener {
     private lateinit var keyboardView: RecyclerView
     private val symbolHistory = SymbolHistory(180)
     private var adapterType: AdapterType = AdapterType.INIT

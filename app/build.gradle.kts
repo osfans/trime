@@ -126,7 +126,6 @@ dependencies {
     implementation(libs.androidx.viewpager2)
     implementation(libs.flexbox)
     implementation(libs.kaml)
-    implementation(libs.koin.android)
     implementation(libs.timber)
     implementation(libs.utilcode)
     implementation(libs.xxpermissions)
