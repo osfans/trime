@@ -1,10 +1,10 @@
 package com.osfans.trime.ui.main
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
@@ -15,7 +15,7 @@ import com.osfans.trime.ime.enums.SymbolKeyboardType
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class LiquidKeyboardEditActivity : AppCompatActivity() {
+class LiquidKeyboardEditActivity : Activity() {
     private val service: TrimeInputMethodService = TrimeInputMethodService.getService()
     private var id: Int? = null
     private lateinit var editText: EditText
