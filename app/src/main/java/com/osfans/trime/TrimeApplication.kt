@@ -10,9 +10,6 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.ui.main.LogActivity
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.startKoin
 import timber.log.Timber
 import kotlin.system.exitProcess
 
@@ -106,10 +103,6 @@ class TrimeApplication : Application() {
             appPrefs.internal.pid.apply {
                 lastPid = this
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
-            }
-            startKoin {
-                androidLogger()
-                androidContext(this@TrimeApplication)
             }
             appPrefs.internal.pid = currentPid
             ClipboardHelper.init(applicationContext)
