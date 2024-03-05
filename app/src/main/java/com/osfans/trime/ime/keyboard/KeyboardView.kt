@@ -29,7 +29,6 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.os.Message
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
@@ -42,14 +41,12 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.KeyboardKeyPreviewBinding
 import com.osfans.trime.ime.enums.KeyEventType
-import com.osfans.trime.ime.keyboard.Key.Companion.isTrimeModifierKey
 import com.osfans.trime.util.LeakGuardHandlerWrapper
 import com.osfans.trime.util.dp2px
 import com.osfans.trime.util.sp2px
@@ -215,20 +212,24 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     private var mLastTapTime: Long = 0
     private val mPreviewLabel = StringBuilder(1)
 
-    /** Whether the keyboard bitmap needs to be redrawn before it's blitted. *  */
+    /** Whether the keyboard bitmap needs to be redrawn before it's blitted. */
     private var mDrawPending = false
 
-    /** The dirty region in the keyboard bitmap  */
+    /** The dirty region in the keyboard bitmap */
     private val mDirtyRect = Rect()
 
-    /** The keyboard bitmap for faster updates  */
+    /** The keyboard bitmap for faster updates */
     private var mBuffer: Bitmap? = null
+
+    /** The canvas for the above mutable keyboard bitmap  */
+    private var mCanvas: Canvas? = null
+
+    /** 位图中实际绘制的区域 */
+    private var mRect: Rect = Rect()
 
     /** Notes if the keyboard just changed, so that we could possibly reallocate the mBuffer.  */
     private var mKeyboardChanged = false
 
-    /** The canvas for the above mutable keyboard bitmap  */
-    private var mCanvas: Canvas? = null
     // The accessibility manager for accessibility support */
     // private AccessibilityManager mAccessibilityManager;
     // The audio manager for accessibility support */
@@ -794,40 +795,42 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         oldh: Int,
     ) {
         super.onSizeChanged(w, h, oldw, oldh)
-        // if (mKeyboard != null) {
-        // mKeyboard.resize(w, h);
-        // }
-        // Release the buffer, if any and it will be reallocated on the next draw
-        mBuffer = null
+        mRect.union(0, 0, w, h)
     }
 
     public override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (mDrawPending || mBuffer == null || mKeyboardChanged) {
-            onBufferDraw()
+        onBufferDraw()
+        if (mRect.isEmpty) mRect.union(0, 0, width, height)
+        mBuffer?.also {
+            canvas.drawBitmap(it, mRect, mRect, null)
         }
-        canvas.drawBitmap(mBuffer!!, 0f, 0f, null)
     }
 
     private fun onBufferDraw() {
-        if (mBuffer == null || mKeyboardChanged) {
-            if (mBuffer == null ||
-                mKeyboardChanged &&
-                (mBuffer!!.width != width || mBuffer!!.height != height)
-            ) {
-                // Make sure our bitmap is at least 1x1
-                val width = max(1, width)
-                val height = max(1, height)
-                mBuffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                mCanvas = Canvas(mBuffer!!)
+        if (mBuffer == null || mCanvas == null) {
+            // 初始化
+            if (width == 0 || height == 0) return
+            mBuffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            mCanvas = Canvas(mBuffer!!)
+            invalidateAllKeys()
+        } else if (mBuffer!!.width < width || mBuffer!!.height < height || mKeyboardChanged) {
+            // 位图尺寸不够，重新创建
+            if (!mKeyboardChanged) {
+                val newWidth = max(width, mBuffer!!.width)
+                val newHeight = max(height, mBuffer!!.height)
+                mBuffer?.recycle()
+                mBuffer = null
+                mBuffer = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                mCanvas?.setBitmap(mBuffer)
             }
             invalidateAllKeys()
             mKeyboardChanged = false
         }
-        if (mKeyboard == null) return
+        if (mKeyboard == null || mKeys == null) return
         mCanvas!!.save()
-        val canvas = mCanvas
-        canvas!!.clipRect(mDirtyRect)
+        val canvas = mCanvas!!
+        canvas.clipRect(mDirtyRect)
         val paint = mPaint
         var keyBackground: Drawable?
         val clipRegion = mClipRegion
@@ -875,13 +878,11 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
             }
             if (keyBackground is GradientDrawable) {
                 keyBackground.cornerRadius =
-                    (
-                        if (key.round_corner != null && key.round_corner!! > 0) {
-                            key.round_corner
-                        } else {
-                            mKeyboard!!.roundCorner
-                        }
-                    )!!
+                    if (key.round_corner != null && key.round_corner!! > 0) {
+                        key.round_corner!!
+                    } else {
+                        mKeyboard!!.roundCorner
+                    }
             }
             var color = key.getTextColorForState(drawableState)
             mPaint.color = color
@@ -902,62 +903,52 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
             }
             canvas.translate((key.x + kbdPaddingLeft).toFloat(), (key.y + kbdPaddingTop).toFloat())
             keyBackground?.draw(canvas)
-            if (!TextUtils.isEmpty(label)) {
+            if (!label.isNullOrEmpty()) {
                 // For characters, use large font. For labels like "Done", use small font.
                 if (key.key_text_size != null && key.key_text_size!! > 0) {
                     paint.textSize = key.key_text_size!!.toFloat()
                 } else {
-                    paint.textSize = (if (label!!.length > 1) mLabelTextSize else mKeyTextSize).toFloat()
+                    paint.textSize = (if (label.length > 1) mLabelTextSize else mKeyTextSize).toFloat()
                 }
                 // Draw a drop shadow for the text
                 paint.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
                 // Draw the text
                 canvas.drawText(
-                    label!!,
-                    (
-                        left + key.key_text_offset_x
-                    ).toFloat(),
-                    (key.height - padding.top - padding.bottom) / 2f + (paint.textSize - paint.descent()) / 2f + top +
-                        key.key_text_offset_y,
+                    label,
+                    (left + key.key_text_offset_x).toFloat(),
+                    (key.height - padding.top - padding.bottom) / 2f +
+                        (paint.textSize - paint.descent()) / 2f + top + key.key_text_offset_y,
                     paint,
                 )
-                if (mShowSymbol) {
+                if (mShowSymbol && !key.symbolLabel.isNullOrEmpty()) {
                     val labelSymbol = key.symbolLabel
-                    if (!TextUtils.isEmpty(labelSymbol)) {
-                        mPaintSymbol.textSize =
-                            (
-                                if (key.symbol_text_size != null && key.symbol_text_size!! > 0) key.symbol_text_size else mSymbolSize
-                            )!!.toFloat()
-                        mPaintSymbol.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
-                        canvas.drawText(
-                            labelSymbol!!,
-                            (
-                                left + key.key_symbol_offset_x
-                            ).toFloat(),
-                            symbolBase + key.key_symbol_offset_y,
-                            mPaintSymbol,
-                        )
-                    }
+                    mPaintSymbol.textSize =
+                        if (key.symbol_text_size != null && key.symbol_text_size!! > 0) {
+                            key.symbol_text_size!!.toFloat()
+                        } else {
+                            mSymbolSize.toFloat()
+                        }
+                    mPaintSymbol.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
+                    canvas.drawText(
+                        labelSymbol!!,
+                        (left + key.key_symbol_offset_x).toFloat(),
+                        symbolBase + key.key_symbol_offset_y,
+                        mPaintSymbol,
+                    )
                 }
-                if (mShowHint) {
-                    if (!TextUtils.isEmpty(hint)) {
-                        mPaintSymbol.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
-                        canvas.drawText(
-                            hint!!,
-                            (
-                                left + key.key_hint_offset_x
-                            ).toFloat(),
-                            key.height + hintBase + key.key_hint_offset_y,
-                            mPaintSymbol,
-                        )
-                    }
+                if (mShowHint && !hint.isNullOrEmpty()) {
+                    mPaintSymbol.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
+                    canvas.drawText(
+                        hint,
+                        (left + key.key_hint_offset_x).toFloat(),
+                        key.height + hintBase + key.key_hint_offset_y,
+                        mPaintSymbol,
+                    )
                 }
-
                 // Turn off drop shadow
                 paint.setShadowLayer(0f, 0f, 0f, 0)
             }
             canvas.translate((-key.x - kbdPaddingLeft).toFloat(), (-key.y - kbdPaddingTop).toFloat())
-            //      break;
         }
         mInvalidatedKey = null
         // Overlay a dark rectangle to dim the keyboard
@@ -1066,7 +1057,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         )
         if (index != NOT_A_KEY && index < mKeys!!.size) {
             val key = mKeys!![index]
-            if (isTrimeModifierKey(key.code) && !key.sendBindings(type.ordinal)) {
+            if (Key.isTrimeModifierKey(key.code) && !key.sendBindings(type.ordinal)) {
                 Timber.d(
                     "\t<TrimeInput>\tdetectAndSendKey()\tModifierKey, key.getEvent, KeyLabel=%s",
                     key.getLabel(),
@@ -1274,7 +1265,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     fun invalidateComposingKeys() {
         if (mKeyboard != null) {
             val keys: List<Key> = mKeyboard!!.composingKeys
-            if (keys != null && keys.size > 5) invalidateAllKeys() else invalidateKeys(keys)
+            if (keys.size > 5) invalidateAllKeys() else invalidateKeys(keys)
         } else {
             Timber.e("invalidateComposingKeys() mKeyboard==null")
         }
@@ -1404,8 +1395,8 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     }
 
     /*
-  @Override
-  public boolean onHoverEvent(MotionEvent event) {
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
       if (mAccessibilityManager.isTouchExplorationEnabled() && event.getPointerCount() == 1) {
           final int action = event.getAction();
           switch (action) {
@@ -1422,8 +1413,9 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
           return onTouchEvent(event);
       }
       return true;
-  }
+    }
      */
+
     override fun performClick(): Boolean {
         return super.performClick()
     }
@@ -1718,6 +1710,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         }
         removeMessages()
         dismissPopupKeyboard()
+        mBuffer?.recycle()
         mBuffer = null
         mCanvas = null
         mMiniKeyboardCache.clear()
@@ -1881,7 +1874,6 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         private const val DELAY_AFTER_PREVIEW = 70
         private const val DEBOUNCE_TIME = 70
         private const val MAX_NEARBY_KEYS = 12
-        private val prefs: AppPrefs
-            get() = defaultInstance()
+        private val prefs get() = AppPrefs.defaultInstance()
     }
 }
