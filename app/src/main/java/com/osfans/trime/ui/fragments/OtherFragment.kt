@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +18,9 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.iso8601UTCDateTime
+import com.osfans.trime.util.queryFileName
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -32,8 +35,34 @@ class OtherFragment : PaddingPreferenceFragment() {
 
     private lateinit var exportLauncher: ActivityResultLauncher<String>
 
+    private lateinit var importLauncher: ActivityResultLauncher<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        importLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+                if (uri == null) return@registerForActivityResult
+                val ctx = requireContext()
+                val cr = ctx.contentResolver
+                lifecycleScope.withLoadingDialog(ctx) {
+                    withContext(NonCancellable + Dispatchers.IO) {
+                        val name = cr.queryFileName(uri) ?: return@withContext
+                        if (!name.endsWith(".zip")) {
+                            ctx.importErrorDialog(getString(R.string.exception_app_data_filename, name))
+                            return@withContext
+                        }
+                        try {
+                            val inputStream = cr.openInputStream(uri)!!
+                            val metadata = DataManager.import(inputStream).getOrThrow()
+                            withContext(Dispatchers.Main) {
+                                ToastUtils.showShort(getString(R.string.app_data_imported, formatDateTime(metadata.exportTime)))
+                            }
+                        } catch (e: Exception) {
+                            ctx.importErrorDialog(e.localizedMessage ?: e.stackTraceToString())
+                        }
+                    }
+                }
+            }
         exportLauncher =
             registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
                 if (uri == null) return@registerForActivityResult
@@ -83,6 +112,25 @@ class OtherFragment : PaddingPreferenceFragment() {
                 }
             },
         )
+        screen.addPreference(
+            Preference(requireContext()).apply {
+                isIconSpaceReserved = false
+                isSingleLineTitle = false
+                title = getString(R.string.import_app_data)
+                setOnPreferenceClickListener { _ ->
+                    AlertDialog.Builder(requireContext())
+                        .setIconAttribute(android.R.attr.alertDialogIcon)
+                        .setTitle(R.string.import_app_data)
+                        .setMessage(R.string.confirm_import_app_data)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            importLauncher.launch("application/zip")
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                    true
+                }
+            },
+        )
     }
 
     override fun onResume() {
@@ -102,6 +150,17 @@ class OtherFragment : PaddingPreferenceFragment() {
             showAppIcon(requireContext())
         } else {
             hideAppIcon(requireContext())
+        }
+    }
+
+    private suspend fun Context.importErrorDialog(message: String) {
+        withContext(Dispatchers.Main.immediate) {
+            AlertDialog.Builder(this@importErrorDialog)
+                .setTitle(R.string.import_error)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .show()
         }
     }
 

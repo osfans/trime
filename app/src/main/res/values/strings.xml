@@ -287,4 +287,11 @@
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
     <string name="export_app_data">Export app data</string>
+    <string name="exception_app_data_metadata">Unable to find metadata of app data</string>
+    <string name="exception_app_data_package_name_mismatch">App data does not match current application</string>
+    <string name="import_error">Import Error</string>
+    <string name="exception_app_data_filename">The filename extension of %1$s does not indicate trime app data</string>
+    <string name="app_data_imported">App data on %1$s has been imported</string>
+    <string name="import_app_data">Import app data</string>
+    <string name="confirm_import_app_data">Import app data would override local settings and symbol history. Process?</string>
 </resources>

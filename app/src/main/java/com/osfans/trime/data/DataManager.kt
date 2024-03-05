@@ -3,17 +3,23 @@ package com.osfans.trime.data
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ResourceUtils
 import com.osfans.trime.BuildConfig
+import com.osfans.trime.R
 import com.osfans.trime.util.Const
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.appContext
+import com.osfans.trime.util.errorRuntime
+import com.osfans.trime.util.extract
+import com.osfans.trime.util.withTempDir
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import timber.log.Timber
 import java.io.File
+import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 object DataManager {
@@ -180,4 +186,38 @@ object DataManager {
             zipStream.closeEntry()
         }
     }
+
+    private fun copyDir(
+        source: File,
+        target: File,
+    ) {
+        val exists = source.exists()
+        val isDir = source.isDirectory
+        if (exists && isDir) {
+            source.copyRecursively(target, overwrite = true)
+        } else {
+            source.toString()
+            Timber.w("Cannot import user data: path='${source.path}', exists=$exists, isDir=$isDir")
+        }
+    }
+
+    fun import(src: InputStream) =
+        runCatching {
+            ZipInputStream(src).use { zipStream ->
+                withTempDir { tempDir ->
+                    val extracted = zipStream.extract(tempDir)
+                    val metadataFile =
+                        extracted.find { it.name == "metadata.json" }
+                            ?: errorRuntime(R.string.exception_app_data_metadata)
+                    val metadata = json.decodeFromString<Metadata>(metadataFile.readText())
+                    if (metadata.packageName != BuildConfig.APPLICATION_ID) {
+                        errorRuntime(R.string.exception_app_data_package_name_mismatch)
+                    }
+                    copyDir(File(tempDir, "shared_prefs"), sharedPrefsDir)
+                    copyDir(File(tempDir, "databases"), dataBasesDir)
+                    copyDir(File(tempDir, "symbol_history"), appContext.filesDir)
+                    metadata
+                }
+            }
+        }
 }

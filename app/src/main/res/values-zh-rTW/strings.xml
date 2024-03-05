@@ -286,4 +286,11 @@
     <string name="notification_permission_title">沒有通知權限</string>
     <string name="notification_permission_message">尚未賦予通知權限，因此無法在耗時較長的操作完成後給您發送通知。</string>
     <string name="export_app_data">匯出應用資料</string>
+    <string name="exception_app_data_metadata">找不到應用資料的元資料</string>
+    <string name="exception_app_data_package_name_mismatch">應用資料與當前應用不匹配</string>
+    <string name="import_error">匯入錯誤</string>
+    <string name="exception_app_data_filename">檔案 %1$s 的拓展名不指向同文的應用資料</string>
+    <string name="app_data_imported">已匯入匯出於 %1$s 的應用資料</string>
+    <string name="import_app_data">匯入應用資料</string>
+    <string name="confirm_import_app_data">匯入應用資料會覆蓋本地設定與符號輸入歷史。繼續嗎？</string>
 </resources>

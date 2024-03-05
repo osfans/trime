@@ -285,4 +285,11 @@
     <string name="notification_permission_title">没有通知权限</string>
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
     <string name="export_app_data">导出应用数据</string>
+    <string name="exception_app_data_metadata">找不到应用数据的元数据</string>
+    <string name="exception_app_data_package_name_mismatch">应用数据与当前应用不匹配</string>
+    <string name="import_error">导入错误</string>
+    <string name="exception_app_data_filename">文件 %1$s 的拓展名不指向同文的应用数据</string>
+    <string name="app_data_imported">已导入导出于 %1$s 的应用数据</string>
+    <string name="import_app_data">导入应用数据</string>
+    <string name="confirm_import_app_data">导入应用数据会覆盖本地设置与符号输入历史。继续吗？</string>
 </resources>
