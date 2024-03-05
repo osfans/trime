@@ -58,6 +58,9 @@ import splitties.systemservices.layoutInflater
 import timber.log.Timber
 import java.lang.reflect.Method
 import java.util.Arrays
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /** 顯示[鍵盤][Keyboard]及[按鍵][Key]  */
 
@@ -128,8 +131,8 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
     private var mKeyTextColor: ColorStateList? = null
     private var mKeyBackColor: StateListDrawable? = null
 
-    private var key_symbol_color = 0
-    private var hilited_key_symbol_color = 0
+    private var keySymbolColor = 0
+    private var hilitedKeySymbolColor = 0
     private var mSymbolSize = 0
     private val mPaintSymbol: Paint
     private var mShadowRadius = 0f
@@ -337,8 +340,8 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
 
     fun reset() {
         val theme = ThemeManager.activeTheme
-        key_symbol_color = ColorManager.getColor("key_symbol_color")!!
-        hilited_key_symbol_color = ColorManager.getColor("hilited_key_symbol_color")!!
+        keySymbolColor = ColorManager.getColor("key_symbol_color")!!
+        hilitedKeySymbolColor = ColorManager.getColor("hilited_key_symbol_color")!!
         mShadowColor = ColorManager.getColor("shadow_color")!!
         mSymbolSize = sp2px(theme.style.getFloat("symbol_text_size")).toInt()
         mKeyTextSize = sp2px(theme.style.getFloat("key_text_size")).toInt()
@@ -384,7 +387,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         showPreview = prefs.keyboard.popupKeyPressEnabled
         mPaint.setTypeface(FontManager.getTypeface("key_font"))
         mPaintSymbol.setTypeface(FontManager.getTypeface("symbol_font"))
-        mPaintSymbol.color = key_symbol_color
+        mPaintSymbol.color = keySymbolColor
         mPaintSymbol.textSize = mSymbolSize.toFloat()
         mPreviewText.typeface = FontManager.getTypeface("preview_font")
         handleEnterLabel(theme)
@@ -445,8 +448,8 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
                         if (mPossiblePoly) return false
                         val deltaX = me2.x - me1!!.x // distance X
                         val deltaY = me2.y - me1.y // distance Y
-                        val absX = Math.abs(deltaX) // absolute value of distance X
-                        val absY = Math.abs(deltaY) // absolute value of distance Y
+                        val absX = abs(deltaX) // absolute value of distance X
+                        val absY = abs(deltaY) // absolute value of distance Y
                         val travel = // threshold distance
                             // I don't really know what getSwipeTravelHi is.
                             // For any one see this plz change the method name to something
@@ -621,7 +624,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
      * @param key 按下的修饰键(非组合键）
      * @return
      */
-    fun setModifier(key: Key): Boolean {
+    private fun setModifier(key: Key): Boolean {
         if (mKeyboard != null) {
             if (mKeyboard!!.clikModifierKey(key.isShiftLock, key.modifierKeyOnMask)) {
                 invalidateAllKeys()
@@ -694,7 +697,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         }
     }
 
-    val isShifted: Boolean
+    private val isShifted: Boolean
         /**
          * Returns the state of the shift key of the keyboard, if any.
          *
@@ -777,7 +780,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         val length = keys.size
         var dimensionSum = 0
         for (key in keys) {
-            dimensionSum += Math.min(key.width, key.height) + key.gap
+            dimensionSum += min(key.width, key.height) + key.gap
         }
         if (dimensionSum < 0 || length == 0) return
         mProximityThreshold = (dimensionSum * Keyboard.SEARCH_DISTANCE / length).toInt()
@@ -813,8 +816,8 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
                 (mBuffer!!.width != width || mBuffer!!.height != height)
             ) {
                 // Make sure our bitmap is at least 1x1
-                val width = Math.max(1, width)
-                val height = Math.max(1, height)
+                val width = max(1, width)
+                val height = max(1, height)
                 mBuffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 mCanvas = Canvas(mBuffer!!)
             }
@@ -885,7 +888,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
                 ?: mKeyTextColor!!.getColorForState(drawableState, 0)
             color = key.getSymbolColorForState(drawableState)
             mPaintSymbol.color = color
-                ?: if (key.isPressed) hilited_key_symbol_color else key_symbol_color
+                ?: if (key.isPressed) hilitedKeySymbolColor else keySymbolColor
 
             // Switch the character to uppercase if shift is pressed
             var label = key.getLabel()
@@ -1153,7 +1156,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
         )
         val popupWidth =
-            Math.max(
+            max(
                 mPreviewText.measuredWidth,
                 key.width + mPreviewText.paddingLeft + mPreviewText.paddingRight,
             )
@@ -1250,12 +1253,7 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         )
         onBufferDraw()
         Timber.d("\t<TrimeInput>\tinvalidateKey()\tinvalidate")
-        invalidate(
-            key.x + paddingLeft,
-            key.y + paddingTop,
-            key.x + key.width + paddingLeft,
-            key.y + key.height + paddingTop,
-        )
+        invalidate()
         Timber.d("\t<TrimeInput>\tinvalidateKey()\tfinish")
     }
 
@@ -1387,10 +1385,10 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
         var mPopupX = popupKey.x + paddingLeft
         var mPopupY = popupKey.y + paddingTop
         mPopupX = mPopupX + popupKey.width - mMiniKeyboardContainer!!.measuredWidth
-        mPopupY = mPopupY - mMiniKeyboardContainer.measuredHeight
+        mPopupY -= mMiniKeyboardContainer.measuredHeight
         val x = mPopupX + mMiniKeyboardContainer.paddingRight + mCoordinates[0]
         val y = mPopupY + mMiniKeyboardContainer.paddingBottom + mCoordinates[1]
-        mMiniKeyboard.setPopupOffset(Math.max(x, 0), y)
+        mMiniKeyboard.setPopupOffset(max(x, 0), y)
 
         // todo 只处理了shift
         Timber.w("only set isShifted, no others modifierkey")
@@ -1586,10 +1584,10 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
             if (prefs.keyboard.swipeEnabled) {
                 val dx = touchX - touchX0
                 val dy = touchY - touchY0
-                val absX = Math.abs(dx)
-                val absY = Math.abs(dy)
+                val absX = abs(dx)
+                val absY = abs(dy)
                 val travel = if (isFastInput && isClickAtLast) prefs.keyboard.swipeTravelHi else prefs.keyboard.swipeTravel
-                if (Math.max(absY, absX) > travel && touchOnePoint) {
+                if (max(absY, absX) > travel && touchOnePoint) {
                     Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\ttouch")
                     var type = KeyEventType.CLICK
                     type =
@@ -1861,8 +1859,8 @@ class KeyboardView(context: Context?, attrs: AttributeSet?) : View(context, attr
                 vel = dist / dur * units // pixels/frame.
                 accumY = if (accumY == 0f) vel else (accumY + vel) * .5f
             }
-            xVelocity = if (accumX < 0.0f) Math.max(accumX, -maxVelocity) else Math.min(accumX, maxVelocity)
-            yVelocity = if (accumY < 0.0f) Math.max(accumY, -maxVelocity) else Math.min(accumY, maxVelocity)
+            xVelocity = if (accumX < 0.0f) max(accumX, -maxVelocity) else min(accumX, maxVelocity)
+            yVelocity = if (accumY < 0.0f) max(accumY, -maxVelocity) else min(accumY, maxVelocity)
         }
 
         companion object {
