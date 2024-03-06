@@ -360,15 +360,15 @@ class Keyboard() {
                         theme.style.getInt("key_press_offset_y"),
                     )
                 val key = Key(this, mk)
-                key.key_text_offset_x =
+                key.keyTextOffsetX =
                     appContext.sp(
                         obtainFloat(mk, "key_text_offset_x", defaultKeyTextOffsetX.toFloat()),
                     ).toInt()
-                key.key_text_offset_y =
+                key.keyTextOffsetY =
                     appContext.sp(
                         obtainFloat(mk, "key_text_offset_y", defaultKeyTextOffsetY.toFloat()),
                     ).toInt()
-                key.key_symbol_offset_x =
+                key.keySymbolOffsetX =
                     appContext.sp(
                         obtainFloat(
                             mk,
@@ -376,7 +376,7 @@ class Keyboard() {
                             defaultKeySymbolOffsetX.toFloat(),
                         ),
                     ).toInt()
-                key.key_symbol_offset_y =
+                key.keySymbolOffsetY =
                     appContext.sp(
                         obtainFloat(
                             mk,
@@ -384,16 +384,16 @@ class Keyboard() {
                             defaultKeySymbolOffsetY.toFloat(),
                         ),
                     ).toInt()
-                key.key_hint_offset_x =
+                key.keyHintOffsetX =
                     appContext.sp(
                         obtainFloat(mk, "key_hint_offset_x", defaultKeyHintOffsetX.toFloat()),
                     ).toInt()
-                key.key_hint_offset_y =
+                key.keyHintOffsetY =
                     appContext.sp(
                         obtainFloat(mk, "key_hint_offset_y", defaultKeyHintOffsetY.toFloat()),
                     ).toInt()
-                key.key_press_offset_x = obtainInt(mk, "key_press_offset_x", defaultKeyPressOffsetX)
-                key.key_press_offset_y = obtainInt(mk, "key_press_offset_y", defaultKeyPressOffsetY)
+                key.keyPressOffsetX = obtainInt(mk, "key_press_offset_x", defaultKeyPressOffsetX)
+                key.keyPressOffsetY = obtainInt(mk, "key_press_offset_y", defaultKeyPressOffsetY)
                 key.x = x
                 key.y = y
                 val rightGap = abs(mDisplayWidth - x - widthPx - gap / 2)

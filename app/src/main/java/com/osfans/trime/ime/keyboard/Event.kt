@@ -25,6 +25,7 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainString
+import com.osfans.trime.util.virtualKeyCharacterMap
 import timber.log.Timber
 import java.util.Locale
 
@@ -199,7 +200,7 @@ class Event(var s: String) {
         }
         shiftLabel = label
         if (Keycode.isStdKey(code)) { // Android keycode区域
-            if (Key.kcm.isPrintingKey(code)) {
+            if (virtualKeyCharacterMap.isPrintingKey(code)) {
                 val mMask = KeyEvent.META_SHIFT_ON or mask
                 val event = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, code, 0, mMask)
                 val k = event.getUnicodeChar(mMask)

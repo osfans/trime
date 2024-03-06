@@ -1,7 +1,7 @@
 package com.osfans.trime.ime.enums
 
 import android.view.KeyEvent
-import com.osfans.trime.ime.keyboard.Key
+import com.osfans.trime.util.virtualKeyCharacterMap
 import timber.log.Timber
 import java.util.EnumMap
 import kotlin.collections.HashMap
@@ -484,14 +484,14 @@ enum class Keycode {
         ): String =
             if (isStdKey(keyCode)) {
                 // Android keycode区域
-                if (Key.kcm.isPrintingKey(keyCode)) {
+                if (virtualKeyCharacterMap.isPrintingKey(keyCode)) {
                     val event = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, mask)
                     val charCode = event.getUnicodeChar(mask)
                     Timber.d("getDisplayLabel(): keycode=$keyCode, mask=$mask, charCode=$charCode")
                     if (charCode > 0) {
                         charCode.toChar().toString()
                     } else {
-                        Key.kcm.getDisplayLabel(keyCode).lowercase()
+                        virtualKeyCharacterMap.getDisplayLabel(keyCode).lowercase()
                     }
                 } else {
                     keyNameOf(keyCode)

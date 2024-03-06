@@ -19,7 +19,6 @@ package com.osfans.trime.ime.keyboard
 
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
-import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import com.osfans.trime.core.Rime.Companion.hasLeft
 import com.osfans.trime.core.Rime.Companion.hasMenu
@@ -34,7 +33,6 @@ import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.sp
-import timber.log.Timber
 import java.text.MessageFormat
 
 /** [鍵盤][Keyboard]中的各個按鍵，包含單擊、長按、滑動等多種[事件][Event]  */
@@ -43,59 +41,52 @@ import java.text.MessageFormat
     "ktlint:standard:value-argument-comment",
 )
 class Key(private val mKeyboard: Keyboard) {
-    @JvmField
     var events = arrayOfNulls<Event>(EVENT_NUM)
 
-    @JvmField
     var edgeFlags = 0
-    private var send_bindings = true
+    private var sendBindings = true
 
-    @JvmField
     var width = 0
 
-    @JvmField
     var height = 0
 
-    @JvmField
     var gap = 0
 
-    @JvmField
     var row = 0
 
-    @JvmField
     var column = 0
     private var label: String? = null
     var hint: String? = null
         private set
     private lateinit var keyConfig: Map<String, Any?>
-    private val key_back_color get() = ColorManager.getDrawable(keyConfig, "key_back_color")
-    private val hilited_key_back_color get() = ColorManager.getDrawable(keyConfig, "hilited_key_back_color")
+    private val keyBackColor get() = ColorManager.getDrawable(keyConfig, "key_back_color")
+    private val hilitedKeyBackColor get() = ColorManager.getDrawable(keyConfig, "hilited_key_back_color")
 
-    private val key_text_color get() = ColorManager.getColor(keyConfig, "key_text_color")
-    private val key_symbol_color get() = ColorManager.getColor(keyConfig, "key_symbol_color")
-    private val hilited_key_text_color get() = ColorManager.getColor(keyConfig, "hilited_key_text_color")
-    private val hilited_key_symbol_color get() = ColorManager.getColor(keyConfig, "hilited_key_symbol_color")
+    private val keyTextColor get() = ColorManager.getColor(keyConfig, "key_text_color")
+    private val keySymbolColor get() = ColorManager.getColor(keyConfig, "key_symbol_color")
+    private val hilitedKeyTextColor get() = ColorManager.getColor(keyConfig, "hilited_key_text_color")
+    private val hilitedKeySymbolColor get() = ColorManager.getColor(keyConfig, "hilited_key_symbol_color")
 
-    var key_text_size: Int? = null
+    var keyTextSize: Int? = null
         private set
-    var symbol_text_size: Int? = null
+    var symbolTextSize: Int? = null
         private set
-    var round_corner: Float? = null
+    var roundCorner: Float? = null
         private set
-    var key_text_offset_x = 0
-        get() = field + key_offset_x
-    var key_text_offset_y = 0
-        get() = field + key_offset_y
-    var key_symbol_offset_x = 0
-        get() = field + key_offset_x
-    var key_symbol_offset_y = 0
-        get() = field + key_offset_y
-    var key_hint_offset_x = 0
-        get() = field + key_offset_x
-    var key_hint_offset_y = 0
-        get() = field + key_offset_y
-    var key_press_offset_x = 0
-    var key_press_offset_y = 0
+    var keyTextOffsetX = 0
+        get() = field + keyOffsetX
+    var keyTextOffsetY = 0
+        get() = field + keyOffsetY
+    var keySymbolOffsetX = 0
+        get() = field + keyOffsetX
+    var keySymbolOffsetY = 0
+        get() = field + keyOffsetY
+    var keyHintOffsetX = 0
+        get() = field + keyOffsetX
+    var keyHintOffsetY = 0
+        get() = field + keyOffsetY
+    var keyPressOffsetX = 0
+    var keyPressOffsetY = 0
 
     @JvmField
     var x = 0
@@ -118,16 +109,16 @@ class Key(private val mKeyboard: Keyboard) {
      * Create an empty key with no attributes.
      *
      * @param parent 按鍵所在的[鍵盤][Keyboard]
-     * @param mk 從YAML中解析得到的Map
+     * @param keyDefs 從YAML中解析得到的按键定义
      */
-    constructor(parent: Keyboard, mk: Map<String, Any?>) : this(parent) {
+    constructor(parent: Keyboard, keyDefs: Map<String, Any?>) : this(parent) {
         var s: String
         run {
-            keyConfig = mk
+            keyConfig = keyDefs
             var hasComposingKey = false
             for (type in KeyEventType.entries) {
                 val typeStr = type.toString().lowercase()
-                s = obtainString(mk, typeStr, "")
+                s = obtainString(keyDefs, typeStr)
                 if (s.isNotEmpty()) {
                     events[type.ordinal] = EventManager.getEvent(s)
                     if (type.ordinal < KeyEventType.COMBO.ordinal) hasComposingKey = true
@@ -136,19 +127,19 @@ class Key(private val mKeyboard: Keyboard) {
                 }
             }
             if (hasComposingKey) mKeyboard.composingKeys.add(this)
-            label = obtainString(mk, "label", "")
-            labelSymbol = obtainString(mk, "label_symbol", "")
-            hint = obtainString(mk, "hint", "")
-            if (mk.containsKey("send_bindings")) {
-                send_bindings = obtainBoolean(mk, "send_bindings", true)
+            label = obtainString(keyDefs, "label", "")
+            labelSymbol = obtainString(keyDefs, "label_symbol", "")
+            hint = obtainString(keyDefs, "hint", "")
+            if (keyDefs.containsKey("send_bindings")) {
+                sendBindings = obtainBoolean(keyDefs, "send_bindings", true)
             } else if (!hasComposingKey) {
-                send_bindings = false
+                sendBindings = false
             }
         }
         mKeyboard.setModiferKey(this.code, this)
-        key_text_size = appContext.sp(obtainFloat(mk, "key_text_size", 0f)).toInt()
-        symbol_text_size = appContext.sp(obtainFloat(mk, "symbol_text_size", 0f)).toInt()
-        round_corner = obtainFloat(mk, "round_corner", 0f)
+        keyTextSize = appContext.sp(obtainFloat(keyDefs, "key_text_size")).toInt()
+        symbolTextSize = appContext.sp(obtainFloat(keyDefs, "symbol_text_size")).toInt()
+        roundCorner = obtainFloat(keyDefs, "round_corner")
     }
 
     fun setOn(on: Boolean): Boolean {
@@ -156,31 +147,31 @@ class Key(private val mKeyboard: Keyboard) {
         return isOn
     }
 
-    val key_offset_x: Int
-        get() = if (isPressed) key_press_offset_x else 0
-    val key_offset_y: Int
-        get() = if (isPressed) key_press_offset_y else 0
+    private val keyOffsetX: Int
+        get() = if (isPressed) keyPressOffsetX else 0
+    private val keyOffsetY: Int
+        get() = if (isPressed) keyPressOffsetY else 0
 
     fun getBackColorForState(drawableState: IntArray): Drawable? {
         return when (drawableState) {
-            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> key_back_color
-            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilited_key_back_color
+            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keyBackColor
+            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeyBackColor
             else -> null
         }
     }
 
     fun getTextColorForState(drawableState: IntArray): Int? {
         return when (drawableState) {
-            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> key_text_color
-            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilited_key_text_color
+            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keyTextColor
+            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeyTextColor
             else -> null
         }
     }
 
     fun getSymbolColorForState(drawableState: IntArray): Int? {
         return when (drawableState) {
-            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> key_symbol_color
-            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilited_key_symbol_color
+            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keySymbolColor
+            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeySymbolColor
             else -> null
         }
     }
@@ -198,10 +189,9 @@ class Key(private val mKeyboard: Keyboard) {
      * Changes the pressed state of the key. If it is a sticky key, it will also change the toggled
      * state of the key if the finger was release inside.
      *
-     * @param inside whether the finger was released inside the key
      * @see .onPressed
      */
-    fun onReleased(inside: Boolean) {
+    fun onReleased() {
         isPressed = !isPressed
         if (click!!.isSticky) isOn = !isOn
     }
@@ -250,29 +240,6 @@ class Key(private val mKeyboard: Keyboard) {
     private val isTrimeModifierKey: Boolean
         // Trime把function键消费掉了，因此键盘只处理function键以外的修饰键
         get() = isTrimeModifierKey(this.code)
-
-    fun printModifierKeyState(invalidKey: String?) {
-        if (isTrimeModifierKey) {
-            Timber.d(
-                "\t<TrimeInput>\tkeyState() key=%s, isShifted=%s, on=%s, invalidKey=%s",
-                getLabel(),
-                mKeyboard.hasModifier(modifierKeyOnMask),
-                isOn,
-                invalidKey,
-            )
-        }
-    }
-
-    fun printModifierKeyState() {
-        if (isTrimeModifierKey) {
-            Timber.d(
-                "\t<TrimeInput>\tkeyState() key=%s, isShifted=%s, on=%s",
-                getLabel(),
-                mKeyboard.hasModifier(modifierKeyOnMask),
-                isOn,
-            )
-        }
-    }
 
     val currentDrawableState: IntArray
         /**
@@ -379,7 +346,7 @@ class Key(private val mKeyboard: Keyboard) {
         if (type != KeyEventType.CLICK.ordinal && type >= 0 && type <= EVENT_NUM) e = events[type]
         if (e != null) return true
         if (events[KeyEventType.ASCII.ordinal] != null && isAsciiMode) return false
-        if (send_bindings) {
+        if (sendBindings) {
             if (events[KeyEventType.PAGING.ordinal] != null && hasLeft()) return true
             if (events[KeyEventType.HAS_MENU.ordinal] != null && hasMenu()) return true
             if (events[KeyEventType.COMPOSING.ordinal] != null && isComposing) return true
@@ -420,7 +387,7 @@ class Key(private val mKeyboard: Keyboard) {
         if (events[KeyEventType.ASCII.ordinal] != null && isAsciiMode) {
             return events[KeyEventType.ASCII.ordinal]
         }
-        if (send_bindings) {
+        if (sendBindings) {
             if (events[KeyEventType.PAGING.ordinal] != null && hasLeft()) {
                 return events[KeyEventType.PAGING.ordinal]
             }
@@ -470,14 +437,12 @@ class Key(private val mKeyboard: Keyboard) {
         }
 
     companion object {
-        @JvmField
         val KEY_STATE_ON_NORMAL =
             intArrayOf(
                 android.R.attr.state_checkable,
                 android.R.attr.state_checked,
             )
 
-        @JvmField
         val KEY_STATE_ON_PRESSED =
             intArrayOf(
                 android.R.attr.state_pressed,
@@ -485,23 +450,18 @@ class Key(private val mKeyboard: Keyboard) {
                 android.R.attr.state_checked,
             )
 
-        @JvmField
         val KEY_STATE_OFF_NORMAL = intArrayOf(android.R.attr.state_checkable)
 
-        @JvmField
         val KEY_STATE_OFF_PRESSED =
             intArrayOf(
                 android.R.attr.state_pressed,
                 android.R.attr.state_checkable,
             )
 
-        @JvmField
         val KEY_STATE_NORMAL = intArrayOf()
 
-        @JvmField
         val KEY_STATE_PRESSED = intArrayOf(android.R.attr.state_pressed)
 
-        @JvmField
         val KEY_STATES =
             arrayOf(
                 KEY_STATE_ON_PRESSED, // 0    "hilited_on_key_back_color"   锁定时按下的背景
@@ -513,9 +473,6 @@ class Key(private val mKeyboard: Keyboard) {
             )
 
         private val EVENT_NUM = KeyEventType.entries.size
-
-        @JvmField
-        val kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
 
         @JvmStatic
         fun isTrimeModifierKey(keycode: Int): Boolean {
