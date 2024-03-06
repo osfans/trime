@@ -792,8 +792,8 @@ class KeyboardView
                 }
                 if (keyBackground is GradientDrawable) {
                     keyBackground.cornerRadius =
-                        if (key.round_corner != null && key.round_corner!! > 0) {
-                            key.round_corner!!
+                        if (key.roundCorner != null && key.roundCorner!! > 0) {
+                            key.roundCorner!!
                         } else {
                             mKeyboard!!.roundCorner
                         }
@@ -819,8 +819,8 @@ class KeyboardView
                 keyBackground?.draw(canvas)
                 if (!label.isNullOrEmpty()) {
                     // For characters, use large font. For labels like "Done", use small font.
-                    if (key.key_text_size != null && key.key_text_size!! > 0) {
-                        paint.textSize = key.key_text_size!!.toFloat()
+                    if (key.keyTextSize != null && key.keyTextSize!! > 0) {
+                        paint.textSize = key.keyTextSize!!.toFloat()
                     } else {
                         paint.textSize = sp(if (label.length > 1) mLabelTextSize else mKeyTextSize)
                     }
@@ -829,24 +829,24 @@ class KeyboardView
                     // Draw the text
                     canvas.drawText(
                         label,
-                        (left + key.key_text_offset_x).toFloat(),
+                        (left + key.keyTextOffsetX).toFloat(),
                         (key.height - padding.top - padding.bottom) / 2f +
-                            (paint.textSize - paint.descent()) / 2f + top + key.key_text_offset_y,
+                            (paint.textSize - paint.descent()) / 2f + top + key.keyTextOffsetY,
                         paint,
                     )
                     if (showKeySymbol && !key.symbolLabel.isNullOrEmpty()) {
                         val labelSymbol = key.symbolLabel
                         mPaintSymbol.textSize =
-                            if (key.symbol_text_size != null && key.symbol_text_size!! > 0) {
-                                key.symbol_text_size!!.toFloat()
+                            if (key.symbolTextSize != null && key.symbolTextSize!! > 0) {
+                                key.symbolTextSize!!.toFloat()
                             } else {
                                 sp(mSymbolSize)
                             }
                         mPaintSymbol.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
                         canvas.drawText(
                             labelSymbol!!,
-                            (left + key.key_symbol_offset_x).toFloat(),
-                            symbolBase + key.key_symbol_offset_y,
+                            (left + key.keySymbolOffsetX).toFloat(),
+                            symbolBase + key.keySymbolOffsetY,
                             mPaintSymbol,
                         )
                     }
@@ -854,8 +854,8 @@ class KeyboardView
                         mPaintSymbol.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
                         canvas.drawText(
                             hint,
-                            (left + key.key_hint_offset_x).toFloat(),
-                            key.height + hintBase + key.key_hint_offset_y,
+                            (left + key.keyHintOffsetX).toFloat(),
+                            key.height + hintBase + key.keyHintOffsetY,
                             mPaintSymbol,
                         )
                     }
@@ -995,7 +995,7 @@ class KeyboardView
             if (oldKeyIndex != mCurrentKeyIndex) {
                 if (oldKeyIndex != NOT_A_KEY && keys!!.size > oldKeyIndex) {
                     val oldKey = keys[oldKeyIndex]
-                    oldKey.onReleased(mCurrentKeyIndex == NOT_A_KEY)
+                    oldKey.onReleased()
                     invalidateKey(oldKeyIndex)
                 }
                 if (mCurrentKeyIndex != NOT_A_KEY && keys!!.size > mCurrentKeyIndex) {
