@@ -62,14 +62,11 @@ object TabManager {
         type: SymbolKeyboardType,
         keyBeans: List<SimpleKeyBean>,
     ) {
-        if (name.trim { it <= ' ' }.isEmpty()) return
+        if (name.isBlank()) return
         if (SymbolKeyboardType.hasKeys(type)) {
-            for (i in tabTags.indices) {
-                val tag = tabTags[i]
-                if (tag.text == name) {
-                    keyboards[i] = keyBeans
-                    return
-                }
+            val index = tabTags.indexOfFirst { it.text == name }
+            if (index >= 0) {
+                keyboards[index] = keyBeans
             }
         }
         tabTags.add(TabTag(name, type))
@@ -84,13 +81,13 @@ object TabManager {
         // 处理single类型和no_key类型。前者把字符串切分为多个按键，后者把字符串转换为命令
         if (keys is String) {
             when (type) {
-                SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.Single(keys))
+                SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(keys))
                 SymbolKeyboardType.NO_KEY -> {
                     val commandType = KeyCommandType.fromString(keys)
                     tabTags.add(TabTag(name, type, commandType))
                     keyboards.add(notKeyboard)
                 }
-                else -> addListTab(name, type, SimpleKeyDao.SimpleKeyboard(keys))
+                else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(keys))
             }
         }
 
@@ -123,8 +120,8 @@ object TabManager {
     }
 
     fun selectTabByIndex(index: Int): List<SimpleKeyBean> {
+        if (index !in tabTags.indices) return listOf()
         currentTabIndex = index
-        if (index >= tabTags.size) return listOf()
         val tag = tabTags[index]
         if (tag.type == SymbolKeyboardType.TABS) tabSwitchPosition = currentTabIndex
         return keyboards[index]
