@@ -5,22 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.R
-import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleKeyItemBinding
-import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.util.appContext
-import kotlinx.coroutines.launch
+import splitties.resources.drawable
+import splitties.resources.styledColor
 
-class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
+abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
 
     // 映射条目的 id 和其在视图中位置的关系
@@ -100,77 +97,52 @@ class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewH
             simpleKeyText.text = bean.text
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
             itemView.background = mBackground
-            if (!this@FlexibleAdapter::listener.isInitialized) return
-            // 如果设置了回调，则设置点击事件
             itemView.setOnClickListener {
-                listener.onPaste(bean)
+                onPaste(bean)
             }
             itemView.setOnLongClickListener {
+                val iconColor = it.context.styledColor(android.R.attr.colorControlNormal)
                 val menu = PopupMenu(it.context, it)
-                val scope = it.findViewTreeLifecycleOwner()!!.lifecycleScope
-                menu.menu.apply {
-                    add(R.string.edit).apply {
-                        setIcon(R.drawable.ic_baseline_edit_24)
-                        setOnMenuItemClickListener {
-                            scope.launch {
-                                listener.onEdit(bean)
-                            }
-                            true
-                        }
-                    }
-                    if (bean.pinned) {
-                        add(R.string.simple_key_unpin).apply {
-                            setIcon(R.drawable.ic_outline_push_pin_24)
-                            setOnMenuItemClickListener {
-                                scope.launch {
-                                    listener.onUnpin(bean)
-                                    setPinStatus(bean.id, false)
-                                }
-                                true
-                            }
-                        }
-                    } else {
-                        add(R.string.simple_key_pin).apply {
-                            setIcon(R.drawable.ic_baseline_push_pin_24)
-                            setOnMenuItemClickListener {
-                                scope.launch {
-                                    listener.onPin(bean)
-                                    setPinStatus(bean.id, true)
-                                }
-                                true
-                            }
-                        }
-                    }
-                    if (listener.showCollectButton) {
-                        add(R.string.collect).apply {
-                            setIcon(R.drawable.ic_baseline_star_24)
-                            setOnMenuItemClickListener {
-                                scope.launch { CollectionHelper.insert(DatabaseBean(text = bean.text)) }
-                                true
-                            }
-                        }
-                    }
 
-                    add(R.string.delete).apply {
-                        setIcon(R.drawable.ic_baseline_delete_24)
+                fun menuItem(
+                    @StringRes title: Int,
+                    @DrawableRes ic: Int,
+                    callback: () -> Unit,
+                ) {
+                    menu.menu.add(title).apply {
+                        icon = it.context.drawable(ic)?.apply { setTint(iconColor) }
                         setOnMenuItemClickListener {
-                            scope.launch {
-                                listener.onDelete(bean)
-                                delete(bean.id)
-                            }
+                            callback()
                             true
                         }
                     }
-                    if (beans.isNotEmpty()) {
-                        add(R.string.delete_all).apply {
-                            setIcon(R.drawable.ic_baseline_delete_sweep_24)
-                            setOnMenuItemClickListener {
-                                scope.launch {
-                                    askToDeleteAll()
-                                }
-                                true
-                            }
-                        }
+                }
+                menuItem(R.string.edit, R.drawable.ic_baseline_edit_24) {
+                    onEdit(bean)
+                }
+                if (bean.pinned) {
+                    menuItem(R.string.simple_key_unpin, R.drawable.ic_outline_push_pin_24) {
+                        onUnpin(bean)
+                        setPinStatus(bean.id, false)
+                    }
+                } else {
+                    menuItem(R.string.simple_key_pin, R.drawable.ic_baseline_push_pin_24) {
+                        onPin(bean)
+                        setPinStatus(bean.id, true)
+                    }
+                }
+                if (showCollectButton) {
+                    menuItem(R.string.collect, R.drawable.ic_baseline_star_24) {
+                        onCollect(bean)
+                    }
+                }
+                menuItem(R.string.delete, R.drawable.ic_baseline_delete_24) {
+                    onDelete(bean)
+                    delete(bean.id)
+                }
+                if (beans.isNotEmpty()) {
+                    menuItem(R.string.delete_all, R.drawable.ic_baseline_delete_sweep_24) {
+                        onDeleteAll()
                     }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -202,42 +174,19 @@ class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewH
         updateBeans(mBeans)
     }
 
-    private fun askToDeleteAll() {
-        val service = TrimeInputMethodService.getService()
-        val askDialog =
-            AlertDialog.Builder(
-                appContext,
-                androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert,
-            ).setTitle(R.string.liquid_keyboard_ask_to_delete_all)
-                .setPositiveButton(R.string.ok) { _, _ ->
-                    service.lifecycleScope.launch {
-                        listener.onDeleteAll()
-                    }
-                }.setNegativeButton(R.string.cancel) { _, _ ->
-                }.create()
-        service.inputView?.showDialog(askDialog)
-    }
+    abstract fun onPaste(bean: DatabaseBean)
 
-    // 添加回调
-    interface Listener {
-        fun onPaste(bean: DatabaseBean)
+    abstract fun onPin(bean: DatabaseBean)
 
-        suspend fun onPin(bean: DatabaseBean)
+    abstract fun onUnpin(bean: DatabaseBean)
 
-        suspend fun onUnpin(bean: DatabaseBean)
+    abstract fun onEdit(bean: DatabaseBean)
 
-        suspend fun onDelete(bean: DatabaseBean)
+    abstract fun onCollect(bean: DatabaseBean)
 
-        suspend fun onEdit(bean: DatabaseBean)
+    abstract fun onDelete(bean: DatabaseBean)
 
-        suspend fun onDeleteAll()
+    abstract fun onDeleteAll()
 
-        val showCollectButton: Boolean
-    }
-
-    private lateinit var listener: Listener
-
-    fun setListener(listener: Listener) {
-        this.listener = listener
-    }
+    abstract val showCollectButton: Boolean
 }
