@@ -18,7 +18,7 @@ android {
     buildToolsVersion = "34.0.0"
 
     defaultConfig {
-        applicationId  = "com.osfans.trime"
+        applicationId = "com.osfans.trime"
         minSdk = 21
         targetSdk = 34
         versionCode = 20240501
@@ -36,17 +36,20 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            //proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-android.txt"
-            signingConfig = with(ApkRelease) {
-                if (project.buildApkRelease) {
-                    signingConfigs.create("release") {
-                        storeFile = file(project.storeFile!!)
-                        storePassword = project.storePassword
-                        keyAlias = project.keyAlias
-                        keyPassword = project.keyPassword
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-android.txt"
+            signingConfig =
+                with(ApkRelease) {
+                    if (project.buildApkRelease) {
+                        signingConfigs.create("release") {
+                            storeFile = file(project.storeFile!!)
+                            storePassword = project.storePassword
+                            keyAlias = project.keyAlias
+                            keyPassword = project.keyPassword
+                        }
+                    } else {
+                        null
                     }
-                } else null
-            }
+                }
 
             resValue("string", "trime_app_name", "@string/app_name_release")
         }
@@ -66,7 +69,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
