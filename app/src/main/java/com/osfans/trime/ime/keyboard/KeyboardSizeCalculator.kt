@@ -1,7 +1,8 @@
 package com.osfans.trime.ime.keyboard
 
 import com.osfans.trime.util.CollectionUtils.obtainFloat
-import com.osfans.trime.util.sp2px
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.sp
 import kotlin.math.abs
 
 class KeyboardSizeCalculator(
@@ -58,7 +59,7 @@ class KeyboardSizeCalculator(
             }
 
             if (column == 0) {
-                val heightK = sp2px(obtainFloat(mk, "height", 0f)).toInt()
+                val heightK = appContext.sp(obtainFloat(mk, "height", 0f)).toInt()
                 rowHeight = if (heightK > 0) heightK else keyHeight
             }
             totalKeyWidth += keyWidthWeight

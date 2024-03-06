@@ -32,7 +32,8 @@ import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainString
-import com.osfans.trime.util.sp2px
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.sp
 import timber.log.Timber
 import java.text.MessageFormat
 
@@ -145,8 +146,8 @@ class Key(private val mKeyboard: Keyboard) {
             }
         }
         mKeyboard.setModiferKey(this.code, this)
-        key_text_size = sp2px(obtainFloat(mk, "key_text_size", 0f)).toInt()
-        symbol_text_size = sp2px(obtainFloat(mk, "symbol_text_size", 0f)).toInt()
+        key_text_size = appContext.sp(obtainFloat(mk, "key_text_size", 0f)).toInt()
+        symbol_text_size = appContext.sp(obtainFloat(mk, "symbol_text_size", 0f)).toInt()
         round_corner = obtainFloat(mk, "round_corner", 0f)
     }
 

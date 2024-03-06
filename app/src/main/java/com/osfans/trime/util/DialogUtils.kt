@@ -1,12 +1,8 @@
 package com.osfans.trime.util
 
 import android.content.Context
-import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
-import android.widget.LinearLayout
-import android.widget.ProgressBar
 import androidx.annotation.StringRes
-import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.blankj.utilcode.util.ToastUtils
@@ -17,34 +13,32 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import splitties.dimensions.dp
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.styles.AndroidStyles
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.verticalMargin
 
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/e37f5513239bab279a9e58cf0c9b163e0dbf5efb/app/src/main/java/org/fcitx/fcitx5/android/ui/common/Preset.kt#L60
 fun Context.progressBarDialogIndeterminate(
     @StringRes titleId: Int,
 ): AlertDialog.Builder {
-    return AlertDialog.Builder(this, Theme_AppCompat_DayNight_Dialog_Alert)
+    val androidStyles = AndroidStyles(this)
+    return AlertDialog.Builder(this)
         .setTitle(titleId)
         .setView(
-            LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                addView(
-                    ProgressBar(
-                        this@progressBarDialogIndeterminate,
-                        null,
-                        android.R.attr.progressBarStyleHorizontal,
-                    ).apply {
+            verticalLayout {
+                add(
+                    androidStyles.progressBar.horizontal {
                         isIndeterminate = true
                     },
-                    MarginLayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ).apply {
-                        val verticalMargin = dp2px(26)
-                        val horizontalMargin = dp2px(20)
-                        topMargin = horizontalMargin
-                        bottomMargin = horizontalMargin
-                        leftMargin = verticalMargin
-                        rightMargin = verticalMargin
+                    lParams {
+                        width = matchParent
+                        verticalMargin = dp(26)
+                        horizontalMargin = dp(20)
                     },
                 )
             },
@@ -93,7 +87,7 @@ suspend fun Context.briefResultLogDialog(
                 fromCustomLogLines(log)
                 layoutParams =
                     MarginLayoutParams(MarginLayoutParams.MATCH_PARENT, MarginLayoutParams.WRAP_CONTENT).apply {
-                        setPadding(dp2px(20), paddingTop, dp2px(20), paddingBottom)
+                        setPadding(dp(20), paddingTop, dp(20), paddingBottom)
                     }
             }
         AlertDialog.Builder(this@briefResultLogDialog)

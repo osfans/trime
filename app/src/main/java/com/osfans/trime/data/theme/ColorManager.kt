@@ -1,18 +1,18 @@
 package com.osfans.trime.data.theme
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import androidx.annotation.ColorInt
-import androidx.core.math.MathUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.bitmapDrawable
-import com.osfans.trime.util.dp2px
 import com.osfans.trime.util.isNightMode
+import splitties.dimensions.dp
 import timber.log.Timber
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -331,16 +331,17 @@ object ColorManager {
 
     //  返回图片或背景的drawable,支持null参数。 Config 2.0
     fun getDrawable(
-        key: String?,
-        borderKey: String?,
-        borderColorKey: String?,
-        roundCornerKey: String,
-        alphaKey: String?,
+        context: Context,
+        key: String,
+        borderKey: String = "",
+        borderColorKey: String = "",
+        roundCornerKey: String = "",
+        alphaKey: String = "",
     ): Drawable? {
         val value = getColorValue(key)
         if (value is Drawable) {
-            if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                value.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
+            if (alphaKey.isNotEmpty() && theme.style.getObject(alphaKey) != null) {
+                value.alpha = theme.style.getInt(alphaKey).coerceIn(0, 255)
             }
             return value
         }
@@ -350,15 +351,15 @@ object ColorManager {
             if (roundCornerKey.isNotEmpty()) {
                 gradient.cornerRadius = theme.style.getFloat(roundCornerKey)
             }
-            if (!borderColorKey.isNullOrEmpty() && !borderKey.isNullOrEmpty()) {
-                val border = dp2px(theme.style.getFloat(borderKey))
+            if (borderColorKey.isNotEmpty() && borderKey.isNotEmpty()) {
+                val border = context.dp(theme.style.getFloat(borderKey))
                 val stroke = getColor(borderColorKey)
                 if (stroke != null && border > 0) {
                     gradient.setStroke(border.toInt(), stroke)
                 }
             }
-            if (!alphaKey.isNullOrEmpty() && theme.style.getObject(alphaKey) != null) {
-                gradient.alpha = MathUtils.clamp(theme.style.getInt(alphaKey), 0, 255)
+            if (alphaKey.isNotEmpty() && theme.style.getObject(alphaKey) != null) {
+                gradient.alpha = theme.style.getInt(alphaKey).coerceIn(0, 255)
             }
             return gradient
         }

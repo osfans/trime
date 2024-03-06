@@ -58,11 +58,11 @@ class QuickBar(context: Context, service: TrimeInputMethodService) {
                 }
             background =
                 ColorManager.getDrawable(
+                    context,
                     "candidate_background",
                     "candidate_border",
                     "candidate_border_color",
                     "candidate_border_round",
-                    null,
                 )
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
             add(oldTabBar.root, lParams(matchParent, matchParent))
