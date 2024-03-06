@@ -62,6 +62,7 @@ class CompositionPopupWindow(
             }
             setBackgroundDrawable(
                 ColorManager.getDrawable(
+                    ctx,
                     "text_back_color",
                     "layout/border",
                     "border_color",

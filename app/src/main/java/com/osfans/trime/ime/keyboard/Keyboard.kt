@@ -29,8 +29,7 @@ import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainInt
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.dp2px
-import com.osfans.trime.util.sp2px
+import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
 import kotlin.math.abs
@@ -189,7 +188,7 @@ class Keyboard() {
 
         // 按键高度取值顺序： keys > keyboard/height > style/key_height
         // 考虑到key设置height_land需要对皮肤做大量修改，而当部分key设置height而部分没有设时会造成按键高度异常，故取消普通按键的height_land参数
-        val height = sp2px(obtainFloat(keyboardConfig, "height", 0f)).toInt()
+        val height = appContext.sp(obtainFloat(keyboardConfig, "height", 0f)).toInt()
         val defaultHeight = if (height > 0) height else keyHeight
         var rowHeight = defaultHeight
         // 定义 新的键盘尺寸计算方式， 避免尺寸计算不恰当，导致切换键盘时键盘高度发生变化，UI闪烁的问题。同时可以快速调整整个键盘的尺寸
@@ -200,7 +199,7 @@ class Keyboard() {
         val autoHeightIndex = obtainInt(keyboardConfig, "auto_height_index", -1)
         val lm = keyboardConfig!!["keys"] as List<Map<String, Any>>
         horizontalGap =
-            sp2px(
+            appContext.sp(
                 obtainFloat(
                     keyboardConfig,
                     "horizontal_gap",
@@ -208,7 +207,7 @@ class Keyboard() {
                 ),
             ).toInt()
         verticalGap =
-            sp2px(
+            appContext.sp(
                 obtainFloat(
                     keyboardConfig,
                     "vertical_gap",
@@ -292,7 +291,7 @@ class Keyboard() {
                         if (keyboardHeight > 0) {
                             height1[row]
                         } else {
-                            val heightK = sp2px(obtainFloat(mk, "height", 0f)).toInt()
+                            val heightK = appContext.sp(obtainFloat(mk, "height", 0f)).toInt()
                             if (heightK > 0) heightK else defaultHeight
                         }
                 }
@@ -301,7 +300,7 @@ class Keyboard() {
                     continue // 縮進
                 }
                 val defaultKeyTextOffsetX =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             keyboardConfig,
                             "key_text_offset_x",
@@ -309,7 +308,7 @@ class Keyboard() {
                         ),
                     ).toInt()
                 val defaultKeyTextOffsetY =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             keyboardConfig,
                             "key_text_offset_y",
@@ -317,7 +316,7 @@ class Keyboard() {
                         ),
                     ).toInt()
                 val defaultKeySymbolOffsetX =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             keyboardConfig,
                             "key_symbol_offset_x",
@@ -325,7 +324,7 @@ class Keyboard() {
                         ),
                     ).toInt()
                 val defaultKeySymbolOffsetY =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             keyboardConfig,
                             "key_symbol_offset_y",
@@ -333,7 +332,7 @@ class Keyboard() {
                         ),
                     ).toInt()
                 val defaultKeyHintOffsetX =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             keyboardConfig,
                             "key_hint_offset_x",
@@ -341,7 +340,7 @@ class Keyboard() {
                         ),
                     ).toInt()
                 val defaultKeyHintOffsetY =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             keyboardConfig,
                             "key_hint_offset_y",
@@ -362,15 +361,15 @@ class Keyboard() {
                     )
                 val key = Key(this, mk)
                 key.key_text_offset_x =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(mk, "key_text_offset_x", defaultKeyTextOffsetX.toFloat()),
                     ).toInt()
                 key.key_text_offset_y =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(mk, "key_text_offset_y", defaultKeyTextOffsetY.toFloat()),
                     ).toInt()
                 key.key_symbol_offset_x =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             mk,
                             "key_symbol_offset_x",
@@ -378,7 +377,7 @@ class Keyboard() {
                         ),
                     ).toInt()
                 key.key_symbol_offset_y =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(
                             mk,
                             "key_symbol_offset_y",
@@ -386,11 +385,11 @@ class Keyboard() {
                         ),
                     ).toInt()
                 key.key_hint_offset_x =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(mk, "key_hint_offset_x", defaultKeyHintOffsetX.toFloat()),
                     ).toInt()
                 key.key_hint_offset_y =
-                    sp2px(
+                    appContext.sp(
                         obtainFloat(mk, "key_hint_offset_y", defaultKeyHintOffsetY.toFloat()),
                     ).toInt()
                 key.key_press_offset_x = obtainInt(mk, "key_press_offset_x", defaultKeyPressOffsetX)
@@ -424,19 +423,21 @@ class Keyboard() {
     }
 
     private fun getKeyboardHeightFromTheme(theme: Theme): Int {
-        var keyboardHeight = dp2px(theme.style.getFloat("keyboard_height")).toInt()
-        if (ScreenUtils.isLandscape()) {
-            val keyBoardHeightLand = dp2px(theme.style.getFloat("keyboard_height_land")).toInt()
-            if (keyBoardHeightLand > 0) keyboardHeight = keyBoardHeightLand
-        }
-        return keyboardHeight
+        val keyboardHeight = theme.style.getFloat("keyboard_height")
+        val keyboardHeightLand = theme.style.getFloat("keyboard_height_land")
+        val value =
+            when (appContext.resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
+                else -> keyboardHeight
+            }
+        return appContext.dp(value).toInt()
     }
 
     private fun getKeyboardHeightFromKeyboardConfig(keyboardConfig: Map<String, Any?>?): Int {
-        var mkeyboardHeight = sp2px(obtainFloat(keyboardConfig, "keyboard_height", 0f)).toInt()
+        var mkeyboardHeight = appContext.sp(obtainFloat(keyboardConfig, "keyboard_height", 0f)).toInt()
         if (ScreenUtils.isLandscape()) {
             val mkeyBoardHeightLand =
-                sp2px(
+                appContext.sp(
                     obtainFloat(keyboardConfig, "keyboard_height_land", 0f),
                 ).toInt()
             if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand
@@ -653,10 +654,10 @@ class Keyboard() {
         // Height of the screen
         // final int mDisplayHeight = dm.heightPixels;
         // Log.v(TAG, "keyboard's display metrics:" + dm);
-        horizontalGap = dp2px(theme.style.getFloat("horizontal_gap")).toInt()
-        verticalGap = dp2px(theme.style.getFloat("vertical_gap")).toInt()
+        horizontalGap = appContext.dp(theme.style.getFloat("horizontal_gap")).toInt()
+        verticalGap = appContext.dp(theme.style.getFloat("vertical_gap")).toInt()
         keyWidth = (mDisplayWidth * theme.style.getFloat("key_width") / 100).toInt()
-        keyHeight = dp2px(theme.style.getFloat("key_height")).toInt()
+        keyHeight = appContext.dp(theme.style.getFloat("key_height")).toInt()
         mProximityThreshold = (keyWidth * SEARCH_DISTANCE).toInt()
         mProximityThreshold *= mProximityThreshold // Square it for comparison
         roundCorner = theme.style.getFloat("round_corner")

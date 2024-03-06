@@ -52,20 +52,20 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
     private val mCommentTextSize = theme.style.getFloat("comment_text_size").coerceAtLeast(1f)
     private val mCommentFont = FontManager.getTypeface("comment_font")
     private val mCommentTextColor = ColorManager.getColor("comment_text_color")
-    private val mBackgroud =
-        ColorManager.getDrawable(
-            "key_back_color",
-            "key_border",
-            "key_border_color",
-            "round_corner",
-            null,
-        )
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = LiquidEntryViewBinding.inflate(LayoutInflater.from(parent.context))
+        binding.root.background =
+            ColorManager.getDrawable(
+                parent.context,
+                "key_back_color",
+                "key_border",
+                "key_border_color",
+                "round_corner",
+            )
         binding.candidate.apply {
             textSize = mCandidateTextSize
             typeface = mCandidateFont
@@ -123,10 +123,6 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
         val (comment, text) = mCandidates[position]
         holder.candidate.text = text
         holder.comment.text = comment
-
-        // 点击前后必须使用相同类型的背景，或者全部为背景图，或者都为背景色
-        // 如果直接使用background，会造成滚动时部分内容的背景填充错误的问题
-        holder.itemView.background = mBackgroud
 
         // 如果设置了回调，则设置点击事件
         holder.itemView.setOnClickListener { listener?.invoke(position) }

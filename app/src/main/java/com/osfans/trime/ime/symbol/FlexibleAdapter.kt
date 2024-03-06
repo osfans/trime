@@ -57,30 +57,26 @@ abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdap
     private val mKeyLongTextSize = theme.style.getFloat("key_long_text_size")
     private val mLabelTextSize = theme.style.getFloat("label_text_size")
 
-    // 这里不用 get() 会导致快速滑动时背景填充错误
-    private val mBackground
-        get() =
-            ColorManager.getDrawable(
-                "long_text_back_color",
-                "key_border",
-                "key_long_text_border",
-                "round_corner",
-                null,
-            )
-
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = SimpleKeyItemBinding.inflate(LayoutInflater.from(parent.context))
-        val holder = ViewHolder(binding)
-        holder.simpleKeyText.apply {
+        binding.root.background =
+            ColorManager.getDrawable(
+                parent.context,
+                "long_text_back_color",
+                "key_border",
+                "key_long_text_border",
+                "round_corner",
+            )
+        binding.simpleKey.apply {
             typeface = mTypeface
             (mLongTextColor ?: mKeyTextColor)?.let { setTextColor(it) }
             (mKeyLongTextSize.takeIf { it > 0f } ?: mLabelTextSize.takeIf { it > 0f })
                 ?.let { textSize = it }
         }
-        return holder
+        return ViewHolder(binding)
     }
 
     inner class ViewHolder(binding: SimpleKeyItemBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -96,7 +92,6 @@ abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdap
             val bean = mBeans[position]
             simpleKeyText.text = bean.text
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
-            itemView.background = mBackground
             itemView.setOnClickListener {
                 onPaste(bean)
             }
