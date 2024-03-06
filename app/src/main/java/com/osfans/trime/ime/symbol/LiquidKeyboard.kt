@@ -286,12 +286,13 @@ class LiquidKeyboard(
         }
 
         service.lifecycleScope.launch {
-            val all = when (type) {
-                SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.getAll()
-                SymbolKeyboardType.COLLECTION -> CollectionHelper.getAll()
-                SymbolKeyboardType.DRAFT -> DraftHelper.getAll()
-                else -> emptyList()
-            }
+            val all =
+                when (type) {
+                    SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.getAll()
+                    SymbolKeyboardType.COLLECTION -> CollectionHelper.getAll()
+                    SymbolKeyboardType.DRAFT -> DraftHelper.getAll()
+                    else -> emptyList()
+                }
             dbAdapter.updateBeans(all)
         }
         // 注册剪贴板更新监听器

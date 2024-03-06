@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Typeface
 import android.graphics.drawable.PaintDrawable
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -35,48 +34,43 @@ import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.GraphicUtils.drawText
 import com.osfans.trime.util.GraphicUtils.measureText
-import com.osfans.trime.util.dp2px
 import com.osfans.trime.util.sp
+import splitties.dimensions.dp
 import timber.log.Timber
 import kotlin.math.abs
 
 // 这是滑动键盘顶部的view，展示了键盘布局的多个标签。
 // 为了公用候选栏的皮肤参数以及外观，大部分代码从Candidate.java复制而来。
 class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+    private val theme = ThemeManager.activeTheme
     private var highlightIndex = 0
-    private var tabTags: ArrayList<TabTag>? = null
-    private var candidateHighlight: PaintDrawable? = null
-    private val separatorPaint: Paint
-    private val candidatePaint: Paint
-    private var candidateFont: Typeface? = null
-    private var candidateTextColor = 0
-    private var hilitedCandidateTextColor = 0
-    private var candidateViewHeight = 0
-    private var commentHeight = 0
-    private var candidateSpacing = 0
-    private var candidatePadding = 0
-    private var isCommentOnTop = false
-    private var shouldCandidateUseCursor = false
+    private val tabTags = mutableListOf<TabTag>()
+    private val candidateHighlight =
+        PaintDrawable(ColorManager.getColor("hilited_candidate_back_color")!!).apply {
+            setCornerRadius(theme.style.getFloat("layout/round_corner"))
+        }
+    private val separatorPaint =
+        Paint().apply {
+            color = ColorManager.getColor("candidate_separator_color") ?: Color.BLACK
+        }
+    private val candidatePaint =
+        Paint().apply {
+            isAntiAlias = true
+            strokeWidth = 0f
+            textSize = sp(theme.style.getFloat("candidate_text_size"))
+            typeface = candidateFont
+        }
+    private val candidateFont = FontManager.getTypeface("candidate_font")
+    private val candidateTextColor = ColorManager.getColor("candidate_text_color")!!
+    private val hilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
+    private val candidateViewHeight = theme.style.getInt("candidate_view_height")
+    private val commentHeight = theme.style.getInt("comment_height")
+    private val candidateSpacing = theme.style.getFloat("candidate_spacing")
+    private val candidatePadding = theme.style.getFloat("candidate_padding")
+    private val isCommentOnTop = theme.style.getBoolean("comment_on_top")
+    private val shouldCandidateUseCursor = theme.style.getBoolean("comment_on_top")
 
     // private final Rect[] tabGeometries = new Rect[MAX_CANDIDATE_COUNT + 2];
-    fun reset() {
-        val theme = ThemeManager.activeTheme
-        candidateHighlight = PaintDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
-        candidateHighlight!!.setCornerRadius(theme.style.getFloat("layout/round_corner"))
-        separatorPaint.color = ColorManager.getColor("candidate_separator_color")!!
-        candidateSpacing = dp2px(theme.style.getFloat("candidate_spacing")).toInt()
-        candidatePadding = dp2px(theme.style.getFloat("candidate_padding")).toInt()
-        candidateTextColor = ColorManager.getColor("candidate_text_color")!!
-        hilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
-        commentHeight = dp2px(theme.style.getFloat("comment_height")).toInt()
-        candidateViewHeight = dp2px(theme.style.getFloat("candidate_view_height")).toInt()
-        candidateFont = FontManager.getTypeface("candidate_font")
-        candidatePaint.textSize = sp(theme.style.getFloat("candidate_text_size"))
-        candidatePaint.setTypeface(candidateFont)
-        isCommentOnTop = theme.style.getBoolean("comment_on_top")
-        shouldCandidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
-        invalidate()
-    }
 
     override fun onMeasure(
         widthMeasureSpec: Int,
@@ -85,7 +79,7 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
         val h = if (isCommentOnTop) candidateViewHeight + commentHeight else candidateViewHeight
         setMeasuredDimension(
             MeasureSpec.makeMeasureSpec(widthMeasureSpec, MeasureSpec.UNSPECIFIED),
-            MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST),
+            MeasureSpec.makeMeasureSpec(dp(h), MeasureSpec.AT_MOST),
         )
     }
 
@@ -94,43 +88,33 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     val highlightLeft: Int
-        get() = tabTags!![highlightIndex].geometry.left
+        get() = tabTags[highlightIndex].geometry.left
     val highlightRight: Int
-        get() = tabTags!![highlightIndex].geometry.right
+        get() = tabTags[highlightIndex].geometry.right
 
     override fun onDraw(canvas: Canvas) {
-        if (tabTags == null) return
+        if (tabTags.isEmpty()) return
         super.onDraw(canvas)
 
         // Draw highlight background
         if (isHighlighted(highlightIndex)) {
-            candidateHighlight!!.bounds = tabTags!![highlightIndex].geometry
-            candidateHighlight!!.draw(canvas)
+            candidateHighlight.bounds = tabTags[highlightIndex].geometry
+            candidateHighlight.draw(canvas)
         }
         // Draw tab text
-        val tabY = (
-            /* (shouldShowComment && isCommentOnTop)
-        ? tabTags.get(0).geometry.centerY()
-            - (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f
-            + commentHeight / 2.0f
-        : */
-            tabTags!![0].geometry.centerY() -
+        val tabY =
+            tabTags[0].geometry.centerY() -
                 (candidatePaint.ascent() + candidatePaint.descent()) / 2.0f
-        )
-        for ((i, computedTab) in tabTags!!.withIndex()) {
+        for ((i, computedTab) in tabTags.withIndex()) {
             // Calculate a position where the text could be centered in the rectangle.
             val tabX = computedTab.geometry.centerX().toFloat()
             candidatePaint.color = if (isHighlighted(i)) hilitedCandidateTextColor else candidateTextColor
-            canvas.drawText(computedTab.text, tabX, tabY, candidatePaint, candidateFont!!)
+            canvas.drawText(computedTab.text, tabX, tabY, candidatePaint, candidateFont)
             // Draw the separator at the right edge of each candidate.
             canvas.drawRect(
-                (
-                    computedTab.geometry.right - candidateSpacing
-                ).toFloat(),
+                computedTab.geometry.right - dp(candidateSpacing),
                 computedTab.geometry.top.toFloat(),
-                (
-                    computedTab.geometry.right + candidateSpacing
-                ).toFloat(),
+                computedTab.geometry.right + dp(candidateSpacing),
                 computedTab.geometry.bottom.toFloat(),
                 separatorPaint,
             )
@@ -138,18 +122,17 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     fun updateTabWidth() {
-        tabTags = TabManager.tabCandidates
+        tabTags.clear()
+        tabTags.addAll(TabManager.tabCandidates)
         highlightIndex = TabManager.selectedOrZero
         var x = 0
-        for ((i, computedTab) in tabTags!!.withIndex()) {
+        for ((i, computedTab) in tabTags.withIndex()) {
             computedTab.geometry.set(x, 0, (x + getTabWidth(i)).toInt(), height)
             x = (x + (getTabWidth(i) + candidateSpacing)).toInt()
         }
         updateLayoutParams {
-            Timber.d("updateTabWidth: layoutPrams from: height=$height, width=$width")
             width = x
-            height = if (isCommentOnTop) candidateViewHeight + commentHeight else candidateViewHeight
-            Timber.d("updateTabWidth: layoutPrams to: height=$height, width=$width")
+            height = dp(if (isCommentOnTop) candidateViewHeight + commentHeight else candidateViewHeight)
         }
         invalidate()
     }
@@ -162,24 +145,17 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     ) {
         super.onSizeChanged(w, h, oldw, oldh)
         updateTabWidth()
-        Timber.d("onSizeChanged() w=$w, Height=$oldh=>$h")
     }
 
     override fun performClick(): Boolean {
         return super.performClick()
     }
 
-    var x0 = 0
-    var y0 = 0
+    private var x0 = 0
+    private var y0 = 0
     private var time0: Long = 0
 
     init {
-        candidatePaint = Paint()
-        candidatePaint.isAntiAlias = true
-        candidatePaint.strokeWidth = 0f
-        separatorPaint = Paint()
-        separatorPaint.color = Color.BLACK
-        reset()
         setWillNotDraw(false)
     }
 
@@ -195,58 +171,32 @@ class TabView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
             MotionEvent.ACTION_MOVE -> if (abs(x - x0) > 100) time0 = 0
             MotionEvent.ACTION_UP -> {
-                val i = getTabIndex(x, y)
+                val i = tabTags.indexOfFirst { it.geometry.contains(x, y) }
                 if (i > -1) {
                     performClick()
                     val tag = TabManager.tabTags[i]
                     if (tag.type == SymbolKeyboardType.NO_KEY) {
-                        when (tag.command) {
-                            KeyCommandType.EXIT -> TrimeInputMethodService.getService().selectLiquidKeyboard(-1)
-                            KeyCommandType.DEL_LEFT, KeyCommandType.DEL_RIGHT, KeyCommandType.REDO, KeyCommandType.UNDO -> {}
-                            else -> {}
+                        if (tag.command == KeyCommandType.EXIT) {
+                            TrimeInputMethodService.getService().selectLiquidKeyboard(-1)
                         }
                     } else if (System.currentTimeMillis() - time0 < 500) {
                         highlightIndex = i
                         invalidate()
                         TrimeInputMethodService.getService().selectLiquidKeyboard(i)
                     }
-                    Timber.d("index=" + i + " length=" + tabTags!!.size)
+                    Timber.d("index=" + i + " length=" + tabTags.size)
                 }
             }
         }
         return true
     }
 
-    /**
-     * 獲得觸摸處候選項序號
-     *
-     * @param x 觸摸點橫座標
-     * @param y 觸摸點縱座標
-     * @return `>=0`: 觸摸點 (x, y) 處候選項序號，從0開始編號； `-1`: 觸摸點 (x, y) 處無候選項；
-     */
-    private fun getTabIndex(
-        x: Int,
-        y: Int,
-    ): Int {
-        // Rect r = new Rect();
-        var retIndex = -1 // Returns -1 if there is no tab in the hitting rectangle.
-        for (computedTab in tabTags!!) {
-            /* Enlarge the rectangle to be more responsive to user clicks.
-      // r.set(tabGeometries[j++]);
-      //r.inset(0, CANDIDATE_TOUCH_OFFSET); */
-            if (computedTab.geometry.contains(x, y)) {
-                retIndex = tabTags!!.indexOf(computedTab)
-            }
-        }
-        return retIndex
-    }
-
     private fun getTabWidth(i: Int): Float {
-        val s = tabTags!![i].text
+        val s = tabTags[i].text
         return if (s.isNotEmpty()) {
-            2 * candidatePadding + candidatePaint.measureText(s, candidateFont!!)
+            2 * dp(candidatePadding) + candidatePaint.measureText(s, candidateFont)
         } else {
-            (2 * candidatePadding).toFloat()
+            2 * dp(candidatePadding)
         }
     }
 }

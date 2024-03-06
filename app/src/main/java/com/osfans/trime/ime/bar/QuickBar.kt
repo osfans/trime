@@ -33,9 +33,7 @@ class QuickBar(context: Context, service: TrimeInputMethodService) {
     }
 
     val oldTabBar by lazy {
-        TabBarBinding.inflate(LayoutInflater.from(context)).apply {
-            tabs.reset()
-        }
+        TabBarBinding.inflate(LayoutInflater.from(context))
     }
 
     enum class State {
