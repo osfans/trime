@@ -25,7 +25,7 @@ spotless {
         googleJavaFormat("1.19.2")
     }
     kotlin {
-        target("**/*.kt")
+        target("**/*.kt", "**/*.kts")
         ktlint("1.2.1")
         trimTrailingWhitespace()
         indentWithSpaces()
