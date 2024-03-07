@@ -59,7 +59,6 @@ import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ime.keyboard.KeyboardWindow
-import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.symbol.TabView
 import com.osfans.trime.ime.text.Candidate
@@ -472,7 +471,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
                 InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
                 -> {
-                    Timber.i(
+                    Timber.d(
                         "EditorInfo: private;" +
                             " packageName=" +
                             attribute.packageName +
@@ -493,7 +492,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 }
 
                 else -> {
-                    Timber.i(
+                    Timber.d(
                         "EditorInfo: normal;" +
                             " packageName=" +
                             attribute.packageName +
@@ -639,7 +638,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         keyCode: Int,
         event: KeyEvent,
     ): Boolean {
-        Timber.i("\t<TrimeInput>\tonKeyDown()\tkeycode=%d, event=%s", keyCode, event.toString())
+        Timber.d("\t<TrimeInput>\tonKeyDown()\tkeycode=%d, event=%s", keyCode, event.toString())
         return if (composeEvent(event) && onKeyEvent(event) && isWindowShown) true else super.onKeyDown(keyCode, event)
     }
 
@@ -647,7 +646,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         keyCode: Int,
         event: KeyEvent,
     ): Boolean {
-        Timber.i("\t<TrimeInput>\tonKeyUp()\tkeycode=%d, event=%s", keyCode, event.toString())
+        Timber.d("\t<TrimeInput>\tonKeyUp()\tkeycode=%d, event=%s", keyCode, event.toString())
         if (composeEvent(event) && textInputManager!!.needSendUpRimeKey) {
             textInputManager!!.onRelease(keyCode)
             if (isWindowShown) return true
@@ -662,7 +661,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      * @return 是否成功處理
      */
     private fun onKeyEvent(event: KeyEvent): Boolean {
-        Timber.i("\t<TrimeInput>\tonKeyEvent()\tRealKeyboard event=%s", event.toString())
+        Timber.d("\t<TrimeInput>\tonKeyEvent()\tRealKeyboard event=%s", event.toString())
         var keyCode = event.keyCode
         textInputManager!!.needSendUpRimeKey = Rime.isComposing
         if (!this.isComposing) {
@@ -698,11 +697,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 switchToPreviousInputMethod()
             } else {
-                val window = window.window
-                if (window != null) {
-                    inputMethodManager
-                        .switchToLastInputMethod(window.attributes.token)
-                }
+                @Suppress("DEPRECATION")
+                inputMethodManager.switchToLastInputMethod(window.window!!.attributes.token)
             }
         } catch (e: Exception) {
             Timber.e(e, "Unable to switch to the previous IME.")
@@ -715,11 +711,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 switchToNextInputMethod(false)
             } else {
-                val window = window.window
-                if (window != null) {
-                    inputMethodManager
-                        .switchToNextInputMethod(window.attributes.token, false)
-                }
+                @Suppress("DEPRECATION")
+                inputMethodManager.switchToNextInputMethod(window.window!!.attributes.token, false)
             }
         } catch (e: Exception) {
             Timber.e(e, "Unable to switch to the next IME.")
@@ -808,7 +801,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         if (et.selectionEnd - et.selectionStart > 0) return ic.performContextMenuAction(android.R.id.cut)
                     }
                 }
-                Timber.i("hookKeyboard cut fail")
+                Timber.w("hookKeyboard cut fail")
                 return false
             }
 
@@ -822,7 +815,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         if (et.selectionEnd - et.selectionStart > 0) return ic.performContextMenuAction(android.R.id.copy)
                     }
                 }
-                Timber.i("hookKeyboard copy fail")
+                Timber.w("hookKeyboard copy fail")
                 return false
             }
 
@@ -996,8 +989,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     interface EventListener {
         fun onCreate() {}
 
-        fun onInitializeInputUi(inputView: InputView) {}
-
         fun onDestroy() {}
 
         fun onStartInputView(
@@ -1005,13 +996,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             restarting: Boolean,
         ) {}
 
-        fun osFinishInputView(finishingInput: Boolean) {}
-
         fun onWindowShown() {}
 
         fun onWindowHidden() {}
-
-        fun onUpdateSelection() {}
     }
 
     companion object {

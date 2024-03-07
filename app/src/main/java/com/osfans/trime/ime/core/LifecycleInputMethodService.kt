@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.lifecycle
+package com.osfans.trime.ime.core
 
 import android.inputmethodservice.InputMethodService
 import androidx.annotation.CallSuper
