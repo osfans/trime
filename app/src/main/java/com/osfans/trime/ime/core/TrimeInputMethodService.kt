@@ -49,6 +49,7 @@ import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
+import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
@@ -58,7 +59,6 @@ import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ime.keyboard.KeyboardWindow
-import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import com.osfans.trime.ime.lifecycle.LifecycleInputMethodService
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.symbol.TabView
@@ -933,7 +933,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val config = resources.configuration
         if (config == null || config.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
         return when (prefs.keyboard.fullscreenMode) {
-            LandscapeInputUIMode.AUTO_SHOW -> {
+            FullscreenMode.AUTO_SHOW -> {
                 Timber.d("FullScreen: Auto")
                 val ei = currentInputEditorInfo
                 if (ei != null && ei.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN != 0) {
@@ -943,12 +943,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 true
             }
 
-            LandscapeInputUIMode.ALWAYS_SHOW -> {
+            FullscreenMode.ALWAYS_SHOW -> {
                 Timber.d("FullScreen: Always")
                 true
             }
 
-            LandscapeInputUIMode.NEVER_SHOW -> {
+            FullscreenMode.NEVER_SHOW -> {
                 Timber.d("FullScreen: Never")
                 false
             }

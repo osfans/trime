@@ -353,7 +353,7 @@ enum class Keycode {
         private val reverseMap: EnumMap<Keycode, String> = EnumMap(Keycode::class.java)
 
         init {
-            for (type in values()) {
+            for (type in entries) {
                 convertMap[type.toString()] = type
             }
 
@@ -436,7 +436,7 @@ enum class Keycode {
             mask: Int = 0,
         ): IntArray {
             val event = IntArray(2)
-            if (keycode !in values().indices) return event
+            if (keycode !in entries.indices) return event
             if (keycode < A.ordinal) {
                 event[0] = keycode
                 event[1] = mask
@@ -470,8 +470,8 @@ enum class Keycode {
         }
 
         private fun hasSymbolLabel(keycode: Int): Boolean {
-            if (keycode !in values().indices) return false
-            return keycode >= A.ordinal || reverseMap.containsKey(values()[keycode])
+            if (keycode !in entries.indices) return false
+            return keycode >= A.ordinal || reverseMap.containsKey(entries[keycode])
         }
 
         fun getSymbolLabel(keycode: Keycode): String {
@@ -519,7 +519,7 @@ enum class Keycode {
         @JvmStatic
         fun valueOf(ordinal: Int): Keycode {
             return runCatching {
-                values()[ordinal]
+                entries[ordinal]
             }.getOrDefault(VoidSymbol)
         }
 

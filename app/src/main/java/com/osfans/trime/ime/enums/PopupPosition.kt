@@ -44,31 +44,13 @@ enum class PopupPosition {
     ;
 
     companion object {
-        @JvmStatic
-        fun fromString(code: String): PopupPosition {
-            return runCatching {
-                valueOf(code.uppercase())
-            }.getOrDefault(FIXED)
-        }
-
-        @JvmStatic
         fun fromString(
             code: String,
-            default: PopupPosition,
+            default: PopupPosition = FIXED,
         ): PopupPosition {
             return runCatching {
                 valueOf(code.uppercase())
             }.getOrDefault(default)
-        }
-
-        /**
-         * 解析候选栏文字，按键文字，按键气泡文字的定位方式
-         */
-        @JvmStatic
-        fun parseKeyPosition(code: String): PopupPosition {
-            return runCatching {
-                valueOf(code.uppercase())
-            }.getOrDefault(CENTER)
         }
     }
 }

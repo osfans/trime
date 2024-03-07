@@ -11,7 +11,7 @@ import android.view.inputmethod.InputConnection
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
-import com.osfans.trime.ime.enums.InlineModeType
+import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.ime.text.TextInputManager
 import timber.log.Timber
 
@@ -68,9 +68,9 @@ class EditorInstance(private val ims: InputMethodService) {
         val ic = inputConnection ?: return
         val composingText =
             when (prefs.keyboard.inlinePreedit) {
-                InlineModeType.INLINE_PREVIEW -> Rime.composingText
-                InlineModeType.INLINE_COMPOSITION -> Rime.compositionText
-                InlineModeType.INLINE_INPUT -> Rime.getRimeRawInput() ?: ""
+                InlinePreeditMode.PREVIEW -> Rime.composingText
+                InlinePreeditMode.COMPOSITION -> Rime.compositionText
+                InlinePreeditMode.INPUT -> Rime.getRimeRawInput() ?: ""
                 else -> ""
             }
         if (ic.getSelectedText(0).isNullOrEmpty() || composingText.isNotEmpty()) {
