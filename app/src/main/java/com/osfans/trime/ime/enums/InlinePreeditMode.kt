@@ -18,21 +18,18 @@
 package com.osfans.trime.ime.enums
 
 /** 嵌入模式枚举  */
-enum class InlineModeType {
-    INLINE_NONE,
-    INLINE_PREVIEW,
-    INLINE_COMPOSITION,
-    INLINE_INPUT,
+enum class InlinePreeditMode {
+    NONE,
+    PREVIEW,
+    COMPOSITION,
+    INPUT,
     ;
 
     companion object {
-        fun fromString(string: String): InlineModeType {
-            return when (string) {
-                "preview", "preedit", "true" -> INLINE_PREVIEW
-                "composition" -> INLINE_COMPOSITION
-                "input" -> INLINE_INPUT
-                else -> INLINE_NONE
-            }
+        fun fromString(string: String): InlinePreeditMode {
+            return runCatching {
+                InlinePreeditMode.valueOf(string.uppercase())
+            }.getOrDefault(NONE)
         }
     }
 }

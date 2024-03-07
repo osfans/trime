@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
-import com.osfans.trime.ime.enums.InlineModeType
+import com.osfans.trime.ime.enums.FullscreenMode
+import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.ime.keyboard.KeyboardPrefs
-import com.osfans.trime.ime.landscapeinput.LandscapeInputUIMode
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
 import java.util.Calendar
@@ -184,11 +184,11 @@ class AppPrefs(
             const val SHOULD_LONG_CLICK_DELETE_CANDIDATE = "keyboard__long_click_delete_candidate"
         }
 
-        var inlinePreedit: InlineModeType
-            get() = InlineModeType.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
+        var inlinePreedit: InlinePreeditMode
+            get() = InlinePreeditMode.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
             set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
-        var fullscreenMode: LandscapeInputUIMode
-            get() = LandscapeInputUIMode.fromString(prefs.getPref(FULLSCREEN_MODE, "auto_show"))
+        var fullscreenMode: FullscreenMode
+            get() = FullscreenMode.fromString(prefs.getPref(FULLSCREEN_MODE, "auto_show"))
             set(v) = prefs.setPref(FULLSCREEN_MODE, v)
         var softCursorEnabled: Boolean = false
             get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)
