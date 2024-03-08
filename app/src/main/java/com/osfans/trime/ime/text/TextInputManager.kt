@@ -16,7 +16,6 @@ import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
-import com.osfans.trime.ime.core.EditorInstance
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.Keycode
@@ -58,8 +57,6 @@ class TextInputManager private constructor() :
     Candidate.EventListener {
         private val trime get() = TrimeInputMethodService.getService()
         private val prefs get() = AppPrefs.defaultInstance()
-        private val activeEditorInstance: EditorInstance
-            get() = trime.activeEditorInstance as EditorInstance
         private var intentReceiver: IntentReceiver? = null
         private var rimeNotiHandlerJob: Job? = null
 
@@ -142,10 +139,10 @@ class TextInputManager private constructor() :
         }
 
         override fun onStartInputView(
-            instance: EditorInstance,
+            info: EditorInfo,
             restarting: Boolean,
         ) {
-            super.onStartInputView(instance, restarting)
+            super.onStartInputView(info, restarting)
             trime.selectLiquidKeyboard(-1)
             if (restarting) {
                 trime.performEscape()
@@ -153,13 +150,13 @@ class TextInputManager private constructor() :
             isComposable = false
             var tempAsciiMode = if (shouldResetAsciiMode) false else null
             val keyboardType =
-                when (instance.editorInfo!!.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
+                when (info.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
                     EditorInfo.IME_FLAG_FORCE_ASCII -> {
                         tempAsciiMode = true
                         ".ascii"
                     }
                     else -> {
-                        val inputAttrsRaw = instance.editorInfo!!.inputType
+                        val inputAttrsRaw = info.inputType
                         isComposable = inputAttrsRaw > 0
                         when (inputAttrsRaw and InputType.TYPE_MASK_CLASS) {
                             InputType.TYPE_CLASS_NUMBER,
@@ -274,7 +271,7 @@ class TextInputManager private constructor() :
                 // todo 释放按键可能不对
                 val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
                 Rime.processKey(event[0], event[1])
-                activeEditorInstance.commitRimeText()
+                trime.commitRimeText()
             }
             Timber.d("\t<TrimeInput>\tonRelease() finish")
         }
@@ -284,7 +281,7 @@ class TextInputManager private constructor() :
             event ?: return
             if (event.commit.isNotEmpty()) {
                 // Directly commit the text and don't dispatch to Rime
-                activeEditorInstance.commitText(event.commit, true)
+                trime.commitCharSequence(event.commit, true)
                 return
             }
             if (event.getText(KeyboardSwitcher.currentKeyboard).isNotEmpty()) {
@@ -294,7 +291,7 @@ class TextInputManager private constructor() :
             when (event.code) {
                 KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
                     Rime.toggleOption(event.getToggle())
-                    activeEditorInstance.commitRimeText()
+                    trime.commitRimeText()
                 }
                 KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                     KeyboardSwitcher.switchKeyboard(event.select)
@@ -332,11 +329,11 @@ class TextInputManager private constructor() :
                         if (activeTextMode < 1) {
                             activeTextMode = 1
                         }
-                        val activeText = activeEditorInstance.getActiveText(activeTextMode)
+                        val activeText = trime.getActiveText(activeTextMode)
                         arg =
                             String.format(
                                 arg,
-                                activeEditorInstance.lastCommittedText,
+                                trime.lastCommittedText,
                                 Rime.getRimeRawInput() ?: "",
                                 activeText,
                                 activeText,
@@ -352,7 +349,7 @@ class TextInputManager private constructor() :
                             ShortcutUtils
                                 .call(trime, event.command, arg)
                         if (textFromCommand != null) {
-                            activeEditorInstance.commitText(textFromCommand)
+                            trime.commitCharSequence(textFromCommand)
                             trime.updateComposing()
                         }
                     }
@@ -430,25 +427,25 @@ class TextInputManager private constructor() :
             if ((metaState == KeyEvent.META_SHIFT_ON || metaState == 0) && keyEventCode >= Keycode.A.ordinal) {
                 val text = Keycode.getSymbolLabel(Keycode.valueOf(keyEventCode))
                 if (text.length == 1) {
-                    activeEditorInstance.commitText(text)
+                    trime.commitCharSequence(text)
                     return
                 }
             }
             // 小键盘自动增加锁定
             if (keyEventCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyEventCode <= KeyEvent.KEYCODE_NUMPAD_EQUALS) {
-                activeEditorInstance.sendDownUpKeyEvent(keyEventCode, metaState or KeyEvent.META_NUM_LOCK_ON)
+                trime.sendDownUpKeyEvent(keyEventCode, metaState or KeyEvent.META_NUM_LOCK_ON)
                 return
             }
             // 大写字母和部分符号转换为Shift+Android keyevent
             val event = toStdKeyEvent(keyEventCode, metaState)
-            activeEditorInstance.sendDownUpKeyEvent(event[0], event[1])
+            trime.sendDownUpKeyEvent(event[0], event[1])
         }
 
         override fun onText(text: CharSequence?) {
             text ?: return
             if (!text.startsWithAsciiChar() && Rime.isComposing) {
                 Rime.commitComposition()
-                activeEditorInstance.commitRimeText()
+                trime.commitRimeText()
             }
             var textToParse = text
             while (textToParse!!.isNotEmpty()) {
@@ -459,8 +456,8 @@ class TextInputManager private constructor() :
                     escapeTagMatcher.matches() -> {
                         target = escapeTagMatcher.group(1) ?: ""
                         Rime.simulateKeySequence(target)
-                        if (!activeEditorInstance.commitRimeText() && !Rime.isComposing) {
-                            activeEditorInstance.commitText(target)
+                        if (!trime.commitRimeText() && !Rime.isComposing) {
+                            trime.commitCharSequence(target)
                         }
                         trime.updateComposing()
                     }
@@ -493,9 +490,9 @@ class TextInputManager private constructor() :
                     if (prefs.keyboard.hookCandidateCommit) {
                         // todo 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
                         // 如果使用了lua处理候选上屏，模拟数字键、空格键是非常有必要的
-                        activeEditorInstance.commitRimeText()
+                        trime.commitRimeText()
                     } else {
-                        activeEditorInstance.commitRimeText()
+                        trime.commitRimeText()
                     }
                 }
             } else if (index == 9) {

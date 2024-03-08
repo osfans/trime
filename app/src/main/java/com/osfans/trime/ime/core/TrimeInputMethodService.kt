@@ -27,7 +27,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.os.SystemClock
 import android.text.InputType
+import android.view.InputDevice
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
@@ -50,6 +53,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
+import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
@@ -92,10 +96,22 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var mIntentReceiver: IntentReceiver? = null
     private var isWindowShown = false // 键盘窗口是否已显示
     private var isAutoCaps = false // 句首自動大寫
-    var activeEditorInstance: EditorInstance? = null
     var textInputManager: TextInputManager? = null // 文字输入管理器
     private var mCompositionPopupWindow: CompositionPopupWindow? = null
     var candidateExPage = false
+
+    private val cursorCapsMode: Int
+        get() =
+            currentInputEditorInfo.run {
+                if (inputType != InputType.TYPE_NULL) {
+                    currentInputConnection?.getCursorCapsMode(inputType) ?: 0
+                } else {
+                    0
+                }
+            }
+
+    var lastCommittedText: CharSequence = ""
+        private set
 
     @Keep
     private val onColorChangeListener =
@@ -123,7 +139,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         } else {
             Timber.i("onWindowShown...")
         }
-        if (RimeWrapper.isReady() && activeEditorInstance != null) {
+        if (RimeWrapper.isReady() && currentInputEditorInfo != null) {
             isWindowShown = true
             updateComposing()
             for (listener in eventListeners) {
@@ -220,7 +236,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 Timber.d("Running Trime.onCreate")
                 ColorManager.init(resources.configuration)
                 textInputManager = TextInputManager.getInstance()
-                activeEditorInstance = EditorInstance(context)
                 InputFeedbackManager.init(this)
                 restartSystemStartTimingSync()
                 try {
@@ -456,7 +471,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             InputFeedbackManager.loadSoundEffects()
             InputFeedbackManager.resetPlayProgress()
             for (listener in eventListeners) {
-                listener.onStartInputView(activeEditorInstance!!, restarting)
+                listener.onStartInputView(attribute, restarting)
             }
             if (prefs.other.showStatusBarIcon) {
                 showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
@@ -568,12 +583,40 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      */
     private fun dispatchCapsStateToInputView() {
         if (isAutoCaps && Rime.isAsciiMode && mainKeyboardView != null && !mainKeyboardView!!.isCapsOn) {
-            mainKeyboardView!!.setShifted(false, activeEditorInstance!!.cursorCapsMode != 0)
+            mainKeyboardView!!.setShifted(false, cursorCapsMode != 0)
         }
     }
 
     private val isComposing: Boolean
         get() = Rime.isComposing
+
+    // 直接commit不做任何处理
+    fun commitCharSequence(
+        text: CharSequence,
+        clearMeatKeyState: Boolean = false,
+    ): Boolean {
+        val ic = currentInputConnection ?: return false
+        ic.commitText(text, 1)
+        if (text.isNotEmpty()) {
+            lastCommittedText = text
+        }
+        if (clearMeatKeyState) {
+            ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
+            DraftHelper.onInputEventChanged()
+        }
+        return true
+    }
+
+    /**
+     * Commits the text got from Rime.
+     */
+    fun commitRimeText(): Boolean {
+        val commit = Rime.getRimeCommit()
+        commit?.let { commitCharSequence(it.commitText) }
+        Timber.d("commitRimeText: updateComposing")
+        updateComposing()
+        return commit != null
+    }
 
     /**
      * Commit the current composing text together with the new text
@@ -582,13 +625,181 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      */
     fun commitText(text: String?) {
         currentInputConnection.finishComposingText()
-        activeEditorInstance!!.commitText(text!!, true)
+        commitCharSequence(text!!, true)
     }
 
     private fun commitTextByChar(text: String) {
-        for (i in text.indices) {
-            if (!activeEditorInstance!!.commitText(text.substring(i, i + 1), false)) break
+        for (char in text) {
+            if (!commitCharSequence(char.toString(), false)) break
         }
+    }
+
+    /**
+     * Constructs a meta state integer flag which can be used for setting the `metaState` field when sending a KeyEvent
+     * to the input connection. If this method is called without a meta modifier set to true, the default value `0` is
+     * returned.
+     *
+     * @param ctrl Set to true to enable the CTRL meta modifier. Defaults to false.
+     * @param alt Set to true to enable the ALT meta modifier. Defaults to false.
+     * @param shift Set to true to enable the SHIFT meta modifier. Defaults to false.
+     *
+     * @return An integer containing all meta flags passed and formatted for use in a [KeyEvent].
+     */
+    fun meta(
+        ctrl: Boolean = false,
+        alt: Boolean = false,
+        shift: Boolean = false,
+        meta: Boolean = false,
+        sym: Boolean = false,
+    ): Int {
+        var metaState = 0
+        if (ctrl) {
+            metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
+        }
+        if (alt) {
+            metaState = metaState or KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
+        }
+        if (shift) {
+            metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
+        }
+        if (meta) {
+            metaState = metaState or KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON
+        }
+        if (sym) {
+            metaState = metaState or KeyEvent.META_SYM_ON
+        }
+
+        return metaState
+    }
+
+    private fun sendDownKeyEvent(
+        eventTime: Long,
+        keyEventCode: Int,
+        metaState: Int,
+    ): Boolean {
+        val ic = currentInputConnection ?: return false
+        return ic.sendKeyEvent(
+            KeyEvent(
+                eventTime,
+                eventTime,
+                KeyEvent.ACTION_DOWN,
+                keyEventCode,
+                0,
+                metaState,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0,
+                KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE,
+                InputDevice.SOURCE_KEYBOARD,
+            ),
+        )
+    }
+
+    private fun sendUpKeyEvent(
+        eventTime: Long,
+        keyEventCode: Int,
+        metaState: Int,
+    ): Boolean {
+        val ic = currentInputConnection ?: return false
+        return ic.sendKeyEvent(
+            KeyEvent(
+                eventTime,
+                SystemClock.uptimeMillis(),
+                KeyEvent.ACTION_UP,
+                keyEventCode,
+                0,
+                metaState,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0,
+                KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE,
+                InputDevice.SOURCE_KEYBOARD,
+            ),
+        )
+    }
+
+    /**
+     * Same as [InputMethodService.sendDownUpKeyEvents] but also allows to set meta state.
+     *
+     * @param keyEventCode The key code to send, use a key code defined in Android's [KeyEvent].
+     * @param metaState Flags indicating which meta keys are currently pressed.
+     * @param count How often the key is pressed while the meta keys passed are down. Must be greater than or equal to
+     *  `1`, else this method will immediately return false.
+     *
+     * @return True on success, false if an error occurred or the input connection is invalid.
+     */
+    fun sendDownUpKeyEvent(
+        keyEventCode: Int,
+        metaState: Int = meta(),
+        count: Int = 1,
+    ): Boolean {
+        if (count < 1) return false
+        val ic = currentInputConnection ?: return false
+        ic.clearMetaKeyStates(
+            KeyEvent.META_FUNCTION_ON
+                or KeyEvent.META_SHIFT_MASK
+                or KeyEvent.META_ALT_MASK
+                or KeyEvent.META_CTRL_MASK
+                or KeyEvent.META_META_MASK
+                or KeyEvent.META_SYM_ON,
+        )
+        ic.beginBatchEdit()
+        val eventTime = SystemClock.uptimeMillis()
+        if (metaState and KeyEvent.META_CTRL_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT, 0)
+        }
+        if (metaState and KeyEvent.META_ALT_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT, 0)
+        }
+        if (metaState and KeyEvent.META_SHIFT_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT, 0)
+        }
+        if (metaState and KeyEvent.META_META_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT, 0)
+        }
+
+        if (metaState and KeyEvent.META_SYM_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SYM, 0)
+        }
+
+        for (n in 0 until count) {
+            sendDownKeyEvent(eventTime, keyEventCode, metaState)
+            sendUpKeyEvent(eventTime, keyEventCode, metaState)
+        }
+        if (metaState and KeyEvent.META_SHIFT_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT, 0)
+        }
+        if (metaState and KeyEvent.META_ALT_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT, 0)
+        }
+        if (metaState and KeyEvent.META_CTRL_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT, 0)
+        }
+
+        if (metaState and KeyEvent.META_META_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT, 0)
+        }
+
+        if (metaState and KeyEvent.META_SYM_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SYM, 0)
+        }
+
+        ic.endBatchEdit()
+        return true
+    }
+
+    fun getActiveText(type: Int): String {
+        if (type == 2) return Rime.getRimeRawInput() ?: "" // 當前編碼
+        var s = Rime.composingText // 當前候選
+        if (s.isEmpty()) {
+            val ic = currentInputConnection
+            var cs = ic?.getSelectedText(0) // 選中字
+            if (type == 1 && cs.isNullOrEmpty()) cs = lastCommittedText // 剛上屏字
+            if (cs.isNullOrEmpty() && ic != null) {
+                cs = ic.getTextBeforeCursor(if (type == 4) 1024 else 1, 0) // 光標前字
+            }
+            if (cs.isNullOrEmpty() && ic != null) cs = ic.getTextAfterCursor(1024, 0) // 光標後面所有字
+            if (cs != null) s = cs.toString()
+        }
+        return s
     }
 
     /**
@@ -609,7 +820,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         updateRimeOption()
         // todo 改为异步处理按键事件、刷新UI
         val ret = Rime.processKey(event[0], event[1])
-        activeEditorInstance!!.commitRimeText()
+        commitRimeText()
         return ret
     }
 
@@ -866,10 +1077,24 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return false
     }
 
+    private fun updateComposingText() {
+        val ic = currentInputConnection ?: return
+        val composingText =
+            when (prefs.keyboard.inlinePreedit) {
+                InlinePreeditMode.PREVIEW -> Rime.composingText
+                InlinePreeditMode.COMPOSITION -> Rime.compositionText
+                InlinePreeditMode.INPUT -> Rime.getRimeRawInput() ?: ""
+                else -> ""
+            }
+        if (ic.getSelectedText(0).isNullOrEmpty() || composingText.isNotEmpty()) {
+            ic.setComposingText(composingText, 1)
+        }
+    }
+
     /** 更新Rime的中西文狀態、編輯區文本  */
     fun updateComposing(): Int {
         val ic = currentInputConnection
-        activeEditorInstance!!.updateComposingText()
+        updateComposingText()
         if (ic != null && mCompositionPopupWindow?.isWinFixed() == false) {
             mCompositionPopupWindow!!.isCursorUpdated = ic.requestCursorUpdates(1)
         }
@@ -992,7 +1217,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         fun onDestroy() {}
 
         fun onStartInputView(
-            instance: EditorInstance,
+            info: EditorInfo,
             restarting: Boolean,
         ) {}
 
