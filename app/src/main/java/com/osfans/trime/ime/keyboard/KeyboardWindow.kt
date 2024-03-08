@@ -3,7 +3,6 @@ package com.osfans.trime.ime.keyboard
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.ViewAnimator
-import com.osfans.trime.core.Rime
 import com.osfans.trime.databinding.MainInputLayoutBinding
 import com.osfans.trime.databinding.SymbolInputLayoutBinding
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -14,12 +13,7 @@ import splitties.views.dsl.core.matchParent
 class KeyboardWindow(context: Context, service: TrimeInputMethodService) {
     val oldMainInputView by lazy {
         MainInputLayoutBinding.inflate(LayoutInflater.from(context)).apply {
-            with(mainKeyboardView) {
-                setOnKeyboardActionListener(service.textInputManager)
-                setShowHint(!Rime.getOption("_hide_key_hint"))
-                setShowSymbol(!Rime.getOption("_hide_key_symbol"))
-                reset()
-            }
+            mainKeyboardView.onKeyboardActionListener = service.textInputManager
         }
     }
 
