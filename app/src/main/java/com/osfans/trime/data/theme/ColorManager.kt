@@ -10,6 +10,7 @@ import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet
+import com.osfans.trime.util.appContext
 import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.isNightMode
 import splitties.dimensions.dp
@@ -331,7 +332,7 @@ object ColorManager {
 
     //  返回图片或背景的drawable,支持null参数。 Config 2.0
     fun getDrawable(
-        context: Context,
+        context: Context = appContext,
         key: String,
         borderKey: String = "",
         borderColorKey: String = "",
