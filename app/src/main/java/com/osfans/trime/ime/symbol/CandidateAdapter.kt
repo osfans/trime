@@ -52,20 +52,20 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
     private val mCommentTextSize = theme.style.getFloat("comment_text_size").coerceAtLeast(1f)
     private val mCommentFont = FontManager.getTypeface("comment_font")
     private val mCommentTextColor = ColorManager.getColor("comment_text_color")
+    private val mBackground =
+        ColorManager.getDrawable(
+            key = "key_back_color",
+            borderKey = "key_border",
+            borderColorKey = "key_border_color",
+            roundCornerKey = "round_corner",
+        )
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = LiquidEntryViewBinding.inflate(LayoutInflater.from(parent.context))
-        binding.root.background =
-            ColorManager.getDrawable(
-                parent.context,
-                "key_back_color",
-                "key_border",
-                "key_border_color",
-                "round_corner",
-            )
+        binding.root.background = mBackground
         binding.candidate.apply {
             textSize = mCandidateTextSize
             typeface = mCandidateFont
