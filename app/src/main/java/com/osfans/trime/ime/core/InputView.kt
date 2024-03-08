@@ -285,8 +285,8 @@ class InputView(
                         quickBar.view.visibility =
                             if (it.value) View.GONE else View.VISIBLE
                     }
-                    "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowHint(!it.value)
-                    "_hide_key_symbol" -> keyboardWindow.oldMainInputView.mainKeyboardView.setShowSymbol(!it.value)
+                    "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.showKeyHint = !it.value
+                    "_hide_key_symbol" -> keyboardWindow.oldMainInputView.mainKeyboardView.showKeySymbol = !it.value
                 }
                 keyboardWindow.oldMainInputView.mainKeyboardView.invalidateAllKeys()
             }

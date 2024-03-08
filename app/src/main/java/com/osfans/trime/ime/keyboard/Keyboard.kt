@@ -460,16 +460,22 @@ class Keyboard() {
         c: Int,
         key: Key?,
     ) {
-        if (c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            mShiftKey = key
-        } else if (c == KeyEvent.KEYCODE_CTRL_LEFT || c == KeyEvent.KEYCODE_CTRL_RIGHT) {
-            mCtrlKey = key
-        } else if (c == KeyEvent.KEYCODE_META_LEFT || c == KeyEvent.KEYCODE_META_RIGHT) {
-            mMetaKey = key
-        } else if (c == KeyEvent.KEYCODE_ALT_LEFT || c == KeyEvent.KEYCODE_ALT_RIGHT) {
-            mAltKey = key
-        } else if (c == KeyEvent.KEYCODE_SYM) {
-            mSymKey = key
+        when (c) {
+            KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
+                mShiftKey = key
+            }
+            KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_CTRL_RIGHT -> {
+                mCtrlKey = key
+            }
+            KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_META_RIGHT -> {
+                mMetaKey = key
+            }
+            KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> {
+                mAltKey = key
+            }
+            KeyEvent.KEYCODE_SYM -> {
+                mSymKey = key
+            }
         }
     }
 
