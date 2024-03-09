@@ -3,6 +3,7 @@ package com.osfans.trime.ime.dependency
 import android.content.Context
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
@@ -16,6 +17,7 @@ abstract class InputComponent(
     @get:InputScope @get:Provides val themedContext: Context,
     @get:InputScope @get:Provides val theme: Theme,
     @get:InputScope @get:Provides val service: TrimeInputMethodService,
+    @get:InputScope @get:Provides val broadcaster: InputBroadcaster,
 ) {
     abstract val quickBar: QuickBar
     abstract val windowManager: BoardWindowManager

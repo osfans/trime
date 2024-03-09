@@ -21,6 +21,7 @@ import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -86,11 +87,18 @@ class InputView(
     private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    private val inputComponent = InputComponent::class.create(themedContext, theme, service)
+    private val broadcaster = InputBroadcaster()
+    private val inputComponent = InputComponent::class.create(themedContext, theme, service, broadcaster)
     private val windowManager = inputComponent.windowManager
     val quickBar: QuickBar = inputComponent.quickBar
     val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
     val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
+
+    private fun addBroadcastReceivers() {
+        broadcaster.addReceiver(quickBar)
+        broadcaster.addReceiver(keyboardWindow)
+        broadcaster.addReceiver(liquidKeyboard)
+    }
 
     private val keyboardSidePadding = theme.style.getInt("keyboard_padding")
     private val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
@@ -120,6 +128,8 @@ class InputView(
     val keyboardView: View
 
     init {
+        addBroadcastReceivers()
+
         notificationHandlerJob =
             service.lifecycleScope.launch {
                 rime.notificationFlow.collect {
@@ -283,20 +293,7 @@ class InputView(
     private fun handleRimeNotification(it: RimeNotification<*>) {
         when (it) {
             is RimeNotification.OptionNotification -> {
-                when (it.value.option) {
-                    "_hide_comment" -> {
-                        quickBar.oldCandidateBar.candidates.shouldShowComment = !it.value.value
-                    }
-                    "_hide_bar",
-                    "_hide_candidate",
-                    -> {
-                        quickBar.view.visibility =
-                            if (it.value.value) View.GONE else View.VISIBLE
-                    }
-                    "_hide_key_hint" -> keyboardWindow.oldMainInputView.mainKeyboardView.showKeyHint = !it.value.value
-                    "_hide_key_symbol" -> keyboardWindow.oldMainInputView.mainKeyboardView.showKeySymbol = !it.value.value
-                }
-                keyboardWindow.oldMainInputView.mainKeyboardView.invalidateAllKeys()
+                broadcaster.onRimeOptionUpdated(it.value)
             }
             else -> {}
         }
@@ -347,9 +344,10 @@ class InputView(
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         showingDialog?.dismiss()
-        // cancel the notification job,
+        // cancel the notification job and clear all broadcast receivers,
         // implies that InputView should not be attached again after detached.
         notificationHandlerJob.cancel()
+        broadcaster.clear()
         super.onDetachedFromWindow()
     }
 }

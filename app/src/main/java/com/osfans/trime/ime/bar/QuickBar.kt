@@ -6,9 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ViewAnimator
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.databinding.TabBarBinding
+import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -19,7 +21,7 @@ import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
-class QuickBar(context: Context, service: TrimeInputMethodService) {
+class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadcastReceiver {
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
             with(root) {
@@ -70,6 +72,17 @@ class QuickBar(context: Context, service: TrimeInputMethodService) {
                 )
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
             add(oldTabBar.root, lParams(matchParent, matchParent))
+        }
+    }
+
+    override fun onRimeOptionUpdated(value: OptionNotification.Value) {
+        when (value.option) {
+            "_hide_comment" -> {
+                oldCandidateBar.candidates.shouldShowComment = !value.value
+            }
+            "_hide_candidate", "_hide_bar" -> {
+                view.visibility = if (value.value) View.GONE else View.VISIBLE
+            }
         }
     }
 }
