@@ -7,6 +7,7 @@ room = "2.6.1"
 splitties = "3.0.0"
 aboutlibraries = "10.9.2"
 kotest = "5.8.0"
+kotlin-inject = "0.6.3"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -30,6 +31,8 @@ kaml = { module = "com.charleskorn.kaml:kaml", version = "0.56.0" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 utilcode = { module = "com.blankj:utilcodex", version = "1.31.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }
+kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }
+kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlin-inject" }
 splitties-bitflags = { module = "com.louiscad.splitties:splitties-bitflags", version.ref = "splitties" }
 splitties-systemservices = { module = "com.louiscad.splitties:splitties-systemservices", version.ref = "splitties" }
 splitties-views-dsl = { module = "com.louiscad.splitties:splitties-views-dsl", version.ref = "splitties" }

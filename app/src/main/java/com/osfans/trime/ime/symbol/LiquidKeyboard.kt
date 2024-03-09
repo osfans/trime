@@ -21,14 +21,18 @@ import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
 import kotlinx.coroutines.launch
+import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import timber.log.Timber
 
+@InputScope
+@Inject
 class LiquidKeyboard(
     private val context: Context,
     private val service: TrimeInputMethodService,

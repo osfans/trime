@@ -21,6 +21,8 @@ import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.dependency.InputComponent
+import com.osfans.trime.ime.dependency.create
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.util.ColorUtils
@@ -84,9 +86,10 @@ class InputView(
     private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    val quickBar = QuickBar(themedContext, service)
-    val keyboardWindow = KeyboardWindow(themedContext, service)
-    val liquidKeyboard = LiquidKeyboard(themedContext, service, theme)
+    private val inputComponent = InputComponent::class.create(themedContext, theme, service)
+    val quickBar: QuickBar = inputComponent.quickBar
+    val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
+    val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
 
     private val keyboardSidePadding = theme.style.getInt("keyboard_padding")
     private val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
@@ -330,7 +333,7 @@ class InputView(
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         showingDialog?.dismiss()
-        // cancel the notification job and unload the Koin module,
+        // cancel the notification job,
         // implies that InputView should not be attached again after detached.
         notificationHandlerJob.cancel()
         super.onDetachedFromWindow()
