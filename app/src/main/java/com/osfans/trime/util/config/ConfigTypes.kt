@@ -74,40 +74,66 @@ class ConfigValue(private val scalar: YamlScalar) : ConfigItem(scalar) {
 }
 
 /** The wrapper of [YamlList] */
-class ConfigList(private val list: YamlList) : ConfigItem(list) {
+class ConfigList(private val list: YamlList) : ConfigItem(list), List<ConfigItem?> {
     constructor(item: ConfigItem) : this(item.node.yamlList)
 
-    val items get() = list.items.map { convertFromYaml(it) }
+    private val items = list.items.map { convertFromYaml(it) }
 
-    operator fun iterator() = items.iterator()
+    override val size = list.items.size
+
+    override fun containsAll(elements: Collection<ConfigItem?>): Boolean = items.containsAll(elements)
+
+    override fun contains(element: ConfigItem?): Boolean = items.contains(element)
+
+    override operator fun iterator() = items.iterator()
+
+    override fun listIterator(): ListIterator<ConfigItem?> = items.listIterator()
+
+    override fun listIterator(index: Int): ListIterator<ConfigItem?> = items.listIterator(index)
+
+    override fun subList(
+        fromIndex: Int,
+        toIndex: Int,
+    ): List<ConfigItem?> = items.subList(fromIndex, toIndex)
+
+    override fun lastIndexOf(element: ConfigItem?): Int = items.lastIndexOf(element)
 
     override fun isEmpty() = list.items.isEmpty()
 
     override fun contentToString(): String = list.contentToString()
 
-    operator fun get(index: Int) = items[index]
+    override operator fun get(index: Int): ConfigItem? = items[index]
+
+    override fun indexOf(element: ConfigItem?): Int = items.indexOf(element)
 
     fun getValue(index: Int) = get(index)?.configValue
 }
 
-class ConfigMap(private val map: YamlMap) : ConfigItem(map) {
+class ConfigMap(private val map: YamlMap) : ConfigItem(map), Map<String, ConfigItem?> {
     constructor(item: ConfigItem) : this(item.node.yamlMap)
 
     override fun isEmpty() = map.entries.isEmpty()
 
+    override val size: Int = map.entries.size
+
     override fun contentToString(): String = map.contentToString()
 
-    fun containsKey(key: String) = map.getKey(key) != null
+    override fun containsKey(key: String) = map.getKey(key) != null
 
-    val entries get() =
+    override fun containsValue(value: ConfigItem?): Boolean = entries.any { it.value == value }
+
+    override val entries: Set<Map.Entry<String, ConfigItem?>> =
         map.entries.entries.associate { (s, n) ->
             s.content to convertFromYaml(n)
-        }
+        }.entries
+
+    override val keys: Set<String> = entries.map { it.key }.toSet()
+
+    override val values: Collection<ConfigItem?> = entries.map { it.value }
 
     operator fun iterator() = entries.iterator()
 
-    @Suppress("UNCHECKED_CAST")
-    operator fun <T : ConfigItem> get(key: String): T? = entries.entries.firstOrNull { it.key == key }?.value as T?
+    override operator fun get(key: String): ConfigItem? = entries.firstOrNull { it.key == key }?.value
 
-    fun getValue(key: String): ConfigValue? = get<ConfigValue>(key)?.configValue
+    fun getValue(key: String): ConfigValue? = get(key)?.configValue
 }
