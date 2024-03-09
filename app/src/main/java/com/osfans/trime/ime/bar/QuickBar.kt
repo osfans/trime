@@ -10,11 +10,15 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.databinding.TabBarBinding
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.SymbolKeyboardType
+import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 
+@InputScope
+@Inject
 class QuickBar(context: Context, service: TrimeInputMethodService) {
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
