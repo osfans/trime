@@ -30,7 +30,7 @@ class CompositionPopupWindow(
     // 顯示懸浮窗口
     val isPopupWindowEnabled =
         AppPrefs.defaultInstance().keyboard.popupWindowEnabled &&
-            theme.style.getObject("window") != null
+            theme.style.getItem("window") != null
 
     val composition =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {

@@ -63,15 +63,15 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         theme.style.getInt("layout/max_entries").takeIf { it > 0 }
             ?: Candidate.MAX_CANDIDATE_COUNT
 
-    @Suppress("UNCHECKED_CAST")
     private val windowComponents =
-        theme.style.getObject("window") as List<Map<String, Any?>>?
-            ?: listOf()
+        theme.style.getList("window")?.mapNotNull {
+            it?.configMap?.entries?.associate { (k, v) -> k to v?.configValue?.getString() }
+        } ?: listOf()
 
-    @Suppress("UNCHECKED_CAST")
     private val liquidWindowComponents =
-        theme.style.getObject("liquid_keyboard_window") as List<Map<String, Any?>>?
-            ?: listOf()
+        theme.style.getList("liquid_keyboard_window")?.mapNotNull {
+            it?.configMap?.entries?.associate { (k, v) -> k to v?.configValue?.getString() }
+        } ?: listOf()
 
     private var highlightIndex = 0
     private val compositionPos = IntArray(2)

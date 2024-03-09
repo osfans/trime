@@ -305,9 +305,9 @@ class KeyboardView
 
         private fun handleEnterLabel() {
             mEnterLabels.clear()
-            @Suppress("UNCHECKED_CAST")
-            (theme.style.getObject("enter_labels") as? Map<String, String?>)?.let {
-                mEnterLabels.putAll(it)
+            (theme.style.getMap("enter_labels"))?.let {
+                val map = it.entries.associate { (k, v) -> k to v?.configValue?.getString() }
+                mEnterLabels.putAll(map)
             }
             labelEnter = mEnterLabels["default"] ?: "⏎".also { mEnterLabels["default"] = it }
             for (label in arrayOf("done", "go", "next", "none", "pre", "search", "send")) {

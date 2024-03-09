@@ -11,7 +11,7 @@ import timber.log.Timber
 /** Manages [Keyboard]s and their status. **/
 object KeyboardSwitcher {
     private val theme get() = ThemeManager.activeTheme
-    private val allKeyboardIds get() = theme.allKeyboardIds
+    private val allKeyboardIds get() = theme.presetKeyboards?.keys?.toList() ?: listOf()
     private val keyboardCache: MutableMap<String, Keyboard> = mutableMapOf()
     private var currentKeyboardId: String? = null
     private var lastKeyboardId: String? = null
@@ -43,19 +43,19 @@ object KeyboardSwitcher {
     }
 
     fun switchKeyboard(name: String?) {
-        val currentIdx = theme.allKeyboardIds.indexOf(currentKeyboardId)
+        val currentIdx = allKeyboardIds.indexOf(currentKeyboardId)
         var mappedName =
             when (name) {
                 ".default" -> autoMatch()
                 ".prior" ->
                     try {
-                        theme.allKeyboardIds[currentIdx - 1]
+                        allKeyboardIds[currentIdx - 1]
                     } catch (e: IndexOutOfBoundsException) {
                         currentKeyboardId
                     }
                 ".next" ->
                     try {
-                        theme.allKeyboardIds[currentIdx + 1]
+                        allKeyboardIds[currentIdx + 1]
                     } catch (e: IndexOutOfBoundsException) {
                         currentKeyboardId
                     }

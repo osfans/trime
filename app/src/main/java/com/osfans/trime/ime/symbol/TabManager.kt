@@ -4,7 +4,10 @@ import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
-import com.osfans.trime.util.CollectionUtils.getOrDefault
+import com.osfans.trime.util.config.ConfigItem
+import com.osfans.trime.util.config.ConfigList
+import com.osfans.trime.util.config.ConfigMap
+import com.osfans.trime.util.config.ConfigValue
 import timber.log.Timber
 
 object TabManager {
@@ -40,14 +43,15 @@ object TabManager {
     }
 
     fun refresh() {
-        val available = theme.liquid.getObject("keyboards") as List<String>? ?: return
-        for (id in available) {
+        val available = theme.liquid.getList("keyboards") ?: return
+        for (item in available) {
+            val id = item?.configValue?.getString() ?: ""
             Timber.d("preparing data for tab #$id")
-            val keyboard = theme.liquid.getObject(id) as Map<String, Any>? ?: continue
+            val keyboard = theme.liquid.getMap(id) ?: continue
             if (!keyboard.containsKey("type")) continue
-            val name = getOrDefault(keyboard, "name", id) as String
-            val type = SymbolKeyboardType.fromString(keyboard["type"] as String?)
-            val keys = keyboard["keys"] ?: "1"
+            val name = keyboard.getValue("name")?.getString() ?: id
+            val type = SymbolKeyboardType.fromString(keyboard.getValue("type")?.getString())
+            val keys = keyboard["keys"]
             addTabHasKeys(name, type, keys)
         }
         tabSwitchData.clear()
@@ -76,31 +80,32 @@ object TabManager {
     private fun addTabHasKeys(
         name: String,
         type: SymbolKeyboardType,
-        keys: Any?,
+        keys: ConfigItem?,
     ) {
         // 处理single类型和no_key类型。前者把字符串切分为多个按键，后者把字符串转换为命令
-        if (keys is String) {
+        if (keys is ConfigValue) {
+            val key = keys.getString()
             when (type) {
-                SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(keys))
+                SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(key))
                 SymbolKeyboardType.NO_KEY -> {
-                    val commandType = KeyCommandType.fromString(keys)
+                    val commandType = KeyCommandType.fromString(key)
                     tabTags.add(TabTag(name, type, commandType))
                     keyboards.add(notKeyboard)
                 }
-                else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(keys))
+                else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(key))
             }
         }
 
-        if (keys !is List<*>) return
+        if (keys !is ConfigList) return
         val keysList: MutableList<SimpleKeyBean> = ArrayList()
-        for (o in keys) {
-            if (o is String) {
-                keysList.add(SimpleKeyBean(o))
+        for (k in keys) {
+            if (k is ConfigValue) {
+                keysList.add(SimpleKeyBean(k.getString()))
             }
 
-            if (o !is Map<*, *>) continue
-            val p = o as Map<String, String>
-            if (p.containsKey("click")) {
+            if (k !is ConfigMap) continue
+            val p = k.entries.associate { (s, n) -> s to n!!.configValue.getString() }
+            if (k.containsKey("click")) {
                 if (p.containsKey("label")) {
                     keysList.add(SimpleKeyBean(p["click"]!!, p["label"]!!))
                 } else {

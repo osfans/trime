@@ -1,6 +1,7 @@
 package com.osfans.trime.data.theme
 
 import androidx.annotation.Keep
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.ime.symbol.TabManager
 import java.io.File
@@ -52,9 +53,11 @@ object ThemeManager {
     lateinit var activeTheme: Theme
         private set
 
-    fun init() = setNormalTheme()
+    private val prefs = AppPrefs.defaultInstance().theme
 
-    fun setNormalTheme(name: String = "") {
+    fun init() = setNormalTheme(prefs.selectedTheme)
+
+    fun setNormalTheme(name: String) {
         Theme(name).let {
             if (::activeTheme.isInitialized) {
                 if (it == activeTheme) return

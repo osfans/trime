@@ -6,6 +6,8 @@ import android.graphics.fonts.FontFamily
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.osfans.trime.data.DataManager
+import com.osfans.trime.util.config.ConfigList
+import com.osfans.trime.util.config.ConfigValue
 import timber.log.Timber
 import java.io.File
 
@@ -19,7 +21,7 @@ object FontManager {
 
     fun refresh() {
         typefaceCache.clear()
-        fontFamiliyCache.clear()
+        fontFamilyCache.clear()
         hanBFont = getTypefaceOrDefault("hanb_font")
         latinFont = getTypefaceOrDefault("latin_font")
     }
@@ -63,7 +65,14 @@ object FontManager {
     }
 
     private fun getTypefaceOrDefault(key: String): Typeface {
-        val fonts = ThemeManager.activeTheme.style.getObject(key)
+        val fonts =
+            ThemeManager.activeTheme.style.getItem(key).run {
+                return@run when (this) {
+                    is ConfigValue -> listOf(getString())
+                    is ConfigList -> this.mapNotNull { it?.configValue?.getString() }
+                    else -> emptyList()
+                }
+            }
 
         fun handler(fontName: String): Typeface? {
             val fontFile = File(fontDir, fontName)
@@ -74,23 +83,15 @@ object FontManager {
             return null
         }
 
-        if (fonts is String) return handler(fonts) ?: Typeface.DEFAULT
-        if (fonts is List<*>) {
-            for (font in fonts as List<String>) {
-                handler(font).let {
-                    if (it != null) return it
-                }
-            }
-        }
-        return Typeface.DEFAULT
+        return fonts.firstNotNullOfOrNull { handler(it) } ?: Typeface.DEFAULT
     }
 
-    private val fontFamiliyCache = mutableMapOf<String, FontFamily>()
+    private val fontFamilyCache = mutableMapOf<String, FontFamily>()
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun getFontFamily(fontName: String): FontFamily? {
-        if (fontFamiliyCache.containsKey(fontName)) {
-            return fontFamiliyCache[fontName]!!
+        if (fontFamilyCache.containsKey(fontName)) {
+            return fontFamilyCache[fontName]!!
         }
         val fontFile = File(fontDir, fontName)
         if (fontFile.exists()) {
@@ -102,21 +103,15 @@ object FontManager {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun getFontFamilies(key: String): List<FontFamily> {
-        val fonts = ThemeManager.activeTheme.style.getObject(key)
-        val fontFamilies = mutableListOf<FontFamily>()
-
-        fun handler(fontName: String) {
-            getFontFamily(fontName)?.let {
-                fontFamilies.add(it)
+        val fonts =
+            ThemeManager.activeTheme.style.getItem(key).run {
+                return@run when (this) {
+                    is ConfigValue -> listOf(getString())
+                    is ConfigList -> this.mapNotNull { it?.configValue?.getString() }
+                    else -> emptyList()
+                }
             }
-        }
 
-        if (fonts is String) handler(fonts)
-        if (fonts is List<*>) {
-            for (font in fonts as List<String>) {
-                handler(font)
-            }
-        }
-        return fontFamilies
+        return fonts.mapNotNull { getFontFamily(it) }
     }
 }
