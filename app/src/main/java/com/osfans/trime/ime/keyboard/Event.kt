@@ -168,7 +168,7 @@ class Event(var s: String) {
         val theme = ThemeManager.activeTheme
         // 预设按键，如 Return BackSpace
         if (theme.presetKeys!!.containsKey(s)) {
-            val presetKey = theme.presetKeys!![s]
+            val presetKey = theme.presetKeys!![s]?.configMap
             command = obtainString(presetKey, "command", "")
             option = obtainString(presetKey, "option", "")
             select = obtainString(presetKey, "select", "")
@@ -183,9 +183,9 @@ class Event(var s: String) {
             code = sends[0]
             mask = sends[1]
             parseLabel()
-            if (presetKey!!.containsKey("text")) text = presetKey["text"] as String
+            text = presetKey?.getValue("text")?.getString() ?: ""
             if (code < 0 && text.isEmpty()) text = s
-            if (presetKey.containsKey("states")) states = presetKey["states"] as List<String>?
+            states = presetKey?.get("states")?.configList?.map { it!!.configValue.getString() }
             isSticky = obtainBoolean(presetKey, "sticky", false)
             isRepeatable = obtainBoolean(presetKey, "repeatable", false)
             isFunctional = obtainBoolean(presetKey, "functional", true)

@@ -50,16 +50,16 @@ suspend fun Context.colorPicker(
     return CoroutineChoiceDialog(this, themeResId).apply {
         title = getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
-        val all by lazy { ColorManager.getPresetColorSchemes() }
+        val all by lazy { ColorManager.presetColorSchemes }
         onInit {
-            items = all.map { it.second }.toTypedArray()
+            items = all.map { it.value["name"]!! }.toTypedArray()
             val current = ColorManager.selectedColor
-            val schemeIds = all.map { it.first }
+            val schemeIds = all.keys
             checkedItem = schemeIds.indexOf(current).takeIf { it > -1 } ?: 1
         }
         postiveDispatcher = Dispatchers.Default
         onOKButton {
-            val schemeIds = all.map { it.first }
+            val schemeIds = all.keys.toList()
             ColorManager.setColorScheme(schemeIds[checkedItem])
         }
     }.create()

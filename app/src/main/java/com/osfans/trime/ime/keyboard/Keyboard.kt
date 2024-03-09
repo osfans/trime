@@ -29,6 +29,7 @@ import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainInt
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
+import com.osfans.trime.util.config.ConfigMap
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -153,16 +154,12 @@ class Keyboard() {
         height = y + keyHeight
     }
 
-    private fun getKeyboardConfig(name: String): Map<String, Any?>? {
+    private fun getKeyboardConfig(name: String): ConfigMap? {
         val theme = ThemeManager.activeTheme
-        val v = theme.keyboards.getObject(name)
         val keyboardConfig =
-            if (v != null) {
-                v as Map<String, Any?>?
-            } else {
-                theme.keyboards.getObject("default") as Map<String, Any?>?
-            }
-        val importPreset = keyboardConfig?.get("import_preset") as String?
+            theme.keyboards.getMap(name)
+                ?: theme.keyboards.getMap("default")
+        val importPreset = keyboardConfig?.getValue("import_preset")?.getString()
         if (importPreset != null) {
             return getKeyboardConfig(importPreset)
         }
@@ -200,7 +197,13 @@ class Keyboard() {
         // 3. 由于高度只能取整数，缩放后仍然存在余数的，由 auto_height_index 指定的行吸收（遵循四舍五入）
         //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
         val autoHeightIndex = obtainInt(keyboardConfig, "auto_height_index", -1)
-        val lm = keyboardConfig!!["keys"] as List<Map<String, Any>>
+        val lm =
+            keyboardConfig!!["keys"]!!.configList
+                .map {
+                    it!!.configMap.entries.associate { (k, v) ->
+                        k to v!!.configValue.getString()
+                    }
+                }
         horizontalGap =
             appContext.sp(
                 obtainFloat(

@@ -16,7 +16,6 @@ import com.osfans.trime.util.isNightMode
 import splitties.dimensions.dp
 import timber.log.Timber
 import java.io.File
-import java.lang.IllegalArgumentException
 
 object ColorManager {
     private val theme get() = ThemeManager.activeTheme
@@ -71,11 +70,10 @@ object ColorManager {
     private val currentColors: MutableMap<String, Any> = hashMapOf()
 
     /** 获取当前主题所有配色 */
-    fun getPresetColorSchemes(): List<Pair<String, String>> {
-        return theme.presetColorSchemes.map { (key, value) ->
-            Pair(key, value!!["name"] as String)
-        }
-    }
+    val presetColorSchemes get() =
+        theme.presetColorSchemes?.entries?.associate { (k, v) ->
+            k to v!!.configMap.entries.associate { (s, n) -> s to n!!.configValue.getString() }
+        } ?: mapOf()
 
     fun interface OnColorChangeListener {
         fun onColorChange()
@@ -112,15 +110,14 @@ object ColorManager {
         lastDarkColorSchemeId = null
         lastLightColorSchemeId = null
 
-        var colorScheme = prefs.selectedColor
-        if (!theme.presetColorSchemes.containsKey(colorScheme)) colorScheme = theme.style.getString("color_scheme") // 主題中指定的配色
-        if (!theme.presetColorSchemes.containsKey(colorScheme)) colorScheme = "default" // 主題中的default配色
-        // 配色表中没有这个 id
-        if (!theme.presetColorSchemes.containsKey(colorScheme)) {
-            Timber.e("Color scheme %s not found", colorScheme)
-            throw IllegalArgumentException("Color scheme $colorScheme not found!")
-        }
-        selectedColor = colorScheme
+        val selected = prefs.selectedColor
+        val fromStyle = theme.style.getString("color_scheme") // 主題中指定的配色
+        val default = "default" // 主題中的 default 配色
+
+        selectedColor = arrayOf(selected, fromStyle, default)
+            .firstOrNull { presetColorSchemes.containsKey(it) }
+            ?: throw NoSuchElementException("No such color scheme found!")
+
         switchNightMode(isNightMode)
     }
 
@@ -129,7 +126,7 @@ object ColorManager {
      * @param colorSchemeId 配色 id
      * */
     fun setColorScheme(colorSchemeId: String) {
-        if (!theme.presetColorSchemes.containsKey(colorSchemeId)) {
+        if (!presetColorSchemes.containsKey(colorSchemeId)) {
             Timber.w("Color scheme %s not found", colorSchemeId)
             return
         }
@@ -169,7 +166,7 @@ object ColorManager {
      * @return 切换深色/亮色模式后配色的 id
      */
     private fun getColorSchemeId(): String? {
-        val colorMap = theme.presetColorSchemes[selectedColor] as Map<String, Any>
+        val colorMap = presetColorSchemes[selectedColor] as Map<String, Any>
         if (isNightMode) {
             if (colorMap.containsKey("dark_scheme")) {
                 return colorMap["dark_scheme"] as String?
@@ -190,8 +187,8 @@ object ColorManager {
 
     private fun refreshColorValues() {
         currentColors.clear()
-        val colorMap = theme.presetColorSchemes[selectedColor] as Map<String, Any>
-        colorMap.forEach { (key, value) ->
+        val colorMap = presetColorSchemes[selectedColor]
+        colorMap?.forEach { (key, value) ->
             when (key) {
                 "name", "author", "light_scheme", "dark_scheme", "sound" -> {}
                 else -> currentColors[key] = value
@@ -199,7 +196,7 @@ object ColorManager {
         }
         theme.fallbackColors?.forEach { (key, value) ->
             if (!currentColors.containsKey(key)) {
-                if (value != null) currentColors[key] = value
+                if (value != null) currentColors[key] = value.configValue.getString()
             }
         }
         defaultFallbackColors.forEach { (key, value) ->
@@ -229,7 +226,7 @@ object ColorManager {
         }
 
         // sound
-        if (colorMap.containsKey("sound")) currentColors["sound"] = colorMap["sound"]!!
+        if (colorMap?.containsKey("sound") == true) currentColors["sound"] = colorMap["sound"]!!
     }
 
     /** 获取参数的真实value，如果是色彩返回int，如果是背景图返回drawable，都不是则进行 fallback
@@ -341,7 +338,7 @@ object ColorManager {
     ): Drawable? {
         val value = getColorValue(key)
         if (value is Drawable) {
-            if (alphaKey.isNotEmpty() && theme.style.getObject(alphaKey) != null) {
+            if (alphaKey.isNotEmpty() && theme.style.getString(alphaKey).isNotEmpty()) {
                 value.alpha = theme.style.getInt(alphaKey).coerceIn(0, 255)
             }
             return value
@@ -359,7 +356,7 @@ object ColorManager {
                     gradient.setStroke(border.toInt(), stroke)
                 }
             }
-            if (alphaKey.isNotEmpty() && theme.style.getObject(alphaKey) != null) {
+            if (alphaKey.isNotEmpty() && theme.style.getString(alphaKey).isNotEmpty()) {
                 gradient.alpha = theme.style.getInt(alphaKey).coerceIn(0, 255)
             }
             return gradient
