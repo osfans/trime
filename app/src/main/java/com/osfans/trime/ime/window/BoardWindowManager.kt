@@ -3,6 +3,7 @@ package com.osfans.trime.ime.window
 import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
+import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
@@ -15,6 +16,7 @@ import timber.log.Timber
 @Inject
 class BoardWindowManager(
     private val context: Context,
+    private val broadcaster: InputBroadcaster,
 ) {
     private val cachedResidentWindows = mutableMapOf<ResidentWindow.Key, Pair<BoardWindow, View?>>()
 
@@ -52,6 +54,7 @@ class BoardWindowManager(
                 cachedResidentWindows[window.key]?.second ?: window.onCreateView()
                     .also { cachedResidentWindows[window.key] = window to it }
             } else {
+                broadcaster.addReceiver(window)
                 window.onCreateView()
             }
         if (currentWindow != null) {
@@ -60,6 +63,9 @@ class BoardWindowManager(
             oldWindow.onDetached()
             view.removeView(oldView)
             Timber.d("Detach $oldWindow")
+            if (oldWindow !is ResidentWindow) {
+                broadcaster.removeReceiver(oldWindow)
+            }
         }
         if (window is ResidentWindow) {
             window.beforeAttached()
