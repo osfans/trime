@@ -34,6 +34,7 @@ import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.PopupWindow
 import com.osfans.trime.core.Rime
@@ -51,6 +52,8 @@ import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.systemservices.layoutInflater
 import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
+import splitties.views.gravityBottomCenter
 import timber.log.Timber
 import java.util.Arrays
 import kotlin.math.abs
@@ -172,7 +175,7 @@ class KeyboardView
         // private Drawable mBackground;
         private val mPreviewText =
             textView {
-                textSize = sp(theme.style.getFloat("preview_text_size"))
+                textSize = theme.style.getFloat("preview_text_size")
                 typeface = FontManager.getTypeface("preview_font")
                 ColorManager.getColor("preview_text_color")?.let { setTextColor(it) }
                 ColorManager.getColor("preview_back_color")?.let {
@@ -182,6 +185,8 @@ class KeyboardView
                             cornerRadius = theme.style.getFloat("round_corner")
                         }
                 }
+                gravity = gravityBottomCenter
+                layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
             }
         private val mPreviewPopup =
             PopupWindow(context).apply {
@@ -365,7 +370,7 @@ class KeyboardView
                 val mKeyboardView = getOwnerInstanceOrNull() ?: return
                 when (msg.what) {
                     MSG_SHOW_PREVIEW -> mKeyboardView.showKey(msg.arg1, msg.arg2)
-                    MSG_REMOVE_PREVIEW -> mKeyboardView.mPreviewText.visibility = INVISIBLE
+                    MSG_REMOVE_PREVIEW -> mKeyboardView.mPreviewPopup.dismiss()
                     MSG_REPEAT ->
                         if (mKeyboardView.repeatKey()) {
                             val repeat = Message.obtain(this, MSG_REPEAT)
