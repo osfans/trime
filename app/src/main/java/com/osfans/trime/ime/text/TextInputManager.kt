@@ -213,15 +213,15 @@ class TextInputManager private constructor() :
             }
         }
 
-        private fun handleRimeNotification(notification: RimeNotification) {
+        private fun handleRimeNotification(notification: RimeNotification<*>) {
             if (notification is RimeNotification.SchemaNotification) {
-                SchemaManager.init(notification.schemaId)
+                SchemaManager.init(notification.value.schemaId)
                 Rime.updateStatus()
                 trime.recreateInputView()
             } else if (notification is RimeNotification.OptionNotification) {
                 Rime.updateContext() // 切換中英文、簡繁體時更新候選
-                val value = notification.value
-                when (val option = notification.option) {
+                val value = notification.value.value
+                when (val option = notification.value.option) {
                     "ascii_mode" -> {
                         InputFeedbackManager.ttsLanguage =
                             locales[if (value) 1 else 0]

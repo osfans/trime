@@ -52,7 +52,7 @@ class Rime(fullCheck: Boolean) {
         private var mStatus: RimeStatus? = null
         private var isHandlingRimeNotification = false
         private val notificationFlow_ =
-            MutableSharedFlow<RimeNotification>(
+            MutableSharedFlow<RimeNotification<*>>(
                 extraBufferCapacity = 15,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
