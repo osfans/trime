@@ -3,6 +3,7 @@ package com.osfans.trime.data.schema
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import kotlinx.serialization.builtins.ListSerializer
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
@@ -16,6 +17,7 @@ object SchemaManager {
     fun init(schemaId: String) {
         currentSchema = runCatching { Schema(schemaId) }.getOrDefault(defaultSchema)
         visibleSwitches = currentSchema.switches
+            ?.decode(ListSerializer(Schema.Switch.serializer()))
             ?.filter { !it.states.isNullOrEmpty() } ?: listOf() // 剔除没有 states 条目项的值，它们不作为开关使用
         updateSwitchOptions()
     }
