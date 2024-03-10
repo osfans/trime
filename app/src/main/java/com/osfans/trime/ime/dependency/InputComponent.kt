@@ -17,8 +17,8 @@ abstract class InputComponent(
     @get:InputScope @get:Provides val themedContext: Context,
     @get:InputScope @get:Provides val theme: Theme,
     @get:InputScope @get:Provides val service: TrimeInputMethodService,
-    @get:InputScope @get:Provides val broadcaster: InputBroadcaster,
 ) {
+    abstract val broadcaster: InputBroadcaster
     abstract val quickBar: QuickBar
     abstract val windowManager: BoardWindowManager
     abstract val keyboardWindow: KeyboardWindow
