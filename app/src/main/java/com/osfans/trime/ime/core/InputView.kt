@@ -87,6 +87,7 @@ class InputView(
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     private val inputComponent = InputComponent::class.create(themedContext, theme, service)
+    private val windowManager = inputComponent.windowManager
     val quickBar: QuickBar = inputComponent.quickBar
     val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
     val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
@@ -126,6 +127,9 @@ class InputView(
                 }
             }
 
+        windowManager.cacheResidentWindow(keyboardWindow, createView = true)
+        windowManager.cacheResidentWindow(liquidKeyboard)
+
         service.window.window!!.also { it ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 shouldUpdateNavbarForeground = true
@@ -153,8 +157,6 @@ class InputView(
                 }
             }
         }
-
-        liquidKeyboard.setKeyboardView(keyboardWindow.oldSymbolInputView.liquidKeyboardView)
 
         keyboardBackground.imageDrawable = ColorManager.getDrawable("keyboard_background")
             ?: ColorManager.getDrawable("keyboard_back_color")
@@ -192,7 +194,7 @@ class InputView(
                     },
                 )
                 add(
-                    keyboardWindow.view,
+                    windowManager.view,
                     lParams(matchParent, wrapContent) {
                         below(quickBar.view)
                         above(bottomPaddingSpace)
@@ -229,7 +231,7 @@ class InputView(
             // hide side padding space views when unnecessary
             leftPaddingSpace.visibility = View.GONE
             rightPaddingSpace.visibility = View.GONE
-            keyboardWindow.view.updateLayoutParams<LayoutParams> {
+            windowManager.view.updateLayoutParams<LayoutParams> {
                 startToEnd = unset
                 endToStart = unset
                 startOfParent()
@@ -244,7 +246,7 @@ class InputView(
             rightPaddingSpace.updateLayoutParams {
                 width = sidePadding
             }
-            keyboardWindow.view.updateLayoutParams<LayoutParams> {
+            windowManager.view.updateLayoutParams<LayoutParams> {
                 startToStart = unset
                 endToEnd = unset
                 startToEndOf(leftPaddingSpace)
@@ -273,6 +275,9 @@ class InputView(
             }
         }
         keyboardWindow.oldMainInputView.mainKeyboardView.updateEnterLabelOnEditorInfo(info)
+        if (!restarting) {
+            windowManager.attachWindow(KeyboardWindow)
+        }
     }
 
     private fun handleRimeNotification(it: RimeNotification) {
@@ -297,9 +302,18 @@ class InputView(
         }
     }
 
-    fun switchUiByState(state: KeyboardWindow.State) {
-        keyboardWindow.switchUiByState(state)
-        quickBar.switchUiByState(QuickBar.State.entries[state.ordinal])
+    enum class Board {
+        Main,
+        Symbol,
+    }
+
+    fun switchBoard(board: Board) {
+        when (board) {
+            Board.Main -> windowManager.attachWindow(keyboardWindow)
+            Board.Symbol -> windowManager.attachWindow(liquidKeyboard)
+        }
+        quickBar.switchUiByState(QuickBar.State.entries[board.ordinal])
+        updateKeyboardSize()
     }
 
     private var showingDialog: Dialog? = null

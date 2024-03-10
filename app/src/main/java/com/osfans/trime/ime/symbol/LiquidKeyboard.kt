@@ -2,10 +2,10 @@ package com.osfans.trime.ime.symbol
 
 import android.app.AlertDialog
 import android.content.Context
+import android.view.View
 import androidx.core.view.setPadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -24,11 +24,20 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.TextInputManager
+import com.osfans.trime.ime.window.BoardWindow
+import com.osfans.trime.ime.window.ResidentWindow
 import com.osfans.trime.util.ShortcutUtils
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
+import splitties.views.dsl.constraintlayout.centerInParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.recyclerview.recyclerView
 import timber.log.Timber
 
 @InputScope
@@ -37,8 +46,7 @@ class LiquidKeyboard(
     private val context: Context,
     private val service: TrimeInputMethodService,
     private val theme: Theme,
-) : ClipboardHelper.OnClipboardUpdateListener {
-    private lateinit var keyboardView: RecyclerView
+) : BoardWindow.NoBarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
     private val symbolHistory = SymbolHistory(180)
     private var adapterType: AdapterType = AdapterType.INIT
     private val simpleAdapter by lazy {
@@ -68,14 +76,32 @@ class LiquidKeyboard(
         CandidateAdapter(theme)
     }
 
-    fun setKeyboardView(view: RecyclerView) {
-        keyboardView =
-            view.apply {
-                val space = view.dp(3)
-                addItemDecoration(SpacesItemDecoration(space))
-                setPadding(space)
-            }
+    companion object : ResidentWindow.Key
+
+    override val key: ResidentWindow.Key
+        get() = LiquidKeyboard
+
+    private val keyboardView =
+        context.recyclerView {
+            val space = dp(3)
+            addItemDecoration(SpacesItemDecoration(space))
+            setPadding(space)
+        }
+
+    override fun onCreateView(): View {
+        return context.constraintLayout {
+            add(
+                keyboardView,
+                lParams(matchParent, KeyboardSwitcher.currentKeyboard.keyboardHeight) {
+                    centerInParent()
+                },
+            )
+        }
     }
+
+    override fun onAttached() {}
+
+    override fun onDetached() {}
 
 // 及时更新layoutManager, 以防在旋转屏幕后打开液体键盘crash
 
