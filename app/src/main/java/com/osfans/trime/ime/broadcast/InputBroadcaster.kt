@@ -2,9 +2,11 @@ package com.osfans.trime.ime.broadcast
 
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.ime.dependency.InputScope
+import me.tatarka.inject.annotations.Inject
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @InputScope
+@Inject
 class InputBroadcaster : InputBroadcastReceiver {
     private val receivers = ConcurrentLinkedQueue<InputBroadcastReceiver>()
 

@@ -21,7 +21,6 @@ import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
-import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -87,8 +86,8 @@ class InputView(
     private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    private val broadcaster = InputBroadcaster()
-    private val inputComponent = InputComponent::class.create(themedContext, theme, service, broadcaster)
+    private val inputComponent = InputComponent::class.create(themedContext, theme, service)
+    private val broadcaster = inputComponent.broadcaster
     private val windowManager = inputComponent.windowManager
     val quickBar: QuickBar = inputComponent.quickBar
     val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
