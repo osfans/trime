@@ -105,7 +105,10 @@ class Keyboard() {
         private set
     var asciiKeyboard: String? = null // 英文鍵盤
         private set
+
     // todo 把按下按键弹出的内容改为单独设计的view，而不是keyboard
+    var keyboardHeight: Int = 0
+        private set
 
     /**
      * Creates a blank keyboard from the given resource file and populates it with the specified
@@ -222,7 +225,7 @@ class Keyboard() {
             )
         val horizontalGap = horizontalGap
         val verticalGap = verticalGap
-        val keyboardHeight = getKeyboardHeight(theme, keyboardConfig)
+        keyboardHeight = getKeyboardHeight(theme, keyboardConfig)
         val keyboardKeyWidth = obtainFloat(keyboardConfig, "width", 0f)
         val maxColumns = if (columns == -1) Int.MAX_VALUE else columns
         var x = this.horizontalGap / 2

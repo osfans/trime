@@ -62,7 +62,6 @@ import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
-import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.symbol.TabView
 import com.osfans.trime.ime.text.Candidate
@@ -230,7 +229,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
-            val context: InputMethodService = this
             ColorManager.addOnChangedListener(onColorChangeListener)
             RimeWrapper.startup {
                 Timber.d("Running Trime.onCreate")
@@ -267,7 +265,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     fun selectLiquidKeyboard(tabIndex: Int) {
         if (inputView == null) return
         if (tabIndex >= 0) {
-            inputView!!.switchUiByState(KeyboardWindow.State.Symbol)
+            inputView!!.switchBoard(InputView.Board.Symbol)
             symbolKeyboardType = inputView!!.liquidKeyboard.select(tabIndex)
             tabView!!.updateTabWidth()
             mTabRoot!!.move(tabView!!.highlightLeft, tabView!!.highlightRight)
@@ -277,7 +275,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             symbolKeyboardType = SymbolKeyboardType.NO_KEY
             // 设置液体键盘处于隐藏状态
             TabManager.setTabExited()
-            inputView!!.switchUiByState(KeyboardWindow.State.Main)
+            inputView!!.switchBoard(InputView.Board.Main)
             updateComposing()
         }
     }
