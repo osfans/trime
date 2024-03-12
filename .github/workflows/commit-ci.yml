@@ -11,7 +11,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-13
+          - macos-14
           - windows-2022
     env:
       BUILD_ABI: armeabi-v7a,arm64-v8a,x86,x86_64
