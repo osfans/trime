@@ -31,7 +31,7 @@ jobs:
       - name: Install macOS utils
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install coreutils clang-format
+          brew update && brew install coreutils clang-format python
 
       - name: Setup Java
         uses: actions/setup-java@v4
