@@ -43,6 +43,8 @@ object TabManager {
     }
 
     fun refresh() {
+        reset()
+
         val available = theme.liquid.getList("keyboards") ?: return
         for (item in available) {
             val id = item?.configValue?.getString() ?: ""
@@ -54,11 +56,16 @@ object TabManager {
             val keys = keyboard["keys"]
             addTabHasKeys(name, type, keys)
         }
-        tabSwitchData.clear()
         tabSwitchData.addAll(
             tabTags.filter { SymbolKeyboardType.hasKeys(it.type) }
                 .map { SimpleKeyBean(it.text) },
         )
+    }
+
+    private fun reset() {
+        tabTags.clear()
+        keyboards.clear()
+        tabSwitchData.clear()
     }
 
     private fun addListTab(
