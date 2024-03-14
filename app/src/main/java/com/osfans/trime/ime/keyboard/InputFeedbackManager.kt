@@ -82,7 +82,7 @@ object InputFeedbackManager {
                     HapticFeedbackConstants.KEYBOARD_TAP
                 }
 
-            if (duration != 0L) { // use vibrator
+            if (duration > 0L) { // use vibrator
                 if (hasAmplitudeControl && amplitude != 0) {
                     vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
                 } else {
