@@ -309,7 +309,6 @@ class InputView(
             Board.Symbol -> windowManager.attachWindow(liquidKeyboard)
         }
         quickBar.switchUiByState(QuickBar.State.entries[board.ordinal])
-        updateKeyboardSize()
     }
 
     private var showingDialog: Dialog? = null
