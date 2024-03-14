@@ -1515,7 +1515,7 @@ class KeyboardView
                     )
                     isClickAtLast = true
                 }
-                invalidateKey(keyIndex)
+                invalidateAllKeys()
                 mRepeatKeyIndex = NOT_A_KEY
                 return false
             }
