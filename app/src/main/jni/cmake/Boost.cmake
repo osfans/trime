@@ -24,7 +24,6 @@ endif()
 set(BOOST_INCLUDE_LIBRARIES
     algorithm
     crc
-    date_time
     dll
     interprocess
     range
@@ -34,9 +33,6 @@ set(BOOST_INCLUDE_LIBRARIES
     utility
     uuid
     # librime-charcode
-    locale
-    asio
-    # librime-lua
-    optional)
+    locale)
 
 add_subdirectory(boost EXCLUDE_FROM_ALL)

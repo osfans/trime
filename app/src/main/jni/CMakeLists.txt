@@ -6,7 +6,7 @@ project(trime-lib VERSION 3.0.0)
 add_link_options("LINKER:--hash-style=gnu,--build-id=none")
 
 set(ANDROID_STL c++_shared)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
