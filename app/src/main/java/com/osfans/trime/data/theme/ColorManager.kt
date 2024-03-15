@@ -122,19 +122,28 @@ object ColorManager {
     }
 
     /**
-     * 切换到指定配色，切换成功后写入 AppPrefs
+     * 切换到指定配色后，写入 AppPrefs
      * @param colorSchemeId 配色 id
      * */
     fun setColorScheme(colorSchemeId: String) {
+        switchColorScheme(colorSchemeId)
+        selectedColor = colorSchemeId
+        prefs.selectedColor = colorSchemeId
+    }
+
+    /**
+     * 切换到指定配色
+     * @param colorSchemeId 配色 id
+     * */
+    private fun switchColorScheme(colorSchemeId: String) {
         if (!presetColorSchemes.containsKey(colorSchemeId)) {
             Timber.w("Color scheme %s not found", colorSchemeId)
             return
         }
         Timber.d("switch color scheme from %s to %s", selectedColor, colorSchemeId)
-        selectedColor = colorSchemeId
         // 刷新配色
         val isFirst = currentColors.isEmpty()
-        refreshColorValues()
+        refreshColorValues(colorSchemeId)
         if (isNightMode) {
             lastDarkColorSchemeId = colorSchemeId
         } else {
@@ -148,7 +157,6 @@ object ColorManager {
                 Timber.d("Initialization finished")
             }
         }
-        prefs.selectedColor = colorSchemeId
         if (!isFirst) fireChange()
     }
 
@@ -156,7 +164,7 @@ object ColorManager {
     private fun switchNightMode(isNightMode: Boolean) {
         this.isNightMode = isNightMode
         val newId = getColorSchemeId()
-        if (newId != null) setColorScheme(newId)
+        if (newId != null) switchColorScheme(newId)
         Timber.d(
             "System changing color, current ColorScheme: $selectedColor, isDarkMode=$isNightMode",
         )
@@ -185,9 +193,9 @@ object ColorManager {
         return selectedColor
     }
 
-    private fun refreshColorValues() {
+    private fun refreshColorValues(colorSchemeId: String) {
         currentColors.clear()
-        val colorMap = presetColorSchemes[selectedColor]
+        val colorMap = presetColorSchemes[colorSchemeId]
         colorMap?.forEach { (key, value) ->
             when (key) {
                 "name", "author", "light_scheme", "dark_scheme", "sound" -> {}
