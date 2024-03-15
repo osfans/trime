@@ -72,10 +72,16 @@ object OpenCCDictManager {
     fun buildOpenCCDict() {
         for (d in getAllDictionaries()) {
             if (d is TextDictionary) {
-                val result: OpenCCDictionary
+                val result: Result<OpenCCDictionary>
                 measureTimeMillis {
-                    result = d.toOpenCCDictionary()
-                }.also { Timber.d("Took $it to convert to $result") }
+                    result = runCatching { d.toOpenCCDictionary() }
+                }.also {
+                    result.onSuccess { r ->
+                        Timber.d("Took $it to convert to $r")
+                    }.onFailure {
+                        Timber.e(it, "Failed to convert $d")
+                    }
+                }
             }
         }
     }
