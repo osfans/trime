@@ -7,51 +7,18 @@ class OpenCCDictionary(file: File) : Dictionary() {
     override var file: File = file
         private set
 
-    var isOCD2: Boolean = true
-        private set
-
-    override val type: Type = Type.OPENCC
-
-    override val name: String
-        get() =
-            if (isOCD2) {
-                super.name
-            } else {
-                file.name.substringBefore("")
-            }
+    override val type: Type =
+        if (file.extension == NEW_FORMAT) {
+            Type.OCD2
+        } else {
+            Type.OCD
+        }
 
     init {
         ensureFileExists()
-        isOCD2 =
-            when {
-                file.extension == type.ext -> {
-                    true
-                }
-                file.name.endsWith(".$OLD_FORMAT") -> {
-                    false
-                }
-                else -> throw IllegalArgumentException("Not a libime dict ${file.name}")
-            }
-    }
-
-    fun useOCD2() {
-        if (isOCD2) {
-            return
+        if (file.extension != type.ext) {
+            throw IllegalArgumentException("Not a OpenCC dict ${file.name}")
         }
-        val newFile = file.resolveSibling(name + ".${type.ext}")
-        file.renameTo(newFile)
-        file = newFile
-        isOCD2 = true
-    }
-
-    fun useOCD() {
-        if (!isOCD2) {
-            return
-        }
-        val newFile = file.resolveSibling(name + ".$OLD_FORMAT")
-        file.renameTo(newFile)
-        file = newFile
-        isOCD2 = false
     }
 
     override fun toTextDictionary(dest: File): TextDictionary {
@@ -71,6 +38,7 @@ class OpenCCDictionary(file: File) : Dictionary() {
     }
 
     companion object {
+        const val NEW_FORMAT = "ocd2"
         const val OLD_FORMAT = "ocd"
     }
 }

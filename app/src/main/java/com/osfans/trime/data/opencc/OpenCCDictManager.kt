@@ -48,8 +48,6 @@ object OpenCCDictManager {
             (sharedDictionaries() + userDictionaries())
         }
 
-    fun openCCDictionaries(): List<OpenCCDictionary> = getAllDictionaries().mapNotNull { it as? OpenCCDictionary }
-
     fun importFromFile(file: File): OpenCCDictionary {
         val raw =
             Dictionary.new(file)
@@ -60,7 +58,7 @@ object OpenCCDictManager {
             raw.toOpenCCDictionary(
                 File(
                     userDir,
-                    file.nameWithoutExtension + ".${Dictionary.Type.OPENCC.ext}",
+                    file.nameWithoutExtension + ".${Dictionary.Type.OCD2.ext}",
                 ),
             )
         Timber.d("Converted $raw to $new")
@@ -127,6 +125,6 @@ object OpenCCDictManager {
     @JvmStatic
     external fun getOpenCCVersion(): String
 
-    const val MODE_BIN_TO_TXT = true // OCD2 to TXT
+    const val MODE_BIN_TO_TXT = true // OCD(2) to TXT
     const val MODE_TXT_TO_BIN = false // TXT to OCD2
 }
