@@ -1,0 +1,892 @@
+{
+  "$id": "https://github.com/osfans/trime/blob/develop/doc/trime-schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "config_version": {
+      "type": "string",
+      "pattern": "\\d+(\\.\\d+)*",
+      "description": "config version"
+    },
+    "name": {
+      "type": "string",
+      "description": "方案名稱"
+    },
+    "author": {
+      "type": "string",
+      "description": "作者資訊"
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "auto_caps": {
+          "enum": [true, false, "ascii"],
+          "default": false,
+          "description": "自动句首大写"
+        },
+        "background_dim_amount": {
+          "type": "number",
+          "description": "备用参数，暂无功能"
+        },
+        "candidate_font": {
+          "type": "string",
+          "description": "候選字型"
+        },
+        "candidate_padding": {
+          "type": "integer",
+          "description": "候選項內邊距"
+        },
+        "candidate_spacing": {
+          "type": "number",
+          "description": "候選間距"
+        },
+        "candidate_text_size": {
+          "type": "integer",
+          "description": "候選字號"
+        },
+        "candidate_use_cursor": {
+          "type": "boolean",
+          "description": "高亮候選項"
+        },
+        "candidate_view_height": {
+          "type": "integer",
+          "description": "候選區高度"
+        },
+        "color_scheme": {
+          "type": "string",
+          "description": "配色方案"
+        },
+        "comment_font": {
+          "type": "string",
+          "description": "編碼提示字型"
+        },
+        "comment_height": {
+          "type": "integer",
+          "description": "編碼提示區高度"
+        },
+        "comment_on_top": {
+          "type": "boolean",
+          "description": "編碼提示在上方或右側"
+        },
+        "comment_text_size": {
+          "type": "integer",
+          "description": "編碼提示字號"
+        },
+        "hanb_font": {
+          "type": "string",
+          "description": "擴充字型"
+        },
+        "horizontal": {
+          "type": "boolean",
+          "description": "水平模式"
+        },
+        "horizontal_gap": {
+          "type": "integer",
+          "description": "鍵水平間距"
+        },
+        "keyboard_padding": {
+          "type": "integer",
+          "description": "竖屏模式下，屏幕左右两侧与键盘的距离（曲面屏减少误触）"
+        },
+        "keyboard_padding_left": {
+          "type": "integer",
+          "description": "竖屏屏模式下，左手键盘布局，屏幕左侧与键盘的距离"
+        },
+        "keyboard_padding_right": {
+          "type": "integer",
+          "description": "竖屏屏模式下，左手键盘布局，屏幕右侧与键盘的距离"
+        },
+        "keyboard_padding_bottom": {
+          "type": "integer",
+          "description": "竖屏模式下，屏幕下边缘与键盘的距离（避免误触发全面屏手势）"
+        },
+        "keyboard_padding_land": {
+          "type": "integer",
+          "description": "横屏模式下，屏幕左右两侧与键盘的距离（避免横屏按键过度拉伸变形）"
+        },
+        "keyboard_padding_land_bottom": {
+          "type": "integer",
+          "description": "横屏模式下，屏幕下侧与键盘的距离"
+        },
+        "layout": {
+          "type": "object",
+          "description": "懸浮窗口設置",
+          "properties": {
+            "position": {
+              "enum": [
+                "left",
+                "right",
+                "left_up",
+                "right_up",
+                "fixed",
+                "bottom_left",
+                "bottom_right",
+                "top_left",
+                "top_right"
+              ],
+              "description": "位置 (left、right需要>=Android5.0)"
+            },
+            "min_length": {
+              "type": "integer",
+              "description": "最小詞長"
+            },
+            "max_length": {
+              "type": "integer",
+              "description": "超過字數則換行"
+            },
+            "sticky_lines": {
+              "type": "integer",
+              "description": "固頂行數"
+            },
+            "sticky_lines_land": {
+              "type": "integer",
+              "description": "横屏模式下的固顶行数"
+            },
+            "max_entries": {
+              "type": "integer",
+              "description": "最大詞條數"
+            },
+            "min_check": {
+              "type": "integer",
+              "description": "只要前n个候选词有长度大于等于min_length的词，就会把长度符合以及之前的词全部加到悬浮窗内"
+            },
+            "all_phrases": {
+              "type": "boolean",
+              "default": false,
+              "description": "所有滿足條件的詞語都顯示在窗口"
+            },
+            "border": {
+              "type": "integer",
+              "description": "邊框寬度"
+            },
+            "max_width": {
+              "type": "integer",
+              "description": "最大寬度，超過則自動換行"
+            },
+            "max_height": {
+              "type": "integer",
+              "description": "最大高度"
+            },
+            "min_width": {
+              "type": "integer",
+              "description": "最小寬度"
+            },
+            "min_height": {
+              "type": "integer",
+              "description": "最小高度"
+            },
+            "margin_x": {
+              "type": "integer",
+              "description": "水平邊距"
+            },
+            "margin_y": {
+              "type": "integer",
+              "description": "豎直邊距"
+            },
+            "margin_bottom": {
+              "type": "integer",
+              "description": "底部边距 （用于适配特定背景图）"
+            },
+            "line_spacing": {
+              "type": "integer",
+              "description": "候选詞的行間距(px)"
+            },
+            "line_spacing_multiplier": {
+              "type": "number",
+              "description": "候选詞的行間距(倍數)"
+            },
+            "real_margin": {
+              "type": "integer",
+              "description": "屏幕左右边缘和悬浮窗之间的距离"
+            },
+            "spacing": {
+              "type": "integer",
+              "description": "屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离"
+            },
+            "round_corner": {
+              "type": "integer",
+              "description": "窗口圓角"
+            },
+            "alpha": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255,
+              "description": "透明度"
+            },
+            "elevation": {
+              "type": "integer",
+              "description": "陰影(>=Android5.0)"
+            },
+            "movable": {
+              "enum": [true, false, "once"],
+              "description": "是否可移動窗口，或僅移動一次"
+            }
+          }
+        },
+        "window": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "default": ""
+              },
+              "end": {
+                "type": "string",
+                "default": ""
+              },
+              "move": {
+                "type": "string",
+                "default": ""
+              },
+              "composition": {
+                "type": "string",
+                "default": ""
+              },
+              "label": {
+                "type": "string",
+                "default": ""
+              },
+              "candidate": {
+                "type": "string",
+                "default": ""
+              },
+              "comment": {
+                "type": "string",
+                "default": ""
+              },
+              "sep": {
+                "type": "string",
+                "default": ""
+              },
+              "letter_spacing": {
+                "type": "number",
+                "default": 0
+              }
+            }
+          }
+        },
+        "liquid_keyboard_window": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "default": ""
+              },
+              "click": {
+                "type": "string",
+                "default": ""
+              },
+              "label": {
+                "oneOf": [{ "type": "string" }, { "type": "integer" }],
+                "default": ""
+              }
+            }
+          }
+        },
+        "key_font": {
+          "type": "string",
+          "description": "鍵盤字型"
+        },
+        "key_height": {
+          "type": "integer",
+          "description": "鍵高"
+        },
+        "key_long_text_size": {
+          "type": "integer",
+          "description": "長標籤字號"
+        },
+        "key_text_size": {
+          "type": "integer",
+          "description": "鍵字號"
+        },
+        "key_width": {
+          "type": "number",
+          "description": "鍵寬，佔螢幕寬的百分比"
+        },
+        "keyboards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "鍵盤配置"
+        },
+        "label_text_size": {
+          "type": "integer",
+          "description": "標籤字號"
+        },
+        "label_font": {
+          "type": "string",
+          "description": "編標籤字型"
+        },
+        "latin_font": {
+          "type": "string",
+          "description": "西文字型"
+        },
+        "latin_locale": {
+          "type": "string",
+          "description": "西文語言"
+        },
+        "locale": {
+          "type": "string",
+          "enum": ["zh_TW", "zh_CN", "zh_HK", ""],
+          "description": "預設語言"
+        },
+        "keyboard_height": {
+          "type": "integer",
+          "description": "锁定键盘高度，避免切换时键盘高度变化而造成闪烁"
+        },
+        "keyboard_height_land": {
+          "type": "integer",
+          "description": "锁定横屏下键盘高度，避免切换时键盘高度变化而造成闪烁"
+        },
+        "preview_font": {
+          "type": "string",
+          "description": "按鍵提示字型"
+        },
+        "preview_height": {
+          "type": "integer",
+          "description": "按鍵提示高度"
+        },
+        "preview_offset": {
+          "type": "integer",
+          "default": "-12",
+          "description": "按鍵提示縱向偏移"
+        },
+        "preview_text_size": {
+          "type": "integer",
+          "description": "按鍵提示字號"
+        },
+        "proximity_correction": {
+          "type": "boolean",
+          "description": "按鍵糾錯"
+        },
+        "reset_ascii_mode": {
+          "type": "boolean",
+          "description": "顯示鍵盤時重置爲中文狀態"
+        },
+        "round_corner": {
+          "type": "number",
+          "description": "按鍵圓角半徑"
+        },
+        "shadow_radius": {
+          "type": "number",
+          "description": "按鍵陰影半徑"
+        },
+        "speech_opencc_config": {
+          "type": "string",
+          "description": "語音輸入簡繁轉換"
+        },
+        "symbol_font": {
+          "type": "string",
+          "description": "符號字型"
+        },
+        "symbol_text_size": {
+          "type": "integer",
+          "description": "編碼字型"
+        },
+        "text_height": {
+          "type": "integer",
+          "description": "編碼區高度"
+        },
+        "text_size": {
+          "type": "integer",
+          "description": "編碼區字號"
+        },
+        "vertical_correction": {
+          "type": "number",
+          "default": "-10",
+          "description": "触摸位置校正（竖直方向）。为了提升打字手感，可将按键的实际触摸位置相对其显示位置上下偏移一点点"
+        },
+        "vertical_gap": {
+          "type": "number",
+          "description": "鍵盤行距"
+        },
+        "long_text_font": {
+          "type": "string",
+          "description": "剪贴板等可能包含大段文本使用的字体"
+        },
+        "background_folder": {
+          "type": "string",
+          "description": "背景图保存在background目录下的哪个子目录"
+        },
+        "key_long_text_border": {
+          "type": "string",
+          "description": ""
+        },
+        "enter_label_mode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "是否使用App提供的ActionLabel内容作为Enter键的文本（由于多数App没有适配ActionLable，实际影响不大）。0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel"
+        },
+        "enter_labels": {
+          "type": "object",
+          "description": "定义Enter键的文本",
+          "properties": {
+            "go": {
+              "type": "string",
+              "default": "前往"
+            },
+            "done": {
+              "type": "string",
+              "default": "完成"
+            },
+            "next": {
+              "type": "string",
+              "default": "下个"
+            },
+            "pre": {
+              "type": "string",
+              "default": "上个"
+            },
+            "search": {
+              "type": "string",
+              "default": "搜索"
+            },
+            "send": {
+              "type": "string",
+              "default": "发送"
+            },
+            "default": {
+              "type": "string",
+              "default": "Enter"
+            }
+          }
+        }
+      }
+    },
+    "fallback_colors": {
+      "type": "object",
+      "properties": {
+        "candidate_text_color": {
+          "type": "string",
+          "default": "text_color"
+        },
+        "comment_text_color": {
+          "type": "string",
+          "default": "candidate_text_color"
+        },
+        "border_color": { "type": "string", "default": "back_color" },
+        "candidate_separator_color": {
+          "type": "string",
+          "default": "border_color"
+        },
+        "hilited_text_color": { "type": "string", "default": "text_color" },
+        "hilited_back_color": { "type": "string", "default": "back_color" },
+        "hilited_candidate_text_color": {
+          "type": "string",
+          "default": "hilited_text_color"
+        },
+        "hilited_candidate_back_color": {
+          "type": "string",
+          "default": "hilited_back_color"
+        },
+        "hilited_label_color": {
+          "type": "string",
+          "default": "hilited_candidate_text_color",
+          "description": "高亮候选序号"
+        },
+        "hilited_comment_text_color": {
+          "type": "string",
+          "default": "comment_text_color"
+        },
+        "hilited_key_back_color": {
+          "type": "string",
+          "default": "hilited_candidate_back_color"
+        },
+        "hilited_key_text_color": {
+          "type": "string",
+          "default": "hilited_candidate_text_color"
+        },
+        "hilited_key_symbol_color": {
+          "type": "string",
+          "default": "hilited_comment_text_color"
+        },
+        "hilited_off_key_back_color": {
+          "type": "string",
+          "default": "hilited_key_back_color"
+        },
+        "hilited_on_key_back_color": {
+          "type": "string",
+          "default": "hilited_key_back_color"
+        },
+        "hilited_off_key_text_color": {
+          "type": "string",
+          "default": "hilited_key_text_color"
+        },
+        "hilited_on_key_text_color": {
+          "type": "string",
+          "default": "hilited_key_text_color"
+        },
+        "key_back_color": { "type": "string", "default": "back_color" },
+        "key_border_color": { "type": "string", "default": "border_color" },
+        "key_text_color": {
+          "type": "string",
+          "default": "candidate_text_color"
+        },
+        "key_symbol_color": {
+          "type": "string",
+          "default": "comment_text_color"
+        },
+        "label_color": { "type": "string", "default": "candidate_text_color" },
+        "off_key_back_color": { "type": "string", "default": "key_back_color" },
+        "off_key_text_color": { "type": "string", "default": "key_text_color" },
+        "on_key_back_color": {
+          "type": "string",
+          "default": "hilited_key_back_color"
+        },
+        "on_key_text_color": {
+          "type": "string",
+          "default": "hilited_key_text_color"
+        },
+        "preview_back_color": { "type": "string", "default": "key_back_color" },
+        "preview_text_color": { "type": "string", "default": "key_text_color" },
+        "shadow_color": { "type": "string", "default": "border_color" },
+        "root_background": {
+          "type": "string",
+          "default": "back_color",
+          "description": "整个键盘区+候选栏的背景图/色"
+        },
+        "candidate_background": {
+          "type": "string",
+          "default": "back_color",
+          "description": "候选栏的整体背景图/色"
+        },
+        "keyboard_back_color": {
+          "type": "string",
+          "default": "border_color",
+          "description": "键盘区的背景图/色"
+        },
+        "liquid_keyboard_background": {
+          "type": "string",
+          "default": "keyboard_back_color",
+          "description": "liquidKeyboard 的背景图/色"
+        },
+        "text_back_color": {
+          "type": "string",
+          "default": "back_color",
+          "description": "编码区背景，即悬浮窗背景"
+        },
+        "long_text_back_color": {
+          "type": "string",
+          "default": "key_back_color",
+          "description": "长文本按键的背景(剪贴板）"
+        }
+      }
+    },
+    "preset_color_schemes": {
+      "type": "object",
+      "patternProperties": {
+        "\\w+": {
+          "name": {
+            "type": "string",
+            "description": "方案名稱"
+          },
+          "author": {
+            "type": "string",
+            "description": "作者資訊"
+          },
+          "back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xe4e7e9",
+            "description": "候選區背景"
+          },
+          "border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xc1c7ca",
+            "description": "邊框"
+          },
+          "candidate_separator_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xc1c7ca",
+            "description": "候選分割背景"
+          },
+          "candidate_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x5a676e",
+            "description": "候選文字"
+          },
+          "comment_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x7b868c",
+            "description": "提示"
+          },
+          "hilited_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xccd3d7da",
+            "description": "標明編碼背景"
+          },
+          "hilited_candidate_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xd3d7da",
+            "description": "標明候選背景"
+          },
+          "hilited_candidate_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明候選文字"
+          },
+          "hilited_comment_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明提示"
+          },
+          "hilited_key_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xd3d7da",
+            "description": "標明按鍵背景"
+          },
+          "hilited_key_symbol_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵符號"
+          },
+          "hilited_key_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵文字"
+          },
+          "hilited_off_key_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xd3d7da",
+            "description": "標明按鍵關閉狀態背景"
+          },
+          "hilited_off_key_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵關閉狀態文字"
+          },
+          "hilited_on_key_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xd3d7da",
+            "description": "標明按鍵打開狀態背景"
+          },
+          "hilited_on_key_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標明按鍵打開狀態文字"
+          },
+          "hilited_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x23948e",
+            "description": "標明編碼"
+          },
+          "key_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xeceff1",
+            "description": "按鍵背景"
+          },
+          "key_border_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xeceff1",
+            "description": "按鍵邊框"
+          },
+          "key_symbol_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x5f6b73",
+            "description": "按鍵符號"
+          },
+          "key_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x37474f",
+            "description": "按鍵文字"
+          },
+          "keyboard_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xffffff",
+            "description": "鍵盤背景"
+          },
+          "label_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "標籤"
+          },
+          "off_key_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xd3d7da",
+            "description": "按鍵關閉狀態背景"
+          },
+          "off_key_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "按鍵關閉狀態文字"
+          },
+          "on_key_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x23948e",
+            "description": "按鍵打開狀態背景"
+          },
+          "on_key_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x37474f",
+            "description": "按鍵打開狀態文字"
+          },
+          "preview_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x55bfbfbf",
+            "description": "按鍵提示背景"
+          },
+          "preview_text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x23948e",
+            "description": "按鍵提示文字"
+          },
+          "shadow_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "按鍵文字陰影"
+          },
+          "text_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0x5a676e",
+            "description": "編碼"
+          },
+          "text_back_color": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 16777215,
+            "default": "0xcce4e7e9",
+            "description": "編碼區背景"
+          }
+        }
+      }
+    },
+    "liquid_keyboard": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "row": { "type": "integer", "description": "每屏最多显示多少行按键" },
+        "row_land": {
+          "type": "integer",
+          "description": "横屏每屏最多显示多少行按键"
+        },
+        "key_height": { "type": "integer", "description": "按键高度" },
+        "key_height_land": {
+          "type": "integer",
+          "description": "横屏模式按键高度"
+        },
+        "single_width": {
+          "type": "integer",
+          "description": "single类型的按键宽度"
+        },
+        "vertical_gap": { "type": "integer", "description": "纵向按键间隙" },
+        "margin_x": { "type": "number", "description": "左右按键间隙的1/2" },
+        "keyboards": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "preset_keys": {
+      "type": "object",
+      "patternProperties": {
+        "\\w+": {
+          "type": "object",
+          "properties": {
+            "label": { "oneOf": [{ "type": "string" }, { "type": "integer" }] },
+            "send": { "oneOf": [{ "type": "string" }, { "type": "integer" }] }
+          }
+        }
+      }
+    },
+    "preset_keyboards": {
+      "type": "object",
+      "patternProperties": {
+        "\\w+": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "author": { "type": "string" },
+            "ascii_mode": { "type": "integer" },
+            "width": { "type": "number" },
+            "height": { "type": "number" },
+            "lock": { "type": "boolean" },
+            "keys": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "click": {
+                    "oneOf": [
+                      { "type": "string" },
+                      { "type": "integer" },
+                      { "type": "boolean" }
+                    ]
+                  },
+                  "long_click": {
+                    "oneOf": [{ "type": "string" }, { "type": "integer" }]
+                  },
+                  "label": { "type": "string" },
+                  "width": { "type": "number" },
+                  "swipe_left": { "type": "string" },
+                  "swipe_right": { "type": "string" },
+                  "swipe_up": { "type": "string" },
+                  "swipe_down": { "type": "string" },
+                  "composing": { "type": "string" },
+                  "send_bindings": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "title": "JSON schema for trime.yaml",
+  "type": "object"
+}
