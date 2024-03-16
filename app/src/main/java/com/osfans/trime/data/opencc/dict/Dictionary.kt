@@ -49,7 +49,7 @@ abstract class Dictionary {
     }
 
     protected fun ensureTxt(dest: File) {
-        if (dest.extension !in Type.Text.ext) {
+        if (dest.extension != Type.Text.ext) {
             throw IllegalArgumentException("Dest file name must end with .${Type.Text.ext}")
         }
         dest.delete()
