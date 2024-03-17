@@ -56,7 +56,7 @@ abstract class Dictionary {
     }
 
     protected fun ensureBin(dest: File) {
-        if (dest.extension != Type.OCD.ext || dest.extension != Type.OCD2.ext) {
+        if (dest.extension != Type.OCD.ext && dest.extension != Type.OCD2.ext) {
             throw IllegalArgumentException("Dest file name must end with .${Type.OCD.ext} or .${Type.OCD2.ext}")
         }
         dest.delete()
