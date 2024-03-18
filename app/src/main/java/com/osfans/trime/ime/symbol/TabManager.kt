@@ -57,7 +57,7 @@ object TabManager {
             addTabHasKeys(name, type, keys)
         }
         tabSwitchData.addAll(
-            tabTags.filter { SymbolKeyboardType.hasKeys(it.type) }
+            tabTags.filter { SymbolKeyboardType.hasKey(it.type) }
                 .map { SimpleKeyBean(it.text) },
         )
     }
@@ -78,6 +78,7 @@ object TabManager {
             val index = tabTags.indexOfFirst { it.text == name }
             if (index >= 0) {
                 keyboards[index] = keyBeans
+                return
             }
         }
         tabTags.add(TabTag(name, type))
@@ -89,11 +90,13 @@ object TabManager {
         type: SymbolKeyboardType,
         keys: ConfigItem?,
     ) {
-        // 处理single类型和no_key类型。前者把字符串切分为多个按键，后者把字符串转换为命令
-        if (keys is ConfigValue) {
-            val key = keys.getString()
+        if (keys is ConfigValue?) {
+            // 对于没有按键的类型，也要返回一个空的 key 值，否则无法显示在标签栏内
+            val key = keys?.configValue?.getString() ?: ""
             when (type) {
+                // 处理 SINGLE 类型：把字符串切分为多个按键
                 SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(key))
+                // 处理 NO_KEY 类型：把字符串转换为命令
                 SymbolKeyboardType.NO_KEY -> {
                     val commandType = KeyCommandType.fromString(key)
                     tabTags.add(TabTag(name, type, commandType))
@@ -104,7 +107,7 @@ object TabManager {
         }
 
         if (keys !is ConfigList) return
-        val keysList: MutableList<SimpleKeyBean> = ArrayList()
+        val keysList = mutableListOf<SimpleKeyBean>()
         for (k in keys) {
             if (k is ConfigValue) {
                 keysList.add(SimpleKeyBean(k.getString()))
@@ -152,17 +155,11 @@ object TabManager {
 
     val tabCandidates: ArrayList<TabTag>
         get() {
-            var addExit = true
-            for (tag in tabTags) {
-                if (tag.command == KeyCommandType.EXIT) {
-                    addExit = false
-                    break
+            return tabTags.apply {
+                if (none { it.command == KeyCommandType.EXIT }) {
+                    add(tagExit)
+                    keyboards.add(notKeyboard)
                 }
             }
-            if (addExit) {
-                tabTags.add(tagExit)
-                keyboards.add(notKeyboard)
-            }
-            return tabTags
         }
 }
