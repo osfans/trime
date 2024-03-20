@@ -63,9 +63,14 @@ class TextInputManager private constructor() :
         val locales = Array(2) { Locale.getDefault() }
 
         var needSendUpRimeKey: Boolean = false
-        var shouldUpdateRimeOption: Boolean = true
         var isComposable: Boolean = false
-        var shouldResetAsciiMode: Boolean = false
+
+        private var shouldUpdateRimeOption
+            get() = trime.shouldUpdateRimeOption
+            set(value) {
+                trime.shouldUpdateRimeOption = value
+            }
+        private val shouldResetAsciiMode get() = trime.shouldResetAsciiMode
 
         companion object {
             /** Delimiter regex for key property group, their format like `{property_1: value_1, property_2: value_2}` */
