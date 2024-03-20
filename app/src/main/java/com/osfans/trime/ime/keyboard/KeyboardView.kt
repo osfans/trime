@@ -409,6 +409,7 @@ class KeyboardView
                     the sliding distance on the other coordinate axis.
                          */
                             if (mPossiblePoly) return false
+                            if (mDownKey == NOT_A_KEY) return false
                             val deltaX = me2.x - me1!!.x // distance X
                             val deltaY = me2.y - me1.y // distance Y
                             val absX = abs(deltaX) // absolute value of distance X
