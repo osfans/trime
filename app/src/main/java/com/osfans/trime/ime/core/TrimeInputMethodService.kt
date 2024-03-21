@@ -42,6 +42,7 @@ import android.view.inputmethod.ExtractedTextRequest
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.Keep
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
@@ -91,6 +92,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var mTabRoot: ScrollView? = null
     private var tabView: TabView? = null
     var inputView: InputView? = null
+    private var initializationUi: InitializationUi? = null
     private var eventListeners = WeakHashSet<EventListener>()
     private var mIntentReceiver: IntentReceiver? = null
     private var isWindowShown = false // 键盘窗口是否已显示
@@ -333,6 +335,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         bindKeyboardToInputView()
         updateComposing() // 切換主題時刷新候選
         setInputView(inputView!!)
+        initializationUi = null
     }
 
     override fun onDestroy() {
@@ -422,7 +425,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onComputeInsets(outInsets: Insets) {
-        val (_, y) = intArrayOf(0, 0).also { inputView?.keyboardView?.getLocationInWindow(it) }
+        val (_, y) =
+            intArrayOf(0, 0).also {
+                if (inputView?.keyboardView?.isVisible == true) {
+                    inputView?.keyboardView?.getLocationInWindow(it)
+                } else {
+                    initializationUi?.initial?.getLocationInWindow(it)
+                }
+            }
         outInsets.apply {
             contentTopInsets = y
             touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
@@ -432,12 +442,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        Timber.d("onCreateInputView")
         RimeWrapper.runAfterStarted {
             recreateInputView()
         }
-        Timber.d("onCreateInputView() finish")
-        return InitializationUi(this).root
+        initializationUi = InitializationUi(this)
+        return initializationUi!!.root
     }
 
     override fun setInputView(view: View) {
