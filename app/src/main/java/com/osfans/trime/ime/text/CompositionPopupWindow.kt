@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
+import androidx.core.math.MathUtils
 import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -129,7 +130,7 @@ class CompositionPopupWindow(
                         PopupPosition.RIGHT, PopupPosition.RIGHT_UP -> x = mPopupRectF.right.toInt()
                         else -> Timber.wtf("UNREACHABLE BRANCH")
                     }
-                    x = x.coerceIn(minX, maxX)
+                    x = MathUtils.clamp(x, minX, maxX)
                     when (popupWindowPos) {
                         PopupPosition.LEFT, PopupPosition.RIGHT ->
                             y = mPopupRectF.bottom.toInt() + popupMargin
@@ -137,7 +138,7 @@ class CompositionPopupWindow(
                             y = mPopupRectF.top.toInt() - mPopupWindow.height - popupMargin
                         else -> Timber.wtf("UNREACHABLE BRANCH")
                     }
-                    y = y.coerceIn(minY, maxY)
+                    y = MathUtils.clamp(y, minY, maxY)
                 }
                 y -= BarUtils.getStatusBarHeight()
                 if (!mPopupWindow.isShowing) {
