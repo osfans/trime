@@ -11,17 +11,15 @@ data class TabTag(
     val text: String,
     /** additional comment of the tab */
     val comment: String,
-    /** position and size info of the tab */
-    val geometry: Rect,
     /** data type of the tab (unused) */
     val type: SymbolKeyboardType,
     /** action type of the tab */
     val command: KeyCommandType,
 ) {
     constructor(text: String, type: SymbolKeyboardType) :
-        this(text, "", Rect(), type, KeyCommandType.NULL)
+        this(text, "", type, KeyCommandType.NULL)
     constructor(text: String, comment: String, type: SymbolKeyboardType) :
-        this(text, comment, Rect(), type, KeyCommandType.NULL)
+        this(text, comment, type, KeyCommandType.NULL)
     constructor(text: String, type: SymbolKeyboardType, command: KeyCommandType) :
-        this(text, "", Rect(), type, command)
+        this(text, "", type, command)
 }
