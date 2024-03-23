@@ -21,4 +21,10 @@ sealed class BoardWindow {
     abstract class NoBarBoardWindow : BoardWindow() {
         override fun toString(): String = javaClass.name
     }
+
+    abstract class BarBoardWindow : BoardWindow() {
+        open fun onCreateBarView(): View? = null
+
+        override fun toString(): String = javaClass.name
+    }
 }
