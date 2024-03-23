@@ -8,12 +8,14 @@ import android.widget.ViewAnimator
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.CandidateBarBinding
-import com.osfans.trime.databinding.TabBarBinding
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ime.symbol.LiquidTabsUi
+import com.osfans.trime.ime.symbol.TabManager
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -21,7 +23,7 @@ import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
-class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadcastReceiver {
+class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme) : InputBroadcastReceiver {
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
             with(root) {
@@ -38,8 +40,10 @@ class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadc
         }
     }
 
-    val oldTabBar by lazy {
-        TabBarBinding.inflate(LayoutInflater.from(context))
+    val tabsUi by lazy {
+        LiquidTabsUi(context, theme).apply {
+            setTabs(TabManager.tabCandidates)
+        }
     }
 
     enum class State {
@@ -71,7 +75,7 @@ class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadc
                     "candidate_border_round",
                 )
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
-            add(oldTabBar.root, lParams(matchParent, matchParent))
+            add(tabsUi.root, lParams(matchParent, matchParent))
         }
     }
 
