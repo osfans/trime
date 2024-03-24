@@ -56,20 +56,20 @@ abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdap
     private val mKeyTextColor = ColorManager.getColor("key_text_color")
     private val mKeyLongTextSize = theme.style.getFloat("key_long_text_size")
     private val mLabelTextSize = theme.style.getFloat("label_text_size")
-    private val mBackground =
-        ColorManager.getDrawable(
-            key = "long_text_back_color",
-            borderKey = "key_border",
-            borderColorKey = "key_long_text_border",
-            roundCornerKey = "round_corner",
-        )
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
         val binding = SimpleKeyItemBinding.inflate(LayoutInflater.from(parent.context))
-        binding.root.background = mBackground
+        binding.root.background =
+            ColorManager.getDrawable(
+                parent.context,
+                "long_text_back_color",
+                "key_border",
+                "key_long_text_border",
+                "round_corner",
+            )
         binding.simpleKey.apply {
             typeface = mTypeface
             (mLongTextColor ?: mKeyTextColor)?.let { setTextColor(it) }
