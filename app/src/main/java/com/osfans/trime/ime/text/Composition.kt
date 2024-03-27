@@ -155,7 +155,9 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         override fun updateDrawState(ds: TextPaint) {
             ds.isUnderlineText = false
             ds.color = keyTextColor
-            ds.bgColor = ColorManager.getColor("key_back_color")!!
+            ColorManager.getColor("key_back_color")?.let {
+                ds.bgColor = it
+            }
         }
     }
 
