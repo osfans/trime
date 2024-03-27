@@ -20,13 +20,13 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
     val beans get() = mBeans
 
     fun updateBeans(beans: List<SimpleKeyBean>) {
-        val prevSize = mBeans.size
+        val prevSize = mBeansByRows.size
         mBeans.clear()
         notifyItemRangeRemoved(0, prevSize)
         mBeans.addAll(beans)
-        notifyItemRangeInserted(0, beans.size)
         mBeansByRows.clear()
         mBeansByRows.addAll(beans.chunked(columnSize))
+        notifyItemRangeInserted(0, mBeansByRows.size)
     }
 
     override fun getItemCount(): Int {
