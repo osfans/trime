@@ -32,12 +32,11 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
         RIGHT,
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateCandidates(candidates: List<CandidateListItem>) {
-        val prevSize = mCandidates.size
         mCandidates.clear()
-        notifyItemRangeRemoved(0, prevSize)
         mCandidates.addAll(candidates)
-        notifyItemRangeInserted(0, candidates.size)
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
