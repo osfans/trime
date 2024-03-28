@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -37,14 +38,33 @@ class LiquidKeyboard(
 ) : BoardWindow.BarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
-    private var adapterType: AdapterType = AdapterType.INIT
+    private lateinit var currentBoardType: SymbolKeyboardType
+    private lateinit var currentBoardAdapter: RecyclerView.Adapter<*>
+
     private val simpleAdapter by lazy {
         val itemWidth = context.dp(theme.liquid.getInt("single_width"))
         val columnCount = context.resources.displayMetrics.widthPixels / itemWidth
         SimpleAdapter(theme, columnCount).apply {
             setHasStableIds(true)
+            setListener { position ->
+                if (position < beans.size) {
+                    val bean = beans[position]
+                    if (currentBoardType === SymbolKeyboardType.SYMBOL) {
+                        service.inputSymbol(bean.text)
+                        return@setListener
+                    } else {
+                        service.commitText(bean.text)
+                        if (currentBoardType !== SymbolKeyboardType.HISTORY) {
+                            symbolHistory.insert(bean.text)
+                            symbolHistory.save()
+                        }
+                        return@setListener
+                    }
+                }
+            }
         }
     }
+
     private val candidateAdapter by lazy {
         CandidateAdapter(theme).apply {
             setListener { position ->
@@ -61,8 +81,40 @@ class LiquidKeyboard(
             }
         }
     }
+
     private val varLengthAdapter by lazy {
-        CandidateAdapter(theme)
+        CandidateAdapter(theme).apply {
+            setListener { position ->
+                val data = TabManager.selectTabByIndex(TabManager.currentTabIndex)
+                if (position < data.size) {
+                    val bean = data[position]
+                    if (currentBoardType === SymbolKeyboardType.SYMBOL) {
+                        service.inputSymbol(bean.text)
+                        return@setListener
+                    } else if (currentBoardType === SymbolKeyboardType.TABS) {
+                        val tag = TabManager.tabTags.find { SymbolKeyboardType.hasKey(it.type) }
+                        val truePosition = TabManager.getTabSwitchPosition(position)
+                        if (tag != null) {
+                            Timber.d(
+                                "TABS click: position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
+                            )
+                            if (tag.type === SymbolKeyboardType.NO_KEY) {
+                                if (tag.command == KeyCommandType.EXIT) {
+                                    service.selectLiquidKeyboard(-1)
+                                }
+                            } else if (TabManager.isAfterTabSwitch(truePosition)) {
+                                // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
+                                select(truePosition)
+                            } else {
+                                service.selectLiquidKeyboard(truePosition)
+                            }
+                        }
+                        return@setListener
+                    }
+                }
+                service.currentInputConnection?.commitText(data[position].text, 1)
+            }
+        }
     }
 
     private val dbAdapter by lazy {
@@ -95,13 +147,11 @@ class LiquidKeyboard(
 
     override fun onDetached() {}
 
-// 及时更新layoutManager, 以防在旋转屏幕后打开液体键盘crash
-
     /**
      * 使用FlexboxLayoutManager时调用此函数获取
      */
-    private fun getFlexbox(): FlexboxLayoutManager {
-        return FlexboxLayoutManager(context).apply {
+    private val flexboxLayoutManager by lazy {
+        FlexboxLayoutManager(context).apply {
             flexDirection = FlexDirection.ROW // 主轴为水平方向，起点在左端。
             flexWrap = FlexWrap.WRAP // 按正常方向换行
             justifyContent = JustifyContent.FLEX_START // 交叉轴的起点对齐
@@ -109,72 +159,36 @@ class LiquidKeyboard(
     }
 
     /**
-     * 使用StaggeredGridLayoutManager时调用此函数获取
+     * 使用 StaggeredGridLayoutManager 时调用此函数获取
      */
-    private fun getOneColumnStaggeredGrid(): StaggeredGridLayoutManager {
-        return StaggeredGridLayoutManager(
-            1,
-            StaggeredGridLayoutManager.VERTICAL,
-        )
+    private val oneColStaggeredGridLayoutManager by lazy {
+        StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
     }
 
     fun select(i: Int): SymbolKeyboardType {
+        if (TabManager.currentTabIndex == i) return currentBoardType
         val tag = TabManager.tabTags[i]
+        currentBoardType = tag.type
         liquidLayout.tabsUi.activateTab(i)
         symbolHistory.load()
+        val data by lazy { TabManager.selectTabByIndex(i) }
         when (tag.type) {
             SymbolKeyboardType.CLIPBOARD,
             SymbolKeyboardType.COLLECTION,
             SymbolKeyboardType.DRAFT,
-            -> {
-                TabManager.selectTabByIndex(i)
-                initDbData(tag.type)
-            }
-            SymbolKeyboardType.CANDIDATE -> {
-                TabManager.selectTabByIndex(i)
-                initCandidates()
-            }
-            SymbolKeyboardType.VAR_LENGTH, SymbolKeyboardType.SYMBOL -> {
-                initVarLengthKeys(i, TabManager.selectTabByIndex(i))
-            }
-            SymbolKeyboardType.TABS -> {
-                TabManager.selectTabByIndex(i)
-                initVarLengthKeys(i, TabManager.tabSwitchData)
-                Timber.d("All tags in TABS: TabManager.tabSwitchData = ${TabManager.tabSwitchData}")
-            }
-            SymbolKeyboardType.HISTORY -> {
-                TabManager.selectTabByIndex(i)
-                initFixData(i)
-            }
-            else -> initFixData(i)
+            -> initDbData()
+            SymbolKeyboardType.CANDIDATE -> initCandidates()
+            SymbolKeyboardType.VAR_LENGTH,
+            SymbolKeyboardType.SYMBOL,
+            SymbolKeyboardType.TABS,
+            -> initVarLengthKeys(data)
+            else -> initFixData(data)
         }
         return tag.type
     }
 
-    private fun initFixData(i: Int) {
-        val tabTag = TabManager.tabTags[i]
-
-        simpleAdapter.apply {
-            setListener { position ->
-                if (position < beans.size) {
-                    val bean = beans[position]
-                    if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                        service.inputSymbol(bean.text)
-                        return@setListener
-                    } else {
-                        service.commitText(bean.text)
-                        if (tabTag.type !== SymbolKeyboardType.HISTORY) {
-                            symbolHistory.insert(bean.text)
-                            symbolHistory.save()
-                        }
-                        return@setListener
-                    }
-                }
-            }
-        }
-
-        if (shouldChangeAdapter(AdapterType.SIMPLE)) {
-            adapterType = AdapterType.SIMPLE
+    private fun initFixData(data: List<SimpleKeyBean>) {
+        if (onAdapterChange(simpleAdapter)) {
             keyboardView.apply {
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
                 adapter = simpleAdapter
@@ -187,23 +201,20 @@ class LiquidKeyboard(
             }
         }
 
-        when (tabTag.type) {
+        when (currentBoardType) {
             SymbolKeyboardType.HISTORY ->
                 simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
             else ->
-                simpleAdapter.updateBeans(TabManager.selectTabByIndex(i))
+                simpleAdapter.updateBeans(data)
         }
         keyboardView.scrollToPosition(0)
-        Timber.d("Tab #%s with bean size %s", i, simpleAdapter.itemCount)
     }
 
-    private fun initDbData(type: SymbolKeyboardType) {
-        dbAdapter.type = type
-
-        if (shouldChangeAdapter(AdapterType.DB)) {
-            adapterType = AdapterType.DB
+    private fun initDbData() {
+        if (onAdapterChange(dbAdapter)) {
+            dbAdapter.type = currentBoardType
             keyboardView.apply {
-                layoutManager = getOneColumnStaggeredGrid()
+                layoutManager = oneColStaggeredGridLayoutManager
                 adapter = dbAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(false)
@@ -214,7 +225,7 @@ class LiquidKeyboard(
 
         service.lifecycleScope.launch {
             val all =
-                when (type) {
+                when (currentBoardType) {
                     SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.getAll()
                     SymbolKeyboardType.COLLECTION -> CollectionHelper.getAll()
                     SymbolKeyboardType.DRAFT -> DraftHelper.getAll()
@@ -227,11 +238,10 @@ class LiquidKeyboard(
     }
 
     private fun initCandidates() {
-        if (shouldChangeAdapter(AdapterType.CANDIDATE)) {
-            adapterType = AdapterType.CANDIDATE
+        if (onAdapterChange(candidateAdapter)) {
             // 设置布局管理器
             keyboardView.apply {
-                layoutManager = getFlexbox()
+                layoutManager = flexboxLayoutManager
                 adapter = candidateAdapter
                 setItemViewCacheSize(50)
                 setHasFixedSize(false)
@@ -243,58 +253,20 @@ class LiquidKeyboard(
         keyboardView.scrollToPosition(0)
     }
 
-    private fun initVarLengthKeys(
-        i: Int,
-        data: List<SimpleKeyBean>,
-    ) {
-        val tabTag = TabManager.tabTags[i]
-
-        varLengthAdapter.apply {
-            setListener { position ->
-                if (position < data.size) {
-                    val bean = data[position]
-                    if (tabTag.type === SymbolKeyboardType.SYMBOL) {
-                        service.inputSymbol(bean.text)
-                        return@setListener
-                    } else if (tabTag.type === SymbolKeyboardType.TABS) {
-                        val tag = TabManager.tabTags.find { SymbolKeyboardType.hasKey(it.type) }
-                        val truePosition = TabManager.getTabSwitchPosition(position)
-                        if (tag != null) {
-                            Timber.d(
-                                "TABS click: position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
-                            )
-                            if (tag.type === SymbolKeyboardType.NO_KEY) {
-                                if (tag.command == KeyCommandType.EXIT) {
-                                    service.selectLiquidKeyboard(-1)
-                                }
-                            } else if (TabManager.isAfterTabSwitch(truePosition)) {
-                                // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                                select(truePosition)
-                            } else {
-                                service.selectLiquidKeyboard(truePosition)
-                            }
-                        }
-                        return@setListener
-                    }
-                }
-                service.currentInputConnection?.commitText(data[position].text, 1)
-            }
-        }
-
-        if (shouldChangeAdapter(AdapterType.VAR_LENGTH)) {
-            adapterType = AdapterType.VAR_LENGTH
+    private fun initVarLengthKeys(data: List<SimpleKeyBean>) {
+        if (onAdapterChange(varLengthAdapter)) {
             // 设置布局管理器
             keyboardView.apply {
-                layoutManager = getFlexbox()
+                layoutManager = flexboxLayoutManager
                 adapter = varLengthAdapter
                 setItemViewCacheSize(50)
                 setHasFixedSize(false)
-                keyboardView.isSelected = true
+                isSelected = true
             }
         }
 
         val candidates =
-            if (tabTag.type === SymbolKeyboardType.SYMBOL) {
+            if (currentBoardType === SymbolKeyboardType.SYMBOL) {
                 data.map { b -> CandidateListItem("", b.label) }
             } else {
                 data.map { b -> CandidateListItem("", b.text) }
@@ -314,21 +286,15 @@ class LiquidKeyboard(
             if (tag.type == SymbolKeyboardType.CLIPBOARD) {
                 Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
                 service.lifecycleScope.launch {
-                    (keyboardView.adapter as FlexibleAdapter).updateBeans(ClipboardHelper.getAll())
+                    dbAdapter.updateBeans(ClipboardHelper.getAll())
                 }
             }
         }
     }
 
-    private fun shouldChangeAdapter(type: AdapterType) =
-        adapterType != type ||
-            adapterType == AdapterType.INIT
-
-    private enum class AdapterType {
-        INIT,
-        SIMPLE,
-        DB,
-        CANDIDATE,
-        VAR_LENGTH,
+    private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean {
+        return (!::currentBoardAdapter.isInitialized || currentBoardAdapter != adapter).also {
+            if (it) currentBoardAdapter = adapter
+        }
     }
 }
