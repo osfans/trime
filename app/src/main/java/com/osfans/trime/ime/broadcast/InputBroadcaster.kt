@@ -2,6 +2,7 @@ package com.osfans.trime.ime.broadcast
 
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.window.BoardWindow
 import me.tatarka.inject.annotations.Inject
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -28,5 +29,13 @@ class InputBroadcaster : InputBroadcastReceiver {
 
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {
         receivers.forEach { it.onRimeOptionUpdated(value) }
+    }
+
+    override fun onWindowAttached(window: BoardWindow) {
+        receivers.forEach { it.onWindowAttached(window) }
+    }
+
+    override fun onWindowDetached(window: BoardWindow) {
+        receivers.forEach { it.onWindowDetached(window) }
     }
 }

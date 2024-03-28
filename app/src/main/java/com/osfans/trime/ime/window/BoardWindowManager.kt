@@ -62,6 +62,7 @@ class BoardWindowManager(
             val oldView = currentView!!
             oldWindow.onDetached()
             view.removeView(oldView)
+            broadcaster.onWindowDetached(oldWindow)
             Timber.d("Detach $oldWindow")
             if (oldWindow !is ResidentWindow) {
                 broadcaster.removeReceiver(oldWindow)
@@ -75,6 +76,7 @@ class BoardWindowManager(
         Timber.d("Attach $window")
         window.onAttached()
         currentWindow = window
+        broadcaster.onWindowAttached(window)
     }
 
     val view: FrameLayout by lazy { context.frameLayout() }

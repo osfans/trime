@@ -305,10 +305,9 @@ class InputView(
 
     fun switchBoard(board: Board) {
         when (board) {
-            Board.Main -> windowManager.attachWindow(keyboardWindow)
-            Board.Symbol -> windowManager.attachWindow(liquidKeyboard)
+            Board.Main -> windowManager.attachWindow(KeyboardWindow)
+            Board.Symbol -> windowManager.attachWindow(LiquidKeyboard)
         }
-        quickBar.switchUiByState(QuickBar.State.entries[board.ordinal])
     }
 
     private var showingDialog: Dialog? = null
