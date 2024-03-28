@@ -84,6 +84,9 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
                     gravity = gravityCenterVertical
                 },
             )
+            post {
+                scrollX = tabs[selected].root.left
+            }
         }
 
     fun setTabs(tags: List<TabTag>) {

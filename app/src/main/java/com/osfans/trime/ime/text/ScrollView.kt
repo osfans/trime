@@ -178,16 +178,4 @@ class ScrollView(context: Context?, attrs: AttributeSet?) : HorizontalScrollView
                 isMoving = true
             }
         }
-
-    fun move(
-        left: Int,
-        right: Int,
-    ) {
-        Timber.d("move: ($left $right), scrollX=$scrollX")
-        if (right > scrollX + width) {
-            scrollTo(right - width, 0)
-        } else if (left < scrollX) {
-            scrollTo(left, 0)
-        }
-    }
 }
