@@ -1,6 +1,5 @@
 package com.osfans.trime.ime.symbol
 
-import android.graphics.Rect
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 

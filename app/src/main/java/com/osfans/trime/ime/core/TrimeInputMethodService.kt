@@ -55,7 +55,6 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
-import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
@@ -64,7 +63,6 @@ import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
-import com.osfans.trime.ime.symbol.LiquidTabsUi
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.CompositionPopupWindow
@@ -89,7 +87,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         get() = AppPrefs.defaultInstance()
     private var mainKeyboardView: KeyboardView? = null // 主軟鍵盤
     private var mCandidate: Candidate? = null // 候選
-    private var liquidTabsUi: LiquidTabsUi? = null
     var inputView: InputView? = null
     private var initializationUi: InitializationUi? = null
     private var eventListeners = WeakHashSet<EventListener>()
@@ -271,7 +268,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (tabIndex >= 0) {
             inputView!!.switchBoard(InputView.Board.Symbol)
             symbolKeyboardType = inputView!!.liquidKeyboard.select(tabIndex)
-            liquidTabsUi?.activateTab(TabManager.selectedOrZero)
             mCompositionPopupWindow?.composition?.compositionView?.changeToLiquidKeyboardToolbar()
             showCompositionView(false)
         } else {
@@ -319,17 +315,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
         // 初始化候选栏
         mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
-        liquidTabsUi =
-            inputView!!.quickBar.tabsUi.apply {
-                setOnTabClickListener {
-                    val tag = TabManager.tabTags[it]
-                    if (tag.type == SymbolKeyboardType.NO_KEY && tag.command == KeyCommandType.EXIT) {
-                        selectLiquidKeyboard(-1)
-                    } else {
-                        selectLiquidKeyboard(it)
-                    }
-                }
-            }
 
         mCompositionPopupWindow =
             CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
@@ -1134,8 +1119,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             } else {
                 mCandidate!!.setText(0)
             }
-            // 刷新候选词后，如果候选词超出屏幕宽度，滚动候选栏
-//            mTabRoot?.move(mCandidate!!.highlightLeft, mCandidate!!.highlightRight)
         }
         mainKeyboardView?.invalidateComposingKeys()
         if (!onEvaluateInputViewShown()) setCandidatesViewShown(textInputManager!!.isComposable) // 實體鍵盤打字時顯示候選欄

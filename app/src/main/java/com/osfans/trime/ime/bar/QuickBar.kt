@@ -8,14 +8,12 @@ import android.widget.ViewAnimator
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.SymbolKeyboardType
-import com.osfans.trime.ime.symbol.LiquidTabsUi
-import com.osfans.trime.ime.symbol.TabManager
+import com.osfans.trime.ime.window.BoardWindow
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -23,7 +21,7 @@ import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
-class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme) : InputBroadcastReceiver {
+class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadcastReceiver {
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
             with(root) {
@@ -40,10 +38,8 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
         }
     }
 
-    val tabsUi by lazy {
-        LiquidTabsUi(context, theme).apply {
-            setTabs(TabManager.tabCandidates)
-        }
+    private val tabUi by lazy {
+        TabUi(context)
     }
 
     enum class State {
@@ -51,9 +47,14 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
         Tab,
     }
 
-    fun switchUiByState(state: State) {
-        if (view.displayedChild == state.ordinal) return
-        view.displayedChild = state.ordinal
+    private fun switchUiByState(state: State) {
+        val index = state.ordinal
+        if (view.displayedChild == index) return
+        val new = view.getChildAt(index)
+        if (new != tabUi.root) {
+            tabUi.removeExternal()
+        }
+        view.displayedChild = index
     }
 
     val view by lazy {
@@ -75,7 +76,7 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
                     "candidate_border_round",
                 )
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
-            add(tabsUi.root, lParams(matchParent, matchParent))
+            add(tabUi.root, lParams(matchParent, matchParent))
         }
     }
 
@@ -88,5 +89,16 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
                 view.visibility = if (value.value) View.GONE else View.VISIBLE
             }
         }
+    }
+
+    override fun onWindowAttached(window: BoardWindow) {
+        if (window is BoardWindow.BarBoardWindow) {
+            window.onCreateBarView()?.let { tabUi.addExternal(it) }
+            switchUiByState(State.Tab)
+        }
+    }
+
+    override fun onWindowDetached(window: BoardWindow) {
+        switchUiByState(State.Candidate)
     }
 }

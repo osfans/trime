@@ -2,7 +2,6 @@ package com.osfans.trime.ime.symbol
 
 import android.content.Context
 import android.view.View
-import androidx.core.view.setPadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -21,19 +20,12 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
-import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.centerInParent
-import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.core.add
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.recyclerview.recyclerView
 import timber.log.Timber
 
 @InputScope
@@ -42,7 +34,8 @@ class LiquidKeyboard(
     private val context: Context,
     private val service: TrimeInputMethodService,
     private val theme: Theme,
-) : BoardWindow.NoBarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
+) : BoardWindow.BarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
+    private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
     private var adapterType: AdapterType = AdapterType.INIT
     private val simpleAdapter by lazy {
@@ -81,23 +74,22 @@ class LiquidKeyboard(
     override val key: ResidentWindow.Key
         get() = LiquidKeyboard
 
-    private val keyboardView =
-        context.recyclerView {
-            val space = dp(3)
-            addItemDecoration(SpacesItemDecoration(space))
-            setPadding(space)
+    private val keyboardView by lazy {
+        liquidLayout.boardView
+    }
+
+    override fun onCreateView(): View =
+        LiquidLayout(context, theme).apply {
+            liquidLayout = this
+            tabsUi.apply {
+                setTabs(TabManager.tabTags)
+                setOnTabClickListener { i ->
+                    select(i)
+                }
+            }
         }
 
-    override fun onCreateView(): View {
-        return context.constraintLayout {
-            add(
-                keyboardView,
-                lParams(matchParent, KeyboardSwitcher.currentKeyboard.keyboardHeight) {
-                    centerInParent()
-                },
-            )
-        }
-    }
+    override fun onCreateBarView() = liquidLayout.tabsUi.root
 
     override fun onAttached() {}
 
@@ -128,6 +120,7 @@ class LiquidKeyboard(
 
     fun select(i: Int): SymbolKeyboardType {
         val tag = TabManager.tabTags[i]
+        liquidLayout.tabsUi.activateTab(i)
         symbolHistory.load()
         when (tag.type) {
             SymbolKeyboardType.CLIPBOARD,
