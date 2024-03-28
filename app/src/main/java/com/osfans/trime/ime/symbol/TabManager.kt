@@ -11,17 +11,13 @@ import com.osfans.trime.util.config.ConfigValue
 import timber.log.Timber
 
 object TabManager {
-    var currentTabIndex = 0
+    var currentTabIndex = -1
         private set
     private var tabSwitchPosition = 0
 
     val theme get() = ThemeManager.activeTheme
     val tabTags = arrayListOf<TabTag>()
-    val tabSwitchData = mutableListOf<SimpleKeyBean>()
     private val keyboards = mutableListOf<List<SimpleKeyBean>>()
-    private val notKeyboard = mutableListOf<SimpleKeyBean>()
-
-    private val tagExit = TabTag("返回", SymbolKeyboardType.NO_KEY, KeyCommandType.EXIT)
 
     /**
      * 得到TABS中对应的真实索引 真实的索引是去除 没有keys列表的tagTab 之后按顺序排列的tagTab索引
@@ -56,16 +52,11 @@ object TabManager {
             val keys = keyboard["keys"]
             addTabHasKeys(name, type, keys)
         }
-        tabSwitchData.addAll(
-            tabTags.filter { SymbolKeyboardType.hasKey(it.type) }
-                .map { SimpleKeyBean(it.text) },
-        )
     }
 
     private fun reset() {
         tabTags.clear()
         keyboards.clear()
-        tabSwitchData.clear()
     }
 
     private fun addListTab(
@@ -100,7 +91,7 @@ object TabManager {
                 SymbolKeyboardType.NO_KEY -> {
                     val commandType = KeyCommandType.fromString(key)
                     tabTags.add(TabTag(name, type, commandType))
-                    keyboards.add(notKeyboard)
+                    keyboards.add(emptyList())
                 }
                 else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(key))
             }
@@ -138,12 +129,13 @@ object TabManager {
         if (index !in tabTags.indices) return listOf()
         currentTabIndex = index
         val tag = tabTags[index]
-        if (tag.type == SymbolKeyboardType.TABS) tabSwitchPosition = currentTabIndex
+        if (tag.type == SymbolKeyboardType.TABS) {
+            tabSwitchPosition = currentTabIndex
+            return tabTags.filter { SymbolKeyboardType.hasKey(it.type) }
+                .map { SimpleKeyBean(it.text) }
+        }
         return keyboards[index]
     }
-
-    val selectedOrZero: Int
-        get() = if (currentTabIndex == -1) 0 else currentTabIndex
 
     fun setTabExited() {
         currentTabIndex = -1
@@ -152,14 +144,4 @@ object TabManager {
     fun isAfterTabSwitch(position: Int): Boolean {
         return tabSwitchPosition <= position
     }
-
-    val tabCandidates: ArrayList<TabTag>
-        get() {
-            return tabTags.apply {
-                if (none { it.command == KeyCommandType.EXIT }) {
-                    add(tagExit)
-                    keyboards.add(notKeyboard)
-                }
-            }
-        }
 }
