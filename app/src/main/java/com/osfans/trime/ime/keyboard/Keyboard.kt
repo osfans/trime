@@ -257,7 +257,7 @@ class Keyboard() {
             var rowWidthWeight = 0f
             for (mk in lm) {
                 val gap = this.horizontalGap
-                val keyWidth = obtainFloat(mk, "width", keyboardKeyWidth)
+                val keyWidth = obtainFloat(mk, "width", 0f)
                 var widthPx = (keyWidth * oneWeightWidthPx).toInt()
                 if (widthPx == 0 && mk.containsKey("click")) widthPx = defaultWidth
                 widthPx -= gap
