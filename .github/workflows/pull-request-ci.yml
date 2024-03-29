@@ -38,7 +38,7 @@ jobs:
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
-      - name: Install macOS utils
+      - name: Install macOS dependency
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install coreutils clang-format
