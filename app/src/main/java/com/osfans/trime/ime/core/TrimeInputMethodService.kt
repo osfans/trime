@@ -251,8 +251,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private var symbolKeyboardType = SymbolKeyboardType.NO_KEY
-
     fun inputSymbol(text: String) {
         textInputManager!!.onPress(KeyEvent.KEYCODE_UNKNOWN)
         if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
@@ -267,11 +265,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (inputView == null) return
         if (tabIndex >= 0) {
             inputView!!.switchBoard(InputView.Board.Symbol)
-            symbolKeyboardType = inputView!!.liquidKeyboard.select(tabIndex)
-            mCompositionPopupWindow?.composition?.compositionView?.changeToLiquidKeyboardToolbar()
-            showCompositionView(false)
+            inputView!!.liquidKeyboard.select(tabIndex)
         } else {
-            symbolKeyboardType = SymbolKeyboardType.NO_KEY
             // 设置液体键盘处于隐藏状态
             TabManager.setTabExited()
             inputView!!.switchBoard(InputView.Board.Main)
@@ -1101,21 +1096,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         var startNum = 0
         if (mCandidate != null) {
             if (mCompositionPopupWindow?.isPopupWindowEnabled == true) {
-                Timber.d("updateComposing: symbolKeyboardType: ${symbolKeyboardType.name}")
                 val composition = mCompositionPopupWindow!!.composition
-                if (symbolKeyboardType != SymbolKeyboardType.NO_KEY &&
-                    symbolKeyboardType != SymbolKeyboardType.CANDIDATE
-                ) {
-                    composition.compositionView.changeToLiquidKeyboardToolbar()
-                    showCompositionView(false)
-                } else {
-                    composition.compositionView.visibility = View.VISIBLE
-                    startNum = composition.compositionView.setWindowContent()
-                    mCandidate!!.setText(startNum)
-                    // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
-                    // otherwise we need to call it here
-                    if (!mCompositionPopupWindow!!.isCursorUpdated) showCompositionView(true)
-                }
+                composition.compositionView.visibility = View.VISIBLE
+                startNum = composition.compositionView.setWindowContent()
+                mCandidate!!.setText(startNum)
+                // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
+                // otherwise we need to call it here
+                if (!mCompositionPopupWindow!!.isCursorUpdated) showCompositionView(true)
             } else {
                 mCandidate!!.setText(0)
             }

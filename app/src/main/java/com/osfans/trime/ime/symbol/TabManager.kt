@@ -2,7 +2,6 @@ package com.osfans.trime.ime.symbol
 
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.config.ConfigList
@@ -87,12 +86,6 @@ object TabManager {
             when (type) {
                 // 处理 SINGLE 类型：把字符串切分为多个按键
                 SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(key))
-                // 处理 NO_KEY 类型：把字符串转换为命令
-                SymbolKeyboardType.NO_KEY -> {
-                    val commandType = KeyCommandType.fromString(key)
-                    tabTags.add(TabTag(name, type, commandType))
-                    keyboards.add(emptyList())
-                }
                 else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(key))
             }
         }
