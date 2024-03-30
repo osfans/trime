@@ -877,11 +877,7 @@ liquid_keyboard:
   single_width: 60    #single类型的按键宽度
   vertical_gap: 8     #纵向按键间隙
   margin_x: 2       #左右按键间隙的1/2
-  keyboards: [emoji, math, ascii, cn, history, clipboard, collection, draft, symbollist, list, ids, symbol, tabs, exit, pinyin, script_symbols, jp, grease, rusa, korea, lation, yinbiao, unit, yanwenzi, combing, emoji_full, candidate]  #tab列表
-  exit:
-    name: 返回
-    type: NO_KEY
-    keys: EXIT
+  keyboards: [emoji, math, ascii, cn, history, clipboard, collection, draft, symbollist, list, ids, symbol, tabs, pinyin, script_symbols, jp, grease, rusa, korea, lation, yinbiao, unit, yanwenzi, combing, emoji_full, candidate]  #tab列表
   tabs:
     name: 更多
     type: TABS

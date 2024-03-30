@@ -2,6 +2,7 @@ package com.osfans.trime.ime.symbol
 
 import android.content.Context
 import android.view.View
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +20,8 @@ import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
-import com.osfans.trime.ime.enums.KeyCommandType
 import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
@@ -98,11 +99,7 @@ class LiquidKeyboard(
                             Timber.d(
                                 "TABS click: position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
                             )
-                            if (tag.type === SymbolKeyboardType.NO_KEY) {
-                                if (tag.command == KeyCommandType.EXIT) {
-                                    service.selectLiquidKeyboard(-1)
-                                }
-                            } else if (TabManager.isAfterTabSwitch(truePosition)) {
+                            if (TabManager.isAfterTabSwitch(truePosition)) {
                                 // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
                                 select(truePosition)
                             } else {
@@ -143,7 +140,11 @@ class LiquidKeyboard(
 
     override fun onCreateBarView() = liquidLayout.tabsUi.root
 
-    override fun onAttached() {}
+    override fun onAttached() {
+        liquidLayout.updateLayoutParams {
+            height = KeyboardSwitcher.currentKeyboard.keyboardHeight
+        }
+    }
 
     override fun onDetached() {}
 

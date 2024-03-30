@@ -20,4 +20,12 @@ object SimpleKeyDao {
         }
         return list
     }
+
+    val operations =
+        arrayOf(
+            "liquid_keyboard_exit" to "返回",
+            "space" to "空格",
+            "BackSpace" to "退格",
+            "Return" to "回车",
+        )
 }

@@ -22,7 +22,6 @@ enum class KeyCommandType {
     NULL,
     LEFT,
     RIGHT,
-    EXIT,
     DEL_LEFT,
     DEL_RIGHT,
     UNDO,

@@ -513,25 +513,4 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         isToolbarMode = false
         return startNum
     }
-
-    /** 设置悬浮窗, 用于liquidKeyboard的悬浮窗工具栏  */
-    fun changeToLiquidKeyboardToolbar() {
-        if (visibility != VISIBLE) return
-        if (liquidWindowComponents.isEmpty()) {
-            this.visibility = GONE
-            return
-        }
-        ss = SpannableStringBuilder()
-        for (m in liquidWindowComponents) {
-            if (m.containsKey("composition")) {
-                appendComposition(m)
-            } else if (m.containsKey("click")) {
-                appendButton(m)
-            }
-        }
-        isSingleLine = !ss.toString().contains("\n")
-        text = ss
-        movementMethod = LinkMovementMethod.getInstance()
-        isToolbarMode = true
-    }
 }
