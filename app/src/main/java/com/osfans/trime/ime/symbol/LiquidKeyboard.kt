@@ -128,7 +128,7 @@ class LiquidKeyboard(
     }
 
     override fun onCreateView(): View =
-        LiquidLayout(context, theme).apply {
+        LiquidLayout(context, service, theme).apply {
             liquidLayout = this
             tabsUi.apply {
                 setTabs(TabManager.tabTags)
