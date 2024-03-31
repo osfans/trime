@@ -8,7 +8,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.text.TextInputManager
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.above
@@ -34,7 +34,7 @@ import splitties.views.gravityCenter
 import splitties.views.padding
 
 @SuppressLint("ViewConstructor")
-class LiquidLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
+class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Theme) : ConstraintLayout(context) {
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
     val operations =
         constraintLayout {
@@ -59,10 +59,15 @@ class LiquidLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
                             )
                             ColorManager.getColor("key_back_color")?.let { bg -> backgroundColor = bg }
                             setOnClickListener {
-                                val event = EventManager.getEvent(operation.first)
-                                TextInputManager.getInstance().run {
-                                    onPress(event.code)
-                                    onEvent(event)
+                                // TODO: 这个方式不太优雅，还需打磨
+                                if (operation.first == "liquid_keyboard_exit") {
+                                    service.selectLiquidKeyboard(-1)
+                                } else {
+                                    val event = EventManager.getEvent(operation.first)
+                                    service.textInputManager?.run {
+                                        onPress(event.code)
+                                        onEvent(event)
+                                    }
                                 }
                             }
                         }
