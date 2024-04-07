@@ -12,8 +12,9 @@ Describe features of this pull request
 #### Code of conduct
 - [ ] [CONTRIBUTING](CONTRIBUTING.md)
 
-#### Style lint
+#### Code style
 - [ ] `make sytle-lint`
+- [ ] [Conventional Commits](https://www.conventionalcommits.org/)
 
 #### Build pass
 - [ ] `make debug`
