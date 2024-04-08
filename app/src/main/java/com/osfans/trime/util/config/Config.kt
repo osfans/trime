@@ -46,7 +46,7 @@ class Config(private val data: ConfigData = ConfigData()) {
     ): Boolean {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getBool() ?: defValue
+        return runCatching { p?.getBool() }.getOrNull() ?: defValue
     }
 
     fun getInt(
@@ -55,7 +55,7 @@ class Config(private val data: ConfigData = ConfigData()) {
     ): Int {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getInt() ?: defValue
+        return runCatching { p?.getInt() }.getOrNull() ?: defValue
     }
 
     fun getFloat(
@@ -64,7 +64,7 @@ class Config(private val data: ConfigData = ConfigData()) {
     ): Float {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getFloat() ?: defValue
+        return runCatching { p?.getFloat() }.getOrNull() ?: defValue
     }
 
     fun getString(
@@ -73,7 +73,7 @@ class Config(private val data: ConfigData = ConfigData()) {
     ): String {
         Timber.d("read: $path")
         val p = data.traverse(path)?.configValue
-        return p?.getString() ?: defValue
+        return runCatching { p?.getString() }.getOrNull() ?: defValue
     }
 
     fun getItem(path: String): ConfigItem? {
