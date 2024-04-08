@@ -70,7 +70,14 @@ val Project.buildGitRepo
 val Project.buildVersionName
     get() =
         envOrProp("BUILD_VERSION_NAME", "buildVersionName") {
-            runCmd("git describe --tags --long --always")
+            // 构建正式版时过滤掉 nightly 标签
+            val cmd =
+                if (builder.contains("nightly", ignoreCase = true)) {
+                    "git describe --tags --long --always --match 'nightly'"
+                } else {
+                    "git describe --tags --long --always --match 'v*'"
+                }
+            runCmd(cmd)
         }
 
 val Project.buildCommitHash
