@@ -293,9 +293,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         commitTextByChar(checkNotNull(ShortcutUtils.pasteFromClipboard(this)).toString())
     }
 
-    private fun showCompositionView(isCandidate: Boolean) {
-        if (Rime.compositionText.isEmpty() && isCandidate) {
-            mCompositionPopupWindow!!.hideCompositionView()
+    private fun showCompositionView() {
+        if (Rime.compositionText.isEmpty()) {
+            mCompositionPopupWindow?.hideCompositionView()
             return
         }
         mCompositionPopupWindow?.updateCompositionView()
@@ -375,8 +375,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
-        mCompositionPopupWindow!!.updateCursorAnchorInfo(cursorAnchorInfo)
-        showCompositionView(true)
+        mCompositionPopupWindow?.updateCursorAnchorInfo(cursorAnchorInfo)
+        showCompositionView()
     }
 
     override fun onUpdateSelection(
@@ -1102,7 +1102,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 mCandidate!!.setText(startNum)
                 // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
                 // otherwise we need to call it here
-                if (!mCompositionPopupWindow!!.isCursorUpdated) showCompositionView(true)
+                if (!mCompositionPopupWindow!!.isCursorUpdated) showCompositionView()
             } else {
                 mCandidate!!.setText(0)
             }
