@@ -50,8 +50,6 @@ object DataManager {
 
     private val prefs get() = AppPrefs.defaultInstance()
 
-    val defaultDataDirectory = File(Environment.getExternalStorageDirectory(), "rime")
-
     private val onDataDirChangeListeners = WeakHashSet<OnDataDirChangeListener>()
 
     fun interface OnDataDirChangeListener {
@@ -72,11 +70,11 @@ object DataManager {
 
     @JvmStatic
     val sharedDataDir
-        get() = File(prefs.profile.sharedDataDir)
+        get() = File(AppPrefs.Profile.getAppShareDir())
 
     @JvmStatic
     val userDataDir
-        get() = File(prefs.profile.userDataDir)
+        get() = File(AppPrefs.Profile.getAppUserDir())
 
     /**
      * Return the absolute path of the compiled config file
