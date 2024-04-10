@@ -52,7 +52,7 @@ import timber.log.Timber
 @SuppressLint("AppCompatCustomView")
 class Composition(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
     private val theme = ThemeManager.activeTheme
-    private val textInputManager = TextInputManager.getInstance()
+    private val textInputManager = TextInputManager.instanceOrNull()
 
     private val keyTextSize = theme.style.getInt("key_text_size")
     private val keyTextColor = ColorManager.getColor("key_text_color")!!
@@ -131,7 +131,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         private val textColor: Int,
     ) : ClickableSpan() {
         override fun onClick(tv: View) {
-            textInputManager.onCandidatePressed(index)
+            textInputManager?.onCandidatePressed(index)
         }
 
         override fun updateDrawState(ds: TextPaint) {
@@ -148,8 +148,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     private inner class EventSpan(private val event: Event) : ClickableSpan() {
         override fun onClick(tv: View) {
-            textInputManager.onPress(event.code)
-            textInputManager.onEvent(event)
+            textInputManager?.onPress(event.code)
+            textInputManager?.onEvent(event)
         }
 
         override fun updateDrawState(ds: TextPaint) {

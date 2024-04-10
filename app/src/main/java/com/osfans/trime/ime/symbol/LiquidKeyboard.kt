@@ -69,8 +69,8 @@ class LiquidKeyboard(
     private val candidateAdapter by lazy {
         CandidateAdapter(theme).apply {
             setListener { position ->
-                TextInputManager.getInstance()
-                    .onCandidatePressed(position)
+                TextInputManager.instanceOrNull()
+                    ?.onCandidatePressed(position)
                 if (Rime.isComposing) {
                     val candidates = Rime.candidatesWithoutSwitch
                     updateCandidates(candidates.toList())
