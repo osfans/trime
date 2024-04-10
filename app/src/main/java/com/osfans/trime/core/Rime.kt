@@ -80,14 +80,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
     }
 
     companion object {
-        private var instance: Rime? = null
-
-        @JvmStatic
-        fun getInstance(): Rime {
-            if (instance == null) instance = Rime()
-            return instance!!
-        }
-
         private var mContext: RimeContext? = null
         private var mStatus: RimeStatus? = null
         private var isHandlingRimeNotification = false

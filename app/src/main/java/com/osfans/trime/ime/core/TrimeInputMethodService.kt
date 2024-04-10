@@ -240,7 +240,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             rime.runOnReady {
                 Timber.d("Running Trime.onCreate")
                 ColorManager.init(resources.configuration)
-                textInputManager = TextInputManager.getInstance()
+                textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
                 InputFeedbackManager.init(this@TrimeInputMethodService)
                 restartSystemStartTimingSync()
                 try {
