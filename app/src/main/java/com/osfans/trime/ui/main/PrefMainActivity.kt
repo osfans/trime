@@ -36,7 +36,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
-import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
 import kotlinx.coroutines.launch
@@ -166,7 +165,7 @@ class PrefMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (isStorageAvailable()) {
+        if (AppPrefs.defaultInstance().profile.isUserDataDirChosen()) {
             SoundEffectManager.init()
         }
     }

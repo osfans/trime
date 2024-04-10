@@ -8,8 +8,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -84,7 +82,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
-        if (appContext.isStorageAvailable()) {
+        if (AppPrefs.defaultInstance().profile.isUserDataDirChosen()) {
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
         }
