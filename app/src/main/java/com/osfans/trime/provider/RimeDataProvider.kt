@@ -15,6 +15,7 @@ import android.provider.DocumentsContract.Root
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
 import com.osfans.trime.R
+import com.osfans.trime.data.AppPrefs
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -72,7 +73,7 @@ class RimeDataProvider : DocumentsProvider() {
     private fun fileFromDocId(docId: String) = File(docIdPrefix, docId)
 
     override fun onCreate(): Boolean {
-        baseDir = context!!.getExternalFilesDir(null)!!
+        baseDir = File(AppPrefs.Profile.getAppPath())
         docIdPrefix = "${baseDir.parent}${File.separator}"
         textFilePaths = Array(TEXT_FILES.size) { baseDir.resolve(TEXT_FILES[it]).absolutePath }
         return true

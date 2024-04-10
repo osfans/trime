@@ -37,8 +37,8 @@ class Rime : RimeApi, RimeLifecycleOwner {
                     DataManager.dirFireChange()
                     DataManager.sync()
 
-                    val sharedDataDir = AppPrefs.defaultInstance().profile.sharedDataDir
-                    val userDataDir = AppPrefs.defaultInstance().profile.userDataDir
+                    val sharedDataDir = AppPrefs.Profile.getAppShareDir()
+                    val userDataDir = AppPrefs.Profile.getAppUserDir()
                     Timber.i("Starting up Rime APIs ...")
                     startupRime(sharedDataDir, userDataDir, fullCheck)
 
