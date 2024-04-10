@@ -53,6 +53,7 @@ class Event(var s: String) {
     private fun parseAction(s: String): Boolean {
         var result = false
         val strs = s.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        var l = ""
         for (str in strs) {
             val set = str.split("=".toRegex(), limit = 2).toTypedArray()
             if (set.size != 2) continue
@@ -61,10 +62,18 @@ class Event(var s: String) {
                 result = true
             } else if (set[0] == "label") {
                 label = set[1]
+                l = label
                 result = true
             } else if (set[0] == "text") {
                 text = set[1]
                 result = true
+            }
+        }
+        if (l.isNullOrEmpty()) {
+            if (commit.isNotEmpty()) {
+                label = commit
+            } else if (text.isNotEmpty()) {
+                label = text
             }
         }
         Timber.d("<Event> text=$text, commit=$commit, label=$label, s=$s")
