@@ -9,9 +9,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name ="android.permission.WAKE_LOCK" />
@@ -22,7 +19,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:allowBackup="true"
         android:icon="@mipmap/ic_app_icon"
         android:label="@string/trime_app_name"
-        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_app_icon_round"
         android:theme="@style/Theme.TrimeAppTheme">
 
