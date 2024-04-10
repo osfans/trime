@@ -137,10 +137,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_candidate_commit">點擊候選詞後，模擬空格鍵完成上屏(暫未實現)</string>
     <string name="trime_app_slogan">擊響中文之韻</string>
     <string name="directory_not_selected">未設定配置文件的資料夾</string>
-    <string name="external_storage_access_required">同文輸入法需要儲存許可權以部署或讀取方案和配置，點選“確定”前往授權。</string>
-    <string name="external_storage_permission_not_available">儲存許可權不可用</string>
-    <string name="external_storage_permission_granted">已授予儲存許可權</string>
-    <string name="external_storage_permission_denied">已拒絕授權儲存許可權，部署或讀取方案和配置功能或不可用</string>
     <string name="alert_window_access_required">同文輸入法需要允許顯示在其他應用上方以能顯示應用外懸浮窗或對話方塊，點選“確定”以授權。</string>
     <string name="keyboard__key_sound_effect_title">按鍵音效</string>
     <string name="sound_progress">正在應用音效...</string>
