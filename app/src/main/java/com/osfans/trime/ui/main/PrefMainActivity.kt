@@ -39,6 +39,7 @@ import com.osfans.trime.ime.core.OneWayFolderSync
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import splitties.systemservices.alarmManager
 import splitties.views.topPadding
@@ -116,16 +117,33 @@ class PrefMainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.rime.run { stateFlow }.collect { state ->
+                viewModel.rime.run { stateFlow }.combine(viewModel.statusStateFlow) { rimeStateFlow, viewModelFlow ->
+                    val final =
+                        if (rimeStateFlow == RimeLifecycle.State.STARTING || viewModelFlow == RimeLifecycle.State.STARTING) {
+                            RimeLifecycle.State.STARTING
+                        } else if (rimeStateFlow == RimeLifecycle.State.READY) {
+                            RimeLifecycle.State.READY
+                        } else {
+                            RimeLifecycle.State.STOPPED
+                        }
+                    final
+                }.collect { state ->
                     when (state) {
                         RimeLifecycle.State.STARTING -> {
-                            loadingDialog?.dismiss()
-                            loadingDialog =
-                                progressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
-                                    show()
-                                }
+                            loadingDialog?.let {
+                                // if dialog is not null, do nothing, we don't want to dismiss and recreate loading dialog
+                            } ?: run {
+                                // if dialog is null, create and show
+                                loadingDialog =
+                                    progressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
+                                        show()
+                                    }
+                            }
                         }
-                        RimeLifecycle.State.READY -> loadingDialog?.dismiss()
+                        RimeLifecycle.State.READY -> {
+                            loadingDialog?.dismiss()
+                            loadingDialog = null
+                        }
                         else -> return@collect
                     }
                 }
@@ -158,8 +176,10 @@ class PrefMainActivity : AppCompatActivity() {
     private fun deploy() {
         lifecycleScope.launch {
             rimeActionWithResultDialog("rime.trime", "W", 1) {
+                viewModel.deploy()
                 copyToInternal()
                 RimeDaemon.restartRime(true)
+                viewModel.deployComplete()
                 true
             }
         }
