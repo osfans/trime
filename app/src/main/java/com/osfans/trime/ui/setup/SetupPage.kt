@@ -6,10 +6,8 @@ package com.osfans.trime.ui.setup
 
 import android.content.Context
 import com.osfans.trime.R
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.util.InputMethodUtils
-import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
-import com.osfans.trime.util.requestExternalStoragePermission
 
 enum class SetupPage {
     Permissions,
@@ -29,7 +27,7 @@ enum class SetupPage {
     fun getHintText(context: Context) =
         context.getText(
             when (this) {
-                Permissions -> R.string.setup__request_permmision_hint
+                Permissions -> R.string.setup__request_permission_hint
                 Enable -> R.string.setup__enable_ime_hint
                 Select -> R.string.setup__select_ime_hint
             },
@@ -38,23 +36,15 @@ enum class SetupPage {
     fun getButtonText(context: Context) =
         context.getText(
             when (this) {
-                Permissions -> R.string.setup__request_permmision
+                Permissions -> R.string.setup__request_permission
                 Enable -> R.string.setup__enable_ime
                 Select -> R.string.setup__select_ime
             },
         )
 
-    fun getButtonAction(context: Context) {
-        when (this) {
-            Permissions -> context.requestExternalStoragePermission()
-            Enable -> InputMethodUtils.showImeEnablerActivity(context)
-            Select -> InputMethodUtils.showImePicker()
-        }
-    }
-
     fun isDone() =
         when (this) {
-            Permissions -> appContext.isStorageAvailable()
+            Permissions -> AppPrefs.defaultInstance().profile.isUserDataDirChosen()
             Enable -> InputMethodUtils.checkIsTrimeEnabled()
             Select -> InputMethodUtils.checkIsTrimeSelected()
         }

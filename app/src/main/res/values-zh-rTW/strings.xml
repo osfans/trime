@@ -263,8 +263,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__split_title">轉換到橫屏鍵盤</string>
     <string name="keyboard__split_space_title">自動分割鍵盤比例</string>
     <string name="setup__step_three">第 3 步</string>
-    <string name="setup__request_permmision_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>
-    <string name="setup__request_permmision">请求存储权限</string>
+    <string name="setup__request_permission_hint">請選擇存放配置檔案的資料夾 (如 "rime")</string>
+    <string name="setup__request_permission">選擇資料夾</string>
     <string name="grant_permission">授予權限</string>
     <string name="schedule_exact_alarm_permission_title">沒有鬧鐘和提醒權限</string>
     <string name="schedule_exact_alarm_permission_message">尚未賦予鬧鐘和提醒權限，因此無法在啟用定時同步時及時為您同步資料配置。</string>

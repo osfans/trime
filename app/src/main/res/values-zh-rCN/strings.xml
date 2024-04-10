@@ -262,8 +262,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__split_title">转换到横屏键盘</string>
     <string name="keyboard__split_space_title">自动分割键盘比例</string>
     <string name="setup__step_three">第 3 步</string>
-    <string name="setup__request_permmision_hint">当前同文需要存储权限以访问配置、使得用户容易更改。</string>
-    <string name="setup__request_permmision">请求存储权限</string>
+    <string name="setup__request_permission_hint">请选择存放配置文件的文件夹 (如 "rime")</string>
+    <string name="setup__request_permission">选择文件夹</string>
     <string name="grant_permission">授予权限</string>
     <string name="schedule_exact_alarm_permission_title">没有闹钟和提醒权限</string>
     <string name="schedule_exact_alarm_permission_message">没有闹钟和提醒权限，我们无法在启用定时同步时及时为您同步数据配置。</string>

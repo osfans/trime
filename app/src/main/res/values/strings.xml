@@ -264,11 +264,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__split_title">Change to Landscape keyboard</string>
     <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
     <string name="setup__step_three">Setup 3</string>
-    <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>
-    <string name="setup__request_permmision">Request storage permmision</string>
+    <string name="setup__request_permission_hint">Please select a directory(e.g. "rime") where configuration files reside.</string>
+    <string name="setup__request_permission">Select folder</string>
     <string name="grant_permission">Grant permission</string>
-    <string name="schedule_exact_alarm_permission_title">No Schedule Exact Alarm Permmision</string>
-    <string name="schedule_exact_alarm_permission_message">Without the permmission to schedule exact alarm, we are not able to sync your profile in time when you enable syncing on schedule.</string>
+    <string name="schedule_exact_alarm_permission_title">No Schedule Exact Alarm Permission</string>
+    <string name="schedule_exact_alarm_permission_message">Without the permission to schedule exact alarm, we are not able to sync your profile in time when you enable syncing on schedule.</string>
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
     <string name="rime_daemon">Rime Daemon</string>
