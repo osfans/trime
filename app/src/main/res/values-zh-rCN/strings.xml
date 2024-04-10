@@ -133,6 +133,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_candidate">点击候选词</string>
     <string name="keyboard__hook_candidate_commit">点击候选词后，模拟空格键完成上屏(暂未实现)</string>
     <string name="trime_app_slogan">击响中文之韵</string>
+    <string name="directory_not_selected">未设定配置文件的文件夹</string>
     <string name="external_storage_access_required">同文输入法需要存储权限以部署或读取方案和配置，点击“确定”前往授权。</string>
     <string name="external_storage_permission_not_available">存储权限不可用</string>
     <string name="external_storage_permission_granted">已授予存储权限</string>
