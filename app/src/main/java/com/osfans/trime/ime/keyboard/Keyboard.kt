@@ -250,16 +250,17 @@ class Keyboard() {
                 horizontalGap,
                 verticalGap,
                 autoHeightIndex,
-            )
-                .calc(lm)
-        defaultWidth = (oneWeightWidthPx * keyboardKeyWidth).toInt()
+            ).calc(lm)
+
         try {
             var rowWidthWeight = 0f
             for (mk in lm) {
                 val gap = this.horizontalGap
-                val keyWidth = obtainFloat(mk, "width", 0f)
+                var keyWidth = obtainFloat(mk, "width", 0f)
+                if (keyWidth == 0f && mk.containsKey("click")) {
+                    keyWidth = keyboardKeyWidth
+                }
                 var widthPx = (keyWidth * oneWeightWidthPx).toInt()
-                if (widthPx == 0 && mk.containsKey("click")) widthPx = defaultWidth
                 widthPx -= gap
                 if (column >= maxColumns || x + widthPx > mDisplayWidth) {
                     // new row
