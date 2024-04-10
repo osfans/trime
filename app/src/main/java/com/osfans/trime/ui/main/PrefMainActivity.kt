@@ -35,6 +35,7 @@ import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
+import com.osfans.trime.ime.core.OneWayFolderSync
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
@@ -157,9 +158,21 @@ class PrefMainActivity : AppCompatActivity() {
     private fun deploy() {
         lifecycleScope.launch {
             rimeActionWithResultDialog("rime.trime", "W", 1) {
+                copyToInternal()
                 RimeDaemon.restartRime(true)
                 true
             }
+        }
+    }
+
+    private suspend fun copyToInternal() {
+        val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
+        val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
+
+        OneWayFolderSync(this, userDirUri).copyAll((AppPrefs.Profile.getAppUserDir()))
+
+        if (shareDirUri != userDirUri && shareDirUri.isNotBlank()) {
+            OneWayFolderSync(this, shareDirUri).copyAll((AppPrefs.Profile.getAppShareDir()))
         }
     }
 
