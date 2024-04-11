@@ -32,8 +32,8 @@ import kotlin.system.measureTimeMillis
  *
  * @see [librime](https://github.com/rime/librime)
  */
-class Rime(fullCheck: Boolean) {
-    val notificationFlow = notificationFlow_.asSharedFlow()
+class Rime(fullCheck: Boolean) : RimeApi {
+    override val notificationFlow = notificationFlow_.asSharedFlow()
 
     init {
         startup(fullCheck)
