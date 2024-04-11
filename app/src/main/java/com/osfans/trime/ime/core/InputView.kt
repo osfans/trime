@@ -16,8 +16,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
+import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
@@ -56,7 +56,7 @@ import splitties.views.imageDrawable
 @SuppressLint("ViewConstructor")
 class InputView(
     val service: TrimeInputMethodService,
-    val rime: Rime,
+    val rime: RimeSession,
 ) : ConstraintLayout(service) {
     private val theme get() = ThemeManager.activeTheme
     private var shouldUpdateNavbarForeground = false
@@ -131,7 +131,7 @@ class InputView(
 
         notificationHandlerJob =
             service.lifecycleScope.launch {
-                rime.notificationFlow.collect {
+                rime.run { notificationFlow }.collect {
                     handleRimeNotification(it)
                 }
             }

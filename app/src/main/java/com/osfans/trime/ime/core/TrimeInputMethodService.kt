@@ -48,6 +48,8 @@ import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeDaemon
+import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.ColorManager
@@ -82,6 +84,7 @@ import timber.log.Timber
 
 @Suppress("ktlint:standard:property-naming")
 open class TrimeInputMethodService : LifecycleInputMethodService() {
+    private lateinit var rime: RimeSession
     private var normalTextEditor = false
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
@@ -223,6 +226,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreate() {
+        rime = RimeDaemon.createSession(javaClass.name)
         super.onCreate()
         // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
         try {
@@ -306,7 +310,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
     fun recreateInputView() {
         mCompositionPopupWindow?.finishInput()
-        inputView = InputView(this, Rime.getInstance(false))
+        inputView = InputView(this, rime)
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
         // 初始化候选栏
         mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
@@ -337,6 +341,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mCompositionPopupWindow?.finishInput()
         ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
+        RimeDaemon.destroySession(javaClass.name)
         self = null
     }
 
