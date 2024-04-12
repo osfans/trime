@@ -142,11 +142,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         } else {
             Timber.i("onWindowShown...")
         }
-        if (RimeWrapper.isReady() && currentInputEditorInfo != null) {
-            isWindowShown = true
-            updateComposing()
-            for (listener in eventListeners) {
-                listener.onWindowShown()
+        rime.runIfReady {
+            if (currentInputEditorInfo != null) {
+                isWindowShown = true
+                updateComposing()
+                for (listener in eventListeners) {
+                    listener.onWindowShown()
+                }
             }
         }
     }
@@ -235,11 +237,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             ColorManager.addOnChangedListener(onColorChangeListener)
-            RimeWrapper.startup {
+            rime.runOnReady {
                 Timber.d("Running Trime.onCreate")
                 ColorManager.init(resources.configuration)
                 textInputManager = TextInputManager.getInstance()
-                InputFeedbackManager.init(this)
+                InputFeedbackManager.init(this@TrimeInputMethodService)
                 restartSystemStartTimingSync()
                 try {
                     for (listener in eventListeners) {
@@ -434,7 +436,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        RimeWrapper.runAfterStarted {
+        rime.runOnReady {
             recreateInputView()
         }
         initializationUi = InitializationUi(this)
@@ -467,7 +469,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=%s", restarting)
-        RimeWrapper.runAfterStarted {
+        rime.runOnReady {
             InputFeedbackManager.loadSoundEffects()
             InputFeedbackManager.resetPlayProgress()
             for (listener in eventListeners) {
@@ -545,12 +547,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 }
             }
         }
-        RimeWrapper.runCheck()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
-        if (RimeWrapper.isReady()) {
+        rime.runIfReady {
             if (normalTextEditor) {
                 DraftHelper.onInputEventChanged()
             }

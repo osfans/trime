@@ -15,8 +15,8 @@ import android.view.KeyEvent
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
@@ -140,7 +140,7 @@ object ShortcutUtils {
         val prefs = AppPrefs.defaultInstance()
         prefs.profile.lastBackgroundSync = Date().time.toString()
         CoroutineScope(Dispatchers.IO).launch {
-            prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { RimeWrapper.deploy() }
+            prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { RimeDaemon.restartRime() }
         }
     }
 
