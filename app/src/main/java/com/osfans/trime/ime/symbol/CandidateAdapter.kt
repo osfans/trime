@@ -43,20 +43,20 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
         return mCandidates.size
     }
 
-    private val mCandidateTextSize = theme.style.getFloat("candidate_text_size").coerceAtLeast(1f)
+    private val mCandidateTextSize = theme.generalStyle.candidateTextSize.toFloat().coerceAtLeast(1f)
     private val mCandidateFont = FontManager.getTypeface("candidate_font")
     private val mCandidateTextColor = ColorManager.getColor("candidate_text_color")
     private val mHilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")
-    private val mCommentPosition = theme.style.getInt("comment_position")
-    private val mCommentTextSize = theme.style.getFloat("comment_text_size").coerceAtLeast(1f)
+    private val mCommentPosition = theme.generalStyle.commentPosition
+    private val mCommentTextSize = theme.generalStyle.commentTextSize.toFloat().coerceAtLeast(1f)
     private val mCommentFont = FontManager.getTypeface("comment_font")
     private val mCommentTextColor = ColorManager.getColor("comment_text_color")
     private val mBackground =
         ColorManager.getDrawable(
             key = "key_back_color",
-            borderKey = "key_border",
+            border = theme.generalStyle.candidateBorder,
             borderColorKey = "key_border_color",
-            roundCornerKey = "round_corner",
+            roundCorner = theme.generalStyle.roundCorner,
         )
 
     override fun onCreateViewHolder(
@@ -81,7 +81,7 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
         }
         val candidate = binding.candidate
         val comment = binding.comment
-        when (CommentPosition.entries[mCommentPosition]) {
+        when (mCommentPosition) {
             CommentPosition.BOTTOM -> {
                 candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     centerHorizontally()

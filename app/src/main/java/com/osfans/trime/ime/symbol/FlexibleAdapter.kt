@@ -17,7 +17,7 @@ import com.osfans.trime.databinding.SimpleKeyItemBinding
 import splitties.resources.drawable
 import splitties.resources.styledColor
 
-abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
+abstract class FlexibleAdapter(private val theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
 
     // 映射条目的 id 和其在视图中位置的关系
@@ -54,8 +54,8 @@ abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdap
     private val mTypeface = FontManager.getTypeface("long_text_font")
     private val mLongTextColor = ColorManager.getColor("long_text_color")
     private val mKeyTextColor = ColorManager.getColor("key_text_color")
-    private val mKeyLongTextSize = theme.style.getFloat("key_long_text_size")
-    private val mLabelTextSize = theme.style.getFloat("label_text_size")
+    private val mKeyLongTextSize = theme.generalStyle.keyLongTextSize
+    private val mLabelTextSize = theme.generalStyle.labelTextSize
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -66,15 +66,15 @@ abstract class FlexibleAdapter(theme: Theme) : RecyclerView.Adapter<FlexibleAdap
             ColorManager.getDrawable(
                 parent.context,
                 "long_text_back_color",
-                "key_border",
+                border = theme.generalStyle.keyBorder,
                 "key_long_text_border",
-                "round_corner",
+                roundCorner = theme.generalStyle.roundCorner,
             )
         binding.simpleKey.apply {
             typeface = mTypeface
             (mLongTextColor ?: mKeyTextColor)?.let { setTextColor(it) }
             (mKeyLongTextSize.takeIf { it > 0f } ?: mLabelTextSize.takeIf { it > 0f })
-                ?.let { textSize = it }
+                ?.let { textSize = it.toFloat() }
         }
         return ViewHolder(binding)
     }
