@@ -30,8 +30,8 @@ import androidx.core.content.ContextCompat
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.ime.core.RimeWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -55,7 +55,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
             COMMAND_DEPLOY ->
                 launch {
                     withContext(Dispatchers.IO) {
-                        RimeWrapper.deploy()
+                        RimeDaemon.restartRime()
                     }
                     ToastUtils.showLong(R.string.deploy_finish)
                 }
@@ -63,7 +63,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                 launch {
                     withContext(Dispatchers.IO) {
                         Rime.syncRimeUserData()
-                        RimeWrapper.deploy()
+                        RimeDaemon.restartRime()
                     }
                 }
             COMMAND_TIMING_SYNC ->
@@ -106,7 +106,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                         }
 
                         Rime.syncRimeUserData()
-                        RimeWrapper.deploy()
+                        RimeDaemon.restartRime()
                         wakeLock.release() // 释放唤醒锁
                     }
                 }

@@ -21,9 +21,9 @@ import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
-import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
@@ -75,7 +75,8 @@ class ProfileFragment :
                 lifecycleScope.launch {
                     this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
                         Rime.syncRimeUserData()
-                        RimeWrapper.deploy()
+                        RimeDaemon.restartRime()
+                        true
                     }
                 }
                 true

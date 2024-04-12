@@ -21,6 +21,8 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.schema.SchemaManager
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -32,19 +34,57 @@ import kotlin.system.measureTimeMillis
  *
  * @see [librime](https://github.com/rime/librime)
  */
-class Rime(fullCheck: Boolean) : RimeApi {
-    override val notificationFlow = notificationFlow_.asSharedFlow()
+class Rime : RimeApi, RimeLifecycleOwner {
+    private val lifecycleImpl = RimeLifecycleImpl()
+    override val lifecycle get() = lifecycleImpl
 
-    init {
-        startup(fullCheck)
+    override val notificationFlow = notificationFlow_.asSharedFlow()
+    override val stateFlow = lifecycle.stateFlow
+
+    override val isReady: Boolean
+        get() = lifecycle.stateFlow.value == RimeLifecycle.State.READY
+
+    fun startup(fullCheck: Boolean) {
+        if (lifecycle.stateFlow.value != RimeLifecycle.State.STOPPED) {
+            Timber.w("Skip starting rime: not at stopped state!")
+            return
+        }
+        if (appContext.isStorageAvailable()) {
+            isHandlingRimeNotification = false
+
+            DataManager.dirFireChange()
+            DataManager.sync()
+
+            val sharedDataDir = AppPrefs.defaultInstance().profile.sharedDataDir
+            val userDataDir = AppPrefs.defaultInstance().profile.userDataDir
+
+            lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
+            Timber.i("Starting up Rime APIs ...")
+            startupRime(sharedDataDir, userDataDir, fullCheck)
+
+            Timber.i("Initializing schema stuffs after starting up ...")
+            SchemaManager.init(getCurrentRimeSchema())
+            updateStatus()
+            OpenCCDictManager.buildOpenCCDict()
+            lifecycleImpl.emitState(RimeLifecycle.State.READY)
+        }
+    }
+
+    fun finalize() {
+        if (lifecycle.stateFlow.value != RimeLifecycle.State.READY) {
+            Timber.w("Skip stopping rime: not at ready state!")
+            return
+        }
+        exitRime()
+        lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
     }
 
     companion object {
         private var instance: Rime? = null
 
         @JvmStatic
-        fun getInstance(fullCheck: Boolean = false): Rime {
-            if (instance == null) instance = Rime(fullCheck)
+        fun getInstance(): Rime {
+            if (instance == null) instance = Rime()
             return instance!!
         }
 
@@ -59,33 +99,6 @@ class Rime(fullCheck: Boolean) : RimeApi {
 
         init {
             System.loadLibrary("rime_jni")
-        }
-
-        private fun startup(fullCheck: Boolean) {
-            isHandlingRimeNotification = false
-
-            DataManager.sync()
-
-            val sharedDataDir = AppPrefs.defaultInstance().profile.sharedDataDir
-            val userDataDir = AppPrefs.defaultInstance().profile.userDataDir
-
-            Timber.i("Starting up Rime APIs ...")
-            startupRime(sharedDataDir, userDataDir, fullCheck)
-
-            Timber.i("Initializing schema stuffs after starting up ...")
-            SchemaManager.init(getCurrentRimeSchema())
-            updateStatus()
-        }
-
-        fun destroy() {
-            exitRime()
-            instance = null
-        }
-
-        fun deploy() {
-            destroy()
-            getInstance(true)
-            OpenCCDictManager.buildOpenCCDict()
         }
 
         fun updateStatus() {

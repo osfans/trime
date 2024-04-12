@@ -26,11 +26,11 @@ import androidx.navigation.ui.setupWithNavController
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
+import com.osfans.trime.core.RimeLifecycle
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
-import com.osfans.trime.ime.core.RimeWrapper
-import com.osfans.trime.ime.core.Status
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
@@ -112,19 +112,17 @@ class PrefMainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                RimeWrapper.statusStateFlow.collect { state ->
+                viewModel.rime.run { stateFlow }.collect { state ->
                     when (state) {
-                        Status.IN_PROGRESS -> {
+                        RimeLifecycle.State.STARTING -> {
                             loadingDialog?.dismiss()
                             loadingDialog =
                                 progressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
                                     show()
                                 }
                         }
-                        Status.UN_INIT -> {
-                            RimeWrapper.startup()
-                        }
-                        else -> loadingDialog?.dismiss()
+                        RimeLifecycle.State.READY -> loadingDialog?.dismiss()
+                        else -> return@collect
                     }
                 }
             }
@@ -156,7 +154,8 @@ class PrefMainActivity : AppCompatActivity() {
     private fun deploy() {
         lifecycleScope.launch {
             rimeActionWithResultDialog("rime.trime", "W", 1) {
-                RimeWrapper.deploy()
+                RimeDaemon.restartRime()
+                true
             }
         }
     }

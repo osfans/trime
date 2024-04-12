@@ -8,12 +8,12 @@ import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.SchemaListItem
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffect
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.core.RimeWrapper
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun Context.schemaPicker(
                         .toTypedArray(),
                 )
                 withContext(Dispatchers.Default) {
-                    RimeWrapper.deploy()
+                    RimeDaemon.restartRime()
                 }
             }
         }
