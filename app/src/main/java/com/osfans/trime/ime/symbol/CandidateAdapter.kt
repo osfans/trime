@@ -25,7 +25,7 @@ import splitties.views.dsl.constraintlayout.topOfParent
 class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.ViewHolder>() {
     private val mCandidates = mutableListOf<CandidateListItem>()
 
-    internal enum class CommentPosition {
+    enum class CommentPosition {
         UNKNOWN,
         TOP,
         BOTTOM,
