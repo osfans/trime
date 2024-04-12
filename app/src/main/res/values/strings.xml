@@ -286,4 +286,6 @@
     <string name="schedule_exact_alarm_permission_message">Without the permmission to schedule exact alarm, we are not able to sync your profile in time when you enable syncing on schedule.</string>
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
+    <string name="rime_daemon">Rime Daemon</string>
+    <string name="restarting_rime">Restarting Rime</string>
 </resources>

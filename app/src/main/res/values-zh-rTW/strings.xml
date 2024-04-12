@@ -285,4 +285,6 @@
     <string name="schedule_exact_alarm_permission_message">尚未賦予鬧鐘和提醒權限，因此無法在啟用定時同步時及時為您同步資料配置。</string>
     <string name="notification_permission_title">沒有通知權限</string>
     <string name="notification_permission_message">尚未賦予通知權限，因此無法在耗時較長的操作完成後給您發送通知。</string>
+    <string name="rime_daemon">Rime 常駐程式</string>
+    <string name="restarting_rime">重新啟動 Rime</string>
 </resources>

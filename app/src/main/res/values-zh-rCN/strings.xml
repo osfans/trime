@@ -284,4 +284,6 @@
     <string name="schedule_exact_alarm_permission_message">没有闹钟和提醒权限，我们无法在启用定时同步时及时为您同步数据配置。</string>
     <string name="notification_permission_title">没有通知权限</string>
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
+    <string name="rime_daemon">Rime 守护程序</string>
+    <string name="restarting_rime">正在重新启动 Rime</string>
 </resources>
