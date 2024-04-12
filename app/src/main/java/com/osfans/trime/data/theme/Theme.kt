@@ -22,7 +22,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.util.config.Config
-import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.config.ConfigList
 import com.osfans.trime.util.config.ConfigMap
 import timber.log.Timber
@@ -30,7 +29,6 @@ import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
 class Theme(name: String) {
-    val style: Style
     val generalStyle: GeneralStyle
     val liquid: Liquid
     val keyboards: Keyboards
@@ -74,7 +72,6 @@ class Theme(name: String) {
                 deploy(name)
             } ?: Config()
 
-        style = Style(config)
         liquid = Liquid(config)
         keyboards = Keyboards(config)
         generalStyle = mapToGeneralStyle(config)
@@ -97,22 +94,6 @@ class Theme(name: String) {
             mapper.errors.joinToString(","),
         )
         return generalStyle
-    }
-
-    class Style(private val config: Config) {
-        fun getString(key: String): String = config.getString("style/$key")
-
-        fun getInt(key: String): Int = config.getInt("style/$key")
-
-        fun getFloat(key: String): Float = config.getFloat("style/$key")
-
-        fun getBoolean(key: String): Boolean = config.getBool("style/$key")
-
-        fun getList(key: String): ConfigList? = config.getList("style/$key")
-
-        fun getMap(key: String): ConfigMap? = config.getMap("style/$key")
-
-        fun getItem(key: String): ConfigItem? = config.getItem("style/$key")
     }
 
     class Liquid(private val config: Config) {
