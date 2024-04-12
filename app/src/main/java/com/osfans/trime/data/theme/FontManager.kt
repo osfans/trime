@@ -6,24 +6,36 @@ import android.graphics.fonts.FontFamily
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.osfans.trime.data.DataManager
-import com.osfans.trime.util.config.ConfigList
-import com.osfans.trime.util.config.ConfigValue
 import timber.log.Timber
 import java.io.File
 
 object FontManager {
+    private enum class FontKey {
+        HANB_FONT,
+        LATIN_FONT,
+        CANDIDATE_FONT,
+        COMMENT_FONT,
+        KEY_FONT,
+        LABEL_FONT,
+        PREVIEW_FONT,
+        SYMBOL_FONT,
+        TEXT_FONT,
+        LONG_TEXT_FONT,
+    }
+
     private val fontDir get() = File(DataManager.userDataDir, "fonts")
-    var hanBFont: Typeface = getTypefaceOrDefault("hanb_font")
+    var hanBFont: Typeface = getTypefaceOrDefault(FontKey.HANB_FONT.name)
         private set
-    var latinFont: Typeface = getTypefaceOrDefault("latin_font")
+    var latinFont: Typeface = getTypefaceOrDefault(FontKey.LATIN_FONT.name)
         private set
     private val typefaceCache = mutableMapOf<String, Typeface>()
+    private val fontFamilyCache = mutableMapOf<String, FontFamily>()
 
     fun refresh() {
         typefaceCache.clear()
         fontFamilyCache.clear()
-        hanBFont = getTypefaceOrDefault("hanb_font")
-        latinFont = getTypefaceOrDefault("latin_font")
+        hanBFont = getTypefaceOrDefault(FontKey.HANB_FONT.name)
+        latinFont = getTypefaceOrDefault(FontKey.LATIN_FONT.name)
     }
 
     @JvmStatic
@@ -39,9 +51,9 @@ object FontManager {
                     typefaceCache[key] = Typeface.DEFAULT
                     return@getTypeface Typeface.DEFAULT
                 }
-                fontFamilies.addAll(getFontFamilies("latin_font"))
+                fontFamilies.addAll(getFontFamilies(FontKey.LATIN_FONT.name))
                 fontFamilies.addAll(it)
-                fontFamilies.addAll(getFontFamilies("hanb_font"))
+                fontFamilies.addAll(getFontFamilies(FontKey.HANB_FONT.name))
             }
             buildTypeface(fontFamilies).let {
                 typefaceCache[key] = it
@@ -65,14 +77,7 @@ object FontManager {
     }
 
     private fun getTypefaceOrDefault(key: String): Typeface {
-        val fonts =
-            ThemeManager.activeTheme.style.getItem(key).run {
-                return@run when (this) {
-                    is ConfigValue -> listOf(getString())
-                    is ConfigList -> this.mapNotNull { it?.configValue?.getString() }
-                    else -> emptyList()
-                }
-            }
+        val fonts = getFontFromStyle(key)
 
         fun handler(fontName: String): Typeface? {
             val fontFile = File(fontDir, fontName)
@@ -83,10 +88,25 @@ object FontManager {
             return null
         }
 
-        return fonts.firstNotNullOfOrNull { handler(it) } ?: Typeface.DEFAULT
+        return fonts?.firstNotNullOfOrNull { handler(it) } ?: Typeface.DEFAULT
     }
 
-    private val fontFamilyCache = mutableMapOf<String, FontFamily>()
+    private fun getFontFromStyle(key: String): List<String>? {
+        val style = ThemeManager.activeTheme.generalStyle
+        return when (FontKey.entries.firstOrNull { it.name == key.uppercase() }) {
+            FontKey.HANB_FONT -> style.hanbFont
+            FontKey.LATIN_FONT -> style.latinFont
+            FontKey.CANDIDATE_FONT -> style.candidateFont
+            FontKey.COMMENT_FONT -> style.commentFont
+            FontKey.KEY_FONT -> style.keyFont
+            FontKey.LABEL_FONT -> style.labelFont
+            FontKey.PREVIEW_FONT -> style.previewFont
+            FontKey.SYMBOL_FONT -> style.symbolFont
+            FontKey.TEXT_FONT -> style.textFont
+            FontKey.LONG_TEXT_FONT -> style.longTextFont
+            else -> null
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun getFontFamily(fontName: String): FontFamily? {
@@ -103,15 +123,8 @@ object FontManager {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun getFontFamilies(key: String): List<FontFamily> {
-        val fonts =
-            ThemeManager.activeTheme.style.getItem(key).run {
-                return@run when (this) {
-                    is ConfigValue -> listOf(getString())
-                    is ConfigList -> this.mapNotNull { it?.configValue?.getString() }
-                    else -> emptyList()
-                }
-            }
+        val fonts = getFontFromStyle(key)
 
-        return fonts.mapNotNull { getFontFamily(it) }
+        return fonts?.mapNotNull { getFontFamily(it) } ?: listOf()
     }
 }
