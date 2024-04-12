@@ -1,0 +1,16 @@
+# Trime default style settings
+# encoding: utf-8
+
+config_version: "3.0"
+name: 預設 #方案名稱
+author: osfans #作者資訊
+
+style:
+  auto_caps:
+  background_folder: /
+  background_dim_amount: not dim
+  candidate_font:
+  candidate_use_cursor:
+  color_scheme: default #配色方案
+  comment_position: aaaa
+  enter_labels:  # 定义Enter键的文本
