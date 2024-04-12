@@ -16,7 +16,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.enums.Keycode
@@ -59,7 +58,6 @@ class TextInputManager(
     KeyboardView.OnKeyboardActionListener,
     Candidate.EventListener {
     private val prefs get() = AppPrefs.defaultInstance()
-    private var intentReceiver: IntentReceiver? = null
     private var rimeNotificationJob: Job? = null
 
     val locales = Array(2) { Locale.getDefault() }
@@ -101,11 +99,6 @@ class TextInputManager(
      */
     override fun onCreate() {
         super.onCreate()
-
-        intentReceiver =
-            IntentReceiver().also {
-                it.registerReceiver(trime)
-            }
         rimeNotificationJob =
             rime.run { notificationFlow }
                 .onEach(::handleRimeNotification)
@@ -135,9 +128,6 @@ class TextInputManager(
      * Cancels all coroutines and cleans up.
      */
     override fun onDestroy() {
-        intentReceiver?.unregisterReceiver(trime)
-        intentReceiver = null
-
         rimeNotificationJob?.cancel()
         rimeNotificationJob = null
         instance = null
