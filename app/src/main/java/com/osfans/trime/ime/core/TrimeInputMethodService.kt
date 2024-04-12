@@ -121,7 +121,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ColorManager.OnColorChangeListener {
             lifecycleScope.launch(Dispatchers.Main) {
                 recreateInputView()
-                inputView?.startInput(currentInputEditorInfo)
+                currentInputEditorInfo?.let { inputView?.startInput(it) }
             }
         }
 
