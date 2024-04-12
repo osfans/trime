@@ -8,6 +8,7 @@ import android.widget.ViewAnimator
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -21,7 +22,7 @@ import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
-class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadcastReceiver {
+class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme) : InputBroadcastReceiver {
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
             with(root) {
@@ -71,9 +72,9 @@ class QuickBar(context: Context, service: TrimeInputMethodService) : InputBroadc
                 ColorManager.getDrawable(
                     context,
                     "candidate_background",
-                    "candidate_border",
+                    theme.generalStyle.candidateBorder,
                     "candidate_border_color",
-                    "candidate_border_round",
+                    theme.generalStyle.candidateBorderRound,
                 )
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))

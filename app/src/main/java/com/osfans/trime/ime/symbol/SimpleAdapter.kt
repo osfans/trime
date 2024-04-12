@@ -38,15 +38,15 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
     }
 
     private val mSingleWidth = theme.liquid.getInt("single_width")
-    private val mTextSize = theme.style.getFloat("label_text_size")
+    private val mTextSize = theme.generalStyle.labelTextSize
     private val mTextColor = ColorManager.getColor("key_text_color")
     private val mTypeface = FontManager.getTypeface("key_font")
     private val mBackground =
         ColorManager.getDrawable(
             key = "key_back_color",
-            borderKey = "key_border",
+            border = theme.generalStyle.keyBorder,
             borderColorKey = "key_border_color",
-            roundCornerKey = "round_corner",
+            roundCorner = theme.generalStyle.roundCorner,
         )
 
     override fun onCreateViewHolder(
@@ -66,7 +66,7 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
         holder.simpleKeyTexts.forEachIndexed { index, textView ->
             holder.wrappers[index].tag = index
             textView.apply {
-                mTextSize.takeIf { it > 0f }?.let { this.textSize = it }
+                mTextSize.takeIf { it > 0f }?.let { this.textSize = it.toFloat() }
                 mTextColor?.let { setTextColor(it) }
                 typeface = mTypeface
                 gravity = Gravity.CENTER

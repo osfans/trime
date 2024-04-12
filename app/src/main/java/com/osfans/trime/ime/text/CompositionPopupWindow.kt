@@ -31,7 +31,7 @@ class CompositionPopupWindow(
     // 顯示懸浮窗口
     val isPopupWindowEnabled =
         AppPrefs.defaultInstance().keyboard.popupWindowEnabled &&
-            theme.style.getItem("window") != null
+            theme.generalStyle.window != null
 
     val composition =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
@@ -39,19 +39,19 @@ class CompositionPopupWindow(
         }
 
     // 悬浮窗口是否可移動
-    private val isPopupWindowMovable = theme.style.getString("layout/movable")
+    private val isPopupWindowMovable = theme.generalStyle.layout.movable
 
     private var popupWindowX = 0
     private var popupWindowY = 0 // 悬浮床移动座標
 
     // 候選窗與邊緣空隙
-    private val popupMargin = theme.style.getInt("layout/spacing")
+    private val popupMargin = theme.generalStyle.layout.spacing
 
     // 悬浮窗与屏幕两侧的间距
-    private val popupMarginH = theme.style.getInt("layout/real_margin")
+    private val popupMarginH = theme.generalStyle.layout.realMargin
 
     // 悬浮窗口彈出位置
-    private var popupWindowPos = PopupPosition.fromString(theme.style.getString("layout/position"))
+    private var popupWindowPos = PopupPosition.fromString(theme.generalStyle.layout.position)
 
     private val mPopupWindow =
         PopupWindow(composition.root).apply {
@@ -65,13 +65,13 @@ class CompositionPopupWindow(
                 ColorManager.getDrawable(
                     ctx,
                     "text_back_color",
-                    "layout/border",
+                    theme.generalStyle.layout.border,
                     "border_color",
-                    "layout/round_corner",
-                    "layout/alpha",
+                    theme.generalStyle.layout.roundCorner,
+                    theme.generalStyle.layout.alpha,
                 ),
             )
-            elevation = ctx.dp(theme.style.getFloat("layout/elevation"))
+            elevation = ctx.dp(theme.generalStyle.layout.elevation.toFloat())
         }
 
     var isCursorUpdated = false // 光標是否移動
@@ -175,7 +175,7 @@ class CompositionPopupWindow(
 
     fun updateCompositionView() {
         if (isPopupWindowMovable == "once") {
-            popupWindowPos = PopupPosition.fromString(ThemeManager.activeTheme.style.getString("layout/position"))
+            popupWindowPos = PopupPosition.fromString(ThemeManager.activeTheme.generalStyle.layout.position)
         }
         composition.root.measure(
             ViewGroup.LayoutParams.WRAP_CONTENT,
