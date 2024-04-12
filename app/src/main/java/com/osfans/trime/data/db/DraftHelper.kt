@@ -70,8 +70,8 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     fun onInputEventChanged() {
         if (!(limit != 0 && this::dftDao.isInitialized)) return
 
-        TrimeInputMethodService.getService()
-            .currentInputConnection
+        TrimeInputMethodService.getServiceOrNull()
+            ?.currentInputConnection
             ?.let { DatabaseBean.fromInputConnection(it) }
             ?.takeIf {
                 it.text!!.isNotBlank() &&
