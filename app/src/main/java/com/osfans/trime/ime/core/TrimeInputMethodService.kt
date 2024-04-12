@@ -332,7 +332,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onDestroy() {
-        if (mIntentReceiver != null) mIntentReceiver!!.unregisterReceiver(this)
+        mIntentReceiver?.unregisterReceiver(this)
         mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
