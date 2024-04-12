@@ -19,6 +19,8 @@ package com.osfans.trime.data.theme
 
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
+import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.util.config.Config
 import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.config.ConfigList
@@ -29,6 +31,7 @@ import kotlin.system.measureTimeMillis
 /** 主题和样式配置  */
 class Theme(name: String) {
     val style: Style
+    val generalStyle: GeneralStyle
     val liquid: Liquid
     val keyboards: Keyboards
 
@@ -74,12 +77,26 @@ class Theme(name: String) {
         style = Style(config)
         liquid = Liquid(config)
         keyboards = Keyboards(config)
+        generalStyle = mapToGeneralStyle(config)
         fallbackColors = config.getMap("fallback_colors")
         presetKeys = config.getMap("preset_keys")
         presetColorSchemes = config.getMap("preset_color_schemes")
         presetKeyboards = config.getMap("preset_keyboards")
         Timber.i("The theme is initialized")
         prefs.selectedTheme = name
+    }
+
+    private fun mapToGeneralStyle(config: Config): GeneralStyle {
+        val generalStyleMap = config.getMap("style")
+        val mapper = GeneralStyleMapper(generalStyleMap)
+        val generalStyle = mapper.map()
+
+        Timber.w(
+            "GeneralStyleMapper (%d) Warnings: %s",
+            mapper.errors.size,
+            mapper.errors.joinToString(","),
+        )
+        return generalStyle
     }
 
     class Style(private val config: Config) {
