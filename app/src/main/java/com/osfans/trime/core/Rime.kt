@@ -26,6 +26,7 @@ import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.system.measureTimeMillis
 
@@ -70,6 +71,28 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 }
             },
         )
+
+    private suspend inline fun <T> withRimeContext(crossinline block: suspend () -> T): T =
+        withContext(dispatcher) {
+            block()
+        }
+
+    override suspend fun isEmpty(): Boolean =
+        withRimeContext {
+            getCurrentRimeSchema() == ".default" // 無方案
+        }
+
+    override suspend fun availableSchemata(): Array<SchemaListItem> = withRimeContext { getAvailableRimeSchemaList() }
+
+    override suspend fun enabledSchemata(): Array<SchemaListItem> = withRimeContext { getSelectedRimeSchemaList() }
+
+    override suspend fun setEnabledSchemata(schemaIds: Array<String>) = withRimeContext { selectRimeSchemas(schemaIds) }
+
+    override suspend fun selectedSchemata(): Array<SchemaListItem> = withRimeContext { getRimeSchemaList() }
+
+    override suspend fun selectedSchemaId(): String = withRimeContext { getCurrentRimeSchema() }
+
+    override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
 
     fun startup(fullCheck: Boolean) {
         if (lifecycle.stateFlow.value != RimeLifecycle.State.STOPPED) {
