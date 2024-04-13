@@ -237,20 +237,22 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             ColorManager.addOnChangedListener(onColorChangeListener)
-            rime.runOnReady {
-                Timber.d("Running Trime.onCreate")
-                ColorManager.init(resources.configuration)
-                textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
-                InputFeedbackManager.init(this@TrimeInputMethodService)
-                restartSystemStartTimingSync()
-                try {
-                    for (listener in eventListeners) {
-                        listener.onCreate()
+            lifecycleScope.launch {
+                rime.runOnReady {
+                    Timber.d("Running Trime.onCreate")
+                    ColorManager.init(resources.configuration)
+                    textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
+                    InputFeedbackManager.init(this@TrimeInputMethodService)
+                    restartSystemStartTimingSync()
+                    try {
+                        for (listener in eventListeners) {
+                            listener.onCreate()
+                        }
+                    } catch (e: Exception) {
+                        Timber.e(e)
                     }
-                } catch (e: Exception) {
-                    Timber.e(e)
+                    Timber.d("Trime.onCreate  completed")
                 }
-                Timber.d("Trime.onCreate  completed")
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -436,8 +438,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        rime.runOnReady {
-            recreateInputView()
+        lifecycleScope.launch(Dispatchers.Main) {
+            rime.runOnReady {
+                recreateInputView()
+            }
         }
         initializationUi = InitializationUi(this)
         return initializationUi!!.root
@@ -469,80 +473,82 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=%s", restarting)
-        rime.runOnReady {
-            InputFeedbackManager.loadSoundEffects()
-            InputFeedbackManager.resetPlayProgress()
-            for (listener in eventListeners) {
-                listener.onStartInputView(attribute, restarting)
-            }
-            if (prefs.other.showStatusBarIcon) {
-                showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
-            }
-            bindKeyboardToInputView()
-            setCandidatesViewShown(!Rime.isEmpty) // 軟鍵盤出現時顯示候選欄
-            inputView?.startInput(attribute, restarting)
-            when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
-                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
-                -> {
-                    Timber.d(
-                        "EditorInfo: private;" +
-                            " packageName=" +
-                            attribute.packageName +
-                            "; fieldName=" +
-                            attribute.fieldName +
-                            "; actionLabel=" +
-                            attribute.actionLabel +
-                            "; inputType=" +
-                            attribute.inputType +
-                            "; VARIATION=" +
-                            (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                            "; CLASS=" +
-                            (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                            "; ACTION=" +
-                            (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                    )
-                    normalTextEditor = false
+        lifecycleScope.launch(Dispatchers.Main) {
+            rime.runOnReady {
+                InputFeedbackManager.loadSoundEffects()
+                InputFeedbackManager.resetPlayProgress()
+                for (listener in eventListeners) {
+                    listener.onStartInputView(attribute, restarting)
                 }
+                if (prefs.other.showStatusBarIcon) {
+                    showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
+                }
+                bindKeyboardToInputView()
+                setCandidatesViewShown(!Rime.isEmpty) // 軟鍵盤出現時顯示候選欄
+                inputView?.startInput(attribute, restarting)
+                when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
+                    InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                    InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+                    -> {
+                        Timber.d(
+                            "EditorInfo: private;" +
+                                " packageName=" +
+                                attribute.packageName +
+                                "; fieldName=" +
+                                attribute.fieldName +
+                                "; actionLabel=" +
+                                attribute.actionLabel +
+                                "; inputType=" +
+                                attribute.inputType +
+                                "; VARIATION=" +
+                                (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
+                                "; CLASS=" +
+                                (attribute.inputType and InputType.TYPE_MASK_CLASS) +
+                                "; ACTION=" +
+                                (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
+                        )
+                        normalTextEditor = false
+                    }
 
-                else -> {
-                    Timber.d(
-                        "EditorInfo: normal;" +
-                            " packageName=" +
-                            attribute.packageName +
-                            "; fieldName=" +
-                            attribute.fieldName +
-                            "; actionLabel=" +
-                            attribute.actionLabel +
-                            "; inputType=" +
-                            attribute.inputType +
-                            "; VARIATION=" +
-                            (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                            "; CLASS=" +
-                            (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                            "; ACTION=" +
-                            (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                    )
-                    if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                        == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                    ) {
-                        //  应用程求以隐身模式打开键盘应用程序
-                        normalTextEditor = false
-                        Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
-                    } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
-                        prefs
-                            .clipboard
-                            .draftExcludeApp
-                            .contains(attribute.packageName)
-                    ) {
-                        normalTextEditor = false
-                        Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
-                    } else {
-                        normalTextEditor = true
-                        DraftHelper.onInputEventChanged()
+                    else -> {
+                        Timber.d(
+                            "EditorInfo: normal;" +
+                                " packageName=" +
+                                attribute.packageName +
+                                "; fieldName=" +
+                                attribute.fieldName +
+                                "; actionLabel=" +
+                                attribute.actionLabel +
+                                "; inputType=" +
+                                attribute.inputType +
+                                "; VARIATION=" +
+                                (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
+                                "; CLASS=" +
+                                (attribute.inputType and InputType.TYPE_MASK_CLASS) +
+                                "; ACTION=" +
+                                (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
+                        )
+                        if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                            == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                        ) {
+                            //  应用程求以隐身模式打开键盘应用程序
+                            normalTextEditor = false
+                            Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
+                        } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
+                            prefs
+                                .clipboard
+                                .draftExcludeApp
+                                .contains(attribute.packageName)
+                        ) {
+                            normalTextEditor = false
+                            Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
+                        } else {
+                            normalTextEditor = true
+                            DraftHelper.onInputEventChanged()
+                        }
                     }
                 }
             }

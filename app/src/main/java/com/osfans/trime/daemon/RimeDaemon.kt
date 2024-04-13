@@ -3,16 +3,34 @@ package com.osfans.trime.daemon
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.NotificationUtils
 import com.osfans.trime.R
+import com.osfans.trime.TrimeApplication
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeLifecycle
+import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
 import com.osfans.trime.util.appContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import splitties.systemservices.notificationManager
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
+/**
+ * Manage the singleton instance of [Rime]
+ *
+ * To use rime, client should call [createSession] to obtain a [RimeSession],
+ * and call [destroySession] on client destroyed. Client should not leak the instance of [RimeApi],
+ * and must use [RimeSession] to access rime functionalities.
+ *
+ * The instance of [Rime] always exists,but whether the dispatcher runs and callback works depend on clients, i.e.
+ * if no clients are connected, [Rime.finalize] will be called.
+ *
+ * Functions are thread-safe in this class.
+ *
+ * Adapted from [fcitx5-android/FcitxDaemon.kt](https://github.com/fcitx5-android/fcitx5-android/blob/364afb44dcf0d9e3db3d43a21a32601b2190cbdf/app/src/main/java/org/fcitx/fcitx5/android/daemon/FcitxDaemon.kt)
+ */
 object RimeDaemon {
     private val realRime by lazy { Rime() }
 
@@ -36,19 +54,23 @@ object RimeDaemon {
                     runBlocking { block(rimeImpl) }
                 }
 
-            override fun runOnReady(block: RimeApi.() -> Unit) {
+            override suspend fun <T> runOnReady(block: suspend RimeApi.() -> T): T =
                 ensureEstablished {
                     realRime.lifecycle.whenReady { block(rimeImpl) }
                 }
-            }
 
-            override fun runIfReady(block: RimeApi.() -> Unit) {
+            override fun runIfReady(block: suspend RimeApi.() -> Unit) {
                 ensureEstablished {
                     if (realRime.isReady) {
-                        realRime.lifecycle.handler.post { block(rimeImpl) }
+                        realRime.lifecycleScope.launch {
+                            block(rimeImpl)
+                        }
                     }
                 }
             }
+
+            override val lifecycleScope: CoroutineScope
+                get() = realRime.lifecycle.lifecycleScope
         }
 
     fun createSession(name: String): RimeSession =
@@ -94,9 +116,11 @@ object RimeDaemon {
             }
             realRime.finalize()
             realRime.startup(fullCheck)
-            // cancel notification on ready
-            realRime.lifecycle.whenReady {
-                notificationManager.cancel(CHANNEL_ID, id)
+            TrimeApplication.getInstance().coroutineScope.launch {
+                // cancel notification on ready
+                realRime.lifecycle.whenReady {
+                    notificationManager.cancel(CHANNEL_ID, id)
+                }
             }
         }
 }
