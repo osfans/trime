@@ -10,6 +10,9 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.ui.main.LogActivity
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.plus
 import timber.log.Timber
 import kotlin.system.exitProcess
 
@@ -30,6 +33,8 @@ class TrimeApplication : Application() {
 
         private const val MAX_STACKTRACE_SIZE = 128000
     }
+
+    val coroutineScope = MainScope() + CoroutineName("TrimeApplication")
 
     override fun onCreate() {
         super.onCreate()

@@ -1,23 +1,24 @@
+// Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/364afb44dcf0d9e3db3d43a21a32601b2190cbdf/app/src/main/java/org/fcitx/fcitx5/android/core/FcitxLifecycle.kt
 package com.osfans.trime.core
 
-import android.os.Handler
-import android.os.Looper
-import androidx.core.os.HandlerCompat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import java.util.Collections
+import kotlinx.coroutines.launch
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class RimeLifecycleImpl : RimeLifecycle {
     private val _stateFlow = MutableStateFlow(RimeLifecycle.State.STOPPED)
     override val stateFlow = _stateFlow.asStateFlow()
 
-    override val handler = HandlerCompat.createAsync(Looper.getMainLooper())
-    override val runnableList: MutableList<Runnable> = Collections.synchronizedList(mutableListOf<Runnable>())
+    override val lifecycleScope: CoroutineScope = RimeLifecycleScope(this)
 
     fun emitState(state: RimeLifecycle.State) {
         when (state) {
@@ -43,8 +44,7 @@ class RimeLifecycleImpl : RimeLifecycle {
 
 interface RimeLifecycle {
     val stateFlow: StateFlow<State>
-    val handler: Handler
-    val runnableList: MutableList<Runnable>
+    val lifecycleScope: CoroutineScope
 
     enum class State {
         STARTING,
@@ -55,40 +55,59 @@ interface RimeLifecycle {
 
 interface RimeLifecycleOwner {
     val lifecycle: RimeLifecycle
-    val handler get() = lifecycle.handler
 }
 
-fun RimeLifecycle.whenAtState(
+val RimeLifecycleOwner.lifecycleScope get() = lifecycle.lifecycleScope
+
+class RimeLifecycleScope(
+    val lifecycle: RimeLifecycle,
+    override val coroutineContext: CoroutineContext = SupervisorJob(),
+) : CoroutineScope {
+    init {
+        launch {
+            lifecycle.stateFlow.collect {
+                if (it == RimeLifecycle.State.STOPPED) {
+                    coroutineContext.cancelChildren()
+                }
+            }
+        }
+    }
+}
+
+suspend fun <T> RimeLifecycle.whenAtState(
     state: RimeLifecycle.State,
-    block: () -> Unit,
-) {
-    runnableList.add(Runnable { block() })
-    if (stateFlow.value == state) {
-        handler.post(runnableList.removeFirst())
+    block: suspend CoroutineScope.() -> T,
+): T {
+    return if (stateFlow.value == state) {
+        block(lifecycleScope)
     } else {
         StateDelegate(this, state).run(block)
     }
 }
 
-inline fun RimeLifecycle.whenReady(noinline block: () -> Unit) = whenAtState(RimeLifecycle.State.READY, block)
+suspend inline fun <T> RimeLifecycle.whenReady(noinline block: suspend CoroutineScope.() -> T) =
+    whenAtState(RimeLifecycle.State.READY, block)
 
 private class StateDelegate(val lifecycle: RimeLifecycle, val state: RimeLifecycle.State) {
     private var job: Job? = null
 
     init {
         job =
-            lifecycle.stateFlow.onEach {
-                if (it == state) {
-                    while (lifecycle.runnableList.isNotEmpty()) {
-                        lifecycle.handler.post(lifecycle.runnableList.removeFirst())
+            lifecycle.lifecycleScope.launch {
+                lifecycle.stateFlow.collect {
+                    if (it == state) {
+                        continuation?.resume(Unit)
                     }
                 }
-            }.launchIn(MainScope())
+            }
     }
 
-    fun <T> run(block: () -> T): T {
+    private var continuation: Continuation<Unit>? = null
+
+    suspend fun <T> run(block: suspend CoroutineScope.() -> T): T {
+        suspendCoroutine { continuation = it }
         job?.cancel()
         job = null
-        return block()
+        return block(lifecycle.lifecycleScope)
     }
 }
