@@ -44,28 +44,41 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override val isReady: Boolean
         get() = lifecycle.stateFlow.value == RimeLifecycle.State.READY
 
+    private val dispatcher =
+        RimeDispatcher(
+            object : RimeDispatcher.RimeLooper {
+                override fun nativeStartup(fullCheck: Boolean) {
+                    isHandlingRimeNotification = false
+
+                    DataManager.dirFireChange()
+                    DataManager.sync()
+
+                    val sharedDataDir = AppPrefs.defaultInstance().profile.sharedDataDir
+                    val userDataDir = AppPrefs.defaultInstance().profile.userDataDir
+                    Timber.i("Starting up Rime APIs ...")
+                    startupRime(sharedDataDir, userDataDir, fullCheck)
+
+                    Timber.i("Initializing schema stuffs after starting up ...")
+                    SchemaManager.init(getCurrentRimeSchema())
+                    updateStatus()
+
+                    OpenCCDictManager.buildOpenCCDict()
+                }
+
+                override fun nativeFinalize() {
+                    exitRime()
+                }
+            },
+        )
+
     fun startup(fullCheck: Boolean) {
         if (lifecycle.stateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
         if (appContext.isStorageAvailable()) {
-            isHandlingRimeNotification = false
-
-            DataManager.dirFireChange()
-            DataManager.sync()
-
-            val sharedDataDir = AppPrefs.defaultInstance().profile.sharedDataDir
-            val userDataDir = AppPrefs.defaultInstance().profile.userDataDir
-
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
-            Timber.i("Starting up Rime APIs ...")
-            startupRime(sharedDataDir, userDataDir, fullCheck)
-
-            Timber.i("Initializing schema stuffs after starting up ...")
-            SchemaManager.init(getCurrentRimeSchema())
-            updateStatus()
-            OpenCCDictManager.buildOpenCCDict()
+            dispatcher.start(fullCheck)
             lifecycleImpl.emitState(RimeLifecycle.State.READY)
         }
     }
@@ -75,7 +88,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
             Timber.w("Skip stopping rime: not at ready state!")
             return
         }
-        exitRime()
+        dispatcher.stop()
         lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
     }
 
