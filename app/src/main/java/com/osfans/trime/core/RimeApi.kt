@@ -8,4 +8,18 @@ interface RimeApi {
     val stateFlow: SharedFlow<RimeLifecycle.State>
 
     val isReady: Boolean
+
+    suspend fun isEmpty(): Boolean
+
+    suspend fun availableSchemata(): Array<SchemaListItem>
+
+    suspend fun enabledSchemata(): Array<SchemaListItem>
+
+    suspend fun setEnabledSchemata(schemaIds: Array<String>): Boolean
+
+    suspend fun selectedSchemata(): Array<SchemaListItem>
+
+    suspend fun selectedSchemaId(): String
+
+    suspend fun selectSchema(schemaId: String): Boolean
 }
