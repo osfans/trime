@@ -49,8 +49,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
                 override fun nativeStartup(fullCheck: Boolean) {
-                    isHandlingRimeNotification = false
-
                     DataManager.dirFireChange()
                     DataManager.sync()
 
@@ -118,7 +116,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
     companion object {
         private var mContext: RimeContext? = null
         private var mStatus: RimeStatus? = null
-        private var isHandlingRimeNotification = false
         private val notificationFlow_ =
             MutableSharedFlow<RimeNotification<*>>(
                 extraBufferCapacity = 15,
@@ -299,7 +296,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
             option: String,
             value: Boolean,
         ) {
-            if (isHandlingRimeNotification) return
             setRimeOption(option, value)
         }
 
@@ -461,11 +457,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
             messageType: String,
             messageValue: String,
         ) {
-            isHandlingRimeNotification = true
             val notification = RimeNotification.create(messageType, messageValue)
             Timber.d("Handling Rime notification: $notification")
             notificationFlow_.tryEmit(notification)
-            isHandlingRimeNotification = false
         }
     }
 }

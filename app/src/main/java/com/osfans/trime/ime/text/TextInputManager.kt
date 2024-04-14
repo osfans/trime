@@ -64,11 +64,6 @@ class TextInputManager(
     var needSendUpRimeKey: Boolean = false
     var isComposable: Boolean = false
 
-    private var shouldUpdateRimeOption
-        get() = trime.shouldUpdateRimeOption
-        set(value) {
-            trime.shouldUpdateRimeOption = value
-        }
     private val shouldResetAsciiMode get() = trime.shouldResetAsciiMode
 
     // TODO: move things using this context to InputView scope.
@@ -236,10 +231,8 @@ class TextInputManager(
                         KeyboardSwitcher.switchKeyboard(keyboard)
                         trime.bindKeyboardToInputView()
                     } else if (option.startsWith("_key_") && option.length > 5 && value) {
-                        shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
                         val key = option.substring(5)
                         onEvent(EventManager.getEvent(key))
-                        shouldUpdateRimeOption = true
                     }
             }
         }
@@ -259,11 +252,8 @@ class TextInputManager(
                 ", Event.getRimeEvent=" + Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON),
         )
         if (needSendUpRimeKey) {
-            if (shouldUpdateRimeOption) {
-                Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
-                shouldUpdateRimeOption = false
-            }
+            Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
+            Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
             // todo 释放按键可能不对
             val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
             Rime.processKey(event[0], event[1])
