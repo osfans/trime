@@ -100,7 +100,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var mCompositionPopupWindow: CompositionPopupWindow? = null
     var candidateExPage = false
 
-    var shouldUpdateRimeOption = false
     var shouldResetAsciiMode = false
 
     private val cursorCapsMode: Int
@@ -183,16 +182,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val theme = ThemeManager.activeTheme
         shouldResetAsciiMode = theme.generalStyle.resetASCIIMode
         isAutoCaps = theme.generalStyle.autoCaps.toBoolean()
-        shouldUpdateRimeOption = true
     }
 
     private fun updateRimeOption(): Boolean {
         try {
-            if (shouldUpdateRimeOption) {
-                Rime.setOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
-                Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
-                shouldUpdateRimeOption = false
-            }
+            Rime.setOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
+            Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
         } catch (e: Exception) {
             Timber.e(e)
             return false
@@ -326,7 +321,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
         loadConfig()
         KeyboardSwitcher.newOrReset()
-        shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
         bindKeyboardToInputView()
         updateComposing() // 切換主題時刷新候選
         setInputView(inputView!!)
