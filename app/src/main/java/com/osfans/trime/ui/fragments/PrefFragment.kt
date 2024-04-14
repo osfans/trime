@@ -7,9 +7,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.get
 import com.osfans.trime.R
+import com.osfans.trime.daemon.launchOnReady
+import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
+import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
-import com.osfans.trime.ui.main.schemaPicker
 import kotlinx.coroutines.launch
 
 class PrefFragment : PaddingPreferenceFragment() {
@@ -32,8 +34,18 @@ class PrefFragment : PaddingPreferenceFragment() {
     ) {
         setPreferencesFromResource(R.xml.prefs, rootKey)
         with(preferenceScreen) {
-            get<Preference>("pref_schemas")?.setOnPreferenceClickListener {
-                lifecycleScope.launch { context.schemaPicker().show() }
+            get<Preference>("pref_schemata")?.setOnPreferenceClickListener {
+                viewModel.rime.launchOnReady { api ->
+                    lifecycleScope.launch {
+                        EnabledSchemaPickerDialog.build(api, this, context) {
+                            setPositiveButton(R.string.enable_schemata) { _, _ ->
+                                lifecycleScope.launch {
+                                    AvailableSchemaPickerDialog.build(api, context).show()
+                                }
+                            }
+                        }.show()
+                    }
+                }
                 true
             }
             get<Preference>("pref_user_data")?.setOnPreferenceClickListener {

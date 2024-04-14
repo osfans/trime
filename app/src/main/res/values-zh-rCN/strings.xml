@@ -46,7 +46,6 @@
     <string name="pref_select_summary">选取同文输入法</string>
     <string name="looks__selected_theme_title">主题</string>
     <string name="looks__selected_theme_summary">选取主题</string>
-    <string name="pref_select_schemas">选择方案</string>
     <string name="looks__selected_color_title">配色</string>
     <string name="looks__selected_color_summary">选取键盘配色</string>
     <string name="keyboard__key_sound_title">按键声音</string>
@@ -93,7 +92,6 @@
     <string name="themes_progress">正在应用主题…</string>
     <string name="schemas_progress">正在加载方案…</string>
     <string name="set_ime">设置</string>
-    <string name="no_schemas">请在用户文件夹中放入default.yaml、输入法方案！</string>
     <string name="other_ime">其他输入法</string>
     <string name="other__ui_mode_title">夜间模式</string>
     <string name="pref_other">其他设置</string>
@@ -246,7 +244,6 @@
     <string name="pref_profile_summary">设定存储位置和修改同步设置等</string>
     <string name="profile_reset_summary">用默认的内置配置覆盖共享目录中的相同文件</string>
     <string name="profile_sync_user_data_summary">备份配置文件和同步用户词典</string>
-    <string name="pref_select_schemas_summary">启用或禁用方案并部署</string>
     <string name="other_managed_clipboard">剪贴板内容</string>
     <string name="other_managed_draft">管理草稿箱内容</string>
     <string name="other_managed_collection">管理收藏夹内容</string>
@@ -286,4 +283,10 @@
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
     <string name="rime_daemon">Rime 守护程序</string>
     <string name="restarting_rime">正在重新启动 Rime</string>
+    <string name="select_current_schema">选择当前方案</string>
+    <string name="enable_schemata">启用方案</string>
+    <string name="no_schema_to_select">当前没有方案可选择。请前往启用方案。</string>
+    <string name="no_schema_to_enable">没有方案可启用。请确保您已在用户文件夹中放入了前置文件和方案文件。</string>
+    <string name="schemata">方案</string>
+    <string name="schemata_hint">选择当前方案或启用更多方案</string>
 </resources>

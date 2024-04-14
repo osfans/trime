@@ -49,8 +49,6 @@
     <string name="looks__selected_theme_summary">Select Desired Theme</string>
     <string name="pref_themes_name_tongwenfeng">Tongwenfeng</string>
     <string name="pref_themes_name_trime">Default</string>
-    <string name="pref_select_schemas">Select schemas</string>
-    <string name="pref_select_schemas_summary">Enable or disable schema(s) and then deploy</string>
     <string name="looks__selected_color_title">Colors</string>
     <string name="looks__selected_color_summary">Select Desired Color for Keyboard</string>
     <string name="profile_reset">Reset</string>
@@ -100,7 +98,6 @@
     <string name="themes_progress">Applying theme…</string>
     <string name="schemas_progress">Loading schemas…</string>
     <string name="set_ime">Preferences</string>
-    <string name="no_schemas">Put default.yaml and schema files into user directory!</string>
     <string name="other_ime">Other IMEs</string>
     <string name="other__ui_mode_title">Night Mode</string>
     <string name="pref_other">Others</string>
@@ -288,4 +285,10 @@
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
     <string name="rime_daemon">Rime Daemon</string>
     <string name="restarting_rime">Restarting Rime</string>
+    <string name="select_current_schema">Select current schema</string>
+    <string name="enable_schemata">Enable schemata</string>
+    <string name="no_schema_to_select">Currently there is no schema to select. Please go to enable schemata from the available list.</string>
+    <string name="no_schema_to_enable">No schema to enable. Make sure you have prelude and schema files in the user directory.</string>
+    <string name="schemata">Schemata</string>
+    <string name="schemata_hint">Select current schema or enable more schemata</string>
 </resources>

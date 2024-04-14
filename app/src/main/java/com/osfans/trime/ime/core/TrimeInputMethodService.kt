@@ -484,7 +484,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
                 }
                 bindKeyboardToInputView()
-                setCandidatesViewShown(!Rime.isEmpty) // 軟鍵盤出現時顯示候選欄
+                setCandidatesViewShown(!rime.run { isEmpty() }) // 軟鍵盤出現時顯示候選欄
                 inputView?.startInput(attribute, restarting)
                 when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
                     InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,

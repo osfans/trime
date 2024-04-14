@@ -1,23 +1,23 @@
 package com.osfans.trime.ime.text
 
-import android.content.DialogInterface
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
-import com.osfans.trime.core.SchemaListItem
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
+import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.enums.SymbolKeyboardType
@@ -27,7 +27,6 @@ import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ui.main.colorPicker
-import com.osfans.trime.ui.main.schemaPicker
 import com.osfans.trime.ui.main.soundPicker
 import com.osfans.trime.ui.main.themePicker
 import com.osfans.trime.util.ShortcutUtils
@@ -200,7 +199,7 @@ class TextInputManager(
             tempAsciiMode = KeyboardSwitcher.currentKeyboard.asciiMode
         }
         tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
-        isComposable = isComposable && !Rime.isEmpty
+        isComposable = isComposable && !rime.run { isEmpty() }
         if (!trime.onEvaluateInputViewShown()) {
             // Show candidate view when using physical keyboard
             trime.setCandidatesViewShown(isComposable)
@@ -361,9 +360,11 @@ class TextInputManager(
                                 trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                             )
                         "schema" ->
-                            trime.inputView?.showDialog(
-                                trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert),
-                            )
+                            rime.launchOnReady { api ->
+                                trime.lifecycleScope.launch {
+                                    trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, trime))
+                                }
+                            }
                         "sound" ->
                             trime.inputView?.showDialog(
                                 trime.soundPicker(Theme_AppCompat_DayNight_Dialog_Alert),
@@ -378,7 +379,24 @@ class TextInputManager(
                         trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
                     )
                 }
-            KeyEvent.KEYCODE_MENU -> showOptionsDialog()
+            KeyEvent.KEYCODE_MENU -> {
+                rime.launchOnReady { api ->
+                    trime.lifecycleScope.launch {
+                        trime.inputView?.showDialog(
+                            EnabledSchemaPickerDialog.build(api, this, trime) {
+                                setPositiveButton(R.string.enable_schemata) { _, _ ->
+                                    trime.lifecycleScope.launch {
+                                        trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, context))
+                                    }
+                                }
+                                setNegativeButton(R.string.set_ime) { _, _ ->
+                                    ShortcutUtils.launchMainActivity(context)
+                                }
+                            },
+                        )
+                    }
+                }
+            }
             else -> {
                 if (event.mask == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
                     if (event.code == KeyEvent.KEYCODE_SPACE && prefs.keyboard.hookShiftSpace) {
@@ -507,46 +525,5 @@ class TextInputManager(
     override fun onCandidateLongClicked(index: Int) {
         Rime.deleteCandidate(index)
         trime.updateComposing()
-    }
-
-    private fun showOptionsDialog() {
-        val builder = AlertDialog.Builder(trime, Theme_AppCompat_DayNight_Dialog_Alert)
-        builder
-            .setTitle(R.string.app_name_release)
-            .setIcon(R.mipmap.ic_app_icon)
-            .setNegativeButton(R.string.other_ime) { dialog, _ ->
-                dialog.dismiss()
-                inputMethodManager.showInputMethodPicker()
-            }
-            .setPositiveButton(R.string.set_ime) { dialog, _ ->
-                ShortcutUtils.launchMainActivity(trime)
-                dialog.dismiss()
-            }
-        if (Rime.getCurrentRimeSchema() == (".default")) {
-            builder.setMessage(R.string.no_schemas)
-        } else {
-            val schemaList = Rime.getRimeSchemaList()
-            val schemaNameList = schemaList.map(SchemaListItem::name).toTypedArray()
-            val schemaIdList = schemaList.map(SchemaListItem::schemaId).toTypedArray()
-            val currentSchema = Rime.getCurrentRimeSchema()
-            builder
-                .setNegativeButton(
-                    R.string.pref_select_schemas,
-                ) { dialog, _ ->
-                    dialog.dismiss()
-                    trime.inputView?.showDialog(trime.schemaPicker(Theme_AppCompat_DayNight_Dialog_Alert))
-                }
-                .setSingleChoiceItems(
-                    schemaNameList,
-                    schemaIdList.indexOf(currentSchema),
-                ) { dialog: DialogInterface, id: Int ->
-                    dialog.dismiss()
-                    trime.lifecycleScope.launch {
-                        Rime.selectSchema(schemaIdList[id] ?: return@launch)
-                    }
-                    shouldUpdateRimeOption = true
-                }
-        }
-        trime.inputView?.showDialog(builder.create())
     }
 }

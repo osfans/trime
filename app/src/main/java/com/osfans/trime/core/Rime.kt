@@ -313,17 +313,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
 
         @JvmStatic
-        val isEmpty: Boolean
-            get() = getCurrentRimeSchema() == ".default" // 無方案
-
-        fun selectSchema(schemaId: String): Boolean {
-            Timber.d("selectSchema: schemaId=$schemaId")
-            return selectRimeSchema(schemaId).also {
-                updateContext()
-            }
-        }
-
-        @JvmStatic
         fun setCaretPos(caretPos: Int) {
             setRimeCaretPos(caretPos)
             updateContext()

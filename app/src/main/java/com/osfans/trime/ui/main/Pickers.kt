@@ -3,12 +3,7 @@ package com.osfans.trime.ui.main
 import android.content.Context
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
-import com.osfans.trime.core.Rime
-import com.osfans.trime.core.SchemaListItem
-import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffect
 import com.osfans.trime.data.sound.SoundEffectManager
@@ -16,8 +11,6 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 suspend fun Context.themePicker(
     @StyleRes themeResId: Int = 0,
@@ -63,36 +56,6 @@ suspend fun Context.colorPicker(
             ColorManager.setColorScheme(schemeIds[checkedItem])
         }
     }.create()
-}
-
-fun Context.schemaPicker(
-    @StyleRes themeResId: Int = 0,
-): AlertDialog {
-    val available = Rime.getAvailableRimeSchemaList()
-    val selected = Rime.getSelectedRimeSchemaList()
-    val availableIds = available.mapNotNull(SchemaListItem::schemaId)
-    val selectedIds = selected.mapNotNull(SchemaListItem::schemaId)
-    val checked = availableIds.map(selectedIds::contains).toBooleanArray()
-    return AlertDialog.Builder(this, themeResId)
-        .setTitle(R.string.pref_select_schemas)
-        .setMultiChoiceItems(
-            available.mapNotNull(SchemaListItem::name).toTypedArray(),
-            checked,
-        ) { _, id, isChecked -> checked[id] = isChecked }
-        .setPositiveButton(android.R.string.ok) { _, _ ->
-            (this as LifecycleOwner).lifecycleScope.launch {
-                Rime.selectRimeSchemas(
-                    availableIds
-                        .filterIndexed { i, _ -> checked[i] }
-                        .toTypedArray(),
-                )
-                withContext(Dispatchers.Default) {
-                    RimeDaemon.restartRime()
-                }
-            }
-        }
-        .setNegativeButton(android.R.string.cancel, null)
-        .create()
 }
 
 fun Context.soundPicker(
