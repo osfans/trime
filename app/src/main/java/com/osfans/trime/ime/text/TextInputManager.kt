@@ -251,24 +251,24 @@ class TextInputManager(
         }
     }
 
-        override fun onRelease(keyEventCode: Int) {
-            Timber.d(
-                "\t<TrimeInput>\tonRelease() needSendUpRimeKey=" + needSendUpRimeKey + ", keyEventcode=" + keyEventCode +
-                    ", Event.getRimeEvent=" + Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON),
-            )
-            if (needSendUpRimeKey) {
-                if (shouldUpdateRimeOption) {
-                    Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                    Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
-                    shouldUpdateRimeOption = false
-                }
-                // todo 释放按键可能不对
-                val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
-                Rime.processKey(event[0], event[1])
-                trime.commitRimeText()
+    override fun onRelease(keyEventCode: Int) {
+        Timber.d(
+            "\t<TrimeInput>\tonRelease() needSendUpRimeKey=" + needSendUpRimeKey + ", keyEventcode=" + keyEventCode +
+                ", Event.getRimeEvent=" + Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON),
+        )
+        if (needSendUpRimeKey) {
+            if (shouldUpdateRimeOption) {
+                Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
+                Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
+                shouldUpdateRimeOption = false
             }
-            Timber.d("\t<TrimeInput>\tonRelease() finish")
+            // todo 释放按键可能不对
+            val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
+            Rime.processKey(event[0], event[1])
+            trime.commitRimeText()
         }
+        Timber.d("\t<TrimeInput>\tonRelease() finish")
+    }
 
     // KeyboardEvent 处理软键盘事件
     override fun onEvent(event: Event?) {
