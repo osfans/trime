@@ -55,7 +55,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
             COMMAND_DEPLOY ->
                 launch {
                     withContext(Dispatchers.IO) {
-                        RimeDaemon.restartRime()
+                        RimeDaemon.restartRime(true)
                     }
                     ToastUtils.showLong(R.string.deploy_finish)
                 }
@@ -63,7 +63,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                 launch {
                     withContext(Dispatchers.IO) {
                         Rime.syncRimeUserData()
-                        RimeDaemon.restartRime()
+                        RimeDaemon.restartRime(true)
                     }
                 }
             COMMAND_TIMING_SYNC ->
@@ -106,7 +106,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                         }
 
                         Rime.syncRimeUserData()
-                        RimeDaemon.restartRime()
+                        RimeDaemon.restartRime(true)
                         wakeLock.release() // 释放唤醒锁
                     }
                 }

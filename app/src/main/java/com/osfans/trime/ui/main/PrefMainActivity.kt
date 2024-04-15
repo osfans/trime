@@ -154,7 +154,7 @@ class PrefMainActivity : AppCompatActivity() {
     private fun deploy() {
         lifecycleScope.launch {
             rimeActionWithResultDialog("rime.trime", "W", 1) {
-                RimeDaemon.restartRime()
+                RimeDaemon.restartRime(true)
                 true
             }
         }
