@@ -42,6 +42,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.model.EnterLabel
 import com.osfans.trime.databinding.KeyboardPopupKeyboardBinding
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.LeakGuardHandlerWrapper
@@ -131,9 +132,9 @@ class KeyboardView
 
         private var mKeyboard: Keyboard? = null
         private var mCurrentKeyIndex = NOT_A_KEY
-        private val mKeyTextSize = theme.style.getFloat("key_text_size")
+        private val mKeyTextSize = theme.generalStyle.keyTextSize.toFloat()
         private val mLabelTextSize =
-            theme.style.getFloat("key_long_text_size")
+            theme.generalStyle.keyLongTextSize.toFloat()
                 .takeIf { it > 0 } ?: mKeyTextSize
         private val mKeyTextColor =
             ColorStateList(
@@ -159,7 +160,7 @@ class KeyboardView
 
         private val keySymbolColor = ColorManager.getColor("key_symbol_color")!!
         private val hilitedKeySymbolColor = ColorManager.getColor("hilited_key_symbol_color")!!
-        private val mSymbolSize = theme.style.getFloat("symbol_text_size")
+        private val mSymbolSize = theme.generalStyle.symbolTextSize.toFloat()
         private val mPaintSymbol =
             Paint().apply {
                 isAntiAlias = true
@@ -168,21 +169,21 @@ class KeyboardView
                 color = keySymbolColor
                 textSize = sp(mSymbolSize)
             }
-        private val mShadowRadius = theme.style.getFloat("shadow_radius")
+        private val mShadowRadius = theme.generalStyle.shadowRadius
         private val mShadowColor = ColorManager.getColor("shadow_color")!!
-        private val mBackgroundDimAmount = theme.style.getFloat("background_dim_amount")
+        private val mBackgroundDimAmount = theme.generalStyle.backgroundDimAmount
 
         // private Drawable mBackground;
         private val mPreviewText =
             textView {
-                textSize = theme.style.getFloat("preview_text_size")
+                textSize = theme.generalStyle.previewTextSize.toFloat()
                 typeface = FontManager.getTypeface("preview_font")
                 ColorManager.getColor("preview_text_color")?.let { setTextColor(it) }
                 ColorManager.getColor("preview_back_color")?.let {
                     background =
                         GradientDrawable().apply {
                             setColor(it)
-                            cornerRadius = theme.style.getFloat("round_corner")
+                            cornerRadius = theme.generalStyle.roundCorner.toFloat()
                         }
                 }
                 gravity = gravityBottomCenter
@@ -193,8 +194,8 @@ class KeyboardView
                 contentView = mPreviewText
                 isTouchable = false
             }
-        private val mPreviewOffset = theme.style.getInt("preview_offset")
-        private val mPreviewHeight = theme.style.getInt("preview_height")
+        private val mPreviewOffset = theme.generalStyle.previewOffset
+        private val mPreviewHeight = theme.generalStyle.previewHeight
 
         // Working variable
         private val mCoordinates = IntArray(2)
@@ -208,7 +209,7 @@ class KeyboardView
 
         /** Listener for [OnKeyboardActionListener].  */
         var onKeyboardActionListener: OnKeyboardActionListener? = null
-        private val mVerticalCorrection = theme.style.getInt("vertical_correction")
+        private val mVerticalCorrection = theme.generalStyle.verticalCorrection
         private var mProximityThreshold = 0
 
         /**
@@ -228,7 +229,7 @@ class KeyboardView
          * 是否允許距離校正 When enabled, calls to [OnKeyboardActionListener.onKey] will include key codes for
          * adjacent keys. When disabled, only the primary key code will be reported.
          */
-        private val enableProximityCorrection = theme.style.getBoolean("proximity_correction")
+        private val enableProximityCorrection = theme.generalStyle.proximityCorrection
         private val mPaint =
             Paint().apply {
                 isAntiAlias = true
@@ -300,26 +301,16 @@ class KeyboardView
         var showKeyHint = !Rime.getOption("_hide_key_hint")
         var showKeySymbol = !Rime.getOption("_hide_key_symbol")
         private lateinit var labelEnter: String
-        private val mEnterLabels = mutableMapOf<String, String?>()
-        private val enterLabelMode = EnterLabelMode.fromOrdinal(theme.style.getInt("enter_label_mode"))
+        private val mEnterLabels: EnterLabel = theme.generalStyle.enterLabel
+        private val enterLabelMode = EnterLabelMode.fromOrdinal(theme.generalStyle.enterLabelMode)
 
         private fun handleEnterLabel() {
-            mEnterLabels.clear()
-            (theme.style.getMap("enter_labels"))?.let {
-                val map = it.entries.associate { (k, v) -> k to v?.configValue?.getString() }
-                mEnterLabels.putAll(map)
-            }
-            labelEnter = mEnterLabels["default"] ?: "⏎".also { mEnterLabels["default"] = it }
-            for (label in arrayOf("done", "go", "next", "none", "pre", "search", "send")) {
-                if (!mEnterLabels.containsKey(label)) {
-                    mEnterLabels[label] = labelEnter
-                }
-            }
+            labelEnter = mEnterLabels.default ?: "⏎"
         }
 
         fun updateEnterLabelOnEditorInfo(info: EditorInfo) {
             if (info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-                labelEnter = mEnterLabels["default"]!!
+                labelEnter = mEnterLabels.default
             } else {
                 val action = info.imeOptions and EditorInfo.IME_MASK_ACTION
                 val actionLabel = info.actionLabel
@@ -332,7 +323,7 @@ class KeyboardView
                             if (!actionLabel.isNullOrEmpty()) {
                                 actionLabel.toString()
                             } else {
-                                mEnterLabels["default"]!!
+                                mEnterLabels.default
                             }
                     }
                     EnterLabelMode.CUSTOM_PREFERRED,
@@ -340,20 +331,20 @@ class KeyboardView
                     -> {
                         labelEnter =
                             when (action) {
-                                EditorInfo.IME_ACTION_DONE -> mEnterLabels["done"]!!
-                                EditorInfo.IME_ACTION_GO -> mEnterLabels["go"]!!
-                                EditorInfo.IME_ACTION_NEXT -> mEnterLabels["next"]!!
-                                EditorInfo.IME_ACTION_PREVIOUS -> mEnterLabels["pre"]!!
-                                EditorInfo.IME_ACTION_SEARCH -> mEnterLabels["search"]!!
-                                EditorInfo.IME_ACTION_SEND -> mEnterLabels["send"]!!
+                                EditorInfo.IME_ACTION_DONE -> mEnterLabels.done
+                                EditorInfo.IME_ACTION_GO -> mEnterLabels.go
+                                EditorInfo.IME_ACTION_NEXT -> mEnterLabels.next
+                                EditorInfo.IME_ACTION_PREVIOUS -> mEnterLabels.pre
+                                EditorInfo.IME_ACTION_SEARCH -> mEnterLabels.search
+                                EditorInfo.IME_ACTION_SEND -> mEnterLabels.send
                                 else -> {
                                     if (enterLabelMode == EnterLabelMode.ACTION_LABEL_NEVER) {
-                                        mEnterLabels["default"]!!
+                                        mEnterLabels.default
                                     } else {
                                         if (!actionLabel.isNullOrEmpty()) {
                                             actionLabel.toString()
                                         } else {
-                                            mEnterLabels["default"]!!
+                                            mEnterLabels.default
                                         }
                                     }
                                 }

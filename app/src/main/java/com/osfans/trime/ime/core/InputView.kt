@@ -99,10 +99,10 @@ class InputView(
         broadcaster.addReceiver(liquidKeyboard)
     }
 
-    private val keyboardSidePadding = theme.style.getInt("keyboard_padding")
-    private val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
-    private val keyboardBottomPadding = theme.style.getInt("keyboard_padding_bottom")
-    private val keyboardBottomPaddingLandscape = theme.style.getInt("keyboard_padding_land_bottom")
+    private val keyboardSidePadding = theme.generalStyle.keyboardPadding
+    private val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
+    private val keyboardBottomPadding = theme.generalStyle.keyboardPaddingBottom
+    private val keyboardBottomPaddingLandscape = theme.generalStyle.keyboardPaddingLandBottom
 
     private val keyboardSidePaddingPx: Int
         get() {

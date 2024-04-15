@@ -62,7 +62,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var timeMove: Long = 0
     private val candidateHighlight =
         PaintDrawable(ColorManager.getColor("hilited_candidate_back_color")!!).apply {
-            setCornerRadius(theme.style.getFloat("layout/round_corner"))
+            setCornerRadius(theme.generalStyle.layout.roundCorner.toFloat())
         }
     private val separatorPaint =
         Paint().apply {
@@ -71,21 +71,21 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private val candidatePaint =
         Paint().apply {
             typeface = candidateFont
-            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.candidateTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
     private val symbolPaint =
         Paint().apply {
             typeface = symbolFont
-            theme.style.getFloat("candidate_text_size").takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.symbolTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
     private val commentPaint =
         Paint().apply {
             typeface = commentFont
-            theme.style.getFloat("comment_text_size").takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.commentTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
@@ -96,13 +96,13 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private val hilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
     private val commentTextColor = ColorManager.getColor("comment_text_color")!!
     private val hilitedCommentTextColor = ColorManager.getColor("hilited_comment_text_color")!!
-    private val candidateViewHeight = dp(theme.style.getInt("candidate_view_height"))
-    private val commentHeight = dp(theme.style.getInt("comment_height"))
-    private val candidateSpacing = dp(theme.style.getFloat("candidate_spacing")).toInt()
-    private val candidatePadding = dp(theme.style.getInt("candidate_padding"))
+    private val candidateViewHeight = dp(theme.generalStyle.candidateViewHeight)
+    private val commentHeight = dp(theme.generalStyle.commentHeight)
+    private val candidateSpacing = dp(theme.generalStyle.candidateSpacing).toInt()
+    private val candidatePadding = dp(theme.generalStyle.candidatePadding)
     var shouldShowComment = true
-    private val isCommentOnTop = theme.style.getBoolean("comment_on_top")
-    private val candidateUseCursor = theme.style.getBoolean("candidate_use_cursor")
+    private val isCommentOnTop = theme.generalStyle.commentOnTop
+    private val candidateUseCursor = theme.generalStyle.candidateUseCursor
     private val prefs = AppPrefs.defaultInstance().keyboard
 
     override fun onMeasure(
