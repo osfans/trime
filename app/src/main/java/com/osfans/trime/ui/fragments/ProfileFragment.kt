@@ -75,7 +75,7 @@ class ProfileFragment :
                 lifecycleScope.launch {
                     this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
                         Rime.syncRimeUserData()
-                        RimeDaemon.restartRime()
+                        RimeDaemon.restartRime(true)
                         true
                     }
                 }
