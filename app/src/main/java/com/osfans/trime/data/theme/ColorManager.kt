@@ -347,9 +347,7 @@ object ColorManager {
     ): Drawable? {
         val value = getColorValue(key)
         if (value is Drawable) {
-            if (alpha < 255) {
-                value.alpha = MathUtils.clamp(alpha, 0, 255)
-            }
+            value.alpha = MathUtils.clamp(alpha, 0, 255)
             return value
         }
 
@@ -365,9 +363,7 @@ object ColorManager {
                     gradient.setStroke(borderPx, stroke)
                 }
             }
-            if (alpha < 255) {
-                gradient.alpha = MathUtils.clamp(alpha, 0, 255)
-            }
+            gradient.alpha = MathUtils.clamp(alpha, 0, 255)
             return gradient
         }
         return null
