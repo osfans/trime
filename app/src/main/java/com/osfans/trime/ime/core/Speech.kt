@@ -97,7 +97,7 @@ class Speech(context: Context) : RecognitionListener {
         val trime = TrimeInputMethodService.getServiceOrNull()
         if (trime != null) {
             val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            val openccConfig = ThemeManager.activeTheme.style.getString("speech_opencc_config")
+            val openccConfig = ThemeManager.activeTheme.generalStyle.speechOpenccConfig
             for (result in matches!!) trime.commitText(OpenCCDictManager.convertLine(result!!, openccConfig))
         }
     }

@@ -209,7 +209,7 @@ class Keyboard() {
                 obtainFloat(
                     keyboardConfig,
                     "horizontal_gap",
-                    theme.style.getFloat("horizontal_gap"),
+                    theme.generalStyle.horizontalGap.toFloat(),
                 ),
             ).toInt()
         verticalGap =
@@ -217,14 +217,14 @@ class Keyboard() {
                 obtainFloat(
                     keyboardConfig,
                     "vertical_gap",
-                    theme.style.getFloat("vertical_gap"),
+                    theme.generalStyle.verticalGap.toFloat(),
                 ),
             ).toInt()
         roundCorner =
             obtainFloat(
                 keyboardConfig,
                 "round_corner",
-                theme.style.getFloat("round_corner"),
+                theme.generalStyle.roundCorner.toFloat(),
             )
         val horizontalGap = horizontalGap
         val verticalGap = verticalGap
@@ -311,7 +311,7 @@ class Keyboard() {
                         obtainFloat(
                             keyboardConfig,
                             "key_text_offset_x",
-                            theme.style.getFloat("key_text_offset_x"),
+                            theme.generalStyle.keyTextOffsetX.toFloat(),
                         ),
                     ).toInt()
                 val defaultKeyTextOffsetY =
@@ -319,7 +319,7 @@ class Keyboard() {
                         obtainFloat(
                             keyboardConfig,
                             "key_text_offset_y",
-                            theme.style.getFloat("key_text_offset_y"),
+                            theme.generalStyle.keyTextOffsetY.toFloat(),
                         ),
                     ).toInt()
                 val defaultKeySymbolOffsetX =
@@ -327,7 +327,7 @@ class Keyboard() {
                         obtainFloat(
                             keyboardConfig,
                             "key_symbol_offset_x",
-                            theme.style.getFloat("key_symbol_offset_x"),
+                            theme.generalStyle.keySymbolOffsetX.toFloat(),
                         ),
                     ).toInt()
                 val defaultKeySymbolOffsetY =
@@ -335,7 +335,7 @@ class Keyboard() {
                         obtainFloat(
                             keyboardConfig,
                             "key_symbol_offset_y",
-                            theme.style.getFloat("key_symbol_offset_y"),
+                            theme.generalStyle.keySymbolOffsetY.toFloat(),
                         ),
                     ).toInt()
                 val defaultKeyHintOffsetX =
@@ -343,7 +343,7 @@ class Keyboard() {
                         obtainFloat(
                             keyboardConfig,
                             "key_hint_offset_x",
-                            theme.style.getFloat("key_hint_offset_x"),
+                            theme.generalStyle.keyHintOffsetX.toFloat(),
                         ),
                     ).toInt()
                 val defaultKeyHintOffsetY =
@@ -351,20 +351,20 @@ class Keyboard() {
                         obtainFloat(
                             keyboardConfig,
                             "key_hint_offset_y",
-                            theme.style.getFloat("key_hint_offset_y"),
+                            theme.generalStyle.keyHintOffsetY.toFloat(),
                         ),
                     ).toInt()
                 val defaultKeyPressOffsetX =
                     obtainInt(
                         keyboardConfig,
                         "key_press_offset_x",
-                        theme.style.getInt("key_press_offset_x"),
+                        theme.generalStyle.keyPressOffsetX,
                     )
                 val defaultKeyPressOffsetY =
                     obtainInt(
                         keyboardConfig,
                         "key_press_offset_y",
-                        theme.style.getInt("key_press_offset_y"),
+                        theme.generalStyle.keyPressOffsetY,
                     )
                 val key = Key(this, mk)
                 key.keyTextOffsetX =
@@ -430,8 +430,8 @@ class Keyboard() {
     }
 
     private fun getKeyboardHeightFromTheme(theme: Theme): Int {
-        val keyboardHeight = theme.style.getFloat("keyboard_height")
-        val keyboardHeightLand = theme.style.getFloat("keyboard_height_land")
+        val keyboardHeight = theme.generalStyle.keyboardHeight
+        val keyboardHeightLand = theme.generalStyle.keyboardHeightLand
         val value =
             when (appContext.resources.configuration.orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
@@ -645,8 +645,8 @@ class Keyboard() {
 
         // 橫屏模式下，键盘左右两侧到屏幕边缘的距离
         val theme = ThemeManager.activeTheme
-        val keyboardSidePadding = theme.style.getInt("keyboard_padding")
-        val keyboardSidePaddingLandscape = theme.style.getInt("keyboard_padding_land")
+        val keyboardSidePadding = theme.generalStyle.keyboardPadding
+        val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
 
         val keyboardSidePaddingPx =
             appContext.dp(
@@ -661,13 +661,13 @@ class Keyboard() {
         // Height of the screen
         // final int mDisplayHeight = dm.heightPixels;
         // Log.v(TAG, "keyboard's display metrics:" + dm);
-        horizontalGap = appContext.dp(theme.style.getFloat("horizontal_gap")).toInt()
-        verticalGap = appContext.dp(theme.style.getFloat("vertical_gap")).toInt()
-        keyWidth = (mDisplayWidth * theme.style.getFloat("key_width") / 100).toInt()
-        keyHeight = appContext.dp(theme.style.getFloat("key_height")).toInt()
+        horizontalGap = appContext.dp(theme.generalStyle.horizontalGap)
+        verticalGap = appContext.dp(theme.generalStyle.verticalGap)
+        keyWidth = (mDisplayWidth * theme.generalStyle.keyWidth / 100).toInt()
+        keyHeight = appContext.dp(theme.generalStyle.keyHeight)
         mProximityThreshold = (keyWidth * SEARCH_DISTANCE).toInt()
         mProximityThreshold *= mProximityThreshold // Square it for comparison
-        roundCorner = theme.style.getFloat("round_corner")
+        roundCorner = theme.generalStyle.roundCorner.toFloat()
         mKeys = ArrayList()
         composingKeys = ArrayList()
     }

@@ -181,8 +181,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     fun loadConfig() {
         val theme = ThemeManager.activeTheme
-        shouldResetAsciiMode = theme.style.getBoolean("reset_ascii_mode")
-        isAutoCaps = theme.style.getBoolean("auto_caps")
+        shouldResetAsciiMode = theme.generalStyle.resetASCIIMode
+        isAutoCaps = theme.generalStyle.autoCaps.toBoolean()
         shouldUpdateRimeOption = true
     }
 
@@ -190,11 +190,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         try {
             if (shouldUpdateRimeOption) {
                 Rime.setOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
-                Rime.setOption("_horizontal", ThemeManager.activeTheme.style.getBoolean("horizontal")) // 水平模式
+                Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
                 shouldUpdateRimeOption = false
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.e(e)
             return false
         }
         return true

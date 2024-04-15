@@ -44,7 +44,7 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                     val text =
                         textView {
                             text = operation.second
-                            textSize = theme.style.getFloat("label_text_size")
+                            textSize = theme.generalStyle.labelTextSize.toFloat()
                             typeface = FontManager.getTypeface("key_font")
                             ColorManager.getColor("key_text_color")?.let { color -> setTextColor(color) }
                         }

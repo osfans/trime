@@ -105,7 +105,7 @@ class TextInputManager(
                 .launchIn(trime.lifecycleScope)
 
         val theme = ThemeManager.activeTheme
-        val defaultLocale = theme.style.getString("locale").split(DELIMITER_SPLITTER)
+        val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)
         locales[0] =
             when (defaultLocale.size) {
                 3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
@@ -113,7 +113,7 @@ class TextInputManager(
                 else -> Locale.getDefault()
             }
 
-        val latinLocale = theme.style.getString("latin_locale").split(DELIMITER_SPLITTER)
+        val latinLocale = theme.generalStyle.latinLocale.split(DELIMITER_SPLITTER)
         locales[1] =
             when (latinLocale.size) {
                 3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
@@ -251,24 +251,24 @@ class TextInputManager(
         }
     }
 
-    override fun onRelease(keyEventCode: Int) {
-        Timber.d(
-            "\t<TrimeInput>\tonRelease() needSendUpRimeKey=" + needSendUpRimeKey + ", keyEventcode=" + keyEventCode +
-                ", Event.getRimeEvent=" + Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON),
-        )
-        if (needSendUpRimeKey) {
-            if (shouldUpdateRimeOption) {
-                Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                Rime.setOption("_horizontal", ThemeManager.activeTheme.style.getBoolean("horizontal"))
-                shouldUpdateRimeOption = false
+        override fun onRelease(keyEventCode: Int) {
+            Timber.d(
+                "\t<TrimeInput>\tonRelease() needSendUpRimeKey=" + needSendUpRimeKey + ", keyEventcode=" + keyEventCode +
+                    ", Event.getRimeEvent=" + Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON),
+            )
+            if (needSendUpRimeKey) {
+                if (shouldUpdateRimeOption) {
+                    Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
+                    Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
+                    shouldUpdateRimeOption = false
+                }
+                // todo 释放按键可能不对
+                val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
+                Rime.processKey(event[0], event[1])
+                trime.commitRimeText()
             }
-            // todo 释放按键可能不对
-            val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
-            Rime.processKey(event[0], event[1])
-            trime.commitRimeText()
+            Timber.d("\t<TrimeInput>\tonRelease() finish")
         }
-        Timber.d("\t<TrimeInput>\tonRelease() finish")
-    }
 
     // KeyboardEvent 处理软键盘事件
     override fun onEvent(event: Event?) {

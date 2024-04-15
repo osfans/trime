@@ -29,7 +29,7 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
 
         val text =
             textView {
-                textSize = theme.style.getFloat("candidate_text_size")
+                textSize = theme.generalStyle.candidateTextSize.toFloat()
                 typeface = FontManager.getTypeface("candidate_font")
                 ColorManager.getColor("candidate_text_color")?.let { setTextColor(it) }
             }
@@ -40,7 +40,7 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
                     text,
                     lParams {
                         gravity = gravityCenter
-                        horizontalPadding = dp(theme.style.getFloat("candidate_padding")).toInt()
+                        horizontalPadding = dp(theme.generalStyle.candidatePadding)
                     },
                 )
                 background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
@@ -64,7 +64,7 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
                 }
             val background = if (active) ColorManager.getColor("hilited_candidate_back_color")!! else Color.TRANSPARENT
             text.setTextColor(color)
-            root.background = PaintDrawable(background).apply { setCornerRadius(theme.style.getFloat("layout/round_corner")) }
+            root.background = PaintDrawable(background).apply { setCornerRadius(theme.generalStyle.layout.roundCorner.toFloat()) }
         }
     }
 
