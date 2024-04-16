@@ -231,13 +231,8 @@ class Keyboard() {
         keyboardHeight = getKeyboardHeight(theme, keyboardConfig)
         val keyboardKeyWidth = obtainFloat(keyboardConfig, "width", 0f)
         val maxColumns = if (columns == -1) Int.MAX_VALUE else columns
-        var x = this.horizontalGap / 2
-        var y = this.verticalGap
-        var row = 0
-        var column = 0
-        minWidth = 0
         val isSplit = KeyboardPrefs().isLandscapeMode() && isLandscapeSplit
-        val (rowWidthTotalWeight, oneWeightWidthPx, multiplier, height1) =
+        val (rowWidthTotalWeight, oneWeightWidthPx, multiplier, scaledHeight, scaledVerticalGap) =
             KeyboardSizeCalculator(
                 name,
                 isSplit,
@@ -251,6 +246,12 @@ class Keyboard() {
                 verticalGap,
                 autoHeightIndex,
             ).calc(lm)
+
+        var x = this.horizontalGap / 2
+        var y = scaledVerticalGap
+        var row = 0
+        var column = 0
+        minWidth = 0
 
         try {
             var rowWidthWeight = 0f
@@ -266,7 +267,7 @@ class Keyboard() {
                     // new row
                     rowWidthWeight = 0f
                     x = gap / 2
-                    y += this.verticalGap + rowHeight
+                    y += scaledVerticalGap + rowHeight
                     column = 0
                     row++
                     if (mKeys.size > 0) mKeys[mKeys.size - 1].edgeFlags = mKeys[mKeys.size - 1].edgeFlags or EDGE_RIGHT
@@ -296,7 +297,7 @@ class Keyboard() {
                 if (column == 0) {
                     rowHeight =
                         if (keyboardHeight > 0) {
-                            height1[row]
+                            scaledHeight[row]
                         } else {
                             val heightK = appContext.sp(obtainFloat(mk, "height", 0f)).toInt()
                             if (heightK > 0) heightK else defaultHeight
@@ -418,7 +419,7 @@ class Keyboard() {
                 }
             }
             if (mKeys.size > 0) mKeys[mKeys.size - 1].edgeFlags = mKeys[mKeys.size - 1].edgeFlags or EDGE_RIGHT
-            this.height = y + rowHeight + this.verticalGap
+            this.height = y + rowHeight + scaledVerticalGap
             for (key in mKeys) {
                 if (key.column == 0) key.edgeFlags = key.edgeFlags or EDGE_LEFT
                 if (key.row == 0) key.edgeFlags = key.edgeFlags or EDGE_TOP
