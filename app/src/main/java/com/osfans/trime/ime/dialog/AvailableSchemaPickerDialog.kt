@@ -2,17 +2,17 @@ package com.osfans.trime.ime.dialog
 
 import android.app.AlertDialog
 import android.content.Context
+import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.daemon.RimeDaemon
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 
 object AvailableSchemaPickerDialog {
     suspend fun build(
         rime: RimeApi,
+        scope: LifecycleCoroutineScope,
         context: Context,
     ): AlertDialog {
         val availables = rime.availableSchemata()
@@ -31,7 +31,6 @@ object AvailableSchemaPickerDialog {
                 setPositiveButton(R.string.ok) { _, _ ->
                     val newEnabled = availableIds.filterIndexed { index, _ -> enabledBools[index] }
                     if (setOf(newEnabled) == setOf(enabledIds)) return@setPositiveButton
-                    val scope = MainScope() + CoroutineName("AvailableSchemaPicker")
                     scope.launch {
                         rime.setEnabledSchemata(newEnabled.toTypedArray())
                         RimeDaemon.restartRime()

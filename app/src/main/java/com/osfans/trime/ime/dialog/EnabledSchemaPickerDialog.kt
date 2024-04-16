@@ -2,16 +2,16 @@ package com.osfans.trime.ime.dialog
 
 import android.app.AlertDialog
 import android.content.Context
+import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeApi
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import splitties.systemservices.inputMethodManager
 
 object EnabledSchemaPickerDialog {
     suspend fun build(
         rime: RimeApi,
-        scope: CoroutineScope,
+        scope: LifecycleCoroutineScope,
         context: Context,
         extensions: (AlertDialog.Builder.() -> AlertDialog.Builder)? = null,
     ): AlertDialog {
@@ -28,9 +28,10 @@ object EnabledSchemaPickerDialog {
                 setSingleChoiceItems(
                     selectedNames.toTypedArray(),
                     selectedIndex,
-                ) { _, which ->
+                ) { dialog, which ->
                     scope.launch {
                         rime.selectSchema(selectedIds[which])
+                        dialog.dismiss()
                     }
                 }
             }
