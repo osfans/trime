@@ -349,7 +349,7 @@ class TextInputManager(
                         "schema" ->
                             rime.launchOnReady { api ->
                                 trime.lifecycleScope.launch {
-                                    trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, themedContext))
+                                    trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, trime.lifecycleScope, themedContext))
                                 }
                             }
                         "sound" -> trime.inputView?.showDialog(buildSoundEffectPickerDialog(themedContext))
@@ -365,10 +365,10 @@ class TextInputManager(
                 rime.launchOnReady { api ->
                     trime.lifecycleScope.launch {
                         trime.inputView?.showDialog(
-                            EnabledSchemaPickerDialog.build(api, this, themedContext) {
+                            EnabledSchemaPickerDialog.build(api, trime.lifecycleScope, themedContext) {
                                 setPositiveButton(R.string.enable_schemata) { _, _ ->
                                     trime.lifecycleScope.launch {
-                                        trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, context))
+                                        trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, trime.lifecycleScope, context))
                                     }
                                 }
                                 setNegativeButton(R.string.set_ime) { _, _ ->
