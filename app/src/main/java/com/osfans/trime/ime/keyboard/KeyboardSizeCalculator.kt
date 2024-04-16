@@ -4,6 +4,7 @@ import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.sp
 import kotlin.math.abs
+import kotlin.math.ceil
 
 class KeyboardSizeCalculator(
     val name: String,
@@ -83,11 +84,13 @@ class KeyboardSizeCalculator(
         rawSumHeight += rowHeight
         rawHeight.add(rowHeight)
 
+        val scaledVerticalGap = calculateScaledVerticalGap(rawSumHeight, rawHeight)
         return KeyboardSize(
             rowTotalWeight,
             calculateOneWeightWidthPx(),
             splitSpaceRatio,
-            calculateAdjustedHeight(rawSumHeight, rawHeight, autoHeightIndex),
+            calculateAdjustedHeight(rawSumHeight, rawHeight, scaledVerticalGap),
+            scaledVerticalGap.toInt(),
         )
     }
 
@@ -95,19 +98,24 @@ class KeyboardSizeCalculator(
         return (mAllowedWidth / (MAX_TOTAL_WEIGHT * (1 + splitSpaceRatio)))
     }
 
+    private fun calculateScaledVerticalGap(
+        rawSumHeight: Int,
+        rawHeight: List<Int>,
+    ): Double {
+        val scale: Double =
+            keyboardHeight.toDouble() / (rawSumHeight + mDefaultVerticalGap * (rawHeight.size + 1))
+
+        return ceil((mDefaultVerticalGap * scale))
+    }
+
     private fun calculateAdjustedHeight(
         rawSumHeight: Int,
         rawHeight: List<Int>,
-        autoHeightIndex: Int,
+        scaledVerticalGap: Double,
     ): List<Int> {
-        var scale: Float =
-            keyboardHeight.toFloat() / (rawSumHeight + mDefaultVerticalGap * (rawHeight.size + 1))
+        var remainHeight = keyboardHeight - scaledVerticalGap * (rawHeight.size + 1)
 
-        val verticalGap = Math.ceil((mDefaultVerticalGap * scale).toDouble()).toInt()
-
-        var autoHeight: Int = keyboardHeight - verticalGap * (rawHeight.size + 1)
-
-        scale = (autoHeight.toFloat()) / rawSumHeight
+        val scale = remainHeight / rawSumHeight
 
         var finalAutoHeightIndex = -100
         if (autoHeightIndex < 0) {
@@ -122,13 +130,13 @@ class KeyboardSizeCalculator(
             if (i != finalAutoHeightIndex) {
                 val h: Int = (rawHeight[i] * scale).toInt()
                 newHeight[i] = h
-                autoHeight -= h
+                remainHeight -= h
             }
         }
-        if (autoHeight < 1) {
-            if (rawHeight[autoHeight] > 0) autoHeight = 1
+        if (remainHeight < 1) {
+            if (rawHeight[finalAutoHeightIndex] > 0) remainHeight = 1.0
         }
-        newHeight[finalAutoHeightIndex] = autoHeight
+        newHeight[finalAutoHeightIndex] = remainHeight.toInt()
 
         return newHeight
     }
