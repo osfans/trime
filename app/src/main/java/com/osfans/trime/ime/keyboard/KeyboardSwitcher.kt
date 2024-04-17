@@ -112,7 +112,7 @@ object KeyboardSwitcher {
             return currentSchemaId
         }
         // 获取方案中的 alphabet（包含所有用到的按键
-        val alphabet = SchemaManager.getActiveSchema().alphabet
+        val alphabet = SchemaManager.activeSchema.alphabet
         if (alphabet.isNullOrEmpty()) return "default"
 
         val layout =

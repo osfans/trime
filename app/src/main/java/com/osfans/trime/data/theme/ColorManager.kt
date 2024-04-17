@@ -96,7 +96,11 @@ object ColorManager {
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
-        ThemeManager.init()
+        runCatching {
+            ThemeManager.init()
+        }.getOrElse {
+            Timber.e(it, "Setting up theme failed!")
+        }
     }
 
     fun onSystemNightModeChange(isNight: Boolean) {
