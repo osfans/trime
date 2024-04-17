@@ -22,8 +22,8 @@ object SchemaManager {
         updateSwitchOptions()
     }
 
-    @JvmStatic
-    fun getActiveSchema() = currentSchema
+    val activeSchema: Schema
+        get() = runCatching { currentSchema }.getOrDefault(defaultSchema)
 
     @JvmStatic
     fun updateSwitchOptions() {

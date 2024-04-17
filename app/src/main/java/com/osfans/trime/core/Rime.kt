@@ -57,7 +57,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
                     Timber.i("Starting up Rime APIs ...")
                     startupRime(sharedDataDir, userDataDir, fullCheck)
 
-                    Timber.i("Initializing schema stuffs after starting up ...")
                     SchemaManager.init(getCurrentRimeSchema())
                     updateStatus()
 

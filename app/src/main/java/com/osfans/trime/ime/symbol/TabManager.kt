@@ -108,7 +108,7 @@ object TabManager {
                 continue
             }
 
-            val symbolMaps = SchemaManager.getActiveSchema().symbols
+            val symbolMaps = SchemaManager.activeSchema.symbols
             for ((key, value) in p) {
                 if (symbolMaps?.containsKey(value) == true) {
                     keysList.add(SimpleKeyBean(value, key))

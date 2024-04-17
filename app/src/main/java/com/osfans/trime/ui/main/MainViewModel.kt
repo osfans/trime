@@ -10,7 +10,7 @@ class MainViewModel : ViewModel() {
 
     val topOptionsMenu = MutableLiveData<Boolean>()
 
-    val rime: RimeSession by lazy { RimeDaemon.createSession(javaClass.name) }
+    val rime: RimeSession = RimeDaemon.createSession(javaClass.name)
 
     fun setToolbarTitle(title: String) {
         toolbarTitle.value = title
