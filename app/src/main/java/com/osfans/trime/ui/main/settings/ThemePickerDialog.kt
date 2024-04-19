@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.core.OneWayFolderSync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,12 +45,25 @@ object ThemePickerDialog {
                     currentIndex,
                 ) { dialog, which ->
                     scope.launch {
-                        ThemeManager.setNormalTheme(all[which])
                         dialog.dismiss()
+                        withContext(Dispatchers.IO) {
+                            copyThemeFile(context, all[which])
+                            ThemeManager.setNormalTheme(all[which])
+                        }
                     }
                 }
             }
             setNegativeButton(android.R.string.cancel, null)
         }.create()
+    }
+
+    private suspend fun copyThemeFile(context: Context, selectedName: String){
+        val fileNameWithoutExt = if (selectedName == "trime") selectedName else "$selectedName.trime"
+
+        val sync = OneWayFolderSync(context, AppPrefs.defaultInstance().profile.userDataDir)
+        sync.copyFiles(
+            arrayOf("$fileNameWithoutExt.yaml", "$fileNameWithoutExt.custom.yaml"),
+            AppPrefs.Profile.getAppPath(),
+        )
     }
 }
