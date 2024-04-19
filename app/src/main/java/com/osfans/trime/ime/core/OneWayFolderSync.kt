@@ -51,7 +51,7 @@ class OneWayFolderSync(private val context: Context, private val docUriStr: Stri
                 docFile?.let { doc ->
                     val file = File(appSpecificPath, fileName)
                     copyToUri(file, doc)
-                }?.run {
+                }?: {
                     Timber.e("Cannot export file: %s", fileName)
                 }
             }?.onFailure {
@@ -143,10 +143,13 @@ class OneWayFolderSync(private val context: Context, private val docUriStr: Stri
     }
 
     companion object {
-        suspend fun exportTo() {
+        suspend fun exportModifiedFiles() {
             val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
 
-            OneWayFolderSync(appContext, userDirUri).export(arrayOf("default.custom.yaml"), AppPrefs.Profile.getAppUserDir())
+            OneWayFolderSync(appContext, userDirUri).export(
+                arrayOf("default.custom.yaml", "user.yaml"),
+                AppPrefs.Profile.getAppUserDir()
+            )
         }
     }
 }
