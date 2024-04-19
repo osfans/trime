@@ -34,7 +34,7 @@ object ThemePickerDialog {
             }
         val current =
             AppPrefs.defaultInstance().theme.selectedTheme
-        val currentIndex = all.indexOfFirst { it == current }
+        val currentIndex = all.indexOfFirst { it == current }.coerceAtLeast(0)
         return AlertDialog.Builder(context).apply {
             setTitle(R.string.looks__selected_theme_title)
             if (allNames.isEmpty()) {
