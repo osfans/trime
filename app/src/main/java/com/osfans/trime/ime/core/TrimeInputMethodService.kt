@@ -75,6 +75,7 @@ import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.bitflags.hasFlag
 import splitties.systemservices.inputMethodManager
 import splitties.views.gravityBottom
@@ -144,7 +145,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         rime.runIfReady {
             if (currentInputEditorInfo != null) {
                 isWindowShown = true
-                updateComposing()
+                withContext(Dispatchers.Main) {
+                    updateComposing()
+                }
                 for (listener in eventListeners) {
                     listener.onWindowShown()
                 }
@@ -1097,21 +1100,19 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val ic = currentInputConnection
         updateComposingText()
         if (ic != null && mCompositionPopupWindow?.isWinFixed() == false) {
-            mCompositionPopupWindow!!.isCursorUpdated = ic.requestCursorUpdates(1)
+            mCompositionPopupWindow?.isCursorUpdated = ic.requestCursorUpdates(1)
         }
         var startNum = 0
-        if (mCandidate != null) {
-            if (mCompositionPopupWindow?.isPopupWindowEnabled == true) {
-                val composition = mCompositionPopupWindow!!.composition
-                composition.compositionView.visibility = View.VISIBLE
-                startNum = composition.compositionView.setWindowContent()
-                mCandidate!!.setText(startNum)
-                // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
-                // otherwise we need to call it here
-                if (!mCompositionPopupWindow!!.isCursorUpdated) showCompositionView()
-            } else {
-                mCandidate!!.setText(0)
-            }
+        if (mCompositionPopupWindow?.isPopupWindowEnabled == true) {
+            val composition = mCompositionPopupWindow!!.composition
+            composition.compositionView.visibility = View.VISIBLE
+            startNum = composition.compositionView.setWindowContent()
+            mCandidate?.setText(startNum)
+            // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
+            // otherwise we need to call it here
+            if (mCompositionPopupWindow?.isCursorUpdated == false) showCompositionView()
+        } else {
+            mCandidate?.setText(0)
         }
         mainKeyboardView?.invalidateComposingKeys()
         if (!onEvaluateInputViewShown()) setCandidatesViewShown(textInputManager!!.isComposable) // 實體鍵盤打字時顯示候選欄

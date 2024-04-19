@@ -878,7 +878,11 @@ class KeyboardView
                 paint.color = -0xff0100
                 canvas.drawCircle((mStartX + mLastX) / 2f, (mStartY + mLastY) / 2f, 2f, paint)
             }
-            mCanvas!!.restore()
+            try {
+                mCanvas?.restore()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             mDrawPending = false
             mDirtyRect.setEmpty()
         }
