@@ -1,8 +1,8 @@
 package com.osfans.trime.ui.main
 
+import android.app.AlertDialog
 import android.content.Context
-import androidx.annotation.StyleRes
-import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffect
@@ -12,11 +12,12 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ui.components.CoroutineChoiceDialog
 import kotlinx.coroutines.Dispatchers
 
-suspend fun Context.themePicker(
-    @StyleRes themeResId: Int = 0,
+suspend fun buildThemePickerDialog(
+    context: Context,
+    scope: LifecycleCoroutineScope,
 ): AlertDialog {
-    return CoroutineChoiceDialog(this, themeResId).apply {
-        title = getString(R.string.looks__selected_theme_title)
+    return CoroutineChoiceDialog(context, scope).apply {
+        title = context.getString(R.string.looks__selected_theme_title)
         initDispatcher = Dispatchers.IO
         onInit {
             items =
@@ -37,11 +38,12 @@ suspend fun Context.themePicker(
     }.create()
 }
 
-suspend fun Context.colorPicker(
-    @StyleRes themeResId: Int = 0,
+suspend fun buildColorPickerDialog(
+    context: Context,
+    scope: LifecycleCoroutineScope,
 ): AlertDialog {
-    return CoroutineChoiceDialog(this, themeResId).apply {
-        title = getString(R.string.looks__selected_color_title)
+    return CoroutineChoiceDialog(context, scope).apply {
+        title = context.getString(R.string.looks__selected_color_title)
         initDispatcher = Dispatchers.Default
         val all by lazy { ColorManager.presetColorSchemes }
         onInit {
@@ -58,13 +60,11 @@ suspend fun Context.colorPicker(
     }.create()
 }
 
-fun Context.soundPicker(
-    @StyleRes themeResId: Int = 0,
-): AlertDialog {
+fun buildSoundEffectPickerDialog(context: Context): AlertDialog {
     val all = SoundEffectManager.getAllSoundEffects().mapNotNull(SoundEffect::name)
     val current = SoundEffectManager.getActiveSoundEffect().getOrNull()?.name ?: ""
     var checked = all.indexOf(current)
-    return AlertDialog.Builder(this, themeResId)
+    return AlertDialog.Builder(context)
         .setTitle(R.string.keyboard__key_sound_package_title)
         .setSingleChoiceItems(
             all.toTypedArray(),

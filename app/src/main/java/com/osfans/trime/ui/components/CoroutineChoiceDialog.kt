@@ -1,21 +1,18 @@
 package com.osfans.trime.ui.components
 
+import android.app.AlertDialog
 import android.content.Context
-import androidx.annotation.StyleRes
-import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CoroutineChoiceDialog(
     context: Context,
-    @StyleRes themeResId: Int,
-) : CoroutineScope by (context as LifecycleOwner).lifecycleScope {
-    private val builder = AlertDialog.Builder(context, themeResId)
+    private val scope: LifecycleCoroutineScope,
+) {
+    private val builder = AlertDialog.Builder(context)
     var items: Array<CharSequence> = arrayOf()
     var checkedItem: Int = -1
     var checkedItems: BooleanArray = booleanArrayOf()
@@ -26,8 +23,6 @@ class CoroutineChoiceDialog(
 
     private lateinit var onInitListener: ActionListener
     private lateinit var onPositiveListener: ActionListener
-
-    constructor(context: Context) : this(context, 0)
 
     fun interface ActionListener {
         fun onAction()
@@ -68,7 +63,7 @@ class CoroutineChoiceDialog(
                     }
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
-                    launch {
+                    scope.launch {
                         positive()
                     }
                 }
