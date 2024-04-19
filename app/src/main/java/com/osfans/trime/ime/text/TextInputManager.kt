@@ -3,7 +3,6 @@ package com.osfans.trime.ime.text
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
-import androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -26,9 +25,9 @@ import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
-import com.osfans.trime.ui.main.colorPicker
-import com.osfans.trime.ui.main.soundPicker
-import com.osfans.trime.ui.main.themePicker
+import com.osfans.trime.ui.main.buildColorPickerDialog
+import com.osfans.trime.ui.main.buildSoundEffectPickerDialog
+import com.osfans.trime.ui.main.buildThemePickerDialog
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.Job
@@ -36,6 +35,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import splitties.systemservices.inputMethodManager
+import splitties.views.dsl.core.withTheme
 import timber.log.Timber
 import java.util.Locale
 
@@ -70,6 +70,9 @@ class TextInputManager(
             trime.shouldUpdateRimeOption = value
         }
     private val shouldResetAsciiMode get() = trime.shouldResetAsciiMode
+
+    // TODO: move things using this context to InputView scope.
+    private val themedContext = trime.withTheme(android.R.style.Theme_DeviceDefault_Settings)
 
     companion object {
         /** Delimiter regex for key property group, their format like `{property_1: value_1, property_2: value_2}` */
@@ -351,39 +354,28 @@ class TextInputManager(
             KeyEvent.KEYCODE_SETTINGS -> { // Settings
                 trime.lifecycleScope.launch {
                     when (event.option) {
-                        "theme" ->
-                            trime.inputView?.showDialog(
-                                trime.themePicker(Theme_AppCompat_DayNight_Dialog_Alert),
-                            )
-                        "color" ->
-                            trime.inputView?.showDialog(
-                                trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
-                            )
+                        "theme" -> trime.inputView?.showDialog(buildThemePickerDialog(themedContext, trime.lifecycleScope))
+                        "color" -> trime.inputView?.showDialog(buildColorPickerDialog(themedContext, trime.lifecycleScope))
                         "schema" ->
                             rime.launchOnReady { api ->
                                 trime.lifecycleScope.launch {
-                                    trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, trime))
+                                    trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, themedContext))
                                 }
                             }
-                        "sound" ->
-                            trime.inputView?.showDialog(
-                                trime.soundPicker(Theme_AppCompat_DayNight_Dialog_Alert),
-                            )
+                        "sound" -> trime.inputView?.showDialog(buildSoundEffectPickerDialog(themedContext))
                         else -> ShortcutUtils.launchMainActivity(trime)
                     }
                 }
             }
             KeyEvent.KEYCODE_PROG_RED ->
                 trime.lifecycleScope.launch {
-                    trime.inputView?.showDialog(
-                        trime.colorPicker(Theme_AppCompat_DayNight_Dialog_Alert),
-                    )
+                    trime.inputView?.showDialog(buildColorPickerDialog(themedContext, trime.lifecycleScope))
                 }
             KeyEvent.KEYCODE_MENU -> {
                 rime.launchOnReady { api ->
                     trime.lifecycleScope.launch {
                         trime.inputView?.showDialog(
-                            EnabledSchemaPickerDialog.build(api, this, trime) {
+                            EnabledSchemaPickerDialog.build(api, this, themedContext) {
                                 setPositiveButton(R.string.enable_schemata) { _, _ ->
                                     trime.lifecycleScope.launch {
                                         trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, context))

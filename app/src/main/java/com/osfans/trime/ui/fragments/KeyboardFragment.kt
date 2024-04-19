@@ -12,7 +12,7 @@ import com.osfans.trime.data.DataManager
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
-import com.osfans.trime.ui.main.soundPicker
+import com.osfans.trime.ui.main.buildSoundEffectPickerDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,7 +29,7 @@ class KeyboardFragment :
         addPreferencesFromResource(R.xml.keyboard_preference)
         findPreference<Preference>("keyboard__key_sound_package")
             ?.setOnPreferenceClickListener {
-                lifecycleScope.launch { requireContext().soundPicker().show() }
+                lifecycleScope.launch { buildSoundEffectPickerDialog(requireContext()).show() }
                 true
             }
     }
