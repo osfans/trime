@@ -1,7 +1,9 @@
 package com.osfans.trime.daemon
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.blankj.utilcode.util.NotificationUtils
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import com.osfans.trime.core.Rime
@@ -97,6 +99,22 @@ object RimeDaemon {
             }
         }
 
+    init {
+        createNotificationChannel()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel =
+                NotificationChannel(
+                    CHANNEL_ID,
+                    appContext.getText(R.string.rime_daemon),
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply { description = CHANNEL_ID }
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
     private const val CHANNEL_ID = "rime-daemon"
     private var restartId = 0
 
@@ -106,20 +124,20 @@ object RimeDaemon {
     fun restartRime(fullCheck: Boolean = false) =
         lock.withLock {
             val id = restartId++
-            NotificationUtils.notify(CHANNEL_ID, id) {
-                it.setSmallIcon(R.drawable.ic_baseline_sync_24)
-                    .setContentTitle(appContext.getString(R.string.rime_daemon))
-                    .setContentText(appContext.getString(R.string.restarting_rime))
-                    .setOngoing(true)
-                    .setProgress(100, 0, true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-            }
+            NotificationCompat.Builder(appContext, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_sync_24)
+                .setContentTitle(appContext.getString(R.string.rime_daemon))
+                .setContentText(appContext.getString(R.string.restarting_rime))
+                .setOngoing(true)
+                .setProgress(100, 0, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build().let { notificationManager.notify(id, it) }
             realRime.finalize()
             realRime.startup(fullCheck)
             TrimeApplication.getInstance().coroutineScope.launch {
                 // cancel notification on ready
                 realRime.lifecycle.whenReady {
-                    notificationManager.cancel(CHANNEL_ID, id)
+                    notificationManager.cancel(id)
                 }
             }
         }
