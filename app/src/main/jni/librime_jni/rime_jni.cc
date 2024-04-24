@@ -41,6 +41,7 @@ class Rime {
     RIME_STRUCT(RimeTraits, trime_traits)
     trime_traits.shared_data_dir = sharedDir;
     trime_traits.user_data_dir = userDir;
+    trime_traits.log_dir = "";  // set empty log_dir to log to logcat only
     trime_traits.app_name = "rime.trime";
     trime_traits.distribution_name = "Rime";
     trime_traits.distribution_code_name = "trime";
