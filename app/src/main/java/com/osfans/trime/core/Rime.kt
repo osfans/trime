@@ -40,10 +40,10 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override val lifecycle get() = lifecycleImpl
 
     override val notificationFlow = notificationFlow_.asSharedFlow()
-    override val stateFlow = lifecycle.stateFlow
+    override val stateFlow get() = lifecycle.currentStateFlow
 
     override val isReady: Boolean
-        get() = lifecycle.stateFlow.value == RimeLifecycle.State.READY
+        get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
 
     private val dispatcher =
         RimeDispatcher(
@@ -61,6 +61,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
                     updateStatus()
 
                     OpenCCDictManager.buildOpenCCDict()
+                    lifecycleImpl.emitState(RimeLifecycle.State.READY)
                 }
 
                 override fun nativeFinalize() {
@@ -92,19 +93,18 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
 
     fun startup(fullCheck: Boolean) {
-        if (lifecycle.stateFlow.value != RimeLifecycle.State.STOPPED) {
+        if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
         if (appContext.isStorageAvailable()) {
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
-            lifecycleImpl.emitState(RimeLifecycle.State.READY)
         }
     }
 
     fun finalize() {
-        if (lifecycle.stateFlow.value != RimeLifecycle.State.READY) {
+        if (lifecycle.currentStateFlow.value != RimeLifecycle.State.READY) {
             Timber.w("Skip stopping rime: not at ready state!")
             return
         }

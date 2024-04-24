@@ -69,6 +69,10 @@ class RimeDispatcher(private val looper: RimeLooper) : CoroutineDispatcher() {
 
     private val channel = Channel<Unit>(Channel.UNLIMITED)
 
+    /**
+     * Start the dispatcher
+     * This function returns immediately
+     */
     fun start(fullCheck: Boolean) {
         Timber.d("RimeDispatcher start()")
         internalScope.launch {
@@ -92,6 +96,10 @@ class RimeDispatcher(private val looper: RimeLooper) : CoroutineDispatcher() {
         }
     }
 
+    /**
+     * Stop the dispatcher
+     * This function blocks until fully stopped
+     */
     fun stop(): List<Runnable> {
         Timber.i("RimeDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
