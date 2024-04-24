@@ -15,8 +15,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class RimeLifecycleImpl : RimeLifecycle {
-    private val _stateFlow = MutableStateFlow(RimeLifecycle.State.STOPPED)
-    override val stateFlow = _stateFlow.asStateFlow()
+    private val internalStateFlow = MutableStateFlow(RimeLifecycle.State.STOPPED)
+    override val currentStateFlow = internalStateFlow.asStateFlow()
 
     override val lifecycleScope: CoroutineScope = RimeLifecycleScope(this)
 
@@ -24,26 +24,26 @@ class RimeLifecycleImpl : RimeLifecycle {
         when (state) {
             RimeLifecycle.State.STARTING -> {
                 checkAtState(RimeLifecycle.State.STOPPED)
-                _stateFlow.value = RimeLifecycle.State.STARTING
+                internalStateFlow.value = RimeLifecycle.State.STARTING
             }
             RimeLifecycle.State.READY -> {
                 checkAtState(RimeLifecycle.State.STARTING)
-                _stateFlow.value = RimeLifecycle.State.READY
+                internalStateFlow.value = RimeLifecycle.State.READY
             }
             RimeLifecycle.State.STOPPED -> {
                 checkAtState(RimeLifecycle.State.READY)
-                _stateFlow.value = RimeLifecycle.State.STOPPED
+                internalStateFlow.value = RimeLifecycle.State.STOPPED
             }
         }
     }
 
     private fun checkAtState(state: RimeLifecycle.State) =
-        takeIf { (_stateFlow.value == state) }
-            ?: throw IllegalStateException("Currently not at $state! Actual state is ${_stateFlow.value}")
+        takeIf { (internalStateFlow.value == state) }
+            ?: throw IllegalStateException("Currently not at $state! Actual state is ${internalStateFlow.value}")
 }
 
 interface RimeLifecycle {
-    val stateFlow: StateFlow<State>
+    val currentStateFlow: StateFlow<State>
     val lifecycleScope: CoroutineScope
 
     enum class State {
@@ -65,7 +65,7 @@ class RimeLifecycleScope(
 ) : CoroutineScope {
     init {
         launch {
-            lifecycle.stateFlow.collect {
+            lifecycle.currentStateFlow.collect {
                 if (it == RimeLifecycle.State.STOPPED) {
                     coroutineContext.cancelChildren()
                 }
@@ -78,7 +78,7 @@ suspend fun <T> RimeLifecycle.whenAtState(
     state: RimeLifecycle.State,
     block: suspend CoroutineScope.() -> T,
 ): T {
-    return if (stateFlow.value == state) {
+    return if (currentStateFlow.value == state) {
         block(lifecycleScope)
     } else {
         StateDelegate(this, state).run(block)
@@ -94,7 +94,7 @@ private class StateDelegate(val lifecycle: RimeLifecycle, val state: RimeLifecyc
     init {
         job =
             lifecycle.lifecycleScope.launch {
-                lifecycle.stateFlow.collect {
+                lifecycle.currentStateFlow.collect {
                     if (it == state) {
                         continuation?.resume(Unit)
                     }

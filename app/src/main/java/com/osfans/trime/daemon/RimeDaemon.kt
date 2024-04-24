@@ -80,7 +80,7 @@ object RimeDaemon {
             if (name in sessions) {
                 return@withLock sessions.getValue(name)
             }
-            if (realRime.lifecycle.stateFlow.value == RimeLifecycle.State.STOPPED) {
+            if (realRime.lifecycle.currentStateFlow.value == RimeLifecycle.State.STOPPED) {
                 realRime.startup(false)
             }
             val session = establish(name)
