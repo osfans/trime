@@ -7,7 +7,7 @@ set(RIME_JNI_SOURCES
   rime_jni.cc
 )
 add_library(rime_jni SHARED ${RIME_JNI_SOURCES})
-target_link_libraries(rime_jni log rime-static ${Opencc_LIBRARY})
+target_link_libraries(rime_jni rime-static ${Opencc_LIBRARY})
 target_include_directories(rime_jni PRIVATE
   "${CMAKE_SOURCE_DIR}/librime/src"
   "${Opencc_INCLUDE_PATH}"
