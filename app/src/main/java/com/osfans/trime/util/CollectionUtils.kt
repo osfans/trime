@@ -1,7 +1,5 @@
 package com.osfans.trime.util
 
-import com.osfans.trime.util.config.ConfigValue
-
 object CollectionUtils {
     @JvmStatic
     fun <K, V> getOrDefault(
@@ -38,10 +36,7 @@ object CollectionUtils {
     ): String {
         if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val v = obtainValue(map, key)
-        return when (v) {
-            is ConfigValue? -> v?.getString()
-            else -> v?.toString()
-        } ?: defValue
+        return v?.toString() ?: defValue
     }
 
     @JvmStatic
