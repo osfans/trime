@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2015 - 2024 Rime community
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 mainDir=app/src/main
 resDir=$(mainDir)/res
 jniDir=$(mainDir)/jni
@@ -34,6 +38,17 @@ style-apply: spotlessApply clang-format
 
 debug: style-lint
 	./gradlew assembleDebug
+
+reuse:
+	pipx run reuse annotate \
+	 --recursive --skip-unrecognised \
+	 --merge-copyrights \
+	 --copyright="Rime community" \
+	 --license="GPL-3.0-or-later" .
+	# remove binary file
+	find . -type f -name "*.license" -delete
+	# checkout ignore file
+	git checkout gradlew gradlew.bat gradle/* CHANGELOG.md
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
 release: opencc-data style-lint
