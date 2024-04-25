@@ -37,34 +37,24 @@ class Event(var s: String) {
     var isSticky = false
 
     // 快速把字符串解析为event, 暂时只处理了comment类型 不能完全正确处理=，
-    private fun parseAction(s: String): Boolean {
-        var result = false
-        val strs = s.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        var l = ""
-        for (str in strs) {
-            val set = str.split("=".toRegex(), limit = 2).toTypedArray()
-            if (set.size != 2) continue
-            if (set[0] == "commit") {
-                commit = set[1]
-                result = true
-            } else if (set[0] == "label") {
-                label = set[1]
-                l = label
-                result = true
-            } else if (set[0] == "text") {
-                text = set[1]
-                result = true
+    private fun parseAction(raw: String): Boolean {
+        val pairs =
+            raw.split(',')
+                .filter { it.isNotBlank() }
+                .map { it.split('=', limit = 2) }
+                .associate { it.first() to (it.getOrNull(1) ?: "") }
+
+        val (commit, label, text) =
+            pairs.run {
+                arrayOf(get("commit") ?: "", get("label") ?: "", get("text") ?: "")
             }
-        }
-        if (l.isNullOrEmpty()) {
-            if (commit.isNotEmpty()) {
-                label = commit
-            } else if (text.isNotEmpty()) {
-                label = text
-            }
-        }
-        Timber.d("<Event> text=$text, commit=$commit, label=$label, s=$s")
-        return result
+
+        this.commit = commit
+        this.text = text
+        this.label = label.ifEmpty { commit }.ifEmpty { text }
+
+        Timber.d("parseAction: raw=$raw: text=$text, commit=$commit, label=$label")
+        return commit.isNotBlank() || text.isNotBlank() || label.isNotBlank()
     }
 
     private fun adjustCase(
