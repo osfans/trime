@@ -314,7 +314,7 @@ object ColorManager {
         m: Map<String, Any?>,
         key: String?,
     ): Int? {
-        val value = getColorValue(m[key] as String?)
+        val value = getColorValue(m[key].toString())
         return if (value is Int) value else null
     }
 
@@ -335,7 +335,7 @@ object ColorManager {
         m: Map<String, Any?>,
         key: String,
     ): Drawable? {
-        val value = getColorValue(m[key] as String?)
+        val value = getColorValue(m[key].toString())
         if (value is Int) {
             return GradientDrawable().apply { setColor(value) }
         } else if (value is Drawable) {
