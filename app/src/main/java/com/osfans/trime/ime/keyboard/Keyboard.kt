@@ -188,7 +188,7 @@ class Keyboard() {
             keyboardConfig!!["keys"]!!.configList
                 .map {
                     it!!.configMap.entries.associate { (k, v) ->
-                        k to v!!.configValue.getString()
+                        k to v!!
                     }
                 }
         horizontalGap =
@@ -425,7 +425,7 @@ class Keyboard() {
                 Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
                 else -> keyboardHeight
             }
-        return appContext.dp(value).toInt()
+        return appContext.dp(value)
     }
 
     private fun getKeyboardHeightFromKeyboardConfig(keyboardConfig: Map<String, Any?>?): Int {

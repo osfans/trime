@@ -56,7 +56,7 @@ abstract class ConfigItem(val node: YamlNode) {
         item: ConfigItem,
         expectedType: String,
     ): Nothing {
-        throw IllegalArgumentException("Expected element to be $expectedType bus is ${item::class.simpleName}")
+        throw IllegalArgumentException("Expected element to be $expectedType but is ${item::class.simpleName}")
     }
 }
 
@@ -75,6 +75,8 @@ class ConfigValue(private val scalar: YamlScalar) : ConfigItem(scalar) {
     override fun isEmpty() = scalar.content.isEmpty()
 
     override fun contentToString(): String = scalar.contentToString()
+
+    override fun toString(): String = scalar.content
 }
 
 /** The wrapper of [YamlList] */
@@ -111,6 +113,9 @@ class ConfigList(private val list: YamlList) : ConfigItem(list), List<ConfigItem
     override fun indexOf(element: ConfigItem?): Int = items.indexOf(element)
 
     fun getValue(index: Int) = get(index)?.configValue
+
+    // just like other Java / Kotlin collection type
+    override fun toString(): String = items.joinToString(prefix = "[", postfix = "]")
 }
 
 class ConfigMap(private val map: YamlMap) : ConfigItem(map), Map<String, ConfigItem?> {
@@ -140,4 +145,7 @@ class ConfigMap(private val map: YamlMap) : ConfigItem(map), Map<String, ConfigI
     override operator fun get(key: String): ConfigItem? = entries.firstOrNull { it.key == key }?.value
 
     fun getValue(key: String): ConfigValue? = get(key)?.configValue
+
+    // just like other Java / Kotlin map type
+    override fun toString(): String = entries.joinToString(prefix = "{", postfix = "}") { (key, value) -> "$key=$value" }
 }
