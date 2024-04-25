@@ -16,30 +16,10 @@ import timber.log.Timber
 object TabManager {
     var currentTabIndex = -1
         private set
-    private var tabSwitchPosition = 0
 
     val theme get() = ThemeManager.activeTheme
     val tabTags = arrayListOf<TabTag>()
     private val keyboards = mutableListOf<List<SimpleKeyBean>>()
-
-    /**
-     * 得到TABS中对应的真实索引 真实的索引是去除 没有keys列表的tagTab 之后按顺序排列的tagTab索引
-     *
-     * @param position 位置（索引）
-     * @return int TABS中显示的真实索引
-     */
-    fun getTabSwitchPosition(position: Int): Int {
-        var p = position
-        var i = 0
-        for (tag in tabTags) {
-            if (SymbolKeyboardType.hasKey(tag.type)) {
-                p--
-                if (p <= 0) break
-            }
-            i++
-        }
-        return i
-    }
 
     fun refresh() {
         reset()
@@ -127,7 +107,6 @@ object TabManager {
         currentTabIndex = index
         val tag = tabTags[index]
         if (tag.type == SymbolKeyboardType.TABS) {
-            tabSwitchPosition = currentTabIndex
             return tabTags.filter { SymbolKeyboardType.hasKey(it.type) }
                 .map { SimpleKeyBean(it.text) }
         }
@@ -136,9 +115,5 @@ object TabManager {
 
     fun setTabExited() {
         currentTabIndex = -1
-    }
-
-    fun isAfterTabSwitch(position: Int): Boolean {
-        return tabSwitchPosition <= position
     }
 }

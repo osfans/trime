@@ -97,19 +97,8 @@ class LiquidKeyboard(
                         service.inputSymbol(bean.text)
                         return@setListener
                     } else if (currentBoardType === SymbolKeyboardType.TABS) {
-                        val tag = TabManager.tabTags.find { SymbolKeyboardType.hasKey(it.type) }
-                        val truePosition = TabManager.getTabSwitchPosition(position)
-                        if (tag != null) {
-                            Timber.d(
-                                "TABS click: position = $position, truePosition = $truePosition, tag.text = ${tag.text}",
-                            )
-                            if (TabManager.isAfterTabSwitch(truePosition)) {
-                                // tab的位置在“更多”的右侧，不滚动tab，焦点仍然在”更多“上
-                                select(truePosition)
-                            } else {
-                                service.selectLiquidKeyboard(truePosition)
-                            }
-                        }
+                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == bean.text }
+                        select(realPosition)
                         return@setListener
                     }
                 }
