@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2015 - 2024 Rime community
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 ## 隱私權政策
 
 **同文**爲開源安卓漢語輸入法項目，讀取以下資訊是爲了協助使用者更快速的輸入文字。

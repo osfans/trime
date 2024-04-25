@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2015 - 2024 Rime community
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 set(BOOST_VER 1.84.0)
 
 if(NOT EXISTS "boost-${BOOST_VER}.tar.xz")

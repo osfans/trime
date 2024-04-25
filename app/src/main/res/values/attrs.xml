@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2015 - 2024 Rime community
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 <resources>
     <attr name="useSimpleSummaryProvider" format="boolean" />
     <declare-styleable name="DialogSeekBarPreferenceAttrs">

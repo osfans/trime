@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2015 - 2024 Rime community
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package com.osfans.trime.data.theme.model
 
 import com.osfans.trime.ime.symbol.CandidateAdapter.CommentPosition

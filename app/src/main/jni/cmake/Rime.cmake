@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2015 - 2024 Rime community
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # if you want to add some new plugins, add them to librime_jni/rime_jni.cc too
 set(RIME_PLUGINS librime-lua librime-charcode librime-octagram librime-predict)
 

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2015 - 2024 Rime community
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Liquid Keyboard 參數
 
 (3.2.17), 只有使用 `single_width` 。其餘的還未有作用。

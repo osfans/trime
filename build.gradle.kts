@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2015 - 2024 Rime community
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * The buildscript block is where you configure the repositories and
  * dependencies for Gradle itself--meaning, you should not include dependencies

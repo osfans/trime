@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2015 - 2024 Rime community
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Contributing to Trime
 
 We would love for you to contribute to Trime and help make it even better than it is today!

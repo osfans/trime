@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2015 - 2024 Rime community
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef TRIME_JNI_UTILS_H
 #define TRIME_JNI_UTILS_H
 
