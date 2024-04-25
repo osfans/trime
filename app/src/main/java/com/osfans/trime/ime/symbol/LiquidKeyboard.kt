@@ -52,18 +52,17 @@ class LiquidKeyboard(
         SimpleAdapter(theme, columnCount).apply {
             setHasStableIds(true)
             setListener { position ->
-                if (position < beans.size) {
+                if (position in beans.indices) {
                     val bean = beans[position]
-                    if (currentBoardType === SymbolKeyboardType.SYMBOL) {
-                        service.inputSymbol(bean.text)
-                        return@setListener
-                    } else {
-                        service.commitText(bean.text)
-                        if (currentBoardType !== SymbolKeyboardType.HISTORY) {
-                            symbolHistory.insert(bean.text)
-                            symbolHistory.save()
+                    when (currentBoardType) {
+                        SymbolKeyboardType.SYMBOL -> service.inputSymbol(bean.text)
+                        else -> {
+                            service.commitText(bean.text)
+                            if (currentBoardType != SymbolKeyboardType.HISTORY) {
+                                symbolHistory.insert(bean.text)
+                                symbolHistory.save()
+                            }
                         }
-                        return@setListener
                     }
                 }
             }
@@ -91,18 +90,17 @@ class LiquidKeyboard(
         CandidateAdapter(theme).apply {
             setListener { position ->
                 val data = TabManager.selectTabByIndex(TabManager.currentTabIndex)
-                if (position < data.size) {
+                if (position in data.indices) {
                     val bean = data[position]
-                    if (currentBoardType === SymbolKeyboardType.SYMBOL) {
-                        service.inputSymbol(bean.text)
-                        return@setListener
-                    } else if (currentBoardType === SymbolKeyboardType.TABS) {
-                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == bean.text }
-                        select(realPosition)
-                        return@setListener
+                    when (currentBoardType) {
+                        SymbolKeyboardType.SYMBOL -> service.inputSymbol(bean.text)
+                        SymbolKeyboardType.TABS -> {
+                            val realPosition = TabManager.tabTags.indexOfFirst { it.text == bean.text }
+                            select(realPosition)
+                        }
+                        else -> service.currentInputConnection?.commitText(bean.text, 1)
                     }
                 }
-                service.currentInputConnection?.commitText(data[position].text, 1)
             }
         }
     }
