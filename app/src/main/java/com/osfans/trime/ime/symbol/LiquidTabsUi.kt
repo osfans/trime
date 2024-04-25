@@ -122,7 +122,12 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
         if (selected >= 0) {
             tabs[selected].setActive(false)
         }
-        tabs[index].setActive(true)
+        tabs[index].also { tabUi ->
+            tabUi.setActive(true)
+            if (tabUi.root.left !in root.scrollX..root.scrollX + root.width) {
+                root.run { post { smoothScrollTo(tabUi.root.left, scrollY) } }
+            }
+        }
         selected = index
     }
 
