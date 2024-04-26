@@ -56,12 +56,14 @@ object SoundEffectManager {
 
     @JvmStatic
     fun switchSound(name: String) {
-        if (getSound(name) == null) {
-            Timber.w("Unknown sound package name: $name")
-            return
+        getSound(name).let {
+            if (it == null) {
+                Timber.w("Unknown sound package name: $name")
+                return
+            }
+            currentSoundEffect = it
+            AppPrefs.defaultInstance().keyboard.customSoundPackage = name
         }
-        AppPrefs.defaultInstance().keyboard.customSoundPackage = name
-        currentSoundEffect = getSound(name)!!
     }
 
     fun init() {
