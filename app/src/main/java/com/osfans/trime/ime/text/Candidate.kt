@@ -65,7 +65,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private val symbolPaint =
         Paint().apply {
             typeface = symbolFont
-            theme.generalStyle.symbolTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.candidateTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
