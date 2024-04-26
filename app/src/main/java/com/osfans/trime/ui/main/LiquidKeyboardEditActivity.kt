@@ -15,7 +15,7 @@ import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.databinding.ActivityLiquidKeyboardEditBinding
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ime.symbol.SymbolBoardType
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -23,7 +23,7 @@ class LiquidKeyboardEditActivity : Activity() {
     private val service: TrimeInputMethodService = TrimeInputMethodService.getService()
     private var id: Int? = null
     private lateinit var editText: EditText
-    private var type: SymbolKeyboardType? = null
+    private var type: SymbolBoardType? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +45,7 @@ class LiquidKeyboardEditActivity : Activity() {
         // Extract necessary values.
         if (intent.extras != null) {
             val strType = intent.getStringExtra(LIQUID_KEYBOARD_TYPE)
-            type = SymbolKeyboardType.fromString(strType)
+            type = SymbolBoardType.fromString(strType)
             id = intent.getIntExtra(DB_BEAN_ID, -1)
             val text = intent.getStringExtra(DB_BEAN_TEXT)
             editText.setText(text)
@@ -60,19 +60,19 @@ class LiquidKeyboardEditActivity : Activity() {
         if (id == null || id == -1) return
         val newText = editText.text.toString()
         when (type) {
-            SymbolKeyboardType.CLIPBOARD -> {
+            SymbolBoardType.CLIPBOARD -> {
                 service.lifecycleScope.launch {
                     ClipboardHelper.updateText(id!!, newText)
                 }
             }
 
-            SymbolKeyboardType.COLLECTION -> {
+            SymbolBoardType.COLLECTION -> {
                 service.lifecycleScope.launch {
                     CollectionHelper.updateText(id!!, newText)
                 }
             }
 
-            SymbolKeyboardType.DRAFT -> {
+            SymbolBoardType.DRAFT -> {
                 service.lifecycleScope.launch {
                     DraftHelper.updateText(id!!, newText)
                 }

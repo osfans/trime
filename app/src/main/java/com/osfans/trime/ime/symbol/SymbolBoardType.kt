@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.ime.enums
+package com.osfans.trime.ime.symbol
 
-enum class SymbolKeyboardType {
+enum class SymbolBoardType {
     // 不占据tab位，仅当在“更多”面板，即“TABS”中显示时，产生换行效果
     NEW_ROW,
 
@@ -55,7 +55,7 @@ enum class SymbolKeyboardType {
 
     companion object {
         @JvmStatic
-        fun fromString(code: String?): SymbolKeyboardType {
+        fun fromString(code: String?): SymbolBoardType {
             code ?: return SINGLE
             return runCatching {
                 valueOf(code.uppercase())
@@ -64,13 +64,13 @@ enum class SymbolKeyboardType {
 
         // 是否在liquidKeyboard键盘区域展示按键
         @JvmStatic
-        fun hasKeys(type: SymbolKeyboardType): Boolean {
+        fun hasKeys(type: SymbolBoardType): Boolean {
             return type > HISTORY
         }
 
         // 是否呈现在liquidKeyboard键盘区域的tabs列表中
         @JvmStatic
-        fun hasKey(type: SymbolKeyboardType): Boolean {
+        fun hasKey(type: SymbolBoardType): Boolean {
             return type >= CLIPBOARD
         }
     }

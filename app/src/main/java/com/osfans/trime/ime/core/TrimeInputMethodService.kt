@@ -45,13 +45,13 @@ import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.ime.enums.Keycode
-import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
+import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.CompositionPopupWindow
@@ -277,13 +277,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (name.matches("-?\\d+".toRegex())) {
             selectLiquidKeyboard(name.toInt())
         } else if (name.matches("[A-Z]+".toRegex())) {
-            selectLiquidKeyboard(SymbolKeyboardType.valueOf(name))
+            selectLiquidKeyboard(SymbolBoardType.valueOf(name))
         } else {
             selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.text == name })
         }
     }
 
-    fun selectLiquidKeyboard(type: SymbolKeyboardType) {
+    fun selectLiquidKeyboard(type: SymbolBoardType) {
         selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.type == type })
     }
 
