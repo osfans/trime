@@ -22,6 +22,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
@@ -65,6 +66,7 @@ class InputView(
     private val theme get() = ThemeManager.activeTheme
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
+    private val navbarBackground get() = AppPrefs.defaultInstance().theme.navbarBackground
 
     private val keyboardBackground =
         imageView {
@@ -143,30 +145,41 @@ class InputView(
         windowManager.cacheResidentWindow(keyboardWindow, createView = true)
         windowManager.cacheResidentWindow(liquidKeyboard)
 
-        service.window.window!!.also { it ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                shouldUpdateNavbarForeground = true
-                // allow draw behind navigation bar
-                WindowCompat.setDecorFitsSystemWindows(it, false)
-                it.navigationBarColor = Color.TRANSPARENT
-                // don't apply scrim to transparent navigation bar
-                it.isNavigationBarContrastEnforced = false
-                ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-                    insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                        bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                            bottomMargin = it.bottom
-                        }
+        service.window.window!!.also {
+            when (navbarBackground) {
+                AppPrefs.Theme.NavbarBackground.NONE -> {
+                    WindowCompat.setDecorFitsSystemWindows(it, true)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        it.isNavigationBarContrastEnforced = true
                     }
-                    WindowInsetsCompat.CONSUMED
                 }
-            } else {
-                shouldUpdateNavbarForeground = true
-                shouldUpdateNavbarBackground = true
-                // don't draw behind navigation bar
-                WindowCompat.setDecorFitsSystemWindows(it, true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // don't apply scrim to transparent navigation bar
-                    it.isNavigationBarContrastEnforced = false
+                AppPrefs.Theme.NavbarBackground.COLOR_ONLY -> {
+                    shouldUpdateNavbarForeground = true
+                    shouldUpdateNavbarBackground = true
+                    // don't draw behind navigation bar
+                    WindowCompat.setDecorFitsSystemWindows(it, true)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // don't apply scrim to transparent navigation bar
+                        it.isNavigationBarContrastEnforced = false
+                    }
+                }
+                AppPrefs.Theme.NavbarBackground.FULL -> {
+                    shouldUpdateNavbarForeground = true
+                    // allow draw behind navigation bar
+                    WindowCompat.setDecorFitsSystemWindows(it, false)
+                    it.navigationBarColor = Color.TRANSPARENT
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // don't apply scrim to transparent navigation bar
+                        it.isNavigationBarContrastEnforced = false
+                    }
+                    ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+                        insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                            bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+                                bottomMargin = it.bottom
+                            }
+                        }
+                        WindowInsetsCompat.CONSUMED
+                    }
                 }
             }
         }

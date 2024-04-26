@@ -316,6 +316,7 @@ class AppPrefs(
             const val SELECTED_COLOR = "theme_selected_color"
             const val AUTO_DARK = "theme_auto_dark"
             const val USE_MINI_KEYBOARD = "theme_use_mini_keyboard"
+            const val NAVBAR_BACKGROUND = "navbar_background"
         }
 
         var selectedTheme: String
@@ -330,6 +331,16 @@ class AppPrefs(
         var useMiniKeyboard: Boolean = false
             get() = prefs.getPref(USE_MINI_KEYBOARD, false)
             private set
+
+        enum class NavbarBackground {
+            NONE,
+            COLOR_ONLY,
+            FULL,
+        }
+
+        var navbarBackground: NavbarBackground
+            get() = NavbarBackground.valueOf(prefs.getPref(NAVBAR_BACKGROUND, NavbarBackground.COLOR_ONLY.name))
+            set(value) = prefs.setPref(NAVBAR_BACKGROUND, value.name)
     }
 
     /**

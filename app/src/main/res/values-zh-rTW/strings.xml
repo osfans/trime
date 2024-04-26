@@ -278,4 +278,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_schema_to_enable">沒有方案可啟用。請確保您已在使用者資料夾中放入了前置檔案和方案檔案。</string>
     <string name="schemata">方案</string>
     <string name="schemata_hint">選擇當前方案或啓用更多方案</string>
+    <string name="navbar_background">導航欄背景</string>
+    <string-array name="navbar_bkg_labels">
+        <item>無背景</item>
+        <item>跟隨鍵盤背景色</item>
+        <item>鍵盤背景圖片</item>
+    </string-array>
 </resources>

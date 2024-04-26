@@ -16,6 +16,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:iconSpaceReserved="false"
         android:title="@string/looks__selected_color_title"
         android:summary="@string/looks__selected_color_summary" />
+    <ListPreference android:key="navbar_background"
+        app:iconSpaceReserved="false"
+        android:title="@string/navbar_background"
+        android:defaultValue="COLOR_ONLY"
+        android:entryValues="@array/navbar_bkg_values"
+        android:entries="@array/navbar_bkg_labels"
+        app:useSimpleSummaryProvider="true"/>
     <SwitchPreferenceCompat android:key="theme_auto_dark"
         app:iconSpaceReserved="false"
         android:title="@string/keyboard__auto_dark_title"
