@@ -34,24 +34,24 @@ object InputFeedbackManager {
     private var lastPressedKeycode = 0
     private val soundIds: MutableList<Int> = mutableListOf()
 
-    fun init(context: Context) {
+    fun init() {
         runCatching {
-            tts = TextToSpeech(context, null)
-            soundPool =
-                SoundPool.Builder()
-                    .setMaxStreams(1)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setLegacyStreamType(AudioManager.STREAM_SYSTEM)
-                            .build(),
-                    ).build()
             SoundEffectManager.init()
         }.getOrElse {
             Timber.w(it, "Failed to initialize InputFeedbackManager")
         }
     }
 
-    fun loadSoundEffects() {
+    fun loadSoundEffects(context: Context) {
+        tts = TextToSpeech(context, null)
+        soundPool =
+            SoundPool.Builder()
+                .setMaxStreams(1)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setLegacyStreamType(AudioManager.STREAM_SYSTEM)
+                        .build(),
+                ).build()
         SoundEffectManager.getActiveSoundFilePaths().onSuccess { path ->
             soundIds.clear()
             soundIds.addAll(path.map { soundPool?.load(it, 1) ?: 0 })

@@ -232,7 +232,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     Timber.d("Running Trime.onCreate")
                     ColorManager.init(resources.configuration)
                     textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
-                    InputFeedbackManager.init(this@TrimeInputMethodService)
+                    InputFeedbackManager.init()
                     restartSystemStartTimingSync()
                     try {
                         for (listener in eventListeners) {
@@ -465,7 +465,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         Timber.d("onStartInputView: restarting=%s", restarting)
         lifecycleScope.launch(Dispatchers.Main) {
             rime.runOnReady {
-                InputFeedbackManager.loadSoundEffects()
+                InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
                 InputFeedbackManager.resetPlayProgress()
                 for (listener in eventListeners) {
                     listener.onStartInputView(attribute, restarting)
