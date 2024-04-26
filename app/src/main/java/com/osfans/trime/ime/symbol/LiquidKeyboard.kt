@@ -24,7 +24,6 @@ import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
-import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.ime.window.BoardWindow
@@ -43,7 +42,7 @@ class LiquidKeyboard(
 ) : BoardWindow.BarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
-    private lateinit var currentBoardType: SymbolKeyboardType
+    private lateinit var currentBoardType: SymbolBoardType
     private lateinit var currentBoardAdapter: RecyclerView.Adapter<*>
 
     private val simpleAdapter by lazy {
@@ -55,10 +54,10 @@ class LiquidKeyboard(
                 if (position in beans.indices) {
                     val bean = beans[position]
                     when (currentBoardType) {
-                        SymbolKeyboardType.SYMBOL -> service.inputSymbol(bean.text)
+                        SymbolBoardType.SYMBOL -> service.inputSymbol(bean.text)
                         else -> {
                             service.commitText(bean.text)
-                            if (currentBoardType != SymbolKeyboardType.HISTORY) {
+                            if (currentBoardType != SymbolBoardType.HISTORY) {
                                 symbolHistory.insert(bean.text)
                                 symbolHistory.save()
                             }
@@ -93,8 +92,8 @@ class LiquidKeyboard(
                 if (position in data.indices) {
                     val bean = data[position]
                     when (currentBoardType) {
-                        SymbolKeyboardType.SYMBOL -> service.inputSymbol(bean.text)
-                        SymbolKeyboardType.TABS -> {
+                        SymbolBoardType.SYMBOL -> service.inputSymbol(bean.text)
+                        SymbolBoardType.TABS -> {
                             val realPosition = TabManager.tabTags.indexOfFirst { it.text == bean.text }
                             select(realPosition)
                         }
@@ -157,7 +156,7 @@ class LiquidKeyboard(
         StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
     }
 
-    fun select(i: Int): SymbolKeyboardType {
+    fun select(i: Int): SymbolBoardType {
         if (TabManager.currentTabIndex == i) return currentBoardType
         val tag = TabManager.tabTags[i]
         currentBoardType = tag.type
@@ -165,14 +164,14 @@ class LiquidKeyboard(
         symbolHistory.load()
         val data by lazy { TabManager.selectTabByIndex(i) }
         when (tag.type) {
-            SymbolKeyboardType.CLIPBOARD,
-            SymbolKeyboardType.COLLECTION,
-            SymbolKeyboardType.DRAFT,
+            SymbolBoardType.CLIPBOARD,
+            SymbolBoardType.COLLECTION,
+            SymbolBoardType.DRAFT,
             -> initDbData()
-            SymbolKeyboardType.CANDIDATE -> initCandidates()
-            SymbolKeyboardType.VAR_LENGTH,
-            SymbolKeyboardType.SYMBOL,
-            SymbolKeyboardType.TABS,
+            SymbolBoardType.CANDIDATE -> initCandidates()
+            SymbolBoardType.VAR_LENGTH,
+            SymbolBoardType.SYMBOL,
+            SymbolBoardType.TABS,
             -> initVarLengthKeys(data)
             else -> initFixData(data)
         }
@@ -194,7 +193,7 @@ class LiquidKeyboard(
         }
 
         when (currentBoardType) {
-            SymbolKeyboardType.HISTORY ->
+            SymbolBoardType.HISTORY ->
                 simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
             else ->
                 simpleAdapter.updateBeans(data)
@@ -218,9 +217,9 @@ class LiquidKeyboard(
         service.lifecycleScope.launch {
             val all =
                 when (currentBoardType) {
-                    SymbolKeyboardType.CLIPBOARD -> ClipboardHelper.getAll()
-                    SymbolKeyboardType.COLLECTION -> CollectionHelper.getAll()
-                    SymbolKeyboardType.DRAFT -> DraftHelper.getAll()
+                    SymbolBoardType.CLIPBOARD -> ClipboardHelper.getAll()
+                    SymbolBoardType.COLLECTION -> CollectionHelper.getAll()
+                    SymbolBoardType.DRAFT -> DraftHelper.getAll()
                     else -> emptyList()
                 }
             dbAdapter.updateBeans(all)
@@ -258,7 +257,7 @@ class LiquidKeyboard(
         }
 
         val candidates =
-            if (currentBoardType === SymbolKeyboardType.SYMBOL) {
+            if (currentBoardType === SymbolBoardType.SYMBOL) {
                 data.map { b -> CandidateListItem("", b.label) }
             } else {
                 data.map { b -> CandidateListItem("", b.text) }
@@ -275,7 +274,7 @@ class LiquidKeyboard(
         // 判断液体键盘视图是否已开启，-1为未开启
         if (selected >= 0) {
             val tag = TabManager.tabTags[selected]
-            if (tag.type == SymbolKeyboardType.CLIPBOARD) {
+            if (tag.type == SymbolBoardType.CLIPBOARD) {
                 Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
                 service.lifecycleScope.launch {
                     dbAdapter.updateBeans(ClipboardHelper.getAll())

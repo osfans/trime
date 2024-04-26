@@ -22,7 +22,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
@@ -191,7 +191,7 @@ object ShortcutUtils {
 
     fun launchLiquidKeyboardEdit(
         context: Context,
-        type: SymbolKeyboardType,
+        type: SymbolBoardType,
         id: Int,
         text: String,
     ) {

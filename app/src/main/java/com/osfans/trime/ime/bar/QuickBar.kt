@@ -17,7 +17,7 @@ import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
-import com.osfans.trime.ime.enums.SymbolKeyboardType
+import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.window.BoardWindow
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
@@ -33,7 +33,7 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
                 setPageStr(
                     { service.handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0) },
                     { service.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) },
-                    { service.selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE) },
+                    { service.selectLiquidKeyboard(SymbolBoardType.CANDIDATE) },
                 )
             }
             with(candidates) {

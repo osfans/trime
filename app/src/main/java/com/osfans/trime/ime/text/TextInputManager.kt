@@ -23,12 +23,12 @@ import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
-import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
+import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ui.main.buildColorPickerDialog
 import com.osfans.trime.ui.main.buildSoundEffectPickerDialog
 import com.osfans.trime.ui.main.buildThemePickerDialog
@@ -514,7 +514,7 @@ class TextInputManager(
         when (arrow) {
             Candidate.PAGE_UP_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_UP, 0)
             Candidate.PAGE_DOWN_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
-            Candidate.PAGE_EX_BUTTON -> trime.selectLiquidKeyboard(SymbolKeyboardType.CANDIDATE)
+            Candidate.PAGE_EX_BUTTON -> trime.selectLiquidKeyboard(SymbolBoardType.CANDIDATE)
         }
     }
 

@@ -6,7 +6,6 @@ package com.osfans.trime.ime.symbol
 
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.enums.SymbolKeyboardType
 import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.config.ConfigList
 import com.osfans.trime.util.config.ConfigMap
@@ -31,7 +30,7 @@ object TabManager {
             val keyboard = theme.liquid.getMap(id) ?: continue
             if (!keyboard.containsKey("type")) continue
             val name = keyboard.getValue("name")?.getString() ?: id
-            val type = SymbolKeyboardType.fromString(keyboard.getValue("type")?.getString())
+            val type = SymbolBoardType.fromString(keyboard.getValue("type")?.getString())
             val keys = keyboard["keys"]
             addTabHasKeys(name, type, keys)
         }
@@ -44,11 +43,11 @@ object TabManager {
 
     private fun addListTab(
         name: String,
-        type: SymbolKeyboardType,
+        type: SymbolBoardType,
         keyBeans: List<SimpleKeyBean>,
     ) {
         if (name.isBlank()) return
-        if (SymbolKeyboardType.hasKeys(type)) {
+        if (SymbolBoardType.hasKeys(type)) {
             val index = tabTags.indexOfFirst { it.text == name }
             if (index >= 0) {
                 keyboards[index] = keyBeans
@@ -61,7 +60,7 @@ object TabManager {
 
     private fun addTabHasKeys(
         name: String,
-        type: SymbolKeyboardType,
+        type: SymbolBoardType,
         keys: ConfigItem?,
     ) {
         if (keys is ConfigValue?) {
@@ -69,7 +68,7 @@ object TabManager {
             val key = keys?.configValue?.getString() ?: ""
             when (type) {
                 // 处理 SINGLE 类型：把字符串切分为多个按键
-                SymbolKeyboardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(key))
+                SymbolBoardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(key))
                 else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(key))
             }
         }
@@ -106,8 +105,8 @@ object TabManager {
         if (index !in tabTags.indices) return listOf()
         currentTabIndex = index
         val tag = tabTags[index]
-        if (tag.type == SymbolKeyboardType.TABS) {
-            return tabTags.filter { SymbolKeyboardType.hasKey(it.type) }
+        if (tag.type == SymbolBoardType.TABS) {
+            return tabTags.filter { SymbolBoardType.hasKey(it.type) }
                 .map { SimpleKeyBean(it.text) }
         }
         return keyboards[index]
