@@ -21,4 +21,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item name="colorOnSurface">@color/colorOnSurface</item>
         <item name="colorOnError">@color/colorOnError</item>
     </style>
+
+    <style name="Theme.DialogTheme" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 </resources>

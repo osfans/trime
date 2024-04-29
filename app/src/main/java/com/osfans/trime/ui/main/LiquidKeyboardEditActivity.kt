@@ -9,18 +9,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.EditText
-import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.databinding.ActivityLiquidKeyboardEditBinding
-import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.symbol.SymbolBoardType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LiquidKeyboardEditActivity : Activity() {
-    private val service: TrimeInputMethodService = TrimeInputMethodService.getService()
+    private val scope: CoroutineScope = MainScope()
     private var id: Int? = null
     private lateinit var editText: EditText
     private var type: SymbolBoardType? = null
@@ -61,19 +61,19 @@ class LiquidKeyboardEditActivity : Activity() {
         val newText = editText.text.toString()
         when (type) {
             SymbolBoardType.CLIPBOARD -> {
-                service.lifecycleScope.launch {
+                scope.launch {
                     ClipboardHelper.updateText(id!!, newText)
                 }
             }
 
             SymbolBoardType.COLLECTION -> {
-                service.lifecycleScope.launch {
+                scope.launch {
                     CollectionHelper.updateText(id!!, newText)
                 }
             }
 
             SymbolBoardType.DRAFT -> {
-                service.lifecycleScope.launch {
+                scope.launch {
                     DraftHelper.updateText(id!!, newText)
                 }
             }
