@@ -123,12 +123,12 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
         holder: ViewHolder,
         position: Int,
     ) {
-        val (comment, text) = mCandidates[position]
-        holder.candidate.text = text
-        holder.comment.text = comment
+        val item = mCandidates[position]
+        holder.candidate.text = item.text
+        holder.comment.text = item.comment
 
         // 如果设置了回调，则设置点击事件
-        holder.itemView.setOnClickListener { listener?.invoke(position) }
+        holder.itemView.setOnClickListener { listener?.invoke(item, position) }
 
         // 点击时产生背景变色效果
         holder.itemView.setOnTouchListener { _, motionEvent: MotionEvent ->
@@ -140,11 +140,11 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
     }
 
     /** 添加 候选点击事件 Listener 回调 */
-    private var listener: ((Int) -> Unit)? = null
+    private var listener: (CandidateListItem.(Int) -> Unit)? = null
 
     /** @param listener position
      * */
-    fun setListener(listener: ((Int) -> Unit)?) {
+    fun setListener(listener: (CandidateListItem.(Int) -> Unit)?) {
         this.listener = listener
     }
 }

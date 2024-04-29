@@ -68,37 +68,27 @@ class LiquidKeyboard(
         }
     }
 
-    private val candidateAdapter by lazy {
-        CandidateAdapter(theme).apply {
-            setListener { position ->
-                TextInputManager.instanceOrNull()
-                    ?.onCandidatePressed(position)
-                if (Rime.isComposing) {
-                    val candidates = Rime.candidatesWithoutSwitch
-                    updateCandidates(candidates.toList())
-                    notifyItemRangeChanged(0, candidates.size)
-                    keyboardView.scrollToPosition(0)
-                } else {
-                    service.selectLiquidKeyboard(-1)
-                }
-            }
-        }
-    }
-
     private val varLengthAdapter by lazy {
         CandidateAdapter(theme).apply {
             setListener { position ->
-                val data = TabManager.selectTabByIndex(TabManager.currentTabIndex)
-                if (position in data.indices) {
-                    val bean = data[position]
-                    when (currentBoardType) {
-                        SymbolBoardType.SYMBOL -> service.inputSymbol(bean.text)
-                        SymbolBoardType.TABS -> {
-                            val realPosition = TabManager.tabTags.indexOfFirst { it.text == bean.text }
-                            select(realPosition)
+                when (currentBoardType) {
+                    SymbolBoardType.CANDIDATE -> {
+                        TextInputManager.instanceOrNull()
+                            ?.onCandidatePressed(position)
+                        if (Rime.isComposing) {
+                            val candidates = Rime.candidatesWithoutSwitch
+                            updateCandidates(candidates.toList())
+                            keyboardView.scrollToPosition(0)
+                        } else {
+                            service.selectLiquidKeyboard(-1)
                         }
-                        else -> service.currentInputConnection?.commitText(bean.text, 1)
                     }
+                    SymbolBoardType.SYMBOL -> service.inputSymbol(this.text)
+                    SymbolBoardType.TABS -> {
+                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == this.text }
+                        select(realPosition)
+                    }
+                    else -> service.currentInputConnection?.commitText(this.text, 1)
                 }
             }
         }
@@ -168,11 +158,18 @@ class LiquidKeyboard(
             SymbolBoardType.COLLECTION,
             SymbolBoardType.DRAFT,
             -> initDbData()
-            SymbolBoardType.CANDIDATE -> initCandidates()
-            SymbolBoardType.VAR_LENGTH,
+            SymbolBoardType.CANDIDATE -> initVarLengthKeys(Rime.candidatesWithoutSwitch.toList())
             SymbolBoardType.SYMBOL,
+            SymbolBoardType.VAR_LENGTH,
             SymbolBoardType.TABS,
-            -> initVarLengthKeys(data)
+            -> {
+                val items =
+                    data.map {
+                        val text = if (tag.type == SymbolBoardType.SYMBOL) it.label else it.text
+                        CandidateListItem("", text)
+                    }
+                initVarLengthKeys(items)
+            }
             else -> initFixData(data)
         }
     }
@@ -227,23 +224,7 @@ class LiquidKeyboard(
         ClipboardHelper.addOnUpdateListener(this)
     }
 
-    private fun initCandidates() {
-        if (onAdapterChange(candidateAdapter)) {
-            // 设置布局管理器
-            keyboardView.apply {
-                layoutManager = flexboxLayoutManager
-                adapter = candidateAdapter
-                setItemViewCacheSize(50)
-                setHasFixedSize(false)
-                isSelected = true
-            }
-        }
-
-        candidateAdapter.updateCandidates(Rime.candidatesWithoutSwitch.toList())
-        keyboardView.scrollToPosition(0)
-    }
-
-    private fun initVarLengthKeys(data: List<SimpleKeyBean>) {
+    private fun initVarLengthKeys(data: List<CandidateListItem>) {
         if (onAdapterChange(varLengthAdapter)) {
             // 设置布局管理器
             keyboardView.apply {
@@ -254,14 +235,7 @@ class LiquidKeyboard(
                 isSelected = true
             }
         }
-
-        val candidates =
-            if (currentBoardType === SymbolBoardType.SYMBOL) {
-                data.map { b -> CandidateListItem("", b.label) }
-            } else {
-                data.map { b -> CandidateListItem("", b.text) }
-            }
-        varLengthAdapter.updateCandidates(candidates)
+        varLengthAdapter.updateCandidates(data)
     }
 
     /**
