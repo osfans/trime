@@ -20,6 +20,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.SimpleKeyItemBinding
 import splitties.resources.drawable
 import splitties.resources.styledColor
+import kotlin.math.min
 
 abstract class FlexibleAdapter(private val theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
@@ -52,6 +53,30 @@ abstract class FlexibleAdapter(private val theme: Theme) : RecyclerView.Adapter<
             mBeansId[id] = index
         }
     }
+
+    private fun excerptText(
+        str: String,
+        lines: Int = 4,
+        chars: Int = 128,
+    ): String =
+        buildString {
+            val length = str.length
+            var lineBreak = -1
+            for (i in 1..lines) {
+                val start = lineBreak + 1 // skip previous '\n'
+                val excerptEnd = min(start + chars, length)
+                lineBreak = str.indexOf('\n', start)
+                if (lineBreak < 0) {
+                    // no line breaks remaining, substring to end of text
+                    append(str.substring(start, excerptEnd))
+                    break
+                } else {
+                    val end = min(excerptEnd, lineBreak)
+                    // append one line exactly
+                    appendLine(str.substring(start, end))
+                }
+            }
+        }
 
     override fun getItemCount(): Int = mBeans.size
 
@@ -94,7 +119,7 @@ abstract class FlexibleAdapter(private val theme: Theme) : RecyclerView.Adapter<
     ) {
         with(viewHolder) {
             val bean = mBeans[position]
-            simpleKeyText.text = bean.text
+            simpleKeyText.text = bean.text?.let { excerptText(it) }
             simpleKeyPin.visibility = if (bean.pinned) View.VISIBLE else View.INVISIBLE
             itemView.setOnClickListener {
                 onPaste(bean)
