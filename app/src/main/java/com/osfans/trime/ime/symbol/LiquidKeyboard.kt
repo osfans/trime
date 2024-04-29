@@ -51,17 +51,14 @@ class LiquidKeyboard(
         val columnCount = context.resources.displayMetrics.widthPixels / itemWidth
         SimpleAdapter(theme, columnCount).apply {
             setHasStableIds(true)
-            setListener { position ->
-                if (position in beans.indices) {
-                    val bean = beans[position]
-                    when (currentBoardType) {
-                        SymbolBoardType.SYMBOL -> service.inputSymbol(bean.text)
-                        else -> {
-                            service.commitText(bean.text)
-                            if (currentBoardType != SymbolBoardType.HISTORY) {
-                                symbolHistory.insert(bean.text)
-                                symbolHistory.save()
-                            }
+            setListener {
+                when (currentBoardType) {
+                    SymbolBoardType.SYMBOL -> service.inputSymbol(this.text)
+                    else -> {
+                        service.commitText(this.text)
+                        if (currentBoardType != SymbolBoardType.HISTORY) {
+                            symbolHistory.insert(this.text)
+                            symbolHistory.save()
                         }
                     }
                 }
@@ -156,7 +153,6 @@ class LiquidKeyboard(
         val tag = TabManager.tabTags[i]
         currentBoardType = tag.type
         liquidLayout.tabsUi.activateTab(i)
-        symbolHistory.load()
         val data = TabManager.selectTabByIndex(i)
         when (tag.type) {
             SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
@@ -173,6 +169,10 @@ class LiquidKeyboard(
                         CandidateListItem("", text)
                     }
                 initVarLengthKeys(items)
+            }
+            SymbolBoardType.HISTORY -> {
+                symbolHistory.load()
+                initFixData(symbolHistory.toOrderedList().map { SimpleKeyBean(it) })
             }
             else -> initFixData(data)
         }
@@ -191,13 +191,7 @@ class LiquidKeyboard(
                 isSelected = true
             }
         }
-
-        when (currentBoardType) {
-            SymbolBoardType.HISTORY ->
-                simpleAdapter.updateBeans(symbolHistory.toOrderedList().map(::SimpleKeyBean))
-            else ->
-                simpleAdapter.updateBeans(data)
-        }
+        simpleAdapter.updateBeans(data)
         keyboardView.scrollToPosition(0)
     }
 

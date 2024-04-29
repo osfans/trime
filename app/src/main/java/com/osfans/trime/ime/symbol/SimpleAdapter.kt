@@ -102,16 +102,16 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
             holder.wrappers[index]
                 .setOnClickListener { view: View ->
                     if (view.tag != null) {
-                        listener?.invoke(position * columnSize + view.tag as Int)
+                        listener?.invoke(bean[index], position * columnSize + view.tag as Int)
                     }
                 }
         }
     }
 
     /** 添加OnItemClickListener回调 */
-    private var listener: ((Int) -> Unit)? = null
+    private var listener: (SimpleKeyBean.(Int) -> Unit)? = null
 
-    fun setListener(listener: ((Int) -> Unit)?) {
+    fun setListener(listener: (SimpleKeyBean.(Int) -> Unit)?) {
         this.listener = listener
     }
 }
