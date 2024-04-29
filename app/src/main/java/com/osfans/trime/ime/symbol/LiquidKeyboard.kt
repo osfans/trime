@@ -20,6 +20,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
+import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -124,9 +125,13 @@ class LiquidKeyboard(
         liquidLayout.updateLayoutParams {
             height = KeyboardSwitcher.currentKeyboard.keyboardHeight
         }
+        // 注册剪贴板更新监听器
+        ClipboardHelper.addOnUpdateListener(this)
     }
 
-    override fun onDetached() {}
+    override fun onDetached() {
+        ClipboardHelper.removeOnUpdateListener(this)
+    }
 
     /**
      * 使用FlexboxLayoutManager时调用此函数获取
@@ -154,10 +159,9 @@ class LiquidKeyboard(
         symbolHistory.load()
         val data = TabManager.selectTabByIndex(i)
         when (tag.type) {
-            SymbolBoardType.CLIPBOARD,
-            SymbolBoardType.COLLECTION,
-            SymbolBoardType.DRAFT,
-            -> initDbData()
+            SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
+            SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
+            SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
             SymbolBoardType.CANDIDATE -> initVarLengthKeys(Rime.candidatesWithoutSwitch.toList())
             SymbolBoardType.SYMBOL,
             SymbolBoardType.VAR_LENGTH,
@@ -197,7 +201,7 @@ class LiquidKeyboard(
         keyboardView.scrollToPosition(0)
     }
 
-    private fun initDbData() {
+    private fun initDbData(data: suspend () -> List<DatabaseBean>) {
         if (onAdapterChange(dbAdapter)) {
             dbAdapter.type = currentBoardType
             keyboardView.apply {
@@ -211,17 +215,8 @@ class LiquidKeyboard(
         }
 
         service.lifecycleScope.launch {
-            val all =
-                when (currentBoardType) {
-                    SymbolBoardType.CLIPBOARD -> ClipboardHelper.getAll()
-                    SymbolBoardType.COLLECTION -> CollectionHelper.getAll()
-                    SymbolBoardType.DRAFT -> DraftHelper.getAll()
-                    else -> emptyList()
-                }
-            dbAdapter.updateBeans(all)
+            dbAdapter.updateBeans(data())
         }
-        // 注册剪贴板更新监听器
-        ClipboardHelper.addOnUpdateListener(this)
     }
 
     private fun initVarLengthKeys(data: List<CandidateListItem>) {
@@ -243,15 +238,10 @@ class LiquidKeyboard(
      * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
      */
     override fun onUpdate(text: String) {
-        val selected = TabManager.currentTabIndex
-        // 判断液体键盘视图是否已开启，-1为未开启
-        if (selected >= 0) {
-            val tag = TabManager.tabTags[selected]
-            if (tag.type == SymbolBoardType.CLIPBOARD) {
-                Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
-                service.lifecycleScope.launch {
-                    dbAdapter.updateBeans(ClipboardHelper.getAll())
-                }
+        if (currentBoardType == SymbolBoardType.CLIPBOARD) {
+            Timber.v("OnClipboardUpdateListener onUpdate: update clipboard view")
+            service.lifecycleScope.launch {
+                dbAdapter.updateBeans(ClipboardHelper.getAll())
             }
         }
     }
