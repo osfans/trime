@@ -156,13 +156,13 @@ class LiquidKeyboard(
         StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
     }
 
-    fun select(i: Int): SymbolBoardType {
-        if (TabManager.currentTabIndex == i) return currentBoardType
+    fun select(i: Int) {
+        if (TabManager.currentTabIndex == i) return
         val tag = TabManager.tabTags[i]
         currentBoardType = tag.type
         liquidLayout.tabsUi.activateTab(i)
         symbolHistory.load()
-        val data by lazy { TabManager.selectTabByIndex(i) }
+        val data = TabManager.selectTabByIndex(i)
         when (tag.type) {
             SymbolBoardType.CLIPBOARD,
             SymbolBoardType.COLLECTION,
@@ -175,7 +175,6 @@ class LiquidKeyboard(
             -> initVarLengthKeys(data)
             else -> initFixData(data)
         }
-        return tag.type
     }
 
     private fun initFixData(data: List<SimpleKeyBean>) {
