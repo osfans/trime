@@ -1,0 +1,1 @@
+<p>Trime is originally a frontend of open-source Android Traditional Chinese IME, based on RIME input method framework and written in Java/Kotlin with JNI. It is designed to protect the native language of various local dialects of Chinese and is a universal shape-based and phonetic-based input method platform.</p>
