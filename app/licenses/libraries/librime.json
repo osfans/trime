@@ -1,6 +1,6 @@
 {
     "uniqueId": "rime/librime",
-    "artifactVersion": "1.8.5",
+    "artifactVersion": "1.11.1",
     "description": "Rime Input Method Engine",
     "name": "rime/librime",
     "website": "https://rime.im/",
