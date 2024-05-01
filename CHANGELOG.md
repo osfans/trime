@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [3.2.18] - 2024-05-01
 
 ### 🚀 Features
 
@@ -10,6 +10,15 @@ All notable changes to this project will be documented in this file.
 - Enhance the exception handling when build opencc dictionaries
 - Add json schema
 - Add operation area in LiquidKeyboard
+- Show notification when restarting rime
+- Add class & mapper to hold style parameters
+- Add `GeneralStyle` to `Theme`
+- Implements RimeDispatcher for running the rime backend solo on a single thread
+- Make dialog use device default settings theme outside the app
+- Override `toString()` method of custom config types
+- Auto scroll to the activated liquid tab when it's out of the viewport
+- Allow user to determine navigation bar background behavior
+- Excerpt the text of clipboard, collection or draft entry ...
 
 ### 🐛 Bug Fixes
 
@@ -38,6 +47,28 @@ All notable changes to this project will be documented in this file.
 - Incorrect filled items' background when fast scroll the clipboard
 - LiquidTabsUi didn't scroll to current selected tab on init
 - Back button in LiquidKeyboard didn't work well with some themes
+- Wrong tag name in release artifactory (#1289)
+- Inaccurate command to get build version name
+- Landscape keyboard's keys' position
+- Crash on switching from other input method
+- Create rime session by lazy in MainViewModel ...
+- IntentReceiver was re-registered in TextInputManager
+- Ensure to pass non-null input editor info to `startInput` of InputView ...
+- Calculate scaled vertical gap to fit all keyboard height
+- Forgot to require full check when manually deploy or sync user data
+- Actions in dialog didn't actually launch sometimes
+- Crash on typing after switching theme in the app settings
+- Librime backend didn't log to logcat
+- Emit ready state in instead of after `dispatcher.start()`
+- Could only turn the candidate page once
+- Add missing new line
+- Error key label in parseAction
+- Error on getting color or drawable from external map config
+- Page Up/Down symbol text size
+- Failed to load sound effects
+- Incorrect real position got from the symbol board of `TABS` type
+- Liquid keyboard could not switch to `tabs` tab ...
+- LiquidKeyboardEditActivity didn't follow the night mode
 
 ### 🚜 Refactor
 
@@ -64,6 +95,34 @@ All notable changes to this project will be documented in this file.
 - Replace TabView with new LiquidTabsUi
 - Automatically switch bar view when board window attach or detach
 - Comb and simplify the code logic of LiquidKeyboard
+- Enhance exception handling of the config traversing
+- Remove redundant parameters to show composition window
+- Introduce daemon to manage sessions access to rime
+- Enhance lifecycle management of Rime
+- Adjust TextInputManager constructor method
+- Replace with `GeneralStyle` in `ColorManager`
+- Make all fields in `CompositionComponent` to non-nullable
+- Replace with `GeneralStyle` in various classes
+- Map font family from `GeneralStyle`
+- Remove unnecessary condition checking
+- Replace handler with main looper with custom RimeLifecycleScope
+- Add schemata stuffs to RimeApi
+- Enhance the UX of selecting/enabling schema(ta)
+- Remove the judgment of whether the notification is handling
+- Enhance handling of exception when built files are removed by user manually
+- Use native notification builder api to notify restarting
+- Make the code of parseAction in Event more neat
+- Make the code of LiquidKeyboard more clean
+- Move SymbolKeyboardType to symbol package and rename to SymbolBoardType
+- Merge `candidateAdapter` into `varLengthAdapter ` in LiquidKeyboard
+- Get database data in place on selecting
+- Simplify the logic of the init of the fix data in LiquidKeyboard
+
+### 📚 Documentation
+
+- Generate changelog with cliff
+- Add conventional commits in pull request template
+- Add SPDX license header with reuse
 
 ### ⚡ Performance
 
@@ -82,6 +141,19 @@ All notable changes to this project will be documented in this file.
 - Add macos 14 m1 runner
 - Upgrade librime to 1.11.0
 - Chanage macos dependency step name
+- Add git cliff config
+- Bump jvm target to jdk 11
+- Upgrade gradle to 8.7
+- Downgrade java version to 17 on release and nightly build
+- Remove unused `Theme.Style`
+- SpotApply style
+- Add resue target
+- Upgrade librime to 1.11.1
+- Update android gradle plugin to 8.3.2
+- Add fastlane metadata for F-Droid
+- Update version info of native license metadata
+- Add changelog target
+- Update changelog of 3.2.18
 
 ### Build
 
