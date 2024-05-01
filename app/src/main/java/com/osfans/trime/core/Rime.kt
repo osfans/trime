@@ -5,7 +5,7 @@
 package com.osfans.trime.core
 
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.util.appContext

@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.data
+package com.osfans.trime.data.base
 
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ResourceUtils
+import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.util.Const
 import com.osfans.trime.util.WeakHashSet
 import timber.log.Timber

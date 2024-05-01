@@ -4,7 +4,7 @@
 
 package com.osfans.trime.util.config
 
-import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.base.DataManager
 import timber.log.Timber
 
 /**

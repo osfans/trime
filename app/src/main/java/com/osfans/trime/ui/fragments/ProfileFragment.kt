@@ -27,7 +27,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel

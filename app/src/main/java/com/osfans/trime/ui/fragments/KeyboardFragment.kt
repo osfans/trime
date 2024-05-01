@@ -12,7 +12,7 @@ import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
