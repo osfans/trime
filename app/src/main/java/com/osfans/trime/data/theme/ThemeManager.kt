@@ -6,7 +6,7 @@ package com.osfans.trime.data.theme
 
 import androidx.annotation.Keep
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ime.symbol.TabManager
 import java.io.File
 

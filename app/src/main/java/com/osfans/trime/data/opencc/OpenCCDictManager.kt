@@ -5,7 +5,7 @@
 package com.osfans.trime.data.opencc
 
 import androidx.annotation.Keep
-import com.osfans.trime.data.DataManager
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.dict.Dictionary
 import com.osfans.trime.data.opencc.dict.OpenCCDictionary
 import com.osfans.trime.data.opencc.dict.TextDictionary
