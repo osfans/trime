@@ -31,11 +31,12 @@ import timber.log.Timber
 class CompositionPopupWindow(
     private val ctx: Context,
     private val theme: Theme,
+    private val anchorView: View,
 ) {
     // 顯示懸浮窗口
     val isPopupWindowEnabled =
         AppPrefs.defaultInstance().keyboard.popupWindowEnabled &&
-            theme.generalStyle.window != null
+            theme.generalStyle.window.isNotEmpty()
 
     val composition =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
@@ -82,14 +83,11 @@ class CompositionPopupWindow(
 
     private val mPopupRectF = RectF()
     private val mPopupHandler = Handler(Looper.getMainLooper())
-    var anchorView: View? = null
 
     private val mPopupTimer =
         Runnable {
-            if (!isPopupWindowEnabled) return@Runnable
-            anchorView?.let { anchor ->
-                if (anchor.windowToken == null) return@Runnable
-
+            if (!isPopupWindowEnabled || anchorView.windowToken == null) return@Runnable
+            anchorView.let { anchor ->
                 var x = 0
                 var y = 0
                 val candidateLocation = IntArray(2)
@@ -146,7 +144,7 @@ class CompositionPopupWindow(
                 }
                 y -= BarUtils.getStatusBarHeight()
                 if (!mPopupWindow.isShowing) {
-                    mPopupWindow.showAtLocation(anchorView, Gravity.START or Gravity.TOP, x, y)
+                    mPopupWindow.showAtLocation(anchor, Gravity.START or Gravity.TOP, x, y)
                 } else {
                     /* must use the width and height of popup window itself here directly,
                      * otherwise the width and height cannot be updated! */
@@ -220,10 +218,5 @@ class CompositionPopupWindow(
             }
             cursorAnchorInfo.matrix.mapRect(mPopupRectF)
         }
-    }
-
-    fun finishInput() {
-        hideCompositionView()
-        anchorView = null
     }
 }

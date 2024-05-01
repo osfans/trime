@@ -292,27 +292,25 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun showCompositionView() {
-        if (Rime.compositionText.isEmpty()) {
+        if (Rime.isComposing) {
+            mCompositionPopupWindow?.updateCompositionView()
+        } else {
             mCompositionPopupWindow?.hideCompositionView()
-            return
         }
-        mCompositionPopupWindow?.updateCompositionView()
     }
 
     /** Must be called on the UI thread
      *
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
     fun recreateInputView() {
-        mCompositionPopupWindow?.finishInput()
+        mCompositionPopupWindow?.hideCompositionView()
         inputView = InputView(this, rime)
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
         // 初始化候选栏
         mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
 
         mCompositionPopupWindow =
-            CompositionPopupWindow(this, ThemeManager.activeTheme).apply {
-                anchorView = inputView?.quickBar?.view
-            }.apply { hideCompositionView() }
+            CompositionPopupWindow(this, ThemeManager.activeTheme, inputView!!.quickBar.view)
 
         loadConfig()
         KeyboardSwitcher.newOrReset()
@@ -328,11 +326,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
+        mCompositionPopupWindow = null
         for (listener in eventListeners) {
             listener.onDestroy()
         }
         eventListeners.clear()
-        mCompositionPopupWindow?.finishInput()
         ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
         RimeDaemon.destroySession(javaClass.name)
@@ -546,21 +544,20 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        super.onFinishInputView(finishingInput)
+        Timber.d("onFinishInputView: finishingInput=$finishingInput")
         rime.runIfReady {
             if (normalTextEditor) {
                 DraftHelper.onInputEventChanged()
             }
             try {
                 performEscape()
-                mCompositionPopupWindow!!.hideCompositionView()
             } catch (e: Exception) {
                 Timber.e(e, "Failed to show the PopupWindow.")
             }
         }
         InputFeedbackManager.finishInput()
         inputView?.finishInput()
-        Timber.d("OnFinishInputView")
+        mCompositionPopupWindow?.hideCompositionView()
     }
 
     fun bindKeyboardToInputView() {
