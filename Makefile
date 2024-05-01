@@ -39,6 +39,7 @@ style-apply: spotlessApply clang-format
 debug: style-lint
 	./gradlew assembleDebug
 
+# add SPDX license header
 reuse:
 	pipx run reuse annotate \
 	 --recursive --skip-unrecognised \
@@ -49,6 +50,10 @@ reuse:
 	find . -type f -name "*.license" -delete
 	# checkout ignore file
 	git checkout gradlew gradlew.bat gradle/* CHANGELOG.md
+
+# generate changlog
+cliff:
+	git-cliff -o CHANGELOG.md
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
 release: opencc-data style-lint
