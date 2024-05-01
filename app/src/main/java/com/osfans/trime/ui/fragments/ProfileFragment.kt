@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
-import com.blankj.utilcode.util.ResourceUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
@@ -31,6 +30,7 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.rimeActionWithResultDialog
@@ -207,18 +207,14 @@ class ProfileFragment :
                         var res = true
                         lifecycleScope.withLoadingDialog(context) {
                             withContext(Dispatchers.IO) {
-                                for ((i, a) in items.withIndex()) {
-                                    if (checkedItems[i]) {
-                                        res = res and (
-                                            runCatching {
-                                                ResourceUtils.copyFileFromAssets(
-                                                    "rime/$a",
-                                                    "${DataManager.sharedDataDir.absolutePath}/$a",
-                                                )
-                                            }.getOrNull() ?: false
-                                        )
+                                res =
+                                    items.fold(true) { acc, asset ->
+                                        ResourceUtils.copyFile(asset, DataManager.sharedDataDir).fold({
+                                            acc and true // on success
+                                        }, {
+                                            acc and false // on failure
+                                        })
                                     }
-                                }
                             }
                         }
                         ToastUtils.showShort(
