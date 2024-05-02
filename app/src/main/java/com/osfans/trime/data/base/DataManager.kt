@@ -6,7 +6,7 @@ package com.osfans.trime.data.base
 
 import android.content.res.AssetManager
 import android.os.Build
-import com.blankj.utilcode.util.PathUtils
+import android.os.Environment
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.ResourceUtils
@@ -50,7 +50,7 @@ object DataManager {
 
     private val prefs get() = AppPrefs.defaultInstance()
 
-    val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
+    val defaultDataDirectory = File(Environment.getExternalStorageDirectory(), "rime")
 
     private val onDataDirChangeListeners = WeakHashSet<OnDataDirChangeListener>()
 

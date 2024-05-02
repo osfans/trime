@@ -17,65 +17,80 @@ import com.osfans.trime.R
 import com.osfans.trime.databinding.FolderPickerDialogBinding
 import java.io.File
 
-class FolderPickerPreference : Preference {
-    private var value = ""
-    lateinit var documentTreeLauncher: ActivityResultLauncher<Uri?>
-    lateinit var dialogView: FolderPickerDialogBinding
+class FolderPickerPreference
+    @JvmOverloads
+    constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int = androidx.preference.R.attr.preferenceStyle,
+    ) : Preference(context, attrs, defStyleAttr) {
+        private var value = ""
+        lateinit var documentTreeLauncher: ActivityResultLauncher<Uri?>
+        lateinit var dialogView: FolderPickerDialogBinding
 
-    @Suppress("unused")
-    constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) :
-        this(context, attrs, androidx.preference.R.attr.preferenceStyle)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        context.theme.obtainStyledAttributes(attrs, R.styleable.FolderPickerPreferenceAttrs, 0, 0).run {
-            try {
-                if (getBoolean(R.styleable.FolderPickerPreferenceAttrs_useSimpleSummaryProvider, false)) {
-                    summaryProvider = SummaryProvider<FolderPickerPreference> { it.currentValue }
-                }
-            } finally {
-                recycle()
-            }
-        }
-    }
+        var default = ""
 
-    private val currentValue: String
-        get() = getPersistedString(value)
-
-    override fun onGetDefaultValue(
-        a: TypedArray,
-        index: Int,
-    ): Any {
-        return a.getString(index) ?: ""
-    }
-
-    override fun onSetInitialValue(defaultValue: Any?) {
-        value = defaultValue as? String ?: getPersistedString("")
-    }
-
-    override fun onClick() = showPickerDialog()
-
-    private fun showPickerDialog() {
-        val initValue = currentValue
-        dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
-        dialogView.editText.setText(initValue)
-        dialogView.button.setOnClickListener {
-            documentTreeLauncher.launch(UriUtils.file2Uri(File(initValue)))
-        }
-        AlertDialog.Builder(context)
-            .setTitle(this@FolderPickerPreference.title)
-            .setView(dialogView.root)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val value = dialogView.editText.text.toString()
-                if (callChangeListener(value)) {
-                    persistString(value)
-                    notifyChanged()
+        init {
+            context.theme.obtainStyledAttributes(attrs, R.styleable.FolderPickerPreferenceAttrs, 0, 0).run {
+                try {
+                    if (getBoolean(R.styleable.FolderPickerPreferenceAttrs_useSimpleSummaryProvider, false)) {
+                        summaryProvider = SummaryProvider<FolderPickerPreference> { it.value }
+                    }
+                } finally {
+                    recycle()
                 }
             }
-            .setNeutralButton(R.string.pref__default) { _, _ ->
+        }
+
+        override fun persistString(value: String): Boolean {
+            return super.persistString(value).also {
+                if (it) this.value = value
+            }
+        }
+
+        override fun setDefaultValue(defaultValue: Any?) {
+            super.setDefaultValue(defaultValue)
+            default = defaultValue as? String ?: ""
+        }
+
+        override fun onGetDefaultValue(
+            a: TypedArray,
+            index: Int,
+        ): Any {
+            return a.getString(index) ?: default
+        }
+
+        override fun onSetInitialValue(defaultValue: Any?) {
+            value = getPersistedString(defaultValue as? String ?: default)
+        }
+
+        override fun onClick() = showPickerDialog()
+
+        private fun showPickerDialog() {
+            val initValue = value
+            dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
+            dialogView.editText.setText(initValue)
+            dialogView.button.setOnClickListener {
+                documentTreeLauncher.launch(UriUtils.file2Uri(File(initValue)))
+            }
+            AlertDialog.Builder(context)
+                .setTitle(this@FolderPickerPreference.title)
+                .setView(dialogView.root)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    val value = dialogView.editText.text.toString()
+                    setValue(value)
+                }
+                .setNeutralButton(R.string.pref__default) { _, _ ->
+                    setValue(default)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+
+        private fun setValue(value: String) {
+            if (callChangeListener(value)) {
                 persistString(value)
                 notifyChanged()
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        }
     }
-}
