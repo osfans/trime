@@ -55,7 +55,7 @@ class LogActivity : AppCompatActivity() {
                                 it.write(logView.currentLog)
                             }
                         }
-                    }?.toast()
+                    }?.let { toast(it) }
                 }
             }
     }
