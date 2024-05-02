@@ -121,20 +121,12 @@ class AppPrefs(
 
     class Internal(private val prefs: AppPrefs) {
         companion object {
-            const val LAST_VERSION_NAME = "general__last_version_name"
             const val PID = "general__pid"
-            const val LAST_BUILD_GIT_HASH = "general__last_build_git_hash"
         }
 
-        var lastVersionName: String
-            get() = prefs.getPref(LAST_VERSION_NAME, "")
-            set(v) = prefs.setPref(LAST_VERSION_NAME, v)
         var pid: Int
             get() = prefs.getPref(PID, 0)
             set(v) = prefs.setPref(PID, v)
-        var lastBuildGitHash: String
-            get() = prefs.getPref(LAST_BUILD_GIT_HASH, "")
-            set(v) = prefs.setPref(LAST_BUILD_GIT_HASH, v)
     }
 
     /**
@@ -420,7 +412,6 @@ class AppPrefs(
             const val UI_MODE = "other__ui_mode"
             const val SHOW_APP_ICON = "other__show_app_icon"
             const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
-            const val DESTROY_ON_QUIT = "other__destroy_on_quit"
         }
 
         var uiMode: String
@@ -431,9 +422,6 @@ class AppPrefs(
             set(v) = prefs.setPref(SHOW_APP_ICON, v)
         var showStatusBarIcon: Boolean = false
             get() = prefs.getPref(SHOW_STATUS_BAR_ICON, false)
-            private set
-        var destroyOnQuit: Boolean = false
-            get() = prefs.getPref(DESTROY_ON_QUIT, false)
             private set
     }
 }

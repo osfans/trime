@@ -4,16 +4,50 @@
 
 package com.osfans.trime.data.base
 
+import android.content.res.AssetManager
+import android.os.Build
 import com.blankj.utilcode.util.PathUtils
-import com.blankj.utilcode.util.ResourceUtils
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.util.Const
+import com.osfans.trime.util.FileUtils
+import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.WeakHashSet
+import com.osfans.trime.util.appContext
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 object DataManager {
     private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
+
+    private const val DATA_CHECKSUMS_NAME = "checksums.json"
+
+    private val lock = ReentrantLock()
+
+    private val json by lazy { Json }
+
+    private fun deserializeDataChecksums(raw: String): DataChecksums {
+        return json.decodeFromString<DataChecksums>(raw)
+    }
+
+    // If Android version supports direct boot, we put the hierarchy in device encrypted storage
+    // instead of credential encrypted storage so that data can be accessed before user unlock
+    private val dataDir: File =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Timber.d("Using device protected storage")
+            appContext.createDeviceProtectedStorageContext().dataDir
+        } else {
+            File(appContext.applicationInfo.dataDir)
+        }
+
+    private fun AssetManager.dataChecksums(): DataChecksums {
+        return open(DATA_CHECKSUMS_NAME)
+            .bufferedReader()
+            .use { it.readText() }
+            .let { deserializeDataChecksums(it) }
+    }
+
     private val prefs get() = AppPrefs.defaultInstance()
 
     val defaultDataDirectory = File(PathUtils.getExternalStoragePath(), "rime")
@@ -44,14 +78,6 @@ object DataManager {
     val userDataDir
         get() = File(prefs.profile.userDataDir)
 
-    sealed class Diff {
-        object New : Diff()
-
-        object Update : Diff()
-
-        object Keep : Diff()
-    }
-
     /**
      * Return the absolute path of the compiled config file
      * based on given resource id.
@@ -72,48 +98,38 @@ object DataManager {
         return defaultPath.absolutePath
     }
 
-    private fun diff(
-        old: String,
-        new: String,
-    ): Diff {
-        return when {
-            old.isBlank() -> Diff.New
-            !new.contentEquals(old) -> Diff.Update
-            else -> Diff.Keep
-        }
-    }
+    fun sync() =
+        lock.withLock {
+            val oldChecksumsFile = File(dataDir, DATA_CHECKSUMS_NAME)
+            val oldChecksums =
+                oldChecksumsFile
+                    .runCatching { deserializeDataChecksums(bufferedReader().use { it.readText() }) }
+                    .getOrElse { DataChecksums("", emptyMap()) }
 
-    @JvmStatic
-    fun sync() {
-        val newHash = Const.buildCommitHash
-        val oldHash = prefs.internal.lastBuildGitHash
+            val newChecksums = appContext.assets.dataChecksums()
 
-        diff(oldHash, newHash).run {
-            Timber.d("Diff: $this")
-            when (this) {
-                is Diff.New ->
-                    ResourceUtils.copyFileFromAssets(
-                        "rime",
-                        sharedDataDir.absolutePath,
-                    )
-                is Diff.Update ->
-                    ResourceUtils.copyFileFromAssets(
-                        "rime",
-                        sharedDataDir.absolutePath,
-                    )
-                is Diff.Keep -> {}
+            DataDiff.diff(oldChecksums, newChecksums).sortedByDescending { it.ordinal }.forEach {
+                Timber.d("Diff: $it")
+                when (it) {
+                    is DataDiff.CreateFile,
+                    is DataDiff.UpdateFile,
+                    -> ResourceUtils.copyFile(it.path, sharedDataDir)
+                    is DataDiff.DeleteDir,
+                    is DataDiff.DeleteFile,
+                    -> FileUtils.delete(sharedDataDir.resolve(it.path)).getOrThrow()
+                }
             }
-        }
 
-        // FIXME：缺失 default.custom.yaml 会导致方案列表为空
-        with(File(sharedDataDir, DEFAULT_CUSTOM_FILE_NAME)) {
-            val customDefault = this
-            if (!customDefault.exists()) {
-                Timber.d("Creating empty default.custom.yaml ...")
-                customDefault.createNewFile()
+            ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir)
+
+            // FIXME：缺失 default.custom.yaml 会导致方案列表为空
+            File(sharedDataDir, DEFAULT_CUSTOM_FILE_NAME).let {
+                if (!it.exists()) {
+                    Timber.d("Creating empty default.custom.yaml")
+                    it.bufferedWriter().use { w -> w.write("") }
+                }
             }
-        }
 
-        Timber.i("Synced!")
-    }
+            Timber.d("Synced!")
+        }
 }
