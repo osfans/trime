@@ -13,8 +13,7 @@ import timber.log.Timber
 
 object ColorUtils {
     @JvmStatic
-    fun parseColor(s: String?): Int? {
-        if (s == null) return null
+    fun parseColor(s: String): Int? {
         val hex: String = if (s.startsWith("#")) s.replace("#", "0x") else s
         return try {
             val completed =
