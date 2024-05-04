@@ -314,8 +314,11 @@ object ColorManager {
         m: Map<String, Any?>,
         key: String?,
     ): Int? {
-        val value = getColorValue(m[key].toString())
-        return if (value is Int) value else null
+        m[key].let {
+            if (it == null) return null
+            val value = getColorValue(it.toString())
+            return if (value is Int) value else null
+        }
     }
 
     //  返回drawable。  Config 2.0
@@ -335,13 +338,16 @@ object ColorManager {
         m: Map<String, Any?>,
         key: String,
     ): Drawable? {
-        val value = getColorValue(m[key].toString())
-        if (value is Int) {
-            return GradientDrawable().apply { setColor(value) }
-        } else if (value is Drawable) {
-            return value
+        m[key].let {
+            if (it == null) return null
+            val value = getColorValue(it.toString())
+            if (value is Int) {
+                return GradientDrawable().apply { setColor(value) }
+            } else if (value is Drawable) {
+                return value
+            }
+            return null
         }
-        return null
     }
 
     //  返回图片或背景的drawable,支持null参数。 Config 2.0
