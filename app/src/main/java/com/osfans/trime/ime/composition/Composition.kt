@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.ime.text
+package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -31,6 +31,8 @@ import com.osfans.trime.data.theme.model.CompositionComponent
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.ime.text.Candidate
+import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber

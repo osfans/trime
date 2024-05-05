@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.ime.text
+package com.osfans.trime.ime.composition
 
 import android.content.Context
 import android.graphics.RectF
