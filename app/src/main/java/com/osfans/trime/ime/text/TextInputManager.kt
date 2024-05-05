@@ -17,6 +17,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.Speech
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
@@ -218,6 +219,7 @@ class TextInputManager(
             SchemaManager.init(notification.value.schemaId)
             Rime.updateStatus()
             trime.recreateInputView()
+            trime.inputView?.switchBoard(InputView.Board.Main)
         } else if (notification is RimeNotification.OptionNotification) {
             Rime.updateContext() // 切換中英文、簡繁體時更新候選
             val value = notification.value.value
