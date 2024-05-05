@@ -251,8 +251,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         ss!!.setSpan(AbsoluteSizeSpan(textSize), start, end, 0)
         m.letterSpacing.toFloat().takeIf { it > 0 }
             ?.let { ss?.setSpan(LetterSpacingSpan(it), start, end, 0) }
-        start = compositionPos[0] + r.selStartPos
-        end = compositionPos[0] + r.selEndPos
+        start = compositionPos[0] + r.selStart
+        end = compositionPos[0] + r.selEnd
         ss!!.setSpan(ForegroundColorSpan(ColorManager.getColor("hilited_text_color")!!), start, end, 0)
         ss!!.setSpan(BackgroundColorSpan(ColorManager.getColor("hilited_back_color")!!), start, end, 0)
         sep = m.end
@@ -467,10 +467,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      */
     fun setWindowContent(): Int {
         if (visibility != VISIBLE) return 0
-        val stacks = Throwable().stackTrace
-        Timber.d("setWindow Rime.getComposition(), [1]${stacks[1]}, [2]${stacks[2]}, [3]${stacks[3]}")
-        val (_, _, _, _, s) = Rime.composition ?: return 0
-        if (s.isNullOrEmpty()) return 0
+        Rime.composition?.preedit?.takeIf { it.isNotBlank() } ?: return 0
         isSingleLine = true // 設置單行
         ss = SpannableStringBuilder()
         var startNum = 0

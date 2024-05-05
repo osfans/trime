@@ -20,21 +20,15 @@ data class CandidateListItem(
 data class RimeComposition(
     val length: Int = 0,
     val cursorPos: Int = 0,
-    val selStart: Int = 0,
-    val selEnd: Int = 0,
+    private val _selStart: Int = 0,
+    private val _selEnd: Int = 0,
     val preedit: String? = "",
 ) {
-    val selStartPos: Int
-        get() {
-            if (length == 0) return 0
-            return preedit?.let { String(it.toByteArray(), 0, selStart).length } ?: 0
-        }
+    val selStart: Int =
+        if (preedit.isNullOrEmpty()) 0 else String(preedit.toByteArray(), 0, _selStart).length
 
-    val selEndPos: Int
-        get() {
-            if (length == 0) return 0
-            return preedit?.let { String(it.toByteArray(), 0, selEnd).length } ?: 0
-        }
+    val selEnd: Int =
+        if (preedit.isNullOrEmpty()) 0 else String(preedit.toByteArray(), 0, _selEnd).length
 }
 
 /** Rime候選區，包含多個[候選項][CandidateListItem]  */
