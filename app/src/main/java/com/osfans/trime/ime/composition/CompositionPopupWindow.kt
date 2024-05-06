@@ -24,14 +24,19 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.CompositionRootBinding
+import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.PopupPosition
+import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import timber.log.Timber
 
+@InputScope
+@Inject
 class CompositionPopupWindow(
     private val ctx: Context,
     private val theme: Theme,
-    private val anchorView: View,
+    private val bar: QuickBar,
 ) {
     // 顯示懸浮窗口
     val isPopupWindowEnabled =
@@ -86,8 +91,8 @@ class CompositionPopupWindow(
 
     private val mPopupTimer =
         Runnable {
-            if (!isPopupWindowEnabled || anchorView.windowToken == null) return@Runnable
-            anchorView.let { anchor ->
+            if (!isPopupWindowEnabled || bar.view.windowToken == null) return@Runnable
+            bar.view.let { anchor ->
                 var x = 0
                 var y = 0
                 val candidateLocation = IntArray(2)

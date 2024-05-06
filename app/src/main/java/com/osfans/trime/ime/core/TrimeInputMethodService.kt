@@ -309,8 +309,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         // 初始化候选栏
         mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
 
-        mCompositionPopupWindow =
-            CompositionPopupWindow(this, ThemeManager.activeTheme, inputView!!.quickBar.view)
+        mCompositionPopupWindow = inputView!!.composition
 
         loadConfig()
         KeyboardSwitcher.newOrReset()

@@ -8,6 +8,7 @@ import android.content.Context
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.InputBroadcaster
+import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
@@ -24,6 +25,7 @@ abstract class InputComponent(
 ) {
     abstract val broadcaster: InputBroadcaster
     abstract val quickBar: QuickBar
+    abstract val composition: CompositionPopupWindow
     abstract val windowManager: BoardWindowManager
     abstract val keyboardWindow: KeyboardWindow
     abstract val liquidKeyboard: LiquidKeyboard
