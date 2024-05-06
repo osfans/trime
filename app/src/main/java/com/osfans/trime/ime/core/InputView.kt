@@ -26,6 +26,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -96,6 +97,7 @@ class InputView(
     private val broadcaster = inputComponent.broadcaster
     private val windowManager = inputComponent.windowManager
     val quickBar: QuickBar = inputComponent.quickBar
+    val composition: CompositionPopupWindow = inputComponent.composition
     val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
     val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
 
