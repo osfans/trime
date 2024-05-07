@@ -1096,7 +1096,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (mCompositionPopupWindow?.isPopupWindowEnabled == true) {
             val composition = mCompositionPopupWindow!!.composition
             composition.compositionView.visibility = View.VISIBLE
-            startNum = composition.compositionView.setWindowContent()
+            startNum = composition.compositionView.update()
             mCandidate?.setText(startNum)
             // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
             // otherwise we need to call it here
