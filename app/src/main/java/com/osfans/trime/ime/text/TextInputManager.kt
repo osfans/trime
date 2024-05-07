@@ -149,11 +149,11 @@ class TextInputManager(
             trime.performEscape()
         }
         isComposable = false
-        var tempAsciiMode = if (shouldResetAsciiMode) false else null
+        var forceAsciiMode = false
         val keyboardType =
             when (info.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
                 EditorInfo.IME_FLAG_FORCE_ASCII -> {
-                    tempAsciiMode = true
+                    forceAsciiMode = true
                     ".ascii"
                 }
                 else -> {
@@ -164,6 +164,7 @@ class TextInputManager(
                         InputType.TYPE_CLASS_PHONE,
                         InputType.TYPE_CLASS_DATETIME,
                         -> {
+                            forceAsciiMode = true
                             "number"
                         }
                         InputType.TYPE_CLASS_TEXT -> {
@@ -182,8 +183,7 @@ class TextInputManager(
                                             " inputAttrsRaw" + inputAttrsRaw +
                                             "; InputType" + (inputAttrsRaw and InputType.TYPE_MASK_VARIATION),
                                     )
-
-                                    tempAsciiMode = true
+                                    forceAsciiMode = true
                                     ".ascii"
                                 }
                                 else -> null.also { isComposable = true }
@@ -202,10 +202,19 @@ class TextInputManager(
 
         // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
         // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。
-        if (shouldResetAsciiMode && KeyboardSwitcher.currentKeyboard.isResetAsciiMode) {
-            tempAsciiMode = KeyboardSwitcher.currentKeyboard.asciiMode
+        KeyboardSwitcher.currentKeyboard.let {
+            if (forceAsciiMode) {
+                if (!Rime.isAsciiMode) Rime.setOption("ascii_mode", true)
+                return@let
+            }
+            if (shouldResetAsciiMode) {
+                if (it.resetAsciiMode) {
+                    if (Rime.isAsciiMode != it.asciiMode) Rime.setOption("ascii_mode", it.asciiMode)
+                } else {
+                    if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
+                }
+            }
         }
-        tempAsciiMode?.let { Rime.setOption("ascii_mode", it) }
         isComposable = isComposable && !rime.run { isEmpty() }
         if (!trime.onEvaluateInputViewShown()) {
             // Show candidate view when using physical keyboard
@@ -225,6 +234,7 @@ class TextInputManager(
                 "ascii_mode" -> {
                     InputFeedbackManager.ttsLanguage =
                         locales[if (value) 1 else 0]
+                    KeyboardSwitcher.currentKeyboard.currentAsciiMode = value
                 }
                 "_hide_bar",
                 "_hide_candidate",
@@ -296,8 +306,10 @@ class TextInputManager(
             KeyEvent.KEYCODE_EISU -> { // Switch keyboard
                 KeyboardSwitcher.switchKeyboard(event.select)
                 /** Set ascii mode according to keyboard's settings, can not place into [Rime.handleRimeNotification] */
-                if (shouldResetAsciiMode && KeyboardSwitcher.currentKeyboard.isResetAsciiMode) {
-                    Rime.setOption("ascii_mode", KeyboardSwitcher.currentKeyboard.asciiMode)
+                KeyboardSwitcher.currentKeyboard.let {
+                    if (Rime.isAsciiMode != it.currentAsciiMode) {
+                        Rime.setOption("ascii_mode", it.currentAsciiMode)
+                    }
                 }
                 trime.bindKeyboardToInputView()
                 trime.updateComposing()
