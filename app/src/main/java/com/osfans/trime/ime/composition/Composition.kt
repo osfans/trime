@@ -29,6 +29,7 @@ import androidx.core.text.inSpans
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeComposition
+import com.osfans.trime.core.RimeContext
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
@@ -387,19 +388,25 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      *
      * @return 悬浮窗显示的候选词数量
      */
-    fun update(): Int {
+    fun update(inputContext: RimeContext): Int {
         if (visibility != VISIBLE) return 0
-        Rime.composition?.preedit?.takeIf { it.isNotBlank() } ?: return 0
-        val candidates = Rime.candidatesWithoutSwitch
-        val startNum = calculateOffset(candidates.map { it.text })
+        inputContext.composition?.preedit?.takeIf { it.isNotBlank() } ?: return 0
+        val candidates = inputContext.candidates
+        val startNum = calculateOffset(candidates)
         val content =
             buildSpannedString {
                 for (component in windowComponents) {
                     when {
                         component.move.isNotBlank() -> buildSpannedMove(component)
-                        component.composition.isNotBlank() -> buildSpannedComposition(component, Rime.composition!!)
+                        component.composition.isNotBlank() -> buildSpannedComposition(component, inputContext.composition)
                         component.click.isNotBlank() -> buildSpannedButton(component)
-                        component.candidate.isNotBlank() -> buildSpannedCandidates(component, candidates, Rime.selectLabels, startNum)
+                        component.candidate.isNotBlank() ->
+                            buildSpannedCandidates(
+                                component,
+                                candidates,
+                                inputContext.selectLabels,
+                                startNum,
+                            )
                     }
                 }
             }
