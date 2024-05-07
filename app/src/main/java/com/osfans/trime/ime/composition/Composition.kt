@@ -23,6 +23,7 @@ import android.text.style.UnderlineSpan
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
@@ -42,10 +43,12 @@ import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
+import kotlin.math.absoluteValue
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置  */
 @SuppressLint("AppCompatCustomView")
 class Composition(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val theme = ThemeManager.activeTheme
     private val textInputManager = TextInputManager.instanceOrNull()
 
@@ -92,10 +95,11 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private val highlightBackColorSpan by lazy { highlightBackColor?.let { BackgroundColorSpan(it) } }
 
     private var firstMove = true
-    private var mDx = 0f
-    private var mDy = 0f
-    private var mCurrentX = 0
-    private var mCurrentY = 0
+    private var deltaX = 0f
+    private var deltaY = 0f
+    private var initialX = 0f
+    private var initialY = 0f
+    private var onActionMove: ((Float, Float) -> Unit)? = null
 
     private val stickyLines: Int
         get() =
@@ -201,44 +205,56 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val action = event.action
-
-        if (action == MotionEvent.ACTION_UP) {
-            var n = getOffsetForPosition(event.x, event.y)
-            if (n in preeditRange[0]..preeditRange[1]) {
-                val s =
-                    text
-                        .toString()
-                        .substring(n, preeditRange[1])
-                        .replace(" ", "")
-                        .replace("‸", "")
-                n = Rime.getRimeRawInput()!!.length - s.length // 從右側定位
-                Rime.setCaretPos(n)
-                TrimeInputMethodService.getService().updateComposing()
-                return true
-            }
-        } else if (movable != Movable.NEVER &&
-            (action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_DOWN)
-        ) {
-            val n = getOffsetForPosition(event.x, event.y)
-            if (n in movableRange[0]..movableRange[1]) {
-                if (action == MotionEvent.ACTION_DOWN) {
-                    if (firstMove || movable == Movable.ONCE) {
-                        firstMove = false
-                        getLocationOnScreen(intArrayOf(mCurrentX, mCurrentY))
+        val touched = getOffsetForPosition(event.x, event.y)
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                if (movable != Movable.NEVER) {
+                    if (touched in movableRange[0]..movableRange[1]) {
+                        if (firstMove || movable == Movable.ONCE) {
+                            initialX = event.rawX
+                            initialY = event.rawY
+                            firstMove = false
+                        }
+                        deltaX = initialX - event.rawX
+                        deltaY = initialY - event.rawY
+                        return true
                     }
-                    mDx = mCurrentX - event.rawX
-                    mDy = mCurrentY - event.rawY
-                } else { // MotionEvent.ACTION_MOVE
-                    mCurrentX = (event.rawX + mDx).toInt()
-                    mCurrentY = (event.rawY + mDy).toInt()
-                    TrimeInputMethodService.getService().updatePopupWindow(mCurrentX, mCurrentY)
                 }
-                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (movable != Movable.NEVER) {
+                    if (touched in movableRange[0]..movableRange[1]) {
+                        initialX = event.rawX + deltaX
+                        initialY = event.rawY + deltaY
+                        val absX = initialX.absoluteValue
+                        val absY = initialY.absoluteValue
+                        if (absX > touchSlop || absY > touchSlop) {
+                            onActionMove?.invoke(initialX, initialY)
+                        }
+                        return true
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if (touched in preeditRange[0]..preeditRange[1]) {
+                    val s =
+                        text
+                            .toString()
+                            .substring(touched, preeditRange[1])
+                            .replace(" ", "")
+                            .replace("‸", "")
+                    val newPos = Rime.getRimeRawInput()!!.length - s.length // 從右側定位
+                    Rime.setCaretPos(newPos)
+                    TrimeInputMethodService.getService().updateComposing()
+                    return true
+                }
             }
         }
-
         return super.onTouchEvent(event)
+    }
+
+    fun setOnActionMoveListener(listener: ((Float, Float) -> Unit)? = null) {
+        onActionMove = listener
     }
 
     private fun SpannableStringBuilder.buildSpannedComposition(

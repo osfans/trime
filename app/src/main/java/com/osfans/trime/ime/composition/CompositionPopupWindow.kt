@@ -46,6 +46,9 @@ class CompositionPopupWindow(
     val composition =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
             root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
+            compositionView.setOnActionMoveListener { x, y ->
+                updatePopupWindow(x.toInt(), y.toInt())
+            }
         }
 
     // 悬浮窗口是否可移動
