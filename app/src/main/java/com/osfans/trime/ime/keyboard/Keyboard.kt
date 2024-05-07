@@ -75,10 +75,13 @@ class Keyboard() {
     /** Width of the screen available to fit the keyboard  */
     private val mDisplayWidth: Int
 
-    /** Keyboard mode, or zero, if none.  */
-    private var mAsciiMode = 0
-    var isResetAsciiMode = false
+    /** Keyboard default ascii mode  */
+    var asciiMode = false
         private set
+    var currentAsciiMode = false
+    var resetAsciiMode = true
+        private set
+
     var landscapeKeyboard: String? = null
         private set
     private var mLandscapePercent = 0
@@ -158,9 +161,10 @@ class Keyboard() {
         val keyboardConfig = getKeyboardConfig(name)
 
         mLabelTransform = obtainString(keyboardConfig, "label_transform", "none")
-        mAsciiMode = obtainInt(keyboardConfig, "ascii_mode", 1)
-        if (mAsciiMode == 0) asciiKeyboard = obtainString(keyboardConfig, "ascii_keyboard", "")
-        isResetAsciiMode = obtainBoolean(keyboardConfig, "reset_ascii_mode", false)
+        asciiMode = obtainInt(keyboardConfig, "ascii_mode", 1) == 1
+        currentAsciiMode = asciiMode
+        if (asciiMode) asciiKeyboard = obtainString(keyboardConfig, "ascii_keyboard", "")
+        resetAsciiMode = obtainBoolean(keyboardConfig, "reset_ascii_mode", true)
         landscapeKeyboard = obtainString(keyboardConfig, "landscape_keyboard", "")
         mLandscapePercent =
             obtainInt(
@@ -747,8 +751,6 @@ class Keyboard() {
         return IntArray(0)
     }
 
-    val asciiMode: Boolean
-        get() = mAsciiMode != 0
     val isLandscapeSplit: Boolean
         get() = mLandscapePercent > 0
     val isLabelUppercase: Boolean

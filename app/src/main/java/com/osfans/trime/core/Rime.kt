@@ -278,7 +278,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
             option: String,
             value: Boolean,
         ) {
-            setRimeOption(option, value)
+            measureTimeMillis {
+                setRimeOption(option, value)
+            }.also { Timber.d("Took $it ms to set $option to $value") }
         }
 
         @JvmStatic
