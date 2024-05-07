@@ -100,7 +100,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
     }
 
     companion object {
-        private var mContext: RimeContext? = null
+        var inputContext: RimeContext? = null
         private var mStatus: RimeStatus? = null
         private val notificationFlow_ =
             MutableSharedFlow<RimeNotification<*>>(
@@ -122,7 +122,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
         fun updateContext() {
             Timber.d("Update Rime context ...")
             measureTimeMillis {
-                mContext = getRimeContext() ?: RimeContext()
+                inputContext = getRimeContext() ?: RimeContext()
             }.also { Timber.d("Took $it ms to get context") }
             updateStatus()
         }
@@ -164,17 +164,17 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         @JvmStatic
         fun hasMenu(): Boolean {
-            return isComposing && mContext?.menu?.numCandidates != 0
+            return isComposing && inputContext?.menu?.numCandidates != 0
         }
 
         @JvmStatic
         fun hasLeft(): Boolean {
-            return hasMenu() && mContext?.menu?.pageNo != 0
+            return hasMenu() && inputContext?.menu?.pageNo != 0
         }
 
         @JvmStatic
         fun hasRight(): Boolean {
-            return hasMenu() && mContext?.menu?.isLastPage == false
+            return hasMenu() && inputContext?.menu?.isLastPage == false
         }
 
         @JvmStatic
@@ -184,7 +184,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         @JvmStatic
         val composition: RimeComposition?
-            get() = mContext?.composition
+            get() = inputContext?.composition
 
         @JvmStatic
         val compositionText: String
@@ -192,11 +192,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         @JvmStatic
         val composingText: String
-            get() = mContext?.commitTextPreview ?: ""
-
-        @JvmStatic
-        val selectLabels: Array<String>
-            get() = mContext?.selectLabels ?: arrayOf()
+            get() = inputContext?.commitTextPreview ?: ""
 
         @JvmStatic
         fun isVoidKeycode(keycode: Int): Boolean {
@@ -243,16 +239,16 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 return if (!isComposing && showSwitches) {
                     SchemaManager.getStatusSwitches()
                 } else {
-                    mContext?.candidates ?: arrayOf()
+                    inputContext?.candidates ?: arrayOf()
                 }
             }
 
         val candidatesWithoutSwitch: Array<CandidateListItem>
-            get() = if (isComposing) mContext?.candidates ?: arrayOf() else arrayOf()
+            get() = if (isComposing) inputContext?.candidates ?: arrayOf() else arrayOf()
 
         @JvmStatic
         val candHighlightIndex: Int
-            get() = if (isComposing) mContext?.menu?.highlightedCandidateIndex ?: -1 else -1
+            get() = if (isComposing) inputContext?.menu?.highlightedCandidateIndex ?: -1 else -1
 
         fun commitComposition(): Boolean {
             return commitRimeComposition().also {
