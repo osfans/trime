@@ -383,7 +383,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      */
     private fun calculateOffset(candidates: Array<CandidateListItem>): Int {
         if (candidates.isEmpty()) return 0
-        var j = minOf(minCheckCount, candidates.size, maxCount) - 1
+        var j = (minOf(minCheckCount, candidates.size, maxCount) - 1).coerceAtLeast(0)
         while (j > 0) {
             val text = candidates[j].text
             if (text.length >= minCheckLength) break
