@@ -217,10 +217,7 @@ class TextInputManager(
             }
         }
         isComposable = isComposable && !rime.run { isEmpty() }
-        if (!trime.onEvaluateInputViewShown()) {
-            // Show candidate view when using physical keyboard
-            trime.setCandidatesViewShown(isComposable)
-        }
+        trime.updateComposing()
     }
 
     private fun handleRimeNotification(notification: RimeNotification<*>) {
