@@ -142,12 +142,14 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         private val highlightTextColor: Int?,
         private val highlightBackColor: Int?,
         private val textColor: Int?,
+        private val textSize: Int,
     ) : ClickableSpan() {
         override fun onClick(tv: View) {
             textInputManager?.onCandidatePressed(index)
         }
 
         override fun updateDrawState(ds: TextPaint) {
+            ds.textSize = sp(textSize).toFloat()
             ds.isUnderlineText = false
             ds.typeface = typeface
             if (index == highlightIndex) {
@@ -319,6 +321,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     highlightLabelColor,
                     highlightCandidateBackColor,
                     labelColor,
+                    labelTextSize,
                 )
             inSpans(alignmentSpan, labelSpan, labelTextSizeSpan) { append(label) }
 
@@ -329,6 +332,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     highlightCandidateTextColor,
                     highlightCandidateBackColor,
                     candidateTextColor,
+                    candidateTextSize,
                 )
             inSpans(alignmentSpan, candidateSpan, candidateTextSizeSpan) { append(text) }
             currentLineLength += text.length
@@ -341,6 +345,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                         highlightCommentTextColor,
                         highlightCandidateBackColor,
                         commentTextColor,
+                        commentTextSize,
                     )
                 inSpans(alignmentSpan, commentSpan, commentTextSizeSpan) { append(comment) }
                 currentLineLength += comment.length
