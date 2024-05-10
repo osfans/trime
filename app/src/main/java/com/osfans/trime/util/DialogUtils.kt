@@ -4,6 +4,7 @@
 
 package com.osfans.trime.util
 
+import android.content.ClipData
 import android.content.Context
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.annotation.StringRes
@@ -18,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.dimensions.dp
+import splitties.systemservices.clipboardManager
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalMargin
 import splitties.views.dsl.core.lParams
@@ -98,6 +100,11 @@ suspend fun Context.briefResultLogDialog(
             .setTitle(R.string.setup__done)
             .setMessage(R.string.found_some_problems)
             .setView(logView)
+            .setNeutralButton(androidx.preference.R.string.copy) { _, _ ->
+                val logText = ClipData.newPlainText("log", log.joinToString("\n"))
+                clipboardManager.setPrimaryClip(logText)
+                this@briefResultLogDialog.toast(R.string.copy_done)
+            }
             .setPositiveButton(R.string.setup__skip_hint_yes, null)
             .show()
     } else {
