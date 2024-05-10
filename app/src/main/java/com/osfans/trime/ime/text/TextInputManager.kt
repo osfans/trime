@@ -15,6 +15,7 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
+import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.InputView
@@ -351,17 +352,15 @@ class TextInputManager(
                         )
                 }
 
-                if (event.command == "liquid_keyboard") {
-                    trime.selectLiquidKeyboard(arg)
-                } else if (event.command == "paste_by_char") {
-                    trime.pasteByChar()
-                } else {
-                    val textFromCommand =
-                        ShortcutUtils
-                            .call(trime, event.command, arg)
-                    if (textFromCommand != null) {
-                        trime.commitCharSequence(textFromCommand)
-                        trime.updateComposing()
+                when (event.command) {
+                    "liquid_keyboard" -> trime.selectLiquidKeyboard(arg)
+                    "paste_by_char" -> trime.pasteByChar()
+                    "set_color_scheme" -> ColorManager.setColorScheme(arg)
+                    else -> {
+                        ShortcutUtils.call(trime, event.command, arg)?.let {
+                            trime.commitCharSequence(it)
+                            trime.updateComposing()
+                        }
                     }
                 }
             }
