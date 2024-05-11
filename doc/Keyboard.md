@@ -10,6 +10,22 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 - `single_width` : 在 `SINGLE` 類別中，每項的闊度 (和高度相等)。
 
+新增一些参数 `fixed_key_bar:` 用于自定义液态键盘中的固定按键条：
+
+例：
+```yaml
+liquid_keyboard:
+  fixed_key_bar:  # 固定按键条
+    position: bottom  # 摆放位置（在滚动区域的……） top|bottom|left|right （上/下/左/右）
+    keys:  # 按键（显示名称为对应的label，不能放太多）
+      - liquid_keyboard_exit  # 返回键（在preset_keys内定义，同下）
+      - space1  # 空格键
+      - BackSpace  # 退格键
+      - Return2  # 回车键
+      - liquid_keyboard_clipboard  # “剪贴板”跳转按键
+      - liquid_keyboard_switch  # “更多”跳转按键
+```
+
 # 藍芽鍵盤問題
 https://github.com/osfans/trime/issues/1058#issuecomment-1672635413
 
