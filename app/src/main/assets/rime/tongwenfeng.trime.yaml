@@ -881,6 +881,15 @@ liquid_keyboard:
   single_width: 60    #single类型的按键宽度
   vertical_gap: 8     #纵向按键间隙
   margin_x: 2       #左右按键间隙的1/2
+  fixed_key_bar: # 固定按键条
+    position: bottom  # 摆放位置（在滚动区域的……） top|bottom|left|right
+    keys: # 按键（显示名称为对应的label，不能放太多）
+      - liquid_keyboard_exit
+      - space1
+      - BackSpace
+      - Return2
+      - liquid_keyboard_clipboard
+      - liquid_keyboard_tabs
   keyboards: [emoji, math, ascii, cn, history, clipboard, collection, draft, symbollist, list, ids, symbol, tabs, pinyin, script_symbols, jp, grease, rusa, korea, lation, yinbiao, unit, yanwenzi, combing, emoji_full, candidate]  #tab列表
   tabs:
     name: 更多
@@ -3920,6 +3929,7 @@ preset_keys:
   Shift_L: {label: Shift, preview: '⇪', functional: false, send: Shift_L}
   Return: { label: enter_labels, preview: '↩', functional: false, send: Return }
   Return1: {label: Enter, preview: '↩', functional: false, send: Return}
+  Return2: {label: 回车, send: Return }
   Hide: {label: 隐藏, send: BACK}
   BackSpace: {label: 退格, preview: '⇦', repeatable: true, functional: false, send: BackSpace}
   space: {repeatable: false, preview: ' ', functional: false, label: '_______', send: space}
@@ -3969,8 +3979,10 @@ preset_keys:
   Keyboard_next: { label: 后退, functional: false, send: Eisu_toggle, select: .next }
   Keyboard_last: { label: 后退, functional: false, send: Eisu_toggle, select: .last }
   Keyboard_last_lock: { label: 返回, send: Eisu_toggle, select: .last_lock } #直接切換到下一键盘
+  liquid_keyboard_exit: {label: 返回, send: function, command: liquid_keyboard, option: "-1"}  #退出liquidkeyboard
   liquid_keyboard_switch: { label: 更多, send: function, command: liquid_keyboard, option: "特殊" }
   liquid_keyboard_switch2: { toggle: _liquid_keyboard, send: Mode_switch, states: [ 更多, 更多 ] }
+  liquid_keyboard_tabs: { label: 更多, send: function, command: liquid_keyboard, option: "更多" }
   liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
   liquid_keyboard_clipboard: { label: 剪贴, send: function, command: liquid_keyboard, option: "剪贴" }
   # rime状态
