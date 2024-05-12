@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.osfans.trime.data.theme.ColorManager
@@ -18,7 +19,8 @@ import com.osfans.trime.databinding.SimpleItemOneBinding
 import com.osfans.trime.databinding.SimpleItemRowBinding
 import splitties.dimensions.dp
 
-class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
+class SimpleAdapter(theme: Theme, private val columnSize: Int) :
+    RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<SimpleKeyBean>()
     private val mBeansByRows = mutableListOf<List<SimpleKeyBean>>()
     val beans get() = mBeans
@@ -42,6 +44,8 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
     }
 
     private val mSingleWidth = theme.liquid.getInt("single_width")
+    private val mSingleHeight = theme.liquid.getInt("key_height")
+    private val mStringMarginX = theme.liquid.getFloat("margin_x")
     private val mTextSize = theme.generalStyle.labelTextSize
     private val mTextColor = ColorManager.getColor("key_text_color")
     private val mTypeface = FontManager.getTypeface("key_font")
@@ -57,13 +61,18 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
-        val binding = SimpleItemRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val size = parent.dp(mSingleWidth)
+        val binding =
+            SimpleItemRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val width = parent.dp(mSingleWidth)
+        val height = parent.dp(mSingleHeight)
+        val marginX = parent.dp(mStringMarginX).toInt()
         val bindings = mutableListOf<SimpleItemOneBinding>()
         for (i in 0 until columnSize) {
             val sub = SimpleItemOneBinding.inflate(LayoutInflater.from(parent.context), null, false)
             bindings.add(sub)
-            binding.wrapper.addView(sub.root, size, size)
+            val layoutParams = LinearLayout.LayoutParams(width, height)
+            layoutParams.setMargins(marginX, 0, marginX, 0)
+            binding.wrapper.addView(sub.root, layoutParams)
         }
         val holder = ViewHolder(binding, bindings)
 
@@ -81,7 +90,8 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) : RecyclerView.Ad
         return holder
     }
 
-    class ViewHolder(binding: SimpleItemRowBinding, views: List<SimpleItemOneBinding>) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(binding: SimpleItemRowBinding, views: List<SimpleItemOneBinding>) :
+        RecyclerView.ViewHolder(binding.root) {
         val simpleKeyTexts = views.map { it.root.getChildAt(0) as TextView }
         val wrappers = views.map { it.root.apply { getChildAt(1).visibility = View.GONE } }
     }
