@@ -6,6 +6,7 @@ package com.osfans.trime.ime.symbol
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
 import com.osfans.trime.data.theme.ColorManager
@@ -14,7 +15,6 @@ import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
-import splitties.views.backgroundColor
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
@@ -48,11 +48,11 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
     private val fixedKeyBar =
         constraintLayout {
-            val operations = theme.liquid.getMap("fixed_key_bar")?.get("keys")?.configList
-            operations?.let {
+            val fixedKeys = theme.liquid.getMap("fixed_key_bar")?.get("keys")?.configList
+            fixedKeys?.let {
                 val btns =
-                    Array(it.size) {
-                        val operation = operations.get(it)
+                    Array(it.size) { index ->
+                        val operation = fixedKeys[index]
                         val text =
                             textView {
                                 text =
@@ -65,6 +65,13 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                             }
                         val root =
                             frameLayout {
+                                background =
+                                    GradientDrawable().apply {
+                                        cornerRadius = theme.generalStyle.roundCorner.toFloat()
+                                        ColorManager.getColor("key_back_color")?.let { bg ->
+                                            setColor(bg)
+                                        }
+                                    }
                                 add(
                                     text,
                                     lParams(matchParent, wrapContent) {
@@ -72,8 +79,6 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                                         padding = dp(5)
                                     },
                                 )
-                                ColorManager.getColor("key_back_color")
-                                    ?.let { bg -> backgroundColor = bg }
                                 // todo 想办法实现退格键、空格键等 repeatable: true 长按连续触发
                                 setOnClickListener {
                                     val event = EventManager.getEvent(operation.toString())
@@ -85,6 +90,7 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                             }
                         return@Array root
                     }
+                val marginX = theme.liquid.getFloat("margin_x")
                 when (
                     theme.liquid.getMap("fixed_key_bar")
                         ?.get("position")?.configValue.toString()
@@ -94,8 +100,18 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                             add(
                                 btn,
                                 lParams(wrapContent, matchConstraints) {
-                                    if (i == 0) topOfParent() else below(btns[i - 1])
-                                    if (i == btns.size - 1) bottomOfParent() else above(btns[i + 1])
+                                    if (i == 0) {
+                                        topOfParent()
+                                    } else {
+                                        topMargin = dp(marginX).toInt()
+                                        below(btns[i - 1])
+                                    }
+                                    if (i == btns.size - 1) {
+                                        bottomOfParent()
+                                    } else {
+                                        bottomMargin = dp(marginX).toInt()
+                                        above(btns[i + 1])
+                                    }
                                 },
                             )
                         }
@@ -106,8 +122,18 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                             add(
                                 btn,
                                 lParams(wrapContent, matchConstraints) {
-                                    if (i == 0) startOfParent() else after(btns[i - 1])
-                                    if (i == btns.size - 1) endOfParent() else before(btns[i + 1])
+                                    if (i == 0) {
+                                        startOfParent()
+                                    } else {
+                                        leftMargin = dp(marginX).toInt()
+                                        after(btns[i - 1])
+                                    }
+                                    if (i == btns.size - 1) {
+                                        endOfParent()
+                                    } else {
+                                        rightMargin = dp(marginX).toInt()
+                                        before(btns[i + 1])
+                                    }
                                 },
                             )
                         }
