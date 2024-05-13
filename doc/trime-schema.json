@@ -832,8 +832,14 @@
         "fixed_key_bar": {
           "type": "object",
           "properties": {
-            "position": {"type": "string", "description": "固定按键条摆放位置（相对滚动区域的方位） top|bottom|left|right （上/下/左/右）"},
-            "keys": {"type": "array", "description": "固定按键条的按键（显示名称为对应的label，不能放太多）"}
+            "position": {
+              "enum": ["top", "bottom", "left", "right"],
+              "description": "固定按键条摆放位置（相对滚动区域的上/下/左/右方位）"
+            },
+            "keys": {
+              "type": "array",
+              "description": "固定按键条的按键（显示名称为对应的label，不能放太多）"
+            }
           }
         },
         "keyboards": { "type": "array", "items": { "type": "string" } }
