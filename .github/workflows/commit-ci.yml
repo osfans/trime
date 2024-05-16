@@ -81,7 +81,7 @@ jobs:
       - name: Add JNI cache
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
         shell: bash
-        run: cp -R app/build/intermediates/stripped_native_libs/debug/out/lib app/prebuilt
+        run: cp -R app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib app/prebuilt
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -103,6 +103,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: librime_jni-${{ matrix.os }}
-          path: app/build/intermediates/stripped_native_libs/debug/out/lib/*
+          path: app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/*
           # keep 90 days
           retention-days: 90
