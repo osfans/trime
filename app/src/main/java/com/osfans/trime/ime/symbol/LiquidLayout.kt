@@ -6,7 +6,6 @@ package com.osfans.trime.ime.symbol
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
 import com.osfans.trime.data.theme.ColorManager
@@ -66,12 +65,13 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                         val root =
                             frameLayout {
                                 background =
-                                    GradientDrawable().apply {
-                                        cornerRadius = theme.generalStyle.roundCorner.toFloat()
-                                        ColorManager.getColor("key_back_color")?.let { bg ->
-                                            setColor(bg)
-                                        }
-                                    }
+                                    ColorManager.getDrawable(
+                                        context,
+                                        key = "key_back_color",
+                                        border = theme.generalStyle.keyBorder,
+                                        borderColorKey = "key_border_color",
+                                        roundCorner = theme.generalStyle.roundCorner,
+                                    )
                                 add(
                                     text,
                                     lParams(matchParent, wrapContent) {
