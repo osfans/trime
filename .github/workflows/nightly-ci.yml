@@ -59,7 +59,7 @@ jobs:
 
       - name: Add JNI cache
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
-        run: cp -R app/build/intermediates/stripped_native_libs/release/out/lib app/prebuilt
+        run: cp -R app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib app/prebuilt
 
       - name: Create Nightly release
         uses: 'marvinpinto/action-automatic-releases@latest'
