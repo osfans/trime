@@ -35,7 +35,8 @@ class Theme(name: String) {
         private const val DEFAULT_THEME_NAME = "trime"
 
         private fun deploy(active: String): Config? {
-            val nameWithExtension = "$active.yaml"
+            val ext = if (active == DEFAULT_THEME_NAME) ".yaml" else ".trime.yaml"
+            val nameWithExtension = "$active$ext"
             val isDeployed: Boolean
             measureTimeMillis {
                 isDeployed = Rime.deployRimeConfigFile(nameWithExtension, VERSION_KEY)
@@ -46,7 +47,7 @@ class Theme(name: String) {
                     Timber.w("Failed to deploy theme file '$nameWithExtension'")
                 }
             }
-            return Config.create(active)
+            return Config.create(nameWithExtension.removeSuffix(".yaml"))
         }
     }
 
