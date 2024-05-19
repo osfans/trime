@@ -196,8 +196,8 @@ class LiquidKeyboard(
     }
 
     private fun initDbData(data: suspend () -> List<DatabaseBean>) {
+        dbAdapter.type = currentBoardType
         if (onAdapterChange(dbAdapter)) {
-            dbAdapter.type = currentBoardType
             keyboardView.apply {
                 layoutManager = oneColStaggeredGridLayoutManager
                 adapter = dbAdapter
