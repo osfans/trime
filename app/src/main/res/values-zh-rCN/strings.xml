@@ -138,7 +138,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="external_storage_permission_granted">已授予存储权限</string>
     <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
     <string name="alert_window_access_required">同文输入法需要允许显示在其他应用上方以能显示应用外悬浮窗或对话框，点击“确定”以授权。</string>
-    <string name="keyboard__key_sound_package_title">按键音效包</string>
+    <string name="keyboard__key_sound_effect_title">按键音效</string>
     <string name="sound_progress">正在应用音效...</string>
     <string name="clipboard_draft_limit">草稿箱历史记录上限</string>
     <string name="clipboard_draft_output_title">草稿箱过滤规则</string>
@@ -278,6 +278,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="schemata">方案</string>
     <string name="schemata_hint">选择当前方案或启用更多方案</string>
     <string name="navbar_background">导航栏背景</string>
+    <string name="no_theme_to_select">当前没有主题可选择。</string>
+    <string name="no_color_to_select">当前没有配色方案可选择。</string>
+    <string name="no_effect_to_select">当前没有按键音效可选择。</string>
     <string-array name="navbar_bkg_labels">
         <item>无背景</item>
         <item>跟随键盘背景色</item>

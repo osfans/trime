@@ -192,7 +192,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:iconSpaceReserved="false" />
         <Preference
             android:key="keyboard__key_sound_package"
-            android:title="@string/keyboard__key_sound_package_title"
+            android:title="@string/keyboard__key_sound_effect_title"
             android:dependency="keyboard__custom_key_sound"
             app:iconSpaceReserved="false" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference

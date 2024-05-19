@@ -31,9 +31,9 @@ import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ime.symbol.SymbolBoardType
-import com.osfans.trime.ui.main.buildColorPickerDialog
-import com.osfans.trime.ui.main.buildSoundEffectPickerDialog
-import com.osfans.trime.ui.main.buildThemePickerDialog
+import com.osfans.trime.ui.main.settings.ColorPickerDialog
+import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
+import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.startsWithAsciiChar
 import kotlinx.coroutines.Job
@@ -368,22 +368,22 @@ class TextInputManager(
             KeyEvent.KEYCODE_SETTINGS -> { // Settings
                 trime.lifecycleScope.launch {
                     when (event.option) {
-                        "theme" -> trime.inputView?.showDialog(buildThemePickerDialog(themedContext, trime.lifecycleScope))
-                        "color" -> trime.inputView?.showDialog(buildColorPickerDialog(themedContext, trime.lifecycleScope))
+                        "theme" -> trime.inputView?.showDialog(ThemePickerDialog.build(trime.lifecycleScope, themedContext))
+                        "color" -> trime.inputView?.showDialog(ColorPickerDialog.build(trime.lifecycleScope, themedContext))
                         "schema" ->
                             rime.launchOnReady { api ->
                                 trime.lifecycleScope.launch {
                                     trime.inputView?.showDialog(AvailableSchemaPickerDialog.build(api, trime.lifecycleScope, themedContext))
                                 }
                             }
-                        "sound" -> trime.inputView?.showDialog(buildSoundEffectPickerDialog(themedContext))
+                        "sound" -> trime.inputView?.showDialog(KeySoundEffectPickerDialog.build(trime.lifecycleScope, themedContext))
                         else -> ShortcutUtils.launchMainActivity(trime)
                     }
                 }
             }
             KeyEvent.KEYCODE_PROG_RED ->
                 trime.lifecycleScope.launch {
-                    trime.inputView?.showDialog(buildColorPickerDialog(themedContext, trime.lifecycleScope))
+                    trime.inputView?.showDialog(ColorPickerDialog.build(trime.lifecycleScope, themedContext))
                 }
             KeyEvent.KEYCODE_MENU -> {
                 rime.launchOnReady { api ->

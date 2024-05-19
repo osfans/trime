@@ -52,7 +52,7 @@ object SoundEffectManager {
 
     private fun getSound(name: String) = userSounds.find { it.name == name }
 
-    private val userSounds: MutableList<SoundEffect> = listSounds()
+    private val userSounds: MutableList<SoundEffect> get() = listSounds()
 
     @JvmStatic
     fun switchSound(name: String) {

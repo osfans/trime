@@ -29,15 +29,22 @@ object ThemeManager {
         DataManager.addOnChangedListener(onDataDirChange)
     }
 
+    private val suffixRegex = Regex("(.*?)(\\.trime\\.yaml$|\\.yaml$)")
+
     private fun listThemes(path: File): MutableList<String> {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
-            ?.map { f -> f.nameWithoutExtension }
+            ?.mapNotNull { f ->
+                suffixRegex.matchEntire(f.name)?.let { result ->
+                    val basename = if (result.groups[2]?.value == ".trime.yaml") result.groupValues[1] else f.nameWithoutExtension
+                    basename
+                }
+            }
             ?.toMutableList() ?: mutableListOf()
     }
 
-    private val sharedThemes: MutableList<String> = listThemes(DataManager.sharedDataDir)
+    private val sharedThemes: MutableList<String> get() = listThemes(DataManager.sharedDataDir)
 
-    private val userThemes: MutableList<String> = listThemes(DataManager.userDataDir)
+    private val userThemes: MutableList<String> get() = listThemes(DataManager.userDataDir)
 
     fun getAllThemes(): List<String> {
         if (DataManager.sharedDataDir.absolutePath == DataManager.userDataDir.absolutePath) {

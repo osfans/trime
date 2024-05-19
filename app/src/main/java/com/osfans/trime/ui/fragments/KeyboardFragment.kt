@@ -16,7 +16,7 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
-import com.osfans.trime.ui.main.buildSoundEffectPickerDialog
+import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +33,7 @@ class KeyboardFragment :
         addPreferencesFromResource(R.xml.keyboard_preference)
         findPreference<Preference>("keyboard__key_sound_package")
             ?.setOnPreferenceClickListener {
-                lifecycleScope.launch { buildSoundEffectPickerDialog(requireContext()).show() }
+                lifecycleScope.launch { KeySoundEffectPickerDialog.build(lifecycleScope, requireContext()).show() }
                 true
             }
     }

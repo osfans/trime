@@ -4,11 +4,11 @@
 
 package com.osfans.trime.util
 
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.Context
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
