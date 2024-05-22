@@ -288,4 +288,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>Follow keyboard color</item>
         <item>Keyboard background image</item>
     </string-array>
+    <string name="theme_trime">default</string>
+    <string name="theme_tongwenfeng">tongwenfeng</string>
 </resources>

@@ -29,15 +29,10 @@ object ThemeManager {
         DataManager.addOnChangedListener(onDataDirChange)
     }
 
-    private val suffixRegex = Regex("(.*?)(\\.trime\\.yaml$|\\.yaml$)")
-
     private fun listThemes(path: File): MutableList<String> {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
             ?.mapNotNull { f ->
-                suffixRegex.matchEntire(f.name)?.let { result ->
-                    val basename = if (result.groups[2]?.value == ".trime.yaml") result.groupValues[1] else f.nameWithoutExtension
-                    basename
-                }
+                if (f.name == "trime.yaml") "trime" else f.name.substringBeforeLast(".trime.yaml")
             }
             ?.toMutableList() ?: mutableListOf()
     }
