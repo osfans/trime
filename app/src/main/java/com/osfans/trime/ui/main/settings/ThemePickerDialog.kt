@@ -19,16 +19,24 @@ object ThemePickerDialog {
             withContext(Dispatchers.IO) {
                 ThemeManager.getAllThemes()
             }
+        val allNames =
+            all.map {
+                when (it) {
+                    "trime" -> context.getString(R.string.theme_trime)
+                    "tongwenfeng" -> context.getString(R.string.theme_tongwenfeng)
+                    else -> it
+                }
+            }
         val current =
             AppPrefs.defaultInstance().theme.selectedTheme
         val currentIndex = all.indexOfFirst { it == current }
         return AlertDialog.Builder(context).apply {
             setTitle(R.string.looks__selected_theme_title)
-            if (all.isEmpty()) {
+            if (allNames.isEmpty()) {
                 setMessage(R.string.no_theme_to_select)
             } else {
                 setSingleChoiceItems(
-                    all.toTypedArray(),
+                    allNames.toTypedArray(),
                     currentIndex,
                 ) { dialog, which ->
                     scope.launch {

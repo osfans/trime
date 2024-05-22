@@ -286,4 +286,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>跟随键盘背景色</item>
         <item>键盘背景图片</item>
     </string-array>
+    <string name="theme_trime">默认</string>
+    <string name="theme_tongwenfeng">同文风</string>
 </resources>
