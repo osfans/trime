@@ -55,6 +55,9 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         Paint().apply {
             color = ColorManager.getColor("candidate_separator_color")!!
         }
+    private val candidateFont = FontManager.getTypeface("candidate_font")
+    private val symbolFont = FontManager.getTypeface("symbol_font")
+    private val commentFont = FontManager.getTypeface("comment_font")
     private val candidatePaint =
         Paint().apply {
             typeface = candidateFont
@@ -76,9 +79,6 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             isAntiAlias = true
             strokeWidth = 0f
         }
-    private val candidateFont = FontManager.getTypeface("candidate_font")
-    private val symbolFont = FontManager.getTypeface("symbol_font")
-    private val commentFont = FontManager.getTypeface("comment_font")
     private val candidateTextColor = ColorManager.getColor("candidate_text_color")!!
     private val hilitedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")!!
     private val commentTextColor = ColorManager.getColor("comment_text_color")!!
