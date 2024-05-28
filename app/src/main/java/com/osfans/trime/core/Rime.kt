@@ -82,7 +82,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
-        if (AppPrefs.defaultInstance().profile.isUserDataDirChosen()) {
+        if (AppPrefs.defaultInstance().profile.isUserDataDirChosen() &&
+            AppPrefs.Profile.getAppPath().isNotBlank()
+        ) {
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
         }
