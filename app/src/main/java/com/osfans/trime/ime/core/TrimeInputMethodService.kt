@@ -41,6 +41,7 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.broadcast.ExternalStorageStateReceiver
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.enums.FullscreenMode
@@ -218,6 +219,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreate() {
+        val stateReceiver =
+            ExternalStorageStateReceiver(this) {
+                if (!rime.run { isReady }) {
+                    RimeDaemon.destroySession(javaClass.name)
+                    rime = RimeDaemon.createSession(javaClass.name)
+                }
+            }
+        stateReceiver.listenExternalStorageChangeState()
+
         rime = RimeDaemon.createSession(javaClass.name)
         super.onCreate()
         // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
