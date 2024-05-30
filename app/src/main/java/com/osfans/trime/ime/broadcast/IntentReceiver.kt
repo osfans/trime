@@ -19,6 +19,7 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.util.ShortcutUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -92,8 +93,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                             }
                         }
 
-                        Rime.syncRimeUserData()
-                        RimeDaemon.restartRime(true)
+                        ShortcutUtils.sync(true)
                         wakeLock.release() // 释放唤醒锁
                     }
                 }

@@ -21,6 +21,7 @@ import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.storage.FolderExport
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
@@ -144,7 +145,14 @@ object ShortcutUtils {
         val prefs = AppPrefs.defaultInstance()
         prefs.profile.lastBackgroundSync = Date().time.toString()
         CoroutineScope(Dispatchers.IO).launch {
-            prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { RimeDaemon.restartRime() }
+            prefs.profile.lastSyncStatus = sync()
+        }
+    }
+
+    suspend fun sync(fullCheck: Boolean = false): Boolean{
+        return Rime.syncRimeUserData().also {
+            FolderExport.exportSyncDir()
+            RimeDaemon.restartRime(fullCheck)
         }
     }
 

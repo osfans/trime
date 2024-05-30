@@ -31,6 +31,7 @@ import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ResourceUtils
+import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.rimeActionWithResultDialog
@@ -83,9 +84,7 @@ class ProfileFragment :
                 lifecycleScope.launch {
                     this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
                         viewModel.deploy()
-                        Rime.syncRimeUserData()
-                        RimeDaemon.restartRime(true)
-                        FolderExport.exportSyncDir()
+                        ShortcutUtils.sync(true)
                         viewModel.deployComplete()
                         true
                     }
