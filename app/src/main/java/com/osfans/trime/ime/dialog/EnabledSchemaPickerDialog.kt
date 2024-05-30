@@ -9,7 +9,7 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeApi
-import com.osfans.trime.ime.core.OneWayFolderSync
+import com.osfans.trime.data.storage.FolderSync
 import kotlinx.coroutines.launch
 import splitties.systemservices.inputMethodManager
 
@@ -36,7 +36,7 @@ object EnabledSchemaPickerDialog {
                 ) { dialog, which ->
                     scope.launch {
                         rime.selectSchema(selectedIds[which])
-                        OneWayFolderSync.exportModifiedFiles()
+                        FolderSync.exportModifiedFiles()
                         dialog.dismiss()
                     }
                 }

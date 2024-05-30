@@ -1,4 +1,4 @@
-package com.osfans.trime.ime.core
+package com.osfans.trime.data.storage
 
 import android.content.Context
 import androidx.core.net.toUri
@@ -8,7 +8,7 @@ import com.osfans.trime.util.appContext
 import timber.log.Timber
 import java.io.File
 
-class OneWayFolderSync(private val context: Context, private val docUriStr: String) {
+class FolderSync(private val context: Context, private val docUriStr: String) {
     private val sourceFiles = mutableSetOf<String>()
 
     suspend fun copyFiles(
@@ -36,27 +36,6 @@ class OneWayFolderSync(private val context: Context, private val docUriStr: Stri
             }
         }.onFailure {
             Timber.e(it, "Uri (%s) Error", docUriStr)
-        }
-    }
-
-    suspend fun export(
-        fileNames: Array<String>,
-        appSpecificPath: String,
-    ) {
-        fileNames.forEach { fileName ->
-            DocumentFile.fromTreeUri(context, docUriStr.toUri())?.runCatching {
-                val docFile =
-                    this.findFile(fileName)?.takeIf { it.isFile && it.canWrite() }
-                        ?: this.createFile("*/*", fileName)
-                docFile?.let { doc ->
-                    val file = File(appSpecificPath, fileName)
-                    copyToUri(file, doc)
-                }?: {
-                    Timber.e("Cannot export file: %s", fileName)
-                }
-            }?.onFailure {
-                Timber.e(it, "Uri Error")
-            }
         }
     }
 
@@ -111,20 +90,6 @@ class OneWayFolderSync(private val context: Context, private val docUriStr: Stri
         }
     }
 
-    private fun copyToUri(
-        sourceFile: File,
-        targetDoc: DocumentFile,
-    ) {
-        val oss = context.contentResolver.openOutputStream(targetDoc.uri, "wt")
-        oss?.use {
-            sourceFile.inputStream().apply {
-                copyTo(oss)
-
-                close()
-            }
-        }
-    }
-
     private fun recursiveDeleteFiles(path: File) {
         path.listFiles()?.forEachIndexed { _, file ->
             if (file.isFile) {
@@ -146,10 +111,10 @@ class OneWayFolderSync(private val context: Context, private val docUriStr: Stri
         suspend fun exportModifiedFiles() {
             val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
 
-            OneWayFolderSync(appContext, userDirUri).export(
-                arrayOf("default.custom.yaml", "user.yaml"),
-                AppPrefs.Profile.getAppUserDir()
-            )
+            val f1 = File(AppPrefs.Profile.getAppUserDir(), "default.custom.yaml")
+            val f2 = File(AppPrefs.Profile.getAppUserDir(), "user.yaml")
+
+            FolderExport(appContext, userDirUri).exportModifiedFiles(arrayOf(f1, f2))
         }
     }
 }

@@ -9,8 +9,8 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.storage.FolderSync
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.core.OneWayFolderSync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -57,10 +57,13 @@ object ThemePickerDialog {
         }.create()
     }
 
-    private suspend fun copyThemeFile(context: Context, selectedName: String){
+    private suspend fun copyThemeFile(
+        context: Context,
+        selectedName: String,
+    ) {
         val fileNameWithoutExt = if (selectedName == "trime") selectedName else "$selectedName.trime"
 
-        val sync = OneWayFolderSync(context, AppPrefs.defaultInstance().profile.userDataDir)
+        val sync = FolderSync(context, AppPrefs.defaultInstance().profile.userDataDir)
         sync.copyFiles(
             arrayOf("$fileNameWithoutExt.yaml", "$fileNameWithoutExt.custom.yaml"),
             AppPrefs.Profile.getAppPath(),

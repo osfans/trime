@@ -10,9 +10,8 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.ime.core.OneWayFolderSync
+import com.osfans.trime.data.storage.FolderSync
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 
 object AvailableSchemaPickerDialog {
     suspend fun build(
@@ -38,7 +37,7 @@ object AvailableSchemaPickerDialog {
                     if (setOf(newEnabled) == setOf(enabledIds)) return@setPositiveButton
                     scope.launch {
                         rime.setEnabledSchemata(newEnabled.toTypedArray())
-                        OneWayFolderSync.exportModifiedFiles()
+                        FolderSync.exportModifiedFiles()
                         RimeDaemon.restartRime()
                     }
                 }
