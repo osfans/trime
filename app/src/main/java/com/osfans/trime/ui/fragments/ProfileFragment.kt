@@ -26,6 +26,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.storage.FolderExport
 import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
@@ -81,8 +82,11 @@ class ProfileFragment :
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
                 lifecycleScope.launch {
                     this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
+                        viewModel.deploy()
                         Rime.syncRimeUserData()
                         RimeDaemon.restartRime(true)
+                        FolderExport.exportSyncDir()
+                        viewModel.deployComplete()
                         true
                     }
                 }
