@@ -100,6 +100,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_timing_sync">Timing sync</string>
     <string name="profile_timing_sync_trigger_time">Timing sync is enabled Next sync at time: %1$s</string>
     <string name="profile_enable_timing_sync">Click to enable</string>
+    <string name="profile__error_user_data_dir">Please set it in &quot;Profile&quot;.</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
     <string name="pref_keyboard__function">View</string>

@@ -98,6 +98,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_timing_sync">定時同步</string>
     <string name="profile_timing_sync_trigger_time">已啟用定時同步 下次同步時間: %1$s</string>
     <string name="profile_enable_timing_sync">點擊以啟用定時同步</string>
+    <string name="profile__error_user_data_dir">請到「配置管理」設定相關資料。</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
     <string name="pref_keyboard__function">檢視</string>

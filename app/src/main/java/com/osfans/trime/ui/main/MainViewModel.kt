@@ -12,6 +12,11 @@ import com.osfans.trime.daemon.RimeSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+enum class MainUiState{
+    LOADING,
+    READY,
+    ERR_DIRECTORY_MISSING
+}
 class MainViewModel : ViewModel() {
     private val _statusStateFlow = MutableStateFlow(RimeLifecycle.State.STOPPED)
     val statusStateFlow = _statusStateFlow.asStateFlow()
