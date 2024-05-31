@@ -22,11 +22,8 @@ import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
-import com.osfans.trime.core.Rime
-import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.data.storage.FolderExport
 import com.osfans.trime.ui.components.FolderPickerPreference
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
@@ -83,10 +80,10 @@ class ProfileFragment :
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
                 lifecycleScope.launch {
                     this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
-                        viewModel.deploy()
-                        ShortcutUtils.sync(true)
-                        viewModel.deployComplete()
-                        true
+                        viewModel.setToLoading()
+                        val result = ShortcutUtils.sync(true)
+                        viewModel.setToReady()
+                        result
                     }
                 }
                 true

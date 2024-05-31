@@ -149,10 +149,12 @@ object ShortcutUtils {
         }
     }
 
-    suspend fun sync(fullCheck: Boolean = false): Boolean{
-        return Rime.syncRimeUserData().also {
-            FolderExport.exportSyncDir()
+    suspend fun sync(fullCheck: Boolean = false): Boolean {
+        return if (Rime.syncRimeUserData()) {
             RimeDaemon.restartRime(fullCheck)
+            return FolderExport.exportSyncDir()
+        } else {
+            false
         }
     }
 
