@@ -9,25 +9,34 @@ import timber.log.Timber
 import java.io.File
 
 class FolderExport(private val context: Context, private val docUriStr: String) {
-    suspend fun exportDir(dirPath: File) {
-        DocumentFile.fromTreeUri(appContext, docUriStr.toUri())?.runCatching {
-            val dirDoc = this.findFile(dirPath.name)?.takeIf { it.isDirectory && it.canWrite() } ?: this.createDirectory(dirPath.name)
+    suspend fun exportDir(dirPath: File): Boolean {
+        return runCatching {
+            DocumentFile.fromTreeUri(appContext, docUriStr.toUri())?.let { dir ->
+                val dirDoc =
+                    dir.findFile(dirPath.name)?.takeIf { it.isDirectory && it.canWrite() }
+                        ?: dir.createDirectory(dirPath.name)
 
-            dirDoc?.let {
-                recursiveExport(dirPath, dirDoc)
-            } ?: run {
-                Timber.e("Error, cannot create export folder, %s", dirPath.name)
+                dirDoc?.let {
+                    recursiveExport(dirPath, dirDoc)
+                } ?: run {
+                    Timber.e("Error, cannot create export folder, %s", dirPath.name)
+                }
             }
-        }?.onFailure {
-            Timber.e(it)
-        }
+            true
+        }.onFailure {
+            Timber.e(it, "Error in export")
+        }.getOrDefault(false)
     }
 
     suspend fun exportModifiedFiles(fileNames: Array<File>) {
-        DocumentFile.fromTreeUri(appContext, docUriStr.toUri())?.runCatching {
-            fileNames.forEach { fileName ->
-                export(fileName, this)
+        runCatching {
+            DocumentFile.fromTreeUri(appContext, docUriStr.toUri())?.let {
+                fileNames.forEach { fileName ->
+                    export(fileName, it)
+                }
             }
+        }.onFailure {
+            Timber.e(it, "Error in export")
         }
     }
 
@@ -96,13 +105,13 @@ class FolderExport(private val context: Context, private val docUriStr: String) 
             FolderExport(appContext, userDirUri).exportModifiedFiles(arrayOf(f1, f2))
         }
 
-        suspend fun exportSyncDir() {
+        suspend fun exportSyncDir(): Boolean {
             val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
 
             val dir = "sync"
             val dirFile = File(AppPrefs.Profile.getAppUserDir(), dir)
 
-            FolderExport(appContext, userDirUri).exportDir(dirFile)
+            return FolderExport(appContext, userDirUri).exportDir(dirFile)
         }
     }
 }
