@@ -90,6 +90,8 @@ class Rime : RimeApi, RimeLifecycleOwner {
         ) {
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
+        } else {
+            Timber.w("Skip starting rime: directory not yet ready")
         }
     }
 
