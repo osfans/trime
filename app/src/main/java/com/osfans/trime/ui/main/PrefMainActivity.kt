@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import splitties.systemservices.alarmManager
 import splitties.views.topPadding
+import timber.log.Timber
 
 class PrefMainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -119,17 +121,20 @@ class PrefMainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.rime.run { stateFlow }.combine(viewModel.statusStateFlow) { rimeStateFlow, viewModelFlow ->
                     val final =
-                        if (rimeStateFlow == RimeLifecycle.State.STARTING || viewModelFlow == RimeLifecycle.State.STARTING) {
-                            RimeLifecycle.State.STARTING
+                        if (viewModelFlow == MainUiState.ERR_DIRECTORY_MISSING) {
+                            viewModelFlow
+                        } else if (rimeStateFlow == RimeLifecycle.State.STARTING || viewModelFlow == MainUiState.LOADING) {
+                            MainUiState.LOADING
                         } else if (rimeStateFlow == RimeLifecycle.State.READY) {
-                            RimeLifecycle.State.READY
+                            MainUiState.READY
                         } else {
-                            RimeLifecycle.State.STOPPED
+                            MainUiState.READY
                         }
                     final
                 }.collect { state ->
+                    Timber.d("UI State is %s", state)
                     when (state) {
-                        RimeLifecycle.State.STARTING -> {
+                        MainUiState.LOADING -> {
                             loadingDialog?.let {
                                 // if dialog is not null, do nothing, we don't want to dismiss and recreate loading dialog
                             } ?: run {
@@ -140,9 +145,15 @@ class PrefMainActivity : AppCompatActivity() {
                                     }
                             }
                         }
-                        RimeLifecycle.State.READY -> {
+                        MainUiState.READY -> {
                             loadingDialog?.dismiss()
                             loadingDialog = null
+                        }
+                        MainUiState.ERR_DIRECTORY_MISSING -> {
+                            loadingDialog?.dismiss()
+                            loadingDialog = null
+                            viewModel.setToReady()
+                            showNoDirectoryAlert()
                         }
                         else -> return@collect
                     }
@@ -176,24 +187,28 @@ class PrefMainActivity : AppCompatActivity() {
     private fun deploy() {
         lifecycleScope.launch {
             rimeActionWithResultDialog("rime.trime", "W", 1) {
-                viewModel.deploy()
-                copyToInternal()
-                RimeDaemon.restartRime(true)
-                viewModel.deployComplete()
+                viewModel.setToLoading()
+                if (copyToInternal()) {
+                    RimeDaemon.restartRime(true)
+                    viewModel.setToReady()
+                } else {
+                    viewModel.setToError()
+                }
                 true
             }
         }
     }
 
     private suspend fun copyToInternal(): Boolean {
-        val allowedUriList = contentResolver.persistedUriPermissions.map {
-            it.uri.toString()
-        }
+        val allowedUriList =
+            contentResolver.persistedUriPermissions.map {
+                it.uri.toString()
+            }
 
         val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
         val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
 
-        return if(viewModel.checkAndResetPathPermission(allowedUriList, userDirUri, shareDirUri)){
+        return if (viewModel.checkAndResetPathPermission(allowedUriList, userDirUri, shareDirUri)) {
             FolderSync.copyDir(this)
             true
         } else {
@@ -201,9 +216,16 @@ class PrefMainActivity : AppCompatActivity() {
         }
     }
 
-        if (shareDirUri != userDirUri && shareDirUri.isNotBlank()) {
-            FolderSync(this, shareDirUri).copyAll((AppPrefs.Profile.getAppShareDir()))
-        }
+    @UiThread
+    private fun showNoDirectoryAlert() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.directory_not_selected)
+            .setMessage(R.string.profile__error_user_data_dir)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                navHostFragment.navController.navigate(R.id.action_prefFragment_to_profileFragment)
+            }
+            .setCancelable(false)
+            .show()
     }
 
     override fun onResume() {
