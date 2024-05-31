@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.osfans.trime.data.AppPrefs
-import com.osfans.trime.util.appContext
 import timber.log.Timber
 import java.io.File
 
@@ -108,13 +107,15 @@ class FolderSync(private val context: Context, private val docUriStr: String) {
     }
 
     companion object {
-        suspend fun exportModifiedFiles() {
+        suspend fun copyDir(context: Context) {
             val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
+            val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
 
-            val f1 = File(AppPrefs.Profile.getAppUserDir(), "default.custom.yaml")
-            val f2 = File(AppPrefs.Profile.getAppUserDir(), "user.yaml")
+            FolderSync(context, userDirUri).copyAll((AppPrefs.Profile.getAppUserDir()))
 
-            FolderExport(appContext, userDirUri).exportModifiedFiles(arrayOf(f1, f2))
+            if (shareDirUri != userDirUri && shareDirUri.isNotBlank()) {
+                FolderSync(context, shareDirUri).copyAll((AppPrefs.Profile.getAppShareDir()))
+            }
         }
     }
 }

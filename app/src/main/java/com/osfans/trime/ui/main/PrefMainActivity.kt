@@ -185,11 +185,21 @@ class PrefMainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun copyToInternal() {
+    private suspend fun copyToInternal(): Boolean {
+        val allowedUriList = contentResolver.persistedUriPermissions.map {
+            it.uri.toString()
+        }
+
         val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
         val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
 
-        FolderSync(this, userDirUri).copyAll((AppPrefs.Profile.getAppUserDir()))
+        return if(viewModel.checkAndResetPathPermission(allowedUriList, userDirUri, shareDirUri)){
+            FolderSync.copyDir(this)
+            true
+        } else {
+            false
+        }
+    }
 
         if (shareDirUri != userDirUri && shareDirUri.isNotBlank()) {
             FolderSync(this, shareDirUri).copyAll((AppPrefs.Profile.getAppShareDir()))
