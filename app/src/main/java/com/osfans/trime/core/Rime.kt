@@ -30,6 +30,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override val isReady: Boolean
         get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
 
+    override val isStarting: Boolean
+        get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.STARTING
+
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
