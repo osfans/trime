@@ -15,6 +15,8 @@ import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
+import com.osfans.trime.daemon.RimeDaemon.createSession
+import com.osfans.trime.daemon.RimeDaemon.destroySession
 import com.osfans.trime.util.appContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -122,26 +124,33 @@ object RimeDaemon {
     private const val CHANNEL_ID = "rime-daemon"
     private var restartId = 0
 
+    private fun postNotification(id: Int) {
+        NotificationCompat.Builder(appContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_baseline_sync_24)
+            .setContentTitle(appContext.getString(R.string.rime_daemon))
+            .setContentText(appContext.getString(R.string.restarting_rime))
+            .setOngoing(true)
+            .setProgress(100, 0, true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build().let { notificationManager.notify(id, it) }
+    }
+
     /**
      * Restart Rime instance to deploy while keep the session
      */
     fun restartRime(fullCheck: Boolean = false) =
         lock.withLock {
-            val id = restartId++
-            NotificationCompat.Builder(appContext, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_baseline_sync_24)
-                .setContentTitle(appContext.getString(R.string.rime_daemon))
-                .setContentText(appContext.getString(R.string.restarting_rime))
-                .setOngoing(true)
-                .setProgress(100, 0, true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .build().let { notificationManager.notify(id, it) }
             realRime.finalize()
             realRime.startup(fullCheck)
-            TrimeApplication.getInstance().coroutineScope.launch {
-                // cancel notification on ready
-                realRime.lifecycle.whenReady {
-                    notificationManager.cancel(id)
+
+            if (realRime.isStarting) {
+                val id = restartId++
+                postNotification(id)
+                TrimeApplication.getInstance().coroutineScope.launch {
+                    // cancel notification on ready
+                    realRime.lifecycle.whenReady {
+                        notificationManager.cancel(id)
+                    }
                 }
             }
         }
