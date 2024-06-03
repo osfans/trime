@@ -195,7 +195,8 @@ class ProfileFragment :
                 true
             }
             get<Preference>("profile_reset")?.setOnPreferenceClickListener {
-                val items = appContext.assets.list("rime")!!
+                val rimeFolder = "rime"
+                val items = appContext.assets.list(rimeFolder)!!
                 val checkedItems = items.map { false }.toBooleanArray()
                 AlertDialog.Builder(context)
                     .setTitle(R.string.profile_reset)
@@ -209,7 +210,7 @@ class ProfileFragment :
                             withContext(Dispatchers.IO) {
                                 res =
                                     items.fold(true) { acc, asset ->
-                                        ResourceUtils.copyFile(asset, DataManager.sharedDataDir).fold({
+                                        ResourceUtils.copyFiles("$rimeFolder/$asset", DataManager.sharedDataDir, "$rimeFolder/").fold({
                                             acc and true // on success
                                         }, {
                                             acc and false // on failure
