@@ -99,7 +99,7 @@ class DataChecksumsPlugin : Plugin<Project> {
                     ?: mutableMapOf()
 
             fun File.allParents(): List<File> =
-                if (parentFile == null || parentFile.path in map) {
+                if (parentFile == null || parentFile.invariantSeparatorsPath in map) {
                     listOf()
                 } else {
                     listOf(parentFile) + parentFile.allParents()
@@ -110,7 +110,7 @@ class DataChecksumsPlugin : Plugin<Project> {
                 }
                 logger.log(LogLevel.DEBUG, "${change.changeType}: ${change.normalizedPath}")
                 val relativeFile = change.file.relativeTo(file.parentFile)
-                val key = relativeFile.path
+                val key = relativeFile.invariantSeparatorsPath
                 if (change.changeType == ChangeType.REMOVED) {
                     map.remove(key)
                 } else {
@@ -120,7 +120,7 @@ class DataChecksumsPlugin : Plugin<Project> {
             // calculate dirs
             inputDir.asFileTree.forEach {
                 it.relativeTo(file.parentFile).allParents().forEach { p ->
-                    map[p.path] = ""
+                    map[p.invariantSeparatorsPath] = ""
                 }
             }
             serialize(map.toSortedMap())
