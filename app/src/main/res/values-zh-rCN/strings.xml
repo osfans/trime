@@ -204,6 +204,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item name="100">100</item>
     </string-array>
     <string name="pref_toolkit">工具箱</string>
+    <string name="pref_toolkit_internal_dir">內部文件夹</string>
     <string name="system">系统</string>
     <string name="export">导出</string>
     <string name="scroll_to_bottom">跳到最后</string>

@@ -217,6 +217,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clear">清除畫面</string>
     <string name="system">系統</string>
     <string name="pref_toolkit">工具箱</string>
+    <string name="pref_toolkit_internal_dir">內部資料夾</string>
     <string name="exception_logcat_created">Logcat 行程已建立</string>
     <string name="pref_about">關於</string>
     <string name="pref_theme_and_color">主題與配色</string>
