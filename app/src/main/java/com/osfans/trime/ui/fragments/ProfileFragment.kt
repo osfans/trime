@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ui.fragments
 
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.TimePickerDialog
@@ -12,7 +13,6 @@ import android.content.SharedPreferences
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.provider.DocumentsContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
@@ -21,7 +21,6 @@ import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import com.blankj.utilcode.util.ToastUtils
-import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
@@ -50,14 +49,20 @@ class ProfileFragment :
 
     private fun FolderPickerPreference.registerDocumentTreeLauncher() {
         documentTreeLauncher =
-            registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
-                it ?: return@registerForActivityResult
-                val uri =
-                    DocumentsContract.buildDocumentUriUsingTree(
-                        it,
-                        DocumentsContract.getTreeDocumentId(it),
-                    )
-                dialogView.editText.setText(UriUtils.uri2File(uri).absolutePath)
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val context = requireContext()
+                    result.data?.data?.also { uri ->
+                        val contentResolver = context.contentResolver
+
+                        val takeFlags: Int =
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        contentResolver.takePersistableUriPermission(uri, takeFlags)
+
+                        assignValue(uri.toString())
+                    }
+                }
             }
     }
 
@@ -67,12 +72,10 @@ class ProfileFragment :
     ) {
         addPreferencesFromResource(R.xml.profile_preference)
         with(preferenceScreen) {
-            get<FolderPickerPreference>("profile_shared_data_dir")?.apply {
-                setDefaultValue(DataManager.defaultDataDirectory.path)
+            get<FolderPickerPreference>(AppPrefs.Profile.SHARED_DATA_DIR)?.apply {
                 registerDocumentTreeLauncher()
             }
-            get<FolderPickerPreference>("profile_user_data_dir")?.apply {
-                setDefaultValue(DataManager.defaultDataDirectory.path)
+            get<FolderPickerPreference>(AppPrefs.Profile.USER_DATA_DIR)?.apply {
                 registerDocumentTreeLauncher()
             }
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
@@ -85,7 +88,7 @@ class ProfileFragment :
                 }
                 true
             }
-            get<SwitchPreferenceCompat>("profile_sync_in_background")?.apply {
+            get<SwitchPreferenceCompat>(AppPrefs.Profile.SYNC_BACKGROUND_ENABLED)?.apply {
                 val lastBackgroundSync = prefs.profile.lastBackgroundSync
                 summaryOn =
                     if (lastBackgroundSync.isBlank()) {
@@ -105,7 +108,7 @@ class ProfileFragment :
                     }
                 summaryOff = context.getString(R.string.profile_enable_syncing_in_background)
             }
-            get<SwitchPreferenceCompat>("profile_timing_sync")?.apply { // 定时同步偏好描述
+            get<SwitchPreferenceCompat>(AppPrefs.Profile.TIMING_SYNC_ENABLED)?.apply { // 定时同步偏好描述
                 val timingSyncPreference: SwitchPreferenceCompat? = findPreference("profile_timing_sync")
                 timingSyncPreference?.summaryProvider =
                     Preference.SummaryProvider<SwitchPreferenceCompat> {
@@ -119,7 +122,7 @@ class ProfileFragment :
                         }
                     }
             }
-            get<SwitchPreferenceCompat>("profile_timing_sync")?.setOnPreferenceClickListener { // 监听定时同步偏好设置
+            get<SwitchPreferenceCompat>(AppPrefs.Profile.TIMING_SYNC_ENABLED)?.setOnPreferenceClickListener { // 监听定时同步偏好设置
                 // 设置待发送的同步事件
                 val pendingIntent =
                     PendingIntent.getBroadcast(
@@ -133,7 +136,7 @@ class ProfileFragment :
                         },
                     )
                 val cal = Calendar.getInstance()
-                if (get<SwitchPreferenceCompat>("profile_timing_sync")?.isChecked == true) { // 当定时同步偏好打开时
+                if (get<SwitchPreferenceCompat>(AppPrefs.Profile.TIMING_SYNC_ENABLED)?.isChecked == true) { // 当定时同步偏好打开时
                     val timeSetListener = // 监听时间选择器设置
                         TimePickerDialog.OnTimeSetListener { _, hour, minute ->
                             cal.set(Calendar.HOUR_OF_DAY, hour)
@@ -235,7 +238,7 @@ class ProfileFragment :
     ) { // 实时更新定时同步偏好描述
         val timingSyncPreference: SwitchPreferenceCompat? = findPreference("profile_timing_sync")
         when (key) {
-            "profile_timing_sync_trigger_time",
+            AppPrefs.Profile.TIMING_SYNC_TRIGGER_TIME,
             -> {
                 timingSyncPreference?.summaryProvider =
                     Preference.SummaryProvider<SwitchPreferenceCompat> {
