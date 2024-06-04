@@ -209,18 +209,20 @@ class ProfileFragment :
                         lifecycleScope.withLoadingDialog(context) {
                             withContext(Dispatchers.IO) {
                                 res =
-                                    items.fold(true) { acc, asset ->
-                                        ResourceUtils.copyFiles("$rimeFolder/$asset", DataManager.sharedDataDir, "$rimeFolder/").fold({
-                                            acc and true // on success
-                                        }, {
-                                            acc and false // on failure
-                                        })
-                                    }
+                                    items.filterIndexed { index, _ -> checkedItems[index] }
+                                        .fold(true) { acc, asset ->
+                                            ResourceUtils.copyFiles(
+                                                "$rimeFolder/$asset",
+                                                DataManager.sharedDataDir,
+                                                "$rimeFolder/",
+                                            )
+                                                .fold({ acc and true }, { acc and false })
+                                        }
                             }
+                            ToastUtils.showShort(
+                                if (res) R.string.reset_success else R.string.reset_failure,
+                            )
                         }
-                        ToastUtils.showShort(
-                            if (res) R.string.reset_success else R.string.reset_failure,
-                        )
                     }.show()
                 true
             }
