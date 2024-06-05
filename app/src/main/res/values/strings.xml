@@ -290,4 +290,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </string-array>
     <string name="theme_trime">default</string>
     <string name="theme_tongwenfeng">tongwenfeng</string>
+    <string name="pref__clear">Clear</string>
 </resources>

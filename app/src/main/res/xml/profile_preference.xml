@@ -16,6 +16,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:iconSpaceReserved="false"
             android:title="@string/profile_shared_data_dir"
             app:persistent="true"
+            app:defaultButtonLabel="@string/pref__clear"
             app:useSimpleSummaryProvider="true" />
 
         <com.osfans.trime.ui.components.FolderPickerPreference
@@ -23,6 +24,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:iconSpaceReserved="false"
             android:title="@string/profile_user_data_dir"
             app:persistent="true"
+            app:showDefaultButton="false"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
