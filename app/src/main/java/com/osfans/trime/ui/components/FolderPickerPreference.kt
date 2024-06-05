@@ -28,6 +28,9 @@ class FolderPickerPreference
         lateinit var documentTreeLauncher: ActivityResultLauncher<Intent?>
         lateinit var dialogView: FolderPickerDialogBinding
         private var tempValue = ""
+        private var showDefaultButton = true
+        private var defaultButtonLabel: String
+        private var alertDialog: AlertDialog? = null
 
         var default = ""
 
@@ -37,6 +40,10 @@ class FolderPickerPreference
                     if (getBoolean(R.styleable.FolderPickerPreferenceAttrs_useSimpleSummaryProvider, false)) {
                         summaryProvider = SummaryProvider<FolderPickerPreference> { it.value }
                     }
+                    showDefaultButton = getBoolean(R.styleable.FolderPickerPreferenceAttrs_showDefaultButton, true)
+                    defaultButtonLabel = getString(
+                        R.styleable.FolderPickerPreferenceAttrs_defaultButtonLabel,
+                    ) ?: context.getString(R.string.pref__default)
                 } finally {
                     recycle()
                 }
@@ -74,17 +81,26 @@ class FolderPickerPreference
             dialogView.button.setOnClickListener {
                 documentTreeLauncher.launch(SetupFragment.getFolderIntent())
             }
-            AlertDialog.Builder(context)
-                .setTitle(this@FolderPickerPreference.title)
-                .setView(dialogView.root)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    val value = tempValue
-                    if (value.isNotBlank()) {
-                        setValue(value)
+            val builder =
+                AlertDialog.Builder(context)
+                    .setTitle(this@FolderPickerPreference.title)
+                    .setView(dialogView.root)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        val value = tempValue
+                        if (value.isNotBlank()) {
+                            setValue(value)
+                        }
                     }
+                    .setNegativeButton(android.R.string.cancel, null)
+
+            if (showDefaultButton) {
+                builder.setNeutralButton(defaultButtonLabel) { _, _ ->
+                    setValue(default)
                 }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
+            }
+
+            alertDialog = builder.create()
+            alertDialog?.show()
         }
 
         private fun setValue(value: String) {
