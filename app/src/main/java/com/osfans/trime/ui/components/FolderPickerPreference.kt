@@ -85,13 +85,7 @@ class FolderPickerPreference
                 AlertDialog.Builder(context)
                     .setTitle(this@FolderPickerPreference.title)
                     .setView(dialogView.root)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        val value = tempValue
-                        if (value.isNotBlank()) {
-                            setValue(value)
-                        }
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, null)
 
             if (showDefaultButton) {
                 builder.setNeutralButton(defaultButtonLabel) { _, _ ->
@@ -110,9 +104,11 @@ class FolderPickerPreference
             }
         }
 
-        fun assignValue(value: String) {
-            tempValue = value
-            dialogView.editText.text = getDisplayValue(value)
+        fun saveValueAndClose(value: String) {
+            if (value.isNotBlank()) {
+                setValue(value)
+            }
+            alertDialog?.dismiss()
         }
 
         private fun getDisplayValue(value: String): String {

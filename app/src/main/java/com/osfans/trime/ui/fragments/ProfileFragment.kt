@@ -59,7 +59,7 @@ class ProfileFragment :
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         contentResolver.takePersistableUriPermission(uri, takeFlags)
 
-                        assignValue(uri.toString())
+                        saveValueAndClose(uri.toString())
                     }
                 }
             }
