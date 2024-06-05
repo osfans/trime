@@ -275,6 +275,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="enable_schemata">啓用方案</string>
     <string name="no_schema_to_select">當前沒有方案可選擇。請前往啟用方案。</string>
     <string name="no_schema_to_enable">沒有方案可啟用。請確保您已在使用者資料夾中放入了前置檔案和方案檔案。</string>
+    <string name="no_schema_before_deploy">沒有方案可使用。請先進行「部署」。</string>
     <string name="schemata">方案</string>
     <string name="schemata_hint">選擇當前方案或啓用更多方案</string>
     <string name="navbar_background">導航欄背景</string>

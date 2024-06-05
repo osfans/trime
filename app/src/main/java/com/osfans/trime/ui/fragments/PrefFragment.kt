@@ -5,6 +5,7 @@
 package com.osfans.trime.ui.fragments
 
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -39,16 +40,13 @@ class PrefFragment : PaddingPreferenceFragment() {
         setPreferencesFromResource(R.xml.prefs, rootKey)
         with(preferenceScreen) {
             get<Preference>("pref_schemata")?.setOnPreferenceClickListener {
-                viewModel.rime.launchOnReady { api ->
-                    lifecycleScope.launch {
-                        EnabledSchemaPickerDialog.build(api, lifecycleScope, context) {
-                            setPositiveButton(R.string.enable_schemata) { _, _ ->
-                                lifecycleScope.launch {
-                                    AvailableSchemaPickerDialog.build(api, lifecycleScope, context).show()
-                                }
-                            }
-                        }.show()
-                    }
+                if (viewModel.rime.run { !isStarting && !isReady }) {
+                    AlertDialog.Builder(context)
+                        .setMessage(R.string.no_schema_before_deploy)
+                        .setPositiveButton(R.string.ok, null)
+                        .show()
+                } else {
+                    showSchemaPicker()
                 }
                 true
             }
@@ -75,6 +73,24 @@ class PrefFragment : PaddingPreferenceFragment() {
             get<Preference>("pref_others")?.setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_prefFragment_to_otherFragment)
                 true
+            }
+        }
+    }
+
+    private fun showSchemaPicker() {
+        viewModel.rime.launchOnReady { api ->
+            lifecycleScope.launch {
+                EnabledSchemaPickerDialog.build(api, lifecycleScope, requireContext()) {
+                    setPositiveButton(R.string.enable_schemata) { _, _ ->
+                        lifecycleScope.launch {
+                            AvailableSchemaPickerDialog.build(
+                                api,
+                                lifecycleScope,
+                                context,
+                            ).show()
+                        }
+                    }
+                }.show()
             }
         }
     }
