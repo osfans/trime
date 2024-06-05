@@ -353,9 +353,17 @@ class AppPrefs(
                 return PathUtils.getExternalAppFilesPath()
             }
 
-            fun getAppUserDir() = getAppPath() + "/user"
+            fun isAppPathReady() = getAppPath().isNotBlank()
+        }
 
-            fun getAppShareDir() = getAppPath() + "/share"
+        fun getAppUserDir() = getAppPath() + "/user"
+
+        fun getAppShareDir(): String {
+            return if (sharedDataDir.isNotEmpty() && sharedDataDir != userDataDir) {
+                getAppPath() + "/share"
+            } else {
+                getAppUserDir()
+            }
         }
 
         var sharedDataDir: String

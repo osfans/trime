@@ -111,10 +111,12 @@ class FolderSync(private val context: Context, private val docUriStr: String) {
             val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
             val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
 
-            FolderSync(context, userDirUri).copyAll((AppPrefs.Profile.getAppUserDir()))
+            FolderSync(context, userDirUri)
+                .copyAll(AppPrefs.defaultInstance().profile.getAppUserDir())
 
             if (shareDirUri != userDirUri && shareDirUri.isNotBlank()) {
-                FolderSync(context, shareDirUri).copyAll((AppPrefs.Profile.getAppShareDir()))
+                FolderSync(context, shareDirUri)
+                    .copyAll(AppPrefs.defaultInstance().profile.getAppShareDir())
             }
         }
     }

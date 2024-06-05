@@ -70,11 +70,11 @@ object DataManager {
 
     @JvmStatic
     val sharedDataDir
-        get() = File(AppPrefs.Profile.getAppShareDir())
+        get() = File(prefs.profile.getAppShareDir())
 
     @JvmStatic
     val userDataDir
-        get() = File(AppPrefs.Profile.getAppUserDir())
+        get() = File(prefs.profile.getAppUserDir())
 
     /**
      * Return the absolute path of the compiled config file

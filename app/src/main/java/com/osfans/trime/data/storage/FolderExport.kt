@@ -97,19 +97,21 @@ class FolderExport(private val context: Context, private val docUriStr: String) 
 
     companion object {
         suspend fun exportModifiedFiles() {
-            val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
+            val profile = AppPrefs.defaultInstance().profile
+            val userDirUri = profile.userDataDir
 
-            val f1 = File(AppPrefs.Profile.getAppUserDir(), "default.custom.yaml")
-            val f2 = File(AppPrefs.Profile.getAppUserDir(), "user.yaml")
+            val f1 = File(profile.getAppUserDir(), "default.custom.yaml")
+            val f2 = File(profile.getAppUserDir(), "user.yaml")
 
             FolderExport(appContext, userDirUri).exportModifiedFiles(arrayOf(f1, f2))
         }
 
         suspend fun exportSyncDir(): Boolean {
-            val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
+            val profile = AppPrefs.defaultInstance().profile
+            val userDirUri = profile.userDataDir
 
             val dir = "sync"
-            val dirFile = File(AppPrefs.Profile.getAppUserDir(), dir)
+            val dirFile = File(profile.getAppUserDir(), dir)
 
             return FolderExport(appContext, userDirUri).exportDir(dirFile)
         }
