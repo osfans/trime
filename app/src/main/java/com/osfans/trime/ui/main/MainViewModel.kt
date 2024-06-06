@@ -62,10 +62,10 @@ class MainViewModel : ViewModel() {
         shareDirUri: String,
     ): Boolean {
         return if (!persistedUriList.contains(userDirUri)) {
-            AppPrefs.defaultInstance().profile.userDataDir = ""
+            AppPrefs.defaultInstance().profile.userDataDirUri = ""
             false
         } else if (shareDirUri.isNotBlank() && !persistedUriList.contains(shareDirUri)) {
-            AppPrefs.defaultInstance().profile.sharedDataDir = ""
+            AppPrefs.defaultInstance().profile.sharedDataDirUri = ""
             false
         } else {
             true

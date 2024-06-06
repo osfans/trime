@@ -14,16 +14,22 @@ class FolderSync(private val context: Context, private val docUriStr: String) {
         fileNames: Array<String>,
         appSpecificPath: String,
     ) {
-        DocumentFile.fromTreeUri(context, docUriStr.toUri())?.runCatching {
-            fileNames.forEach { name ->
-                val docFile = this.findFile(name)?.takeIf { it.isFile }
-                docFile?.let {
-                    val file = File(appSpecificPath, name)
-                    copyToFile(it, file)
+        runCatching {
+            DocumentFile.fromTreeUri(context, docUriStr.toUri())?.let { tree ->
+                fileNames.forEach { name ->
+                    val docFile = tree.findFile(name)?.takeIf { it.isFile }
+                    docFile?.let {
+                        val file = File(appSpecificPath, name)
+                        copyToFile(it, file)
+                    } ?: run {
+                        Timber.w("Files %s not exists", name)
+                    }
                 }
+            } ?: run {
+                Timber.w("Tree URI %s not exists", docUriStr)
             }
-        }?.onFailure {
-            Timber.e(it, "Uri Error")
+        }.onFailure {
+            Timber.e(it, "CopyFiles Error")
         }
     }
 
@@ -108,8 +114,8 @@ class FolderSync(private val context: Context, private val docUriStr: String) {
 
     companion object {
         suspend fun copyDir(context: Context) {
-            val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
-            val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
+            val userDirUri = AppPrefs.defaultInstance().profile.userDataDirUri
+            val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDirUri
 
             FolderSync(context, userDirUri)
                 .copyAll(AppPrefs.defaultInstance().profile.getAppUserDir())

@@ -359,17 +359,17 @@ class AppPrefs(
         fun getAppUserDir() = getAppPath() + "/user"
 
         fun getAppShareDir(): String {
-            return if (sharedDataDir.isNotEmpty() && sharedDataDir != userDataDir) {
+            return if (sharedDataDirUri.isNotEmpty() && sharedDataDirUri != userDataDirUri) {
                 getAppPath() + "/share"
             } else {
                 getAppUserDir()
             }
         }
 
-        var sharedDataDir: String
+        var sharedDataDirUri: String
             get() = prefs.getPref(SHARED_DATA_DIR, "")
             set(v) = prefs.setPref(SHARED_DATA_DIR, v)
-        var userDataDir: String
+        var userDataDirUri: String
             get() = prefs.getPref(USER_DATA_DIR, "")
             set(v) = prefs.setPref(USER_DATA_DIR, v)
         var syncBackgroundEnabled: Boolean
@@ -388,7 +388,7 @@ class AppPrefs(
             get() = prefs.getPref(LAST_BACKGROUND_SYNC, "")
             set(v) = prefs.setPref(LAST_BACKGROUND_SYNC, v)
 
-        fun isUserDataDirChosen() = userDataDir.isNotBlank() && userDataDir.startsWith(URI_PREFIX)
+        fun isUserDataDirChosen() = userDataDirUri.isNotBlank() && userDataDirUri.startsWith(URI_PREFIX)
     }
 
     class Clipboard(private val prefs: AppPrefs) {

@@ -63,7 +63,7 @@ object ThemePickerDialog {
     ) {
         val fileNameWithoutExt = if (selectedName == "trime") selectedName else "$selectedName.trime"
 
-        val sync = FolderSync(context, AppPrefs.defaultInstance().profile.userDataDir)
+        val sync = FolderSync(context, AppPrefs.defaultInstance().profile.userDataDirUri)
         sync.copyFiles(
             arrayOf("$fileNameWithoutExt.yaml", "$fileNameWithoutExt.custom.yaml"),
             AppPrefs.Profile.getAppPath(),

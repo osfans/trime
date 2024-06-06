@@ -205,8 +205,8 @@ class PrefMainActivity : AppCompatActivity() {
                 it.uri.toString()
             }
 
-        val userDirUri = AppPrefs.defaultInstance().profile.userDataDir
-        val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDir
+        val userDirUri = AppPrefs.defaultInstance().profile.userDataDirUri
+        val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDirUri
 
         return if (viewModel.checkAndResetPathPermission(allowedUriList, userDirUri, shareDirUri)) {
             FolderSync.copyDir(this)

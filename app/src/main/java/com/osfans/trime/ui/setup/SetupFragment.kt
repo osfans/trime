@@ -80,7 +80,7 @@ class SetupFragment : Fragment() {
     }
 
     private fun saveUri(uri: Uri) {
-        AppPrefs.defaultInstance().profile.userDataDir = uri.toString()
+        AppPrefs.defaultInstance().profile.userDataDirUri = uri.toString()
     }
 
     private fun openDirectory() {
