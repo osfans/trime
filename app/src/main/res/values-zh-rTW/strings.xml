@@ -290,4 +290,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="theme_trime">預設</string>
     <string name="theme_tongwenfeng">同文風</string>
     <string name="pref__clear">清除</string>
+    <string name="share">共享</string>
 </resources>

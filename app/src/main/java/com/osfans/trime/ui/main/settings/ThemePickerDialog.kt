@@ -26,15 +26,19 @@ object ThemePickerDialog {
             }
         val allNames =
             all.map {
-                when (it) {
-                    "trime" -> context.getString(R.string.theme_trime)
-                    "tongwenfeng" -> context.getString(R.string.theme_tongwenfeng)
-                    else -> it
+                when (val themeName = it.first) {
+                    ThemeManager.DEFAULT_THEME -> context.getString(R.string.theme_trime)
+                    ThemeManager.TONGWENFENG_THEME -> context.getString(R.string.theme_tongwenfeng)
+                    else ->
+                        if (ThemeManager.isUserTheme(it)) {
+                            themeName
+                        } else {
+                            "[${context.getString(R.string.share)}] $themeName"
+                        }
                 }
             }
-        val current =
-            AppPrefs.defaultInstance().theme.selectedTheme
-        val currentIndex = all.indexOfFirst { it == current }.coerceAtLeast(0)
+        val current = AppPrefs.defaultInstance().theme.selectedTheme
+        val currentIndex = all.indexOfFirst { it.first == current }.coerceAtLeast(0)
         return AlertDialog.Builder(context).apply {
             setTitle(R.string.looks__selected_theme_title)
             if (allNames.isEmpty()) {
@@ -48,7 +52,7 @@ object ThemePickerDialog {
                         dialog.dismiss()
                         withContext(Dispatchers.IO) {
                             copyThemeFile(context, all[which])
-                            ThemeManager.setNormalTheme(all[which])
+                            ThemeManager.setNormalTheme(all[which].first)
                         }
                     }
                 }
@@ -59,14 +63,35 @@ object ThemePickerDialog {
 
     private suspend fun copyThemeFile(
         context: Context,
-        selectedName: String,
+        selectedTheme: Pair<String, String>,
     ) {
-        val fileNameWithoutExt = if (selectedName == "trime") selectedName else "$selectedName.trime"
+        val themeName = selectedTheme.first
+        val fileNameWithoutExt =
+            if (themeName == "trime") {
+                "trime"
+            } else {
+                "$themeName.trime"
+            }
 
-        val sync = FolderSync(context, AppPrefs.defaultInstance().profile.userDataDirUri)
+        val profile = AppPrefs.defaultInstance().profile
+        val uri =
+            if (ThemeManager.isUserTheme(selectedTheme)) {
+                profile.userDataDirUri
+            } else {
+                profile.sharedDataDirUri
+            }
+
+        val targetPath =
+            if (ThemeManager.isUserTheme(selectedTheme)) {
+                profile.getAppUserDir()
+            } else {
+                profile.getAppShareDir()
+            }
+
+        val sync = FolderSync(context, uri)
         sync.copyFiles(
             arrayOf("$fileNameWithoutExt.yaml", "$fileNameWithoutExt.custom.yaml"),
-            AppPrefs.Profile.getAppPath(),
+            targetPath,
         )
     }
 }
