@@ -94,6 +94,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_timing_sync">定时同步</string>
     <string name="profile_timing_sync_trigger_time">已开启定时同步 下次同步时间: %1$s</string>
     <string name="profile_enable_timing_sync">点击以开启定时同步</string>
+    <string name="profile__error_user_data_dir">请到「配置管理」设定相关资料。</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
     <string name="pref_keyboard__effect">按键效果</string>
@@ -133,10 +134,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_candidate">点击候选词</string>
     <string name="keyboard__hook_candidate_commit">点击候选词后，模拟空格键完成上屏(暂未实现)</string>
     <string name="trime_app_slogan">击响中文之韵</string>
-    <string name="external_storage_access_required">同文输入法需要存储权限以部署或读取方案和配置，点击“确定”前往授权。</string>
-    <string name="external_storage_permission_not_available">存储权限不可用</string>
-    <string name="external_storage_permission_granted">已授予存储权限</string>
-    <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
+    <string name="directory_not_selected">未设定配置文件的文件夹</string>
     <string name="alert_window_access_required">同文输入法需要允许显示在其他应用上方以能显示应用外悬浮窗或对话框，点击“确定”以授权。</string>
     <string name="keyboard__key_sound_effect_title">按键音效</string>
     <string name="sound_progress">正在应用音效...</string>
@@ -206,6 +204,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item name="100">100</item>
     </string-array>
     <string name="pref_toolkit">工具箱</string>
+    <string name="pref_toolkit_internal_dir">內部文件夹</string>
     <string name="system">系统</string>
     <string name="export">导出</string>
     <string name="scroll_to_bottom">跳到最后</string>
@@ -262,8 +261,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__split_title">转换到横屏键盘</string>
     <string name="keyboard__split_space_title">自动分割键盘比例</string>
     <string name="setup__step_three">第 3 步</string>
-    <string name="setup__request_permmision_hint">当前同文需要存储权限以访问配置、使得用户容易更改。</string>
-    <string name="setup__request_permmision">请求存储权限</string>
+    <string name="setup__request_permission_hint">请选择存放配置文件的文件夹 (如 "rime")</string>
+    <string name="setup__request_permission">选择文件夹</string>
     <string name="grant_permission">授予权限</string>
     <string name="schedule_exact_alarm_permission_title">没有闹钟和提醒权限</string>
     <string name="schedule_exact_alarm_permission_message">没有闹钟和提醒权限，我们无法在启用定时同步时及时为您同步数据配置。</string>
@@ -275,6 +274,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="enable_schemata">启用方案</string>
     <string name="no_schema_to_select">当前没有方案可选择。请前往启用方案。</string>
     <string name="no_schema_to_enable">没有方案可启用。请确保您已在用户文件夹中放入了前置文件和方案文件。</string>
+    <string name="no_schema_before_deploy">没有方案可使用。请先进行「部署」。</string>
     <string name="schemata">方案</string>
     <string name="schemata_hint">选择当前方案或启用更多方案</string>
     <string name="navbar_background">导航栏背景</string>
@@ -288,4 +288,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </string-array>
     <string name="theme_trime">默认</string>
     <string name="theme_tongwenfeng">同文风</string>
+    <string name="pref__clear">清除</string>
+    <string name="share">共享</string>
 </resources>

@@ -13,6 +13,7 @@ object ResourceUtils {
         dest: File,
         removedPrefix: String = "",
     ) = runCatching {
+        Timber.d("CopyFiles %s -> %s", filename, File(dest, filename.removePrefix(removedPrefix)).absolutePath)
         appContext.assets.open(filename).use { i ->
             File(dest, filename.removePrefix(removedPrefix))
                 .also { it.parentFile?.mkdirs() }
@@ -34,6 +35,7 @@ object ResourceUtils {
                     acc + copyFiles("$assetPath/$file", File(destFile, formattedDestPath), file).getOrDefault(0L)
                 }
             } else {
+                Timber.d("CopyFiles %s -> %s", assetPath, File(destFile, formattedDestPath.split(File.pathSeparator).last()).absolutePath)
                 appContext.assets.open(assetPath).use { i ->
                     File(destFile, formattedDestPath.split(File.pathSeparator).last())
                         .also { it.parentFile?.mkdirs() }

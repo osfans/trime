@@ -8,8 +8,7 @@ import android.content.Context
 import android.view.View
 import android.widget.ProgressBar
 import com.osfans.trime.R
-import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
+import com.osfans.trime.data.AppPrefs
 import splitties.dimensions.dp
 import splitties.resources.color
 import splitties.views.backgroundColor
@@ -41,10 +40,10 @@ class InitializationUi(override val ctx: Context) : Ui {
             val textView =
                 textView {
                     textResource =
-                        if (appContext.isStorageAvailable()) {
+                        if (isDeploying()) {
                             R.string.deploy_progress
                         } else {
-                            R.string.external_storage_permission_not_available
+                            R.string.directory_not_selected
                         }
                     textSize = 24f
                     textAlignment = View.TEXT_ALIGNMENT_CENTER
@@ -55,7 +54,7 @@ class InitializationUi(override val ctx: Context) : Ui {
                 ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
                     isIndeterminate = true
                     visibility =
-                        if (appContext.isStorageAvailable()) {
+                        if (isDeploying()) {
                             View.VISIBLE
                         } else {
                             View.GONE
@@ -77,6 +76,8 @@ class InitializationUi(override val ctx: Context) : Ui {
                 },
             )
         }
+
+    private fun isDeploying() = AppPrefs.defaultInstance().profile.isUserDataDirChosen()
 
     override val root =
         constraintLayout {

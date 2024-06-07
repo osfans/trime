@@ -15,6 +15,11 @@ object ThemeManager {
         fun onThemeChange(theme: Theme)
     }
 
+    private const val SHARE_TYPE = "SHARE"
+    private const val USER_TYPE = "USER"
+    const val DEFAULT_THEME = "trime"
+    const val TONGWENFENG_THEME = "tongwenfeng"
+
     /**
      * Update sharedThemes and userThemes.
      */
@@ -32,27 +37,56 @@ object ThemeManager {
     private fun listThemes(path: File): MutableList<String> {
         return path.listFiles { _, name -> name.endsWith("trime.yaml") }
             ?.mapNotNull { f ->
-                if (f.name == "trime.yaml") "trime" else f.name.substringBeforeLast(".trime.yaml")
+                getThemeName(f)
             }
             ?.toMutableList() ?: mutableListOf()
     }
 
-    private val sharedThemes: MutableList<String> get() = listThemes(DataManager.sharedDataDir)
-
-    private val userThemes: MutableList<String> get() = listThemes(DataManager.userDataDir)
-
-    fun getAllThemes(): List<String> {
-        if (DataManager.sharedDataDir.absolutePath == DataManager.userDataDir.absolutePath) {
-            return userThemes
+    private fun getThemeName(f: File): String {
+        val name = f.name.substringBeforeLast(".trime.yaml")
+        return if (name == "trime.yaml") {
+            "trime"
+        } else {
+            name
         }
-        return sharedThemes + userThemes
+    }
+
+    private fun getSharedThemes(): List<String> = listThemes(DataManager.sharedDataDir).sorted()
+
+    private fun getUserThemes(): List<String> = listThemes(DataManager.userDataDir).sorted()
+
+    fun getAllThemes(): List<Pair<String, String>> {
+        val userThemes = getUserThemes()
+        if (DataManager.sharedDataDir.absolutePath == DataManager.userDataDir.absolutePath) {
+            return userThemes.map { Pair(it, USER_TYPE) }
+        }
+
+        // if same theme exists in both user & share dir, user dir will be used
+        val allThemes = userThemes.map { Pair(it, USER_TYPE) }.toMutableList()
+        getSharedThemes().forEach {
+            if (!userThemes.contains(it)) {
+                allThemes.add(Pair(it, SHARE_TYPE))
+            }
+        }
+
+        return allThemes.also {
+            moveThemeToFirst(it, TONGWENFENG_THEME)
+            moveThemeToFirst(it, DEFAULT_THEME)
+        }
+    }
+
+    private fun moveThemeToFirst(
+        themes: MutableList<Pair<String, String>>,
+        themeName: String,
+    ) {
+        val defaultThemeIdx = themes.indexOfFirst { it.first == themeName }
+        if (defaultThemeIdx > 0) {
+            val pair = themes.removeAt(defaultThemeIdx)
+            themes.add(0, pair)
+        }
     }
 
     private fun refreshThemes() {
-        sharedThemes.clear()
-        userThemes.clear()
-        sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
-        userThemes.addAll(listThemes(DataManager.userDataDir))
     }
 
     // 在初始化 ColorManager 时会被赋值
@@ -75,5 +109,9 @@ object ThemeManager {
             ColorManager.refresh()
             TabManager.refresh()
         }
+    }
+
+    fun isUserTheme(theme: Pair<String, String>): Boolean {
+        return theme.second == USER_TYPE
     }
 }

@@ -7,8 +7,8 @@ package com.osfans.trime.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.blankj.utilcode.util.PathUtils
 import com.osfans.trime.R
-import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.ime.keyboard.KeyboardPrefs
@@ -347,13 +347,30 @@ class AppPrefs(
             const val TIMING_SYNC_TRIGGER_TIME = "profile_timing_sync_trigger_time"
             const val LAST_SYNC_STATUS = "profile_last_sync_status"
             const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
+            const val URI_PREFIX = "content://com.android.externalstorage.documents/"
+
+            fun getAppPath(): String {
+                return PathUtils.getExternalAppFilesPath()
+            }
+
+            fun isAppPathReady() = getAppPath().isNotBlank()
         }
 
-        var sharedDataDir: String
-            get() = prefs.getPref(SHARED_DATA_DIR, DataManager.defaultDataDirectory.path)
+        fun getAppUserDir() = getAppPath() + "/user"
+
+        fun getAppShareDir(): String {
+            return if (sharedDataDirUri.isNotEmpty() && sharedDataDirUri != userDataDirUri) {
+                getAppPath() + "/share"
+            } else {
+                getAppUserDir()
+            }
+        }
+
+        var sharedDataDirUri: String
+            get() = prefs.getPref(SHARED_DATA_DIR, "")
             set(v) = prefs.setPref(SHARED_DATA_DIR, v)
-        var userDataDir: String
-            get() = prefs.getPref(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
+        var userDataDirUri: String
+            get() = prefs.getPref(USER_DATA_DIR, "")
             set(v) = prefs.setPref(USER_DATA_DIR, v)
         var syncBackgroundEnabled: Boolean
             get() = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)
@@ -370,6 +387,8 @@ class AppPrefs(
         var lastBackgroundSync: String
             get() = prefs.getPref(LAST_BACKGROUND_SYNC, "")
             set(v) = prefs.setPref(LAST_BACKGROUND_SYNC, v)
+
+        fun isUserDataDirChosen() = userDataDirUri.isNotBlank() && userDataDirUri.startsWith(URI_PREFIX)
     }
 
     class Clipboard(private val prefs: AppPrefs) {

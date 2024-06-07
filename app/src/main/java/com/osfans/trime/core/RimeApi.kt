@@ -13,6 +13,8 @@ interface RimeApi {
 
     val isReady: Boolean
 
+    val isStarting: Boolean
+
     suspend fun isEmpty(): Boolean
 
     suspend fun availableSchemata(): Array<SchemaListItem>

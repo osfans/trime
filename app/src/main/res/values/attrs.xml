@@ -21,5 +21,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <declare-styleable name="FolderPickerPreferenceAttrs">
         <attr name="useSimpleSummaryProvider" />
+        <attr name="showDefaultButton" format="boolean" />
+        <attr name="defaultButtonLabel" format="reference|string" />
     </declare-styleable>
 </resources>

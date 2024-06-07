@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
@@ -34,14 +35,16 @@ import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
+import com.osfans.trime.data.storage.FolderSync
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity
-import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import splitties.systemservices.alarmManager
 import splitties.views.topPadding
+import timber.log.Timber
 
 class PrefMainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -116,16 +119,42 @@ class PrefMainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.rime.run { stateFlow }.collect { state ->
-                    when (state) {
-                        RimeLifecycle.State.STARTING -> {
-                            loadingDialog?.dismiss()
-                            loadingDialog =
-                                progressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
-                                    show()
-                                }
+                viewModel.rime.run { stateFlow }.combine(viewModel.statusStateFlow) { rimeStateFlow, viewModelFlow ->
+                    val final =
+                        if (viewModelFlow == MainUiState.ERR_DIRECTORY_MISSING) {
+                            viewModelFlow
+                        } else if (rimeStateFlow == RimeLifecycle.State.STARTING || viewModelFlow == MainUiState.LOADING) {
+                            MainUiState.LOADING
+                        } else if (rimeStateFlow == RimeLifecycle.State.READY) {
+                            MainUiState.READY
+                        } else {
+                            MainUiState.READY
                         }
-                        RimeLifecycle.State.READY -> loadingDialog?.dismiss()
+                    final
+                }.collect { state ->
+                    Timber.d("UI State is %s", state)
+                    when (state) {
+                        MainUiState.LOADING -> {
+                            loadingDialog?.let {
+                                // if dialog is not null, do nothing, we don't want to dismiss and recreate loading dialog
+                            } ?: run {
+                                // if dialog is null, create and show
+                                loadingDialog =
+                                    progressBarDialogIndeterminate(R.string.deploy_progress).create().apply {
+                                        show()
+                                    }
+                            }
+                        }
+                        MainUiState.READY -> {
+                            loadingDialog?.dismiss()
+                            loadingDialog = null
+                        }
+                        MainUiState.ERR_DIRECTORY_MISSING -> {
+                            loadingDialog?.dismiss()
+                            loadingDialog = null
+                            viewModel.setToReady()
+                            showNoDirectoryAlert()
+                        }
                         else -> return@collect
                     }
                 }
@@ -158,15 +187,50 @@ class PrefMainActivity : AppCompatActivity() {
     private fun deploy() {
         lifecycleScope.launch {
             rimeActionWithResultDialog("rime.trime", "W", 1) {
-                RimeDaemon.restartRime(true)
+                viewModel.setToLoading()
+                if (copyToInternal()) {
+                    RimeDaemon.restartRime(true)
+                    viewModel.setToReady()
+                } else {
+                    viewModel.setToError()
+                }
                 true
             }
         }
     }
 
+    private suspend fun copyToInternal(): Boolean {
+        val allowedUriList =
+            contentResolver.persistedUriPermissions.map {
+                it.uri.toString()
+            }
+
+        val userDirUri = AppPrefs.defaultInstance().profile.userDataDirUri
+        val shareDirUri = AppPrefs.defaultInstance().profile.sharedDataDirUri
+
+        return if (viewModel.checkAndResetPathPermission(allowedUriList, userDirUri, shareDirUri)) {
+            FolderSync.copyDir(this)
+            true
+        } else {
+            false
+        }
+    }
+
+    @UiThread
+    private fun showNoDirectoryAlert() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.directory_not_selected)
+            .setMessage(R.string.profile__error_user_data_dir)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                navHostFragment.navController.navigate(R.id.action_prefFragment_to_profileFragment)
+            }
+            .setCancelable(false)
+            .show()
+    }
+
     override fun onResume() {
         super.onResume()
-        if (isStorageAvailable()) {
+        if (AppPrefs.defaultInstance().profile.isUserDataDirChosen()) {
             SoundEffectManager.init()
         }
     }

@@ -8,7 +8,9 @@ import android.app.AlertDialog
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
+import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
+import com.osfans.trime.data.storage.StorageUtils
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.Logcat
@@ -44,6 +46,21 @@ class ToolkitFragment : PaddingPreferenceFragment() {
                             Logcat.default.clearLog()
                         }.setNegativeButton(R.string.cancel, null)
                         .show()
+                    true
+                }
+            },
+        )
+        screen.addPreference(
+            Preference(context).apply {
+                setTitle(R.string.pref_toolkit_internal_dir)
+                isIconSpaceReserved = false
+                setOnPreferenceClickListener {
+                    val intent = StorageUtils.getViewDirIntent(context)
+                    intent?.let {
+                        startActivity(it)
+                    } ?: run {
+                        ToastUtils.showShort("No Document App Found")
+                    }
                     true
                 }
             },

@@ -8,8 +8,6 @@ import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -32,6 +30,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override val isReady: Boolean
         get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
 
+    override val isStarting: Boolean
+        get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.STARTING
+
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
@@ -39,8 +40,8 @@ class Rime : RimeApi, RimeLifecycleOwner {
                     DataManager.dirFireChange()
                     DataManager.sync()
 
-                    val sharedDataDir = AppPrefs.defaultInstance().profile.sharedDataDir
-                    val userDataDir = AppPrefs.defaultInstance().profile.userDataDir
+                    val sharedDataDir = AppPrefs.defaultInstance().profile.getAppShareDir()
+                    val userDataDir = AppPrefs.defaultInstance().profile.getAppUserDir()
                     Timber.i("Starting up Rime APIs ...")
                     startupRime(sharedDataDir, userDataDir, fullCheck)
 
@@ -84,9 +85,13 @@ class Rime : RimeApi, RimeLifecycleOwner {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
-        if (appContext.isStorageAvailable()) {
+        if (AppPrefs.defaultInstance().profile.isUserDataDirChosen() &&
+            AppPrefs.Profile.isAppPathReady()
+        ) {
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
+        } else {
+            Timber.w("Skip starting rime: directory not yet ready")
         }
     }
 

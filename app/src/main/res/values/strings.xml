@@ -100,6 +100,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_timing_sync">Timing sync</string>
     <string name="profile_timing_sync_trigger_time">Timing sync is enabled Next sync at time: %1$s</string>
     <string name="profile_enable_timing_sync">Click to enable</string>
+    <string name="profile__error_user_data_dir">Please set it in &quot;Profile&quot;.</string>
     <string name="pref_help__marketplace">Marketplace</string>
     <string name="pref_help__user_community">User Community</string>
     <string name="pref_keyboard__function">View</string>
@@ -140,10 +141,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_candidate">Click candidate</string>
     <string name="keyboard__hook_candidate_commit">Send Space when click candidate (coming soon)</string>
     <string name="trime_app_slogan">Trimes with Your Keystrokes</string>
-    <string name="external_storage_access_required">Trime needs to access external storage to deploy or read schemas and config, tap OK to grant the permission.</string>
-    <string name="external_storage_permission_not_available">External storage permission is not available</string>
-    <string name="external_storage_permission_granted">External storage permission is granted</string>
-    <string name="external_storage_permission_denied">External storage permission was denied, deployment or reading schemas and config may not be available</string>
+    <string name="directory_not_selected">Working folder is not yet set.</string>
     <string name="alert_window_access_required">Trime needs alert window permission to show up popup window or dialog, tap OK to grant the permission.</string>
     <string name="keyboard__key_sound_effect_title">Key Sound Effect</string>
     <string name="sound_progress">Loading sound...</string>
@@ -224,6 +222,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="scroll_to_bottom">Jump to Bottom</string>
     <string name="system">System</string>
     <string name="pref_toolkit">Toolkit</string>
+    <string name="pref_toolkit_internal_dir">Internal Directory</string>
     <string name="reset__asset_is_null_or_empty">This path points to a empty directory or null pointer.</string>
     <string name="pref_profile">Profile</string>
     <string name="pref_keyboard">Keyboard settings</string>
@@ -264,11 +263,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__split_title">Change to Landscape keyboard</string>
     <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
     <string name="setup__step_three">Setup 3</string>
-    <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>
-    <string name="setup__request_permmision">Request storage permmision</string>
+    <string name="setup__request_permission_hint">Please select a folder(e.g. "rime") where configuration files reside.</string>
+    <string name="setup__request_permission">Select folder</string>
     <string name="grant_permission">Grant permission</string>
-    <string name="schedule_exact_alarm_permission_title">No Schedule Exact Alarm Permmision</string>
-    <string name="schedule_exact_alarm_permission_message">Without the permmission to schedule exact alarm, we are not able to sync your profile in time when you enable syncing on schedule.</string>
+    <string name="schedule_exact_alarm_permission_title">No Schedule Exact Alarm Permission</string>
+    <string name="schedule_exact_alarm_permission_message">Without the permission to schedule exact alarm, we are not able to sync your profile in time when you enable syncing on schedule.</string>
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
     <string name="rime_daemon">Rime Daemon</string>
@@ -277,6 +276,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="enable_schemata">Enable schemata</string>
     <string name="no_schema_to_select">Currently there is no schema to select. Please go to enable schemata from the available list.</string>
     <string name="no_schema_to_enable">No schema to enable. Make sure you have prelude and schema files in the user directory.</string>
+    <string name="no_schema_before_deploy">No schema to select.  Please "Deploy" first.</string>
     <string name="schemata">Schemata</string>
     <string name="schemata_hint">Select current schema or enable more schemata</string>
     <string name="navbar_background">Navigation bar background</string>
@@ -290,4 +290,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </string-array>
     <string name="theme_trime">default</string>
     <string name="theme_tongwenfeng">tongwenfeng</string>
+    <string name="pref__clear">Clear</string>
+    <string name="share">Share</string>
 </resources>

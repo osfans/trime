@@ -6,7 +6,6 @@ package com.osfans.trime.data.base
 
 import android.content.res.AssetManager
 import android.os.Build
-import android.os.Environment
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.ResourceUtils
@@ -50,8 +49,6 @@ object DataManager {
 
     private val prefs get() = AppPrefs.defaultInstance()
 
-    val defaultDataDirectory = File(Environment.getExternalStorageDirectory(), "rime")
-
     private val onDataDirChangeListeners = WeakHashSet<OnDataDirChangeListener>()
 
     fun interface OnDataDirChangeListener {
@@ -72,11 +69,11 @@ object DataManager {
 
     @JvmStatic
     val sharedDataDir
-        get() = File(prefs.profile.sharedDataDir)
+        get() = File(prefs.profile.getAppShareDir())
 
     @JvmStatic
     val userDataDir
-        get() = File(prefs.profile.userDataDir)
+        get() = File(prefs.profile.getAppUserDir())
 
     /**
      * Return the absolute path of the compiled config file
@@ -126,7 +123,7 @@ object DataManager {
             File(sharedDataDir, DEFAULT_CUSTOM_FILE_NAME).let {
                 if (!it.exists()) {
                     Timber.d("Creating empty default.custom.yaml")
-                    it.bufferedWriter().use { w -> w.write("") }
+                    it.also { it.parentFile?.mkdirs() }.bufferedWriter().use { w -> w.write("") }
                 }
             }
 
