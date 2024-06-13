@@ -12,9 +12,9 @@ import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
-import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.FolderPickerDialogBinding
+import com.osfans.trime.util.getUriForFile
 import java.io.File
 
 class FolderPickerPreference
@@ -71,7 +71,7 @@ class FolderPickerPreference
             dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
             dialogView.editText.setText(initValue)
             dialogView.button.setOnClickListener {
-                documentTreeLauncher.launch(UriUtils.file2Uri(File(initValue)))
+                documentTreeLauncher.launch(context.getUriForFile(File(initValue)))
             }
             AlertDialog.Builder(context)
                 .setTitle(this@FolderPickerPreference.title)
