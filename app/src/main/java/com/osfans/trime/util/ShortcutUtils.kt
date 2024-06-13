@@ -16,8 +16,6 @@ import android.os.Build
 import android.text.TextUtils
 import android.util.SparseArray
 import android.view.KeyEvent
-import com.blankj.utilcode.util.ActivityUtils
-import com.blankj.utilcode.util.IntentUtils
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
@@ -50,62 +48,68 @@ object ShortcutUtils {
             "clipboard" -> return pasteFromClipboard(context)
             "date" -> return getDate(option)
             "commit" -> return option
-            "run" -> startIntent(option)
+            "run" -> context.startIntent(option)
             "share_text" -> TrimeInputMethodService.getService().shareText()
             "liquid_keyboard" -> TrimeInputMethodService.getService().selectLiquidKeyboard(option)
-            else -> startIntent(command, option)
+            else -> context.startIntent(command, option)
         }
         return null
     }
 
-    private fun startIntent(arg: String) {
-        val intent =
-            when {
-                arg.indexOf(':') >= 0 -> {
-                    Intent.parseUri(arg, Intent.URI_INTENT_SCHEME)
-                }
-                arg.indexOf('/') >= 0 -> {
-                    Intent(Intent.ACTION_MAIN).apply {
-                        addCategory(Intent.CATEGORY_LAUNCHER)
-                        component = ComponentName.unflattenFromString(arg)
-                    }
-                }
-                else -> IntentUtils.getLaunchAppIntent(arg)
+    private fun Context.startIntent(arg: String) {
+        when {
+            arg.contains(':') -> { // URI
+                Intent.parseUri(arg, Intent.URI_INTENT_SCHEME)
             }
-        intent.flags = (
-            Intent.FLAG_ACTIVITY_NEW_TASK
-                or Intent.FLAG_ACTIVITY_NO_HISTORY
-        )
-        ActivityUtils.startActivity(intent)
+            arg.contains('/') -> { // Component name
+                Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_LAUNCHER)
+                    component = ComponentName.unflattenFromString(arg)
+                }
+            }
+            else -> packageManager.getLaunchIntentForPackage(arg) // Package name
+        }?.apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+        }?.let {
+            runCatching {
+                Timber.d("startIntent: arg=$arg")
+                startActivity(it)
+            }.getOrElse { Timber.e(it, "Error on starting activity with intent") }
+        }
     }
 
-    private fun startIntent(
+    private fun Context.startIntent(
         action: String,
         arg: String,
     ) {
-        val act = "android.intent.action.${action.uppercase()}"
-        var intent = Intent(act)
-        when (act) {
+        val longAction = "android.intent.action.${action.uppercase()}"
+        val intent = Intent(longAction)
+        when (longAction) {
             // Search or open link
             // Note that web_search cannot directly open link
             Intent.ACTION_WEB_SEARCH, Intent.ACTION_SEARCH -> {
                 if (arg.startsWith("http")) {
                     startIntent(arg)
-                    ActivityUtils.startLauncherActivity()
                     return
                 } else {
                     intent.putExtra(SearchManager.QUERY, arg)
                 }
             }
-            // Share text
-            Intent.ACTION_SEND -> intent = IntentUtils.getShareTextIntent(arg)
-            // Stage the data
-            else -> {
-                if (arg.isNotEmpty()) Intent(act).data = Uri.parse(arg) else Intent(act)
+            Intent.ACTION_SEND -> { // Share text
+                intent.apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, arg)
+                }
+            }
+            else -> { // Stage the data
+                if (arg.isNotEmpty()) intent.data = Uri.parse(arg)
             }
         }
         intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY)
-        ActivityUtils.startActivity(intent)
+        runCatching {
+            Timber.d("startIntent: action=$longAction, arg=$arg")
+            startActivity(intent)
+        }.getOrElse { Timber.e(it, "Error on starting activity with intent") }
     }
 
     private fun getDate(string: String): CharSequence {
@@ -148,13 +152,17 @@ object ShortcutUtils {
         }
     }
 
-    fun openCategory(keyCode: Int): Boolean {
+    fun Context.openCategory(keyCode: Int): Boolean {
         val category = applicationLaunchKeyCategories[keyCode]
-        return if (category != null) {
-            Timber.d("\t<TrimeInput>\topenCategory()\tkeycode=%d, app=%s", keyCode, category)
-            val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
-            ActivityUtils.startActivity(intent)
+        return if (!category.isNullOrEmpty()) {
+            Timber.d("openCategory: keyEvent=${KeyEvent.keyCodeToString(keyCode)}, category=$category")
+            val intent =
+                Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                }
+            runCatching {
+                startActivity(intent)
+            }.getOrElse { Timber.e(it, "Error on starting activity with category") }
             true
         } else {
             false

@@ -14,10 +14,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>none</item>
     </string-array>
     <string-array name="keyboard__split_values">
-        <item>never</item>
-        <item>landscape</item>
-        <item>auto</item>
-        <item>always</item>
+        <item>NEVER</item>
+        <item>LANDSCAPE</item>
+        <item>AUTO</item>
+        <item>ALWAYS</item>
     </string-array>
     <string-array name="other__ui_mode_values">
         <item>auto</item>

@@ -57,6 +57,7 @@ import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
+import com.osfans.trime.util.ShortcutUtils.openCategory
 import com.osfans.trime.util.StringUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
@@ -944,7 +945,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // 处理返回键（隐藏软键盘）和回车键（换行）
             // todo 确认是否有必要单独处理回车键？是否需要把back和escape全部占用？
             Timber.d("\t<TrimeInput>\thandleKey()\tEnterOrHide, keycode=%d", keyEventCode)
-        } else if (ShortcutUtils.openCategory(keyEventCode)) {
+        } else if (openCategory(keyEventCode)) {
             // 打开系统默认应用
             Timber.d("\t<TrimeInput>\thandleKey()\topenCategory keycode=%d", keyEventCode)
         } else {
