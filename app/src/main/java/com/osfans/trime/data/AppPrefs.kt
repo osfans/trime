@@ -202,9 +202,9 @@ class AppPrefs(
             private set
 
         enum class SplitOption {
-            AUTO,
-            LANDSCAPE,
             NEVER,
+            LANDSCAPE,
+            AUTO,
             ALWAYS,
         }
 
