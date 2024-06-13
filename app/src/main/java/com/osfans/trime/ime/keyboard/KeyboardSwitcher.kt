@@ -9,6 +9,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.util.appContext
 import timber.log.Timber
 
@@ -20,7 +21,6 @@ object KeyboardSwitcher {
     private var currentKeyboardId: String? = null
     private var lastKeyboardId: String? = null
     private var lastLockKeyboardId: String? = null
-    private val keyboardPrefs = KeyboardPrefs()
     lateinit var currentKeyboard: Keyboard
 
     private fun getKeyboard(name: String): Keyboard {
@@ -87,7 +87,7 @@ object KeyboardSwitcher {
             if ("mini" in allKeyboardIds) mappedName = "mini"
         }
         // 切换到横屏布局
-        if (keyboardPrefs.isLandscapeMode()) {
+        if (appContext.isLandscapeMode()) {
             val landscapeKeyboard = getKeyboard(mappedName).landscapeKeyboard
             if (landscapeKeyboard != null && landscapeKeyboard in allKeyboardIds) {
                 mappedName = landscapeKeyboard

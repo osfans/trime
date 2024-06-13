@@ -11,7 +11,6 @@ import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
-import com.osfans.trime.ime.keyboard.KeyboardPrefs
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
 import java.util.Calendar
@@ -201,8 +200,16 @@ class AppPrefs(
         var switchArrowEnabled: Boolean = false
             get() = prefs.getPref(SWITCH_ARROW_ENABLED, true)
             private set
-        val splitOption: String
-            get() = prefs.getPref(SPLIT, KeyboardPrefs.SPLIT_OPTION_NEVER)
+
+        enum class SplitOption {
+            AUTO,
+            LANDSCAPE,
+            NEVER,
+            ALWAYS,
+        }
+
+        val splitOption: SplitOption
+            get() = SplitOption.valueOf(prefs.getPref(SPLIT, SplitOption.NEVER.name))
         val splitSpacePercent: Int
             get() = prefs.getPref(SPLIT_SPACE_PERCENT, 100)
         var candidatePageSize: Int = 0
