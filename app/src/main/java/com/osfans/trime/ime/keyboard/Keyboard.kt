@@ -6,17 +6,18 @@ package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
 import android.view.KeyEvent
-import com.blankj.utilcode.util.ScreenUtils
 import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainInt
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.config.ConfigMap
+import com.osfans.trime.util.isLandscape
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -222,7 +223,7 @@ class Keyboard() {
         keyboardHeight = getKeyboardHeight(theme, keyboardConfig)
         val keyboardKeyWidth = obtainFloat(keyboardConfig, "width", 0f)
         val maxColumns = if (columns == -1) Int.MAX_VALUE else columns
-        val isSplit = KeyboardPrefs().isLandscapeMode() && isLandscapeSplit
+        val isSplit = appContext.isLandscapeMode() && isLandscapeSplit
         val (rowWidthTotalWeight, oneWeightWidthPx, multiplier, scaledHeight, scaledVerticalGap) =
             KeyboardSizeCalculator(
                 name,
@@ -434,7 +435,7 @@ class Keyboard() {
 
     private fun getKeyboardHeightFromKeyboardConfig(keyboardConfig: Map<String, Any?>?): Int {
         var mkeyboardHeight = appContext.sp(obtainFloat(keyboardConfig, "keyboard_height", 0f)).toInt()
-        if (ScreenUtils.isLandscape()) {
+        if (appContext.resources.configuration.isLandscape()) {
             val mkeyBoardHeightLand =
                 appContext.sp(
                     obtainFloat(keyboardConfig, "keyboard_height_land", 0f),
@@ -642,13 +643,14 @@ class Keyboard() {
 
         val keyboardSidePaddingPx =
             appContext.dp(
-                when (appContext.resources.configuration.orientation) {
-                    Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
-                    else -> keyboardSidePadding
+                if (appContext.resources.configuration.isLandscape()) {
+                    keyboardSidePaddingLandscape
+                } else {
+                    keyboardSidePadding
                 },
             )
 
-        mDisplayWidth = ScreenUtils.getAppScreenWidth() - 2 * keyboardSidePaddingPx
+        mDisplayWidth = appContext.resources.displayMetrics.widthPixels - 2 * keyboardSidePaddingPx
 
         // Height of the screen
         // final int mDisplayHeight = dm.heightPixels;
