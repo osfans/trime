@@ -8,9 +8,9 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.Context
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.lifecycle.LifecycleCoroutineScope
-import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.ui.components.log.LogView
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +108,7 @@ suspend fun Context.briefResultLogDialog(
             .setPositiveButton(R.string.setup__skip_hint_yes, null)
             .show()
     } else {
-        ToastUtils.showShort(R.string.setup__done)
+        toast(R.string.setup__done)
     }
 }
 
@@ -129,7 +129,7 @@ suspend fun Context.rimeActionWithResultDialog(
         if (result) {
             briefResultLogDialog(tag, priority, thresholds)
         } else {
-            ToastUtils.showLong("Failed")
+            toast("Failed", Toast.LENGTH_LONG)
         }
     }
 }

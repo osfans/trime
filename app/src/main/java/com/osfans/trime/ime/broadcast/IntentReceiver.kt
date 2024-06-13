@@ -13,12 +13,13 @@ import android.content.IntentFilter
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.PowerManager.PARTIAL_WAKE_LOCK
+import android.widget.Toast
 import androidx.core.content.ContextCompat
-import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -44,7 +45,7 @@ class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
                     withContext(Dispatchers.IO) {
                         RimeDaemon.restartRime(true)
                     }
-                    ToastUtils.showLong(R.string.deploy_finish)
+                    context.toast(R.string.deploy_finish, Toast.LENGTH_LONG)
                 }
             COMMAND_SYNC ->
                 launch {

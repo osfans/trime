@@ -18,7 +18,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.recyclerview.widget.RecyclerView
-import com.blankj.utilcode.util.ToastUtils
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
@@ -122,7 +121,7 @@ fun Context.requestExternalStoragePermission() {
                     all: Boolean,
                 ) {
                     if (all) {
-                        ToastUtils.showShort(R.string.external_storage_permission_granted)
+                        toast(R.string.external_storage_permission_granted)
                     }
                 }
 
@@ -131,13 +130,13 @@ fun Context.requestExternalStoragePermission() {
                     never: Boolean,
                 ) {
                     if (never) {
-                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                        toast(R.string.external_storage_permission_denied)
                         XXPermissions.startPermissionActivity(
                             this@requestExternalStoragePermission,
                             permissions,
                         )
                     } else {
-                        ToastUtils.showShort(R.string.external_storage_permission_denied)
+                        toast(R.string.external_storage_permission_denied)
                     }
                 }
             },

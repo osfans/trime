@@ -8,11 +8,11 @@ import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.get
-import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.opencc.OpenCCDictManager
@@ -21,6 +21,7 @@ import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.Const
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.thirdPartySummary
+import com.osfans.trime.util.toast
 import splitties.systemservices.clipboardManager
 
 class AboutFragment : PaddingPreferenceFragment() {
@@ -53,7 +54,7 @@ class AboutFragment : PaddingPreferenceFragment() {
                 setOnPreferenceClickListener {
                     val info = ClipData.newPlainText("BuildInfo", summary)
                     clipboardManager.setPrimaryClip(info)
-                    ToastUtils.showLong(R.string.copy_done)
+                    context.toast(R.string.copy_done, Toast.LENGTH_LONG)
                     true
                 }
             }
