@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
-import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
@@ -34,6 +33,7 @@ import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
 import com.osfans.trime.util.rimeActionWithResultDialog
+import com.osfans.trime.util.toast
 import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -219,9 +219,7 @@ class ProfileFragment :
                                                 .fold({ acc and true }, { acc and false })
                                         }
                             }
-                            ToastUtils.showShort(
-                                if (res) R.string.reset_success else R.string.reset_failure,
-                            )
+                            context.toast((if (res) R.string.reset_success else R.string.reset_failure))
                         }
                     }.show()
                 true

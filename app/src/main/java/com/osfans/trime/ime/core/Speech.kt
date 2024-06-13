@@ -12,29 +12,23 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.annotation.StringRes
-import com.blankj.utilcode.util.ToastUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.util.toast
 import timber.log.Timber
 import java.util.Arrays
 
 /** [語音輸入][RecognitionListener]  */
-class Speech(context: Context) : RecognitionListener {
-    private val speechRecognizer: SpeechRecognizer?
-    private val recognizerIntent: Intent
-
-    init {
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
-        speechRecognizer.setRecognitionListener(this)
-        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        // recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en");
-        // recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.getPackageName());
-        // recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-        // RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        // recognizerIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "開始語音");
-    }
+class Speech(private val context: Context) : RecognitionListener {
+    private val speechRecognizer =
+        SpeechRecognizer.createSpeechRecognizer(context).apply {
+            setRecognitionListener(this@Speech)
+        }
+    private val recognizerIntent: Intent =
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
 
     fun startListening() {
         speechRecognizer?.startListening(recognizerIntent)
@@ -57,7 +51,7 @@ class Speech(context: Context) : RecognitionListener {
             speechRecognizer.stopListening()
             speechRecognizer.destroy()
         }
-        ToastUtils.showShort(getErrorText(errorCode))
+        context.toast(getErrorText(errorCode))
     }
 
     override fun onEvent(
@@ -73,7 +67,7 @@ class Speech(context: Context) : RecognitionListener {
 
     override fun onReadyForSpeech(arg0: Bundle) {
         Timber.i("onReadyForSpeech")
-        ToastUtils.showShort("請開始說話：")
+        context.toast("請開始說話：")
     }
 
     override fun onResults(results: Bundle) {
