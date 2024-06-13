@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
-import com.blankj.utilcode.util.UriUtils
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
@@ -32,6 +31,7 @@ import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
+import com.osfans.trime.util.getFileFromUri
 import com.osfans.trime.util.rimeActionWithResultDialog
 import com.osfans.trime.util.toast
 import com.osfans.trime.util.withLoadingDialog
@@ -57,7 +57,7 @@ class ProfileFragment :
                         it,
                         DocumentsContract.getTreeDocumentId(it),
                     )
-                dialogView.editText.setText(UriUtils.uri2File(uri).absolutePath)
+                dialogView.editText.setText(context.getFileFromUri(uri)?.absolutePath)
             }
     }
 
