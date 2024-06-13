@@ -4,8 +4,11 @@
 
 package com.osfans.trime.ui.setup
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -19,11 +22,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.blankj.utilcode.util.NotificationUtils
 import com.osfans.trime.R
 import com.osfans.trime.databinding.ActivitySetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
+import splitties.systemservices.notificationManager
 
 class SetupActivity : FragmentActivity() {
     private lateinit var viewPager: ViewPager2
@@ -31,6 +34,7 @@ class SetupActivity : FragmentActivity() {
 
     companion object {
         private var binaryCount = false
+        private const val CHANNEL_ID = "setup"
         private const val NOTIFY_ID = 87463
 
         fun shouldSetup() = !binaryCount && SetupPage.hasUndonePage()
@@ -54,7 +58,7 @@ class SetupActivity : FragmentActivity() {
         val prevButton =
             binding.prevButton.apply {
                 text = getString(R.string.setup__prev)
-                setOnClickListener { viewPager.currentItem = viewPager.currentItem - 1 }
+                setOnClickListener { viewPager.currentItem -= 1 }
             }
         binding.skipButton.apply {
             text = getString(R.string.setup__skip)
@@ -71,8 +75,8 @@ class SetupActivity : FragmentActivity() {
         val nextButton =
             binding.nextButton.apply {
                 setOnClickListener {
-                    if (viewPager.currentItem != SetupPage.values().size - 1) {
-                        viewPager.currentItem = viewPager.currentItem + 1
+                    if (viewPager.currentItem != SetupPage.entries.size - 1) {
+                        viewPager.currentItem += 1
                     } else {
                         finish()
                     }
@@ -110,6 +114,7 @@ class SetupActivity : FragmentActivity() {
         // Skip to undone page
         firstUndonePage()?.let { viewPager.currentItem = it.ordinal }
         binaryCount = true
+        createNotificationChannel()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -118,38 +123,51 @@ class SetupActivity : FragmentActivity() {
         (fragment as SetupFragment).sync()
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel =
+                NotificationChannel(
+                    CHANNEL_ID,
+                    getText(R.string.setup_channel),
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply { description = CHANNEL_ID }
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
     override fun onPause() {
         if (SetupPage.hasUndonePage()) {
-            NotificationUtils.notify(NOTIFY_ID) { param ->
-                param.setSmallIcon(R.drawable.ic_trime_status)
-                    .setContentTitle(getText(R.string.trime_app_name))
-                    .setContentText(getText(R.string.setup__notify_hint))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setContentIntent(
-                        PendingIntent.getActivity(
-                            this,
-                            0,
-                            Intent(this, javaClass),
-                            PendingIntent.FLAG_IMMUTABLE,
-                        ),
-                    )
-                    .setAutoCancel(true)
-            }
+            NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_trime_status)
+                .setContentTitle(getText(R.string.trime_app_name))
+                .setContentText(getText(R.string.setup__notify_hint))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        Intent(this, javaClass),
+                        PendingIntent.FLAG_IMMUTABLE,
+                    ),
+                )
+                .setAutoCancel(true)
+                .build()
+                .let { notificationManager.notify(NOTIFY_ID, it) }
         }
         super.onPause()
     }
 
     override fun onResume() {
-        NotificationUtils.cancel(NOTIFY_ID)
+        notificationManager.cancel(NOTIFY_ID)
         super.onResume()
     }
 
     private inner class Adapter : FragmentStateAdapter(this) {
-        override fun getItemCount(): Int = SetupPage.values().size
+        override fun getItemCount(): Int = SetupPage.entries.size
 
         override fun createFragment(position: Int): Fragment =
             SetupFragment().apply {
-                arguments = bundleOf("page" to SetupPage.values()[position])
+                arguments = bundleOf("page" to SetupPage.entries[position])
             }
     }
 }
