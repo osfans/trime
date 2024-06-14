@@ -275,24 +275,25 @@ Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
 }
 
 static bool is_save_option(const char *p) {
+  auto rime = rime_get_api();
   bool is_save = false;
   std::string option_name(p);
   if (option_name.empty()) return is_save;
   RimeConfig config = {nullptr};
-  bool b = RimeConfigOpen("default", &config);
+  bool b = rime->config_open("default", &config);
   if (!b) return is_save;
   const char *key = "switcher/save_options";
   RimeConfigIterator iter = {nullptr};
-  RimeConfigBeginList(&iter, &config, key);
-  while (RimeConfigNext(&iter)) {
-    std::string item(RimeConfigGetCString(&config, iter.path));
+  rime->config_begin_list(&iter, &config, key);
+  while (rime->config_next(&iter)) {
+    std::string item(rime->config_get_cstring(&config, iter.path));
     if (option_name == item) {
       is_save = true;
       break;
     }
   }
-  RimeConfigEnd(&iter);
-  RimeConfigClose(&config);
+  rime->config_end(&iter);
+  rime->config_close(&config);
   return is_save;
 }
 
@@ -439,16 +440,17 @@ Java_com_osfans_trime_core_Rime_getRimeConfigMap(JNIEnv *env, jclass clazz,
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_runRimeTask(JNIEnv *env, jclass /* thiz */,
                                             jstring task_name) {
+  auto rime = rime_get_api();
   const char *s = env->GetStringUTFChars(task_name, nullptr);
   RimeConfig config = {nullptr};
-  Bool b = RimeRunTask(s);
+  Bool b = rime->run_task(s);
   env->ReleaseStringUTFChars(task_name, s);
   return b;
 }
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getRimeSharedDataDir(JNIEnv *env,
                                                      jclass /* thiz */) {
-  return env->NewStringUTF(RimeGetSharedDataDir());
+  return env->NewStringUTF(rime_get_api()->get_shared_data_dir());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -459,12 +461,12 @@ Java_com_osfans_trime_core_Rime_getRimeUserDataDir(JNIEnv *env,
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getRimeSyncDir(JNIEnv *env, jclass /* thiz */) {
-  return env->NewStringUTF(RimeGetSyncDir());
+  return env->NewStringUTF(rime_get_api()->get_sync_dir());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getRimeUserId(JNIEnv *env, jclass /* thiz */) {
-  return env->NewStringUTF(RimeGetUserId());
+  return env->NewStringUTF(rime_get_api()->get_user_id());
 }
 
 extern "C" JNIEXPORT jstring JNICALL

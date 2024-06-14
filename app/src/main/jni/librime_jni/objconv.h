@@ -86,7 +86,7 @@ inline jobject rimeConfigListToJObject(JNIEnv *env, RimeConfig *config,
   auto obj =
       env->NewObject(GlobalRef->ArrayList, GlobalRef->ArrayListInit, size);
   int i = 0;
-  while (RimeConfigNext(&iter)) {
+  while (rime->config_next(&iter)) {
     auto e = JRef<>(env, rimeConfigValueToJObject(env, config, iter.path));
     env->CallVoidMethod(obj, GlobalRef->ArrayListAdd, i++, *e);
   }
