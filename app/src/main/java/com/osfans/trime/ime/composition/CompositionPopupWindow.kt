@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.composition
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.RectF
 import android.os.Build
@@ -18,7 +19,6 @@ import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import androidx.core.math.MathUtils
-import com.blankj.utilcode.util.BarUtils
 import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
@@ -92,6 +92,14 @@ class CompositionPopupWindow(
     private val mPopupRectF = RectF()
     private val mPopupHandler = Handler(Looper.getMainLooper())
 
+    // TODO: Don't access internal resource like this
+    private val statusBarHeight: Int
+        @SuppressLint("InternalInsetResource", "DiscouragedApi")
+        get() {
+            val id = ctx.resources.getIdentifier("status_bar_height", "dimen", "android")
+            return ctx.resources.getDimensionPixelSize(id)
+        }
+
     private val mPopupTimer =
         Runnable {
             if (!isPopupWindowEnabled || bar.view.windowToken == null) return@Runnable
@@ -150,7 +158,7 @@ class CompositionPopupWindow(
                     }
                     y = MathUtils.clamp(y, minY, maxY)
                 }
-                y -= BarUtils.getStatusBarHeight()
+                y -= statusBarHeight
                 if (!mPopupWindow.isShowing) {
                     mPopupWindow.showAtLocation(anchor, Gravity.START or Gravity.TOP, x, y)
                 } else {
