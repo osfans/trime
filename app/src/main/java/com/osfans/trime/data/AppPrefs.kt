@@ -209,7 +209,7 @@ class AppPrefs(
         }
 
         val splitOption: SplitOption
-            get() = SplitOption.valueOf(prefs.getPref(SPLIT, SplitOption.NEVER.name))
+            get() = SplitOption.valueOf(prefs.getPref(SPLIT, SplitOption.NEVER.name).uppercase())
         val splitSpacePercent: Int
             get() = prefs.getPref(SPLIT_SPACE_PERCENT, 100)
         var candidatePageSize: Int = 0
