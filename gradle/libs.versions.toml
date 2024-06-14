@@ -29,7 +29,6 @@ androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 kaml = { module = "com.charleskorn.kaml:kaml", version = "0.56.0" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
-utilcode = { module = "com.blankj:utilcodex", version = "1.31.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }
 kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }
 kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlin-inject" }
