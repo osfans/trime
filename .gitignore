@@ -477,3 +477,6 @@ app/src/main/assets/checksums.json
 app/boost-*.tar.xz
 app/src/main/jni/boost/
 
+# kotlin
+.kotlin
+
