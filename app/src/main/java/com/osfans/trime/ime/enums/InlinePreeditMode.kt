@@ -10,13 +10,4 @@ enum class InlinePreeditMode {
     PREVIEW,
     COMPOSITION,
     INPUT,
-    ;
-
-    companion object {
-        fun fromString(string: String): InlinePreeditMode {
-            return runCatching {
-                InlinePreeditMode.valueOf(string.uppercase())
-            }.getOrDefault(NONE)
-        }
-    }
 }

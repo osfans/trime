@@ -528,7 +528,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
                             prefs
                                 .clipboard
-                                .draftExcludeApp
+                                .draftExcludeApp.trim().split('\n')
                                 .contains(attribute.packageName)
                         ) {
                             normalTextEditor = false
