@@ -53,7 +53,7 @@ class KeyboardFragment :
                 TrimeInputMethodService.getServiceOrNull()?.recreateInputView()
             }
             "keyboard__candidate_page_size" -> {
-                val pageSize = AppPrefs.defaultInstance().keyboard.candidatePageSize
+                val pageSize = AppPrefs.defaultInstance().keyboard.candidatePageSize.toInt()
                 if (pageSize <= 0) return
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {

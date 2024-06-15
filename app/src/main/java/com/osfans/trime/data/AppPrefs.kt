@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.prefs.PreferenceDelegateOwner
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.util.appContext
@@ -23,62 +24,12 @@ class AppPrefs(
 ) {
     private val applicationContext: WeakReference<Context> = WeakReference(appContext)
 
-    val internal = Internal(this)
-    val keyboard = Keyboard(this)
-    val theme = Theme(this)
-    val profile = Profile(this)
-    val clipboard = Clipboard(this)
-    val other = Other(this)
-
-    /**
-     * Fetches the value for [key] from the shared preferences and returns it.
-     * The type is automatically derived from the given [default] value.
-     * @return The value for [key] or [default].
-     */
-    private inline fun <reified T> getPref(
-        key: String,
-        default: T,
-    ): T {
-        return when {
-            false is T -> {
-                shared.getBoolean(key, default as Boolean) as T
-            }
-            0 is T -> {
-                shared.getInt(key, default as Int) as T
-            }
-            0L is T -> {
-                shared.getLong(key, default as Long) as T
-            }
-            "" is T -> {
-                (shared.getString(key, default as String) ?: (default as String)) as T
-            }
-            else -> null as T
-        }
-    }
-
-    /**
-     * Sets the [value] for [key] in the shared preferences, puts the value into the corresponding
-     * cache and returns it.
-     */
-    private inline fun <reified T> setPref(
-        key: String,
-        value: T,
-    ) {
-        when {
-            false is T -> {
-                shared.edit().putBoolean(key, value as Boolean).apply()
-            }
-            0 is T -> {
-                shared.edit().putInt(key, value as Int).apply()
-            }
-            0L is T -> {
-                shared.edit().putLong(key, value as Long).apply()
-            }
-            "" is T -> {
-                shared.edit().putString(key, value as String).apply()
-            }
-        }
-    }
+    val internal = Internal(shared)
+    val keyboard = Keyboard(shared)
+    val theme = Theme(shared)
+    val profile = Profile(shared)
+    val clipboard = Clipboard(shared)
+    val other = Other(shared)
 
     companion object {
         private var defaultInstance: AppPrefs? = null
@@ -89,7 +40,6 @@ class AppPrefs(
             return instance
         }
 
-        @JvmStatic
         fun defaultInstance(): AppPrefs {
             return defaultInstance
                 ?: throw UninitializedPropertyAccessException(
@@ -118,20 +68,18 @@ class AppPrefs(
         }
     }
 
-    class Internal(private val prefs: AppPrefs) {
+    class Internal(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
             const val PID = "general__pid"
         }
 
-        var pid: Int
-            get() = prefs.getPref(PID, 0)
-            set(v) = prefs.setPref(PID, v)
+        var pid by int(PID, 0)
     }
 
     /**
      *  Wrapper class of keyboard settings.
      */
-    class Keyboard(private val prefs: AppPrefs) {
+    class Keyboard(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
             const val INLINE_PREEDIT_MODE = "keyboard__inline_preedit"
             const val SOFT_CURSOR_ENABLED = "keyboard__soft_cursor"
@@ -179,27 +127,13 @@ class AppPrefs(
             const val SHOULD_LONG_CLICK_DELETE_CANDIDATE = "keyboard__long_click_delete_candidate"
         }
 
-        var inlinePreedit: InlinePreeditMode
-            get() = InlinePreeditMode.fromString(prefs.getPref(INLINE_PREEDIT_MODE, "preview"))
-            set(v) = prefs.setPref(INLINE_PREEDIT_MODE, v)
-        var fullscreenMode: FullscreenMode
-            get() = FullscreenMode.fromString(prefs.getPref(FULLSCREEN_MODE, "auto_show"))
-            set(v) = prefs.setPref(FULLSCREEN_MODE, v)
-        var softCursorEnabled: Boolean = false
-            get() = prefs.getPref(SOFT_CURSOR_ENABLED, true)
-            private set
-        var popupWindowEnabled: Boolean = false
-            get() = prefs.getPref(FLOATING_WINDOW_ENABLED, true)
-            private set
-        var popupKeyPressEnabled: Boolean = false
-            get() = prefs.getPref(POPUP_KEY_PRESS_ENABLED, false)
-            private set
-        var switchesEnabled: Boolean = false
-            get() = prefs.getPref(SWITCHES_ENABLED, true)
-            private set
-        var switchArrowEnabled: Boolean = false
-            get() = prefs.getPref(SWITCH_ARROW_ENABLED, true)
-            private set
+        var inlinePreedit by enum(INLINE_PREEDIT_MODE, InlinePreeditMode.PREVIEW)
+        var fullscreenMode by enum(FULLSCREEN_MODE, FullscreenMode.AUTO_SHOW)
+        val softCursorEnabled by bool(SOFT_CURSOR_ENABLED, true)
+        val popupWindowEnabled by bool(FLOATING_WINDOW_ENABLED, true)
+        val popupKeyPressEnabled by bool(POPUP_KEY_PRESS_ENABLED, false)
+        val switchesEnabled by bool(SWITCHES_ENABLED, true)
+        val switchArrowEnabled by bool(SWITCH_ARROW_ENABLED, true)
 
         enum class SplitOption {
             NEVER,
@@ -208,108 +142,46 @@ class AppPrefs(
             ALWAYS,
         }
 
-        val splitOption: SplitOption
-            get() = SplitOption.valueOf(prefs.getPref(SPLIT, SplitOption.NEVER.name).uppercase())
-        val splitSpacePercent: Int
-            get() = prefs.getPref(SPLIT_SPACE_PERCENT, 100)
-        var candidatePageSize: Int = 0
-            get() = prefs.getPref(CANDIDATE_PAGE_SIZE, "0").toInt()
-            private set
+        val splitOption by enum(SPLIT, SplitOption.NEVER)
+        val splitSpacePercent by int(SPLIT_SPACE_PERCENT, 100)
+        val candidatePageSize by string(CANDIDATE_PAGE_SIZE, "0")
 
-        var hookFastInput: Boolean = false
-            get() = prefs.getPref(HOOK_FAST_INPUT, false)
-            private set
-        var hookCandidate: Boolean = false
-            get() = prefs.getPref(HOOK_CANDIDATE, false)
-            private set
-        var hookCandidateCommit: Boolean = false
-            get() = prefs.getPref(HOOK_CANDIDATE_COMMIT, false)
-            private set
-        var hookCtrlA: Boolean = false
-            get() = prefs.getPref(HOOK_CTRL_A, false)
-            private set
-        var hookCtrlCV: Boolean = false
-            get() = prefs.getPref(HOOK_CTRL_CV, false)
-            private set
-        var hookCtrlLR: Boolean = false
-            get() = prefs.getPref(HOOK_CTRL_LR, false)
-            private set
-        var hookCtrlZY: Boolean = false
-            get() = prefs.getPref(HOOK_CTRL_ZY, false)
-            private set
-        var hookShiftSpace: Boolean = false
-            get() = prefs.getPref(HOOK_SHIFT_SPACE, false)
-            private set
-        var hookShiftNum: Boolean = false
-            get() = prefs.getPref(HOOK_SHIFT_NUM, false)
-            private set
-        var hookShiftSymbol: Boolean = false
-            get() = prefs.getPref(HOOK_SHIFT_SYMBOL, false)
-            private set
+        val hookFastInput by bool(HOOK_FAST_INPUT, false)
+        val hookCandidate by bool(HOOK_CANDIDATE, false)
+        val hookCandidateCommit by bool(HOOK_CANDIDATE_COMMIT, false)
+        val hookCtrlA by bool(HOOK_CTRL_A, false)
+        val hookCtrlCV by bool(HOOK_CTRL_CV, false)
+        val hookCtrlLR by bool(HOOK_CTRL_LR, false)
+        val hookCtrlZY by bool(HOOK_CTRL_ZY, false)
+        val hookShiftSpace by bool(HOOK_SHIFT_SPACE, false)
+        val hookShiftNum by bool(HOOK_SHIFT_NUM, false)
+        val hookShiftSymbol by bool(HOOK_SHIFT_SYMBOL, false)
 
-        var soundEnabled: Boolean = false
-            get() = prefs.getPref(SOUND_ENABLED, false)
-            private set
-        var customSoundEnabled: Boolean
-            get() = prefs.getPref(CUSTOM_SOUND_ENABLED, false)
-            set(v) = prefs.setPref(CUSTOM_SOUND_ENABLED, v)
-        var customSoundPackage: String
-            get() = prefs.getPref(CUSTOM_SOUND_PACKAGE, "")
-            set(v) = prefs.setPref(CUSTOM_SOUND_PACKAGE, v)
-        var soundVolume: Int = 0
-            get() = prefs.getPref(SOUND_VOLUME, 100)
-            private set
-        var vibrationEnabled: Boolean = false
-            get() = prefs.getPref(VIBRATION_ENABLED, false)
-            private set
-        var vibrationDuration: Int = 0
-            get() = prefs.getPref(VIBRATION_DURATION, 10)
-            private set
-        var vibrationAmplitude: Int = 0
-            get() = prefs.getPref(VIBRATION_AMPLITUDE, -1)
-            private set
-        var swipeEnabled: Boolean = false
-            get() = prefs.getPref(SWIPE_ENABLED, true)
-            private set
-        var swipeTravel: Int = 0
-            get() = prefs.getPref(SWIPE_TRAVEL, 80)
-            private set
-        var swipeTravelHi: Int = 0
-            get() = prefs.getPref(SWIPE_TRAVEL_HI, 200)
-            private set
-        var swipeVelocity: Int = 0
-            get() = prefs.getPref(SWIPE_VELOCITY, 800)
-            private set
-        var swipeVelocityHi: Int = 0
-            get() = prefs.getPref(SWIPE_VELOCITY_HI, 25000)
-            private set
-        var swipeTimeHi: Int = 0
-            get() = prefs.getPref(SWIPE_TIME_HI, 80)
-            private set
-        var longPressTimeout: Int = 0
-            get() = prefs.getPref(LONG_PRESS_TIMEOUT, 400)
-            private set
-        var repeatInterval: Int = 0
-            get() = prefs.getPref(REPEAT_INTERVAL, 50)
-            private set
-        var deleteCandidateTimeout: Int = 0
-            get() = prefs.getPref(DELETE_CANDIDATE_TIMEOUT, 2000)
-            private set
-        var shouldLongClickDeleteCandidate: Boolean = false
-            get() = prefs.getPref(SHOULD_LONG_CLICK_DELETE_CANDIDATE, false)
-            private set
-        var isSpeakKey: Boolean
-            get() = prefs.getPref(SPEAK_KEY_PRESS_ENABLED, false)
-            set(v) = prefs.setPref(SPEAK_KEY_PRESS_ENABLED, v)
-        var isSpeakCommit: Boolean
-            get() = prefs.getPref(SPEAK_COMMIT_ENABLED, false)
-            set(v) = prefs.setPref(SPEAK_COMMIT_ENABLED, v)
+        val soundEnabled by bool(SOUND_ENABLED, false)
+        var customSoundEnabled by bool(CUSTOM_SOUND_ENABLED, false)
+        var customSoundPackage by string(CUSTOM_SOUND_PACKAGE, "")
+        val soundVolume by int(SOUND_VOLUME, 100)
+        val vibrationEnabled by bool(VIBRATION_ENABLED, false)
+        val vibrationDuration by int(VIBRATION_DURATION, 10)
+        val vibrationAmplitude by int(VIBRATION_AMPLITUDE, -1)
+        val swipeEnabled by bool(SWIPE_ENABLED, true)
+        val swipeTravel by int(SWIPE_TRAVEL, 80)
+        val swipeTravelHi by int(SWIPE_TRAVEL_HI, 200)
+        val swipeVelocity by int(SWIPE_VELOCITY, 800)
+        val swipeVelocityHi by int(SWIPE_VELOCITY_HI, 25000)
+        val swipeTimeHi by int(SWIPE_TIME_HI, 80)
+        val longPressTimeout by int(LONG_PRESS_TIMEOUT, 400)
+        val repeatInterval by int(REPEAT_INTERVAL, 50)
+        val deleteCandidateTimeout by int(DELETE_CANDIDATE_TIMEOUT, 2000)
+        val shouldLongClickDeleteCandidate by bool(SHOULD_LONG_CLICK_DELETE_CANDIDATE, false)
+        var isSpeakKey by bool(SPEAK_KEY_PRESS_ENABLED, false)
+        var isSpeakCommit by bool(SPEAK_COMMIT_ENABLED, false)
     }
 
     /**
      *  Wrapper class of theme and color settings.
      */
-    class Theme(private val prefs: AppPrefs) {
+    class Theme(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
             const val SELECTED_THEME = "theme_selected_theme"
             const val SELECTED_COLOR = "theme_selected_color"
@@ -318,18 +190,10 @@ class AppPrefs(
             const val NAVBAR_BACKGROUND = "navbar_background"
         }
 
-        var selectedTheme: String
-            get() = prefs.getPref(SELECTED_THEME, "trime")
-            set(v) = prefs.setPref(SELECTED_THEME, v)
-        var selectedColor: String
-            get() = prefs.getPref(SELECTED_COLOR, "default")
-            set(v) = prefs.setPref(SELECTED_COLOR, v)
-        var autoDark: Boolean = false
-            get() = prefs.getPref(AUTO_DARK, false)
-            private set
-        var useMiniKeyboard: Boolean = false
-            get() = prefs.getPref(USE_MINI_KEYBOARD, false)
-            private set
+        var selectedTheme by string(SELECTED_THEME, "trime")
+        var selectedColor by string(SELECTED_COLOR, "default")
+        val autoDark by bool(AUTO_DARK, false)
+        val useMiniKeyboard by bool(USE_MINI_KEYBOARD, false)
 
         enum class NavbarBackground {
             NONE,
@@ -337,15 +201,13 @@ class AppPrefs(
             FULL,
         }
 
-        var navbarBackground: NavbarBackground
-            get() = NavbarBackground.valueOf(prefs.getPref(NAVBAR_BACKGROUND, NavbarBackground.COLOR_ONLY.name))
-            set(value) = prefs.setPref(NAVBAR_BACKGROUND, value.name)
+        var navbarBackground by enum(NAVBAR_BACKGROUND, NavbarBackground.COLOR_ONLY)
     }
 
     /**
      *  Wrapper class of profile settings.
      */
-    class Profile(private val prefs: AppPrefs) {
+    class Profile(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
             const val SHARED_DATA_DIR = "profile_shared_data_dir"
             const val USER_DATA_DIR = "profile_user_data_dir"
@@ -356,30 +218,16 @@ class AppPrefs(
             const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
         }
 
-        var sharedDataDir: String
-            get() = prefs.getPref(SHARED_DATA_DIR, DataManager.defaultDataDirectory.path)
-            set(v) = prefs.setPref(SHARED_DATA_DIR, v)
-        var userDataDir: String
-            get() = prefs.getPref(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
-            set(v) = prefs.setPref(USER_DATA_DIR, v)
-        var syncBackgroundEnabled: Boolean
-            get() = prefs.getPref(SYNC_BACKGROUND_ENABLED, false)
-            set(v) = prefs.setPref(SYNC_BACKGROUND_ENABLED, v)
-        var timingSyncEnabled: Boolean
-            get() = prefs.getPref(TIMING_SYNC_ENABLED, false)
-            set(v) = prefs.setPref(TIMING_SYNC_ENABLED, v)
-        var timingSyncTriggerTime: Long
-            get() = prefs.getPref(TIMING_SYNC_TRIGGER_TIME, Calendar.getInstance().timeInMillis + 1200000L)
-            set(v) = prefs.setPref(TIMING_SYNC_TRIGGER_TIME, v)
-        var lastSyncStatus: Boolean
-            get() = prefs.getPref(LAST_SYNC_STATUS, false)
-            set(v) = prefs.setPref(LAST_SYNC_STATUS, v)
-        var lastBackgroundSync: String
-            get() = prefs.getPref(LAST_BACKGROUND_SYNC, "")
-            set(v) = prefs.setPref(LAST_BACKGROUND_SYNC, v)
+        var sharedDataDir by string(SHARED_DATA_DIR, DataManager.defaultDataDirectory.path)
+        var userDataDir by string(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
+        var syncBackgroundEnabled by bool(SYNC_BACKGROUND_ENABLED, false)
+        var timingSyncEnabled by bool(TIMING_SYNC_ENABLED, false)
+        var timingSyncTriggerTime by long(TIMING_SYNC_TRIGGER_TIME, Calendar.getInstance().timeInMillis + 1200000L)
+        var lastSyncStatus by bool(LAST_SYNC_STATUS, false)
+        var lastBackgroundSync by string(LAST_BACKGROUND_SYNC, "")
     }
 
-    class Clipboard(private val prefs: AppPrefs) {
+    class Clipboard(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
             const val CLIPBOARD_COMPARE_RULES = "clipboard_clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "clipboard_clipboard_output"
@@ -389,44 +237,26 @@ class AppPrefs(
             const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
         }
 
-        var clipboardCompareRules: List<String>
-            get() = prefs.getPref(CLIPBOARD_COMPARE_RULES, "").trim().split('\n')
-            set(v) = prefs.setPref(CLIPBOARD_COMPARE_RULES, v.joinToString("\n"))
-        var clipboardOutputRules: List<String>
-            get() = prefs.getPref(CLIPBOARD_OUTPUT_RULES, "").trim().split('\n')
-            set(v) = prefs.setPref(CLIPBOARD_OUTPUT_RULES, v.joinToString("\n"))
-        var draftOutputRules: List<String>
-            get() = prefs.getPref(DRAFT_OUTPUT_RULES, "").trim().split('\n')
-            set(v) = prefs.setPref(DRAFT_OUTPUT_RULES, v.joinToString("\n"))
-        var clipboardLimit: Int
-            get() = prefs.getPref(CLIPBOARD_LIMIT, 10)
-            set(v) = prefs.setPref(CLIPBOARD_LIMIT, v)
-        var draftLimit: Int
-            get() = prefs.getPref(DRAFT_LIMIT, 10)
-            set(v) = prefs.setPref(DRAFT_LIMIT, v)
-        var draftExcludeApp: String
-            get() = prefs.getPref(DRAFT_EXCLUDE_APP, "")
-            set(v) = prefs.setPref(DRAFT_EXCLUDE_APP, v)
+        var clipboardCompareRules by string(CLIPBOARD_COMPARE_RULES, "")
+        var clipboardOutputRules by string(CLIPBOARD_OUTPUT_RULES, "")
+        var draftOutputRules by string(DRAFT_OUTPUT_RULES, "")
+        var clipboardLimit by int(CLIPBOARD_LIMIT, 10)
+        var draftLimit by int(DRAFT_LIMIT, 10)
+        var draftExcludeApp by string(DRAFT_EXCLUDE_APP, "")
     }
 
     /**
      *  Wrapper class of configuration settings.
      */
-    class Other(private val prefs: AppPrefs) {
+    class Other(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
             const val UI_MODE = "other__ui_mode"
             const val SHOW_APP_ICON = "other__show_app_icon"
             const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
         }
 
-        var uiMode: String
-            get() = prefs.getPref(UI_MODE, "auto")
-            set(v) = prefs.setPref(UI_MODE, v)
-        var showAppIcon: Boolean
-            get() = prefs.getPref(SHOW_APP_ICON, true)
-            set(v) = prefs.setPref(SHOW_APP_ICON, v)
-        var showStatusBarIcon: Boolean = false
-            get() = prefs.getPref(SHOW_STATUS_BAR_ICON, false)
-            private set
+        var uiMode by string(UI_MODE, "auto")
+        var showAppIcon by bool(SHOW_APP_ICON, true)
+        val showStatusBarIcon by bool(SHOW_STATUS_BAR_ICON, false)
     }
 }
