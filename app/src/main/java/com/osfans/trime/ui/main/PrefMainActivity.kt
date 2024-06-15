@@ -32,7 +32,7 @@ import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
 import com.osfans.trime.ui.setup.SetupActivity

@@ -6,7 +6,7 @@ package com.osfans.trime.data.db
 
 import android.content.Context
 import androidx.room.Room
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.util.StringUtils.matches
 import kotlinx.coroutines.CoroutineScope

@@ -2,14 +2,13 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.data
+package com.osfans.trime.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.data.prefs.PreferenceDelegateOwner
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.util.appContext

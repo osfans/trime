@@ -7,7 +7,7 @@ package com.osfans.trime.ime.keyboard
 import android.view.KeyEvent
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeKeyMapping
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.util.CollectionUtils.obtainBoolean

@@ -6,7 +6,7 @@ package com.osfans.trime.data.schema
 
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import kotlinx.serialization.builtins.ListSerializer
 
 object SchemaManager {

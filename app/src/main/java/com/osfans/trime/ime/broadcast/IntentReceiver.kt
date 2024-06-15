@@ -18,7 +18,7 @@ import androidx.core.content.ContextCompat
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

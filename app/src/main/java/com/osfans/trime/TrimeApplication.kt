@@ -9,10 +9,10 @@ import android.content.Intent
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ui.main.LogActivity
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope

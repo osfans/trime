@@ -13,7 +13,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager

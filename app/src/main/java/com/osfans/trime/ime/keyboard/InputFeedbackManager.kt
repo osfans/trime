@@ -14,7 +14,7 @@ import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.View
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import splitties.systemservices.audioManager
 import splitties.systemservices.vibrator

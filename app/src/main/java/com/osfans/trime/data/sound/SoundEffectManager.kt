@@ -7,8 +7,8 @@ package com.osfans.trime.data.sound
 import androidx.annotation.Keep
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
-import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.prefs.AppPrefs
 import timber.log.Timber
 import java.io.File
 

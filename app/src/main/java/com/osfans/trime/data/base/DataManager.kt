@@ -7,7 +7,7 @@ package com.osfans.trime.data.base
 import android.content.res.AssetManager
 import android.os.Build
 import android.os.Environment
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.WeakHashSet

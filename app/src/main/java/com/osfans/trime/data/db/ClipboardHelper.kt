@@ -7,7 +7,7 @@ package com.osfans.trime.data.db
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.StringUtils.matches
 import com.osfans.trime.util.StringUtils.removeAll
 import com.osfans.trime.util.WeakHashSet
