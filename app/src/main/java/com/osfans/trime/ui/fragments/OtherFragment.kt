@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
 import com.osfans.trime.R
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 

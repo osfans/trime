@@ -8,7 +8,7 @@ import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

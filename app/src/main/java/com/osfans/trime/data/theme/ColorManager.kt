@@ -10,8 +10,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import androidx.annotation.ColorInt
 import androidx.core.math.MathUtils
-import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet

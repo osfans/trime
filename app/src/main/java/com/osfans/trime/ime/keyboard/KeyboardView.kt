@@ -25,7 +25,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.PopupWindow
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager

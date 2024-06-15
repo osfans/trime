@@ -18,7 +18,7 @@ import android.util.SparseArray
 import android.view.KeyEvent
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity

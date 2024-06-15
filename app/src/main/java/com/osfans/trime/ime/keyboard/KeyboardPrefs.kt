@@ -5,7 +5,7 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.isLandscape
 
 object KeyboardPrefs {

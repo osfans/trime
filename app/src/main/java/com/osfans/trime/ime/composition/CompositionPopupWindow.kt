@@ -19,7 +19,7 @@ import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import androidx.core.math.MathUtils
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager

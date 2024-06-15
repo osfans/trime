@@ -37,8 +37,8 @@ import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.AppPrefs
 import com.osfans.trime.data.db.DraftHelper
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver

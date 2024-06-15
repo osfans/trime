@@ -5,7 +5,7 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.util.config.Config

@@ -6,7 +6,7 @@ package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.AppPrefs
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode

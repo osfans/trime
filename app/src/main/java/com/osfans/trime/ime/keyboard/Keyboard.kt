@@ -6,7 +6,7 @@ package com.osfans.trime.ime.keyboard
 
 import android.content.res.Configuration
 import android.view.KeyEvent
-import com.osfans.trime.data.AppPrefs.Companion.defaultInstance
+import com.osfans.trime.data.prefs.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
