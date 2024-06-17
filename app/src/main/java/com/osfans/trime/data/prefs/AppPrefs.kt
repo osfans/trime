@@ -254,7 +254,13 @@ class AppPrefs(
             const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
         }
 
-        var uiMode by string(UI_MODE, "auto")
+        enum class UiMode {
+            AUTO,
+            LIGHT,
+            DARK,
+        }
+
+        var uiMode by enum(UI_MODE, UiMode.AUTO)
         var showAppIcon by bool(SHOW_APP_ICON, true)
         val showStatusBarIcon by bool(SHOW_STATUS_BAR_ICON, false)
     }

@@ -9,7 +9,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <ListPreference
-        android:defaultValue="auto"
+        android:defaultValue="AUTO"
         app:iconSpaceReserved="false"
         app:entries="@array/other__ui_mode_entries"
         app:entryValues="@array/other__ui_mode_values"
