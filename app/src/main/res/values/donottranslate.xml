@@ -20,9 +20,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>ALWAYS</item>
     </string-array>
     <string-array name="other__ui_mode_values">
-        <item>auto</item>
-        <item>light</item>
-        <item>dark</item>
+        <item>AUTO</item>
+        <item>LIGHT</item>
+        <item>DARK</item>
     </string-array>
     <string-array name="other__clipboard_manager_values">
         <item>0</item>

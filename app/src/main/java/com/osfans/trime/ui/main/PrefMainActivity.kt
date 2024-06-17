@@ -45,7 +45,7 @@ import splitties.views.topPadding
 
 class PrefMainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
-    private val prefs get() = AppPrefs.defaultInstance()
+    private val prefs = AppPrefs.defaultInstance()
 
     private lateinit var navHostFragment: NavHostFragment
     private var loadingDialog: AlertDialog? = null
@@ -65,10 +65,9 @@ class PrefMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val uiMode =
             when (prefs.other.uiMode) {
-                "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
+                AppPrefs.Other.UiMode.AUTO -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                AppPrefs.Other.UiMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                AppPrefs.Other.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
             }
         AppCompatDelegate.setDefaultNightMode(uiMode)
 

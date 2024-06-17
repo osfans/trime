@@ -70,9 +70,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>Always</item>
     </string-array>
     <string-array name="other__ui_mode_entries" >
-        <item name="auto">System Default</item>
-        <item name="light">Light</item>
-        <item name="dark">Dark</item>
+        <item>System Default</item>
+        <item>Light</item>
+        <item>Dark</item>
     </string-array>
     <string name="keyboard__soft_cursor_title">Use soft cursor(^) in composition</string>
     <string name="pref_deploy">Deploy</string>
