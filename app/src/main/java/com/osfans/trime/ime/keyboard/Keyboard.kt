@@ -164,7 +164,7 @@ class Keyboard() {
         mLabelTransform = obtainString(keyboardConfig, "label_transform", "none")
         asciiMode = obtainInt(keyboardConfig, "ascii_mode", 1) == 1
         currentAsciiMode = asciiMode
-        if (asciiMode) asciiKeyboard = obtainString(keyboardConfig, "ascii_keyboard", "")
+        if (!asciiMode) asciiKeyboard = obtainString(keyboardConfig, "ascii_keyboard", "")
         resetAsciiMode = obtainBoolean(keyboardConfig, "reset_ascii_mode", true)
         landscapeKeyboard = obtainString(keyboardConfig, "landscape_keyboard", "")
         mLandscapePercent =
