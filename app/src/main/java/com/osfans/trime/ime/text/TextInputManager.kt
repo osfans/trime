@@ -35,7 +35,7 @@ import com.osfans.trime.ui.main.settings.ColorPickerDialog
 import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.ShortcutUtils
-import com.osfans.trime.util.startsWithAsciiChar
+import com.osfans.trime.util.isAsciiPrintable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -461,7 +461,7 @@ class TextInputManager(
 
     override fun onText(text: CharSequence?) {
         text ?: return
-        if (!text.startsWithAsciiChar() && Rime.isComposing) {
+        if (!text.first().isAsciiPrintable() && Rime.isComposing) {
             Rime.commitComposition()
             trime.commitRimeText()
         }

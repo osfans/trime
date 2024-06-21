@@ -9,6 +9,7 @@ import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.util.appContext
+import com.osfans.trime.util.isAsciiPrintable
 import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -214,15 +215,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
             }
         }
 
-        private fun isValidText(text: CharSequence?): Boolean {
-            if (text.isNullOrEmpty()) return false
-            val ch = text.toString().codePointAt(0)
-            return ch in 0x20..0x7f
-        }
-
         @JvmStatic
         fun simulateKeySequence(sequence: CharSequence): Boolean {
-            if (!isValidText(sequence)) return false
+            if (!sequence.first().isAsciiPrintable()) return false
             Timber.d("simulateKeySequence: $sequence")
             return simulateRimeKeySequence(
                 sequence.toString().replace("{}", "{braceleft}{braceright}"),
