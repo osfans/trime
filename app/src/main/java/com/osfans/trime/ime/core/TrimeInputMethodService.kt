@@ -58,8 +58,8 @@ import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.ShortcutUtils.openCategory
-import com.osfans.trime.util.StringUtils
 import com.osfans.trime.util.WeakHashSet
+import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.isNightMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -1049,7 +1049,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)
                     if (et != null) {
-                        val moveTo = StringUtils.findSectionAfter(et.text, et.startOffset + et.selectionEnd)
+                        val moveTo = et.text.findSectionFrom(et.startOffset + et.selectionEnd)
                         ic.setSelection(moveTo, moveTo)
                         return true
                     }
@@ -1062,7 +1062,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)
                     if (et != null) {
-                        val moveTo = StringUtils.findSectionBefore(et.text, et.startOffset + et.selectionStart)
+                        val moveTo = et.text.findSectionFrom(et.startOffset + et.selectionStart, true)
                         ic.setSelection(moveTo, moveTo)
                         return true
                     }

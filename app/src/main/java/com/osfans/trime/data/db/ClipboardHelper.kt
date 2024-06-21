@@ -8,9 +8,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.util.StringUtils.matches
-import com.osfans.trime.util.StringUtils.removeAll
 import com.osfans.trime.util.WeakHashSet
+import com.osfans.trime.util.matchesAny
+import com.osfans.trime.util.removeRegexSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,10 +62,14 @@ object ClipboardHelper :
     private val limit get() = AppPrefs.defaultInstance().clipboard.clipboardLimit
     private val compare get() =
         AppPrefs.defaultInstance().clipboard.clipboardCompareRules
-            .trim().split('\n')
+            .split('\n')
+            .map { Regex(it.trim()) }
+            .toHashSet()
     private val output get() =
         AppPrefs.defaultInstance().clipboard.clipboardOutputRules
-            .trim().split('\n')
+            .split('\n')
+            .map { Regex(it) }
+            .toHashSet()
 
     var lastBean: DatabaseBean? = null
 
@@ -118,10 +122,10 @@ object ClipboardHelper :
             ?.let { DatabaseBean.fromClipData(it) }
             ?.takeIf {
                 it.text!!.isNotBlank() &&
-                    !it.text.matches(output.toTypedArray())
+                    !it.text.matchesAny(output)
             }
             ?.let { b ->
-                if (b.text!!.removeAll(compare.toTypedArray()).isEmpty()) return
+                if (b.text?.removeRegexSet(compare)?.isEmpty() == true) return
                 Timber.d("Accept clipboard $b")
                 launch {
                     mutex.withLock {
