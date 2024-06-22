@@ -40,7 +40,7 @@ class CandidateAdapter(theme: Theme) : RecyclerView.Adapter<CandidateAdapter.Vie
     fun updateCandidates(candidates: List<CandidateListItem>) {
         mCandidates.clear()
         mCandidates.addAll(candidates)
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, candidates.size)
     }
 
     override fun getItemCount(): Int {
