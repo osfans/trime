@@ -220,6 +220,8 @@ class LiquidKeyboard(
                 layoutManager = flexboxLayoutManager
                 adapter = varLengthAdapter
                 setItemViewCacheSize(50)
+                // CandidateAdapter现在使用notifyItemRangeChanged，下面禁用layout变化的缺省动画。
+                keyboardView.itemAnimator = null
                 setHasFixedSize(false)
                 isSelected = true
             }
