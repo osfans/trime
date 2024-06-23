@@ -80,6 +80,14 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
     override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
 
+    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { updateContext() } }
+
+    override suspend fun clearComposition() =
+        withRimeContext {
+            clearRimeComposition()
+            updateContext()
+        }
+
     fun startup(fullCheck: Boolean) {
         if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
@@ -244,17 +252,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
         @JvmStatic
         val candHighlightIndex: Int
             get() = if (isComposing) inputContext?.menu?.highlightedCandidateIndex ?: -1 else -1
-
-        fun commitComposition(): Boolean {
-            return commitRimeComposition().also {
-                updateContext()
-            }
-        }
-
-        fun clearComposition() {
-            clearRimeComposition()
-            updateContext()
-        }
 
         fun selectCandidate(index: Int): Boolean {
             return selectRimeCandidateOnCurrentPage(index).also {

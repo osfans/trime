@@ -147,9 +147,6 @@ class TextInputManager(
     ) {
         super.onStartInputView(info, restarting)
         trime.selectLiquidKeyboard(-1)
-        if (restarting) {
-            trime.performEscape()
-        }
         isComposable = false
         var forceAsciiMode = false
         val keyboardType =
@@ -462,8 +459,10 @@ class TextInputManager(
     override fun onText(text: CharSequence?) {
         text ?: return
         if (!text.first().isAsciiPrintable() && Rime.isComposing) {
-            Rime.commitComposition()
-            trime.commitRimeText()
+            trime.postRimeJob {
+                commitComposition()
+                trime.commitRimeText()
+            }
         }
         var textToParse = text
         while (textToParse!!.isNotEmpty()) {

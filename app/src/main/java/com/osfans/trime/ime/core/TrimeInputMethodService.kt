@@ -35,6 +35,7 @@ import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeApi
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.DraftHelper
@@ -61,19 +62,28 @@ import com.osfans.trime.util.ShortcutUtils.openCategory
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.isNightMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.bitflags.hasFlag
 import splitties.systemservices.inputMethodManager
 import splitties.views.gravityBottom
 import timber.log.Timber
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /** [輸入法][InputMethodService]主程序  */
 
 @Suppress("ktlint:standard:property-naming")
 open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var rime: RimeSession
+    private val jobs = Channel<Job>(capacity = Channel.UNLIMITED)
+
     private var normalTextEditor = false
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
@@ -114,6 +124,28 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
         }
 
+    private fun postJob(
+        ctx: CoroutineContext,
+        scope: CoroutineScope,
+        block: suspend () -> Unit,
+    ): Job {
+        val job = scope.launch(ctx, CoroutineStart.LAZY) { block() }
+        jobs.trySend(job)
+        return job
+    }
+
+    /**
+     * Post a rime operation to [jobs] to be executed
+     *
+     * Unlike `rime.runOnReady` or `rime.launchOnReady` where
+     * subsequent operations can start if the prior operation is not finished (suspended),
+     * [postRimeJob] ensures that operations are executed sequentially.
+     */
+    fun postRimeJob(
+        ctx: CoroutineContext = EmptyCoroutineContext,
+        block: suspend RimeApi.() -> Unit,
+    ) = postJob(ctx, rime.lifecycleScope) { rime.runOnReady(block) }
+
     init {
         try {
             check(self == null) { "Trime is already initialized" }
@@ -131,7 +163,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         } else {
             Timber.i("onWindowShown...")
         }
-        rime.runIfReady {
+        postRimeJob {
             if (currentInputEditorInfo != null) {
                 isWindowShown = true
                 withContext(Dispatchers.Main) {
@@ -161,13 +193,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         for (listener in eventListeners) {
             listener.onWindowHidden()
         }
-    }
-
-    fun updatePopupWindow(
-        offsetX: Int,
-        offsetY: Int,
-    ) {
-        mCompositionPopupWindow!!.updatePopupWindow(offsetX, offsetY)
     }
 
     fun loadConfig() {
@@ -220,6 +245,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreate() {
         rime = RimeDaemon.createSession(javaClass.name)
+        lifecycleScope.launch {
+            jobs.consumeEach { it.join() }
+        }
         super.onCreate()
         // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
         try {
@@ -228,22 +256,20 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             ColorManager.addOnChangedListener(onColorChangeListener)
-            lifecycleScope.launch {
-                rime.runOnReady {
-                    Timber.d("Running Trime.onCreate")
-                    ColorManager.init(resources.configuration)
-                    textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
-                    InputFeedbackManager.init()
-                    restartSystemStartTimingSync()
-                    try {
-                        for (listener in eventListeners) {
-                            listener.onCreate()
-                        }
-                    } catch (e: Exception) {
-                        Timber.e(e)
+            postRimeJob {
+                Timber.d("Running Trime.onCreate")
+                ColorManager.init(resources.configuration)
+                textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
+                InputFeedbackManager.init()
+                restartSystemStartTimingSync()
+                try {
+                    for (listener in eventListeners) {
+                        listener.onCreate()
                     }
-                    Timber.d("Trime.onCreate  completed")
+                } catch (e: Exception) {
+                    Timber.e(e)
                 }
+                Timber.d("Trime.onCreate  completed")
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -304,7 +330,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      *
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
     fun recreateInputView() {
-        mCompositionPopupWindow?.hideCompositionView()
         inputView = InputView(this, rime)
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
         // 初始化候选栏
@@ -361,13 +386,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        val config = resources.configuration
-        // 屏幕方向改变时会重置 inputView，不用在这里重置键盘
-        if (config.orientation != newConfig.orientation) {
-            // Clear composing text and candidates for orientation change.
-            performEscape()
-        }
         super.onConfigurationChanged(newConfig)
+        postRimeJob { clearComposition() }
         ColorManager.onSystemNightModeChange(newConfig.isNightMode())
     }
 
@@ -402,7 +422,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
         if (candidatesStart == -1 && candidatesEnd == -1 && newSelStart == 0 && newSelEnd == 0) {
             // 上屏後，清除候選區
-            performEscape()
+            postRimeJob { clearComposition() }
         }
         // Update the caps-lock status for the current cursor position.
         dispatchCapsStateToInputView()
@@ -426,10 +446,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        lifecycleScope.launch(Dispatchers.Main) {
-            rime.runOnReady {
-                recreateInputView()
-            }
+        postRimeJob(Dispatchers.Main) {
+            recreateInputView()
         }
         initializationUi = InitializationUi(this)
         return initializationUi!!.root
@@ -456,87 +474,98 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     }
 
+    override fun onStartInput(
+        attribute: EditorInfo,
+        restarting: Boolean,
+    ) {
+        Timber.d("onStartInput: restarting=$restarting")
+        postRimeJob {
+            if (restarting) {
+                // when input restarts in the same editor, clear previous composition
+                clearComposition()
+            }
+        }
+    }
+
     override fun onStartInputView(
         attribute: EditorInfo,
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=%s", restarting)
-        lifecycleScope.launch(Dispatchers.Main) {
-            rime.runOnReady {
-                InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
-                InputFeedbackManager.resetPlayProgress()
-                for (listener in eventListeners) {
-                    listener.onStartInputView(attribute, restarting)
+        postRimeJob(Dispatchers.Main) {
+            InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
+            InputFeedbackManager.resetPlayProgress()
+            for (listener in eventListeners) {
+                listener.onStartInputView(attribute, restarting)
+            }
+            if (prefs.other.showStatusBarIcon) {
+                showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
+            }
+            bindKeyboardToInputView()
+            setCandidatesViewShown(!rime.run { isEmpty() }) // 軟鍵盤出現時顯示候選欄
+            inputView?.startInput(attribute, restarting)
+            when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
+                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+                -> {
+                    Timber.d(
+                        "EditorInfo: private;" +
+                            " packageName=" +
+                            attribute.packageName +
+                            "; fieldName=" +
+                            attribute.fieldName +
+                            "; actionLabel=" +
+                            attribute.actionLabel +
+                            "; inputType=" +
+                            attribute.inputType +
+                            "; VARIATION=" +
+                            (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
+                            "; CLASS=" +
+                            (attribute.inputType and InputType.TYPE_MASK_CLASS) +
+                            "; ACTION=" +
+                            (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
+                    )
+                    normalTextEditor = false
                 }
-                if (prefs.other.showStatusBarIcon) {
-                    showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
-                }
-                bindKeyboardToInputView()
-                setCandidatesViewShown(!rime.run { isEmpty() }) // 軟鍵盤出現時顯示候選欄
-                inputView?.startInput(attribute, restarting)
-                when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
-                    InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                    InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                    InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                    InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
-                    -> {
-                        Timber.d(
-                            "EditorInfo: private;" +
-                                " packageName=" +
-                                attribute.packageName +
-                                "; fieldName=" +
-                                attribute.fieldName +
-                                "; actionLabel=" +
-                                attribute.actionLabel +
-                                "; inputType=" +
-                                attribute.inputType +
-                                "; VARIATION=" +
-                                (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                                "; CLASS=" +
-                                (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                                "; ACTION=" +
-                                (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                        )
-                        normalTextEditor = false
-                    }
 
-                    else -> {
-                        Timber.d(
-                            "EditorInfo: normal;" +
-                                " packageName=" +
-                                attribute.packageName +
-                                "; fieldName=" +
-                                attribute.fieldName +
-                                "; actionLabel=" +
-                                attribute.actionLabel +
-                                "; inputType=" +
-                                attribute.inputType +
-                                "; VARIATION=" +
-                                (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                                "; CLASS=" +
-                                (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                                "; ACTION=" +
-                                (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                        )
-                        if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                            == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                        ) {
-                            //  应用程求以隐身模式打开键盘应用程序
-                            normalTextEditor = false
-                            Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
-                        } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
-                            prefs
-                                .clipboard
-                                .draftExcludeApp.trim().split('\n')
-                                .contains(attribute.packageName)
-                        ) {
-                            normalTextEditor = false
-                            Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
-                        } else {
-                            normalTextEditor = true
-                            DraftHelper.onInputEventChanged()
-                        }
+                else -> {
+                    Timber.d(
+                        "EditorInfo: normal;" +
+                            " packageName=" +
+                            attribute.packageName +
+                            "; fieldName=" +
+                            attribute.fieldName +
+                            "; actionLabel=" +
+                            attribute.actionLabel +
+                            "; inputType=" +
+                            attribute.inputType +
+                            "; VARIATION=" +
+                            (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
+                            "; CLASS=" +
+                            (attribute.inputType and InputType.TYPE_MASK_CLASS) +
+                            "; ACTION=" +
+                            (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
+                    )
+                    if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                        == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                    ) {
+                        //  应用程求以隐身模式打开键盘应用程序
+                        normalTextEditor = false
+                        Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
+                    } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
+                        prefs
+                            .clipboard
+                            .draftExcludeApp.trim().split('\n')
+                            .contains(attribute.packageName)
+                    ) {
+                        normalTextEditor = false
+                        Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
+                    } else {
+                        normalTextEditor = true
+                        DraftHelper.onInputEventChanged()
                     }
                 }
             }
@@ -545,19 +574,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
-        rime.runIfReady {
+        postRimeJob {
             if (normalTextEditor) {
                 DraftHelper.onInputEventChanged()
             }
-            try {
-                performEscape()
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to show the PopupWindow.")
-            }
+            clearComposition()
         }
         InputFeedbackManager.finishInput()
         inputView?.finishInput()
-        mCompositionPopupWindow?.hideCompositionView()
     }
 
     fun bindKeyboardToInputView() {
@@ -1122,11 +1146,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             return true
         }
         return false
-    }
-
-    /** 模擬PC鍵盤中Esc鍵的功能：清除輸入的編碼和候選項  */
-    fun performEscape() {
-        if (this.isComposing) textInputManager!!.onKey(KeyEvent.KEYCODE_ESCAPE, 0)
     }
 
     override fun onEvaluateFullscreenMode(): Boolean {
