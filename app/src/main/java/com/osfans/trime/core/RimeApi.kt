@@ -26,4 +26,8 @@ interface RimeApi {
     suspend fun selectedSchemaId(): String
 
     suspend fun selectSchema(schemaId: String): Boolean
+
+    suspend fun commitComposition(): Boolean
+
+    suspend fun clearComposition()
 }
