@@ -43,7 +43,6 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
-import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.ime.enums.Keycode
@@ -55,7 +54,6 @@ import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
-import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.ShortcutUtils.openCategory
@@ -88,7 +86,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
     private var mainKeyboardView: KeyboardView? = null // 主軟鍵盤
-    private var mCandidate: Candidate? = null // 候選
     var inputView: InputView? = null
     private var initializationUi: InitializationUi? = null
     private var eventListeners = WeakHashSet<EventListener>()
@@ -96,7 +93,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var isWindowShown = false // 键盘窗口是否已显示
     private var isAutoCaps = false // 句首自動大寫
     var textInputManager: TextInputManager? = null // 文字输入管理器
-    private var mCompositionPopupWindow: CompositionPopupWindow? = null
     var candidateExPage = false
 
     var shouldUpdateRimeOption = false
@@ -318,24 +314,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         commitTextByChar(checkNotNull(ShortcutUtils.pasteFromClipboard(this)).toString())
     }
 
-    private fun showCompositionView() {
-        if (Rime.isComposing) {
-            mCompositionPopupWindow?.updateCompositionView()
-        } else {
-            mCompositionPopupWindow?.hideCompositionView()
-        }
-    }
-
     /** Must be called on the UI thread
      *
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
     fun recreateInputView() {
         inputView = InputView(this, rime)
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
-        // 初始化候选栏
-        mCandidate = inputView!!.quickBar.oldCandidateBar.candidates
-
-        mCompositionPopupWindow = inputView!!.composition
 
         loadConfig()
         KeyboardSwitcher.newOrReset()
@@ -351,7 +335,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
-        mCompositionPopupWindow = null
         for (listener in eventListeners) {
             listener.onDestroy()
         }
@@ -392,8 +375,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
-        mCompositionPopupWindow?.updateCursorAnchorInfo(cursorAnchorInfo)
-        showCompositionView()
+        inputView?.updateCursorAnchorInfo(cursorAnchorInfo)
     }
 
     override fun onUpdateSelection(
@@ -1110,27 +1092,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     /** 更新Rime的中西文狀態、編輯區文本  */
-    fun updateComposing(): Int {
-        val ic = currentInputConnection
+    fun updateComposing() {
         updateComposingText()
-        if (ic != null && mCompositionPopupWindow?.isWinFixed() == false) {
-            mCompositionPopupWindow?.isCursorUpdated = ic.requestCursorUpdates(1)
-        }
-        var startNum = 0
-        if (mCompositionPopupWindow?.isPopupWindowEnabled == true) {
-            val composition = mCompositionPopupWindow!!.composition
-            composition.compositionView.visibility = View.VISIBLE
-            startNum = Rime.inputContext?.let { composition.compositionView.update(it) } ?: 0
-            mCandidate?.setText(startNum)
-            // if isCursorUpdated, showCompositionView will be called in onUpdateCursorAnchorInfo
-            // otherwise we need to call it here
-            if (mCompositionPopupWindow?.isCursorUpdated == false) showCompositionView()
-        } else {
-            mCandidate?.setText(0)
-        }
-        mainKeyboardView?.invalidateComposingKeys()
+        inputView?.updateComposing(currentInputConnection)
         if (!onEvaluateInputViewShown()) setCandidatesViewShown(textInputManager!!.isComposable) // 實體鍵盤打字時顯示候選欄
-        return startNum
     }
 
     /**

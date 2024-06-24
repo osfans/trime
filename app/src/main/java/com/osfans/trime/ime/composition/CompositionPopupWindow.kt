@@ -19,6 +19,7 @@ import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import androidx.core.math.MathUtils
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
@@ -175,7 +176,7 @@ class CompositionPopupWindow(
             popupWindowPos !== PopupPosition.LEFT_UP && popupWindowPos !== PopupPosition.RIGHT_UP
     }
 
-    fun updatePopupWindow(
+    private fun updatePopupWindow(
         offsetX: Int,
         offsetY: Int,
     ) {
@@ -186,12 +187,20 @@ class CompositionPopupWindow(
         mPopupWindow.update(popupWindowX, popupWindowY, -1, -1, true)
     }
 
-    fun hideCompositionView() {
+    fun updateView() {
+        if (Rime.isComposing) {
+            updateCompositionView()
+        } else {
+            hideCompositionView()
+        }
+    }
+
+    private fun hideCompositionView() {
         mPopupWindow.dismiss()
         mPopupHandler.removeCallbacks(mPopupTimer)
     }
 
-    fun updateCompositionView() {
+    private fun updateCompositionView() {
         if (isPopupWindowMovable == "once") {
             popupWindowPos = PopupPosition.fromString(ThemeManager.activeTheme.generalStyle.layout.position)
         }
@@ -234,5 +243,6 @@ class CompositionPopupWindow(
             }
             cursorAnchorInfo.matrix.mapRect(mPopupRectF)
         }
+        updateView()
     }
 }

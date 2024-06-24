@@ -12,7 +12,9 @@ import android.os.Build
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
+import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
@@ -20,6 +22,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
@@ -327,6 +330,34 @@ class InputView(
             Board.Main -> windowManager.attachWindow(KeyboardWindow)
             Board.Symbol -> windowManager.attachWindow(LiquidKeyboard)
         }
+    }
+
+    fun updateCursorAnchorInfo(info: CursorAnchorInfo) {
+        composition.updateCursorAnchorInfo(info)
+    }
+
+    fun updateComposing(ic: InputConnection?) {
+        val candidateView = quickBar.oldCandidateBar.candidates
+        val compositionView = composition.composition.compositionView
+        val mainKeyboardView = keyboardWindow.oldMainInputView.mainKeyboardView
+        if (composition.isPopupWindowEnabled) {
+            val offset = Rime.inputContext?.let { compositionView.update(it) } ?: 0
+            candidateView.setText(offset)
+            val isCursorUpdated =
+                if (ic != null && !composition.isWinFixed()) {
+                    ic.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE)
+                } else {
+                    false
+                }.also { composition.isCursorUpdated = it }
+            // if isCursorUpdated, updateView will be called in onUpdateCursorAnchorInfo
+            // otherwise we need to call it here
+            if (!isCursorUpdated) {
+                composition.updateView()
+            }
+        } else {
+            candidateView.setText(0)
+        }
+        mainKeyboardView.invalidateComposingKeys()
     }
 
     private var showingDialog: Dialog? = null
