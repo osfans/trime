@@ -13,6 +13,7 @@ import android.graphics.drawable.PaintDrawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.view.updateLayoutParams
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.prefs.AppPrefs
@@ -42,7 +43,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     // private var expectWidth = 0
     private var listener = WeakReference<EventListener?>(null)
     private var highlightIndex = -1
-    private var candidates: Array<CandidateListItem>? = null
+    private val candidates = arrayListOf<CandidateListItem>()
     private val computedCandidates = ArrayList<ComputedCandidate>(MAX_CANDIDATE_COUNT)
     private var startNum = 0
     private var timeDown: Long = 0
@@ -132,22 +133,18 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         index: Int,
         isLongClick: Boolean,
     ) {
-        if (index < 0 || index >= computedCandidates.size) return
-
-        val candidate = computedCandidates[index]
-        if (candidate is ComputedCandidate.Word) {
-            if (listener.get() != null) {
+        if (index !in computedCandidates.indices) return
+        val listener = listener.get() ?: return
+        when (val candidate = computedCandidates[index]) {
+            is ComputedCandidate.Word -> {
                 if (isLongClick && prefs.shouldLongClickDeleteCandidate) {
-                    listener.get()!!.onCandidateLongClicked(index + startNum)
+                    listener.onCandidateLongClicked(index + startNum)
                 } else {
-                    listener.get()!!.onCandidatePressed(index + startNum)
+                    listener.onCandidatePressed(index + startNum)
                 }
             }
-        }
-        if (candidate is ComputedCandidate.Symbol) {
-            val arrow = candidate.arrow
-            if (listener.get() != null) {
-                listener.get()!!.onCandidateSymbolPressed(arrow)
+            is ComputedCandidate.Symbol -> {
+                listener.onCandidateSymbolPressed(candidate.arrow)
             }
         }
     }
@@ -162,36 +159,17 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         return candidateUseCursor && i == highlightIndex
     }
 
-    val highlightLeft: Int
-        get() {
-            return if (highlightIndex in computedCandidates.indices) {
-                computedCandidates[highlightIndex].geometry.left
-            } else {
-                0
-            }
-        }
-    val highlightRight: Int
-        get() {
-            return if (highlightIndex in computedCandidates.indices) {
-                computedCandidates[highlightIndex].geometry.right
-            } else {
-                0
-            }
-        }
-
     override fun onDraw(canvas: Canvas) {
-        if (candidates == null) return
+        if (candidates.isEmpty()) return
         super.onDraw(canvas)
         // 是否水平居中显示(不带编码提示的)候选项
-        var isAlign = true
-        if (isCommentOnTop) {
-            candidates?.forEachIndexed { index, candidate ->
-                if (index < startNum) return@forEachIndexed
-                val comment = candidate.comment
+        val isAlign =
+            if (isCommentOnTop) {
                 // 只要有一个候选项有编码提示就不会居中
-                if (comment.isNotEmpty()) isAlign = false
+                candidates.drop(startNum).any { it.comment.isEmpty() }
+            } else {
+                true
             }
-        }
         computedCandidates.forEachIndexed { index, computedCandidate ->
             // Draw highlight
             if (candidateUseCursor && index == highlightIndex) {
@@ -199,44 +177,41 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 candidateHighlight.draw(canvas)
             }
             // Draw candidates
-            if (computedCandidate is ComputedCandidate.Word) {
-                var wordX = computedCandidate.geometry.centerX().toFloat()
-                var wordY = (
-                    computedCandidates[0].geometry.centerY() -
-                        (candidatePaint.ascent() + candidatePaint.descent()) / 2
-                )
-                if (!isAlign) wordY += commentHeight / 2.0f
-                // 绘制编码提示
-                val comment = computedCandidate.comment
-                if (shouldShowComment && !comment.isNullOrEmpty()) {
-                    var commentX = computedCandidate.geometry.centerX().toFloat()
-                    var commentY = commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2
-                    if (!isCommentOnTop) {
-                        val commentWidth = commentPaint.measureText(comment, commentFont)
-                        commentX = computedCandidate.geometry.right - commentWidth / 2
-                        commentY += (computedCandidates[0].geometry.bottom - commentHeight).toFloat()
-                        wordX -= commentWidth / 2.0f
+            when (computedCandidate) {
+                is ComputedCandidate.Word -> {
+                    val (word, comment, geometry) = computedCandidate
+                    var wordX = geometry.centerX().toFloat()
+                    var wordY = geometry.centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2
+                    if (!isAlign) wordY += commentHeight / 2.0f
+                    // 绘制编码提示
+                    if (shouldShowComment && !comment.isNullOrEmpty()) {
+                        var commentX = geometry.centerX().toFloat()
+                        var commentY = commentHeight / 2.0f - (commentPaint.ascent() + commentPaint.descent()) / 2
+                        if (!isCommentOnTop) {
+                            val commentWidth = commentPaint.measureText(comment, commentFont)
+                            commentX = geometry.right - commentWidth / 2
+                            commentY += (geometry.bottom - commentHeight).toFloat()
+                            wordX -= commentWidth / 2.0f
+                        }
+                        commentPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
+                        canvas.drawText(comment, commentX, commentY, commentPaint, commentFont)
                     }
-                    commentPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
-                    canvas.drawText(comment, commentX, commentY, commentPaint, commentFont)
+                    // 绘制候选项
+                    candidatePaint.color = if (isHighlighted(index)) hilitedCandidateTextColor else candidateTextColor
+                    canvas.drawText(word, wordX, wordY, candidatePaint, candidateFont)
                 }
-                // 绘制候选项
-                val word = computedCandidate.word
-                candidatePaint.color = if (isHighlighted(index)) hilitedCandidateTextColor else candidateTextColor
-                canvas.drawText(word, wordX, wordY, candidatePaint, candidateFont)
-            } else if (computedCandidate is ComputedCandidate.Symbol) {
-                // Draw page up / down buttons
-                val arrow = computedCandidate.arrow
-                val arrowX = (
-                    computedCandidate.geometry.centerX() -
-                        symbolPaint.measureText(arrow, symbolFont) / 2
-                )
-                val arrowY = (
-                    computedCandidates[0].geometry.centerY() -
-                        (candidatePaint.ascent() + candidatePaint.descent()) / 2
-                )
-                symbolPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
-                canvas.drawText(arrow, arrowX, arrowY, symbolPaint)
+                is ComputedCandidate.Symbol -> {
+                    // Draw page up / down buttons
+                    val (arrow, geometry) = computedCandidate
+                    val arrowX =
+                        geometry.centerX() -
+                            symbolPaint.measureText(arrow, symbolFont) / 2
+                    val arrowY =
+                        geometry.centerY() -
+                            (candidatePaint.ascent() + candidatePaint.descent()) / 2
+                    symbolPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
+                    canvas.drawText(arrow, arrowX, arrowY, symbolPaint)
+                }
             }
             // Draw separators
             if (index + 1 < computedCandidates.size) {
@@ -270,7 +245,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         computedCandidates.clear()
         updateCandidates()
         var x = if ((!Rime.hasLeft())) 0 else pageButtonWidth
-        candidates?.forEachIndexed { index, candidate ->
+        candidates.forEachIndexed { index, (comment, text) ->
             if (index < startNum) return@forEachIndexed
             // if (pageEx >= 0 && x >= minWidth) {
             //     computedCandidates.add(
@@ -283,8 +258,6 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             //     hasExButton = true
             //     break
             // }
-            val text = candidate.text
-            val comment = candidate.comment
             var candidateWidth = candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding
             if (shouldShowComment && comment.isNotEmpty()) {
                 val commentWidth = commentPaint.measureText(comment, (commentFont))
@@ -329,10 +302,10 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             )
             x += pageButtonWidth
         }
-        val params = layoutParams
-        params.width = x
-        params.height = if ((shouldShowComment && isCommentOnTop)) candidateViewHeight + commentHeight else candidateViewHeight
-        layoutParams = params
+        updateLayoutParams {
+            width = x
+            height = if ((shouldShowComment && isCommentOnTop)) candidateViewHeight + commentHeight else candidateViewHeight
+        }
         // Trime.getService().candidateExPage = hasExButton
     }
 
@@ -392,17 +365,11 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun getCandidateIndex(
         x: Int,
         y: Int,
-    ): Int {
-        computedCandidates.forEachIndexed { index, computedCandidate ->
-            if (computedCandidate.geometry.contains(x, y)) {
-                return@getCandidateIndex index
-            }
-        }
-        return -1
-    }
+    ): Int = computedCandidates.indexOfFirst { it.geometry.contains(x, y) }
 
     private fun updateCandidates() {
-        candidates = Rime.candidatesOrStatusSwitches
+        candidates.clear()
+        candidates.addAll(Rime.candidatesOrStatusSwitches)
         highlightIndex = Rime.candHighlightIndex - startNum
     }
 
