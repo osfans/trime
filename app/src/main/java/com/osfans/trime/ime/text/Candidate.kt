@@ -170,6 +170,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             } else {
                 true
             }
+        val first = computedCandidates.first()
         computedCandidates.forEachIndexed { index, computedCandidate ->
             // Draw highlight
             if (candidateUseCursor && index == highlightIndex) {
@@ -181,7 +182,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                 is ComputedCandidate.Word -> {
                     val (word, comment, geometry) = computedCandidate
                     var wordX = geometry.centerX().toFloat()
-                    var wordY = geometry.centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2
+                    var wordY = first.geometry.centerY() - (candidatePaint.ascent() + candidatePaint.descent()) / 2
                     if (!isAlign) wordY += commentHeight / 2.0f
                     // 绘制编码提示
                     if (shouldShowComment && !comment.isNullOrEmpty()) {
@@ -190,7 +191,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         if (!isCommentOnTop) {
                             val commentWidth = commentPaint.measureText(comment, commentFont)
                             commentX = geometry.right - commentWidth / 2
-                            commentY += (geometry.bottom - commentHeight).toFloat()
+                            commentY += (first.geometry.bottom - commentHeight).toFloat()
                             wordX -= commentWidth / 2.0f
                         }
                         commentPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
@@ -207,7 +208,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
                         geometry.centerX() -
                             symbolPaint.measureText(arrow, symbolFont) / 2
                     val arrowY =
-                        geometry.centerY() -
+                        first.geometry.centerY() -
                             (candidatePaint.ascent() + candidatePaint.descent()) / 2
                     symbolPaint.color = if (isHighlighted(index)) hilitedCommentTextColor else commentTextColor
                     canvas.drawText(arrow, arrowX, arrowY, symbolPaint)
