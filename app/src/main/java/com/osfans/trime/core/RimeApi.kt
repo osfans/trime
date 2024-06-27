@@ -30,4 +30,8 @@ interface RimeApi {
     suspend fun commitComposition(): Boolean
 
     suspend fun clearComposition()
+
+    suspend fun selectCandidate(index: Int): Boolean
+
+    suspend fun deleteCandidate(index: Int): Boolean
 }

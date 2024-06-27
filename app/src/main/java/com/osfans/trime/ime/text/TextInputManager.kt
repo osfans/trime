@@ -36,10 +36,12 @@ import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.isAsciiPrintable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.systemservices.inputMethodManager
 import splitties.views.dsl.core.withTheme
 import timber.log.Timber
@@ -503,13 +505,15 @@ class TextInputManager(
                 trime.updateComposing()
             }
         } else if (prefs.keyboard.hookCandidate || index > 9) {
-            if (Rime.selectCandidate(index)) {
-                if (prefs.keyboard.hookCandidateCommit) {
-                    // todo 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
-                    // 如果使用了lua处理候选上屏，模拟数字键、空格键是非常有必要的
-                    trime.commitRimeText()
-                } else {
-                    trime.commitRimeText()
+            trime.postRimeJob {
+                if (selectCandidate(index)) {
+                    if (prefs.keyboard.hookCandidateCommit) {
+                        // TODO: 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
+                        // 如果使用了lua处理候选上屏，模拟数字键、空格键是非常有必要的
+                        trime.commitRimeText()
+                    } else {
+                        trime.commitRimeText()
+                    }
                 }
             }
         } else if (index == 9) {
@@ -528,7 +532,11 @@ class TextInputManager(
     }
 
     override fun onCandidateLongClicked(index: Int) {
-        Rime.deleteCandidate(index)
-        trime.updateComposing()
+        trime.postRimeJob {
+            deleteCandidate(index)
+            withContext(Dispatchers.Main) {
+                trime.updateComposing()
+            }
+        }
     }
 }
