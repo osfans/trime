@@ -46,7 +46,7 @@ class KeyboardFragment :
             "keyboard__key_long_press_timeout",
             "keyboard__key_repeat_interval",
             "keyboard__show_key_popup",
-            AppPrefs.Keyboard.SPLIT, AppPrefs.Keyboard.SPLIT_SPACE_PERCENT,
+            AppPrefs.Keyboard.LANDSCAPE_MODE, AppPrefs.Keyboard.SPLIT_SPACE_PERCENT,
             "keyboard__show_window",
             "keyboard__inline_preedit", "keyboard__soft_cursor",
             -> {

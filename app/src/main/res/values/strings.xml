@@ -63,7 +63,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>Input</item>
         <item>None</item>
     </string-array>
-    <string-array name="keyboard__split_entries">
+    <string-array name="keyboard__landscape_mode_entries">
         <item>Never</item>
         <item>Only in landscape mode</item>
         <item>Auto (In wide screen or landscape mode)</item>
@@ -261,7 +261,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__custom_key_sound">Use custom key sound</string>
 
     <string name="pref_keyboard__landscape">Landscape Mode</string>
-    <string name="keyboard__split_title">Change to Landscape keyboard</string>
+    <string name="keyboard__landscape_mode_title">Enable Landscape Mode</string>
     <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
     <string name="setup__step_three">Setup 3</string>
     <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>

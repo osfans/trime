@@ -42,10 +42,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:title="@string/pref_keyboard__landscape">
         <ListPreference
             android:defaultValue="never"
-            android:entries="@array/keyboard__split_entries"
-            android:entryValues="@array/keyboard__split_values"
-            android:key="keyboard__split"
-            android:title="@string/keyboard__split_title"
+            android:entries="@array/keyboard__landscape_mode_entries"
+            android:entryValues="@array/keyboard__landscape_mode_values"
+            android:key="keyboard__landscape_mode"
+            android:title="@string/keyboard__landscape_mode_title"
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
 

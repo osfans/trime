@@ -17,7 +17,6 @@ import com.osfans.trime.util.CollectionUtils.obtainInt
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.config.ConfigMap
-import com.osfans.trime.util.isLandscape
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -426,16 +425,14 @@ class Keyboard() {
         val keyboardHeight = theme.generalStyle.keyboardHeight
         val keyboardHeightLand = theme.generalStyle.keyboardHeightLand
         val value =
-            when (appContext.resources.configuration.orientation) {
-                Configuration.ORIENTATION_LANDSCAPE -> keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
-                else -> keyboardHeight
-            }
+            if (appContext.isLandscapeMode()) keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
+            else keyboardHeight
         return appContext.dp(value)
     }
 
     private fun getKeyboardHeightFromKeyboardConfig(keyboardConfig: Map<String, Any?>?): Int {
         var mkeyboardHeight = appContext.sp(obtainFloat(keyboardConfig, "keyboard_height", 0f)).toInt()
-        if (appContext.resources.configuration.isLandscape()) {
+        if (appContext.isLandscapeMode()) {
             val mkeyBoardHeightLand =
                 appContext.sp(
                     obtainFloat(keyboardConfig, "keyboard_height_land", 0f),
@@ -643,11 +640,7 @@ class Keyboard() {
 
         val keyboardSidePaddingPx =
             appContext.dp(
-                if (appContext.resources.configuration.isLandscape()) {
-                    keyboardSidePaddingLandscape
-                } else {
-                    keyboardSidePadding
-                },
+                if (appContext.isLandscapeMode()) keyboardSidePaddingLandscape else keyboardSidePadding,
             )
 
         mDisplayWidth = appContext.resources.displayMetrics.widthPixels - 2 * keyboardSidePaddingPx

@@ -59,6 +59,7 @@ import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.ShortcutUtils.openCategory
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.findSectionFrom
+import com.osfans.trime.util.isLandscape
 import com.osfans.trime.util.isNightMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -1115,7 +1116,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onEvaluateFullscreenMode(): Boolean {
         val config = resources.configuration
-        if (config == null || config.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
+        if (config == null || !resources.configuration.isLandscape()) return false
         return when (prefs.keyboard.fullscreenMode) {
             FullscreenMode.AUTO_SHOW -> {
                 Timber.d("FullScreen: Auto")

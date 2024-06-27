@@ -61,7 +61,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>輸入碼</item>
         <item>無</item>
     </string-array>
-    <string-array name="keyboard__split_entries">
+    <string-array name="keyboard__landscape_mode_entries">
         <item>永不</item>
         <item>只在橫屏時</item>
         <item>在闊螢幕或橫屏時</item>
@@ -260,7 +260,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__custom_key_sound">使用自訂按鍵音</string>
 
     <string name="pref_keyboard__landscape">橫向模式</string>
-    <string name="keyboard__split_title">轉換到橫屏鍵盤</string>
+    <string name="keyboard__landscape_mode_title">啟用橫屏模式</string>
     <string name="keyboard__split_space_title">自動分割鍵盤比例</string>
     <string name="setup__step_three">第 3 步</string>
     <string name="setup__request_permmision_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>

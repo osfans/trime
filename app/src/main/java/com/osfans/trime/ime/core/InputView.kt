@@ -32,9 +32,11 @@ import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
+import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.util.ColorUtils
+import com.osfans.trime.util.appContext
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -118,20 +120,14 @@ class InputView(
     private val keyboardSidePaddingPx: Int
         get() {
             val value =
-                when (resources.configuration.orientation) {
-                    Configuration.ORIENTATION_LANDSCAPE -> keyboardSidePaddingLandscape
-                    else -> keyboardSidePadding
-                }
+                if (appContext.isLandscapeMode()) keyboardSidePaddingLandscape else keyboardSidePadding
             return dp(value)
         }
 
     private val keyboardBottomPaddingPx: Int
         get() {
             val value =
-                when (resources.configuration.orientation) {
-                    Configuration.ORIENTATION_LANDSCAPE -> keyboardBottomPaddingLandscape
-                    else -> keyboardBottomPadding
-                }
+                if (appContext.isLandscapeMode()) keyboardBottomPaddingLandscape else keyboardBottomPadding
             return dp(value)
         }
 

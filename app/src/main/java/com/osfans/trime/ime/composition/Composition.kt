@@ -38,9 +38,11 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.model.CompositionComponent
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
+import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
+import com.osfans.trime.util.appContext
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import kotlin.math.absoluteValue
@@ -102,11 +104,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private var onActionMove: ((Float, Float) -> Unit)? = null
 
     private val stickyLines: Int
-        get() =
-            when (resources.configuration.orientation) {
-                Configuration.ORIENTATION_LANDSCAPE -> theme.generalStyle.layout.stickyLinesLand
-                else -> theme.generalStyle.layout.stickyLines
-            }
+        get() = if (appContext.isLandscapeMode()) theme.generalStyle.layout.stickyLinesLand
+        else theme.generalStyle.layout.stickyLines
 
     private enum class Movable {
         ALWAYS,
@@ -223,6 +222,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     }
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (movable != Movable.NEVER) {
                     if (touched in movableRange[0]..movableRange[1]) {
@@ -237,6 +237,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                     }
                 }
             }
+
             MotionEvent.ACTION_UP -> {
                 if (touched in preeditRange[0]..preeditRange[1]) {
                     val s =
@@ -419,7 +420,10 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 for (component in windowComponents) {
                     when {
                         component.move.isNotBlank() -> buildSpannedMove(component)
-                        component.composition.isNotBlank() -> buildSpannedComposition(component, inputContext.composition)
+                        component.composition.isNotBlank() -> buildSpannedComposition(
+                            component, inputContext.composition
+                        )
+
                         component.click.isNotBlank() -> buildSpannedButton(component)
                         component.candidate.isNotBlank() ->
                             buildSpannedCandidates(

@@ -85,7 +85,7 @@ class AppPrefs(
             const val FLOATING_WINDOW_ENABLED = "keyboard__show_window"
             const val POPUP_KEY_PRESS_ENABLED = "keyboard__show_key_popup"
             const val SWITCHES_ENABLED = "keyboard__show_switches"
-            const val SPLIT = "keyboard__split"
+            const val LANDSCAPE_MODE = "keyboard__landscape_mode"
             const val SPLIT_SPACE_PERCENT = "keyboard__split_space"
             const val SWITCH_ARROW_ENABLED = "keyboard__show_switch_arrow"
             const val FULLSCREEN_MODE = "keyboard__fullscreen_mode"
@@ -134,14 +134,14 @@ class AppPrefs(
         val switchesEnabled by bool(SWITCHES_ENABLED, true)
         val switchArrowEnabled by bool(SWITCH_ARROW_ENABLED, true)
 
-        enum class SplitOption {
+        enum class LandscapeModeOption {
             NEVER,
             LANDSCAPE,
             AUTO,
             ALWAYS,
         }
 
-        val splitOption by enum(SPLIT, SplitOption.NEVER)
+        val landscapeModeOption by enum(LANDSCAPE_MODE, LandscapeModeOption.NEVER)
         val splitSpacePercent by int(SPLIT_SPACE_PERCENT, 100)
         val candidatePageSize by string(CANDIDATE_PAGE_SIZE, "0")
 

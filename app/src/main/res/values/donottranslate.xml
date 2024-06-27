@@ -13,7 +13,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>input</item>
         <item>none</item>
     </string-array>
-    <string-array name="keyboard__split_values">
+    <string-array name="keyboard__landscape_mode_values">
         <item>NEVER</item>
         <item>LANDSCAPE</item>
         <item>AUTO</item>
