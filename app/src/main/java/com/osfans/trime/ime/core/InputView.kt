@@ -6,7 +6,6 @@ package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.view.View
@@ -36,7 +35,6 @@ import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.util.ColorUtils
-import com.osfans.trime.util.appContext
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -120,14 +118,14 @@ class InputView(
     private val keyboardSidePaddingPx: Int
         get() {
             val value =
-                if (appContext.isLandscapeMode()) keyboardSidePaddingLandscape else keyboardSidePadding
+                if (context.isLandscapeMode()) keyboardSidePaddingLandscape else keyboardSidePadding
             return dp(value)
         }
 
     private val keyboardBottomPaddingPx: Int
         get() {
             val value =
-                if (appContext.isLandscapeMode()) keyboardBottomPaddingLandscape else keyboardBottomPadding
+                if (context.isLandscapeMode()) keyboardBottomPaddingLandscape else keyboardBottomPadding
             return dp(value)
         }
 

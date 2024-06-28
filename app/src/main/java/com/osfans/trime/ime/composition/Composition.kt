@@ -6,7 +6,6 @@ package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Typeface
 import android.text.Layout
 import android.text.SpannableStringBuilder
@@ -42,7 +41,6 @@ import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
-import com.osfans.trime.util.appContext
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import kotlin.math.absoluteValue
@@ -104,7 +102,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private var onActionMove: ((Float, Float) -> Unit)? = null
 
     private val stickyLines: Int
-        get() = if (appContext.isLandscapeMode()) theme.generalStyle.layout.stickyLinesLand
+        get() = if (context.isLandscapeMode()) theme.generalStyle.layout.stickyLinesLand
         else theme.generalStyle.layout.stickyLines
 
     private enum class Movable {
