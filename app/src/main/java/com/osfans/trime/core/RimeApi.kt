@@ -34,4 +34,14 @@ interface RimeApi {
     suspend fun selectCandidate(index: Int): Boolean
 
     suspend fun deleteCandidate(index: Int): Boolean
+
+    suspend fun customize(
+        configId: String,
+        key2value: Map<String, Any>,
+    )
+
+    suspend fun deploySingleConfig(
+        path: String,
+        versionKey: String,
+    ): Boolean
 }

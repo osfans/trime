@@ -98,6 +98,21 @@ class Rime : RimeApi, RimeLifecycleOwner {
             deleteRimeCandidateOnCurrentPage(index).also { updateContext() }
         }
 
+    override suspend fun customize(
+        configId: String,
+        key2value: Map<String, Any>,
+    ) = withRimeContext {
+        setRimeCustomConfigItem(configId, key2value)
+    }
+
+    override suspend fun deploySingleConfig(
+        path: String,
+        versionKey: String,
+    ): Boolean =
+        withRimeContext {
+            deployRimeConfigFile(path, versionKey)
+        }
+
     fun startup(fullCheck: Boolean) {
         if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
