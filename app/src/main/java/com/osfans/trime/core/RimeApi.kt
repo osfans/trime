@@ -35,6 +35,8 @@ interface RimeApi {
 
     suspend fun deleteCandidate(index: Int): Boolean
 
+    suspend fun moveCaret(index: Int)
+
     suspend fun customize(
         configId: String,
         key2value: Map<String, Any>,

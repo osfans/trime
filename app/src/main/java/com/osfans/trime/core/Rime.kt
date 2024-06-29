@@ -98,6 +98,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
             deleteRimeCandidateOnCurrentPage(index).also { updateContext() }
         }
 
+    override suspend fun moveCaret(index: Int) =
+        withRimeContext {
+            setRimeCaretPos(index)
+            updateContext()
+        }
+
     override suspend fun customize(
         configId: String,
         key2value: Map<String, Any>,
@@ -295,12 +301,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         fun toggleOption(option: String) {
             setOption(option, !getOption(option))
-        }
-
-        @JvmStatic
-        fun setCaretPos(caretPos: Int) {
-            setRimeCaretPos(caretPos)
-            updateContext()
         }
 
         // init

@@ -42,6 +42,8 @@ import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import splitties.dimensions.dp
 import kotlin.math.absoluteValue
 
@@ -239,15 +241,15 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             }
             MotionEvent.ACTION_UP -> {
                 if (touched in preeditRange[0]..preeditRange[1]) {
-                    val s =
-                        text
-                            .toString()
-                            .substring(touched, preeditRange[1])
-                            .replace(" ", "")
-                            .replace("‸", "")
-                    val newPos = Rime.getRimeRawInput()!!.length - s.length // 從右側定位
-                    Rime.setCaretPos(newPos)
-                    TrimeInputMethodService.getService().updateComposing()
+                    TrimeInputMethodService.getService().apply {
+                        postRimeJob {
+                            val newPos = text.subSequence(preeditRange[0] until touched).filterNot { it.isWhitespace() }.length
+                            moveCaret(newPos)
+                            withContext(Dispatchers.Main) {
+                                updateComposing()
+                            }
+                        }
+                    }
                     return true
                 }
             }

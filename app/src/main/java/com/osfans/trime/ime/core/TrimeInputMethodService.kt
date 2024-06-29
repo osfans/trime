@@ -397,9 +397,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (candidatesEnd != -1 && (newSelStart != candidatesEnd || newSelEnd != candidatesEnd)) {
             // 移動光標時，更新候選區
             if (newSelEnd in candidatesStart..<candidatesEnd) {
-                val n = newSelEnd - candidatesStart
-                Rime.setCaretPos(n)
-                updateComposing()
+                postRimeJob {
+                    moveCaret(newSelEnd - candidatesStart)
+                    withContext(Dispatchers.Main) {
+                        updateComposing()
+                    }
+                }
             }
         }
         if (candidatesStart == -1 && candidatesEnd == -1 && newSelStart == 0 && newSelEnd == 0) {
