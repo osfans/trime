@@ -102,8 +102,12 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private var onActionMove: ((Float, Float) -> Unit)? = null
 
     private val stickyLines: Int
-        get() = if (context.isLandscapeMode()) theme.generalStyle.layout.stickyLinesLand
-        else theme.generalStyle.layout.stickyLines
+        get() =
+            if (context.isLandscapeMode()) {
+                theme.generalStyle.layout.stickyLinesLand
+            } else {
+                theme.generalStyle.layout.stickyLines
+            }
 
     private enum class Movable {
         ALWAYS,
@@ -418,9 +422,11 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 for (component in windowComponents) {
                     when {
                         component.move.isNotBlank() -> buildSpannedMove(component)
-                        component.composition.isNotBlank() -> buildSpannedComposition(
-                            component, inputContext.composition
-                        )
+                        component.composition.isNotBlank() ->
+                            buildSpannedComposition(
+                                component,
+                                inputContext.composition,
+                            )
 
                         component.click.isNotBlank() -> buildSpannedButton(component)
                         component.candidate.isNotBlank() ->

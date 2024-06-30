@@ -4,7 +4,6 @@
 
 package com.osfans.trime.ime.keyboard
 
-import android.content.res.Configuration
 import android.view.KeyEvent
 import com.osfans.trime.data.prefs.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.EventManager
@@ -425,8 +424,11 @@ class Keyboard() {
         val keyboardHeight = theme.generalStyle.keyboardHeight
         val keyboardHeightLand = theme.generalStyle.keyboardHeightLand
         val value =
-            if (appContext.isLandscapeMode()) keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
-            else keyboardHeight
+            if (appContext.isLandscapeMode()) {
+                keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
+            } else {
+                keyboardHeight
+            }
         return appContext.dp(value)
     }
 
