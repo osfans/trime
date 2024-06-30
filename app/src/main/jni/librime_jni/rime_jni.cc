@@ -8,6 +8,7 @@
 
 #include "jni-utils.h"
 #include "objconv.h"
+#include "types.h"
 
 #define MAX_BUFFER_LENGTH 2048
 
@@ -274,27 +275,14 @@ Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
   return obj;
 }
 
-static bool is_save_option(const char *p) {
-  auto rime = rime_get_api();
-  bool is_save = false;
-  std::string option_name(p);
-  if (option_name.empty()) return is_save;
-  RimeConfig config = {nullptr};
-  bool b = rime->config_open("default", &config);
-  if (!b) return is_save;
-  const char *key = "switcher/save_options";
-  RimeConfigIterator iter = {nullptr};
-  rime->config_begin_list(&iter, &config, key);
-  while (rime->config_next(&iter)) {
-    std::string item(rime->config_get_cstring(&config, iter.path));
-    if (option_name == item) {
-      is_save = true;
-      break;
-    }
-  }
-  rime->config_end(&iter);
-  rime->config_close(&config);
-  return is_save;
+static bool is_save_option(std::string_view option_name) {
+  if (option_name.empty()) return false;
+  return Config("default").any(
+      "switcher/save_options",
+      [&option_name](RimeApi *api, auto config, auto iter) -> bool {
+        auto item = api->config_get_cstring(config, iter->path);
+        return option_name == item;
+      });
 }
 
 // runtime options
@@ -303,16 +291,12 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_setRimeOption(
   if (!is_rime_running()) {
     return;
   }
-  auto rime = rime_get_api();
-  RimeConfig user = {nullptr};
-  auto opt = CString(env, option);
-  bool b;
+  std::string opt(CString(env, option));
   if (is_save_option(opt)) {
-    if (rime->user_config_open("user", &user)) {
-      std::string key = "var/option/" + std::string(opt);
-      rime->config_set_bool(&user, key.c_str(), value);
-      rime->config_close(&user);
-    }
+    Config("user", true).use([&opt, value](RimeApi *api, auto config) {
+      auto key = "var/option/" + opt;
+      api->config_set_bool(config, key.c_str(), value);
+    });
   }
   Rime::Instance().setOption(opt, value);
 }
@@ -330,11 +314,9 @@ extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getRimeSchemaList(JNIEnv *env,
                                                   jclass /* thiz */) {
   auto rime = rime_get_api();
-  RimeSchemaList list = {0};
+  SchemaList list(rime);
   rime->get_schema_list(&list);
-  auto array = rimeSchemaListToJObjectArray(env, list);
-  rime->free_schema_list(&list);
-  return array;
+  return rimeSchemaListToJObjectArray(env, *list);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -349,15 +331,13 @@ Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv *env,
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeSchema(JNIEnv *env, jclass /* thiz */,
                                                  jstring schema_id) {
-  auto rime = rime_get_api();
-  RimeConfig user = {nullptr};
-  auto schema = CString(env, schema_id);
-  if (rime->user_config_open("user", &user)) {
-    rime->config_set_string(&user, "var/previously_selected_schema", schema);
-    std::string key = "var/schema_access_time/" + std::string(schema);
-    rime->config_set_int(&user, key.c_str(), time(nullptr));
-    rime->config_close(&user);
-  }
+  std::string schema(CString(env, schema_id));
+  Config("user", true).use([&schema](RimeApi *api, auto config) {
+    api->config_set_string(config, "var/previously_selected_schema",
+                           schema.c_str());
+    std::string key = "var/schema_access_time/" + schema;
+    api->config_set_int(config, key.c_str(), time(nullptr));
+  });
   return Rime::Instance().selectSchema(schema);
 }
 
@@ -421,20 +401,6 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getLibrimeVersion(JNIEnv *env,
                                                   jclass /* thiz */) {
   return env->NewStringUTF(LIBRIME_VERSION);
-}
-
-extern "C" JNIEXPORT jobject JNICALL
-Java_com_osfans_trime_core_Rime_getRimeConfigMap(JNIEnv *env, jclass clazz,
-                                                 jstring config_id,
-                                                 jstring key) {
-  auto rime = rime_get_api();
-  RimeConfig config = {nullptr};
-  jobject value = nullptr;
-  if (rime->config_open(CString(env, config_id), &config)) {
-    value = rimeConfigMapToJObject(env, &config, CString(env, key));
-    rime->config_close(&config);
-  }
-  return value;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

@@ -74,56 +74,6 @@ inline jobject rimeStatusToJObject(JNIEnv *env, const RimeStatus &status) {
                         status.is_traditional, status.is_ascii_punct);
 }
 
-inline jobject rimeConfigValueToJObject(JNIEnv *env, RimeConfig *config,
-                                        const std::string &key);
-
-inline jobject rimeConfigListToJObject(JNIEnv *env, RimeConfig *config,
-                                       const std::string &key) {
-  auto rime = rime_get_api();
-  RimeConfigIterator iter = {nullptr};
-  if (!rime->config_begin_list(&iter, config, key.c_str())) return nullptr;
-  auto size = rime->config_list_size(config, key.c_str());
-  auto obj =
-      env->NewObject(GlobalRef->ArrayList, GlobalRef->ArrayListInit, size);
-  int i = 0;
-  while (rime->config_next(&iter)) {
-    auto e = JRef<>(env, rimeConfigValueToJObject(env, config, iter.path));
-    env->CallVoidMethod(obj, GlobalRef->ArrayListAdd, i++, *e);
-  }
-  rime->config_end(&iter);
-  return obj;
-}
-
-inline jobject rimeConfigMapToJObject(JNIEnv *env, RimeConfig *config,
-                                      const std::string &key) {
-  auto rime = rime_get_api();
-  RimeConfigIterator iter = {nullptr};
-  if (!rime->config_begin_map(&iter, config, key.c_str())) return nullptr;
-  auto obj = env->NewObject(GlobalRef->HashMap, GlobalRef->HashMapInit);
-  while (rime->config_next(&iter)) {
-    auto v = JRef<>(env, rimeConfigValueToJObject(env, config, iter.path));
-    env->CallObjectMethod(obj, GlobalRef->HashMapPut, *JString(env, iter.key),
-                          *v);
-  }
-  rime->config_end(&iter);
-  return obj;
-}
-
-inline jobject rimeConfigValueToJObject(JNIEnv *env, RimeConfig *config,
-                                        const std::string &key) {
-  auto rime = rime_get_api();
-
-  const char *value;
-  if ((value = rime->config_get_cstring(config, key.c_str()))) {
-    return env->NewStringUTF(value);
-  }
-  jobject list;
-  if ((list = rimeConfigListToJObject(env, config, key))) {
-    return list;
-  }
-  return rimeConfigMapToJObject(env, config, key);
-}
-
 inline jobjectArray rimeSchemaListToJObjectArray(JNIEnv *env,
                                                  RimeSchemaList &list) {
   jobjectArray array = env->NewObjectArray(static_cast<int>(list.size),

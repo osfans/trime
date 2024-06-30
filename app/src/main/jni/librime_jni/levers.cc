@@ -6,38 +6,31 @@
 
 #include "jni-utils.h"
 #include "objconv.h"
+#include "types.h"
 
 // customize settings
-
-static RimeLeversApi *get_levers() {
-  return (RimeLeversApi *)(RimeFindModule("levers")->get_api());
-}
 
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getAvailableRimeSchemaList(JNIEnv *env,
                                                            jclass /* thiz */) {
-  auto levers = get_levers();
-  auto switcher = levers->switcher_settings_init();
-  RimeSchemaList list = {0};
-  levers->load_settings((RimeCustomSettings *)switcher);
-  levers->get_available_schema_list(switcher, &list);
-  auto array = rimeSchemaListToJObjectArray(env, list);
-  levers->schema_list_destroy(&list);
-  levers->custom_settings_destroy((RimeCustomSettings *)switcher);
+  jobjectArray array = nullptr;
+  CustomConfig().use([env, &array](auto api, auto settings) {
+    SchemaList list(api);
+    api->get_available_schema_list((RimeSwitcherSettings *)settings, &list);
+    array = rimeSchemaListToJObjectArray(env, *list);
+  });
   return array;
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getSelectedRimeSchemaList(JNIEnv *env,
                                                           jclass /* thiz */) {
-  auto levers = get_levers();
-  auto switcher = levers->switcher_settings_init();
-  RimeSchemaList list = {0};
-  levers->load_settings((RimeCustomSettings *)switcher);
-  levers->get_selected_schema_list(switcher, &list);
-  auto array = rimeSchemaListToJObjectArray(env, list);
-  levers->schema_list_destroy(&list);
-  levers->custom_settings_destroy((RimeCustomSettings *)switcher);
+  jobjectArray array = nullptr;
+  CustomConfig().use([env, &array](auto api, auto settings) {
+    SchemaList list(api);
+    api->get_selected_schema_list((RimeSwitcherSettings *)settings, &list);
+    array = rimeSchemaListToJObjectArray(env, *list);
+  });
   return array;
 }
 
@@ -51,12 +44,10 @@ Java_com_osfans_trime_core_Rime_selectRimeSchemas(JNIEnv *env,
     auto string = JRef<jstring>(env, env->GetObjectArrayElement(array, i));
     entries[i] = env->GetStringUTFChars(string, nullptr);
   }
-  auto levers = get_levers();
-  auto switcher = levers->switcher_settings_init();
-  levers->load_settings((RimeCustomSettings *)switcher);
-  levers->select_schemas(switcher, entries, schemaIdsLength);
-  levers->save_settings((RimeCustomSettings *)switcher);
-  levers->custom_settings_destroy((RimeCustomSettings *)switcher);
+  CustomConfig().use([schemaIdsLength, &entries](auto api, auto settings) {
+    api->select_schemas((RimeSwitcherSettings *)settings, entries,
+                        schemaIdsLength);
+  });
   for (int i = 0; i < schemaIdsLength; i++) {
     auto string = JRef<jstring>(env, env->GetObjectArrayElement(array, i));
     env->ReleaseStringUTFChars(string, entries[i]);
@@ -65,22 +56,34 @@ Java_com_osfans_trime_core_Rime_selectRimeSchemas(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_osfans_trime_core_Rime_setRimeCustomConfigInt(
-    JNIEnv *env, jclass clazz, jstring config_id,
-    jobjectArray key_value_pairs) {
-  auto levers = get_levers();
-  auto custom =
-      levers->custom_settings_init(CString(env, config_id), "rime.trime");
-  levers->load_settings(custom);
-  int arrayLength = env->GetArrayLength(key_value_pairs);
-  for (int i = 0; i < arrayLength; i++) {
-    auto pair = JRef<>(env, env->GetObjectArrayElement(key_value_pairs, i));
-    auto key = CString(
-        env, (jstring)env->CallObjectMethod(pair, GlobalRef->PairFirst));
-    auto value =
-        extract_int(env, env->CallObjectMethod(pair, GlobalRef->PairSecond));
-    levers->customize_int(custom, key, value);
-    levers->save_settings(custom);
-  }
-  levers->custom_settings_destroy(custom);
+Java_com_osfans_trime_core_Rime_setRimeCustomConfigItem(JNIEnv *env,
+                                                        jclass clazz,
+                                                        jstring config_id,
+                                                        jobject k2v) {
+  CustomConfig(*CString(env, config_id))
+      .use([env, k2v](RimeLeversApi *api, auto settings) {
+        auto set =
+            JRef<>(env, env->CallObjectMethod(k2v, GlobalRef->MapEntries));
+        auto iter = JRef<>(env, env->CallObjectMethod(set, GlobalRef->SetIter));
+        while (env->CallBooleanMethod(iter, GlobalRef->IterHasNext)) {
+          auto entry =
+              JRef<>(env, env->CallObjectMethod(iter, GlobalRef->IterNext));
+          auto key = CString(
+              env, (jstring)env->CallObjectMethod(entry, GlobalRef->MapEntryK));
+          auto value =
+              JRef<>(env, env->CallObjectMethod(entry, GlobalRef->MapEntryV));
+          if (env->IsInstanceOf(value, GlobalRef->String)) {
+            api->customize_string(settings, key, CString(env, (jstring)*value));
+          } else if (env->IsInstanceOf(value, GlobalRef->Integer)) {
+            auto cValue = env->CallIntMethod(value, GlobalRef->IntegerV);
+            api->customize_int(settings, key, cValue);
+          } else if (env->IsInstanceOf(value, GlobalRef->Double)) {
+            auto cValue = env->CallDoubleMethod(value, GlobalRef->DoubleV);
+            api->customize_double(settings, key, cValue);
+          } else if (env->IsInstanceOf(value, GlobalRef->Boolean)) {
+            auto cValue = env->CallBooleanMethod(value, GlobalRef->BooleanV);
+            api->customize_bool(settings, key, cValue);
+          }
+        }
+      });
 }

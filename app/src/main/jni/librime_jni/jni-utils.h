@@ -15,12 +15,6 @@ static inline void throwJavaException(JNIEnv *env, const char *msg) {
   env->DeleteLocalRef(c);
 }
 
-static inline jint extract_int(JNIEnv *env, jobject f) {
-  return env->CallIntMethod(
-      f,
-      env->GetMethodID(env->FindClass("java/lang/Integer"), "intValue", "()I"));
-}
-
 class CString {
  private:
   JNIEnv *env_;
@@ -118,9 +112,28 @@ class GlobalRefSingleton {
 
   jclass Integer;
   jmethodID IntegerInit;
+  jmethodID IntegerV;
+
+  jclass Double;
+  jmethodID DoubleV;
 
   jclass Boolean;
   jmethodID BooleanInit;
+  jmethodID BooleanV;
+
+  jclass Map;
+  jmethodID MapEntries;
+
+  jclass MapEntry;
+  jmethodID MapEntryK;
+  jmethodID MapEntryV;
+
+  jclass Set;
+  jmethodID SetIter;
+
+  jclass Iterator;
+  jmethodID IterHasNext;
+  jmethodID IterNext;
 
   jclass HashMap;
   jmethodID HashMapInit;
@@ -129,10 +142,6 @@ class GlobalRefSingleton {
   jclass ArrayList;
   jmethodID ArrayListInit;
   jmethodID ArrayListAdd;
-
-  jclass Pair;
-  jmethodID PairFirst;
-  jmethodID PairSecond;
 
   jclass Rime;
   jmethodID HandleRimeNotification;
@@ -171,10 +180,34 @@ class GlobalRefSingleton {
     Integer = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("java/lang/Integer")));
     IntegerInit = env->GetMethodID(Integer, "<init>", "(I)V");
+    IntegerV = env->GetMethodID(Integer, "intValue", "()I");
+
+    Double = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/lang/Double")));
+    DoubleV = env->GetMethodID(Double, "doubleValue", "()D");
 
     Boolean = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("java/lang/Boolean")));
     BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");
+    BooleanV = env->GetMethodID(Boolean, "booleanValue", "()Z");
+
+    Map = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/util/Map")));
+    MapEntries = env->GetMethodID(Map, "entrySet", "()Ljava/util/Set;");
+
+    MapEntry = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/util/Map$Entry")));
+    MapEntryK = env->GetMethodID(MapEntry, "getKey", "()Ljava/lang/Object;");
+    MapEntryV = env->GetMethodID(MapEntry, "getValue", "()Ljava/lang/Object;");
+
+    Set = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/util/Set")));
+    SetIter = env->GetMethodID(Set, "iterator", "()Ljava/util/Iterator;");
+
+    Iterator = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/util/Iterator")));
+    IterHasNext = env->GetMethodID(Iterator, "hasNext", "()Z");
+    IterNext = env->GetMethodID(Iterator, "next", "()Ljava/lang/Object;");
 
     HashMap = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("java/util/HashMap")));
@@ -187,11 +220,6 @@ class GlobalRefSingleton {
         env->NewGlobalRef(env->FindClass("java/util/ArrayList")));
     ArrayListInit = env->GetMethodID(ArrayList, "<init>", "(I)V");
     ArrayListAdd = env->GetMethodID(ArrayList, "add", "(ILjava/lang/Object;)V");
-
-    Pair = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("kotlin/Pair")));
-    PairFirst = env->GetMethodID(Pair, "getFirst", "()Ljava/lang/Object;");
-    PairSecond = env->GetMethodID(Pair, "getSecond", "()Ljava/lang/Object;");
 
     Rime = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime")));

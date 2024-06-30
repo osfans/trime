@@ -57,9 +57,9 @@ class KeyboardFragment :
                 if (pageSize <= 0) return
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
-                        Rime.setRimeCustomConfigInt(
+                        Rime.setRimeCustomConfigItem(
                             "default",
-                            arrayOf("menu/page_size" to pageSize),
+                            mapOf("menu/page_size" to pageSize),
                         )
                         Rime.deployRimeConfigFile("${DataManager.userDataDir}/default.yaml", "")
                     }
