@@ -2,6 +2,100 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.19] - 2024-06-30
+
+### 🚀 Features
+
+- Smarter and faster assets syncing
+- *(event)* Add command set_color_scheme
+- Add button to copy brief result logs to clipboard
+- Custom liquid keyboard fixed key bar
+- Fixed key bar support `round_corner` , `margin_x`
+- Fixed key bar support image `key_back_color`
+- Restore selected files only
+
+### 🐛 Bug Fixes
+
+- Crash on showing composition popup window somehow
+- Crash on showing toast in LogActivity on some custom ROMs
+- Data dir preferences didn't show default value on init
+- Main keyboard view wouldn't show up after switching schema
+- Attempt to correct the wrong popup window position on moving
+- Index out of bounds when calculate offset in Composition view
+- Candidate ascii_mode state mismatch
+- The last candidate font size is abnormal
+- Work with the old synced asset files hierarchy
+- Liquid keyboard `key_height` , `margin_x` no work
+- Fix missing debug stripped native libs
+- `dbAdapter.type` not updated when switching tabs
+- Theme file named xx.yy.trime.yaml cannot be selected
+- Copy folders in `assets` correctly
+- Use `/` as path separator for all OS
+- Crash on access to split option enum constants
+- `ascii_keyboard` tag was malfunctional
+- Draw all computed candidates aligned with the first one in the Y-axis direction
+- Use unified landscape mode
+- Use local context instead of appContext
+
+### 🚜 Refactor
+
+- Move DataManager in a standalone package
+- Utilize custom resource util methods to reset assets
+- Split out composition stuffs from text package
+- Adjust RimeComposition fields
+- Simplify the logic to build composition view content
+- Update composition view from external context data
+- Move CompositionPopupWindow into InputComponent (and InputView)
+- Rewrite ascii mode switch logic
+- Refactors to picker dialog
+- Use custom toast utils
+- Use native apis to build notification
+- Use native apis to get stuffs from system's resource instance
+- Use native apis to build intent and start activity
+- Use custom uri utils
+- Access internal inset resources by self
+- Implement PreferenceDelegate to simplify AppPrefs
+- Move AppPrefs to prefs package
+- Use enum class to list app ui mode
+- Reimplement StringUtils as Strings and Regex
+- Remove outdated licensing layout
+- Add `Char.isAsciiPrintable` function
+- Move `(commit/clear)Composition` to new api interface
+- Simplify the code of Candidate view
+- Move the composing logic to the view into InputView
+
+### 📚 Documentation
+
+- Add missing license header
+- Add missing SPDX header
+
+### ⚡ Performance
+
+- Make parseColor no longer check the parameter is null
+
+### 🎨 Styling
+
+- Format code
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.2.19
+- Update trime-schema.json
+- Upgrade to ubuntu 24.04 runner
+- Fix broken jni cache source path for release
+- Built-in theme name localization
+- Remove androidutilcode from dependencies
+- Migrate to rime_get_api
+- Upgrade librime lua with rime_get_api
+- Upgrade librime with rime_get_api
+- Add .kotlin to git ignore
+- Upgrade boost to 1.85.0
+- Upgrade gradle to 8.8
+
+### Build
+
+- Upgrade kotlin to 2 and more
+
 ## [3.2.18] - 2024-05-01
 
 ### 🚀 Features
