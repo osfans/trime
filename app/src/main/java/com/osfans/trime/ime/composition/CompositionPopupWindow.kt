@@ -85,7 +85,11 @@ class CompositionPopupWindow(
                     theme.generalStyle.layout.alpha,
                 ),
             )
-            elevation = ctx.dp(theme.generalStyle.layout.elevation.toFloat())
+            elevation =
+                ctx.dp(
+                    theme.generalStyle.layout.elevation
+                        .toFloat(),
+                )
         }
 
     var isCursorUpdated = false // 光標是否移動
@@ -170,11 +174,12 @@ class CompositionPopupWindow(
             }
         }
 
-    fun isWinFixed(): Boolean {
-        return Build.VERSION.SDK_INT <= VERSION_CODES.LOLLIPOP ||
-            popupWindowPos !== PopupPosition.LEFT && popupWindowPos !== PopupPosition.RIGHT &&
-            popupWindowPos !== PopupPosition.LEFT_UP && popupWindowPos !== PopupPosition.RIGHT_UP
-    }
+    fun isWinFixed(): Boolean =
+        Build.VERSION.SDK_INT <= VERSION_CODES.LOLLIPOP ||
+            popupWindowPos !== PopupPosition.LEFT &&
+            popupWindowPos !== PopupPosition.RIGHT &&
+            popupWindowPos !== PopupPosition.LEFT_UP &&
+            popupWindowPos !== PopupPosition.RIGHT_UP
 
     private fun updatePopupWindow(
         offsetX: Int,
@@ -195,7 +200,7 @@ class CompositionPopupWindow(
         }
     }
 
-    private fun hideCompositionView() {
+    fun hideCompositionView() {
         mPopupWindow.dismiss()
         mPopupHandler.removeCallbacks(mPopupTimer)
     }

@@ -372,6 +372,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         postRimeJob { clearComposition() }
+        inputView?.composition?.hideCompositionView()
         ColorManager.onSystemNightModeChange(newConfig.isNightMode())
     }
 
@@ -429,6 +430,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreateInputView(): View {
+        Timber.d("onCreateInputView")
         postRimeJob(Dispatchers.Main) {
             recreateInputView()
         }
@@ -438,7 +440,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun setInputView(view: View) {
         val inputArea =
-            window.window!!.decorView
+            window.window!!
+                .decorView
                 .findViewById<FrameLayout>(android.R.id.inputArea)
         inputArea.updateLayoutParams<ViewGroup.LayoutParams> {
             height = ViewGroup.LayoutParams.MATCH_PARENT
@@ -541,7 +544,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
                         prefs
                             .clipboard
-                            .draftExcludeApp.trim().split('\n')
+                            .draftExcludeApp
+                            .trim()
+                            .split('\n')
                             .contains(attribute.packageName)
                     ) {
                         normalTextEditor = false
@@ -1170,13 +1175,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    fun addEventListener(listener: EventListener): Boolean {
-        return eventListeners.add(listener)
-    }
+    fun addEventListener(listener: EventListener): Boolean = eventListeners.add(listener)
 
-    fun removeEventListener(listener: EventListener): Boolean {
-        return eventListeners.remove(listener)
-    }
+    fun removeEventListener(listener: EventListener): Boolean = eventListeners.remove(listener)
 
     interface EventListener {
         fun onCreate() {}
@@ -1197,13 +1198,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         var self: TrimeInputMethodService? = null
 
         @JvmStatic
-        fun getService(): TrimeInputMethodService {
-            return self ?: throw IllegalStateException("Trime not initialized")
-        }
+        fun getService(): TrimeInputMethodService = self ?: throw IllegalStateException("Trime not initialized")
 
-        fun getServiceOrNull(): TrimeInputMethodService? {
-            return self
-        }
+        fun getServiceOrNull(): TrimeInputMethodService? = self
 
         private val syncBackgroundHandler =
             Handler(
