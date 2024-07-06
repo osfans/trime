@@ -28,7 +28,10 @@ import java.lang.ref.WeakReference
 import kotlin.math.max
 
 /** 顯示候選字詞  */
-class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+class Candidate(
+    context: Context?,
+    attrs: AttributeSet?,
+) : View(context, attrs) {
     /** 處理候選條選字事件  */
     interface EventListener {
         fun onCandidatePressed(index: Int)
@@ -50,7 +53,10 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var timeMove: Long = 0
     private val candidateHighlight =
         PaintDrawable(ColorManager.getColor("hilited_candidate_back_color")!!).apply {
-            setCornerRadius(theme.generalStyle.layout.roundCorner.toFloat())
+            setCornerRadius(
+                theme.generalStyle.layout.roundCorner
+                    .toFloat(),
+            )
         }
     private val separatorPaint =
         Paint().apply {
@@ -62,21 +68,30 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private val candidatePaint =
         Paint().apply {
             typeface = candidateFont
-            theme.generalStyle.candidateTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.candidateTextSize
+                .toFloat()
+                .takeIf { it > 0 }
+                ?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
     private val symbolPaint =
         Paint().apply {
             typeface = symbolFont
-            theme.generalStyle.candidateTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.candidateTextSize
+                .toFloat()
+                .takeIf { it > 0 }
+                ?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
     private val commentPaint =
         Paint().apply {
             typeface = commentFont
-            theme.generalStyle.commentTextSize.toFloat().takeIf { it > 0 }?.let { textSize = sp(it) }
+            theme.generalStyle.commentTextSize
+                .toFloat()
+                .takeIf { it > 0 }
+                ?.let { textSize = sp(it) }
             isAntiAlias = true
             strokeWidth = 0f
         }
@@ -155,9 +170,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         requestLayout()
     }
 
-    private fun isHighlighted(i: Int): Boolean {
-        return candidateUseCursor && i == highlightIndex
-    }
+    private fun isHighlighted(i: Int): Boolean = candidateUseCursor && i == highlightIndex
 
     override fun onDraw(canvas: Canvas) {
         if (candidates.isEmpty()) return
@@ -166,7 +179,7 @@ class Candidate(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         val isAlign =
             if (isCommentOnTop) {
                 // 只要有一个候选项有编码提示就不会居中
-                candidates.drop(startNum).any { it.comment.isEmpty() }
+                !candidates.drop(startNum).any { it.comment.isNotEmpty() }
             } else {
                 true
             }
