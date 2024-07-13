@@ -22,7 +22,6 @@ object OpenCCDictManager {
     @Keep
     private val onDataDirChange =
         DataManager.OnDataDirChangeListener {
-            sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
             userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
         }
 
@@ -32,8 +31,8 @@ object OpenCCDictManager {
         DataManager.addOnChangedListener(onDataDirChange)
     }
 
-    var sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
-    var userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
+    private val sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
+    private var userDir = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
 
     fun sharedDictionaries(): List<Dictionary> =
         sharedDir
@@ -45,12 +44,7 @@ object OpenCCDictManager {
             .listFiles()
             ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
-    fun getAllDictionaries(): List<Dictionary> =
-        if (sharedDir.path == userDir.path) {
-            userDictionaries()
-        } else {
-            (sharedDictionaries() + userDictionaries())
-        }
+    fun getAllDictionaries(): List<Dictionary> = sharedDictionaries() + userDictionaries()
 
     fun importFromFile(file: File): OpenCCDictionary {
         val raw =

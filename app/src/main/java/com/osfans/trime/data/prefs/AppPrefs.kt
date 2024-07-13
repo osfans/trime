@@ -208,7 +208,6 @@ class AppPrefs(
      */
     class Profile(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
         companion object {
-            const val SHARED_DATA_DIR = "profile_shared_data_dir"
             const val USER_DATA_DIR = "profile_user_data_dir"
             const val SYNC_BACKGROUND_ENABLED = "profile_sync_in_background"
             const val TIMING_SYNC_ENABLED = "profile_timing_sync"
@@ -217,7 +216,6 @@ class AppPrefs(
             const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
         }
 
-        var sharedDataDir by string(SHARED_DATA_DIR, DataManager.defaultDataDirectory.path)
         var userDataDir by string(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
         var syncBackgroundEnabled by bool(SYNC_BACKGROUND_ENABLED, false)
         var timingSyncEnabled by bool(TIMING_SYNC_ENABLED, false)

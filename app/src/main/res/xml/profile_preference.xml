@@ -11,12 +11,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <PreferenceCategory android:title="@string/storage"
         app:iconSpaceReserved="false" >
-        <com.osfans.trime.ui.components.FolderPickerPreference
-            android:key="profile_shared_data_dir"
-            app:iconSpaceReserved="false"
-            android:title="@string/profile_shared_data_dir"
-            app:persistent="true"
-            app:useSimpleSummaryProvider="true" />
 
         <com.osfans.trime.ui.components.FolderPickerPreference
             android:key="profile_user_data_dir"

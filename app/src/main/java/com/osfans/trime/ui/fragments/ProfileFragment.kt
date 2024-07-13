@@ -67,10 +67,6 @@ class ProfileFragment :
     ) {
         addPreferencesFromResource(R.xml.profile_preference)
         with(preferenceScreen) {
-            get<FolderPickerPreference>("profile_shared_data_dir")?.apply {
-                setDefaultValue(DataManager.defaultDataDirectory.path)
-                registerDocumentTreeLauncher()
-            }
             get<FolderPickerPreference>("profile_user_data_dir")?.apply {
                 setDefaultValue(DataManager.defaultDataDirectory.path)
                 registerDocumentTreeLauncher()
