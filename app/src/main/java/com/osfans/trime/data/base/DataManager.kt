@@ -71,8 +71,7 @@ object DataManager {
     }
 
     @JvmStatic
-    val sharedDataDir
-        get() = File(prefs.profile.sharedDataDir)
+    val sharedDataDir = File(appContext.getExternalFilesDir(null), "shared").also { it.mkdirs() }
 
     @JvmStatic
     val userDataDir
@@ -123,7 +122,7 @@ object DataManager {
             ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir)
 
             // FIXME：缺失 default.custom.yaml 会导致方案列表为空
-            File(sharedDataDir, DEFAULT_CUSTOM_FILE_NAME).let {
+            File(userDataDir, DEFAULT_CUSTOM_FILE_NAME).let {
                 if (!it.exists()) {
                     Timber.d("Creating empty default.custom.yaml")
                     it.bufferedWriter().use { w -> w.write("") }
