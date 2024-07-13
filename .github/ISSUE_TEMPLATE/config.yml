@@ -4,3 +4,7 @@
 
 blank_issues_enabled: false
 
+contact_links:
+  - name: GitHub 讨论区 / GitHub Discussions
+    url: https://github.com/osfans/trime/discussions
+    about: 请在这里提出有关如何使用本输入法的疑问。 / Please ask questions about how to use the input method here.
