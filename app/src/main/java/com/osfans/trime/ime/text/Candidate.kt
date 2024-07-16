@@ -173,7 +173,7 @@ class Candidate(
     private fun isHighlighted(i: Int): Boolean = candidateUseCursor && i == highlightIndex
 
     override fun onDraw(canvas: Canvas) {
-        if (candidates.isEmpty()) return
+        if (candidates.isEmpty() || computedCandidates.isEmpty()) return
         super.onDraw(canvas)
         // 是否水平居中显示(不带编码提示的)候选项
         val isAlign =
