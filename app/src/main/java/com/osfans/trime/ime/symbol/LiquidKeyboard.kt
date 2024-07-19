@@ -10,6 +10,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ItemAnimator
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -45,6 +46,7 @@ class LiquidKeyboard(
     private val symbolHistory = SymbolHistory(180)
     private lateinit var currentBoardType: SymbolBoardType
     private lateinit var currentBoardAdapter: RecyclerView.Adapter<*>
+    private var defaultKeyboardAnimation: ItemAnimator? = null
 
     private val simpleAdapter by lazy {
         val itemWidth = context.dp(theme.liquid.getInt("single_width"))
@@ -185,6 +187,9 @@ class LiquidKeyboard(
                 adapter = simpleAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(true)
+                defaultKeyboardAnimation?.let {
+                    keyboardView.itemAnimator = it
+                }
                 // 添加分割线
                 // 设置添加删除动画
                 // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
@@ -203,6 +208,9 @@ class LiquidKeyboard(
                 adapter = dbAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(false)
+                defaultKeyboardAnimation?.let {
+                    keyboardView.itemAnimator = it
+                }
                 // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
                 isSelected = true
             }
@@ -220,8 +228,11 @@ class LiquidKeyboard(
                 layoutManager = flexboxLayoutManager
                 adapter = varLengthAdapter
                 setItemViewCacheSize(50)
-                // CandidateAdapter现在使用notifyItemRangeChanged，下面禁用layout变化的缺省动画。
-                keyboardView.itemAnimator = null
+                // CandidateAdapter现在使用notifyItemRangeChanged，保存并禁用layout变化的缺省动画。
+                keyboardView.itemAnimator?.let {
+                    defaultKeyboardAnimation = it
+                    keyboardView.itemAnimator = null
+                }
                 setHasFixedSize(false)
                 isSelected = true
             }
