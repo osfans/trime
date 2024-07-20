@@ -5,26 +5,29 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
+import android.widget.FrameLayout
 import com.osfans.trime.core.RimeNotification.OptionNotification
-import com.osfans.trime.databinding.MainInputLayoutBinding
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
 import me.tatarka.inject.annotations.Inject
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
 class KeyboardWindow(
-    context: Context,
+    private val context: Context,
     private val service: TrimeInputMethodService,
 ) : BoardWindow.NoBarBoardWindow(), ResidentWindow, InputBroadcastReceiver {
-    val oldMainInputView by lazy {
-        MainInputLayoutBinding.inflate(LayoutInflater.from(context))
-    }
+    val mainKeyboardView by lazy { KeyboardView(context) }
+
+    private lateinit var keyboardView: FrameLayout
 
     companion object : ResidentWindow.Key
 
@@ -32,22 +35,24 @@ class KeyboardWindow(
         get() = KeyboardWindow
 
     override fun onCreateView(): View {
-        return oldMainInputView.root
+        keyboardView = context.frameLayout()
+        keyboardView.apply { add(mainKeyboardView, lParams(matchParent, matchParent)) }
+        return keyboardView
     }
 
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {
         when (value.option) {
-            "_hide_key_hint" -> oldMainInputView.mainKeyboardView.showKeyHint = !value.value
-            "_hide_key_symbol" -> oldMainInputView.mainKeyboardView.showKeySymbol = !value.value
+            "_hide_key_hint" -> mainKeyboardView.showKeyHint = !value.value
+            "_hide_key_symbol" -> mainKeyboardView.showKeySymbol = !value.value
         }
-        oldMainInputView.mainKeyboardView.invalidateAllKeys()
+        mainKeyboardView.invalidateAllKeys()
     }
 
     override fun onAttached() {
-        oldMainInputView.mainKeyboardView.onKeyboardActionListener = service.textInputManager
+        mainKeyboardView.onKeyboardActionListener = service.textInputManager
     }
 
     override fun onDetached() {
-        oldMainInputView.mainKeyboardView.onKeyboardActionListener = null
+        mainKeyboardView.onKeyboardActionListener = null
     }
 }
