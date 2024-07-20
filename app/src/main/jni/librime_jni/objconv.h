@@ -130,10 +130,11 @@ inline jobjectArray rimeSchemaListToJObjectArray(JNIEnv *env,
                                            GlobalRef->SchemaListItem, nullptr);
   for (int i = 0; i < list.size; i++) {
     auto item = list.list[i];
-    auto obj = JRef<>(env, env->NewObject(GlobalRef->SchemaListItem,
-                                          GlobalRef->SchemaListItemInit,
-                                          *JString(env, item.schema_id),
-                                          *JString(env, item.name)));
+    auto obj = JRef<>(
+        env,
+        env->NewObject(GlobalRef->SchemaListItem, GlobalRef->SchemaListItemInit,
+                       *JString(env, item.schema_id ? item.schema_id : ""),
+                       *JString(env, item.name ? item.name : "")));
     env->SetObjectArrayElement(array, i, obj);
   }
   return array;

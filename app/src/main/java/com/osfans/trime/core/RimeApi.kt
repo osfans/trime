@@ -15,13 +15,13 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
-    suspend fun availableSchemata(): Array<SchemaListItem>
+    suspend fun availableSchemata(): Array<SchemaItem>
 
-    suspend fun enabledSchemata(): Array<SchemaListItem>
+    suspend fun enabledSchemata(): Array<SchemaItem>
 
     suspend fun setEnabledSchemata(schemaIds: Array<String>): Boolean
 
-    suspend fun selectedSchemata(): Array<SchemaListItem>
+    suspend fun selectedSchemata(): Array<SchemaItem>
 
     suspend fun selectedSchemaId(): String
 

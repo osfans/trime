@@ -7,14 +7,12 @@ package com.osfans.trime.core
 sealed class RimeNotification<T>(open val value: T) {
     abstract val messageType: MessageType
 
-    data class SchemaNotification(override val value: Value) :
-        RimeNotification<SchemaNotification.Value>(value) {
+    data class SchemaNotification(override val value: SchemaItem) :
+        RimeNotification<SchemaItem>(value) {
         override val messageType: MessageType
             get() = MessageType.Schema
 
-        data class Value(val schemaId: String, val schemaName: String)
-
-        override fun toString() = "SchemaEvent(schemaId=${value.schemaId}, schemaName=${value.schemaName})"
+        override fun toString() = "SchemaEvent(schemaId=${value.id}, schemaName=${value.name})"
     }
 
     data class OptionNotification(override val value: Value) :
@@ -56,7 +54,7 @@ sealed class RimeNotification<T>(open val value: T) {
         ) = when (type) {
             "schema" -> {
                 val (id, name) = value.split('/', limit = 2)
-                SchemaNotification(SchemaNotification.Value(id, name))
+                SchemaNotification(SchemaItem(id, name))
             }
             "option" ->
                 OptionNotification(
