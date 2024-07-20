@@ -13,6 +13,8 @@ interface RimeApi {
 
     val isReady: Boolean
 
+    val schemaItemCached: SchemaItem
+
     suspend fun isEmpty(): Boolean
 
     suspend fun availableSchemata(): Array<SchemaItem>
@@ -26,6 +28,8 @@ interface RimeApi {
     suspend fun selectedSchemaId(): String
 
     suspend fun selectSchema(schemaId: String): Boolean
+
+    suspend fun currentSchema(): SchemaItem
 
     suspend fun commitComposition(): Boolean
 

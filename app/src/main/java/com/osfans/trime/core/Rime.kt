@@ -33,6 +33,9 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override val isReady: Boolean
         get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
 
+    override var schemaItemCached = SchemaItem(".default")
+        private set
+
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
@@ -80,6 +83,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
     override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
 
+    override suspend fun currentSchema() =
+        withRimeContext {
+            val schema = getRimeStatus()?.let { SchemaItem(it.schemaId, it.schemaName) }
+            schema ?: schemaItemCached
+        }
+
     override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { updateContext() } }
 
     override suspend fun clearComposition() =
@@ -88,12 +97,20 @@ class Rime : RimeApi, RimeLifecycleOwner {
             updateContext()
         }
 
+    private fun handleRimeNotification(notif: RimeNotification<*>) {
+        when (notif) {
+            is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
+            else -> {}
+        }
+    }
+
     fun startup(fullCheck: Boolean) {
         if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
         if (appContext.isStorageAvailable()) {
+            registerRimeNotificationHandler(::handleRimeNotification)
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
         }
@@ -106,6 +123,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
         dispatcher.stop()
         lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
+        unregisterRimeNotificationHandler(::handleRimeNotification)
     }
 
     companion object {
@@ -116,6 +134,8 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 extraBufferCapacity = 15,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
+
+        private val notificationHandlers = ArrayList<(RimeNotification<*>) -> Unit>()
 
         init {
             System.loadLibrary("rime_jni")
@@ -435,7 +455,17 @@ class Rime : RimeApi, RimeLifecycleOwner {
         ) {
             val notification = RimeNotification.create(messageType, messageValue)
             Timber.d("Handling Rime notification: $notification")
+            notificationHandlers.forEach { it.invoke(notification) }
             notificationFlow_.tryEmit(notification)
+        }
+
+        private fun registerRimeNotificationHandler(handler: (RimeNotification<*>) -> Unit) {
+            if (notificationHandlers.contains(handler)) return
+            notificationHandlers.add(handler)
+        }
+
+        private fun unregisterRimeNotificationHandler(handler: (RimeNotification<*>) -> Unit) {
+            notificationHandlers.remove(handler)
         }
     }
 }
