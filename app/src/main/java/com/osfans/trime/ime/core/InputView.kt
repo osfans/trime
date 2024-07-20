@@ -299,10 +299,10 @@ class InputView(
                 }
             }
         }
-        keyboardWindow.oldMainInputView.mainKeyboardView.updateEnterLabelOnEditorInfo(info)
         if (!restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
+        keyboardWindow.mainKeyboardView.updateEnterLabelOnEditorInfo(info)
     }
 
     private fun handleRimeNotification(it: RimeNotification<*>) {
@@ -333,7 +333,7 @@ class InputView(
     fun updateComposing(ic: InputConnection?) {
         val candidateView = quickBar.oldCandidateBar.candidates
         val compositionView = composition.composition.compositionView
-        val mainKeyboardView = keyboardWindow.oldMainInputView.mainKeyboardView
+        val mainKeyboardView = keyboardWindow.mainKeyboardView
         if (composition.isPopupWindowEnabled) {
             val offset = Rime.inputContext?.let { compositionView.update(it) } ?: 0
             candidateView.setText(offset)
@@ -379,7 +379,7 @@ class InputView(
 
     fun finishInput() {
         showingDialog?.dismiss()
-        keyboardWindow.oldMainInputView.mainKeyboardView.finishInput()
+        keyboardWindow.mainKeyboardView.finishInput()
     }
 
     override fun onDetachedFromWindow() {

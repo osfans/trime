@@ -254,8 +254,8 @@ class KeyboardView
         private val mDistances = IntArray(MAX_NEARBY_KEYS)
 
         // For multi-tap
-        private var mLastSentIndex = 0
-        private var mLastTapTime: Long = 0
+        private var mLastSentIndex = -1
+        private var mLastTapTime: Long = -1
 
         /** Whether the keyboard bitmap needs to be redrawn before it's blitted. */
         private var mDrawPending = false
@@ -364,7 +364,6 @@ class KeyboardView
         }
 
         init {
-            resetMultiTap()
             initGestureDetector()
             handleEnterLabel()
             invalidateAllKeys()
@@ -1152,7 +1151,7 @@ class KeyboardView
 
         private fun openPopupIfRequired(me: MotionEvent): Boolean {
             // Check if we have a popup layout specified first.
-            if (mCurrentKey < 0 || mCurrentKey >= mKeys!!.size) {
+            if (mCurrentKey !in mKeys!!.indices) {
                 return false
             }
             showPreview(NOT_A_KEY)
