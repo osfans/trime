@@ -20,10 +20,10 @@ object EnabledSchemaPickerDialog {
         extensions: (AlertDialog.Builder.() -> AlertDialog.Builder)? = null,
     ): AlertDialog {
         val selecteds = rime.selectedSchemata()
-        val selectedNames = selecteds.mapNotNull { it.name }
-        val selectedIds = selecteds.mapNotNull { it.schemaId }
+        val selectedNames = selecteds.map { it.name }
+        val selectedIds = selecteds.map { it.id }
         val selectedSchemaId = rime.selectedSchemaId()
-        val selectedIndex = selecteds.indexOfFirst { it.schemaId == selectedSchemaId }
+        val selectedIndex = selecteds.indexOfFirst { it.id == selectedSchemaId }
         return AlertDialog.Builder(context).apply {
             setTitle(R.string.select_current_schema)
             if (rime.isEmpty()) {

@@ -220,7 +220,7 @@ class TextInputManager(
 
     private fun handleRimeNotification(notification: RimeNotification<*>) {
         if (notification is RimeNotification.SchemaNotification) {
-            SchemaManager.init(notification.value.schemaId)
+            SchemaManager.init(notification.value.id)
             Rime.updateStatus()
             trime.recreateInputView()
             trime.inputView?.switchBoard(InputView.Board.Main)

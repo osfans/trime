@@ -232,8 +232,8 @@ class GlobalRefSingleton {
     RimeStatusInit = env->GetMethodID(
         RimeStatus, "<init>", "(Ljava/lang/String;Ljava/lang/String;ZZZZZZZ)V");
 
-    SchemaListItem = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("com/osfans/trime/core/SchemaListItem")));
+    SchemaListItem = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("com/osfans/trime/core/SchemaItem")));
     SchemaListItemInit = env->GetMethodID(
         SchemaListItem, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
   }

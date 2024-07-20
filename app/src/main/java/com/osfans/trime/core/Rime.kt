@@ -68,13 +68,13 @@ class Rime : RimeApi, RimeLifecycleOwner {
             getCurrentRimeSchema() == ".default" // 無方案
         }
 
-    override suspend fun availableSchemata(): Array<SchemaListItem> = withRimeContext { getAvailableRimeSchemaList() }
+    override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
 
-    override suspend fun enabledSchemata(): Array<SchemaListItem> = withRimeContext { getSelectedRimeSchemaList() }
+    override suspend fun enabledSchemata(): Array<SchemaItem> = withRimeContext { getSelectedRimeSchemaList() }
 
     override suspend fun setEnabledSchemata(schemaIds: Array<String>) = withRimeContext { selectRimeSchemas(schemaIds) }
 
-    override suspend fun selectedSchemata(): Array<SchemaListItem> = withRimeContext { getRimeSchemaList() }
+    override suspend fun selectedSchemata(): Array<SchemaItem> = withRimeContext { getRimeSchemaList() }
 
     override suspend fun selectedSchemaId(): String = withRimeContext { getCurrentRimeSchema() }
 
@@ -347,7 +347,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
         external fun getRimeOption(option: String): Boolean
 
         @JvmStatic
-        external fun getRimeSchemaList(): Array<SchemaListItem>
+        external fun getRimeSchemaList(): Array<SchemaItem>
 
         @JvmStatic
         external fun getCurrentRimeSchema(): String
@@ -413,10 +413,10 @@ class Rime : RimeApi, RimeLifecycleOwner {
         external fun getRimeKeycodeByName(name: String): Int
 
         @JvmStatic
-        external fun getAvailableRimeSchemaList(): Array<SchemaListItem>
+        external fun getAvailableRimeSchemaList(): Array<SchemaItem>
 
         @JvmStatic
-        external fun getSelectedRimeSchemaList(): Array<SchemaListItem>
+        external fun getSelectedRimeSchemaList(): Array<SchemaItem>
 
         @JvmStatic
         external fun selectRimeSchemas(schemaIds: Array<String>): Boolean

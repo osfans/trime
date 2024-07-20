@@ -6,9 +6,9 @@ package com.osfans.trime.core
 
 import timber.log.Timber
 
-data class SchemaListItem(
-    val schemaId: String?,
-    val name: String?,
+data class SchemaItem(
+    val id: String,
+    val name: String = "",
 )
 
 data class CandidateListItem(
