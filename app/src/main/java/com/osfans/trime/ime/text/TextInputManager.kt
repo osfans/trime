@@ -75,7 +75,6 @@ class TextInputManager(
         set(value) {
             trime.shouldUpdateRimeOption = value
         }
-    private val shouldResetAsciiMode get() = trime.shouldResetAsciiMode
 
     // TODO: move things using this context to InputView scope.
     private val themedContext = trime.withTheme(android.R.style.Theme_DeviceDefault_Settings)
@@ -128,8 +127,6 @@ class TextInputManager(
                 2 -> Locale(latinLocale[0], latinLocale[1])
                 else -> Locale.US
             }
-        // preload all required parameters
-        trime.loadConfig()
     }
 
     /**
@@ -147,73 +144,15 @@ class TextInputManager(
     ) {
         super.onStartInputView(info, restarting)
         trime.selectLiquidKeyboard(-1)
-        isComposable = false
-        var forceAsciiMode = false
-        val keyboardType =
-            when (info.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) {
-                EditorInfo.IME_FLAG_FORCE_ASCII -> {
-                    forceAsciiMode = true
-                    ".ascii"
-                }
-                else -> {
-                    val inputAttrsRaw = info.inputType
-                    isComposable = inputAttrsRaw > 0
-                    when (inputAttrsRaw and InputType.TYPE_MASK_CLASS) {
-                        InputType.TYPE_CLASS_NUMBER,
-                        InputType.TYPE_CLASS_PHONE,
-                        InputType.TYPE_CLASS_DATETIME,
-                        -> {
-                            forceAsciiMode = true
-                            "number"
-                        }
-                        InputType.TYPE_CLASS_TEXT -> {
-                            when (inputAttrsRaw and InputType.TYPE_MASK_VARIATION) {
-                                InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE -> {
-                                    null
-                                }
-                                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                                InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
-                                -> {
-                                    Timber.i(
-                                        "EditorInfo: " +
-                                            " inputAttrsRaw" + inputAttrsRaw +
-                                            "; InputType" + (inputAttrsRaw and InputType.TYPE_MASK_VARIATION),
-                                    )
-                                    forceAsciiMode = true
-                                    ".ascii"
-                                }
-                                else -> null.also { isComposable = true }
-                            }
-                        }
-                        else -> {
-                            if (inputAttrsRaw <= 0) return
-                            null
-                        }
-                    }
-                }
-            }
-
-        // Select a keyboard based on the input type of the editing field.
-        KeyboardSwitcher.switchKeyboard(keyboardType)
-
-        // style/reset_ascii_mode指定了弹出键盘时是否重置ASCII状态。
-        // 键盘的reset_ascii_mode指定了重置时是否重置到keyboard的ascii_mode描述的状态。
-        KeyboardSwitcher.currentKeyboard.let {
-            if (forceAsciiMode) {
-                if (!Rime.isAsciiMode) Rime.setOption("ascii_mode", true)
-                return@let
-            }
-            if (shouldResetAsciiMode) {
-                if (it.resetAsciiMode) {
-                    if (Rime.isAsciiMode != it.asciiMode) Rime.setOption("ascii_mode", it.asciiMode)
-                } else {
-                    if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
-                }
-            }
-        }
+        isComposable =
+            arrayOf(
+                InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE,
+                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+            ).none { it == info.inputType and InputType.TYPE_MASK_VARIATION }
         isComposable = isComposable && !rime.run { isEmpty() }
         trime.updateComposing()
     }
@@ -231,7 +170,6 @@ class TextInputManager(
                 "ascii_mode" -> {
                     InputFeedbackManager.ttsLanguage =
                         locales[if (value) 1 else 0]
-                    KeyboardSwitcher.currentKeyboard.currentAsciiMode = value
                 }
                 "_hide_bar",
                 "_hide_candidate",
@@ -240,13 +178,7 @@ class TextInputManager(
                 }
                 "_liquid_keyboard" -> trime.selectLiquidKeyboard(0)
                 else ->
-                    if (option.startsWith("_keyboard_") &&
-                        option.length > 10 && value
-                    ) {
-                        val keyboard = option.substring(10)
-                        KeyboardSwitcher.switchKeyboard(keyboard)
-                        trime.bindKeyboardToInputView()
-                    } else if (option.startsWith("_key_") && option.length > 5 && value) {
+                    if (option.startsWith("_key_") && option.length > 5 && value) {
                         shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
                         val key = option.substring(5)
                         onEvent(EventManager.getEvent(key))
@@ -286,30 +218,10 @@ class TextInputManager(
     // KeyboardEvent 处理软键盘事件
     override fun onEvent(event: Event?) {
         event ?: return
-        if (event.commit.isNotEmpty()) {
-            // Directly commit the text and don't dispatch to Rime
-            trime.commitCharSequence(event.commit, true)
-            return
-        }
-        if (event.getText(KeyboardSwitcher.currentKeyboard).isNotEmpty()) {
-            onText(event.getText(KeyboardSwitcher.currentKeyboard))
-            return
-        }
         when (event.code) {
             KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
                 Rime.toggleOption(event.getToggle())
                 trime.commitRimeText()
-            }
-            KeyEvent.KEYCODE_EISU -> { // Switch keyboard
-                KeyboardSwitcher.switchKeyboard(event.select)
-                /** Set ascii mode according to keyboard's settings, can not place into [Rime.handleRimeNotification] */
-                KeyboardSwitcher.currentKeyboard.let {
-                    if (Rime.isAsciiMode != it.currentAsciiMode) {
-                        Rime.setOption("ascii_mode", it.currentAsciiMode)
-                    }
-                }
-                trime.bindKeyboardToInputView()
-                trime.updateComposing()
             }
             KeyEvent.KEYCODE_LANGUAGE_SWITCH -> { // Switch IME
                 when {

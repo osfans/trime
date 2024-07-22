@@ -4,10 +4,18 @@
 
 package com.osfans.trime.ime.broadcast
 
+import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.ime.window.BoardWindow
 
 interface InputBroadcastReceiver {
+    fun onStartInput(info: EditorInfo) {}
+
+    fun onSelectionUpdate(
+        start: Int,
+        end: Int,
+    ) {}
+
     fun onRimeOptionUpdated(value: OptionNotification.Value) {}
 
     fun onWindowAttached(window: BoardWindow) {}
