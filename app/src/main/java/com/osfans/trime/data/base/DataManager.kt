@@ -70,12 +70,13 @@ object DataManager {
         onDataDirChangeListeners.forEach { it.onDataDirChange() }
     }
 
-    @JvmStatic
     val sharedDataDir = File(appContext.getExternalFilesDir(null), "shared").also { it.mkdirs() }
 
-    @JvmStatic
     val userDataDir
-        get() = File(prefs.profile.userDataDir)
+        get() =
+            File(prefs.profile.userDataDir).also {
+                if (!it.exists()) it.mkdirs()
+            }
 
     /**
      * Return the absolute path of the compiled config file
@@ -122,12 +123,11 @@ object DataManager {
             ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir)
 
             // FIXME：缺失 default.custom.yaml 会导致方案列表为空
-            File(userDataDir, DEFAULT_CUSTOM_FILE_NAME).let {
-                if (!it.exists()) {
+            runCatching {
+                if (File(userDataDir, DEFAULT_CUSTOM_FILE_NAME).createNewFile()) {
                     Timber.d("Creating empty default.custom.yaml")
-                    it.bufferedWriter().use { w -> w.write("") }
                 }
-            }
+            }.getOrElse { Timber.e(it, "Failed to create default.custom.yaml") }
 
             Timber.d("Synced!")
         }
