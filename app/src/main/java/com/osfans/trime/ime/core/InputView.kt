@@ -385,6 +385,7 @@ class InputView(
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         showingDialog?.dismiss()
+        composition.hideCompositionView()
         // cancel the notification job and clear all broadcast receivers,
         // implies that InputView should not be attached again after detached.
         notificationHandlerJob.cancel()

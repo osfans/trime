@@ -319,7 +319,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      *
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
     fun recreateInputView() {
-        inputView?.composition?.hideCompositionView()
         inputView = InputView(this, rime)
         mainKeyboardView = inputView!!.keyboardWindow.oldMainInputView.mainKeyboardView
 
