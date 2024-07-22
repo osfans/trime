@@ -5,6 +5,7 @@
 package com.osfans.trime.ime.dependency
 
 import android.content.Context
+import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.InputBroadcaster
@@ -22,6 +23,7 @@ abstract class InputComponent(
     @get:InputScope @get:Provides val themedContext: Context,
     @get:InputScope @get:Provides val theme: Theme,
     @get:InputScope @get:Provides val service: TrimeInputMethodService,
+    @get:InputScope @get:Provides val rime: RimeSession,
 ) {
     abstract val broadcaster: InputBroadcaster
     abstract val quickBar: QuickBar

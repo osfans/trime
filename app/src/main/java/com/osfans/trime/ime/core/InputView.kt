@@ -96,7 +96,7 @@ class InputView(
     private val notificationHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    private val inputComponent = InputComponent::class.create(themedContext, theme, service)
+    private val inputComponent = InputComponent::class.create(themedContext, theme, service, rime)
     private val broadcaster = inputComponent.broadcaster
     private val windowManager = inputComponent.windowManager
     val quickBar: QuickBar = inputComponent.quickBar
@@ -299,6 +299,7 @@ class InputView(
                 }
             }
         }
+        broadcaster.onStartInput(info)
         if (!restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
@@ -352,6 +353,13 @@ class InputView(
             candidateView.setText(0)
         }
         mainKeyboardView.invalidateComposingKeys()
+    }
+
+    fun updateSelection(
+        start: Int,
+        end: Int,
+    ) {
+        broadcaster.onSelectionUpdate(start, end)
     }
 
     private var showingDialog: Dialog? = null

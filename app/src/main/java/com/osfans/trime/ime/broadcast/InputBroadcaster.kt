@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.broadcast
 
+import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.window.BoardWindow
@@ -29,6 +30,17 @@ class InputBroadcaster : InputBroadcastReceiver {
 
     fun clear() {
         receivers.clear()
+    }
+
+    override fun onStartInput(info: EditorInfo) {
+        receivers.forEach { it.onStartInput(info) }
+    }
+
+    override fun onSelectionUpdate(
+        start: Int,
+        end: Int,
+    ) {
+        receivers.forEach { it.onSelectionUpdate(start, end) }
     }
 
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {

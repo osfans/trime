@@ -50,8 +50,6 @@ import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Key
-import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.text.TextInputManager
@@ -86,28 +84,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var normalTextEditor = false
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
-    private var mainKeyboardView: KeyboardView? = null // 主軟鍵盤
     var inputView: InputView? = null
     private var initializationUi: InitializationUi? = null
     private var eventListeners = WeakHashSet<EventListener>()
     private var mIntentReceiver: IntentReceiver? = null
     private var isWindowShown = false // 键盘窗口是否已显示
-    private var isAutoCaps = false // 句首自動大寫
     var textInputManager: TextInputManager? = null // 文字输入管理器
     var candidateExPage = false
 
     var shouldUpdateRimeOption = false
-    var shouldResetAsciiMode = false
-
-    private val cursorCapsMode: Int
-        get() =
-            currentInputEditorInfo.run {
-                if (inputType != InputType.TYPE_NULL) {
-                    currentInputConnection?.getCursorCapsMode(inputType) ?: 0
-                } else {
-                    0
-                }
-            }
 
     var lastCommittedText: CharSequence = ""
         private set
@@ -192,13 +177,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    fun loadConfig() {
-        val theme = ThemeManager.activeTheme
-        shouldResetAsciiMode = theme.generalStyle.resetASCIIMode
-        isAutoCaps = theme.generalStyle.autoCaps.toBoolean()
-        shouldUpdateRimeOption = true
-    }
-
     private fun updateRimeOption(): Boolean {
         try {
             if (shouldUpdateRimeOption) {
@@ -259,6 +237,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
                 InputFeedbackManager.init()
                 restartSystemStartTimingSync()
+                shouldUpdateRimeOption = true
                 try {
                     for (listener in eventListeners) {
                         listener.onCreate()
@@ -320,12 +299,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
     fun recreateInputView() {
         inputView = InputView(this, rime)
-        mainKeyboardView = inputView!!.keyboardWindow.mainKeyboardView
-
-        loadConfig()
-        KeyboardSwitcher.newOrReset()
         shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
-        bindKeyboardToInputView()
         updateComposing() // 切換主題時刷新候選
         setInputView(inputView!!)
         initializationUi = null
@@ -408,8 +382,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // 上屏後，清除候選區
             postRimeJob { clearComposition() }
         }
-        // Update the caps-lock status for the current cursor position.
-        dispatchCapsStateToInputView()
+        inputView?.updateSelection(newSelStart, newSelEnd)
     }
 
     override fun onComputeInsets(outInsets: Insets) {
@@ -487,7 +460,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             if (prefs.other.showStatusBarIcon) {
                 showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
             }
-            bindKeyboardToInputView()
             setCandidatesViewShown(!rime.run { isEmpty() }) // 軟鍵盤出現時顯示候選欄
             inputView?.startInput(attribute, restarting)
             when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
@@ -570,27 +542,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
         InputFeedbackManager.finishInput()
         inputView?.finishInput()
-    }
-
-    fun bindKeyboardToInputView() {
-        if (mainKeyboardView == null) return
-        KeyboardSwitcher.currentKeyboard.let {
-            // Bind the selected keyboard to the input view.
-            if (it != mainKeyboardView!!.keyboard) {
-                mainKeyboardView!!.keyboard = it
-            }
-            dispatchCapsStateToInputView()
-        }
-    }
-
-    /**
-     * Dispatches cursor caps info to input view in order to implement auto caps lock at the start of
-     * a sentence.
-     */
-    private fun dispatchCapsStateToInputView() {
-        if (isAutoCaps && Rime.isAsciiMode && mainKeyboardView != null && !mainKeyboardView!!.isCapsOn) {
-            mainKeyboardView!!.setShifted(false, cursorCapsMode != 0)
-        }
     }
 
     private val isComposing: Boolean
@@ -1207,9 +1158,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 Looper.getMainLooper(),
             ) { msg: Message ->
                 // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-                if (!(msg.obj as TrimeInputMethodService).isShowInputRequested) {
+                val service = msg.obj as TrimeInputMethodService
+                if (!service.isShowInputRequested) {
                     ShortcutUtils.syncInBackground()
-                    (msg.obj as TrimeInputMethodService).loadConfig()
+                    service.shouldUpdateRimeOption = true
                 }
                 false
             }
