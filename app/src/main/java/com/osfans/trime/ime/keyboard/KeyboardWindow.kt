@@ -83,6 +83,9 @@ class KeyboardWindow(
         currentKeyboard?.let {
             if (it.isLock) lastLockKeyboardId = target
             dispatchCapsState(it::setShifted)
+            if (Rime.isAsciiMode != it.currentAsciiMode) {
+                Rime.setOption("ascii_mode", it.currentAsciiMode)
+            }
             // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
             KeyboardSwitcher.currentKeyboard = it
             mainKeyboardView.keyboard = it
@@ -202,8 +205,6 @@ class KeyboardWindow(
                 } else {
                     if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
                 }
-            } else if (Rime.isAsciiMode != it.currentAsciiMode) {
-                Rime.setOption("ascii_mode", it.currentAsciiMode)
             }
         }
     }
