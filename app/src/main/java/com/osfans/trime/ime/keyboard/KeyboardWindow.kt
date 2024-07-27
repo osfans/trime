@@ -133,14 +133,14 @@ class KeyboardWindow(
         var final = dot.ifEmpty { smartMatchKeyboard() }
 
         // 切换到 mini 键盘
-        val deviceKeyboard = context.resources.configuration.keyboard
+        val deviceKeyboard = service.resources.configuration.keyboard
         val useMiniKeyboard = AppPrefs.defaultInstance().theme.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS
         if (useMiniKeyboard) {
             if (presetKeyboardIds.contains("mini")) final = "mini"
         }
 
         // 切换到横屏布局
-        if (context.isLandscapeMode()) {
+        if (service.isLandscapeMode()) {
             val landscape = currentKeyboard?.landscapeKeyboard
             if (!landscape.isNullOrEmpty() && presetKeyboardIds.contains(landscape)) final = landscape
         }
