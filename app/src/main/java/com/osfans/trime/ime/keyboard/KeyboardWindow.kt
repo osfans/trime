@@ -141,8 +141,10 @@ class KeyboardWindow(
 
         // 切换到横屏布局
         if (service.isLandscapeMode()) {
-            val landscape = currentKeyboard?.landscapeKeyboard
-            if (!landscape.isNullOrEmpty() && presetKeyboardIds.contains(landscape)) final = landscape
+            val landscape =
+                theme.presetKeyboards?.get(final)?.configMap
+                    ?.getValue("landscape_keyboard")?.getString() ?: ""
+            if (landscape.isNotEmpty() && presetKeyboardIds.contains(landscape)) final = landscape
         }
         return final
     }
@@ -152,12 +154,10 @@ class KeyboardWindow(
         ContextCompat.getMainExecutor(service).execute {
             if (keyboardsCached.containsKey(target)) {
                 if (target == currentKeyboardId) return@execute
-                attachKeyboard(target)
             } else {
-                val keyboard = Keyboard(target)
-                keyboardsCached[target] = keyboard
-                attachKeyboard(target)
+                keyboardsCached[target] = Keyboard(target)
             }
+            attachKeyboard(target)
             if (windowManager.isAttached(this)) {
                 service.updateComposing()
             }
