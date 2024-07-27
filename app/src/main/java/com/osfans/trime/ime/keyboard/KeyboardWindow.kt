@@ -23,6 +23,7 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.window.BoardWindow
+import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
@@ -38,6 +39,7 @@ class KeyboardWindow(
     private val service: TrimeInputMethodService,
     private val theme: Theme,
     private val rime: RimeSession,
+    private val windowManager: BoardWindowManager,
 ) : BoardWindow.NoBarBoardWindow(), ResidentWindow, InputBroadcastReceiver {
     private val cursorCapsMode: Int
         get() =
@@ -155,6 +157,9 @@ class KeyboardWindow(
                 val keyboard = Keyboard(target)
                 keyboardsCached[target] = keyboard
                 attachKeyboard(target)
+            }
+            if (windowManager.isAttached(this)) {
+                service.updateComposing()
             }
         }
         Timber.d("Switched to keyboard: $target")
