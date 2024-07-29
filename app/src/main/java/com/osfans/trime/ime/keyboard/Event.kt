@@ -27,7 +27,7 @@ class Event(var s: String) {
     private var states: List<String>? = null
     var command: String = ""
     var option: String = ""
-    var select: String? = null
+    var select: String = ""
     private var toggle: String = ""
     var commit: String = ""
         private set

@@ -265,7 +265,7 @@ class KeyboardWindow(
                 return
             }
             if (event.code == KeyEvent.KEYCODE_EISU) { // Switch keyboard
-                switchKeyboard(event.select ?: ".default")
+                switchKeyboard(event.select)
             } else {
                 delegate.onEvent(event)
             }
