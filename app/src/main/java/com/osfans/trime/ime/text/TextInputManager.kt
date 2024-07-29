@@ -225,10 +225,10 @@ class TextInputManager(
             }
             KeyEvent.KEYCODE_LANGUAGE_SWITCH -> { // Switch IME
                 when {
-                    event.select!!.contentEquals(".next") -> {
+                    event.select == ".next" -> {
                         trime.switchToNextIme()
                     }
-                    !event.select.isNullOrEmpty() -> {
+                    event.select.isNotEmpty() -> {
                         trime.switchToPrevIme()
                     }
                     else -> {
