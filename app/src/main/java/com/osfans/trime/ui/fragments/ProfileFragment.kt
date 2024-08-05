@@ -207,11 +207,7 @@ class ProfileFragment :
                                 res =
                                     items.filterIndexed { index, _ -> checkedItems[index] }
                                         .fold(true) { acc, asset ->
-                                            ResourceUtils.copyFiles(
-                                                "$rimeFolder/$asset",
-                                                DataManager.sharedDataDir,
-                                                "$rimeFolder/",
-                                            )
+                                            ResourceUtils.copyFile("$rimeFolder/$asset", DataManager.sharedDataDir, true)
                                                 .fold({ acc and true }, { acc and false })
                                         }
                             }
