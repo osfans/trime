@@ -113,10 +113,10 @@ object DataManager {
                 when (it) {
                     is DataDiff.CreateFile,
                     is DataDiff.UpdateFile,
-                    -> ResourceUtils.copyFile(it.path, sharedDataDir, "rime/")
+                    -> ResourceUtils.copyFile(it.path, sharedDataDir, true)
                     is DataDiff.DeleteDir,
                     is DataDiff.DeleteFile,
-                    -> FileUtils.delete(sharedDataDir.resolve(it.path.removePrefix("rime/"))).getOrThrow()
+                    -> FileUtils.delete(sharedDataDir.resolve(it.path.substringAfterLast('/'))).getOrThrow()
                 }
             }
 

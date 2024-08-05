@@ -9,38 +9,24 @@ import java.io.File
 
 object ResourceUtils {
     fun copyFile(
-        filename: String,
+        path: String,
         dest: File,
-        removedPrefix: String = "",
-    ) = runCatching {
-        appContext.assets.open(filename).use { i ->
-            File(dest, filename.removePrefix(removedPrefix))
-                .also { it.parentFile?.mkdirs() }
-                .outputStream()
-                .use { o -> i.copyTo(o) }
-        }
-    }.onFailure { Timber.e(it, "Caught a error in copying assets") }
-
-    fun copyFiles(
-        assetPath: String,
-        destFile: File,
-        removedPrefix: String = "",
-    ): Result<Long> {
-        return runCatching {
-            val formattedDestPath = assetPath.removePrefix(removedPrefix)
-            val files = appContext.assets.list(assetPath)
-            if (files?.isNotEmpty() == true) {
-                files.fold(0L) { acc, file ->
-                    acc + copyFiles("$assetPath/$file", File(destFile, formattedDestPath), file).getOrDefault(0L)
+        baseToDest: Boolean = false,
+    ): Result<Long> =
+        runCatching {
+            val destFileName = if (baseToDest) path.substringAfterLast('/') else path
+            val assets = appContext.assets.list(path)
+            if (!assets.isNullOrEmpty()) {
+                assets.fold(0L) { acc, asset ->
+                    acc + copyFile("$path/$asset", File(dest, destFileName), baseToDest).getOrDefault(0L)
                 }
             } else {
-                appContext.assets.open(assetPath).use { i ->
-                    File(destFile, formattedDestPath.split(File.pathSeparator).last())
+                appContext.assets.open(path).use { i ->
+                    File(dest, destFileName)
                         .also { it.parentFile?.mkdirs() }
                         .outputStream()
                         .use { o -> i.copyTo(o) }
                 }
             }
         }.onFailure { Timber.e(it, "Caught a error in copying assets") }
-    }
 }
