@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.osfans.trime.ime.bar
+package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.view.View
