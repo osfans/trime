@@ -27,6 +27,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
+bravh = { module = "io.github.cymchad:BaseRecyclerViewAdapterHelper4", version = "4.1.4" }
 kaml = { module = "com.charleskorn.kaml:kaml", version = "0.56.0" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }

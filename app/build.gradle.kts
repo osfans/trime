@@ -132,6 +132,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.viewpager2)
     implementation(libs.flexbox)
+    implementation(libs.bravh)
     implementation(libs.kaml)
     implementation(libs.timber)
     implementation(libs.xxpermissions)
