@@ -231,6 +231,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             ColorManager.addOnChangedListener(onColorChangeListener)
+            mIntentReceiver =
+                IntentReceiver().also {
+                    it.registerReceiver(this)
+                }
             postRimeJob {
                 Timber.d("Running Trime.onCreate")
                 ColorManager.init(resources.configuration)
