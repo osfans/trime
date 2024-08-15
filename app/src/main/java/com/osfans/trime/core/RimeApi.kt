@@ -34,4 +34,11 @@ interface RimeApi {
     suspend fun commitComposition(): Boolean
 
     suspend fun clearComposition()
+
+    suspend fun setRuntimeOption(
+        option: String,
+        value: Boolean,
+    )
+
+    suspend fun getRuntimeOption(option: String): Boolean
 }
