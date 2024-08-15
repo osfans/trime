@@ -96,6 +96,19 @@ class Rime : RimeApi, RimeLifecycleOwner {
             updateContext()
         }
 
+    override suspend fun setRuntimeOption(
+        option: String,
+        value: Boolean,
+    ): Unit =
+        withRimeContext {
+            setRimeOption(option, value)
+        }
+
+    override suspend fun getRuntimeOption(option: String): Boolean =
+        withRimeContext {
+            getRimeOption(option)
+        }
+
     private fun handleRimeNotification(notif: RimeNotification<*>) {
         when (notif) {
             is RimeNotification.SchemaNotification -> schemaItemCached = notif.value

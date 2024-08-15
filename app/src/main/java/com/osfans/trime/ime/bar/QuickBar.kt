@@ -10,9 +10,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.core.SchemaItem
+import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
@@ -32,7 +33,7 @@ import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
-class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme) : InputBroadcastReceiver {
+class QuickBar(context: Context, service: TrimeInputMethodService, rime: RimeSession, theme: Theme) : InputBroadcastReceiver {
     private val prefs = AppPrefs.defaultInstance()
 
     private val showSwitchers get() = prefs.keyboard.switchesEnabled
@@ -55,12 +56,18 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
                     val prevEnabled = switch.enabled
                     switch.enabled =
                         if (switch.options.isNullOrEmpty()) {
-                            (1 - prevEnabled).also { Rime.setOption(switch.name!!, it == 1) }
+                            (1 - prevEnabled).also { newValue ->
+                                rime.launchOnReady {
+                                    it.setRuntimeOption(switch.name!!, newValue == 1)
+                                }
+                            }
                         } else {
                             val options = switch.options
-                            ((prevEnabled + 1) % options.size).also {
-                                Rime.setOption(options[prevEnabled], false)
-                                Rime.setOption(options[it], true)
+                            ((prevEnabled + 1) % options.size).also { newValue ->
+                                rime.launchOnReady {
+                                    it.setRuntimeOption(options[prevEnabled], false)
+                                    it.setRuntimeOption(options[newValue], true)
+                                }
                             }
                         }
                 }
@@ -79,7 +86,7 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
             }
             with(candidates) {
                 setCandidateListener(service.textInputManager)
-                shouldShowComment = !Rime.getOption("_hide_comment")
+                rime.launchOnReady { shouldShowComment = !it.getRuntimeOption("_hide_comment") }
             }
         }
     }
@@ -106,14 +113,16 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
 
     val view by lazy {
         ViewAnimator(context).apply {
-            visibility =
-                if (Rime.getOption("_hide_candidate") ||
-                    Rime.getOption("_hide_bar")
-                ) {
-                    View.GONE
-                } else {
-                    View.VISIBLE
-                }
+            rime.launchOnReady {
+                visibility =
+                    if (it.getRuntimeOption("_hide_candidate") ||
+                        it.getRuntimeOption("_hide_bar")
+                    ) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    }
+            }
             background =
                 ColorManager.getDrawable(
                     context,
