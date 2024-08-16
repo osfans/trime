@@ -8,11 +8,14 @@ import android.content.Context
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.Schema
 import com.osfans.trime.data.theme.Theme
 
 class SwitchesAdapter(private val theme: Theme) :
     BaseQuickAdapter<Schema.Switch, SwitchesAdapter.Holder>() {
+    private val showArrow = AppPrefs.defaultInstance().keyboard.switchArrowEnabled
+
     inner class Holder(val ui: SwitchUi) : RecyclerView.ViewHolder(ui.root)
 
     override fun onCreateViewHolder(
@@ -31,6 +34,17 @@ class SwitchesAdapter(private val theme: Theme) :
         holder.ui.apply {
             val enabled = item!!.enabled
             setLabel(item.states!![enabled])
+            if (item.options.isNullOrEmpty()) {
+                val text =
+                    item.states[1 - enabled].let {
+                        if (showArrow) {
+                            "→ $it"
+                        } else {
+                            it
+                        }
+                    }
+                setAltLabel(text)
+            }
         }
     }
 }

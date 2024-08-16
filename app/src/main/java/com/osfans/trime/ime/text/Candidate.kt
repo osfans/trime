@@ -112,12 +112,7 @@ class Candidate(
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,
     ) {
-        val h =
-            if (shouldShowComment && isCommentOnTop) {
-                candidateViewHeight + commentHeight
-            } else {
-                candidateViewHeight
-            }
+        val h = candidateViewHeight + commentHeight
         setMeasuredDimension(
             MeasureSpec.makeMeasureSpec(widthMeasureSpec, MeasureSpec.UNSPECIFIED),
             MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST),
