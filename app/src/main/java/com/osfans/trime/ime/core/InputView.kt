@@ -197,7 +197,7 @@ class InputView(
                 )
                 add(
                     quickBar.view,
-                    lParams(matchParent, wrapContent) {
+                    lParams(matchParent, dp(quickBar.themedHeight)) {
                         topOfParent()
                         centerHorizontally()
                     },

@@ -38,6 +38,9 @@ class QuickBar(context: Context, service: TrimeInputMethodService, rime: RimeSes
 
     private val showSwitchers get() = prefs.keyboard.switchesEnabled
 
+    val themedHeight =
+        theme.generalStyle.candidateViewHeight + theme.generalStyle.commentHeight
+
     private fun evalAlwaysUiState() {
         val newState =
             when {
