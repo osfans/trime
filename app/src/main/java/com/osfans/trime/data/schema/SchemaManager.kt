@@ -4,14 +4,13 @@
 
 package com.osfans.trime.data.schema
 
-import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.prefs.AppPrefs
 import kotlinx.serialization.builtins.ListSerializer
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
-    private lateinit var visibleSwitches: List<Schema.Switch>
+    lateinit var visibleSwitches: List<Schema.Switch>
 
     private val arrow get() = AppPrefs.defaultInstance().keyboard.switchArrowEnabled
 
@@ -42,40 +41,6 @@ object SchemaManager {
                     // 需要 coerceAtLeast 确保其至少为 0
                     s.options.indexOfFirst { Rime.getRimeOption(it) }.coerceAtLeast(0)
                 }
-        }
-    }
-
-    @JvmStatic
-    fun toggleSwitchOption(index: Int) {
-        if (!this::visibleSwitches.isInitialized || visibleSwitches.isEmpty()) return
-        val switch = visibleSwitches[index]
-        val enabled = switch.enabled
-        switch.enabled =
-            if (switch.options.isNullOrEmpty()) {
-                (1 - enabled).also { Rime.setOption(switch.name!!, it == 1) }
-            } else {
-                val options = switch.options
-                ((enabled + 1) % options.size).also {
-                    Rime.setOption(options[enabled], false)
-                    Rime.setOption(options[it], true)
-                }
-            }
-    }
-
-    @JvmStatic
-    fun getStatusSwitches(): Array<CandidateListItem> {
-        if (!this::visibleSwitches.isInitialized || visibleSwitches.isEmpty()) return arrayOf()
-        return Array(visibleSwitches.size) {
-            val switch = visibleSwitches[it]
-            val enabled = switch.enabled
-            val text = switch.states!![enabled]
-            val comment =
-                if (switch.options.isNullOrEmpty()) {
-                    "${if (arrow) "→ " else ""}${switch.states[1 - enabled]}"
-                } else {
-                    ""
-                }
-            CandidateListItem(comment, text)
         }
     }
 }

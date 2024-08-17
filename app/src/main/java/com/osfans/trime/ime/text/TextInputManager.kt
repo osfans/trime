@@ -409,12 +409,7 @@ class TextInputManager(
      */
     override fun onCandidatePressed(index: Int) {
         onPress(0)
-        if (!Rime.isComposing) {
-            if (index >= 0) {
-                SchemaManager.toggleSwitchOption(index)
-                trime.updateComposing()
-            }
-        } else if (prefs.keyboard.hookCandidate || index > 9) {
+        if (prefs.keyboard.hookCandidate || index > 9) {
             if (Rime.selectCandidate(index)) {
                 if (prefs.keyboard.hookCandidateCommit) {
                     // todo 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
