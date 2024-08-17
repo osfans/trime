@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.Theme
@@ -86,7 +87,9 @@ class KeyboardWindow(
             if (it.isLock) lastLockKeyboardId = target
             dispatchCapsState(it::setShifted)
             if (Rime.isAsciiMode != it.currentAsciiMode) {
-                Rime.setOption("ascii_mode", it.currentAsciiMode)
+                rime.launchOnReady { api ->
+                    api.setRuntimeOption("ascii_mode", it.currentAsciiMode)
+                }
             }
             // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
             KeyboardSwitcher.currentKeyboard = it
@@ -202,13 +205,15 @@ class KeyboardWindow(
             }
         switchKeyboard(targetKeyboard)
         currentKeyboard?.let {
-            if (tempAsciiMode) {
-                if (!Rime.isAsciiMode) Rime.setOption("ascii_mode", true)
-            } else if (theme.generalStyle.resetASCIIMode) {
-                if (it.resetAsciiMode) {
-                    if (Rime.isAsciiMode != it.asciiMode) Rime.setOption("ascii_mode", it.asciiMode)
-                } else {
-                    if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
+            rime.launchOnReady { api ->
+                if (tempAsciiMode) {
+                    if (!Rime.isAsciiMode) api.setRuntimeOption("ascii_mode", true)
+                } else if (theme.generalStyle.resetASCIIMode) {
+                    if (it.resetAsciiMode) {
+                        if (Rime.isAsciiMode != it.asciiMode) api.setRuntimeOption("ascii_mode", it.asciiMode)
+                    } else {
+                        if (Rime.isAsciiMode) api.setRuntimeOption("ascii_mode", false)
+                    }
                 }
             }
         }
