@@ -6,6 +6,7 @@ package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeNotification.OptionNotification
+import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.window.BoardWindow
 import me.tatarka.inject.annotations.Inject
@@ -41,6 +42,10 @@ class InputBroadcaster : InputBroadcastReceiver {
         end: Int,
     ) {
         receivers.forEach { it.onSelectionUpdate(start, end) }
+    }
+
+    override fun onRimeSchemaUpdated(schema: SchemaItem) {
+        receivers.forEach { it.onRimeSchemaUpdated(schema) }
     }
 
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {

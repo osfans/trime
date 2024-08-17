@@ -6,7 +6,6 @@ package com.osfans.trime.core
 
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.isAsciiPrintable
@@ -254,17 +253,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 updateContext()
             }
         }
-
-        @JvmStatic
-        val candidatesOrStatusSwitches: Array<CandidateListItem>
-            get() {
-                val showSwitches = AppPrefs.defaultInstance().keyboard.switchesEnabled
-                return if (!isComposing && showSwitches) {
-                    SchemaManager.getStatusSwitches()
-                } else {
-                    inputContext?.candidates ?: arrayOf()
-                }
-            }
 
         val candidatesWithoutSwitch: Array<CandidateListItem>
             get() = if (isComposing) inputContext?.candidates ?: arrayOf() else arrayOf()

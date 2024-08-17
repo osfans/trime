@@ -383,7 +383,7 @@ class Candidate(
 
     private fun updateCandidates() {
         candidates.clear()
-        candidates.addAll(Rime.candidatesOrStatusSwitches)
+        candidates.addAll(Rime.candidatesWithoutSwitch)
         highlightIndex = Rime.candHighlightIndex - startNum
     }
 

@@ -8,12 +8,17 @@ import android.content.Context
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
+import com.osfans.trime.core.SchemaItem
+import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.CandidateBarBinding
+import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -28,6 +33,41 @@ import splitties.views.dsl.core.matchParent
 @InputScope
 @Inject
 class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme) : InputBroadcastReceiver {
+    private val prefs = AppPrefs.defaultInstance()
+
+    private val showSwitchers get() = prefs.keyboard.switchesEnabled
+
+    private fun evalAlwaysUiState() {
+        val newState =
+            when {
+                showSwitchers -> AlwaysUi.State.Switchers
+                else -> AlwaysUi.State.Empty
+            }
+        if (newState == alwaysUi.currentState) return
+        alwaysUi.updateState(newState)
+    }
+
+    private val alwaysUi: AlwaysUi by lazy {
+        AlwaysUi(context, theme).apply {
+            switchesUi.apply {
+                setSwitches(SchemaManager.visibleSwitches)
+                setOnSwitchClick { switch ->
+                    val prevEnabled = switch.enabled
+                    switch.enabled =
+                        if (switch.options.isNullOrEmpty()) {
+                            (1 - prevEnabled).also { Rime.setOption(switch.name!!, it == 1) }
+                        } else {
+                            val options = switch.options
+                            ((prevEnabled + 1) % options.size).also {
+                                Rime.setOption(options[prevEnabled], false)
+                                Rime.setOption(options[it], true)
+                            }
+                        }
+                }
+            }
+        }
+    }
+
     val oldCandidateBar by lazy {
         CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
             with(root) {
@@ -49,11 +89,12 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
     }
 
     enum class State {
+        Always,
         Candidate,
         Tab,
     }
 
-    private fun switchUiByState(state: State) {
+    fun switchUiByState(state: State) {
         val index = state.ordinal
         if (view.displayedChild == index) return
         val new = view.getChildAt(index)
@@ -81,8 +122,20 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
                     "candidate_border_color",
                     theme.generalStyle.candidateBorderRound,
                 )
+            add(alwaysUi.root, lParams(matchParent, matchParent))
             add(oldCandidateBar.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
+        }
+    }
+
+    override fun onStartInput(info: EditorInfo) {
+        evalAlwaysUiState()
+    }
+
+    override fun onRimeSchemaUpdated(schema: SchemaItem) {
+        if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
+            SchemaManager.init(schema.id)
+            alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
         }
     }
 
@@ -94,6 +147,10 @@ class QuickBar(context: Context, service: TrimeInputMethodService, theme: Theme)
             "_hide_candidate", "_hide_bar" -> {
                 view.visibility = if (value.value) View.GONE else View.VISIBLE
             }
+        }
+        if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
+            SchemaManager.updateSwitchOptions()
+            alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
         }
     }
 

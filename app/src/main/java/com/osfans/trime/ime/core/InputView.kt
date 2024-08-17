@@ -308,6 +308,9 @@ class InputView(
 
     private fun handleRimeNotification(it: RimeNotification<*>) {
         when (it) {
+            is RimeNotification.SchemaNotification -> {
+                broadcaster.onRimeSchemaUpdated(it.value)
+            }
             is RimeNotification.OptionNotification -> {
                 broadcaster.onRimeOptionUpdated(it.value)
             }
@@ -351,6 +354,11 @@ class InputView(
             }
         } else {
             candidateView.setText(0)
+        }
+        if (Rime.isComposing) {
+            quickBar.switchUiByState(QuickBar.State.Candidate)
+        } else {
+            quickBar.switchUiByState(QuickBar.State.Always)
         }
         mainKeyboardView.invalidateComposingKeys()
     }

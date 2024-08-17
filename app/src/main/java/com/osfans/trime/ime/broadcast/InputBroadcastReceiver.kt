@@ -6,6 +6,7 @@ package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeNotification.OptionNotification
+import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.ime.window.BoardWindow
 
 interface InputBroadcastReceiver {
@@ -15,6 +16,8 @@ interface InputBroadcastReceiver {
         start: Int,
         end: Int,
     ) {}
+
+    fun onRimeSchemaUpdated(schema: SchemaItem) {}
 
     fun onRimeOptionUpdated(value: OptionNotification.Value) {}
 
