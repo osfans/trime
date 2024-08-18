@@ -34,8 +34,8 @@ class SwitchesAdapter(private val theme: Theme) :
         holder.ui.apply {
             val enabled = item!!.enabled
             setLabel(item.states!![enabled])
-            if (item.options.isNullOrEmpty()) {
-                val text =
+            val altText =
+                if (item.options.isNullOrEmpty()) {
                     item.states[1 - enabled].let {
                         if (showArrow) {
                             "→ $it"
@@ -43,8 +43,10 @@ class SwitchesAdapter(private val theme: Theme) :
                             it
                         }
                     }
-                setAltLabel(text)
-            }
+                } else {
+                    ""
+                }
+            setAltLabel(altText)
         }
     }
 }

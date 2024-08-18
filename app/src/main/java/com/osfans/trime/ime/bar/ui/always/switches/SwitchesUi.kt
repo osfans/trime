@@ -26,7 +26,7 @@ class SwitchesUi(override val ctx: Context, val theme: Theme) : Ui {
             layoutParams = ViewGroup.LayoutParams(matchParent, matchParent)
             layoutManager = horizontalLayoutManager()
             adapter = switchesAdapter
-            addItemDecoration(SpacesItemDecoration(dp(3)))
+            addItemDecoration(SpacesItemDecoration(dp(theme.generalStyle.candidateSpacing).toInt()))
         }
 
     fun setSwitches(list: List<Schema.Switch>) {

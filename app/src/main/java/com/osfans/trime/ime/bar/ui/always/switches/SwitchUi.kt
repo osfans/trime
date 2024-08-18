@@ -6,9 +6,11 @@ package com.osfans.trime.ime.bar.ui.always.switches
 
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.util.rippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.after
@@ -24,8 +26,10 @@ import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
+import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
+import splitties.views.horizontalPadding
 
 class SwitchUi(override val ctx: Context, private val theme: Theme) : Ui {
     var enabled: Int = -1
@@ -47,7 +51,9 @@ class SwitchUi(override val ctx: Context, private val theme: Theme) : Ui {
 
     override val root =
         constraintLayout {
-            layoutParams = lParams(wrapContent, wrapContent)
+            horizontalPadding = dp(theme.generalStyle.candidatePadding)
+            layoutParams = ViewGroup.LayoutParams(wrapContent, matchParent)
+            background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
             if (theme.generalStyle.commentOnTop) {
                 add(
                     altLabel,
@@ -92,9 +98,13 @@ class SwitchUi(override val ctx: Context, private val theme: Theme) : Ui {
     }
 
     fun setAltLabel(str: String) {
-        altLabel.text = str
-        if (altLabel.visibility == View.GONE) {
-            altLabel.visibility = View.VISIBLE
+        altLabel.run {
+            if (str.isNotEmpty()) {
+                text = str
+                if (visibility == View.GONE) visibility = View.VISIBLE
+            } else if (visibility != View.GONE) {
+                visibility = View.GONE
+            }
         }
     }
 }
