@@ -109,6 +109,14 @@ class Rime : RimeApi, RimeLifecycleOwner {
             getRimeOption(option)
         }
 
+    override suspend fun getCandidates(
+        startIndex: Int,
+        limit: Int,
+    ): Array<CandidateListItem> =
+        withRimeContext {
+            getRimeCandidates(startIndex, limit) ?: emptyArray()
+        }
+
     private fun handleRimeNotification(notif: RimeNotification<*>) {
         when (notif) {
             is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
@@ -453,6 +461,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
             optionName: String,
             state: Boolean,
         ): String?
+
+        @JvmStatic
+        external fun getRimeCandidates(
+            startIndex: Int,
+            limit: Int,
+        ): Array<CandidateListItem>?
 
         /** call from rime_jni */
         @JvmStatic

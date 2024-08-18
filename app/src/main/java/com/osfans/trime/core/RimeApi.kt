@@ -41,4 +41,9 @@ interface RimeApi {
     )
 
     suspend fun getRuntimeOption(option: String): Boolean
+
+    suspend fun getCandidates(
+        startIndex: Int,
+        limit: Int,
+    ): Array<CandidateListItem>
 }
