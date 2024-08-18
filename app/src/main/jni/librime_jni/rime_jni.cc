@@ -5,6 +5,7 @@
 #include <rime_api.h>
 
 #include <string>
+#include <vector>
 
 #include "jni-utils.h"
 #include "objconv.h"
@@ -115,6 +116,31 @@ class Rime {
 
   std::string stateLabel(const std::string &optionName, bool state) {
     return rime->get_state_label(session, optionName.c_str(), state);
+  }
+
+  using CandidateItem = std::pair<std::string, std::string>;
+  using CandidateList = std::vector<CandidateItem>;
+
+  CandidateList getCandidates(int startIndex, int limit) {
+    CandidateList result;
+    result.reserve(limit);
+    RimeCandidateListIterator iter{nullptr};
+    if (rime->candidate_list_from_index(session, &iter, startIndex)) {
+      int count = 0;
+      while (rime->candidate_list_next(&iter)) {
+        if (count >= limit) break;
+        std::string text(iter.candidate.text);
+        std::string comment;
+        if (iter.candidate.comment) {
+          comment = iter.candidate.comment;
+        }
+        auto item = std::make_pair(text, comment);
+        result.emplace_back(std::move(item));
+        ++count;
+      }
+      rime->candidate_list_end(&iter);
+    }
+    return std::move(result);
   }
 
   void exit() {
@@ -479,4 +505,26 @@ Java_com_osfans_trime_core_Rime_getRimeStateLabel(JNIEnv *env,
   }
   return env->NewStringUTF(
       Rime::Instance().stateLabel(CString(env, option_name), state).c_str());
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_osfans_trime_core_Rime_getRimeCandidates(JNIEnv *env, jclass clazz,
+                                                  jint start_index,
+                                                  jint limit) {
+  if (!is_rime_running()) {
+    return nullptr;
+  }
+  auto candidates = Rime::Instance().getCandidates(start_index, limit);
+  int size = static_cast<int>(candidates.size());
+  jobjectArray array =
+      env->NewObjectArray(size, GlobalRef->CandidateListItem, nullptr);
+  for (int i = 0; i < size; i++) {
+    auto &candidate = candidates[i];
+    auto item = JRef<>(env, env->NewObject(GlobalRef->CandidateListItem,
+                                           GlobalRef->CandidateListItemInit,
+                                           *JString(env, candidate.second),
+                                           *JString(env, candidate.first)));
+    env->SetObjectArrayElement(array, i, item);
+  }
+  return array;
 }
