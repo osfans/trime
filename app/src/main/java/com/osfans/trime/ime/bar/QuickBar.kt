@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
@@ -26,6 +27,7 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.window.BoardWindow
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -33,7 +35,12 @@ import splitties.views.dsl.core.matchParent
 
 @InputScope
 @Inject
-class QuickBar(context: Context, service: TrimeInputMethodService, rime: RimeSession, theme: Theme) : InputBroadcastReceiver {
+class QuickBar(
+    private val context: Context,
+    private val service: TrimeInputMethodService,
+    private val rime: RimeSession,
+    private val theme: Theme,
+) : InputBroadcastReceiver {
     private val prefs = AppPrefs.defaultInstance()
 
     private val showSwitchers get() = prefs.keyboard.switchesEnabled
@@ -146,8 +153,10 @@ class QuickBar(context: Context, service: TrimeInputMethodService, rime: RimeSes
 
     override fun onRimeSchemaUpdated(schema: SchemaItem) {
         if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
-            SchemaManager.init(schema.id)
-            alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
+            service.lifecycleScope.launch {
+                SchemaManager.init(schema.id)
+                alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
+            }
         }
     }
 
@@ -161,8 +170,10 @@ class QuickBar(context: Context, service: TrimeInputMethodService, rime: RimeSes
             }
         }
         if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
-            SchemaManager.updateSwitchOptions()
-            alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
+            service.lifecycleScope.launch {
+                SchemaManager.updateSwitchOptions()
+                alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
+            }
         }
     }
 
