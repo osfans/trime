@@ -34,8 +34,12 @@ class RimeLifecycleImpl : RimeLifecycle {
                 checkAtState(RimeLifecycle.State.STARTING)
                 internalStateFlow.value = RimeLifecycle.State.READY
             }
-            RimeLifecycle.State.STOPPED -> {
+            RimeLifecycle.State.STOPPING -> {
                 checkAtState(RimeLifecycle.State.READY)
+                internalStateFlow.value = RimeLifecycle.State.STOPPING
+            }
+            RimeLifecycle.State.STOPPED -> {
+                checkAtState(RimeLifecycle.State.STOPPING)
                 internalStateFlow.value = RimeLifecycle.State.STOPPED
             }
         }
@@ -53,6 +57,7 @@ interface RimeLifecycle {
     enum class State {
         STARTING,
         READY,
+        STOPPING,
         STOPPED,
     }
 }
