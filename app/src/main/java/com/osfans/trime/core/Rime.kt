@@ -138,7 +138,13 @@ class Rime : RimeApi, RimeLifecycleOwner {
             Timber.w("Skip stopping rime: not at ready state!")
             return
         }
-        dispatcher.stop()
+        lifecycleImpl.emitState(RimeLifecycle.State.STOPPING)
+        Timber.i("Rime finalize()")
+        dispatcher.stop().let {
+            if (it.isNotEmpty()) {
+                Timber.w("${it.size} job(s) didn't get a chance to run!")
+            }
+        }
         lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
         unregisterRimeNotificationHandler(::handleRimeNotification)
     }
