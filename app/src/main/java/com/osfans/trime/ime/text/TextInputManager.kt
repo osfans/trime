@@ -203,10 +203,8 @@ class TextInputManager(
         )
         if (needSendUpRimeKey) {
             if (shouldUpdateRimeOption) {
-                rime.launchOnReady {
-                    it.setRuntimeOption("soft_cursors", prefs.keyboard.softCursorEnabled)
-                    it.setRuntimeOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
-                }
+                Rime.setOption("soft_cursors", prefs.keyboard.softCursorEnabled)
+                Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal)
                 shouldUpdateRimeOption = false
             }
             // todo 释放按键可能不对
@@ -222,9 +220,7 @@ class TextInputManager(
         event ?: return
         when (event.code) {
             KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
-                rime.launchOnReady {
-                    it.toggleRuntimeOption(event.getToggle())
-                }
+                Rime.toggleOption(event.getToggle())
                 trime.commitRimeText()
             }
             KeyEvent.KEYCODE_LANGUAGE_SWITCH -> { // Switch IME

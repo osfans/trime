@@ -109,11 +109,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
             getRimeOption(option)
         }
 
-    override suspend fun toggleRuntimeOption(option: String): Unit =
-        withRimeContext {
-            setRimeOption(option, !getRimeOption(option))
-        }
-
     private fun handleRimeNotification(notif: RimeNotification<*>) {
         when (notif) {
             is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
@@ -298,8 +293,22 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
 
         @JvmStatic
+        fun setOption(
+            option: String,
+            value: Boolean,
+        ) {
+            measureTimeMillis {
+                setRimeOption(option, value)
+            }.also { Timber.d("Took $it ms to set $option to $value") }
+        }
+
+        @JvmStatic
         fun getOption(option: String): Boolean {
             return getRimeOption(option)
+        }
+
+        fun toggleOption(option: String) {
+            setOption(option, !getOption(option))
         }
 
         @JvmStatic

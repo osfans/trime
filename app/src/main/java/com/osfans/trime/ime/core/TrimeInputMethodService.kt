@@ -180,10 +180,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun updateRimeOption(): Boolean {
         try {
             if (shouldUpdateRimeOption) {
-                postRimeJob {
-                    setRuntimeOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
-                    setRuntimeOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
-                }
+                Rime.setOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
+                Rime.setOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
                 shouldUpdateRimeOption = false
             }
         } catch (e: Exception) {
@@ -260,14 +258,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     fun inputSymbol(text: String) {
         textInputManager!!.onPress(KeyEvent.KEYCODE_UNKNOWN)
-        postRimeJob {
-            if (Rime.isAsciiMode) setRuntimeOption("ascii_mode", false)
-            val asciiPunch = Rime.isAsciiPunch
-            if (asciiPunch) setRuntimeOption("ascii_punct", false)
-            textInputManager!!.onText("{Escape}$text")
-            if (asciiPunch) setRuntimeOption("ascii_punct", true)
-            selectLiquidKeyboard(-1)
-        }
+        if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
+        val asciiPunch = Rime.isAsciiPunch
+        if (asciiPunch) Rime.setOption("ascii_punct", false)
+        textInputManager!!.onText("{Escape}$text")
+        if (asciiPunch) Rime.setOption("ascii_punct", true)
+        self!!.selectLiquidKeyboard(-1)
     }
 
     fun selectLiquidKeyboard(tabIndex: Int) {
