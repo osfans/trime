@@ -114,6 +114,14 @@ class Rime {
     return rime->delete_candidate_on_current_page(session, index);
   }
 
+  bool selectCandidate(size_t index) {
+    return rime->select_candidate(session, index);
+  }
+
+  bool forgetCandidate(size_t index) {
+    return rime->delete_candidate(session, index);
+  }
+
   std::string stateLabel(const std::string &optionName, bool state) {
     return rime->get_state_label(session, optionName.c_str(), state);
   }
@@ -441,6 +449,26 @@ Java_com_osfans_trime_core_Rime_deleteRimeCandidateOnCurrentPage(
     return false;
   }
   return Rime::Instance().deleteCandidateOnCurrentPage(index);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_osfans_trime_core_Rime_selectRimeCandidate(JNIEnv *env,
+                                                    jclass /* thiz */,
+                                                    jint index) {
+  if (!is_rime_running()) {
+    return false;
+  }
+  return Rime::Instance().selectCandidate(index);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_osfans_trime_core_Rime_forgetRimeCandidate(JNIEnv *env,
+                                                    jclass /* thiz */,
+                                                    jint index) {
+  if (!is_rime_running()) {
+    return false;
+  }
+  return Rime::Instance().forgetCandidate(index);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
