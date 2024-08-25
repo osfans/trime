@@ -10,14 +10,12 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ItemAnimator
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
+import com.chad.library.adapter4.util.setOnDebouncedItemClick
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
@@ -27,7 +25,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.ime.text.TextInputManager
+import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
@@ -40,13 +38,13 @@ import timber.log.Timber
 class LiquidKeyboard(
     private val context: Context,
     private val service: TrimeInputMethodService,
+    private val rime: RimeSession,
     private val theme: Theme,
 ) : BoardWindow.BarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
     private lateinit var currentBoardType: SymbolBoardType
     private lateinit var currentBoardAdapter: RecyclerView.Adapter<*>
-    private var defaultKeyboardAnimation: ItemAnimator? = null
 
     private val simpleAdapter by lazy {
         val itemWidth = context.dp(theme.liquid.getInt("single_width"))
@@ -70,25 +68,33 @@ class LiquidKeyboard(
 
     private val varLengthAdapter by lazy {
         CandidateAdapter(theme).apply {
-            setListener { position ->
+            setOnDebouncedItemClick { _, _, position ->
+                val item = items[position]
                 when (currentBoardType) {
                     SymbolBoardType.CANDIDATE -> {
-                        TextInputManager.instanceOrNull()
-                            ?.onCandidatePressed(position)
+                        service.lifecycleScope.launch {
+                            rime.runOnReady {
+                                if (selectCandidate(position)) {
+                                    service.commitRimeText()
+                                }
+                            }
+                        }
                         if (Rime.isComposing) {
-                            val candidates = Rime.candidatesWithoutSwitch
-                            updateCandidates(candidates.toList())
-                            keyboardView.scrollToPosition(0)
+                            service.lifecycleScope.launch {
+                                val candidates = rime.runOnReady { getCandidates(0, Candidate.MAX_CANDIDATE_COUNT) }
+                                submitList(candidates.toList())
+                                keyboardView.scrollToPosition(0)
+                            }
                         } else {
                             service.selectLiquidKeyboard(-1)
                         }
                     }
-                    SymbolBoardType.SYMBOL -> service.inputSymbol(this.text)
+                    SymbolBoardType.SYMBOL -> service.inputSymbol(item.text)
                     SymbolBoardType.TABS -> {
-                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == this.text }
+                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == item.text }
                         select(realPosition)
                     }
-                    else -> service.currentInputConnection?.commitText(this.text, 1)
+                    else -> service.currentInputConnection?.commitText(item.text, 1)
                 }
             }
         }
@@ -136,11 +142,7 @@ class LiquidKeyboard(
      * 使用FlexboxLayoutManager时调用此函数获取
      */
     private val flexboxLayoutManager by lazy {
-        FlexboxLayoutManager(context).apply {
-            flexDirection = FlexDirection.ROW // 主轴为水平方向，起点在左端。
-            flexWrap = FlexWrap.WRAP // 按正常方向换行
-            justifyContent = JustifyContent.FLEX_START // 交叉轴的起点对齐
-        }
+        FlexboxLayoutManager(context)
     }
 
     /**
@@ -160,7 +162,10 @@ class LiquidKeyboard(
             SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
             SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
             SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
-            SymbolBoardType.CANDIDATE -> initVarLengthKeys(Rime.candidatesWithoutSwitch.toList())
+            SymbolBoardType.CANDIDATE ->
+                service.lifecycleScope.launch {
+                    initVarLengthKeys(rime.runOnReady { getCandidates(0, Candidate.MAX_CANDIDATE_COUNT) }.toList())
+                }
             SymbolBoardType.SYMBOL,
             SymbolBoardType.VAR_LENGTH,
             SymbolBoardType.TABS,
@@ -187,9 +192,6 @@ class LiquidKeyboard(
                 adapter = simpleAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(true)
-                defaultKeyboardAnimation?.let {
-                    keyboardView.itemAnimator = it
-                }
                 // 添加分割线
                 // 设置添加删除动画
                 // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
@@ -208,9 +210,6 @@ class LiquidKeyboard(
                 adapter = dbAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(false)
-                defaultKeyboardAnimation?.let {
-                    keyboardView.itemAnimator = it
-                }
                 // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
                 isSelected = true
             }
@@ -228,16 +227,11 @@ class LiquidKeyboard(
                 layoutManager = flexboxLayoutManager
                 adapter = varLengthAdapter
                 setItemViewCacheSize(50)
-                // CandidateAdapter现在使用notifyItemRangeChanged，保存并禁用layout变化的缺省动画。
-                keyboardView.itemAnimator?.let {
-                    defaultKeyboardAnimation = it
-                    keyboardView.itemAnimator = null
-                }
                 setHasFixedSize(false)
                 isSelected = true
             }
         }
-        varLengthAdapter.updateCandidates(data)
+        varLengthAdapter.submitList(data)
     }
 
     /**
