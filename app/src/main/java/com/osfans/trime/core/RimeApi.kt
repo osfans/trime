@@ -17,6 +17,10 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
+    suspend fun selectCandidate(idx: Int): Boolean
+
+    suspend fun forgetCandidate(idx: Int): Boolean
+
     suspend fun availableSchemata(): Array<SchemaItem>
 
     suspend fun enabledSchemata(): Array<SchemaItem>

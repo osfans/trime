@@ -70,6 +70,16 @@ class Rime : RimeApi, RimeLifecycleOwner {
             getCurrentRimeSchema() == ".default" // 無方案
         }
 
+    override suspend fun selectCandidate(idx: Int): Boolean =
+        withRimeContext {
+            selectRimeCandidate(idx).also { if (it) updateContext() }
+        }
+
+    override suspend fun forgetCandidate(idx: Int): Boolean =
+        withRimeContext {
+            forgetRimeCandidate(idx).also { if (it) updateContext() }
+        }
+
     override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
 
     override suspend fun enabledSchemata(): Array<SchemaItem> = withRimeContext { getSelectedRimeSchemaList() }
@@ -420,6 +430,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         @JvmStatic
         external fun deleteRimeCandidateOnCurrentPage(index: Int): Boolean
+
+        @JvmStatic
+        external fun selectRimeCandidate(index: Int): Boolean
+
+        @JvmStatic
+        external fun forgetRimeCandidate(index: Int): Boolean
 
         @JvmStatic
         external fun getLibrimeVersion(): String
