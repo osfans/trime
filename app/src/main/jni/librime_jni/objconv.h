@@ -20,7 +20,9 @@ inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
       env->NewObject(GlobalRef->RimeComposition, GlobalRef->RimeCompositionInit,
                      context.composition.length, context.composition.cursor_pos,
                      context.composition.sel_start, context.composition.sel_end,
-                     *JString(env, context.composition.preedit)));
+                     *JString(env, context.composition.preedit
+                                       ? context.composition.preedit
+                                       : "")));
 
   const auto &menu = context.menu;
 
@@ -50,7 +52,7 @@ inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
         env, env->NewObject(
                  GlobalRef->CandidateListItem, GlobalRef->CandidateListItemInit,
                  *JString(env, candidate.comment ? candidate.comment : ""),
-                 *JString(env, candidate.text ? candidate.text : "")));
+                 *JString(env, candidate.text)));
     env->SetObjectArrayElement(candidates, i, jcandidate);
   }
 
@@ -62,7 +64,9 @@ inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
 
   return env->NewObject(
       GlobalRef->RimeContext, GlobalRef->RimeContextInit, *jcomposition, *jmenu,
-      *JString(env, context.commit_text_preview), *selectLabels);
+      *JString(env,
+               context.commit_text_preview ? context.commit_text_preview : ""),
+      *selectLabels);
 }
 
 inline jobject rimeStatusToJObject(JNIEnv *env, const RimeStatus &status) {
