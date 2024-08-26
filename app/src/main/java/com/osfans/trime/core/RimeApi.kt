@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.SharedFlow
 interface RimeApi {
     val notificationFlow: SharedFlow<RimeNotification<*>>
 
+    val responseFlow: SharedFlow<RimeResponse>
+
     val stateFlow: SharedFlow<RimeLifecycle.State>
 
     val isReady: Boolean

@@ -210,7 +210,6 @@ class TextInputManager(
             // todo 释放按键可能不对
             val event = Event.getRimeEvent(keyEventCode, Rime.META_RELEASE_ON)
             Rime.processKey(event[0], event[1])
-            trime.commitRimeText()
         }
         Timber.d("\t<TrimeInput>\tonRelease() finish")
     }
@@ -221,7 +220,9 @@ class TextInputManager(
         when (event.code) {
             KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
                 Rime.toggleOption(event.getToggle())
-                trime.commitRimeText()
+                trime.lifecycleScope.launch {
+                    rime.runOnReady { commitComposition() }
+                }
             }
             KeyEvent.KEYCODE_LANGUAGE_SWITCH -> { // Switch IME
                 when {
@@ -373,7 +374,6 @@ class TextInputManager(
         if (!text.first().isAsciiPrintable() && Rime.isComposing) {
             trime.postRimeJob {
                 commitComposition()
-                trime.commitRimeText()
             }
         }
         var textToParse = text
@@ -385,10 +385,10 @@ class TextInputManager(
                 escapeTagMatcher.matches() -> {
                     target = escapeTagMatcher.group(1) ?: ""
                     Rime.simulateKeySequence(target)
-                    if (!trime.commitRimeText() && !Rime.isComposing) {
-                        trime.commitCharSequence(target)
-                    }
-                    trime.updateComposing()
+//                    if (!trime.commitRimeText() && !Rime.isComposing) {
+//                        trime.commitCharSequence(target)
+//                    }
+//                    trime.updateComposing()
                 }
                 propertyGroupMatcher.matches() -> {
                     target = propertyGroupMatcher.group(1) ?: ""
@@ -414,9 +414,7 @@ class TextInputManager(
                 if (prefs.keyboard.hookCandidateCommit) {
                     // todo 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
                     // 如果使用了lua处理候选上屏，模拟数字键、空格键是非常有必要的
-                    trime.commitRimeText()
                 } else {
-                    trime.commitRimeText()
                 }
             }
         } else if (index == 9) {
