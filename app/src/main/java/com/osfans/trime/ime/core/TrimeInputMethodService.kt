@@ -36,6 +36,7 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
+import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.DraftHelper
@@ -65,6 +66,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.bitflags.hasFlag
@@ -223,6 +225,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         lifecycleScope.launch {
             jobs.consumeEach { it.join() }
         }
+        lifecycleScope.launch {
+            rime.run { responseFlow }.collect {
+                handleRimeResponse(it)
+            }
+        }
         super.onCreate()
         // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
         try {
@@ -254,6 +261,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         } catch (e: Exception) {
             Timber.e(e)
         }
+    }
+
+    private fun handleRimeResponse(response: RimeResponse) {
+        val (commit, _, _) = response
+        if (commit != null && !commit.text.isNullOrEmpty()) {
+            commitCharSequence(commit.text)
+        }
+        updateComposing()
     }
 
     fun inputSymbol(text: String) {
@@ -568,17 +583,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     /**
-     * Commits the text got from Rime.
-     */
-    fun commitRimeText(): Boolean {
-        val commit = Rime.getRimeCommit()
-        commit?.text?.let { commitCharSequence(it) }
-        Timber.d("commitRimeText: updateComposing")
-        updateComposing()
-        return commit != null
-    }
-
-    /**
      * Commit the current composing text together with the new text
      *
      * @param text the new text to be committed
@@ -779,9 +783,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun onRimeKey(event: IntArray): Boolean {
         updateRimeOption()
         // todo 改为异步处理按键事件、刷新UI
-        val ret = Rime.processKey(event[0], event[1])
-        commitRimeText()
-        return ret
+        return Rime.processKey(event[0], event[1])
     }
 
     private fun composeEvent(event: KeyEvent): Boolean {

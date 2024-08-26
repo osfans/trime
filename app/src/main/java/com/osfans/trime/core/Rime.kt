@@ -27,6 +27,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override val lifecycle get() = lifecycleImpl
 
     override val notificationFlow = notificationFlow_.asSharedFlow()
+    override val responseFlow = responseFlow_.asSharedFlow()
     override val stateFlow get() = lifecycle.currentStateFlow
 
     override val isReady: Boolean
@@ -171,6 +172,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
 
+        private val responseFlow_ =
+            MutableSharedFlow<RimeResponse>(
+                extraBufferCapacity = 15,
+                onBufferOverflow = BufferOverflow.DROP_LATEST,
+            )
+
         private val notificationHandlers = ArrayList<(RimeNotification<*>) -> Unit>()
 
         init {
@@ -190,6 +197,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 inputContext = getRimeContext()
             }.also { Timber.d("Took $it ms to get context") }
             updateStatus()
+            requestRimeResponse()
         }
 
         /*
@@ -503,6 +511,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         private fun unregisterRimeNotificationHandler(handler: (RimeNotification<*>) -> Unit) {
             notificationHandlers.remove(handler)
+        }
+
+        fun requestRimeResponse() {
+            val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
+            Timber.d("Got Rime response: $response")
+            responseFlow_.tryEmit(response)
         }
     }
 }

@@ -73,11 +73,7 @@ class LiquidKeyboard(
                 when (currentBoardType) {
                     SymbolBoardType.CANDIDATE -> {
                         service.lifecycleScope.launch {
-                            rime.runOnReady {
-                                if (selectCandidate(position)) {
-                                    service.commitRimeText()
-                                }
-                            }
+                            rime.runOnReady { selectCandidate(position) }
                         }
                         if (Rime.isComposing) {
                             service.lifecycleScope.launch {
