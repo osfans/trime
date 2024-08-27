@@ -23,11 +23,13 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
+import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.candidates.CompatCandidateModule
 import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
@@ -94,20 +96,23 @@ class InputView(
         }
 
     private val notificationHandlerJob: Job
+    private val responseHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     private val inputComponent = InputComponent::class.create(themedContext, theme, service, rime)
     private val broadcaster = inputComponent.broadcaster
     private val windowManager = inputComponent.windowManager
-    val quickBar: QuickBar = inputComponent.quickBar
+    private val quickBar: QuickBar = inputComponent.quickBar
     val composition: CompositionPopupWindow = inputComponent.composition
     val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
     val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
+    private val compatCandidate: CompatCandidateModule = inputComponent.compatCandidate
 
     private fun addBroadcastReceivers() {
         broadcaster.addReceiver(quickBar)
         broadcaster.addReceiver(keyboardWindow)
         broadcaster.addReceiver(liquidKeyboard)
+        broadcaster.addReceiver(compatCandidate)
     }
 
     private val keyboardSidePadding = theme.generalStyle.keyboardPadding
@@ -138,6 +143,13 @@ class InputView(
             service.lifecycleScope.launch {
                 rime.run { notificationFlow }.collect {
                     handleRimeNotification(it)
+                }
+            }
+
+        responseHandlerJob =
+            service.lifecycleScope.launch {
+                rime.run { responseFlow }.collect {
+                    handleRimeResponse(it)
                 }
             }
 
@@ -318,6 +330,13 @@ class InputView(
         }
     }
 
+    private fun handleRimeResponse(response: RimeResponse) {
+        val ctx = response.context
+        if (ctx != null) {
+            broadcaster.onInputContextUpdate(ctx)
+        }
+    }
+
     enum class Board {
         Main,
         Symbol,
@@ -335,12 +354,10 @@ class InputView(
     }
 
     fun updateComposing(ic: InputConnection?) {
-        val candidateView = quickBar.oldCandidateBar.candidates
         val compositionView = composition.composition.compositionView
         val mainKeyboardView = keyboardWindow.mainKeyboardView
         if (composition.isPopupWindowEnabled) {
-            val offset = Rime.inputContext?.let { compositionView.update(it) } ?: 0
-            candidateView.setText(offset)
+            Rime.inputContext?.let { compositionView.update(it) } ?: 0
             val isCursorUpdated =
                 if (ic != null && !composition.isWinFixed()) {
                     ic.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE)
@@ -352,13 +369,6 @@ class InputView(
             if (!isCursorUpdated) {
                 composition.updateView()
             }
-        } else {
-            candidateView.setText(0)
-        }
-        if (Rime.isComposing) {
-            quickBar.switchUiByState(QuickBar.State.Candidate)
-        } else {
-            quickBar.switchUiByState(QuickBar.State.Always)
         }
         mainKeyboardView.invalidateComposingKeys()
     }

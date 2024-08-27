@@ -5,13 +5,12 @@
 package com.osfans.trime.ime.bar
 
 import android.content.Context
-import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeNotification.OptionNotification
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
@@ -19,13 +18,12 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.databinding.CandidateBarBinding
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
+import com.osfans.trime.ime.candidates.CompatCandidateModule
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
-import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.window.BoardWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
@@ -40,6 +38,7 @@ class QuickBar(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val theme: Theme,
+    private val compatCandidate: CompatCandidateModule,
 ) : InputBroadcastReceiver {
     private val prefs = AppPrefs.defaultInstance()
 
@@ -86,23 +85,19 @@ class QuickBar(
     }
 
     val oldCandidateBar by lazy {
-        CandidateBarBinding.inflate(LayoutInflater.from(context)).apply {
-            with(root) {
-                setPageStr(
-                    { service.handleKey(KeyEvent.KEYCODE_PAGE_DOWN, 0) },
-                    { service.handleKey(KeyEvent.KEYCODE_PAGE_UP, 0) },
-                    { service.selectLiquidKeyboard(SymbolBoardType.CANDIDATE) },
-                )
-            }
-            with(candidates) {
-                setCandidateListener(service.textInputManager)
-                rime.launchOnReady { shouldShowComment = !it.getRuntimeOption("_hide_comment") }
-            }
-        }
+        compatCandidate.binding
     }
 
     private val tabUi by lazy {
         TabUi(context)
+    }
+
+    override fun onInputContextUpdate(ctx: RimeProto.Context) {
+        if (ctx.composition.length > 0) {
+            switchUiByState(State.Candidate)
+        } else {
+            switchUiByState(State.Always)
+        }
     }
 
     enum class State {
@@ -111,7 +106,7 @@ class QuickBar(
         Tab,
     }
 
-    fun switchUiByState(state: State) {
+    private fun switchUiByState(state: State) {
         val index = state.ordinal
         if (view.displayedChild == index) return
         val new = view.getChildAt(index)
@@ -181,6 +176,8 @@ class QuickBar(
         if (window is BoardWindow.BarBoardWindow) {
             window.onCreateBarView()?.let { tabUi.addExternal(it) }
             switchUiByState(State.Tab)
+        } else {
+            switchUiByState(State.Always)
         }
     }
 

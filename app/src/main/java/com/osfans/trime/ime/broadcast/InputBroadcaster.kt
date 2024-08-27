@@ -6,6 +6,7 @@ package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeNotification.OptionNotification
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.window.BoardWindow
@@ -50,6 +51,10 @@ class InputBroadcaster : InputBroadcastReceiver {
 
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {
         receivers.forEach { it.onRimeOptionUpdated(value) }
+    }
+
+    override fun onInputContextUpdate(ctx: RimeProto.Context) {
+        receivers.forEach { it.onInputContextUpdate(ctx) }
     }
 
     override fun onWindowAttached(window: BoardWindow) {
