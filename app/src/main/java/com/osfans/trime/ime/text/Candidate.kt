@@ -14,7 +14,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.updateLayoutParams
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -123,15 +122,59 @@ class Candidate(
         this.listener = WeakReference(listener)
     }
 
-    /**
-     * 刷新候選列表
-     *
-     * @param start 候選的起始編號
-     */
-    fun setText(start: Int) {
-        startNum = start
-        removeHighlight()
-        updateCandidateData()
+    fun updateCandidatesFromMenu(menu: RimeProto.Context.Menu) {
+        val candidates = menu.candidates
+        val hasLeft = menu.pageNumber != 0
+        val hasRight = !menu.isLastPage
+        highlightIndex = menu.highlightedCandidateIndex
+        computedCandidates.clear()
+        this.candidates.clear()
+        this.candidates.addAll(candidates)
+
+        val pageButtonWidth =
+            candidateSpacing + 2 * candidatePadding +
+                symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont).toInt()
+        var x = if (hasLeft) pageButtonWidth else 0
+        candidates.forEachIndexed { i, (text, comment) ->
+            val textWidth =
+                (candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding).run {
+                    if (shouldShowComment && !comment.isNullOrEmpty()) {
+                        val commentWidth = commentPaint.measureText(comment, (commentFont))
+                        if (isCommentOnTop) max(this, commentWidth) else this + commentWidth
+                    } else {
+                        this
+                    }
+                }
+            computedCandidates.add(
+                ComputedCandidate.Word(
+                    text,
+                    comment,
+                    Rect(x, 0, (x + textWidth).toInt(), measuredHeight),
+                ),
+            )
+            x += (textWidth + candidateSpacing).toInt()
+        }
+        if (hasLeft) {
+            computedCandidates.add(
+                ComputedCandidate.Symbol(
+                    PAGE_UP_BUTTON,
+                    Rect(0, 0, pageButtonWidth, measuredHeight),
+                ),
+            )
+        }
+        if (hasRight) {
+            computedCandidates.add(
+                ComputedCandidate.Symbol(
+                    PAGE_DOWN_BUTTON,
+                    Rect(x, 0, (x + pageButtonWidth), measuredHeight),
+                ),
+            )
+            x += pageButtonWidth
+        }
+        updateLayoutParams {
+            width = x
+            height = if (shouldShowComment && isCommentOnTop) candidateViewHeight + commentHeight else candidateViewHeight
+        }
     }
 
     /**
@@ -159,12 +202,6 @@ class Candidate(
         }
     }
 
-    private fun removeHighlight() {
-        highlightIndex = -1
-        invalidate()
-        requestLayout()
-    }
-
     private fun isHighlighted(i: Int): Boolean = candidateUseCursor && i == highlightIndex
 
     override fun onDraw(canvas: Canvas) {
@@ -181,7 +218,7 @@ class Candidate(
         val first = computedCandidates.first()
         computedCandidates.forEachIndexed { index, computedCandidate ->
             // Draw highlight
-            if (candidateUseCursor && index == highlightIndex) {
+            if (isHighlighted(index)) {
                 candidateHighlight.bounds = computedCandidate.geometry
                 candidateHighlight.draw(canvas)
             }
@@ -235,99 +272,6 @@ class Candidate(
         }
     }
 
-    private fun updateCandidateData() {
-        // TODO 暂时搁置设置里关于候选数量的设定
-        // 之后根据 Rime 新的 api 写一个候选管理器再重新启用
-        // var hasExButton = false
-        // val pageEx = appPrefs.keyboard.candidatePageSize - 10000
-        val pageButtonWidth =
-            candidateSpacing + 2 * candidatePadding +
-                symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont).toInt()
-        // val minWidth =
-        //     if (pageEx > 2) {
-        //         (expectWidth * (pageEx / 10f + 1) - pageButtonWidth).toInt()
-        //     } else if (pageEx == 2) {
-        //         (expectWidth - pageButtonWidth * 2)
-        //     } else {
-        //         expectWidth - pageButtonWidth
-        //     }
-        computedCandidates.clear()
-        updateCandidates()
-        var x = if ((!Rime.hasLeft())) 0 else pageButtonWidth
-        candidates.forEachIndexed { index, (text, comment) ->
-            if (index < startNum) return@forEachIndexed
-            // if (pageEx >= 0 && x >= minWidth) {
-            //     computedCandidates.add(
-            //         ComputedCandidate.Symbol(
-            //             PAGE_EX_BUTTON,
-            //             Rect(x, 0, (x + pageButtonWidth), measuredHeight),
-            //         ),
-            //     )
-            //     x += pageButtonWidth
-            //     hasExButton = true
-            //     break
-            // }
-            var candidateWidth = candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding
-            if (shouldShowComment && !comment.isNullOrEmpty()) {
-                val commentWidth = commentPaint.measureText(comment, (commentFont))
-                candidateWidth = if (isCommentOnTop) max(candidateWidth, commentWidth) else candidateWidth + commentWidth
-            }
-
-            // 自动填满候选栏，并保障展开候选按钮显示出来
-            // if (pageEx == 0 && x + candidateWidth + candidateSpacing > minWidth) {
-            //     computedCandidates.add(
-            //         ComputedCandidate.Symbol(
-            //             PAGE_EX_BUTTON,
-            //             Rect(x, 0, (x + pageButtonWidth), measuredHeight),
-            //         ),
-            //     )
-            //     x += pageButtonWidth
-            //     hasExButton = true
-            //     break
-            // }
-            computedCandidates.add(
-                ComputedCandidate.Word(
-                    text,
-                    comment,
-                    Rect(x, 0, (x + candidateWidth).toInt(), measuredHeight),
-                ),
-            )
-            x += (candidateWidth + candidateSpacing).toInt()
-        }
-        if (Rime.hasLeft()) {
-            computedCandidates.add(
-                ComputedCandidate.Symbol(
-                    PAGE_UP_BUTTON,
-                    Rect(0, 0, pageButtonWidth, measuredHeight),
-                ),
-            )
-        }
-        if (Rime.hasRight()) {
-            computedCandidates.add(
-                ComputedCandidate.Symbol(
-                    PAGE_DOWN_BUTTON,
-                    Rect(x, 0, (x + pageButtonWidth), measuredHeight),
-                ),
-            )
-            x += pageButtonWidth
-        }
-        updateLayoutParams {
-            width = x
-            height = if ((shouldShowComment && isCommentOnTop)) candidateViewHeight + commentHeight else candidateViewHeight
-        }
-        // Trime.getService().candidateExPage = hasExButton
-    }
-
-    override fun onSizeChanged(
-        w: Int,
-        h: Int,
-        oldw: Int,
-        oldh: Int,
-    ) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        updateCandidateData()
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(me: MotionEvent): Boolean {
         val x = me.x.toInt()
@@ -375,12 +319,6 @@ class Candidate(
         x: Int,
         y: Int,
     ): Int = computedCandidates.indexOfFirst { it.geometry.contains(x, y) }
-
-    private fun updateCandidates() {
-        candidates.clear()
-        candidates.addAll(Rime.candidatesWithoutSwitch)
-        highlightIndex = Rime.candHighlightIndex - startNum
-    }
 
     companion object {
         const val MAX_CANDIDATE_COUNT = 30

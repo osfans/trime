@@ -291,9 +291,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
             }
         }
 
-        val candidatesWithoutSwitch: Array<RimeProto.Candidate>
-            get() = inputContext?.menu?.candidates ?: arrayOf()
-
         @JvmStatic
         val candHighlightIndex: Int
             get() = inputContext?.menu?.highlightedCandidateIndex ?: -1
