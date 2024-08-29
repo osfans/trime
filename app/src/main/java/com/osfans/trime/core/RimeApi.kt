@@ -51,5 +51,5 @@ interface RimeApi {
     suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
-    ): Array<CandidateListItem>
+    ): Array<CandidateItem>
 }

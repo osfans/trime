@@ -9,7 +9,7 @@ data class SchemaItem(
     val name: String = "",
 )
 
-data class CandidateListItem(
+data class CandidateItem(
     val comment: String,
     val text: String,
 )

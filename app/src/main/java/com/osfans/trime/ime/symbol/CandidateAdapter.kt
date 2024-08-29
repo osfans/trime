@@ -15,7 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.core.CandidateListItem
+import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
@@ -28,7 +28,7 @@ import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.topOfParent
 
 // 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR_LENGTH
-class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateListItem, CandidateAdapter.ViewHolder>() {
+class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateItem, CandidateAdapter.ViewHolder>() {
     enum class CommentPosition {
         UNKNOWN,
         TOP,
@@ -119,7 +119,7 @@ class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateLis
     override fun onBindViewHolder(
         holder: ViewHolder,
         position: Int,
-        item: CandidateListItem?,
+        item: CandidateItem?,
     ) {
         item?.run {
             holder.candidate.text = text
