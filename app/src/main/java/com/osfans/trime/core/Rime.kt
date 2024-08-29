@@ -257,7 +257,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         @JvmStatic
         val composingText: String
-            get() = inputContext?.commitTextPreview ?: ""
+            get() = inputContext?.composition?.commitTextPreview ?: ""
 
         @JvmStatic
         fun isVoidKeycode(keycode: Int): Boolean {

@@ -1047,9 +1047,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val ic = currentInputConnection ?: return
         val text =
             when (prefs.keyboard.inlinePreedit) {
-                InlinePreeditMode.PREVIEW -> ctx.commitTextPreview ?: ""
+                InlinePreeditMode.PREVIEW -> ctx.composition.commitTextPreview ?: ""
                 InlinePreeditMode.COMPOSITION -> ctx.composition.preedit ?: ""
-                InlinePreeditMode.INPUT -> Rime.getRimeRawInput() ?: ""
+                InlinePreeditMode.INPUT -> ctx.input
                 InlinePreeditMode.NONE -> ""
             }
         if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
