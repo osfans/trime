@@ -80,7 +80,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     private val windowComponents = theme.generalStyle.window
 
-    private val highlightIndex get() = if (candidateUseCursor) Rime.candHighlightIndex else -1
+    private var highlightIndex: Int = -1
     private val preeditRange = intArrayOf(0, 0)
     private val movableRange = intArrayOf(0, 0)
 
@@ -355,10 +355,13 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         inSpans(alignmentSpan) { append(m.end) }
     }
 
-    private fun SpannableStringBuilder.buildSpannedButton(m: CompositionComponent) {
+    private fun SpannableStringBuilder.buildSpannedButton(
+        m: CompositionComponent,
+        menu: RimeProto.Context.Menu,
+    ) {
         when (m.whenStr) {
-            "paging" -> if (!Rime.hasLeft()) return
-            "has_menu" -> if (!Rime.hasMenu()) return
+            "paging" -> if (menu.pageNumber == 0) return
+            "has_menu" -> if (menu.candidates.isEmpty()) return
         }
         val alignmentSpan = alignmentSpan(m.align)
         val event = EventManager.getEvent(m.click)
@@ -387,16 +390,16 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     /**
      * 计算悬浮窗显示候选词后，候选栏从第几个候选词开始展示 注意当 all_phrases==true 时，悬浮窗显示的候选词数量和候选栏从第几个开始，是不一致的
      */
-    private fun calculateOffset(candidates: Array<RimeProto.Candidate>): Int {
+    private fun calculateOffset(candidates: List<String>): Int {
         if (candidates.isEmpty()) return 0
         var j = (minOf(minCheckCount, candidates.size, maxCount) - 1).coerceAtLeast(0)
         while (j > 0) {
-            val text = candidates[j].text
+            val text = candidates[j]
             if (text.length >= minCheckLength) break
             j--
         }
         while (j < minOf(maxCount, candidates.size)) {
-            val text = candidates[j].text
+            val text = candidates[j]
             if (text.length < minCheckLength) {
                 return j
             }
@@ -410,11 +413,14 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      *
      * @return 悬浮窗显示的候选词数量
      */
-    fun update(inputContext: RimeProto.Context): Int {
+    fun update(ctx: RimeProto.Context): Int {
         if (visibility != VISIBLE) return 0
-        inputContext.composition.preedit.takeIf { !it.isNullOrEmpty() } ?: return 0
-        val candidates = inputContext.menu.candidates
-        val startNum = calculateOffset(candidates)
+        ctx.composition.preedit.takeIf { !it.isNullOrEmpty() } ?: return 0
+        val candidates = ctx.menu.candidates
+        val startNum = calculateOffset(candidates.map { it.text })
+        if (candidateUseCursor) {
+            highlightIndex = ctx.menu.highlightedCandidateIndex
+        }
         val content =
             buildSpannedString {
                 for (component in windowComponents) {
@@ -423,15 +429,15 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                         component.composition.isNotBlank() ->
                             buildSpannedComposition(
                                 component,
-                                inputContext.composition,
+                                ctx.composition,
                             )
 
-                        component.click.isNotBlank() -> buildSpannedButton(component)
+                        component.click.isNotBlank() -> buildSpannedButton(component, ctx.menu)
                         component.candidate.isNotBlank() ->
                             buildSpannedCandidates(
                                 component,
                                 candidates,
-                                inputContext.selectLabels,
+                                ctx.selectLabels,
                                 startNum,
                             )
                     }

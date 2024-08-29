@@ -84,7 +84,7 @@ class QuickBar(
         }
     }
 
-    val oldCandidateBar by lazy {
+    private val candidateUi by lazy {
         compatCandidate.binding
     }
 
@@ -137,7 +137,7 @@ class QuickBar(
                     theme.generalStyle.candidateBorderRound,
                 )
             add(alwaysUi.root, lParams(matchParent, matchParent))
-            add(oldCandidateBar.root, lParams(matchParent, matchParent))
+            add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
         }
     }
@@ -158,7 +158,7 @@ class QuickBar(
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {
         when (value.option) {
             "_hide_comment" -> {
-                oldCandidateBar.candidates.shouldShowComment = !value.value
+                candidateUi.candidates.shouldShowComment = !value.value
             }
             "_hide_candidate", "_hide_bar" -> {
                 view.visibility = if (value.value) View.GONE else View.VISIBLE

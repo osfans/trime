@@ -3,7 +3,6 @@ package com.osfans.trime.ime.candidates
 import android.content.Context
 import android.view.KeyEvent
 import android.view.LayoutInflater
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.databinding.CandidateBarBinding
@@ -32,9 +31,5 @@ class CompatCandidateModule(
                 rime.launchOnReady { shouldShowComment = !it.getRuntimeOption("_hide_comment") }
             }
         }
-    }
-
-    override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        binding.candidates.updateCandidatesFromMenu(ctx.menu)
     }
 }

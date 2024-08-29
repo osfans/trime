@@ -21,7 +21,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeSession
@@ -112,6 +111,7 @@ class InputView(
         broadcaster.addReceiver(quickBar)
         broadcaster.addReceiver(keyboardWindow)
         broadcaster.addReceiver(liquidKeyboard)
+        broadcaster.addReceiver(composition)
         broadcaster.addReceiver(compatCandidate)
     }
 
@@ -334,6 +334,12 @@ class InputView(
         val ctx = response.context
         if (ctx != null) {
             broadcaster.onInputContextUpdate(ctx)
+            if (composition.isPopupWindowEnabled) {
+                val offset = composition.binding.composition.update(ctx)
+                compatCandidate.binding.candidates.updateCandidates(ctx.menu, offset)
+            } else {
+                compatCandidate.binding.candidates.updateCandidates(ctx.menu)
+            }
         }
     }
 
@@ -354,23 +360,14 @@ class InputView(
     }
 
     fun updateComposing(ic: InputConnection?) {
-        val compositionView = composition.composition.compositionView
-        val mainKeyboardView = keyboardWindow.mainKeyboardView
         if (composition.isPopupWindowEnabled) {
-            Rime.inputContext?.let { compositionView.update(it) } ?: 0
-            val isCursorUpdated =
-                if (ic != null && !composition.isWinFixed()) {
-                    ic.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE)
-                } else {
-                    false
-                }.also { composition.isCursorUpdated = it }
-            // if isCursorUpdated, updateView will be called in onUpdateCursorAnchorInfo
-            // otherwise we need to call it here
-            if (!isCursorUpdated) {
-                composition.updateView()
-            }
+            if (ic != null && !composition.isWinFixed()) {
+                ic.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE)
+            } else {
+                false
+            }.also { composition.isCursorUpdated = it }
         }
-        mainKeyboardView.invalidateComposingKeys()
+        keyboardWindow.mainKeyboardView.invalidateComposingKeys()
     }
 
     fun updateSelection(

@@ -13,7 +13,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   android:layout_height="wrap_content">
 
   <com.osfans.trime.ime.composition.Composition
-    android:id="@+id/compositionView"
+    android:id="@+id/composition"
     android:ellipsize="none"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"/>

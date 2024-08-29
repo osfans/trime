@@ -291,10 +291,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
             }
         }
 
-        @JvmStatic
-        val candHighlightIndex: Int
-            get() = inputContext?.menu?.highlightedCandidateIndex ?: -1
-
         fun selectCandidate(index: Int): Boolean {
             return selectRimeCandidateOnCurrentPage(index).also {
                 updateContext()
