@@ -36,6 +36,7 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
@@ -264,9 +265,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun handleRimeResponse(response: RimeResponse) {
-        val (commit, _, _) = response
+        val (commit, ctx, _) = response
         if (commit != null && !commit.text.isNullOrEmpty()) {
             commitCharSequence(commit.text)
+        }
+        if (ctx != null) {
+            updateComposingText(ctx)
         }
         updateComposing()
     }
@@ -1039,23 +1043,22 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return false
     }
 
-    private fun updateComposingText() {
+    private fun updateComposingText(ctx: RimeProto.Context) {
         val ic = currentInputConnection ?: return
-        val composingText =
+        val text =
             when (prefs.keyboard.inlinePreedit) {
-                InlinePreeditMode.PREVIEW -> Rime.composingText
-                InlinePreeditMode.COMPOSITION -> Rime.compositionText
+                InlinePreeditMode.PREVIEW -> ctx.commitTextPreview ?: ""
+                InlinePreeditMode.COMPOSITION -> ctx.composition.preedit ?: ""
                 InlinePreeditMode.INPUT -> Rime.getRimeRawInput() ?: ""
-                else -> ""
+                InlinePreeditMode.NONE -> ""
             }
-        if (ic.getSelectedText(0).isNullOrEmpty() || composingText.isNotEmpty()) {
-            ic.setComposingText(composingText, 1)
+        if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
+            ic.setComposingText(text, 1)
         }
     }
 
     /** 更新Rime的中西文狀態、編輯區文本  */
     fun updateComposing() {
-        updateComposingText()
         inputView?.updateComposing(currentInputConnection)
         if (!onEvaluateInputViewShown()) setCandidatesViewShown(textInputManager!!.isComposable) // 實體鍵盤打字時顯示候選欄
     }

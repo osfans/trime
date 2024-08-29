@@ -256,14 +256,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
 
         @JvmStatic
-        val composition: RimeProto.Context.Composition?
-            get() = inputContext?.composition
-
-        @JvmStatic
-        val compositionText: String
-            get() = composition?.preedit ?: ""
-
-        @JvmStatic
         val composingText: String
             get() = inputContext?.commitTextPreview ?: ""
 
