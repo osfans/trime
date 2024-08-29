@@ -123,7 +123,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
     override suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
-    ): Array<CandidateListItem> =
+    ): Array<CandidateItem> =
         withRimeContext {
             getRimeCandidates(startIndex, limit) ?: emptyArray()
         }
@@ -475,7 +475,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
         external fun getRimeCandidates(
             startIndex: Int,
             limit: Int,
-        ): Array<CandidateListItem>?
+        ): Array<CandidateItem>?
 
         /** call from rime_jni */
         @JvmStatic

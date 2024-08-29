@@ -548,11 +548,11 @@ Java_com_osfans_trime_core_Rime_getRimeCandidates(JNIEnv *env, jclass clazz,
   auto candidates = Rime::Instance().getCandidates(start_index, limit);
   int size = static_cast<int>(candidates.size());
   jobjectArray array =
-      env->NewObjectArray(size, GlobalRef->CandidateListItem, nullptr);
+      env->NewObjectArray(size, GlobalRef->CandidateItem, nullptr);
   for (int i = 0; i < size; i++) {
     auto &candidate = candidates[i];
-    auto item = JRef<>(env, env->NewObject(GlobalRef->CandidateListItem,
-                                           GlobalRef->CandidateListItemInit,
+    auto item = JRef<>(env, env->NewObject(GlobalRef->CandidateItem,
+                                           GlobalRef->CandidateItemInit,
                                            *JString(env, candidate.second),
                                            *JString(env, candidate.first)));
     env->SetObjectArrayElement(array, i, item);

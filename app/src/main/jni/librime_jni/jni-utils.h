@@ -145,8 +145,8 @@ class GlobalRefSingleton {
   jclass Rime;
   jmethodID HandleRimeNotification;
 
-  jclass CandidateListItem;
-  jmethodID CandidateListItemInit;
+  jclass CandidateItem;
+  jmethodID CandidateItemInit;
 
   jclass CandidateProto;
   jmethodID CandidateProtoInit;
@@ -212,10 +212,10 @@ class GlobalRefSingleton {
         env->GetStaticMethodID(Rime, "handleRimeNotification",
                                "(Ljava/lang/String;Ljava/lang/String;)V");
 
-    CandidateListItem = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("com/osfans/trime/core/CandidateListItem")));
-    CandidateListItemInit = env->GetMethodID(
-        CandidateListItem, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
+    CandidateItem = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/CandidateItem")));
+    CandidateItemInit = env->GetMethodID(
+        CandidateItem, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
 
     CandidateProto = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/RimeProto$Candidate")));

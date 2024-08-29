@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chad.library.adapter4.util.setOnDebouncedItemClick
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.osfans.trime.core.CandidateListItem
+import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.SymbolHistory
@@ -169,7 +169,7 @@ class LiquidKeyboard(
                 val items =
                     data.map {
                         val text = if (tag.type == SymbolBoardType.SYMBOL) it.label else it.text
-                        CandidateListItem("", text)
+                        CandidateItem("", text)
                     }
                 initVarLengthKeys(items)
             }
@@ -216,7 +216,7 @@ class LiquidKeyboard(
         }
     }
 
-    private fun initVarLengthKeys(data: List<CandidateListItem>) {
+    private fun initVarLengthKeys(data: List<CandidateItem>) {
         if (onAdapterChange(varLengthAdapter)) {
             // 设置布局管理器
             keyboardView.apply {
