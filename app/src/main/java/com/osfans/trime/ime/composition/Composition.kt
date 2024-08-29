@@ -289,7 +289,6 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private fun SpannableStringBuilder.buildSpannedCandidates(
         m: CompositionComponent,
         candidates: Array<RimeProto.Candidate>,
-        selectLabels: Array<String>,
         offset: Int,
     ) {
         if (candidates.isEmpty()) return
@@ -297,7 +296,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         val alignmentSpan = alignmentSpan(m.align)
         for ((i, candidate) in candidates.withIndex()) {
             val text = String.format(m.candidate, candidate.text)
-            val label = String.format(m.label, selectLabels[i])
+            val label = String.format(m.label, candidate.label)
             if (i >= maxCount) break
             if (!allPhrases && i >= offset) break
             if (allPhrases && text.length < minCheckLength) {
@@ -437,7 +436,6 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                             buildSpannedCandidates(
                                 component,
                                 candidates,
-                                ctx.selectLabels,
                                 startNum,
                             )
                     }

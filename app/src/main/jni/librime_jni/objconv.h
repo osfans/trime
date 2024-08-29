@@ -14,7 +14,8 @@ inline jobject rimeCommitToJObject(JNIEnv *env, const RimeCommit &commit) {
                         *JString(env, commit.text));
 }
 
-inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
+inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context,
+                                    std::string_view input, int caretPos) {
   jobject composition = env->NewObject(GlobalRef->CompositionProto,
                                        GlobalRef->CompositionProtoDefault);
   if (RIME_STRUCT_HAS_MEMBER(context, context.composition)) {
@@ -22,18 +23,19 @@ inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
         GlobalRef->CompositionProto, GlobalRef->CompositionProtoInit,
         context.composition.length, context.composition.cursor_pos,
         context.composition.sel_start, context.composition.sel_end,
-        *JString(env, context.composition.preedit));
+        *JString(env, context.composition.preedit),
+        *JString(env, context.commit_text_preview));
   }
 
   jobject menu =
       env->NewObject(GlobalRef->MenuProto, GlobalRef->MenuProtoDefault);
-  auto destSelectLabels = env->NewObjectArray(0, GlobalRef->String, nullptr);
   if (RIME_STRUCT_HAS_MEMBER(context, context.menu)) {
     const auto &src = context.menu;
     const auto numCandidates = src.num_candidates;
     const auto selectKeysSize = src.select_keys ? strlen(src.select_keys) : 0;
-    destSelectLabels =
-        env->NewObjectArray(src.num_candidates, GlobalRef->String, nullptr);
+    auto destSelectLabels = JRef<jobjectArray>(
+        env,
+        env->NewObjectArray(src.num_candidates, GlobalRef->String, nullptr));
     auto destCandidates = JRef<jobjectArray>(
         env, env->NewObjectArray(src.num_candidates, GlobalRef->CandidateProto,
                                  nullptr));
@@ -52,18 +54,19 @@ inline jobject rimeContextToJObject(JNIEnv *env, const RimeContext &context) {
       auto candidate = JRef<>(env, env->NewObject(GlobalRef->CandidateProto,
                                                   GlobalRef->CandidateProtoInit,
                                                   *JString(env, item.text),
-                                                  *JString(env, item.comment)));
+                                                  *JString(env, item.comment),
+                                                  *JString(env, label)));
       env->SetObjectArrayElement(destCandidates, i, candidate);
     }
     menu = env->NewObject(GlobalRef->MenuProto, GlobalRef->MenuProtoInit,
                           src.page_size, src.page_no, src.is_last_page,
-                          src.highlighted_candidate_index, *destCandidates);
+                          src.highlighted_candidate_index, *destCandidates,
+                          *JString(env, src.select_keys), *destSelectLabels);
   }
 
   return env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoInit,
                         *JRef<>(env, composition), *JRef<>(env, menu),
-                        *JString(env, context.commit_text_preview),
-                        *JRef<>(env, destSelectLabels));
+                        *JString(env, input.data()), caretPos);
 }
 
 inline jobject rimeStatusToJObject(JNIEnv *env, const RimeStatus &status) {

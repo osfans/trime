@@ -285,9 +285,12 @@ Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
   }
   RIME_STRUCT(RimeContext, context)
   auto rime = rime_get_api();
+  auto session = Rime::Instance().sessionId();
   jobject obj = nullptr;
-  if (rime->get_context(Rime::Instance().sessionId(), &context)) {
-    obj = rimeContextToJObject(env, context);
+  if (rime->get_context(session, &context)) {
+    std::string_view input(rime->get_input(session));
+    int caretPos = static_cast<int>(rime->get_caret_pos(session));
+    obj = rimeContextToJObject(env, context, input, caretPos);
     rime->free_context(&context);
   }
   return obj;
