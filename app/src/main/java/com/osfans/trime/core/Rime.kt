@@ -163,8 +163,8 @@ class Rime : RimeApi, RimeLifecycleOwner {
     }
 
     companion object {
-        var inputContext: RimeContext? = null
-        private var mStatus: RimeStatus? = null
+        var inputContext: RimeProto.Context? = null
+        private var mStatus: RimeProto.Status? = null
         private val notificationFlow_ =
             MutableSharedFlow<RimeNotification<*>>(
                 extraBufferCapacity = 15,
@@ -180,14 +180,14 @@ class Rime : RimeApi, RimeLifecycleOwner {
         fun updateStatus() {
             SchemaManager.updateSwitchOptions()
             measureTimeMillis {
-                mStatus = getRimeStatus() ?: RimeStatus()
+                mStatus = getRimeStatus()
             }.also { Timber.d("Took $it ms to get status") }
         }
 
         fun updateContext() {
             Timber.d("Update Rime context ...")
             measureTimeMillis {
-                inputContext = getRimeContext() ?: RimeContext()
+                inputContext = getRimeContext()
             }.also { Timber.d("Took $it ms to get context") }
             updateStatus()
         }
@@ -229,12 +229,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         @JvmStatic
         fun hasMenu(): Boolean {
-            return isComposing && inputContext?.menu?.numCandidates != 0
+            return !inputContext?.menu?.candidates.isNullOrEmpty()
         }
 
         @JvmStatic
         fun hasLeft(): Boolean {
-            return hasMenu() && inputContext?.menu?.pageNo != 0
+            return hasMenu() && inputContext?.menu?.pageNumber != 0
         }
 
         @JvmStatic
@@ -248,7 +248,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
 
         @JvmStatic
-        val composition: RimeComposition?
+        val composition: RimeProto.Context.Composition?
             get() = inputContext?.composition
 
         @JvmStatic
@@ -291,12 +291,12 @@ class Rime : RimeApi, RimeLifecycleOwner {
             }
         }
 
-        val candidatesWithoutSwitch: Array<CandidateListItem>
-            get() = if (isComposing) inputContext?.candidates ?: arrayOf() else arrayOf()
+        val candidatesWithoutSwitch: Array<RimeProto.Candidate>
+            get() = inputContext?.menu?.candidates ?: arrayOf()
 
         @JvmStatic
         val candHighlightIndex: Int
-            get() = if (isComposing) inputContext?.menu?.highlightedCandidateIndex ?: -1 else -1
+            get() = inputContext?.menu?.highlightedCandidateIndex ?: -1
 
         fun selectCandidate(index: Int): Boolean {
             return selectRimeCandidateOnCurrentPage(index).also {
@@ -373,13 +373,13 @@ class Rime : RimeApi, RimeLifecycleOwner {
 
         // output
         @JvmStatic
-        external fun getRimeCommit(): RimeCommit?
+        external fun getRimeCommit(): RimeProto.Commit?
 
         @JvmStatic
-        external fun getRimeContext(): RimeContext?
+        external fun getRimeContext(): RimeProto.Context?
 
         @JvmStatic
-        external fun getRimeStatus(): RimeStatus?
+        external fun getRimeStatus(): RimeProto.Status?
 
         // runtime options
         @JvmStatic

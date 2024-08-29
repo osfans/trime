@@ -14,8 +14,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.updateLayoutParams
-import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
@@ -46,7 +46,7 @@ class Candidate(
     // private var expectWidth = 0
     private var listener = WeakReference<EventListener?>(null)
     private var highlightIndex = -1
-    private val candidates = arrayListOf<CandidateListItem>()
+    private val candidates = arrayListOf<RimeProto.Candidate>()
     private val computedCandidates = ArrayList<ComputedCandidate>(MAX_CANDIDATE_COUNT)
     private var startNum = 0
     private var timeDown: Long = 0
@@ -174,7 +174,7 @@ class Candidate(
         val isAlign =
             if (isCommentOnTop) {
                 // 只要有一个候选项有编码提示就不会居中
-                !candidates.drop(startNum).any { it.comment.isNotEmpty() }
+                !candidates.drop(startNum).any { !it.comment.isNullOrEmpty() }
             } else {
                 true
             }
@@ -254,7 +254,7 @@ class Candidate(
         computedCandidates.clear()
         updateCandidates()
         var x = if ((!Rime.hasLeft())) 0 else pageButtonWidth
-        candidates.forEachIndexed { index, (comment, text) ->
+        candidates.forEachIndexed { index, (text, comment) ->
             if (index < startNum) return@forEachIndexed
             // if (pageEx >= 0 && x >= minWidth) {
             //     computedCandidates.add(
@@ -268,7 +268,7 @@ class Candidate(
             //     break
             // }
             var candidateWidth = candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding
-            if (shouldShowComment && comment.isNotEmpty()) {
+            if (shouldShowComment && !comment.isNullOrEmpty()) {
                 val commentWidth = commentPaint.measureText(comment, (commentFont))
                 candidateWidth = if (isCommentOnTop) max(candidateWidth, commentWidth) else candidateWidth + commentWidth
             }

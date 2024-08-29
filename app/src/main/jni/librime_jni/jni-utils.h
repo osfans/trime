@@ -145,23 +145,28 @@ class GlobalRefSingleton {
   jclass Rime;
   jmethodID HandleRimeNotification;
 
-  jclass RimeComposition;
-  jmethodID RimeCompositionInit;
-
   jclass CandidateListItem;
   jmethodID CandidateListItemInit;
 
-  jclass RimeCommit;
-  jmethodID RimeCommitInit;
+  jclass CandidateProto;
+  jmethodID CandidateProtoInit;
 
-  jclass RimeContext;
-  jmethodID RimeContextInit;
+  jclass CommitProto;
+  jmethodID CommitProtoInit;
 
-  jclass RimeMenu;
-  jmethodID RimeMenuInit;
+  jclass ContextProto;
+  jmethodID ContextProtoInit;
 
-  jclass RimeStatus;
-  jmethodID RimeStatusInit;
+  jclass CompositionProto;
+  jmethodID CompositionProtoInit;
+  jmethodID CompositionProtoDefault;
+
+  jclass MenuProto;
+  jmethodID MenuProtoInit;
+  jmethodID MenuProtoDefault;
+
+  jclass StatusProto;
+  jmethodID StatusProtoInit;
 
   jclass SchemaListItem;
   jmethodID SchemaListItemInit;
@@ -207,38 +212,48 @@ class GlobalRefSingleton {
         env->GetStaticMethodID(Rime, "handleRimeNotification",
                                "(Ljava/lang/String;Ljava/lang/String;)V");
 
-    RimeComposition = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("com/osfans/trime/core/RimeComposition")));
-    RimeCompositionInit = env->GetMethodID(RimeComposition, "<init>",
-                                           "(IIIILjava/lang/String;)V");
-
     CandidateListItem = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/CandidateListItem")));
     CandidateListItemInit = env->GetMethodID(
         CandidateListItem, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
 
-    RimeCommit = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("com/osfans/trime/core/RimeCommit")));
-    RimeCommitInit =
-        env->GetMethodID(RimeCommit, "<init>", "(Ljava/lang/String;)V");
+    CandidateProto = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeProto$Candidate")));
+    CandidateProtoInit = env->GetMethodID(
+        CandidateProto, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
 
-    RimeContext = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("com/osfans/trime/core/RimeContext")));
-    RimeContextInit = env->GetMethodID(
-        RimeContext, "<init>",
-        "(Lcom/osfans/trime/core/RimeComposition;Lcom/osfans/trime/core/"
-        "RimeMenu;Ljava/lang/String;[Ljava/lang/String;)V");
+    CommitProto = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeProto$Commit")));
+    CommitProtoInit =
+        env->GetMethodID(CommitProto, "<init>", "(Ljava/lang/String;)V");
 
-    RimeMenu = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("com/osfans/trime/core/RimeMenu")));
-    RimeMenuInit =
-        env->GetMethodID(RimeMenu, "<init>",
-                         "(IIZII[Lcom/osfans/trime/core/CandidateListItem;)V");
+    ContextProto = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeProto$Context")));
+    ContextProtoInit = env->GetMethodID(
+        ContextProto, "<init>",
+        "(Lcom/osfans/trime/core/RimeProto$Context$Composition;Lcom/osfans/"
+        "trime/core/"
+        "RimeProto$Context$Menu;Ljava/lang/String;[Ljava/lang/String;)V");
 
-    RimeStatus = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("com/osfans/trime/core/RimeStatus")));
-    RimeStatusInit = env->GetMethodID(
-        RimeStatus, "<init>", "(Ljava/lang/String;Ljava/lang/String;ZZZZZZZ)V");
+    CompositionProto = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeProto$Context$Composition")));
+    CompositionProtoInit = env->GetMethodID(CompositionProto, "<init>",
+                                            "(IIIILjava/lang/String;)V");
+    CompositionProtoDefault =
+        env->GetMethodID(CompositionProto, "<init>", "()V");
+
+    MenuProto = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeProto$Context$Menu")));
+    MenuProtoInit =
+        env->GetMethodID(MenuProto, "<init>",
+                         "(IIZI[Lcom/osfans/trime/core/RimeProto$Candidate;)V");
+    MenuProtoDefault = env->GetMethodID(MenuProto, "<init>", "()V");
+
+    StatusProto = reinterpret_cast<jclass>(env->NewGlobalRef(
+        env->FindClass("com/osfans/trime/core/RimeProto$Status")));
+    StatusProtoInit =
+        env->GetMethodID(StatusProto, "<init>",
+                         "(Ljava/lang/String;Ljava/lang/String;ZZZZZZZ)V");
 
     SchemaListItem = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/SchemaItem")));
