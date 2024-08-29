@@ -572,7 +572,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      */
     fun commitRimeText(): Boolean {
         val commit = Rime.getRimeCommit()
-        commit?.let { commitCharSequence(it.commitText) }
+        commit?.text?.let { commitCharSequence(it) }
         Timber.d("commitRimeText: updateComposing")
         updateComposing()
         return commit != null

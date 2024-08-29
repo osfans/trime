@@ -26,10 +26,8 @@ import android.view.ViewConfiguration
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
-import com.osfans.trime.core.CandidateListItem
 import com.osfans.trime.core.Rime
-import com.osfans.trime.core.RimeComposition
-import com.osfans.trime.core.RimeContext
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
@@ -264,7 +262,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     private fun SpannableStringBuilder.buildSpannedComposition(
         m: CompositionComponent,
-        composition: RimeComposition,
+        composition: RimeProto.Context.Composition,
     ) {
         val alignmentSpan = alignmentSpan(m.align)
         val preeditSpans =
@@ -290,7 +288,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     /** 生成悬浮窗内的文本  */
     private fun SpannableStringBuilder.buildSpannedCandidates(
         m: CompositionComponent,
-        candidates: Array<CandidateListItem>,
+        candidates: Array<RimeProto.Candidate>,
         selectLabels: Array<String>,
         offset: Int,
     ) {
@@ -299,7 +297,6 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         val alignmentSpan = alignmentSpan(m.align)
         for ((i, candidate) in candidates.withIndex()) {
             val text = String.format(m.candidate, candidate.text)
-            val comment = String.format(m.comment, candidate.comment)
             val label = String.format(m.label, selectLabels[i])
             if (i >= maxCount) break
             if (!allPhrases && i >= offset) break
@@ -340,7 +337,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
             inSpans(alignmentSpan, candidateSpan, candidateTextSizeSpan) { append(text) }
             currentLineLength += text.length
 
-            if (showComment) {
+            if (showComment && !candidate.comment.isNullOrEmpty()) {
+                val comment = String.format(m.comment, candidate.comment)
                 val commentSpan =
                     CandidateSpan(
                         i,
@@ -389,7 +387,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     /**
      * 计算悬浮窗显示候选词后，候选栏从第几个候选词开始展示 注意当 all_phrases==true 时，悬浮窗显示的候选词数量和候选栏从第几个开始，是不一致的
      */
-    private fun calculateOffset(candidates: Array<CandidateListItem>): Int {
+    private fun calculateOffset(candidates: Array<RimeProto.Candidate>): Int {
         if (candidates.isEmpty()) return 0
         var j = (minOf(minCheckCount, candidates.size, maxCount) - 1).coerceAtLeast(0)
         while (j > 0) {
@@ -412,10 +410,10 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
      *
      * @return 悬浮窗显示的候选词数量
      */
-    fun update(inputContext: RimeContext): Int {
+    fun update(inputContext: RimeProto.Context): Int {
         if (visibility != VISIBLE) return 0
-        inputContext.composition?.preedit?.takeIf { it.isNotBlank() } ?: return 0
-        val candidates = inputContext.candidates
+        inputContext.composition.preedit.takeIf { !it.isNullOrEmpty() } ?: return 0
+        val candidates = inputContext.menu.candidates
         val startNum = calculateOffset(candidates)
         val content =
             buildSpannedString {
