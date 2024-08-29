@@ -19,13 +19,14 @@ import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import androidx.core.math.MathUtils
-import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.databinding.CompositionRootBinding
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.PopupPosition
 import me.tatarka.inject.annotations.Inject
@@ -38,16 +39,16 @@ class CompositionPopupWindow(
     private val ctx: Context,
     private val theme: Theme,
     private val bar: QuickBar,
-) {
+) : InputBroadcastReceiver {
     // 顯示懸浮窗口
     val isPopupWindowEnabled =
         AppPrefs.defaultInstance().keyboard.popupWindowEnabled &&
             theme.generalStyle.window.isNotEmpty()
 
-    val composition =
+    val binding =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
             root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
-            compositionView.setOnActionMoveListener { x, y ->
+            composition.setOnActionMoveListener { x, y ->
                 updatePopupWindow(x.toInt(), y.toInt())
             }
         }
@@ -68,7 +69,7 @@ class CompositionPopupWindow(
     private var popupWindowPos = PopupPosition.fromString(theme.generalStyle.layout.position)
 
     private val mPopupWindow =
-        PopupWindow(composition.root).apply {
+        PopupWindow(binding.root).apply {
             isClippingEnabled = false
             inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -192,8 +193,8 @@ class CompositionPopupWindow(
         mPopupWindow.update(popupWindowX, popupWindowY, -1, -1, true)
     }
 
-    fun updateView() {
-        if (Rime.isComposing) {
+    override fun onInputContextUpdate(ctx: RimeProto.Context) {
+        if (ctx.composition.length > 0) {
             updateCompositionView()
         } else {
             hideCompositionView()
@@ -209,12 +210,12 @@ class CompositionPopupWindow(
         if (isPopupWindowMovable == "once") {
             popupWindowPos = PopupPosition.fromString(ThemeManager.activeTheme.generalStyle.layout.position)
         }
-        composition.root.measure(
+        binding.root.measure(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         )
-        mPopupWindow.width = composition.root.measuredWidth
-        mPopupWindow.height = composition.root.measuredHeight
+        mPopupWindow.width = binding.root.measuredWidth
+        mPopupWindow.height = binding.root.measuredHeight
         mPopupHandler.post(mPopupTimer)
     }
 
@@ -248,6 +249,5 @@ class CompositionPopupWindow(
             }
             cursorAnchorInfo.matrix.mapRect(mPopupRectF)
         }
-        updateView()
     }
 }

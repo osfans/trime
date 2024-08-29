@@ -122,10 +122,14 @@ class Candidate(
         this.listener = WeakReference(listener)
     }
 
-    fun updateCandidatesFromMenu(menu: RimeProto.Context.Menu) {
+    fun updateCandidates(
+        menu: RimeProto.Context.Menu,
+        offset: Int = 0,
+    ) {
         val candidates = menu.candidates
         val hasLeft = menu.pageNumber != 0
         val hasRight = !menu.isLastPage
+        startNum = offset
         highlightIndex = menu.highlightedCandidateIndex
         computedCandidates.clear()
         this.candidates.clear()
@@ -135,7 +139,7 @@ class Candidate(
             candidateSpacing + 2 * candidatePadding +
                 symbolPaint.measureText(PAGE_DOWN_BUTTON, symbolFont).toInt()
         var x = if (hasLeft) pageButtonWidth else 0
-        candidates.forEachIndexed { i, (text, comment) ->
+        candidates.drop(offset).forEach { (text, comment) ->
             val textWidth =
                 (candidatePaint.measureText(text, (candidateFont)) + 2 * candidatePadding).run {
                     if (shouldShowComment && !comment.isNullOrEmpty()) {
