@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
+    implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.preference)
     implementation(libs.androidx.recyclerview)
     ksp(libs.androidx.room.compiler)
