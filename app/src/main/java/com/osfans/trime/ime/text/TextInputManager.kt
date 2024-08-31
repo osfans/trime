@@ -382,11 +382,14 @@ class TextInputManager(
             when {
                 escapeTagMatcher.matches() -> {
                     target = escapeTagMatcher.group(1) ?: ""
-                    Rime.simulateKeySequence(target)
-//                    if (!trime.commitRimeText() && !Rime.isComposing) {
-//                        trime.commitCharSequence(target)
-//                    }
-//                    trime.updateComposing()
+                    // FIXME: rime will not handle the key sequence when
+                    //  ascii_mode is on, there may be a better solution
+                    //  for this.
+                    if (Rime.isAsciiMode) {
+                        trime.commitCharSequence(target)
+                    } else {
+                        Rime.simulateRimeKeySequence(target)
+                    }
                 }
                 propertyGroupMatcher.matches() -> {
                     target = propertyGroupMatcher.group(1) ?: ""
