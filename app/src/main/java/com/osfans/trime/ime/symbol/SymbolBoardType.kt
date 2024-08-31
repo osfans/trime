@@ -23,9 +23,6 @@ enum class SymbolBoardType {
     //  文本框编辑历史，即“草稿箱”
     DRAFT,
 
-    // 候选词
-    CANDIDATE,
-
     //  近期上屏符号历史（需要区分来源并提示？）
     HISTORY,
 

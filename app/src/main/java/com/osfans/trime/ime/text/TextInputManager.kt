@@ -30,7 +30,6 @@ import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Keyboard
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.keyboard.KeyboardView
-import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ui.main.settings.ColorPickerDialog
 import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
@@ -60,8 +59,7 @@ class TextInputManager(
     private val trime: TrimeInputMethodService,
     private val rime: RimeSession,
 ) : TrimeInputMethodService.EventListener,
-    KeyboardView.OnKeyboardActionListener,
-    Candidate.EventListener {
+    KeyboardView.OnKeyboardActionListener {
     private val prefs get() = AppPrefs.defaultInstance()
     private var rimeNotificationJob: Job? = null
 
@@ -402,38 +400,5 @@ class TextInputManager(
             textToParse = textToParse.substring(target.length)
         }
         needSendUpRimeKey = false
-    }
-
-    /**
-     * Commits the pressed candidate and suggest the following words.
-     */
-    override fun onCandidatePressed(index: Int) {
-        onPress(0)
-        if (prefs.keyboard.hookCandidate || index > 9) {
-            if (Rime.selectCandidate(index)) {
-                if (prefs.keyboard.hookCandidateCommit) {
-                    // todo 找到切换高亮候选词的API，并把此处改为模拟移动候选后发送空格
-                    // 如果使用了lua处理候选上屏，模拟数字键、空格键是非常有必要的
-                } else {
-                }
-            }
-        } else if (index == 9) {
-            trime.handleKey(KeyEvent.KEYCODE_0, 0)
-        } else {
-            trime.handleKey(KeyEvent.KEYCODE_1 + index, 0)
-        }
-    }
-
-    override fun onCandidateSymbolPressed(arrow: String) {
-        when (arrow) {
-            Candidate.PAGE_UP_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_UP, 0)
-            Candidate.PAGE_DOWN_BUTTON -> onKey(KeyEvent.KEYCODE_PAGE_DOWN, 0)
-            Candidate.PAGE_EX_BUTTON -> trime.selectLiquidKeyboard(SymbolBoardType.CANDIDATE)
-        }
-    }
-
-    override fun onCandidateLongClicked(index: Int) {
-        Rime.deleteCandidate(index)
-        trime.updateComposing()
     }
 }

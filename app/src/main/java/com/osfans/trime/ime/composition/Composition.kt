@@ -37,7 +37,6 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
@@ -73,7 +72,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private val allPhrases = theme.generalStyle.layout.allPhrases
     private val maxCount =
         theme.generalStyle.layout.maxEntries.takeIf { it > 0 }
-            ?: Candidate.MAX_CANDIDATE_COUNT
+            ?: 30
     private val maxLength = theme.generalStyle.layout.maxLength
     private val minCheckLength = theme.generalStyle.layout.minLength // 候选词长度大于设定，才会显示到悬浮窗中
     private val minCheckCount = theme.generalStyle.layout.minCheck // 检查至少多少个候选词。当首选词长度不足时，继续检查后方候选词
@@ -98,6 +97,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private var initialX = 0f
     private var initialY = 0f
     private var onActionMove: ((Float, Float) -> Unit)? = null
+    private var onSelectCandidate: ((Int) -> Unit)? = null
 
     private val stickyLines: Int
         get() =
@@ -144,7 +144,7 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         private val textSize: Int,
     ) : ClickableSpan() {
         override fun onClick(tv: View) {
-            textInputManager?.onCandidatePressed(index)
+            onSelectCandidate?.invoke(index)
         }
 
         override fun updateDrawState(ds: TextPaint) {
@@ -158,6 +158,10 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 textColor?.let { ds.color = it }
             }
         }
+    }
+
+    fun setOnSelectCandidateListener(listener: ((Int) -> Unit)?) {
+        onSelectCandidate = listener
     }
 
     private inner class EventSpan(private val event: Event) : ClickableSpan() {

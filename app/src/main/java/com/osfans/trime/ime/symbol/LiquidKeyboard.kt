@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chad.library.adapter4.util.setOnDebouncedItemClick
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.core.CandidateItem
-import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
@@ -25,7 +24,6 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.ime.text.Candidate
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
@@ -71,20 +69,6 @@ class LiquidKeyboard(
             setOnDebouncedItemClick { _, _, position ->
                 val item = items[position]
                 when (currentBoardType) {
-                    SymbolBoardType.CANDIDATE -> {
-                        service.lifecycleScope.launch {
-                            rime.runOnReady { selectCandidate(position) }
-                        }
-                        if (Rime.isComposing) {
-                            service.lifecycleScope.launch {
-                                val candidates = rime.runOnReady { getCandidates(0, Candidate.MAX_CANDIDATE_COUNT) }
-                                submitList(candidates.toList())
-                                keyboardView.scrollToPosition(0)
-                            }
-                        } else {
-                            service.selectLiquidKeyboard(-1)
-                        }
-                    }
                     SymbolBoardType.SYMBOL -> service.inputSymbol(item.text)
                     SymbolBoardType.TABS -> {
                         val realPosition = TabManager.tabTags.indexOfFirst { it.text == item.text }
@@ -158,10 +142,6 @@ class LiquidKeyboard(
             SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
             SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
             SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
-            SymbolBoardType.CANDIDATE ->
-                service.lifecycleScope.launch {
-                    initVarLengthKeys(rime.runOnReady { getCandidates(0, Candidate.MAX_CANDIDATE_COUNT) }.toList())
-                }
             SymbolBoardType.SYMBOL,
             SymbolBoardType.VAR_LENGTH,
             SymbolBoardType.TABS,

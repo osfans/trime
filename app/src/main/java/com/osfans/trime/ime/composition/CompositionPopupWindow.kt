@@ -20,6 +20,8 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.widget.PopupWindow
 import androidx.core.math.MathUtils
 import com.osfans.trime.core.RimeProto
+import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
@@ -37,6 +39,7 @@ import timber.log.Timber
 @Inject
 class CompositionPopupWindow(
     private val ctx: Context,
+    private val rime: RimeSession,
     private val theme: Theme,
     private val bar: QuickBar,
 ) : InputBroadcastReceiver {
@@ -48,8 +51,13 @@ class CompositionPopupWindow(
     val binding =
         CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
             root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
-            composition.setOnActionMoveListener { x, y ->
-                updatePopupWindow(x.toInt(), y.toInt())
+            composition.run {
+                setOnActionMoveListener { x, y ->
+                    updatePopupWindow(x.toInt(), y.toInt())
+                }
+                setOnSelectCandidateListener { idx ->
+                    rime.launchOnReady { it.selectCandidate(idx) }
+                }
             }
         }
 
