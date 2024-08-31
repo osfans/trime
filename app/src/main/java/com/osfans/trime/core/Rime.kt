@@ -246,11 +246,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
 
         @JvmStatic
-        fun hasRight(): Boolean {
-            return hasMenu() && inputContext?.menu?.isLastPage == false
-        }
-
-        @JvmStatic
         fun showAsciiPunch(): Boolean {
             return mStatus?.isAsciiPunch == true || mStatus?.isAsciiMode == true
         }
@@ -287,18 +282,6 @@ class Rime : RimeApi, RimeLifecycleOwner {
                 sequence.toString().replace("{}", "{braceleft}{braceright}"),
             ).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
-                updateContext()
-            }
-        }
-
-        fun selectCandidate(index: Int): Boolean {
-            return selectRimeCandidateOnCurrentPage(index).also {
-                updateContext()
-            }
-        }
-
-        fun deleteCandidate(index: Int): Boolean {
-            return deleteRimeCandidateOnCurrentPage(index).also {
                 updateContext()
             }
         }
