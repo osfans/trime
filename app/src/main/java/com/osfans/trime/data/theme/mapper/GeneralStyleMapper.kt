@@ -5,7 +5,7 @@
 package com.osfans.trime.data.theme.mapper
 
 import com.osfans.trime.data.theme.model.GeneralStyle
-import com.osfans.trime.ime.symbol.CandidateAdapter.CommentPosition
+import com.osfans.trime.ime.symbol.VarLengthAdapter.SecondTextPosition
 import com.osfans.trime.util.config.ConfigItem
 
 class GeneralStyleMapper(
@@ -38,12 +38,12 @@ class GeneralStyleMapper(
         val commentHeight = getInt("comment_height")
 
         val commentOnTop = getBoolean("comment_on_top")
-        val commentPosition =
+        val secondTextPosition =
             runCatching {
                 val s = getString("comment_position")
-                CommentPosition.valueOf(s.uppercase())
+                SecondTextPosition.valueOf(s.uppercase())
             }.getOrElse {
-                CommentPosition.UNKNOWN
+                SecondTextPosition.UNKNOWN
             }
 
         val commentTextSize = getInt("comment_text_size")
@@ -172,7 +172,7 @@ class GeneralStyleMapper(
             commentFont,
             commentHeight,
             commentOnTop,
-            commentPosition,
+            secondTextPosition,
             commentTextSize,
             hanbFont,
             horizontal,

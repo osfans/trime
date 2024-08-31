@@ -5,7 +5,7 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
-import com.osfans.trime.ime.symbol.CandidateAdapter
+import com.osfans.trime.ime.symbol.VarLengthAdapter
 import com.osfans.trime.util.config.Config
 import com.osfans.trime.util.config.ConfigData
 import io.kotest.core.spec.style.BehaviorSpec
@@ -58,7 +58,7 @@ class GeneralStyleTest : BehaviorSpec({
                 generalStyle.candidateBorder shouldBe 0
                 generalStyle.candidateFont shouldBe emptyList()
                 generalStyle.candidateUseCursor shouldBe false
-                generalStyle.commentPosition shouldBe CandidateAdapter.CommentPosition.UNKNOWN
+                generalStyle.commentPosition shouldBe VarLengthAdapter.SecondTextPosition.UNKNOWN
 
                 generalStyle.enterLabel shouldNotBe null
                 generalStyle.enterLabel.go shouldBe "go"

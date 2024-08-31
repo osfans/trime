@@ -4,7 +4,7 @@
 
 package com.osfans.trime.data.theme.model
 
-import com.osfans.trime.ime.symbol.CandidateAdapter.CommentPosition
+import com.osfans.trime.ime.symbol.VarLengthAdapter.SecondTextPosition
 
 data class GeneralStyle(
     val autoCaps: String,
@@ -21,7 +21,7 @@ data class GeneralStyle(
     val commentFont: List<String>,
     val commentHeight: Int,
     val commentOnTop: Boolean,
-    val commentPosition: CommentPosition,
+    val commentPosition: SecondTextPosition,
     val commentTextSize: Int,
     val hanbFont: List<String>,
     val horizontal: Boolean,

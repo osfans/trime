@@ -8,12 +8,12 @@ import android.content.Context
 import android.view.View
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chad.library.adapter4.util.setOnDebouncedItemClick
+import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.osfans.trime.core.CandidateItem
+import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
@@ -29,6 +29,7 @@ import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
+import splitties.views.recyclerview.verticalLayoutManager
 import timber.log.Timber
 
 @InputScope
@@ -65,16 +66,16 @@ class LiquidKeyboard(
     }
 
     private val varLengthAdapter by lazy {
-        CandidateAdapter(theme).apply {
+        VarLengthAdapter(theme).apply {
             setOnDebouncedItemClick { _, _, position ->
                 val item = items[position]
                 when (currentBoardType) {
-                    SymbolBoardType.SYMBOL -> service.inputSymbol(item.text)
+                    SymbolBoardType.SYMBOL -> service.inputSymbol(item.first)
                     SymbolBoardType.TABS -> {
-                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == item.text }
+                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == item.first }
                         select(realPosition)
                     }
-                    else -> service.currentInputConnection?.commitText(item.text, 1)
+                    else -> service.currentInputConnection?.commitText(item.first, 1)
                 }
             }
         }
@@ -122,7 +123,10 @@ class LiquidKeyboard(
      * 使用FlexboxLayoutManager时调用此函数获取
      */
     private val flexboxLayoutManager by lazy {
-        FlexboxLayoutManager(context)
+        FlexboxLayoutManager(context).apply {
+            justifyContent = JustifyContent.SPACE_AROUND
+            alignItems = AlignItems.FLEX_START
+        }
     }
 
     /**
@@ -149,7 +153,7 @@ class LiquidKeyboard(
                 val items =
                     data.map {
                         val text = if (tag.type == SymbolBoardType.SYMBOL) it.label else it.text
-                        CandidateItem("", text)
+                        text to ""
                     }
                 initVarLengthKeys(items)
             }
@@ -164,7 +168,7 @@ class LiquidKeyboard(
     private fun initFixData(data: List<SimpleKeyBean>) {
         if (onAdapterChange(simpleAdapter)) {
             keyboardView.apply {
-                layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                layoutManager = verticalLayoutManager()
                 adapter = simpleAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(true)
@@ -196,15 +200,12 @@ class LiquidKeyboard(
         }
     }
 
-    private fun initVarLengthKeys(data: List<CandidateItem>) {
+    private fun initVarLengthKeys(data: List<Pair<String, String>>) {
         if (onAdapterChange(varLengthAdapter)) {
             // 设置布局管理器
             keyboardView.apply {
                 layoutManager = flexboxLayoutManager
                 adapter = varLengthAdapter
-                setItemViewCacheSize(50)
-                setHasFixedSize(false)
-                isSelected = true
             }
         }
         varLengthAdapter.submitList(data)

@@ -15,21 +15,24 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
-import com.osfans.trime.core.CandidateItem
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.databinding.LiquidEntryViewBinding
+import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
 import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.topOfParent
+import splitties.views.dsl.core.wrapContent
+import splitties.views.setPaddingDp
 
-// 显示长度不固定，字体大小正常的内容。用于类型 CANDIDATE, VAR_LENGTH
-class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateItem, CandidateAdapter.ViewHolder>() {
-    enum class CommentPosition {
+// 显示长度不固定，字体大小正常的内容。用于类型 TABS, VAR_LENGTH
+class VarLengthAdapter(private val theme: Theme) : BaseQuickAdapter<Pair<String, String>, VarLengthAdapter.ViewHolder>() {
+    enum class SecondTextPosition {
         UNKNOWN,
         TOP,
         BOTTOM,
@@ -51,23 +54,32 @@ class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateIte
         viewType: Int,
     ): ViewHolder {
         val binding = LiquidEntryViewBinding.inflate(LayoutInflater.from(parent.context))
-        binding.root.background =
-            StateListDrawable().apply {
-                addState(
-                    intArrayOf(),
-                    ColorManager.getDrawable(
-                        context = context,
-                        key = "key_back_color",
-                        border = theme.generalStyle.candidateBorder,
-                        borderColorKey = "key_border_color",
-                        roundCorner = theme.generalStyle.roundCorner,
-                    ),
-                )
-                mHilitedCandidateBackColor?.let {
-                    addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(it))
+        binding.root.run {
+            background =
+                StateListDrawable().apply {
+                    addState(
+                        intArrayOf(),
+                        ColorManager.getDrawable(
+                            context = context,
+                            key = "key_back_color",
+                            border = theme.generalStyle.candidateBorder,
+                            borderColorKey = "key_border_color",
+                            roundCorner = theme.generalStyle.roundCorner,
+                        ),
+                    )
+                    mHilitedCandidateBackColor?.let {
+                        addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(it))
+                    }
                 }
-            }
-        binding.candidate.apply {
+
+            minimumWidth = dp(40)
+            val size = theme.generalStyle.candidatePadding
+            setPaddingDp(size, 0, size, 0)
+            layoutParams =
+                FlexboxLayoutManager.LayoutParams(wrapContent, wrapContent)
+                    .apply { flexGrow = 1f }
+        }
+        binding.first.apply {
             textSize = mCandidateTextSize
             typeface = mCandidateFont
             mCandidateTextColor?.let { setTextColor(it) }
@@ -75,16 +87,16 @@ class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateIte
         val isCommentHidden = Rime.getRimeOption("_hide_comment")
         if (isCommentHidden) return ViewHolder(binding)
 
-        binding.comment.apply {
+        binding.second.apply {
             visibility = View.GONE
             textSize = mCommentTextSize
             typeface = mCommentFont
             mCommentTextColor?.let { setTextColor(it) }
         }
-        val candidate = binding.candidate
-        val comment = binding.comment
+        val candidate = binding.first
+        val comment = binding.first
         when (mCommentPosition) {
-            CommentPosition.BOTTOM -> {
+            SecondTextPosition.BOTTOM -> {
                 candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     centerHorizontally()
                 }
@@ -95,7 +107,7 @@ class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateIte
                 }
             }
 
-            CommentPosition.TOP -> {
+            SecondTextPosition.TOP -> {
                 candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     centerHorizontally()
                 }
@@ -106,24 +118,24 @@ class CandidateAdapter(private val theme: Theme) : BaseQuickAdapter<CandidateIte
                 }
             }
 
-            CommentPosition.RIGHT, CommentPosition.UNKNOWN -> {}
+            SecondTextPosition.RIGHT, SecondTextPosition.UNKNOWN -> {}
         }
         return ViewHolder(binding)
     }
 
     class ViewHolder(binding: LiquidEntryViewBinding) : RecyclerView.ViewHolder(binding.root) {
-        val candidate: TextView = binding.candidate
-        val comment: TextView = binding.comment
+        val first: TextView = binding.first
+        val second: TextView = binding.second
     }
 
     override fun onBindViewHolder(
         holder: ViewHolder,
         position: Int,
-        item: CandidateItem?,
+        item: Pair<String, String>?,
     ) {
         item?.run {
-            holder.candidate.text = text
-            holder.comment.text = comment
+            holder.first.text = first
+            holder.second.text = second
         }
     }
 }
