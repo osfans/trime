@@ -93,21 +93,17 @@ class QuickBar(
         TabUi(context)
     }
 
+    private val barStateMachine = QuickBarStateMachine.new {
+        switchUiByState(it)
+    }
+
     override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        if (ctx.composition.length > 0) {
-            switchUiByState(State.Candidate)
-        } else {
-            switchUiByState(State.Always)
-        }
+        barStateMachine.push(
+            QuickBarStateMachine.TransitionEvent.CandidatesUpdated,
+            QuickBarStateMachine.BooleanKey.CandidateEmpty to ctx.menu.candidates.isEmpty())
     }
 
-    enum class State {
-        Always,
-        Candidate,
-        Tab,
-    }
-
-    private fun switchUiByState(state: State) {
+    private fun switchUiByState(state: QuickBarStateMachine.State) {
         val index = state.ordinal
         if (view.displayedChild == index) return
         val new = view.getChildAt(index)
@@ -176,13 +172,11 @@ class QuickBar(
     override fun onWindowAttached(window: BoardWindow) {
         if (window is BoardWindow.BarBoardWindow) {
             window.onCreateBarView()?.let { tabUi.addExternal(it) }
-            switchUiByState(State.Tab)
-        } else {
-            switchUiByState(State.Always)
+            barStateMachine.push(QuickBarStateMachine.TransitionEvent.BarBoardWindowAttached)
         }
     }
 
     override fun onWindowDetached(window: BoardWindow) {
-        switchUiByState(State.Candidate)
+        barStateMachine.push(QuickBarStateMachine.TransitionEvent.WindowDetached)
     }
 }
