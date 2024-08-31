@@ -122,8 +122,6 @@ class AppPrefs(
             const val SWIPE_TIME_HI = "keyboard__key_swipe_time_hi"
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
-            const val DELETE_CANDIDATE_TIMEOUT = "keyboard__key_delete_candidate_timeout"
-            const val SHOULD_LONG_CLICK_DELETE_CANDIDATE = "keyboard__long_click_delete_candidate"
         }
 
         var inlinePreedit by enum(INLINE_PREEDIT_MODE, InlinePreeditMode.PREVIEW)
@@ -171,8 +169,6 @@ class AppPrefs(
         val swipeTimeHi by int(SWIPE_TIME_HI, 80)
         val longPressTimeout by int(LONG_PRESS_TIMEOUT, 400)
         val repeatInterval by int(REPEAT_INTERVAL, 50)
-        val deleteCandidateTimeout by int(DELETE_CANDIDATE_TIMEOUT, 2000)
-        val shouldLongClickDeleteCandidate by bool(SHOULD_LONG_CLICK_DELETE_CANDIDATE, false)
         var isSpeakKey by bool(SPEAK_KEY_PRESS_ENABLED, false)
         var isSpeakCommit by bool(SPEAK_COMMIT_ENABLED, false)
     }
