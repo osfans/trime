@@ -22,13 +22,18 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
 
 class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
+    private val maybeCandidateTextColor = ColorManager.getColor("candidate_text_color")
+    private val maybeCommentTextColor = ColorManager.getColor("comment_text_color")
+    private val maybeHighlightedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")
+    private val maybeHighlightedCommentTextColor = ColorManager.getColor("hilited_comment_text_color")
+
     private val text =
         textView {
             textSize = theme.generalStyle.candidateTextSize.toFloat()
             typeface = FontManager.getTypeface("candidate_font")
             isSingleLine = true
             gravity = gravityCenter
-            ColorManager.getColor("candidate_text_color")?.let { setTextColor(it) }
+            maybeCandidateTextColor?.let { setTextColor(it) }
         }
 
     private val comment =
@@ -37,7 +42,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
             typeface = FontManager.getTypeface("comment_font")
             isSingleLine = true
             gravity = gravityCenter
-            ColorManager.getColor("comment_text_color")?.let { setTextColor(it) }
+            maybeCommentTextColor?.let { setTextColor(it) }
             visibility = View.GONE
         }
 
@@ -90,6 +95,16 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
             } else if (visibility != View.GONE) {
                 visibility = View.GONE
             }
+        }
+    }
+
+    fun highlight(yes: Boolean) {
+        if (yes) {
+            maybeHighlightedCandidateTextColor?.let { text.setTextColor(it) }
+            maybeHighlightedCommentTextColor?.let { comment.setTextColor(it) }
+        } else {
+            maybeCandidateTextColor?.let { text.setTextColor(it) }
+            maybeCommentTextColor?.let { comment.setTextColor(it) }
         }
     }
 }

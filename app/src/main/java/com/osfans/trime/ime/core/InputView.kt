@@ -338,11 +338,12 @@ class InputView(
             val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
             val isLastPage = ctx.menu.isLastPage
             val previous = ctx.menu.run { pageSize * pageNumber }
+            val highlightedIdx = ctx.menu.highlightedCandidateIndex
             if (composition.isPopupWindowEnabled) {
                 val sticky = composition.binding.composition.update(ctx)
-                compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, sticky)
+                compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx, sticky)
             } else {
-                compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous)
+                compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
             }
             if (candidates.isEmpty()) {
                 compactCandidate.refreshUnrolled()

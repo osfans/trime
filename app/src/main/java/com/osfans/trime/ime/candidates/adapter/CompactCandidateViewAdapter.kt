@@ -24,15 +24,20 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
     var previous: Int = 0
         private set
 
+    var highlightedIdx: Int = -1
+        private set
+
     fun updateCandidates(
         list: List<CandidateItem>,
         isLastPage: Boolean,
         previous: Int,
+        highlightedIdx: Int,
         sticky: Int = 0,
     ) {
         this.isLastPage = isLastPage
         this.previous = previous
         this.sticky = sticky
+        this.highlightedIdx = highlightedIdx
         super.submitList(list.drop(sticky))
     }
 
@@ -57,11 +62,15 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
         item: CandidateItem?,
     ) {
         val (comment, text) = item!!
-        holder.ui.setText(text)
-        holder.ui.setComment(comment)
+        val idx = sticky + position
+        holder.ui.run {
+            setText(text)
+            setComment(comment)
+            highlight(theme.generalStyle.candidateUseCursor && idx == highlightedIdx)
+        }
         holder.text = text
         holder.comment = comment
-        holder.idx = sticky + position
+        holder.idx = idx
         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
             minWidth = 0
             flexGrow = 1f
