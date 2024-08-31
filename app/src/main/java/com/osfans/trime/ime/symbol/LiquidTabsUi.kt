@@ -7,10 +7,10 @@ package com.osfans.trime.ime.symbol
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.PaintDrawable
+import android.widget.HorizontalScrollView
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.text.ScrollView
 import com.osfans.trime.util.rippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
@@ -80,7 +80,8 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
     private val horizontal = horizontalLayout()
 
     override val root =
-        ScrollView(ctx, null).apply {
+        HorizontalScrollView(ctx).apply {
+            isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             add(
                 horizontal,
