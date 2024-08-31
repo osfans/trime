@@ -7,6 +7,9 @@ package com.osfans.trime.ime.window
 import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
+import androidx.transition.Transition
+import androidx.transition.TransitionManager
+import androidx.transition.TransitionSet
 import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
@@ -26,6 +29,24 @@ class BoardWindowManager(
 
     private var currentWindow: BoardWindow? = null
     private var currentView: View? = null
+
+    private fun prepareAnimation(
+        exitAnimation: Transition?,
+        enterAnimation: Transition?,
+        remove: View,
+        add: View,
+    ) {
+        enterAnimation?.addTarget(add)
+        exitAnimation?.addTarget(remove)
+        TransitionManager.beginDelayedTransition(
+            view,
+            TransitionSet().apply {
+                enterAnimation?.let { addTransition(it) }
+                exitAnimation?.let { addTransition(it) }
+                duration = 300
+            },
+        )
+    }
 
     @Suppress("BOUNDS_NOT_ALLOWED_IF_BOUNDED_BY_TYPE_PARAMETER")
     fun <W : BoardWindow, E : ResidentWindow, R> cacheResidentWindow(
@@ -64,6 +85,12 @@ class BoardWindowManager(
         if (currentWindow != null) {
             val oldWindow = currentWindow!!
             val oldView = currentView!!
+            prepareAnimation(
+                oldWindow.exitAnimation(window),
+                window.enterAnimation(oldWindow),
+                oldView,
+                newView,
+            )
             oldWindow.onDetached()
             view.removeView(oldView)
             broadcaster.onWindowDetached(oldWindow)
