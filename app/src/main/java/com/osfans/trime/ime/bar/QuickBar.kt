@@ -19,9 +19,10 @@ import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
+import com.osfans.trime.ime.bar.ui.CandidateUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.CompatCandidateModule
+import com.osfans.trime.ime.candidates.CompactCandidateModule
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.window.BoardWindow
@@ -38,7 +39,7 @@ class QuickBar(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val theme: Theme,
-    private val compatCandidate: CompatCandidateModule,
+    private val compactCandidate: CompactCandidateModule,
 ) : InputBroadcastReceiver {
     private val prefs = AppPrefs.defaultInstance()
 
@@ -85,7 +86,7 @@ class QuickBar(
     }
 
     private val candidateUi by lazy {
-        compatCandidate.binding
+        CandidateUi(context, compactCandidate.view)
     }
 
     private val tabUi by lazy {
@@ -158,7 +159,7 @@ class QuickBar(
     override fun onRimeOptionUpdated(value: OptionNotification.Value) {
         when (value.option) {
             "_hide_comment" -> {
-                candidateUi.candidates.shouldShowComment = !value.value
+                // candidateUi.candidates.shouldShowComment = !value.value
             }
             "_hide_candidate", "_hide_bar" -> {
                 view.visibility = if (value.value) View.GONE else View.VISIBLE

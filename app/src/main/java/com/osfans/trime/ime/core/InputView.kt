@@ -21,6 +21,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeSession
@@ -28,7 +29,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
-import com.osfans.trime.ime.candidates.CompatCandidateModule
+import com.osfans.trime.ime.candidates.CompactCandidateModule
 import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
@@ -105,14 +106,14 @@ class InputView(
     val composition: CompositionPopupWindow = inputComponent.composition
     val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
     val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
-    private val compatCandidate: CompatCandidateModule = inputComponent.compatCandidate
+    private val compactCandidate: CompactCandidateModule = inputComponent.compactCandidate
 
     private fun addBroadcastReceivers() {
         broadcaster.addReceiver(quickBar)
         broadcaster.addReceiver(keyboardWindow)
         broadcaster.addReceiver(liquidKeyboard)
         broadcaster.addReceiver(composition)
-        broadcaster.addReceiver(compatCandidate)
+        broadcaster.addReceiver(compactCandidate)
     }
 
     private val keyboardSidePadding = theme.generalStyle.keyboardPadding
@@ -334,11 +335,12 @@ class InputView(
         val ctx = response.context
         if (ctx != null) {
             broadcaster.onInputContextUpdate(ctx)
+            val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
             if (composition.isPopupWindowEnabled) {
                 val offset = composition.binding.composition.update(ctx)
-                compatCandidate.binding.candidates.updateCandidates(ctx.menu, offset)
+                compactCandidate.adapter.updateCandidates(candidates, offset)
             } else {
-                compatCandidate.binding.candidates.updateCandidates(ctx.menu)
+                compactCandidate.adapter.updateCandidates(candidates)
             }
         }
     }

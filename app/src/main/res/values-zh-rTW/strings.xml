@@ -290,4 +290,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="theme_trime">預設</string>
     <string name="theme_tongwenfeng">同文風</string>
     <string name="setup_channel">設定精靈</string>
+    <string name="forget_this_word">忘記該詞</string>
 </resources>

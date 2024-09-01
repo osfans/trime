@@ -9,7 +9,7 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.InputBroadcaster
-import com.osfans.trime.ime.candidates.CompatCandidateModule
+import com.osfans.trime.ime.candidates.CompactCandidateModule
 import com.osfans.trime.ime.composition.CompositionPopupWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -32,5 +32,5 @@ abstract class InputComponent(
     abstract val windowManager: BoardWindowManager
     abstract val keyboardWindow: KeyboardWindow
     abstract val liquidKeyboard: LiquidKeyboard
-    abstract val compatCandidate: CompatCandidateModule
+    abstract val compactCandidate: CompactCandidateModule
 }
