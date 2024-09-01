@@ -1,7 +1,10 @@
-/*
- * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
- */
+// Copyright 2021 - 2023 Fcitx5 for Android Contributors
+// Copyright 2021-2023 Fcitx5 for Android Contributors
+// SPDX-FileCopyrightText: 2024 Rime community
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 package com.osfans.trime.ime.bar
 
 import com.osfans.trime.ime.bar.QuickBarStateMachine.BooleanKey.CandidateEmpty

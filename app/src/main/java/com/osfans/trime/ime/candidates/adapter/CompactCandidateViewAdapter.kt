@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Rime community
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package com.osfans.trime.ime.candidates.adapter
 
 import android.content.Context
