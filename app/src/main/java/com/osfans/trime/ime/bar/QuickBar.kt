@@ -182,6 +182,8 @@ class QuickBar(
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
+
+            evalAlwaysUiState()
         }
     }
 
