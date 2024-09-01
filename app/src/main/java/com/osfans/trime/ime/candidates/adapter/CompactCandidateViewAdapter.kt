@@ -13,6 +13,7 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 import splitties.views.setPaddingDp
+import kotlin.math.max
 
 open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<CandidateItem, CandidateViewHolder>() {
     var sticky: Int = 0
@@ -26,6 +27,14 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
 
     var highlightedIdx: Int = -1
         private set
+
+    val left: Int
+        get() =
+            if (sticky > 0 && previous > 0) {
+                sticky + previous
+            } else {
+                max(sticky, previous)
+            }
 
     fun updateCandidates(
         list: List<CandidateItem>,
@@ -70,7 +79,7 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
         }
         holder.text = text
         holder.comment = comment
-        holder.idx = idx
+        holder.idx = left + position // unused
         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
             minWidth = 0
             flexGrow = 1f
