@@ -6,11 +6,16 @@ package com.osfans.trime.ime.candidates
 
 import android.content.Context
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.util.pressHighlightDrawable
 import splitties.views.dsl.constraintlayout.above
+import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.below
+import splitties.views.dsl.constraintlayout.bottomOfParent
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -20,7 +25,6 @@ import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
@@ -52,36 +56,49 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
 
     override val root =
         constraintLayout {
+            background = ColorManager.getColor("hilited_candidate_back_color")?.let { pressHighlightDrawable(it) }
             if (theme.generalStyle.commentOnTop) {
                 add(
                     comment,
-                    lParams(wrapContent, matchParent) {
+                    lParams(wrapContent, wrapContent) {
                         topOfParent()
                         centerHorizontally()
                         above(text)
+
+                        verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+                        verticalBias = 0.5f
                     },
                 )
                 add(
                     text,
-                    lParams(wrapContent, matchParent) {
+                    lParams(wrapContent, wrapContent) {
+                        below(comment)
                         centerHorizontally()
-                        topOfParent()
+                        bottomOfParent()
+
+                        verticalBias = 0.5f
                     },
                 )
             } else {
                 add(
                     text,
-                    lParams(wrapContent, matchParent) {
+                    lParams(wrapContent, wrapContent) {
                         startOfParent()
                         centerVertically()
                         before(comment)
+
+                        horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+                        horizontalBias = 0.5f
                     },
                 )
                 add(
                     comment,
-                    lParams(wrapContent, matchParent) {
+                    lParams(wrapContent, wrapContent) {
+                        after(text)
                         centerVertically()
                         endOfParent()
+
+                        horizontalBias = 0.5f
                     },
                 )
             }
