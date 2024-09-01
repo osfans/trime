@@ -2,6 +2,84 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0] - 2024-09-01
+
+### 🚀 Features
+
+- Internal shared data directory
+- Builtin prelude files
+- Initial implementation of SwitchesUi
+- Add runtime option setter and getter to new api interface
+- *(jni)* Use NewString to create jstring
+- *(jni)* Add getRimeCandidates API
+- *(jni)* Add selectRimeCanidate and forgetRimeCandidate APIs
+- *(api)* Initial implementation of emitting rime response via shared flow
+- Update composing text via rime response flow
+- Update candidates via rime response shared flow
+- Update composition via rime response shared flow
+- New (compact) candidate view using recyclerview
+- *(utils)* Introduce EventStateMachine
+- *(window)* Add default animation effect when enter or exit
+- Implements unrolled candidate view
+- Restore the highlight of the candidate
+
+### 🐛 Bug Fixes
+
+- Candidates are abnormally centered
+- 输入状态下切换深色模式时，悬浮窗无法关闭
+- Fix list is empty
+- 输入状态下切换配色，悬浮窗无法关闭
+- Error on access to user data dir especially on app first run
+- Ime could not follow the keyboard's ascii mode after switching
+- Switcher didn't update after switching to different ascii mode keyboard
+- Keyboard layout didn't switch in time on device's orientation changed
+- Couldn't back to appropriate keyboard layout from others at landscape mode
+- Keyboard layout sometimes inadvertently backed to the default layout
+- Timing sync (#1441)
+- Candidate view in LiquidKeyboard didn't show all bulk candidates
+- Key sequence could not be committed when ascii mode is on
+- Inaccurate left offset before the compact candidate view ...
+
+### 🚜 Refactor
+
+- Hide composition view on input view detached from window
+- Create main keyboard view without binding
+- Cancel jvm overloads on keyboard view
+- Rename SchemaListItem to SchemaItem
+- Add `schemaItemCached` and `currentSchema()` to Rime(Api)
+- Migrate KeyboardSwitcher features into KeyboardWindow
+- Slightly change the base data syncing logic
+- Move bar ui classes into ui package
+- Restore the style for SwitchesUi
+- Apply the new runtime option setter and getter as more as possible
+- Add STOPPING state for RimeLifecycle
+- Slightly improve the switches view
+- Migrate rime out data class into RimeProto
+- Adjust the data struct of RimeProto
+- Rename CandidateListItem to CandidateItem
+- Implements QuickBarStateMachine to drive UI update of QuickBar
+- Remove obsolete candidate view
+- Remove obsolete custom scroll view
+- Remove unused api functions
+- Rename CandidateAdapter to VarLengthAdapter
+- Remove unused preference entries
+
+### 📚 Documentation
+
+- Add SPDX license header with reuse
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.0
+- Use form for issue template
+- Checkout submodules recursively on pull request and commit
+- Disable layout update animations.
+- Introduce BRAVH library
+- Update librime to 1.11.2-27-gcdab8936
+- Introduce AndroidX Paging library
+- Upgrade gradle to 8.10
+- Add 3.3.0 changelog
+
 ## [3.2.19] - 2024-06-30
 
 ### 🚀 Features
@@ -68,6 +146,7 @@ All notable changes to this project will be documented in this file.
 
 - Add missing license header
 - Add missing SPDX header
+- Add 3.2.19 change log
 
 ### ⚡ Performance
 
