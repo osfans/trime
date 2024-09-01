@@ -18,6 +18,8 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.adapter.CompactCandidateViewAdapter
 import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxVerticalDecoration
@@ -41,6 +43,7 @@ class CompactCandidateModule(
     val service: TrimeInputMethodService,
     val rime: RimeSession,
     val theme: Theme,
+    val bar: QuickBar,
 ) : InputBroadcastReceiver {
     private val _unrolledCandidateOffset =
         MutableSharedFlow<Int>(
@@ -50,19 +53,24 @@ class CompactCandidateModule(
 
     val unrolledCandidateOffset = _unrolledCandidateOffset.asSharedFlow()
 
-    private fun refreshUnrolled() {
+    fun refreshUnrolled() {
         runBlocking {
-            _unrolledCandidateOffset.emit(adapter.stickyOffset + view.childCount)
+            _unrolledCandidateOffset.emit(adapter.run { max(sticky, previous) } + view.childCount)
         }
+        bar.unrollButtonStateMachine.push(
+            UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
+            UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
+                (adapter.run { isLastPage && itemCount == layoutManager.childCount }),
+        )
     }
 
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
             setOnDebouncedItemClick { _, _, position ->
-                rime.launchOnReady { it.selectCandidate(stickyOffset + position) }
+                rime.launchOnReady { it.selectCandidate(sticky + position) }
             }
             setOnItemLongClickListener { _, view, position ->
-                showCandidateAction(stickyOffset + position, items[position].text, view)
+                showCandidateAction(sticky + position, items[position].text, view)
                 true
             }
         }

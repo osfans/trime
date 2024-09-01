@@ -9,6 +9,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
 import androidx.lifecycle.lifecycleScope
+import com.osfans.trime.R
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
@@ -23,9 +24,12 @@ import com.osfans.trime.ime.bar.ui.CandidateUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.CompactCandidateModule
+import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
+import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.views.dsl.core.add
@@ -39,8 +43,11 @@ class QuickBar(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val theme: Theme,
-    private val compactCandidate: CompactCandidateModule,
+    private val windowManager: BoardWindowManager,
+    lazyCompactCandidate: Lazy<CompactCandidateModule>,
 ) : InputBroadcastReceiver {
+    private val compactCandidate by lazyCompactCandidate
+
     private val prefs = AppPrefs.defaultInstance()
 
     private val showSwitchers get() = prefs.keyboard.switchesEnabled
@@ -93,14 +100,53 @@ class QuickBar(
         TabUi(context)
     }
 
-    private val barStateMachine = QuickBarStateMachine.new {
-        switchUiByState(it)
+    private val barStateMachine =
+        QuickBarStateMachine.new {
+            switchUiByState(it)
+        }
+
+    val unrollButtonStateMachine =
+        UnrollButtonStateMachine.new {
+            when (it) {
+                UnrollButtonStateMachine.State.ClickToAttachWindow -> {
+                    setUnrollButtonToAttach()
+                    setUnrollButtonEnabled(true)
+                }
+                UnrollButtonStateMachine.State.ClickToDetachWindow -> {
+                    setUnrollButtonToDetach()
+                    setUnrollButtonEnabled(true)
+                }
+                UnrollButtonStateMachine.State.Hidden -> {
+                    setUnrollButtonEnabled(false)
+                }
+            }
+        }
+
+    private fun setUnrollButtonToAttach() {
+        candidateUi.unrollButton.setOnClickListener {
+            windowManager.attachWindow(
+                FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, compactCandidate),
+            )
+        }
+        candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_more_24)
+    }
+
+    private fun setUnrollButtonToDetach() {
+        candidateUi.unrollButton.setOnClickListener {
+            windowManager.attachWindow(KeyboardWindow)
+        }
+        candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_less_24)
+    }
+
+    private fun setUnrollButtonEnabled(enabled: Boolean) {
+        candidateUi.unrollButton.visibility = if (enabled) View.VISIBLE else View.INVISIBLE
     }
 
     override fun onInputContextUpdate(ctx: RimeProto.Context) {
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.CandidatesUpdated,
-            QuickBarStateMachine.BooleanKey.CandidateEmpty to ctx.menu.candidates.isEmpty())
+            QuickBarStateMachine.BooleanKey.CandidateEmpty to ctx.menu.candidates.isEmpty(),
+        )
     }
 
     private fun switchUiByState(state: QuickBarStateMachine.State) {

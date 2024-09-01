@@ -15,15 +15,25 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.setPaddingDp
 
 open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<CandidateItem, CandidateViewHolder>() {
-    var stickyOffset: Int = 0
+    var sticky: Int = 0
+        private set
+
+    var isLastPage: Boolean = false
+        private set
+
+    var previous: Int = 0
         private set
 
     fun updateCandidates(
         list: List<CandidateItem>,
-        offset: Int = 0,
+        isLastPage: Boolean,
+        previous: Int,
+        sticky: Int = 0,
     ) {
-        stickyOffset = offset
-        super.submitList(list.drop(offset))
+        this.isLastPage = isLastPage
+        this.previous = previous
+        this.sticky = sticky
+        super.submitList(list.drop(sticky))
     }
 
     override fun onCreateViewHolder(
@@ -51,7 +61,7 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
         holder.ui.setComment(comment)
         holder.text = text
         holder.comment = comment
-        holder.idx = position
+        holder.idx = sticky + position
         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
             minWidth = 0
             flexGrow = 1f
