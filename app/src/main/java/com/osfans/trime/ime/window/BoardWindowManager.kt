@@ -43,7 +43,7 @@ class BoardWindowManager(
             TransitionSet().apply {
                 enterAnimation?.let { addTransition(it) }
                 exitAnimation?.let { addTransition(it) }
-                duration = 300
+                duration = 100
             },
         )
     }
