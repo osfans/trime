@@ -59,7 +59,7 @@ class CompactCandidateModule(
 
     fun refreshUnrolled() {
         runBlocking {
-            _unrolledCandidateOffset.emit(adapter.left + view.childCount)
+            _unrolledCandidateOffset.emit(adapter.before + view.childCount)
         }
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
@@ -71,10 +71,10 @@ class CompactCandidateModule(
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
             setOnDebouncedItemClick { _, _, position ->
-                rime.launchOnReady { it.selectCandidate(left + position) }
+                rime.launchOnReady { it.selectCandidate(before + position) }
             }
             setOnItemLongClickListener { _, view, position ->
-                showCandidateAction(left + position, items[position].text, view)
+                showCandidateAction(before + position, items[position].text, view)
                 true
             }
         }
