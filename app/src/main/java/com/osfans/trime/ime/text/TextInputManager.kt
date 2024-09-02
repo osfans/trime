@@ -385,10 +385,9 @@ class TextInputManager(
                     // FIXME: rime will not handle the key sequence when
                     //  ascii_mode is on, there may be a better solution
                     //  for this.
-                    if (Rime.isAsciiMode) {
+                    Rime.simulateKeySequence(target)
+                    if (Rime.getRimeCommit() == null && !Rime.isComposing) {
                         trime.commitCharSequence(target)
-                    } else {
-                        Rime.simulateRimeKeySequence(target)
                     }
                 }
                 propertyGroupMatcher.matches() -> {
