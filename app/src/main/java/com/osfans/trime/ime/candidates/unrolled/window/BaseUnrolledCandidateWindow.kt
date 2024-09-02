@@ -82,7 +82,6 @@ abstract class BaseUnrolledCandidateWindow(
         Pager(PagingConfig(pageSize = 48)) {
             CandidatesPagingSource(
                 rime,
-                total = compactCandidate.adapter.run { before + itemCount },
                 offset = adapter.offset,
             )
         }
