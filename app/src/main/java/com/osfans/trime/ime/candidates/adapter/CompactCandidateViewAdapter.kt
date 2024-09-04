@@ -80,7 +80,7 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
         holder.idx = before + position // unused
         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
             minWidth = 0
-            flexGrow = 1f
+            flexGrow = 0f
         }
     }
 }

@@ -35,7 +35,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
     private val maybeHighlightedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")
     private val maybeHighlightedCommentTextColor = ColorManager.getColor("hilited_comment_text_color")
 
-    private val text =
+    private val label =
         textView {
             textSize = theme.generalStyle.candidateTextSize.toFloat()
             typeface = FontManager.getTypeface("candidate_font")
@@ -44,7 +44,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
             maybeCandidateTextColor?.let { setTextColor(it) }
         }
 
-    private val comment =
+    private val altLabel =
         textView {
             textSize = theme.generalStyle.commentTextSize.toFloat()
             typeface = FontManager.getTypeface("comment_font")
@@ -59,20 +59,20 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
             background = ColorManager.getColor("hilited_candidate_back_color")?.let { pressHighlightDrawable(it) }
             if (theme.generalStyle.commentOnTop) {
                 add(
-                    comment,
+                    altLabel,
                     lParams(wrapContent, wrapContent) {
                         topOfParent()
                         centerHorizontally()
-                        above(text)
+                        above(label)
 
                         verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
                         verticalBias = 0.5f
                     },
                 )
                 add(
-                    text,
+                    label,
                     lParams(wrapContent, wrapContent) {
-                        below(comment)
+                        below(altLabel)
                         centerHorizontally()
                         bottomOfParent()
 
@@ -81,20 +81,20 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
                 )
             } else {
                 add(
-                    text,
+                    label,
                     lParams(wrapContent, wrapContent) {
                         startOfParent()
                         centerVertically()
-                        before(comment)
+                        before(altLabel)
 
                         horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
                         horizontalBias = 0.5f
                     },
                 )
                 add(
-                    comment,
+                    altLabel,
                     lParams(wrapContent, wrapContent) {
-                        after(text)
+                        after(label)
                         centerVertically()
                         endOfParent()
 
@@ -105,11 +105,11 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
         }
 
     fun setText(str: String) {
-        text.text = str
+        label.text = str
     }
 
     fun setComment(str: String) {
-        comment.run {
+        altLabel.run {
             if (str.isNotEmpty()) {
                 text = str
                 if (visibility == View.GONE) visibility = View.VISIBLE
@@ -121,11 +121,11 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
 
     fun highlight(yes: Boolean) {
         if (yes) {
-            maybeHighlightedCandidateTextColor?.let { text.setTextColor(it) }
-            maybeHighlightedCommentTextColor?.let { comment.setTextColor(it) }
+            maybeHighlightedCandidateTextColor?.let { label.setTextColor(it) }
+            maybeHighlightedCommentTextColor?.let { altLabel.setTextColor(it) }
         } else {
-            maybeCandidateTextColor?.let { text.setTextColor(it) }
-            maybeCommentTextColor?.let { comment.setTextColor(it) }
+            maybeCandidateTextColor?.let { label.setTextColor(it) }
+            maybeCommentTextColor?.let { altLabel.setTextColor(it) }
         }
     }
 }
