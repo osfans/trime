@@ -5,6 +5,7 @@
 package com.osfans.trime.ime.candidates
 
 import android.content.Context
+import android.text.TextUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
@@ -38,6 +39,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
             typeface = FontManager.getTypeface("candidate_font")
             isSingleLine = true
             gravity = gravityCenter
+            ellipsize = TextUtils.TruncateAt.END
             maybeCandidateTextColor?.let { setTextColor(it) }
         }
 
@@ -47,6 +49,7 @@ class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
             typeface = FontManager.getTypeface("comment_font")
             isSingleLine = true
             gravity = gravityCenter
+            ellipsize = TextUtils.TruncateAt.END
             maybeCommentTextColor?.let { setTextColor(it) }
         }
 
