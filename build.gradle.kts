@@ -24,7 +24,7 @@ plugins {
 spotless {
     kotlin {
         target("**/*.kt", "**/*.kts")
-        ktlint("1.2.1")
+        ktlint("1.3.1")
         trimTrailingWhitespace()
         indentWithSpaces()
         endWithNewline()
