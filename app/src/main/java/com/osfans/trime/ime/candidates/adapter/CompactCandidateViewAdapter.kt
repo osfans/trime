@@ -71,8 +71,8 @@ open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<Cand
         val (comment, text) = item!!
         val idx = sticky + position
         holder.ui.run {
-            setText(text)
-            setComment(comment)
+            label.text = text
+            altLabel.text = comment
             highlight(theme.generalStyle.candidateUseCursor && idx == highlightedIdx)
         }
         holder.text = text
