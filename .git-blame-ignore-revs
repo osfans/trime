@@ -1,0 +1,11 @@
+# Run this command to always ignore specific commits in `git blame`
+# git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# format files
+13787ebb7ac95707365510ea66069a9c32533a34
+e236272da0cc9462a732b59fa43d3f23ee982c20
+a455d03cf528f84f749a6b4794329e38e07aabfb
+35cc3728d9318cb540081d27460b2a2def8fbc1b
+f3a0bec6459c9aeead0c5c36d120861bf07b8048
+ba9b4eeace24505c57bb16dc90de137a3300e799
+
