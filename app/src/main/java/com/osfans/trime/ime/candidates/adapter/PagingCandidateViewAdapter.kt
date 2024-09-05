@@ -52,8 +52,8 @@ open class PagingCandidateViewAdapter(val theme: Theme) : PagingDataAdapter<Cand
         position: Int,
     ) {
         val (comment, text) = getItem(position)!!
-        holder.ui.setText(text)
-        holder.ui.setComment(comment)
+        holder.ui.label.text = text
+        holder.ui.altLabel.text = comment
         holder.text = text
         holder.comment = comment
         holder.idx = position + offset
