@@ -78,14 +78,13 @@ fun RecyclerView.applyNavBarInsetsBottomPadding() {
     }
 }
 
-inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+inline fun <reified T : Serializable> Bundle.serializable(key: String): T? =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         getSerializable(key, T::class.java)
     } else {
         @Suppress("DEPRECATION")
         getSerializable(key) as? T
     }
-}
 
 fun Preference.thirdPartySummary(versionCode: String) {
     summary = versionCode
@@ -105,13 +104,13 @@ fun Preference.optionalPreference() {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Context.isStorageAvailable(): Boolean {
-    return XXPermissions.isGranted(this, Permission.MANAGE_EXTERNAL_STORAGE) &&
+inline fun Context.isStorageAvailable(): Boolean =
+    XXPermissions.isGranted(this, Permission.MANAGE_EXTERNAL_STORAGE) &&
         Environment.getExternalStorageDirectory().absolutePath.isNotEmpty()
-}
 
 fun Context.requestExternalStoragePermission() {
-    XXPermissions.with(this)
+    XXPermissions
+        .with(this)
         .permission(Permission.MANAGE_EXTERNAL_STORAGE)
         .request(
             object : OnPermissionCallback {

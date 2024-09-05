@@ -12,19 +12,20 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.Schema
 import com.osfans.trime.data.theme.Theme
 
-class SwitchesAdapter(private val theme: Theme) :
-    BaseQuickAdapter<Schema.Switch, SwitchesAdapter.Holder>() {
+class SwitchesAdapter(
+    private val theme: Theme,
+) : BaseQuickAdapter<Schema.Switch, SwitchesAdapter.Holder>() {
     private val showArrow = AppPrefs.defaultInstance().keyboard.switchArrowEnabled
 
-    inner class Holder(val ui: SwitchUi) : RecyclerView.ViewHolder(ui.root)
+    inner class Holder(
+        val ui: SwitchUi,
+    ) : RecyclerView.ViewHolder(ui.root)
 
     override fun onCreateViewHolder(
         context: Context,
         parent: ViewGroup,
         viewType: Int,
-    ): Holder {
-        return Holder(SwitchUi(context, theme))
-    }
+    ): Holder = Holder(SwitchUi(context, theme))
 
     override fun onBindViewHolder(
         holder: Holder,

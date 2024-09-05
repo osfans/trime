@@ -89,10 +89,11 @@ fun bitmapDrawable(path: String?): Drawable? {
 }
 
 fun StateListDrawable.stateDrawableAt(index: Int): Drawable =
-    javaClass.getMethod(
-        "getStateDrawable",
-        Int::class.javaPrimitiveType,
-    ).invoke(this, index) as Drawable
+    javaClass
+        .getMethod(
+            "getStateDrawable",
+            Int::class.javaPrimitiveType,
+        ).invoke(this, index) as Drawable
 
 fun StateListDrawable.indexOfStateSet(stateSet: IntArray): Int =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

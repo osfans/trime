@@ -109,13 +109,13 @@ class DbAdapter(
         }
 
         val confirm =
-            AlertDialog.Builder(context)
+            AlertDialog
+                .Builder(context)
                 .setTitle(R.string.delete_all)
                 .setMessage(R.string.liquid_keyboard_ask_to_delete_all)
                 .setPositiveButton(R.string.ok) { _, _ ->
                     deleteAll()
-                }
-                .setNegativeButton(R.string.cancel, null)
+                }.setNegativeButton(R.string.cancel, null)
                 .create()
         service.inputView?.showDialog(confirm)
     }

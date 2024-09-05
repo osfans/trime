@@ -16,7 +16,10 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.recyclerview.recyclerView
 
 @SuppressLint("ViewConstructor")
-class UnrolledCandidateLayout(context: Context, theme: Theme) : ConstraintLayout(context) {
+class UnrolledCandidateLayout(
+    context: Context,
+    theme: Theme,
+) : ConstraintLayout(context) {
     val recyclerView =
         recyclerView {
             isVerticalScrollBarEnabled = false

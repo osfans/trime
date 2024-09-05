@@ -32,7 +32,9 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
 
     private val limit get() = AppPrefs.defaultInstance().clipboard.draftLimit
     private val output get() =
-        AppPrefs.defaultInstance().clipboard.draftOutputRules
+        AppPrefs
+            .defaultInstance()
+            .clipboard.draftOutputRules
             .split('\n')
             .map { Regex(it) }
             .toHashSet()
@@ -78,14 +80,14 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     fun onInputEventChanged() {
         if (!(limit != 0 && this::dftDao.isInitialized)) return
 
-        TrimeInputMethodService.getServiceOrNull()
+        TrimeInputMethodService
+            .getServiceOrNull()
             ?.currentInputConnection
             ?.let { DatabaseBean.fromInputConnection(it) }
             ?.takeIf {
                 it.text!!.isNotBlank() &&
                     !it.text.matchesAny(output)
-            }
-            ?.let { b ->
+            }?.let { b ->
                 Timber.d("Accept $b")
                 launch {
                     mutex.withLock {
@@ -115,8 +117,7 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
                         } else {
                             it
                         }
-                    }
-                    .sortedBy { it.id }
+                    }.sortedBy { it.id }
                     .subList(0, all.size - limit)
             dftDao.delete(outdated)
         }

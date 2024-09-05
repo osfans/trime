@@ -7,7 +7,9 @@ package com.osfans.trime.data.opencc.dict
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import java.io.File
 
-class OpenCCDictionary(file: File) : Dictionary() {
+class OpenCCDictionary(
+    file: File,
+) : Dictionary() {
     override var file: File = file
         private set
 

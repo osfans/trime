@@ -22,7 +22,9 @@ import kotlin.system.measureTimeMillis
  *
  * @see [librime](https://github.com/rime/librime)
  */
-class Rime : RimeApi, RimeLifecycleOwner {
+class Rime :
+    RimeApi,
+    RimeLifecycleOwner {
     private val lifecycleImpl = RimeLifecycleImpl()
     override val lifecycle get() = lifecycleImpl
 
@@ -236,19 +238,13 @@ class Rime : RimeApi, RimeLifecycleOwner {
         val currentSchemaName get() = mStatus?.schemaName ?: ""
 
         @JvmStatic
-        fun hasMenu(): Boolean {
-            return !inputContext?.menu?.candidates.isNullOrEmpty()
-        }
+        fun hasMenu(): Boolean = !inputContext?.menu?.candidates.isNullOrEmpty()
 
         @JvmStatic
-        fun hasLeft(): Boolean {
-            return hasMenu() && inputContext?.menu?.pageNumber != 0
-        }
+        fun hasLeft(): Boolean = hasMenu() && inputContext?.menu?.pageNumber != 0
 
         @JvmStatic
-        fun showAsciiPunch(): Boolean {
-            return mStatus?.isAsciiPunch == true || mStatus?.isAsciiMode == true
-        }
+        fun showAsciiPunch(): Boolean = mStatus?.isAsciiPunch == true || mStatus?.isAsciiMode == true
 
         @JvmStatic
         val composingText: String
@@ -297,9 +293,7 @@ class Rime : RimeApi, RimeLifecycleOwner {
         }
 
         @JvmStatic
-        fun getOption(option: String): Boolean {
-            return getRimeOption(option)
-        }
+        fun getOption(option: String): Boolean = getRimeOption(option)
 
         fun toggleOption(option: String) {
             setOption(option, !getOption(option))

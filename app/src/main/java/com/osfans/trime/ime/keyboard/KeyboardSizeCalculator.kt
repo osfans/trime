@@ -98,9 +98,7 @@ class KeyboardSizeCalculator(
         )
     }
 
-    private fun calculateOneWeightWidthPx(): Float {
-        return (mAllowedWidth / (MAX_TOTAL_WEIGHT * (1 + splitSpaceRatio)))
-    }
+    private fun calculateOneWeightWidthPx(): Float = (mAllowedWidth / (MAX_TOTAL_WEIGHT * (1 + splitSpaceRatio)))
 
     private fun calculateScaledVerticalGap(
         rawSumHeight: Int,

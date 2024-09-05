@@ -17,7 +17,10 @@ import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 
-class CandidateUi(override val ctx: Context, private val compatView: View) : Ui {
+class CandidateUi(
+    override val ctx: Context,
+    private val compatView: View,
+) : Ui {
     val unrollButton =
         ToolButton(ctx, R.drawable.ic_baseline_expand_more_24).apply {
             visibility = View.INVISIBLE

@@ -23,24 +23,26 @@ object ColorPickerDialog {
         val allNames = all.values.mapNotNull { it["name"] }
         val currentId = ColorManager.selectedColor
         val currentIndex = all.keys.indexOfFirst { it == currentId }
-        return AlertDialog.Builder(context).apply {
-            setTitle(R.string.looks__selected_color_title)
-            if (all.isEmpty()) {
-                setMessage(R.string.no_color_to_select)
-            } else {
-                setSingleChoiceItems(
-                    allNames.toTypedArray(),
-                    currentIndex,
-                ) { dialog, which ->
-                    scope.launch {
-                        if (which != currentIndex) {
-                            ColorManager.setColorScheme(allIds.elementAt(which))
+        return AlertDialog
+            .Builder(context)
+            .apply {
+                setTitle(R.string.looks__selected_color_title)
+                if (all.isEmpty()) {
+                    setMessage(R.string.no_color_to_select)
+                } else {
+                    setSingleChoiceItems(
+                        allNames.toTypedArray(),
+                        currentIndex,
+                    ) { dialog, which ->
+                        scope.launch {
+                            if (which != currentIndex) {
+                                ColorManager.setColorScheme(allIds.elementAt(which))
+                            }
+                            dialog.dismiss()
                         }
-                        dialog.dismiss()
                     }
                 }
-            }
-            setNegativeButton(android.R.string.cancel, null)
-        }.create()
+                setNegativeButton(android.R.string.cancel, null)
+            }.create()
     }
 }

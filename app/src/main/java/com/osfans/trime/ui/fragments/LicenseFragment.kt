@@ -29,14 +29,14 @@ class LicenseFragment : PaddingPreferenceFragment() {
         lifecycleScope.launch {
             val context = preferenceManager.context
             val screen = preferenceManager.createPreferenceScreen(context)
-            Libs.Builder()
+            Libs
+                .Builder()
                 .withJson(context, R.raw.aboutlibraries)
                 .build()
                 .libraries
                 .sortedBy {
                     if (it.tag == "native") it.uniqueId.uppercase() else it.uniqueId.lowercase()
-                }
-                .forEach {
+                }.forEach {
                     screen.addPreference(
                         Preference(context).apply {
                             isIconSpaceReserved = false
@@ -68,12 +68,12 @@ class LicenseFragment : PaddingPreferenceFragment() {
             else -> {
                 val licenseArray = licenses.toTypedArray()
                 val licenseNames = licenseArray.map { it.spdxId ?: it.name }.toTypedArray()
-                AlertDialog.Builder(requireContext())
+                AlertDialog
+                    .Builder(requireContext())
                     .setTitle(uniqueId)
                     .setItems(licenseNames) { _, idx ->
                         showLicenseContent(licenseArray[idx])
-                    }
-                    .setPositiveButton(android.R.string.cancel, null)
+                    }.setPositiveButton(android.R.string.cancel, null)
                     .show()
             }
         }

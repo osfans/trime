@@ -40,7 +40,9 @@ class KeyboardWindow(
     private val theme: Theme,
     private val rime: RimeSession,
     private val windowManager: BoardWindowManager,
-) : BoardWindow.NoBarBoardWindow(), ResidentWindow, InputBroadcastReceiver {
+) : BoardWindow.NoBarBoardWindow(),
+    ResidentWindow,
+    InputBroadcastReceiver {
     private val cursorCapsMode: Int
         get() =
             service.currentInputEditorInfo.run {
@@ -142,8 +144,11 @@ class KeyboardWindow(
         // 切换到横屏布局
         if (service.isLandscapeMode()) {
             val landscape =
-                theme.presetKeyboards?.get(final)?.configMap
-                    ?.getValue("landscape_keyboard")?.getString() ?: ""
+                theme.presetKeyboards
+                    ?.get(final)
+                    ?.configMap
+                    ?.getValue("landscape_keyboard")
+                    ?.getString() ?: ""
             if (landscape.isNotEmpty() && presetKeyboardIds.contains(landscape)) final = landscape
         }
         return final
@@ -250,8 +255,9 @@ class KeyboardWindow(
         mainKeyboardView.onKeyboardActionListener = null
     }
 
-    inner class ListenerDecorator(private val delegate: KeyboardView.OnKeyboardActionListener) :
-        KeyboardView.OnKeyboardActionListener by delegate {
+    inner class ListenerDecorator(
+        private val delegate: KeyboardView.OnKeyboardActionListener,
+    ) : KeyboardView.OnKeyboardActionListener by delegate {
         override fun onEvent(event: Event?) {
             event ?: return
             if (event.commit.isNotEmpty()) {

@@ -17,7 +17,9 @@ import timber.log.Timber
 import java.util.Locale
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
-class Event(var s: String) {
+class Event(
+    var s: String,
+) {
     var code = 0
     var mask = 0
     private var text: String = ""
@@ -39,7 +41,8 @@ class Event(var s: String) {
     // 快速把字符串解析为event, 暂时只处理了comment类型 不能完全正确处理=，
     private fun parseAction(raw: String): Boolean {
         val pairs =
-            raw.split(',')
+            raw
+                .split(',')
                 .filter { it.isNotBlank() }
                 .map { it.split('=', limit = 2) }
                 .associate { it.first() to (it.getOrNull(1) ?: "") }
@@ -65,7 +68,9 @@ class Event(var s: String) {
         if (str.isEmpty()) return ""
         if (str.length == 1 && kb != null && kb.needUpCase()) {
             str = str.uppercase(Locale.getDefault())
-        } else if (str.length == 1 && kb != null && !Rime.isAsciiMode &&
+        } else if (str.length == 1 &&
+            kb != null &&
+            !Rime.isAsciiMode &&
             kb.isLabelUppercase
         ) {
             str = str.uppercase(Locale.getDefault())
@@ -78,7 +83,8 @@ class Event(var s: String) {
         if (state != null) return state
         if (kb == null) return adjustCase(label, null)
         if (kb.isOnlyShiftOn) {
-            if (code >= KeyEvent.KEYCODE_0 && code <= KeyEvent.KEYCODE_9 &&
+            if (code >= KeyEvent.KEYCODE_0 &&
+                code <= KeyEvent.KEYCODE_9 &&
                 !AppPrefs.defaultInstance().keyboard.hookShiftNum
             ) {
                 return adjustCase(shiftLabel, kb)
@@ -98,21 +104,20 @@ class Event(var s: String) {
 
     fun getText(kb: Keyboard?): String {
         if (text.isNotEmpty()) return adjustCase(text, kb)
-        if (kb != null && kb.needUpCase() && mask == 0 &&
-            code >= KeyEvent.KEYCODE_A && code <= KeyEvent.KEYCODE_Z
+        if (kb != null &&
+            kb.needUpCase() &&
+            mask == 0 &&
+            code >= KeyEvent.KEYCODE_A &&
+            code <= KeyEvent.KEYCODE_Z
         ) {
             return adjustCase(label, kb)
         }
         return ""
     }
 
-    fun getPreviewText(kb: Keyboard?): String {
-        return preview.ifEmpty { getLabel(kb) }
-    }
+    fun getPreviewText(kb: Keyboard?): String = preview.ifEmpty { getLabel(kb) }
 
-    fun getToggle(): String {
-        return toggle.ifEmpty { "ascii_mode" }
-    }
+    fun getToggle(): String = toggle.ifEmpty { "ascii_mode" }
 
     private fun parseLabel() {
         if (label.isNotEmpty()) return
@@ -219,9 +224,7 @@ class Event(var s: String) {
         private fun hasModifier(
             mask: Int,
             modifier: Int,
-        ): Boolean {
-            return mask and modifier > 0
-        }
+        ): Boolean = mask and modifier > 0
 
         // KeyboardEvent 从软键盘的按键keycode（可能含有mask）和mask，分离出rimekeycode和mask构成的数组
         @JvmStatic

@@ -34,7 +34,9 @@ import splitties.views.textResource
  *
  * TODO: Add a help or info button to show what's problem is behind the scene.
  */
-class InitializationUi(override val ctx: Context) : Ui {
+class InitializationUi(
+    override val ctx: Context,
+) : Ui {
     val initial =
         constraintLayout {
             backgroundColor = color(R.color.colorPrimaryDark)

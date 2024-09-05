@@ -19,8 +19,10 @@ import com.osfans.trime.databinding.SimpleItemOneBinding
 import com.osfans.trime.databinding.SimpleItemRowBinding
 import splitties.dimensions.dp
 
-class SimpleAdapter(theme: Theme, private val columnSize: Int) :
-    RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
+class SimpleAdapter(
+    theme: Theme,
+    private val columnSize: Int,
+) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<SimpleKeyBean>()
     private val mBeansByRows = mutableListOf<List<SimpleKeyBean>>()
     val beans get() = mBeans
@@ -35,13 +37,9 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) :
         notifyItemRangeInserted(0, mBeansByRows.size)
     }
 
-    override fun getItemCount(): Int {
-        return mBeansByRows.size
-    }
+    override fun getItemCount(): Int = mBeansByRows.size
 
-    override fun getItemId(position: Int): Long {
-        return position * 1000L
-    }
+    override fun getItemId(position: Int): Long = position * 1000L
 
     private val mSingleWidth = theme.liquid.getInt("single_width")
     private val mSingleHeight = theme.liquid.getInt("key_height")
@@ -90,8 +88,10 @@ class SimpleAdapter(theme: Theme, private val columnSize: Int) :
         return holder
     }
 
-    class ViewHolder(binding: SimpleItemRowBinding, views: List<SimpleItemOneBinding>) :
-        RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(
+        binding: SimpleItemRowBinding,
+        views: List<SimpleItemOneBinding>,
+    ) : RecyclerView.ViewHolder(binding.root) {
         val simpleKeyTexts = views.map { it.root.getChildAt(0) as TextView }
         val wrappers = views.map { it.root.apply { getChildAt(1).visibility = View.GONE } }
     }

@@ -45,10 +45,12 @@ object InputFeedbackManager {
     fun loadSoundEffects(context: Context) {
         tts = TextToSpeech(context, null)
         soundPool =
-            SoundPool.Builder()
+            SoundPool
+                .Builder()
                 .setMaxStreams(1)
                 .setAudioAttributes(
-                    AudioAttributes.Builder()
+                    AudioAttributes
+                        .Builder()
                         .setLegacyStreamType(AudioManager.STREAM_SYSTEM)
                         .build(),
                 ).build()
@@ -178,7 +180,8 @@ object InputFeedbackManager {
         val text =
             when {
                 0 is T -> {
-                    KeyEvent.keyCodeToString(content as Int)
+                    KeyEvent
+                        .keyCodeToString(content as Int)
                         .replace("KEYCODE_", "")
                         .replace("_", " ")
                         .lowercase(Locale.getDefault())

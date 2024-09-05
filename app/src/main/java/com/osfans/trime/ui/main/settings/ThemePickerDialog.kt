@@ -34,22 +34,24 @@ object ThemePickerDialog {
         val current =
             AppPrefs.defaultInstance().theme.selectedTheme
         val currentIndex = all.indexOfFirst { it == current }
-        return AlertDialog.Builder(context).apply {
-            setTitle(R.string.looks__selected_theme_title)
-            if (allNames.isEmpty()) {
-                setMessage(R.string.no_theme_to_select)
-            } else {
-                setSingleChoiceItems(
-                    allNames.toTypedArray(),
-                    currentIndex,
-                ) { dialog, which ->
-                    scope.launch {
-                        ThemeManager.setNormalTheme(all[which])
-                        dialog.dismiss()
+        return AlertDialog
+            .Builder(context)
+            .apply {
+                setTitle(R.string.looks__selected_theme_title)
+                if (allNames.isEmpty()) {
+                    setMessage(R.string.no_theme_to_select)
+                } else {
+                    setSingleChoiceItems(
+                        allNames.toTypedArray(),
+                        currentIndex,
+                    ) { dialog, which ->
+                        scope.launch {
+                            ThemeManager.setNormalTheme(all[which])
+                            dialog.dismiss()
+                        }
                     }
                 }
-            }
-            setNegativeButton(android.R.string.cancel, null)
-        }.create()
+                setNegativeButton(android.R.string.cancel, null)
+            }.create()
     }
 }

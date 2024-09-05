@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
+class Logcat(
+    val pid: Int? = Process.myPid(),
+) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private var process: java.lang.Process? = null
     private var emittingJob: Job? = null
 
@@ -40,7 +42,8 @@ class Logcat(val pid: Int? = Process.myPid()) : CoroutineScope by CoroutineScope
     fun getLogAsync(): Deferred<Result<List<String>>> =
         async {
             runCatching {
-                Runtime.getRuntime()
+                Runtime
+                    .getRuntime()
                     .exec(arrayOf("logcat", pid?.let { "--pid=$it" } ?: "", "-d"))
                     .inputStream
                     .bufferedReader()

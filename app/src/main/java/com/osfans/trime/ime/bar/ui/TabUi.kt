@@ -13,7 +13,9 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.matchParent
 
-class TabUi(override val ctx: Context) : Ui {
+class TabUi(
+    override val ctx: Context,
+) : Ui {
     private var external: View? = null
 
     override val root = constraintLayout { }

@@ -27,16 +27,12 @@ abstract class PreferenceDelegateOwner(
     protected fun bool(
         key: String,
         defaultValue: Boolean,
-    ): PreferenceDelegate<Boolean> {
-        return PreferenceDelegate(sharedPreferences, key, defaultValue)
-    }
+    ): PreferenceDelegate<Boolean> = PreferenceDelegate(sharedPreferences, key, defaultValue)
 
     protected fun string(
         key: String,
         defaultValue: String,
-    ): PreferenceDelegate<String> {
-        return PreferenceDelegate(sharedPreferences, key, defaultValue)
-    }
+    ): PreferenceDelegate<String> = PreferenceDelegate(sharedPreferences, key, defaultValue)
 
     protected fun stringSet(
         key: String,

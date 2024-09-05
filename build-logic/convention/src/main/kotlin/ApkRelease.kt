@@ -11,7 +11,9 @@ object ApkRelease {
 
     private val Project.props: Properties
         get() =
-            rootProject.file(KEYSTORE_PROPERTIES).takeIf { it.exists() }
+            rootProject
+                .file(KEYSTORE_PROPERTIES)
+                .takeIf { it.exists() }
                 ?.let { Properties().apply { load(it.inputStream()) } }
                 ?: Properties()
 

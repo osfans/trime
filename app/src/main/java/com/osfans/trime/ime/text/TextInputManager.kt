@@ -88,9 +88,7 @@ class TextInputManager(
         private val DELIMITER_SPLITTER = """[-_]""".toRegex()
         private var instance: TextInputManager? = null
 
-        fun instanceOrNull(): TextInputManager? {
-            return instance
-        }
+        fun instanceOrNull(): TextInputManager? = instance
     }
 
     init {
@@ -105,7 +103,8 @@ class TextInputManager(
     override fun onCreate() {
         super.onCreate()
         rimeNotificationJob =
-            rime.run { notificationFlow }
+            rime
+                .run { notificationFlow }
                 .onEach(::handleRimeNotification)
                 .launchIn(trime.lifecycleScope)
 
@@ -320,7 +319,8 @@ class TextInputManager(
                         onKey(event.code, 0)
                         return
                     } else if (prefs.keyboard.hookShiftSymbol) {
-                        if (event.code >= KeyEvent.KEYCODE_GRAVE && event.code <= KeyEvent.KEYCODE_SLASH ||
+                        if (event.code >= KeyEvent.KEYCODE_GRAVE &&
+                            event.code <= KeyEvent.KEYCODE_SLASH ||
                             event.code == KeyEvent.KEYCODE_COMMA ||
                             event.code == KeyEvent.KEYCODE_PERIOD
                         ) {

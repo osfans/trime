@@ -27,7 +27,9 @@ import java.text.MessageFormat
     "ktlint:standard:property-naming",
     "ktlint:standard:value-argument-comment",
 )
-class Key(private val mKeyboard: Keyboard) {
+class Key(
+    private val mKeyboard: Keyboard,
+) {
     var events = arrayOfNulls<Event>(EVENT_NUM)
 
     var edgeFlags = 0
@@ -139,29 +141,26 @@ class Key(private val mKeyboard: Keyboard) {
     private val keyOffsetY: Int
         get() = if (isPressed) keyPressOffsetY else 0
 
-    fun getBackColorForState(drawableState: IntArray): Drawable? {
-        return when (drawableState) {
+    fun getBackColorForState(drawableState: IntArray): Drawable? =
+        when (drawableState) {
             KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keyBackColor
             KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeyBackColor
             else -> null
         }
-    }
 
-    fun getTextColorForState(drawableState: IntArray): Int? {
-        return when (drawableState) {
+    fun getTextColorForState(drawableState: IntArray): Int? =
+        when (drawableState) {
             KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keyTextColor
             KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeyTextColor
             else -> null
         }
-    }
 
-    fun getSymbolColorForState(drawableState: IntArray): Int? {
-        return when (drawableState) {
+    fun getSymbolColorForState(drawableState: IntArray): Int? =
+        when (drawableState) {
             KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keySymbolColor
             KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeySymbolColor
             else -> null
         }
-    }
 
     /**
      * Informs the key that it has been pressed, in case it needs to change its appearance or state.
@@ -363,9 +362,7 @@ class Key(private val mKeyboard: Keyboard) {
     val longClick: Event?
         get() = events[KeyEventType.LONG_CLICK.ordinal]
 
-    fun hasEvent(i: Int): Boolean {
-        return events[i] != null
-    }
+    fun hasEvent(i: Int): Boolean = events[i] != null
 
     fun getEvent(i: Int): Event? {
         var e: Event? = null
@@ -391,14 +388,14 @@ class Key(private val mKeyboard: Keyboard) {
     val code: Int
         get() = click!!.code
 
-    fun getCode(type: Int): Int {
-        return getEvent(type)!!.code
-    }
+    fun getCode(type: Int): Int = getEvent(type)!!.code
 
     fun getLabel(): String? {
         val event = event
-        return if (!TextUtils.isEmpty(label) && event === click &&
-            events[KeyEventType.ASCII.ordinal] == null && !showAsciiPunch()
+        return if (!TextUtils.isEmpty(label) &&
+            event === click &&
+            events[KeyEventType.ASCII.ordinal] == null &&
+            !showAsciiPunch()
         ) {
             label
         } else {
@@ -406,13 +403,12 @@ class Key(private val mKeyboard: Keyboard) {
         }
     }
 
-    fun getPreviewText(type: Int): String {
-        return if (type == KeyEventType.CLICK.ordinal) {
+    fun getPreviewText(type: Int): String =
+        if (type == KeyEventType.CLICK.ordinal) {
             event!!.getPreviewText(mKeyboard)
         } else {
             getEvent(type)!!.getPreviewText(mKeyboard)
         }
-    }
 
     val symbolLabel: String?
         get() {
@@ -462,8 +458,6 @@ class Key(private val mKeyboard: Keyboard) {
         private val EVENT_NUM = KeyEventType.entries.size
 
         @JvmStatic
-        fun isTrimeModifierKey(keycode: Int): Boolean {
-            return if (keycode == KeyEvent.KEYCODE_FUNCTION) false else KeyEvent.isModifierKey(keycode)
-        }
+        fun isTrimeModifierKey(keycode: Int): Boolean = if (keycode == KeyEvent.KEYCODE_FUNCTION) false else KeyEvent.isModifierKey(keycode)
     }
 }

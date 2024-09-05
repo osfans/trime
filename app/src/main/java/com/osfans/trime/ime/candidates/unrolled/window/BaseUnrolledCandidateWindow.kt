@@ -46,7 +46,8 @@ abstract class BaseUnrolledCandidateWindow(
     private val bar: QuickBar,
     private val windowManager: BoardWindowManager,
     private val compactCandidate: CompactCandidateModule,
-) : BoardWindow.NoBarBoardWindow(), InputBroadcastReceiver {
+) : BoardWindow.NoBarBoardWindow(),
+    InputBroadcastReceiver {
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
     private lateinit var candidateLayout: UnrolledCandidateLayout
 

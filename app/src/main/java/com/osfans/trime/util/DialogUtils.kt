@@ -33,7 +33,8 @@ fun Context.progressBarDialogIndeterminate(
     @StringRes titleId: Int,
 ): AlertDialog.Builder {
     val androidStyles = AndroidStyles(this)
-    return AlertDialog.Builder(this)
+    return AlertDialog
+        .Builder(this)
         .setTitle(titleId)
         .setView(
             verticalLayout {
@@ -48,8 +49,7 @@ fun Context.progressBarDialogIndeterminate(
                     },
                 )
             },
-        )
-        .setCancelable(false)
+        ).setCancelable(false)
 }
 
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/e37f5513239bab279a9e58cf0c9b163e0dbf5efb/app/src/main/java/org/fcitx/fcitx5/android/ui/common/Preset.kt#L76
@@ -81,7 +81,8 @@ suspend fun Context.briefResultLogDialog(
 ) = withContext(Dispatchers.Main.immediate) {
     val log =
         withContext(Dispatchers.IO) {
-            Runtime.getRuntime()
+            Runtime
+                .getRuntime()
                 .exec(arrayOf("logcat", "-d", "-v", "time", "-s", "$tag:$priority"))
                 .inputStream
                 .bufferedReader()
@@ -96,7 +97,8 @@ suspend fun Context.briefResultLogDialog(
                         setPadding(dp(20), paddingTop, dp(20), paddingBottom)
                     }
             }
-        AlertDialog.Builder(this@briefResultLogDialog)
+        AlertDialog
+            .Builder(this@briefResultLogDialog)
             .setTitle(R.string.setup__done)
             .setMessage(R.string.found_some_problems)
             .setView(logView)
@@ -104,8 +106,7 @@ suspend fun Context.briefResultLogDialog(
                 val logText = ClipData.newPlainText("log", log.joinToString("\n"))
                 clipboardManager.setPrimaryClip(logText)
                 this@briefResultLogDialog.toast(R.string.copy_done)
-            }
-            .setPositiveButton(R.string.setup__skip_hint_yes, null)
+            }.setPositiveButton(R.string.setup__skip_hint_yes, null)
             .show()
     } else {
         toast(R.string.setup__done)

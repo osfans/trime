@@ -17,7 +17,9 @@ import com.charleskorn.kaml.yamlScalar
 import kotlinx.serialization.DeserializationStrategy
 
 /** Config item base class */
-abstract class ConfigItem(val node: YamlNode) {
+abstract class ConfigItem(
+    val node: YamlNode,
+) {
     enum class ValueType {
         Null,
         Scalar,
@@ -55,13 +57,13 @@ abstract class ConfigItem(val node: YamlNode) {
     private fun error(
         item: ConfigItem,
         expectedType: String,
-    ): Nothing {
-        throw IllegalArgumentException("Expected element to be $expectedType but is ${item::class.simpleName}")
-    }
+    ): Nothing = throw IllegalArgumentException("Expected element to be $expectedType but is ${item::class.simpleName}")
 }
 
 /** The wrapper of [YamlScalar] */
-class ConfigValue(private val scalar: YamlScalar) : ConfigItem(scalar) {
+class ConfigValue(
+    private val scalar: YamlScalar,
+) : ConfigItem(scalar) {
     constructor(item: ConfigItem) : this(item.node.yamlScalar)
 
     fun getString() = scalar.content
@@ -80,7 +82,10 @@ class ConfigValue(private val scalar: YamlScalar) : ConfigItem(scalar) {
 }
 
 /** The wrapper of [YamlList] */
-class ConfigList(private val list: YamlList) : ConfigItem(list), List<ConfigItem?> {
+class ConfigList(
+    private val list: YamlList,
+) : ConfigItem(list),
+    List<ConfigItem?> {
     constructor(item: ConfigItem) : this(item.node.yamlList)
 
     private val items = list.items.map { convertFromYaml(it) }
@@ -118,7 +123,10 @@ class ConfigList(private val list: YamlList) : ConfigItem(list), List<ConfigItem
     override fun toString(): String = items.joinToString(prefix = "[", postfix = "]")
 }
 
-class ConfigMap(private val map: YamlMap) : ConfigItem(map), Map<String, ConfigItem?> {
+class ConfigMap(
+    private val map: YamlMap,
+) : ConfigItem(map),
+    Map<String, ConfigItem?> {
     constructor(item: ConfigItem) : this(item.node.yamlMap)
 
     override fun isEmpty() = map.entries.isEmpty()
@@ -132,9 +140,10 @@ class ConfigMap(private val map: YamlMap) : ConfigItem(map), Map<String, ConfigI
     override fun containsValue(value: ConfigItem?): Boolean = entries.any { it.value == value }
 
     override val entries: Set<Map.Entry<String, ConfigItem?>> =
-        map.entries.entries.associate { (s, n) ->
-            s.content to convertFromYaml(n)
-        }.entries
+        map.entries.entries
+            .associate { (s, n) ->
+                s.content to convertFromYaml(n)
+            }.entries
 
     override val keys: Set<String> = entries.map { it.key }.toSet()
 

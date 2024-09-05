@@ -51,7 +51,8 @@ import kotlin.math.pow
 /** 顯示[鍵盤][Keyboard]及[按鍵][Key]  */
 class KeyboardView(
     context: Context,
-) : View(context), View.OnClickListener {
+) : View(context),
+    View.OnClickListener {
     /** 處理按鍵、觸摸等輸入事件  */
     interface OnKeyboardActionListener {
         /**
@@ -116,7 +117,8 @@ class KeyboardView(
     private var mCurrentKeyIndex = NOT_A_KEY
     private val mKeyTextSize = theme.generalStyle.keyTextSize.toFloat()
     private val mLabelTextSize =
-        theme.generalStyle.keyLongTextSize.toFloat()
+        theme.generalStyle.keyLongTextSize
+            .toFloat()
             .takeIf { it > 0 } ?: mKeyTextSize
     private val mKeyTextColor =
         ColorStateList(
@@ -338,7 +340,9 @@ class KeyboardView(
 
     private val mHandler = MyHandler(this)
 
-    private class MyHandler(view: KeyboardView) : LeakGuardHandlerWrapper<KeyboardView?>(view) {
+    private class MyHandler(
+        view: KeyboardView,
+    ) : LeakGuardHandlerWrapper<KeyboardView?>(view) {
         override fun handleMessage(msg: Message) {
             val mKeyboardView = getOwnerInstanceOrNull() ?: return
             when (msg.what) {
@@ -553,14 +557,13 @@ class KeyboardView(
      * @param key 按下的修饰键(非组合键）
      * @return
      */
-    private fun setModifier(key: Key): Boolean {
-        return if (mKeyboard?.clikModifierKey(key.isShiftLock, key.modifierKeyOnMask) == true) {
+    private fun setModifier(key: Key): Boolean =
+        if (mKeyboard?.clikModifierKey(key.isShiftLock, key.modifierKeyOnMask) == true) {
             invalidateAllKeys()
             true
         } else {
             false
         }
-    }
 
     /**
      * 設定鍵盤的Shift鍵狀態
@@ -584,26 +587,24 @@ class KeyboardView(
         }
     }
 
-    private fun resetShifted(): Boolean {
-        return if (mKeyboard?.resetShifted() == true) {
+    private fun resetShifted(): Boolean =
+        if (mKeyboard?.resetShifted() == true) {
             // The whole keyboard probably needs to be redrawn
             invalidateAllKeys()
             true
         } else {
             false
         }
-    }
 
     // 重置全部修饰键的状态
-    private fun resetModifer(): Boolean {
-        return if (mKeyboard?.resetModifer() == true) {
+    private fun resetModifer(): Boolean =
+        if (mKeyboard?.resetModifer() == true) {
             // The whole keyboard probably needs to be redrawn
             invalidateAllKeys()
             true
         } else {
             false
         }
-    }
 
     // 重置全部修饰键的状态(如果有锁定则不重置）
     private fun refreshModifier() {
@@ -1286,9 +1287,7 @@ class KeyboardView(
     }
      */
 
-    override fun performClick(): Boolean {
-        return super.performClick()
-    }
+    override fun performClick(): Boolean = super.performClick()
 
     override fun onTouchEvent(me: MotionEvent): Boolean {
         // Convert multi-pointer up/down events to single up/down events to

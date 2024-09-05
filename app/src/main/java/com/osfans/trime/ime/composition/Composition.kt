@@ -44,7 +44,10 @@ import kotlin.math.absoluteValue
 
 /** 編碼區，顯示已輸入的按鍵編碼，可使用方向鍵或觸屏移動光標位置  */
 @SuppressLint("AppCompatCustomView")
-class Composition(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
+class Composition(
+    context: Context,
+    attrs: AttributeSet?,
+) : TextView(context, attrs) {
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val theme = ThemeManager.activeTheme
     private val textInputManager = TextInputManager.instanceOrNull()
@@ -71,7 +74,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
     private val showComment = !Rime.getOption("_hide_comment")
     private val allPhrases = theme.generalStyle.layout.allPhrases
     private val maxCount =
-        theme.generalStyle.layout.maxEntries.takeIf { it > 0 }
+        theme.generalStyle.layout.maxEntries
+            .takeIf { it > 0 }
             ?: 30
     private val maxLength = theme.generalStyle.layout.maxLength
     private val minCheckLength = theme.generalStyle.layout.minLength // 候选词长度大于设定，才会显示到悬浮窗中
@@ -114,8 +118,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         ;
 
         companion object {
-            fun fromString(string: String): Movable {
-                return runCatching {
+            fun fromString(string: String): Movable =
+                runCatching {
                     when (string) {
                         "true" -> ALWAYS
                         "false" -> NEVER
@@ -123,7 +127,6 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                         else -> valueOf(string)
                     }
                 }.getOrDefault(NEVER)
-            }
         }
     }
 
@@ -164,7 +167,9 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         onSelectCandidate = listener
     }
 
-    private inner class EventSpan(private val event: Event) : ClickableSpan() {
+    private inner class EventSpan(
+        private val event: Event,
+    ) : ClickableSpan() {
         override fun onClick(tv: View) {
             textInputManager?.onPress(event.code)
             textInputManager?.onEvent(event)
@@ -189,8 +194,10 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
 
     init {
         setLineSpacing(
-            theme.generalStyle.layout.lineSpacing.toFloat(),
-            theme.generalStyle.layout.lineSpacingMultiplier.coerceAtLeast(1f),
+            theme.generalStyle.layout.lineSpacing
+                .toFloat(),
+            theme.generalStyle.layout.lineSpacingMultiplier
+                .coerceAtLeast(1f),
         )
         val marginX = dp(theme.generalStyle.layout.marginX)
         val marginY = dp(theme.generalStyle.layout.marginY)
@@ -274,7 +281,10 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
                 alignmentSpan,
                 CompositionSpan(),
                 AbsoluteSizeSpan(sp(theme.generalStyle.textSize)),
-                m.letterSpacing.toFloat().takeIf { it > 0 }?.let { ScaleXSpan(it) },
+                m.letterSpacing
+                    .toFloat()
+                    .takeIf { it > 0 }
+                    ?.let { ScaleXSpan(it) },
             ).mapNotNull { it }.toTypedArray()
         val colorSpans = listOf(highlightTextColorSpan, highlightBackColorSpan).mapNotNull { it }
         inSpans(alignmentSpan) { append(m.start) }
@@ -379,7 +389,8 @@ class Composition(context: Context, attrs: AttributeSet?) : TextView(context, at
         val alignmentSpan = alignmentSpan(m.align)
         val moveSpans =
             listOf(alignmentSpan, keyTextSizeSpan, keyTextColorSpan)
-                .mapNotNull { it }.toTypedArray()
+                .mapNotNull { it }
+                .toTypedArray()
 
         inSpans(alignmentSpan) { append(m.start) }
         inSpans(*moveSpans) {

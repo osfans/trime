@@ -41,11 +41,12 @@ class DataChecksumsPlugin : Plugin<Project> {
             inputDir.set(target.assetsDir.resolve("rime"))
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
         }
-        target.task<Delete>(CLEAN_TASK) {
-            delete(target.assetsDir.resolve(FILE_NAME))
-        }.also {
-            target.tasks.findByName("clean")?.dependsOn(it)
-        }
+        target
+            .task<Delete>(CLEAN_TASK) {
+                delete(target.assetsDir.resolve(FILE_NAME))
+            }.also {
+                target.tasks.findByName("clean")?.dependsOn(it)
+            }
     }
 
     abstract class DataChecksumsTask : DefaultTask() {
@@ -68,7 +69,8 @@ class DataChecksumsPlugin : Plugin<Project> {
         private fun serialize(files: Map<String, String>) {
             val checksums =
                 DataChecksums(
-                    Hashing.sha256()
+                    Hashing
+                        .sha256()
                         .hashString(
                             files.entries.joinToString { it.key + it.value },
                             Charset.defaultCharset(),
@@ -87,15 +89,15 @@ class DataChecksumsPlugin : Plugin<Project> {
         @TaskAction
         fun execute(inputChanges: InputChanges) {
             val map =
-                file.exists()
+                file
+                    .exists()
                     .takeIf { it }
                     ?.runCatching {
                         deserialize()
                             // remove all old dirs
                             .filterValues { it.isNotBlank() }
                             .toMutableMap()
-                    }
-                    ?.getOrNull()
+                    }?.getOrNull()
                     ?: mutableMapOf()
 
             fun File.allParents(): List<File> =

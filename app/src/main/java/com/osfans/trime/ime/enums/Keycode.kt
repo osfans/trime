@@ -431,9 +431,7 @@ enum class Keycode {
             reverseMap[KP_9] = "9"
         }
 
-        fun isStdKey(keycode: Int): Boolean {
-            return keycode in SOFT_LEFT.ordinal..PROFILE_SWITCH.ordinal
-        }
+        fun isStdKey(keycode: Int): Boolean = keycode in SOFT_LEFT.ordinal..PROFILE_SWITCH.ordinal
 
         fun toStdKeyEvent(
             keycode: Int,
@@ -478,9 +476,7 @@ enum class Keycode {
             return keycode >= A.ordinal || reverseMap.containsKey(entries[keycode])
         }
 
-        fun getSymbolLabel(keycode: Keycode): String {
-            return reverseMap[keycode] ?: ""
-        }
+        fun getSymbolLabel(keycode: Keycode): String = reverseMap[keycode] ?: ""
 
         fun getDisplayLabel(
             keyCode: Int,
@@ -516,21 +512,16 @@ enum class Keycode {
             )
 
         @JvmStatic
-        fun fromString(s: String): Keycode {
-            return convertMap[s] ?: VoidSymbol
-        }
+        fun fromString(s: String): Keycode = convertMap[s] ?: VoidSymbol
 
         @JvmStatic
-        fun valueOf(ordinal: Int): Keycode {
-            return runCatching {
+        fun valueOf(ordinal: Int): Keycode =
+            runCatching {
                 entries[ordinal]
             }.getOrDefault(VoidSymbol)
-        }
 
         @JvmStatic
-        fun keyNameOf(ordinal: Int): String {
-            return valueOf(ordinal).toString().substringAfter('_')
-        }
+        fun keyNameOf(ordinal: Int): String = valueOf(ordinal).toString().substringAfter('_')
 
         @JvmStatic
         fun keyCodeOf(name: String): Int {

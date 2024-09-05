@@ -27,15 +27,19 @@ import kotlin.coroutines.CoroutineContext
  *
  * Adapted from [fcitx5-android/FcitxDispatcher.kt](https://github.com/fcitx5-android/fcitx5-android/blob/364afb44dcf0d9e3db3d43a21a32601b2190cbdf/app/src/main/java/org/fcitx/fcitx5/android/core/FcitxDispatcher.kt).
  */
-class RimeDispatcher(private val looper: RimeLooper) : CoroutineDispatcher() {
+class RimeDispatcher(
+    private val looper: RimeLooper,
+) : CoroutineDispatcher() {
     interface RimeLooper {
         fun nativeStartup(fullCheck: Boolean)
 
         fun nativeFinalize()
     }
 
-    class WrappedRunnable(private val runnable: Runnable, private val name: String? = null) :
-        Runnable by runnable {
+    class WrappedRunnable(
+        private val runnable: Runnable,
+        private val name: String? = null,
+    ) : Runnable by runnable {
         private val time = System.currentTimeMillis()
         var started = false
             private set
@@ -59,9 +63,10 @@ class RimeDispatcher(private val looper: RimeLooper) : CoroutineDispatcher() {
     }
 
     private val internalDispatcher =
-        Executors.newSingleThreadExecutor {
-            Thread(it, "rime-main")
-        }.asCoroutineDispatcher()
+        Executors
+            .newSingleThreadExecutor {
+                Thread(it, "rime-main")
+            }.asCoroutineDispatcher()
 
     private val internalScope = CoroutineScope(internalDispatcher)
 

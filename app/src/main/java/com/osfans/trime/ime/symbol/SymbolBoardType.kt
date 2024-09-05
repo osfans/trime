@@ -61,14 +61,10 @@ enum class SymbolBoardType {
 
         // 是否在liquidKeyboard键盘区域展示按键
         @JvmStatic
-        fun hasKeys(type: SymbolBoardType): Boolean {
-            return type > HISTORY
-        }
+        fun hasKeys(type: SymbolBoardType): Boolean = type > HISTORY
 
         // 是否呈现在liquidKeyboard键盘区域的tabs列表中
         @JvmStatic
-        fun hasKey(type: SymbolBoardType): Boolean {
-            return type >= CLIPBOARD
-        }
+        fun hasKey(type: SymbolBoardType): Boolean = type >= CLIPBOARD
     }
 }

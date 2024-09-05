@@ -22,7 +22,9 @@ import splitties.views.gravityCenter
 import splitties.views.imageResource
 import splitties.views.padding
 
-class ToolButton(context: Context) : FrameLayout(context) {
+class ToolButton(
+    context: Context,
+) : FrameLayout(context) {
     val image =
         imageView {
             isClickable = false

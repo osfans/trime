@@ -10,8 +10,10 @@ import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.daemon.RimeSession
 import timber.log.Timber
 
-class CandidatesPagingSource(val rime: RimeSession, val offset: Int) :
-    PagingSource<Int, CandidateItem>() {
+class CandidatesPagingSource(
+    val rime: RimeSession,
+    val offset: Int,
+) : PagingSource<Int, CandidateItem>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CandidateItem> {
         // use candidate index for key, null means load from beginning (including offset)
         val startIndex = params.key ?: offset

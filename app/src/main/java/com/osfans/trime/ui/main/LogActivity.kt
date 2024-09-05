@@ -48,14 +48,15 @@ class LogActivity : AppCompatActivity() {
         launcher =
             registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
                 lifecycleScope.launch(NonCancellable + Dispatchers.IO) {
-                    uri?.runCatching {
-                        contentResolver.openOutputStream(this)?.use { os ->
-                            os.bufferedWriter().use {
-                                it.write(DeviceInfo.get(this@LogActivity))
-                                it.write(logView.currentLog)
+                    uri
+                        ?.runCatching {
+                            contentResolver.openOutputStream(this)?.use { os ->
+                                os.bufferedWriter().use {
+                                    it.write(DeviceInfo.get(this@LogActivity))
+                                    it.write(logView.currentLog)
+                                }
                             }
-                        }
-                    }?.let { toast(it) }
+                        }?.let { toast(it) }
                 }
             }
     }
@@ -76,7 +77,8 @@ class LogActivity : AppCompatActivity() {
             }
             windowInsets
         }
-        WindowCompat.getInsetsController(window, window.decorView)
+        WindowCompat
+            .getInsetsController(window, window.decorView)
             .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
@@ -86,7 +88,8 @@ class LogActivity : AppCompatActivity() {
             if (intent.hasExtra(FROM_CRASH)) {
                 supportActionBar!!.setTitle(R.string.crash_logs)
                 clearButton.visibility = View.GONE
-                AlertDialog.Builder(this@LogActivity)
+                AlertDialog
+                    .Builder(this@LogActivity)
                     .setTitle(R.string.app_crash)
                     .setMessage(R.string.app_crash_message)
                     .setPositiveButton(android.R.string.ok, null)

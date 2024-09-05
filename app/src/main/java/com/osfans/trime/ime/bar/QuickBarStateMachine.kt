@@ -26,8 +26,9 @@ object QuickBarStateMachine {
         CandidateEmpty,
     }
 
-    enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
-        EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
+    enum class TransitionEvent(
+        val builder: TransitionBuildBlock<State, BooleanKey>,
+    ) : EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
         CandidatesUpdated({
             from(Always) transitTo Candidate on (CandidateEmpty to false)
             from(Candidate) transitTo Always on (CandidateEmpty to true)

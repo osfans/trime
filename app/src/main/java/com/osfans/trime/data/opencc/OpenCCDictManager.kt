@@ -74,11 +74,12 @@ object OpenCCDictManager {
                 measureTimeMillis {
                     result = runCatching { d.toOpenCCDictionary() }
                 }.also {
-                    result.onSuccess { r ->
-                        Timber.d("Took $it to convert to $r")
-                    }.onFailure {
-                        Timber.e(it, "Failed to convert $d")
-                    }
+                    result
+                        .onSuccess { r ->
+                            Timber.d("Took $it to convert to $r")
+                        }.onFailure {
+                            Timber.e(it, "Failed to convert $d")
+                        }
                 }
             }
         }

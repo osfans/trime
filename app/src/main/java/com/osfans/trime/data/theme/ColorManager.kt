@@ -298,9 +298,7 @@ object ColorManager {
         return defaultPath.path
     }
 
-    private fun isFileString(str: String?): Boolean {
-        return str?.contains(Regex("""\.[a-z]{3,4}$""")) == true
-    }
+    private fun isFileString(str: String?): Boolean = str?.contains(Regex("""\.[a-z]{3,4}$""")) == true
 
     // API 2.0
     @ColorInt

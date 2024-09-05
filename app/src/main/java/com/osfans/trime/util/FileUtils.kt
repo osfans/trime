@@ -13,7 +13,8 @@ object FileUtils {
             if (!file.exists()) return Result.success(Unit)
             val res =
                 if (file.isDirectory) {
-                    file.walkBottomUp()
+                    file
+                        .walkBottomUp()
                         .fold(true) { acc, file ->
                             if (file.exists()) file.delete() else acc
                         }

@@ -31,7 +31,10 @@ import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 import splitties.views.horizontalPadding
 
-class SwitchUi(override val ctx: Context, private val theme: Theme) : Ui {
+class SwitchUi(
+    override val ctx: Context,
+    private val theme: Theme,
+) : Ui {
     var enabled: Int = -1
 
     private val label =

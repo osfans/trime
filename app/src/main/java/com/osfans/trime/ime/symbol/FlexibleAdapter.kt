@@ -22,7 +22,9 @@ import splitties.resources.drawable
 import splitties.resources.styledColor
 import kotlin.math.min
 
-abstract class FlexibleAdapter(private val theme: Theme) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
+abstract class FlexibleAdapter(
+    private val theme: Theme,
+) : RecyclerView.Adapter<FlexibleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<DatabaseBean>()
 
     // 映射条目的 id 和其在视图中位置的关系
@@ -108,7 +110,9 @@ abstract class FlexibleAdapter(private val theme: Theme) : RecyclerView.Adapter<
         return ViewHolder(binding)
     }
 
-    inner class ViewHolder(binding: SimpleKeyItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(
+        binding: SimpleKeyItemBinding,
+    ) : RecyclerView.ViewHolder(binding.root) {
         val simpleKeyText = binding.simpleKey
         val simpleKeyPin = binding.simpleKeyPin
     }

@@ -21,22 +21,22 @@ object InputMethodUtils {
 
     private fun getSecureSettings(name: String) = Settings.Secure.getString(appContext.contentResolver, name)
 
-    fun checkIsTrimeEnabled(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            inputMethodManager.enabledInputMethodList.also {
-                Timber.i("List of active IMEs: $it")
-            }.any {
-                it.packageName == BuildConfig.APPLICATION_ID && it.serviceName == serviceName
-            }
+    fun checkIsTrimeEnabled(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            inputMethodManager.enabledInputMethodList
+                .also {
+                    Timber.i("List of active IMEs: $it")
+                }.any {
+                    it.packageName == BuildConfig.APPLICATION_ID && it.serviceName == serviceName
+                }
         } else {
             val activeImeIds = getSecureSettings(Settings.Secure.ENABLED_INPUT_METHODS) ?: "(none)"
             Timber.i("List of active IMEs: $activeImeIds")
             activeImeIds.split(":").contains(componentName)
         }
-    }
 
-    fun checkIsTrimeSelected(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+    fun checkIsTrimeSelected(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             inputMethodManager.currentInputMethodInfo?.let {
                 Timber.i("Selected IME: ${it.serviceName}")
                 it.packageName == BuildConfig.APPLICATION_ID && it.serviceName == serviceName
@@ -46,7 +46,6 @@ object InputMethodUtils {
             Timber.i("Selected IME: $selectedImeIds")
             selectedImeIds == componentName
         }
-    }
 
     fun showImeEnablerActivity(context: Context) = context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
 

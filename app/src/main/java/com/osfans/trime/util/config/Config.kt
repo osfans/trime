@@ -10,7 +10,9 @@ import timber.log.Timber
 /**
  * New YAML config parser intended to replace the old one.
  */
-class Config(private val data: ConfigData = ConfigData()) {
+class Config(
+    private val data: ConfigData = ConfigData(),
+) {
     companion object {
         fun create(fileName: String): Config? {
             val data = ConfigData()

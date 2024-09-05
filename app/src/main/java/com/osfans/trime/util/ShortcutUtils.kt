@@ -140,9 +140,7 @@ object ShortcutUtils {
     }
 
     @JvmStatic
-    fun pasteFromClipboard(context: Context): CharSequence? {
-        return clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(context)
-    }
+    fun pasteFromClipboard(context: Context): CharSequence? = clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(context)
 
     fun syncInBackground() {
         val prefs = AppPrefs.defaultInstance()

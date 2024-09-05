@@ -34,10 +34,9 @@ enum class PopupPosition {
         fun fromString(
             code: String,
             default: PopupPosition = FIXED,
-        ): PopupPosition {
-            return runCatching {
+        ): PopupPosition =
+            runCatching {
                 valueOf(code.uppercase())
             }.getOrDefault(default)
-        }
     }
 }

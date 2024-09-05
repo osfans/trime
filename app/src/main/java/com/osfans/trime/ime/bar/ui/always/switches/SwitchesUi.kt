@@ -16,7 +16,10 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.recyclerview.horizontalLayoutManager
 
-class SwitchesUi(override val ctx: Context, val theme: Theme) : Ui {
+class SwitchesUi(
+    override val ctx: Context,
+    val theme: Theme,
+) : Ui {
     private val switchesAdapter by lazy {
         SwitchesAdapter(theme)
     }

@@ -303,7 +303,8 @@ class InputView(
                 service.window.window!!.also {
                     val backColor = ColorManager.getColor("back_color") ?: Color.BLACK
                     if (shouldUpdateNavbarForeground) {
-                        WindowCompat.getInsetsController(it, it.decorView)
+                        WindowCompat
+                            .getInsetsController(it, it.decorView)
                             .isAppearanceLightNavigationBars = ColorUtils.isContrastedDark(backColor)
                     }
                     if (shouldUpdateNavbarBackground) {

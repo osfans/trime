@@ -188,28 +188,31 @@ class Keyboard() {
         //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
         val autoHeightIndex = obtainInt(keyboardConfig, "auto_height_index", -1)
         val lm =
-            keyboardConfig!!["keys"]!!.configList
+            keyboardConfig!!["keys"]!!
+                .configList
                 .map {
                     it!!.configMap.entries.associate { (k, v) ->
                         k to v!!
                     }
                 }
         horizontalGap =
-            appContext.sp(
-                obtainFloat(
-                    keyboardConfig,
-                    "horizontal_gap",
-                    theme.generalStyle.horizontalGap.toFloat(),
-                ),
-            ).toInt()
+            appContext
+                .sp(
+                    obtainFloat(
+                        keyboardConfig,
+                        "horizontal_gap",
+                        theme.generalStyle.horizontalGap.toFloat(),
+                    ),
+                ).toInt()
         verticalGap =
-            appContext.sp(
-                obtainFloat(
-                    keyboardConfig,
-                    "vertical_gap",
-                    theme.generalStyle.verticalGap.toFloat(),
-                ),
-            ).toInt()
+            appContext
+                .sp(
+                    obtainFloat(
+                        keyboardConfig,
+                        "vertical_gap",
+                        theme.generalStyle.verticalGap.toFloat(),
+                    ),
+                ).toInt()
         roundCorner =
             obtainFloat(
                 keyboardConfig,
@@ -298,53 +301,59 @@ class Keyboard() {
                     continue // 縮進
                 }
                 val defaultKeyTextOffsetX =
-                    appContext.sp(
-                        obtainFloat(
-                            keyboardConfig,
-                            "key_text_offset_x",
-                            theme.generalStyle.keyTextOffsetX.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                keyboardConfig,
+                                "key_text_offset_x",
+                                theme.generalStyle.keyTextOffsetX.toFloat(),
+                            ),
+                        ).toInt()
                 val defaultKeyTextOffsetY =
-                    appContext.sp(
-                        obtainFloat(
-                            keyboardConfig,
-                            "key_text_offset_y",
-                            theme.generalStyle.keyTextOffsetY.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                keyboardConfig,
+                                "key_text_offset_y",
+                                theme.generalStyle.keyTextOffsetY.toFloat(),
+                            ),
+                        ).toInt()
                 val defaultKeySymbolOffsetX =
-                    appContext.sp(
-                        obtainFloat(
-                            keyboardConfig,
-                            "key_symbol_offset_x",
-                            theme.generalStyle.keySymbolOffsetX.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                keyboardConfig,
+                                "key_symbol_offset_x",
+                                theme.generalStyle.keySymbolOffsetX.toFloat(),
+                            ),
+                        ).toInt()
                 val defaultKeySymbolOffsetY =
-                    appContext.sp(
-                        obtainFloat(
-                            keyboardConfig,
-                            "key_symbol_offset_y",
-                            theme.generalStyle.keySymbolOffsetY.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                keyboardConfig,
+                                "key_symbol_offset_y",
+                                theme.generalStyle.keySymbolOffsetY.toFloat(),
+                            ),
+                        ).toInt()
                 val defaultKeyHintOffsetX =
-                    appContext.sp(
-                        obtainFloat(
-                            keyboardConfig,
-                            "key_hint_offset_x",
-                            theme.generalStyle.keyHintOffsetX.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                keyboardConfig,
+                                "key_hint_offset_x",
+                                theme.generalStyle.keyHintOffsetX.toFloat(),
+                            ),
+                        ).toInt()
                 val defaultKeyHintOffsetY =
-                    appContext.sp(
-                        obtainFloat(
-                            keyboardConfig,
-                            "key_hint_offset_y",
-                            theme.generalStyle.keyHintOffsetY.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                keyboardConfig,
+                                "key_hint_offset_y",
+                                theme.generalStyle.keyHintOffsetY.toFloat(),
+                            ),
+                        ).toInt()
                 val defaultKeyPressOffsetX =
                     obtainInt(
                         keyboardConfig,
@@ -359,37 +368,43 @@ class Keyboard() {
                     )
                 val key = Key(this, mk)
                 key.keyTextOffsetX =
-                    appContext.sp(
-                        obtainFloat(mk, "key_text_offset_x", defaultKeyTextOffsetX.toFloat()),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(mk, "key_text_offset_x", defaultKeyTextOffsetX.toFloat()),
+                        ).toInt()
                 key.keyTextOffsetY =
-                    appContext.sp(
-                        obtainFloat(mk, "key_text_offset_y", defaultKeyTextOffsetY.toFloat()),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(mk, "key_text_offset_y", defaultKeyTextOffsetY.toFloat()),
+                        ).toInt()
                 key.keySymbolOffsetX =
-                    appContext.sp(
-                        obtainFloat(
-                            mk,
-                            "key_symbol_offset_x",
-                            defaultKeySymbolOffsetX.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                mk,
+                                "key_symbol_offset_x",
+                                defaultKeySymbolOffsetX.toFloat(),
+                            ),
+                        ).toInt()
                 key.keySymbolOffsetY =
-                    appContext.sp(
-                        obtainFloat(
-                            mk,
-                            "key_symbol_offset_y",
-                            defaultKeySymbolOffsetY.toFloat(),
-                        ),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(
+                                mk,
+                                "key_symbol_offset_y",
+                                defaultKeySymbolOffsetY.toFloat(),
+                            ),
+                        ).toInt()
                 key.keyHintOffsetX =
-                    appContext.sp(
-                        obtainFloat(mk, "key_hint_offset_x", defaultKeyHintOffsetX.toFloat()),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(mk, "key_hint_offset_x", defaultKeyHintOffsetX.toFloat()),
+                        ).toInt()
                 key.keyHintOffsetY =
-                    appContext.sp(
-                        obtainFloat(mk, "key_hint_offset_y", defaultKeyHintOffsetY.toFloat()),
-                    ).toInt()
+                    appContext
+                        .sp(
+                            obtainFloat(mk, "key_hint_offset_y", defaultKeyHintOffsetY.toFloat()),
+                        ).toInt()
                 key.keyPressOffsetX = obtainInt(mk, "key_press_offset_x", defaultKeyPressOffsetX)
                 key.keyPressOffsetY = obtainInt(mk, "key_press_offset_y", defaultKeyPressOffsetY)
                 key.x = x
@@ -436,9 +451,10 @@ class Keyboard() {
         var mkeyboardHeight = appContext.sp(obtainFloat(keyboardConfig, "keyboard_height", 0f)).toInt()
         if (appContext.isLandscapeMode()) {
             val mkeyBoardHeightLand =
-                appContext.sp(
-                    obtainFloat(keyboardConfig, "keyboard_height_land", 0f),
-                ).toInt()
+                appContext
+                    .sp(
+                        obtainFloat(keyboardConfig, "keyboard_height_land", 0f),
+                    ).toInt()
             if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand
         }
         return mkeyboardHeight
@@ -482,13 +498,9 @@ class Keyboard() {
     val keys: List<Key>
         get() = mKeys
 
-    fun hasModifier(modifierMask: Int): Boolean {
-        return modifer and modifierMask != 0
-    }
+    fun hasModifier(modifierMask: Int): Boolean = modifer and modifierMask != 0
 
-    fun hasModifier(): Boolean {
-        return modifer != 0
-    }
+    fun hasModifier(): Boolean = modifer != 0
 
     private fun setModifier(
         mask: Int,
@@ -664,9 +676,7 @@ class Keyboard() {
     val isOnlyShiftOn: Boolean
         get() = mShiftKey != null && mShiftKey!!.isOn && modifer and MASK_META_WITHOUT_SHIFT == 0
 
-    fun resetShifted(): Boolean {
-        return if (mShiftKey != null && !mShiftKey!!.isOn) setModifier(KeyEvent.META_SHIFT_ON, false) else false
-    }
+    fun resetShifted(): Boolean = if (mShiftKey != null && !mShiftKey!!.isOn) setModifier(KeyEvent.META_SHIFT_ON, false) else false
 
     fun resetModifer(): Boolean {
         // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
@@ -706,10 +716,13 @@ class Keyboard() {
                 for (i in mKeys.indices) {
                     val key = mKeys[i]
                     if (key.squaredDistanceFrom(x, y) < mProximityThreshold ||
-                        key.squaredDistanceFrom(x + mCellWidth - 1, y) < mProximityThreshold || (
+                        key.squaredDistanceFrom(x + mCellWidth - 1, y) < mProximityThreshold ||
+                        (
                             key.squaredDistanceFrom(x + mCellWidth - 1, y + mCellHeight - 1)
                                 < mProximityThreshold
-                        ) || key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold || key.isInside(x, y) ||
+                        ) ||
+                        key.squaredDistanceFrom(x, y + mCellHeight - 1) < mProximityThreshold ||
+                        key.isInside(x, y) ||
                         key.isInside(x + mCellWidth - 1, y) ||
                         key.isInside(x + mCellWidth - 1, y + mCellHeight - 1) ||
                         key.isInside(x, y + mCellHeight - 1)
@@ -771,9 +784,7 @@ class Keyboard() {
         private fun hasModifier(
             modifierMask: Int,
             mModifierState: Int,
-        ): Boolean {
-            return mModifierState and modifierMask != 0
-        }
+        ): Boolean = mModifierState and modifierMask != 0
 
         fun printModifierKeyState(
             state: Int,

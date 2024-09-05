@@ -38,7 +38,8 @@ class ToolkitFragment : PaddingPreferenceFragment() {
                 setTitle(R.string.real_time_logs_clear)
                 isIconSpaceReserved = false
                 setOnPreferenceClickListener {
-                    AlertDialog.Builder(context)
+                    AlertDialog
+                        .Builder(context)
                         .setMessage(R.string.real_time_logs_confirm)
                         .setPositiveButton(R.string.ok) { _, _ ->
                             Logcat.default.clearLog()

@@ -128,14 +128,16 @@ object RimeDaemon {
     fun restartRime(fullCheck: Boolean = false) =
         lock.withLock {
             val id = restartId++
-            NotificationCompat.Builder(appContext, CHANNEL_ID)
+            NotificationCompat
+                .Builder(appContext, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_sync_24)
                 .setContentTitle(appContext.getString(R.string.rime_daemon))
                 .setContentText(appContext.getString(R.string.restarting_rime))
                 .setOngoing(true)
                 .setProgress(100, 0, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .build().let { notificationManager.notify(id, it) }
+                .build()
+                .let { notificationManager.notify(id, it) }
             realRime.finalize()
             realRime.startup(fullCheck)
             TrimeApplication.getInstance().coroutineScope.launch {

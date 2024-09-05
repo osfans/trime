@@ -42,12 +42,19 @@ import splitties.views.gravityCenter
 import splitties.views.padding
 
 @SuppressLint("ViewConstructor")
-class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Theme) :
-    ConstraintLayout(context) {
+class LiquidLayout(
+    context: Context,
+    service: TrimeInputMethodService,
+    theme: Theme,
+) : ConstraintLayout(context) {
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
     private val fixedKeyBar =
         constraintLayout {
-            val fixedKeys = theme.liquid.getMap("fixed_key_bar")?.get("keys")?.configList
+            val fixedKeys =
+                theme.liquid
+                    .getMap("fixed_key_bar")
+                    ?.get("keys")
+                    ?.configList
             fixedKeys?.let {
                 val btns =
                     Array(it.size) { index ->
@@ -55,11 +62,15 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                         val text =
                             textView {
                                 text =
-                                    theme.presetKeys?.get(operation.toString())?.configMap?.get("label")
+                                    theme.presetKeys
+                                        ?.get(operation.toString())
+                                        ?.configMap
+                                        ?.get("label")
                                         .toString()
                                 textSize = theme.generalStyle.labelTextSize.toFloat()
                                 typeface = FontManager.getTypeface("key_font")
-                                ColorManager.getColor("key_text_color")
+                                ColorManager
+                                    .getColor("key_text_color")
                                     ?.let { color -> setTextColor(color) }
                             }
                         val root =
@@ -92,8 +103,11 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
                     }
                 val marginX = theme.liquid.getFloat("margin_x")
                 when (
-                    theme.liquid.getMap("fixed_key_bar")
-                        ?.get("position")?.configValue.toString()
+                    theme.liquid
+                        .getMap("fixed_key_bar")
+                        ?.get("position")
+                        ?.configValue
+                        .toString()
                 ) {
                     LEFT, RIGHT -> {
                         btns.forEachIndexed { i, btn ->
@@ -152,7 +166,13 @@ class LiquidLayout(context: Context, service: TrimeInputMethodService, theme: Th
     val tabsUi = LiquidTabsUi(context, theme)
 
     init {
-        when (theme.liquid.getMap("fixed_key_bar")?.get("position")?.configValue.toString() ?: "") {
+        when (
+            theme.liquid
+                .getMap("fixed_key_bar")
+                ?.get("position")
+                ?.configValue
+                .toString() ?: ""
+        ) {
             TOP -> {
                 add(
                     boardView,

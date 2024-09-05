@@ -23,24 +23,26 @@ object AvailableSchemaPickerDialog {
         val availableIds = availables.map { it.id }
         val enabledIds = enableds.map { it.id }
         val enabledBools = availableIds.map { enabledIds.contains(it) }.toBooleanArray()
-        return AlertDialog.Builder(context).apply {
-            setTitle(R.string.enable_schemata)
-            if (availables.isEmpty()) {
-                setMessage(R.string.no_schema_to_enable)
-            } else {
-                setMultiChoiceItems(availables.map { it.name }.toTypedArray(), enabledBools) { _, which, isChecked ->
-                    enabledBools[which] = isChecked
-                }
-                setPositiveButton(R.string.ok) { _, _ ->
-                    val newEnabled = availableIds.filterIndexed { index, _ -> enabledBools[index] }
-                    if (setOf(newEnabled) == setOf(enabledIds)) return@setPositiveButton
-                    scope.launch {
-                        rime.setEnabledSchemata(newEnabled.toTypedArray())
-                        RimeDaemon.restartRime()
+        return AlertDialog
+            .Builder(context)
+            .apply {
+                setTitle(R.string.enable_schemata)
+                if (availables.isEmpty()) {
+                    setMessage(R.string.no_schema_to_enable)
+                } else {
+                    setMultiChoiceItems(availables.map { it.name }.toTypedArray(), enabledBools) { _, which, isChecked ->
+                        enabledBools[which] = isChecked
+                    }
+                    setPositiveButton(R.string.ok) { _, _ ->
+                        val newEnabled = availableIds.filterIndexed { index, _ -> enabledBools[index] }
+                        if (setOf(newEnabled) == setOf(enabledIds)) return@setPositiveButton
+                        scope.launch {
+                            rime.setEnabledSchemata(newEnabled.toTypedArray())
+                            RimeDaemon.restartRime()
+                        }
                     }
                 }
-            }
-            setNegativeButton(R.string.cancel, null)
-        }.create()
+                setNegativeButton(R.string.cancel, null)
+            }.create()
     }
 }

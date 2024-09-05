@@ -8,7 +8,9 @@ import com.osfans.trime.util.config.Config
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
-class Schema(schemaId: String = ".default") {
+class Schema(
+    schemaId: String = ".default",
+) {
     private val config =
         if (schemaId == ".default") {
             Config.create("default")

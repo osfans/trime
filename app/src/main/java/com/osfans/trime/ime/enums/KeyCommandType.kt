@@ -17,10 +17,9 @@ enum class KeyCommandType {
 
     companion object {
         @JvmStatic
-        fun fromString(code: String): KeyCommandType {
-            return runCatching {
+        fun fromString(code: String): KeyCommandType =
+            runCatching {
                 valueOf(code.uppercase())
             }.getOrDefault(NULL)
-        }
     }
 }

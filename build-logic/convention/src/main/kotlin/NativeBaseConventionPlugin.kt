@@ -48,10 +48,11 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
     }
 
     private fun registerCleanCxxTask(project: Project) {
-        project.task<Delete>("cleanCxxIntermediates") {
-            delete(project.file(".cxx"))
-        }.also {
-            project.cleanTask.dependsOn(it)
-        }
+        project
+            .task<Delete>("cleanCxxIntermediates") {
+                delete(project.file(".cxx"))
+            }.also {
+                project.cleanTask.dependsOn(it)
+            }
     }
 }

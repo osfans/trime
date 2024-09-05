@@ -114,12 +114,11 @@ class RimeDataProvider : DocumentsProvider() {
         documentId: String,
         mode: String,
         signal: CancellationSignal?,
-    ): ParcelFileDescriptor {
-        return ParcelFileDescriptor.open(
+    ): ParcelFileDescriptor =
+        ParcelFileDescriptor.open(
             fileFromDocId(documentId),
             ParcelFileDescriptor.parseMode(mode),
         )
-    }
 
     @Throws(FileNotFoundException::class)
     override fun openDocumentThumbnail(
@@ -170,16 +169,12 @@ class RimeDataProvider : DocumentsProvider() {
         }
     }
 
-    override fun getDocumentType(documentId: String): String {
-        return fileFromDocId(documentId).mimeType
-    }
+    override fun getDocumentType(documentId: String): String = fileFromDocId(documentId).mimeType
 
     override fun isChildDocument(
         parentDocumentId: String,
         documentId: String,
-    ): Boolean {
-        return documentId.startsWith(parentDocumentId)
-    }
+    ): Boolean = documentId.startsWith(parentDocumentId)
 
     @Throws(FileNotFoundException::class)
     override fun copyDocument(
@@ -239,7 +234,8 @@ class RimeDataProvider : DocumentsProvider() {
         projection: Array<String>?,
     ) = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
         val q = query.lowercase()
-        fileFromDocId(rootId).walk()
+        fileFromDocId(rootId)
+            .walk()
             .filter { it.name.lowercase().contains(q) }
             .take(SEARCH_RESULTS_LIMIT)
             .forEach { newRowFromFile(it) }

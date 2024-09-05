@@ -15,7 +15,9 @@ import timber.log.Timber
 import kotlin.system.measureTimeMillis
 
 /** 主题和样式配置  */
-class Theme(name: String) {
+class Theme(
+    name: String,
+) {
     val generalStyle: GeneralStyle
     val liquid: Liquid
     val keyboards: Keyboards
@@ -84,7 +86,9 @@ class Theme(name: String) {
         return generalStyle
     }
 
-    class Liquid(private val config: Config) {
+    class Liquid(
+        private val config: Config,
+    ) {
         fun getInt(key: String): Int = config.getInt("liquid_keyboard/$key")
 
         fun getFloat(key: String): Float = config.getFloat("liquid_keyboard/$key")
@@ -94,7 +98,9 @@ class Theme(name: String) {
         fun getMap(key: String): ConfigMap? = config.getMap("liquid_keyboard/$key")
     }
 
-    class Keyboards(private val config: Config) {
+    class Keyboards(
+        private val config: Config,
+    ) {
         fun getMap(key: String): ConfigMap? = config.getMap("preset_keyboards/$key")
     }
 }

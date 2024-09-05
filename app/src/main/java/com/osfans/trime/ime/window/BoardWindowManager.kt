@@ -76,7 +76,8 @@ class BoardWindowManager(
         }
         val newView =
             if (window is ResidentWindow) {
-                cachedResidentWindows[window.key]?.second ?: window.onCreateView()
+                cachedResidentWindows[window.key]?.second ?: window
+                    .onCreateView()
                     .also { cachedResidentWindows[window.key] = window to it }
             } else {
                 broadcaster.addReceiver(window)

@@ -42,11 +42,10 @@ class FolderPickerPreference
             }
         }
 
-        override fun persistString(value: String): Boolean {
-            return super.persistString(value).also {
+        override fun persistString(value: String): Boolean =
+            super.persistString(value).also {
                 if (it) this.value = value
             }
-        }
 
         override fun setDefaultValue(defaultValue: Any?) {
             super.setDefaultValue(defaultValue)
@@ -56,9 +55,7 @@ class FolderPickerPreference
         override fun onGetDefaultValue(
             a: TypedArray,
             index: Int,
-        ): Any {
-            return a.getString(index) ?: default
-        }
+        ): Any = a.getString(index) ?: default
 
         override fun onSetInitialValue(defaultValue: Any?) {
             value = getPersistedString(defaultValue as? String ?: default)
@@ -73,17 +70,16 @@ class FolderPickerPreference
             dialogView.button.setOnClickListener {
                 documentTreeLauncher.launch(context.getUriForFile(File(initValue)))
             }
-            AlertDialog.Builder(context)
+            AlertDialog
+                .Builder(context)
                 .setTitle(this@FolderPickerPreference.title)
                 .setView(dialogView.root)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     val value = dialogView.editText.text.toString()
                     setValue(value)
-                }
-                .setNeutralButton(R.string.pref__default) { _, _ ->
+                }.setNeutralButton(R.string.pref__default) { _, _ ->
                     setValue(default)
-                }
-                .setNegativeButton(android.R.string.cancel, null)
+                }.setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
 

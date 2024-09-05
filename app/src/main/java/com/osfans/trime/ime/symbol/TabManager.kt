@@ -106,7 +106,8 @@ object TabManager {
         currentTabIndex = index
         val tag = tabTags[index]
         if (tag.type == SymbolBoardType.TABS) {
-            return tabTags.filter { SymbolBoardType.hasKey(it.type) }
+            return tabTags
+                .filter { SymbolBoardType.hasKey(it.type) }
                 .map { SimpleKeyBean(it.text) }
         }
         return keyboards[index]

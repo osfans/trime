@@ -46,8 +46,7 @@ object SoundEffectManager {
                         return@decode null
                     }
                 return@decode theme
-            }
-            ?.toMutableList() ?: mutableListOf()
+            }?.toMutableList() ?: mutableListOf()
     }
 
     private fun getSound(name: String) = userSounds.find { it.name == name }

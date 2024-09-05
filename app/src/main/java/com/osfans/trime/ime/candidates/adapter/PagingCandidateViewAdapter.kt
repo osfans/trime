@@ -12,23 +12,21 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.CandidateItemUi
 import com.osfans.trime.ime.candidates.CandidateViewHolder
 
-open class PagingCandidateViewAdapter(val theme: Theme) : PagingDataAdapter<CandidateItem, CandidateViewHolder>(diffCallback) {
+open class PagingCandidateViewAdapter(
+    val theme: Theme,
+) : PagingDataAdapter<CandidateItem, CandidateViewHolder>(diffCallback) {
     companion object {
         private val diffCallback =
             object : DiffUtil.ItemCallback<CandidateItem>() {
                 override fun areItemsTheSame(
                     oldItem: CandidateItem,
                     newItem: CandidateItem,
-                ): Boolean {
-                    return oldItem === newItem
-                }
+                ): Boolean = oldItem === newItem
 
                 override fun areContentsTheSame(
                     oldItem: CandidateItem,
                     newItem: CandidateItem,
-                ): Boolean {
-                    return oldItem == newItem
-                }
+                ): Boolean = oldItem == newItem
             }
     }
 
@@ -43,9 +41,7 @@ open class PagingCandidateViewAdapter(val theme: Theme) : PagingDataAdapter<Cand
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): CandidateViewHolder {
-        return CandidateViewHolder(CandidateItemUi(parent.context, theme))
-    }
+    ): CandidateViewHolder = CandidateViewHolder(CandidateItemUi(parent.context, theme))
 
     override fun onBindViewHolder(
         holder: CandidateViewHolder,

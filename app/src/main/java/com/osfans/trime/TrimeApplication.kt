@@ -72,9 +72,8 @@ class TrimeApplication : Application() {
             if (BuildConfig.DEBUG) {
                 Timber.plant(
                     object : Timber.DebugTree() {
-                        override fun createStackElementTag(element: StackTraceElement): String {
-                            return "${super.createStackElementTag(element)}|${element.fileName}:${element.lineNumber}"
-                        }
+                        override fun createStackElementTag(element: StackTraceElement): String =
+                            "${super.createStackElementTag(element)}|${element.fileName}:${element.lineNumber}"
 
                         override fun log(
                             priority: Int,

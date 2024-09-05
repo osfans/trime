@@ -9,7 +9,9 @@ import com.osfans.trime.util.config.ConfigList
 import com.osfans.trime.util.config.ConfigMap
 import com.osfans.trime.util.config.ConfigValue
 
-open class Mapper(private val map: Map<String, ConfigItem?>?) {
+open class Mapper(
+    private val map: Map<String, ConfigItem?>?,
+) {
     val errors = ArrayList<String>()
 
     protected fun getString(
@@ -66,16 +68,15 @@ open class Mapper(private val map: Map<String, ConfigItem?>?) {
         }
     }
 
-    protected fun getObject(key: String): ConfigMap? {
-        return map?.get(key)?.configMap
+    protected fun getObject(key: String): ConfigMap? =
+        map?.get(key)?.configMap
             ?: run {
                 addError(key)
                 null
             }
-    }
 
-    protected fun getList(key: String): List<ConfigItem> {
-        return runCatching {
+    protected fun getList(key: String): List<ConfigItem> =
+        runCatching {
             map?.get(key)?.configList?.mapNotNull {
                 it
             } ?: run {
@@ -86,7 +87,6 @@ open class Mapper(private val map: Map<String, ConfigItem?>?) {
             addError(key)
             listOf()
         }
-    }
 
     protected fun getStringList(
         key: String,
@@ -97,9 +97,10 @@ open class Mapper(private val map: Map<String, ConfigItem?>?) {
         return if (obj is ConfigValue) {
             arrayListOf(obj.getString())
         } else if (obj is ConfigList) {
-            obj.configList.mapNotNull {
-                it?.configValue?.getString()
-            }.takeIf { it.isNotEmpty() } ?: defValue
+            obj.configList
+                .mapNotNull {
+                    it?.configValue?.getString()
+                }.takeIf { it.isNotEmpty() } ?: defValue
         } else {
             addError(key)
             defValue

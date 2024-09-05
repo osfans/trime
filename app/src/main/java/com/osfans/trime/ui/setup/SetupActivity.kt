@@ -63,12 +63,12 @@ class SetupActivity : FragmentActivity() {
         binding.skipButton.apply {
             text = getString(R.string.setup__skip)
             setOnClickListener {
-                AlertDialog.Builder(this@SetupActivity)
+                AlertDialog
+                    .Builder(this@SetupActivity)
                     .setMessage(R.string.setup__skip_hint)
                     .setPositiveButton(R.string.setup__skip_hint_yes) { _, _ ->
                         finish()
-                    }
-                    .setNegativeButton(R.string.setup__skip_hint_no, null)
+                    }.setNegativeButton(R.string.setup__skip_hint_no, null)
                     .show()
             }
         }
@@ -137,7 +137,8 @@ class SetupActivity : FragmentActivity() {
 
     override fun onPause() {
         if (SetupPage.hasUndonePage()) {
-            NotificationCompat.Builder(this, CHANNEL_ID)
+            NotificationCompat
+                .Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_trime_status)
                 .setContentTitle(getText(R.string.trime_app_name))
                 .setContentText(getText(R.string.setup__notify_hint))
@@ -149,8 +150,7 @@ class SetupActivity : FragmentActivity() {
                         Intent(this, javaClass),
                         PendingIntent.FLAG_IMMUTABLE,
                     ),
-                )
-                .setAutoCancel(true)
+                ).setAutoCancel(true)
                 .build()
                 .let { notificationManager.notify(NOTIFY_ID, it) }
         }

@@ -27,9 +27,7 @@ object DataManager {
 
     private val json by lazy { Json }
 
-    private fun deserializeDataChecksums(raw: String): DataChecksums {
-        return json.decodeFromString<DataChecksums>(raw)
-    }
+    private fun deserializeDataChecksums(raw: String): DataChecksums = json.decodeFromString<DataChecksums>(raw)
 
     // If Android version supports direct boot, we put the hierarchy in device encrypted storage
     // instead of credential encrypted storage so that data can be accessed before user unlock
@@ -41,12 +39,11 @@ object DataManager {
             File(appContext.applicationInfo.dataDir)
         }
 
-    private fun AssetManager.dataChecksums(): DataChecksums {
-        return open(DATA_CHECKSUMS_NAME)
+    private fun AssetManager.dataChecksums(): DataChecksums =
+        open(DATA_CHECKSUMS_NAME)
             .bufferedReader()
             .use { it.readText() }
             .let { deserializeDataChecksums(it) }
-    }
 
     private val prefs get() = AppPrefs.defaultInstance()
 

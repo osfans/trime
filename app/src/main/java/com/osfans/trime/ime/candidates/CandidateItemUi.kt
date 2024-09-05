@@ -27,7 +27,10 @@ import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
 
-class CandidateItemUi(override val ctx: Context, theme: Theme) : Ui {
+class CandidateItemUi(
+    override val ctx: Context,
+    theme: Theme,
+) : Ui {
     private val maybeCandidateTextColor = ColorManager.getColor("candidate_text_color")
     private val maybeCommentTextColor = ColorManager.getColor("comment_text_color")
     private val maybeHighlightedCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")

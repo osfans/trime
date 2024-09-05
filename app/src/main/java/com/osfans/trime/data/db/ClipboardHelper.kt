@@ -61,12 +61,16 @@ object ClipboardHelper :
 
     private val limit get() = AppPrefs.defaultInstance().clipboard.clipboardLimit
     private val compare get() =
-        AppPrefs.defaultInstance().clipboard.clipboardCompareRules
+        AppPrefs
+            .defaultInstance()
+            .clipboard.clipboardCompareRules
             .split('\n')
             .map { Regex(it.trim()) }
             .toHashSet()
     private val output get() =
-        AppPrefs.defaultInstance().clipboard.clipboardOutputRules
+        AppPrefs
+            .defaultInstance()
+            .clipboard.clipboardOutputRules
             .split('\n')
             .map { Regex(it) }
             .toHashSet()
@@ -123,8 +127,7 @@ object ClipboardHelper :
             ?.takeIf {
                 it.text!!.isNotBlank() &&
                     !it.text.matchesAny(output)
-            }
-            ?.let { b ->
+            }?.let { b ->
                 if (b.text?.removeRegexSet(compare)?.isEmpty() == true) return
                 Timber.d("Accept clipboard $b")
                 launch {
@@ -160,8 +163,7 @@ object ClipboardHelper :
                         } else {
                             it
                         }
-                    }
-                    .sortedBy { it.id }
+                    }.sortedBy { it.id }
                     .subList(0, all.size - limit)
             clbDao.delete(outdated)
         }

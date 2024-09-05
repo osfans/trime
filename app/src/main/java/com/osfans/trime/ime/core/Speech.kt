@@ -20,7 +20,9 @@ import timber.log.Timber
 import java.util.Arrays
 
 /** [語音輸入][RecognitionListener]  */
-class Speech(private val context: Context) : RecognitionListener {
+class Speech(
+    private val context: Context,
+) : RecognitionListener {
     private val speechRecognizer =
         SpeechRecognizer.createSpeechRecognizer(context).apply {
             setRecognitionListener(this@Speech)

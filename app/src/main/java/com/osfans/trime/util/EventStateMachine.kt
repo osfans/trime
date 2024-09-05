@@ -78,7 +78,9 @@ class EventStateMachine<State : Any, Event : EventStateMachine.TransitionEvent<S
 class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey> {
     private var raw: ((State, State, (B) -> Boolean?) -> State)? = null
 
-    inner class Builder(val source: State) {
+    inner class Builder(
+        val source: State,
+    ) {
         lateinit var target: State
         var pred: ((B) -> Boolean?) -> Boolean = { _ -> true }
     }
@@ -135,8 +137,9 @@ class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey>
 
 typealias TransitionBuildBlock<State, B> = TransitionEventBuilder<State, B>.() -> Unit
 
-class BuildTransitionEvent<State : Any, B : EventStateMachine.BooleanStateKey>(block: TransitionBuildBlock<State, B>) :
-    EventStateMachine.TransitionEvent<State, B> {
+class BuildTransitionEvent<State : Any, B : EventStateMachine.BooleanStateKey>(
+    block: TransitionBuildBlock<State, B>,
+) : EventStateMachine.TransitionEvent<State, B> {
     private val delegate: EventStateMachine.TransitionEvent<State, B> by lazy {
         TransitionEventBuilder<State, B>().also(block).build()
     }

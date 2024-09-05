@@ -46,18 +46,18 @@ class FlexboxUnrolledCandidateWindow(
             override fun onCreateViewHolder(
                 parent: ViewGroup,
                 viewType: Int,
-            ): CandidateViewHolder {
-                return super.onCreateViewHolder(parent, viewType).apply {
+            ): CandidateViewHolder =
+                super.onCreateViewHolder(parent, viewType).apply {
                     itemView.apply {
                         minimumWidth = dp(40)
                         val size = theme.generalStyle.candidatePadding
                         setPaddingDp(size, 0, size, 0)
                         layoutParams =
-                            FlexboxLayoutManager.LayoutParams(wrapContent, dp(40))
+                            FlexboxLayoutManager
+                                .LayoutParams(wrapContent, dp(40))
                                 .apply { flexGrow = 1f }
                     }
                 }
-            }
 
             override fun onBindViewHolder(
                 holder: CandidateViewHolder,

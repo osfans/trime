@@ -7,21 +7,22 @@ package com.osfans.trime.data.opencc.dict
 import java.io.File
 
 abstract class Dictionary {
-    enum class Type(val ext: String) {
+    enum class Type(
+        val ext: String,
+    ) {
         OCD("ocd"),
         OCD2("ocd2"),
         Text("txt"),
         ;
 
         companion object {
-            fun fromFileName(name: String): Type? {
-                return when {
+            fun fromFileName(name: String): Type? =
+                when {
                     name.endsWith(".ocd2") -> OCD2
                     name.endsWith(".ocd") -> OCD
                     name.endsWith(".txt") -> Text
                     else -> null
                 }
-            }
         }
     }
 

@@ -31,7 +31,9 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.setPaddingDp
 
 // 显示长度不固定，字体大小正常的内容。用于类型 TABS, VAR_LENGTH
-class VarLengthAdapter(private val theme: Theme) : BaseQuickAdapter<Pair<String, String>, VarLengthAdapter.ViewHolder>() {
+class VarLengthAdapter(
+    private val theme: Theme,
+) : BaseQuickAdapter<Pair<String, String>, VarLengthAdapter.ViewHolder>() {
     enum class SecondTextPosition {
         UNKNOWN,
         TOP,
@@ -39,12 +41,18 @@ class VarLengthAdapter(private val theme: Theme) : BaseQuickAdapter<Pair<String,
         RIGHT,
     }
 
-    private val mCandidateTextSize = theme.generalStyle.candidateTextSize.toFloat().coerceAtLeast(1f)
+    private val mCandidateTextSize =
+        theme.generalStyle.candidateTextSize
+            .toFloat()
+            .coerceAtLeast(1f)
     private val mCandidateFont = FontManager.getTypeface("candidate_font")
     private val mCandidateTextColor = ColorManager.getColor("candidate_text_color")
     private val mHilitedCandidateBackColor = ColorManager.getColor("hilited_candidate_back_color")
     private val mCommentPosition = theme.generalStyle.commentPosition
-    private val mCommentTextSize = theme.generalStyle.commentTextSize.toFloat().coerceAtLeast(1f)
+    private val mCommentTextSize =
+        theme.generalStyle.commentTextSize
+            .toFloat()
+            .coerceAtLeast(1f)
     private val mCommentFont = FontManager.getTypeface("comment_font")
     private val mCommentTextColor = ColorManager.getColor("comment_text_color")
 
@@ -76,7 +84,8 @@ class VarLengthAdapter(private val theme: Theme) : BaseQuickAdapter<Pair<String,
             val size = theme.generalStyle.candidatePadding
             setPaddingDp(size, 0, size, 0)
             layoutParams =
-                FlexboxLayoutManager.LayoutParams(wrapContent, wrapContent)
+                FlexboxLayoutManager
+                    .LayoutParams(wrapContent, wrapContent)
                     .apply { flexGrow = 1f }
         }
         binding.first.apply {
@@ -123,7 +132,9 @@ class VarLengthAdapter(private val theme: Theme) : BaseQuickAdapter<Pair<String,
         return ViewHolder(binding)
     }
 
-    class ViewHolder(binding: LiquidEntryViewBinding) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(
+        binding: LiquidEntryViewBinding,
+    ) : RecyclerView.ViewHolder(binding.root) {
         val first: TextView = binding.first
         val second: TextView = binding.second
     }

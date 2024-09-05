@@ -13,67 +13,68 @@ import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 
-class GeneralStyleTest : BehaviorSpec({
-    Given("Correct trime.yaml") {
-        val style =
-            Config(
-                ConfigData().apply {
-                    loadFromFile("src/test/assets/trime.yaml")
-                },
-            ).getMap("style")
+class GeneralStyleTest :
+    BehaviorSpec({
+        Given("Correct trime.yaml") {
+            val style =
+                Config(
+                    ConfigData().apply {
+                        loadFromFile("src/test/assets/trime.yaml")
+                    },
+                ).getMap("style")
 
-        When("loaded") {
-            val mapper = GeneralStyleMapper(style)
+            When("loaded") {
+                val mapper = GeneralStyleMapper(style)
 
-            val generalStyle = mapper.map()
+                val generalStyle = mapper.map()
 
-            Then("it should not be null") {
-                generalStyle shouldNotBe null
-                generalStyle.autoCaps shouldBe "false"
-                generalStyle.backgroundDimAmount shouldBe 0.5
+                Then("it should not be null") {
+                    generalStyle shouldNotBe null
+                    generalStyle.autoCaps shouldBe "false"
+                    generalStyle.backgroundDimAmount shouldBe 0.5
 
-                generalStyle.candidateFont shouldBe listOf("han.ttf")
-                println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
-                mapper.errors.size shouldBe 0
+                    generalStyle.candidateFont shouldBe listOf("han.ttf")
+                    println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
+                    mapper.errors.size shouldBe 0
+                }
             }
         }
-    }
 
-    Given("Empty trime.yaml") {
-        val style =
-            Config(
-                ConfigData().apply {
-                    loadFromFile("src/test/assets/incorrect.yaml")
-                },
-            ).getMap("style")
+        Given("Empty trime.yaml") {
+            val style =
+                Config(
+                    ConfigData().apply {
+                        loadFromFile("src/test/assets/incorrect.yaml")
+                    },
+                ).getMap("style")
 
-        When("loaded") {
-            val mapper = GeneralStyleMapper(style)
+            When("loaded") {
+                val mapper = GeneralStyleMapper(style)
 
-            val generalStyle = mapper.map()
+                val generalStyle = mapper.map()
 
-            Then("with default value without exception") {
-                generalStyle.autoCaps shouldBe ""
-                generalStyle.backgroundDimAmount shouldBe 0
-                generalStyle.candidateBorder shouldBe 0
-                generalStyle.candidateFont shouldBe emptyList()
-                generalStyle.candidateUseCursor shouldBe false
-                generalStyle.commentPosition shouldBe VarLengthAdapter.SecondTextPosition.UNKNOWN
+                Then("with default value without exception") {
+                    generalStyle.autoCaps shouldBe ""
+                    generalStyle.backgroundDimAmount shouldBe 0
+                    generalStyle.candidateBorder shouldBe 0
+                    generalStyle.candidateFont shouldBe emptyList()
+                    generalStyle.candidateUseCursor shouldBe false
+                    generalStyle.commentPosition shouldBe VarLengthAdapter.SecondTextPosition.UNKNOWN
 
-                generalStyle.enterLabel shouldNotBe null
-                generalStyle.enterLabel.go shouldBe "go"
+                    generalStyle.enterLabel shouldNotBe null
+                    generalStyle.enterLabel.go shouldBe "go"
 
-                generalStyle.window shouldNotBe null
-                generalStyle.window.size shouldBe 0
+                    generalStyle.window shouldNotBe null
+                    generalStyle.window.size shouldBe 0
 
-                generalStyle.layout shouldNotBe null
+                    generalStyle.layout shouldNotBe null
 
-                generalStyle.liquidKeyboardWindow shouldNotBe null
-                generalStyle.liquidKeyboardWindow.size shouldBe 0
+                    generalStyle.liquidKeyboardWindow shouldNotBe null
+                    generalStyle.liquidKeyboardWindow.size shouldBe 0
 
-                println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
-                mapper.errors.size shouldBeGreaterThan 0
+                    println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
+                    mapper.errors.size shouldBeGreaterThan 0
+                }
             }
         }
-    }
-})
+    })

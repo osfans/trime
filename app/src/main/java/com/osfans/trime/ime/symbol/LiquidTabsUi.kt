@@ -25,7 +25,10 @@ import splitties.views.gravityCenter
 import splitties.views.gravityCenterVertical
 import splitties.views.horizontalPadding
 
-class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
+class LiquidTabsUi(
+    override val ctx: Context,
+    val theme: Theme,
+) : Ui {
     inner class TabUi : Ui {
         override val ctx = this@LiquidTabsUi.ctx
 
@@ -68,7 +71,13 @@ class LiquidTabsUi(override val ctx: Context, val theme: Theme) : Ui {
                 }
             val background = if (active) ColorManager.getColor("hilited_candidate_back_color")!! else Color.TRANSPARENT
             text.setTextColor(color)
-            root.background = PaintDrawable(background).apply { setCornerRadius(theme.generalStyle.layout.roundCorner.toFloat()) }
+            root.background =
+                PaintDrawable(background).apply {
+                    setCornerRadius(
+                        theme.generalStyle.layout.roundCorner
+                            .toFloat(),
+                    )
+                }
         }
     }
 

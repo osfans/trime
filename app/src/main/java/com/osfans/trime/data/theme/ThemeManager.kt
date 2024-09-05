@@ -29,21 +29,18 @@ object ThemeManager {
         DataManager.addOnChangedListener(onDataDirChange)
     }
 
-    private fun listThemes(path: File): MutableList<String> {
-        return path.listFiles { _, name -> name.endsWith("trime.yaml") }
+    private fun listThemes(path: File): MutableList<String> =
+        path
+            .listFiles { _, name -> name.endsWith("trime.yaml") }
             ?.mapNotNull { f ->
                 if (f.name == "trime.yaml") "trime" else f.name.substringBeforeLast(".trime.yaml")
-            }
-            ?.toMutableList() ?: mutableListOf()
-    }
+            }?.toMutableList() ?: mutableListOf()
 
     private val sharedThemes: MutableList<String> get() = listThemes(DataManager.sharedDataDir)
 
     private val userThemes: MutableList<String> get() = listThemes(DataManager.userDataDir)
 
-    fun getAllThemes(): List<String> {
-        return sharedThemes + userThemes
-    }
+    fun getAllThemes(): List<String> = sharedThemes + userThemes
 
     private fun refreshThemes() {
         sharedThemes.clear()

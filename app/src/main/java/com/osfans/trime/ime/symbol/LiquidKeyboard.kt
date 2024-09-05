@@ -39,7 +39,9 @@ class LiquidKeyboard(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val theme: Theme,
-) : BoardWindow.BarBoardWindow(), ResidentWindow, ClipboardHelper.OnClipboardUpdateListener {
+) : BoardWindow.BarBoardWindow(),
+    ResidentWindow,
+    ClipboardHelper.OnClipboardUpdateListener {
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
     private lateinit var currentBoardType: SymbolBoardType
@@ -224,9 +226,8 @@ class LiquidKeyboard(
         }
     }
 
-    private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean {
-        return (!::currentBoardAdapter.isInitialized || currentBoardAdapter != adapter).also {
+    private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean =
+        (!::currentBoardAdapter.isInitialized || currentBoardAdapter != adapter).also {
             if (it) currentBoardAdapter = adapter
         }
-    }
 }

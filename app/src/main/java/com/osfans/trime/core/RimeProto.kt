@@ -5,9 +5,15 @@
 package com.osfans.trime.core
 
 class RimeProto {
-    data class Commit(val text: String?)
+    data class Commit(
+        val text: String?,
+    )
 
-    data class Candidate(val text: String, val comment: String?, val label: String)
+    data class Candidate(
+        val text: String,
+        val comment: String?,
+        val label: String,
+    )
 
     data class Context(
         val composition: Composition,

@@ -124,19 +124,20 @@ class CompactCandidateModule(
             InputFeedbackManager.keyPressVibrate(view, longPress = true)
             candidateActionMenu =
                 PopupMenu(context, view).apply {
-                    menu.add(
-                        buildSpannedString {
-                            bold {
-                                fun coloredOrNot(action: SpannableStringBuilder.() -> Unit) =
-                                    ColorManager.getColor("hilited_candidate_text_color")?.let {
-                                        color(it) { action() }
-                                    } ?: action(this)
-                                coloredOrNot { append(text) }
-                            }
-                        },
-                    ).apply {
-                        isEnabled = false
-                    }
+                    menu
+                        .add(
+                            buildSpannedString {
+                                bold {
+                                    fun coloredOrNot(action: SpannableStringBuilder.() -> Unit) =
+                                        ColorManager.getColor("hilited_candidate_text_color")?.let {
+                                            color(it) { action() }
+                                        } ?: action(this)
+                                    coloredOrNot { append(text) }
+                                }
+                            },
+                        ).apply {
+                            isEnabled = false
+                        }
                     menu.add(R.string.forget_this_word).setOnMenuItemClickListener {
                         rime.runIfReady { forgetCandidate(idx) }
                         true

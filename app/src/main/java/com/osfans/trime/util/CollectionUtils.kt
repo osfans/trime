@@ -52,7 +52,13 @@ object CollectionUtils {
         if (map.isNullOrEmpty() || key.isEmpty()) return defValue
         val nm = obtainString(map, key)
         return runCatching {
-            if (nm.isNotEmpty()) java.lang.Long.decode(nm).toInt() else defValue
+            if (nm.isNotEmpty()) {
+                java.lang.Long
+                    .decode(nm)
+                    .toInt()
+            } else {
+                defValue
+            }
         }.getOrDefault(defValue)
     }
 

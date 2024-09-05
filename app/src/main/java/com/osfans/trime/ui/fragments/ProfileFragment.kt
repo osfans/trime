@@ -101,7 +101,8 @@ class ProfileFragment :
                     }
                 summaryOff = context.getString(R.string.profile_enable_syncing_in_background)
             }
-            get<SwitchPreferenceCompat>("profile_timing_sync")?.apply { // 定时同步偏好描述
+            get<SwitchPreferenceCompat>("profile_timing_sync")?.apply {
+                // 定时同步偏好描述
                 val timingSyncPreference: SwitchPreferenceCompat? = findPreference("profile_timing_sync")
                 timingSyncPreference?.summaryProvider =
                     Preference.SummaryProvider<SwitchPreferenceCompat> {
@@ -115,7 +116,8 @@ class ProfileFragment :
                         }
                     }
             }
-            get<SwitchPreferenceCompat>("profile_timing_sync")?.setOnPreferenceClickListener { // 监听定时同步偏好设置
+            get<SwitchPreferenceCompat>("profile_timing_sync")?.setOnPreferenceClickListener {
+                // 监听定时同步偏好设置
                 // 设置待发送的同步事件
                 val pendingIntent =
                     PendingIntent.getBroadcast(
@@ -181,7 +183,8 @@ class ProfileFragment :
                             cal.get(Calendar.MINUTE),
                             true,
                         )
-                    tpDialog.setOnCancelListener { // 当取消时间选择器时重置偏好
+                    tpDialog.setOnCancelListener {
+                        // 当取消时间选择器时重置偏好
                         get<SwitchPreferenceCompat>("profile_timing_sync")?.isChecked = false
                     }
                     tpDialog.show()
@@ -194,20 +197,22 @@ class ProfileFragment :
                 val rimeFolder = "rime"
                 val items = appContext.assets.list(rimeFolder)!!
                 val checkedItems = items.map { false }.toBooleanArray()
-                AlertDialog.Builder(context)
+                AlertDialog
+                    .Builder(context)
                     .setTitle(R.string.profile_reset)
                     .setMultiChoiceItems(items, checkedItems) { _, id, isChecked ->
                         checkedItems[id] = isChecked
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
+                    }.setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         var res = true
                         lifecycleScope.withLoadingDialog(context) {
                             withContext(Dispatchers.IO) {
                                 res =
-                                    items.filterIndexed { index, _ -> checkedItems[index] }
+                                    items
+                                        .filterIndexed { index, _ -> checkedItems[index] }
                                         .fold(true) { acc, asset ->
-                                            ResourceUtils.copyFile("$rimeFolder/$asset", DataManager.sharedDataDir, true)
+                                            ResourceUtils
+                                                .copyFile("$rimeFolder/$asset", DataManager.sharedDataDir, true)
                                                 .fold({ acc and true }, { acc and false })
                                         }
                             }

@@ -39,15 +39,14 @@ class AppPrefs(
             return instance
         }
 
-        fun defaultInstance(): AppPrefs {
-            return defaultInstance
+        fun defaultInstance(): AppPrefs =
+            defaultInstance
                 ?: throw UninitializedPropertyAccessException(
                     """
                     Default preferences not initialized! Make sure to call initDefault()
                     before accessing the default preferences.
                     """.trimIndent(),
                 )
-        }
     }
 
     /**
@@ -67,7 +66,9 @@ class AppPrefs(
         }
     }
 
-    class Internal(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
+    class Internal(
+        shared: SharedPreferences,
+    ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val PID = "general__pid"
         }
@@ -78,7 +79,9 @@ class AppPrefs(
     /**
      *  Wrapper class of keyboard settings.
      */
-    class Keyboard(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
+    class Keyboard(
+        shared: SharedPreferences,
+    ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val INLINE_PREEDIT_MODE = "keyboard__inline_preedit"
             const val SOFT_CURSOR_ENABLED = "keyboard__soft_cursor"
@@ -176,7 +179,9 @@ class AppPrefs(
     /**
      *  Wrapper class of theme and color settings.
      */
-    class Theme(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
+    class Theme(
+        shared: SharedPreferences,
+    ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val SELECTED_THEME = "theme_selected_theme"
             const val SELECTED_COLOR = "theme_selected_color"
@@ -202,7 +207,9 @@ class AppPrefs(
     /**
      *  Wrapper class of profile settings.
      */
-    class Profile(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
+    class Profile(
+        shared: SharedPreferences,
+    ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val USER_DATA_DIR = "profile_user_data_dir"
             const val SYNC_BACKGROUND_ENABLED = "profile_sync_in_background"
@@ -220,7 +227,9 @@ class AppPrefs(
         var lastBackgroundSync by string(LAST_BACKGROUND_SYNC, "")
     }
 
-    class Clipboard(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
+    class Clipboard(
+        shared: SharedPreferences,
+    ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val CLIPBOARD_COMPARE_RULES = "clipboard_clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "clipboard_clipboard_output"
@@ -241,7 +250,9 @@ class AppPrefs(
     /**
      *  Wrapper class of configuration settings.
      */
-    class Other(shared: SharedPreferences) : PreferenceDelegateOwner(shared) {
+    class Other(
+        shared: SharedPreferences,
+    ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val UI_MODE = "other__ui_mode"
             const val SHOW_APP_ICON = "other__show_app_icon"

@@ -18,7 +18,9 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 import splitties.views.setPaddingDp
 
-open class CompactCandidateViewAdapter(val theme: Theme) : BaseQuickAdapter<CandidateItem, CandidateViewHolder>() {
+open class CompactCandidateViewAdapter(
+    val theme: Theme,
+) : BaseQuickAdapter<CandidateItem, CandidateViewHolder>() {
     var sticky: Int = 0
         private set
 

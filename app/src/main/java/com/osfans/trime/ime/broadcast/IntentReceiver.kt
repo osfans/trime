@@ -32,7 +32,9 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 /** 接收 Intent 廣播事件  */
-class IntentReceiver : BroadcastReceiver(), CoroutineScope by MainScope() {
+class IntentReceiver :
+    BroadcastReceiver(),
+    CoroutineScope by MainScope() {
     override fun onReceive(
         context: Context,
         intent: Intent,

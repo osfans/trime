@@ -29,12 +29,8 @@ open class LeakGuardHandlerWrapper<T>(
     constructor(ownerInstance: T) : this(ownerInstance, Looper.myLooper())
 
     @Synchronized
-    fun getOwnerInstance(): T {
-        return ownerInstanceRef.get()!!
-    }
+    fun getOwnerInstance(): T = ownerInstanceRef.get()!!
 
     @Synchronized
-    fun getOwnerInstanceOrNull(): T? {
-        return ownerInstanceRef.get()
-    }
+    fun getOwnerInstanceOrNull(): T? = ownerInstanceRef.get()
 }

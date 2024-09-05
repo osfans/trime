@@ -23,8 +23,9 @@ object UnrollButtonStateMachine {
         UnrolledCandidatesEmpty,
     }
 
-    enum class TransitionEvent(val builder: TransitionBuildBlock<State, BooleanKey>) :
-        EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
+    enum class TransitionEvent(
+        val builder: TransitionBuildBlock<State, BooleanKey>,
+    ) : EventStateMachine.TransitionEvent<State, BooleanKey> by BuildTransitionEvent(builder) {
         UnrolledCandidatesUpdated({
             from(Hidden) transitTo ClickToAttachWindow on (UnrolledCandidatesEmpty to false)
             from(ClickToAttachWindow) transitTo Hidden on (UnrolledCandidatesEmpty to true)

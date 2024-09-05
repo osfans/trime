@@ -41,13 +41,14 @@ class PrefFragment : PaddingPreferenceFragment() {
             get<Preference>("pref_schemata")?.setOnPreferenceClickListener {
                 viewModel.rime.launchOnReady { api ->
                     lifecycleScope.launch {
-                        EnabledSchemaPickerDialog.build(api, lifecycleScope, context) {
-                            setPositiveButton(R.string.enable_schemata) { _, _ ->
-                                lifecycleScope.launch {
-                                    AvailableSchemaPickerDialog.build(api, lifecycleScope, context).show()
+                        EnabledSchemaPickerDialog
+                            .build(api, lifecycleScope, context) {
+                                setPositiveButton(R.string.enable_schemata) { _, _ ->
+                                    lifecycleScope.launch {
+                                        AvailableSchemaPickerDialog.build(api, lifecycleScope, context).show()
+                                    }
                                 }
-                            }
-                        }.show()
+                            }.show()
                     }
                 }
                 true

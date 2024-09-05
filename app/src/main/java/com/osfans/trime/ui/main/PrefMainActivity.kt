@@ -83,7 +83,8 @@ class PrefMainActivity : AppCompatActivity() {
             binding.prefToolbar.root.topPadding = systemBars.top
             windowInsets
         }
-        WindowCompat.getInsetsController(window, window.decorView)
+        WindowCompat
+            .getInsetsController(window, window.decorView)
             .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
@@ -140,8 +141,8 @@ class PrefMainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.preference__menu_deploy -> {
                 deploy()
                 true
@@ -152,7 +153,6 @@ class PrefMainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
 
     private fun deploy() {
         lifecycleScope.launch {
@@ -178,14 +178,14 @@ class PrefMainActivity : AppCompatActivity() {
 
     private fun checkScheduleExactAlarmPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            AlertDialog.Builder(this)
+            AlertDialog
+                .Builder(this)
                 .setIconAttribute(android.R.attr.alertDialogIcon)
                 .setTitle(R.string.schedule_exact_alarm_permission_title)
                 .setMessage(R.string.schedule_exact_alarm_permission_message)
                 .setPositiveButton(R.string.grant_permission) { _, _ ->
                     startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
-                }
-                .setNegativeButton(android.R.string.cancel, null)
+                }.setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
     }
@@ -194,16 +194,17 @@ class PrefMainActivity : AppCompatActivity() {
         if (XXPermissions.isGranted(this, Permission.POST_NOTIFICATIONS)) {
             return
         } else {
-            AlertDialog.Builder(this)
+            AlertDialog
+                .Builder(this)
                 .setIconAttribute(android.R.attr.alertDialogIcon)
                 .setTitle(R.string.notification_permission_title)
                 .setMessage(R.string.notification_permission_message)
                 .setPositiveButton(R.string.grant_permission) { _, _ ->
-                    XXPermissions.with(this)
+                    XXPermissions
+                        .with(this)
                         .permission(Permission.POST_NOTIFICATIONS)
                         .request(null)
-                }
-                .setNegativeButton(android.R.string.cancel, null)
+                }.setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
     }

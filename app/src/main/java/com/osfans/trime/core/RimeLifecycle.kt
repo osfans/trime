@@ -86,18 +86,20 @@ class RimeLifecycleScope(
 suspend fun <T> RimeLifecycle.whenAtState(
     state: RimeLifecycle.State,
     block: suspend CoroutineScope.() -> T,
-): T {
-    return if (currentStateFlow.value == state) {
+): T =
+    if (currentStateFlow.value == state) {
         block(lifecycleScope)
     } else {
         StateDelegate(this, state).run(block)
     }
-}
 
 suspend inline fun <T> RimeLifecycle.whenReady(noinline block: suspend CoroutineScope.() -> T) =
     whenAtState(RimeLifecycle.State.READY, block)
 
-private class StateDelegate(val lifecycle: RimeLifecycle, val state: RimeLifecycle.State) {
+private class StateDelegate(
+    val lifecycle: RimeLifecycle,
+    val state: RimeLifecycle.State,
+) {
     private var job: Job? = null
 
     init {

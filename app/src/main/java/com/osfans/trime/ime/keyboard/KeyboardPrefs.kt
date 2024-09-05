@@ -13,14 +13,13 @@ object KeyboardPrefs {
 
     private const val WIDE_SCREEN_WIDTH_DP = 600
 
-    fun Context.isLandscapeMode(): Boolean {
-        return when (prefs.keyboard.landscapeModeOption) {
+    fun Context.isLandscapeMode(): Boolean =
+        when (prefs.keyboard.landscapeModeOption) {
             AppPrefs.Keyboard.LandscapeModeOption.AUTO -> resources.configuration.isLandscape() || isWideScreen()
             AppPrefs.Keyboard.LandscapeModeOption.LANDSCAPE -> resources.configuration.isLandscape()
             AppPrefs.Keyboard.LandscapeModeOption.ALWAYS -> true
             else -> false
         }
-    }
 
     private fun Context.isWideScreen(): Boolean {
         val metrics = resources.displayMetrics
