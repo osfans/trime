@@ -22,12 +22,6 @@ plugins {
 }
 
 spotless {
-    java {
-        importOrder()
-        removeUnusedImports()
-        target("app/src/main/java/com/osfans/trime/**/*.java")
-        googleJavaFormat("1.19.2")
-    }
     kotlin {
         target("**/*.kt", "**/*.kts")
         ktlint("1.2.1")
