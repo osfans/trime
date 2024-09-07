@@ -54,7 +54,7 @@ class FlexboxUnrolledCandidateWindow(
                         setPaddingDp(size, 0, size, 0)
                         layoutParams =
                             FlexboxLayoutManager
-                                .LayoutParams(wrapContent, dp(40))
+                                .LayoutParams(wrapContent, dp(theme.generalStyle.run { candidateViewHeight + commentHeight }))
                                 .apply { flexGrow = 1f }
                     }
                 }
