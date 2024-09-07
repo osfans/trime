@@ -19,6 +19,16 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
+    suspend fun processKey(
+        value: Int,
+        modifiers: UInt = 0u,
+    ): Boolean
+
+    suspend fun processKey(
+        value: KeyValue,
+        modifiers: KeyModifiers,
+    ): Boolean
+
     suspend fun selectCandidate(idx: Int): Boolean
 
     suspend fun forgetCandidate(idx: Int): Boolean

@@ -34,8 +34,11 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
+import com.osfans.trime.core.KeyModifiers
+import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
+import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeDaemon
@@ -47,11 +50,9 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
-import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
-import com.osfans.trime.ime.keyboard.Key
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.text.TextInputManager
@@ -79,7 +80,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 /** [輸入法][InputMethodService]主程序  */
 
-@Suppress("ktlint:standard:property-naming")
 open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var rime: RimeSession
     private val jobs = Channel<Job>(capacity = Channel.UNLIMITED)
@@ -93,7 +93,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var mIntentReceiver: IntentReceiver? = null
     private var isWindowShown = false // 键盘窗口是否已显示
     var textInputManager: TextInputManager? = null // 文字输入管理器
-    var candidateExPage = false
 
     var shouldUpdateRimeOption = false
 
@@ -566,9 +565,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         inputView?.finishInput()
     }
 
-    private val isComposing: Boolean
-        get() = Rime.isComposing
-
     // 直接commit不做任何处理
     fun commitCharSequence(
         text: CharSequence,
@@ -643,7 +639,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun sendDownKeyEvent(
         eventTime: Long,
         keyEventCode: Int,
-        metaState: Int,
+        metaState: Int = 0,
     ): Boolean {
         val ic = currentInputConnection ?: return false
         return ic.sendKeyEvent(
@@ -665,7 +661,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun sendUpKeyEvent(
         eventTime: Long,
         keyEventCode: Int,
-        metaState: Int,
+        metaState: Int = 0,
     ): Boolean {
         val ic = currentInputConnection ?: return false
         return ic.sendKeyEvent(
@@ -712,20 +708,20 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ic.beginBatchEdit()
         val eventTime = SystemClock.uptimeMillis()
         if (metaState and KeyEvent.META_CTRL_ON != 0) {
-            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT, 0)
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
         }
         if (metaState and KeyEvent.META_ALT_ON != 0) {
-            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT, 0)
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
         }
         if (metaState and KeyEvent.META_SHIFT_ON != 0) {
-            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT, 0)
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
         }
         if (metaState and KeyEvent.META_META_ON != 0) {
-            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT, 0)
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT)
         }
 
         if (metaState and KeyEvent.META_SYM_ON != 0) {
-            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SYM, 0)
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SYM)
         }
 
         for (n in 0 until count) {
@@ -733,21 +729,21 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             sendUpKeyEvent(eventTime, keyEventCode, metaState)
         }
         if (metaState and KeyEvent.META_SHIFT_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT, 0)
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
         }
         if (metaState and KeyEvent.META_ALT_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT, 0)
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
         }
         if (metaState and KeyEvent.META_CTRL_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT, 0)
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
         }
 
         if (metaState and KeyEvent.META_META_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT, 0)
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT)
         }
 
         if (metaState and KeyEvent.META_SYM_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SYM, 0)
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SYM)
         }
 
         ic.endBatchEdit()
@@ -790,84 +786,28 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return Rime.processKey(event[0], event[1])
     }
 
-    private fun composeEvent(event: KeyEvent): Boolean {
-        if (textInputManager == null) {
-            return false
+    private fun forwardKeyEvent(event: KeyEvent): Boolean {
+        val modifiers = KeyModifiers.fromKeyEvent(event)
+        val keyVal = KeyValue.fromKeyEvent(event)
+        if (keyVal.value != RimeKeyMapping.RimeKey_VoidSymbol) {
+            postRimeJob {
+                processKey(keyVal, modifiers)
+            }
+            return true
         }
-        val keyCode = event.keyCode
-        if (keyCode == KeyEvent.KEYCODE_MENU) return false // 不處理 Menu 鍵
-        if (!Keycode.isStdKey(keyCode)) return false // 只處理安卓標準按鍵
-        if (event.repeatCount == 0 && Key.isTrimeModifierKey(keyCode)) {
-            val ret =
-                onRimeKey(
-                    Event.getRimeEvent(
-                        keyCode,
-                        if (event.action == KeyEvent.ACTION_DOWN) event.modifiers else Rime.META_RELEASE_ON,
-                    ),
-                )
-            if (this.isComposing) setCandidatesViewShown(textInputManager!!.isComposable) // 藍牙鍵盤打字時顯示候選欄
-            return ret
-        }
-        return textInputManager!!.isComposable && !Rime.isVoidKeycode(keyCode)
+        Timber.d("Skipped KeyEvent: $event")
+        return false
     }
 
     override fun onKeyDown(
         keyCode: Int,
         event: KeyEvent,
-    ): Boolean {
-        Timber.d("\t<TrimeInput>\tonKeyDown()\tkeycode=%d, event=%s", keyCode, event.toString())
-        return if (composeEvent(event) && onKeyEvent(event) && isWindowShown) true else super.onKeyDown(keyCode, event)
-    }
+    ): Boolean = forwardKeyEvent(event) || super.onKeyDown(keyCode, event)
 
     override fun onKeyUp(
         keyCode: Int,
         event: KeyEvent,
-    ): Boolean {
-        Timber.d("\t<TrimeInput>\tonKeyUp()\tkeycode=%d, event=%s", keyCode, event.toString())
-        if (composeEvent(event) && textInputManager!!.needSendUpRimeKey) {
-            textInputManager!!.onRelease(keyCode)
-            if (isWindowShown) return true
-        }
-        return super.onKeyUp(keyCode, event)
-    }
-
-    /**
-     * 处理实体键盘事件
-     *
-     * @param event 按鍵事件[KeyEvent]
-     * @return 是否成功處理
-     */
-    private fun onKeyEvent(event: KeyEvent): Boolean {
-        Timber.d("\t<TrimeInput>\tonKeyEvent()\tRealKeyboard event=%s", event.toString())
-        var keyCode = event.keyCode
-        textInputManager!!.needSendUpRimeKey = Rime.isComposing
-        if (!this.isComposing) {
-            if (keyCode == KeyEvent.KEYCODE_DEL ||
-                keyCode == KeyEvent.KEYCODE_ENTER ||
-                keyCode == KeyEvent.KEYCODE_ESCAPE ||
-                keyCode == KeyEvent.KEYCODE_BACK
-            ) {
-                return false
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-            keyCode = KeyEvent.KEYCODE_ESCAPE // 返回鍵清屏
-        }
-        if (event.action == KeyEvent.ACTION_DOWN && event.isCtrlPressed && event.repeatCount == 0 && !KeyEvent.isModifierKey(keyCode)) {
-            if (hookKeyboard(keyCode, event.metaState)) return true
-        }
-        val unicodeChar = event.unicodeChar
-        val s = unicodeChar.toChar().toString()
-        val i = Event.getClickCode(s)
-        var mask = 0
-        if (i > 0) {
-            keyCode = i
-        } else { // 空格、回車等
-            mask = event.metaState
-        }
-        val ret = handleKey(keyCode, mask)
-        if (this.isComposing) setCandidatesViewShown(textInputManager!!.isComposable) // 藍牙鍵盤打字時顯示候選欄
-        return ret
-    }
+    ): Boolean = forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
 
     fun switchToPrevIme() {
         try {
