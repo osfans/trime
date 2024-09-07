@@ -21,21 +21,18 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.PopupWindow
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.data.theme.model.EnterLabel
 import com.osfans.trime.databinding.KeyboardPopupKeyboardBinding
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.LeakGuardHandlerWrapper
 import com.osfans.trime.util.indexOfStateSet
 import com.osfans.trime.util.sp
 import com.osfans.trime.util.stateDrawableAt
-import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.systemservices.layoutInflater
 import splitties.views.dsl.core.textView
@@ -53,20 +50,6 @@ class KeyboardView(
     context: Context,
 ) : View(context),
     View.OnClickListener {
-    enum class EnterLabelMode {
-        ACTION_LABEL_NEVER,
-        ACTION_LABEL_ONLY,
-        ACTION_LABEL_PREFERRED,
-        CUSTOM_PREFERRED,
-        ;
-
-        companion object {
-            fun fromOrdinal(ordinal: Int) =
-                runCatching { entries[ordinal] }
-                    .getOrDefault(ACTION_LABEL_NEVER)
-        }
-    }
-
     private val theme get() = ThemeManager.activeTheme
 
     private var mKeyboard: Keyboard? = null
@@ -237,58 +220,10 @@ class KeyboardView(
     private val mHeadsetRequiredToHearPasswordsAnnounced = false
     var showKeyHint = !Rime.getOption("_hide_key_hint")
     var showKeySymbol = !Rime.getOption("_hide_key_symbol")
-    private lateinit var labelEnter: String
-    private val mEnterLabels: EnterLabel = theme.generalStyle.enterLabel
-    private val enterLabelMode = EnterLabelMode.fromOrdinal(theme.generalStyle.enterLabelMode)
+    private var labelEnter: String = theme.generalStyle.enterLabel.default
 
-    private fun handleEnterLabel() {
-        labelEnter = mEnterLabels.default ?: "⏎"
-    }
-
-    fun updateEnterLabelOnEditorInfo(info: EditorInfo) {
-        if (info.imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-            labelEnter = mEnterLabels.default
-        } else {
-            val action = info.imeOptions and EditorInfo.IME_MASK_ACTION
-            val actionLabel = info.actionLabel
-            when (enterLabelMode) {
-                EnterLabelMode.ACTION_LABEL_ONLY -> {
-                    labelEnter = actionLabel.toString()
-                }
-                EnterLabelMode.ACTION_LABEL_PREFERRED -> {
-                    labelEnter =
-                        if (!actionLabel.isNullOrEmpty()) {
-                            actionLabel.toString()
-                        } else {
-                            mEnterLabels.default
-                        }
-                }
-                EnterLabelMode.CUSTOM_PREFERRED,
-                EnterLabelMode.ACTION_LABEL_NEVER,
-                -> {
-                    labelEnter =
-                        when (action) {
-                            EditorInfo.IME_ACTION_DONE -> mEnterLabels.done
-                            EditorInfo.IME_ACTION_GO -> mEnterLabels.go
-                            EditorInfo.IME_ACTION_NEXT -> mEnterLabels.next
-                            EditorInfo.IME_ACTION_PREVIOUS -> mEnterLabels.pre
-                            EditorInfo.IME_ACTION_SEARCH -> mEnterLabels.search
-                            EditorInfo.IME_ACTION_SEND -> mEnterLabels.send
-                            else -> {
-                                if (enterLabelMode == EnterLabelMode.ACTION_LABEL_NEVER) {
-                                    mEnterLabels.default
-                                } else {
-                                    if (!actionLabel.isNullOrEmpty()) {
-                                        actionLabel.toString()
-                                    } else {
-                                        mEnterLabels.default
-                                    }
-                                }
-                            }
-                        }
-                }
-            }
-        }
+    fun onEnterKeyLabelUpdate(label: String) {
+        labelEnter = label
     }
 
     private val mHandler = MyHandler(this)
@@ -317,7 +252,6 @@ class KeyboardView(
 
     init {
         initGestureDetector()
-        handleEnterLabel()
         invalidateAllKeys()
     }
 

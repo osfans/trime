@@ -8,6 +8,7 @@ import android.content.Context
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.broadcast.EnterKeyLabelModule
 import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.candidates.CompactCandidateModule
 import com.osfans.trime.ime.composition.CompositionPopupWindow
@@ -31,6 +32,7 @@ abstract class InputComponent(
 ) {
     abstract val broadcaster: InputBroadcaster
     abstract val commonKeyboardActionListener: CommonKeyboardActionListener
+    abstract val enterKeyLabel: EnterKeyLabelModule
     abstract val quickBar: QuickBar
     abstract val composition: CompositionPopupWindow
     abstract val windowManager: BoardWindowManager

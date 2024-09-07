@@ -248,6 +248,10 @@ class KeyboardWindow(
         mainKeyboardView.invalidateAllKeys()
     }
 
+    override fun onEnterKeyLabelUpdate(label: String) {
+        mainKeyboardView.onEnterKeyLabelUpdate(label)
+    }
+
     override fun onAttached() {
         mainKeyboardView.keyboardActionListener = ListenerDecorator(commonKeyboardActionListener.listener)
     }

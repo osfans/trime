@@ -102,6 +102,7 @@ class InputView(
     private val inputComponent = InputComponent::class.create(this, themedContext, theme, service, rime)
     private val broadcaster = inputComponent.broadcaster
     val commonKeyboardActionListener = inputComponent.commonKeyboardActionListener
+    private val enterKeyLabel = inputComponent.enterKeyLabel
     private val windowManager = inputComponent.windowManager
     private val quickBar: QuickBar = inputComponent.quickBar
     val composition: CompositionPopupWindow = inputComponent.composition
@@ -315,10 +316,10 @@ class InputView(
             }
         }
         broadcaster.onStartInput(info)
+        enterKeyLabel.updateLabelOnEditorInfo(info)
         if (!restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
-        keyboardWindow.mainKeyboardView.updateEnterLabelOnEditorInfo(info)
     }
 
     private fun handleRimeNotification(it: RimeNotification<*>) {
