@@ -780,26 +780,5 @@ class Keyboard() {
         /** Number of key widths from current touch point to search for nearest keys.  */
         @JvmField
         var SEARCH_DISTANCE = 1.4f
-
-        private fun hasModifier(
-            modifierMask: Int,
-            mModifierState: Int,
-        ): Boolean = mModifierState and modifierMask != 0
-
-        fun printModifierKeyState(
-            state: Int,
-            tag: String?,
-        ) {
-            Timber.d(
-                "\t<TrimeInput>\tkeyState() ctrl=%s, alt=%s, shift=%s, sym=%s, meta=%s, state=%d\t%s",
-                hasModifier(KeyEvent.META_CTRL_ON, state),
-                hasModifier(KeyEvent.META_ALT_ON, state),
-                hasModifier(KeyEvent.META_SHIFT_ON, state),
-                hasModifier(KeyEvent.META_SYM_ON, state),
-                hasModifier(KeyEvent.META_META_ON, state),
-                state,
-                tag,
-            )
-        }
     }
 }
