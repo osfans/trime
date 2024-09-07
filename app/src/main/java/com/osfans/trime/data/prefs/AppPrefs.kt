@@ -92,11 +92,7 @@ class AppPrefs(
             const val SPLIT_SPACE_PERCENT = "keyboard__split_space"
             const val SWITCH_ARROW_ENABLED = "keyboard__show_switch_arrow"
             const val FULLSCREEN_MODE = "keyboard__fullscreen_mode"
-            const val CANDIDATE_PAGE_SIZE = "keyboard__candidate_page_size"
 
-            const val HOOK_FAST_INPUT = "keyboard__hook_fast_input"
-            const val HOOK_CANDIDATE = "keyboard__hook_candidate"
-            const val HOOK_CANDIDATE_COMMIT = "keyboard__hook_candidate_commit"
             const val HOOK_CTRL_A = "keyboard__hook_ctrl_a"
             const val HOOK_CTRL_CV = "keyboard__hook_ctrl_cv"
             const val HOOK_CTRL_LR = "keyboard__hook_ctrl_lr"
@@ -119,10 +115,7 @@ class AppPrefs(
 
             const val SWIPE_ENABLED = "keyboard__swipe_enabled"
             const val SWIPE_TRAVEL = "keyboard__key_swipe_travel"
-            const val SWIPE_TRAVEL_HI = "keyboard__key_swipe_travel_hi"
             const val SWIPE_VELOCITY = "keyboard__key_swipe_velocity"
-            const val SWIPE_VELOCITY_HI = "keyboard__key_swipe_velocity_hi"
-            const val SWIPE_TIME_HI = "keyboard__key_swipe_time_hi"
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
         }
@@ -144,11 +137,7 @@ class AppPrefs(
 
         val landscapeModeOption by enum(LANDSCAPE_MODE, LandscapeModeOption.NEVER)
         val splitSpacePercent by int(SPLIT_SPACE_PERCENT, 100)
-        val candidatePageSize by string(CANDIDATE_PAGE_SIZE, "0")
 
-        val hookFastInput by bool(HOOK_FAST_INPUT, false)
-        val hookCandidate by bool(HOOK_CANDIDATE, false)
-        val hookCandidateCommit by bool(HOOK_CANDIDATE_COMMIT, false)
         val hookCtrlA by bool(HOOK_CTRL_A, false)
         val hookCtrlCV by bool(HOOK_CTRL_CV, false)
         val hookCtrlLR by bool(HOOK_CTRL_LR, false)
@@ -166,10 +155,7 @@ class AppPrefs(
         val vibrationAmplitude by int(VIBRATION_AMPLITUDE, -1)
         val swipeEnabled by bool(SWIPE_ENABLED, true)
         val swipeTravel by int(SWIPE_TRAVEL, 80)
-        val swipeTravelHi by int(SWIPE_TRAVEL_HI, 200)
         val swipeVelocity by int(SWIPE_VELOCITY, 800)
-        val swipeVelocityHi by int(SWIPE_VELOCITY_HI, 25000)
-        val swipeTimeHi by int(SWIPE_TIME_HI, 80)
         val longPressTimeout by int(LONG_PRESS_TIMEOUT, 400)
         val repeatInterval by int(REPEAT_INTERVAL, 50)
         var isSpeakKey by bool(SPEAK_KEY_PRESS_ENABLED, false)

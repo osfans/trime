@@ -186,8 +186,6 @@ class KeyboardView(
     private var mLastKeyTime: Long = 0
     private var mCurrentKeyTime: Long = 0
     private var mLastUpTime: Long = 0
-    private var isFastInput = false
-    private var isClickAtLast = false
     private val mKeyIndices = IntArray(12)
     private var mGestureDetector: GestureDetector? = null
     private var mRepeatKeyIndex = NOT_A_KEY
@@ -346,13 +344,9 @@ class KeyboardView(
                         val absX = abs(deltaX) // absolute value of distance X
                         val absY = abs(deltaY) // absolute value of distance Y
                         val travel = // threshold distance
-                            // I don't really know what getSwipeTravelHi is.
-                            // For any one see this plz change the method name to something
-                            // more understandable.
-                            if (isFastInput && isClickAtLast) prefs.keyboard.swipeTravelHi else prefs.keyboard.swipeTravel
+                            prefs.keyboard.swipeTravel
                         val velocity = // threshold velocity.
-                            // Same here for getSwipeVelocityHi
-                            if (isFastInput && isClickAtLast) prefs.keyboard.swipeVelocity else prefs.keyboard.swipeVelocityHi
+                            prefs.keyboard.swipeVelocity
                         mSwipeTracker.computeCurrentVelocity(10)
                         val endingVelocityX: Float = mSwipeTracker.xVelocity
                         val endingVelocityY: Float = mSwipeTracker.yVelocity
@@ -456,7 +450,6 @@ class KeyboardView(
                             showPreview(NOT_A_KEY)
                             showPreview(mDownKey, type.ordinal)
                             detectAndSendKey(mDownKey, mStartX, mStartY, me1.eventTime, type)
-                            isClickAtLast = false
                             return true
                         }
                         return false
@@ -1263,7 +1256,6 @@ class KeyboardView(
         mComboMode = false
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_CANCEL) {
             mComboCount = 0
-            isFastInput = if (prefs.keyboard.hookFastInput) prefs.keyboard.swipeTimeHi > me.eventTime - mLastUpTime else false
         } else if (pointerCount > 1 || action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_POINTER_UP) {
             mComboMode = true
         }
@@ -1414,7 +1406,7 @@ class KeyboardView(
                 val dy = touchY - touchY0
                 val absX = abs(dx)
                 val absY = abs(dy)
-                val travel = if (isFastInput && isClickAtLast) prefs.keyboard.swipeTravelHi else prefs.keyboard.swipeTravel
+                val travel = prefs.keyboard.swipeTravel
                 if (max(absY, absX) > travel && touchOnePoint) {
                     Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\ttouch")
                     val keyEventType =
@@ -1429,7 +1421,6 @@ class KeyboardView(
                     mHandler.removeMessages(MSG_REPEAT)
                     mHandler.removeMessages(MSG_LONGPRESS)
                     detectAndSendKey(mDownKey, mStartX, mStartY, me.eventTime, keyEventType)
-                    isClickAtLast = false
                     return true
                 } else {
                     Timber.d("swipeDebug.ext fail, dX=$dx, dY=$dy")
@@ -1452,7 +1443,6 @@ class KeyboardView(
                     eventTime,
                     if (mOldPointerCount > 1 || mComboMode) KeyEventType.COMBO else KeyEventType.CLICK,
                 )
-                isClickAtLast = true
             }
             invalidateAllKeys()
             mRepeatKeyIndex = NOT_A_KEY
