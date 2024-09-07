@@ -35,9 +35,9 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.model.CompositionComponent
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
+import com.osfans.trime.ime.keyboard.KeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import kotlin.math.absoluteValue
@@ -50,7 +50,6 @@ class Composition(
 ) : TextView(context, attrs) {
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val theme = ThemeManager.activeTheme
-    private val textInputManager = TextInputManager.instanceOrNull()
 
     private val keyTextSize = theme.generalStyle.keyTextSize
     private val labelTextSize = theme.generalStyle.labelTextSize
@@ -102,6 +101,7 @@ class Composition(
     private var initialY = 0f
     private var onActionMove: ((Float, Float) -> Unit)? = null
     private var onSelectCandidate: ((Int) -> Unit)? = null
+    private var keyboardActionListener: KeyboardActionListener? = null
 
     private val stickyLines: Int
         get() =
@@ -167,12 +167,16 @@ class Composition(
         onSelectCandidate = listener
     }
 
+    fun setKeyboardActionListener(listener: KeyboardActionListener?) {
+        keyboardActionListener = listener
+    }
+
     private inner class EventSpan(
         private val event: Event,
     ) : ClickableSpan() {
         override fun onClick(tv: View) {
-            textInputManager?.onPress(event.code)
-            textInputManager?.onEvent(event)
+            keyboardActionListener?.onPress(event.code)
+            keyboardActionListener?.onEvent(event)
         }
 
         override fun updateDrawState(ds: TextPaint) {

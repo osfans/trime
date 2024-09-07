@@ -23,6 +23,7 @@ import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
@@ -39,6 +40,7 @@ class LiquidKeyboard(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val theme: Theme,
+    private val commonKeyboardActionListener: CommonKeyboardActionListener,
 ) : BoardWindow.BarBoardWindow(),
     ResidentWindow,
     ClipboardHelper.OnClipboardUpdateListener {
@@ -97,7 +99,7 @@ class LiquidKeyboard(
     }
 
     override fun onCreateView(): View =
-        LiquidLayout(context, service, theme).apply {
+        LiquidLayout(context, theme, commonKeyboardActionListener).apply {
             liquidLayout = this
             tabsUi.apply {
                 setTabs(TabManager.tabTags)

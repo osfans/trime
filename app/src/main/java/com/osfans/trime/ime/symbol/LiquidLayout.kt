@@ -12,7 +12,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.after
@@ -44,8 +44,8 @@ import splitties.views.padding
 @SuppressLint("ViewConstructor")
 class LiquidLayout(
     context: Context,
-    service: TrimeInputMethodService,
     theme: Theme,
+    commonKeyboardActionListener: CommonKeyboardActionListener,
 ) : ConstraintLayout(context) {
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
     private val fixedKeyBar =
@@ -93,7 +93,7 @@ class LiquidLayout(
                                 // todo 想办法实现退格键、空格键等 repeatable: true 长按连续触发
                                 setOnClickListener {
                                     val event = EventManager.getEvent(operation.toString())
-                                    service.textInputManager?.run {
+                                    commonKeyboardActionListener.listener.run {
                                         onPress(event.code)
                                         onEvent(event)
                                     }

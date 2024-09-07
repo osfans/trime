@@ -50,6 +50,7 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
+import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
@@ -68,7 +69,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.bitflags.hasFlag
@@ -88,11 +88,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val prefs: AppPrefs
         get() = AppPrefs.defaultInstance()
     var inputView: InputView? = null
+    private val commonKeyboardActionListener: CommonKeyboardActionListener?
+        get() = inputView?.commonKeyboardActionListener
     private var initializationUi: InitializationUi? = null
     private var eventListeners = WeakHashSet<EventListener>()
     private var mIntentReceiver: IntentReceiver? = null
     private var isWindowShown = false // 键盘窗口是否已显示
-    var textInputManager: TextInputManager? = null // 文字输入管理器
+    private var textInputManager: TextInputManager? = null // 文字输入管理器
 
     var shouldUpdateRimeOption = false
 
@@ -275,11 +277,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     fun inputSymbol(text: String) {
-        textInputManager!!.onPress(KeyEvent.KEYCODE_UNKNOWN)
+        commonKeyboardActionListener?.listener?.onPress(KeyEvent.KEYCODE_UNKNOWN)
         if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
         val asciiPunch = Rime.isAsciiPunch
         if (asciiPunch) Rime.setOption("ascii_punct", false)
-        textInputManager!!.onText("{Escape}$text")
+        commonKeyboardActionListener?.listener?.onText("{Escape}$text")
         if (asciiPunch) Rime.setOption("ascii_punct", true)
         self!!.selectLiquidKeyboard(-1)
     }
@@ -842,10 +844,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         keyEventCode: Int,
         metaState: Int,
     ): Boolean { // 軟鍵盤
-        textInputManager!!.needSendUpRimeKey = false
+        commonKeyboardActionListener?.needSendUpRimeKey = false
         if (onRimeKey(Event.getRimeEvent(keyEventCode, metaState))) {
             // 如果输入法消费了按键事件，则需要释放按键
-            textInputManager!!.needSendUpRimeKey = true
+            commonKeyboardActionListener?.needSendUpRimeKey = true
             Timber.d(
                 "\t<TrimeInput>\thandleKey()\trimeProcess, keycode=%d, metaState=%d",
                 keyEventCode,
@@ -861,7 +863,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // 打开系统默认应用
             Timber.d("\t<TrimeInput>\thandleKey()\topenCategory keycode=%d", keyEventCode)
         } else {
-            textInputManager!!.needSendUpRimeKey = true
+            commonKeyboardActionListener?.needSendUpRimeKey = true
             Timber.d(
                 "\t<TrimeInput>\thandleKey()\treturn FALSE, keycode=%d, metaState=%d",
                 keyEventCode,

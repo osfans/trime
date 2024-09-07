@@ -99,8 +99,9 @@ class InputView(
     private val responseHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    private val inputComponent = InputComponent::class.create(themedContext, theme, service, rime)
+    private val inputComponent = InputComponent::class.create(this, themedContext, theme, service, rime)
     private val broadcaster = inputComponent.broadcaster
+    val commonKeyboardActionListener = inputComponent.commonKeyboardActionListener
     private val windowManager = inputComponent.windowManager
     private val quickBar: QuickBar = inputComponent.quickBar
     val composition: CompositionPopupWindow = inputComponent.composition

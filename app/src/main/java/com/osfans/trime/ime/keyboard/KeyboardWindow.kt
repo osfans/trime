@@ -39,6 +39,7 @@ class KeyboardWindow(
     private val service: TrimeInputMethodService,
     private val theme: Theme,
     private val rime: RimeSession,
+    private val commonKeyboardActionListener: CommonKeyboardActionListener,
     private val windowManager: BoardWindowManager,
 ) : BoardWindow.NoBarBoardWindow(),
     ResidentWindow,
@@ -248,7 +249,7 @@ class KeyboardWindow(
     }
 
     override fun onAttached() {
-        mainKeyboardView.keyboardActionListener = service.textInputManager?.let { ListenerDecorator(it) }
+        mainKeyboardView.keyboardActionListener = ListenerDecorator(commonKeyboardActionListener.listener)
     }
 
     override fun onDetached() {
