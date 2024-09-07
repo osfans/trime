@@ -27,4 +27,6 @@ interface InputBroadcastReceiver {
     fun onWindowAttached(window: BoardWindow) {}
 
     fun onWindowDetached(window: BoardWindow) {}
+
+    fun onEnterKeyLabelUpdate(label: String) {}
 }
