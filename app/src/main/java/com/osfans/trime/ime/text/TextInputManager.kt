@@ -28,8 +28,8 @@ import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.Keyboard
+import com.osfans.trime.ime.keyboard.KeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.ime.keyboard.KeyboardView
 import com.osfans.trime.ui.main.settings.ColorPickerDialog
 import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
@@ -59,7 +59,7 @@ class TextInputManager(
     private val trime: TrimeInputMethodService,
     private val rime: RimeSession,
 ) : TrimeInputMethodService.EventListener,
-    KeyboardView.OnKeyboardActionListener {
+    KeyboardActionListener {
     private val prefs get() = AppPrefs.defaultInstance()
     private var rimeNotificationJob: Job? = null
 
@@ -212,8 +212,7 @@ class TextInputManager(
     }
 
     // KeyboardEvent 处理软键盘事件
-    override fun onEvent(event: Event?) {
-        event ?: return
+    override fun onEvent(event: Event) {
         when (event.code) {
             KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
                 Rime.toggleOption(event.getToggle())
@@ -367,15 +366,14 @@ class TextInputManager(
         trime.sendDownUpKeyEvent(event[0], event[1])
     }
 
-    override fun onText(text: CharSequence?) {
-        text ?: return
+    override fun onText(text: CharSequence) {
         if (!text.first().isAsciiPrintable() && Rime.isComposing) {
             trime.postRimeJob {
                 commitComposition()
             }
         }
         var textToParse = text
-        while (textToParse!!.isNotEmpty()) {
+        while (textToParse.isNotEmpty()) {
             var target: String
             val escapeTagMatcher = DELIMITER_PROPERTY_KEY.toPattern().matcher(textToParse)
             val propertyGroupMatcher = DELIMITER_PROPERTY_GROUP.toPattern().matcher(textToParse)

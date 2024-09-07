@@ -248,18 +248,17 @@ class KeyboardWindow(
     }
 
     override fun onAttached() {
-        mainKeyboardView.onKeyboardActionListener = service.textInputManager?.let { ListenerDecorator(it) }
+        mainKeyboardView.keyboardActionListener = service.textInputManager?.let { ListenerDecorator(it) }
     }
 
     override fun onDetached() {
-        mainKeyboardView.onKeyboardActionListener = null
+        mainKeyboardView.keyboardActionListener = null
     }
 
     inner class ListenerDecorator(
-        private val delegate: KeyboardView.OnKeyboardActionListener,
-    ) : KeyboardView.OnKeyboardActionListener by delegate {
-        override fun onEvent(event: Event?) {
-            event ?: return
+        private val delegate: KeyboardActionListener,
+    ) : KeyboardActionListener by delegate {
+        override fun onEvent(event: Event) {
             if (event.commit.isNotEmpty()) {
                 // Directly commit the text and don't dispatch to Rime
                 service.commitCharSequence(event.commit, true)

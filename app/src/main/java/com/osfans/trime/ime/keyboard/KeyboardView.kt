@@ -53,50 +53,6 @@ class KeyboardView(
     context: Context,
 ) : View(context),
     View.OnClickListener {
-    /** 處理按鍵、觸摸等輸入事件  */
-    interface OnKeyboardActionListener {
-        /**
-         * Called when the user presses a key. This is sent before the [.onKey] is called. For
-         * keys that repeat, this is only called once.
-         *
-         * @param primaryCode the unicode of the key being pressed. If the touch is not on a valid key,
-         * the value will be zero.
-         */
-        fun onPress(primaryCode: Int)
-
-        /**
-         * Called when the user releases a key. This is sent after the [.onKey] is called. For
-         * keys that repeat, this is only called once.
-         *
-         * @param primaryCode the code of the key that was released
-         */
-        fun onRelease(primaryCode: Int)
-
-        fun onEvent(event: Event?)
-
-        /**
-         * Send a key press to the listener.
-         *
-         * @param primaryCode this is the key that was pressed
-         * @param mask the codes for all the possible alternative keys with the primary code being the
-         * first. If the primary key code is a single character such as an alphabet or number or
-         * symbol, the alternatives will include other characters that may be on the same key or
-         * adjacent keys. These codes are useful to correct for accidental presses of a key adjacent
-         * to the intended key.
-         */
-        fun onKey(
-            primaryCode: Int,
-            mask: Int,
-        )
-
-        /**
-         * Sends a sequence of characters to the listener.
-         *
-         * @param text the sequence of characters to be displayed.
-         */
-        fun onText(text: CharSequence?)
-    }
-
     enum class EnterLabelMode {
         ACTION_LABEL_NEVER,
         ACTION_LABEL_ONLY,
@@ -191,8 +147,7 @@ class KeyboardView(
     private val mMiniKeyboardCache = mutableMapOf<Key, View?>()
     private var mKeys: Array<Key>? = null
 
-    /** Listener for [OnKeyboardActionListener].  */
-    var onKeyboardActionListener: OnKeyboardActionListener? = null
+    var keyboardActionListener: KeyboardActionListener? = null
     private val mVerticalCorrection = theme.generalStyle.verticalCorrection
     private var mProximityThreshold = 0
 
@@ -210,7 +165,7 @@ class KeyboardView(
     private var touchOnePoint = false
 
     /**
-     * 是否允許距離校正 When enabled, calls to [OnKeyboardActionListener.onKey] will include key codes for
+     * 是否允許距離校正 When enabled, calls to [KeyboardActionListener.onKey] will include key codes for
      * adjacent keys. When disabled, only the primary key code will be reported.
      */
     private val enableProximityCorrection = theme.generalStyle.proximityCorrection
@@ -410,15 +365,17 @@ class KeyboardView(
                         //  so for most of the users that judgment is always true
                         if ((deltaX > travel || velocityX > velocity) &&
                             (
-                                absY < absX || (
-                                    deltaY > 0 &&
-                                        mKeys!![mDownKey].events[KeyEventType.SWIPE_UP.ordinal] == null
-                                ) ||
+                                absY < absX ||
+                                    (
+                                        deltaY > 0 &&
+                                            mKeys!![mDownKey].events[KeyEventType.SWIPE_UP.ordinal] == null
+                                    ) ||
                                     (
                                         deltaY < 0 &&
                                             mKeys!![mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal] == null
                                     )
-                            ) && mKeys!![mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal] != null
+                            ) &&
+                            mKeys!![mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal] != null
                         ) {
                             // I should have implement mDisambiguateSwipe as a config option, but the logic
                             // here is really weird, and I don't really know
@@ -433,15 +390,17 @@ class KeyboardView(
                             }
                         } else if ((deltaX < -travel || velocityX < -velocity) &&
                             (
-                                absY < absX || (
-                                    deltaY > 0 &&
-                                        mKeys!![mDownKey].events[KeyEventType.SWIPE_UP.ordinal] == null
-                                ) ||
+                                absY < absX ||
+                                    (
+                                        deltaY > 0 &&
+                                            mKeys!![mDownKey].events[KeyEventType.SWIPE_UP.ordinal] == null
+                                    ) ||
                                     (
                                         deltaY < 0 &&
                                             mKeys!![mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal] == null
                                     )
-                            ) && mKeys!![mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal] != null
+                            ) &&
+                            mKeys!![mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal] != null
                         ) {
                             if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
                                 return true
@@ -451,15 +410,17 @@ class KeyboardView(
                             }
                         } else if ((deltaY < -travel || velocityY < -velocity) &&
                             (
-                                absX < absY || (
-                                    deltaX > 0 &&
-                                        mKeys!![mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal] == null
-                                ) ||
+                                absX < absY ||
+                                    (
+                                        deltaX > 0 &&
+                                            mKeys!![mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal] == null
+                                    ) ||
                                     (
                                         deltaX < 0 &&
                                             mKeys!![mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal] == null
                                     )
-                            ) && mKeys!![mDownKey].events[KeyEventType.SWIPE_UP.ordinal] != null
+                            ) &&
+                            mKeys!![mDownKey].events[KeyEventType.SWIPE_UP.ordinal] != null
                         ) {
                             if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
                                 return true
@@ -469,15 +430,17 @@ class KeyboardView(
                             }
                         } else if ((deltaY > travel || velocityY > velocity) &&
                             (
-                                absX < absY || (
-                                    deltaX > 0 &&
-                                        mKeys!![mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal] == null
-                                ) ||
+                                absX < absY ||
+                                    (
+                                        deltaX > 0 &&
+                                            mKeys!![mDownKey].events[KeyEventType.SWIPE_RIGHT.ordinal] == null
+                                    ) ||
                                     (
                                         deltaX < 0 &&
                                             mKeys!![mDownKey].events[KeyEventType.SWIPE_LEFT.ordinal] == null
                                     )
-                            ) && mKeys!![mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal] != null
+                            ) &&
+                            mKeys!![mDownKey].events[KeyEventType.SWIPE_DOWN.ordinal] != null
                         ) {
                             if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
                                 return true
@@ -887,7 +850,8 @@ class KeyboardView(
             if (isInside) {
                 primaryIndex = nearestKeyIndex
             }
-            if (enableProximityCorrection && key.squaredDistanceFrom(x, y).also { dist = it } < mProximityThreshold ||
+            if (enableProximityCorrection &&
+                key.squaredDistanceFrom(x, y).also { dist = it } < mProximityThreshold ||
                 isInside
             ) {
                 // Find insertion point
@@ -921,10 +885,10 @@ class KeyboardView(
             if (mComboCount > 9) mComboCount = 9
             mComboCodes[mComboCount++] = code
         } else {
-            onKeyboardActionListener?.onRelease(code)
+            keyboardActionListener?.onRelease(code)
             if (mComboCount > 0) {
                 for (i in 0 until mComboCount) {
-                    onKeyboardActionListener!!.onRelease(mComboCodes[i])
+                    keyboardActionListener?.onRelease(mComboCodes[i])
                 }
                 mComboCount = 0
             }
@@ -956,7 +920,7 @@ class KeyboardView(
                 // getKeyIndices(x, y, codes); // 这里实际上并没有生效
                 Timber.d("detectAndSendKey: onEvent, code=$code, key.getEvent")
                 // 可以在这里把 mKeyboard.getModifer() 获取的修饰键状态写入event里
-                onKeyboardActionListener!!.onEvent(key.getEvent(type.ordinal))
+                key.getEvent(type.ordinal)?.let { keyboardActionListener?.onEvent(it) }
                 releaseKey(code)
                 Timber.d("detectAndSendKey: refreshModifier")
                 refreshModifier()
@@ -1172,12 +1136,11 @@ class KeyboardView(
     private fun onLongPress(popupKey: Key): Boolean {
         val popupKeyboardId = popupKey.popupResId
         if (popupKeyboardId == 0) {
-            if (popupKey.longClick != null) {
+            popupKey.longClick?.let {
                 removeMessages()
                 mAbortKey = true
-                val e = popupKey.longClick
-                onKeyboardActionListener!!.onEvent(e)
-                releaseKey(e!!.code)
+                keyboardActionListener?.onEvent(it)
+                releaseKey(it.code)
                 resetModifer()
                 return true
             }
@@ -1197,10 +1160,10 @@ class KeyboardView(
             mMiniKeyboard = mMiniKeyboardContainer.findViewById(android.R.id.keyboardView)
             val closeButton = mMiniKeyboardContainer.findViewById<View>(android.R.id.closeButton)
             closeButton?.setOnClickListener(this)
-            mMiniKeyboard.onKeyboardActionListener =
-                object : OnKeyboardActionListener {
-                    override fun onEvent(event: Event?) {
-                        onKeyboardActionListener!!.onEvent(event)
+            mMiniKeyboard.keyboardActionListener =
+                object : KeyboardActionListener {
+                    override fun onEvent(event: Event) {
+                        keyboardActionListener?.onEvent(event)
                         dismissPopupKeyboard()
                     }
 
@@ -1208,22 +1171,22 @@ class KeyboardView(
                         primaryCode: Int,
                         mask: Int,
                     ) {
-                        onKeyboardActionListener!!.onKey(primaryCode, mask)
+                        keyboardActionListener?.onKey(primaryCode, mask)
                         dismissPopupKeyboard()
                     }
 
-                    override fun onText(text: CharSequence?) {
-                        onKeyboardActionListener!!.onText(text)
+                    override fun onText(text: CharSequence) {
+                        keyboardActionListener?.onText(text)
                         dismissPopupKeyboard()
                     }
 
                     override fun onPress(primaryCode: Int) {
                         Timber.d("onLongPress: onPress key=$primaryCode")
-                        onKeyboardActionListener!!.onPress(primaryCode)
+                        keyboardActionListener?.onPress(primaryCode)
                     }
 
                     override fun onRelease(primaryCode: Int) {
-                        onKeyboardActionListener!!.onRelease(primaryCode)
+                        keyboardActionListener?.onRelease(primaryCode)
                     }
                 }
             // mInputView.setSuggest(mSuggest);
@@ -1412,7 +1375,7 @@ class KeyboardView(
             touchOnePoint = false
             if (action == MotionEvent.ACTION_POINTER_DOWN) return // 並擊鬆開前的虛擬按鍵事件
             checkMultiTap(eventTime, keyIndex)
-            onKeyboardActionListener!!.onPress(if (keyIndex != NOT_A_KEY) mKeys!![keyIndex].code else 0)
+            keyboardActionListener?.onPress(if (keyIndex != NOT_A_KEY) mKeys!![keyIndex].code else 0)
             if (mCurrentKey >= 0 && mKeys!![mCurrentKey].click!!.isRepeatable) {
                 mRepeatKeyIndex = mCurrentKey
                 val msg = mHandler.obtainMessage(MSG_REPEAT)
