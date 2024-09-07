@@ -258,32 +258,33 @@ class CommonKeyboardActionListener(
                         commitComposition()
                     }
                 }
-                var textToParse = text
-                while (textToParse.isNotEmpty()) {
-                    var target: String
-                    val eventWithEscapeMatcher = BRACED_KEY_EVENT_WITH_ESCAPE.toPattern().matcher(textToParse)
-                    val bracedKeyEventMatcher = BRACED_KEY_EVENT.toPattern().matcher(textToParse)
+                var sequence = text
+                while (sequence.isNotEmpty()) {
+                    var slice: String
                     when {
-                        eventWithEscapeMatcher.matches() -> {
-                            target = eventWithEscapeMatcher.group(1) ?: ""
+                        BRACED_KEY_EVENT_WITH_ESCAPE.matches(sequence) -> {
+                            slice = BRACED_KEY_EVENT_WITH_ESCAPE.matchEntire(sequence)?.groupValues?.get(1) ?: ""
                             // FIXME: rime will not handle the key sequence when
                             //  ascii_mode is on, there may be a better solution
                             //  for this.
-                            Rime.simulateKeySequence(target)
-                            if (Rime.getRimeCommit() == null && !Rime.isComposing) {
-                                service.commitCharSequence(target)
+                            if (Rime.simulateKeySequence(slice)) {
+                                if (Rime.isAsciiMode) {
+                                    service.commitCharSequence(slice)
+                                }
+                            } else {
+                                service.commitCharSequence(slice)
                             }
                         }
-                        bracedKeyEventMatcher.matches() -> {
-                            target = bracedKeyEventMatcher.group(1) ?: ""
-                            onEvent(EventManager.getEvent(target))
+                        BRACED_KEY_EVENT.matches(sequence) -> {
+                            slice = BRACED_KEY_EVENT.matchEntire(sequence)?.groupValues?.get(1) ?: ""
+                            onEvent(EventManager.getEvent(slice))
                         }
                         else -> {
-                            target = textToParse.substring(0, 1)
-                            onEvent(EventManager.getEvent(target))
+                            slice = sequence.first().toString()
+                            onEvent(EventManager.getEvent(slice))
                         }
                     }
-                    textToParse = textToParse.substring(target.length)
+                    sequence = sequence.substring(slice.length)
                 }
                 needSendUpRimeKey = false
             }
