@@ -31,6 +31,7 @@ import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.enums.PopupPosition
+import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -41,6 +42,7 @@ class CompositionPopupWindow(
     private val ctx: Context,
     private val rime: RimeSession,
     private val theme: Theme,
+    private val commonKeyboardActionListener: CommonKeyboardActionListener,
     private val bar: QuickBar,
 ) : InputBroadcastReceiver {
     // 顯示懸浮窗口
@@ -58,6 +60,7 @@ class CompositionPopupWindow(
                 setOnSelectCandidateListener { idx ->
                     rime.launchOnReady { it.selectCandidate(idx) }
                 }
+                setKeyboardActionListener(commonKeyboardActionListener.listener)
             }
         }
 

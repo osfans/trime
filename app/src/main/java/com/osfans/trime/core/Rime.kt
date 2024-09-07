@@ -311,10 +311,6 @@ class Rime :
         @JvmStatic
         fun getOption(option: String): Boolean = getRimeOption(option)
 
-        fun toggleOption(option: String) {
-            setOption(option, !getOption(option))
-        }
-
         @JvmStatic
         fun setCaretPos(caretPos: Int) {
             setRimeCaretPos(caretPos)

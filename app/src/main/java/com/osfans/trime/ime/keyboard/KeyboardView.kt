@@ -1168,10 +1168,10 @@ class KeyboardView(
                     }
 
                     override fun onKey(
-                        primaryCode: Int,
-                        mask: Int,
+                        keyEventCode: Int,
+                        metaState: Int,
                     ) {
-                        keyboardActionListener?.onKey(primaryCode, mask)
+                        keyboardActionListener?.onKey(keyEventCode, metaState)
                         dismissPopupKeyboard()
                     }
 
@@ -1180,13 +1180,13 @@ class KeyboardView(
                         dismissPopupKeyboard()
                     }
 
-                    override fun onPress(primaryCode: Int) {
-                        Timber.d("onLongPress: onPress key=$primaryCode")
-                        keyboardActionListener?.onPress(primaryCode)
+                    override fun onPress(keyEventCode: Int) {
+                        Timber.d("onLongPress: onPress key=$keyEventCode")
+                        keyboardActionListener?.onPress(keyEventCode)
                     }
 
-                    override fun onRelease(primaryCode: Int) {
-                        keyboardActionListener?.onRelease(primaryCode)
+                    override fun onRelease(keyEventCode: Int) {
+                        keyboardActionListener?.onRelease(keyEventCode)
                     }
                 }
             // mInputView.setSuggest(mSuggest);
