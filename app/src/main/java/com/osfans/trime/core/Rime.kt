@@ -73,6 +73,22 @@ class Rime :
             getCurrentRimeSchema() == ".default" // 無方案
         }
 
+    override suspend fun processKey(
+        value: Int,
+        modifiers: UInt,
+    ): Boolean =
+        withRimeContext {
+            processRimeKey(value, modifiers.toInt()).also { if (it) updateContext() }
+        }
+
+    override suspend fun processKey(
+        value: KeyValue,
+        modifiers: KeyModifiers,
+    ): Boolean =
+        withRimeContext {
+            processRimeKey(value.value, modifiers.toInt()).also { if (it) updateContext() }
+        }
+
     override suspend fun selectCandidate(idx: Int): Boolean =
         withRimeContext {
             selectRimeCandidate(idx).also { if (it) updateContext() }
