@@ -110,19 +110,22 @@ object DataManager {
                 when (it) {
                     is DataDiff.CreateFile,
                     is DataDiff.UpdateFile,
-                    -> ResourceUtils.copyFile(it.path, sharedDataDir, true)
+                    -> {
+                        val destPath = sharedDataDir.resolveSibling(it.path).absolutePath
+                        ResourceUtils.copyFile(it.path, destPath)
+                    }
                     is DataDiff.DeleteDir,
                     is DataDiff.DeleteFile,
                     -> FileUtils.delete(sharedDataDir.resolve(it.path.substringAfterLast('/'))).getOrThrow()
                 }
             }
 
-            ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir)
+            ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.absolutePath)
 
-            // FIXME：缺失 default.custom.yaml 会导致方案列表为空
+            // 创建空的 default.custom.yaml 以覆盖 default.yaml 默认的方案列表
             runCatching {
                 if (File(userDataDir, DEFAULT_CUSTOM_FILE_NAME).createNewFile()) {
-                    Timber.d("Creating empty default.custom.yaml")
+                    Timber.d("Created empty default.custom.yaml")
                 }
             }.getOrElse { Timber.e(it, "Failed to create default.custom.yaml") }
 

@@ -8,21 +8,20 @@ import timber.log.Timber
 import java.io.File
 
 object ResourceUtils {
+    /** Copy files from assets */
     fun copyFile(
         path: String,
-        dest: File,
-        baseToDest: Boolean = false,
+        dest: String,
     ): Result<Long> =
         runCatching {
-            val destFileName = if (baseToDest) path.substringAfterLast('/') else path
             val assets = appContext.assets.list(path)
             if (!assets.isNullOrEmpty()) {
                 assets.fold(0L) { acc, asset ->
-                    acc + copyFile("$path/$asset", File(dest, destFileName), baseToDest).getOrDefault(0L)
+                    acc + copyFile("$path/$asset", "$dest/$asset").getOrDefault(0L)
                 }
             } else {
                 appContext.assets.open(path).use { i ->
-                    File(dest, destFileName)
+                    File(dest)
                         .also { it.parentFile?.mkdirs() }
                         .outputStream()
                         .use { o -> i.copyTo(o) }

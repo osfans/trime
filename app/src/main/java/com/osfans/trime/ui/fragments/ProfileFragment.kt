@@ -194,8 +194,8 @@ class ProfileFragment :
                 true
             }
             get<Preference>("profile_reset")?.setOnPreferenceClickListener {
-                val rimeFolder = "rime"
-                val items = appContext.assets.list(rimeFolder)!!
+                val base = "shared"
+                val items = appContext.assets.list(base)!!
                 val checkedItems = items.map { false }.toBooleanArray()
                 AlertDialog
                     .Builder(context)
@@ -211,8 +211,9 @@ class ProfileFragment :
                                     items
                                         .filterIndexed { index, _ -> checkedItems[index] }
                                         .fold(true) { acc, asset ->
+                                            val destPath = DataManager.sharedDataDir.resolve(asset).absolutePath
                                             ResourceUtils
-                                                .copyFile("$rimeFolder/$asset", DataManager.sharedDataDir, true)
+                                                .copyFile("$base/$asset", destPath)
                                                 .fold({ acc and true }, { acc and false })
                                         }
                             }
