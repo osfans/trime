@@ -38,7 +38,7 @@ class DataChecksumsPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         target.task<DataChecksumsTask>(TASK) {
-            inputDir.set(target.assetsDir.resolve("rime"))
+            inputDir.set(target.assetsDir.resolve("shared"))
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
         }
         target

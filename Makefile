@@ -70,7 +70,7 @@ $(TRANSLATE): $(resDir)/values-zh-rTW/strings.xml
 translate: $(TRANSLATE)
 
 opencc-data: srcDir = $(jniDir)/OpenCC/data
-opencc-data: targetDir = $(mainDir)/assets/rime/opencc
+opencc-data: targetDir = $(mainDir)/assets/shared/opencc
 opencc-data:
 	@echo "copy opencc data"
 	@rm -rf $(targetDir)
