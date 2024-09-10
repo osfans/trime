@@ -8,7 +8,12 @@ package com.osfans.trime.ime.keyboard
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.text.TextUtils
 import android.view.KeyEvent
+import android.view.inputmethod.InputMethodInfo
+import android.view.inputmethod.InputMethodManager
+import androidx.core.text.TextUtilsCompat
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifier
@@ -173,6 +178,7 @@ class CommonKeyboardActionListener(
                         KeyEvent.KEYCODE_SETTINGS -> handleSettings(action)
                         KeyEvent.KEYCODE_PROG_RED -> showColorPicker()
                         KeyEvent.KEYCODE_MENU -> showEnabledSchemaPicker()
+                        KeyEvent.KEYCODE_VOICE_ASSIST -> switchToVoiceInputMethod()
                         else -> handleDefaultKeyAction(action)
                     }
                 }
@@ -287,6 +293,34 @@ class CommonKeyboardActionListener(
                     "schema" -> AppUtils.launchMainToSchemaList(context)
                     "sound" -> showSoundEffectPicker()
                     else -> AppUtils.launchMainActivity(service)
+                }
+            }
+
+            private fun switchToVoiceInputMethod() {
+                val imm = service.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+                val selectedIme = prefs.general.voiceAssistInput.getValue()
+                val imeId = selectedIme.ifEmpty {
+                    imm.enabledInputMethodList.firstOrNull { imi ->
+                        (0 until imi.subtypeCount).any { index ->
+                            imi.getSubtypeAt(index).mode == "voice"
+                        }
+                    }?.id
+                }
+
+                if (imeId?.isNotEmpty() == true) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        service.switchInputMethod(imeId)
+                        return
+                    } else {
+                        service.window.window?.let { window ->
+                            @Suppress("DEPRECATION")
+                            imm.setInputMethod(window.attributes.token, imeId)
+                            return
+                        }
+                    }
+                } else {
+                    Timber.w("No Voice IME found")
                 }
             }
 
