@@ -120,7 +120,7 @@ object DataManager {
                 }
             }
 
-            ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.absolutePath)
+            ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.resolve(DATA_CHECKSUMS_NAME).absolutePath)
 
             // 创建空的 default.custom.yaml 以覆盖 default.yaml 默认的方案列表
             runCatching {
