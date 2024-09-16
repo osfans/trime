@@ -13,3 +13,13 @@ data class CandidateItem(
     val comment: String,
     val text: String,
 )
+
+data class InputStatus(
+    val isDisabled: Boolean = true,
+    val isComposing: Boolean = false,
+    val isAsciiMode: Boolean = true,
+    val isFullShape: Boolean = false,
+    val isSimplified: Boolean = false,
+    val isTraditional: Boolean = false,
+    val isAsciiPunch: Boolean = true,
+)
