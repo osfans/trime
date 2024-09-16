@@ -17,6 +17,8 @@ interface RimeApi {
 
     val schemaItemCached: SchemaItem
 
+    val inputStatusCached: InputStatus
+
     suspend fun isEmpty(): Boolean
 
     suspend fun processKey(

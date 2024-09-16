@@ -38,6 +38,9 @@ class Rime :
     override var schemaItemCached = SchemaItem(".default")
         private set
 
+    override var inputStatusCached = InputStatus()
+        private set
+
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
@@ -153,6 +156,20 @@ class Rime :
         }
     }
 
+    private fun handleRimeResponse(response: RimeResponse) {
+        if (response.status != null) {
+            val (item, status) =
+                response.status.run {
+                    SchemaItem(schemaId, schemaName) to
+                        InputStatus(isDisabled, isComposing, isAsciiMode, isFullShape, isSimplified, isTraditional, isAsciiPunch)
+                }
+            inputStatusCached = status
+            if (item != schemaItemCached) {
+                schemaItemCached = item
+            }
+        }
+    }
+
     fun startup(fullCheck: Boolean) {
         if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
@@ -160,6 +177,7 @@ class Rime :
         }
         if (appContext.isStorageAvailable()) {
             registerRimeNotificationHandler(::handleRimeNotification)
+            registerRimeResponseHandler(::handleRimeResponse)
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
         }
@@ -179,6 +197,7 @@ class Rime :
         }
         lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
         unregisterRimeNotificationHandler(::handleRimeNotification)
+        unregisterRimeResponseHandler(::handleRimeResponse)
     }
 
     companion object {
@@ -197,6 +216,8 @@ class Rime :
             )
 
         private val notificationHandlers = ArrayList<(RimeNotification<*>) -> Unit>()
+
+        private val responseHandlers = ArrayList<(RimeResponse) -> Unit>()
 
         init {
             System.loadLibrary("rime_jni")
@@ -491,6 +512,15 @@ class Rime :
             val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
             Timber.d("Got Rime response: $response")
             responseFlow_.tryEmit(response)
+        }
+
+        private fun registerRimeResponseHandler(handler: (RimeResponse) -> Unit) {
+            if (responseHandlers.contains(handler)) return
+            responseHandlers.add(handler)
+        }
+
+        private fun unregisterRimeResponseHandler(handler: (RimeResponse) -> Unit) {
+            responseHandlers.remove(handler)
         }
     }
 }
