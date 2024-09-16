@@ -15,7 +15,6 @@ import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.chad.library.adapter4.util.setOnDebouncedItemClick
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
 import com.osfans.trime.daemon.RimeSession
@@ -70,7 +69,7 @@ class CompactCandidateModule(
 
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
-            setOnDebouncedItemClick { _, _, position ->
+            setOnItemClickListener { _, _, position ->
                 rime.launchOnReady { it.selectCandidate(before + position) }
             }
             setOnItemLongClickListener { _, view, position ->
