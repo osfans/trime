@@ -39,13 +39,16 @@ import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyMapping
+import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
@@ -56,10 +59,8 @@ import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
-import com.osfans.trime.ime.text.TextInputManager
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.ShortcutUtils.openCategory
-import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.isLandscape
 import com.osfans.trime.util.isNightMode
@@ -75,6 +76,7 @@ import splitties.bitflags.hasFlag
 import splitties.systemservices.inputMethodManager
 import splitties.views.gravityBottom
 import timber.log.Timber
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -91,10 +93,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val commonKeyboardActionListener: CommonKeyboardActionListener?
         get() = inputView?.commonKeyboardActionListener
     private var initializationUi: InitializationUi? = null
-    private var eventListeners = WeakHashSet<EventListener>()
     private var mIntentReceiver: IntentReceiver? = null
     private var isWindowShown = false // 键盘窗口是否已显示
-    private var textInputManager: TextInputManager? = null // 文字输入管理器
+    private var isComposable: Boolean = false
+    private val locales = Array(2) { Locale.getDefault() }
 
     var shouldUpdateRimeOption = false
 
@@ -131,15 +133,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         block: suspend RimeApi.() -> Unit,
     ) = postJob(ctx, rime.lifecycleScope) { rime.runOnReady(block) }
 
-    init {
-        try {
-            check(self == null) { "Trime is already initialized" }
-            self = this
-        } catch (e: Exception) {
-            Timber.e(e)
-        }
-    }
-
     override fun onWindowShown() {
         super.onWindowShown()
         if (isWindowShown) {
@@ -153,9 +146,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 isWindowShown = true
                 withContext(Dispatchers.Main) {
                     updateComposing()
-                }
-                for (listener in eventListeners) {
-                    listener.onWindowShown()
                 }
             }
         }
@@ -174,9 +164,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             val msg = Message()
             msg.obj = this
             syncBackgroundHandler.sendMessageDelayed(msg, 5000) // 输入面板隐藏5秒后，开始后台同步
-        }
-        for (listener in eventListeners) {
-            listener.onWindowHidden()
         }
     }
 
@@ -227,11 +214,17 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             jobs.consumeEach { it.join() }
         }
         lifecycleScope.launch {
+            rime.run { notificationFlow }.collect {
+                handleRimeNotification(it)
+            }
+        }
+        lifecycleScope.launch {
             rime.run { responseFlow }.collect {
                 handleRimeResponse(it)
             }
         }
         super.onCreate()
+        instance = this
         // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
         try {
             // Additional try..catch wrapper as the event listeners chain or the super.onCreate() method
@@ -244,23 +237,62 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     it.registerReceiver(this)
                 }
             postRimeJob {
-                Timber.d("Running Trime.onCreate")
                 ColorManager.init(resources.configuration)
-                textInputManager = TextInputManager(this@TrimeInputMethodService, rime)
                 InputFeedbackManager.init()
                 restartSystemStartTimingSync()
                 shouldUpdateRimeOption = true
-                try {
-                    for (listener in eventListeners) {
-                        listener.onCreate()
+                val theme = ThemeManager.activeTheme
+                val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)
+                locales[0] =
+                    when (defaultLocale.size) {
+                        3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
+                        2 -> Locale(defaultLocale[0], defaultLocale[1])
+                        else -> Locale.getDefault()
                     }
-                } catch (e: Exception) {
-                    Timber.e(e)
-                }
+
+                val latinLocale = theme.generalStyle.latinLocale.split(DELIMITER_SPLITTER)
+                locales[1] =
+                    when (latinLocale.size) {
+                        3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
+                        2 -> Locale(latinLocale[0], latinLocale[1])
+                        else -> Locale.US
+                    }
                 Timber.d("Trime.onCreate  completed")
             }
         } catch (e: Exception) {
             Timber.e(e)
+        }
+    }
+
+    private fun handleRimeNotification(notification: RimeNotification<*>) {
+        if (notification is RimeNotification.SchemaNotification) {
+            SchemaManager.init(notification.value.id)
+            recreateInputView()
+            inputView?.switchBoard(InputView.Board.Main)
+        } else if (notification is RimeNotification.OptionNotification) {
+            val value = notification.value.value
+            when (val option = notification.value.option) {
+                "ascii_mode" -> {
+                    InputFeedbackManager.ttsLanguage =
+                        locales[if (value) 1 else 0]
+                }
+                "_hide_bar",
+                "_hide_candidate",
+                -> {
+                    setCandidatesViewShown(isComposable && !value)
+                }
+                "_liquid_keyboard" -> selectLiquidKeyboard(0)
+                else ->
+                    if (option.startsWith("_key_") && option.length > 5 && value) {
+                        shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
+                        val key = option.substring(5)
+                        inputView
+                            ?.commonKeyboardActionListener
+                            ?.listener
+                            ?.onEvent(EventManager.getEvent(key))
+                        shouldUpdateRimeOption = true
+                    }
+            }
         }
     }
 
@@ -282,10 +314,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (asciiPunch) Rime.setOption("ascii_punct", false)
         commonKeyboardActionListener?.listener?.onText("{Escape}$text")
         if (asciiPunch) Rime.setOption("ascii_punct", true)
-        self!!.selectLiquidKeyboard(-1)
+        selectLiquidKeyboard(-1)
     }
 
-    fun selectLiquidKeyboard(tabIndex: Int) {
+    private fun selectLiquidKeyboard(tabIndex: Int) {
         if (inputView == null) return
         if (tabIndex >= 0) {
             inputView!!.switchBoard(InputView.Board.Symbol)
@@ -309,7 +341,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    fun selectLiquidKeyboard(type: SymbolBoardType) {
+    private fun selectLiquidKeyboard(type: SymbolBoardType) {
         selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.type == type })
     }
 
@@ -333,14 +365,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
-        for (listener in eventListeners) {
-            listener.onDestroy()
-        }
-        eventListeners.clear()
         ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
         RimeDaemon.destroySession(javaClass.name)
-        self = null
+        instance = null
     }
 
     private fun handleReturnKey() {
@@ -476,9 +504,18 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         postRimeJob(Dispatchers.Main) {
             InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
             InputFeedbackManager.resetPlayProgress()
-            for (listener in eventListeners) {
-                listener.onStartInputView(attribute, restarting)
-            }
+            selectLiquidKeyboard(-1)
+            isComposable =
+                arrayOf(
+                    InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE,
+                    InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                    InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                    InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+                ).none { it == attribute.inputType and InputType.TYPE_MASK_VARIATION }
+            isComposable = isComposable && !rime.run { isEmpty() }
+            updateComposing()
             if (prefs.other.showStatusBarIcon) {
                 showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
             }
@@ -1001,7 +1038,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     /** 更新Rime的中西文狀態、編輯區文本  */
     fun updateComposing() {
         inputView?.updateComposing(currentInputConnection)
-        if (!onEvaluateInputViewShown()) setCandidatesViewShown(textInputManager!!.isComposable) // 實體鍵盤打字時顯示候選欄
+        if (!onEvaluateInputViewShown()) setCandidatesViewShown(isComposable) // 實體鍵盤打字時顯示候選欄
     }
 
     /**
@@ -1075,32 +1112,16 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    fun addEventListener(listener: EventListener): Boolean = eventListeners.add(listener)
-
-    fun removeEventListener(listener: EventListener): Boolean = eventListeners.remove(listener)
-
-    interface EventListener {
-        fun onCreate() {}
-
-        fun onDestroy() {}
-
-        fun onStartInputView(
-            info: EditorInfo,
-            restarting: Boolean,
-        ) {}
-
-        fun onWindowShown() {}
-
-        fun onWindowHidden() {}
-    }
-
     companion object {
-        var self: TrimeInputMethodService? = null
+        /** Delimiter regex to split language/locale tags. */
+        private val DELIMITER_SPLITTER = """[-_]""".toRegex()
+
+        var instance: TrimeInputMethodService? = null
 
         @JvmStatic
-        fun getService(): TrimeInputMethodService = self ?: throw IllegalStateException("Trime not initialized")
+        fun getService(): TrimeInputMethodService = instance ?: throw IllegalStateException("TrimeInputMethodService is not initialized")
 
-        fun getServiceOrNull(): TrimeInputMethodService? = self
+        fun getServiceOrNull(): TrimeInputMethodService? = instance
 
         private val syncBackgroundHandler =
             Handler(
