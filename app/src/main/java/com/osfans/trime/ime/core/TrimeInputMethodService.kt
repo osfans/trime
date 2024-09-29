@@ -57,8 +57,6 @@ import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
-import com.osfans.trime.ime.symbol.SymbolBoardType
-import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.util.ShortcutUtils
 import com.osfans.trime.util.ShortcutUtils.openCategory
 import com.osfans.trime.util.findSectionFrom
@@ -268,7 +266,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (notification is RimeNotification.SchemaNotification) {
             SchemaManager.init(notification.value.id)
             recreateInputView()
-            inputView?.switchBoard(InputView.Board.Main)
         } else if (notification is RimeNotification.OptionNotification) {
             val value = notification.value.value
             when (val option = notification.value.option) {
@@ -281,7 +278,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 -> {
                     setCandidatesViewShown(isComposable && !value)
                 }
-                "_liquid_keyboard" -> selectLiquidKeyboard(0)
                 else ->
                     if (option.startsWith("_key_") && option.length > 5 && value) {
                         shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
@@ -305,44 +301,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             updateComposingText(ctx)
         }
         updateComposing()
-    }
-
-    fun inputSymbol(text: String) {
-        commonKeyboardActionListener?.listener?.onPress(KeyEvent.KEYCODE_UNKNOWN)
-        if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
-        val asciiPunch = Rime.isAsciiPunch
-        if (asciiPunch) Rime.setOption("ascii_punct", false)
-        commonKeyboardActionListener?.listener?.onText("{Escape}$text")
-        if (asciiPunch) Rime.setOption("ascii_punct", true)
-        selectLiquidKeyboard(-1)
-    }
-
-    private fun selectLiquidKeyboard(tabIndex: Int) {
-        if (inputView == null) return
-        if (tabIndex >= 0) {
-            inputView!!.switchBoard(InputView.Board.Symbol)
-            inputView!!.liquidKeyboard.select(tabIndex)
-        } else {
-            // 设置液体键盘处于隐藏状态
-            TabManager.setTabExited()
-            inputView!!.switchBoard(InputView.Board.Main)
-            updateComposing()
-        }
-    }
-
-    // 按键需要通过tab name来打开liquidKeyboard的指定tab
-    fun selectLiquidKeyboard(name: String) {
-        if (name.matches("-?\\d+".toRegex())) {
-            selectLiquidKeyboard(name.toInt())
-        } else if (name.matches("[A-Z]+".toRegex())) {
-            selectLiquidKeyboard(SymbolBoardType.valueOf(name))
-        } else {
-            selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.text == name })
-        }
-    }
-
-    private fun selectLiquidKeyboard(type: SymbolBoardType) {
-        selectLiquidKeyboard(TabManager.tabTags.indexOfFirst { it.type == type })
     }
 
     fun pasteByChar() {
@@ -504,7 +462,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         postRimeJob(Dispatchers.Main) {
             InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
             InputFeedbackManager.resetPlayProgress()
-            selectLiquidKeyboard(-1)
             isComposable =
                 arrayOf(
                     InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE,
