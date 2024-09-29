@@ -198,7 +198,7 @@ class CommonKeyboardActionListener(
                             "set_color_scheme" -> ColorManager.setColorScheme(arg)
                             else -> {
                                 ShortcutUtils.call(service, event.command, arg)?.let {
-                                    service.commitCharSequence(it)
+                                    service.commitText(it)
                                     service.updateComposing()
                                 }
                             }
@@ -260,7 +260,7 @@ class CommonKeyboardActionListener(
                 if ((metaState == KeyEvent.META_SHIFT_ON || metaState == 0) && keyEventCode >= Keycode.A.ordinal) {
                     val text = Keycode.getSymbolLabel(Keycode.valueOf(keyEventCode))
                     if (text.length == 1) {
-                        service.commitCharSequence(text)
+                        service.commitText(text)
                         return
                     }
                 }
@@ -291,10 +291,10 @@ class CommonKeyboardActionListener(
                             //  for this.
                             if (Rime.simulateKeySequence(slice)) {
                                 if (Rime.isAsciiMode) {
-                                    service.commitCharSequence(slice)
+                                    service.commitText(slice)
                                 }
                             } else {
-                                service.commitCharSequence(slice)
+                                service.commitText(slice)
                             }
                         }
                         BRACED_KEY_EVENT.matches(sequence) -> {

@@ -266,7 +266,7 @@ class KeyboardWindow(
         override fun onEvent(event: Event) {
             if (event.commit.isNotEmpty()) {
                 // Directly commit the text and don't dispatch to Rime
-                service.commitCharSequence(event.commit, true)
+                service.commitText(event.commit, true)
                 return
             }
 
