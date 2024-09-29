@@ -7,7 +7,6 @@ package com.osfans.trime.ime.text
 import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
@@ -119,11 +118,9 @@ class TextInputManager(
     private fun handleRimeNotification(notification: RimeNotification<*>) {
         if (notification is RimeNotification.SchemaNotification) {
             SchemaManager.init(notification.value.id)
-            Rime.updateStatus()
             trime.recreateInputView()
             trime.inputView?.switchBoard(InputView.Board.Main)
         } else if (notification is RimeNotification.OptionNotification) {
-            Rime.updateContext() // 切換中英文、簡繁體時更新候選
             val value = notification.value.value
             when (val option = notification.value.option) {
                 "ascii_mode" -> {

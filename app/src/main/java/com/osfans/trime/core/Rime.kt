@@ -60,6 +60,10 @@ class Rime :
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
                 }
 
+                override fun nativeScheduleTasks() {
+                    updateContext()
+                }
+
                 override fun nativeFinalize() {
                     exitRime()
                 }
@@ -81,7 +85,7 @@ class Rime :
         modifiers: UInt,
     ): Boolean =
         withRimeContext {
-            processRimeKey(value, modifiers.toInt()).also { if (it) updateContext() }
+            processRimeKey(value, modifiers.toInt())
         }
 
     override suspend fun processKey(
@@ -89,17 +93,17 @@ class Rime :
         modifiers: KeyModifiers,
     ): Boolean =
         withRimeContext {
-            processRimeKey(value.value, modifiers.toInt()).also { if (it) updateContext() }
+            processRimeKey(value.value, modifiers.toInt())
         }
 
     override suspend fun selectCandidate(idx: Int): Boolean =
         withRimeContext {
-            selectRimeCandidate(idx).also { if (it) updateContext() }
+            selectRimeCandidate(idx)
         }
 
     override suspend fun forgetCandidate(idx: Int): Boolean =
         withRimeContext {
-            forgetRimeCandidate(idx).also { if (it) updateContext() }
+            forgetRimeCandidate(idx)
         }
 
     override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
@@ -120,12 +124,11 @@ class Rime :
             schema ?: schemaItemCached
         }
 
-    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { updateContext() } }
+    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition() }
 
     override suspend fun clearComposition() =
         withRimeContext {
             clearRimeComposition()
-            updateContext()
         }
 
     override suspend fun setRuntimeOption(
@@ -154,6 +157,7 @@ class Rime :
             is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
             else -> {}
         }
+        updateContext()
     }
 
     private fun handleRimeResponse(response: RimeResponse) {
