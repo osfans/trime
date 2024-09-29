@@ -295,7 +295,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun handleRimeResponse(response: RimeResponse) {
         val (commit, ctx, _) = response
         if (commit != null && !commit.text.isNullOrEmpty()) {
-            commitCharSequence(commit.text)
+            commitText(commit.text)
         }
         if (ctx != null) {
             updateComposingText(ctx)
@@ -561,35 +561,23 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     // 直接commit不做任何处理
-    fun commitCharSequence(
+    fun commitText(
         text: CharSequence,
         clearMeatKeyState: Boolean = false,
-    ): Boolean {
-        val ic = currentInputConnection ?: return false
-        ic.commitText(text, 1)
-        if (text.isNotEmpty()) {
+    ) {
+        val ic = currentInputConnection ?: return
+        if (ic.commitText(text, 1)) {
             lastCommittedText = text
         }
         if (clearMeatKeyState) {
             ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
             DraftHelper.onInputEventChanged()
         }
-        return true
-    }
-
-    /**
-     * Commit the current composing text together with the new text
-     *
-     * @param text the new text to be committed
-     */
-    fun commitText(text: String?) {
-        currentInputConnection.finishComposingText()
-        commitCharSequence(text!!, true)
     }
 
     private fun commitTextByChar(text: String) {
         for (char in text) {
-            if (!commitCharSequence(char.toString(), false)) break
+            commitText(char.toString())
         }
     }
 

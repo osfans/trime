@@ -25,7 +25,7 @@ class DbAdapter(
     var type = SymbolBoardType.CLIPBOARD
 
     override fun onPaste(bean: DatabaseBean) {
-        service.commitText(bean.text)
+        service.commitText(bean.text ?: "")
     }
 
     override fun onPin(bean: DatabaseBean) {
