@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -105,9 +106,9 @@ class InputView(
     private val enterKeyLabel = inputComponent.enterKeyLabel
     private val windowManager = inputComponent.windowManager
     private val quickBar: QuickBar = inputComponent.quickBar
-    val composition: CompositionPopupWindow = inputComponent.composition
-    val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
-    val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
+    private val composition: CompositionPopupWindow = inputComponent.composition
+    private val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
+    private val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
     private val compactCandidate: CompactCandidateModule = inputComponent.compactCandidate
 
     private fun addBroadcastReceivers() {
@@ -326,9 +327,18 @@ class InputView(
         when (it) {
             is RimeNotification.SchemaNotification -> {
                 broadcaster.onRimeSchemaUpdated(it.value)
+
+                windowManager.attachWindow(KeyboardWindow)
             }
             is RimeNotification.OptionNotification -> {
                 broadcaster.onRimeOptionUpdated(it.value)
+
+                if (it.value.option == "_liquid_keyboard") {
+                    ContextCompat.getMainExecutor(service).execute {
+                        windowManager.attachWindow(LiquidKeyboard)
+                        liquidKeyboard.select(0)
+                    }
+                }
             }
             else -> {}
         }
@@ -351,18 +361,6 @@ class InputView(
             if (candidates.isEmpty()) {
                 compactCandidate.refreshUnrolled()
             }
-        }
-    }
-
-    enum class Board {
-        Main,
-        Symbol,
-    }
-
-    fun switchBoard(board: Board) {
-        when (board) {
-            Board.Main -> windowManager.attachWindow(KeyboardWindow)
-            Board.Symbol -> windowManager.attachWindow(LiquidKeyboard)
         }
     }
 

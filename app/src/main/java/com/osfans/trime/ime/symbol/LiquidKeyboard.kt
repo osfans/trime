@@ -5,7 +5,9 @@
 package com.osfans.trime.ime.symbol
 
 import android.content.Context
+import android.view.KeyEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +17,7 @@ import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
@@ -25,7 +28,9 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
+import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
@@ -40,10 +45,12 @@ class LiquidKeyboard(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val theme: Theme,
-    private val commonKeyboardActionListener: CommonKeyboardActionListener,
+    private val windowManager: BoardWindowManager,
+    lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
 ) : BoardWindow.BarBoardWindow(),
     ResidentWindow,
     ClipboardHelper.OnClipboardUpdateListener {
+    private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
     private lateinit var currentBoardType: SymbolBoardType
@@ -56,7 +63,7 @@ class LiquidKeyboard(
             setHasStableIds(true)
             setListener {
                 when (currentBoardType) {
-                    SymbolBoardType.SYMBOL -> service.inputSymbol(this.text)
+                    SymbolBoardType.SYMBOL -> triggerSymbolInput(this.text)
                     else -> {
                         service.commitText(this.text)
                         if (currentBoardType != SymbolBoardType.HISTORY) {
@@ -74,7 +81,7 @@ class LiquidKeyboard(
             setOnDebouncedItemClick { _, _, position ->
                 val item = items[position]
                 when (currentBoardType) {
-                    SymbolBoardType.SYMBOL -> service.inputSymbol(item.first)
+                    SymbolBoardType.SYMBOL -> triggerSymbolInput(item.first)
                     SymbolBoardType.TABS -> {
                         val realPosition = TabManager.tabTags.indexOfFirst { it.text == item.first }
                         select(realPosition)
@@ -213,6 +220,22 @@ class LiquidKeyboard(
             }
         }
         varLengthAdapter.submitList(data)
+    }
+
+    private fun triggerSymbolInput(symbol: String) {
+        commonKeyboardActionListener.listener.onPress(KeyEvent.KEYCODE_UNKNOWN)
+        rime.launchOnReady {
+            val (isAsciiMode, isAsciiPunch) = it.inputStatusCached.run { isAsciiMode to isAsciiPunch }
+            if (isAsciiMode) it.setRuntimeOption("ascii_mode", false)
+            if (isAsciiPunch) it.setRuntimeOption("ascii_punch", false)
+            commonKeyboardActionListener.listener.onText("{Escape}$symbol")
+            if (isAsciiPunch) it.setRuntimeOption("ascii_punch", true)
+            ContextCompat.getMainExecutor(service).execute {
+                TabManager.setTabExited()
+                windowManager.attachWindow(KeyboardWindow)
+                service.updateComposing()
+            }
+        }
     }
 
     /**

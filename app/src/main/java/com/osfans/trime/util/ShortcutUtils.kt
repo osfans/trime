@@ -50,7 +50,6 @@ object ShortcutUtils {
             "commit" -> return option
             "run" -> context.startIntent(option)
             "share_text" -> TrimeInputMethodService.getService().shareText()
-            "liquid_keyboard" -> TrimeInputMethodService.getService().selectLiquidKeyboard(option)
             else -> context.startIntent(command, option)
         }
         return null

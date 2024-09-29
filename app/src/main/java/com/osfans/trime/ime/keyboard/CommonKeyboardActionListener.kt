@@ -26,6 +26,10 @@ import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
+import com.osfans.trime.ime.symbol.LiquidKeyboard
+import com.osfans.trime.ime.symbol.SymbolBoardType
+import com.osfans.trime.ime.symbol.TabManager
+import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ui.main.settings.ColorPickerDialog
 import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
@@ -42,6 +46,8 @@ class CommonKeyboardActionListener(
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
     private val inputView: InputView,
+    private val liquidKeyboard: LiquidKeyboard,
+    private val windowManager: BoardWindowManager,
 ) {
     companion object {
         /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
@@ -171,7 +177,23 @@ class CommonKeyboardActionListener(
                         }
 
                         when (event.command) {
-                            "liquid_keyboard" -> service.selectLiquidKeyboard(arg)
+                            "liquid_keyboard" -> {
+                                val target =
+                                    when {
+                                        arg.matches("-?\\d+".toRegex()) -> arg.toInt()
+                                        arg.matches("[A-Z]+".toRegex()) -> {
+                                            val type = SymbolBoardType.valueOf(arg)
+                                            TabManager.tabTags.indexOfFirst { it.type == type }
+                                        }
+                                        else -> TabManager.tabTags.indexOfFirst { it.text == arg }
+                                    }
+                                if (target >= 0) {
+                                    windowManager.attachWindow(LiquidKeyboard)
+                                    liquidKeyboard.select(target)
+                                } else {
+                                    windowManager.attachWindow(KeyboardWindow)
+                                }
+                            }
                             "paste_by_char" -> service.pasteByChar()
                             "set_color_scheme" -> ColorManager.setColorScheme(arg)
                             else -> {
