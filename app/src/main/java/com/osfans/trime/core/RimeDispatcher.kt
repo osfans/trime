@@ -33,8 +33,6 @@ class RimeDispatcher(
     interface RimeLooper {
         fun nativeStartup(fullCheck: Boolean)
 
-        fun nativeScheduleTasks()
-
         fun nativeFinalize()
     }
 
@@ -94,7 +92,6 @@ class RimeDispatcher(
                     while (isActive && isRunning.get()) {
                         // TODO: because we have nothing to block currently,
                         //  here we use a channel to wait for a signal.
-                        looper.nativeScheduleTasks()
                         runBlocking { channel.receive() }
                         while (true) {
                             val block = queue.poll() ?: break

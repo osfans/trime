@@ -59,10 +59,6 @@ class Rime :
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
                 }
 
-                override fun nativeScheduleTasks() {
-                    requestRimeResponse()
-                }
-
                 override fun nativeFinalize() {
                     exitRime()
                 }
@@ -84,7 +80,7 @@ class Rime :
         modifiers: UInt,
     ): Boolean =
         withRimeContext {
-            processRimeKey(value, modifiers.toInt())
+            processRimeKey(value, modifiers.toInt()).also { if (it) requestRimeResponse() }
         }
 
     override suspend fun processKey(
@@ -92,17 +88,17 @@ class Rime :
         modifiers: KeyModifiers,
     ): Boolean =
         withRimeContext {
-            processRimeKey(value.value, modifiers.toInt())
+            processRimeKey(value.value, modifiers.toInt()).also { if (it) requestRimeResponse() }
         }
 
     override suspend fun selectCandidate(idx: Int): Boolean =
         withRimeContext {
-            selectRimeCandidate(idx)
+            selectRimeCandidate(idx).also { if (it) requestRimeResponse() }
         }
 
     override suspend fun forgetCandidate(idx: Int): Boolean =
         withRimeContext {
-            forgetRimeCandidate(idx)
+            forgetRimeCandidate(idx).also { if (it) requestRimeResponse() }
         }
 
     override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
@@ -123,11 +119,12 @@ class Rime :
             schema ?: schemaItemCached
         }
 
-    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition() }
+    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) requestRimeResponse() } }
 
     override suspend fun clearComposition() =
         withRimeContext {
             clearRimeComposition()
+            requestRimeResponse()
         }
 
     override suspend fun setRuntimeOption(
@@ -291,7 +288,7 @@ class Rime :
             Timber.d("processKey: keyCode=$keycode, mask=$mask")
             return processRimeKey(keycode, mask).also {
                 Timber.d("processKey ${if (it) "success" else "failed"}")
-                requestRimeResponse()
+                if (it) requestRimeResponse()
             }
         }
 
@@ -303,7 +300,7 @@ class Rime :
                 sequence.toString().replace("{}", "{braceleft}{braceright}"),
             ).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
-                requestRimeResponse()
+                if (it) requestRimeResponse()
             }
         }
 
