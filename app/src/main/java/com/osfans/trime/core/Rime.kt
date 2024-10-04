@@ -53,15 +53,14 @@ class Rime :
                     Timber.i("Starting up Rime APIs ...")
                     startupRime(sharedDataDir, userDataDir, fullCheck)
 
-                    SchemaManager.init(getCurrentRimeSchema())
-                    updateStatus()
+                    requestRimeResponse()
 
                     OpenCCDictManager.buildOpenCCDict()
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
                 }
 
                 override fun nativeScheduleTasks() {
-                    updateContext()
+                    requestRimeResponse()
                 }
 
                 override fun nativeFinalize() {
@@ -157,20 +156,24 @@ class Rime :
             is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
             else -> {}
         }
-        updateContext()
+        requestRimeResponse()
     }
 
     private fun handleRimeResponse(response: RimeResponse) {
+        SchemaManager.init(getCurrentRimeSchema())
         if (response.status != null) {
             val (item, status) =
-                response.status.run {
-                    SchemaItem(schemaId, schemaName) to
-                        InputStatus(isDisabled, isComposing, isAsciiMode, isFullShape, isSimplified, isTraditional, isAsciiPunch)
+                response.status.let {
+                    SchemaItem.fromStatus(it) to InputStatus.fromStatus(it)
                 }
             inputStatusCached = status
+            inputStatus = response.status // for compatibility
             if (item != schemaItemCached) {
                 schemaItemCached = item
             }
+        }
+        if (response.context != null) {
+            inputContext = response.context // for compatibility
         }
     }
 
@@ -205,8 +208,8 @@ class Rime :
     }
 
     companion object {
-        var inputContext: RimeProto.Context? = null
-        private var mStatus: RimeProto.Status? = null
+        private var inputContext: RimeProto.Context? = null
+        private var inputStatus: RimeProto.Status? = null
         private val notificationFlow_ =
             MutableSharedFlow<RimeNotification<*>>(
                 extraBufferCapacity = 15,
@@ -225,22 +228,6 @@ class Rime :
 
         init {
             System.loadLibrary("rime_jni")
-        }
-
-        fun updateStatus() {
-            SchemaManager.updateSwitchOptions()
-            measureTimeMillis {
-                mStatus = getRimeStatus()
-            }.also { Timber.d("Took $it ms to get status") }
-        }
-
-        fun updateContext() {
-            Timber.d("Update Rime context ...")
-            measureTimeMillis {
-                inputContext = getRimeContext()
-            }.also { Timber.d("Took $it ms to get context") }
-            updateStatus()
-            requestRimeResponse()
         }
 
         /*
@@ -267,16 +254,13 @@ class Rime :
         val META_RELEASE_ON = getRimeModifierByName("Release")
 
         @JvmStatic
-        val isComposing get() = mStatus?.isComposing ?: false
+        val isComposing get() = inputStatus?.isComposing ?: false
 
         @JvmStatic
-        val isAsciiMode get() = mStatus?.isAsciiMode ?: true
+        val isAsciiMode get() = inputStatus?.isAsciiMode ?: true
 
         @JvmStatic
-        val isAsciiPunch get() = mStatus?.isAsciiPunch ?: true
-
-        @JvmStatic
-        val currentSchemaName get() = mStatus?.schemaName ?: ""
+        val currentSchemaName get() = inputStatus?.schemaName ?: ""
 
         @JvmStatic
         fun hasMenu(): Boolean = !inputContext?.menu?.candidates.isNullOrEmpty()
@@ -285,7 +269,7 @@ class Rime :
         fun hasLeft(): Boolean = hasMenu() && inputContext?.menu?.pageNumber != 0
 
         @JvmStatic
-        fun showAsciiPunch(): Boolean = mStatus?.isAsciiPunch == true || mStatus?.isAsciiMode == true
+        fun showAsciiPunch(): Boolean = inputStatus?.isAsciiPunch == true || inputStatus?.isAsciiMode == true
 
         @JvmStatic
         val composingText: String
@@ -307,7 +291,7 @@ class Rime :
             Timber.d("processKey: keyCode=$keycode, mask=$mask")
             return processRimeKey(keycode, mask).also {
                 Timber.d("processKey ${if (it) "success" else "failed"}")
-                updateContext()
+                requestRimeResponse()
             }
         }
 
@@ -319,7 +303,7 @@ class Rime :
                 sequence.toString().replace("{}", "{braceleft}{braceright}"),
             ).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
-                updateContext()
+                requestRimeResponse()
             }
         }
 
@@ -339,7 +323,7 @@ class Rime :
         @JvmStatic
         fun setCaretPos(caretPos: Int) {
             setRimeCaretPos(caretPos)
-            updateContext()
+            requestRimeResponse()
         }
 
         // init
@@ -515,6 +499,7 @@ class Rime :
         fun requestRimeResponse() {
             val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
             Timber.d("Got Rime response: $response")
+            responseHandlers.forEach { it.invoke(response) }
             responseFlow_.tryEmit(response)
         }
 
