@@ -93,11 +93,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="pref_themes_name_trime">默認</string>
     <string name="profile_shared_data_dir">共享資料夾</string>
     <string name="profile_user_data_dir">使用者資料夾</string>
-    <string name="profile_never_sync_in_background">從未在後臺同步過</string>
     <string name="profile_enable_syncing_in_background">點擊以啟用後台同步</string>
-    <string name="profile_timing_sync">定時同步</string>
-    <string name="profile_timing_sync_trigger_time">已啟用定時同步 下次同步時間: %1$s</string>
-    <string name="profile_enable_timing_sync">點擊以啟用定時同步</string>
+    <string name="profile_timing_background_sync">後台定時同步</string>
+    <string name="profile_timing_background_sync_status">上次同步時間：%1$s（%2$s）\n下次同步時間: %3$s</string>
+    <string name="profile_timing_background_sync_hint">後台定時同步已禁用</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
     <string name="pref_keyboard__function">檢視</string>
@@ -205,8 +204,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="storage">儲存</string>
     <string name="maintenance">維護</string>
     <string name="loading">正在載入</string>
-    <string name="profile_sync_in_background">後臺同步</string>
-    <string name="profile_last_sync_in_background">上次後臺同步時間：%1$s\n狀態：%2$s</string>
     <string name="success">成功</string>
     <string name="failure">失敗</string>
     <string name="other_managed_clipboard">剪貼板內容</string>
@@ -268,4 +265,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="theme_tongwenfeng">同文風</string>
     <string name="setup_channel">設定精靈</string>
     <string name="forget_this_word">忘記該詞</string>
+    <string name="synchronization">同步</string>
+    <string name="profile_timing_background_sync_set_time">設定後台同步時間</string>
 </resources>

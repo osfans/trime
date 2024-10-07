@@ -13,7 +13,6 @@ import com.osfans.trime.ime.enums.FullscreenMode
 import com.osfans.trime.ime.enums.InlinePreeditMode
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
-import java.util.Calendar
 
 /**
  * Helper class for an organized access to the shared preferences.
@@ -198,19 +197,17 @@ class AppPrefs(
     ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val USER_DATA_DIR = "profile_user_data_dir"
-            const val SYNC_BACKGROUND_ENABLED = "profile_sync_in_background"
-            const val TIMING_SYNC_ENABLED = "profile_timing_sync"
-            const val TIMING_SYNC_TRIGGER_TIME = "profile_timing_sync_trigger_time"
-            const val LAST_SYNC_STATUS = "profile_last_sync_status"
-            const val LAST_BACKGROUND_SYNC = "profile_last_background_sync"
+            const val TIMING_BACKGROUND_SYNC_ENABLED = "profile_timing_background_sync"
+            const val TIMING_BACKGROUND_SYNC_SET_TIME = "profile_timing_background_sync_set_time"
+            const val LAST_BACKGROUND_SYNC_STATUS = "profile_last_background_sync_status"
+            const val LAST_BACKGROUND_SYNC_TIME = "profile_last_background_sync_time"
         }
 
         var userDataDir by string(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
-        var syncBackgroundEnabled by bool(SYNC_BACKGROUND_ENABLED, false)
-        var timingSyncEnabled by bool(TIMING_SYNC_ENABLED, false)
-        var timingSyncTriggerTime by long(TIMING_SYNC_TRIGGER_TIME, Calendar.getInstance().timeInMillis + 1200000L)
-        var lastSyncStatus by bool(LAST_SYNC_STATUS, false)
-        var lastBackgroundSync by string(LAST_BACKGROUND_SYNC, "")
+        var timingBackgroundSyncEnabled by bool(TIMING_BACKGROUND_SYNC_ENABLED, false)
+        var timingBackgroundSyncSetTime by long(TIMING_BACKGROUND_SYNC_SET_TIME, System.currentTimeMillis())
+        var lastSyncStatus by bool(LAST_BACKGROUND_SYNC_STATUS, false)
+        var lastBackgroundSyncTime by long(LAST_BACKGROUND_SYNC_TIME, 0L)
     }
 
     class Clipboard(

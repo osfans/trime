@@ -11,9 +11,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.inputmethodservice.InputMethodService
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.os.SystemClock
 import android.text.InputType
 import android.view.InputDevice
@@ -160,11 +157,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             Timber.d("onWindowHidden")
         }
         isWindowShown = false
-        if (prefs.profile.syncBackgroundEnabled) {
-            val msg = Message()
-            msg.obj = this
-            syncBackgroundHandler.sendMessageDelayed(msg, 5000) // 输入面板隐藏5秒后，开始后台同步
-        }
     }
 
     private fun updateRimeOption(): Boolean {
@@ -184,8 +176,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     /** 防止重启系统 强行停止应用时alarm任务丢失 */
     @SuppressLint("ScheduleExactAlarm")
     fun restartSystemStartTimingSync() {
-        if (prefs.profile.timingSyncEnabled) {
-            val triggerTime = prefs.profile.timingSyncTriggerTime
+        if (prefs.profile.timingBackgroundSyncEnabled) {
+            val triggerTime = prefs.profile.timingBackgroundSyncSetTime
             val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
 
             /** 设置待发送的同步事件 */
@@ -1074,18 +1066,5 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         fun getService(): TrimeInputMethodService = instance ?: throw IllegalStateException("TrimeInputMethodService is not initialized")
 
         fun getServiceOrNull(): TrimeInputMethodService? = instance
-
-        private val syncBackgroundHandler =
-            Handler(
-                Looper.getMainLooper(),
-            ) { msg: Message ->
-                // 若当前没有输入面板，则后台同步。防止面板关闭后5秒内再次打开
-                val service = msg.obj as TrimeInputMethodService
-                if (!service.isShowInputRequested) {
-                    ShortcutUtils.syncInBackground()
-                    service.shouldUpdateRimeOption = true
-                }
-                false
-            }
     }
 }

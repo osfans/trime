@@ -89,11 +89,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="pref_themes_name_trime">默认</string>
     <string name="profile_shared_data_dir">共享文件夹</string>
     <string name="profile_user_data_dir">用户文件夹</string>
-    <string name="profile_sync_in_background">后台同步</string>
     <string name="profile_enable_syncing_in_background">点击以开启后台同步</string>
-    <string name="profile_timing_sync">定时同步</string>
-    <string name="profile_timing_sync_trigger_time">已开启定时同步 下次同步时间: %1$s</string>
-    <string name="profile_enable_timing_sync">点击以开启定时同步</string>
+    <string name="profile_timing_background_sync">后台定时同步</string>
+    <string name="profile_timing_background_sync_status">上次同步时间：%1$s（%2$s）\n下次同步时间: %3$s</string>
+    <string name="profile_timing_background_sync_hint">后台定时同步已禁用</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
     <string name="pref_keyboard__effect">按键效果</string>
@@ -198,12 +197,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="pref_about">关于</string>
     <string name="pref_theme_and_color">主题与配色</string>
     <string name="pref_profile">配置管理</string>
-    <string name="profile_never_sync_in_background">从未在后台同步过</string>
     <string name="storage">存储</string>
     <string name="maintenance">维护</string>
     <string name="loading">正在加载</string>
     <string name="profile_reset">恢复默认设置</string>
-    <string name="profile_last_sync_in_background">上次后台同步时间：%1$s\n状态：%2$s</string>
     <string name="success">成功</string>
     <string name="failure">失败</string>
     <string name="pref_profile_summary">设定存储位置和修改同步设置等</string>
@@ -267,4 +264,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="theme_tongwenfeng">同文风</string>
     <string name="setup_channel">设置向导</string>
     <string name="forget_this_word">忘记该词</string>
+    <string name="synchronization">同步</string>
+    <string name="profile_timing_background_sync_set_time">设置后台同步时间</string>
 </resources>
