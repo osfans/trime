@@ -12,6 +12,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import com.osfans.trime.R
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeNotification.OptionNotification
 import com.osfans.trime.daemon.RimeSession
@@ -76,7 +77,7 @@ class KeyboardWindow(
     private val currentKeyboard: Keyboard? get() = keyboardsCached[currentKeyboardId]
 
     override fun onCreateView(): View {
-        keyboardView = context.frameLayout()
+        keyboardView = context.frameLayout(R.id.keyboard_view)
         attachKeyboard(evalKeyboard(".default"))
         keyboardView.apply { add(mainKeyboardView, lParams(matchParent, matchParent)) }
         return keyboardView
