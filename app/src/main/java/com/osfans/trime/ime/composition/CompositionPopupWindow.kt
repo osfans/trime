@@ -12,7 +12,6 @@ import android.os.Build.VERSION_CODES
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -25,8 +24,6 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.databinding.CompositionRootBinding
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.dependency.InputScope
@@ -34,6 +31,10 @@ import com.osfans.trime.ime.enums.PopupPosition
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.wrapContent
 import timber.log.Timber
 
 @InputScope
@@ -50,18 +51,22 @@ class CompositionPopupWindow(
         AppPrefs.defaultInstance().keyboard.popupWindowEnabled &&
             theme.generalStyle.window.isNotEmpty()
 
-    val binding =
-        CompositionRootBinding.inflate(LayoutInflater.from(ctx)).apply {
-            root.visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
-            composition.run {
-                setOnActionMoveListener { x, y ->
-                    updatePopupWindow(x.toInt(), y.toInt())
-                }
-                setOnSelectCandidateListener { idx ->
-                    rime.launchOnReady { it.selectCandidate(idx) }
-                }
-                setKeyboardActionListener(commonKeyboardActionListener.listener)
+    val composition =
+        Composition(ctx, theme).apply {
+            setOnActionMoveListener { x, y ->
+                updatePopupWindow(x.toInt(), y.toInt())
             }
+            setOnSelectCandidateListener { idx ->
+                rime.launchOnReady { it.selectCandidate(idx) }
+            }
+            setKeyboardActionListener(commonKeyboardActionListener.listener)
+        }
+
+    val root =
+        ctx.horizontalLayout {
+            layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
+            visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
+            add(composition, lParams(wrapContent, wrapContent))
         }
 
     // 悬浮窗口是否可移動
@@ -80,7 +85,7 @@ class CompositionPopupWindow(
     private var popupWindowPos = PopupPosition.fromString(theme.generalStyle.layout.position)
 
     private val mPopupWindow =
-        PopupWindow(binding.root).apply {
+        PopupWindow(root).apply {
             isClippingEnabled = false
             inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -219,14 +224,14 @@ class CompositionPopupWindow(
 
     private fun updateCompositionView() {
         if (isPopupWindowMovable == "once") {
-            popupWindowPos = PopupPosition.fromString(ThemeManager.activeTheme.generalStyle.layout.position)
+            popupWindowPos = PopupPosition.fromString(theme.generalStyle.layout.position)
         }
-        binding.root.measure(
+        root.measure(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         )
-        mPopupWindow.width = binding.root.measuredWidth
-        mPopupWindow.height = binding.root.measuredHeight
+        mPopupWindow.width = root.measuredWidth
+        mPopupWindow.height = root.measuredHeight
         mPopupHandler.post(mPopupTimer)
     }
 

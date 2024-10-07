@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.keyboard
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -21,20 +22,23 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
-import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.databinding.KeyboardPopupKeyboardBinding
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.enums.KeyEventType
 import com.osfans.trime.util.LeakGuardHandlerWrapper
 import com.osfans.trime.util.indexOfStateSet
 import com.osfans.trime.util.sp
 import com.osfans.trime.util.stateDrawableAt
 import splitties.dimensions.dp
-import splitties.systemservices.layoutInflater
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityBottomCenter
@@ -46,12 +50,12 @@ import kotlin.math.min
 import kotlin.math.pow
 
 /** 顯示[鍵盤][Keyboard]及[按鍵][Key]  */
+@SuppressLint("ViewConstructor")
 class KeyboardView(
     context: Context,
+    private val theme: Theme,
 ) : View(context),
     View.OnClickListener {
-    private val theme get() = ThemeManager.activeTheme
-
     private var mKeyboard: Keyboard? = null
     private var mCurrentKeyIndex = NOT_A_KEY
     private val mKeyTextSize = theme.generalStyle.keyTextSize.toFloat()
@@ -427,18 +431,17 @@ class KeyboardView(
             removeMessages()
             mRepeatKeyIndex = NOT_A_KEY
             mKeyboard = keyboard
-            val keys = mKeyboard!!.keys
-            mKeys = keys.toTypedArray<Key>()
+            mKeys = keyboard!!.keys.toTypedArray<Key>()
             setKeyboardBackground()
-            requestLayout()
             // Hint to reallocate the buffer if the size changed
             mKeyboardChanged = true
-            invalidateAllKeys()
             computeProximityThreshold(keyboard)
             mMiniKeyboardCache.clear() // Not really necessary to do every time, but will free up views
             // Switching to a different keyboard should abort any pending keys so that the key up
             // doesn't get delivered to the old or new keyboard
             mAbortKey = true // Until the next ACTION_DOWN
+            invalidateAllKeys()
+            requestLayout()
         }
 
     /**
@@ -1080,77 +1083,72 @@ class KeyboardView(
             return false
         }
 
-        var mMiniKeyboardContainer = mMiniKeyboardCache[popupKey]
-        val mMiniKeyboard: KeyboardView
-        if (mMiniKeyboardContainer == null) {
-            mMiniKeyboardContainer = KeyboardPopupKeyboardBinding.inflate(layoutInflater).root
-            mMiniKeyboard = mMiniKeyboardContainer.findViewById(android.R.id.keyboardView)
-            val closeButton = mMiniKeyboardContainer.findViewById<View>(android.R.id.closeButton)
-            closeButton?.setOnClickListener(this)
-            mMiniKeyboard.keyboardActionListener =
-                object : KeyboardActionListener {
-                    override fun onEvent(event: Event) {
-                        keyboardActionListener?.onEvent(event)
-                        dismissPopupKeyboard()
-                    }
+        val miniKeyboardLayout =
+            mMiniKeyboardCache[popupKey] ?: horizontalLayout {
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+            }.also { mMiniKeyboardCache[popupKey] = it }
 
-                    override fun onKey(
-                        keyEventCode: Int,
-                        metaState: Int,
-                    ) {
-                        keyboardActionListener?.onKey(keyEventCode, metaState)
-                        dismissPopupKeyboard()
-                    }
+        val miniKeyboardView =
+            miniKeyboardLayout.findViewById(android.R.id.keyboardView)
+                ?: KeyboardView(context, theme)
+                    .apply {
+                        id = android.R.id.keyboardView
+                        this@apply.keyboardActionListener =
+                            object : KeyboardActionListener {
+                                override fun onEvent(event: Event) {
+                                    keyboardActionListener?.onEvent(event)
+                                    dismissPopupKeyboard()
+                                }
 
-                    override fun onText(text: CharSequence) {
-                        keyboardActionListener?.onText(text)
-                        dismissPopupKeyboard()
-                    }
+                                override fun onKey(
+                                    keyEventCode: Int,
+                                    metaState: Int,
+                                ) {
+                                    keyboardActionListener?.onKey(keyEventCode, metaState)
+                                    dismissPopupKeyboard()
+                                }
 
-                    override fun onPress(keyEventCode: Int) {
-                        Timber.d("onLongPress: onPress key=$keyEventCode")
-                        keyboardActionListener?.onPress(keyEventCode)
-                    }
+                                override fun onText(text: CharSequence) {
+                                    keyboardActionListener?.onText(text)
+                                    dismissPopupKeyboard()
+                                }
 
-                    override fun onRelease(keyEventCode: Int) {
-                        keyboardActionListener?.onRelease(keyEventCode)
-                    }
-                }
-            // mInputView.setSuggest(mSuggest);
-            val keyboard =
-                if (popupKey.popupCharacters != null) {
-                    Keyboard(popupKey.popupCharacters, -1, paddingLeft + paddingRight)
-                } else {
-                    Keyboard()
-                }
-            mMiniKeyboard.keyboard = keyboard
-            mMiniKeyboard.mPopupParent = this
-            mMiniKeyboardContainer.measure(
-                MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST),
-            )
-            mMiniKeyboardCache[popupKey] = mMiniKeyboardContainer
-        } else {
-            mMiniKeyboard = mMiniKeyboardContainer.findViewById(android.R.id.keyboardView)
-        }
+                                override fun onPress(keyEventCode: Int) {
+                                    Timber.d("onLongPress: onPress key=$keyEventCode")
+                                    keyboardActionListener?.onPress(keyEventCode)
+                                }
+
+                                override fun onRelease(keyEventCode: Int) {
+                                    keyboardActionListener?.onRelease(keyEventCode)
+                                }
+                            }
+                        keyboard =
+                            if (popupKey.popupCharacters != null) {
+                                Keyboard(theme, popupKey.popupCharacters, -1, paddingLeft + paddingRight)
+                            } else {
+                                Keyboard(theme)
+                            }
+                        mPopupParent = this
+                    }.also { (miniKeyboardLayout as LinearLayout).run { add(it, lParams(matchParent, wrapContent)) } }
+
+        miniKeyboardLayout.measure(
+            MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST),
+        )
+
         getLocationInWindow(mCoordinates)
-        var mPopupX = popupKey.x + paddingLeft
-        var mPopupY = popupKey.y + paddingTop
-        mPopupX = mPopupX + popupKey.width - mMiniKeyboardContainer.measuredWidth
-        mPopupY -= mMiniKeyboardContainer.measuredHeight
-        val x = mPopupX + mMiniKeyboardContainer.paddingRight + mCoordinates[0]
-        val y = mPopupY + mMiniKeyboardContainer.paddingBottom + mCoordinates[1]
-        mMiniKeyboard.setPopupOffset(max(x, 0), y)
-
+        val x = popupKey.run { x + width } + paddingLeft + miniKeyboardLayout.run { paddingRight - measuredWidth } + mCoordinates[0]
+        val y = popupKey.y + paddingTop + miniKeyboardLayout.run { paddingBottom - measuredHeight } + mCoordinates[1]
+        miniKeyboardView.setPopupOffset(max(x, 0), y)
         // todo 只处理了shift
+        miniKeyboardView.setShifted(false, mKeyboard?.isShifted ?: false)
         Timber.w("only set isShifted, no others modifier key")
-        mMiniKeyboard.setShifted(false, mKeyboard?.isShifted ?: false)
-        mPopupKeyboard.contentView = mMiniKeyboardContainer
-        mPopupKeyboard.width = mMiniKeyboardContainer.measuredWidth
-        mPopupKeyboard.height = mMiniKeyboardContainer.measuredHeight
+
+        mPopupKeyboard.contentView = miniKeyboardLayout
+        mPopupKeyboard.width = miniKeyboardLayout.measuredWidth
+        mPopupKeyboard.height = miniKeyboardLayout.measuredHeight
         mPopupKeyboard.showAtLocation(this, Gravity.NO_GRAVITY, x, y)
         mMiniKeyboardOnScreen = true
-        // mMiniKeyboard.onTouchEvent(getTranslatedEvent(me));
         invalidateAllKeys()
         return true
     }

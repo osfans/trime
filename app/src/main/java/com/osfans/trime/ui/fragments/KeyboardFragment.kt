@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
@@ -46,7 +47,7 @@ class KeyboardFragment :
             "keyboard__show_window",
             "keyboard__inline_preedit", "keyboard__soft_cursor",
             -> {
-                TrimeInputMethodService.getServiceOrNull()?.recreateInputView()
+                TrimeInputMethodService.getServiceOrNull()?.recreateInputView(ThemeManager.activeTheme)
             }
         }
     }

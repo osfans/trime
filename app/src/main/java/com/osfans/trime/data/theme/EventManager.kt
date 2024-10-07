@@ -20,5 +20,5 @@ object EventManager {
         return event
     }
 
-    fun refresh() = eventCache.clear()
+    fun resetCache() = eventCache.clear()
 }
