@@ -5,7 +5,6 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.util.config.Config
@@ -32,7 +31,6 @@ class Theme(
         private set
 
     companion object {
-        private val prefs = AppPrefs.defaultInstance().theme
         private const val VERSION_KEY = "config_version"
         private const val DEFAULT_THEME_NAME = "trime"
 
@@ -70,7 +68,6 @@ class Theme(
         presetColorSchemes = config.getMap("preset_color_schemes")
         presetKeyboards = config.getMap("preset_keyboards")
         Timber.i("The theme is initialized")
-        prefs.selectedTheme = name
     }
 
     private fun mapToGeneralStyle(config: Config): GeneralStyle {

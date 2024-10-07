@@ -29,6 +29,7 @@ import android.view.inputmethod.ExtractedTextRequest
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.Keep
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -76,8 +77,6 @@ import splitties.systemservices.inputMethodManager
 import splitties.views.gravityBottom
 import timber.log.Timber
 import java.util.Locale
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 /** [輸入法][InputMethodService]主程序  */
 
@@ -103,6 +102,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         private set
 
     @Keep
+    private val onThemeChangeListener =
+        ThemeManager.OnThemeChangeListener {
+            recreateInputView(it)
+        }
+
+    @Keep
     private val onColorChangeListener =
         ColorManager.OnColorChangeListener {
             lifecycleScope.launch(Dispatchers.Main) {
@@ -111,11 +116,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
 
     private fun postJob(
-        ctx: CoroutineContext,
         scope: CoroutineScope,
         block: suspend () -> Unit,
     ): Job {
-        val job = scope.launch(ctx, CoroutineStart.LAZY) { block() }
+        val job = scope.launch(start = CoroutineStart.LAZY) { block() }
         jobs.trySend(job)
         return job
     }
@@ -127,10 +131,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      * subsequent operations can start if the prior operation is not finished (suspended),
      * [postRimeJob] ensures that operations are executed sequentially.
      */
-    fun postRimeJob(
-        ctx: CoroutineContext = EmptyCoroutineContext,
-        block: suspend RimeApi.() -> Unit,
-    ) = postJob(ctx, rime.lifecycleScope) { rime.runOnReady(block) }
+    fun postRimeJob(block: suspend RimeApi.() -> Unit) = postJob(rime.lifecycleScope) { rime.runOnReady(block) }
 
     override fun onWindowShown() {
         super.onWindowShown()
@@ -222,6 +223,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 handleRimeResponse(it)
             }
         }
+        ThemeManager.addOnChangedListener(onThemeChangeListener)
         ColorManager.addOnChangedListener(onColorChangeListener)
         super.onCreate()
         instance = this
@@ -324,6 +326,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
+        ThemeManager.removeOnChangedListener(onThemeChangeListener)
         ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
         RimeDaemon.destroySession(javaClass.name)
@@ -413,8 +416,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreateInputView(): View {
         Timber.d("onCreateInputView")
-        postRimeJob(Dispatchers.Main) {
-            recreateInputView(ThemeManager.activeTheme)
+        postRimeJob {
+            ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
+                recreateInputView(ThemeManager.activeTheme)
+            }
         }
         initializationUi = InitializationUi(this)
         return initializationUi!!.root
@@ -460,7 +465,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=%s", restarting)
-        postRimeJob(Dispatchers.Main) {
+        postRimeJob {
             InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
             InputFeedbackManager.resetPlayProgress()
             isComposable =
@@ -477,8 +482,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             if (prefs.other.showStatusBarIcon) {
                 showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
             }
-            setCandidatesViewShown(!rime.run { isEmpty() }) // 軟鍵盤出現時顯示候選欄
-            inputView?.startInput(attribute, restarting)
+            ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
+                inputView?.startInput(attribute, restarting)
+            }
             when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
                 InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
                 InputType.TYPE_TEXT_VARIATION_PASSWORD,

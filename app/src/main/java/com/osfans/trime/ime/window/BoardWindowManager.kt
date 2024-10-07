@@ -10,6 +10,7 @@ import android.widget.FrameLayout
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
+import com.osfans.trime.R
 import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
@@ -60,6 +61,7 @@ class BoardWindowManager(
                 throw IllegalStateException("${window.key} is already occupied")
             }
         }
+        broadcaster.addReceiver(window)
         val view = if (createView) window.onCreateView() else null
         cachedResidentWindows[window.key] = window to view
     }
@@ -111,7 +113,7 @@ class BoardWindowManager(
         broadcaster.onWindowAttached(window)
     }
 
-    val view: FrameLayout by lazy { context.frameLayout() }
+    val view: FrameLayout by lazy { context.frameLayout(R.id.input_window) }
 
     fun isAttached(window: BoardWindow) = currentWindow === window
 }
