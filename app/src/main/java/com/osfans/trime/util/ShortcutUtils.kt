@@ -143,7 +143,7 @@ object ShortcutUtils {
 
     fun syncInBackground() {
         val prefs = AppPrefs.defaultInstance()
-        prefs.profile.lastBackgroundSync = Date().time.toString()
+        prefs.profile.lastBackgroundSyncTime = Date().time
         CoroutineScope(Dispatchers.IO).launch {
             prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { RimeDaemon.restartRime() }
         }

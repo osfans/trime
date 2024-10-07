@@ -65,7 +65,7 @@ class IntentReceiver :
                         wakeLock.acquire(600000) // 10分钟超时
                         val cal = Calendar.getInstance()
                         val triggerTime = cal.timeInMillis + TimeUnit.DAYS.toMillis(1) // 下次同步时间
-                        AppPrefs.defaultInstance().profile.timingSyncTriggerTime =
+                        AppPrefs.defaultInstance().profile.timingBackgroundSyncSetTime =
                             triggerTime // 更新定时同步偏好值
                         // 设置待发送的同步事件
                         val pendingIntent =
