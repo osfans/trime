@@ -28,7 +28,7 @@ import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.candidates.CompactCandidateModule
 import com.osfans.trime.ime.composition.CompositionPopupWindow
@@ -67,10 +67,10 @@ import splitties.views.imageDrawable
  */
 @SuppressLint("ViewConstructor")
 class InputView(
-    val service: TrimeInputMethodService,
-    val rime: RimeSession,
+    private val service: TrimeInputMethodService,
+    private val rime: RimeSession,
+    private val theme: Theme,
 ) : ConstraintLayout(service) {
-    private val theme get() = ThemeManager.activeTheme
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
     private val navbarBackground get() = AppPrefs.defaultInstance().theme.navbarBackground
@@ -83,17 +83,17 @@ class InputView(
 
     private val leftPaddingSpace =
         view(::View) {
-            setOnClickListener { placeholderListener }
+            setOnClickListener(placeholderListener)
         }
 
     private val rightPaddingSpace =
         view(::View) {
-            setOnClickListener { placeholderListener }
+            setOnClickListener(placeholderListener)
         }
 
     private val bottomPaddingSpace =
         view(::View) {
-            setOnClickListener { placeholderListener }
+            setOnClickListener(placeholderListener)
         }
 
     private val notificationHandlerJob: Job
@@ -353,7 +353,7 @@ class InputView(
             val previous = ctx.menu.run { pageSize * pageNumber }
             val highlightedIdx = ctx.menu.highlightedCandidateIndex
             if (composition.isPopupWindowEnabled) {
-                val sticky = composition.binding.composition.update(ctx)
+                val sticky = composition.composition.update(ctx)
                 compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx, sticky)
             } else {
                 compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
@@ -376,7 +376,6 @@ class InputView(
                 false
             }.also { composition.isCursorUpdated = it }
         }
-        keyboardWindow.mainKeyboardView.invalidateComposingKeys()
     }
 
     fun updateSelection(

@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import com.osfans.trime.data.prefs.AppPrefs.Companion.defaultInstance
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.util.CollectionUtils.obtainBoolean
 import com.osfans.trime.util.CollectionUtils.obtainFloat
@@ -23,7 +22,9 @@ import kotlin.math.abs
 
 /** 從YAML中加載鍵盤配置，包含多個[按鍵][Key]。  */
 @Suppress("ktlint:standard:property-naming")
-class Keyboard() {
+class Keyboard(
+    private val theme: Theme,
+) {
     /** 按鍵默認水平間距  */
     private var horizontalGap: Int
 
@@ -114,7 +115,7 @@ class Keyboard() {
      * keyboard will fit as many keys as possible in each row.
      * @param horizontalPadding 按鍵水平間距
      */
-    constructor(characters: CharSequence, columns: Int, horizontalPadding: Int) : this() {
+    constructor(theme: Theme, characters: CharSequence, columns: Int, horizontalPadding: Int) : this(theme) {
         var x = 0
         var y = 0
         var column = 0
@@ -144,7 +145,6 @@ class Keyboard() {
     }
 
     private fun getKeyboardConfig(name: String): ConfigMap? {
-        val theme = ThemeManager.activeTheme
         val keyboardConfig =
             theme.keyboards.getMap(name)
                 ?: theme.keyboards.getMap("default")
@@ -155,8 +155,8 @@ class Keyboard() {
         return keyboardConfig
     }
 
-    constructor(name: String) : this() {
-        val theme = ThemeManager.activeTheme
+    constructor(theme: Theme, name: String) : this(theme) {
+
         val keyboardConfig = getKeyboardConfig(name)
 
         mLabelTransform = obtainString(keyboardConfig, "label_transform", "none")
@@ -648,7 +648,6 @@ class Keyboard() {
     init {
 
         // 橫屏模式下，键盘左右两侧到屏幕边缘的距离
-        val theme = ThemeManager.activeTheme
         val keyboardSidePadding = theme.generalStyle.keyboardPadding
         val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
 

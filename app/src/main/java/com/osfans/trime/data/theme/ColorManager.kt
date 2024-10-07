@@ -23,7 +23,7 @@ import timber.log.Timber
 import java.io.File
 
 object ColorManager {
-    private val theme get() = ThemeManager.activeTheme
+    private lateinit var theme: Theme
     private val prefs = AppPrefs.defaultInstance().theme
     private val backgroundFolder get() = theme.generalStyle.backgroundFolder
 
@@ -81,7 +81,7 @@ object ColorManager {
         } ?: mapOf()
 
     fun interface OnColorChangeListener {
-        fun onColorChange()
+        fun onColorChange(theme: Theme)
     }
 
     private val onChangeListeners = WeakHashSet<OnColorChangeListener>()
@@ -95,16 +95,11 @@ object ColorManager {
     }
 
     private fun fireChange() {
-        onChangeListeners.forEach { it.onColorChange() }
+        onChangeListeners.forEach { it.onColorChange(theme) }
     }
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
-        runCatching {
-            ThemeManager.init()
-        }.getOrElse {
-            Timber.e(it, "Setting up theme failed!")
-        }
     }
 
     fun onSystemNightModeChange(isNight: Boolean) {
@@ -115,9 +110,11 @@ object ColorManager {
     }
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
-    fun refresh() {
+    fun resetCache(theme: Theme) {
         lastDarkColorSchemeId = null
         lastLightColorSchemeId = null
+
+        this.theme = theme
 
         val selected = prefs.selectedColor
         val fromStyle = theme.generalStyle.colorScheme

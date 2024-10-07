@@ -19,7 +19,6 @@ import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.ScaleXSpan
 import android.text.style.UnderlineSpan
-import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -31,7 +30,7 @@ import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
-import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.CompositionComponent
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
@@ -46,10 +45,9 @@ import kotlin.math.absoluteValue
 @SuppressLint("AppCompatCustomView")
 class Composition(
     context: Context,
-    attrs: AttributeSet?,
-) : TextView(context, attrs) {
+    private val theme: Theme,
+) : TextView(context) {
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-    private val theme = ThemeManager.activeTheme
 
     private val keyTextSize = theme.generalStyle.keyTextSize
     private val labelTextSize = theme.generalStyle.labelTextSize

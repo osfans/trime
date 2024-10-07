@@ -5,7 +5,7 @@
 package com.osfans.trime.ime.symbol
 
 import com.osfans.trime.data.schema.SchemaManager
-import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.config.ConfigList
 import com.osfans.trime.util.config.ConfigMap
@@ -16,12 +16,12 @@ object TabManager {
     var currentTabIndex = -1
         private set
 
-    val theme get() = ThemeManager.activeTheme
     val tabTags = arrayListOf<TabTag>()
     private val keyboards = mutableListOf<List<SimpleKeyBean>>()
 
-    fun refresh() {
-        reset()
+    fun resetCache(theme: Theme) {
+        tabTags.clear()
+        keyboards.clear()
 
         val available = theme.liquid.getList("keyboards") ?: return
         for (item in available) {
@@ -34,11 +34,6 @@ object TabManager {
             val keys = keyboard["keys"]
             addTabHasKeys(name, type, keys)
         }
-    }
-
-    private fun reset() {
-        tabTags.clear()
-        keyboards.clear()
     }
 
     private fun addListTab(

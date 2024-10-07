@@ -54,7 +54,7 @@ class KeyboardWindow(
                 }
             }
 
-    val mainKeyboardView by lazy { KeyboardView(context) }
+    val mainKeyboardView by lazy { KeyboardView(context, theme) }
 
     private lateinit var keyboardView: FrameLayout
 
@@ -66,8 +66,8 @@ class KeyboardWindow(
     private val presetKeyboardIds = theme.presetKeyboards?.keys?.toTypedArray() ?: emptyArray()
     private val keyboardsCached: HashMap<String, Keyboard> by lazy {
         hashMapOf(
-            "default" to Keyboard("default"),
-            "number" to Keyboard("number"),
+            "default" to Keyboard(theme, "default"),
+            "number" to Keyboard(theme, "number"),
         )
     }
     private var currentKeyboardId = ""
@@ -77,8 +77,8 @@ class KeyboardWindow(
 
     override fun onCreateView(): View {
         keyboardView = context.frameLayout()
-        keyboardView.apply { add(mainKeyboardView, lParams(matchParent, matchParent)) }
         attachKeyboard(evalKeyboard(".default"))
+        keyboardView.apply { add(mainKeyboardView, lParams(matchParent, matchParent)) }
         return keyboardView
     }
 
@@ -161,7 +161,7 @@ class KeyboardWindow(
             if (keyboardsCached.containsKey(target)) {
                 if (target == currentKeyboardId) return@execute
             } else {
-                keyboardsCached[target] = Keyboard(target)
+                keyboardsCached[target] = Keyboard(theme, target)
             }
             attachKeyboard(target)
             if (windowManager.isAttached(this)) {

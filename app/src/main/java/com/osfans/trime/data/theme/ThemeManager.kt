@@ -47,9 +47,9 @@ object ThemeManager {
         userThemes.clear()
         sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
         userThemes.addAll(listThemes(DataManager.userDataDir))
+        setNormalTheme(prefs.selectedTheme)
     }
 
-    // 在初始化 ColorManager 时会被赋值
     lateinit var activeTheme: Theme
         private set
 
@@ -60,14 +60,13 @@ object ThemeManager {
     fun setNormalTheme(name: String) {
         Theme(name).let {
             if (::activeTheme.isInitialized) {
-                if (it == activeTheme) return
+                if (activeTheme == it) return
             }
+            EventManager.resetCache()
+            FontManager.resetCache(it)
+            ColorManager.resetCache(it)
+            TabManager.resetCache(it)
             activeTheme = it
-            // 由于这里的顺序不能打乱，不适合使用 listener
-            EventManager.refresh()
-            FontManager.refresh()
-            ColorManager.refresh()
-            TabManager.refresh()
         }
     }
 }

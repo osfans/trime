@@ -14,6 +14,8 @@ import timber.log.Timber
 import java.io.File
 
 object FontManager {
+    private lateinit var theme: Theme
+
     private enum class FontKey {
         HANB_FONT,
         LATIN_FONT,
@@ -28,16 +30,17 @@ object FontManager {
     }
 
     private val fontDir get() = File(DataManager.userDataDir, "fonts")
-    var hanBFont: Typeface = getTypefaceOrDefault(FontKey.HANB_FONT.name)
+    lateinit var hanBFont: Typeface
         private set
-    var latinFont: Typeface = getTypefaceOrDefault(FontKey.LATIN_FONT.name)
+    lateinit var latinFont: Typeface
         private set
     private val typefaceCache = mutableMapOf<String, Typeface>()
     private val fontFamilyCache = mutableMapOf<String, FontFamily>()
 
-    fun refresh() {
+    fun resetCache(theme: Theme) {
         typefaceCache.clear()
         fontFamilyCache.clear()
+        this.theme = theme
         hanBFont = getTypefaceOrDefault(FontKey.HANB_FONT.name)
         latinFont = getTypefaceOrDefault(FontKey.LATIN_FONT.name)
     }
@@ -96,7 +99,7 @@ object FontManager {
     }
 
     private fun getFontFromStyle(key: String): List<String>? {
-        val style = ThemeManager.activeTheme.generalStyle
+        val style = theme.generalStyle
         return when (FontKey.entries.firstOrNull { it.name == key.uppercase() }) {
             FontKey.HANB_FONT -> style.hanbFont
             FontKey.LATIN_FONT -> style.latinFont

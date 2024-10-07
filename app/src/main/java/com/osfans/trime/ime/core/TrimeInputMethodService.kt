@@ -49,6 +49,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.enums.FullscreenMode
@@ -105,7 +106,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val onColorChangeListener =
         ColorManager.OnColorChangeListener {
             lifecycleScope.launch(Dispatchers.Main) {
-                recreateInputView()
+                recreateInputView(it)
             }
         }
 
@@ -221,6 +222,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 handleRimeResponse(it)
             }
         }
+        ColorManager.addOnChangedListener(onColorChangeListener)
         super.onCreate()
         instance = this
         // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
@@ -229,13 +231,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
-            ColorManager.addOnChangedListener(onColorChangeListener)
             mIntentReceiver =
                 IntentReceiver().also {
                     it.registerReceiver(this)
                 }
             postRimeJob {
                 ColorManager.init(resources.configuration)
+                ThemeManager.init()
                 InputFeedbackManager.init()
                 restartSystemStartTimingSync()
                 shouldUpdateRimeOption = true
@@ -265,7 +267,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private fun handleRimeNotification(notification: RimeNotification<*>) {
         if (notification is RimeNotification.SchemaNotification) {
             SchemaManager.init(notification.value.id)
-            recreateInputView()
+            recreateInputView(ThemeManager.activeTheme)
         } else if (notification is RimeNotification.OptionNotification) {
             val value = notification.value.value
             when (val option = notification.value.option) {
@@ -310,11 +312,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     /** Must be called on the UI thread
      *
      * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
-    fun recreateInputView() {
-        inputView = InputView(this, rime)
+    fun recreateInputView(theme: Theme) {
         shouldUpdateRimeOption = true // 不能在Rime.onMessage中調用set_option，會卡死
         updateComposing() // 切換主題時刷新候選
-        setInputView(inputView!!)
+        setInputView(InputView(this, rime, theme).also { inputView = it })
         initializationUi = null
     }
 
@@ -413,7 +414,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     override fun onCreateInputView(): View {
         Timber.d("onCreateInputView")
         postRimeJob(Dispatchers.Main) {
-            recreateInputView()
+            recreateInputView(ThemeManager.activeTheme)
         }
         initializationUi = InitializationUi(this)
         return initializationUi!!.root
