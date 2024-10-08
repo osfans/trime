@@ -52,10 +52,10 @@ class Rime :
                     Timber.i("Starting up Rime APIs ...")
                     startupRime(sharedDataDir, userDataDir, fullCheck)
 
-                    requestRimeResponse()
-
-                    OpenCCDictManager.buildOpenCCDict()
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
+
+                    requestRimeResponse()
+                    SchemaManager.init(getCurrentRimeSchema())
                 }
 
                 override fun nativeFinalize() {
@@ -147,16 +147,29 @@ class Rime :
             getRimeCandidates(startIndex, limit) ?: emptyArray()
         }
 
-    private fun handleRimeNotification(notif: RimeNotification<*>) {
-        when (notif) {
-            is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
+    private fun handleRimeNotification(it: RimeNotification<*>) {
+        when (it) {
+            is RimeNotification.SchemaNotification -> {
+                schemaItemCached = it.value
+                SchemaManager.init(it.value.id)
+            }
+            is RimeNotification.OptionNotification -> {
+                getRimeStatus()?.let {
+                    inputStatusCached = InputStatus.fromStatus(it)
+                    inputStatus = it // for compatibility
+                }
+                SchemaManager.updateSwitchOptions()
+            }
+            is RimeNotification.DeployNotification -> {
+                when (it.value) {
+                    "start" -> OpenCCDictManager.buildOpenCCDict()
+                }
+            }
             else -> {}
         }
-        requestRimeResponse()
     }
 
     private fun handleRimeResponse(response: RimeResponse) {
-        SchemaManager.init(getCurrentRimeSchema())
         response.status?.let {
             val status = InputStatus.fromStatus(it)
             inputStatusCached = status

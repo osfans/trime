@@ -58,7 +58,7 @@ class Rime {
     }
     rime->initialize(&trime_traits);
     rime->set_notification_handler(notificationHandler, GlobalRef->jvm);
-    if (rime->start_maintenance(fullCheck) && rime->is_maintenance_mode()) {
+    if (rime->start_maintenance(fullCheck)) {
       rime->join_maintenance_thread();
     }
 
