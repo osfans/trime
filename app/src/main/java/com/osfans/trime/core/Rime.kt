@@ -148,6 +148,11 @@ class Rime :
             getRimeCandidates(startIndex, limit) ?: emptyArray()
         }
 
+    override suspend fun syncUserData(): Boolean =
+        withRimeContext {
+            syncRimeUserData()
+        }
+
     private fun handleRimeNotification(notif: RimeNotification<*>) {
         when (notif) {
             is RimeNotification.SchemaNotification -> schemaItemCached = notif.value
