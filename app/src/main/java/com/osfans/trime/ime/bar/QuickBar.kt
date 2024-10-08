@@ -194,7 +194,6 @@ class QuickBar(
     override fun onRimeSchemaUpdated(schema: SchemaItem) {
         if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
             service.lifecycleScope.launch {
-                SchemaManager.init(schema.id)
                 alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
             }
         }
@@ -211,7 +210,6 @@ class QuickBar(
         }
         if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
             service.lifecycleScope.launch {
-                SchemaManager.updateSwitchOptions()
                 alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
             }
         }

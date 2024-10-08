@@ -10,7 +10,7 @@ import kotlinx.serialization.builtins.ListSerializer
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
-    lateinit var visibleSwitches: List<Schema.Switch>
+    var visibleSwitches: List<Schema.Switch> = listOf()
 
     private val arrow get() = AppPrefs.defaultInstance().keyboard.switchArrowEnabled
 
@@ -30,7 +30,7 @@ object SchemaManager {
 
     @JvmStatic
     fun updateSwitchOptions() {
-        if (!this::visibleSwitches.isInitialized || visibleSwitches.isEmpty()) return // 無方案
+        if (visibleSwitches.isEmpty()) return // 無方案
         visibleSwitches.forEach { s ->
             s.enabled =
                 if (s.options.isNullOrEmpty()) { // 只有单 Rime 运行时选项的开关，开关名即选项名，标记其启用状态

@@ -44,7 +44,6 @@ import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.Theme
@@ -260,7 +259,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun handleRimeNotification(notification: RimeNotification<*>) {
         if (notification is RimeNotification.SchemaNotification) {
-            SchemaManager.init(notification.value.id)
             recreateInputView(ThemeManager.activeTheme)
         } else if (notification is RimeNotification.OptionNotification) {
             val value = notification.value.value
