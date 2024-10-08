@@ -31,7 +31,6 @@ import com.osfans.trime.ui.main.MainViewModel
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.formatDateTime
-import com.osfans.trime.util.getFileFromUri
 import com.osfans.trime.util.rimeActionWithResultDialog
 import com.osfans.trime.util.toast
 import com.osfans.trime.util.withLoadingDialog
@@ -55,7 +54,7 @@ class ProfileFragment :
                         it,
                         DocumentsContract.getTreeDocumentId(it),
                     )
-                dialogView.editText.setText(context.getFileFromUri(uri)?.absolutePath)
+                onResult(uri)
             }
     }
 

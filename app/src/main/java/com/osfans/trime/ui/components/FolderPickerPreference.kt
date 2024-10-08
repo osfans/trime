@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.osfans.trime.R
 import com.osfans.trime.databinding.FolderPickerDialogBinding
+import com.osfans.trime.util.getFileFromUri
 import com.osfans.trime.util.getUriForFile
 import java.io.File
 
@@ -25,10 +26,11 @@ class FolderPickerPreference
         defStyleAttr: Int = androidx.preference.R.attr.preferenceStyle,
     ) : Preference(context, attrs, defStyleAttr) {
         private var value = ""
-        lateinit var documentTreeLauncher: ActivityResultLauncher<Uri?>
-        lateinit var dialogView: FolderPickerDialogBinding
+        private lateinit var dialogView: FolderPickerDialogBinding
 
         var default = ""
+
+        var documentTreeLauncher: ActivityResultLauncher<Uri?>? = null
 
         init {
             context.theme.obtainStyledAttributes(attrs, R.styleable.FolderPickerPreferenceAttrs, 0, 0).run {
@@ -68,7 +70,7 @@ class FolderPickerPreference
             dialogView = FolderPickerDialogBinding.inflate(LayoutInflater.from(context))
             dialogView.editText.setText(initValue)
             dialogView.button.setOnClickListener {
-                documentTreeLauncher.launch(context.getUriForFile(File(initValue)))
+                documentTreeLauncher?.launch(context.getUriForFile(File(initValue)))
             }
             AlertDialog
                 .Builder(context)
@@ -88,5 +90,9 @@ class FolderPickerPreference
                 persistString(value)
                 notifyChanged()
             }
+        }
+
+        fun onResult(result: Uri) {
+            dialogView.editText.setText(context.getFileFromUri(result)?.absolutePath)
         }
     }
