@@ -9,13 +9,17 @@ import android.content.Intent
 import android.os.Process
 import android.util.Log
 import androidx.preference.PreferenceManager
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ui.main.LogActivity
+import com.osfans.trime.worker.BackgroundSyncWork
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -116,9 +120,29 @@ class TrimeApplication : Application() {
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)
+
+            initializeWorkManagerIfAndroidForgotIt()
+            startWorkManager()
         } catch (e: Exception) {
             e.fillInStackTrace()
             return
+        }
+    }
+
+    private fun initializeWorkManagerIfAndroidForgotIt() {
+        if (!WorkManager.isInitialized()) {
+            WorkManager.initialize(
+                applicationContext,
+                Configuration
+                    .Builder()
+                    .build(),
+            )
+        }
+    }
+
+    private fun startWorkManager() {
+        coroutineScope.launch {
+            BackgroundSyncWork.start(applicationContext)
         }
     }
 }

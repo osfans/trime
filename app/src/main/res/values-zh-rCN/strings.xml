@@ -239,8 +239,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__request_permmision_hint">当前同文需要存储权限以访问配置、使得用户容易更改。</string>
     <string name="setup__request_permmision">请求存储权限</string>
     <string name="grant_permission">授予权限</string>
-    <string name="schedule_exact_alarm_permission_title">没有闹钟和提醒权限</string>
-    <string name="schedule_exact_alarm_permission_message">没有闹钟和提醒权限，我们无法在启用定时同步时及时为您同步数据配置。</string>
     <string name="notification_permission_title">没有通知权限</string>
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
     <string name="rime_daemon">Rime 守护程序</string>

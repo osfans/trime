@@ -984,8 +984,8 @@ preset_keys:
   WebSearch: {label: 搜索網頁, command: web_search, option: "%4$s"} #搜索，其他view、dial、edit、search等intent，參考安卓的intent文檔：https://developer.android.com/reference/android/content/Intent.html
   Search: {label: 搜索, command: search, option: "%1$s"} #搜索短信、字典等
   Share: {label: 分享, command: send, option: "%s"} #分享指定文本: %s或者%1$s爲當前字符
-  Deploy: {label: 部署, command: broadcast, option: "com.osfans.trime.deploy"}
-  Sync: {label: 同步, command: broadcast, option: "com.osfans.trime.sync"}
+  Deploy: {label: 部署, command: broadcast, option: "com.osfans.trime.DEPLOY"}
+  Sync: {label: 同步, command: broadcast, option: "com.osfans.trime.SYNC"}
   RepeatCommit: { label: 重复,  command: commit, option: "%1$s" } #重复输入刚上屏的内容
 
 preset_keyboards:

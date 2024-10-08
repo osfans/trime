@@ -64,4 +64,6 @@ interface RimeApi {
         startIndex: Int,
         limit: Int,
     ): Array<CandidateItem>
+
+    suspend fun syncUserData(): Boolean
 }

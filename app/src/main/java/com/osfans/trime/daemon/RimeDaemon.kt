@@ -147,4 +147,6 @@ object RimeDaemon {
                 }
             }
         }
+
+    suspend fun syncUserData() = realRime.syncUserData()
 }
