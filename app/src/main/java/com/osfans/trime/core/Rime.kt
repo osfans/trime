@@ -157,20 +157,17 @@ class Rime :
 
     private fun handleRimeResponse(response: RimeResponse) {
         SchemaManager.init(getCurrentRimeSchema())
-        if (response.status != null) {
-            val (item, status) =
-                response.status.let {
-                    SchemaItem.fromStatus(it) to InputStatus.fromStatus(it)
-                }
+        response.status?.let {
+            val status = InputStatus.fromStatus(it)
             inputStatusCached = status
-            inputStatus = response.status // for compatibility
+            inputStatus = it // for compatibility
+
+            val item = SchemaItem.fromStatus(it)
             if (item != schemaItemCached) {
                 schemaItemCached = item
             }
         }
-        if (response.context != null) {
-            inputContext = response.context // for compatibility
-        }
+        response.context?.let { inputContext = it } // for compatibility
     }
 
     fun startup(fullCheck: Boolean) {
