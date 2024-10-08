@@ -16,17 +16,11 @@ import android.os.Build
 import android.text.TextUtils
 import android.util.SparseArray
 import android.view.KeyEvent
-import com.osfans.trime.core.Rime
-import com.osfans.trime.daemon.RimeDaemon
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import splitties.systemservices.clipboardManager
 import timber.log.Timber
 import java.text.FieldPosition
@@ -140,14 +134,6 @@ object ShortcutUtils {
 
     @JvmStatic
     fun pasteFromClipboard(context: Context): CharSequence? = clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(context)
-
-    fun syncInBackground() {
-        val prefs = AppPrefs.defaultInstance()
-        prefs.profile.lastBackgroundSyncTime = Date().time
-        CoroutineScope(Dispatchers.IO).launch {
-            prefs.profile.lastSyncStatus = Rime.syncRimeUserData().also { RimeDaemon.restartRime() }
-        }
-    }
 
     fun Context.openCategory(keyCode: Int): Boolean {
         val category = applicationLaunchKeyCategories[keyCode]

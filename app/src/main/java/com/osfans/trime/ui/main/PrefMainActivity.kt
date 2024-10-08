@@ -6,9 +6,7 @@ package com.osfans.trime.ui.main
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
@@ -40,7 +38,6 @@ import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.util.progressBarDialogIndeterminate
 import com.osfans.trime.util.rimeActionWithResultDialog
 import kotlinx.coroutines.launch
-import splitties.systemservices.alarmManager
 import splitties.views.topPadding
 
 class PrefMainActivity : AppCompatActivity() {
@@ -111,7 +108,6 @@ class PrefMainActivity : AppCompatActivity() {
             startActivity(Intent(this, SetupActivity::class.java))
         }
 
-        checkScheduleExactAlarmPermission()
         checkNotificationPermission()
 
         lifecycleScope.launch {
@@ -174,20 +170,6 @@ class PrefMainActivity : AppCompatActivity() {
         super.onDestroy()
         loadingDialog?.dismiss()
         loadingDialog = null
-    }
-
-    private fun checkScheduleExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            AlertDialog
-                .Builder(this)
-                .setIconAttribute(android.R.attr.alertDialogIcon)
-                .setTitle(R.string.schedule_exact_alarm_permission_title)
-                .setMessage(R.string.schedule_exact_alarm_permission_message)
-                .setPositiveButton(R.string.grant_permission) { _, _ ->
-                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
-                }.setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
     }
 
     private fun checkNotificationPermission() {

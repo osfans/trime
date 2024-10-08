@@ -4,12 +4,6 @@
 
 package com.osfans.trime.ui.fragments
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Intent
-import android.content.SharedPreferences
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.DocumentsContract
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,7 +14,6 @@ import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
 import androidx.preference.get
 import com.osfans.trime.R
-import com.osfans.trime.core.Rime
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
@@ -38,11 +31,8 @@ import com.osfans.trime.util.withLoadingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import splitties.systemservices.alarmManager
 
-class ProfileFragment :
-    PaddingPreferenceFragment(),
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class ProfileFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.defaultInstance()
 
@@ -71,9 +61,8 @@ class ProfileFragment :
             }
             get<Preference>("profile_sync_user_data")?.setOnPreferenceClickListener {
                 lifecycleScope.launch {
-                    this@ProfileFragment.context?.rimeActionWithResultDialog("rime.trime", "W", 1) {
-                        Rime.syncRimeUserData()
-                        RimeDaemon.restartRime(true)
+                    requireContext().rimeActionWithResultDialog("rime.trime", "W", 1) {
+                        RimeDaemon.syncUserData()
                         true
                     }
                 }
@@ -134,54 +123,9 @@ class ProfileFragment :
         }
     }
 
-    override fun onSharedPreferenceChanged(
-        sharedPreferences: SharedPreferences?,
-        key: String?,
-    ) {
-        // 监听定时同步偏好设置
-        // 设置待发送的同步事件
-        val pendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                0,
-                Intent("com.osfans.trime.timing.sync"),
-                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                } else {
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                },
-            )
-        if (prefs.profile.timingBackgroundSyncEnabled) {
-            val timeAtMillis = prefs.profile.timingBackgroundSyncSetTime
-            if (VERSION.SDK_INT < VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
-                if (VERSION.SDK_INT >= VERSION_CODES.M) { // 根据 API Level 设置 alarm 任务
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        timeAtMillis,
-                        pendingIntent,
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        timeAtMillis,
-                        pendingIntent,
-                    )
-                }
-            }
-        } else {
-            alarmManager.cancel(pendingIntent)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         viewModel.setToolbarTitle(getString(R.string.pref_profile))
         viewModel.disableTopOptionsMenu()
-        preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        preferenceScreen.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
     }
 }
