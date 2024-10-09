@@ -10,7 +10,6 @@ import android.os.Environment
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.ResourceUtils
-import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.appContext
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -49,31 +48,10 @@ object DataManager {
 
     val defaultDataDirectory = File(Environment.getExternalStorageDirectory(), "rime")
 
-    private val onDataDirChangeListeners = WeakHashSet<OnDataDirChangeListener>()
-
-    fun interface OnDataDirChangeListener {
-        fun onDataDirChange()
-    }
-
-    fun addOnChangedListener(listener: OnDataDirChangeListener) {
-        onDataDirChangeListeners.add(listener)
-    }
-
-    fun removeOnChangedListener(listener: OnDataDirChangeListener) {
-        onDataDirChangeListeners.remove(listener)
-    }
-
-    fun dirFireChange() {
-        onDataDirChangeListeners.forEach { it.onDataDirChange() }
-    }
-
     val sharedDataDir = File(appContext.getExternalFilesDir(null), "shared").also { it.mkdirs() }
 
     val userDataDir
-        get() =
-            File(prefs.profile.userDataDir).also {
-                if (!it.exists()) it.mkdirs()
-            }
+        get() = File(prefs.profile.userDataDir).also { it.mkdirs() }
 
     /**
      * Return the absolute path of the compiled config file

@@ -45,7 +45,6 @@ class Rime :
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
                 override fun nativeStartup(fullCheck: Boolean) {
-                    DataManager.dirFireChange()
                     DataManager.sync()
 
                     val sharedDataDir = DataManager.sharedDataDir.absolutePath

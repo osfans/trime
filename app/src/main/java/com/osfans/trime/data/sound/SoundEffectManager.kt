@@ -4,7 +4,6 @@
 
 package com.osfans.trime.data.sound
 
-import androidx.annotation.Keep
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.osfans.trime.data.base.DataManager
@@ -13,16 +12,7 @@ import timber.log.Timber
 import java.io.File
 
 object SoundEffectManager {
-    private var userDir = File(DataManager.userDataDir, "sound")
-
-    /**
-     * Update userDir.
-     */
-    @Keep
-    private val onDataDirChange =
-        DataManager.OnDataDirChangeListener {
-            userDir = File(DataManager.userDataDir, "sound")
-        }
+    private val userDir get() = File(DataManager.userDataDir, "sound").also { it.mkdirs() }
 
     private val yaml =
         Yaml(
@@ -66,8 +56,6 @@ object SoundEffectManager {
     }
 
     fun init() {
-        // register listener
-        DataManager.addOnChangedListener(onDataDirChange)
         currentSoundEffect = getSound(AppPrefs.defaultInstance().keyboard.customSoundPackage) ?: return
     }
 
