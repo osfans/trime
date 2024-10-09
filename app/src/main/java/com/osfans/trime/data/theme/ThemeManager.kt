@@ -4,7 +4,6 @@
 
 package com.osfans.trime.data.theme
 
-import androidx.annotation.Keep
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.TabManager
@@ -14,20 +13,6 @@ import java.io.File
 object ThemeManager {
     fun interface OnThemeChangeListener {
         fun onThemeChange(theme: Theme)
-    }
-
-    /**
-     * Update sharedThemes and userThemes.
-     */
-    @Keep
-    private val onDataDirChange =
-        DataManager.OnDataDirChangeListener {
-            refreshThemes()
-        }
-
-    init {
-        // register listener
-        DataManager.addOnChangedListener(onDataDirChange)
     }
 
     private fun listThemes(path: File): MutableList<String> =
@@ -42,14 +27,6 @@ object ThemeManager {
     private val userThemes: MutableList<String> get() = listThemes(DataManager.userDataDir)
 
     fun getAllThemes(): List<String> = sharedThemes + userThemes
-
-    private fun refreshThemes() {
-        sharedThemes.clear()
-        userThemes.clear()
-        sharedThemes.addAll(listThemes(DataManager.sharedDataDir))
-        userThemes.addAll(listThemes(DataManager.userDataDir))
-        setNormalTheme(prefs.selectedTheme)
-    }
 
     private lateinit var _activeTheme: Theme
 
