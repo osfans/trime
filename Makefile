@@ -75,8 +75,8 @@ opencc-data:
 	@echo "copy opencc data"
 	@rm -rf $(targetDir)
 	@mkdir -p $(targetDir)
-	@cp $(srcDir)/dictionary/* $(targetDir)/
-	@cp $(srcDir)/config/* $(targetDir)/
+	@cp $(srcDir)/dictionary/*.txt $(targetDir)/
+	@cp $(srcDir)/config/*.json $(targetDir)/
 	@rm $(targetDir)/TWPhrases*.txt
 	@python $(srcDir)/scripts/merge.py $(srcDir)/dictionary/TWPhrases*.txt $(targetDir)/TWPhrases.txt
 	@python $(srcDir)/scripts/reverse.py $(targetDir)/TWPhrases.txt $(targetDir)/TWPhrasesRev.txt
