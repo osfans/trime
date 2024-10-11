@@ -256,7 +256,10 @@ class Keyboard(
                 }
                 var widthPx = (keyWidth * oneWeightWidthPx).toInt()
                 widthPx -= gap
-                if (column >= maxColumns || x + widthPx > mDisplayWidth) {
+                if (column >= maxColumns || (x + widthPx > mDisplayWidth && rowWidthTotalWeight.containsKey(
+                        row + 1
+                    ))
+                ) {
                     // new row
                     rowWidthWeight = 0f
                     x = gap / 2
