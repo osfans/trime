@@ -29,5 +29,9 @@ gradlePlugin {
             id = "com.osfans.trime.native-cache-hash"
             implementationClass = "NativeCacheHashPlugin"
         }
+        register("openccData") {
+            id = "com.osfans.trime.opencc-data"
+            implementationClass = "OpenCCDataPlugin"
+        }
     }
 }
