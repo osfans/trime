@@ -6,7 +6,7 @@ mainDir=app/src/main
 resDir=$(mainDir)/res
 jniDir=$(mainDir)/jni
 
-.PHONY: all clean build debug spotlessCheck spotlessApply clang-format-lint clang-format style-lint style-apply release install opencc-data translate ndk android
+.PHONY: all clean build debug spotlessCheck spotlessApply clang-format-lint clang-format style-lint style-apply release install translate ndk android
 
 all: release
 
@@ -56,7 +56,7 @@ cliff:
 	git-cliff -o CHANGELOG.md
 
 TRANSLATE=$(resDir)/values-zh-rCN/strings.xml
-release: opencc-data style-lint
+release: style-lint
 	./gradlew assembleRelease
 
 install: release
@@ -68,20 +68,6 @@ $(TRANSLATE): $(resDir)/values-zh-rTW/strings.xml
 	@opencc -c tw2sp -i $< -o $@
 
 translate: $(TRANSLATE)
-
-opencc-data: srcDir = $(jniDir)/OpenCC/data
-opencc-data: targetDir = $(mainDir)/assets/shared/opencc
-opencc-data:
-	@echo "copy opencc data"
-	@rm -rf $(targetDir)
-	@mkdir -p $(targetDir)
-	@cp $(srcDir)/dictionary/*.txt $(targetDir)/
-	@cp $(srcDir)/config/*.json $(targetDir)/
-	@rm $(targetDir)/TWPhrases*.txt
-	@python $(srcDir)/scripts/merge.py $(srcDir)/dictionary/TWPhrases*.txt $(targetDir)/TWPhrases.txt
-	@python $(srcDir)/scripts/reverse.py $(targetDir)/TWPhrases.txt $(targetDir)/TWPhrasesRev.txt
-	@python $(srcDir)/scripts/reverse.py $(srcDir)/dictionary/TWVariants.txt $(targetDir)/TWVariantsRev.txt
-	@python $(srcDir)/scripts/reverse.py $(srcDir)/dictionary/HKVariants.txt $(targetDir)/HKVariantsRev.txt
 
 ndk:
 	(cd $(mainDir); ndk-build)
