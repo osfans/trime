@@ -52,9 +52,13 @@ Your are now welcome to [contribution](CONTRIBUTING.md) ~ !
 
 ### Prepare
 
-Android SDK and Android NDK should be correctly installed and configured. If you are new to Android development, please install Android Studio.
+#### Requirements:
 
-The needed version of JDK (OpenJDK) is 17 or 21.
+- Android SDK and Android NDK
+  * If you are new to Android development, please install [Android Studio](https://developer.android.com/studio).
+
+- JDK (OpenJDK) 17
+- Python 3 (required by OpenCC to generate dictionary text files)
 
 #### Prerequisites for Windows
 
@@ -77,6 +81,8 @@ If you cannot or wouldn't like to enable anything, it doesn't matter. Copying wi
 ```sh
 git clone git@github.com:osfans/trime.git
 git submodule update --init --recursive
+# use partial clone to save time
+git submodule update --init --recursive --filter=blob:none
 ```
 
 #### 2. Debug version without signature:

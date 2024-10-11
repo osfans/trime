@@ -47,9 +47,13 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 
 ### 准备
 
-开发者应正确安装配置好 Android SDK 和 Android NDK。如果还不熟悉 Android 开发，建议安装 Android Studio，它会自动安装并配置 Android 开发环境。
+#### 开发环境要求
 
-对 JDK（OpenJDK）版本的要求是 17 或 21。
+- Android SDK 和 Android NDK
+  - 如果还不熟悉 Android 开发，建议安装 [Android Studio](https://developer.android.google.cn/studio)，它会自动安装并配置 Android 开发环境。
+
+- JDK（OpenJDK）17
+- Python 3 (用于给 OpenCC 生成词典文本文件）
 
 #### Windows 上的前提条件
 
@@ -72,6 +76,8 @@ TRIME 是 Tongwen RIME 或是 ThaeRvInputMEthod 的缩写:
 ```sh
 git clone git@github.com:osfans/trime.git
 git submodule update --init --recursive
+# 可以使用部分克隆节约时间
+git submodule update --init --recursive --filter=blob:none
 ```
 
 #### 2. 编译调试版本:
