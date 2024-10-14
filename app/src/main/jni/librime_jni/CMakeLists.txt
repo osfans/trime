@@ -31,7 +31,7 @@ execute_process(
 string(STRIP ${OPENCC_VERSION} OPENCC_VERSION)
 
 execute_process(
-  COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/librime/.git describe --tags
+  COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/librime/.git describe --tags --exclude "latest"
   OUTPUT_VARIABLE LIBRIME_VERSION
 )
 string(STRIP ${LIBRIME_VERSION} LIBRIME_VERSION)
