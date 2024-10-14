@@ -28,8 +28,8 @@ class Rime :
     private val lifecycleImpl = RimeLifecycleImpl()
     override val lifecycle get() = lifecycleImpl
 
-    override val notificationFlow = notificationFlow_.asSharedFlow()
-    override val responseFlow = responseFlow_.asSharedFlow()
+    override val callbackFlow = callbackFlow_.asSharedFlow()
+
     override val stateFlow get() = lifecycle.currentStateFlow
 
     override val isReady: Boolean
@@ -147,7 +147,7 @@ class Rime :
             getRimeCandidates(startIndex, limit) ?: emptyArray()
         }
 
-    private fun handleRimeNotification(it: RimeNotification<*>) {
+    private fun handleRimeCallback(it: RimeCallback) {
         when (it) {
             is RimeNotification.SchemaNotification -> {
                 schemaItemCached = it.value
@@ -165,22 +165,21 @@ class Rime :
                     "start" -> OpenCCDictManager.buildOpenCCDict()
                 }
             }
+            is RimeResponse -> {
+                it.status?.let {
+                    val status = InputStatus.fromStatus(it)
+                    inputStatusCached = status
+                    inputStatus = it // for compatibility
+
+                    val item = SchemaItem.fromStatus(it)
+                    if (item != schemaItemCached) {
+                        schemaItemCached = item
+                    }
+                }
+                it.context?.let { inputContext = it } // for compatibility
+            }
             else -> {}
         }
-    }
-
-    private fun handleRimeResponse(response: RimeResponse) {
-        response.status?.let {
-            val status = InputStatus.fromStatus(it)
-            inputStatusCached = status
-            inputStatus = it // for compatibility
-
-            val item = SchemaItem.fromStatus(it)
-            if (item != schemaItemCached) {
-                schemaItemCached = item
-            }
-        }
-        response.context?.let { inputContext = it } // for compatibility
     }
 
     fun startup(fullCheck: Boolean) {
@@ -189,8 +188,7 @@ class Rime :
             return
         }
         if (appContext.isStorageAvailable()) {
-            registerRimeNotificationHandler(::handleRimeNotification)
-            registerRimeResponseHandler(::handleRimeResponse)
+            registerRimeCallbackHandler(::handleRimeCallback)
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
             dispatcher.start(fullCheck)
         }
@@ -209,28 +207,19 @@ class Rime :
             }
         }
         lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
-        unregisterRimeNotificationHandler(::handleRimeNotification)
-        unregisterRimeResponseHandler(::handleRimeResponse)
+        unregisterRimeCallbackHandler(::handleRimeCallback)
     }
 
     companion object {
         private var inputContext: RimeProto.Context? = null
         private var inputStatus: RimeProto.Status? = null
-        private val notificationFlow_ =
-            MutableSharedFlow<RimeNotification<*>>(
+        private val callbackFlow_ =
+            MutableSharedFlow<RimeCallback>(
                 extraBufferCapacity = 15,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
 
-        private val responseFlow_ =
-            MutableSharedFlow<RimeResponse>(
-                extraBufferCapacity = 15,
-                onBufferOverflow = BufferOverflow.DROP_LATEST,
-            )
-
-        private val notificationHandlers = ArrayList<(RimeNotification<*>) -> Unit>()
-
-        private val responseHandlers = ArrayList<(RimeResponse) -> Unit>()
+        private val callbackHandlers = ArrayList<(RimeCallback) -> Unit>()
 
         init {
             System.loadLibrary("rime_jni")
@@ -489,33 +478,23 @@ class Rime :
         ) {
             val notification = RimeNotification.create(messageType, messageValue)
             Timber.d("Handling Rime notification: $notification")
-            notificationHandlers.forEach { it.invoke(notification) }
-            notificationFlow_.tryEmit(notification)
+            callbackHandlers.forEach { it.invoke(notification) }
+            callbackFlow_.tryEmit(notification)
         }
 
-        private fun registerRimeNotificationHandler(handler: (RimeNotification<*>) -> Unit) {
-            if (notificationHandlers.contains(handler)) return
-            notificationHandlers.add(handler)
+        private fun registerRimeCallbackHandler(handler: (RimeCallback) -> Unit) {
+            if (callbackHandlers.contains(handler)) return
+            callbackHandlers.add(handler)
         }
 
-        private fun unregisterRimeNotificationHandler(handler: (RimeNotification<*>) -> Unit) {
-            notificationHandlers.remove(handler)
+        private fun unregisterRimeCallbackHandler(handler: (RimeCallback) -> Unit) {
+            callbackHandlers.remove(handler)
         }
 
         fun requestRimeResponse() {
             val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
             Timber.d("Got Rime response: $response")
-            responseHandlers.forEach { it.invoke(response) }
-            responseFlow_.tryEmit(response)
-        }
-
-        private fun registerRimeResponseHandler(handler: (RimeResponse) -> Unit) {
-            if (responseHandlers.contains(handler)) return
-            responseHandlers.add(handler)
-        }
-
-        private fun unregisterRimeResponseHandler(handler: (RimeResponse) -> Unit) {
-            responseHandlers.remove(handler)
+            callbackFlow_.tryEmit(response)
         }
     }
 }
