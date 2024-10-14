@@ -6,7 +6,7 @@ package com.osfans.trime.core
 
 sealed class RimeNotification<T>(
     open val value: T,
-) {
+) : RimeCallback {
     abstract val messageType: MessageType
 
     data class SchemaNotification(

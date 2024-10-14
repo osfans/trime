@@ -23,6 +23,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.CandidateItem
+import com.osfans.trime.core.RimeCallback
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeSession
@@ -97,8 +98,7 @@ class InputView(
             setOnClickListener(placeholderListener)
         }
 
-    private val notificationHandlerJob: Job
-    private val responseHandlerJob: Job
+    private val callbackHandlerJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
     private val inputComponent = InputComponent::class.create(this, themedContext, theme, service, rime)
@@ -144,17 +144,10 @@ class InputView(
     init {
         addBroadcastReceivers()
 
-        notificationHandlerJob =
+        callbackHandlerJob =
             service.lifecycleScope.launch {
-                rime.run { notificationFlow }.collect {
-                    handleRimeNotification(it)
-                }
-            }
-
-        responseHandlerJob =
-            service.lifecycleScope.launch {
-                rime.run { responseFlow }.collect {
-                    handleRimeResponse(it)
+                rime.run { callbackFlow }.collect {
+                    handleRimeCallback(it)
                 }
             }
 
@@ -324,7 +317,7 @@ class InputView(
         }
     }
 
-    private fun handleRimeNotification(it: RimeNotification<*>) {
+    private fun handleRimeCallback(it: RimeCallback) {
         when (it) {
             is RimeNotification.SchemaNotification -> {
                 broadcaster.onRimeSchemaUpdated(it.value)
@@ -341,27 +334,26 @@ class InputView(
                     }
                 }
             }
+            is RimeResponse -> {
+                val ctx = it.context
+                if (ctx != null) {
+                    broadcaster.onInputContextUpdate(ctx)
+                    val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
+                    val isLastPage = ctx.menu.isLastPage
+                    val previous = ctx.menu.run { pageSize * pageNumber }
+                    val highlightedIdx = ctx.menu.highlightedCandidateIndex
+                    if (composition.isPopupWindowEnabled) {
+                        val sticky = composition.composition.update(ctx)
+                        compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx, sticky)
+                    } else {
+                        compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
+                    }
+                    if (candidates.isEmpty()) {
+                        compactCandidate.refreshUnrolled()
+                    }
+                }
+            }
             else -> {}
-        }
-    }
-
-    private fun handleRimeResponse(response: RimeResponse) {
-        val ctx = response.context
-        if (ctx != null) {
-            broadcaster.onInputContextUpdate(ctx)
-            val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
-            val isLastPage = ctx.menu.isLastPage
-            val previous = ctx.menu.run { pageSize * pageNumber }
-            val highlightedIdx = ctx.menu.highlightedCandidateIndex
-            if (composition.isPopupWindowEnabled) {
-                val sticky = composition.composition.update(ctx)
-                compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx, sticky)
-            } else {
-                compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
-            }
-            if (candidates.isEmpty()) {
-                compactCandidate.refreshUnrolled()
-            }
         }
     }
 
@@ -420,7 +412,7 @@ class InputView(
         composition.hideCompositionView()
         // cancel the notification job and clear all broadcast receivers,
         // implies that InputView should not be attached again after detached.
-        notificationHandlerJob.cancel()
+        callbackHandlerJob.cancel()
         broadcaster.clear()
         super.onDetachedFromWindow()
     }

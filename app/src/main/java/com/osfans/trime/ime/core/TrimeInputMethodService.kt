@@ -37,6 +37,7 @@ import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
+import com.osfans.trime.core.RimeCallback
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeProto
@@ -206,13 +207,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             jobs.consumeEach { it.join() }
         }
         lifecycleScope.launch {
-            rime.run { notificationFlow }.collect {
-                handleRimeNotification(it)
-            }
-        }
-        lifecycleScope.launch {
-            rime.run { responseFlow }.collect {
-                handleRimeResponse(it)
+            rime.run { callbackFlow }.collect {
+                handleRimeCallback(it)
             }
         }
         ThemeManager.addOnChangedListener(onThemeChangeListener)
@@ -258,44 +254,48 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private fun handleRimeNotification(notification: RimeNotification<*>) {
-        if (notification is RimeNotification.SchemaNotification) {
-            recreateInputView(ThemeManager.activeTheme)
-        } else if (notification is RimeNotification.OptionNotification) {
-            val value = notification.value.value
-            when (val option = notification.value.option) {
-                "ascii_mode" -> {
-                    InputFeedbackManager.ttsLanguage =
-                        locales[if (value) 1 else 0]
-                }
-                "_hide_bar",
-                "_hide_candidate",
-                -> {
-                    setCandidatesViewShown(isComposable && !value)
-                }
-                else ->
-                    if (option.startsWith("_key_") && option.length > 5 && value) {
-                        shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
-                        val key = option.substring(5)
-                        inputView
-                            ?.commonKeyboardActionListener
-                            ?.listener
-                            ?.onEvent(EventManager.getEvent(key))
-                        shouldUpdateRimeOption = true
-                    }
+    private fun handleRimeCallback(it: RimeCallback) {
+        when (it) {
+            is RimeNotification.SchemaNotification -> {
+                recreateInputView(ThemeManager.activeTheme)
             }
-        }
-    }
 
-    private fun handleRimeResponse(response: RimeResponse) {
-        val (commit, ctx, _) = response
-        if (commit != null && !commit.text.isNullOrEmpty()) {
-            commitText(commit.text)
+            is RimeNotification.OptionNotification -> {
+                val value = it.value.value
+                when (val option = it.value.option) {
+                    "ascii_mode" -> {
+                        InputFeedbackManager.ttsLanguage =
+                            locales[if (value) 1 else 0]
+                    }
+                    "_hide_bar",
+                    "_hide_candidate",
+                    -> {
+                        setCandidatesViewShown(isComposable && !value)
+                    }
+                    else ->
+                        if (option.startsWith("_key_") && option.length > 5 && value) {
+                            shouldUpdateRimeOption = false // 防止在 handleRimeNotification 中 setOption
+                            val key = option.substring(5)
+                            inputView
+                                ?.commonKeyboardActionListener
+                                ?.listener
+                                ?.onEvent(EventManager.getEvent(key))
+                            shouldUpdateRimeOption = true
+                        }
+                }
+            }
+            is RimeResponse -> {
+                val (commit, ctx) = it
+                if (commit?.text?.isNotEmpty() == true) {
+                    commitText(commit.text)
+                }
+                if (ctx != null) {
+                    updateComposingText(ctx)
+                }
+                updateComposing()
+            }
+            else -> {}
         }
-        if (ctx != null) {
-            updateComposingText(ctx)
-        }
-        updateComposing()
     }
 
     fun pasteByChar() {
