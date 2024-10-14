@@ -32,6 +32,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
+import com.osfans.trime.core.KeyModifier
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.Rime
@@ -768,15 +769,47 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
         val modifiers = KeyModifiers.fromKeyEvent(event)
+        val charCode = event.unicodeChar
+        if (charCode > 0 && charCode != '\t'.code) {
+            postRimeJob {
+                if (!processKey(charCode, modifiers.modifiers)) {
+                    onKeyEventCallback(KeyValue(charCode), modifiers)
+                }
+            }
+            return true
+        }
         val keyVal = KeyValue.fromKeyEvent(event)
         if (keyVal.value != RimeKeyMapping.RimeKey_VoidSymbol) {
             postRimeJob {
-                processKey(keyVal, modifiers)
+                if (!processKey(keyVal, modifiers)) {
+                    onKeyEventCallback(keyVal, modifiers)
+                }
             }
             return true
         }
         Timber.d("Skipped KeyEvent: $event")
         return false
+    }
+
+    private fun onKeyEventCallback(
+        keyVal: KeyValue,
+        modifiers: KeyModifiers,
+    ) {
+        val keyCode = keyVal.keyCode
+        if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+            val eventTime = SystemClock.uptimeMillis()
+            if (modifiers.modifiers == KeyModifier.Release.modifier) {
+                sendUpKeyEvent(eventTime, keyCode, modifiers.metaState)
+            } else {
+                sendDownKeyEvent(eventTime, keyCode, modifiers.metaState)
+            }
+        } else {
+            if (modifiers.modifiers != KeyModifier.Release.modifier && keyVal.value > 0) {
+                commitText(Char(keyVal.value).toString())
+            } else {
+                Timber.w("Unhandled Rime KeyEvent: ($keyVal, $modifiers)")
+            }
+        }
     }
 
     override fun onKeyDown(
