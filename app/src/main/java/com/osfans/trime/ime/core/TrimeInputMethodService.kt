@@ -38,6 +38,7 @@ import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeCallback
+import com.osfans.trime.core.RimeEvent
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeProto
@@ -294,6 +295,24 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 }
                 updateComposing()
             }
+            is RimeEvent.KeyEvent ->
+                it.data.let event@{
+                    val keyCode = it.value.keyCode
+                    if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                        val eventTime = SystemClock.uptimeMillis()
+                        if (it.modifiers.modifiers == KeyModifier.Release.modifier) {
+                            sendUpKeyEvent(eventTime, keyCode, it.modifiers.metaState)
+                        } else {
+                            sendDownKeyEvent(eventTime, keyCode, it.modifiers.metaState)
+                        }
+                    } else {
+                        if (it.modifiers.modifiers != KeyModifier.Release.modifier && it.value.value > 0) {
+                            commitText(Char(it.value.value).toString())
+                        } else {
+                            Timber.w("Unhandled Rime KeyEvent: $it")
+                        }
+                    }
+                }
             else -> {}
         }
     }
@@ -772,44 +791,19 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val charCode = event.unicodeChar
         if (charCode > 0 && charCode != '\t'.code) {
             postRimeJob {
-                if (!processKey(charCode, modifiers.modifiers)) {
-                    onKeyEventCallback(KeyValue(charCode), modifiers)
-                }
+                processKey(charCode, modifiers.modifiers)
             }
             return true
         }
         val keyVal = KeyValue.fromKeyEvent(event)
         if (keyVal.value != RimeKeyMapping.RimeKey_VoidSymbol) {
             postRimeJob {
-                if (!processKey(keyVal, modifiers)) {
-                    onKeyEventCallback(keyVal, modifiers)
-                }
+                processKey(keyVal, modifiers)
             }
             return true
         }
         Timber.d("Skipped KeyEvent: $event")
         return false
-    }
-
-    private fun onKeyEventCallback(
-        keyVal: KeyValue,
-        modifiers: KeyModifiers,
-    ) {
-        val keyCode = keyVal.keyCode
-        if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
-            val eventTime = SystemClock.uptimeMillis()
-            if (modifiers.modifiers == KeyModifier.Release.modifier) {
-                sendUpKeyEvent(eventTime, keyCode, modifiers.metaState)
-            } else {
-                sendDownKeyEvent(eventTime, keyCode, modifiers.metaState)
-            }
-        } else {
-            if (modifiers.modifiers != KeyModifier.Release.modifier && keyVal.value > 0) {
-                commitText(Char(keyVal.value).toString())
-            } else {
-                Timber.w("Unhandled Rime KeyEvent: ($keyVal, $modifiers)")
-            }
-        }
     }
 
     override fun onKeyDown(

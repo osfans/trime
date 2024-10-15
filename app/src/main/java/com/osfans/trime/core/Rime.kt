@@ -79,7 +79,13 @@ class Rime :
         modifiers: UInt,
     ): Boolean =
         withRimeContext {
-            processRimeKey(value, modifiers.toInt()).also { if (it) requestRimeResponse() }
+            processRimeKey(value, modifiers.toInt()).also {
+                if (it) {
+                    requestRimeResponse()
+                } else {
+                    keyEventCallback(KeyValue(value), KeyModifiers(modifiers))
+                }
+            }
         }
 
     override suspend fun processKey(
@@ -87,7 +93,13 @@ class Rime :
         modifiers: KeyModifiers,
     ): Boolean =
         withRimeContext {
-            processRimeKey(value.value, modifiers.toInt()).also { if (it) requestRimeResponse() }
+            processRimeKey(value.value, modifiers.toInt()).also {
+                if (it) {
+                    requestRimeResponse()
+                } else {
+                    keyEventCallback(value, modifiers)
+                }
+            }
         }
 
     override suspend fun selectCandidate(idx: Int): Boolean =
@@ -286,7 +298,11 @@ class Rime :
             Timber.d("processKey: keyCode=$keycode, mask=$mask")
             return processRimeKey(keycode, mask).also {
                 Timber.d("processKey ${if (it) "success" else "failed"}")
-                if (it) requestRimeResponse()
+                if (it) {
+                    requestRimeResponse()
+                } else {
+                    keyEventCallback(KeyValue(keycode), KeyModifiers.of(mask))
+                }
             }
         }
 
@@ -482,6 +498,29 @@ class Rime :
             callbackFlow_.tryEmit(notification)
         }
 
+        fun requestRimeResponse() {
+            val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
+            Timber.d("Got Rime response: $response")
+            callbackFlow_.tryEmit(response)
+        }
+
+        private fun keyEventCallback(
+            value: KeyValue,
+            modifiers: KeyModifiers,
+        ) {
+            handleRimeEvent(RimeEvent.EventType.Key, RimeEvent.KeyEvent.Data(value, modifiers))
+        }
+
+        private fun <T> handleRimeEvent(
+            type: RimeEvent.EventType,
+            data: T,
+        ) {
+            val event = RimeEvent.create(type, data)
+            Timber.d("Handling $event")
+            callbackHandlers.forEach { it.invoke(event) }
+            callbackFlow_.tryEmit(event)
+        }
+
         private fun registerRimeCallbackHandler(handler: (RimeCallback) -> Unit) {
             if (callbackHandlers.contains(handler)) return
             callbackHandlers.add(handler)
@@ -489,12 +528,6 @@ class Rime :
 
         private fun unregisterRimeCallbackHandler(handler: (RimeCallback) -> Unit) {
             callbackHandlers.remove(handler)
-        }
-
-        fun requestRimeResponse() {
-            val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
-            Timber.d("Got Rime response: $response")
-            callbackFlow_.tryEmit(response)
         }
     }
 }
