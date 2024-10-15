@@ -42,7 +42,6 @@ import com.osfans.trime.core.RimeEvent
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeNotification
 import com.osfans.trime.core.RimeProto
-import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.DraftHelper
@@ -285,16 +284,17 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         }
                 }
             }
-            is RimeResponse -> {
-                val (commit, ctx) = it
-                if (commit?.text?.isNotEmpty() == true) {
-                    commitText(commit.text)
+            is RimeEvent.IpcResponseEvent ->
+                it.data.let event@{
+                    val (commit, ctx) = it
+                    if (commit?.text?.isNotEmpty() == true) {
+                        commitText(commit.text)
+                    }
+                    if (ctx != null) {
+                        updateComposingText(ctx)
+                    }
+                    updateComposing()
                 }
-                if (ctx != null) {
-                    updateComposingText(ctx)
-                }
-                updateComposing()
-            }
             is RimeEvent.KeyEvent ->
                 it.data.let event@{
                     val keyCode = it.value.keyCode

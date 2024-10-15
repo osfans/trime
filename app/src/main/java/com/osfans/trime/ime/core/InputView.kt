@@ -24,8 +24,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.RimeCallback
+import com.osfans.trime.core.RimeEvent
 import com.osfans.trime.core.RimeNotification
-import com.osfans.trime.core.RimeResponse
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -334,25 +334,26 @@ class InputView(
                     }
                 }
             }
-            is RimeResponse -> {
-                val ctx = it.context
-                if (ctx != null) {
-                    broadcaster.onInputContextUpdate(ctx)
-                    val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
-                    val isLastPage = ctx.menu.isLastPage
-                    val previous = ctx.menu.run { pageSize * pageNumber }
-                    val highlightedIdx = ctx.menu.highlightedCandidateIndex
-                    if (composition.isPopupWindowEnabled) {
-                        val sticky = composition.composition.update(ctx)
-                        compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx, sticky)
-                    } else {
-                        compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
-                    }
-                    if (candidates.isEmpty()) {
-                        compactCandidate.refreshUnrolled()
+            is RimeEvent.IpcResponseEvent ->
+                it.data.let event@{
+                    val ctx = it.context
+                    if (ctx != null) {
+                        broadcaster.onInputContextUpdate(ctx)
+                        val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
+                        val isLastPage = ctx.menu.isLastPage
+                        val previous = ctx.menu.run { pageSize * pageNumber }
+                        val highlightedIdx = ctx.menu.highlightedCandidateIndex
+                        if (composition.isPopupWindowEnabled) {
+                            val sticky = composition.composition.update(ctx)
+                            compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx, sticky)
+                        } else {
+                            compactCandidate.adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
+                        }
+                        if (candidates.isEmpty()) {
+                            compactCandidate.refreshUnrolled()
+                        }
                     }
                 }
-            }
             else -> {}
         }
     }

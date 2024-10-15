@@ -54,7 +54,7 @@ class Rime :
 
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
 
-                    requestRimeResponse()
+                    ipcResponseCallback()
                     SchemaManager.init(getCurrentRimeSchema())
                 }
 
@@ -81,7 +81,7 @@ class Rime :
         withRimeContext {
             processRimeKey(value, modifiers.toInt()).also {
                 if (it) {
-                    requestRimeResponse()
+                    ipcResponseCallback()
                 } else {
                     keyEventCallback(KeyValue(value), KeyModifiers(modifiers))
                 }
@@ -95,7 +95,7 @@ class Rime :
         withRimeContext {
             processRimeKey(value.value, modifiers.toInt()).also {
                 if (it) {
-                    requestRimeResponse()
+                    ipcResponseCallback()
                 } else {
                     keyEventCallback(value, modifiers)
                 }
@@ -104,12 +104,12 @@ class Rime :
 
     override suspend fun selectCandidate(idx: Int): Boolean =
         withRimeContext {
-            selectRimeCandidate(idx).also { if (it) requestRimeResponse() }
+            selectRimeCandidate(idx).also { if (it) ipcResponseCallback() }
         }
 
     override suspend fun forgetCandidate(idx: Int): Boolean =
         withRimeContext {
-            forgetRimeCandidate(idx).also { if (it) requestRimeResponse() }
+            forgetRimeCandidate(idx).also { if (it) ipcResponseCallback() }
         }
 
     override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
@@ -130,12 +130,12 @@ class Rime :
             schema ?: schemaItemCached
         }
 
-    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) requestRimeResponse() } }
+    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) ipcResponseCallback() } }
 
     override suspend fun clearComposition() =
         withRimeContext {
             clearRimeComposition()
-            requestRimeResponse()
+            ipcResponseCallback()
         }
 
     override suspend fun setRuntimeOption(
@@ -177,19 +177,20 @@ class Rime :
                     "start" -> OpenCCDictManager.buildOpenCCDict()
                 }
             }
-            is RimeResponse -> {
-                it.status?.let {
-                    val status = InputStatus.fromStatus(it)
-                    inputStatusCached = status
-                    inputStatus = it // for compatibility
+            is RimeEvent.IpcResponseEvent ->
+                it.data.let event@{ data ->
+                    data.status?.let {
+                        val status = InputStatus.fromStatus(it)
+                        inputStatusCached = status
+                        inputStatus = it // for compatibility
 
-                    val item = SchemaItem.fromStatus(it)
-                    if (item != schemaItemCached) {
-                        schemaItemCached = item
+                        val item = SchemaItem.fromStatus(it)
+                        if (item != schemaItemCached) {
+                            schemaItemCached = item
+                        }
                     }
+                    data.context?.let { inputContext = it } // for compatibility
                 }
-                it.context?.let { inputContext = it } // for compatibility
-            }
             else -> {}
         }
     }
@@ -299,7 +300,7 @@ class Rime :
             return processRimeKey(keycode, mask).also {
                 Timber.d("processKey ${if (it) "success" else "failed"}")
                 if (it) {
-                    requestRimeResponse()
+                    ipcResponseCallback()
                 } else {
                     keyEventCallback(KeyValue(keycode), KeyModifiers.of(mask))
                 }
@@ -314,7 +315,7 @@ class Rime :
                 sequence.toString().replace("{}", "{braceleft}{braceright}"),
             ).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
-                if (it) requestRimeResponse()
+                if (it) ipcResponseCallback()
             }
         }
 
@@ -334,7 +335,7 @@ class Rime :
         @JvmStatic
         fun setCaretPos(caretPos: Int) {
             setRimeCaretPos(caretPos)
-            requestRimeResponse()
+            ipcResponseCallback()
         }
 
         // init
@@ -498,10 +499,11 @@ class Rime :
             callbackFlow_.tryEmit(notification)
         }
 
-        fun requestRimeResponse() {
-            val response = RimeResponse(getRimeCommit(), getRimeContext(), getRimeStatus())
-            Timber.d("Got Rime response: $response")
-            callbackFlow_.tryEmit(response)
+        private fun ipcResponseCallback() {
+            handleRimeEvent(
+                RimeEvent.EventType.IpcResponse,
+                RimeEvent.IpcResponseEvent.Data(getRimeCommit(), getRimeContext(), getRimeStatus()),
+            )
         }
 
         private fun keyEventCallback(
