@@ -4,7 +4,6 @@
 
 package com.osfans.trime.ime.composition
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.RectF
 import android.os.Build
@@ -35,6 +34,8 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.wrapContent
+import splitties.views.horizontalPadding
+import splitties.views.verticalPadding
 import timber.log.Timber
 
 @InputScope
@@ -62,10 +63,12 @@ class CompositionPopupWindow(
             setKeyboardActionListener(commonKeyboardActionListener.listener)
         }
 
-    val root =
+    private val root =
         ctx.horizontalLayout {
             layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
             visibility = if (isPopupWindowEnabled) View.VISIBLE else View.GONE
+            horizontalPadding = dp(theme.generalStyle.layout.marginX)
+            verticalPadding = dp(theme.generalStyle.layout.marginY)
             add(composition, lParams(wrapContent, wrapContent))
         }
 
@@ -102,6 +105,8 @@ class CompositionPopupWindow(
                     theme.generalStyle.layout.alpha,
                 ),
             )
+            width = ViewGroup.LayoutParams.WRAP_CONTENT
+            height = ViewGroup.LayoutParams.WRAP_CONTENT
             elevation =
                 ctx.dp(
                     theme.generalStyle.layout.elevation
@@ -114,27 +119,21 @@ class CompositionPopupWindow(
     private val mPopupRectF = RectF()
     private val mPopupHandler = Handler(Looper.getMainLooper())
 
-    // TODO: Don't access internal resource like this
-    private val statusBarHeight: Int
-        @SuppressLint("InternalInsetResource", "DiscouragedApi")
-        get() {
-            val id = ctx.resources.getIdentifier("status_bar_height", "dimen", "android")
-            return ctx.resources.getDimensionPixelSize(id)
-        }
-
     private val mPopupTimer =
         Runnable {
             if (!isPopupWindowEnabled || bar.view.windowToken == null) return@Runnable
             bar.view.let { anchor ->
                 var x = 0
                 var y = 0
-                val candidateLocation = IntArray(2)
-                anchor.getLocationOnScreen(candidateLocation)
+                val (_, anchorY) =
+                    intArrayOf(0, 0).also {
+                        anchor.getLocationInWindow(it)
+                    }
 
-                val minX: Int = anchor.dp(popupMarginH)
-                val minY: Int = anchor.dp(popupMargin)
-                val maxX: Int = anchor.width - mPopupWindow.width - minX
-                val maxY = candidateLocation[1] - mPopupWindow.height - minY
+                val minX = anchor.dp(popupMarginH)
+                val minY = anchor.dp(popupMargin)
+                val maxX = anchor.width - root.width - minX
+                val maxY = anchorY - root.height - minY
                 if (isWinFixed() || !isCursorUpdated) {
                     // setCandidatesViewShown(true);
                     when (popupWindowPos) {
@@ -180,13 +179,12 @@ class CompositionPopupWindow(
                     }
                     y = MathUtils.clamp(y, minY, maxY)
                 }
-                y -= statusBarHeight
                 if (!mPopupWindow.isShowing) {
                     mPopupWindow.showAtLocation(anchor, Gravity.START or Gravity.TOP, x, y)
                 } else {
                     /* must use the width and height of popup window itself here directly,
                      * otherwise the width and height cannot be updated! */
-                    mPopupWindow.update(x, y, mPopupWindow.width, mPopupWindow.height)
+                    mPopupWindow.update(x, y, -1, -1)
                 }
             }
         }
@@ -226,12 +224,6 @@ class CompositionPopupWindow(
         if (isPopupWindowMovable == "once") {
             popupWindowPos = PopupPosition.fromString(theme.generalStyle.layout.position)
         }
-        root.measure(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-        )
-        mPopupWindow.width = root.measuredWidth
-        mPopupWindow.height = root.measuredHeight
         mPopupHandler.post(mPopupTimer)
     }
 

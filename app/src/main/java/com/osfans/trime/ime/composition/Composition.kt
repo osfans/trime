@@ -201,10 +201,6 @@ class Composition(
             theme.generalStyle.layout.lineSpacingMultiplier
                 .coerceAtLeast(1f),
         )
-        val marginX = dp(theme.generalStyle.layout.marginX)
-        val marginY = dp(theme.generalStyle.layout.marginY)
-        val marginBottom = dp(theme.generalStyle.layout.marginBottom)
-        setPadding(marginX, marginY, marginX, marginBottom)
 
         minWidth = dp(theme.generalStyle.layout.minWidth)
         minHeight = dp(theme.generalStyle.layout.minHeight)
