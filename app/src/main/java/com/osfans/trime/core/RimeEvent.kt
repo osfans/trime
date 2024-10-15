@@ -10,6 +10,18 @@ sealed class RimeEvent<T>(
 ) : RimeCallback {
     abstract val eventType: EventType
 
+    data class IpcResponseEvent(
+        override val data: Data,
+    ) : RimeEvent<IpcResponseEvent.Data>(data) {
+        override val eventType = EventType.IpcResponse
+
+        data class Data(
+            val commit: RimeProto.Commit?,
+            val context: RimeProto.Context?,
+            val status: RimeProto.Status?,
+        )
+    }
+
     data class KeyEvent(
         override val data: Data,
     ) : RimeEvent<KeyEvent.Data>(data) {
@@ -22,6 +34,7 @@ sealed class RimeEvent<T>(
     }
 
     enum class EventType {
+        IpcResponse,
         Key,
     }
 
@@ -30,6 +43,9 @@ sealed class RimeEvent<T>(
             type: EventType,
             data: T,
         ) = when (type) {
+            EventType.IpcResponse -> {
+                IpcResponseEvent(data as IpcResponseEvent.Data)
+            }
             EventType.Key ->
                 KeyEvent(data as KeyEvent.Data)
         }
