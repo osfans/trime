@@ -24,8 +24,6 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
-import com.osfans.trime.ime.enums.Keycode
-import com.osfans.trime.ime.enums.Keycode.Companion.toStdKeyEvent
 import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
@@ -256,22 +254,11 @@ class CommonKeyboardActionListener(
 
                 needSendUpRimeKey = false
 
-                // 如果没有修饰键，或者只有shift修饰键，针对非Android标准按键，可以直接commit字符
-                if ((metaState == KeyEvent.META_SHIFT_ON || metaState == 0) && keyEventCode >= Keycode.A.ordinal) {
-                    val text = Keycode.getSymbolLabel(Keycode.valueOf(keyEventCode))
-                    if (text.length == 1) {
-                        service.commitText(text)
-                        return
-                    }
-                }
                 // 小键盘自动增加锁定
                 if (keyEventCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyEventCode <= KeyEvent.KEYCODE_NUMPAD_EQUALS) {
                     service.sendDownUpKeyEvent(keyEventCode, metaState or KeyEvent.META_NUM_LOCK_ON)
                     return
                 }
-                // 大写字母和部分符号转换为Shift+Android keyevent
-                val event = toStdKeyEvent(keyEventCode, metaState)
-                service.sendDownUpKeyEvent(event[0], event[1])
             }
 
             override fun onText(text: CharSequence) {
