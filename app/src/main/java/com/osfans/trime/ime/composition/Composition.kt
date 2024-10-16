@@ -28,7 +28,6 @@ import androidx.core.text.inSpans
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.EventManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.CompositionComponent
@@ -36,7 +35,6 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.Event
 import com.osfans.trime.ime.keyboard.KeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
-import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import kotlin.math.absoluteValue
@@ -273,28 +271,29 @@ class Composition(
         m: CompositionComponent,
         composition: RimeProto.Context.Composition,
     ) {
+        if (composition.length <= 0) return
         val alignmentSpan = alignmentSpan(m.align)
-        val preeditSpans =
-            listOf(
-                alignmentSpan,
-                CompositionSpan(),
-                AbsoluteSizeSpan(sp(theme.generalStyle.textSize)),
-                m.letterSpacing
-                    .toFloat()
-                    .takeIf { it > 0 }
-                    ?.let { ScaleXSpan(it) },
-            ).mapNotNull { it }.toTypedArray()
-        val colorSpans = listOf(highlightTextColorSpan, highlightBackColorSpan).mapNotNull { it }
-        inSpans(alignmentSpan) { append(m.start) }
+        if (m.start.isNotEmpty()) {
+            inSpans(alignmentSpan) { append(m.start) }
+        }
         preeditRange[0] = length
-        inSpans(*preeditSpans) { append(composition.preedit) }
+        inSpans(
+            alignmentSpan,
+            CompositionSpan(),
+            AbsoluteSizeSpan(sp(theme.generalStyle.textSize)),
+        ) { append(composition.preedit) }
+        if (m.letterSpacing > 0) {
+            setSpan(ScaleXSpan(m.letterSpacing.toFloat()), preeditRange[0], length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        }
         preeditRange[1] = length
+
         val selStart = preeditRange[0] + composition.selStart
         val selEnd = preeditRange[0] + composition.selEnd
-        for (span in colorSpans) {
-            setSpan(span, selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        highlightTextColorSpan?.let { setSpan(it, selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE) }
+        highlightBackColorSpan?.let { setSpan(it, selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE) }
+        if (m.end.isNotEmpty()) {
+            append(m.end)
         }
-        inSpans(alignmentSpan) { append(m.end) }
     }
 
     /** 生成悬浮窗内的文本  */
@@ -366,23 +365,6 @@ class Composition(
         inSpans(alignmentSpan) { append(m.end) }
     }
 
-    private fun SpannableStringBuilder.buildSpannedButton(
-        m: CompositionComponent,
-        menu: RimeProto.Context.Menu,
-    ) {
-        when (m.whenStr) {
-            "paging" -> if (menu.pageNumber == 0) return
-            "has_menu" -> if (menu.candidates.isEmpty()) return
-        }
-        val alignmentSpan = alignmentSpan(m.align)
-        val event = EventManager.getEvent(m.click)
-        val label = m.label.ifBlank { event.getLabel(KeyboardSwitcher.currentKeyboard) }
-        val buttonSpans = listOf(alignmentSpan, EventSpan(event), keyTextSizeSpan).toTypedArray()
-        inSpans(alignmentSpan) { append(m.start) }
-        inSpans(*buttonSpans) { append(label) }
-        inSpans(alignmentSpan) { append(m.end) }
-    }
-
     private fun SpannableStringBuilder.buildSpannedMove(m: CompositionComponent) {
         val alignmentSpan = alignmentSpan(m.align)
         val moveSpans =
@@ -443,8 +425,6 @@ class Composition(
                                 component,
                                 ctx.composition,
                             )
-
-                        component.click.isNotBlank() -> buildSpannedButton(component, ctx.menu)
                         component.candidate.isNotBlank() ->
                             buildSpannedCandidates(
                                 component,
