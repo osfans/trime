@@ -87,7 +87,7 @@ class CompositionPopupWindow(
     // 悬浮窗口彈出位置
     private var popupWindowPos = PopupPosition.fromString(theme.generalStyle.layout.position)
 
-    private val mPopupWindow =
+    private val mPopupWindow by lazy {
         PopupWindow(root).apply {
             isClippingEnabled = false
             inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
@@ -113,6 +113,7 @@ class CompositionPopupWindow(
                         .toFloat(),
                 )
         }
+    }
 
     var isCursorUpdated = false // 光標是否移動
 
@@ -129,11 +130,14 @@ class CompositionPopupWindow(
                     intArrayOf(0, 0).also {
                         anchor.getLocationInWindow(it)
                     }
+                root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                val selfWidth = root.measuredWidth
+                val selfHeight = root.measuredHeight
 
                 val minX = anchor.dp(popupMarginH)
                 val minY = anchor.dp(popupMargin)
-                val maxX = anchor.width - root.width - minX
-                val maxY = anchorY - root.height - minY
+                val maxX = anchor.width - selfWidth - minX
+                val maxY = anchorY - selfHeight - minY
                 if (isWinFixed() || !isCursorUpdated) {
                     // setCandidatesViewShown(true);
                     when (popupWindowPos) {
@@ -174,7 +178,7 @@ class CompositionPopupWindow(
                         PopupPosition.LEFT, PopupPosition.RIGHT ->
                             y = mPopupRectF.bottom.toInt() + popupMargin
                         PopupPosition.LEFT_UP, PopupPosition.RIGHT_UP ->
-                            y = mPopupRectF.top.toInt() - mPopupWindow.height - popupMargin
+                            y = mPopupRectF.top.toInt() - selfHeight - popupMargin
                         else -> Timber.wtf("UNREACHABLE BRANCH")
                     }
                     y = MathUtils.clamp(y, minY, maxY)
