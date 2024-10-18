@@ -7,7 +7,9 @@ package com.osfans.trime.ime.symbol
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.PaintDrawable
-import android.widget.HorizontalScrollView
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.chad.library.adapter4.BaseQuickAdapter
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
@@ -16,14 +18,14 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
-import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityCenter
-import splitties.views.gravityCenterVertical
 import splitties.views.horizontalPadding
+import splitties.views.recyclerview.horizontalLayoutManager
 
 class LiquidTabsUi(
     override val ctx: Context,
@@ -31,8 +33,6 @@ class LiquidTabsUi(
 ) : Ui {
     inner class TabUi : Ui {
         override val ctx = this@LiquidTabsUi.ctx
-
-        var position: Int = -1
 
         val text =
             textView {
@@ -51,9 +51,6 @@ class LiquidTabsUi(
                     },
                 )
                 background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
-                setOnClickListener {
-                    onTabClick(this@TabUi)
-                }
             }
 
         fun setText(str: String) {
@@ -81,71 +78,72 @@ class LiquidTabsUi(
         }
     }
 
-    private var tabs: Array<TabUi> = arrayOf()
-    private var selected = -1
+    private var onTabClick: ((Int) -> Unit)? = null
 
-    private var onTabClick: (TabUi.(Int) -> Unit)? = null
+    private class TabUiHolder(
+        val ui: LiquidTabsUi.TabUi,
+    ) : RecyclerView.ViewHolder(ui.root)
 
-    private val horizontal = horizontalLayout()
+    private val adapter by lazy {
+        object : BaseQuickAdapter<TabTag, TabUiHolder>() {
+            private var selected = -1
+
+            override fun onCreateViewHolder(
+                context: Context,
+                parent: ViewGroup,
+                viewType: Int,
+            ) = TabUiHolder(TabUi())
+
+            override fun onBindViewHolder(
+                holder: TabUiHolder,
+                position: Int,
+                item: TabTag?,
+            ) {
+                holder.ui.apply {
+                    setText(item!!.text)
+                    setActive(position == selected)
+                    root.run {
+                        layoutParams = ViewGroup.LayoutParams(wrapContent, matchParent)
+                    }
+                }
+            }
+
+            override fun submitList(list: List<TabTag>?) {
+                selected = -1
+                super.submitList(list)
+            }
+
+            fun activateTab(position: Int) {
+                if (position == selected) return
+                notifyItemChanged(selected)
+                selected = position
+                notifyItemChanged(position)
+            }
+        }.apply {
+            setOnItemClickListener { _, _, position ->
+                onTabClick?.invoke(position)
+            }
+        }
+    }
 
     override val root =
-        HorizontalScrollView(ctx).apply {
+        recyclerView {
+            layoutManager = horizontalLayoutManager()
+            adapter = this@LiquidTabsUi.adapter
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
-            add(
-                horizontal,
-                lParams(wrapContent, matchParent) {
-                    gravity = gravityCenterVertical
-                },
-            )
-            post {
-                scrollX = tabs[selected].root.left
-            }
         }
 
     fun setTabs(tags: List<TabTag>) {
-        tabs.forEach { root.removeView(it.root) }
-        selected = -1
-        tabs =
-            Array(tags.size) {
-                val tag = tags[it]
-                TabUi().apply {
-                    position = it
-                    setText(tag.text)
-                    setActive(false)
-                }
-            }
-        tabs.forEach { tabUi ->
-            horizontal.apply {
-                add(
-                    tabUi.root,
-                    lParams(wrapContent, matchParent) {
-                        gravity = gravityCenter
-                    },
-                )
-            }
-        }
+        adapter.submitList(tags)
     }
 
     fun activateTab(index: Int) {
-        if (index == selected) return
-        if (selected >= 0) {
-            tabs[selected].setActive(false)
-        }
-        tabs[index].also { tabUi ->
-            tabUi.setActive(true)
-            if (tabUi.root.left !in root.scrollX..root.scrollX + root.width) {
-                root.run { post { smoothScrollTo(tabUi.root.left, scrollY) } }
-            }
-        }
-        selected = index
+        adapter.activateTab(index)
+        root.post { root.scrollToPosition(index) }
     }
 
-    private fun onTabClick(tabUi: TabUi) {
-        onTabClick?.invoke(tabUi, tabUi.position)
-    }
-
-    fun setOnTabClickListener(listener: (TabUi.(Int) -> Unit)? = null) {
+    fun setOnTabClickListener(listener: ((Int) -> Unit)? = null) {
         onTabClick = listener
     }
 }
