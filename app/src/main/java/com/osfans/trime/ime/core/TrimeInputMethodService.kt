@@ -860,10 +860,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             )
         } else if (hookKeyboard(keyEventCode, metaState)) {
             Timber.d("\t<TrimeInput>\thandleKey()\thookKeyboard, keycode=%d", keyEventCode)
-        } else if (performEnter(keyEventCode) || handleBack(keyEventCode)) {
-            // 处理返回键（隐藏软键盘）和回车键（换行）
-            // todo 确认是否有必要单独处理回车键？是否需要把back和escape全部占用？
-            Timber.d("\t<TrimeInput>\thandleKey()\tEnterOrHide, keycode=%d", keyEventCode)
+        } else if (handleBack(keyEventCode)) {
+            // 处理返回键（隐藏软键盘）
+            Timber.d("handleKey(): Back, keycode=$keyEventCode")
         } else if (openCategory(keyEventCode)) {
             // 打开系统默认应用
             Timber.d("\t<TrimeInput>\thandleKey()\topenCategory keycode=%d", keyEventCode)
