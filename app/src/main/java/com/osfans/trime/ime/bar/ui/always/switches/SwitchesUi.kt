@@ -29,6 +29,8 @@ class SwitchesUi(
             layoutParams = ViewGroup.LayoutParams(matchParent, matchParent)
             layoutManager = horizontalLayoutManager()
             adapter = switchesAdapter
+            isHorizontalScrollBarEnabled = false
+            isVerticalScrollBarEnabled = false
             addItemDecoration(SpacesItemDecoration(dp(theme.generalStyle.candidateSpacing).toInt()))
         }
 
