@@ -87,12 +87,12 @@ class OpenCCDataPlugin : Plugin<Project> {
             input.run {
                 resolve("config")
                     .listFiles { f -> f.extension == "json" }
-                    ?.forEach { f -> f.copyTo(output.resolve(f.name)) }
+                    ?.forEach { f -> f.copyTo(output.resolve(f.name), overwrite = true) }
 
                 val dictionary = resolve("dictionary")
                 for (raw in DICTS_RAW) {
                     val basename = "$raw.txt"
-                    dictionary.resolve(basename).copyTo(output.resolve(basename))
+                    dictionary.resolve(basename).copyTo(output.resolve(basename), overwrite = true)
                 }
 
                 val merge = resolve("scripts/merge.py").absolutePath
