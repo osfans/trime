@@ -120,10 +120,6 @@ class Rime {
     return rime->delete_candidate(session, index);
   }
 
-  std::string stateLabel(const std::string &optionName, bool state) {
-    return rime->get_state_label(session, optionName.c_str(), state);
-  }
-
   using CandidateItem = std::pair<std::string, std::string>;
   using CandidateList = std::vector<CandidateItem>;
 
@@ -480,50 +476,6 @@ Java_com_osfans_trime_core_Rime_forgetRimeCandidate(JNIEnv *env,
     return false;
   }
   return Rime::Instance().forgetCandidate(index);
-}
-
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_runRimeTask(JNIEnv *env, jclass /* thiz */,
-                                            jstring task_name) {
-  auto rime = rime_get_api();
-  const char *s = env->GetStringUTFChars(task_name, nullptr);
-  RimeConfig config = {nullptr};
-  Bool b = rime->run_task(s);
-  env->ReleaseStringUTFChars(task_name, s);
-  return b;
-}
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_getRimeSharedDataDir(JNIEnv *env,
-                                                     jclass /* thiz */) {
-  return env->NewStringUTF(rime_get_api()->get_shared_data_dir());
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_getRimeUserDataDir(JNIEnv *env,
-                                                   jclass /* thiz */) {
-  return env->NewStringUTF(rime_get_api()->get_user_data_dir());
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_getRimeSyncDir(JNIEnv *env, jclass /* thiz */) {
-  return env->NewStringUTF(rime_get_api()->get_sync_dir());
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_getRimeUserId(JNIEnv *env, jclass /* thiz */) {
-  return env->NewStringUTF(rime_get_api()->get_user_id());
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_osfans_trime_core_Rime_getRimeStateLabel(JNIEnv *env,
-                                                  jclass /* thiz */,
-                                                  jstring option_name,
-                                                  jboolean state) {
-  if (!is_rime_running()) {
-    return nullptr;
-  }
-  return env->NewStringUTF(
-      Rime::Instance().stateLabel(CString(env, option_name), state).c_str());
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
