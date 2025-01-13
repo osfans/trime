@@ -16,6 +16,7 @@ kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-androi
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.3" }
 androidx-activity = { module = "androidx.activity:activity-ktx", version = "1.9.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
+androidx-autofill = { module = "androidx.autofill:autofill", version ="1.1.0"}
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.13.1" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
