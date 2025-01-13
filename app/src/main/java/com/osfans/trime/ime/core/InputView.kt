@@ -364,6 +364,10 @@ class InputView(
         broadcaster.onSelectionUpdate(start, end)
     }
 
+    fun updateInlineSuggestion(views: List<View>) {
+        broadcaster.onInlineSuggestion(views)
+    }
+
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         // cancel the notification job and clear all broadcast receivers,

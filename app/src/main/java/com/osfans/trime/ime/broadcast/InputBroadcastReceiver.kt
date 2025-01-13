@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.broadcast
 
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
@@ -29,4 +30,6 @@ interface InputBroadcastReceiver {
     fun onWindowDetached(window: BoardWindow) {}
 
     fun onEnterKeyLabelUpdate(label: String) {}
+
+    fun onInlineSuggestion(views: List<View>) {}
 }

@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.broadcast
 
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
@@ -67,5 +68,9 @@ class InputBroadcaster : InputBroadcastReceiver {
 
     override fun onEnterKeyLabelUpdate(label: String) {
         receivers.forEach { it.onEnterKeyLabelUpdate(label) }
+    }
+
+    override fun onInlineSuggestion(views: List<View>) {
+        receivers.forEach { it.onInlineSuggestion(views) }
     }
 }
