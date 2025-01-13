@@ -397,24 +397,6 @@ class Rime :
         @JvmStatic
         external fun forgetRimeCandidate(index: Int): Boolean
 
-        // module
-        @JvmStatic
-        external fun runRimeTask(taskName: String?): Boolean
-
-        @JvmStatic
-        external fun getRimeSharedDataDir(): String?
-
-        @JvmStatic
-        external fun getRimeUserDataDir(): String?
-
-        @JvmStatic
-        external fun getRimeSyncDir(): String?
-
-        @JvmStatic
-        external fun getRimeUserId(): String?
-
-        // key_table
-
         @JvmStatic
         external fun getAvailableRimeSchemaList(): Array<SchemaItem>
 
@@ -423,12 +405,6 @@ class Rime :
 
         @JvmStatic
         external fun selectRimeSchemas(schemaIds: Array<String>): Boolean
-
-        @JvmStatic
-        external fun getRimeStateLabel(
-            optionName: String,
-            state: Boolean,
-        ): String?
 
         @JvmStatic
         external fun getRimeCandidates(
