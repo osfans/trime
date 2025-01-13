@@ -33,8 +33,6 @@ class Rime {
     return instance;
   }
 
-  bool isRunning() { return session != 0; }
-
   void startup(bool fullCheck,
                const RimeNotificationHandler &notificationHandler) {
     if (!rime) return;
@@ -153,7 +151,7 @@ class Rime {
 
   bool sync() { return rime->sync_user_data(); }
 
-  RimeSessionId sessionId() const { return session; }
+  [[nodiscard]] RimeSessionId sessionId() const { return session; }
 
  private:
   RimeApi *rime;
@@ -161,9 +159,6 @@ class Rime {
 
   bool firstRun = true;
 };
-
-// check rime status
-static inline bool is_rime_running() { return Rime::Instance().isRunning(); }
 
 GlobalRefSingleton *GlobalRef;
 
@@ -176,10 +171,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
     JNIEnv *env, jclass clazz, jstring shared_dir, jstring user_dir,
     jboolean full_check) {
-  if (is_rime_running()) {
-    return;
-  }
-
   // for rime shared data dir
   setenv("RIME_SHARED_DATA_DIR", CString(env, shared_dir), 1);
   // for rime user data dir
@@ -209,9 +200,6 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_exitRime(JNIEnv *env, jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return;
-  }
   Rime::Instance().exit();
 }
 
@@ -242,36 +230,24 @@ Java_com_osfans_trime_core_Rime_syncRimeUserData(JNIEnv *env,
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_processRimeKey(JNIEnv *env, jclass /* thiz */,
                                                jint keycode, jint mask) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().processKey(keycode, mask);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_commitRimeComposition(JNIEnv *env,
                                                       jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().commitComposition();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_clearRimeComposition(JNIEnv *env,
                                                      jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return;
-  }
   Rime::Instance().clearComposition();
 }
 
 // output
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return nullptr;
-  }
   RIME_STRUCT(RimeCommit, commit)
   auto rime = rime_get_api();
   jobject obj = nullptr;
@@ -284,9 +260,6 @@ Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return nullptr;
-  }
   RIME_STRUCT(RimeContext, context)
   auto rime = rime_get_api();
   auto session = Rime::Instance().sessionId();
@@ -302,9 +275,6 @@ Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return nullptr;
-  }
   RIME_STRUCT(RimeStatus, status)
   auto rime = rime_get_api();
   jobject obj = nullptr;
@@ -341,9 +311,6 @@ static bool is_save_option(const char *p) {
 // runtime options
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_setRimeOption(
     JNIEnv *env, jclass /* thiz */, jstring option, jboolean value) {
-  if (!is_rime_running()) {
-    return;
-  }
   auto rime = rime_get_api();
   RimeConfig user = {nullptr};
   auto opt = CString(env, option);
@@ -361,9 +328,6 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_setRimeOption(
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_getRimeOption(JNIEnv *env, jclass /* thiz */,
                                               jstring option) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().getOption(CString(env, option));
 }
 
@@ -381,9 +345,6 @@ Java_com_osfans_trime_core_Rime_getRimeSchemaList(JNIEnv *env,
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv *env,
                                                      jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return env->NewStringUTF("");
-  }
   return env->NewStringUTF(Rime::Instance().currentSchemaId().c_str());
 }
 
@@ -407,54 +368,36 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_simulateRimeKeySequence(JNIEnv *env,
                                                         jclass /* thiz */,
                                                         jstring key_sequence) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().simulateKeySequence(CString(env, key_sequence));
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_osfans_trime_core_Rime_getRimeRawInput(JNIEnv *env,
                                                 jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return env->NewStringUTF("");
-  }
   return env->NewStringUTF(Rime::Instance().rawInput().data());
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCaretPos(JNIEnv *env,
                                                 jclass /* thiz */) {
-  if (!is_rime_running()) {
-    return -1;
-  }
   return static_cast<jint>(Rime::Instance().caretPosition());
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_setRimeCaretPos(JNIEnv *env, jclass /* thiz */,
                                                 jint caret_pos) {
-  if (!is_rime_running()) {
-    return;
-  }
   Rime::Instance().setCaretPosition(caret_pos);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeCandidateOnCurrentPage(
     JNIEnv *env, jclass /* thiz */, jint index) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().selectCandidateOnCurrentPage(index);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_deleteRimeCandidateOnCurrentPage(
     JNIEnv *env, jclass /* thiz */, jint index) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().deleteCandidateOnCurrentPage(index);
 }
 
@@ -462,9 +405,6 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeCandidate(JNIEnv *env,
                                                     jclass /* thiz */,
                                                     jint index) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().selectCandidate(index);
 }
 
@@ -472,9 +412,6 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_forgetRimeCandidate(JNIEnv *env,
                                                     jclass /* thiz */,
                                                     jint index) {
-  if (!is_rime_running()) {
-    return false;
-  }
   return Rime::Instance().forgetCandidate(index);
 }
 
@@ -482,9 +419,6 @@ extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCandidates(JNIEnv *env, jclass clazz,
                                                   jint start_index,
                                                   jint limit) {
-  if (!is_rime_running()) {
-    return nullptr;
-  }
   auto candidates = Rime::Instance().getCandidates(start_index, limit);
   int size = static_cast<int>(candidates.size());
   jobjectArray array =
