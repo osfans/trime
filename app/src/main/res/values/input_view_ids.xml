@@ -11,4 +11,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <item name="unrolled_candidate_view" type="id" />
     <item name="input_window" type="id" />
     <item name="keyboard_view" type="id" />
+    <item name="suggestion_view" type="id" />
 </resources>
