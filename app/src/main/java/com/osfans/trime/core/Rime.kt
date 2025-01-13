@@ -172,7 +172,7 @@ class Rime :
         limit: Int,
     ): Array<CandidateItem> =
         withRimeContext {
-            getRimeCandidates(startIndex, limit) ?: emptyArray()
+            getRimeCandidates(startIndex, limit)
         }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
@@ -410,7 +410,7 @@ class Rime :
         external fun getRimeCandidates(
             startIndex: Int,
             limit: Int,
-        ): Array<CandidateItem>?
+        ): Array<CandidateItem>
 
         @JvmStatic
         fun handleRimeMessage(
