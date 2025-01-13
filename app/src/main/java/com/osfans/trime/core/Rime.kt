@@ -414,14 +414,6 @@ class Rime :
         external fun getRimeUserId(): String?
 
         // key_table
-        @JvmStatic
-        external fun getRimeModifierByName(name: String): Int
-
-        @JvmStatic
-        external fun getRimeKeycodeByName(name: String): Int
-
-        @JvmStatic
-        external fun getRimeKeyUnicode(keycode: Int): Int
 
         @JvmStatic
         external fun getAvailableRimeSchemaList(): Array<SchemaItem>
@@ -470,10 +462,9 @@ class Rime :
             value: Int,
             modifiers: Int,
         ) {
-            val unicode = getRimeKeyUnicode(value)
             handleRimeMessage(
                 5, // RimeMessage.MessageType.Key,
-                arrayOf(value, modifiers, unicode),
+                arrayOf(value, modifiers),
             )
         }
 

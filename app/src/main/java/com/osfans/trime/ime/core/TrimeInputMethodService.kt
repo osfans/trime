@@ -270,8 +270,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                             }
                         }
                     } else {
-                        if (!it.modifiers.release && it.unicode > 0) {
-                            commitText(Char(it.unicode).toString())
+                        if (!it.modifiers.release && it.value.value > 0) {
+                            try {
+                                commitText(Char(it.value.value).toString())
+                            } catch (_: Exception) {
+                            }
                         } else {
                             Timber.w("Unhandled Rime KeyEvent: $it")
                         }
