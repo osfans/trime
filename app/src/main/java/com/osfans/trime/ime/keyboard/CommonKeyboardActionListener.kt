@@ -15,6 +15,7 @@ import com.osfans.trime.core.KeyModifier
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
+import com.osfans.trime.core.RimeKeyEvent
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
@@ -288,7 +289,7 @@ class CommonKeyboardActionListener(
                     RimeKeyMapping
                         .keyCodeToVal(keyEventCode)
                         .takeIf { it != RimeKeyMapping.RimeKey_VoidSymbol }
-                        ?: Rime.getRimeKeycodeByName(Keycode.keyNameOf(keyEventCode))
+                        ?: RimeKeyEvent.getKeycodeByName(Keycode.keyNameOf(keyEventCode))
                 val modifiers = KeyModifiers.fromMetaState(metaState).modifiers
                 service.postRimeJob {
                     if (service.hookKeyboard(keyEventCode, metaState)) {
