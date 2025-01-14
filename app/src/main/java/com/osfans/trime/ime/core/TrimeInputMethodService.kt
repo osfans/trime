@@ -13,6 +13,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.inputmethodservice.InputMethodService
 import android.os.Build
+import android.os.Bundle
 import android.os.SystemClock
 import android.text.InputType
 import android.view.InputDevice
@@ -25,6 +26,8 @@ import android.view.WindowManager
 import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.ExtractedTextRequest
+import android.view.inputmethod.InlineSuggestionsRequest
+import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
@@ -48,6 +51,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
+import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
 import com.osfans.trime.ime.composition.ComposingPopupWindow
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
@@ -86,6 +90,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var initializationUi: InitializationUi? = null
     private var mIntentReceiver: IntentReceiver? = null
     private val locales = Array(2) { Locale.getDefault() }
+
+    private lateinit var inlineSuggestionHandler: InlineSuggestionHandler
 
     var lastCommittedText: CharSequence = ""
         private set
@@ -204,6 +210,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         2 -> Locale(latinLocale[0], latinLocale[1])
                         else -> Locale.US
                     }
+                inlineSuggestionHandler = InlineSuggestionHandler(this@TrimeInputMethodService)
                 Timber.d("Trime.onCreate  completed")
             }
         } catch (e: Exception) {
@@ -436,6 +443,19 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 clearComposition()
             }
         }
+    }
+
+    @SuppressLint("NewApi", "RestrictedApi")
+    override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? = inlineSuggestionHandler.createRequest()
+
+    @SuppressLint("NewApi")
+    override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
+        lifecycleScope.launch {
+            val views = inlineSuggestionHandler.inflateSuggestion(response)
+
+            inputView?.updateInlineSuggestion(views)
+        }
+        return true
     }
 
     override fun onStartInputView(
