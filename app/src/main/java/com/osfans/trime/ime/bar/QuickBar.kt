@@ -21,9 +21,10 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
+import com.osfans.trime.ime.bar.ui.SuggestionUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
+import com.osfans.trime.ime.candidates.CandidateModule
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
@@ -44,9 +45,9 @@ class QuickBar(
     private val rime: RimeSession,
     private val theme: Theme,
     private val windowManager: BoardWindowManager,
-    lazyCompactCandidate: Lazy<CompactCandidateModule>,
+    lazyCandidate: Lazy<CandidateModule>,
 ) : InputBroadcastReceiver {
-    private val compactCandidate by lazyCompactCandidate
+    private val candidate by lazyCandidate
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -93,7 +94,7 @@ class QuickBar(
     }
 
     private val candidateUi by lazy {
-        CandidateUi(context, compactCandidate.view)
+        CandidateUi(context, candidate.compactCandidateModule.view)
     }
 
     private val tabUi by lazy {
@@ -125,7 +126,7 @@ class QuickBar(
     private fun setUnrollButtonToAttach() {
         candidateUi.unrollButton.setOnClickListener {
             windowManager.attachWindow(
-                FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, compactCandidate),
+                FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate.compactCandidateModule),
             )
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_more_24)

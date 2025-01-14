@@ -10,7 +10,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.EnterKeyLabelModule
 import com.osfans.trime.ime.broadcast.InputBroadcaster
-import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
+import com.osfans.trime.ime.candidates.CandidateModule
 import com.osfans.trime.ime.composition.PreeditModule
 import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -40,5 +40,5 @@ abstract class InputComponent(
     abstract val preview: KeyPreviewChoreographer
     abstract val keyboardWindow: KeyboardWindow
     abstract val liquidKeyboard: LiquidKeyboard
-    abstract val compactCandidate: CompactCandidateModule
+    abstract val candidate: CandidateModule
 }
