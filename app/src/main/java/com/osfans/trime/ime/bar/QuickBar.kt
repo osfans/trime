@@ -97,6 +97,17 @@ class QuickBar(
         CandidateUi(context, candidate.compactCandidateModule.view)
     }
 
+    private val suggestionUi by lazy {
+        SuggestionUi(context, candidate.suggestionCandidateModule.view).apply {
+            homeButton.setOnClickListener {
+                barStateMachine.push(
+                    QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
+                    QuickBarStateMachine.BooleanKey.SuggestionEmpty to true,
+                )
+            }
+        }
+    }
+
     private val tabUi by lazy {
         TabUi(context)
     }
@@ -183,6 +194,7 @@ class QuickBar(
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
+            add(suggestionUi.root, lParams(matchParent, matchParent))
 
             evalAlwaysUiState()
         }
@@ -225,5 +237,12 @@ class QuickBar(
 
     override fun onWindowDetached(window: BoardWindow) {
         barStateMachine.push(QuickBarStateMachine.TransitionEvent.WindowDetached)
+    }
+
+    override fun onInlineSuggestion(views: List<View>) {
+        barStateMachine.push(
+            QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
+            QuickBarStateMachine.BooleanKey.SuggestionEmpty to views.isEmpty(),
+        )
     }
 }
