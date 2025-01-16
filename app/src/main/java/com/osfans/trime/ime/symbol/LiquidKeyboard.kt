@@ -30,9 +30,7 @@ import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import splitties.views.recyclerview.verticalLayoutManager
@@ -149,21 +147,28 @@ class LiquidKeyboard(
 
     fun select(i: Int) {
         val tag = TabManager.tabTags[i]
-        if (TabManager.currentTabIndex == i) {
-            if (tag.type == SymbolBoardType.CLIPBOARD) {
-                service.lifecycleScope.launch {
-                    dbAdapter.submitList(ClipboardHelper.getAll())
-                }
+
+        fun loadDbData() =
+            when (tag.type) {
+                SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
+                SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
+                SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
+                else -> null
             }
+
+        if (TabManager.currentTabIndex == i) {
+            loadDbData() ?: return
             return
         }
+
         currentBoardType = tag.type
         liquidLayout.tabsUi.activateTab(i)
         val data = TabManager.selectTabByIndex(i)
         when (tag.type) {
-            SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
-            SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
-            SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
+            SymbolBoardType.CLIPBOARD,
+            SymbolBoardType.COLLECTION,
+            SymbolBoardType.DRAFT,
+            -> loadDbData()
             SymbolBoardType.SYMBOL,
             SymbolBoardType.VAR_LENGTH,
             SymbolBoardType.TABS,
@@ -211,7 +216,9 @@ class LiquidKeyboard(
         }
 
         service.lifecycleScope.launch {
-            dbAdapter.submitList(data())
+            dbAdapter.submitList(data()) {
+                keyboardView.post { keyboardView.scrollToPosition(0) }
+            }
         }
     }
 
@@ -246,14 +253,8 @@ class LiquidKeyboard(
      * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
      */
     override fun onUpdate(bean: DatabaseBean) {
-        service.lifecycleScope.launch {
-            if (currentBoardType == SymbolBoardType.CLIPBOARD) {
-                dbAdapter.submitList(ClipboardHelper.getAll())
-                withContext(Dispatchers.Main) {
-                    keyboardView.scrollToPosition(0)
-                }
-            }
-        }
+        if (currentBoardType != SymbolBoardType.CLIPBOARD) return
+        initDbData { ClipboardHelper.getAll() }
     }
 
     private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean =
