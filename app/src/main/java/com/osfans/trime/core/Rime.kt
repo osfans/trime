@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import kotlin.system.measureTimeMillis
 
 /**
  * Rime JNI and instance methods
@@ -39,6 +38,15 @@ class Rime :
         private set
 
     override var inputStatusCached = InputStatus()
+        private set
+
+    override var compositionCached = RimeProto.Context.Composition()
+        private set
+
+    override var menuCached = RimeProto.Context.Menu()
+        private set
+
+    override var rawInputCached = ""
         private set
 
     private val dispatcher =
@@ -206,6 +214,9 @@ class Rime :
                         }
                     }
                     inputContext = data.context // for compatibility
+                    compositionCached = data.context.composition
+                    menuCached = data.context.menu
+                    rawInputCached = data.context.input
                 }
             else -> {}
         }
@@ -271,10 +282,6 @@ class Rime :
 
         @JvmStatic
         fun showAsciiPunch(): Boolean = inputStatus?.isAsciiPunch == true || inputStatus?.isAsciiMode == true
-
-        @JvmStatic
-        val composingText: String
-            get() = inputContext?.composition?.commitTextPreview ?: ""
 
         @JvmStatic
         fun simulateKeySequence(sequence: CharSequence): Boolean {

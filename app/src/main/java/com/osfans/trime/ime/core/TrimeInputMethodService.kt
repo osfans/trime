@@ -31,6 +31,7 @@ import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
+import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -38,7 +39,6 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.KeyValue
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeMessage
@@ -734,22 +734,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return true
     }
 
-    fun getActiveText(type: Int): String {
-        if (type == 2) return Rime.getRimeRawInput() ?: "" // 當前編碼
-        var s = Rime.composingText // 當前候選
-        if (s.isEmpty()) {
-            val ic = currentInputConnection
-            var cs = ic?.getSelectedText(0) // 選中字
-            if (type == 1 && cs.isNullOrEmpty()) cs = lastCommittedText // 剛上屏字
-            if (cs.isNullOrEmpty() && ic != null) {
-                cs = ic.getTextBeforeCursor(if (type == 4) 1024 else 1, 0) // 光標前字
-            }
-            if (cs.isNullOrEmpty() && ic != null) cs = ic.getTextAfterCursor(1024, 0) // 光標後面所有字
-            if (cs != null) s = cs.toString()
-        }
-        return s
-    }
-
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
         val modifiers = KeyModifiers.fromKeyEvent(event)
         val charCode = event.unicodeChar
@@ -971,6 +955,46 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
         if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
             ic.setComposingText(text, 1)
+        }
+    }
+
+    fun getActiveText(type: Int): String {
+        if (type == 2) return rime.run { rawInputCached } // 當前編碼
+        var text: CharSequence? = rime.run { compositionCached }.commitTextPreview // 當前候選
+        if (text.isNullOrEmpty()) {
+            val info = currentInputEditorInfo
+            text = EditorInfoCompat.getInitialSelectedText(info, 0) // 選中字
+        }
+        if (text.isNullOrEmpty()) {
+            if (type == 1) text = lastCommittedText // 剛上屏字
+        }
+        if (text.isNullOrEmpty()) {
+            val step = if (type == 4) 1024 else 1
+            text = getTextAroundCursor(step, before = true)
+        }
+        if (text.isNullOrEmpty()) {
+            text = getTextAroundCursor(before = false)
+        }
+        return text.toString()
+    }
+
+    private fun getTextAroundCursor(
+        initialStep: Int = 1024,
+        before: Boolean,
+    ): String? {
+        val info = currentInputEditorInfo ?: return null
+        var step = initialStep
+        while (true) {
+            val text =
+                if (before) {
+                    EditorInfoCompat.getInitialTextBeforeCursor(info, step, 0)
+                } else {
+                    EditorInfoCompat.getInitialTextAfterCursor(info, step, 0)
+                } ?: return null
+            if (text.length < step) {
+                return text.toString()
+            }
+            step *= 2
         }
     }
 
