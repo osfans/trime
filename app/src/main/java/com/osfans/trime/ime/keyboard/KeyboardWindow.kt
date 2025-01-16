@@ -112,8 +112,9 @@ class KeyboardWindow(
                 }
                 if (it.isLock) lastLockKeyboardId = target
                 dispatchCapsState(it::setShifted)
-                if (Rime.isAsciiMode != it.currentAsciiMode) {
-                    Rime.setOption("ascii_mode", it.currentAsciiMode)
+                val isAsciiMode = rime.run { inputStatusCached }.isAsciiMode
+                if (isAsciiMode != it.currentAsciiMode) {
+                    service.postRimeJob { setRuntimeOption("ascii_mode", it.currentAsciiMode) }
                 }
                 // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
                 KeyboardSwitcher.currentKeyboard = it
@@ -236,13 +237,20 @@ class KeyboardWindow(
             }
         switchKeyboard(targetKeyboard)
         currentKeyboard?.let {
+            val isAsciiMode = rime.run { inputStatusCached }.isAsciiMode
             if (tempAsciiMode) {
-                if (!Rime.isAsciiMode) Rime.setOption("ascii_mode", true)
+                if (!isAsciiMode) {
+                    service.postRimeJob { setRuntimeOption("ascii_mode", true) }
+                }
             } else if (theme.generalStyle.resetASCIIMode) {
                 if (it.resetAsciiMode) {
-                    if (Rime.isAsciiMode != it.asciiMode) Rime.setOption("ascii_mode", it.asciiMode)
+                    if (isAsciiMode != it.asciiMode) {
+                        service.postRimeJob { setRuntimeOption("ascii_mode", it.asciiMode) }
+                    }
                 } else {
-                    if (Rime.isAsciiMode) Rime.setOption("ascii_mode", false)
+                    if (isAsciiMode) {
+                        service.postRimeJob { setRuntimeOption("ascii_mode", false) }
+                    }
                 }
             }
         }
