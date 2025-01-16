@@ -60,6 +60,8 @@ class CommonKeyboardActionListener(
 
         /** Pattern for braced key event to capture `{Escape}` as group 2 */
         private val BRACED_KEY_EVENT_WITH_ESCAPE = """^((\{Escape\})?[^{}]+).*$""".toRegex()
+
+        private val PLACEHOLDER_PATTERN = Regex(".*(%([1-4]\\$)?s).*")
     }
 
     private val prefs = AppPrefs.defaultInstance()
@@ -115,6 +117,18 @@ class CommonKeyboardActionListener(
         }
     }
 
+    private fun expandActiveText(input: String): String =
+        if (input.matches(PLACEHOLDER_PATTERN)) {
+            input.format(
+                service.getActiveText(1),
+                service.getActiveText(2),
+                service.getActiveText(3),
+                service.getActiveText(4),
+            )
+        } else {
+            input
+        }
+
     val listener by lazy {
         object : KeyboardActionListener {
             override fun onPress(keyEventCode: Int) {
@@ -160,30 +174,7 @@ class CommonKeyboardActionListener(
                         }
                     }
                     KeyEvent.KEYCODE_FUNCTION -> { // Command Express
-                        // Comments from trime.yaml:
-                        // %s或者%1$s爲當前字符
-                        // %2$s爲當前輸入的編碼
-                        // %3$s爲光標前字符
-                        // %4$s爲光標前所有字符
-                        var arg = action.option
-                        val activeTextRegex = Regex(".*%(\\d*)\\$" + "s.*")
-                        if (arg.matches(activeTextRegex)) {
-                            var activeTextMode =
-                                arg.replaceFirst(activeTextRegex, "$1").toDouble().toInt()
-                            if (activeTextMode < 1) {
-                                activeTextMode = 1
-                            }
-                            val activeText = service.getActiveText(activeTextMode)
-                            arg =
-                                String.format(
-                                    arg,
-                                    service.lastCommittedText,
-                                    Rime.getRimeRawInput() ?: "",
-                                    activeText,
-                                    activeText,
-                                )
-                        }
-
+                        val arg = expandActiveText(action.option)
                         when (action.command) {
                             "liquid_keyboard" -> {
                                 val target =

@@ -17,6 +17,12 @@ interface RimeApi {
 
     val inputStatusCached: InputStatus
 
+    val compositionCached: RimeProto.Context.Composition
+
+    val menuCached: RimeProto.Context.Menu
+
+    val rawInputCached: String
+
     suspend fun isEmpty(): Boolean
 
     suspend fun processKey(
