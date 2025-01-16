@@ -55,6 +55,7 @@ import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
 import com.osfans.trime.ime.composition.ComposingPopupWindow
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
+import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.forceShowSelf
 import com.osfans.trime.util.isNightMode
@@ -236,6 +237,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         commitText(commit.text)
                     }
                     updateComposingText(ctx)
+                    KeyboardSwitcher.currentKeyboardView.invalidateAllKeys()
                 }
             is RimeMessage.KeyMessage ->
                 it.data.let event@{
