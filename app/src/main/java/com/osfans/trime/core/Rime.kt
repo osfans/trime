@@ -289,23 +289,7 @@ class Rime :
         }
 
         @JvmStatic
-        fun setOption(
-            option: String,
-            value: Boolean,
-        ) {
-            measureTimeMillis {
-                setRimeOption(option, value)
-            }.also { Timber.d("Took $it ms to set $option to $value") }
-        }
-
-        @JvmStatic
         fun getOption(option: String): Boolean = getRimeOption(option)
-
-        @JvmStatic
-        fun setCaretPos(caretPos: Int) {
-            setRimeCaretPos(caretPos)
-            requireResponse()
-        }
 
         // init
         @JvmStatic
