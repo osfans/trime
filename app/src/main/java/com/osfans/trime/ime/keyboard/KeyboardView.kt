@@ -1024,7 +1024,6 @@ class KeyboardView(
                     if (mOldPointerCount > 1 || mComboMode) KeyBehavior.COMBO else KeyBehavior.CLICK,
                 )
             }
-            invalidateAllKeys()
             mRepeatKeyIndex = NOT_A_KEY
             return false
         }

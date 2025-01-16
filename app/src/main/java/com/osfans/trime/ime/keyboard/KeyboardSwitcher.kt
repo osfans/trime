@@ -8,4 +8,5 @@ package com.osfans.trime.ime.keyboard
 @Deprecated("Migrate into KeyboardWindow")
 object KeyboardSwitcher {
     lateinit var currentKeyboard: Keyboard
+    lateinit var currentKeyboardView: KeyboardView
 }
