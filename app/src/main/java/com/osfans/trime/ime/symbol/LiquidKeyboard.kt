@@ -236,7 +236,7 @@ class LiquidKeyboard(
     private fun triggerSymbolInput(symbol: String) {
         commonKeyboardActionListener.listener.onPress(KeyEvent.KEYCODE_UNKNOWN)
         rime.launchOnReady {
-            val (isAsciiMode, isAsciiPunch) = it.inputStatusCached.run { isAsciiMode to isAsciiPunch }
+            val (isAsciiMode, isAsciiPunch) = it.statusCached.run { isAsciiMode to isAsciiPunch }
             if (isAsciiMode) it.setRuntimeOption("ascii_mode", false)
             if (isAsciiPunch) it.setRuntimeOption("ascii_punch", false)
             commonKeyboardActionListener.listener.onText("{Escape}$symbol")

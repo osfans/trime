@@ -87,14 +87,14 @@ class RimeProto {
     }
 
     data class Status(
-        val schemaId: String,
-        val schemaName: String,
-        val isDisabled: Boolean,
-        val isComposing: Boolean,
-        val isAsciiMode: Boolean,
-        val isFullShape: Boolean,
-        val isSimplified: Boolean,
-        val isTraditional: Boolean,
-        val isAsciiPunch: Boolean,
+        val schemaId: String = "",
+        val schemaName: String = "",
+        val isDisabled: Boolean = true,
+        val isComposing: Boolean = false,
+        val isAsciiMode: Boolean = true,
+        val isFullShape: Boolean = false,
+        val isSimplified: Boolean = false,
+        val isTraditional: Boolean = false,
+        val isAsciiPunch: Boolean = true,
     )
 }
