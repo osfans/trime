@@ -39,6 +39,18 @@ class PagedCandidatesUi(
         ) : UiHolder(ui)
     }
 
+    enum class ClickType {
+        CANDIDATE,
+        PREV_PAGE,
+        NEXT_PAGE,
+    }
+
+    private var clickListener: ((type: ClickType, position: Int) -> Unit)? = null
+
+    fun setOnClickListener(listener: (type: ClickType, position: Int) -> Unit) {
+        clickListener = listener
+    }
+
     val candidatesAdapter =
         object : BaseQuickAdapter<RimeProto.Candidate, UiHolder>() {
             override fun getItemCount(items: List<RimeProto.Candidate>) =
@@ -75,12 +87,21 @@ class PagedCandidatesUi(
                     is UiHolder.Candidate -> {
                         val candidate = item ?: return
                         holder.ui.update(candidate, position == menu.highlightedCandidateIndex)
+                        holder.ui.root.setOnClickListener {
+                            clickListener?.invoke(ClickType.CANDIDATE, position)
+                        }
                     }
                     is UiHolder.Pagination -> {
                         holder.ui.update(menu)
                         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
                             width = if (isHorizontal) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
                             alignSelf = if (isHorizontal) AlignItems.CENTER else AlignItems.STRETCH
+                        }
+                        holder.ui.prevIcon.setOnClickListener {
+                            clickListener?.invoke(ClickType.PREV_PAGE, menu.pageNumber)
+                        }
+                        holder.ui.nextIcon.setOnClickListener {
+                            clickListener?.invoke(ClickType.NEXT_PAGE, menu.pageNumber)
                         }
                     }
                 }

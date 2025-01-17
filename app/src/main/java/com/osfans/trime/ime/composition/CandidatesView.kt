@@ -6,8 +6,10 @@
 package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
+import android.view.KeyEvent
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
@@ -49,8 +51,20 @@ class CandidatesView(
 
     private val candidatesUi =
         PagedCandidatesUi(ctx, theme).apply {
-            candidatesAdapter.setOnItemClickListener { _, _, position ->
-                rime.launchOnReady { it.selectPagedCandidate(position) }
+            setOnClickListener { type, position ->
+                when (type) {
+                    PagedCandidatesUi.ClickType.CANDIDATE -> {
+                        rime.launchOnReady { it.selectPagedCandidate(position) }
+                    }
+                    PagedCandidatesUi.ClickType.PREV_PAGE -> {
+                        val value = RimeKeyMapping.keyCodeToVal(KeyEvent.KEYCODE_PAGE_UP)
+                        rime.launchOnReady { it.processKey(value, 0u) }
+                    }
+                    PagedCandidatesUi.ClickType.NEXT_PAGE -> {
+                        val value = RimeKeyMapping.keyCodeToVal(KeyEvent.KEYCODE_PAGE_DOWN)
+                        rime.launchOnReady { it.processKey(value, 0u) }
+                    }
+                }
             }
         }
 

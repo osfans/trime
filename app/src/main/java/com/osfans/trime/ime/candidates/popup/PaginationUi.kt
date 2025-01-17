@@ -38,8 +38,8 @@ class PaginationUi(
         scaleType = ImageView.ScaleType.CENTER_CROP
     }
 
-    private val prevIcon = createIcon(R.drawable.ic_baseline_arrow_left_24)
-    private val nextIcon = createIcon(R.drawable.ic_baseline_arrow_right_24)
+    val prevIcon = createIcon(R.drawable.ic_baseline_arrow_left_24)
+    val nextIcon = createIcon(R.drawable.ic_baseline_arrow_right_24)
 
     private val disabledAlpha = ctx.styledFloat(android.R.attr.disabledAlpha)
 
