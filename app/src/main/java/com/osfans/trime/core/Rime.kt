@@ -34,10 +34,7 @@ class Rime :
     override val isReady: Boolean
         get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
 
-    override var schemaItemCached = SchemaItem(".default")
-        private set
-
-    override var inputStatusCached = InputStatus()
+    override var statusCached = RimeProto.Status()
         private set
 
     override var compositionCached = RimeProto.Context.Composition()
@@ -148,12 +145,6 @@ class Rime :
 
     override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
 
-    override suspend fun currentSchema() =
-        withRimeContext {
-            val schema = getRimeStatus()?.let { SchemaItem(it.schemaId, it.schemaName) }
-            schema ?: schemaItemCached
-        }
-
     override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) requireResponse() } }
 
     override suspend fun clearComposition() =
@@ -186,12 +177,12 @@ class Rime :
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.SchemaMessage -> {
-                schemaItemCached = it.data
+                statusCached = getRimeStatus()!!
                 SchemaManager.init(it.data.id)
             }
             is RimeMessage.OptionMessage -> {
                 getRimeStatus()?.let {
-                    inputStatusCached = InputStatus.fromStatus(it)
+                    statusCached = it
                     inputStatus = it // for compatibility
                 }
                 SchemaManager.updateSwitchOptions()
@@ -204,14 +195,8 @@ class Rime :
             is RimeMessage.ResponseMessage ->
                 it.data.let event@{ data ->
                     data.status.let {
-                        val status = InputStatus.fromStatus(it)
-                        inputStatusCached = status
+                        statusCached = it
                         inputStatus = it // for compatibility
-
-                        val item = SchemaItem.fromStatus(it)
-                        if (item != schemaItemCached) {
-                            schemaItemCached = item
-                        }
                     }
                     inputContext = data.context // for compatibility
                     compositionCached = data.context.composition

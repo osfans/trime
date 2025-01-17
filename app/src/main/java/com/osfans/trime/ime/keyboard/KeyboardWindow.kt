@@ -90,7 +90,7 @@ class KeyboardWindow(
 
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
-        attachKeyboard(evalKeyboard(rime.run { schemaItemCached.id }))
+        attachKeyboard(evalKeyboard(rime.run { statusCached }.schemaId))
         return keyboardView
     }
 
@@ -112,7 +112,7 @@ class KeyboardWindow(
                 }
                 if (it.isLock) lastLockKeyboardId = target
                 dispatchCapsState(it::setShifted)
-                val isAsciiMode = rime.run { inputStatusCached }.isAsciiMode
+                val isAsciiMode = rime.run { statusCached }.isAsciiMode
                 if (isAsciiMode != it.currentAsciiMode) {
                     service.postRimeJob { setRuntimeOption("ascii_mode", it.currentAsciiMode) }
                 }
@@ -131,9 +131,9 @@ class KeyboardWindow(
 
     private fun smartMatchKeyboard(): String {
         // 主题的布局中包含方案id，直接采用
-        val currentSchema = rime.run { schemaItemCached }
-        if (presetKeyboardIds.contains(currentSchema.id)) {
-            return currentSchema.id
+        val currentSchema = rime.run { statusCached }.schemaId
+        if (presetKeyboardIds.contains(currentSchema)) {
+            return currentSchema
         }
         val alphabet = SchemaManager.activeSchema.alphabet ?: return "default"
         val layout =
@@ -236,7 +236,7 @@ class KeyboardWindow(
             }
         switchKeyboard(targetKeyboard)
         currentKeyboard?.let {
-            val isAsciiMode = rime.run { inputStatusCached }.isAsciiMode
+            val isAsciiMode = rime.run { statusCached }.isAsciiMode
             if (tempAsciiMode) {
                 if (!isAsciiMode) {
                     service.postRimeJob { setRuntimeOption("ascii_mode", true) }

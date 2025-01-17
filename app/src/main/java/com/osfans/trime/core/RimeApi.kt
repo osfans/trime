@@ -13,9 +13,7 @@ interface RimeApi {
 
     val isReady: Boolean
 
-    val schemaItemCached: SchemaItem
-
-    val inputStatusCached: InputStatus
+    val statusCached: RimeProto.Status
 
     val compositionCached: RimeProto.Context.Composition
 
@@ -56,8 +54,6 @@ interface RimeApi {
     suspend fun selectedSchemaId(): String
 
     suspend fun selectSchema(schemaId: String): Boolean
-
-    suspend fun currentSchema(): SchemaItem
 
     suspend fun commitComposition(): Boolean
 
