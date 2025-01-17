@@ -22,8 +22,7 @@ class InputDeviceManager {
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
     private fun setupInputViewCallback(isVirtual: Boolean) {
-        val shouldSetupInputView = isVirtual && candidatesMode != PopupCandidatesMode.FORCE_SHOW
-        inputView?.handleMessage = shouldSetupInputView
+        inputView?.handleMessage = isVirtual
         inputView?.visibility = if (isVirtual) View.VISIBLE else View.GONE
     }
 
