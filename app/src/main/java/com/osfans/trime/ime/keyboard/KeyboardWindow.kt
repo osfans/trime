@@ -7,7 +7,6 @@ package com.osfans.trime.ime.keyboard
 import android.content.Context
 import android.content.res.Configuration
 import android.text.InputType
-import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
@@ -331,11 +330,8 @@ class KeyboardWindow(
                     return
                 }
             }
-            if (action.code == KeyEvent.KEYCODE_EISU) { // Switch keyboard
-                switchKeyboard(action.select)
-            } else {
-                delegate.onAction(action)
-            }
+
+            delegate.onAction(action)
         }
     }
 }
