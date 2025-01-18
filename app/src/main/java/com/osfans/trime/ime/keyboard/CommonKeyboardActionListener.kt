@@ -52,6 +52,7 @@ class CommonKeyboardActionListener(
     private val rime: RimeSession,
     private val liquidKeyboard: LiquidKeyboard,
     private val windowManager: BoardWindowManager,
+    private val lazyKeyboardWindow: Lazy<KeyboardWindow>,
 ) {
     companion object {
         /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
@@ -60,6 +61,8 @@ class CommonKeyboardActionListener(
         /** Pattern for braced key event to capture `{Escape}` as group 2 */
         private val BRACED_KEY_EVENT_WITH_ESCAPE = """^((\{Escape\})?[^{}]+).*$""".toRegex()
     }
+
+    private val keyboardWindow by lazyKeyboardWindow
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -148,6 +151,9 @@ class CommonKeyboardActionListener(
                                 api.commitComposition()
                             }
                         }
+                    }
+                    KeyEvent.KEYCODE_EISU -> { // Switch keyboard
+                        keyboardWindow.switchKeyboard(action.select)
                     }
                     KeyEvent.KEYCODE_LANGUAGE_SWITCH -> { // Switch IME
                         if (action.select == ".next") {
@@ -336,8 +342,8 @@ class CommonKeyboardActionListener(
                             // FIXME: rime will not handle the key sequence when
                             //  ascii_mode is on, there may be a better solution
                             //  for this.
-                            if (Rime.simulateKeySequence(slice)) {
-                                if (Rime.isAsciiMode) {
+                            if (Rime.isAsciiMode) {
+                                if (Rime.simulateKeySequence(slice)) {
                                     service.commitText(slice)
                                 }
                             } else {

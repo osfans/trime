@@ -32,13 +32,13 @@ abstract class InputComponent(
     @get:InputScope @get:Provides val rime: RimeSession,
 ) {
     abstract val broadcaster: InputBroadcaster
-    abstract val commonKeyboardActionListener: CommonKeyboardActionListener
     abstract val enterKeyLabel: EnterKeyLabelModule
     abstract val quickBar: QuickBar
     abstract val preedit: PreeditModule
     abstract val windowManager: BoardWindowManager
     abstract val preview: KeyPreviewChoreographer
     abstract val keyboardWindow: KeyboardWindow
+    abstract val commonKeyboardActionListener: CommonKeyboardActionListener
     abstract val liquidKeyboard: LiquidKeyboard
     abstract val candidate: CandidateModule
 }
