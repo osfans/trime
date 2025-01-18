@@ -237,7 +237,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         commitText(commit.text)
                     }
                     updateComposingText(ctx)
-                    KeyboardSwitcher.currentKeyboardView.invalidateAllKeys()
+                    KeyboardSwitcher.currentKeyboardView?.invalidateAllKeys()
                 }
             is RimeMessage.KeyMessage ->
                 it.data.let event@{
