@@ -92,30 +92,10 @@ class KeyAction(
 
     init {
         val unbraced = raw.removeSurrounding("{", "}")
-        var handled = false
-        // match like: { x: "{Control+a}" }
-        if (raw.matches(BRACED_STR)) {
-            val (c, m) = Keycode.parseSend(unbraced)
-            if (c != KeyEvent.KEYCODE_UNKNOWN || m > 0) {
-                code = c
-                modifier = m
-                handled = true
-            } else {
-                // match: { x: { commit: a, text: b, label: c } }
-                val action = decodeMapFromString(raw)
-                if (action.isNotEmpty()) {
-                    commit = action["commit"] ?: ""
-                    text = action["text"] ?: ""
-                    label = action["label"] ?: ""
-                    handled = true
-                }
-            }
-        }
-        if (!handled) {
-            val theme = ThemeManager.activeTheme
+        when {
             // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
-            if (theme.presetKeys!!.containsKey(unbraced)) {
-                theme.presetKeys!![unbraced]!!.configMap.let {
+            ThemeManager.activeTheme.presetKeys?.get(unbraced) != null -> {
+                ThemeManager.activeTheme.presetKeys!![unbraced]!!.configMap.let { it ->
                     command = it.getValue("command")?.getString() ?: ""
                     option = it.getValue("option")?.getString() ?: ""
                     select = it.getValue("select")?.getString() ?: ""
@@ -134,48 +114,61 @@ class KeyAction(
                             it["states"]?.configList?.decode(ListSerializer(String.serializer()))
                         }.getOrNull()
 
-                    val send = it.getValue("send")?.getString()
-                    if (!send.isNullOrEmpty()) {
+                    it.getValue("send")?.getString()?.let { send ->
                         val (c, m) = Keycode.parseSend(send)
                         code = c
                         modifier = m
-                    } else if (command.isNotEmpty()) {
-                        code = KeyEvent.KEYCODE_FUNCTION
+                    } ?: run {
+                        if (command.isNotEmpty()) {
+                            code = KeyEvent.KEYCODE_FUNCTION
+                        }
                     }
 
                     if (label.isEmpty()) {
-                        if (code == KeyEvent.KEYCODE_SPACE) {
-                            label = Rime.currentSchemaName
-                        } else if (code != KeyEvent.KEYCODE_UNKNOWN) {
-                            label = Keycode.getDisplayLabel(code, modifier)
-                        }
+                        label =
+                            when (code) {
+                                KeyEvent.KEYCODE_SPACE -> Rime.currentSchemaName
+                                KeyEvent.KEYCODE_UNKNOWN -> ""
+                                else -> Keycode.getDisplayLabel(code, modifier)
+                            }
                     }
                 }
-            } else {
+            }
+            // match like: { x: "{Control+a}" }
+            raw.matches(BRACED_STR) -> {
+                val (c, m) = Keycode.parseSend(unbraced)
+                if (c != KeyEvent.KEYCODE_UNKNOWN || m > 0) {
+                    code = c
+                    modifier = m
+                }
+                // match: { x: { commit: a, text: b, label: c } }
+                decodeMapFromString(raw).takeIf { it.isNotEmpty() }?.let {
+                    commit = it["commit"] ?: ""
+                    text = it["text"] ?: ""
+                    label = it["label"] ?: ""
+                }
+            }
+            else -> {
                 // match like: { x: 1 } or { x: q } ...
                 code = Keycode.keyCodeOf(unbraced)
                 // match like: { x: "(){Left}" } (key sequence to simulate)
                 if (unbraced.isNotEmpty() && !Keycode.isStdKey(code)) {
                     text = raw
                     label = raw.replace(BRACED_STR, "")
-                } else {
-                    if (label.isEmpty()) {
-                        if (code == KeyEvent.KEYCODE_SPACE) {
-                            label = Rime.currentSchemaName
-                        } else if (code != KeyEvent.KEYCODE_UNKNOWN) {
-                            label = Keycode.getDisplayLabel(code, modifier)
+                } else if (label.isEmpty()) {
+                    label =
+                        when (code) {
+                            KeyEvent.KEYCODE_SPACE -> Rime.currentSchemaName
+                            KeyEvent.KEYCODE_UNKNOWN -> ""
+                            else -> Keycode.getDisplayLabel(code, modifier)
                         }
-                    }
                 }
             }
-            shiftLabel = label
-            if (Keycode.isStdKey(code)) { // Android keycode区域
-                if (virtualKeyCharacterMap.isPrintingKey(code)) {
-                    val charCode = virtualKeyCharacterMap.get(code, modifier or KeyEvent.META_SHIFT_ON)
-                    if (charCode > 0) {
-                        shiftLabel = charCode.toChar().toString()
-                    }
-                }
+        }
+        shiftLabel = label
+        if (Keycode.isStdKey(code) && virtualKeyCharacterMap.isPrintingKey(code)) {
+            virtualKeyCharacterMap.get(code, modifier or KeyEvent.META_SHIFT_ON).takeIf { it > 0 }?.let { charCode ->
+                shiftLabel = charCode.toChar().toString()
             }
         }
     }
