@@ -334,7 +334,7 @@ class CommonKeyboardActionListener(
                             // FIXME: rime will not handle the key sequence when
                             //  ascii_mode is on, there may be a better solution
                             //  for this.
-                            if (Rime.isAsciiMode || !Rime.simulateKeySequence(slice)) {
+                            if ((!Rime.simulateKeySequence(slice) || Rime.isAsciiMode) && !Rime.isComposing) {
                                 service.commitText(slice)
                             }
                         }
