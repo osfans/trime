@@ -90,14 +90,16 @@ class CandidatesView(
 
     init {
         minWidth = dp(theme.generalStyle.layout.minWidth)
+        minHeight = dp(theme.generalStyle.layout.minHeight)
         verticalPadding = dp(theme.generalStyle.layout.marginX)
         horizontalPadding = dp(theme.generalStyle.layout.marginY)
         background =
             ColorManager.getDrawable(
-                "candidate_background",
-                "candidate_border_color",
-                dp(theme.generalStyle.candidateBorder),
-                dp(theme.generalStyle.candidateBorderRound),
+                "text_back_color",
+                "border_color",
+                dp(theme.generalStyle.layout.border),
+                dp(theme.generalStyle.layout.roundCorner),
+                theme.generalStyle.layout.alpha,
             )
         add(
             preeditUi.root,
