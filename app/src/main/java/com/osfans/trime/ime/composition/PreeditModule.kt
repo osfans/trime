@@ -54,7 +54,7 @@ class PreeditModule(
         PreeditUi(context, theme, setupPreeditView = {
             textBackColor?.let { backgroundColor = it }
         }).apply {
-            root.alpha = theme.generalStyle.layout.alpha
+            root.alpha = theme.generalStyle.layout.alpha / 255f
             root.outlineProvider = topLeftCornerRadiusOutlineProvider
             root.clipToOutline = true
             preedit.setOnCursorMoveListener { position ->
