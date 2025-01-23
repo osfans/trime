@@ -188,12 +188,12 @@ class AppPrefs(
         shared: SharedPreferences,
     ) : PreferenceDelegateOwner(shared, R.string.candidates_window) {
         companion object {
-            const val MODE = "candidates__mode"
-            const val POSITION = "candidates__position"
+            const val MODE = "show_candidates_window"
+            const val POSITION = "candidates_window_position"
         }
 
-        val mode = enum(R.string.candidates_mode, MODE, PopupCandidatesMode.DISABLED)
-        val position = enum(R.string.display_position, POSITION, PopupPosition.BOTTOM_LEFT)
+        val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
+        val position = enum(R.string.candidates_window_position, POSITION, PopupPosition.BOTTOM_LEFT)
     }
 
     /**

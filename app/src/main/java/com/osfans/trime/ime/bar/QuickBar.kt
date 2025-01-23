@@ -160,7 +160,7 @@ class QuickBar(
 
     override fun onInputContextUpdate(ctx: RimeProto.Context) {
         // TODO: 临时修复状态栏与悬浮窗同时显示，后续需优化：考虑分离数据或寻找更好的实现方式
-        if (candidatesMode == PopupCandidatesMode.FORCE_SHOW) return
+        if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) return
 
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.CandidatesUpdated,
