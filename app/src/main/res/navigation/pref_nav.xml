@@ -74,7 +74,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <fragment
         android:id="@+id/keyboardFragment"
         android:name="com.osfans.trime.ui.fragments.KeyboardFragment"
-        android:label="@string/keyboard" />
+        android:label="@string/virtual_keyboard" />
     <fragment
         android:id="@+id/themeFragment"
         android:name="com.osfans.trime.ui.fragments.ThemeFragment"

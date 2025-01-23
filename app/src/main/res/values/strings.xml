@@ -45,7 +45,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__speak_key_commit_title">Voice on commit</string>
     <string name="keyboard__long_press_timeout_title">Long key press delay</string>
     <string name="keyboard__key_repeat_interval_title">Key repeat interval</string>
-    <string name="keyboard__show_switches_title">Show switches in candidate bar</string>
+    <string name="show_schema_switches_in_idle">Show schema switches in idle</string>
     <string name="keyboard__show_key_popup_title">Popup on key press</string>
     <string-array name="keyboard__landscape_mode_entries">
         <item>Never</item>
@@ -86,7 +86,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clipboard_clipboard_limit">Clipboard History Limit</string>
     <string name="clipboard_clipboard_compare_title">Clipboard Compare Rules</string>
     <string name="clipboard_clipboard_output_title">Clipboard Output Rules</string>
-    <string name="keyboard__show_switche_arrow_title">Show arrow for switch (→)</string>
+    <string name="show_arrow_in_switches">Add arrow (→) for schema switches</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -136,7 +136,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__build_info">Build Info</string>
     <string name="keyboard__use_mini_keyboard_title">Show mini keyboard with real keyboard attached</string>
     <string name="pref_trime_telegram">Telegram Group</string>
-    <string name="pref_keyboard__candidate">Candidate</string>
+    <string name="quick_bar">Quick bar</string>
     <string name="copy_done">Copied to clipboard!</string>
     <string name="keyboard__hook_shift_space">Ignore Shift locked for Space</string>
     <string name="keyboard__hook_shift_num">Ignore Shift locked for 0-9</string>
@@ -154,7 +154,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="scroll_to_bottom">Jump to Bottom</string>
     <string name="toolkit">Toolkit</string>
     <string name="profile">Profile</string>
-    <string name="keyboard">Keyboard</string>
+    <string name="virtual_keyboard">Virtual Keyboard</string>
     <string name="theme">Theme</string>
     <string name="about">About</string>
     <string name="storage">Storage</string>
