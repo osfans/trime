@@ -94,11 +94,10 @@ class CandidatesView(
         horizontalPadding = dp(theme.generalStyle.layout.marginY)
         background =
             ColorManager.getDrawable(
-                ctx,
                 "candidate_background",
-                theme.generalStyle.candidateBorder,
                 "candidate_border_color",
-                theme.generalStyle.candidateBorderRound,
+                dp(theme.generalStyle.candidateBorder),
+                dp(theme.generalStyle.candidateBorderRound),
             )
         add(
             preeditUi.root,

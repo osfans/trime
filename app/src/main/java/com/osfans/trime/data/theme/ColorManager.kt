@@ -4,7 +4,6 @@
 
 package com.osfans.trime.data.theme
 
-import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -15,10 +14,8 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet
-import com.osfans.trime.util.appContext
 import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.isNightMode
-import splitties.dimensions.dp
 import timber.log.Timber
 import java.io.File
 
@@ -345,36 +342,30 @@ object ColorManager {
         }
     }
 
-    //  返回图片或背景的drawable,支持null参数。 Config 2.0
     fun getDrawable(
-        context: Context = appContext,
-        key: String,
-        border: Int = 0,
-        borderColorKey: String = "",
-        roundCorner: Float = 0f,
+        colorKey: String,
+        borderColorKey: String? = null,
+        borderPx: Int = 0,
+        cornerRadius: Float = 0f,
         alpha: Int = 255,
-    ): Drawable? {
-        val value = getColorValue(key)
-        if (value is Drawable) {
-            value.alpha = MathUtils.clamp(alpha, 0, 255)
-            return value
-        }
-
-        if (value is Int) {
-            val gradient = GradientDrawable().apply { setColor(value) }
-            if (roundCorner > 0) {
-                gradient.cornerRadius = roundCorner
+    ): Drawable? =
+        when (val value = getColorValue(colorKey)) {
+            is Drawable -> {
+                value.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
             }
-            if (borderColorKey.isNotEmpty() && border > 0) {
-                val borderPx = context.dp(border)
-                val stroke = getColor(borderColorKey)
-                if (stroke != null && borderPx > 0) {
-                    gradient.setStroke(borderPx, stroke)
+            is Int -> {
+                GradientDrawable().apply {
+                    setColor(value)
+                    this.cornerRadius = cornerRadius
+                    this.alpha = MathUtils.clamp(alpha, 0, 255)
+                    if (!borderColorKey.isNullOrEmpty()) {
+                        val borderColor = getColor(borderColorKey)
+                        if (borderColor != null) {
+                            setStroke(borderPx, borderColor)
+                        }
+                    }
                 }
             }
-            gradient.alpha = MathUtils.clamp(alpha, 0, 255)
-            return gradient
+            else -> null
         }
-        return null
-    }
 }

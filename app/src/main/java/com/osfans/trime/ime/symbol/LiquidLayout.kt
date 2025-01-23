@@ -77,11 +77,10 @@ class LiquidLayout(
                             frameLayout {
                                 background =
                                     ColorManager.getDrawable(
-                                        context,
-                                        key = "key_back_color",
-                                        border = theme.generalStyle.keyBorder,
-                                        borderColorKey = "key_border_color",
-                                        roundCorner = theme.generalStyle.roundCorner,
+                                        "key_back_color",
+                                        "key_border_color",
+                                        dp(theme.generalStyle.keyBorder),
+                                        dp(theme.generalStyle.roundCorner),
                                     )
                                 add(
                                     text,

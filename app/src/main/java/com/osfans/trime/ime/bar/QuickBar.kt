@@ -34,6 +34,7 @@ import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
+import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -191,11 +192,10 @@ class QuickBar(
             }
             background =
                 ColorManager.getDrawable(
-                    context,
                     "candidate_background",
-                    theme.generalStyle.candidateBorder,
                     "candidate_border_color",
-                    theme.generalStyle.candidateBorderRound,
+                    dp(theme.generalStyle.candidateBorder),
+                    dp(theme.generalStyle.candidateBorderRound),
                 )
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
