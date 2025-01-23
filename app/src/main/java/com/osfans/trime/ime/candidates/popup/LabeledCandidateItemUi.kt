@@ -8,6 +8,7 @@ package com.osfans.trime.ime.candidates.popup
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.text.TextPaint
 import android.text.style.UnderlineSpan
 import androidx.annotation.ColorInt
@@ -19,7 +20,6 @@ import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
-import splitties.views.backgroundColor
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.textView
 import splitties.views.padding
@@ -76,7 +76,15 @@ class LabeledCandidateItemUi(
                     inSpans(CandidateSpan(commentFg, ctx.sp(commentSize), commentFont)) { append(candidate.comment) }
                 }
             }
-        val bg = if (highlighted) highlightBackColor else Color.TRANSPARENT
-        root.backgroundColor = bg
+        val bg =
+            GradientDrawable().apply {
+                if (highlighted) {
+                    setColor(highlightBackColor)
+                    cornerRadius = ctx.dp(theme.generalStyle.layout.roundCorner)
+                } else {
+                    setColor(Color.TRANSPARENT)
+                }
+            }
+        root.background = bg
     }
 }
