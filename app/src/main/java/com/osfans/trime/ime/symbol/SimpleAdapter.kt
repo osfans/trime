@@ -20,12 +20,11 @@ import com.osfans.trime.databinding.SimpleItemRowBinding
 import splitties.dimensions.dp
 
 class SimpleAdapter(
-    theme: Theme,
+    private val theme: Theme,
     private val columnSize: Int,
 ) : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
     private val mBeans = mutableListOf<SimpleKeyBean>()
     private val mBeansByRows = mutableListOf<List<SimpleKeyBean>>()
-    val beans get() = mBeans
 
     fun updateBeans(beans: List<SimpleKeyBean>) {
         val prevSize = mBeansByRows.size
@@ -47,13 +46,6 @@ class SimpleAdapter(
     private val mTextSize = theme.generalStyle.labelTextSize
     private val mTextColor = ColorManager.getColor("key_text_color")
     private val mTypeface = FontManager.getTypeface("key_font")
-    private val mBackground =
-        ColorManager.getDrawable(
-            key = "key_back_color",
-            border = theme.generalStyle.keyBorder,
-            borderColorKey = "key_border_color",
-            roundCorner = theme.generalStyle.roundCorner,
-        )
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -82,7 +74,13 @@ class SimpleAdapter(
                 typeface = mTypeface
                 gravity = Gravity.CENTER
                 ellipsize = TextUtils.TruncateAt.MARQUEE
-                background = mBackground
+                background =
+                    ColorManager.getDrawable(
+                        "key_back_color",
+                        "key_border_color",
+                        dp(theme.generalStyle.keyBorder),
+                        dp(theme.generalStyle.roundCorner),
+                    )
             }
         }
         return holder

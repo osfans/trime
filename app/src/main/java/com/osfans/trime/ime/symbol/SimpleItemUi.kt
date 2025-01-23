@@ -81,11 +81,10 @@ class SimpleItemUi(
             minimumHeight = dp(30)
             background =
                 ColorManager.getDrawable(
-                    ctx,
                     "long_text_back_color",
-                    border = theme.generalStyle.keyBorder,
                     "key_long_text_border",
-                    roundCorner = theme.generalStyle.roundCorner,
+                    dp(theme.generalStyle.keyBorder),
+                    dp(theme.generalStyle.roundCorner),
                 )
             add(layout, lParams(matchParent, matchParent))
         }

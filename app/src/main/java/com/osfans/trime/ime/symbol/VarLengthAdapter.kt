@@ -68,11 +68,10 @@ class VarLengthAdapter(
                     addState(
                         intArrayOf(),
                         ColorManager.getDrawable(
-                            context = context,
-                            key = "key_back_color",
-                            border = theme.generalStyle.candidateBorder,
-                            borderColorKey = "key_border_color",
-                            roundCorner = theme.generalStyle.roundCorner,
+                            "key_back_color",
+                            "key_border_color",
+                            dp(theme.generalStyle.candidateBorder),
+                            dp(theme.generalStyle.roundCorner),
                         ),
                     )
                     mHilitedCandidateBackColor?.let {

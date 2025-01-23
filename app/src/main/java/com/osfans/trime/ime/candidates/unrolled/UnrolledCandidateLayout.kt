@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
+import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.core.add
@@ -29,11 +30,10 @@ class UnrolledCandidateLayout(
         id = R.id.unrolled_candidate_view
         background =
             ColorManager.getDrawable(
-                context,
                 "candidate_background",
-                theme.generalStyle.candidateBorder,
                 "candidate_border_color",
-                theme.generalStyle.candidateBorderRound,
+                dp(theme.generalStyle.candidateBorder),
+                dp(theme.generalStyle.candidateBorderRound),
             )
 
         add(
