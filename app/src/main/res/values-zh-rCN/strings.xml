@@ -217,20 +217,20 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="synchronization">同步</string>
     <string name="profile_timing_background_sync_set_time">设置后台同步时间</string>
     <string name="candidates_window">候选窗口</string>
-    <string name="candidates_mode">候选词显示模式</string>
+    <string name="show_candidates_window">显示候选词窗口</string>
     <string name="general">常规</string>
     <string name="preedit">预编辑码</string>
     <string name="commit_text_preview">首选词预览</string>
     <string name="raw_input">原始输入码</string>
     <string name="composing_text_mode">在程序中显示撰写文本</string>
     <string name="depends_on_input_device">根据输入设备而定</string>
-    <string name="force_show">强制显示</string>
+    <string name="always_show">始终显示</string>
     <string name="follow_cursor">跟随光标</string>
     <string name="bottom_left">左下</string>
     <string name="bottom_right">右下</string>
     <string name="top_left">左上</string>
     <string name="top_right">右上</string>
-    <string name="display_position">显示位置</string>
+    <string name="candidates_window_position">候选词窗口位置</string>
     <string name="deploy_failure">部署失败</string>
     <string name="view_deploy_failure_log">部署失败。点此查看错误日志。</string>
 </resources>

@@ -27,7 +27,7 @@ class InputDeviceManager {
     }
 
     private fun setupComposingPopupWindowCallback(isVirtual: Boolean) {
-        val shouldSetupWindow = !isVirtual || candidatesMode == PopupCandidatesMode.FORCE_SHOW
+        val shouldSetupWindow = !isVirtual || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
         composingPopupWindow?.handleMessage = shouldSetupWindow
         composingPopupWindow?.useVirtualKeyboard = isVirtual
         // dismiss ComposingPopupWindow when entering virtual keyboard mode,
@@ -85,7 +85,7 @@ class InputDeviceManager {
             when (candidatesMode) {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE -> isVirtualKeyboard
-                PopupCandidatesMode.FORCE_SHOW -> true
+                PopupCandidatesMode.ALWAYS_SHOW -> true
                 PopupCandidatesMode.DISABLED -> true
             }
         applyMode(service, useVirtualKeyboard)
@@ -123,7 +123,7 @@ class InputDeviceManager {
             when (candidatesMode) {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE -> false
-                PopupCandidatesMode.FORCE_SHOW -> false
+                PopupCandidatesMode.ALWAYS_SHOW -> false
                 PopupCandidatesMode.DISABLED -> true
             }
         applyMode(service, useVirtualKeyboard)
@@ -147,7 +147,7 @@ class InputDeviceManager {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE ->
                     toolType == MotionEvent.TOOL_TYPE_FINGER || toolType == MotionEvent.TOOL_TYPE_STYLUS
-                PopupCandidatesMode.FORCE_SHOW -> false
+                PopupCandidatesMode.ALWAYS_SHOW -> false
                 PopupCandidatesMode.DISABLED -> true
             }
         applyMode(service, useVirtualKeyboard)

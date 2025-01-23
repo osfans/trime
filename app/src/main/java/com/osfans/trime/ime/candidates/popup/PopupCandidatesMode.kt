@@ -13,6 +13,6 @@ enum class PopupCandidatesMode(
 ) : PreferenceDelegateEnum {
     SYSTEM_DEFAULT(R.string.system_default),
     INPUT_DEVICE(R.string.depends_on_input_device),
-    FORCE_SHOW(R.string.force_show),
+    ALWAYS_SHOW(R.string.always_show),
     DISABLED(R.string.disable),
 }

@@ -216,21 +216,21 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="forget_this_word">忘記該詞</string>
     <string name="synchronization">同步</string>
     <string name="profile_timing_background_sync_set_time">設定後台同步時間</string>
-    <string name="candidates_window">候选窗口</string>
-    <string name="candidates_mode">候選詞顯示模式</string>
+    <string name="candidates_window">候选視窗</string>
+    <string name="show_candidates_window">顯示候選詞視窗</string>
     <string name="general">常規</string>
     <string name="preedit">預編輯碼</string>
     <string name="commit_text_preview">首選詞預覽</string>
     <string name="raw_input">原始輸入碼</string>
     <string name="composing_text_mode">在程式中顯示撰寫文字</string>
     <string name="depends_on_input_device">視輸入設備而定</string>
-    <string name="force_show">強制顯示</string>
+    <string name="always_show">始終顯示</string>
     <string name="follow_cursor">跟隨游標</string>
     <string name="bottom_left">左下</string>
     <string name="bottom_right">右下</string>
     <string name="top_left">左上</string>
     <string name="top_right">右上</string>
-    <string name="display_position">顯示位置</string>
+    <string name="candidates_window_position">候選詞視窗位置</string>
     <string name="deploy_failure">部署失敗</string>
     <string name="view_deploy_failure_log">部署失敗。點此檢視錯誤日誌。</string>
 </resources>

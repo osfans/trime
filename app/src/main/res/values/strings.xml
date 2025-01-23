@@ -217,20 +217,20 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="synchronization">Synchronization</string>
     <string name="profile_timing_background_sync_set_time">Set background sync time</string>
     <string name="candidates_window">Candidates Window</string>
-    <string name="candidates_mode">Candidates mode</string>
+    <string name="show_candidates_window">Show candidates window</string>
     <string name="general">General</string>
     <string name="preedit">Preedit</string>
     <string name="commit_text_preview">Commit text preview</string>
     <string name="raw_input">Raw input</string>
     <string name="composing_text_mode">Show composing text in editor</string>
     <string name="depends_on_input_device">Depends on input device</string>
-    <string name="force_show">Force show</string>
+    <string name="always_show">Always show</string>
     <string name="follow_cursor">Follow cursor</string>
     <string name="bottom_left">Bottom left</string>
     <string name="bottom_right">Bottom right</string>
     <string name="top_left">Top left</string>
     <string name="top_right">Top right</string>
-    <string name="display_position">Display position</string>
+    <string name="candidates_window_position">Candidates window position</string>
     <string name="deploy_failure">Deploy failure</string>
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
 </resources>
