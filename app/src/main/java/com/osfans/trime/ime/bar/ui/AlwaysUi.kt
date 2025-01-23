@@ -25,7 +25,7 @@ class AlwaysUi(
 ) : Ui {
     enum class State {
         Empty,
-        Switchers,
+        Switches,
     }
 
     var currentState = State.Empty
@@ -55,7 +55,7 @@ class AlwaysUi(
         Timber.d("Switch always ui to $state")
         when (state) {
             State.Empty -> animator.displayedChild = 0
-            State.Switchers -> animator.displayedChild = 1
+            State.Switches -> animator.displayedChild = 1
         }
         currentState = state
     }

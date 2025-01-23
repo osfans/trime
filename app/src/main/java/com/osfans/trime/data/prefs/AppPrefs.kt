@@ -111,10 +111,10 @@ class AppPrefs(
         companion object {
             const val SOFT_CURSOR_ENABLED = "keyboard__soft_cursor"
             const val POPUP_KEY_PRESS_ENABLED = "keyboard__show_key_popup"
-            const val SWITCHES_ENABLED = "keyboard__show_switches"
+            const val SHOW_SCHEMA_SWITCHES = "show_schema_switches_in_idle"
+            const val SHOW_ARROW_IN_SWITCHES = "show_arrow_in_switches"
             const val LANDSCAPE_MODE = "keyboard__landscape_mode"
             const val SPLIT_SPACE_PERCENT = "keyboard__split_space"
-            const val SWITCH_ARROW_ENABLED = "keyboard__show_switch_arrow"
 
             const val HOOK_CTRL_A = "keyboard__hook_ctrl_a"
             const val HOOK_CTRL_CV = "keyboard__hook_ctrl_cv"
@@ -146,8 +146,8 @@ class AppPrefs(
 
         val softCursorEnabled by bool(SOFT_CURSOR_ENABLED, true)
         val popupKeyPressEnabled = bool(POPUP_KEY_PRESS_ENABLED, false)
-        val switchesEnabled = bool(SWITCHES_ENABLED, true)
-        val switchArrowEnabled = bool(SWITCH_ARROW_ENABLED, true)
+        val showSchemaSwitches = bool(SHOW_SCHEMA_SWITCHES, true)
+        val showArrowInSwitches = bool(SHOW_ARROW_IN_SWITCHES, true)
 
         enum class LandscapeModeOption {
             NEVER,

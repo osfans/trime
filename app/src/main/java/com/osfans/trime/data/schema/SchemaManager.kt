@@ -5,14 +5,11 @@
 package com.osfans.trime.data.schema
 
 import com.osfans.trime.core.Rime
-import com.osfans.trime.data.prefs.AppPrefs
 import kotlinx.serialization.builtins.ListSerializer
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
     var visibleSwitches: List<Schema.Switch> = listOf()
-
-    private val arrow get() = AppPrefs.defaultInstance().keyboard.switchArrowEnabled
 
     private val defaultSchema = Schema()
 

@@ -45,7 +45,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__speak_key_commit_title">上屏時朗讀字符</string>
     <string name="keyboard__long_press_timeout_title">長按按鍵的延遲時間</string>
     <string name="keyboard__key_repeat_interval_title">重複按鍵的重複間隔</string>
-    <string name="keyboard__show_switches_title">在候選欄中顯示狀態</string>
+    <string name="show_schema_switches_in_idle">空閒時顯示方案開關</string>
     <string name="keyboard__show_key_popup_title">按鍵時彈出顯示字符</string>
     <string-array name="keyboard__landscape_mode_entries">
         <item>永不</item>
@@ -85,7 +85,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="pref__default">預設</string>
     <string name="clipboard_clipboard_compare_title">剪貼板去重規則</string>
     <string name="clipboard_clipboard_output_title">剪貼板過濾規則</string>
-    <string name="keyboard__show_switche_arrow_title">爲開關顯示箭頭符號(→)</string>
+    <string name="show_arrow_in_switches">方案開關顯示箭頭符號（→）</string>
     <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -134,7 +134,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__build_info">建構資訊</string>
     <string name="keyboard__use_mini_keyboard_title">連接實體鍵盤時，顯示迷你軟鍵盤</string>
     <string name="pref_trime_telegram">Telegram群組</string>
-    <string name="pref_keyboard__candidate">候選欄</string>
+    <string name="quick_bar">快捷欄</string>
     <string name="copy_done">已複製</string>
     <string name="keyboard__hook_shift_space">點擊空格時，忽略Shift的鎖定狀態</string>
     <string name="keyboard__hook_shift_num">點擊0-9時，忽略Shift的鎖定狀態</string>
@@ -155,7 +155,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="theme">主題</string>
     <string name="profile">配置</string>
     <string name="profile_summary">設定儲存位置和修改同步設定等</string>
-    <string name="keyboard">鍵盤</string>
+    <string name="virtual_keyboard">虛擬鍵盤</string>
     <string name="storage">儲存</string>
     <string name="maintenance">維護</string>
     <string name="loading">正在載入</string>

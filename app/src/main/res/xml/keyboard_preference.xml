@@ -9,7 +9,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="pref_keyboard"
-    android:title="@string/keyboard">
+    android:title="@string/virtual_keyboard">
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
@@ -56,7 +56,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:title="@string/pref_keyboard__candidate">
+        app:title="@string/quick_bar">
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="keyboard__soft_cursor"
@@ -65,13 +65,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
-            android:key="keyboard__show_switches"
-            android:title="@string/keyboard__show_switches_title"
+            android:key="show_schema_switches_in_idle"
+            android:title="@string/show_schema_switches_in_idle"
             app:iconSpaceReserved="false" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
-            android:key="keyboard__show_switch_arrow"
-            android:title="@string/keyboard__show_switche_arrow_title"
+            android:key="show_arrow_in_switches"
+            android:title="@string/show_arrow_in_switches"
+            app:dependency="show_schema_switches_in_idle"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 

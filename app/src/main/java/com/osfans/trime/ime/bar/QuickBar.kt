@@ -53,7 +53,7 @@ class QuickBar(
 
     private val prefs = AppPrefs.defaultInstance()
 
-    private val showSwitchers by prefs.keyboard.switchesEnabled
+    private val showSwitches by prefs.keyboard.showSchemaSwitches
 
     val themedHeight =
         theme.generalStyle.candidateViewHeight + theme.generalStyle.commentHeight
@@ -61,7 +61,7 @@ class QuickBar(
     private fun evalAlwaysUiState() {
         val newState =
             when {
-                showSwitchers -> AlwaysUi.State.Switchers
+                showSwitches -> AlwaysUi.State.Switches
                 else -> AlwaysUi.State.Empty
             }
         if (newState == alwaysUi.currentState) return
@@ -211,7 +211,7 @@ class QuickBar(
     }
 
     override fun onRimeSchemaUpdated(schema: SchemaItem) {
-        if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
+        if (alwaysUi.currentState == AlwaysUi.State.Switches) {
             service.lifecycleScope.launch {
                 alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
             }
@@ -227,7 +227,7 @@ class QuickBar(
                 view.visibility = if (value.value) View.GONE else View.VISIBLE
             }
         }
-        if (alwaysUi.currentState == AlwaysUi.State.Switchers) {
+        if (alwaysUi.currentState == AlwaysUi.State.Switches) {
             service.lifecycleScope.launch {
                 alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
             }

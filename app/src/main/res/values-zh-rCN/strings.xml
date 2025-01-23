@@ -42,7 +42,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__speak_key_commit_title">上屏时朗读字符</string>
     <string name="keyboard__long_press_timeout_title">长按按键的延迟时间</string>
     <string name="keyboard__key_repeat_interval_title">重复按键的重复间隔</string>
-    <string name="keyboard__show_switches_title">在候选栏中显示状态</string>
+    <string name="show_schema_switches_in_idle">空闲时显示方案开关</string>
     <string name="keyboard__show_key_popup_title">按键时弹出显示字符</string>
     <string-array name="keyboard__landscape_mode_entries">
         <item>永不</item>
@@ -82,7 +82,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clipboard_clipboard_limit">剪贴板历史记录上限</string>
     <string name="clipboard_clipboard_compare_title">剪贴板去重规则</string>
     <string name="clipboard_clipboard_output_title">剪贴板过滤规则</string>
-    <string name="keyboard__show_switche_arrow_title">为开关显示箭头符号(→)</string>
+    <string name="show_arrow_in_switches">方案开关显示箭头符号（→）</string>
     <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -131,7 +131,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__build_info">构建信息</string>
     <string name="keyboard__use_mini_keyboard_title">连接实体键盘时，显示迷你软键盘</string>
     <string name="pref_trime_telegram">Telegram群组</string>
-    <string name="pref_keyboard__candidate">候选栏</string>
+    <string name="quick_bar">快捷栏</string>
     <string name="copy_done">已复制</string>
     <string name="keyboard__hook_shift_space">点击空格时，忽略Shift的锁定状态</string>
     <string name="keyboard__hook_shift_num">点击0-9时，忽略Shift的锁定状态</string>
@@ -148,7 +148,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="app_crash">应用程序崩溃了</string>
     <string name="exception_logcat_created">Logcat 进程已创建</string>
     <string name="app_crash_message">抱歉，但我们提供了日志以供调查。</string>
-    <string name="keyboard">键盘</string>
+    <string name="virtual_keyboard">虚拟键盘</string>
     <string name="about">关于</string>
     <string name="theme">主题</string>
     <string name="profile">配置</string>
