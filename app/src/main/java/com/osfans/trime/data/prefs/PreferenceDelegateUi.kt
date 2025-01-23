@@ -8,6 +8,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import androidx.preference.SwitchPreference
 
 abstract class PreferenceDelegateUi<T : Preference>(
     val key: String,
@@ -16,6 +17,28 @@ abstract class PreferenceDelegateUi<T : Preference>(
     abstract fun createUi(context: Context): T
 
     fun isEnabled() = enableUiOn?.invoke() ?: true
+
+    class Switch(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: Boolean,
+        @StringRes
+        val summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<SwitchPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) =
+            SwitchPreference(context).apply {
+                key = this@Switch.key
+                isIconSpaceReserved = false
+                isSingleLineTitle = false
+                setDefaultValue(defaultValue)
+                if (this@Switch.summary != null) {
+                    setSummary(this@Switch.summary)
+                }
+                setTitle(this@Switch.title)
+            }
+    }
 
     class StringList<T : Any>(
         @StringRes

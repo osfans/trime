@@ -233,4 +233,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="candidates_window_position">Candidates window position</string>
     <string name="deploy_failure">Deploy failure</string>
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
+    <string name="hide_quick_bar_when_always_show">Hide quick bar when always show candidates window</string>
 </resources>
