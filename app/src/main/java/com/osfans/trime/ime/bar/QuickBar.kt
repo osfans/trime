@@ -54,6 +54,7 @@ class QuickBar(
     private val prefs = AppPrefs.defaultInstance()
 
     private val showSwitches by prefs.keyboard.showSchemaSwitches
+    private val hideQuickBar by prefs.candidates.hideQuickBar
 
     val themedHeight =
         theme.generalStyle.candidateViewHeight + theme.generalStyle.commentHeight
@@ -182,9 +183,7 @@ class QuickBar(
         ViewAnimator(context).apply {
             rime.launchOnReady {
                 visibility =
-                    if (it.getRuntimeOption("_hide_candidate") ||
-                        it.getRuntimeOption("_hide_bar")
-                    ) {
+                    if (hideQuickBar && candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
                         View.GONE
                     } else {
                         View.VISIBLE
@@ -222,9 +221,6 @@ class QuickBar(
         when (value.option) {
             "_hide_comment" -> {
                 // candidateUi.candidates.shouldShowComment = !value.value
-            }
-            "_hide_candidate", "_hide_bar" -> {
-                view.visibility = if (value.value) View.GONE else View.VISIBLE
             }
         }
         if (alwaysUi.currentState == AlwaysUi.State.Switches) {

@@ -190,10 +190,12 @@ class AppPrefs(
         companion object {
             const val MODE = "show_candidates_window"
             const val POSITION = "candidates_window_position"
+            const val HIDE_QUICK_BAR = "hide_quick_bar"
         }
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
         val position = enum(R.string.candidates_window_position, POSITION, PopupPosition.BOTTOM_LEFT)
+        val hideQuickBar = switch(R.string.hide_quick_bar_when_always_show, HIDE_QUICK_BAR, false)
     }
 
     /**

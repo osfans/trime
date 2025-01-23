@@ -61,6 +61,22 @@ abstract class PreferenceDelegateOwner(
         },
     )
 
+    protected fun switch(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: Boolean,
+        @StringRes
+        summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate<Boolean> {
+        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
+        val ui = PreferenceDelegateUi.Switch(title, key, defaultValue, summary, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     // TODO: replace all [enum] with this
     protected inline fun <reified T> enum(
         @StringRes title: Int,
