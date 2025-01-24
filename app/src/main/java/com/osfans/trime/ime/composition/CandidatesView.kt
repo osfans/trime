@@ -6,15 +6,26 @@
 package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
+import android.graphics.RectF
+import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.inputmethod.CursorAnchorInfo
+import android.widget.PopupWindow
+import androidx.core.graphics.component1
+import androidx.core.graphics.component2
+import androidx.core.graphics.component3
+import androidx.core.graphics.component4
+import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
+import com.osfans.trime.ime.core.BaseInputMessenger
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.below
@@ -32,14 +43,21 @@ import splitties.views.verticalPadding
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
-    val service: TrimeInputMethodService,
-    val rime: RimeSession,
-    val theme: Theme,
-) : ConstraintLayout(service) {
+    service: TrimeInputMethodService,
+    rime: RimeSession,
+    theme: Theme,
+) : BaseInputMessenger(service, rime, theme) {
+    var useVirtualKeyboard: Boolean = true
+
     private val ctx = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
+
+    private val position by AppPrefs.defaultInstance().candidates.position
 
     private var menu = RimeProto.Context.Menu()
     private var inputComposition = RimeProto.Context.Composition()
+
+    private val anchorPosition = RectF()
+    private val parentSize = floatArrayOf(0f, 0f)
 
     private val preeditUi =
         PreeditUi(ctx, theme).apply {
@@ -65,10 +83,41 @@ class CandidatesView(
             }
         }
 
-    fun update(ctx: RimeProto.Context) {
-        inputComposition = ctx.composition
-        menu = ctx.menu
-        updateUi()
+    private val touchEventReceiverWindow =
+        PopupWindow(
+            object : View(context) {
+                @SuppressLint("ClickableViewAccessibility")
+                override fun onTouchEvent(event: MotionEvent): Boolean = this@CandidatesView.dispatchTouchEvent(event)
+            },
+        )
+
+    private var isWindowShowing = false
+
+    private fun showWindow() {
+        isWindowShowing = true
+        val (left, top) = intArrayOf(0, 0).also { getLocationInWindow(it) }
+        if (touchEventReceiverWindow.isShowing) {
+            touchEventReceiverWindow.update(left, top, width, height)
+        } else {
+            touchEventReceiverWindow.width = width
+            touchEventReceiverWindow.height = height
+            touchEventReceiverWindow.showAtLocation(this, Gravity.NO_GRAVITY, left, top)
+        }
+    }
+
+    private fun dismissWindow() {
+        if (isWindowShowing) {
+            isWindowShowing = false
+            touchEventReceiverWindow.dismiss()
+        }
+    }
+
+    override fun handleRimeMessage(it: RimeMessage<*>) {
+        if (it is RimeMessage.ResponseMessage) {
+            inputComposition = it.data.context.composition
+            menu = it.data.context.menu
+            updateUi()
+        }
     }
 
     private fun evaluateVisibility(): Boolean =
@@ -83,10 +132,101 @@ class CandidatesView(
             // so it should be safety to get option immediately
             val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
             candidatesUi.update(menu, isHorizontalLayout)
+            updatePosition()
+            showWindow()
+            visibility = View.VISIBLE
+        } else {
+            dismissWindow()
+            visibility = GONE
         }
     }
 
+    private fun updatePosition() {
+        val x: Float
+        val y: Float
+        val (horizontal, top, _, bottom) = anchorPosition
+        val (parentWidth, parentHeight) = parentSize
+        val selfWidth = width.toFloat()
+        val selfHeight = height.toFloat()
+        val (_, inputViewHeight) =
+            intArrayOf(0, 0)
+                .also { service.inputView?.keyboardView?.getLocationInWindow(it) }
+
+        val minX = 0f
+        val minY = 0f
+        val maxX = parentWidth - selfWidth
+        val maxY =
+            if (useVirtualKeyboard) {
+                inputViewHeight - selfHeight
+            } else {
+                parentHeight - selfHeight
+            }
+        when (position) {
+            PopupPosition.TOP_RIGHT -> {
+                x = maxX
+                y = minY
+            }
+            PopupPosition.TOP_LEFT -> {
+                x = minX
+                y = minY
+            }
+            PopupPosition.BOTTOM_RIGHT -> {
+                x = maxX
+                y = maxY
+            }
+            PopupPosition.BOTTOM_LEFT -> {
+                x = minX
+                y = maxY
+            }
+            PopupPosition.FOLLOW -> {
+                x =
+                    if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                        val rtlOffset = parentWidth - horizontal
+                        if (rtlOffset + selfWidth > parentWidth) selfWidth - parentWidth else -rtlOffset
+                    } else {
+                        if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
+                    }
+                y = if (bottom + selfHeight > parentHeight) top - selfHeight else bottom
+            }
+        }
+        translationX = x
+        translationY = y
+    }
+
+    private val decorLocation = floatArrayOf(0f, 0f)
+
+    fun updateCursorAnchor(
+        info: CursorAnchorInfo,
+        updateLocation: (FloatArray, FloatArray) -> Unit,
+    ) {
+        if (position != PopupPosition.FOLLOW) return
+        val bounds = info.getCharacterBounds(0)
+        // update anchorPosition
+        if (bounds == null) {
+            // composing is disabled in target app or trime settings
+            // use the position of the insertion marker instead
+            anchorPosition.top = info.insertionMarkerTop
+            anchorPosition.left = info.insertionMarkerHorizontal
+            anchorPosition.bottom = info.insertionMarkerBottom
+            anchorPosition.right = info.insertionMarkerHorizontal
+        } else {
+            // for different writing system (e.g. right to left languages),
+            // we have to calculate the correct RectF
+            val horizontal = if (layoutDirection == View.LAYOUT_DIRECTION_RTL) bounds.right else bounds.left
+            anchorPosition.top = bounds.top
+            anchorPosition.left = horizontal
+            anchorPosition.bottom = bounds.bottom
+            anchorPosition.right = horizontal
+        }
+        info.matrix.mapRect(anchorPosition)
+        updateLocation(decorLocation, parentSize)
+        val (dX, dY) = decorLocation
+        anchorPosition.offset(-dX, -dY)
+    }
+
     init {
+        visibility = View.GONE
+
         minWidth = dp(theme.generalStyle.layout.minWidth)
         minHeight = dp(theme.generalStyle.layout.minHeight)
         verticalPadding = dp(theme.generalStyle.layout.marginX)
