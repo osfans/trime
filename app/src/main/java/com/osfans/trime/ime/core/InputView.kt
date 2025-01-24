@@ -247,6 +247,14 @@ class InputView(
         updateKeyboardSize()
 
         add(
+            preedit.ui.root,
+            lParams(matchParent, wrapContent) {
+                above(keyboardView)
+                centerHorizontally()
+            },
+        )
+
+        add(
             keyboardView,
             lParams(matchParent, wrapContent) {
                 centerHorizontally()
@@ -377,7 +385,6 @@ class InputView(
         // implies that InputView should not be attached again after detached.
         baseMessageHandler.cancelJob()
         updateWindowViewHeightJob.cancel()
-        preedit.onDetached()
         preview.root.removeAllViews()
         broadcaster.clear()
         super.onDetachedFromWindow()

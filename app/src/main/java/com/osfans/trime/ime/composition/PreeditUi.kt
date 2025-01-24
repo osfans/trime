@@ -63,6 +63,9 @@ open class PreeditUi(
             }
         }
 
+    var visible = false
+        private set
+
     private fun updateTextView(
         str: CharSequence,
         visible: Boolean,
@@ -79,6 +82,8 @@ open class PreeditUi(
         val string = inputComposition.toSpannedString()
         val cursorPos = inputComposition.cursorPos
         val hasPreedit = inputComposition.length > 0
+        visible = hasPreedit
+        if (!visible) return
         val stringWithCursor =
             if (cursorPos == 0 || cursorPos == string.length) {
                 string
