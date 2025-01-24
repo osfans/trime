@@ -7,12 +7,9 @@ package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
 import android.graphics.RectF
-import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.CursorAnchorInfo
-import android.widget.PopupWindow
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.core.graphics.component3
@@ -26,6 +23,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
 import com.osfans.trime.ime.core.BaseInputMessenger
+import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.below
@@ -83,34 +81,7 @@ class CandidatesView(
             }
         }
 
-    private val touchEventReceiverWindow =
-        PopupWindow(
-            object : View(context) {
-                @SuppressLint("ClickableViewAccessibility")
-                override fun onTouchEvent(event: MotionEvent): Boolean = this@CandidatesView.dispatchTouchEvent(event)
-            },
-        )
-
-    private var isWindowShowing = false
-
-    private fun showWindow() {
-        isWindowShowing = true
-        val (left, top) = intArrayOf(0, 0).also { getLocationInWindow(it) }
-        if (touchEventReceiverWindow.isShowing) {
-            touchEventReceiverWindow.update(left, top, width, height)
-        } else {
-            touchEventReceiverWindow.width = width
-            touchEventReceiverWindow.height = height
-            touchEventReceiverWindow.showAtLocation(this, Gravity.NO_GRAVITY, left, top)
-        }
-    }
-
-    private fun dismissWindow() {
-        if (isWindowShowing) {
-            isWindowShowing = false
-            touchEventReceiverWindow.dismiss()
-        }
-    }
+    private val touchEventReceiverWindow = TouchEventReceiverWindow(this)
 
     override fun handleRimeMessage(it: RimeMessage<*>) {
         if (it is RimeMessage.ResponseMessage) {
@@ -133,10 +104,10 @@ class CandidatesView(
             val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
             candidatesUi.update(menu, isHorizontalLayout)
             updatePosition()
-            showWindow()
+            touchEventReceiverWindow.showup()
             visibility = View.VISIBLE
         } else {
-            dismissWindow()
+            touchEventReceiverWindow.dismiss()
             visibility = GONE
         }
     }
