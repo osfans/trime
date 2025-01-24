@@ -30,6 +30,7 @@ import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import androidx.annotation.Keep
+import androidx.annotation.Size
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.isVisible
@@ -52,7 +53,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
-import com.osfans.trime.ime.composition.ComposingPopupWindow
+import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
@@ -63,7 +64,6 @@ import com.osfans.trime.util.monitorCursorAnchor
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
@@ -86,7 +86,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var decorView: View
     private lateinit var contentView: FrameLayout
     var inputView: InputView? = null
-    private var composingPopupWindow: ComposingPopupWindow? = null
+    private var candidatesView: CandidatesView? = null
     private val inputDeviceManager = InputDeviceManager()
     private var initializationUi: InitializationUi? = null
     private var mIntentReceiver: IntentReceiver? = null
@@ -100,15 +100,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     @Keep
     private val onThemeChangeListener =
         ThemeManager.OnThemeChangeListener {
-            recreateInputView(it)
+            replaceInputViews(it)
         }
 
     @Keep
     private val onColorChangeListener =
         ColorManager.OnColorChangeListener {
-            lifecycleScope.launch(Dispatchers.Main) {
-                recreateInputView(it)
-            }
+            replaceInputViews(it)
         }
 
     private fun postJob(
@@ -284,21 +282,26 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private fun setupInputViews(theme: Theme): InputView {
-        composingPopupWindow?.cancelJob()
+    private fun replaceInputView(theme: Theme): InputView {
         val newInputView = InputView(this, rime, theme)
-        val newComposingWindow = ComposingPopupWindow(this, rime, theme, contentView)
+        setInputView(newInputView)
+        inputDeviceManager.setInputView(newInputView)
         inputView = newInputView
-        composingPopupWindow = newComposingWindow
-        inputDeviceManager.setComponents(newInputView, newComposingWindow)
         return newInputView
     }
 
-    /** Must be called on the UI thread
-     *
-     * 重置鍵盤、候選條、狀態欄等 !!注意，如果其中調用Rime.setOption，切換方案會卡住  */
-    fun recreateInputView(theme: Theme) {
-        setInputView(setupInputViews(theme))
+    private fun replaceCandidateView(theme: Theme): CandidatesView {
+        val newCandidatesView = CandidatesView(this, rime, theme)
+        contentView.removeView(candidatesView)
+        contentView.addView(newCandidatesView)
+        inputDeviceManager.setCandidatesView(newCandidatesView)
+        candidatesView = newCandidatesView
+        return newCandidatesView
+    }
+
+    private fun replaceInputViews(theme: Theme) {
+        replaceInputView(theme)
+        replaceCandidateView(theme)
         initializationUi = null
     }
 
@@ -342,8 +345,31 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ColorManager.onSystemNightModeChange(newConfig.isNightMode())
     }
 
+    private val decorLocationInt = intArrayOf(0, 0)
+    private var decorLocationUpdated = false
+
+    private fun updateDecorLocation(
+        @Size(2) outDecorLocation: FloatArray,
+        @Size(2) outContentSize: FloatArray,
+    ) {
+        outContentSize[0] = contentView.width.toFloat()
+        outContentSize[1] = contentView.height.toFloat()
+        decorView.getLocationOnScreen(decorLocationInt)
+        outDecorLocation[0] = decorLocationInt[0].toFloat()
+        outDecorLocation[1] = decorLocationInt[1].toFloat()
+        // contentSize and decorLocation can be completely wrong,
+        // when measuring right after the very first onStartInputView() of an IMS' lifecycle
+        if (outContentSize[0] > 0 && outContentSize[1] > 0) {
+            decorLocationUpdated = true
+        }
+    }
+
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
-        composingPopupWindow?.updateCursorAnchorInfo(cursorAnchorInfo, decorView)
+        candidatesView?.updateCursorAnchor(cursorAnchorInfo) { outDecorLocation, outParentSize ->
+            if (!decorLocationUpdated) {
+                updateDecorLocation(outDecorLocation, outParentSize)
+            }
+        }
     }
 
     override fun onUpdateSelection(
@@ -411,7 +437,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         Timber.d("onCreateInputView")
         postRimeJob {
             ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
-                recreateInputView(ThemeManager.activeTheme)
+                replaceInputViews(ThemeManager.activeTheme)
             }
         }
         initializationUi = InitializationUi(this)

@@ -12,49 +12,48 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
-import com.osfans.trime.ime.composition.ComposingPopupWindow
+import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.util.monitorCursorAnchor
 
 class InputDeviceManager {
     private var inputView: InputView? = null
-    private var composingPopupWindow: ComposingPopupWindow? = null
+    private var candidatesView: CandidatesView? = null
 
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
     private fun setupInputViewCallback(isVirtual: Boolean) {
-        inputView?.handleMessage = isVirtual
+        inputView?.handleMessages = isVirtual
         inputView?.visibility = if (isVirtual) View.VISIBLE else View.GONE
     }
 
-    private fun setupComposingPopupWindowCallback(isVirtual: Boolean) {
-        val shouldSetupWindow = !isVirtual || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
-        composingPopupWindow?.handleMessage = shouldSetupWindow
-        composingPopupWindow?.useVirtualKeyboard = isVirtual
-        // dismiss ComposingPopupWindow when entering virtual keyboard mode,
-        // but preserve the visibility when entering physical keyboard mode (in case it's empty)
-        if (!shouldSetupWindow) {
-            composingPopupWindow?.dismiss()
+    private fun setupCandidatesViewCallback(isVirtual: Boolean) {
+        val shouldSetupView = !isVirtual || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
+        candidatesView?.handleMessages = shouldSetupView
+        candidatesView?.useVirtualKeyboard = isVirtual
+        if (!shouldSetupView) {
+            candidatesView?.visibility = View.GONE
         }
     }
 
-    private fun setupComponentCallback(isVirtual: Boolean) {
+    private fun setupViewCallbacks(isVirtual: Boolean) {
         setupInputViewCallback(isVirtual)
-        setupComposingPopupWindowCallback(isVirtual)
+        setupCandidatesViewCallback(isVirtual)
     }
 
     var isVirtualKeyboard = true
         private set(value) {
             field = value
-            setupComponentCallback(value)
+            setupViewCallbacks(value)
         }
 
-    fun setComponents(
-        inputView: InputView,
-        compositionWindow: ComposingPopupWindow,
-    ) {
+    fun setInputView(inputView: InputView) {
         this.inputView = inputView
-        this.composingPopupWindow = compositionWindow
-        setupComponentCallback(this.isVirtualKeyboard)
+        setupInputViewCallback(this.isVirtualKeyboard)
+    }
+
+    fun setCandidatesView(candidatesView: CandidatesView) {
+        this.candidatesView = candidatesView
+        setupCandidatesViewCallback(this.isVirtualKeyboard)
     }
 
     private fun applyMode(

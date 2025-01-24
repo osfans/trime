@@ -11,7 +11,6 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -62,10 +61,10 @@ import splitties.views.imageDrawable
  */
 @SuppressLint("ViewConstructor")
 class InputView(
-    private val service: TrimeInputMethodService,
-    private val rime: RimeSession,
-    private val theme: Theme,
-) : ConstraintLayout(service) {
+    service: TrimeInputMethodService,
+    rime: RimeSession,
+    theme: Theme,
+) : BaseInputMessenger(service, rime, theme) {
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
     private val navbarBackground get() = AppPrefs.defaultInstance().theme.navbarBackground
@@ -331,42 +330,33 @@ class InputView(
         }
     }
 
-    private val baseMessageHandler =
-        object : BaseMessageHandler(service, rime) {
-            override fun handleRimeMessage(it: RimeMessage<*>) {
-                when (it) {
-                    is RimeMessage.SchemaMessage -> {
-                        broadcaster.onRimeSchemaUpdated(it.data)
+    override fun handleRimeMessage(it: RimeMessage<*>) {
+        when (it) {
+            is RimeMessage.SchemaMessage -> {
+                broadcaster.onRimeSchemaUpdated(it.data)
 
-                        windowManager.attachWindow(KeyboardWindow)
+                windowManager.attachWindow(KeyboardWindow)
+            }
+
+            is RimeMessage.OptionMessage -> {
+                broadcaster.onRimeOptionUpdated(it.data)
+
+                if (it.data.option == "_liquid_keyboard") {
+                    ContextCompat.getMainExecutor(service).execute {
+                        windowManager.attachWindow(LiquidKeyboard)
+                        liquidKeyboard.select(0)
                     }
-
-                    is RimeMessage.OptionMessage -> {
-                        broadcaster.onRimeOptionUpdated(it.data)
-
-                        if (it.data.option == "_liquid_keyboard") {
-                            ContextCompat.getMainExecutor(service).execute {
-                                windowManager.attachWindow(LiquidKeyboard)
-                                liquidKeyboard.select(0)
-                            }
-                        }
-                    }
-
-                    is RimeMessage.ResponseMessage ->
-                        it.data.let event@{
-                            broadcaster.onInputContextUpdate(it.context)
-                        }
-
-                    else -> {}
                 }
             }
-        }
 
-    var handleMessage: Boolean
-        get() = baseMessageHandler.handleMessage
-        set(value) {
-            baseMessageHandler.handleMessage = value
+            is RimeMessage.ResponseMessage ->
+                it.data.let event@{
+                    broadcaster.onInputContextUpdate(it.context)
+                }
+
+            else -> {}
         }
+    }
 
     fun updateSelection(
         start: Int,
@@ -383,7 +373,6 @@ class InputView(
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
         // cancel the notification job and clear all broadcast receivers,
         // implies that InputView should not be attached again after detached.
-        baseMessageHandler.cancelJob()
         updateWindowViewHeightJob.cancel()
         preview.root.removeAllViews()
         broadcaster.clear()
