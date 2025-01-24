@@ -5,13 +5,14 @@
 
 package com.osfans.trime.ime.composition
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Outline
 import android.graphics.Rect
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
-import android.view.WindowManager
 import android.widget.PopupWindow
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
@@ -19,11 +20,11 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
+import splitties.dimensions.dp
 import splitties.views.backgroundColor
 
 @InputScope
@@ -32,7 +33,6 @@ class PreeditModule(
     context: Context,
     theme: Theme,
     rime: RimeSession,
-    private val bar: QuickBar,
 ) : InputBroadcastReceiver {
     private val textBackColor = ColorManager.getColor("text_back_color")
 
@@ -42,7 +42,7 @@ class PreeditModule(
                 view: View,
                 outline: Outline,
             ) {
-                val radius = theme.generalStyle.layout.roundCorner
+                val radius = context.dp(theme.generalStyle.layout.roundCorner)
                 val width = view.width
                 val height = view.height
                 val rect = Rect(-radius.toInt(), 0, width, (height + radius).toInt())
@@ -57,17 +57,42 @@ class PreeditModule(
             root.alpha = theme.generalStyle.layout.alpha / 255f
             root.outlineProvider = topLeftCornerRadiusOutlineProvider
             root.clipToOutline = true
+            root.visibility = View.INVISIBLE
             preedit.setOnCursorMoveListener { position ->
                 rime.launchOnReady { it.moveCursorPos(position) }
             }
         }
 
-    private val window =
-        PopupWindow(ui.root).apply {
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-            animationStyle = 0
+    private val touchEventReceiverWindow =
+        PopupWindow(
+            object : View(context) {
+                @SuppressLint("ClickableViewAccessibility")
+                override fun onTouchEvent(event: MotionEvent): Boolean = ui.preedit.onTouchEvent(event)
+            },
+        )
+
+    private var isWindowShowing = false
+
+    private fun showWindow() {
+        isWindowShowing = true
+        val (left, top) = intArrayOf(0, 0).also { ui.preedit.getLocationInWindow(it) }
+        val width = ui.preedit.width
+        val height = ui.preedit.height
+        if (touchEventReceiverWindow.isShowing) {
+            touchEventReceiverWindow.update(left, top, width, height)
+        } else {
+            touchEventReceiverWindow.width = width
+            touchEventReceiverWindow.height = height
+            touchEventReceiverWindow.showAtLocation(ui.root, Gravity.NO_GRAVITY, left, top)
         }
+    }
+
+    private fun dismissWindow() {
+        if (isWindowShowing) {
+            isWindowShowing = false
+            touchEventReceiverWindow.dismiss()
+        }
+    }
 
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
@@ -76,18 +101,11 @@ class PreeditModule(
         if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) return
 
         ui.update(ctx.composition)
+        ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
         if (ctx.composition.length > 0) {
-            val (x, y) = intArrayOf(0, 0).also { bar.view.getLocationInWindow(it) }
-            window.showAtLocation(bar.view, Gravity.START or Gravity.TOP, x, y)
-            ui.root.post {
-                window.update(x, y - ui.root.height, -1, -1)
-            }
+            showWindow()
         } else {
-            window.dismiss()
+            dismissWindow()
         }
-    }
-
-    fun onDetached() {
-        window.dismiss()
     }
 }

@@ -6,6 +6,7 @@
 package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
+import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.osfans.trime.core.RimeProto
@@ -77,6 +78,7 @@ class CandidatesView(
     private fun updateUi() {
         if (evaluateVisibility()) {
             preeditUi.update(inputComposition)
+            preeditUi.root.visibility = if (preeditUi.visible) View.VISIBLE else View.INVISIBLE
             // if CandidatesView can be shown, rime engine is ready most of the time,
             // so it should be safety to get option immediately
             val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
