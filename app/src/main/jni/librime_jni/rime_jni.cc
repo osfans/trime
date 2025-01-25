@@ -118,6 +118,10 @@ class Rime {
     return rime->delete_candidate(session, index);
   }
 
+  bool changePage(bool backward) {
+    return rime->change_page(session, backward);
+  }
+
   using CandidateItem = std::pair<std::string, std::string>;
   using CandidateList = std::vector<CandidateItem>;
 
@@ -413,6 +417,13 @@ Java_com_osfans_trime_core_Rime_forgetRimeCandidate(JNIEnv *env,
                                                     jclass /* thiz */,
                                                     jint index) {
   return Rime::Instance().forgetCandidate(index);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_osfans_trime_core_Rime_changeRimeCandidatePage(JNIEnv *env,
+                                                        jclass clazz,
+                                                        jboolean backward) {
+  return Rime::Instance().changePage(backward);
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
