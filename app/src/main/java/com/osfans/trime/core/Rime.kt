@@ -127,6 +127,11 @@ class Rime :
             deleteRimeCandidateOnCurrentPage(idx).also { if (it) requireResponse() }
         }
 
+    override suspend fun changeCandidatePage(backward: Boolean): Boolean =
+        withRimeContext {
+            changeRimeCandidatePage(backward).also { if (it) requireResponse() }
+        }
+
     override suspend fun moveCursorPos(position: Int) =
         withRimeContext {
             setRimeCaretPos(position)
@@ -372,6 +377,9 @@ class Rime :
 
         @JvmStatic
         external fun forgetRimeCandidate(index: Int): Boolean
+
+        @JvmStatic
+        external fun changeRimeCandidatePage(backward: Boolean): Boolean
 
         @JvmStatic
         external fun getAvailableRimeSchemaList(): Array<SchemaItem>
