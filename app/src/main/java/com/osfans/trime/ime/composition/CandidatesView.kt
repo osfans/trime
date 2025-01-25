@@ -134,6 +134,11 @@ class CandidatesView(
         val y: Float
         val (horizontal, top, _, bottom) = anchorPosition
         val (parentWidth, parentHeight) = parentSize
+        if (parentWidth <= 0 || parentHeight <= 0) {
+            translationX = 0f
+            translationY = 0f
+            return
+        }
         val selfWidth = width.toFloat()
         val selfHeight = height.toFloat()
         val (_, inputViewHeight) =
@@ -186,7 +191,7 @@ class CandidatesView(
 
     fun updateCursorAnchor(
         info: CursorAnchorInfo,
-        updateLocation: (FloatArray, FloatArray) -> Unit,
+        updateDecorLocation: (FloatArray, FloatArray) -> Unit,
     ) {
         val bounds = info.getCharacterBounds(0)
         // update anchorPosition
@@ -206,8 +211,15 @@ class CandidatesView(
             anchorPosition.bottom = bounds.bottom
             anchorPosition.right = horizontal
         }
+        updateDecorLocation(decorLocation, parentSize)
+        @Suppress("KotlinConstantConditions")
+        // Any component of anchorPosition can be NaN,
+        // meaning it will not equal itself!
+        if (anchorPosition != anchorPosition) {
+            anchorPosition.set(0f, parentSize[1], 0f, parentSize[1])
+            return
+        }
         info.matrix.mapRect(anchorPosition)
-        updateLocation(decorLocation, parentSize)
         val (dX, dY) = decorLocation
         anchorPosition.offset(-dX, -dY)
     }
