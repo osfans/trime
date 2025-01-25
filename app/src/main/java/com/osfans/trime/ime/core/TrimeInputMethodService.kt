@@ -349,27 +349,24 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var decorLocationUpdated = false
 
     private fun updateDecorLocation(
-        @Size(2) outDecorLocation: FloatArray,
-        @Size(2) outContentSize: FloatArray,
+        @Size(2) outDecor: FloatArray,
+        @Size(2) outContent: FloatArray,
     ) {
-        outContentSize[0] = contentView.width.toFloat()
-        outContentSize[1] = contentView.height.toFloat()
+        if (decorLocationUpdated) return
+        outContent[0] = contentView.width.toFloat()
+        outContent[1] = contentView.height.toFloat()
         decorView.getLocationOnScreen(decorLocationInt)
-        outDecorLocation[0] = decorLocationInt[0].toFloat()
-        outDecorLocation[1] = decorLocationInt[1].toFloat()
+        outDecor[0] = decorLocationInt[0].toFloat()
+        outDecor[1] = decorLocationInt[1].toFloat()
         // contentSize and decorLocation can be completely wrong,
         // when measuring right after the very first onStartInputView() of an IMS' lifecycle
-        if (outContentSize[0] > 0 && outContentSize[1] > 0) {
+        if (outContent[0] > 0 && outContent[1] > 0) {
             decorLocationUpdated = true
         }
     }
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
-        candidatesView?.updateCursorAnchor(cursorAnchorInfo) { outDecorLocation, outParentSize ->
-            if (!decorLocationUpdated) {
-                updateDecorLocation(outDecorLocation, outParentSize)
-            }
-        }
+        candidatesView?.updateCursorAnchor(cursorAnchorInfo, ::updateDecorLocation)
     }
 
     override fun onUpdateSelection(
