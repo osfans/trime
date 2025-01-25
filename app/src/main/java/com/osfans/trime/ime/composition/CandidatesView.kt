@@ -9,6 +9,8 @@ import android.annotation.SuppressLint
 import android.graphics.RectF
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.ViewTreeObserver.OnPreDrawListener
 import android.view.inputmethod.CursorAnchorInfo
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
@@ -56,6 +58,21 @@ class CandidatesView(
 
     private val anchorPosition = RectF()
     private val parentSize = floatArrayOf(0f, 0f)
+
+    private var shouldUpdatePosition = false
+
+    private val layoutListener =
+        OnGlobalLayoutListener {
+            shouldUpdatePosition = true
+        }
+
+    private val preDrawListener =
+        OnPreDrawListener {
+            if (shouldUpdatePosition) {
+                updatePosition()
+            }
+            true
+        }
 
     private val preeditUi =
         PreeditUi(ctx, theme).apply {
@@ -162,6 +179,7 @@ class CandidatesView(
         }
         translationX = x
         translationY = y
+        shouldUpdatePosition = false
     }
 
     private val decorLocation = floatArrayOf(0f, 0f)
@@ -170,7 +188,6 @@ class CandidatesView(
         info: CursorAnchorInfo,
         updateLocation: (FloatArray, FloatArray) -> Unit,
     ) {
-        if (position != PopupPosition.FOLLOW) return
         val bounds = info.getCharacterBounds(0)
         // update anchorPosition
         if (bounds == null) {
@@ -229,5 +246,17 @@ class CandidatesView(
 
         isFocusable = false
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        candidatesUi.root.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        viewTreeObserver.addOnPreDrawListener(preDrawListener)
+    }
+
+    override fun onDetachedFromWindow() {
+        viewTreeObserver.removeOnPreDrawListener(preDrawListener)
+        candidatesUi.root.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+        super.onDetachedFromWindow()
     }
 }
