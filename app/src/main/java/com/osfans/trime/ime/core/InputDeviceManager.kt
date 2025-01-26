@@ -146,7 +146,7 @@ class InputDeviceManager {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE ->
                     toolType == MotionEvent.TOOL_TYPE_FINGER || toolType == MotionEvent.TOOL_TYPE_STYLUS
-                PopupCandidatesMode.ALWAYS_SHOW -> false
+                PopupCandidatesMode.ALWAYS_SHOW -> true
                 PopupCandidatesMode.DISABLED -> true
             }
         applyMode(service, useVirtualKeyboard)
