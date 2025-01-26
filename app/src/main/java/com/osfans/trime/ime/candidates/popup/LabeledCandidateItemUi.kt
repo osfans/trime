@@ -7,11 +7,7 @@ package com.osfans.trime.ime.candidates.popup
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.text.TextPaint
-import android.text.style.UnderlineSpan
-import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import com.osfans.trime.core.RimeProto
@@ -28,19 +24,6 @@ class LabeledCandidateItemUi(
     override val ctx: Context,
     val theme: Theme,
 ) : Ui {
-    class CandidateSpan(
-        @ColorInt private val color: Int,
-        private val textSize: Float,
-        private val typeface: Typeface,
-    ) : UnderlineSpan() {
-        override fun updateDrawState(ds: TextPaint) {
-            ds.isUnderlineText = false
-            ds.color = color
-            ds.textSize = textSize
-            ds.typeface = typeface
-        }
-    }
-
     private val labelSize = theme.generalStyle.labelTextSize
     private val textSize = theme.generalStyle.candidateTextSize
     private val commentSize = theme.generalStyle.commentTextSize
@@ -69,11 +52,11 @@ class LabeledCandidateItemUi(
         val commentFg = if (highlighted) highlightCommentTextColor else commentColor
         root.text =
             buildSpannedString {
-                inSpans(CandidateSpan(labelFg, ctx.sp(labelSize), labelFont)) { append(candidate.label) }
-                inSpans(CandidateSpan(textFg, ctx.sp(textSize), textFont)) { append(candidate.text) }
-                if (!candidate.comment.isNullOrEmpty()) {
+                inSpans(CandidateItemSpan(labelFg, ctx.sp(labelSize), labelFont)) { append(candidate.label) }
+                inSpans(CandidateItemSpan(textFg, ctx.sp(textSize), textFont)) { append(candidate.text) }
+                if (!candidate.comment.isNullOrBlank()) {
                     append(" ")
-                    inSpans(CandidateSpan(commentFg, ctx.sp(commentSize), commentFont)) { append(candidate.comment) }
+                    inSpans(CandidateItemSpan(commentFg, ctx.sp(commentSize), commentFont)) { append(candidate.comment) }
                 }
             }
         val bg =
