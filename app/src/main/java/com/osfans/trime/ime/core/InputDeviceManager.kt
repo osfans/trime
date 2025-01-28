@@ -29,7 +29,6 @@ class InputDeviceManager {
     private fun setupCandidatesViewCallback(isVirtual: Boolean) {
         val shouldSetupView = !isVirtual || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
         candidatesView?.handleMessages = shouldSetupView
-        candidatesView?.useVirtualKeyboard = isVirtual
         if (!shouldSetupView) {
             candidatesView?.visibility = View.GONE
         }
@@ -63,7 +62,7 @@ class InputDeviceManager {
         if (useVirtualKeyboard == isVirtualKeyboard) {
             return
         }
-        // monitor CursorAnchorInfo when switching to ComposingPopupWindow
+        // monitor CursorAnchorInfo when switching to CandidatesView
         service.currentInputConnection.monitorCursorAnchor(!useVirtualKeyboard)
         isVirtualKeyboard = useVirtualKeyboard
     }
