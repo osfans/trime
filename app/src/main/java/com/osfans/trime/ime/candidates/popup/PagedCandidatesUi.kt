@@ -6,6 +6,7 @@
 package com.osfans.trime.ime.candidates.popup
 
 import android.content.Context
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
@@ -123,6 +124,7 @@ class PagedCandidatesUi(
             isFocusable = false
             adapter = candidatesAdapter
             layoutManager = candidatesLayoutManager
+            overScrollMode = View.OVER_SCROLL_NEVER
         }
 
     fun update(

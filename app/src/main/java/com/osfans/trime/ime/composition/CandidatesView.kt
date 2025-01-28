@@ -120,8 +120,6 @@ class CandidatesView(
             // so it should be safety to get option immediately
             val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
             candidatesUi.update(menu, isHorizontalLayout)
-            updatePosition()
-            touchEventReceiverWindow.showup()
             visibility = View.VISIBLE
         } else {
             touchEventReceiverWindow.dismiss()
@@ -184,6 +182,10 @@ class CandidatesView(
         }
         translationX = x
         translationY = y
+        // update touchEventReceiverWindow's position after CandidatesView's
+        if (evaluateVisibility()) {
+            touchEventReceiverWindow.showup()
+        }
         shouldUpdatePosition = false
     }
 
@@ -222,6 +224,7 @@ class CandidatesView(
         info.matrix.mapRect(anchorPosition)
         val (dX, dY) = decorLocation
         anchorPosition.offset(-dX, -dY)
+        updatePosition()
     }
 
     init {
@@ -269,6 +272,7 @@ class CandidatesView(
     override fun onDetachedFromWindow() {
         viewTreeObserver.removeOnPreDrawListener(preDrawListener)
         candidatesUi.root.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+        touchEventReceiverWindow.dismiss()
         super.onDetachedFromWindow()
     }
 }
