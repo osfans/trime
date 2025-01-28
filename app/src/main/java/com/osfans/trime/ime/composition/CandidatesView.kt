@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
-import android.view.inputmethod.CursorAnchorInfo
+import androidx.annotation.Size
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.core.graphics.component3
@@ -47,8 +47,6 @@ class CandidatesView(
     rime: RimeSession,
     theme: Theme,
 ) : BaseInputMessenger(service, rime, theme) {
-    var useVirtualKeyboard: Boolean = true
-
     private val ctx = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
 
     private val position by AppPrefs.defaultInstance().candidates.position
@@ -131,19 +129,11 @@ class CandidatesView(
         }
         val selfWidth = width.toFloat()
         val selfHeight = height.toFloat()
-        val (_, inputViewHeight) =
-            intArrayOf(0, 0)
-                .also { service.inputView?.keyboardView?.getLocationInWindow(it) }
 
         val minX = 0f
         val minY = 0f
         val maxX = parentWidth - selfWidth
-        val maxY =
-            if (useVirtualKeyboard) {
-                inputViewHeight - selfHeight
-            } else {
-                parentHeight - selfHeight
-            }
+        val maxY = (if (bottom + selfHeight > parentHeight) top else parentHeight) - selfHeight
         when (position) {
             PopupPosition.TOP_RIGHT -> {
                 x = maxX
@@ -181,41 +171,14 @@ class CandidatesView(
         shouldUpdatePosition = false
     }
 
-    private val decorLocation = floatArrayOf(0f, 0f)
-
     fun updateCursorAnchor(
-        info: CursorAnchorInfo,
-        updateDecorLocation: (FloatArray, FloatArray) -> Unit,
+        anchorPosition: RectF,
+        @Size(2) parent: FloatArray,
     ) {
-        val bounds = info.getCharacterBounds(0)
-        // update anchorPosition
-        if (bounds == null) {
-            // composing is disabled in target app or trime settings
-            // use the position of the insertion marker instead
-            anchorPosition.top = info.insertionMarkerTop
-            anchorPosition.left = info.insertionMarkerHorizontal
-            anchorPosition.bottom = info.insertionMarkerBottom
-            anchorPosition.right = info.insertionMarkerHorizontal
-        } else {
-            // for different writing system (e.g. right to left languages),
-            // we have to calculate the correct RectF
-            val horizontal = if (layoutDirection == View.LAYOUT_DIRECTION_RTL) bounds.right else bounds.left
-            anchorPosition.top = bounds.top
-            anchorPosition.left = horizontal
-            anchorPosition.bottom = bounds.bottom
-            anchorPosition.right = horizontal
-        }
-        updateDecorLocation(decorLocation, parentSize)
-        @Suppress("KotlinConstantConditions")
-        // Any component of anchorPosition can be NaN,
-        // meaning it will not equal itself!
-        if (anchorPosition != anchorPosition) {
-            anchorPosition.set(0f, parentSize[1], 0f, parentSize[1])
-            return
-        }
-        info.matrix.mapRect(anchorPosition)
-        val (dX, dY) = decorLocation
-        anchorPosition.offset(-dX, -dY)
+        this.anchorPosition.set(anchorPosition)
+        val (parentWidth, parentHeight) = parent
+        parentSize[0] = parentWidth
+        parentSize[1] = parentHeight
         updatePosition()
     }
 

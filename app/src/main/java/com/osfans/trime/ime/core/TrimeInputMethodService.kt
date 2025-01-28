@@ -11,6 +11,7 @@ import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.RectF
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.Bundle
@@ -30,7 +31,6 @@ import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import androidx.annotation.Keep
-import androidx.annotation.Size
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.isVisible
@@ -52,6 +52,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.broadcast.IntentReceiver
+import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InitializationUi
@@ -85,7 +86,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         get() = AppPrefs.defaultInstance()
     private lateinit var decorView: View
     private lateinit var contentView: FrameLayout
-    var inputView: InputView? = null
+    private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
     private val inputDeviceManager = InputDeviceManager()
     private var initializationUi: InitializationUi? = null
@@ -345,28 +346,69 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ColorManager.onSystemNightModeChange(newConfig.isNightMode())
     }
 
+    private val contentSize = floatArrayOf(0f, 0f)
+    private val decorLocation = floatArrayOf(0f, 0f)
     private val decorLocationInt = intArrayOf(0, 0)
     private var decorLocationUpdated = false
 
-    private fun updateDecorLocation(
-        @Size(2) outDecor: FloatArray,
-        @Size(2) outContent: FloatArray,
-    ) {
-        if (decorLocationUpdated) return
-        outContent[0] = contentView.width.toFloat()
-        outContent[1] = contentView.height.toFloat()
+    private fun updateDecorLocation() {
+        contentSize[0] = contentView.width.toFloat()
+        contentSize[1] =
+            if (inputDeviceManager.isVirtualKeyboard) {
+                inputViewLocation[1].toFloat()
+            } else {
+                contentView.height.toFloat()
+            }
         decorView.getLocationOnScreen(decorLocationInt)
-        outDecor[0] = decorLocationInt[0].toFloat()
-        outDecor[1] = decorLocationInt[1].toFloat()
+        decorLocation[0] = decorLocationInt[0].toFloat()
+        decorLocation[1] = decorLocationInt[1].toFloat()
         // contentSize and decorLocation can be completely wrong,
         // when measuring right after the very first onStartInputView() of an IMS' lifecycle
-        if (outContent[0] > 0 && outContent[1] > 0) {
+        if (contentSize[0] > 0 && contentSize[1] > 0) {
             decorLocationUpdated = true
         }
     }
 
-    override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo) {
-        candidatesView?.updateCursorAnchor(cursorAnchorInfo, ::updateDecorLocation)
+    private val anchorPosition = RectF()
+
+    private fun workaroundNullCursorAnchorInfo() {
+        anchorPosition.set(0f, contentSize[1], 0f, contentSize[1])
+        candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
+    }
+
+    override fun onUpdateCursorAnchorInfo(info: CursorAnchorInfo) {
+        val bounds = info.getCharacterBounds(0)
+        // update anchorPosition
+        if (bounds == null) {
+            // composing is disabled in target app or trime settings
+            // use the position of the insertion marker instead
+            anchorPosition.top = info.insertionMarkerTop
+            anchorPosition.left = info.insertionMarkerHorizontal
+            anchorPosition.bottom = info.insertionMarkerBottom
+            anchorPosition.right = info.insertionMarkerHorizontal
+        } else {
+            // for different writing system (e.g. right to left languages),
+            // we have to calculate the correct RectF
+            val horizontal = if (candidatesView?.layoutDirection == View.LAYOUT_DIRECTION_RTL) bounds.right else bounds.left
+            anchorPosition.top = bounds.top
+            anchorPosition.left = horizontal
+            anchorPosition.bottom = bounds.bottom
+            anchorPosition.right = horizontal
+        }
+        if (!decorLocationUpdated) {
+            updateDecorLocation()
+        }
+        @Suppress("KotlinConstantConditions")
+        // Any component of anchorPosition can be NaN,
+        // meaning it will not equal itself!
+        if (anchorPosition != anchorPosition) {
+            workaroundNullCursorAnchorInfo()
+            return
+        }
+        info.matrix.mapRect(anchorPosition)
+        val (dX, dY) = decorLocation
+        anchorPosition.offset(-dX, -dY)
+        candidatesView?.updateCursorAnchor(anchorPosition, contentSize)
     }
 
     override fun onUpdateSelection(
@@ -399,23 +441,23 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         inputView?.updateSelection(newSelStart, newSelEnd)
     }
 
+    private val inputViewLocation = intArrayOf(0, 0)
+
     override fun onComputeInsets(outInsets: Insets) {
         if (inputDeviceManager.isVirtualKeyboard) {
-            val (_, y) =
-                intArrayOf(0, 0).also {
-                    if (inputView?.keyboardView?.isVisible == true) {
-                        inputView?.keyboardView?.getLocationInWindow(it)
-                    } else {
-                        initializationUi?.initial?.getLocationInWindow(it)
-                    }
-                }
+            if (inputView?.keyboardView?.isVisible == true) {
+                inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
+            } else {
+                initializationUi?.initial?.getLocationInWindow(inputViewLocation)
+            }
             outInsets.apply {
-                contentTopInsets = y
-                visibleTopInsets = y
+                contentTopInsets = inputViewLocation[1]
+                visibleTopInsets = inputViewLocation[1]
                 touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
             }
         } else {
-            val h = decorView.height
+            val n = decorView.findViewById<View>(android.R.id.navigationBarBackground)?.height ?: 0
+            val h = decorView.height - n
             outInsets.apply {
                 contentTopInsets = h
                 visibleTopInsets = h
@@ -486,14 +528,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return true
     }
 
+    private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
+
     override fun onStartInputView(
         attribute: EditorInfo,
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=$restarting")
-        if (!restarting) {
-            currentInputConnection?.monitorCursorAnchor()
-        }
         postRimeJob {
             updateRimeOption(this)
             InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
@@ -502,8 +543,18 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
             }
             ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
-                if (inputDeviceManager.evaluateOnStartInputView(attribute, this@TrimeInputMethodService)) {
+                val useVirtualKeyboard =
+                    inputDeviceManager.evaluateOnStartInputView(attribute, this@TrimeInputMethodService)
+                if (useVirtualKeyboard) {
                     inputView?.startInput(attribute, restarting)
+                }
+                if (!useVirtualKeyboard || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
+                    if (currentInputConnection?.monitorCursorAnchor() != true) {
+                        if (!decorLocationUpdated) {
+                            updateDecorLocation()
+                        }
+                        workaroundNullCursorAnchorInfo()
+                    }
                 }
             }
             when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
@@ -578,6 +629,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
+        decorLocationUpdated = false
         inputDeviceManager.onFinishInputView()
         currentInputConnection?.apply {
             if (normalTextEditor) {
@@ -784,6 +836,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         event: KeyEvent,
     ): Boolean {
         if (inputDeviceManager.evaluateOnKeyDown(event, this)) {
+            decorLocationUpdated = false
             forceShowSelf()
         }
         return forwardKeyEvent(event) || super.onKeyDown(keyCode, event)
@@ -799,6 +852,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     override fun onViewClicked(focusChanged: Boolean) {
         super.onViewClicked(focusChanged)
         if (Build.VERSION.SDK_INT < 34) {
+            decorLocationUpdated = false
             inputDeviceManager.evaluateOnViewClicked(this)
         }
     }
@@ -806,6 +860,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     @TargetApi(34)
     override fun onUpdateEditorToolType(toolType: Int) {
         super.onUpdateEditorToolType(toolType)
+        decorLocationUpdated = false
         inputDeviceManager.evaluateOnUpdateEditorToolType(toolType, this)
     }
 
