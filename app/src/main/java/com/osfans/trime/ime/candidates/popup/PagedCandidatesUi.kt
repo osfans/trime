@@ -23,6 +23,9 @@ import splitties.views.dsl.recyclerview.recyclerView
 class PagedCandidatesUi(
     override val ctx: Context,
     val theme: Theme,
+    private val onCandidateClick: (Int) -> Unit,
+    private val onPrevPage: () -> Unit,
+    private val onNextPage: () -> Unit,
 ) : Ui {
     private var menu = RimeProto.Context.Menu()
 
@@ -40,19 +43,7 @@ class PagedCandidatesUi(
         ) : UiHolder(ui)
     }
 
-    enum class ClickType {
-        CANDIDATE,
-        PREV_PAGE,
-        NEXT_PAGE,
-    }
-
-    private var clickListener: ((type: ClickType, position: Int) -> Unit)? = null
-
-    fun setOnClickListener(listener: (type: ClickType, position: Int) -> Unit) {
-        clickListener = listener
-    }
-
-    val candidatesAdapter =
+    private val candidatesAdapter =
         object : BaseQuickAdapter<RimeProto.Candidate, UiHolder>() {
             override fun getItemCount(items: List<RimeProto.Candidate>) =
                 items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
@@ -89,7 +80,7 @@ class PagedCandidatesUi(
                         val candidate = item ?: return
                         holder.ui.update(candidate, position == menu.highlightedCandidateIndex)
                         holder.ui.root.setOnClickListener {
-                            clickListener?.invoke(ClickType.CANDIDATE, position)
+                            onCandidateClick.invoke(position)
                         }
                     }
                     is UiHolder.Pagination -> {
@@ -99,10 +90,10 @@ class PagedCandidatesUi(
                             alignSelf = if (isHorizontal) AlignItems.CENTER else AlignItems.STRETCH
                         }
                         holder.ui.prevIcon.setOnClickListener {
-                            clickListener?.invoke(ClickType.PREV_PAGE, menu.pageNumber)
+                            onPrevPage.invoke()
                         }
                         holder.ui.nextIcon.setOnClickListener {
-                            clickListener?.invoke(ClickType.NEXT_PAGE, menu.pageNumber)
+                            onNextPage.invoke()
                         }
                     }
                 }
