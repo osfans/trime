@@ -82,21 +82,13 @@ class CandidatesView(
         }
 
     private val candidatesUi =
-        PagedCandidatesUi(ctx, theme).apply {
-            setOnClickListener { type, position ->
-                when (type) {
-                    PagedCandidatesUi.ClickType.CANDIDATE -> {
-                        rime.launchOnReady { it.selectPagedCandidate(position) }
-                    }
-                    PagedCandidatesUi.ClickType.PREV_PAGE -> {
-                        rime.launchOnReady { it.changeCandidatePage(true) }
-                    }
-                    PagedCandidatesUi.ClickType.NEXT_PAGE -> {
-                        rime.launchOnReady { it.changeCandidatePage(false) }
-                    }
-                }
-            }
-        }
+        PagedCandidatesUi(
+            ctx,
+            theme,
+            onCandidateClick = { index -> rime.launchOnReady { it.selectPagedCandidate(index) } },
+            onPrevPage = { rime.launchOnReady { it.changeCandidatePage(true) } },
+            onNextPage = { rime.launchOnReady { it.changeCandidatePage(false) } },
+        )
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(this)
 
