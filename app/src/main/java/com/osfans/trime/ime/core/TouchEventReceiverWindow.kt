@@ -22,15 +22,18 @@ class TouchEventReceiverWindow(
                 @SuppressLint("ClickableViewAccessibility")
                 override fun onTouchEvent(event: MotionEvent): Boolean = contentView.dispatchTouchEvent(event)
             },
-        )
+        ).apply {
+            // disable animation
+            animationStyle = 0
+        }
 
     private var isWindowShowing = false
 
+    private val cachedLocation = intArrayOf(0, 0)
+
     fun showup() {
         isWindowShowing = true
-        val location = intArrayOf(0, 0)
-        contentView.getLocationInWindow(location)
-        val (left, top) = location
+        val (left, top) = cachedLocation.also { contentView.getLocationInWindow(it) }
         val width = contentView.width
         val height = contentView.height
         if (window.isShowing) {
