@@ -54,7 +54,7 @@ class QuickBar(
     private val prefs = AppPrefs.defaultInstance()
 
     private val showSwitches by prefs.keyboard.showSchemaSwitches
-    private val hideQuickBar by prefs.candidates.hideQuickBar
+    private val hideQuickBar by prefs.keyboard.hideQuickBar
 
     val themedHeight =
         theme.generalStyle.candidateViewHeight + theme.generalStyle.commentHeight
@@ -181,14 +181,12 @@ class QuickBar(
 
     val view by lazy {
         ViewAnimator(context).apply {
-            rime.launchOnReady {
-                visibility =
-                    if (hideQuickBar && candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
-                        View.GONE
-                    } else {
-                        View.VISIBLE
-                    }
-            }
+            visibility =
+                if (hideQuickBar) {
+                    View.GONE
+                } else {
+                    View.VISIBLE
+                }
             background =
                 ColorManager.getDrawable(
                     "candidate_background",
