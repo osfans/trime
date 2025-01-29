@@ -6,6 +6,7 @@ package com.osfans.trime.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.Keep
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
@@ -46,12 +47,24 @@ class AppPrefs(
 
     val candidates = Candidates(shared).register()
 
+    @Keep
+    private val onSharedPreferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == null) return@OnSharedPreferenceChangeListener
+            providers.forEach {
+                it.notifyChange(key)
+            }
+        }
+
     companion object {
         private var defaultInstance: AppPrefs? = null
 
         fun initDefault(sharedPreferences: SharedPreferences): AppPrefs {
             val instance = AppPrefs(sharedPreferences)
             defaultInstance = instance
+            sharedPreferences.registerOnSharedPreferenceChangeListener(
+                defaultInstance().onSharedPreferenceChangeListener,
+            )
             return instance
         }
 
@@ -113,6 +126,7 @@ class AppPrefs(
             const val POPUP_KEY_PRESS_ENABLED = "keyboard__show_key_popup"
             const val SHOW_SCHEMA_SWITCHES = "show_schema_switches_in_idle"
             const val SHOW_ARROW_IN_SWITCHES = "show_arrow_in_switches"
+            const val HIDE_QUICK_BAR = "hide_quick_bar"
             const val LANDSCAPE_MODE = "keyboard__landscape_mode"
             const val SPLIT_SPACE_PERCENT = "keyboard__split_space"
 
@@ -148,6 +162,7 @@ class AppPrefs(
         val popupKeyPressEnabled = bool(POPUP_KEY_PRESS_ENABLED, false)
         val showSchemaSwitches = bool(SHOW_SCHEMA_SWITCHES, true)
         val showArrowInSwitches = bool(SHOW_ARROW_IN_SWITCHES, true)
+        val hideQuickBar = bool(HIDE_QUICK_BAR, false)
 
         enum class LandscapeModeOption {
             NEVER,
@@ -190,12 +205,10 @@ class AppPrefs(
         companion object {
             const val MODE = "show_candidates_window"
             const val POSITION = "candidates_window_position"
-            const val HIDE_QUICK_BAR = "hide_quick_bar"
         }
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
         val position = enum(R.string.candidates_window_position, POSITION, PopupPosition.BOTTOM_LEFT)
-        val hideQuickBar = switch(R.string.hide_quick_bar_when_always_show, HIDE_QUICK_BAR, false)
     }
 
     /**

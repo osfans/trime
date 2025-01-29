@@ -48,6 +48,8 @@ import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.prefs.PreferenceDelegate
+import com.osfans.trime.data.prefs.PreferenceDelegateProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
@@ -98,6 +100,25 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     var lastCommittedText: CharSequence = ""
         private set
 
+    private val recreateInputViewPrefs: Array<PreferenceDelegate<*>> =
+        arrayOf(
+            prefs.keyboard.showSchemaSwitches,
+            prefs.keyboard.showArrowInSwitches,
+            prefs.keyboard.hideQuickBar,
+        )
+
+    @Keep
+    private val recreateInputViewListener =
+        PreferenceDelegate.OnChangeListener<Any> { _, _ ->
+            replaceInputView(ThemeManager.activeTheme)
+        }
+
+    @Keep
+    private val recreateCandidatesViewListener =
+        PreferenceDelegateProvider.OnChangeListener {
+            replaceCandidateView(ThemeManager.activeTheme)
+        }
+
     @Keep
     private val onThemeChangeListener =
         ThemeManager.OnThemeChangeListener {
@@ -107,7 +128,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     @Keep
     private val onColorChangeListener =
         ColorManager.OnColorChangeListener {
-            replaceInputViews(it)
+            ContextCompat.getMainExecutor(this).execute {
+                replaceInputViews(it)
+            }
         }
 
     private fun postJob(
@@ -174,6 +197,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 handleRimeMessage(it)
             }
         }
+        recreateInputViewPrefs.forEach {
+            it.registerOnChangeListener(recreateInputViewListener)
+        }
+        prefs.candidates.registerOnChangeListener(recreateCandidatesViewListener)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         ColorManager.addOnChangedListener(onColorChangeListener)
         super.onCreate()
@@ -311,6 +338,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
+        recreateInputViewPrefs.forEach {
+            it.unregisterOnChangeListener(recreateInputViewListener)
+        }
+        prefs.candidates.unregisterOnChangeListener(recreateCandidatesViewListener)
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
