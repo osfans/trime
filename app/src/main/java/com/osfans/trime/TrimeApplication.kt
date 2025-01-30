@@ -8,12 +8,14 @@ import android.app.Application
 import android.content.Intent
 import android.os.Process
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
@@ -28,18 +30,20 @@ import kotlin.system.exitProcess
  * classes everywhere.
  */
 class TrimeApplication : Application() {
-    companion object {
-        private var instance: TrimeApplication? = null
-        private var lastPid: Int? = null
-
-        fun getInstance() = instance ?: throw IllegalStateException("Trime application is not created!")
-
-        fun getLastPid() = lastPid
-
-        private const val MAX_STACKTRACE_SIZE = 128000
-    }
-
     val coroutineScope = MainScope() + CoroutineName("TrimeApplication")
+
+    private val rimeIntentReceiver = RimeIntentReceiver()
+
+    private fun registerBroadcastReceiver() {
+        ContextCompat.registerReceiver(
+            this,
+            rimeIntentReceiver,
+            RimeIntentReceiver.intentFilter,
+            PERMISSION_TEST_INPUT_METHOD,
+            null,
+            ContextCompat.RECEIVER_EXPORTED,
+        )
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -128,9 +132,34 @@ class TrimeApplication : Application() {
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)
+            registerBroadcastReceiver()
         } catch (e: Exception) {
             e.fillInStackTrace()
             return
         }
+    }
+
+    companion object {
+        private var instance: TrimeApplication? = null
+        private var lastPid: Int? = null
+
+        fun getInstance() = instance ?: throw IllegalStateException("Trime application is not created!")
+
+        fun getLastPid() = lastPid
+
+        private const val MAX_STACKTRACE_SIZE = 128000
+
+        /**
+         * This permission is requested by com.android.shell, makes it possible to start
+         * deploy from `adb shell am` command:
+         * ```sh
+         * adb shell am broadcast -a com.osfans.trime.action.DEPLOY
+         * ```
+         * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-7.0.0_r1/packages/Shell/AndroidManifest.xml#67
+         *
+         * other candidate: android.permission.TEST_INPUT_METHOD requires Android 14
+         * https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-14.0.0_r1/packages/Shell/AndroidManifest.xml#628
+         */
+        const val PERMISSION_TEST_INPUT_METHOD = "android.permission.READ_INPUT_STATE"
     }
 }

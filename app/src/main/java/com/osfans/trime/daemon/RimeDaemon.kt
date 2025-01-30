@@ -131,6 +131,11 @@ object RimeDaemon {
         }
     }
 
+    /**
+     * Reuse a session for remote service
+     */
+    fun getFirstSessionOrNull() = sessions.firstNotNullOfOrNull { it.value }
+
     private const val CHANNEL_ID = "rime-daemon"
     private const val MESSAGE_ID = 2331
     private var restartId = 0
