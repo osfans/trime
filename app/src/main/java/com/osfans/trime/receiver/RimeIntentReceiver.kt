@@ -8,7 +8,6 @@ package com.osfans.trime.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.daemon.RimeDaemon
 import timber.log.Timber
@@ -34,13 +33,7 @@ class RimeIntentReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        private const val ACTION_DEPLOY = "${BuildConfig.APPLICATION_ID}.action.DEPLOY"
-        private const val ACTION_SYNC_USER_DATA = "${BuildConfig.APPLICATION_ID}.action.SYNC_USER_DATA"
-
-        val intentFilter =
-            IntentFilter().apply {
-                addAction(ACTION_DEPLOY)
-                addAction(ACTION_SYNC_USER_DATA)
-            }
+        const val ACTION_DEPLOY = "${BuildConfig.APPLICATION_ID}.action.DEPLOY"
+        const val ACTION_SYNC_USER_DATA = "${BuildConfig.APPLICATION_ID}.action.SYNC_USER_DATA"
     }
 }

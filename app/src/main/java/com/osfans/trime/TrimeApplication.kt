@@ -6,6 +6,7 @@ package com.osfans.trime
 
 import android.app.Application
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Process
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -35,10 +36,15 @@ class TrimeApplication : Application() {
     private val rimeIntentReceiver = RimeIntentReceiver()
 
     private fun registerBroadcastReceiver() {
+        val intentFilter =
+            IntentFilter().apply {
+                addAction(RimeIntentReceiver.ACTION_DEPLOY)
+                addAction(RimeIntentReceiver.ACTION_SYNC_USER_DATA)
+            }
         ContextCompat.registerReceiver(
             this,
             rimeIntentReceiver,
-            RimeIntentReceiver.intentFilter,
+            intentFilter,
             PERMISSION_TEST_INPUT_METHOD,
             null,
             ContextCompat.RECEIVER_EXPORTED,

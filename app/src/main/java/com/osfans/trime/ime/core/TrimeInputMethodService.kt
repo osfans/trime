@@ -10,6 +10,7 @@ import android.app.AlarmManager
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.RectF
 import android.inputmethodservice.InputMethodService
@@ -59,6 +60,7 @@ import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.forceShowSelf
 import com.osfans.trime.util.isNightMode
@@ -90,6 +92,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
     private val inputDeviceManager = InputDeviceManager()
+    private val rimeIntentReceiver = RimeIntentReceiver()
     private var initializationUi: InitializationUi? = null
     private val locales = Array(2) { Locale.getDefault() }
 
@@ -185,6 +188,20 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    private fun registerReceiver() {
+        val intentFilter =
+            IntentFilter().apply {
+                addAction(RimeIntentReceiver.ACTION_DEPLOY)
+                addAction(RimeIntentReceiver.ACTION_SYNC_USER_DATA)
+            }
+        ContextCompat.registerReceiver(
+            this,
+            rimeIntentReceiver,
+            intentFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+    }
+
     override fun onCreate() {
         rime = RimeDaemon.createSession(javaClass.name)
         lifecycleScope.launch {
@@ -232,7 +249,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         else -> Locale.US
                     }
                 inlineSuggestionHandler = InlineSuggestionHandler(this@TrimeInputMethodService)
-                Timber.d("Trime.onCreate  completed")
+                registerReceiver()
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -337,6 +354,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         ColorManager.removeOnChangedListener(onColorChangeListener)
         super.onDestroy()
+        unregisterReceiver(rimeIntentReceiver)
         RimeDaemon.destroySession(javaClass.name)
     }
 
