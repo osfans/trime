@@ -208,19 +208,20 @@ class CommonKeyboardActionListener(
                             }
                             "commit" -> service.commitText(arg)
                             "date" -> service.commitText(customFormatDateTime(arg))
-                            "run" ->
-                                service.startActivity(
-                                    buildIntentFromArgument(arg)?.apply {
-                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
-                                    },
-                                )
+                            "run" -> {
+                                val intent = buildIntentFromArgument(arg)
+                                if (intent != null) {
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                                    service.startActivity(intent)
+                                }
+                            }
                             "share_text" -> service.shareText()
                             else -> {
-                                service.startActivity(
-                                    buildIntentFromAction(action.command, arg)?.apply {
-                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
-                                    },
-                                )
+                                val intent = buildIntentFromAction(action.command, arg)
+                                if (intent != null) {
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                                    service.startActivity(intent)
+                                }
                             }
                         }
                     }
