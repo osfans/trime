@@ -8,6 +8,7 @@ import android.app.Application
 import android.content.Intent
 import android.os.Process
 import android.util.Log
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
@@ -44,6 +45,17 @@ class TrimeApplication : Application() {
         super.onCreate()
         if (!BuildConfig.DEBUG) {
             Thread.setDefaultUncaughtExceptionHandler { _, e ->
+                val crashTime = System.currentTimeMillis()
+                val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+                val lastCrashTimePrefKey = "last_crash_time"
+                val lastCrashTime = sharedPrefs.getLong(lastCrashTimePrefKey, -1L)
+                sharedPrefs.edit(commit = true) {
+                    putLong(lastCrashTimePrefKey, crashTime)
+                }
+                if (crashTime - lastCrashTime <= 10_000L) {
+                    // continuous crashes within 10 seconds, maybe in a crash loop. just bail
+                    exitProcess(10)
+                }
                 startActivity(
                     Intent(applicationContext, LogActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
