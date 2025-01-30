@@ -53,7 +53,6 @@ import com.osfans.trime.data.prefs.PreferenceDelegateProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.broadcast.IntentReceiver
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
 import com.osfans.trime.ime.composition.CandidatesView
@@ -92,7 +91,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var candidatesView: CandidatesView? = null
     private val inputDeviceManager = InputDeviceManager()
     private var initializationUi: InitializationUi? = null
-    private var mIntentReceiver: IntentReceiver? = null
     private val locales = Array(2) { Locale.getDefault() }
 
     private lateinit var inlineSuggestionHandler: InlineSuggestionHandler
@@ -212,10 +210,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
-            mIntentReceiver =
-                IntentReceiver().also {
-                    it.registerReceiver(this)
-                }
             postRimeJob {
                 ColorManager.init(resources.configuration)
                 ThemeManager.init()
@@ -334,8 +328,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onDestroy() {
-        mIntentReceiver?.unregisterReceiver(this)
-        mIntentReceiver = null
         InputFeedbackManager.destroy()
         inputView = null
         recreateInputViewPrefs.forEach {

@@ -23,6 +23,8 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
+    suspend fun syncUserData(): Boolean
+
     suspend fun processKey(
         value: Int,
         modifiers: UInt = 0u,
