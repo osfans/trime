@@ -23,3 +23,13 @@ class SchemaItem {
     return std::move(result);
   }
 };
+
+class CandidateItem {
+ public:
+  std::string text;
+  std::string comment;
+
+  explicit CandidateItem(const RimeCandidate &candidate)
+      : text(candidate.text),
+        comment(candidate.comment ? candidate.comment : "") {}
+};

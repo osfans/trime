@@ -10,6 +10,6 @@ data class SchemaItem(
 )
 
 data class CandidateItem(
-    val comment: String,
     val text: String,
+    val comment: String = "",
 )
