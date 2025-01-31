@@ -117,4 +117,22 @@ inline std::vector<std::string> stringArrayToStringVector(JNIEnv *env,
   return std::move(result);
 }
 
+inline jobject rimeCandidateItemToJObject(JNIEnv *env,
+                                          const CandidateItem &item) {
+  return env->NewObject(GlobalRef->CandidateItem, GlobalRef->CandidateItemInit,
+                        *JString(env, item.text), *JString(env, item.comment));
+}
+
+inline jobjectArray rimeCandidateListToJObjectArray(
+    JNIEnv *env, const std::vector<CandidateItem> &list) {
+  jobjectArray array = env->NewObjectArray(static_cast<int>(list.size()),
+                                           GlobalRef->CandidateItem, nullptr);
+  int i = 0;
+  for (const auto &item : list) {
+    auto jItem = JRef(env, rimeCandidateItemToJObject(env, item));
+    env->SetObjectArrayElement(array, i++, jItem);
+  }
+  return array;
+}
+
 #endif  // TRIME_OBJCONV_H

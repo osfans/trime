@@ -109,7 +109,7 @@ class CompactCandidateModule(
     }
 
     override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        val candidates = ctx.menu.candidates.map { CandidateItem(it.comment ?: "", it.text) }
+        val candidates = ctx.menu.candidates.map { CandidateItem(it.text, it.comment ?: "") }
         val isLastPage = ctx.menu.isLastPage
         val previous = ctx.menu.run { pageSize * pageNumber }
         val highlightedIdx = ctx.menu.highlightedCandidateIndex
