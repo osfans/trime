@@ -4,6 +4,7 @@
 
 package com.osfans.trime.core
 
+import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.schema.SchemaManager
@@ -54,8 +55,15 @@ class Rime :
 
                     val sharedDataDir = DataManager.sharedDataDir.absolutePath
                     val userDataDir = DataManager.userDataDir.absolutePath
-                    Timber.i("Starting up Rime APIs ...")
-                    startupRime(sharedDataDir, userDataDir, fullCheck)
+                    Timber.d(
+                        """
+                        Starting rime with:
+                        sharedDataDir: $sharedDataDir
+                        userDataDir: $userDataDir
+                        fullCheck: $fullCheck
+                        """.trimIndent(),
+                    )
+                    startupRime(sharedDataDir, userDataDir, BuildConfig.BUILD_VERSION_NAME, fullCheck)
 
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
 
@@ -298,6 +306,7 @@ class Rime :
         external fun startupRime(
             sharedDir: String,
             userDir: String,
+            versionName: String,
             fullCheck: Boolean,
         )
 

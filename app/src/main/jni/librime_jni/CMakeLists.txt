@@ -12,14 +12,3 @@ target_include_directories(rime_jni PRIVATE
   "${CMAKE_SOURCE_DIR}/librime/src"
   "${Opencc_INCLUDE_PATH}"
 )
-
-
-execute_process(
-  COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/../../../../.git describe --tags
-  OUTPUT_VARIABLE TRIME_VERSION
-)
-string(STRIP ${TRIME_VERSION} TRIME_VERSION)
-
-target_compile_definitions(rime_jni PRIVATE
-  TRIME_VERSION="${TRIME_VERSION}"
-)

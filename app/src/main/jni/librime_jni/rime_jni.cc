@@ -38,15 +38,16 @@ class Rime {
     if (!rime) return;
     const char *userDir = getenv("RIME_USER_DATA_DIR");
     const char *sharedDir = getenv("RIME_SHARED_DATA_DIR");
+    const char *versionName = getenv("RIME_DISTRIBUTION_VERSION");
 
     RIME_STRUCT(RimeTraits, trime_traits)
     trime_traits.shared_data_dir = sharedDir;
     trime_traits.user_data_dir = userDir;
     trime_traits.log_dir = "";  // set empty log_dir to log to logcat only
     trime_traits.app_name = "rime.trime";
-    trime_traits.distribution_name = "Rime";
+    trime_traits.distribution_name = "Trime";
     trime_traits.distribution_code_name = "trime";
-    trime_traits.distribution_version = TRIME_VERSION;
+    trime_traits.distribution_version = versionName;
 
     if (firstRun) {
       rime->setup(&trime_traits);
@@ -176,11 +177,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
     JNIEnv *env, jclass clazz, jstring shared_dir, jstring user_dir,
-    jboolean full_check) {
+    jstring version_name, jboolean full_check) {
   // for rime shared data dir
   setenv("RIME_SHARED_DATA_DIR", CString(env, shared_dir), 1);
   // for rime user data dir
   setenv("RIME_USER_DATA_DIR", CString(env, user_dir), 1);
+  setenv("RIME_DISTRIBUTION_VERSION", CString(env, version_name), 1);
 
   auto notificationHandler = [](void *context_object, RimeSessionId session_id,
                                 const char *message_type,
