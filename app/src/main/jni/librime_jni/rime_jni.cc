@@ -293,44 +293,10 @@ Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
   return obj;
 }
 
-static bool is_save_option(const char *p) {
-  auto rime = rime_get_api();
-  bool is_save = false;
-  std::string option_name(p);
-  if (option_name.empty()) return is_save;
-  RimeConfig config = {nullptr};
-  bool b = rime->config_open("default", &config);
-  if (!b) return is_save;
-  const char *key = "switcher/save_options";
-  RimeConfigIterator iter = {nullptr};
-  rime->config_begin_list(&iter, &config, key);
-  while (rime->config_next(&iter)) {
-    std::string item(rime->config_get_cstring(&config, iter.path));
-    if (option_name == item) {
-      is_save = true;
-      break;
-    }
-  }
-  rime->config_end(&iter);
-  rime->config_close(&config);
-  return is_save;
-}
-
 // runtime options
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_setRimeOption(
     JNIEnv *env, jclass /* thiz */, jstring option, jboolean value) {
-  auto rime = rime_get_api();
-  RimeConfig user = {nullptr};
-  auto opt = CString(env, option);
-  bool b;
-  if (is_save_option(opt)) {
-    if (rime->user_config_open("user", &user)) {
-      std::string key = "var/option/" + std::string(opt);
-      rime->config_set_bool(&user, key.c_str(), value);
-      rime->config_close(&user);
-    }
-  }
-  Rime::Instance().setOption(opt, value);
+  Rime::Instance().setOption(CString(env, option), value);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -354,16 +320,7 @@ Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv *env,
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeSchema(JNIEnv *env, jclass /* thiz */,
                                                  jstring schema_id) {
-  auto rime = rime_get_api();
-  RimeConfig user = {nullptr};
-  auto schema = CString(env, schema_id);
-  if (rime->user_config_open("user", &user)) {
-    rime->config_set_string(&user, "var/previously_selected_schema", schema);
-    std::string key = "var/schema_access_time/" + std::string(schema);
-    rime->config_set_int(&user, key.c_str(), time(nullptr));
-    rime->config_close(&user);
-  }
-  return Rime::Instance().selectSchema(schema);
+  return Rime::Instance().selectSchema(CString(env, schema_id));
 }
 
 // testing
