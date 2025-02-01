@@ -13,6 +13,7 @@
 
 #include <rime_api.h>
 
+#include "helper-types.h"
 #include "jni-utils.h"
 
 inline jobject rimeCommitToJObject(JNIEnv *env, const RimeCommit &commit) {
@@ -84,20 +85,36 @@ inline jobject rimeStatusToJObject(JNIEnv *env, const RimeStatus &status) {
                         status.is_traditional, status.is_ascii_punct);
 }
 
-inline jobjectArray rimeSchemaListToJObjectArray(JNIEnv *env,
-                                                 RimeSchemaList &list) {
-  jobjectArray array = env->NewObjectArray(static_cast<int>(list.size),
+inline jobject rimeSchemaListItemToJObject(JNIEnv *env,
+                                           const SchemaItem &item) {
+  return env->NewObject(GlobalRef->SchemaListItem,
+                        GlobalRef->SchemaListItemInit,
+                        *JString(env, item.schemaId), *JString(env, item.name));
+}
+
+inline jobjectArray rimeSchemaListToJObjectArray(
+    JNIEnv *env, const std::vector<SchemaItem> &list) {
+  jobjectArray array = env->NewObjectArray(static_cast<int>(list.size()),
                                            GlobalRef->SchemaListItem, nullptr);
-  for (int i = 0; i < list.size; i++) {
-    auto item = list.list[i];
-    auto obj = JRef<>(
-        env,
-        env->NewObject(GlobalRef->SchemaListItem, GlobalRef->SchemaListItemInit,
-                       *JString(env, item.schema_id ? item.schema_id : ""),
-                       *JString(env, item.name ? item.name : "")));
-    env->SetObjectArrayElement(array, i, obj);
+  int i = 0;
+  for (const auto &item : list) {
+    auto jItem = JRef(env, rimeSchemaListItemToJObject(env, item));
+    env->SetObjectArrayElement(array, i++, jItem);
   }
   return array;
+}
+
+inline std::vector<std::string> stringArrayToStringVector(JNIEnv *env,
+                                                          jobjectArray array) {
+  auto length = env->GetArrayLength(array);
+  std::vector<std::string> result;
+  result.reserve(length);
+  for (int i = 0; i < length; ++i) {
+    CString cstr(
+        env, reinterpret_cast<jstring>(env->GetObjectArrayElement(array, i)));
+    result.emplace_back(cstr);
+  }
+  return std::move(result);
 }
 
 #endif  // TRIME_OBJCONV_H
