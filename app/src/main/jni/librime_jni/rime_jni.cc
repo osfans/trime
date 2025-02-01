@@ -90,6 +90,16 @@ class Rime {
                                                                         : "";
   }
 
+  std::vector<SchemaItem> schemaList() {
+    std::vector<SchemaItem> result;
+    RimeSchemaList list{};
+    if (rime->get_schema_list(&list)) {
+      result = SchemaItem::fromCList(list);
+      rime->free_schema_list(&list);
+    }
+    return std::move(result);
+  }
+
   bool selectSchema(const std::string &schemaId) {
     return rime->select_schema(session, schemaId.c_str());
   }
@@ -338,12 +348,7 @@ Java_com_osfans_trime_core_Rime_getRimeOption(JNIEnv *env, jclass /* thiz */,
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getRimeSchemaList(JNIEnv *env,
                                                   jclass /* thiz */) {
-  auto rime = rime_get_api();
-  RimeSchemaList list = {0};
-  rime->get_schema_list(&list);
-  auto array = rimeSchemaListToJObjectArray(env, list);
-  rime->free_schema_list(&list);
-  return array;
+  return rimeSchemaListToJObjectArray(env, Rime::Instance().schemaList());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
