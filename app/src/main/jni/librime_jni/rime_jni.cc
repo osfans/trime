@@ -88,12 +88,12 @@ class Rime {
 
   RIME_PROTO_OBJ statusProto() { return proto->status_proto(session); }
 
-  void setOption(const std::string &key, bool value) {
-    rime->set_option(session, key.c_str(), value);
+  void setOption(std::string_view key, bool value) {
+    rime->set_option(session, key.data(), value);
   }
 
-  bool getOption(const std::string &key) {
-    return rime->get_option(session, key.c_str());
+  bool getOption(std::string_view key) {
+    return rime->get_option(session, key.data());
   }
 
   std::string currentSchemaId() {
@@ -112,8 +112,8 @@ class Rime {
     return std::move(result);
   }
 
-  bool selectSchema(const std::string &schemaId) {
-    return rime->select_schema(session, schemaId.c_str());
+  bool selectSchema(std::string_view schemaId) {
+    return rime->select_schema(session, schemaId.data());
   }
 
   std::string rawInput() { return rime->get_input(session); }
@@ -282,13 +282,13 @@ Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
 // runtime options
 extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_setRimeOption(
     JNIEnv *env, jclass /* thiz */, jstring option, jboolean value) {
-  Rime::Instance().setOption(CString(env, option), value);
+  Rime::Instance().setOption(*CString(env, option), value);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_getRimeOption(JNIEnv *env, jclass /* thiz */,
                                               jstring option) {
-  return Rime::Instance().getOption(CString(env, option));
+  return Rime::Instance().getOption(*CString(env, option));
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
@@ -306,7 +306,7 @@ Java_com_osfans_trime_core_Rime_getCurrentRimeSchema(JNIEnv *env,
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeSchema(JNIEnv *env, jclass /* thiz */,
                                                  jstring schema_id) {
-  return Rime::Instance().selectSchema(CString(env, schema_id));
+  return Rime::Instance().selectSchema(*CString(env, schema_id));
 }
 
 // testing
