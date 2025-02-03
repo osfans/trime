@@ -279,43 +279,40 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             is RimeMessage.KeyMessage ->
                 it.data.let event@{
                     val keyCode = it.value.keyCode
-                    if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
-                        val eventTime = SystemClock.uptimeMillis()
-                        if (it.modifiers.release) {
-                            sendUpKeyEvent(eventTime, keyCode, it.modifiers.metaState)
-                        } else {
-                            // TODO: look for better workaround for this
-                            if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                                handleReturnKey()
-                                return
+                    if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+                        when {
+                            !it.modifiers.release && it.value.value > 0 -> {
+                                runCatching {
+                                    commitText("${it.value.value.toChar()}")
+                                }
                             }
-
-                            if (keyCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
-                                // ignore KP_X keys, which is handled in `CommonKeyboardActionListener`.
-                                // Requires this empty body becoz Kotlin request it
-                                return
-                            }
-
-                            it.modifiers.apply {
-                                if (this.shift) sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
-
-                                sendDownKeyEvent(eventTime, keyCode, it.modifiers.metaState)
-
-                                if (this.shift) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
-
-                                if (ctrl && keyCode == KeyEvent.KEYCODE_C) cancelTextSelection()
-                            }
+                            else -> Timber.w("Unhandled Rime KeyEvent: $it")
                         }
-                    } else {
-                        if (!it.modifiers.release && it.value.value > 0) {
-                            try {
-                                commitText(Char(it.value.value).toString())
-                            } catch (_: Exception) {
-                            }
-                        } else {
-                            Timber.w("Unhandled Rime KeyEvent: $it")
-                        }
+                        return
                     }
+
+                    val eventTime = SystemClock.uptimeMillis()
+                    if (it.modifiers.release) {
+                        sendUpKeyEvent(eventTime, keyCode, it.modifiers.metaState)
+                        return
+                    }
+
+                    // TODO: look for better workaround for this
+                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                        handleReturnKey()
+                        return
+                    }
+
+                    if (keyCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
+                        // ignore KP_X keys, which is handled in `CommonKeyboardActionListener`.
+                        // Requires this empty body becoz Kotlin request it
+                        return
+                    }
+
+                    if (it.modifiers.shift) sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
+                    sendDownKeyEvent(eventTime, keyCode, it.modifiers.metaState)
+                    if (it.modifiers.shift) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
+                    if (it.modifiers.ctrl && keyCode == KeyEvent.KEYCODE_C) clearTextSelection()
                 }
             else -> {}
         }
@@ -993,7 +990,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         if (et.selectionStart != et.selectionEnd) {
                             ic.performContextMenuAction(android.R.id.copy).also { result ->
                                 if (result) {
-                                    cancelTextSelection()
+                                    clearTextSelection()
                                 }
                                 return result
                             }
@@ -1052,7 +1049,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return false
     }
 
-    fun cancelTextSelection() {
+    fun clearTextSelection() {
         val ic = currentInputConnection ?: return
         val etr = ExtractedTextRequest().apply { token = 0 }
         val et = currentInputConnection.getExtractedText(etr, 0)
