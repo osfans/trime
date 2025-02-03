@@ -16,6 +16,8 @@ class MainViewModel : ViewModel() {
 
     val rime: RimeSession = RimeDaemon.createSession(javaClass.name)
 
+    val restartBackgroundSyncWork = MutableLiveData(false)
+
     fun setToolbarTitle(title: String) {
         toolbarTitle.value = title
     }

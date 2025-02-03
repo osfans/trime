@@ -6,10 +6,7 @@ package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.AlarmManager
 import android.app.Dialog
-import android.app.PendingIntent
-import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.RectF
@@ -161,33 +158,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    /** 防止重启系统 强行停止应用时alarm任务丢失 */
-    @SuppressLint("ScheduleExactAlarm")
-    fun restartSystemStartTimingSync() {
-        if (prefs.profile.timingBackgroundSyncEnabled) {
-            val triggerTime = prefs.profile.timingBackgroundSyncSetTime
-            val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-
-            /** 设置待发送的同步事件 */
-            val pendingIntent =
-                PendingIntent.getBroadcast(
-                    this,
-                    0,
-                    Intent("com.osfans.trime.timing.sync"),
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    } else {
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                    },
-                )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 根据SDK设置alarm任务
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-            }
-        }
-    }
-
     private fun registerReceiver() {
         val intentFilter =
             IntentFilter().apply {
@@ -231,7 +201,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 ColorManager.init(resources.configuration)
                 ThemeManager.init()
                 InputFeedbackManager.init()
-                restartSystemStartTimingSync()
                 val theme = ThemeManager.activeTheme
                 val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)
                 locales[0] =

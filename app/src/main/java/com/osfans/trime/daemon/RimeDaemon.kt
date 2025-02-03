@@ -99,6 +99,12 @@ object RimeDaemon {
             if (realRime.lifecycle.currentStateFlow.value == RimeLifecycle.State.STOPPED) {
                 realRime.startup(false)
             }
+            messageJob =
+                TrimeApplication.getInstance().coroutineScope.launch {
+                    realRime.messageFlow.collect {
+                        handleRimeMessage(it)
+                    }
+                }
             val session = establish(name)
             sessions[name] = session
             return@withLock session
@@ -112,6 +118,8 @@ object RimeDaemon {
             sessions -= name
             if (sessions.isEmpty()) {
                 realRime.finalize()
+                messageJob?.cancel()
+                messageJob = null
             }
         }
 
@@ -157,12 +165,6 @@ object RimeDaemon {
                 .build()
                 .let { notificationManager.notify(id, it) }
             realRime.finalize()
-            messageJob =
-                TrimeApplication.getInstance().coroutineScope.launch {
-                    realRime.messageFlow.collect {
-                        handleRimeMessage(it)
-                    }
-                }
             realRime.startup(fullCheck)
             TrimeApplication.getInstance().coroutineScope.launch {
                 // cancel notification on ready

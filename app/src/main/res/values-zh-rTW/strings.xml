@@ -60,8 +60,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </string-array>
     <string name="keyboard__soft_cursor_title">懸浮窗編碼區使用插入符號(^)</string>
     <string name="pref_deploy">部署</string>
-    <string name="profile_sync_user_data">同步使用者資料</string>
-    <string name="profile_sync_user_data_summary">備份配置檔案和同步使用者詞典</string>
+    <string name="sync_user_data_immediately">立即同步使用者資料</string>
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>
     <string name="deploy_progress">正在部署…</string>
@@ -72,9 +71,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="other__show_status_bar_icon_title">顯示通知欄圖標</string>
     <string name="other__destroy_on_quit_title">離開時清理記憶體</string>
     <string name="profile_user_data_dir">使用者資料夾</string>
-    <string name="profile_timing_background_sync">後台定時同步</string>
-    <string name="profile_timing_background_sync_status">上次同步時間：%1$s（%2$s）\n下次同步時間: %3$s</string>
-    <string name="profile_timing_background_sync_hint">後台定時同步已禁用</string>
+    <string name="periodic_background_sync">後台定時同步</string>
+    <string name="periodic_background_sync_status">上次同步時間（狀態）：%1$s（%2$s）</string>
     <string name="pref_help__marketplace">應用市場</string>
     <string name="pref_help__user_community">使用者社群</string>
     <string name="pref_keyboard__function">檢視</string>
@@ -189,8 +187,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__request_permmision_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>
     <string name="setup__request_permmision">请求存储权限</string>
     <string name="grant_permission">授予權限</string>
-    <string name="schedule_exact_alarm_permission_title">沒有鬧鐘和提醒權限</string>
-    <string name="schedule_exact_alarm_permission_message">尚未賦予鬧鐘和提醒權限，因此無法在啟用定時同步時及時為您同步資料配置。</string>
     <string name="notification_permission_title">沒有通知權限</string>
     <string name="notification_permission_message">尚未賦予通知權限，因此無法在耗時較長的操作完成後給您發送通知。</string>
     <string name="rime_daemon">Rime 常駐程式</string>
@@ -215,7 +211,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup_channel">設定精靈</string>
     <string name="forget_this_word">忘記該詞</string>
     <string name="synchronization">同步</string>
-    <string name="profile_timing_background_sync_set_time">設定後台同步時間</string>
+    <string name="periodic_background_sync_interval">後台同步時間間隔（以分鐘為單位）</string>
     <string name="candidates_window">候选視窗</string>
     <string name="show_candidates_window">顯示候選詞視窗</string>
     <string name="general">常規</string>

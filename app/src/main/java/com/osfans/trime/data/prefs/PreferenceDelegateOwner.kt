@@ -15,12 +15,12 @@ abstract class PreferenceDelegateOwner(
     protected fun int(
         key: String,
         defaultValue: Int,
-    ) = PreferenceDelegate(sharedPreferences, key, defaultValue)
+    ) = PreferenceDelegate(sharedPreferences, key, defaultValue).apply { register() }
 
     protected fun long(
         key: String,
         defaultValue: Long,
-    ) = PreferenceDelegate(sharedPreferences, key, defaultValue)
+    ) = PreferenceDelegate(sharedPreferences, key, defaultValue).apply { register() }
 
     protected fun float(
         key: String,
@@ -30,7 +30,7 @@ abstract class PreferenceDelegateOwner(
     protected fun bool(
         key: String,
         defaultValue: Boolean,
-    ): PreferenceDelegate<Boolean> = PreferenceDelegate(sharedPreferences, key, defaultValue)
+    ): PreferenceDelegate<Boolean> = PreferenceDelegate(sharedPreferences, key, defaultValue).apply { register() }
 
     protected fun string(
         key: String,

@@ -18,8 +18,10 @@ import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity
+import com.osfans.trime.worker.BackgroundSyncWork
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import timber.log.Timber
 import kotlin.system.exitProcess
@@ -139,9 +141,16 @@ class TrimeApplication : Application() {
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)
             registerBroadcastReceiver()
+            startWorkManager()
         } catch (e: Exception) {
             e.fillInStackTrace()
             return
+        }
+    }
+
+    private fun startWorkManager() {
+        coroutineScope.launch {
+            BackgroundSyncWork.start(applicationContext)
         }
     }
 
