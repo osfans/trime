@@ -155,6 +155,16 @@ class CommonKeyboardActionListener(
             }
 
             override fun onAction(action: KeyAction) {
+                if (action.commit.isNotEmpty()) {
+                    service.commitText(action.commit, true)
+                    return
+                }
+                KeyboardSwitcher.currentKeyboard?.let {
+                    if (action.getText(it).isNotEmpty()) {
+                        onText(action.getText(it))
+                        return
+                    }
+                }
                 when (action.code) {
                     KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
                         rime.launchOnReady { api ->
@@ -322,32 +332,30 @@ class CommonKeyboardActionListener(
 
             override fun onText(text: CharSequence) {
                 if (!text.first().isAsciiPrintable() && Rime.isComposing) {
-                    service.postRimeJob {
-                        commitComposition()
-                    }
+                    service.postRimeJob { commitComposition() }
                 }
+
                 var sequence = text
                 while (sequence.isNotEmpty()) {
-                    var slice: String
-                    when {
-                        BRACED_KEY_EVENT_WITH_ESCAPE.matches(sequence) -> {
-                            slice = BRACED_KEY_EVENT_WITH_ESCAPE.matchEntire(sequence)?.groupValues?.get(1) ?: ""
-                            // FIXME: rime will not handle the key sequence when
-                            //  ascii_mode is on, there may be a better solution
-                            //  for this.
+                    val slice =
+                        when {
+                            BRACED_KEY_EVENT_WITH_ESCAPE.matches(sequence) ->
+                                BRACED_KEY_EVENT_WITH_ESCAPE.matchEntire(sequence)?.groupValues?.get(1)
+                                    ?: ""
+                            BRACED_KEY_EVENT.matches(sequence) -> BRACED_KEY_EVENT.matchEntire(sequence)?.groupValues?.get(1) ?: ""
+                            else -> sequence.first().toString()
+                        }
+
+                    service.postRimeJob {
+                        if (slice.startsWith("{") && slice.endsWith("}")) {
+                            onAction(KeyActionManager.getAction(slice))
+                        } else {
                             if ((!Rime.simulateKeySequence(slice) || Rime.isAsciiMode) && !Rime.isComposing) {
-                                service.commitText(slice)
+                                service.commitText(slice.replace("{Escape}", ""))
                             }
                         }
-                        BRACED_KEY_EVENT.matches(sequence) -> {
-                            slice = BRACED_KEY_EVENT.matchEntire(sequence)?.groupValues?.get(1) ?: ""
-                            onAction(KeyActionManager.getAction(slice))
-                        }
-                        else -> {
-                            slice = sequence.first().toString()
-                            onAction(KeyActionManager.getAction(slice))
-                        }
                     }
+
                     sequence = sequence.substring(slice.length)
                 }
                 shouldReleaseKey = false
