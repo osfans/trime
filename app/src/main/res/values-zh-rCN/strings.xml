@@ -234,4 +234,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_failure">部署失败</string>
     <string name="view_deploy_failure_log">部署失败。点此查看错误日志。</string>
     <string name="hide_quick_bar">隐藏快捷栏</string>
+    <string name="schema_switches_debounce_interval">方案开关连击间隔</string>
 </resources>

@@ -126,6 +126,7 @@ class AppPrefs(
             const val POPUP_KEY_PRESS_ENABLED = "keyboard__show_key_popup"
             const val SHOW_SCHEMA_SWITCHES = "show_schema_switches_in_idle"
             const val SHOW_ARROW_IN_SWITCHES = "show_arrow_in_switches"
+            const val SWITCHES_DEBOUNCE_INTERVAL = "schema_switches_debounce_interval"
             const val HIDE_QUICK_BAR = "hide_quick_bar"
             const val LANDSCAPE_MODE = "keyboard__landscape_mode"
             const val SPLIT_SPACE_PERCENT = "keyboard__split_space"
@@ -162,6 +163,7 @@ class AppPrefs(
         val popupKeyPressEnabled = bool(POPUP_KEY_PRESS_ENABLED, false)
         val showSchemaSwitches = bool(SHOW_SCHEMA_SWITCHES, true)
         val showArrowInSwitches = bool(SHOW_ARROW_IN_SWITCHES, true)
+        val switchesDebounceInterval = int(SWITCHES_DEBOUNCE_INTERVAL, 300)
         val hideQuickBar = bool(HIDE_QUICK_BAR, false)
 
         enum class LandscapeModeOption {

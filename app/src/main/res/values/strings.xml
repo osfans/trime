@@ -234,4 +234,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_failure">Deploy failure</string>
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
     <string name="hide_quick_bar">Hide quick bar</string>
+    <string name="schema_switches_debounce_interval">Schema switches debounce interval</string>
 </resources>
