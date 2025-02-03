@@ -24,6 +24,11 @@ private val iso8601DateFormat by lazy {
 
 fun iso8601UTCDateTime(timeMillis: Long? = null): String = iso8601DateFormat.format(timeMillis?.let { Date(it) } ?: Date())
 
+fun customFormatTimeInDefault(
+    pattern: String,
+    timeMillis: Long? = null,
+): String = SimpleDateFormat(pattern, Locale.getDefault()).format(timeMillis?.let { Date(it) } ?: Date())
+
 fun customFormatDateTime(
     pattern: String,
     timeMillis: Long? = null,

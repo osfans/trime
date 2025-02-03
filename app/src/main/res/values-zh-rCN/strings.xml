@@ -57,7 +57,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </string-array>
     <string name="keyboard__soft_cursor_title">悬浮窗编码区使用插入符号(^)</string>
     <string name="pref_deploy">部署</string>
-    <string name="profile_sync_user_data">同步用户数据</string>
+    <string name="sync_user_data_immediately">立即同步用户数据</string>
     <string name="reset_success">重置成功</string>
     <string name="reset_failure">重置失败</string>
     <string name="deploy_progress">正在部署…</string>
@@ -68,9 +68,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="other__show_status_bar_icon_title">显示通知栏图标</string>
     <string name="other__destroy_on_quit_title">退出时清除缓存</string>
     <string name="profile_user_data_dir">用户文件夹</string>
-    <string name="profile_timing_background_sync">后台定时同步</string>
-    <string name="profile_timing_background_sync_status">上次同步时间：%1$s（%2$s）\n下次同步时间: %3$s</string>
-    <string name="profile_timing_background_sync_hint">后台定时同步已禁用</string>
+    <string name="periodic_background_sync">后台定时同步</string>
+    <string name="periodic_background_sync_status">上次同步时间（状态）：%1$s（%2$s）</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
     <string name="pref_keyboard__effect">按键效果</string>
@@ -160,7 +159,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="failure">失败</string>
     <string name="profile_summary">设定存储位置和修改同步设置等</string>
     <string name="profile_reset_summary">用默认的内置配置覆盖共享目录中的相同文件</string>
-    <string name="profile_sync_user_data_summary">备份配置文件和同步用户词典</string>
     <string name="delete">删除</string>
     <string name="edit">编辑</string>
     <string name="collect">收藏</string>
@@ -189,8 +187,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__request_permmision_hint">当前同文需要存储权限以访问配置、使得用户容易更改。</string>
     <string name="setup__request_permmision">请求存储权限</string>
     <string name="grant_permission">授予权限</string>
-    <string name="schedule_exact_alarm_permission_title">没有闹钟和提醒权限</string>
-    <string name="schedule_exact_alarm_permission_message">没有闹钟和提醒权限，我们无法在启用定时同步时及时为您同步数据配置。</string>
     <string name="notification_permission_title">没有通知权限</string>
     <string name="notification_permission_message">没有发送通知的权限，我们无法在一些耗时操作完成时通知您。</string>
     <string name="rime_daemon">Rime 守护程序</string>
@@ -215,7 +211,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup_channel">设置向导</string>
     <string name="forget_this_word">忘记该词</string>
     <string name="synchronization">同步</string>
-    <string name="profile_timing_background_sync_set_time">设置后台同步时间</string>
+    <string name="periodic_background_sync_interval">后台同步时间间隔（以分钟为单位）</string>
     <string name="candidates_window">候选窗口</string>
     <string name="show_candidates_window">显示候选词窗口</string>
     <string name="general">常规</string>

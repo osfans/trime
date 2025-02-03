@@ -41,7 +41,7 @@ class AppPrefs(
     val general = General(shared).register()
     val keyboard = Keyboard(shared)
     val theme = Theme(shared)
-    val profile = Profile(shared)
+    val profile = Profile(shared).register()
     val clipboard = Clipboard(shared)
     val other = Other(shared)
 
@@ -249,17 +249,17 @@ class AppPrefs(
     ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val USER_DATA_DIR = "profile_user_data_dir"
-            const val TIMING_BACKGROUND_SYNC_ENABLED = "profile_timing_background_sync"
-            const val TIMING_BACKGROUND_SYNC_SET_TIME = "profile_timing_background_sync_set_time"
-            const val LAST_BACKGROUND_SYNC_STATUS = "profile_last_background_sync_status"
-            const val LAST_BACKGROUND_SYNC_TIME = "profile_last_background_sync_time"
+            const val PERIODIC_BACKGROUND_SYNC = "periodic_background_sync"
+            const val PERIODIC_BACKGROUND_SYNC_INTERVAL = "periodic_background_sync_interval"
+            const val LAST_BACKGROUND_SYNC_STATUS = "last_background_sync_status"
+            const val LAST_BACKGROUND_SYNC_TIME = "last_background_sync_time"
         }
 
         var userDataDir by string(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
-        var timingBackgroundSyncEnabled by bool(TIMING_BACKGROUND_SYNC_ENABLED, false)
-        var timingBackgroundSyncSetTime by long(TIMING_BACKGROUND_SYNC_SET_TIME, System.currentTimeMillis())
-        var lastSyncStatus by bool(LAST_BACKGROUND_SYNC_STATUS, false)
-        var lastBackgroundSyncTime by long(LAST_BACKGROUND_SYNC_TIME, 0L)
+        val periodicBackgroundSync = bool(PERIODIC_BACKGROUND_SYNC, false)
+        val periodicBackgroundSyncInterval = int(PERIODIC_BACKGROUND_SYNC_INTERVAL, 30)
+        val lastBackgroundSyncStatus = bool(LAST_BACKGROUND_SYNC_STATUS, false)
+        val lastBackgroundSyncTime = long(LAST_BACKGROUND_SYNC_TIME, 0L)
     }
 
     class Clipboard(
