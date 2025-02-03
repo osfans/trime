@@ -85,7 +85,7 @@ class KeyboardWindow(
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
 
-    private val keyboardActionListener = ListenerDecorator(commonKeyboardActionListener.listener)
+    private val keyboardActionListener = commonKeyboardActionListener.listener
 
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
@@ -311,27 +311,6 @@ class KeyboardWindow(
         currentKeyboardView?.let {
             it.onDetach()
             it.keyboardActionListener = null
-        }
-    }
-
-    inner class ListenerDecorator(
-        private val delegate: KeyboardActionListener,
-    ) : KeyboardActionListener by delegate {
-        override fun onAction(action: KeyAction) {
-            if (action.commit.isNotEmpty()) {
-                // Directly commit the text and don't dispatch to Rime
-                service.commitText(action.commit, true)
-                return
-            }
-
-            currentKeyboard?.let {
-                if (action.getText(it).isNotEmpty()) {
-                    onText(action.getText(it))
-                    return
-                }
-            }
-
-            delegate.onAction(action)
         }
     }
 }
