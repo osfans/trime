@@ -21,7 +21,9 @@ class InputBroadcaster : InputBroadcastReceiver {
 
     fun <T> addReceiver(receiver: T) {
         if (receiver is InputBroadcastReceiver && receiver !is InputBroadcaster) {
-            receivers.add(receiver)
+            if (!receivers.contains(receiver)) {
+                receivers.add(receiver)
+            }
         }
     }
 
