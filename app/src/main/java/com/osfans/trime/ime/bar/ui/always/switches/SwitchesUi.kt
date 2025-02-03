@@ -38,12 +38,12 @@ class SwitchesUi(
         switchesAdapter.submitList(list)
     }
 
-    fun setOnSwitchClick(listener: (Schema.Switch) -> Unit) {
-        switchesAdapter.setOnDebouncedItemClick { adapter, _, position ->
-            val typed = (adapter as SwitchesAdapter)
-            if (typed.items.isEmpty()) return@setOnDebouncedItemClick
-            val switch = typed.items[position]
-            listener(switch)
+    fun setOnSwitchClick(
+        listener: (Schema.Switch) -> Unit,
+        debounceTime: Long = 300L,
+    ) {
+        switchesAdapter.setOnDebouncedItemClick(debounceTime) { adapter, _, position ->
+            (adapter as? SwitchesAdapter)?.items?.getOrNull(position)?.let(listener)
         }
     }
 }

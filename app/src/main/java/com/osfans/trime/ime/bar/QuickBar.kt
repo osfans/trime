@@ -54,6 +54,7 @@ class QuickBar(
     private val prefs = AppPrefs.defaultInstance()
 
     private val showSwitches by prefs.keyboard.showSchemaSwitches
+    private val debounceInterval by prefs.keyboard.switchesDebounceInterval
     private val hideQuickBar by prefs.keyboard.hideQuickBar
 
     val themedHeight =
@@ -73,7 +74,7 @@ class QuickBar(
         AlwaysUi(context, theme).apply {
             switchesUi.apply {
                 setSwitches(SchemaManager.visibleSwitches)
-                setOnSwitchClick { switch ->
+                setOnSwitchClick({ switch ->
                     val prevEnabled = switch.enabled
                     switch.enabled =
                         if (switch.options.isEmpty()) {
@@ -91,7 +92,7 @@ class QuickBar(
                                 }
                             }
                         }
-                }
+                }, debounceTime = debounceInterval.toLong())
             }
         }
     }
