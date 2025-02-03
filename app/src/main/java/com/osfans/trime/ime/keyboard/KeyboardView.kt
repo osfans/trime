@@ -339,7 +339,6 @@ class KeyboardView(
                     }
                     if (sendDownKey) {
                         Timber.d("initGestureDetector: sendDownKey")
-                        showPreview(NOT_A_KEY)
                         showPreview(mDownKey, behavior)
                         detectAndSendKey(mDownKey, mStartX, mStartY, me1.eventTime, behavior)
                         return true
@@ -738,23 +737,15 @@ class KeyboardView(
         // Release the old key and press the new key
         val keys = mKeys
         if (oldKeyIndex != mCurrentKeyIndex) {
-            if (oldKeyIndex in keys.indices) {
-                val oldKey = keys[oldKeyIndex]
+            keys.getOrNull(oldKeyIndex)?.let { oldKey ->
                 oldKey.onReleased()
                 invalidateKey(oldKey)
+                if (showPreview) dismissKeyPreview(oldKey)
             }
-            if (mCurrentKeyIndex in keys.indices) {
-                val newKey = keys[mCurrentKeyIndex]
+            keys.getOrNull(mCurrentKeyIndex)?.let { newKey ->
                 newKey.onPressed()
                 invalidateKey(newKey)
-            }
-        }
-        // If key changed and preview is on ...
-        if (oldKeyIndex != mCurrentKeyIndex && showPreview) {
-            if (keyIndex == NOT_A_KEY) {
-                dismissKeyPreview(keys[oldKeyIndex])
-            } else {
-                showKeyPreview(keys[keyIndex], behavior)
+                if (showPreview) showKeyPreview(newKey, behavior)
             }
         }
     }
@@ -792,13 +783,12 @@ class KeyboardView(
         if (mCurrentKey !in mKeys.indices) {
             return false
         }
-        showPreview(NOT_A_KEY)
         showPreview(mCurrentKey, KeyBehavior.LONG_CLICK)
         val popupKey = mKeys[mCurrentKey]
         return onLongPress(popupKey).also {
             if (it) {
                 mAbortKey = true
-                showPreview(-1)
+                showPreview(NOT_A_KEY)
             }
         }
     }
