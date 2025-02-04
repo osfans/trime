@@ -19,20 +19,16 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
-import com.osfans.trime.core.RimeLifecycle
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.sound.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
-import com.osfans.trime.ui.components.ProgressBarDialogIndeterminate
 import com.osfans.trime.ui.setup.SetupActivity
 import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.worker.BackgroundSyncWork
@@ -45,7 +41,6 @@ class PrefMainActivity : AppCompatActivity() {
     private val uiMode by AppPrefs.defaultInstance().other.uiMode
 
     private lateinit var navController: NavController
-    private var loadingDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val uiMode =
@@ -55,7 +50,6 @@ class PrefMainActivity : AppCompatActivity() {
                 AppPrefs.Other.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
             }
         AppCompatDelegate.setDefaultNightMode(uiMode)
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val binding = ActivityPrefBinding.inflate(layoutInflater)
@@ -108,23 +102,6 @@ class PrefMainActivity : AppCompatActivity() {
         }
 
         checkNotificationPermission()
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.rime.run { stateFlow }.collect { state ->
-                    when (state) {
-                        RimeLifecycle.State.STARTING -> {
-                            loadingDialog = ProgressBarDialogIndeterminate(R.string.deploy_progress).show()
-                        }
-                        RimeLifecycle.State.READY -> {
-                            loadingDialog?.dismiss()
-                            loadingDialog = null
-                        }
-                        else -> {}
-                    }
-                }
-            }
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
