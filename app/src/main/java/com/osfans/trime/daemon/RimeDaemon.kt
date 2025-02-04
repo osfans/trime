@@ -4,12 +4,10 @@
 
 package com.osfans.trime.daemon
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
@@ -21,6 +19,7 @@ import com.osfans.trime.core.lifecycleScope
 import com.osfans.trime.core.whenReady
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.util.appContext
+import com.osfans.trime.util.createNotificationChannel
 import com.osfans.trime.util.logcat
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.CoroutineScope
@@ -123,22 +122,6 @@ object RimeDaemon {
             }
         }
 
-    init {
-        createNotificationChannel()
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel =
-                NotificationChannel(
-                    CHANNEL_ID,
-                    appContext.getText(R.string.rime_daemon),
-                    NotificationManager.IMPORTANCE_HIGH,
-                ).apply { description = CHANNEL_ID }
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
     /**
      * Reuse a session for remote service
      */
@@ -147,6 +130,14 @@ object RimeDaemon {
     private const val CHANNEL_ID = "rime-daemon"
     private const val MESSAGE_ID = 2331
     private var restartId = 0
+
+    init {
+        createNotificationChannel(
+            CHANNEL_ID,
+            appContext.getString(R.string.rime_daemon),
+            NotificationManagerCompat.IMPORTANCE_HIGH,
+        )
+    }
 
     /**
      * Restart Rime instance to deploy while keep the session
