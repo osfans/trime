@@ -63,43 +63,39 @@ class Rime {
     if (rime->start_maintenance(fullCheck)) {
       rime->join_maintenance_thread();
     }
-
-    session = rime->create_session();
-    if (!session) {
-      return;
-    }
   }
 
   bool processKey(int keycode, int mask) {
-    return rime->process_key(session, keycode, mask);
+    return rime->process_key(session(), keycode, mask);
   }
 
   bool simulateKeySequence(const std::string &sequence) {
-    return rime->simulate_key_sequence(session, sequence.data());
+    return rime->simulate_key_sequence(session(), sequence.data());
   }
 
-  bool commitComposition() { return rime->commit_composition(session); }
+  bool commitComposition() { return rime->commit_composition(session()); }
 
-  void clearComposition() { rime->clear_composition(session); }
+  void clearComposition() { rime->clear_composition(session()); }
 
-  RIME_PROTO_OBJ commitProto() { return proto->commit_proto(session); }
+  RIME_PROTO_OBJ commitProto() { return proto->commit_proto(session()); }
 
-  RIME_PROTO_OBJ contextProto() { return proto->context_proto(session); }
+  RIME_PROTO_OBJ contextProto() { return proto->context_proto(session()); }
 
-  RIME_PROTO_OBJ statusProto() { return proto->status_proto(session); }
+  RIME_PROTO_OBJ statusProto() { return proto->status_proto(session()); }
 
   void setOption(std::string_view key, bool value) {
-    rime->set_option(session, key.data(), value);
+    rime->set_option(session(), key.data(), value);
   }
 
   bool getOption(std::string_view key) {
-    return rime->get_option(session, key.data());
+    return rime->get_option(session(), key.data());
   }
 
   std::string currentSchemaId() {
     char result[MAX_BUFFER_LENGTH];
-    return rime->get_current_schema(session, result, MAX_BUFFER_LENGTH) ? result
-                                                                        : "";
+    return rime->get_current_schema(session(), result, MAX_BUFFER_LENGTH)
+               ? result
+               : "";
   }
 
   std::vector<SchemaItem> schemaList() {
@@ -113,42 +109,42 @@ class Rime {
   }
 
   bool selectSchema(std::string_view schemaId) {
-    return rime->select_schema(session, schemaId.data());
+    return rime->select_schema(session(), schemaId.data());
   }
 
-  std::string rawInput() { return rime->get_input(session); }
+  std::string rawInput() { return rime->get_input(session()); }
 
-  size_t caretPosition() { return rime->get_caret_pos(session); }
+  size_t caretPosition() { return rime->get_caret_pos(session()); }
 
   void setCaretPosition(size_t caretPos) {
-    rime->set_caret_pos(session, caretPos);
+    rime->set_caret_pos(session(), caretPos);
   }
 
   bool selectCandidateOnCurrentPage(size_t index) {
-    return rime->select_candidate_on_current_page(session, index);
+    return rime->select_candidate_on_current_page(session(), index);
   }
 
   bool deleteCandidateOnCurrentPage(size_t index) {
-    return rime->delete_candidate_on_current_page(session, index);
+    return rime->delete_candidate_on_current_page(session(), index);
   }
 
   bool selectCandidate(size_t index) {
-    return rime->select_candidate(session, index);
+    return rime->select_candidate(session(), index);
   }
 
   bool forgetCandidate(size_t index) {
-    return rime->delete_candidate(session, index);
+    return rime->delete_candidate(session(), index);
   }
 
   bool changePage(bool backward) {
-    return rime->change_page(session, backward);
+    return rime->change_page(session(), backward);
   }
 
   std::vector<CandidateItem> getCandidates(int startIndex, int limit) {
     std::vector<CandidateItem> result;
     result.reserve(limit);
     RimeCandidateListIterator iter{};
-    if (rime->candidate_list_from_index(session, &iter, startIndex)) {
+    if (rime->candidate_list_from_index(session(), &iter, startIndex)) {
       int count = 0;
       while (rime->candidate_list_next(&iter)) {
         if (count >= limit) break;
@@ -162,8 +158,8 @@ class Rime {
   }
 
   void exit() {
-    rime->destroy_session(session);
-    session = 0;
+    rime->destroy_session(session_);
+    session_ = 0;
     rime->finalize();
   }
 
@@ -172,7 +168,14 @@ class Rime {
  private:
   RimeApi *rime;
   RimeProtoApi *proto;
-  RimeSessionId session = 0;
+  RimeSessionId session_ = 0;
+
+  RimeSessionId session() {
+    if (session_ == 0 || !rime->find_session(session_)) {
+      session_ = rime->create_session();
+    }
+    return session_;
+  }
 
   bool firstRun = true;
 };
