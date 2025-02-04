@@ -77,11 +77,17 @@ class Rime {
 
   void clearComposition() { rime->clear_composition(session()); }
 
-  RIME_PROTO_OBJ commitProto() { return proto->commit_proto(session()); }
+  void commitProto(RIME_PROTO_BUILDER *builder) {
+    proto->commit_proto(session(), builder);
+  }
 
-  RIME_PROTO_OBJ contextProto() { return proto->context_proto(session()); }
+  void contextProto(RIME_PROTO_BUILDER *builder) {
+    proto->context_proto(session(), builder);
+  }
 
-  RIME_PROTO_OBJ statusProto() { return proto->status_proto(session()); }
+  void statusProto(RIME_PROTO_BUILDER *builder) {
+    proto->status_proto(session(), builder);
+  }
 
   void setOption(std::string_view key, bool value) {
     rime->set_option(session(), key.data(), value);
@@ -269,17 +275,23 @@ Java_com_osfans_trime_core_Rime_clearRimeComposition(JNIEnv *env,
 // output
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
-  return Rime::Instance().commitProto();
+  jobject proto = nullptr;
+  Rime::Instance().commitProto(&proto);
+  return proto;
 }
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
-  return Rime::Instance().contextProto();
+  jobject proto = nullptr;
+  Rime::Instance().contextProto(&proto);
+  return proto;
 }
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
-  return Rime::Instance().statusProto();
+  jobject proto = nullptr;
+  Rime::Instance().statusProto(&proto);
+  return proto;
 }
 
 // runtime options

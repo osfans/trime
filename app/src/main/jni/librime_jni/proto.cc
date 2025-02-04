@@ -12,24 +12,28 @@
 
 using namespace rime;
 
-RIME_PROTO_OBJ rime_commit_proto(RimeSessionId session_id) {
+void rime_commit_proto(RimeSessionId session_id,
+                       RIME_PROTO_BUILDER *commit_builder) {
   an<Session> session(Service::instance().GetSession(session_id));
-  if (!session) return nullptr;
+  if (!session) return;
   auto env = GlobalRef->AttachEnv();
   const string &commit_text(session->commit_text());
-  RIME_PROTO_OBJ commit =
-      env->NewObject(GlobalRef->CommitProto, GlobalRef->CommitProtoInit,
-                     *JString(env, commit_text));
-  session->ResetCommitText();
-  return commit;
+  if (!commit_text.empty()) {
+    auto *commit = (jobject *)commit_builder;
+    *commit = env->NewObject(GlobalRef->CommitProto, GlobalRef->CommitProtoInit,
+                             *JString(env, commit_text));
+    session->ResetCommitText();
+  }
 }
 
-RIME_PROTO_OBJ rime_context_proto(RimeSessionId session_id) {
+void rime_context_proto(RimeSessionId session_id,
+                        RIME_PROTO_BUILDER *context_builder) {
   an<Session> session = Service::instance().GetSession(session_id);
-  if (!session) return nullptr;
+  if (!session) return;
   Context *ctx = session->context();
-  if (!ctx) return nullptr;
+  if (!ctx) return;
   auto env = GlobalRef->AttachEnv();
+  auto *context = (jobject *)context_builder;
   jobject composition = env->NewObject(GlobalRef->CompositionProto,
                                        GlobalRef->CompositionProtoDefault);
   if (ctx->IsComposing()) {
@@ -94,19 +98,22 @@ RIME_PROTO_OBJ rime_context_proto(RimeSessionId session_id) {
           *JRef<jobjectArray>(env, dest_labels));
     }
   }
-  return env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoInit,
-                        *JRef(env, composition), *JRef(env, menu),
-                        *JString(env, ctx->input()), ctx->caret_pos());
+  *context =
+      env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoInit,
+                     *JRef(env, composition), *JRef(env, menu),
+                     *JString(env, ctx->input()), ctx->caret_pos());
 }
 
-RIME_PROTO_OBJ rime_status_proto(RimeSessionId session_id) {
+void rime_status_proto(RimeSessionId session_id,
+                       RIME_PROTO_BUILDER *status_builder) {
   an<Session> session(Service::instance().GetSession(session_id));
-  if (!session) return nullptr;
+  if (!session) return;
   Schema *schema = session->schema();
   Context *ctx = session->context();
-  if (!schema || !ctx) return nullptr;
+  if (!schema || !ctx) return;
   auto env = GlobalRef->AttachEnv();
-  return env->NewObject(
+  auto *status = (jobject *)status_builder;
+  *status = env->NewObject(
       GlobalRef->StatusProto, GlobalRef->StatusProtoInit,
       *JString(env, schema->schema_id()), *JString(env, schema->schema_name()),
       Service::instance().disabled(), ctx->IsComposing(),
