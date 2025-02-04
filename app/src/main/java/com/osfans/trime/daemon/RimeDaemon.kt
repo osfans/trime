@@ -20,7 +20,8 @@ import com.osfans.trime.core.whenReady
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.createNotificationChannel
-import com.osfans.trime.util.logcat
+import com.osfans.trime.util.readText
+import com.osfans.trime.util.subprocess
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -171,9 +172,7 @@ object RimeDaemon {
         if (it is RimeMessage.DeployMessage) {
             when (it.data) {
                 RimeMessage.DeployMessage.State.Start -> {
-                    withContext(Dispatchers.IO) {
-                        logcat { clear() }
-                    }
+                    withContext(Dispatchers.IO) { subprocess("logcat", "--clear") }
                 }
                 RimeMessage.DeployMessage.State.Success -> {
                     ContextCompat.getMainExecutor(appContext).execute {
@@ -185,13 +184,8 @@ object RimeDaemon {
                         Intent(appContext, LogActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             val log =
-                                withContext(Dispatchers.IO) {
-                                    logcat {
-                                        format("brief")
-                                        filterspec("rime.trime", "W")
-                                        dump()
-                                    }.inputStream.bufferedReader().readText()
-                                }
+                                subprocess("logcat", "-v", "brief", "-s", "rime.trime:W", "-d")
+                                    .readText()
                             putExtra(LogActivity.FROM_DEPLOY, true)
                             putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
                         }

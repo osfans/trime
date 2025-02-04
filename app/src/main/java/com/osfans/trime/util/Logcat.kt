@@ -39,10 +39,7 @@ class Logcat(
     fun getLogAsync(): Deferred<Result<List<String>>> =
         async {
             runCatching {
-                logcat {
-                    pid?.let { pid(it) }
-                    dump()
-                }.inputStream.bufferedReader().readLines()
+                subprocess("logcat", pid?.let { "--pid=$it" } ?: "", "-d").readLines()
             }
         }
 
@@ -51,7 +48,7 @@ class Logcat(
      */
     fun clearLog(): Job =
         launch {
-            runCatching { logcat { clear() } }
+            runCatching { subprocess("logcat", "--clear") }
         }
 
     /**
@@ -63,10 +60,8 @@ class Logcat(
         } else {
             launch {
                 runCatching {
-                    logcat {
-                        pid?.let { pid(it) }
-                        format("time")
-                    }.also { process = it }
+                    subprocess("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "time")
+                        .also { process = it }
                         .asFlow()
                         .collect { flow.emit(it) }
                 }
@@ -84,36 +79,4 @@ class Logcat(
     companion object {
         val default by lazy { Logcat() }
     }
-}
-
-// DSL
-inline fun logcat(builderAction: LogcatCommandBuilder.() -> Unit): java.lang.Process =
-    LogcatCommandBuilder().apply(builderAction).toProcess()
-
-class LogcatCommandBuilder {
-    private val cmdList = arrayListOf("logcat")
-
-    fun clear() = apply { cmdList.add("--clear") }
-
-    fun dump() = apply { cmdList.add("-d") }
-
-    fun pid(pid: Int) = apply { cmdList.add("--pid=$pid") }
-
-    fun format(format: String) = apply { cmdList.add("--format=$format") }
-
-    fun filterspec(
-        tag: String,
-        priority: String,
-    ) = apply {
-        cmdList.add("-s")
-        cmdList.add("$tag:$priority")
-    }
-
-    fun filterspec(spec: String) =
-        apply {
-            cmdList.add("-s")
-            cmdList.add(spec)
-        }
-
-    fun toProcess(): java.lang.Process = Runtime.getRuntime().exec(cmdList.toTypedArray())
 }
