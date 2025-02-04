@@ -4,17 +4,15 @@
 
 package com.osfans.trime.ui.setup
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -26,6 +24,8 @@ import com.osfans.trime.R
 import com.osfans.trime.databinding.ActivitySetupBinding
 import com.osfans.trime.ui.setup.SetupPage.Companion.firstUndonePage
 import com.osfans.trime.ui.setup.SetupPage.Companion.isLastPage
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.createNotificationChannel
 import splitties.systemservices.notificationManager
 
 class SetupActivity : FragmentActivity() {
@@ -114,25 +114,17 @@ class SetupActivity : FragmentActivity() {
         // Skip to undone page
         firstUndonePage()?.let { viewPager.currentItem = it.ordinal }
         binaryCount = true
-        createNotificationChannel()
+        createNotificationChannel(
+            CHANNEL_ID,
+            appContext.getString(R.string.setup_channel),
+            NotificationManagerCompat.IMPORTANCE_HIGH,
+        )
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
         (fragment as SetupFragment).sync()
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel =
-                NotificationChannel(
-                    CHANNEL_ID,
-                    getText(R.string.setup_channel),
-                    NotificationManager.IMPORTANCE_HIGH,
-                ).apply { description = CHANNEL_ID }
-            notificationManager.createNotificationChannel(channel)
-        }
     }
 
     override fun onPause() {
