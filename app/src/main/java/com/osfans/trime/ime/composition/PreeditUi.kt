@@ -70,12 +70,8 @@ open class PreeditUi(
         str: CharSequence,
         visible: Boolean,
     ) = preedit.run {
-        if (visible) {
-            text = str
-            if (visibility == View.GONE) visibility = View.VISIBLE
-        } else if (visibility != View.GONE) {
-            visibility = View.GONE
-        }
+        text = str
+        visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     fun update(inputComposition: RimeProto.Context.Composition) {
@@ -83,7 +79,10 @@ open class PreeditUi(
         val cursorPos = inputComposition.cursorPos
         val hasPreedit = inputComposition.length > 0
         visible = hasPreedit
-        if (!visible) return
+        if (!visible) {
+            updateTextView("", false)
+            return
+        }
         val stringWithCursor =
             if (cursorPos == 0 || cursorPos == string.length) {
                 string
