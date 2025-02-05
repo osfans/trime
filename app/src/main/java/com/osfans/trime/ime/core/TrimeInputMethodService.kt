@@ -252,7 +252,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         when {
                             !it.modifiers.release && it.value.value > 0 -> {
                                 runCatching {
-                                    commitText("${it.value.value.toChar()}")
+                                    commitText("${Char(it.value.value)}")
                                 }
                             }
                             else -> Timber.w("Unhandled Rime KeyEvent: $it")
