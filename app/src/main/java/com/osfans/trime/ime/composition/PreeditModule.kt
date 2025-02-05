@@ -71,7 +71,7 @@ class PreeditModule(
         ui.update(ctx.composition)
         ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
         if (ctx.composition.length > 0) {
-            touchEventReceiverWindow.showup()
+            touchEventReceiverWindow.show()
         } else {
             touchEventReceiverWindow.dismiss()
         }

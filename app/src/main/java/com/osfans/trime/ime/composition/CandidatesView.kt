@@ -40,6 +40,7 @@ import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 import splitties.views.horizontalPadding
 import splitties.views.verticalPadding
+import kotlin.math.roundToInt
 
 @SuppressLint("ViewConstructor")
 class CandidatesView(
@@ -59,11 +60,20 @@ class CandidatesView(
 
     private var shouldUpdatePosition = false
 
+    /**
+     * layout update may or may not cause [CandidatesView]'s size [onSizeChanged],
+     * in either case, we should reposition it
+     */
     private val layoutListener =
         OnGlobalLayoutListener {
             shouldUpdatePosition = true
         }
 
+    /**
+     * [CandidatesView]'s position is calculated based on it's size,
+     * so we need to recalculate the position after layout,
+     * and before any actual drawing to avoid flicker
+     */
     private val preDrawListener =
         OnPreDrawListener {
             if (shouldUpdatePosition) {
@@ -103,33 +113,37 @@ class CandidatesView(
             menu.candidates.isNotEmpty()
 
     private fun updateUi() {
+        preeditUi.update(inputComposition)
+        preeditUi.root.visibility = if (preeditUi.visible) View.VISIBLE else View.INVISIBLE
+        // if CandidatesView can be shown, rime engine is ready most of the time,
+        // so it should be safety to get option immediately
+        val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
+        candidatesUi.update(menu, isHorizontalLayout)
         if (evaluateVisibility()) {
-            preeditUi.update(inputComposition)
-            preeditUi.root.visibility = if (preeditUi.visible) View.VISIBLE else View.INVISIBLE
-            // if CandidatesView can be shown, rime engine is ready most of the time,
-            // so it should be safety to get option immediately
-            val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
-            candidatesUi.update(menu, isHorizontalLayout)
             visibility = View.VISIBLE
         } else {
+            // RecyclerView won't update its items when ancestor view is GONE
+            visibility = View.INVISIBLE
             touchEventReceiverWindow.dismiss()
-            visibility = GONE
         }
     }
 
     private fun updatePosition() {
-        val x: Float
-        val y: Float
-        val (horizontal, top, _, bottom) = anchorPosition
+        if (visibility != View.VISIBLE) return
         val (parentWidth, parentHeight) = parentSize
         if (parentWidth <= 0 || parentHeight <= 0) {
             translationX = 0f
             translationY = 0f
             return
         }
-        val selfWidth = width.toFloat()
-        val selfHeight = height.toFloat()
+        val (horizontal, top, _, bottom) = anchorPosition
+        val w = width
+        val h = height
+        val selfWidth = w.toFloat()
+        val selfHeight = h.toFloat()
 
+        val x: Float
+        val y: Float
         val minX = 0f
         val minY = 0f
         val maxX = parentWidth - selfWidth
@@ -165,9 +179,7 @@ class CandidatesView(
         translationX = x
         translationY = y
         // update touchEventReceiverWindow's position after CandidatesView's
-        if (evaluateVisibility()) {
-            touchEventReceiverWindow.showup()
-        }
+        touchEventReceiverWindow.showAt(x.roundToInt(), y.roundToInt(), w, h)
         shouldUpdatePosition = false
     }
 
@@ -183,7 +195,7 @@ class CandidatesView(
     }
 
     init {
-        visibility = View.GONE
+        visibility = View.INVISIBLE
 
         minWidth = dp(theme.generalStyle.layout.minWidth)
         minHeight = dp(theme.generalStyle.layout.minHeight)
