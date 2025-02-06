@@ -31,7 +31,7 @@ class PreeditModule(
     theme: Theme,
     rime: RimeSession,
 ) : InputBroadcastReceiver {
-    private val textBackColor = ColorManager.getColor("text_back_color")
+    private val textBackColor = ColorManager.getColor("text_back_color")!!
 
     private val topLeftCornerRadiusOutlineProvider =
         object : ViewOutlineProvider() {
@@ -48,16 +48,18 @@ class PreeditModule(
         }
 
     val ui =
-        PreeditUi(context, theme, setupPreeditView = {
-            textBackColor?.let { backgroundColor = it }
-        }).apply {
+        PreeditUi(
+            context,
+            theme,
+            setupPreeditView = {
+                backgroundColor = textBackColor
+            },
+            onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
+        ).apply {
             root.alpha = theme.generalStyle.layout.alpha / 255f
             root.outlineProvider = topLeftCornerRadiusOutlineProvider
             root.clipToOutline = true
             root.visibility = View.INVISIBLE
-            preedit.setOnCursorMoveListener { position ->
-                rime.launchOnReady { it.moveCursorPos(position) }
-            }
         }
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(ui.root)

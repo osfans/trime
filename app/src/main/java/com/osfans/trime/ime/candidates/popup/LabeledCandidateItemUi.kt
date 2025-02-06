@@ -7,7 +7,10 @@ package com.osfans.trime.ime.candidates.popup
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.text.SpannableStringBuilder
+import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import com.osfans.trime.core.RimeProto
@@ -43,6 +46,13 @@ class LabeledCandidateItemUi(
             padding = dp(theme.generalStyle.candidatePadding)
         }
 
+    private inline fun SpannableStringBuilder.inSpanWith(
+        @ColorInt color: Int,
+        textSize: Float,
+        typeface: Typeface,
+        builderAction: SpannableStringBuilder.() -> Unit,
+    ) = inSpans(CandidateItemSpan(color, textSize, typeface), builderAction)
+
     fun update(
         candidate: RimeProto.Candidate,
         highlighted: Boolean,
@@ -52,11 +62,12 @@ class LabeledCandidateItemUi(
         val commentFg = if (highlighted) highlightCommentTextColor else commentColor
         root.text =
             buildSpannedString {
-                inSpans(CandidateItemSpan(labelFg, ctx.sp(labelSize), labelFont)) { append(candidate.label) }
-                inSpans(CandidateItemSpan(textFg, ctx.sp(textSize), textFont)) { append(candidate.text) }
+                inSpanWith(labelFg, ctx.sp(labelSize), labelFont) { append(candidate.label) }
+                append(" ")
+                inSpanWith(textFg, ctx.sp(textSize), textFont) { append(candidate.text) }
                 if (!candidate.comment.isNullOrBlank()) {
                     append(" ")
-                    inSpans(CandidateItemSpan(commentFg, ctx.sp(commentSize), commentFont)) { append(candidate.comment) }
+                    inSpanWith(commentFg, ctx.sp(commentSize), commentFont) { append(candidate.comment) }
                 }
             }
         val bg =
