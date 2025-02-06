@@ -18,11 +18,7 @@ class PreeditTextView
         context: Context,
         attributeSet: AttributeSet? = null,
     ) : TextView(context, attributeSet) {
-        private var onCursorMove: ((Int) -> Unit)? = null
-
-        fun setOnCursorMoveListener(listener: ((Int) -> Unit)) {
-            onCursorMove = listener
-        }
+        var onMoveCursor: ((Int) -> Unit)? = null
 
         private var touchX: Int = 0
         private var newSel: CharSequence = ""
@@ -31,12 +27,14 @@ class PreeditTextView
         override fun onTouchEvent(event: MotionEvent): Boolean {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    touchX = getOffsetForPosition(event.x, event.y)
-                    newSel = text.subSequence(0, touchX).replace("\\s".toRegex(), "")
+                    val x = event.x - paddingLeft
+                    val y = event.y - paddingTop
+                    touchX = getOffsetForPosition(x, y)
+                    newSel = text.subSequence(0, touchX).dropWhile { it.isWhitespace() }
                     return true
                 }
                 MotionEvent.ACTION_UP -> {
-                    onCursorMove?.invoke(newSel.length)
+                    onMoveCursor?.invoke(newSel.length)
                     touchX = 0
                     newSel = ""
                     return true

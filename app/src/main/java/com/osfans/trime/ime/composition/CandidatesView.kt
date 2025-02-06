@@ -39,6 +39,7 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.withTheme
 import splitties.views.dsl.core.wrapContent
 import splitties.views.horizontalPadding
+import splitties.views.setPaddingDp
 import splitties.views.verticalPadding
 import kotlin.math.roundToInt
 
@@ -83,11 +84,12 @@ class CandidatesView(
         }
 
     private val preeditUi =
-        PreeditUi(ctx, theme).apply {
-            preedit.setOnCursorMoveListener { position ->
-                rime.launchOnReady { it.moveCursorPos(position) }
-            }
-        }
+        PreeditUi(
+            ctx,
+            theme,
+            setupPreeditView = { setPaddingDp(3, 1, 3, 1) },
+            onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
+        )
 
     private val candidatesUi =
         PagedCandidatesUi(

@@ -22,24 +22,24 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.view
-import splitties.views.setPaddingDp
 
 open class PreeditUi(
     final override val ctx: Context,
     private val theme: Theme,
     private val setupPreeditView: (TextView.() -> Unit)? = null,
+    private val onMoveCursor: ((Int) -> Unit)? = null,
 ) : Ui {
-    private val textColor = ColorManager.getColor("text_color")
-    private val highlightTextColor = ColorManager.getColor("hilited_text_color")
-    private val highlightBackColor = ColorManager.getColor("hilited_back_color")
+    private val textColor = ColorManager.getColor("text_color")!!
+    private val highlightTextColor = ColorManager.getColor("hilited_text_color")!!
+    private val highlightBackColor = ColorManager.getColor("hilited_back_color")!!
 
     val preedit =
         view(::PreeditTextView) {
-            setPaddingDp(3, 1, 3, 1)
-            textColor?.let { setTextColor(it) }
+            setTextColor(textColor)
             textSize = theme.generalStyle.textSize
             typeface = FontManager.getTypeface("text_font")
             setupPreeditView?.invoke(this)
+            onMoveCursor = this@PreeditUi.onMoveCursor
         }
 
     override val root =
@@ -54,12 +54,10 @@ open class PreeditUi(
 
     private fun RimeProto.Context.Composition.toSpannedString() =
         buildSpannedString {
-            append(preedit ?: "")
-            highlightTextColor?.let {
-                setSpan(ForegroundColorSpan(it), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            }
-            highlightBackColor?.let {
-                setSpan(BackgroundColorSpan(it), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            if (!preedit.isNullOrEmpty()) {
+                append(preedit)
+                setSpan(ForegroundColorSpan(highlightTextColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                setSpan(BackgroundColorSpan(highlightBackColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
             }
         }
 
