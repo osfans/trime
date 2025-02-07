@@ -6,6 +6,7 @@ package com.osfans.trime.daemon
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Color
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.osfans.trime.R
@@ -176,6 +177,7 @@ object RimeDaemon {
                 RimeMessage.DeployMessage.State.Start -> {
                     sendNotification(MESSAGE_ID) {
                         setSmallIcon(R.drawable.ic_baseline_sync_24)
+                        setColor(Color.GRAY)
                         setContentText(appContext.getString(R.string.deploy_progress))
                         setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         setTimeoutAfter(2000L)
@@ -183,8 +185,9 @@ object RimeDaemon {
                     withContext(Dispatchers.IO) { subprocess("logcat", "--clear") }
                 }
                 RimeMessage.DeployMessage.State.Success -> {
-                    sendNotification(MESSAGE_ID) {
+                    sendNotification(MESSAGE_ID + 1) {
                         setSmallIcon(R.drawable.ic_baseline_sync_24)
+                        setColor(Color.GREEN)
                         setContentText(appContext.getString(R.string.deploy_finish))
                         setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         setTimeoutAfter(2000L)
@@ -200,8 +203,9 @@ object RimeDaemon {
                             putExtra(LogActivity.FROM_DEPLOY, true)
                             putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
                         }
-                    sendNotification(MESSAGE_ID) {
+                    sendNotification(MESSAGE_ID + 2) {
                         setSmallIcon(R.drawable.ic_baseline_warning_24)
+                        setColor(Color.YELLOW)
                         setContentText(appContext.getString(R.string.view_deploy_failure_log))
                         setContentIntent(
                             PendingIntent.getActivity(
