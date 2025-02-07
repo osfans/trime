@@ -290,11 +290,26 @@ class Rime :
         fun simulateKeySequence(sequence: CharSequence): Boolean {
             if (!sequence.first().isAsciiPrintable()) return false
             Timber.d("simulateKeySequence: $sequence")
-            return simulateRimeKeySequence(
-                sequence.toString().replace("{}", "{braceleft}{braceright}"),
-            ).also {
+
+            val simulateResult =
+                simulateRimeKeySequence(
+                    sequence.toString().replace("{}", "{braceleft}{braceright}"),
+                )
+            val commit = getRimeCommit()
+            val ctx = getRimeContext()
+
+            return (simulateResult && (!commit?.text.isNullOrEmpty() || !ctx?.input.isNullOrEmpty())).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
-                if (it) requireResponse()
+                if (it) {
+                    handleRimeMessage(
+                        4, // RimeMessage.MessageType.Response
+                        arrayOf(
+                            commit ?: RimeProto.Commit(null),
+                            ctx ?: return false,
+                            getRimeStatus() ?: return false,
+                        ),
+                    )
+                }
             }
         }
 

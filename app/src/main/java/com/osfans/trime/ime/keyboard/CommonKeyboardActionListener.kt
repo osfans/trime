@@ -59,8 +59,8 @@ class CommonKeyboardActionListener(
         /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
         private val BRACED_KEY_EVENT = """^(\{[^{}]+\}).*$""".toRegex()
 
-        /** Pattern for braced key event to capture `{Escape}` as group 2 */
-        private val BRACED_KEY_EVENT_WITH_ESCAPE = """^((\{Escape\})?[^{}]+).*$""".toRegex()
+        /** Pattern for unbraced characters (including {Escape}) like `abc`, `{Escape}jk` etc. */
+        private val UNBRACED_CHAR = """^((\{Escape\})?[^{}]+).*$""".toRegex()
 
         private val PLACEHOLDER_PATTERN = Regex(".*(%([1-4]\\$)?s).*")
     }
@@ -339,9 +339,7 @@ class CommonKeyboardActionListener(
                 while (sequence.isNotEmpty()) {
                     val slice =
                         when {
-                            BRACED_KEY_EVENT_WITH_ESCAPE.matches(sequence) ->
-                                BRACED_KEY_EVENT_WITH_ESCAPE.matchEntire(sequence)?.groupValues?.get(1)
-                                    ?: ""
+                            UNBRACED_CHAR.matches(sequence) -> UNBRACED_CHAR.matchEntire(sequence)?.groupValues?.get(1) ?: ""
                             BRACED_KEY_EVENT.matches(sequence) -> BRACED_KEY_EVENT.matchEntire(sequence)?.groupValues?.get(1) ?: ""
                             else -> sequence.first().toString()
                         }
@@ -349,10 +347,11 @@ class CommonKeyboardActionListener(
                     service.postRimeJob {
                         if (slice.startsWith("{") && slice.endsWith("}")) {
                             onAction(KeyActionManager.getAction(slice))
-                        } else {
-                            if ((!Rime.simulateKeySequence(slice) || Rime.isAsciiMode) && !Rime.isComposing) {
-                                service.commitText(slice.replace("{Escape}", ""))
-                            }
+                            return@postRimeJob
+                        }
+
+                        if (!Rime.simulateKeySequence(slice)) {
+                            service.commitText(slice.replace("{Escape}", ""))
                         }
                     }
 
