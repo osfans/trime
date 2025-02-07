@@ -67,14 +67,14 @@ class SwitcherSettings {
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getAvailableRimeSchemaList(JNIEnv *env,
                                                            jclass /* thiz */) {
-  static SwitcherSettings switcher;
+  SwitcherSettings switcher;
   return rimeSchemaListToJObjectArray(env, switcher.availableSchemas());
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_osfans_trime_core_Rime_getSelectedRimeSchemaList(JNIEnv *env,
                                                           jclass /* thiz */) {
-  static SwitcherSettings switcher;
+  SwitcherSettings switcher;
   return rimeSchemaListToJObjectArray(env, switcher.selectedSchemas());
 }
 
@@ -82,6 +82,6 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeSchemas(JNIEnv *env,
                                                   jclass /* thiz */,
                                                   jobjectArray array) {
-  static SwitcherSettings switcher;
+  SwitcherSettings switcher;
   return switcher.selectSchemas(stringArrayToStringVector(env, array));
 }
