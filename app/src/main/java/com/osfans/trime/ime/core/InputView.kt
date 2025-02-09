@@ -5,21 +5,16 @@
 package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
-import android.graphics.Color
-import android.os.Build
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
@@ -32,7 +27,6 @@ import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.preview.KeyPreviewChoreographer
 import com.osfans.trime.ime.symbol.LiquidKeyboard
-import com.osfans.trime.util.ColorUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
@@ -65,10 +59,6 @@ class InputView(
     rime: RimeSession,
     theme: Theme,
 ) : BaseInputMessenger(service, rime, theme) {
-    private var shouldUpdateNavbarForeground = false
-    private var shouldUpdateNavbarBackground = false
-    private val navbarBackground get() = AppPrefs.defaultInstance().theme.navbarBackground
-
     private val keyboardBackground =
         imageView {
             scaleType = ImageView.ScaleType.CENTER_CROP
@@ -142,45 +132,6 @@ class InputView(
         windowManager.cacheResidentWindow(liquidKeyboard)
         // show KeyboardWindow by default
         windowManager.attachWindow(KeyboardWindow)
-
-        service.window.window!!.also {
-            when (navbarBackground) {
-                AppPrefs.Theme.NavbarBackground.NONE -> {
-                    WindowCompat.setDecorFitsSystemWindows(it, true)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        it.isNavigationBarContrastEnforced = true
-                    }
-                }
-                AppPrefs.Theme.NavbarBackground.COLOR_ONLY -> {
-                    shouldUpdateNavbarForeground = true
-                    shouldUpdateNavbarBackground = true
-                    // don't draw behind navigation bar
-                    WindowCompat.setDecorFitsSystemWindows(it, true)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // don't apply scrim to transparent navigation bar
-                        it.isNavigationBarContrastEnforced = false
-                    }
-                }
-                AppPrefs.Theme.NavbarBackground.FULL -> {
-                    shouldUpdateNavbarForeground = true
-                    // allow draw behind navigation bar
-                    WindowCompat.setDecorFitsSystemWindows(it, false)
-                    it.navigationBarColor = Color.TRANSPARENT
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // don't apply scrim to transparent navigation bar
-                        it.isNavigationBarContrastEnforced = false
-                    }
-                    ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-                        insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
-                            bottomPaddingSpace.updateLayoutParams<LayoutParams> {
-                                bottomMargin = it.bottom
-                            }
-                        }
-                        WindowInsetsCompat.CONSUMED
-                    }
-                }
-            }
-        }
 
         keyboardBackground.imageDrawable = ColorManager.getDrawable("keyboard_background")
             ?: ColorManager.getDrawable("keyboard_back_color")
@@ -308,21 +259,6 @@ class InputView(
         info: EditorInfo,
         restarting: Boolean = false,
     ) {
-        if (!restarting) {
-            if (shouldUpdateNavbarForeground || shouldUpdateNavbarBackground) {
-                service.window.window!!.also {
-                    val backColor = ColorManager.getColor("back_color") ?: Color.BLACK
-                    if (shouldUpdateNavbarForeground) {
-                        WindowCompat
-                            .getInsetsController(it, it.decorView)
-                            .isAppearanceLightNavigationBars = ColorUtils.isContrastedDark(backColor)
-                    }
-                    if (shouldUpdateNavbarBackground) {
-                        it.navigationBarColor = backColor
-                    }
-                }
-            }
-        }
         broadcaster.onStartInput(info)
         enterKeyLabel.updateLabelOnEditorInfo(info)
         if (!restarting) {

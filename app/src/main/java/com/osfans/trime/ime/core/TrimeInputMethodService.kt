@@ -89,7 +89,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var contentView: FrameLayout
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
-    private val inputDeviceManager = InputDeviceManager()
+    private val navBarManager = NavigationBarManager()
+    private val inputDeviceManager =
+        InputDeviceManager onChange@{
+            val w = window.window ?: return@onChange
+            navBarManager.evaluate(w, useVirtualKeyboard = it)
+        }
     private val rimeIntentReceiver = RimeIntentReceiver()
     private var initializationUi: InitializationUi? = null
     private val locales = Array(2) { Locale.getDefault() }
@@ -292,6 +297,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val newInputView = InputView(this, rime, theme)
         setInputView(newInputView)
         inputDeviceManager.setInputView(newInputView)
+        navBarManager.setupInputView(newInputView)
         inputView = newInputView
         return newInputView
     }
@@ -301,11 +307,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         contentView.removeView(candidatesView)
         contentView.addView(newCandidatesView)
         inputDeviceManager.setCandidatesView(newCandidatesView)
+        navBarManager.setupInputView(newCandidatesView)
         candidatesView = newCandidatesView
         return newCandidatesView
     }
 
     private fun replaceInputViews(theme: Theme) {
+        navBarManager.evaluate(window.window!!)
+        navBarManager.update(window.window!!)
         replaceInputView(theme)
         replaceCandidateView(theme)
         initializationUi = null
@@ -352,6 +361,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         super.onConfigurationChanged(newConfig)
         postRimeJob { clearComposition() }
         ColorManager.onSystemNightModeChange(newConfig.isNightMode())
+    }
+
+    override fun onWindowShown() {
+        super.onWindowShown()
+        // navbar foreground/background color would reset every time window shows
+        navBarManager.update(window.window!!)
     }
 
     private val contentSize = floatArrayOf(0f, 0f)

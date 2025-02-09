@@ -15,7 +15,9 @@ import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.util.monitorCursorAnchor
 
-class InputDeviceManager {
+class InputDeviceManager(
+    private val onChange: (Boolean) -> Unit,
+) {
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
 
@@ -65,6 +67,7 @@ class InputDeviceManager {
         // monitor CursorAnchorInfo when switching to CandidatesView
         service.currentInputConnection.monitorCursorAnchor(!useVirtualKeyboard)
         isVirtualKeyboard = useVirtualKeyboard
+        onChange(isVirtualKeyboard)
     }
 
     private var startedInputView = false
