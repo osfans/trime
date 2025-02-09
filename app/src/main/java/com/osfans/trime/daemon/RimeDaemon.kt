@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.osfans.trime.R
 import com.osfans.trime.TrimeApplication
 import com.osfans.trime.core.Rime
@@ -124,7 +123,6 @@ object RimeDaemon {
         createNotificationChannel(
             CHANNEL_ID,
             appContext.getString(R.string.rime_daemon),
-            NotificationManagerCompat.IMPORTANCE_HIGH,
         )
         TrimeApplication.getInstance().coroutineScope.launch {
             realRime.messageFlow.collect {
