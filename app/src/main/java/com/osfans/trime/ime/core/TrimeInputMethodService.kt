@@ -559,9 +559,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             updateRimeOption(this)
             InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
             InputFeedbackManager.resetPlayProgress()
-            if (prefs.other.showStatusBarIcon) {
-                showStatusIcon(R.drawable.ic_trime_status) // 狀態欄圖標
-            }
             ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
                 val useVirtualKeyboard =
                     inputDeviceManager.evaluateOnStartInputView(attribute, this@TrimeInputMethodService)
