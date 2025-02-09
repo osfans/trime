@@ -51,6 +51,6 @@ object ColorUtils {
         val r = color.red / 255f
         val g = color.green / 255f
         val b = color.blue / 255f
-        return (r * 0.2126f + g * 0.7152f + b * 0.0722f) > 0.73f
+        return (r * 0.2126f + g * 0.7152f + b * 0.0722f) <= 0.73f
     }
 }

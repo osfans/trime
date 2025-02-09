@@ -238,7 +238,7 @@ class AppPrefs(
             FULL,
         }
 
-        var navbarBackground by enum(NAVBAR_BACKGROUND, NavbarBackground.COLOR_ONLY)
+        val navbarBackground = enum(NAVBAR_BACKGROUND, NavbarBackground.COLOR_ONLY)
     }
 
     /**
