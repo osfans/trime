@@ -63,6 +63,8 @@ class Rime {
     if (rime->start_maintenance(fullCheck)) {
       rime->join_maintenance_thread();
     }
+
+    session_ = rime->create_session();
   }
 
   bool processKey(int keycode, int mask) {
