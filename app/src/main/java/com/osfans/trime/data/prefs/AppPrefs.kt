@@ -291,7 +291,6 @@ class AppPrefs(
         companion object {
             const val UI_MODE = "other__ui_mode"
             const val SHOW_APP_ICON = "other__show_app_icon"
-            const val SHOW_STATUS_BAR_ICON = "other__show_status_bar_icon"
         }
 
         enum class UiMode {
@@ -302,6 +301,5 @@ class AppPrefs(
 
         val uiMode = enum(UI_MODE, UiMode.AUTO)
         var showAppIcon by bool(SHOW_APP_ICON, true)
-        val showStatusBarIcon by bool(SHOW_STATUS_BAR_ICON, false)
     }
 }

@@ -24,12 +24,4 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:summaryOn="@string/other__show_app_icon_on_summary"
         app:summaryOff="@string/other__show_app_icon_off_summary"/>
 
-    <SwitchPreferenceCompat android:key="other__show_status_bar_icon"
-        app:iconSpaceReserved="false"
-        android:title="@string/other__show_status_bar_icon_title" />
-
-    <SwitchPreferenceCompat android:key="other__destroy_on_quit"
-        app:iconSpaceReserved="false"
-        android:title="@string/other__destroy_on_quit_title" />
-
 </PreferenceScreen>
