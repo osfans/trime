@@ -12,7 +12,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -117,7 +116,6 @@ class SetupActivity : FragmentActivity() {
         createNotificationChannel(
             CHANNEL_ID,
             appContext.getString(R.string.setup_channel),
-            NotificationManagerCompat.IMPORTANCE_HIGH,
         )
     }
 
