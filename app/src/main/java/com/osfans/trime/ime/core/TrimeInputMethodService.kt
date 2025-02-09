@@ -58,6 +58,7 @@ import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.receiver.RimeIntentReceiver
+import com.osfans.trime.util.any
 import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.forceShowSelf
 import com.osfans.trime.util.isNightMode
@@ -405,10 +406,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (!decorLocationUpdated) {
             updateDecorLocation()
         }
-        @Suppress("KotlinConstantConditions")
-        // Any component of anchorPosition can be NaN,
-        // meaning it will not equal itself!
-        if (anchorPosition != anchorPosition) {
+        if (anchorPosition.any(Float::isNaN)) {
             workaroundNullCursorAnchorInfo()
             return
         }
