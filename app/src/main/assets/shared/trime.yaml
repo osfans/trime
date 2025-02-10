@@ -33,14 +33,6 @@ style:
   keyboard_padding_land: 40 #横屏模式下，屏幕左右两侧与键盘的距离（避免横屏按键过度拉伸变形）
   keyboard_padding_land_bottom: 0 #横屏模式下，屏幕下侧与键盘的距离
   layout: #懸浮窗口設置
-    position: fixed #位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要>=Android5.0)
-    min_length: 5 #最小詞長
-    max_length: 10 #超過字數則換行
-    sticky_lines: 0 #固頂行數
-    sticky_lines_land: 0 #横屏模式下的固顶行数
-    max_entries: 1 #最大詞條數
-    min_check: 3 #只要前n个候选词有长度大于等于min_length的词，就会把长度符合以及之前的词全部加到悬浮窗内。
-    all_phrases: false #所有滿足條件的詞語都顯示在窗口
     border: 2 #邊框寬度
     max_width: 230 #最大寬度，超過則自動換行
     max_height: 400 #最大高度
@@ -48,19 +40,12 @@ style:
     min_height: 0 #最小高度
     margin_x: 5 #水平邊距 NOTE: margin_{x, y, bottom} 实际为 padding
     margin_y: 5 #豎直邊距
-    margin_bottom: 0 #底部边距 （用于适配特定背景图）
     line_spacing: 0 #候选詞的行間距(px)
     line_spacing_multiplier: 1.2 #候选詞的行間距(倍數)
-    real_margin: 3 #屏幕左右边缘和悬浮窗之间的距离 TODO: 在 4.0 时给 real_margin 与 spacing 换一个更适合的名字
     spacing: 1 #屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离
     round_corner: 8 #窗口圓角
     alpha: 0xdd #透明度(0-255)
     elevation: 5 #陰影(>=Android5.0)
-    movable: once #是否可移動窗口，或僅移動一次 true|false|once
-  window: #懸浮窗口組件
-    - {start: "", move: 'ㄓ ', end: ""}
-    - {start: "", composition: "%s", end: "", letter_spacing: 0} #letter_spacing需要>=Android5.0。TODO: 不爲0時，會導致不換行的問題
-    - {start: "\n", label: "%s.", candidate: "%s", comment: " %s", end: "", sep: " "}
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_long_text_size: 14 #長標籤字號

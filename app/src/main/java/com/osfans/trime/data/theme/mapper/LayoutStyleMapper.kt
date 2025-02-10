@@ -11,22 +11,6 @@ class LayoutStyleMapper(
     style: Map<String, ConfigItem?>?,
 ) : Mapper(style) {
     fun map(): Layout {
-        val position = getString("position")
-
-        val minLength = getInt("min_length")
-
-        val maxLength = getInt("max_length")
-
-        val stickyLines = getInt("sticky_lines")
-
-        val stickyLinesLand = getInt("sticky_lines_land")
-
-        val maxEntries = getInt("max_entries")
-
-        val minCheck = getInt("min_check")
-
-        val allPhrases = getBoolean("all_phrases")
-
         val border = getInt("border")
 
         val maxWidth = getInt("max_width")
@@ -41,31 +25,17 @@ class LayoutStyleMapper(
 
         val marginY = getInt("margin_y")
 
-        val marginBottom = getInt("margin_bottom")
-
         val lineSpacing = getInt("line_spacing")
 
         val lineSpacingMultiplier = getFloat("line_spacing_multiplier")
-
-        val realMargin = getInt("real_margin")
 
         val spacing = getInt("spacing")
 
         val roundCorner = getFloat("round_corner")
 
         val alpha = getInt("alpha", 204)
-        val elevation = getInt("elevation")
-        val movable = getString("movable")
 
         return Layout(
-            position,
-            minLength,
-            maxLength,
-            stickyLines,
-            stickyLinesLand,
-            maxEntries,
-            minCheck,
-            allPhrases,
             border,
             maxWidth,
             maxHeight,
@@ -73,15 +43,11 @@ class LayoutStyleMapper(
             minHeight,
             marginX,
             marginY,
-            marginBottom,
             lineSpacing,
             lineSpacingMultiplier,
-            realMargin,
             spacing,
             roundCorner,
             alpha,
-            elevation,
-            movable,
         )
     }
 }
