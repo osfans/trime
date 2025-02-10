@@ -45,12 +45,6 @@ style:
   horizontal: true #水平模式
   horizontal_gap: *hgap #键水平间距
   layout:
-    position: fixed #候选窗口位置：left|right|left_up|right_up|fixed|bottom_left|bottom_right|top_left|top_right(left、right需要Android5.0以上)
-    min_length: 4 #候选窗口最小词长
-    max_length: 14 #超过字数则换行
-    sticky_lines: 1 #固顶行数
-    sticky_lines_land: 0 #横屏模式下的固顶行数
-    max_entries: 5 #候选窗口最大词条数
     border: 0 #候选窗口边框宽度
     max_width: 360 #最大宽度，超过则自动换行
     max_height: 300 #最大高度
@@ -60,18 +54,10 @@ style:
     margin_y: 5 #竖直边距
     line_spacing: 0 #候选词的行间距(px)
     line_spacing_multiplier: 1.2 #候选词的行间距(倍数)
-    real_margin: 3 #屏幕左右边缘和悬浮窗之间的距离 TODO: 在 4.0 时给 real_margin 与 spacing 换一个更适合的名字
     spacing: 1 #屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离
     round_corner: *round2 #候选窗口圆角
     alpha: 0xff #透明度(0-255)
-    elevation: 0 #阴影(>=Android5.0)
     background: background.png #颜色或者backgrounds目录下的图片文档名
-    movable: false #是否可移动窗口，或仅移动一次 true|false|once
-    all_phrases: false #显示所有长词
-  window: #悬浮窗口组件
-#    - {start: "", move: 'ㄓ ', end: ""}
-    - {start: "", composition: "%s", end: "", letter_spacing: 0.12} #letter_spacing需要Android5.0
-    - {start: "\n", label: "%s.", candidate: "%s", comment: "%s", end: "", sep: "☁️️"}
   key_font: symbol.ttf #键盘字体
   key_height: *jpgd4 #键高
   key_long_text_size: 16 #长标签字号
