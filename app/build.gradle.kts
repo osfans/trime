@@ -5,6 +5,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
+    id("com.osfans.trime.app-convention")
     id("com.osfans.trime.native-app-convention")
     id("com.osfans.trime.data-checksums")
     id("com.osfans.trime.native-cache-hash")
@@ -61,6 +62,11 @@ android {
 
             resValue("string", "trime_app_name", "@string/app_name_debug")
         }
+        all {
+            // remove META-INF/version-control-info.textproto
+            @Suppress("UnstableApiUsage")
+            vcsInfo.include = false
+        }
     }
 
     buildFeatures {
@@ -85,6 +91,24 @@ android {
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
+        }
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
+    packaging {
+        resources {
+            excludes +=
+                setOf(
+                    "/META-INF/*.version",
+                    "/META-INF/*.kotlin_module", // cannot be excluded actually
+                    "/META-INF/androidx/**",
+                    "/DebugProbesKt.bin",
+                    "/kotlin-tooling-metadata.json",
+                )
         }
     }
 }
@@ -154,4 +178,11 @@ dependencies {
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.junit)
+}
+
+configurations {
+    all {
+        // remove Baseline Profile Installer or whatever it is...
+        exclude(group = "androidx.profileinstaller", module = "profileinstaller")
+    }
 }

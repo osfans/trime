@@ -17,6 +17,10 @@ dependencies {
 
 gradlePlugin {
     plugins {
+        register("androidAppConvention") {
+            id = "com.osfans.trime.app-convention"
+            implementationClass = "AndroidAppConventionPlugin"
+        }
         register("dataChecksums") {
             id = "com.osfans.trime.data-checksums"
             implementationClass = "DataChecksumsPlugin"
