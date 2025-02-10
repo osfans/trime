@@ -13,11 +13,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    env:
-      SIGN_KEY_BASE64: ${{ secrets.SIGNING_KEY }}
-      SIGN_KEY_STORE_PWD: ${{ secrets.KEY_STORE_PASSWORD }}
-      SIGN_KEY_ALIAS: ${{ secrets.ALIAS }}
-      SIGN_KEY_PWD: ${{ secrets.KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,6 +42,15 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Setup Keystore
+        run: |
+          cat << EOF > keystore.properties
+          keyBase64=${{ secrets.SIGNING_KEY }}
+          storePassword=${{ secrets.KEY_STORE_PASSWORD }}
+          keyAlias=${{ secrets.ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
 
       - name: Build Trime
         run: make release

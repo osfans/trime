@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.Properties
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -80,20 +81,29 @@ val Project.buildTimestamp
             System.currentTimeMillis().toString()
         }
 
+val Project.signKeyStoreProps: Properties?
+    get() {
+        val name =
+            envOrPropOrNull("KEYSTORE_PROPERTIES", "keystoreProperties")
+                ?: "keystore.properties"
+        val file = File(name)
+        return if (file.exists()) Properties().apply { load(file.inputStream()) } else null
+    }
+
 val Project.signKeyBase64: String?
-    get() = envOrPropOrNull("SIGN_KEY_BASE64", "signKeyBase64")
+    get() = signKeyStoreProps?.get("keyBase64") as? String
 
 val Project.signKeyStore
-    get() = envOrPropOrNull("SIGN_KEY_STORE", "signKeyStore")
+    get() = signKeyStoreProps?.get("storeFile") as? String
 
 val Project.signKeyStorePwd
-    get() = envOrPropOrNull("SIGN_KEY_STORE_PWD", "signKeyStorePwd")
+    get() = signKeyStoreProps?.get("storePassword") as? String
 
 val Project.signKeyAlias
-    get() = envOrPropOrNull("SIGN_KEY_ALIAS", "signKeyAlias")
+    get() = signKeyStoreProps?.get("keyAlias") as? String
 
 val Project.signKeyPwd
-    get() = envOrPropOrNull("SIGN_KEY_PWD", "signKeyPwd")
+    get() = signKeyStoreProps?.get("keyPassword") as? String
 
 val Project.signKeyFile: File?
     get() {
