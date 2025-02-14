@@ -29,6 +29,7 @@ import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
@@ -139,7 +140,8 @@ class QuickBar(
         }
 
     private fun setUnrollButtonToAttach() {
-        candidateUi.unrollButton.setOnClickListener {
+        candidateUi.unrollButton.setOnClickListener { view ->
+            InputFeedbackManager.keyPressVibrate(view)
             windowManager.attachWindow(
                 FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate.compactCandidateModule),
             )
@@ -148,7 +150,8 @@ class QuickBar(
     }
 
     private fun setUnrollButtonToDetach() {
-        candidateUi.unrollButton.setOnClickListener {
+        candidateUi.unrollButton.setOnClickListener { view ->
+            InputFeedbackManager.keyPressVibrate(view)
             windowManager.attachWindow(KeyboardWindow)
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_less_24)

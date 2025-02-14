@@ -67,8 +67,11 @@ class CompactCandidateModule(
 
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
-            setOnItemClickListener { _, _, position ->
-                rime.launchOnReady { it.selectCandidate(previous + position) }
+            setOnItemClickListener { _, view, position ->
+                rime.launchOnReady {
+                    InputFeedbackManager.keyPressVibrate(view)
+                    it.selectCandidate(previous + position)
+                }
             }
             setOnItemLongClickListener { _, view, position ->
                 showCandidateAction(previous + position, items[position].text, view)

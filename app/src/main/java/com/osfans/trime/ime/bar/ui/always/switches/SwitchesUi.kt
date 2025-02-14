@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.chad.library.adapter4.util.setOnDebouncedItemClick
 import com.osfans.trime.data.schema.Schema
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.symbol.SpacesItemDecoration
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
@@ -42,7 +43,8 @@ class SwitchesUi(
         listener: (Schema.Switch) -> Unit,
         debounceTime: Long = 300L,
     ) {
-        switchesAdapter.setOnDebouncedItemClick(debounceTime) { adapter, _, position ->
+        switchesAdapter.setOnDebouncedItemClick(debounceTime) { adapter, view, position ->
+            InputFeedbackManager.keyPressVibrate(view)
             (adapter as? SwitchesAdapter)?.items?.getOrNull(position)?.let(listener)
         }
     }
