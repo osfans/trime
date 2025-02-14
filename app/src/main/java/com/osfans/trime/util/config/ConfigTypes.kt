@@ -11,6 +11,7 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlNull
 import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.YamlTaggedNode
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
@@ -36,7 +37,7 @@ abstract class ConfigItem(
             is YamlScalar -> ValueType.Scalar
             is YamlList -> ValueType.List
             is YamlMap -> ValueType.Map
-            else -> ValueType.Null
+            is YamlTaggedNode -> ValueType.Tagged
         }
 
     abstract fun contentToString(): String
@@ -58,6 +59,13 @@ abstract class ConfigItem(
         item: ConfigItem,
         expectedType: String,
     ): Nothing = throw IllegalArgumentException("Expected element to be $expectedType but is ${item::class.simpleName}")
+}
+
+/** The wrapper of [YamlNull] */
+class ConfigNull(
+    private val nullable: YamlNull,
+) : ConfigItem(nullable) {
+    override fun contentToString(): String = nullable.contentToString()
 }
 
 /** The wrapper of [YamlScalar] */
@@ -85,39 +93,39 @@ class ConfigValue(
 class ConfigList(
     private val list: YamlList,
 ) : ConfigItem(list),
-    List<ConfigItem?> {
+    List<ConfigItem> {
     constructor(item: ConfigItem) : this(item.node.yamlList)
 
     private val items = list.items.map { convertFromYaml(it) }
 
     override val size = list.items.size
 
-    override fun containsAll(elements: Collection<ConfigItem?>): Boolean = items.containsAll(elements)
+    override fun containsAll(elements: Collection<ConfigItem>): Boolean = items.containsAll(elements)
 
-    override fun contains(element: ConfigItem?): Boolean = items.contains(element)
+    override fun contains(element: ConfigItem): Boolean = items.contains(element)
 
     override operator fun iterator() = items.iterator()
 
-    override fun listIterator(): ListIterator<ConfigItem?> = items.listIterator()
+    override fun listIterator(): ListIterator<ConfigItem> = items.listIterator()
 
-    override fun listIterator(index: Int): ListIterator<ConfigItem?> = items.listIterator(index)
+    override fun listIterator(index: Int): ListIterator<ConfigItem> = items.listIterator(index)
 
     override fun subList(
         fromIndex: Int,
         toIndex: Int,
-    ): List<ConfigItem?> = items.subList(fromIndex, toIndex)
+    ): List<ConfigItem> = items.subList(fromIndex, toIndex)
 
-    override fun lastIndexOf(element: ConfigItem?): Int = items.lastIndexOf(element)
+    override fun lastIndexOf(element: ConfigItem): Int = items.lastIndexOf(element)
 
     override fun isEmpty() = list.items.isEmpty()
 
     override fun contentToString(): String = list.contentToString()
 
-    override operator fun get(index: Int): ConfigItem? = items[index]
+    override operator fun get(index: Int): ConfigItem = items[index]
 
-    override fun indexOf(element: ConfigItem?): Int = items.indexOf(element)
+    override fun indexOf(element: ConfigItem): Int = items.indexOf(element)
 
-    fun getValue(index: Int) = get(index)?.configValue
+    fun getValue(index: Int) = get(index).configValue
 
     // just like other Java / Kotlin collection type
     override fun toString(): String = items.joinToString(prefix = "[", postfix = "]")
@@ -126,7 +134,7 @@ class ConfigList(
 class ConfigMap(
     private val map: YamlMap,
 ) : ConfigItem(map),
-    Map<String, ConfigItem?> {
+    Map<String, ConfigItem> {
     constructor(item: ConfigItem) : this(item.node.yamlMap)
 
     override fun isEmpty() = map.entries.isEmpty()
@@ -137,9 +145,9 @@ class ConfigMap(
 
     override fun containsKey(key: String) = map.getKey(key) != null
 
-    override fun containsValue(value: ConfigItem?): Boolean = entries.any { it.value == value }
+    override fun containsValue(value: ConfigItem): Boolean = entries.any { it.value == value }
 
-    override val entries: Set<Map.Entry<String, ConfigItem?>> =
+    override val entries: Set<Map.Entry<String, ConfigItem>> =
         map.entries.entries
             .associate { (s, n) ->
                 s.content to convertFromYaml(n)
@@ -147,7 +155,7 @@ class ConfigMap(
 
     override val keys: Set<String> = entries.map { it.key }.toSet()
 
-    override val values: Collection<ConfigItem?> = entries.map { it.value }
+    override val values: Collection<ConfigItem> = entries.map { it.value }
 
     operator fun iterator() = entries.iterator()
 
@@ -157,4 +165,10 @@ class ConfigMap(
 
     // just like other Java / Kotlin map type
     override fun toString(): String = entries.joinToString(prefix = "{", postfix = "}") { (key, value) -> "$key=$value" }
+}
+
+class ConfigTagged(
+    private val tagged: YamlTaggedNode,
+) : ConfigItem(tagged) {
+    override fun contentToString(): String = tagged.contentToString()
 }

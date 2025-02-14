@@ -12,19 +12,22 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlNull
 import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.YamlTaggedNode
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.yamlNull
 import com.charleskorn.kaml.yamlScalar
+import com.charleskorn.kaml.yamlTaggedNode
 import timber.log.Timber
 import java.io.File
 
-fun convertFromYaml(node: YamlNode): ConfigItem? =
+fun convertFromYaml(node: YamlNode): ConfigItem =
     when (node) {
-        is YamlNull -> null
+        is YamlNull -> ConfigNull(node.yamlNull)
         is YamlScalar -> ConfigValue(node.yamlScalar)
         is YamlList -> ConfigList(node.yamlList)
         is YamlMap -> ConfigMap(node.yamlMap)
-        else -> null
+        is YamlTaggedNode -> ConfigTagged(node.yamlTaggedNode)
     }
 
 /**
