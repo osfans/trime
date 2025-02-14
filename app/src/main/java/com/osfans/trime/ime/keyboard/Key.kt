@@ -27,30 +27,31 @@ class Key(
     private val mKeyboard: Keyboard,
 ) {
     var keyActions = arrayOfNulls<KeyAction>(EVENT_NUM)
-
     var edgeFlags = 0
     private var sendBindings = true
+    private lateinit var keyMap: Map<String, Any?>
+
+    var isPressed = false
+        private set
+    var isOn = false
+        private set
+
+    @JvmField
+    var x = 0
+
+    @JvmField
+    var y = 0
 
     var width = 0
-
     var height = 0
-
     var gap = 0
-
     var row = 0
-
     var column = 0
+
     private var label = ""
+    private var labelSymbol = ""
     var hint: String = ""
         private set
-    private lateinit var keyMap: Map<String, Any?>
-    private val keyBackColor get() = ColorManager.getDrawable(keyMap, "key_back_color")
-    private val hilitedKeyBackColor get() = ColorManager.getDrawable(keyMap, "hilited_key_back_color")
-
-    private val keyTextColor get() = ColorManager.getColor(keyMap, "key_text_color")
-    private val keySymbolColor get() = ColorManager.getColor(keyMap, "key_symbol_color")
-    private val hilitedKeyTextColor get() = ColorManager.getColor(keyMap, "hilited_key_text_color")
-    private val hilitedKeySymbolColor get() = ColorManager.getColor(keyMap, "hilited_key_symbol_color")
 
     var keyTextSize: Float = 0f
         private set
@@ -73,17 +74,12 @@ class Key(
     var keyPressOffsetX = 0
     var keyPressOffsetY = 0
 
-    @JvmField
-    var x = 0
-
-    @JvmField
-    var y = 0
-    var isPressed = false
-        private set
-    var isOn = false
-        private set
-
-    private var labelSymbol = ""
+    private val keyBackColor get() = ColorManager.getDrawable(keyMap, "key_back_color")
+    private val keyTextColor get() = ColorManager.getColor(keyMap, "key_text_color")
+    private val keySymbolColor get() = ColorManager.getColor(keyMap, "key_symbol_color")
+    private val hilitedKeyBackColor get() = ColorManager.getDrawable(keyMap, "hilited_key_back_color")
+    private val hilitedKeyTextColor get() = ColorManager.getColor(keyMap, "hilited_key_text_color")
+    private val hilitedKeySymbolColor get() = ColorManager.getColor(keyMap, "hilited_key_symbol_color")
 
     /**
      * Create an empty key with no attributes.
@@ -94,29 +90,32 @@ class Key(
     constructor(parent: Keyboard, externalKeyMap: Map<String, Any?>) : this(parent) {
         keyMap = externalKeyMap
         var hasComposingKey = false
-        for (behavior in KeyBehavior.entries) {
+        KeyBehavior.entries.forEach { behavior ->
             val behaviorName = behavior.name.lowercase()
             val what = obtainString(externalKeyMap, behaviorName)
-            if (what.isNotEmpty()) {
-                keyActions[behavior.ordinal] = KeyActionManager.getAction(what)
-                if (behavior.ordinal < KeyBehavior.COMBO.ordinal) hasComposingKey = true
-            } else if (behavior == KeyBehavior.CLICK) {
-                keyActions[behavior.ordinal] = KeyActionManager.getAction("")
+            when {
+                what.isNotEmpty() -> {
+                    keyActions[behavior.ordinal] = KeyActionManager.getAction(what)
+                    if (behavior.ordinal < KeyBehavior.COMBO.ordinal) {
+                        hasComposingKey = true
+                    }
+                }
+                behavior == KeyBehavior.CLICK -> {
+                    keyActions[behavior.ordinal] = KeyActionManager.getAction("")
+                }
             }
         }
         if (hasComposingKey) mKeyboard.composingKeys.add(this)
         label = obtainString(externalKeyMap, "label")
         labelSymbol = obtainString(externalKeyMap, "label_symbol")
         hint = obtainString(externalKeyMap, "hint")
-        if (externalKeyMap.containsKey("send_bindings")) {
-            sendBindings = obtainBoolean(externalKeyMap, "send_bindings", true)
-        } else if (!hasComposingKey) {
-            sendBindings = false
-        }
-        mKeyboard.setModiferKey(this.code, this)
         keyTextSize = obtainFloat(externalKeyMap, "key_text_size")
         symbolTextSize = obtainFloat(externalKeyMap, "symbol_text_size")
         roundCorner = obtainFloat(externalKeyMap, "round_corner")
+        sendBindings = externalKeyMap["send_bindings"]?.let {
+            obtainBoolean(externalKeyMap, "send_bindings", true)
+        } ?: hasComposingKey
+        mKeyboard.setModiferKey(this.code, this)
     }
 
     fun setOn(on: Boolean): Boolean {
@@ -225,12 +224,10 @@ class Key(
         get() {
             val isShifted = isTrimeModifierKey && mKeyboard.hasModifier(modifierKeyOnMask)
             val states =
-                if (isShifted || isOn) {
-                    if (isPressed) KEY_STATE_ON_PRESSED else KEY_STATE_ON_NORMAL
-                } else if (click!!.isSticky || click!!.isFunctional) {
-                    if (isPressed) KEY_STATE_OFF_PRESSED else KEY_STATE_OFF_NORMAL
-                } else {
-                    if (isPressed) KEY_STATE_PRESSED else KEY_STATE_NORMAL
+                when {
+                    isShifted || isOn -> if (isPressed) KEY_STATE_ON_PRESSED else KEY_STATE_ON_NORMAL
+                    click!!.isSticky || click!!.isFunctional -> if (isPressed) KEY_STATE_OFF_PRESSED else KEY_STATE_OFF_NORMAL
+                    else -> if (isPressed) KEY_STATE_PRESSED else KEY_STATE_NORMAL
                 }
 
             // only for modiferKey debug
@@ -249,82 +246,43 @@ class Key(
             }
             return states
         }
+
     val modifierKeyOnMask: Int
         get() = getModifierKeyOnMask(this.code)
 
-    private fun getModifierKeyOnMask(keycode: Int): Int {
-        if (keycode == KeyEvent.KEYCODE_SHIFT_LEFT ||
-            keycode == KeyEvent.KEYCODE_SHIFT_RIGHT
-        ) {
-            return KeyEvent.META_SHIFT_ON
+    private fun getModifierKeyOnMask(keycode: Int): Int =
+        when (keycode) {
+            KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> KeyEvent.META_SHIFT_ON
+            KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_CTRL_RIGHT -> KeyEvent.META_CTRL_ON
+            KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_META_RIGHT -> KeyEvent.META_META_ON
+            KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> KeyEvent.META_ALT_ON
+            KeyEvent.KEYCODE_SYM -> KeyEvent.META_SYM_ON
+            else -> 0
         }
-        if (keycode == KeyEvent.KEYCODE_CTRL_LEFT ||
-            keycode == KeyEvent.KEYCODE_CTRL_RIGHT
-        ) {
-            return KeyEvent.META_CTRL_ON
-        }
-        if (keycode == KeyEvent.KEYCODE_META_LEFT ||
-            keycode == KeyEvent.KEYCODE_META_RIGHT
-        ) {
-            return KeyEvent.META_META_ON
-        }
-        if (keycode == KeyEvent.KEYCODE_ALT_LEFT ||
-            keycode == KeyEvent.KEYCODE_ALT_RIGHT
-        ) {
-            return KeyEvent.META_ALT_ON
-        }
-        return if (keycode == KeyEvent.KEYCODE_SYM) KeyEvent.META_SYM_ON else 0
-    }
 
     val isShift: Boolean
-        get() {
-            val c = this.code
-            return c == KeyEvent.KEYCODE_SHIFT_LEFT || c == KeyEvent.KEYCODE_SHIFT_RIGHT
-        }
+        get() = this.code == KeyEvent.KEYCODE_SHIFT_LEFT || this.code == KeyEvent.KEYCODE_SHIFT_RIGHT
+
     val isShiftLock: Boolean
-        // Shift、Ctrl、Alt、Meta等修饰键在点击时是否触发锁定
-        get() {
-            val s = click!!.shiftLock
-            // shift_lock #ascii_long: 英文長按中文單按鎖定, long: 長按鎖定, click: 單按鎖定
-            if ("long" == s) return false
-            if ("click" == s) return true
-            return if ("ascii_long" == s) !isAsciiMode else false
-        }
+        // Shift、Ctrl、Alt、Meta 等修饰键在点击时是否触发锁定
+        get() =
+            when (click?.shiftLock) {
+                "long" -> false // 长按锁定
+                "click" -> true // 点击锁定
+                "ascii_long" -> !isAsciiMode // 英文长按锁定，中文点击锁定
+                else -> false
+            }
 
     /**
      * @param behavior 同文按键模式（点击/长按/滑动）
      * @return
      */
-    fun sendBindings(behavior: KeyBehavior): Boolean {
-        var e: KeyAction? = null
-        if (behavior != KeyBehavior.CLICK) e = keyActions[behavior.ordinal]
-        if (e != null) return true
-        if (keyActions[KeyBehavior.ASCII.ordinal] != null && isAsciiMode) return false
-        if (sendBindings) {
-            if (keyActions[KeyBehavior.PAGING.ordinal] != null && hasLeft()) return true
-            if (keyActions[KeyBehavior.HAS_MENU.ordinal] != null && hasMenu()) return true
-            if (keyActions[KeyBehavior.COMPOSING.ordinal] != null && isComposing) return true
-        }
-        return false
-    }
+    fun sendBindings(behavior: KeyBehavior): Boolean =
+        keyActions[behavior.ordinal]?.takeIf { behavior != KeyBehavior.CLICK } != null || checkKeyAction(sendBindings) != null
 
     private val keyAction: KeyAction?
-        get() {
-            if (keyActions[KeyBehavior.ASCII.ordinal] != null && isAsciiMode) {
-                return keyActions[KeyBehavior.ASCII.ordinal]
-            }
-            if (keyActions[KeyBehavior.PAGING.ordinal] != null && hasLeft()) {
-                return keyActions[KeyBehavior.PAGING.ordinal]
-            }
-            if (keyActions[KeyBehavior.HAS_MENU.ordinal] != null && hasMenu()) {
-                return keyActions[KeyBehavior.HAS_MENU.ordinal]
-            }
-            return if (keyActions[KeyBehavior.COMPOSING.ordinal] != null && isComposing) {
-                keyActions[KeyBehavior.COMPOSING.ordinal]
-            } else {
-                click
-            }
-        }
+        get() = checkKeyAction() ?: click
+
     val click: KeyAction?
         get() = keyActions[KeyBehavior.CLICK.ordinal]
     val longClick: KeyAction?
@@ -332,60 +290,39 @@ class Key(
 
     fun hasAction(behavior: KeyBehavior): Boolean = keyActions[behavior.ordinal] != null
 
-    fun getAction(behavior: KeyBehavior): KeyAction? {
-        var e: KeyAction? = null
-        if (behavior != KeyBehavior.CLICK) e = keyActions[behavior.ordinal]
-        if (e != null) return e
-        if (keyActions[KeyBehavior.ASCII.ordinal] != null && isAsciiMode) {
-            return keyActions[KeyBehavior.ASCII.ordinal]
-        }
-        if (sendBindings) {
-            if (keyActions[KeyBehavior.PAGING.ordinal] != null && hasLeft()) {
-                return keyActions[KeyBehavior.PAGING.ordinal]
-            }
-            if (keyActions[KeyBehavior.HAS_MENU.ordinal] != null && hasMenu()) {
-                return keyActions[KeyBehavior.HAS_MENU.ordinal]
-            }
-            if (keyActions[KeyBehavior.COMPOSING.ordinal] != null && isComposing) {
-                return keyActions[KeyBehavior.COMPOSING.ordinal]
-            }
-        }
-        return click
-    }
+    fun getAction(behavior: KeyBehavior): KeyAction? =
+        keyActions[behavior.ordinal]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
+
+    private fun checkKeyAction(): KeyAction? =
+        keyActions[KeyBehavior.ASCII.ordinal].takeIf { isAsciiMode }
+            ?: keyActions[KeyBehavior.PAGING.ordinal]?.takeIf { hasLeft() }
+            ?: keyActions[KeyBehavior.HAS_MENU.ordinal]?.takeIf { hasMenu() }
+            ?: keyActions[KeyBehavior.COMPOSING.ordinal]?.takeIf { isComposing }
+
+    private fun checkKeyAction(sendBindings: Boolean): KeyAction? = checkKeyAction().takeIf { sendBindings }
 
     val code: Int
         get() = click!!.code
 
     fun getCode(behavior: KeyBehavior): Int = getAction(behavior)!!.code
 
-    fun getLabel(): String {
-        keyAction
-        return if (label.isNotEmpty() &&
-            keyAction === click &&
-            keyActions[KeyBehavior.ASCII.ordinal] == null &&
-            !showAsciiPunch()
-        ) {
-            label
-        } else {
-            keyAction!!.getLabel(mKeyboard) // 中文狀態顯示標籤
+    fun getLabel(): String =
+        when {
+            label.isNotEmpty() &&
+                keyAction == click &&
+                keyActions[KeyBehavior.ASCII.ordinal] == null &&
+                !showAsciiPunch() -> label
+            else -> keyAction!!.getLabel(mKeyboard) // 中文狀態顯示標籤
         }
-    }
 
     fun getPreviewText(behavior: KeyBehavior): String =
-        if (behavior == KeyBehavior.CLICK) {
-            keyAction!!.getPreview(mKeyboard)
-        } else {
-            getAction(behavior)!!.getPreview(mKeyboard)
+        when (behavior) {
+            KeyBehavior.CLICK -> keyAction!!.getPreview(mKeyboard)
+            else -> getAction(behavior)!!.getPreview(mKeyboard)
         }
 
     val symbolLabel: String
-        get() {
-            if (labelSymbol.isEmpty()) {
-                val longClick = longClick
-                if (longClick != null) return longClick.getLabel(mKeyboard)
-            }
-            return labelSymbol
-        }
+        get() = labelSymbol.takeIf { it.isNotEmpty() } ?: longClick?.getLabel(mKeyboard) ?: ""
 
     companion object {
         val KEY_STATE_ON_NORMAL =
@@ -420,12 +357,12 @@ class Key(
                 KEY_STATE_OFF_PRESSED, // 2   "hilited_off_key_back_color"  功能键按下的背景
                 KEY_STATE_OFF_NORMAL, // 3    "off_key_back_color"          功能键背景
                 KEY_STATE_PRESSED, // 4       "hilited_key_back_color"      按键按下的背景
-                KEY_STATE_NORMAL, // 5         "key_back_color"              按键背景
+                KEY_STATE_NORMAL, // 5        "key_back_color"              按键背景
             )
 
         private val EVENT_NUM = KeyBehavior.entries.size
 
         @JvmStatic
-        fun isTrimeModifierKey(keycode: Int): Boolean = if (keycode == KeyEvent.KEYCODE_FUNCTION) false else KeyEvent.isModifierKey(keycode)
+        fun isTrimeModifierKey(keycode: Int): Boolean = keycode != KeyEvent.KEYCODE_FUNCTION && KeyEvent.isModifierKey(keycode)
     }
 }
