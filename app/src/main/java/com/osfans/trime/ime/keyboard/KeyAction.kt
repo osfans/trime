@@ -12,7 +12,6 @@ import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.util.virtualKeyCharacterMap
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import splitties.bitflags.hasFlag
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
 class KeyAction(
@@ -61,20 +60,21 @@ class KeyAction(
         }
 
     fun getLabel(keyboard: Keyboard): String {
-        val state = states?.get(if (Rime.getOption(toggle)) 1 else 0)
-        if (state != null) return state
+        states?.get(if (Rime.getOption(toggle)) 1 else 0)?.let { return it }
         if (keyboard.isOnlyShiftOn) {
-            if (code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9 && !hookShiftNum) {
+            if (!hookShiftNum && !Rime.isComposing && code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9) {
                 return adjustCase(shiftLabel, keyboard)
             }
-            if (code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
-                code == KeyEvent.KEYCODE_COMMA ||
-                code == KeyEvent.KEYCODE_PERIOD
+            if (!hookShiftSymbol &&
+                Rime.isAsciiMode &&
+                (
+                    code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
+                        code == KeyEvent.KEYCODE_COMMA ||
+                        code == KeyEvent.KEYCODE_PERIOD
+                )
             ) {
-                if (!hookShiftSymbol) return adjustCase(shiftLabel, keyboard)
+                return adjustCase(shiftLabel, keyboard)
             }
-        } else if ((modifier or keyboard.modifier).hasFlag(KeyEvent.META_SHIFT_ON)) {
-            return adjustCase(shiftLabel, keyboard)
         }
         return adjustCase(label, keyboard)
     }

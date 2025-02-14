@@ -248,24 +248,20 @@ class CommonKeyboardActionListener(
                     KeyEvent.KEYCODE_MENU -> showEnabledSchemaPicker()
                     else -> {
                         if (action.modifier == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
-                            if (action.code == KeyEvent.KEYCODE_SPACE && prefs.keyboard.hookShiftSpace) {
+                            val shouldHookSpace =
+                                prefs.keyboard.hookShiftSpace && action.code == KeyEvent.KEYCODE_SPACE
+                            val shouldHookNumber =
+                                prefs.keyboard.hookShiftNum && action.code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9
+                            val shouldHookSymbol =
+                                (prefs.keyboard.hookShiftSymbol || !Rime.isAsciiMode) &&
+                                    (
+                                        action.code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
+                                            action.code == KeyEvent.KEYCODE_COMMA ||
+                                            action.code == KeyEvent.KEYCODE_PERIOD
+                                    )
+                            if (shouldHookSpace || shouldHookNumber || shouldHookSymbol) {
                                 onKey(action.code, 0)
                                 return
-                            } else if (action.code >= KeyEvent.KEYCODE_0 &&
-                                action.code <= KeyEvent.KEYCODE_9 &&
-                                prefs.keyboard.hookShiftNum
-                            ) {
-                                onKey(action.code, 0)
-                                return
-                            } else if (prefs.keyboard.hookShiftSymbol) {
-                                if (action.code >= KeyEvent.KEYCODE_GRAVE &&
-                                    action.code <= KeyEvent.KEYCODE_SLASH ||
-                                    action.code == KeyEvent.KEYCODE_COMMA ||
-                                    action.code == KeyEvent.KEYCODE_PERIOD
-                                ) {
-                                    onKey(action.code, 0)
-                                    return
-                                }
                             }
                         }
                         val modifier =
@@ -274,10 +270,8 @@ class CommonKeyboardActionListener(
                                 (action.modifier and KeyEvent.META_CTRL_ON) != 0 -> {
                                     when (action.code) {
                                         in KeyEvent.KEYCODE_DPAD_UP..KeyEvent.KEYCODE_DPAD_RIGHT,
-                                        KeyEvent.KEYCODE_MOVE_HOME,
-                                        KeyEvent.KEYCODE_MOVE_END,
+                                        KeyEvent.KEYCODE_MOVE_HOME, KeyEvent.KEYCODE_MOVE_END,
                                         -> action.modifier or KeyboardSwitcher.currentKeyboard.modifier
-
                                         else -> action.modifier
                                     }
                                 }

@@ -133,7 +133,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_shift_space">点击空格时，忽略Shift的锁定状态</string>
     <string name="keyboard__hook_shift_num">点击0-9时，忽略Shift的锁定状态</string>
     <string name="keyboard__hook_shift_symbol">点击符号键时，忽略Shift的锁定状态</string>
-    <string name="keyboard__hook_shift_arrow">点击方向键时，不重置Shift的锁定状态</string>
+    <string name="keyboard__hook_shift_arrow">点击方向键时，保持Shift的锁定状态</string>
     <string name="toolkit">工具箱</string>
     <string name="export">导出</string>
     <string name="scroll_to_bottom">跳到最后</string>

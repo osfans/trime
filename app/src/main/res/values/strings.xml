@@ -137,7 +137,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_shift_space">Ignore Shift locked for Space</string>
     <string name="keyboard__hook_shift_num">Ignore Shift locked for 0-9</string>
     <string name="keyboard__hook_shift_symbol">Ignore Shift locked for Symbol keys</string>
-    <string name="keyboard__hook_shift_arrow">Not reset Shift state for arrow keys</string>
+    <string name="keyboard__hook_shift_arrow">Keep Shift locked for Arrow keys</string>
     <string name="exception_logcat_created">Logcat process is already created</string>
     <string name="app_crash">Application crashed</string>
     <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
