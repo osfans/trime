@@ -373,37 +373,18 @@ class KeyboardView(
      * 设置键盘修饰键的状态
      *
      * @param key 按下的修饰键(非组合键）
+     * @param behavior 按键行为(单击、长按等)
      * @return
      */
-    private fun setModifier(key: Key): Boolean =
-        if (keyboard.clikModifierKey(key.isShiftLock, key.modifierKeyOnMask)) {
-            invalidateAllKeys()
-            true
-        } else {
-            false
-        }
+    private fun setModifier(
+        key: Key,
+        behavior: KeyBehavior,
+    ): Boolean = setModifier(key.isShiftLock xor (behavior == KeyBehavior.LONG_CLICK), key.modifierKeyOnMask)
 
-    /**
-     * 設定鍵盤的Shift鍵狀態
-     *
-     * @param on 是否保持Shift按下狀態
-     * @param shifted 是否按下Shift
-     * @return Shift鍵狀態是否改變
-     * @see Keyboard.setShifted
-     */
-    fun setShifted(
+    private fun setModifier(
         on: Boolean,
-        shifted: Boolean,
-    ): Boolean {
-        // todo 扩展为设置全部修饰键的状态
-        return if (keyboard.setShifted(on, shifted)) {
-            // The whole keyboard probably needs to be redrawn
-            invalidateAllKeys()
-            true
-        } else {
-            false
-        }
-    }
+        code: Int,
+    ): Boolean = keyboard.clikModifierKey(on, code).also { if (it) invalidateAllKeys() }
 
     // 重置全部修饰键的状态(如果有锁定则不重置）
     private fun refreshModifier() {
@@ -705,7 +686,7 @@ class KeyboardView(
             val key = mKeys[index]
             if (Key.isTrimeModifierKey(key.code) && !key.sendBindings(behavior)) {
                 Timber.d("detectAndSendKey: ModifierKey, key.getEvent, keyLabel=${key.getLabel()}")
-                setModifier(key)
+                setModifier(key, behavior)
             } else {
                 if (key.click!!.isRepeatable) {
                     if (behavior > KeyBehavior.CLICK) mAbortKey = true
@@ -812,10 +793,8 @@ class KeyboardView(
             }
             return true
         }
-        Timber.w("only set isShifted, no others modifierkey")
-        if (popupKey.isShift && !popupKey.sendBindings(KeyBehavior.LONG_CLICK)) {
-            // todo 其他修饰键
-            setShifted(!popupKey.isOn, !popupKey.isOn)
+        if (Key.isTrimeModifierKey(popupKey.code) && !popupKey.sendBindings(KeyBehavior.LONG_CLICK)) {
+            setModifier(popupKey, KeyBehavior.LONG_CLICK)
             return true
         }
         return false

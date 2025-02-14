@@ -256,6 +256,7 @@ class KeyboardWindow(
     }
 
     private fun dispatchCapsState(setShift: (Boolean, Boolean) -> Unit) {
+        // TODO: 启用自动首句大写后，点击方向键时，保持Shift锁定状态功能将无法生效
         if (theme.generalStyle.autoCaps.toBoolean() && Rime.isAsciiMode && currentKeyboardView?.isCapsOn == false) {
             setShift(false, cursorCapsMode != 0)
         }
@@ -265,7 +266,9 @@ class KeyboardWindow(
         start: Int,
         end: Int,
     ) {
-        dispatchCapsState { on, shifted -> currentKeyboardView?.setShifted(on, shifted) }
+        dispatchCapsState { on, shifted ->
+            currentKeyboard?.setShifted(on, shifted)?.let { if (it) currentKeyboardView?.invalidateAllKeys() }
+        }
     }
 
     override fun onRimeSchemaUpdated(schema: SchemaItem) {

@@ -42,9 +42,6 @@ class Keyboard(
     var roundCorner: Float
         private set
 
-    // 鍵盤的Shift鍵是否按住
-    // private boolean mShifted;
-
     /** 鍵盤的Shift鍵  */
     var mShiftKey: Key? = null
     var mCtrlKey: Key? = null
@@ -457,58 +454,53 @@ class Keyboard(
         )
     }
 
-    val isAlted: Boolean
-        get() = hasModifier(KeyEvent.META_ALT_ON)
     val isShifted: Boolean
+        get() = modifier.hasFlag(KeyEvent.META_SHIFT_ON) || mShiftKey?.isOn == true
+
+    val isOnlyShiftOn: Boolean
         get() =
-            modifier.hasFlag(KeyEvent.META_SHIFT_ON) ||
-                mShiftKey?.isOn == true
+            isShifted &&
+                !modifier.hasFlag(KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON or KeyEvent.META_SYM_ON or KeyEvent.META_META_ON)
 
     /**
-     * 設定鍵盤的Shift鍵狀態
+     * 设置Shift键状态（用于自动大写）
      *
-     * @param on 是否保持Shift按下狀態(锁定)
-     * @param shifted 是否按下Shift
-     * @return Shift鍵狀態是否改變
+     * @param on 是否锁定Shift键
+     * @param shifted 是否按下Shift键
+     * @return Shift键状态是否改变
      */
     fun setShifted(
         on: Boolean,
         shifted: Boolean,
     ): Boolean {
-        var on = on
-        on = on and shifted
-        if (mShiftKey != null) mShiftKey!!.setOn(on)
-        return setModifier(KeyEvent.META_SHIFT_ON, on || shifted)
+        mShiftKey?.setOn(on)
+        return setModifier(KeyEvent.META_SHIFT_ON, shifted)
     }
 
     /**
-     * 设定修饰键的状态
+     * 设置修饰键的状态
      *
      * @param on 是否锁定修饰键
-     * @param keycode 修饰键on的keyevent mask code
-     * @return
+     * @param keycode 修饰键的 KeyEvent 掩码
+     * @return 修饰键状态是否改变
      */
     fun clikModifierKey(
         on: Boolean,
         keycode: Int,
     ): Boolean {
         val keyDown = !hasModifier(keycode)
-        var keepOn = on
-        if (keycode == KeyEvent.META_SHIFT_ON && mShiftKey != null) {
-            keepOn = mShiftKey!!.setOn(on)
-        } else if (keycode == KeyEvent.META_ALT_ON && mAltKey != null) {
-            keepOn = mAltKey!!.setOn(on)
-        } else if (keycode == KeyEvent.META_CTRL_ON && mCtrlKey != null) {
-            keepOn = mCtrlKey!!.setOn(on)
-        } else if (keycode == KeyEvent.META_META_ON && mMetaKey != null) {
-            keepOn = mMetaKey!!.setOn(on)
-        } else if (keycode == KeyEvent.KEYCODE_SYM && mSymKey != null) {
-            keepOn = mSymKey!!.setOn(on)
-        }
+        val modifierKey =
+            when (keycode) {
+                KeyEvent.META_SHIFT_ON -> mShiftKey
+                KeyEvent.META_ALT_ON -> mAltKey
+                KeyEvent.META_CTRL_ON -> mCtrlKey
+                KeyEvent.META_META_ON -> mMetaKey
+                KeyEvent.KEYCODE_SYM -> mSymKey
+                else -> null
+            }
+        val keepOn = modifierKey?.setOn(on) ?: on
         return if (on) setModifier(keycode, keepOn) else setModifier(keycode, keyDown)
     }
-
-    private val MASK_META_WITHOUT_SHIFT = KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON or KeyEvent.META_SYM_ON or KeyEvent.META_META_ON
 
     /** Creates a keyboard from the given xml key layout file.  */
     init {
@@ -537,9 +529,6 @@ class Keyboard(
         mKeys = ArrayList()
         composingKeys = ArrayList()
     }
-
-    val isOnlyShiftOn: Boolean
-        get() = mShiftKey != null && mShiftKey!!.isOn && modifier and MASK_META_WITHOUT_SHIFT == 0
 
     fun refreshModifier(): Boolean {
         // 这里改为了一次性重置全部修饰键状态并返回TRUE刷新UI，可能有bug
