@@ -952,7 +952,7 @@ class KeyboardView(
             if (mCurrentKey != NOT_A_KEY) {
                 handleLongPressJob()
             }
-            showPreview(keyIndex, KeyBehavior.COMPOSING)
+            showPreview(keyIndex, KeyBehavior.CLICK)
         }
 
         /**
