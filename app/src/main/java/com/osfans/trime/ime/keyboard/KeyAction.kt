@@ -175,17 +175,13 @@ class KeyAction(
 
     companion object {
         private val BRACED_STR = Regex("""\{[^{}]+\}""")
-        private val KV_PATTERN = Regex("""(\\w+)=(\\w+)""")
 
-        private fun decodeMapFromString(str: String): Map<String, String> {
-            val map = mutableMapOf<String, String>()
-            val trimmed = str.removeSurrounding("{", "}")
-            val matches = KV_PATTERN.findAll(trimmed)
-            for (match in matches) {
-                val (_, k, v) = match.groupValues
-                map[k] = v
-            }
-            return map
-        }
+        private fun decodeMapFromString(str: String): Map<String, String> =
+            str
+                .removeSurrounding("{", "}")
+                .split(", ")
+                .mapNotNull {
+                    it.split("=").takeIf { it.size == 2 }?.let { (key, value) -> key to value }
+                }.toMap()
     }
 }
