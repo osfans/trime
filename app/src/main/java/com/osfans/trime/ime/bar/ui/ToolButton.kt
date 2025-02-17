@@ -6,7 +6,6 @@ package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.ColorInt
@@ -37,9 +36,9 @@ class ToolButton(
         context: Context,
         @DrawableRes icon: Int,
     ) : this(context) {
-        image.imageTintList = ColorStateList.valueOf(ColorManager.getColor("comment_text_color") ?: Color.WHITE)
+        image.imageTintList = ColorStateList.valueOf(ColorManager.getColor("comment_text_color"))
         setIcon(icon)
-        ColorManager.getColor("hilited_on_key_back_color")?.let { setPressHighlightColor(it) }
+        setPressHighlightColor(ColorManager.getColor("hilited_on_key_back_color"))
         add(image, lParams(wrapContent, wrapContent, gravityCenter))
     }
 

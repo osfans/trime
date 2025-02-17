@@ -16,8 +16,6 @@ class SuggestionItemUi(
     override val ctx: Context,
     theme: Theme,
 ) : Ui {
-    private val firstBackColorH = ColorManager.getColor("hilited_candidate_back_color")!!
-
     override val root = constraintLayout {}
 
     fun update(
@@ -29,9 +27,9 @@ class SuggestionItemUi(
 
         root.background =
             if (isHighlighted) {
-                ColorDrawable(firstBackColorH)
+                ColorDrawable(ColorManager.getColor("hilited_candidate_back_color"))
             } else {
-                pressHighlightDrawable(firstBackColorH)
+                pressHighlightDrawable(ColorManager.getColor("hilited_candidate_back_color"))
             }
     }
 }

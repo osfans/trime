@@ -74,12 +74,22 @@ class Key(
     var keyPressOffsetX = 0
     var keyPressOffsetY = 0
 
-    private val keyBackColor get() = ColorManager.getDrawable(keyMap, "key_back_color")
-    private val keyTextColor get() = ColorManager.getColor(keyMap, "key_text_color")
-    private val keySymbolColor get() = ColorManager.getColor(keyMap, "key_symbol_color")
-    private val hilitedKeyBackColor get() = ColorManager.getDrawable(keyMap, "hilited_key_back_color")
-    private val hilitedKeyTextColor get() = ColorManager.getColor(keyMap, "hilited_key_text_color")
-    private val hilitedKeySymbolColor get() = ColorManager.getColor(keyMap, "hilited_key_symbol_color")
+    private fun Map<String, Any?>.getColor(key: String) =
+        runCatching {
+            this[key]?.let { ColorManager.resolveColor(it.toString(), false) }
+        }.getOrNull()
+
+    private fun Map<String, Any?>.getDrawable(key: String) =
+        runCatching {
+            this[key]?.let { ColorManager.resolveDrawable(it.toString(), false) }
+        }.getOrNull()
+
+    private val keyBackColor get() = keyMap.getDrawable("key_back_color")
+    private val keyTextColor get() = keyMap.getColor("key_text_color")
+    private val keySymbolColor get() = keyMap.getColor("key_symbol_color")
+    private val hilitedKeyBackColor get() = keyMap.getDrawable("hilited_key_back_color")
+    private val hilitedKeyTextColor get() = keyMap.getColor("hilited_key_text_color")
+    private val hilitedKeySymbolColor get() = keyMap.getColor("hilited_key_symbol_color")
 
     /**
      * Create an empty key with no attributes.

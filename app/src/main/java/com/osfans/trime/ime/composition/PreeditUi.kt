@@ -29,9 +29,9 @@ open class PreeditUi(
     private val setupPreeditView: (TextView.() -> Unit)? = null,
     private val onMoveCursor: ((Int) -> Unit)? = null,
 ) : Ui {
-    private val textColor = ColorManager.getColor("text_color")!!
-    private val highlightTextColor = ColorManager.getColor("hilited_text_color")!!
-    private val highlightBackColor = ColorManager.getColor("hilited_back_color")!!
+    private val textColor = ColorManager.getColor("text_color")
+    private val highlightTextColor = ColorManager.getColor("hilited_text_color")
+    private val highlightBackColor = ColorManager.getColor("hilited_back_color")
 
     val preedit =
         view(::PreeditTextView) {

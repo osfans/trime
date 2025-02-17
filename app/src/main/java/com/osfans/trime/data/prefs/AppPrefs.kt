@@ -222,14 +222,14 @@ class AppPrefs(
         companion object {
             const val SELECTED_THEME = "theme_selected_theme"
             const val SELECTED_COLOR = "theme_selected_color"
-            const val AUTO_DARK = "theme_auto_dark"
+            const val FOLLOW_SYSTEM_DAY_NIGHT = "follow_system_day_night"
             const val USE_MINI_KEYBOARD = "theme_use_mini_keyboard"
             const val NAVBAR_BACKGROUND = "navbar_background"
         }
 
         var selectedTheme by string(SELECTED_THEME, "trime")
-        var selectedColor by string(SELECTED_COLOR, "default")
-        val autoDark by bool(AUTO_DARK, false)
+        val selectedColor = string(SELECTED_COLOR, "default")
+        val followSystemDayNight = bool(FOLLOW_SYSTEM_DAY_NIGHT, false)
         val useMiniKeyboard by bool(USE_MINI_KEYBOARD, false)
 
         enum class NavbarBackground {

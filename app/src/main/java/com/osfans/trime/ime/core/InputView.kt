@@ -134,7 +134,6 @@ class InputView(
         windowManager.attachWindow(KeyboardWindow)
 
         keyboardBackground.imageDrawable = ColorManager.getDrawable("keyboard_background")
-            ?: ColorManager.getDrawable("keyboard_back_color")
 
         keyboardView =
             constraintLayout {

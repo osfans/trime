@@ -40,7 +40,7 @@ class SwitchUi(
             typeface = FontManager.getTypeface("candidate_font")
             isSingleLine = true
             gravity = gravityCenter
-            ColorManager.getColor("candidate_text_color")?.let { setTextColor(it) }
+            setTextColor(ColorManager.getColor("candidate_text_color"))
         }
 
     private val lastText =
@@ -49,7 +49,7 @@ class SwitchUi(
             typeface = FontManager.getTypeface("comment_font")
             isSingleLine = true
             gravity = gravityCenter
-            ColorManager.getColor("comment_text_color")?.let { setTextColor(it) }
+            setTextColor(ColorManager.getColor("comment_text_color"))
             visibility = View.GONE
         }
 
@@ -57,7 +57,7 @@ class SwitchUi(
         constraintLayout {
             horizontalPadding = dp(theme.generalStyle.candidatePadding)
             layoutParams = ViewGroup.LayoutParams(wrapContent, matchParent)
-            background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
+            background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
             if (theme.generalStyle.commentOnTop) {
                 verticalChain(
                     listOf(lastText, firstText),

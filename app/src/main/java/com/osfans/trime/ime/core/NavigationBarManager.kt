@@ -86,7 +86,10 @@ class NavigationBarManager {
     }
 
     fun update(window: Window) {
-        val backColor = ColorManager.getColor("back_color") ?: Color.BLACK
+        val backColor =
+            runCatching {
+                ColorManager.getColor("back_color")
+            }.getOrDefault(Color.BLACK)
         if (shouldUpdateNavbarForeground) {
             WindowCompat
                 .getInsetsController(window, window.decorView)

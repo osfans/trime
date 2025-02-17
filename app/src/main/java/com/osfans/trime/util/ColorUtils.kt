@@ -9,37 +9,23 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
-import timber.log.Timber
 
 object ColorUtils {
-    @JvmStatic
-    fun parseColor(s: String): Int? {
-        val hex: String = if (s.startsWith("#")) s.replace("#", "0x") else s
-        return try {
-            val completed =
-                if (hex.startsWith("0x") || hex.startsWith("0X")) {
-                    when {
-                        hex.length == 3 || hex.length == 4 -> {
-                            String.format("#%02x000000", java.lang.Long.decode(hex)) // 0xA -> #AA000000
-                        }
-                        hex.length < 8 -> { // 0xGBB -> #RRGGBB
-                            String.format("#%06x", java.lang.Long.decode(hex))
-                        }
-                        hex.length == 9 -> { // 0xARRGGBB -> #AARRGGBB
-                            "#0" + hex.substring(2)
-                        }
-                        else -> {
-                            "#" + hex.substring(2) // 0xAARRGGBB -> #AARRGGBB, 0xRRGGBB -> #RRGGBB
-                        }
-                    }
-                } else {
-                    hex // red, green, blue ...
+    @ColorInt
+    fun parseColor(colorString: String): Int {
+        val normalized =
+            if (colorString.startsWith("#") || colorString.startsWith("0x", ignoreCase = true)) {
+                val sub = colorString.replace("^#|^0x".toRegex(), "")
+                when (sub.length) {
+                    1, 2 -> "#%02x000000".format(colorString.toLong(16)) // 0xA(A) -> #AA000000
+                    in 3..5 -> "#%06x".format(colorString.toLong(16)) // 0xGBB... -> #RRGGBB
+                    7 -> "#0$sub"
+                    else -> "#$sub" // 0x(AA)RRGGBB -> #(AA)RRGGBB
                 }
-            Color.parseColor(completed)
-        } catch (e: IllegalArgumentException) {
-            Timber.w("Invalid or unknown color value: %s", s)
-            null
-        }
+            } else {
+                colorString // red, green, blue ...
+            }
+        return Color.parseColor(normalized)
     }
 
     /**

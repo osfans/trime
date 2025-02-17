@@ -36,9 +36,9 @@ class LiquidTabsUi(
 
         val text =
             textView {
-                textSize = theme.generalStyle.candidateTextSize.toFloat()
+                textSize = theme.generalStyle.candidateTextSize
                 typeface = FontManager.getTypeface("candidate_font")
-                ColorManager.getColor("candidate_text_color")?.let { setTextColor(it) }
+                setTextColor(ColorManager.getColor("candidate_text_color"))
             }
 
         override val root =
@@ -50,7 +50,7 @@ class LiquidTabsUi(
                         horizontalPadding = dp(theme.generalStyle.candidatePadding)
                     },
                 )
-                background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color")!!)
+                background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
             }
 
         fun setText(str: String) {
@@ -62,17 +62,16 @@ class LiquidTabsUi(
                 if (active) {
                     ColorManager.getColor(
                         "hilited_candidate_text_color",
-                    )!!
+                    )
                 } else {
-                    ColorManager.getColor("candidate_text_color")!!
+                    ColorManager.getColor("candidate_text_color")
                 }
-            val background = if (active) ColorManager.getColor("hilited_candidate_back_color")!! else Color.TRANSPARENT
+            val background = if (active) ColorManager.getColor("hilited_candidate_back_color") else Color.TRANSPARENT
             text.setTextColor(color)
             root.background =
                 PaintDrawable(background).apply {
                     setCornerRadius(
-                        theme.generalStyle.layout.roundCorner
-                            .toFloat(),
+                        theme.generalStyle.layout.roundCorner,
                     )
                 }
         }

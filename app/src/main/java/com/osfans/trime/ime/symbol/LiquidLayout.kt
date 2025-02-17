@@ -67,11 +67,9 @@ class LiquidLayout(
                                         ?.configMap
                                         ?.get("label")
                                         .toString()
-                                textSize = theme.generalStyle.labelTextSize.toFloat()
+                                textSize = theme.generalStyle.labelTextSize
                                 typeface = FontManager.getTypeface("key_font")
-                                ColorManager
-                                    .getColor("key_text_color")
-                                    ?.let { color -> setTextColor(color) }
+                                setTextColor(ColorManager.getColor("key_text_color"))
                             }
                         val root =
                             frameLayout {

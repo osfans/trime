@@ -31,8 +31,6 @@ class PreeditModule(
     theme: Theme,
     rime: RimeSession,
 ) : InputBroadcastReceiver {
-    private val textBackColor = ColorManager.getColor("text_back_color")!!
-
     private val topLeftCornerRadiusOutlineProvider =
         object : ViewOutlineProvider() {
             override fun getOutline(
@@ -52,7 +50,7 @@ class PreeditModule(
             context,
             theme,
             setupPreeditView = {
-                backgroundColor = textBackColor
+                backgroundColor = ColorManager.getColor("text_back_color")
             },
             onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
         ).apply {

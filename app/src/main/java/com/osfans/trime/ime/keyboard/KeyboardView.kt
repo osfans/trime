@@ -61,12 +61,12 @@ class KeyboardView(
         ColorStateList(
             Key.KEY_STATES,
             intArrayOf(
-                ColorManager.getColor("hilited_on_key_text_color")!!,
-                ColorManager.getColor("on_key_text_color")!!,
-                ColorManager.getColor("hilited_off_key_text_color")!!,
-                ColorManager.getColor("off_key_text_color")!!,
-                ColorManager.getColor("hilited_key_text_color")!!,
-                ColorManager.getColor("key_text_color")!!,
+                ColorManager.getColor("hilited_on_key_text_color"),
+                ColorManager.getColor("on_key_text_color"),
+                ColorManager.getColor("hilited_off_key_text_color"),
+                ColorManager.getColor("off_key_text_color"),
+                ColorManager.getColor("hilited_key_text_color"),
+                ColorManager.getColor("key_text_color"),
             ),
         )
     private val mKeyBackColor =
@@ -79,11 +79,11 @@ class KeyboardView(
             addState(Key.KEY_STATE_NORMAL, ColorManager.getDrawable("key_back_color"))
         }
 
-    private val keySymbolColor = ColorManager.getColor("key_symbol_color")!!
-    private val hilitedKeySymbolColor = ColorManager.getColor("hilited_key_symbol_color")!!
+    private val keySymbolColor = ColorManager.getColor("key_symbol_color")
+    private val hilitedKeySymbolColor = ColorManager.getColor("hilited_key_symbol_color")
     private val symbolTextSize = theme.generalStyle.symbolTextSize
     private val mShadowRadius = theme.generalStyle.shadowRadius
-    private val mShadowColor = ColorManager.getColor("shadow_color")!!
+    private val mShadowColor = ColorManager.getColor("shadow_color")
 
     // Working variable
     private val originCoords = intArrayOf(0, 0)

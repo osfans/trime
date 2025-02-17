@@ -33,7 +33,7 @@ class PaginationUi(
     private fun createIcon(
         @DrawableRes icon: Int,
     ) = imageView {
-        imageTintList = ColorStateList.valueOf(ColorManager.getColor("key_text_color")!!)
+        imageTintList = ColorStateList.valueOf(ColorManager.getColor("key_text_color"))
         imageDrawable = drawable(icon)
         scaleType = ImageView.ScaleType.CENTER_CROP
     }

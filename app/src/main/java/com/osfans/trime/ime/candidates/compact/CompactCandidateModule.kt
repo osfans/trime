@@ -8,7 +8,6 @@ package com.osfans.trime.ime.candidates.compact
 import android.content.Context
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
-import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.PopupMenu
 import androidx.core.text.bold
@@ -99,7 +98,7 @@ class CompactCandidateModule(
             val intrinsicSize = max(spacing, context.dp(spacing)).toInt()
             intrinsicWidth = intrinsicSize
             intrinsicHeight = intrinsicSize
-            ColorManager.getColor("candidate_separator_color")?.let { paint.color = it }
+            paint.color = ColorManager.getColor("candidate_separator_color")
         }
     }
 
@@ -139,11 +138,7 @@ class CompactCandidateModule(
                         .add(
                             buildSpannedString {
                                 bold {
-                                    fun coloredOrNot(action: SpannableStringBuilder.() -> Unit) =
-                                        ColorManager.getColor("hilited_candidate_text_color")?.let {
-                                            color(it) { action() }
-                                        } ?: action(this)
-                                    coloredOrNot { append(text) }
+                                    color(ColorManager.getColor("hilited_candidate_text_color")) { append(text) }
                                 }
                             },
                         ).apply {
