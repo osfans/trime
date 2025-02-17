@@ -253,7 +253,7 @@ class CommonKeyboardActionListener(
                             val shouldHookNumber =
                                 prefs.keyboard.hookShiftNum && action.code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9
                             val shouldHookSymbol =
-                                (prefs.keyboard.hookShiftSymbol || !Rime.isAsciiMode) &&
+                                prefs.keyboard.hookShiftSymbol &&
                                     (
                                         action.code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
                                             action.code == KeyEvent.KEYCODE_COMMA ||
