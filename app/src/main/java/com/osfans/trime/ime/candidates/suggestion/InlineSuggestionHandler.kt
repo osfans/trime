@@ -36,8 +36,8 @@ class InlineSuggestionHandler(
 ) {
     @SuppressLint("NewApi", "RestrictedApi")
     fun createRequest(): InlineSuggestionsRequest {
-        val firstTextColor = ColorManager.getColor("candidate_text_color")!!
-        val backColor = ColorManager.getColor("candidate_background")!!
+        val firstTextColor = ColorManager.getColor("candidate_text_color")
+        val backColor = ColorManager.getColor("candidate_background")
 
         val style =
             InlineSuggestionUi

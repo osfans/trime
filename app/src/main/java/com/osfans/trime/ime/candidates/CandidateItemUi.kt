@@ -35,11 +35,11 @@ class CandidateItemUi(
     private val lastTextSize = theme.generalStyle.commentTextSize
     private val firstTextFont = FontManager.getTypeface("candidate_font")
     private val lastTextFont = FontManager.getTypeface("comment_font")
-    private val firstTextColor = ColorManager.getColor("candidate_text_color")!!
-    private val lastTextColor = ColorManager.getColor("comment_text_color")!!
-    private val lastTextColorH = ColorManager.getColor("hilited_comment_text_color")!!
-    private val firstTextColorH = ColorManager.getColor("hilited_candidate_text_color")!!
-    private val firstBackColorH = ColorManager.getColor("hilited_candidate_back_color")!!
+    private val firstTextColor = ColorManager.getColor("candidate_text_color")
+    private val lastTextColor = ColorManager.getColor("comment_text_color")
+    private val lastTextColorH = ColorManager.getColor("hilited_comment_text_color")
+    private val firstTextColorH = ColorManager.getColor("hilited_candidate_text_color")
+    private val firstBackColorH = ColorManager.getColor("hilited_candidate_back_color")
 
     private val firstText =
         view(::AutoScaleTextView) {

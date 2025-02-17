@@ -28,16 +28,12 @@ class KeyPreviewUi(
     override val root =
         textView {
             setCompoundDrawables(null, null, null, null)
-            ColorManager.getColor("preview_back_color")?.let { color ->
-                background =
-                    GradientDrawable().apply {
-                        setColor(color)
-                        cornerRadius = theme.generalStyle.roundCorner
-                    }
-            }
-            ColorManager.getColor("preview_text_color")?.let { color ->
-                setTextColor(color)
-            }
+            background =
+                GradientDrawable().apply {
+                    setColor(ColorManager.getColor("preview_back_color"))
+                    cornerRadius = theme.generalStyle.roundCorner
+                }
+            setTextColor(ColorManager.getColor("preview_text_color"))
             textSize = theme.generalStyle.previewTextSize
             typeface = FontManager.getTypeface("preview_font")
             gravity = gravityCenter

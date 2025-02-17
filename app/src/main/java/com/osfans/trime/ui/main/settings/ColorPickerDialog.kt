@@ -9,20 +9,20 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
-import kotlinx.coroutines.Dispatchers
+import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 object ColorPickerDialog {
-    suspend fun build(
+    fun build(
         scope: LifecycleCoroutineScope,
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val all = withContext(Dispatchers.Default) { ColorManager.presetColorSchemes }
+        val theme = ThemeManager.activeTheme
+        val all = theme.presetColorSchemes
         val allIds = all.keys
         val allNames = all.values.mapNotNull { it["name"] }
-        val currentId = ColorManager.selectedColor
+        val currentId = ColorManager.activeColorScheme
         val currentIndex = all.keys.indexOfFirst { it == currentId }
         return AlertDialog
             .Builder(context)

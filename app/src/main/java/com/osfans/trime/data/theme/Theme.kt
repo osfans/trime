@@ -23,12 +23,10 @@ class Theme(
 
     var presetKeys: ConfigMap? = null
         private set
-    var fallbackColors: ConfigMap? = null
-        private set
-    var presetColorSchemes: ConfigMap? = null
-        private set
     var presetKeyboards: ConfigMap? = null
         private set
+    val presetColorSchemes: Map<String, Map<String, String>>
+    val fallbackColors: Map<String, String>
 
     companion object {
         private const val VERSION_KEY = "config_version"
@@ -63,9 +61,19 @@ class Theme(
         liquid = Liquid(config)
         keyboards = Keyboards(config)
         generalStyle = mapToGeneralStyle(config)
-        fallbackColors = config.getMap("fallback_colors")
+        fallbackColors = config
+            .getMap("fallback_colors")
+            ?.mapValues { it.value.configValue.getString() } ?: mapOf()
         presetKeys = config.getMap("preset_keys")
-        presetColorSchemes = config.getMap("preset_color_schemes")
+        presetColorSchemes = config
+            .getMap("preset_color_schemes")
+            ?.entries
+            ?.associate { (k, v) ->
+                k to
+                    v.configMap.entries.associate { (s, n) ->
+                        s to n.configValue.getString()
+                    }
+            } ?: mapOf()
         presetKeyboards = config.getMap("preset_keyboards")
         Timber.i("The theme is initialized")
     }
