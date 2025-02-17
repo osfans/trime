@@ -66,6 +66,7 @@ class KeyAction(
                 return adjustCase(shiftLabel, keyboard)
             }
             if (!hookShiftSymbol &&
+                // TODO: 判断中英模式仅能正确处理已配置映射的符号，对于未配置映射的符号，即使在中文模式下也能上屏 Shift 切换的符号。
                 Rime.isAsciiMode &&
                 (
                     code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
