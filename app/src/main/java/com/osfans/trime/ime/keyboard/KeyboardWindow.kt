@@ -5,7 +5,6 @@
 package com.osfans.trime.ime.keyboard
 
 import android.content.Context
-import android.content.res.Configuration
 import android.text.InputType
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -16,7 +15,6 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
@@ -166,13 +164,6 @@ class KeyboardWindow(
                 }
             }
         var final = dot.ifEmpty { smartMatchKeyboard() }
-
-        // 切换到 mini 键盘
-        val deviceKeyboard = service.resources.configuration.keyboard
-        val useMiniKeyboard = AppPrefs.defaultInstance().theme.useMiniKeyboard && deviceKeyboard != Configuration.KEYBOARD_NOKEYS
-        if (useMiniKeyboard) {
-            if (presetKeyboardIds.contains("mini")) final = "mini"
-        }
 
         // 切换到横屏布局
         if (service.isLandscapeMode()) {
