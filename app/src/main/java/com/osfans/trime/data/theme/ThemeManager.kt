@@ -55,7 +55,7 @@ object ThemeManager {
     private val prefs = AppPrefs.defaultInstance().theme
 
     fun init() {
-        Theme(prefs.selectedTheme).let {
+        Theme(prefs.selectedTheme.getValue()).let {
             KeyActionManager.resetCache()
             FontManager.resetCache(it)
             ColorManager.resetCache(it)
@@ -72,6 +72,6 @@ object ThemeManager {
             TabManager.resetCache(it)
             activeTheme = it
         }
-        prefs.selectedTheme = name
+        prefs.selectedTheme.setValue(name)
     }
 }

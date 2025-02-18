@@ -33,7 +33,10 @@ object ThemePickerDialog {
                 }
             }
         val current =
-            AppPrefs.defaultInstance().theme.selectedTheme
+            AppPrefs
+                .defaultInstance()
+                .theme.selectedTheme
+                .getValue()
         val currentIndex = all.indexOfFirst { it == current }
         return AlertDialog
             .Builder(context)

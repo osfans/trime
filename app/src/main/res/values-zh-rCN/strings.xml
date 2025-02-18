@@ -126,7 +126,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__swipe_enabled">允许触发按键的滑动手势</string>
     <string name="keyboard__key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
     <string name="about__build_info">构建信息</string>
-    <string name="keyboard__use_mini_keyboard_title">连接实体键盘时，显示迷你软键盘</string>
     <string name="pref_trime_telegram">Telegram群组</string>
     <string name="quick_bar">快捷栏</string>
     <string name="copy_done">已复制</string>
