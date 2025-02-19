@@ -14,14 +14,10 @@ class Config(
     private val data: ConfigData = ConfigData(),
 ) {
     companion object {
-        fun create(fileName: String): Config? {
-            val data = ConfigData()
-            return if (data.loadFromFile(DataManager.resolveDeployedResourcePath(fileName))) {
-                Config(data)
-            } else {
-                null
+        fun create(fileName: String): Config =
+            Config().apply {
+                data.loadFromFile(DataManager.resolveDeployedResourcePath(fileName))
             }
-        }
     }
 
     fun loadFromFile(fileName: String) = data.loadFromFile(fileName)

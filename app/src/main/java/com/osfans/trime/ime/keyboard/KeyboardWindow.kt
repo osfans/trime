@@ -75,7 +75,7 @@ class KeyboardWindow(
     override val key: ResidentWindow.Key
         get() = KeyboardWindow
 
-    private val presetKeyboardIds = theme.presetKeyboards?.keys?.toTypedArray() ?: emptyArray()
+    private val presetKeyboardIds = theme.presetKeyboards.keys.toList()
     private var currentKeyboardId = ""
     private var lastKeyboardId = ""
     private var lastLockKeyboardId = ""
@@ -168,8 +168,7 @@ class KeyboardWindow(
         // 切换到横屏布局
         if (service.isLandscapeMode()) {
             val landscape =
-                theme.presetKeyboards
-                    ?.get(final)
+                theme.presetKeyboards[final]
                     ?.configMap
                     ?.getValue("landscape_keyboard")
                     ?.getString() ?: ""

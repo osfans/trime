@@ -23,11 +23,11 @@ object TabManager {
         tabTags.clear()
         keyboards.clear()
 
-        val available = theme.liquid.getList("keyboards") ?: return
+        val available = theme.liquidKeyboards["keyboards"]?.configList ?: return
         for (item in available) {
-            val id = item?.configValue?.getString() ?: ""
+            val id = item.configValue.getString()
             Timber.d("preparing data for tab #$id")
-            val keyboard = theme.liquid.getMap(id) ?: continue
+            val keyboard = theme.liquidKeyboards[id]?.configMap ?: continue
             if (!keyboard.containsKey("type")) continue
             val name = keyboard.getValue("name")?.getString() ?: id
             val type = SymbolBoardType.fromString(keyboard.getValue("type")?.getString())
@@ -76,7 +76,7 @@ object TabManager {
             }
 
             if (k !is ConfigMap) continue
-            val p = k.entries.associate { (s, n) -> s to n!!.configValue.getString() }
+            val p = k.entries.associate { (s, n) -> s to n.configValue.getString() }
             if (k.containsKey("click")) {
                 if (p.containsKey("label")) {
                     keysList.add(SimpleKeyBean(p["click"]!!, p["label"]!!))

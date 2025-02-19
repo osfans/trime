@@ -20,38 +20,28 @@ object ThemePickerDialog {
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val all =
+        val allThemes =
             withContext(Dispatchers.IO) {
                 ThemeManager.getAllThemes()
             }
-        val allNames =
-            all.map {
-                when (it) {
-                    "trime" -> context.getString(R.string.theme_trime)
-                    "tongwenfeng" -> context.getString(R.string.theme_tongwenfeng)
-                    else -> it
-                }
-            }
-        val current =
-            AppPrefs
-                .defaultInstance()
-                .theme.selectedTheme
-                .getValue()
-        val currentIndex = all.indexOfFirst { it == current }
+        val selectedTheme by AppPrefs.defaultInstance().theme.selectedTheme
+        val selectedIndex = allThemes.indexOfFirst { it.configId == selectedTheme }
         return AlertDialog
             .Builder(context)
             .apply {
                 setTitle(R.string.looks__selected_theme_title)
-                if (allNames.isEmpty()) {
+                if (allThemes.isEmpty()) {
                     setMessage(R.string.no_theme_to_select)
                 } else {
                     setSingleChoiceItems(
-                        allNames.toTypedArray(),
-                        currentIndex,
+                        allThemes.map { it.name }.toTypedArray(),
+                        selectedIndex,
                     ) { dialog, which ->
                         scope.launch {
                             afterConfirm?.invoke()
-                            ThemeManager.setNormalTheme(all[which])
+                            if (which == selectedIndex) return@launch
+                            val newTheme = allThemes[which]
+                            ThemeManager.selectTheme(newTheme)
                             dialog.dismiss()
                         }
                     }

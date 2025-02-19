@@ -8,25 +8,17 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.util.WeakHashSet
-import java.io.File
 
 object ThemeManager {
     fun interface OnThemeChangeListener {
         fun onThemeChange(theme: Theme)
     }
 
-    private fun listThemes(path: File): MutableList<String> =
-        path
-            .listFiles { _, name -> name.endsWith("trime.yaml") }
-            ?.mapNotNull { f ->
-                if (f.name == "trime.yaml") "trime" else f.name.substringBeforeLast(".trime.yaml")
-            }?.toMutableList() ?: mutableListOf()
-
-    private val sharedThemes: MutableList<String> get() = listThemes(DataManager.sharedDataDir)
-
-    private val userThemes: MutableList<String> get() = listThemes(DataManager.userDataDir)
-
-    fun getAllThemes(): List<String> = sharedThemes + userThemes
+    fun getAllThemes(): List<Theme> {
+        val sharedThemes = ThemeFilesManager.listThemes(DataManager.sharedDataDir)
+        val userThemes = ThemeFilesManager.listThemes(DataManager.userDataDir)
+        return sharedThemes + userThemes
+    }
 
     private lateinit var _activeTheme: Theme
 
@@ -54,24 +46,25 @@ object ThemeManager {
 
     private val prefs = AppPrefs.defaultInstance().theme
 
-    fun init() {
-        Theme(prefs.selectedTheme.getValue()).let {
-            KeyActionManager.resetCache()
-            FontManager.resetCache(it)
-            ColorManager.resetCache(it)
-            TabManager.resetCache(it)
-            _activeTheme = it
-        }
+    private fun evaluateActiveTheme(): Theme {
+        val newTheme = Theme(prefs.selectedTheme.getValue())
+        KeyActionManager.resetCache()
+        FontManager.resetCache(newTheme)
+        ColorManager.resetCache(newTheme)
+        TabManager.resetCache(newTheme)
+        return newTheme
     }
 
-    fun setNormalTheme(name: String) {
-        Theme(name).let {
-            KeyActionManager.resetCache()
-            FontManager.resetCache(it)
-            ColorManager.resetCache(it)
-            TabManager.resetCache(it)
-            activeTheme = it
-        }
-        prefs.selectedTheme.setValue(name)
+    fun init() {
+        _activeTheme = evaluateActiveTheme()
+    }
+
+    fun selectTheme(theme: Theme) {
+        KeyActionManager.resetCache()
+        FontManager.resetCache(theme)
+        ColorManager.resetCache(theme)
+        TabManager.resetCache(theme)
+        activeTheme = theme
+        prefs.selectedTheme.setValue(theme.configId)
     }
 }

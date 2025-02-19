@@ -58,7 +58,7 @@ class LiquidKeyboard(
     }
 
     private val simpleAdapter by lazy {
-        val itemWidth = context.dp(theme.liquid.getInt("single_width"))
+        val itemWidth = context.dp(theme.liquidKeyboards["single_width"]?.configValue?.getInt() ?: 0)
         val columnCount = context.resources.displayMetrics.widthPixels / itemWidth
         SimpleAdapter(theme, columnCount).apply {
             setHasStableIds(true)

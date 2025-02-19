@@ -93,46 +93,45 @@ class KeyAction(
 
     init {
         val unbraced = raw.removeSurrounding("{", "}")
+        val presetKey = ThemeManager.activeTheme.presetKeys[unbraced]
         when {
             // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
-            ThemeManager.activeTheme.presetKeys?.get(unbraced) != null -> {
-                ThemeManager.activeTheme.presetKeys!![unbraced]!!.configMap.let { it ->
-                    command = it.getValue("command")?.getString() ?: ""
-                    option = it.getValue("option")?.getString() ?: ""
-                    select = it.getValue("select")?.getString() ?: ""
-                    toggle = it.getValue("toggle")?.getString() ?: ""
-                    label = it.getValue("label")?.getString() ?: ""
-                    preview = it.getValue("preview")?.getString() ?: ""
-                    shiftLock = it.getValue("shift_lock")?.getString() ?: ""
-                    commit = it.getValue("commit")?.getString() ?: ""
-                    text = it.getValue("text")?.getString() ?: ""
-                    isSticky = it.getValue("sticky")?.getBool() ?: false
-                    isRepeatable = it.getValue("repeatable")?.getBool() ?: false
-                    isFunctional = it.getValue("functional")?.getBool() ?: true
+            presetKey != null -> {
+                command = presetKey["command"]?.configValue?.getString() ?: ""
+                option = presetKey["option"]?.configValue?.getString() ?: ""
+                select = presetKey["select"]?.configValue?.getString() ?: ""
+                toggle = presetKey["toggle"]?.configValue?.getString() ?: ""
+                label = presetKey["label"]?.configValue?.getString() ?: ""
+                preview = presetKey["preview"]?.configValue?.getString() ?: ""
+                shiftLock = presetKey["shift_lock"]?.configValue?.getString() ?: ""
+                commit = presetKey["commit"]?.configValue?.getString() ?: ""
+                text = presetKey["text"]?.configValue?.getString() ?: ""
+                isSticky = presetKey["sticky"]?.configValue?.getBool() ?: false
+                isRepeatable = presetKey["repeatable"]?.configValue?.getBool() ?: false
+                isFunctional = presetKey["functional"]?.configValue?.getBool() ?: false
 
-                    states =
-                        runCatching {
-                            it["states"]?.configList?.decode(ListSerializer(String.serializer()))
-                        }.getOrNull()
+                states =
+                    runCatching {
+                        presetKey["states"]?.configList?.decode(ListSerializer(String.serializer()))
+                    }.getOrDefault(listOf())
 
-                    it.getValue("send")?.getString()?.let { send ->
-                        val (c, m) = Keycode.parseSend(send)
-                        code = c
-                        modifier = m
-                    } ?: run {
-                        if (command.isNotEmpty()) {
-                            code = KeyEvent.KEYCODE_FUNCTION
+                presetKey["send"]?.configValue?.getString()?.let { send ->
+                    val (c, m) = Keycode.parseSend(send)
+                    code = c
+                    modifier = m
+                } ?: run {
+                    if (command.isNotEmpty()) {
+                        code = KeyEvent.KEYCODE_FUNCTION
+                    }
+                }
+
+                if (label.isEmpty()) {
+                    label =
+                        when (code) {
+                            KeyEvent.KEYCODE_SPACE -> Rime.currentSchemaName
+                            KeyEvent.KEYCODE_UNKNOWN -> ""
+                            else -> Keycode.getDisplayLabel(code, modifier)
                         }
-                    }
-
-                    if (label.isEmpty()) {
-                        label =
-                            when (code) {
-                                KeyEvent.KEYCODE_SPACE -> Rime.currentSchemaName
-                                KeyEvent.KEYCODE_UNKNOWN -> ""
-                                else -> Keycode.getDisplayLabel(code, modifier)
-                            }
-                    }
                 }
             }
             // match like: { x: "{Control+a}" }
