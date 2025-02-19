@@ -8,7 +8,6 @@ import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,12 +23,12 @@ object ThemePickerDialog {
             withContext(Dispatchers.IO) {
                 ThemeManager.getAllThemes()
             }
-        val selectedTheme by AppPrefs.defaultInstance().theme.selectedTheme
+        val selectedTheme by ThemeManager.prefs.selectedTheme
         val selectedIndex = allThemes.indexOfFirst { it.configId == selectedTheme }
         return AlertDialog
             .Builder(context)
             .apply {
-                setTitle(R.string.looks__selected_theme_title)
+                setTitle(R.string.selected_theme)
                 if (allThemes.isEmpty()) {
                     setMessage(R.string.no_theme_to_select)
                 } else {

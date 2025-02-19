@@ -18,6 +18,28 @@ abstract class PreferenceDelegateUi<T : Preference>(
 
     fun isEnabled() = enableUiOn?.invoke() ?: true
 
+    class StringLike(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: String,
+        @StringRes
+        val summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<Preference>(key, enableUiOn) {
+        override fun createUi(context: Context) =
+            Preference(context).apply {
+                key = this@StringLike.key
+                isIconSpaceReserved = false
+                isSingleLineTitle = false
+                setDefaultValue(defaultValue)
+                if (this@StringLike.summary != null) {
+                    setSummary(this@StringLike.summary)
+                }
+                setTitle(this@StringLike.title)
+            }
+    }
+
     class Switch(
         @StringRes
         val title: Int,

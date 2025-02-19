@@ -29,10 +29,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__product_prime">Win10 PRIME輸入法平臺</string>
     <string name="about__privacy_policy">隱私權政策</string>
     <string name="about__build_info_format">建構者：%1$s\nGit 倉庫：%2$s\n建構 Git 雜湊值：%3$s\n建構時間：%4$s</string>
-    <string name="looks__selected_theme_title">主題</string>
-    <string name="looks__selected_theme_summary">選取想要的主題</string>
-    <string name="looks__selected_color_title">配色</string>
-    <string name="looks__selected_color_summary">選取想要的鍵盤配色</string>
+    <string name="selected_theme">主題</string>
+    <string name="selected_theme_summary">選取想要的主題</string>
+    <string name="normal_mode_color">配色</string>
+    <string name="normal_mode_color_summary">選取想要的配色</string>
     <string name="profile_reset">回廠</string>
     <string name="profile_reset_summary">使用預設的內建設置覆蓋共享資料夾下相同檔案</string>
     <string name="keyboard__key_sound_title">按鍵聲音</string>
@@ -116,7 +116,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__skip_hint">您確定要跳過嚮導嗎？</string>
     <string name="setup__skip_hint_yes">好的，謝謝</string>
     <string name="setup__skip_hint_no">不，我想留在這兒</string>
-    <string name="keyboard__auto_dark_title">自動切換暗黑/明亮配色方案</string>
+    <string name="follow_system_day_night_color">跟隨系統設定主題色調</string>
     <string name="pref_keyboard__hook">攔截事件</string>
     <string name="keyboard__hook_ctrl_a">攔截 Ctrl+A</string>
     <string name="keyboard__hook_ctrl_cv">攔截 Ctrl+C/V/X</string>
@@ -198,11 +198,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_theme_to_select">當前沒有主題可選擇。</string>
     <string name="no_color_to_select">當前沒有配色方案可選擇。</string>
     <string name="no_effect_to_select">當前沒有按鍵音效可選擇。</string>
-    <string-array name="navbar_bkg_labels">
-        <item>無背景</item>
-        <item>跟隨鍵盤背景色</item>
-        <item>鍵盤背景圖片</item>
-    </string-array>
     <string name="setup_channel">設定精靈</string>
     <string name="forget_this_word">忘記該詞</string>
     <string name="synchronization">同步</string>
@@ -226,4 +221,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="view_deploy_failure_log">部署失敗。點此檢視錯誤日誌。</string>
     <string name="hide_quick_bar">隱藏快捷欄</string>
     <string name="schema_switches_debounce_interval">方案開關連擊間隔</string>
+    <string name="navbar_bkg_none">無背景</string>
+    <string name="navbar_bkg_color_only">跟隨鍵盤背景色</string>
+    <string name="navbar_bkg_full">鍵盤背景圖片</string>
 </resources>

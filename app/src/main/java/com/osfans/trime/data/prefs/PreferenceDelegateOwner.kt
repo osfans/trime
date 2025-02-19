@@ -35,12 +35,7 @@ abstract class PreferenceDelegateOwner(
     protected fun string(
         key: String,
         defaultValue: String,
-    ): PreferenceDelegate<String> = PreferenceDelegate(sharedPreferences, key, defaultValue)
-
-    protected fun stringSet(
-        key: String,
-        defaultValue: Set<String>,
-    ) = PreferenceDelegate(sharedPreferences, key, defaultValue)
+    ): PreferenceDelegate<String> = PreferenceDelegate(sharedPreferences, key, defaultValue).apply { register() }
 
     protected fun <T : Any> serializable(
         key: String,
@@ -60,6 +55,22 @@ abstract class PreferenceDelegateOwner(
             override fun deserialize(raw: String) = enumValueOf<T>(raw.uppercase())
         },
     )
+
+    protected fun string(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: String,
+        @StringRes
+        summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate<String> {
+        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
+        val ui = PreferenceDelegateUi.StringLike(title, key, defaultValue, summary, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
 
     protected fun switch(
         @StringRes
@@ -93,7 +104,7 @@ abstract class PreferenceDelegateOwner(
         val entryValues = enumValues<T>().toList()
         val entryLabels = entryValues.map { it.stringRes }
         val pref = serializable(key, defaultValue, serializer)
-        val ui = PreferenceDelegateUi.StringList(title, key, defaultValue, serializer, entryValues, entryLabels)
+        val ui = PreferenceDelegateUi.StringList(title, key, defaultValue, serializer, entryValues, entryLabels, enableUiOn)
         pref.register()
         ui.registerUi()
         return pref

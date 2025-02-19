@@ -30,13 +30,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_themeFragment"
-            app:destination="@id/themeFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
             android:id="@+id/action_prefFragment_to_otherFragment"
             app:destination="@id/otherFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
@@ -66,6 +59,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <action
             android:id="@+id/action_prefFragment_to_generalSettingsFragment"
             app:destination="@id/generalSettingsFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_themeSettingsFragment"
+            app:destination="@id/themeSettingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
@@ -75,10 +71,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:id="@+id/keyboardFragment"
         android:name="com.osfans.trime.ui.fragments.KeyboardFragment"
         android:label="@string/virtual_keyboard" />
-    <fragment
-        android:id="@+id/themeFragment"
-        android:name="com.osfans.trime.ui.fragments.ThemeFragment"
-        android:label="@string/theme" />
     <fragment
         android:id="@+id/otherFragment"
         android:name="com.osfans.trime.ui.fragments.OtherFragment"
@@ -115,4 +107,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:id="@+id/generalSettingsFragment"
         android:name="com.osfans.trime.ui.main.settings.GeneralSettingsFragment"
         android:label="@string/general" />
+    <fragment
+        android:id="@+id/themeSettingsFragment"
+        android:name="com.osfans.trime.ui.main.settings.theme.ThemeSettingsFragment"
+        android:label="@string/theme" />
 </navigation>

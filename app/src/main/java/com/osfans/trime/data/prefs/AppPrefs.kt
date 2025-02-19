@@ -40,7 +40,6 @@ class AppPrefs(
     val internal = Internal(shared)
     val general = General(shared).register()
     val keyboard = Keyboard(shared)
-    val theme = Theme(shared)
     val profile = Profile(shared).register()
     val clipboard = Clipboard(shared)
     val other = Other(shared)
@@ -86,7 +85,6 @@ class AppPrefs(
         try {
             applicationContext.get()?.let { context ->
                 PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
-                PreferenceManager.setDefaultValues(context, R.xml.theme_color_preference, true)
                 PreferenceManager.setDefaultValues(context, R.xml.profile_preference, true)
                 PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
             }
@@ -211,32 +209,6 @@ class AppPrefs(
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
         val position = enum(R.string.candidates_window_position, POSITION, PopupPosition.BOTTOM_LEFT)
-    }
-
-    /**
-     *  Wrapper class of theme and color settings.
-     */
-    class Theme(
-        shared: SharedPreferences,
-    ) : PreferenceDelegateOwner(shared) {
-        companion object {
-            const val SELECTED_THEME = "theme_selected_theme"
-            const val SELECTED_COLOR = "theme_selected_color"
-            const val FOLLOW_SYSTEM_DAY_NIGHT = "follow_system_day_night"
-            const val NAVBAR_BACKGROUND = "navbar_background"
-        }
-
-        val selectedTheme = string(SELECTED_THEME, "trime")
-        val selectedColor = string(SELECTED_COLOR, "default")
-        val followSystemDayNight = bool(FOLLOW_SYSTEM_DAY_NIGHT, false)
-
-        enum class NavbarBackground {
-            NONE,
-            COLOR_ONLY,
-            FULL,
-        }
-
-        val navbarBackground = enum(NAVBAR_BACKGROUND, NavbarBackground.COLOR_ONLY)
     }
 
     /**

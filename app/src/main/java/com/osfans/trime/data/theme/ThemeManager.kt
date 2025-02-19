@@ -44,7 +44,7 @@ object ThemeManager {
         onChangeListeners.forEach { it.onThemeChange(_activeTheme) }
     }
 
-    private val prefs = AppPrefs.defaultInstance().theme
+    val prefs = AppPrefs.defaultInstance().registerProvider(::ThemePrefs)
 
     private fun evaluateActiveTheme(): Theme {
         val newTheme = Theme(prefs.selectedTheme.getValue())
