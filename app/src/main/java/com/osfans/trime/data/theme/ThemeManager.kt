@@ -4,6 +4,7 @@
 
 package com.osfans.trime.data.theme
 
+import android.content.res.Configuration
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.TabManager
@@ -24,7 +25,7 @@ object ThemeManager {
 
     var activeTheme: Theme
         get() = _activeTheme
-        set(value) {
+        private set(value) {
             if (::_activeTheme.isInitialized && _activeTheme == value) return
             _activeTheme = value
             fireChange()
@@ -50,19 +51,20 @@ object ThemeManager {
         val newTheme = Theme(prefs.selectedTheme.getValue())
         KeyActionManager.resetCache()
         FontManager.resetCache(newTheme)
-        ColorManager.resetCache(newTheme)
+        ColorManager.switchTheme(newTheme)
         TabManager.resetCache(newTheme)
         return newTheme
     }
 
-    fun init() {
+    fun init(configuration: Configuration) {
         _activeTheme = evaluateActiveTheme()
+        ColorManager.init(configuration)
     }
 
     fun selectTheme(theme: Theme) {
         KeyActionManager.resetCache()
         FontManager.resetCache(theme)
-        ColorManager.resetCache(theme)
+        ColorManager.switchTheme(theme)
         TabManager.resetCache(theme)
         activeTheme = theme
         prefs.selectedTheme.setValue(theme.configId)

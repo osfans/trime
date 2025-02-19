@@ -12,11 +12,11 @@ import androidx.annotation.ColorInt
 import androidx.collection.LruCache
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.isNightMode
-import timber.log.Timber
 
 object ColorManager {
     private lateinit var theme: Theme
@@ -25,21 +25,35 @@ object ColorManager {
     private val followSystemDayNight by prefs.followSystemDayNight
     private val backgroundFolder get() = theme.generalStyle.backgroundFolder
 
-    private lateinit var initialColors: Map<String, String>
-    private lateinit var fallbackRules: Map<String, String>
-
-    private var lastLightColorScheme: String? = null // 上一个 light 配色
-    private var lastDarkColorScheme: String? = null // 上一个 dark 配色
     private var isNightMode = false
 
-    val activeColorScheme: String
-        get() {
-            return if (isNightMode) {
-                initialColors["dark_scheme"] ?: lastDarkColorScheme
-            } else {
-                initialColors["light_scheme"] ?: lastLightColorScheme
-            } ?: normalModeColor
+    val presetColorSchemes: List<ColorScheme>
+        get() = theme.presetColorSchemes
+
+    private val customFallbackRules: Map<String, String>
+        get() = theme.fallbackColors
+
+    private val fullFallbackRules get() = customFallbackRules + defaultFallbackColors
+
+    private lateinit var _activeColorScheme: ColorScheme
+
+    var activeColorScheme: ColorScheme
+        get() = _activeColorScheme
+        set(value) {
+            if (_activeColorScheme == value) return
+            _activeColorScheme = value
+            fireChange()
         }
+
+    private val lightModeColorScheme: ColorScheme? =
+        runCatching {
+            _activeColorScheme.values["light_scheme"]?.let { colorScheme(it) }
+        }.getOrNull()
+
+    private val darkModeColorScheme: ColorScheme? =
+        runCatching {
+            _activeColorScheme.values["dark_scheme"]?.let { colorScheme(it) }
+        }.getOrNull()
 
     private val defaultFallbackColors =
         mapOf(
@@ -103,63 +117,46 @@ object ColorManager {
         onChangeListeners.forEach { it.onColorChange(theme) }
     }
 
+    private fun colorScheme(id: String) = presetColorSchemes.find { it.id == id }
+
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
+        _activeColorScheme = evaluateActiveColorScheme()
     }
 
     fun onSystemNightModeChange(isNight: Boolean) {
-        if (!followSystemDayNight) return
-        if (isNightMode == isNight) return
+        freeCaches()
         isNightMode = isNight
-        switchNightMode(isNightMode)
+        activeColorScheme = evaluateActiveColorScheme()
     }
+
+    private fun evaluateActiveColorScheme(): ColorScheme =
+        if (followSystemDayNight) {
+            if (isNightMode) {
+                darkModeColorScheme
+            } else {
+                lightModeColorScheme
+            } ?: colorScheme(normalModeColor)!!
+        } else {
+            colorScheme(normalModeColor)!!
+        }
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
-    fun resetCache(theme: Theme) {
-        lastDarkColorScheme = null
-        lastLightColorScheme = null
-        colorCache.evictAll()
-        drawableCache.evictAll()
-
+    fun switchTheme(theme: Theme) {
+        freeCaches()
         this.theme = theme
-
-        initialColors = theme.presetColorSchemes[normalModeColor] ?: mapOf()
-        fallbackRules = theme.fallbackColors + defaultFallbackColors
-
-        switchNightMode(isNightMode)
+        val newScheme = evaluateActiveColorScheme()
+        _activeColorScheme = newScheme
+        normalModeColor = newScheme.id
     }
 
-    fun setColorScheme(scheme: String) {
-        switchColorScheme(scheme)
-        normalModeColor = scheme
+    fun setColorScheme(scheme: ColorScheme) {
+        freeCaches()
+        activeColorScheme = scheme
+        normalModeColor = scheme.id
     }
 
-    private fun switchColorScheme(scheme: String) {
-        if (!theme.presetColorSchemes.containsKey(scheme)) {
-            Timber.w("Color scheme $scheme not found", scheme)
-            return
-        }
-        Timber.d("switch color scheme from $normalModeColor to $scheme")
-        // 刷新配色
-        val isFirst = colorCache.size() == 0 || drawableCache.size() == 0
-        refreshColorValues(scheme)
-        if (isNightMode) {
-            lastDarkColorScheme = scheme
-        } else {
-            lastLightColorScheme = scheme
-        }
-        if (!isFirst) fireChange()
-    }
-
-    /** 切换深色/亮色模式 */
-    private fun switchNightMode(isNightMode: Boolean) {
-        this.isNightMode = isNightMode
-        switchColorScheme(activeColorScheme)
-        Timber.d("System changing color, current color scheme: $activeColorScheme, isDarkMode=$isNightMode")
-    }
-
-    private fun refreshColorValues(scheme: String) {
-        initialColors = theme.presetColorSchemes[scheme] ?: mapOf()
+    private fun freeCaches() {
         colorCache.evictAll()
         drawableCache.evictAll()
     }
@@ -206,12 +203,12 @@ object ColorManager {
 
         while (true) {
             when {
-                initialColors.containsKey(currentKey) -> {
-                    return parser(initialColors[currentKey]!!)
+                activeColorScheme.values.containsKey(currentKey) -> {
+                    return parser(activeColorScheme.values[currentKey]!!)
                 }
-                fallbackRules.containsKey(currentKey) -> {
+                fullFallbackRules.containsKey(currentKey) -> {
                     currentKey =
-                        fallbackRules[currentKey]!!.also {
+                        fullFallbackRules[currentKey]!!.also {
                             check(visitedKeys.add(it)) { "Circular fallback: $key" }
                         }
                 }

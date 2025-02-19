@@ -31,11 +31,9 @@ import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
-import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.BuildConfig
-import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.RimeApi
@@ -54,7 +52,6 @@ import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
 import com.osfans.trime.ime.composition.CandidatesView
-import com.osfans.trime.ime.keyboard.InitializationUi
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.receiver.RimeIntentReceiver
@@ -96,7 +93,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             navBarManager.evaluate(w, useVirtualKeyboard = it)
         }
     private val rimeIntentReceiver = RimeIntentReceiver()
-    private var initializationUi: InitializationUi? = null
     private val locales = Array(2) { Locale.getDefault() }
 
     private lateinit var inlineSuggestionHandler: InlineSuggestionHandler
@@ -203,29 +199,26 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
-            postRimeJob {
-                ColorManager.init(resources.configuration)
-                ThemeManager.init()
-                InputFeedbackManager.init()
-                val theme = ThemeManager.activeTheme
-                val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)
-                locales[0] =
-                    when (defaultLocale.size) {
-                        3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
-                        2 -> Locale(defaultLocale[0], defaultLocale[1])
-                        else -> Locale.getDefault()
-                    }
+            ThemeManager.init(resources.configuration)
+            InputFeedbackManager.init()
+            val theme = ThemeManager.activeTheme
+            val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)
+            locales[0] =
+                when (defaultLocale.size) {
+                    3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
+                    2 -> Locale(defaultLocale[0], defaultLocale[1])
+                    else -> Locale.getDefault()
+                }
 
-                val latinLocale = theme.generalStyle.latinLocale.split(DELIMITER_SPLITTER)
-                locales[1] =
-                    when (latinLocale.size) {
-                        3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
-                        2 -> Locale(latinLocale[0], latinLocale[1])
-                        else -> Locale.US
-                    }
-                inlineSuggestionHandler = InlineSuggestionHandler(this@TrimeInputMethodService)
-                registerReceiver()
-            }
+            val latinLocale = theme.generalStyle.latinLocale.split(DELIMITER_SPLITTER)
+            locales[1] =
+                when (latinLocale.size) {
+                    3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
+                    2 -> Locale(latinLocale[0], latinLocale[1])
+                    else -> Locale.US
+                }
+            inlineSuggestionHandler = InlineSuggestionHandler(this@TrimeInputMethodService)
+            registerReceiver()
         } catch (e: Exception) {
             Timber.e(e)
         }
@@ -317,7 +310,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         navBarManager.update(window.window!!)
         replaceInputView(theme)
         replaceCandidateView(theme)
-        initializationUi = null
     }
 
     override fun onDestroy() {
@@ -465,11 +457,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onComputeInsets(outInsets: Insets) {
         if (inputDeviceManager.isVirtualKeyboard) {
-            if (inputView?.keyboardView?.isVisible == true) {
-                inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
-            } else {
-                initializationUi?.initial?.getLocationInWindow(inputViewLocation)
-            }
+            inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
             outInsets.apply {
                 contentTopInsets = inputViewLocation[1]
                 visibleTopInsets = inputViewLocation[1]
@@ -492,15 +480,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     fun superEvaluateInputViewShown() = super.onEvaluateInputViewShown()
 
-    override fun onCreateInputView(): View {
+    override fun onCreateInputView(): View? {
         Timber.d("onCreateInputView")
-        postRimeJob {
-            ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
-                replaceInputViews(ThemeManager.activeTheme)
-            }
-        }
-        initializationUi = InitializationUi(this)
-        return initializationUi!!.root
+        replaceInputViews(ThemeManager.activeTheme)
+        // We will call `setInputView` by ourselves. This is fine.
+        return null
     }
 
     override fun setInputView(view: View) {

@@ -5,6 +5,7 @@
 package com.osfans.trime.data.theme
 
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
+import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.util.config.Config
 import com.osfans.trime.util.config.ConfigItem
@@ -32,16 +33,18 @@ class Theme(
             } ?: mapOf()
     val presetKeyboards: Map<String, ConfigItem> =
         config.getMap("preset_keyboards") ?: mapOf()
-    val presetColorSchemes: Map<String, Map<String, String>> =
+    val presetColorSchemes: List<ColorScheme> =
         config
             .getMap("preset_color_schemes")
             ?.entries
-            ?.associate { (k, v) ->
-                k to
-                    v.configMap.entries.associate { (s, n) ->
-                        s to n.configValue.getString()
-                    }
-            } ?: mapOf()
+            ?.map {
+                ColorScheme(
+                    it.key,
+                    it.value.configMap.entries.associate { (k, v) ->
+                        k to v.configValue.getString()
+                    },
+                )
+            }?.toList() ?: listOf()
     val fallbackColors: Map<String, String> =
         config
             .getMap("fallback_colors")
