@@ -209,7 +209,10 @@ class CommonKeyboardActionListener(
                                     windowManager.attachWindow(KeyboardWindow)
                                 }
                             }
-                            "set_color_scheme" -> ColorManager.setColorScheme(arg)
+                            "set_color_scheme" -> {
+                                val newScheme = ColorManager.presetColorSchemes.find { it.id == arg }
+                                if (newScheme != null) ColorManager.setColorScheme(newScheme)
+                            }
                             "broadcast" -> service.sendBroadcast(Intent(arg))
                             "clipboard" -> {
                                 clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(service)?.let {

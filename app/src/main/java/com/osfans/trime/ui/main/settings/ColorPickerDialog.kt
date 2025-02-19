@@ -9,7 +9,6 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
-import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.launch
 
 object ColorPickerDialog {
@@ -18,27 +17,25 @@ object ColorPickerDialog {
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val theme = ThemeManager.activeTheme
-        val all = theme.presetColorSchemes
-        val allIds = all.keys
-        val allNames = all.values.mapNotNull { it["name"] }
-        val currentId = ColorManager.activeColorScheme
-        val currentIndex = all.keys.indexOfFirst { it == currentId }
+        val presetSchemes = ColorManager.presetColorSchemes
+        val currentScheme = ColorManager.activeColorScheme
+        val currentIndex = presetSchemes.indexOfFirst { it.id == currentScheme.id }
         return AlertDialog
             .Builder(context)
             .apply {
                 setTitle(R.string.normal_mode_color)
-                if (all.isEmpty()) {
+                if (presetSchemes.isEmpty()) {
                     setMessage(R.string.no_color_to_select)
                 } else {
                     setSingleChoiceItems(
-                        allNames.toTypedArray(),
+                        presetSchemes.map { it.values["name"] }.toTypedArray(),
                         currentIndex,
                     ) { dialog, which ->
                         scope.launch {
                             afterConfirm?.invoke()
                             if (which != currentIndex) {
-                                ColorManager.setColorScheme(allIds.elementAt(which))
+                                val newScheme = presetSchemes[which]
+                                ColorManager.setColorScheme(newScheme)
                             }
                             dialog.dismiss()
                         }
