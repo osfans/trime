@@ -12,7 +12,6 @@ import androidx.annotation.ColorInt
 import androidx.collection.LruCache
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.bitmapDrawable
@@ -21,8 +20,8 @@ import timber.log.Timber
 
 object ColorManager {
     private lateinit var theme: Theme
-    private val prefs = AppPrefs.defaultInstance().theme
-    private var prefsSelectedColor by prefs.selectedColor
+    private val prefs = ThemeManager.prefs
+    private var normalModeColor by prefs.normalModeColor
     private val followSystemDayNight by prefs.followSystemDayNight
     private val backgroundFolder get() = theme.generalStyle.backgroundFolder
 
@@ -39,7 +38,7 @@ object ColorManager {
                 initialColors["dark_scheme"] ?: lastDarkColorScheme
             } else {
                 initialColors["light_scheme"] ?: lastLightColorScheme
-            } ?: prefsSelectedColor
+            } ?: normalModeColor
         }
 
     private val defaultFallbackColors =
@@ -124,7 +123,7 @@ object ColorManager {
 
         this.theme = theme
 
-        initialColors = theme.presetColorSchemes[prefsSelectedColor] ?: mapOf()
+        initialColors = theme.presetColorSchemes[normalModeColor] ?: mapOf()
         fallbackRules = theme.fallbackColors + defaultFallbackColors
 
         switchNightMode(isNightMode)
@@ -132,7 +131,7 @@ object ColorManager {
 
     fun setColorScheme(scheme: String) {
         switchColorScheme(scheme)
-        prefsSelectedColor = scheme
+        normalModeColor = scheme
     }
 
     private fun switchColorScheme(scheme: String) {
@@ -140,7 +139,7 @@ object ColorManager {
             Timber.w("Color scheme $scheme not found", scheme)
             return
         }
-        Timber.d("switch color scheme from $prefsSelectedColor to $scheme")
+        Timber.d("switch color scheme from $normalModeColor to $scheme")
         // 刷新配色
         val isFirst = colorCache.size() == 0 || drawableCache.size() == 0
         refreshColorValues(scheme)

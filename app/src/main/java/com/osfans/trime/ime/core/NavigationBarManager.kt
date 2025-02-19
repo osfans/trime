@@ -10,12 +10,13 @@ import android.os.Build
 import android.view.Window
 import androidx.annotation.ColorInt
 import androidx.core.view.WindowCompat
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.data.theme.ThemePrefs
 import com.osfans.trime.util.ColorUtils
 
 class NavigationBarManager {
-    private val navbarBackground by AppPrefs.defaultInstance().theme.navbarBackground
+    private val navbarBackground by ThemeManager.prefs.navbarBackground
 
     private var shouldUpdateNavbarForeground = false
     private var shouldUpdateNavbarBackground = false
@@ -48,19 +49,19 @@ class NavigationBarManager {
 
     fun evaluate(window: Window) {
         when (navbarBackground) {
-            AppPrefs.Theme.NavbarBackground.NONE -> {
+            ThemePrefs.NavbarBackground.NONE -> {
                 shouldUpdateNavbarForeground = false
                 shouldUpdateNavbarBackground = false
                 window.useSystemNavbarBackground(true)
                 window.enforceNavbarContrast(true)
             }
-            AppPrefs.Theme.NavbarBackground.COLOR_ONLY -> {
+            ThemePrefs.NavbarBackground.COLOR_ONLY -> {
                 shouldUpdateNavbarForeground = true
                 shouldUpdateNavbarBackground = true
                 window.useSystemNavbarBackground(true)
                 window.enforceNavbarContrast(false)
             }
-            AppPrefs.Theme.NavbarBackground.FULL -> {
+            ThemePrefs.NavbarBackground.FULL -> {
                 shouldUpdateNavbarForeground = true
                 shouldUpdateNavbarBackground = false
                 window.useSystemNavbarBackground(false)

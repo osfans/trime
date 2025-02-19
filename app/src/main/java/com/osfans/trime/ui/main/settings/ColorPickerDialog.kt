@@ -27,7 +27,7 @@ object ColorPickerDialog {
         return AlertDialog
             .Builder(context)
             .apply {
-                setTitle(R.string.looks__selected_color_title)
+                setTitle(R.string.normal_mode_color)
                 if (all.isEmpty()) {
                     setMessage(R.string.no_color_to_select)
                 } else {

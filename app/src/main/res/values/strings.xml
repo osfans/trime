@@ -29,10 +29,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__product_prime">Win10 PRIME Platform</string>
     <string name="about__privacy_policy">Privacy Policy</string>
     <string name="about__build_info_format">Builder: %1$s\nGit Repo: %2$s\nBuild Git Hash: %3$s\nBuild Time: %4$s</string>
-    <string name="looks__selected_theme_title">Themes</string>
-    <string name="looks__selected_theme_summary">Select Desired Theme</string>
-    <string name="looks__selected_color_title">Colors</string>
-    <string name="looks__selected_color_summary">Select Desired Color for Keyboard</string>
+    <string name="selected_theme">Themes</string>
+    <string name="selected_theme_summary">Select desired theme</string>
+    <string name="normal_mode_color">Colors</string>
+    <string name="normal_mode_color_summary">Select desired color</string>
     <string name="profile_reset">Reset</string>
     <string name="profile_reset_summary">Overwrite the same files in shared directory with default built-in assets</string>
     <string name="keyboard__key_sound_title">Sound on keypress</string>
@@ -118,7 +118,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__skip_hint">"Do you want to skip the setup wizard? "</string>
     <string name="setup__skip_hint_yes">OK, thanks</string>
     <string name="setup__skip_hint_no">No, please leave me here</string>
-    <string name="keyboard__auto_dark_title">Auto change dark/light color scheme</string>
+    <string name="follow_system_day_night_color">Follow system day/night color</string>
     <string name="pref_keyboard__hook">Hook</string>
     <string name="keyboard__hook_ctrl_a">Hook Ctrl+A</string>
     <string name="keyboard__hook_ctrl_cv">Hook Ctrl+C/V/X</string>
@@ -198,11 +198,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_theme_to_select">Currently there is no theme to select.</string>
     <string name="no_color_to_select">Currently there is no color scheme to select.</string>
     <string name="no_effect_to_select">Currently there is no key sound effect to select.</string>
-    <string-array name="navbar_bkg_labels">
-        <item>No background</item>
-        <item>Follow keyboard color</item>
-        <item>Keyboard background image</item>
-    </string-array>
     <string name="theme_trime">default</string>
     <string name="theme_tongwenfeng">tongwenfeng</string>
     <string name="setup_channel">Setup Wizard</string>
@@ -228,4 +223,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
     <string name="hide_quick_bar">Hide quick bar</string>
     <string name="schema_switches_debounce_interval">Schema switches debounce interval</string>
+    <string name="navbar_bkg_none">No background</string>
+    <string name="navbar_bkg_color_only">Follow keyboard color</string>
+    <string name="navbar_bkg_full">Keyboard background image</string>
 </resources>
