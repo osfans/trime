@@ -14,7 +14,7 @@ import com.osfans.trime.util.CollectionUtils.obtainFloat
 import com.osfans.trime.util.CollectionUtils.obtainInt
 import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.config.ConfigMap
+import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.sp
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -142,15 +142,17 @@ class Keyboard(
         height = y + keyHeight
     }
 
-    private fun getKeyboardConfig(name: String): ConfigMap? {
+    private fun getKeyboardConfig(name: String): Map<String, ConfigItem> {
         val keyboardConfig =
-            theme.keyboards.getMap(name)
-                ?: theme.keyboards.getMap("default")
+            (
+                theme.presetKeyboards[name]
+                    ?: theme.presetKeyboards["default"]
+            )?.configMap
         val importPreset = keyboardConfig?.getValue("import_preset")?.getString()
         if (importPreset != null) {
             return getKeyboardConfig(importPreset)
         }
-        return keyboardConfig
+        return keyboardConfig ?: mapOf()
     }
 
     constructor(theme: Theme, name: String) : this(theme) {
@@ -184,11 +186,11 @@ class Keyboard(
         //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
         val autoHeightIndex = obtainInt(keyboardConfig, "auto_height_index", -1)
         val lm =
-            keyboardConfig!!["keys"]!!
+            keyboardConfig["keys"]!!
                 .configList
                 .map {
-                    it!!.configMap.entries.associate { (k, v) ->
-                        k to v!!
+                    it.configMap.entries.associate { (k, v) ->
+                        k to v
                     }
                 }
         horizontalGap =

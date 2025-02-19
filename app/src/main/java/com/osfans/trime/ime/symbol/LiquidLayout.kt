@@ -51,8 +51,8 @@ class LiquidLayout(
     private val fixedKeyBar =
         constraintLayout {
             val fixedKeys =
-                theme.liquid
-                    .getMap("fixed_key_bar")
+                theme.liquidKeyboards["fixed_key_bar"]
+                    ?.configMap
                     ?.get("keys")
                     ?.configList
             fixedKeys?.let {
@@ -62,11 +62,10 @@ class LiquidLayout(
                         val text =
                             textView {
                                 text =
-                                    theme.presetKeys
-                                        ?.get(operation.toString())
-                                        ?.configMap
+                                    theme.presetKeys[operation.toString()]
                                         ?.get("label")
-                                        .toString()
+                                        ?.configValue
+                                        ?.getString() ?: ""
                                 textSize = theme.generalStyle.labelTextSize
                                 typeface = FontManager.getTypeface("key_font")
                                 setTextColor(ColorManager.getColor("key_text_color"))
@@ -98,13 +97,13 @@ class LiquidLayout(
                             }
                         return@Array root
                     }
-                val marginX = theme.liquid.getFloat("margin_x")
+                val marginX = theme.liquidKeyboards["margin_x"]?.configValue?.getFloat() ?: 0f
                 when (
-                    theme.liquid
-                        .getMap("fixed_key_bar")
+                    theme.liquidKeyboards["fixed_key_bar"]
+                        ?.configMap
                         ?.get("position")
                         ?.configValue
-                        .toString()
+                        ?.getString()
                 ) {
                     LEFT, RIGHT -> {
                         btns.forEachIndexed { i, btn ->
@@ -164,11 +163,11 @@ class LiquidLayout(
 
     init {
         when (
-            theme.liquid
-                .getMap("fixed_key_bar")
+            theme.liquidKeyboards["fixed_key_bar"]
+                ?.configMap
                 ?.get("position")
                 ?.configValue
-                .toString() ?: ""
+                ?.getString()
         ) {
             TOP -> {
                 add(

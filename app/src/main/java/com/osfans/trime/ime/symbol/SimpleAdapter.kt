@@ -40,9 +40,9 @@ class SimpleAdapter(
 
     override fun getItemId(position: Int): Long = position * 1000L
 
-    private val mSingleWidth = theme.liquid.getInt("single_width")
-    private val mSingleHeight = theme.liquid.getInt("key_height")
-    private val mStringMarginX = theme.liquid.getFloat("margin_x")
+    private val mSingleWidth = theme.liquidKeyboards["single_width"]?.configValue?.getInt() ?: 0
+    private val mSingleHeight = theme.liquidKeyboards["key_height"]?.configValue?.getInt() ?: 0
+    private val mStringMarginX = theme.liquidKeyboards["margin_x"]?.configValue?.getFloat() ?: 0f
     private val mTextSize = theme.generalStyle.labelTextSize
     private val mTextColor = ColorManager.getColor("key_text_color")
     private val mTypeface = FontManager.getTypeface("key_font")
@@ -69,8 +69,8 @@ class SimpleAdapter(
         holder.simpleKeyTexts.forEachIndexed { index, textView ->
             holder.wrappers[index].tag = index
             textView.apply {
-                mTextSize.takeIf { it > 0f }?.let { this.textSize = it.toFloat() }
-                mTextColor?.let { setTextColor(it) }
+                textSize = mTextSize
+                setTextColor(mTextColor)
                 typeface = mTypeface
                 gravity = Gravity.CENTER
                 ellipsize = TextUtils.TruncateAt.MARQUEE
