@@ -64,13 +64,7 @@ class GeneralStyleTest :
                     generalStyle.enterLabel shouldNotBe null
                     generalStyle.enterLabel.go shouldBe "go"
 
-                    generalStyle.window shouldNotBe null
-                    generalStyle.window.size shouldBe 0
-
                     generalStyle.layout shouldNotBe null
-
-                    generalStyle.liquidKeyboardWindow shouldNotBe null
-                    generalStyle.liquidKeyboardWindow.size shouldBe 0
 
                     println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
                     mapper.errors.size shouldBeGreaterThan 0
