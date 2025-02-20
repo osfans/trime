@@ -33,8 +33,6 @@ data class GeneralStyle(
     val keyboardPaddingLand: Int,
     val keyboardPaddingLandBottom: Int,
     val layout: Layout,
-    val window: List<CompositionComponent>,
-    val liquidKeyboardWindow: List<CompositionComponent>,
     val keyFont: List<String>,
     val keyBorder: Int,
     val keyHeight: Int,

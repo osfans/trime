@@ -71,16 +71,6 @@ class GeneralStyleMapper(
                 LayoutStyleMapper(it).map()
             }
 
-        val window =
-            (getList("window")).map {
-                val compositionWindowStyleMapper = CompositionWindowStyleMapper(it.configMap)
-                compositionWindowStyleMapper.map()
-            }
-        val liquidKeyboardWindow =
-            (getList("liquid_keyboard_window")).map {
-                val mapper = CompositionWindowStyleMapper(it.configMap)
-                mapper.map()
-            }
         val keyFont = getStringList("key_font")
         val keyBorder = getInt("key_border")
 
@@ -184,8 +174,6 @@ class GeneralStyleMapper(
             keyboardPaddingLand,
             keyboardPaddingLandBottom,
             layout,
-            window,
-            liquidKeyboardWindow,
             keyFont,
             keyBorder,
             keyHeight,
