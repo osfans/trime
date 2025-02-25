@@ -38,7 +38,7 @@ class ToolButton(
     ) : this(context) {
         image.imageTintList = ColorStateList.valueOf(ColorManager.getColor("comment_text_color"))
         setIcon(icon)
-        setPressHighlightColor(ColorManager.getColor("hilited_on_key_back_color"))
+        setPressHighlightColor(ColorManager.getColor("hilited_candidate_button_color"))
         add(image, lParams(wrapContent, wrapContent, gravityCenter))
     }
 
