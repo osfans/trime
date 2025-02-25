@@ -65,6 +65,7 @@ object ColorManager {
             "hilited_back_color" to "back_color",
             "hilited_candidate_text_color" to "hilited_text_color",
             "hilited_candidate_back_color" to "hilited_back_color",
+            "hilited_candidate_button_color" to "hilited_candidate_back_color",
             "hilited_label_color" to "hilited_candidate_text_color",
             "hilited_comment_text_color" to "comment_text_color",
             "hilited_key_back_color" to "hilited_candidate_back_color",
@@ -131,15 +132,10 @@ object ColorManager {
     }
 
     private fun evaluateActiveColorScheme(): ColorScheme =
-        if (followSystemDayNight) {
-            if (isNightMode) {
-                darkModeColorScheme
-            } else {
-                lightModeColorScheme
-            } ?: colorScheme(normalModeColor)!!
-        } else {
-            colorScheme(normalModeColor)!!
-        }
+        when {
+            followSystemDayNight -> if (isNightMode) darkModeColorScheme else lightModeColorScheme
+            else -> null
+        } ?: colorScheme(normalModeColor) ?: colorScheme("default")!!
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
