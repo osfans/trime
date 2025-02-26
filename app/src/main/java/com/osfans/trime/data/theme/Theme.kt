@@ -4,6 +4,7 @@
 
 package com.osfans.trime.data.theme
 
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
@@ -15,7 +16,14 @@ import timber.log.Timber
 class Theme(
     val configId: String,
 ) {
-    private val config = Config.create(configId)
+    private val config: Config
+
+    init {
+        if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
+            throw IllegalArgumentException("Failed to deploy theme config file '$configId'")
+        }
+        config = Config.create(configId)
+    }
 
     val name = config.getString("name")
     val generalStyle = mapToGeneralStyle()
@@ -61,5 +69,9 @@ class Theme(
             mapper.errors.joinToString(","),
         )
         return generalStyle
+    }
+
+    companion object {
+        private const val CONFIG_VERSION_KEY = "config_version"
     }
 }
