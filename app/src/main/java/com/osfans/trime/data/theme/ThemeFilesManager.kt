@@ -5,29 +5,36 @@
 
 package com.osfans.trime.data.theme
 
-import com.osfans.trime.core.Rime
-import com.osfans.trime.data.base.DataManager
+import com.charleskorn.kaml.AnchorsAndAliases
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import timber.log.Timber
 import java.io.File
 
 object ThemeFilesManager {
-    private const val CONFIG_VERSION_KEY = "config_version"
+    private val yaml =
+        Yaml(
+            configuration =
+                YamlConfiguration(
+                    strictMode = false,
+                    anchorsAndAliases = AnchorsAndAliases.Permitted(200u),
+                ),
+        )
 
-    fun listThemes(dir: File): MutableList<Theme> {
+    fun listThemes(dir: File): MutableList<ThemeStub> {
         val files = dir.listFiles { _, name -> name.endsWith("trime.yaml") } ?: return mutableListOf()
         return files
             .sortedByDescending { it.lastModified() }
             .mapNotNull decode@{
-                val deployed = DataManager.userDataDir.resolve("build/${it.name}")
-                if (!deployed.exists()) {
-                    if (!Rime.deployRimeConfigFile(it.name, CONFIG_VERSION_KEY)) {
-                        Timber.w("Failed to deploy theme file ${it.absolutePath}")
-                        return@decode null
-                    }
-                }
                 val theme =
                     runCatching {
-                        Theme(it.nameWithoutExtension)
+                        yaml
+                            .decodeFromString(
+                                ThemeStub.serializer(),
+                                it.inputStream().bufferedReader().readText(),
+                            ).apply {
+                                configId = it.nameWithoutExtension
+                            }
                     }.getOrElse { e ->
                         Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
                         return@decode null
