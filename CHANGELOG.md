@@ -2,6 +2,150 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.3] - 2025-03-01
+
+### 🚀 Features
+
+- Clear text selection after copy
+- Add switch to not reset shift state for arrow keys
+- Set Trime to support inline suggestions for v30 onward
+- Add "autofill" library
+- Add logics & UIs for displaying inline suggestions
+- Add `CandidateModule` to encapsulate different candidate module
+- Add new `Suggestion` State to `QuickBarStateMachine`
+- Handle `onInlineSuggestion()` in `QuickBar` with `suggestionUi`
+- Request and handle inline suggestion in `TrimeInputMethodService`
+- Page navigation using prevIcon and nextIcon components
+- Add corner radius to highlighted candidate items in popup candidate window
+- Add setting to hide quick bar when always show candidates window
+- Notify on preference changes
+- Avoid crash loop
+- Allow users to trigger rime action via adb shell
+- Add setting option, schema switches debounce interval
+- Execute background sync work via WorkManager
+- All trime modifier keys, support long-press lock
+
+### 🐛 Bug Fixes
+
+- Do Not Send Key Event for NumPad Key
+- Notification/toast on RimeMessage will be popped up repeatedly
+- Shift + arrow keys not working to select text
+- Copy, cut keys not working when the shift key is locked
+- Edit action interceptor not working
+- Theme preset trime combination keys not working
+- Liquid keyboard symbollist not working
+- In drafts or collection tab of liquid keyboard, adapter data changes to clipboard after copying text
+- Liquid keyboard not regenerate data as expected after related view cache was destroyed
+- Clipboard update listener, not updating data as expected after copying existing text
+- Clipboard view cache exists, switching clipboards after copying text not update data to show newly copied content
+- Clipboard item text color not follow theme key text color
+- Liquid keyboard not auto-scrolling to top after data update
+- Composing key label not display and reset as expected
+- Force show mode, toggle switch options cannot update view
+- CurrentKeyboardView has not been initialized, causing crash
+- Key sequence cannot switch keyboards and commit partial text
+- Force show mode, candidates and window components show simultaneously (temp)
+- Key sequence cannot guide symbol and lua script mapping
+- Key sequence cannot parse theme preset keys with same name as key types
+- Setting ascii_mode to true in composing state causes symbol to be repeated commits
+- Labeled candidate item in CandidatesView couldn't break line correctly
+- Keyboard hides once click input box when the candidates window is always shown
+- NPE on key commands that to start activity with intent
+- Key preview not dismissed as expected
+- Schema switches would be processed twice
+- Key sequence not handling `commit` and `text` preset keys and not processed in order
+- Duplicated toast on deploy messaging (again)
+- *(jni)* Recreate rime session when necessary
+- Sending non-Android key events will commit "Not a Character" text
+- In `ascii_mode` and `ascii_punct` modes, symbols for which mapping has not been set in the scheme config will cannot be committed
+- *(jni)* Enabled schema list always showed the previous settings
+- *(daemon)* Use distinct notification IDs for deploy start/success/failure states
+- IMS didn't workaround null cursor anchor info correctly
+- Navbar color didn't change after changing theme or color
+- *(jni)* Potential crash on setting rime runtime options
+- Notification might not pop on screen by default
+- Key preview displays incorrect label
+- Space, number, symbol keys hook shift not working
+- No vibrate effect for candidates
+- Preset keys abbreviation not working
+- Key bindings not working for Shift + symbol
+- Crash when selecting new theme/color
+- Modifications to theme configs didn't take effect
+
+### 🚜 Refactor
+
+- Merge modifier state with the current keyboard's modifier state after sending combination keys
+- Simplify PrefMainActivity
+- Still handle rime deploy message in RimeDaemon
+- Add inline suggestions handling in `broadcaster`
+- Use `CandidateModule` instead and add `SuggestionCandidateModule` to receive event
+- Remove inject annotation in `CompactCandidateModule`
+- Remove rime keycode to unicode mapping
+- Remove unused delegated rime api
+- Remove redundant run state checking
+- Migrate `Rime.setOption` and `Rime.setCaretPos` to new api usage
+- Make clear how to get and expand active text for command express
+- Merge `schemaItemCached` and `inputStatusCached` into `statusCached`
+- Improve getting drawable from color schemes
+- Restore the candidate window background to previous settings
+- Polish candidates window settings wording
+- Polish (virtual) keyboard settings wording
+- Use rime dedicate api to change candidate page
+- Improve touch event receiving of stock PreeditUi
+- Improve touch event receiving of CandidatesView
+- Makeup a universal TouchEventReceiverWindow
+- Make sure CandidatesView positioning correct on first time showup
+- Make sure CandidatesView will not display overflow the screen
+- Update touchEventReceiverWindow's position after CandidatesView's
+- Simplify the setup of PageCandidatesUi's listeners
+- Extract CandidatesView's cursor anchor updating to IMS
+- Re-register intent receiver for IMS
+- Add helpers to manage levers api
+- Add helpers to transform candidate list
+- Pass version name to rime setup via JNI
+- Remove unused stuffs from `jni-utils.h`
+- Remove user config accesses when select schema or set option
+- *(jni)* Pack rime proto marshaling as rime c api
+- *(jni)* Use std::string_view as more as possible
+- Reduce nesting of KeyMessage in TrimeInputMethodService
+- New public createNotificationChannel util method
+- Replace logcat DSL with `subprocess`
+- Make custom proto apis comply with the original style
+- Improve CandidatesView's positioning
+- Adjust preedit ui setups and appearance
+- Remove show status bar icon settings
+- Remove deprecated setting fields in theme
+- Improve color/drawable resolving
+- *(config)* Add ConfigNull and ConfigTagged types
+- Cancel showing mini keyboard when use physical keyboard
+- Improve theme parsing
+- Rebuild theme setting delegates
+- Improve color scheme parsing
+- Remove deprecated theme setting fields from data classes
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.3
+- Bump librime to 1.13.0
+- Introduce AndroidX Work library
+- Update dependencies and toolchains
+- Upgrade spotless to 7.0.2
+- Upgrade gradle to 8.12.1
+- Upgrade librime to 1.13.1
+- Add 3.3.3 changelog
+
+### Build
+
+- Always overwrite files when install OpenCC data
+- Remove UseZGC option for gradle
+- Enable app shrinking for release build type
+- Add more app shrinking settings
+- Re-enable developers use file(s) to store sign key properties
+
+### Reforce
+
+- *(key)* Reduce redundant code, 'ascii' support 'send_bindings'
+
 ## [3.3.2] - 2025-01-01
 
 ### 🚀 Features
