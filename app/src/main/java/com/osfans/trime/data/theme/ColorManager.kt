@@ -5,6 +5,7 @@
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -17,6 +18,7 @@ import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.isNightMode
+import timber.log.Timber
 
 object ColorManager {
     private lateinit var theme: Theme
@@ -164,7 +166,12 @@ object ColorManager {
     ): Int {
         val color =
             resolveValue(key) { value ->
-                ColorUtils.parseColor(value)
+                runCatching {
+                    ColorUtils.parseColor(value)
+                }.getOrElse {
+                    Timber.e(it, "Cannot parse color $key=$value, fallback to 0x00")
+                    Color.TRANSPARENT
+                }
             }
         if (putCache) {
             synchronized(colorCache) { colorCache.put(key, color) }
