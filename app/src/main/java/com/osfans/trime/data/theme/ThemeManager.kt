@@ -15,7 +15,7 @@ object ThemeManager {
         fun onThemeChange(theme: Theme)
     }
 
-    fun getAllThemes(): List<ThemeStub> {
+    fun getAllThemes(): List<Theme> {
         val sharedThemes = ThemeFilesManager.listThemes(DataManager.sharedDataDir)
         val userThemes = ThemeFilesManager.listThemes(DataManager.userDataDir)
         return sharedThemes + userThemes

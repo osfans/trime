@@ -15,12 +15,15 @@ import timber.log.Timber
 /** 主题和样式配置  */
 class Theme(
     val configId: String,
+    parseOnly: Boolean = false,
 ) {
     private val config: Config
 
     init {
-        if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
-            throw IllegalArgumentException("Failed to deploy theme config file '$configId'")
+        if (!parseOnly) {
+            if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
+                throw IllegalArgumentException("Failed to deploy theme config file '$configId'")
+            }
         }
         config = Config.create(configId)
     }
