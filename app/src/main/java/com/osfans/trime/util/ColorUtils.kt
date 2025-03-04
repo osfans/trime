@@ -17,8 +17,8 @@ object ColorUtils {
             if (colorString.startsWith("#") || colorString.startsWith("0x", ignoreCase = true)) {
                 val sub = colorString.replace("^#|^0x".toRegex(), "")
                 when (sub.length) {
-                    1, 2 -> "#%02x000000".format(colorString.toLong(16)) // 0xA(A) -> #AA000000
-                    in 3..5 -> "#%06x".format(colorString.toLong(16)) // 0xGBB... -> #RRGGBB
+                    1, 2 -> "#%02x000000".format(java.lang.Long.decode(colorString)) // 0xA(A) -> #AA000000
+                    in 3..5 -> "#%06x".format(java.lang.Long.decode(colorString)) // 0xGBB... -> #RRGGBB
                     7 -> "#0$sub"
                     else -> "#$sub" // 0x(AA)RRGGBB -> #(AA)RRGGBB
                 }
