@@ -199,7 +199,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
-            ThemeManager.init(resources.configuration)
             InputFeedbackManager.init()
             val theme = ThemeManager.activeTheme
             val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)

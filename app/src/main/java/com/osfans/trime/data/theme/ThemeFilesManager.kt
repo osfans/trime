@@ -19,7 +19,7 @@ object ThemeFilesManager {
             configuration =
                 YamlConfiguration(
                     strictMode = false,
-                    anchorsAndAliases = AnchorsAndAliases.Permitted(null)
+                    anchorsAndAliases = AnchorsAndAliases.Permitted(null),
                 ),
         )
 

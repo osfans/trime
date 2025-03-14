@@ -16,8 +16,10 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity
+import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.worker.BackgroundSyncWork
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
@@ -140,6 +142,9 @@ class TrimeApplication : Application() {
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)
+            if (applicationContext.isStorageAvailable()) {
+                ThemeManager.init(resources.configuration)
+            }
             registerBroadcastReceiver()
             startWorkManager()
         } catch (e: Exception) {
