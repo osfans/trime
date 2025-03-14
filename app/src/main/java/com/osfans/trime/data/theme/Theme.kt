@@ -15,15 +15,12 @@ import timber.log.Timber
 /** 主题和样式配置  */
 class Theme(
     val configId: String,
-    parseOnly: Boolean = false,
 ) {
     private val config: Config
 
     init {
-        if (!parseOnly) {
-            if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
-                throw IllegalArgumentException("Failed to deploy theme config file '$configId'")
-            }
+        if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
+            Timber.w("Failed to deploy theme config file '$configId.yaml'")
         }
         config = Config.create(configId)
     }
@@ -66,11 +63,7 @@ class Theme(
         val mapper = GeneralStyleMapper(generalStyleMap)
         val generalStyle = mapper.map()
 
-        Timber.w(
-            "GeneralStyleMapper (%d) Warnings: %s",
-            mapper.errors.size,
-            mapper.errors.joinToString(","),
-        )
+        Timber.w("Failed to read ${mapper.errors.size} properties under 'style' node: ${mapper.errors.joinToString(", ")}")
         return generalStyle
     }
 
