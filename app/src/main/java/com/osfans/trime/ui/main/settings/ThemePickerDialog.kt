@@ -40,8 +40,8 @@ object ThemePickerDialog {
                         scope.launch {
                             afterConfirm?.invoke()
                             if (which == selectedIndex) return@launch
-                            val newStub = allThemes[which]
-                            ThemeManager.selectTheme(Theme(newStub.configId))
+                            val newItem = allThemes[which]
+                            ThemeManager.selectTheme(Theme(newItem.configId))
                             dialog.dismiss()
                         }
                     }
