@@ -42,20 +42,20 @@ object ColorManager {
     var activeColorScheme: ColorScheme
         get() = _activeColorScheme
         set(value) {
-            if (_activeColorScheme == value) return
+            if (this::_activeColorScheme.isInitialized && _activeColorScheme == value) return
             _activeColorScheme = value
+            lightModeColorScheme = runCatching {
+                _activeColorScheme.values["light_scheme"]?.let { colorScheme(it) }
+            }.getOrNull()
+            darkModeColorScheme = runCatching {
+                _activeColorScheme.values["dark_scheme"]?.let { colorScheme(it) }
+            }.getOrNull()
             fireChange()
         }
 
-    private val lightModeColorScheme: ColorScheme? =
-        runCatching {
-            _activeColorScheme.values["light_scheme"]?.let { colorScheme(it) }
-        }.getOrNull()
+    private var lightModeColorScheme: ColorScheme? = null
 
-    private val darkModeColorScheme: ColorScheme? =
-        runCatching {
-            _activeColorScheme.values["dark_scheme"]?.let { colorScheme(it) }
-        }.getOrNull()
+    private var darkModeColorScheme: ColorScheme? = null
 
     private val defaultFallbackColors =
         mapOf(
@@ -124,7 +124,7 @@ object ColorManager {
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
-        _activeColorScheme = evaluateActiveColorScheme()
+        activeColorScheme = evaluateActiveColorScheme()
     }
 
     fun onSystemNightModeChange(isNight: Boolean) {
@@ -145,7 +145,7 @@ object ColorManager {
         freeCaches()
         this.theme = theme
         val newScheme = evaluateActiveColorScheme()
-        _activeColorScheme = newScheme
+        activeColorScheme = newScheme
         normalModeColor = newScheme.id
     }
 
