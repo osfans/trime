@@ -155,7 +155,7 @@ class KeyboardWindow(
                 ".last_lock" -> lastLockKeyboardId
                 ".ascii" -> {
                     var ascii = currentKeyboard?.asciiKeyboard
-                    if(ascii.isNullOrEmpty()) {
+                    if (ascii.isNullOrEmpty()) {
                         ascii = lastLockKeyboardId
                     }
                     if (presetKeyboardIds.contains(ascii)) ascii else currentKeyboardId

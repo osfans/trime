@@ -44,12 +44,14 @@ object ColorManager {
         set(value) {
             if (this::_activeColorScheme.isInitialized && _activeColorScheme == value) return
             _activeColorScheme = value
-            lightModeColorScheme = runCatching {
-                _activeColorScheme.values["light_scheme"]?.let { colorScheme(it) }
-            }.getOrNull()
-            darkModeColorScheme = runCatching {
-                _activeColorScheme.values["dark_scheme"]?.let { colorScheme(it) }
-            }.getOrNull()
+            lightModeColorScheme =
+                runCatching {
+                    _activeColorScheme.values["light_scheme"]?.let { colorScheme(it) }
+                }.getOrNull()
+            darkModeColorScheme =
+                runCatching {
+                    _activeColorScheme.values["dark_scheme"]?.let { colorScheme(it) }
+                }.getOrNull()
             fireChange()
         }
 
