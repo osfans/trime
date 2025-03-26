@@ -110,8 +110,8 @@ class KeyboardWindow(
                 if (it.isLock) lastLockKeyboardId = target
                 dispatchCapsState(it::setShifted)
                 val isAsciiMode = rime.run { statusCached }.isAsciiMode
-                if (isAsciiMode != it.currentAsciiMode) {
-                    service.postRimeJob { setRuntimeOption("ascii_mode", it.currentAsciiMode) }
+                if (isAsciiMode != it.asciiMode) {
+                    service.postRimeJob { setRuntimeOption("ascii_mode", it.asciiMode) }
                 }
                 // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
                 KeyboardSwitcher.currentKeyboard = it
@@ -154,8 +154,11 @@ class KeyboardWindow(
                 ".last" -> lastKeyboardId
                 ".last_lock" -> lastLockKeyboardId
                 ".ascii" -> {
-                    val ascii = currentKeyboard?.asciiKeyboard
-                    if (!ascii.isNullOrEmpty() && presetKeyboardIds.contains(ascii)) ascii else currentKeyboardId
+                    var ascii = currentKeyboard?.asciiKeyboard
+                    if (ascii.isNullOrEmpty()) {
+                        ascii = lastLockKeyboardId
+                    }
+                    if (presetKeyboardIds.contains(ascii)) ascii else currentKeyboardId
                 }
                 else -> {
                     id.ifEmpty {
@@ -267,7 +270,6 @@ class KeyboardWindow(
 
     override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
         when (val opt = value.option) {
-            "ascii_mode" -> currentKeyboard?.currentAsciiMode = value.value
             "_hide_key_hint" -> currentKeyboardView?.showKeyHint = !value.value
             "_hide_key_symbol" -> currentKeyboardView?.showKeySymbol = !value.value
             else -> {
