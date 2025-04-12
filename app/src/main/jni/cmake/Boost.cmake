@@ -4,7 +4,7 @@
 
 set(BOOST_VER 1.85.0)
 
-if(NOT EXISTS "boost-${BOOST_VER}-cmake.tar.xz")
+if(NOT EXISTS "boost-${BOOST_VER}.tar.xz")
   message(STATUS "Downloading Boost ${BOOST_VER} ......")
   file(
     DOWNLOAD
