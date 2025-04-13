@@ -23,7 +23,7 @@ jobs:
         os:
           - ubuntu-24.04
           - macos-15
-          - windows-2022
+          - windows-2025
     env:
       BUILD_ABI: armeabi-v7a,arm64-v8a,x86,x86_64
     steps:
