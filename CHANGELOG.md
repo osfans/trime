@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.4] - 2025-05-01
+
+### 🐛 Bug Fixes
+
+- Couldn't load theme with over 200 anchors and aliases
+- Frequent exception on color parsing
+- Theme name in list might be empty
+- Potential uninitialized theme property exception
+- Fix the nightmode not working problems (#1633)
+- Fix boost file check
+
+### 🚜 Refactor
+
+- Show clear exception when failed to eval valid color scheme
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.4
+- Update librime-lua to e3912a4
+- Upgrade boost to 1.88.0
+- Upgrade runner to window-2025
+- Add 3.3.4 changelog
+
 ## [3.3.3] - 2025-03-01
 
 ### 🚀 Features
