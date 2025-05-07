@@ -224,4 +224,17 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="navbar_bkg_none">无背景</string>
     <string name="navbar_bkg_color_only">跟随键盘背景色</string>
     <string name="navbar_bkg_full">键盘背景图片</string>
+    <string name="use_internal_storage">使用内部存储</string>  
+    <string name="use_internal_storage_summary">将用户数据存储在应用程序内部目录中，以更好地保护隐私</string>  
+    <string name="export_user_data">导出用户数据</string>  
+    <string name="export_user_data_summary">导出用户数据，用于多设备同步</string>
+    <string name="import_user_data">导入用户数据</string>  
+    <string name="import_user_data_summary">将用户数据从外部存储导入到内部存储</string>
+    <string name="import_data_title">导入数据</string>  
+    <string name="import_data_message">是否要从外部存储导入数据到内部存储？</string>  
+    <string name="import_success">数据导入成功</string>  
+    <string name="export_success">数据导出成功</string>  
+    <string name="export_failure">数据导出失败</string>  
+    <string name="yes">是</string>  
+    <string name="no">否</string>
 </resources>

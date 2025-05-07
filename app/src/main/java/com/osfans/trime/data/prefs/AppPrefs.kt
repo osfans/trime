@@ -31,7 +31,7 @@ class AppPrefs(
         providers.add(provider)
         return provider
     }
-
+    
     private fun <T : PreferenceDelegateProvider> T.register() =
         this.apply {
             registerProvider { this }
@@ -223,6 +223,8 @@ class AppPrefs(
             const val PERIODIC_BACKGROUND_SYNC_INTERVAL = "periodic_background_sync_interval"
             const val LAST_BACKGROUND_SYNC_STATUS = "last_background_sync_status"
             const val LAST_BACKGROUND_SYNC_TIME = "last_background_sync_time"
+            const val USE_INTERNAL_STORAGE = "use_internal_storage"
+            const val INTERNAL_STORAGE_FIRST_IMPORT = "internal_storage_first_import"  // 新增常量
         }
 
         var userDataDir by string(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
@@ -230,6 +232,8 @@ class AppPrefs(
         val periodicBackgroundSyncInterval = int(PERIODIC_BACKGROUND_SYNC_INTERVAL, 30)
         val lastBackgroundSyncStatus = bool(LAST_BACKGROUND_SYNC_STATUS, false)
         val lastBackgroundSyncTime = long(LAST_BACKGROUND_SYNC_TIME, 0L)
+        val useInternalStorage by bool(USE_INTERNAL_STORAGE, false)
+        var internalStorageFirstImport by bool(INTERNAL_STORAGE_FIRST_IMPORT, false)
     }
 
     class Clipboard(
@@ -242,6 +246,7 @@ class AppPrefs(
             const val DRAFT_EXCLUDE_APP = "clipboard_draft_exclude_app"
             const val DRAFT_LIMIT = "clipboard_draft_limit"
             const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
+
         }
 
         var clipboardCompareRules by string(CLIPBOARD_COMPARE_RULES, "")
@@ -250,6 +255,7 @@ class AppPrefs(
         var clipboardLimit by int(CLIPBOARD_LIMIT, 10)
         var draftLimit by int(DRAFT_LIMIT, 10)
         var draftExcludeApp by string(DRAFT_EXCLUDE_APP, "")
+
     }
 
     /**

@@ -226,4 +226,17 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="navbar_bkg_none">No background</string>
     <string name="navbar_bkg_color_only">Follow keyboard color</string>
     <string name="navbar_bkg_full">Keyboard background image</string>
+    <string name="use_internal_storage">Use internal storage</string>  
+    <string name="use_internal_storage_summary">Store user data in app internal directory for better privacy</string>  
+    <string name="export_user_data">Export user data</string>  
+    <string name="export_user_data_summary">Export user data for multi-device synchronization</string>
+    <string name="import_user_data">Import user data</string>  
+    <string name="import_user_data_summary">Import user data from external storage to internal storage</string>
+    <string name="import_data_title">Import Data</string>  
+    <string name="import_data_message">Do you want to import data from external storage to internal storage?</string>  
+    <string name="yes">Yes</string>  
+    <string name="no">No</string>  
+    <string name="import_success">Data imported successfully</string>  
+    <string name="export_success">Data exported successfully</string>  
+    <string name="export_failure">Failed to export data</string>
 </resources>

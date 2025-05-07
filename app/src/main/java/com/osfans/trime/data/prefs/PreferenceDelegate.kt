@@ -10,6 +10,7 @@ import com.osfans.trime.util.WeakHashSet
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+
 open class PreferenceDelegate<T : Any>(
     val sharedPreferences: SharedPreferences,
     val key: String,

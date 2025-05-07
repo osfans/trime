@@ -50,9 +50,17 @@ object DataManager {
 
     val sharedDataDir = File(appContext.getExternalFilesDir(null), "shared").also { it.mkdirs() }
 
-    val userDataDir
-        get() = File(prefs.profile.userDataDir).also { it.mkdirs() }
-
+    val userDataDir: File
+        get() {
+            val prefs = AppPrefs.defaultInstance().profile
+            return if (prefs.useInternalStorage) {
+                // 使用应用内部存储
+                File(appContext.filesDir, "user_data").also { it.mkdirs() }
+            } else {
+                // 使用外部存储（原有行为）
+                File(prefs.userDataDir).also { it.mkdirs() }
+            }
+        }
     /**
      * Return the absolute path of the compiled config file
      * based on given resource id.
