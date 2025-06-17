@@ -5,8 +5,8 @@
 
 package com.osfans.trime.ime.candidates.suggestion
 
-import android.view.View
+import android.widget.inline.InlineContentView
 
 data class SuggestionViewItem(
-    val view: View,
+    val view: InlineContentView?,
 )

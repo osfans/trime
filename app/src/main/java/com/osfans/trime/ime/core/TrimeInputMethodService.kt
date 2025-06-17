@@ -29,6 +29,7 @@ import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import androidx.annotation.Keep
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.updateLayoutParams
@@ -50,7 +51,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
-import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHandler
+import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHelper
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
@@ -94,8 +95,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     private val rimeIntentReceiver = RimeIntentReceiver()
     private val locales = Array(2) { Locale.getDefault() }
-
-    private lateinit var inlineSuggestionHandler: InlineSuggestionHandler
 
     var lastCommittedText: CharSequence = ""
         private set
@@ -216,7 +215,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     2 -> Locale(latinLocale[0], latinLocale[1])
                     else -> Locale.US
                 }
-            inlineSuggestionHandler = InlineSuggestionHandler(this@TrimeInputMethodService)
             registerReceiver()
         } catch (e: Exception) {
             Timber.e(e)
@@ -517,17 +515,16 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    @SuppressLint("NewApi", "RestrictedApi")
-    override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? = inlineSuggestionHandler.createRequest()
+    @RequiresApi(Build.VERSION_CODES.R)
+    override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
+        if (!inputDeviceManager.isVirtualKeyboard) return null
+        return InlineSuggestionHelper.createRequest(this)
+    }
 
     @SuppressLint("NewApi")
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
-        lifecycleScope.launch {
-            val views = inlineSuggestionHandler.inflateSuggestion(response)
-
-            inputView?.updateInlineSuggestion(views)
-        }
-        return true
+        if (!inputDeviceManager.isVirtualKeyboard) return false
+        return inputView?.handleInlineSuggestions(response) == true
     }
 
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode

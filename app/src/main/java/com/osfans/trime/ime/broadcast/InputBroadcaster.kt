@@ -4,8 +4,8 @@
 
 package com.osfans.trime.ime.broadcast
 
-import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestion
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
@@ -72,7 +72,7 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onEnterKeyLabelUpdate(label) }
     }
 
-    override fun onInlineSuggestion(views: List<View>) {
-        receivers.forEach { it.onInlineSuggestion(views) }
+    override fun onInlineSuggestions(suggestions: List<InlineSuggestion>) {
+        receivers.forEach { it.onInlineSuggestions(suggestions) }
     }
 }

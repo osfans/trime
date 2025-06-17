@@ -5,11 +5,14 @@
 package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
@@ -308,8 +311,12 @@ class InputView(
         broadcaster.onSelectionUpdate(start, end)
     }
 
-    fun updateInlineSuggestion(views: List<View>) {
-        broadcaster.onInlineSuggestion(views)
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
+        val suggestions = response.inlineSuggestions
+        broadcaster.onInlineSuggestions(suggestions)
+        quickBar.handleInlineSuggestions(suggestions.isEmpty())
+        return true
     }
 
     override fun onDetachedFromWindow() {
