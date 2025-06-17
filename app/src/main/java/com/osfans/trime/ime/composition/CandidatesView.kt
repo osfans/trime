@@ -7,10 +7,12 @@ package com.osfans.trime.ime.composition
 
 import android.annotation.SuppressLint
 import android.graphics.RectF
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
+import android.view.WindowInsets
 import androidx.annotation.Size
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
@@ -24,7 +26,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
-import com.osfans.trime.ime.core.BaseInputMessenger
+import com.osfans.trime.ime.core.BaseInputView
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
@@ -48,7 +50,7 @@ class CandidatesView(
     service: TrimeInputMethodService,
     rime: RimeSession,
     theme: Theme,
-) : BaseInputMessenger(service, rime, theme) {
+) : BaseInputView(service, rime, theme) {
     private val ctx = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
 
     private val position by AppPrefs.defaultInstance().candidates.position
@@ -101,6 +103,8 @@ class CandidatesView(
         )
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(this)
+
+    private var bottomInsets = 0
 
     override fun handleRimeMessage(it: RimeMessage<*>) {
         if (it is RimeMessage.ResponseMessage) {
@@ -175,7 +179,8 @@ class CandidatesView(
                     } else {
                         if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
                     }
-                y = if (bottom + selfHeight > parentHeight) top - selfHeight else bottom
+                val bottomLimit = parentHeight - bottomInsets
+                y = if (bottom + selfHeight > bottomLimit) top - selfHeight else bottom
             }
         }
         translationX = x
@@ -230,6 +235,13 @@ class CandidatesView(
 
         isFocusable = false
         layoutParams = ViewGroup.LayoutParams(wrapContent, wrapContent)
+    }
+
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            bottomInsets = getNavBarBottomInset(insets)
+        }
+        return insets
     }
 
     override fun onAttachedToWindow() {

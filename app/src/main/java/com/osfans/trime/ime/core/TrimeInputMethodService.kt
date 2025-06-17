@@ -306,7 +306,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun replaceInputViews(theme: Theme) {
         navBarManager.evaluate(window.window!!)
-        navBarManager.update(window.window!!)
         replaceInputView(theme)
         replaceCandidateView(theme)
     }
