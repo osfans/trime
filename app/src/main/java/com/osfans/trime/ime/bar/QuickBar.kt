@@ -5,9 +5,11 @@
 package com.osfans.trime.ime.bar
 
 import android.content.Context
+import android.os.Build
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
@@ -243,10 +245,11 @@ class QuickBar(
         barStateMachine.push(QuickBarStateMachine.TransitionEvent.WindowDetached)
     }
 
-    override fun onInlineSuggestion(views: List<View>) {
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun handleInlineSuggestions(isEmpty: Boolean) {
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
-            QuickBarStateMachine.BooleanKey.SuggestionEmpty to views.isEmpty(),
+            QuickBarStateMachine.BooleanKey.SuggestionEmpty to isEmpty,
         )
     }
 }
