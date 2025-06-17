@@ -7,6 +7,7 @@ package com.osfans.trime.ime.core
 import android.annotation.SuppressLint
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
@@ -58,7 +59,7 @@ class InputView(
     service: TrimeInputMethodService,
     rime: RimeSession,
     theme: Theme,
-) : BaseInputMessenger(service, rime, theme) {
+) : BaseInputView(service, rime, theme) {
     private val keyboardBackground =
         imageView {
             scaleType = ImageView.ScaleType.CENTER_CROP
@@ -252,6 +253,13 @@ class InputView(
             }
         }
         quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+    }
+
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        bottomPaddingSpace.updateLayoutParams<LayoutParams> {
+            bottomMargin = getNavBarBottomInset(insets)
+        }
+        return insets
     }
 
     fun startInput(

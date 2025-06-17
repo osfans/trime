@@ -101,7 +101,7 @@ class NavigationBarManager {
         }
     }
 
-    fun setupInputView(v: BaseInputMessenger) {
+    fun setupInputView(v: BaseInputView) {
         // on API 35+, we must call requestApplyInsets() manually after replacing views,
         // otherwise View#onApplyWindowInsets won't be called. ¯\_(ツ)_/¯
         v.requestApplyInsets()
