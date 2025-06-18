@@ -72,7 +72,6 @@ import splitties.bitflags.hasFlag
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
-import java.util.Locale
 
 /** [輸入法][InputMethodService]主程序  */
 
@@ -94,7 +93,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             navBarManager.evaluate(w, useVirtualKeyboard = it)
         }
     private val rimeIntentReceiver = RimeIntentReceiver()
-    private val locales = Array(2) { Locale.getDefault() }
 
     var lastCommittedText: CharSequence = ""
         private set
@@ -198,23 +196,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
-            InputFeedbackManager.init()
-            val theme = ThemeManager.activeTheme
-            val defaultLocale = theme.generalStyle.locale.split(DELIMITER_SPLITTER)
-            locales[0] =
-                when (defaultLocale.size) {
-                    3 -> Locale(defaultLocale[0], defaultLocale[1], defaultLocale[2])
-                    2 -> Locale(defaultLocale[0], defaultLocale[1])
-                    else -> Locale.getDefault()
-                }
-
-            val latinLocale = theme.generalStyle.latinLocale.split(DELIMITER_SPLITTER)
-            locales[1] =
-                when (latinLocale.size) {
-                    3 -> Locale(latinLocale[0], latinLocale[1], latinLocale[2])
-                    2 -> Locale(latinLocale[0], latinLocale[1])
-                    else -> Locale.US
-                }
+            InputFeedbackManager.init(this)
             registerReceiver()
         } catch (e: Exception) {
             Timber.e(e)
@@ -223,20 +205,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
-            is RimeMessage.OptionMessage -> {
-                val (option, value) = it.data
-                when (option) {
-                    "ascii_mode" -> {
-                        InputFeedbackManager.ttsLanguage =
-                            locales[if (value) 1 else 0]
-                    }
-                }
-            }
             is RimeMessage.ResponseMessage ->
                 it.data.let event@{
                     val (commit, ctx) = it
                     if (commit.text?.isNotEmpty() == true) {
                         commitText(commit.text)
+                        InputFeedbackManager.textCommitSpeak(commit.text)
                     }
                     updateComposingText(ctx)
                     KeyboardSwitcher.currentKeyboardView?.invalidateAllKeys()
@@ -536,8 +510,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         Timber.d("onStartInputView: restarting=$restarting")
         postRimeJob {
             updateRimeOption(this)
-            InputFeedbackManager.loadSoundEffects(this@TrimeInputMethodService)
-            InputFeedbackManager.resetPlayProgress()
             ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
                 val useVirtualKeyboard =
                     inputDeviceManager.evaluateOnStartInputView(attribute, this@TrimeInputMethodService)

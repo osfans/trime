@@ -32,14 +32,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="selected_theme_summary">选取主题</string>
     <string name="normal_mode_color">配色</string>
     <string name="normal_mode_color_summary">选取配色</string>
-    <string name="keyboard__key_sound_title">按键声音</string>
-    <string name="keyboard__key_sound_volume_title">按键音量</string>
-    <string name="keyboard__key_vibration_title">按键时振动</string>
-    <string name="keyboard__key_vibration_duration_title">按键振动时长</string>
-    <string name="keyboard__key_vibration_amplitude_title">按键振动强度</string>
+    <string name="sound_on_keypress">按键声音</string>
+    <string name="sound_volume">按键音量</string>
+    <string name="vibrate_on_keypress">按键时振动</string>
+    <string name="vibration_duration">按键振动时长</string>
+    <string name="vibration_amplitude">按键振动强度</string>
     <string name="unit__time_ms">" 毫秒"</string>
-    <string name="keyboard__speak_key_press_title">按键时朗读字符</string>
-    <string name="keyboard__speak_key_commit_title">上屏时朗读字符</string>
+    <string name="speak_on_keypress">按键时朗读字符</string>
+    <string name="speak_key_commit">上屏时朗读字符</string>
     <string name="keyboard__long_press_timeout_title">长按按键的延迟时间</string>
     <string name="keyboard__key_repeat_interval_title">重复按键的重复间隔</string>
     <string name="show_schema_switches_in_idle">空闲时显示方案开关</string>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="periodic_background_sync_status">上次同步时间（状态）：%1$s（%2$s）</string>
     <string name="pref_help__marketplace">应用市场</string>
     <string name="pref_help__user_community">用户社区</string>
-    <string name="pref_keyboard__effect">按键效果</string>
+    <string name="effects">效果</string>
     <string name="pref_keyboard__function">视图</string>
     <string name="other__show_app_icon_title">在启动器中显示图标</string>
     <string name="other__show_app_icon_on_summary">此选项仅对部分 ROM 有效</string>
@@ -97,7 +97,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="external_storage_permission_not_available">存储权限不可用</string>
     <string name="external_storage_permission_granted">已授予存储权限</string>
     <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
-    <string name="keyboard__key_sound_effect_title">按键音效</string>
+    <string name="custom_sound_effect_name">自定义按键音效</string>
     <string name="clipboard_draft_limit">草稿箱历史记录上限</string>
     <string name="clipboard_draft_output_title">草稿箱过滤规则</string>
     <string name="setup__next">下一步</string>
@@ -175,8 +175,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="disable">禁用</string>
     <string name="pref_clipboard_summary">收藏夹和草稿箱也在这里管理</string>
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
-    <string name="keyboard__custom_key_sound">使用自定义按键音</string>
-
+    <string name="custom_sound_effect_enabled">使用自定义按键音效</string>
     <string name="pref_keyboard__landscape">横屏模式</string>
     <string name="keyboard__landscape_mode_title">启用横屏模式</string>
     <string name="keyboard__split_space_title">自动分割键盘比例</string>

@@ -138,17 +138,17 @@ class AppPrefs(
             const val HOOK_SHIFT_SYMBOL = "keyboard__hook_shift_symbol"
             const val HOOK_SHIFT_ARROW = "keyboard__hook_shift_arrow"
 
-            const val SOUND_ENABLED = "keyboard__key_sound"
-            const val SOUND_VOLUME = "keyboard__key_sound_volume"
-            const val CUSTOM_SOUND_ENABLED = "keyboard__custom_key_sound"
-            const val CUSTOM_SOUND_PACKAGE = "keyboard__key_sound_package"
+            const val SOUND_ON_KEYPRESS = "sound_on_keypress"
+            const val KEY_SOUND_VALUE = "sound_volume"
+            const val SOUND_EFFECT_ENABLED = "custom_sound_effect_enabled"
+            const val CUSTOM_SOUND_EFFECT = "custom_sound_effect_name"
 
-            const val VIBRATION_ENABLED = "keyboard__key_vibration"
-            const val VIBRATION_DURATION = "keyboard__key_vibration_duration"
-            const val VIBRATION_AMPLITUDE = "keyboard__key_vibration_amplitude"
+            const val VIBRATE_ON_KEYPRESS = "vibrate_on_keypress"
+            const val VIBRATION_DURATION = "vibration_duration"
+            const val VIBRATION_AMPLITUDE = "vibration_amplitude"
 
-            const val SPEAK_KEY_PRESS_ENABLED = "keyboard__speak_key_press"
-            const val SPEAK_COMMIT_ENABLED = "keyboard__speak_commit"
+            const val SPEAK_ON_KEYPRESS = "speak_on_keypress"
+            const val SPEAK_ON_COMMIT = "speak_on_commit"
 
             const val SWIPE_ENABLED = "keyboard__swipe_enabled"
             const val SWIPE_TRAVEL = "keyboard__key_swipe_travel"
@@ -183,20 +183,20 @@ class AppPrefs(
         val hookShiftSymbol by bool(HOOK_SHIFT_SYMBOL, false)
         val hookShiftArrow by bool(HOOK_SHIFT_ARROW, true)
 
-        val soundEnabled by bool(SOUND_ENABLED, false)
-        var customSoundEnabled by bool(CUSTOM_SOUND_ENABLED, false)
-        var customSoundPackage by string(CUSTOM_SOUND_PACKAGE, "")
-        val soundVolume by int(SOUND_VOLUME, 100)
-        val vibrationEnabled by bool(VIBRATION_ENABLED, false)
-        val vibrationDuration by int(VIBRATION_DURATION, 10)
-        val vibrationAmplitude by int(VIBRATION_AMPLITUDE, -1)
+        val soundOnKeyPress = bool(SOUND_ON_KEYPRESS, false)
+        val soundEffectEnabled = bool(SOUND_EFFECT_ENABLED, false)
+        val customSoundEffect = string(CUSTOM_SOUND_EFFECT, "")
+        val soundVolume = int(KEY_SOUND_VALUE, 100)
+        val vibrateOnKeyPress = bool(VIBRATE_ON_KEYPRESS, false)
+        val vibrationDuration = int(VIBRATION_DURATION, 10)
+        val vibrationAmplitude = int(VIBRATION_AMPLITUDE, -1)
         val swipeEnabled = bool(SWIPE_ENABLED, true)
         val swipeTravel = int(SWIPE_TRAVEL, 80)
         val swipeVelocity = int(SWIPE_VELOCITY, 800)
         val longPressTimeout = int(LONG_PRESS_TIMEOUT, 400)
         val repeatInterval = int(REPEAT_INTERVAL, 50)
-        var isSpeakKey by bool(SPEAK_KEY_PRESS_ENABLED, false)
-        var isSpeakCommit by bool(SPEAK_COMMIT_ENABLED, false)
+        val speakOnKeyPress = bool(SPEAK_ON_KEYPRESS, false)
+        val speakOnCommit = bool(SPEAK_ON_COMMIT, false)
     }
 
     class Candidates(

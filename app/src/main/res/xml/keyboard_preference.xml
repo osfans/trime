@@ -149,27 +149,27 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <PreferenceCategory
         app:iconSpaceReserved="false"
-        app:key="settings__keyboard_effects"
-        app:title="@string/pref_keyboard__effect">
+        app:title="@string/effects">
         <SwitchPreferenceCompat
-            android:key="keyboard__key_sound"
-            android:title="@string/keyboard__key_sound_title"
+            android:key="sound_on_keypress"
+            android:title="@string/sound_on_keypress"
             app:iconSpaceReserved="false" />
         <SwitchPreferenceCompat
-            android:key="keyboard__custom_key_sound"
-            android:title="@string/keyboard__custom_key_sound"
-            android:dependency="keyboard__key_sound"
+            android:key="custom_sound_effect_enabled"
+            android:title="@string/custom_sound_effect_enabled"
+            android:dependency="sound_on_keypress"
             app:iconSpaceReserved="false" />
         <Preference
-            android:key="keyboard__key_sound_package"
-            android:title="@string/keyboard__key_sound_effect_title"
-            android:dependency="keyboard__custom_key_sound"
-            app:iconSpaceReserved="false" />
+            android:key="custom_sound_effect_name"
+            android:title="@string/custom_sound_effect_name"
+            android:dependency="custom_sound_effect_enabled"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
-            android:dependency="keyboard__key_sound"
-            android:key="keyboard__key_sound_volume"
-            android:title="@string/keyboard__key_sound_volume_title"
+            android:dependency="sound_on_keypress"
+            android:key="sound_volume"
+            android:title="@string/sound_volume"
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="100"
@@ -178,14 +178,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:unit="%"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
-            android:key="keyboard__key_vibration"
-            android:title="@string/keyboard__key_vibration_title"
+            android:key="vibrate_on_keypress"
+            android:title="@string/vibrate_on_keypress"
             app:iconSpaceReserved="false" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
-            android:dependency="keyboard__key_vibration"
-            android:key="keyboard__key_vibration_duration"
-            android:title="@string/keyboard__key_vibration_duration_title"
+            android:dependency="vibrate_on_keypress"
+            android:key="vibration_duration"
+            android:title="@string/vibration_duration"
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="100"
@@ -195,23 +195,22 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="-1"
-            android:dependency="keyboard__key_vibration"
-            android:key="keyboard__key_vibration_amplitude"
-            android:title="@string/keyboard__key_vibration_amplitude_title"
+            android:dependency="vibrate_on_keypress"
+            android:key="vibration_amplitude"
+            android:title="@string/vibration_amplitude"
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="255"
             app:systemDefaultValue="-1"
             app:systemDefaultValueText="@string/system_default"
             app:useSimpleSummaryProvider="true" />
-        <!--        <SwitchPreference android:key="key_vibrate_default_amplitude" android:title="@string/key_vibrate_default_amplitude"/>-->
         <SwitchPreferenceCompat
-            android:key="keyboard__speak_key_press"
-            android:title="@string/keyboard__speak_key_press_title"
+            android:key="speak_on_keypress"
+            android:title="@string/speak_on_keypress"
             app:iconSpaceReserved="false" />
         <SwitchPreferenceCompat
-            android:key="keyboard__speak_commit"
-            android:title="@string/keyboard__speak_key_commit_title"
+            android:key="speak_commit"
+            android:title="@string/speak_key_commit"
             app:iconSpaceReserved="false" />
         <SwitchPreferenceCompat
             android:key="keyboard__swipe_enabled"

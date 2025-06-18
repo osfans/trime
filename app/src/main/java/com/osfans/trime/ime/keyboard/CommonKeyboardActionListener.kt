@@ -32,7 +32,7 @@ import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ui.main.settings.ColorPickerDialog
-import com.osfans.trime.ui.main.settings.KeySoundEffectPickerDialog
+import com.osfans.trime.ui.main.settings.SoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.AppUtils
 import com.osfans.trime.util.buildIntentFromAction
@@ -97,7 +97,7 @@ class CommonKeyboardActionListener(
 
     private fun showSoundEffectPicker() {
         showDialog {
-            KeySoundEffectPickerDialog.build(service.lifecycleScope, context)
+            SoundEffectPickerDialog.build(service.lifecycleScope, context)
         }
     }
 
