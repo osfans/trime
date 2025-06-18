@@ -108,6 +108,16 @@ class GlobalRefSingleton {
   jclass Boolean;
   jmethodID BooleanInit;
 
+  jclass Double;
+  jmethodID DoubleInit;
+
+  jclass Long;
+  jmethodID LongInit;
+
+  jclass HashMap;
+  jmethodID HashMapInit;
+  jmethodID HashMapPut;
+
   jclass Rime;
   jmethodID HandleRimeMessage;
 
@@ -157,6 +167,21 @@ class GlobalRefSingleton {
     Boolean = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("java/lang/Boolean")));
     BooleanInit = env->GetMethodID(Boolean, "<init>", "(Z)V");
+
+    Double = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/lang/Double")));
+    DoubleInit = env->GetMethodID(Double, "<init>", "(D)V");
+
+    Long = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/lang/Long")));
+    LongInit = env->GetMethodID(Long, "<init>", "(J)V");
+
+    HashMap = reinterpret_cast<jclass>(
+        env->NewGlobalRef(env->FindClass("java/util/HashMap")));
+    HashMapInit = env->GetMethodID(HashMap, "<init>", "()V");
+    HashMapPut = env->GetMethodID(
+        HashMap, "put",
+        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
     Rime = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/Rime")));

@@ -4,34 +4,44 @@
 
 package com.osfans.trime.data.schema
 
-import com.osfans.trime.util.config.Config
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
+import com.osfans.trime.core.RimeConfig
+import timber.log.Timber
 
 class Schema(
-    schemaId: String = ".default",
+    schemaId: String,
 ) {
-    private val config =
-        if (schemaId == ".default") {
-            Config.create("default")
-        } else {
-            Config.create("$schemaId.schema")
+    val switches: List<Switch>
+
+    val symbols: Map<String, RimeConfig>
+
+    val alphabet: String
+
+    init {
+        RimeConfig.openSchema(schemaId).use { c ->
+            switches =
+                c.getList("switches").mapNotNull decode@{ e ->
+                    try {
+                        Switch(
+                            name = e.getString("name"),
+                            options = e.getStringList("options"),
+                            reset = e.getInt("reset", -1),
+                            states = e.getStringList("states"),
+                        )
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to decode switches of schema '$schemaId'")
+                        null
+                    }
+                }
+            symbols = c.getMap("punctuator/symbols")
+            alphabet = c.getString("speller/alphabet")
         }
+    }
 
-    val switches get() =
-        config?.getList("switches")
-
-    val symbols get() =
-        config?.getMap("punctuator/symbols")
-
-    val alphabet get() = config?.getString("speller/alphabet")
-
-    @Serializable
     data class Switch(
         val name: String = "",
         val options: List<String> = listOf(),
         val reset: Int = -1,
         val states: List<String> = listOf(),
-        @Transient var enabled: Int = 0,
+        var enabled: Int = 0,
     )
 }
