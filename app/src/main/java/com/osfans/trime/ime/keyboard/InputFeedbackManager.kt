@@ -48,19 +48,23 @@ object InputFeedbackManager {
                             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                             .build(),
                     ).build()
-            cacheSoundId()
         } catch (e: Exception) {
             Timber.e(e, "Error on initializing InputFeedbackManager")
         }
     }
 
     private fun cacheSoundId() {
+        cachedSoundIds.clear()
         SoundEffectManager.activeAudioPaths.forEachIndexed { i, path ->
             val id = soundPool?.load(path, 1) ?: 0
             if (id != 0 && !cachedSoundIds.containsValue(id)) {
                 cachedSoundIds.put(i, id)
             }
         }
+    }
+
+    fun startInput() {
+        cacheSoundId()
     }
 
     private val hasAmplitudeControl =

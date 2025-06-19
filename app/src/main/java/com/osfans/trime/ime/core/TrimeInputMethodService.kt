@@ -508,6 +508,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=$restarting")
+        InputFeedbackManager.startInput()
         postRimeJob {
             updateRimeOption(this)
             ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {

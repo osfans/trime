@@ -8,6 +8,7 @@ import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.util.FileUtils
 import timber.log.Timber
 import java.io.File
 
@@ -24,11 +25,7 @@ object SoundEffectManager {
         get() {
             val dest = File(DataManager.userDataDir, "soundeffect")
             val old = File(DataManager.userDataDir, "sound")
-            if (old.exists() && old.isDirectory) {
-                old.renameTo(dest)
-                return dest
-            }
-            return dest.also { it.mkdirs() }
+            return FileUtils.rename(old, dest.name).getOrDefault(dest.also { it.mkdirs() })
         }
 
     private fun listSounds(): MutableList<SoundEffect> {
