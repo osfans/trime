@@ -35,7 +35,7 @@ data class SoundEffect(
 
         fun querySoundIndex(keyCode: Int): Int {
             if (sounds.isEmpty()) return -1
-            if (sysKeyCodes.isEmpty() && minKeyCode >= maxKeyCode) return -1
+            if (sysKeyCodes.isEmpty() && minKeyCode > maxKeyCode) return -1
             if (sysKeyCodes.isEmpty()) {
                 if (keyCode !in minKeyCode..maxKeyCode) return -1
                 return sounds[if (inOrder) (keyCode - minKeyCode) % sounds.size else sounds.indices.random()]

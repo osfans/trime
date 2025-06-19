@@ -122,8 +122,10 @@ object InputFeedbackManager {
             var index = 0
             for (key in effect.keyset) {
                 val i = key.querySoundIndex(keyCode)
-                if (i >= 0) index = i
-                break
+                if (i >= 0) {
+                    index = i
+                    break
+                }
             }
             Timber.d("without melody: index: $index, sounds.size=${sounds.size}")
             index
