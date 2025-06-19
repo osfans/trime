@@ -20,6 +20,7 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.databinding.LiquidEntryViewBinding
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.above
@@ -34,13 +35,6 @@ import splitties.views.setPaddingDp
 class VarLengthAdapter(
     private val theme: Theme,
 ) : BaseQuickAdapter<Pair<String, String>, VarLengthAdapter.ViewHolder>() {
-    enum class SecondTextPosition {
-        UNKNOWN,
-        TOP,
-        BOTTOM,
-        RIGHT,
-    }
-
     private val mCandidateTextSize =
         theme.generalStyle.candidateTextSize
             .toFloat()
@@ -74,9 +68,12 @@ class VarLengthAdapter(
                             dp(theme.generalStyle.roundCorner),
                         ),
                     )
-                    mHilitedCandidateBackColor?.let {
-                        addState(intArrayOf(android.R.attr.state_pressed), ColorDrawable(it))
-                    }
+                    addState(
+                        intArrayOf(android.R.attr.state_pressed),
+                        ColorDrawable(
+                            mHilitedCandidateBackColor,
+                        ),
+                    )
                 }
 
             minimumWidth = dp(40)
@@ -99,12 +96,12 @@ class VarLengthAdapter(
             visibility = View.GONE
             textSize = mCommentTextSize
             typeface = mCommentFont
-            mCommentTextColor?.let { setTextColor(it) }
+            setTextColor(mCommentTextColor)
         }
         val candidate = binding.first
         val comment = binding.first
         when (mCommentPosition) {
-            SecondTextPosition.BOTTOM -> {
+            GeneralStyle.CommentPosition.BOTTOM -> {
                 candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     centerHorizontally()
                 }
@@ -115,7 +112,7 @@ class VarLengthAdapter(
                 }
             }
 
-            SecondTextPosition.TOP -> {
+            GeneralStyle.CommentPosition.TOP -> {
                 candidate.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     centerHorizontally()
                 }
@@ -125,8 +122,7 @@ class VarLengthAdapter(
                     centerHorizontally()
                 }
             }
-
-            SecondTextPosition.RIGHT, SecondTextPosition.UNKNOWN -> {}
+            else -> {}
         }
         return ViewHolder(binding)
     }

@@ -196,6 +196,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
+            ThemeManager.init(resources.configuration)
             InputFeedbackManager.init(this)
             registerReceiver()
         } catch (e: Exception) {

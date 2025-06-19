@@ -5,16 +5,12 @@
 package com.osfans.trime.ime.keyboard
 
 import android.view.KeyEvent
-import com.osfans.trime.data.prefs.AppPrefs.Companion.defaultInstance
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
-import com.osfans.trime.util.CollectionUtils.obtainBoolean
-import com.osfans.trime.util.CollectionUtils.obtainFloat
-import com.osfans.trime.util.CollectionUtils.obtainInt
-import com.osfans.trime.util.CollectionUtils.obtainString
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.config.ConfigItem
 import com.osfans.trime.util.sp
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
@@ -84,7 +80,7 @@ class Keyboard(
     private var mLandscapePercent = 0
 
     // Variables for pre-computing nearest keys.
-    private var mLabelTransform: String? = null
+    private lateinit var mLabelTransform: TextKeyboard.LabelTransform
     private var mCellWidth = 0
     private var mCellHeight = 0
     private var mGridNeighbors: Array<IntArray?>? = null
@@ -130,7 +126,7 @@ class Keyboard(
             key.width = keyWidth
             key.height = keyHeight
             key.gap = horizontalGap
-            key.keyActions[0] = KeyActionManager.getAction(element.toString())
+            key.keyActions[KeyBehavior.COMPOSING] = KeyActionManager.getAction(element.toString())
             column++
             x += key.width + key.gap
             mKeys.add(key)
@@ -141,84 +137,76 @@ class Keyboard(
         height = y + keyHeight
     }
 
-    private fun getKeyboardConfig(name: String): Map<String, ConfigItem> {
+    private fun getKeyboardConfig(name: String): TextKeyboard? {
         val keyboardConfig =
             (
                 theme.presetKeyboards[name]
                     ?: theme.presetKeyboards["default"]
-            )?.configMap
-        val importPreset = keyboardConfig?.getValue("import_preset")?.getString()
-        if (importPreset != null) {
+            )
+        val importPreset = keyboardConfig?.importPreset ?: ""
+        if (importPreset.isNotEmpty()) {
             return getKeyboardConfig(importPreset)
         }
-        return keyboardConfig ?: mapOf()
+        return keyboardConfig
     }
 
     constructor(theme: Theme, name: String) : this(theme) {
 
-        val keyboardConfig = getKeyboardConfig(name)
+        val textKeyboard = getKeyboardConfig(name) ?: return
 
-        mLabelTransform = obtainString(keyboardConfig, "label_transform", "none")
-        asciiMode = obtainInt(keyboardConfig, "ascii_mode", 1) == 1
-        if (!asciiMode) asciiKeyboard = obtainString(keyboardConfig, "ascii_keyboard", "")
-        resetAsciiMode = obtainBoolean(keyboardConfig, "reset_ascii_mode", true)
-        landscapeKeyboard = obtainString(keyboardConfig, "landscape_keyboard", "")
+        mLabelTransform = textKeyboard.labelTransform
+        asciiMode = textKeyboard.asciiMode
+        if (!asciiMode) asciiKeyboard = textKeyboard.asciiKeyboard
+        resetAsciiMode = textKeyboard.resetAsciiMode
+        landscapeKeyboard = textKeyboard.landscapeKeyboard
+        val preferredSplitPercent by AppPrefs.defaultInstance().keyboard.splitSpacePercent
         mLandscapePercent =
-            obtainInt(
-                keyboardConfig,
-                "landscape_split_percent",
-                defaultInstance().keyboard.splitSpacePercent,
-            )
-        isLock = obtainBoolean(keyboardConfig, "lock", false)
-        val columns = obtainInt(keyboardConfig, "columns", 30)
+            if (textKeyboard.landscapeSplitPercent > 0) {
+                textKeyboard.landscapeSplitPercent
+            } else {
+                preferredSplitPercent
+            }
+        isLock = textKeyboard.lock
+        val columns = textKeyboard.columns
 
         // 按键高度取值顺序： keys > keyboard/height > style/key_height
         // 考虑到key设置height_land需要对皮肤做大量修改，而当部分key设置height而部分没有设时会造成按键高度异常，故取消普通按键的height_land参数
-        val height = appContext.sp(obtainFloat(keyboardConfig, "height", 0f)).toInt()
-        val defaultHeight = if (height > 0) height else keyHeight
+        val defaultHeight =
+            if (textKeyboard.height > 0) {
+                appContext.sp(textKeyboard.height).toInt()
+            } else {
+                keyHeight
+            }
         var rowHeight = defaultHeight
         // 定义 新的键盘尺寸计算方式， 避免尺寸计算不恰当，导致切换键盘时键盘高度发生变化，UI闪烁的问题。同时可以快速调整整个键盘的尺寸
         // 1. default键盘的高度 = 其他键盘的高度
         // 2. 当键盘高度(不含padding)与keyboard_height不一致时，每行按键等比例缩放按键高度高度，行之间的间距向上取整数、padding不缩放；
         // 3. 由于高度只能取整数，缩放后仍然存在余数的，由 auto_height_index 指定的行吸收（遵循四舍五入）
         //    特别的，当值为负数时，为倒序序号（-1即倒数第一个）;当值大于按键行数时，为最后一行
-        val autoHeightIndex = obtainInt(keyboardConfig, "auto_height_index", -1)
-        val lm =
-            keyboardConfig["keys"]!!
-                .configList
-                .map {
-                    it.configMap.entries.associate { (k, v) ->
-                        k to v
-                    }
-                }
+        val autoHeightIndex = textKeyboard.autoHeightIndex
+        val keys = textKeyboard.keys
         horizontalGap =
-            appContext
-                .sp(
-                    obtainFloat(
-                        keyboardConfig,
-                        "horizontal_gap",
-                        theme.generalStyle.horizontalGap.toFloat(),
-                    ),
-                ).toInt()
-        verticalGap =
-            appContext
-                .sp(
-                    obtainFloat(
-                        keyboardConfig,
-                        "vertical_gap",
-                        theme.generalStyle.verticalGap.toFloat(),
-                    ),
-                ).toInt()
-        roundCorner =
-            obtainFloat(
-                keyboardConfig,
-                "round_corner",
-                theme.generalStyle.roundCorner,
+            appContext.sp(
+                intArrayOf(
+                    textKeyboard.horizontalGap,
+                    theme.generalStyle.horizontalGap,
+                ).firstOrNull { it > 0 } ?: 0,
             )
+        verticalGap =
+            appContext.sp(
+                intArrayOf(
+                    textKeyboard.verticalGap,
+                    theme.generalStyle.horizontalGap,
+                ).firstOrNull { it > 0 } ?: 0,
+            )
+        roundCorner = floatArrayOf(
+            textKeyboard.roundCorner,
+            theme.generalStyle.roundCorner,
+        ).firstOrNull { it > 0 } ?: 0f
         val horizontalGap = horizontalGap
         val verticalGap = verticalGap
-        keyboardHeight = getKeyboardHeight(theme, keyboardConfig)
-        val keyboardKeyWidth = obtainFloat(keyboardConfig, "width", 0f)
+        keyboardHeight = getKeyboardHeight(theme, textKeyboard)
+        val keyboardKeyWidth = textKeyboard.width
         val maxColumns = if (columns == -1) Int.MAX_VALUE else columns
         val isSplit = appContext.isLandscapeMode() && isLandscapeSplit
         val (rowWidthTotalWeight, oneWeightWidthPx, multiplier, scaledHeight, scaledVerticalGap) =
@@ -234,7 +222,7 @@ class Keyboard(
                 horizontalGap,
                 verticalGap,
                 autoHeightIndex,
-            ).calc(lm)
+            ).calc(keys)
 
         var x = this.horizontalGap / 2
         var y = scaledVerticalGap
@@ -244,12 +232,14 @@ class Keyboard(
 
         try {
             var rowWidthWeight = 0f
-            for (mk in lm) {
+            for (textKey in keys) {
                 val gap = this.horizontalGap
-                var keyWidth = obtainFloat(mk, "width", 0f)
-                if (keyWidth == 0f && mk.containsKey("click")) {
-                    keyWidth = keyboardKeyWidth
-                }
+                val keyWidth =
+                    if (textKey.width == 0f && textKey.click.isNotEmpty()) {
+                        keyboardKeyWidth
+                    } else {
+                        textKey.width
+                    }
                 var widthPx = (keyWidth * oneWeightWidthPx).toInt()
                 widthPx -= gap
                 if (column >= maxColumns || x + widthPx > mDisplayWidth) {
@@ -288,55 +278,66 @@ class Keyboard(
                         if (keyboardHeight > 0) {
                             scaledHeight[row]
                         } else {
-                            val heightK = appContext.sp(obtainFloat(mk, "height", 0f)).toInt()
-                            if (heightK > 0) heightK else defaultHeight
+                            if (textKey.height > 0) {
+                                appContext.sp(textKey.height).toInt()
+                            } else {
+                                defaultHeight
+                            }
                         }
                 }
-                if (!mk.containsKey("click")) { // 無按鍵事件
+                if (textKey.click.isEmpty()) { // 無按鍵事件
                     x += widthPx + gap
                     continue // 縮進
                 }
-                val key = Key(this, mk)
+                val key = Key(this, textKey)
                 key.keyTextOffsetX =
-                    obtainFloat(
-                        mk,
-                        "key_text_offset_x",
-                        obtainFloat(keyboardConfig, "key_text_offset_x", theme.generalStyle.keyTextOffsetX),
-                    )
+                    floatArrayOf(
+                        textKey.keyTextOffsetX,
+                        textKeyboard.keyTextOffsetX,
+                        theme.generalStyle.keyTextOffsetX,
+                    ).firstOrNull { it > 0 } ?: 0f
                 key.keyTextOffsetY =
-                    obtainFloat(
-                        mk,
-                        "key_text_offset_y",
-                        obtainFloat(keyboardConfig, "key_text_offset_y", theme.generalStyle.keyTextOffsetY),
-                    )
+                    floatArrayOf(
+                        textKey.keyTextOffsetY,
+                        textKeyboard.keyTextOffsetY,
+                        theme.generalStyle.keyTextOffsetY,
+                    ).firstOrNull { it > 0 } ?: 0f
                 key.keySymbolOffsetX =
-                    obtainFloat(
-                        mk,
-                        "key_symbol_offset_x",
-                        obtainFloat(keyboardConfig, "key_symbol_offset_x", theme.generalStyle.keySymbolOffsetX),
-                    )
+                    floatArrayOf(
+                        textKey.keySymbolOffsetX,
+                        textKeyboard.keySymbolOffsetX,
+                        theme.generalStyle.keySymbolOffsetX,
+                    ).firstOrNull { it > 0 } ?: 0f
                 key.keySymbolOffsetY =
-                    obtainFloat(
-                        mk,
-                        "key_symbol_offset_y",
-                        obtainFloat(keyboardConfig, "key_symbol_offset_y", theme.generalStyle.keySymbolOffsetY),
-                    )
+                    floatArrayOf(
+                        textKey.keySymbolOffsetY,
+                        textKeyboard.keySymbolOffsetY,
+                        theme.generalStyle.keySymbolOffsetY,
+                    ).firstOrNull { it > 0 } ?: 0f
                 key.keyHintOffsetX =
-                    obtainFloat(
-                        mk,
-                        "key_hint_offset_x",
-                        obtainFloat(keyboardConfig, "key_hint_offset_x", theme.generalStyle.keyHintOffsetX),
-                    )
+                    floatArrayOf(
+                        textKey.keyHintOffsetX,
+                        textKeyboard.keyHintOffsetX,
+                        theme.generalStyle.keyHintOffsetX,
+                    ).firstOrNull { it > 0 } ?: 0f
                 key.keyHintOffsetY =
-                    obtainFloat(
-                        mk,
-                        "key_hint_offset_y",
-                        obtainFloat(keyboardConfig, "key_hint_offset_y", theme.generalStyle.keyHintOffsetY),
-                    )
+                    floatArrayOf(
+                        textKey.keyHintOffsetX,
+                        textKeyboard.keyHintOffsetX,
+                        theme.generalStyle.keyHintOffsetX,
+                    ).firstOrNull { it > 0 } ?: 0f
                 key.keyPressOffsetX =
-                    obtainInt(mk, "key_press_offset_x", obtainInt(keyboardConfig, "key_press_offset_x", theme.generalStyle.keyPressOffsetX))
+                    intArrayOf(
+                        textKey.keyPressOffsetX,
+                        textKeyboard.keyPressOffsetX,
+                        theme.generalStyle.keyPressOffsetX,
+                    ).firstOrNull { it > 0 } ?: 0
                 key.keyPressOffsetY =
-                    obtainInt(mk, "key_press_offset_y", obtainInt(keyboardConfig, "key_press_offset_y", theme.generalStyle.keyPressOffsetY))
+                    intArrayOf(
+                        textKey.keyPressOffsetY,
+                        textKeyboard.keyPressOffsetY,
+                        theme.generalStyle.keyPressOffsetY,
+                    ).firstOrNull { it > 0 } ?: 0
                 key.x = x
                 key.y = y
                 val rightGap = abs(mDisplayWidth - x - widthPx - gap / 2)
@@ -366,41 +367,31 @@ class Keyboard(
     }
 
     private fun getKeyboardHeightFromTheme(theme: Theme): Int {
-        val keyboardHeight = theme.generalStyle.keyboardHeight
-        val keyboardHeightLand = theme.generalStyle.keyboardHeightLand
-        val value =
-            if (appContext.isLandscapeMode()) {
-                keyboardHeightLand.takeIf { it > 0 } ?: keyboardHeight
-            } else {
-                keyboardHeight
-            }
-        return appContext.dp(value)
+        var keyboardHeight = theme.generalStyle.keyboardHeight
+        if (appContext.isLandscapeMode()) {
+            val keyboardHeightLand = theme.generalStyle.keyboardHeightLand
+            if (keyboardHeightLand > 0) keyboardHeight = keyboardHeightLand
+        }
+        return appContext.dp(keyboardHeight)
     }
 
-    private fun getKeyboardHeightFromKeyboardConfig(keyboardConfig: Map<String, Any?>?): Int {
-        var mkeyboardHeight = appContext.sp(obtainFloat(keyboardConfig, "keyboard_height", 0f)).toInt()
+    private fun getKeyboardHeightFromKeyboardConfig(textKeyboard: TextKeyboard): Int {
+        var keyboardHeight = textKeyboard.keyboardHeight
         if (appContext.isLandscapeMode()) {
-            val mkeyBoardHeightLand =
-                appContext
-                    .sp(
-                        obtainFloat(keyboardConfig, "keyboard_height_land", 0f),
-                    ).toInt()
-            if (mkeyBoardHeightLand > 0) mkeyboardHeight = mkeyBoardHeightLand
+            val keyboardHeightLand = textKeyboard.keyboardHeightLand
+            if (keyboardHeightLand > 0) keyboardHeight = keyboardHeightLand
         }
-        return mkeyboardHeight
+        return appContext.dp(keyboardHeight)
     }
 
     private fun getKeyboardHeight(
         theme: Theme,
-        keyboardConfig: Map<String, Any?>?,
-    ): Int {
-        val keyboardHeight = getKeyboardHeightFromKeyboardConfig(keyboardConfig)
-        return if (keyboardHeight == 0) {
-            getKeyboardHeightFromTheme(theme)
-        } else {
-            keyboardHeight
-        }
-    }
+        textKeyboard: TextKeyboard,
+    ): Int =
+        intArrayOf(
+            getKeyboardHeightFromKeyboardConfig(textKeyboard),
+            getKeyboardHeightFromTheme(theme),
+        ).firstOrNull { it > 0 } ?: 0
 
     fun setModiferKey(
         c: Int,
@@ -605,7 +596,7 @@ class Keyboard(
     val isLandscapeSplit: Boolean
         get() = mLandscapePercent > 0
     val isLabelUppercase: Boolean
-        get() = mLabelTransform.contentEquals("uppercase")
+        get() = mLabelTransform == TextKeyboard.LabelTransform.UPPERCASE
 
     companion object {
         const val EDGE_LEFT = 0x01

@@ -171,10 +171,7 @@ class KeyboardWindow(
         // 切换到横屏布局
         if (service.isLandscapeMode()) {
             val landscape =
-                theme.presetKeyboards[final]
-                    ?.configMap
-                    ?.getValue("landscape_keyboard")
-                    ?.getString() ?: ""
+                theme.presetKeyboards[final]?.landscapeKeyboard ?: ""
             if (landscape.isNotEmpty() && presetKeyboardIds.contains(landscape)) final = landscape
         }
         return final

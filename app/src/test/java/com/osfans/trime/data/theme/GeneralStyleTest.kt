@@ -4,29 +4,32 @@
 
 package com.osfans.trime.data.theme
 
+import com.osfans.trime.BuildConfig
+import com.osfans.trime.core.Rime
+import com.osfans.trime.core.RimeConfig
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
-import com.osfans.trime.ime.symbol.VarLengthAdapter
-import com.osfans.trime.util.config.Config
-import com.osfans.trime.util.config.ConfigData
+import com.osfans.trime.data.theme.model.GeneralStyle
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import java.io.File
 
 class GeneralStyleTest :
     BehaviorSpec({
         Given("Correct trime.yaml") {
-            val style =
-                Config(
-                    ConfigData().apply {
-                        loadFromFile("src/test/assets/trime.yaml")
-                    },
-                ).getMap("style")
+            val dir = File("src/test/assets")
+            Rime.startupRime(
+                dir.absolutePath,
+                dir.absolutePath,
+                BuildConfig.BUILD_VERSION_NAME,
+                false,
+            )
 
             When("loaded") {
-                val mapper = GeneralStyleMapper(style)
-
-                val generalStyle = mapper.map()
+                val generalStyle =
+                    RimeConfig.openUserConfig("trime").use {
+                        GeneralStyleMapper("style", it).map()
+                    }
 
                 Then("it should not be null") {
                     generalStyle shouldNotBe null
@@ -34,24 +37,26 @@ class GeneralStyleTest :
                     generalStyle.backgroundDimAmount shouldBe 0.5
 
                     generalStyle.candidateFont shouldBe listOf("han.ttf")
-                    println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
-                    mapper.errors.size shouldBe 0
                 }
             }
+
+            Rime.exitRime()
         }
 
         Given("Empty trime.yaml") {
-            val style =
-                Config(
-                    ConfigData().apply {
-                        loadFromFile("src/test/assets/incorrect.yaml")
-                    },
-                ).getMap("style")
+            val dir = File("src/test/assets")
+            Rime.startupRime(
+                dir.absolutePath,
+                dir.absolutePath,
+                BuildConfig.BUILD_VERSION_NAME,
+                false,
+            )
 
             When("loaded") {
-                val mapper = GeneralStyleMapper(style)
-
-                val generalStyle = mapper.map()
+                val generalStyle =
+                    RimeConfig.openUserConfig("incorrect").use {
+                        GeneralStyleMapper("style", it).map()
+                    }
 
                 Then("with default value without exception") {
                     generalStyle.autoCaps shouldBe ""
@@ -59,16 +64,15 @@ class GeneralStyleTest :
                     generalStyle.candidateBorder shouldBe 0
                     generalStyle.candidateFont shouldBe emptyList()
                     generalStyle.candidateUseCursor shouldBe false
-                    generalStyle.commentPosition shouldBe VarLengthAdapter.SecondTextPosition.UNKNOWN
+                    generalStyle.commentPosition shouldBe GeneralStyle.CommentPosition.UNKNOWN
 
                     generalStyle.enterLabel shouldNotBe null
                     generalStyle.enterLabel.go shouldBe "go"
 
                     generalStyle.layout shouldNotBe null
-
-                    println("Error: " + mapper.errors.size + ", " + mapper.errors.joinToString(","))
-                    mapper.errors.size shouldBeGreaterThan 0
                 }
             }
+
+            Rime.exitRime()
         }
     })

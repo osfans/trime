@@ -4,29 +4,21 @@
 
 package com.osfans.trime.data.theme.mapper
 
-import com.osfans.trime.data.theme.model.EnterLabel
-import com.osfans.trime.util.config.ConfigItem
+import com.osfans.trime.core.RimeConfig
+import com.osfans.trime.data.theme.model.GeneralStyle
 
 class EnterLabelStyleMapper(
-    style: Map<String, ConfigItem?>?,
-) : Mapper(style) {
-    fun map(): EnterLabel {
-        val go = getString("go", "go")
-        val done = getString("done", "done")
-        val next = getString("next", "next")
-        val pre = getString("pre", "pre")
-        val search = getString("search", "search")
-        val send = getString("send", "send")
-        val default = getString("default", "Enter")
-
-        return EnterLabel(
-            go,
-            done,
-            next,
-            pre,
-            search,
-            send,
-            default,
+    prefix: String,
+    config: RimeConfig,
+) : Mapper(prefix, config) {
+    fun map() =
+        GeneralStyle.EnterLabel(
+            go = getString("go", "go"),
+            done = getString("done", "done"),
+            next = getString("next", "next"),
+            pre = getString("pre", "pre"),
+            search = getString("search", "search"),
+            send = getString("send", "send"),
+            default = getString("default", "Enter"),
         )
-    }
 }
