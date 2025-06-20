@@ -4,6 +4,7 @@
 
 package com.osfans.trime.util.config
 
+import com.charleskorn.kaml.AnchorsAndAliases
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlException
@@ -41,6 +42,8 @@ class ConfigData {
             configuration =
                 YamlConfiguration(
                     strictMode = false,
+                    anchorsAndAliases = AnchorsAndAliases.Permitted(null),
+                    codePointLimit = CODE_POINT_LIMIT,
                 ),
         )
 
@@ -78,5 +81,9 @@ class ConfigData {
             p = p.configMap[key]
         }
         return p
+    }
+
+    companion object {
+        private const val CODE_POINT_LIMIT = 6 * 1024 * 1024 // 6 MB
     }
 }
