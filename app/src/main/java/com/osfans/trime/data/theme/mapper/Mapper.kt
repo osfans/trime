@@ -4,110 +4,47 @@
 
 package com.osfans.trime.data.theme.mapper
 
-import com.osfans.trime.util.config.ConfigItem
-import com.osfans.trime.util.config.ConfigList
-import com.osfans.trime.util.config.ConfigMap
-import com.osfans.trime.util.config.ConfigValue
+import com.osfans.trime.util.config.Config
 
-open class Mapper(
-    private val map: Map<String, ConfigItem?>?,
+abstract class Mapper<T>(
+    val prefix: String,
+    val config: Config,
 ) {
-    val errors = ArrayList<String>()
+    abstract fun map(): T
 
     protected fun getString(
         key: String,
         defValue: String = "",
-    ): String {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
-        val v = map[key]
-        return v?.configValue?.getString() ?: run {
-            addError(key)
-            defValue
-        }
-    }
+    ): String = config.getString("$prefix/$key", defValue)
 
     protected fun getInt(
         key: String,
         defValue: Int = 0,
-    ): Int {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
-        val v = map[key]
-        return runCatching {
-            v!!.configValue.getInt()
-        }.getOrElse {
-            addError(key)
-            defValue
-        }
-    }
+    ): Int = config.getInt("$prefix/$key", defValue)
 
     protected fun getFloat(
         key: String,
         defValue: Float = 0f,
-    ): Float {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
-        val v = map[key]
-        return runCatching {
-            v!!.configValue.getFloat()
-        }.getOrElse {
-            addError(key)
-            defValue
-        }
-    }
+    ): Float = config.getFloat("$prefix/$key", defValue)
 
     protected fun getBoolean(
         key: String,
         defValue: Boolean = false,
-    ): Boolean {
-        if (map.isNullOrEmpty() || key.isEmpty()) return defValue
-        val v = map[key]
-        return runCatching {
-            v!!.configValue.getBool()
-        }.getOrElse {
-            addError(key)
-            defValue
-        }
-    }
+    ): Boolean = config.getBool("$prefix/$key", defValue)
 
-    protected fun getObject(key: String): ConfigMap? =
-        map?.get(key)?.configMap
-            ?: run {
-                addError(key)
-                null
-            }
+    protected fun getItem(key: String): Config = config.getItem("$prefix/$key")
 
-    protected fun getList(key: String): List<ConfigItem> =
-        runCatching {
-            map?.get(key)?.configList?.mapNotNull {
-                it
-            } ?: run {
-                addError(key)
-                listOf()
-            }
-        }.getOrElse {
-            addError(key)
-            listOf()
-        }
+    protected fun getList(key: String): List<Config> = config.getList("$prefix/$key")
 
     protected fun getStringList(
         key: String,
-        defValue: List<String> = listOf(),
+        defValue: List<String> = emptyList(),
     ): List<String> {
-        val obj = map?.get(key)
-
-        return if (obj is ConfigValue) {
-            arrayListOf(obj.getString())
-        } else if (obj is ConfigList) {
-            obj.configList
-                .mapNotNull {
-                    it?.configValue?.getString()
-                }.takeIf { it.isNotEmpty() } ?: defValue
-        } else {
-            addError(key)
-            defValue
+        if (config.isList("$prefix/$key")) {
+            return config.getStringList("$prefix/$key")
+        } else if (config.isValue("$prefix/$key")) {
+            return listOf(config.getString("$prefix/$key"))
         }
-    }
-
-    private fun addError(key: String) {
-        errors.add(key)
+        return defValue
     }
 }

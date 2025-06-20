@@ -7,5 +7,5 @@ package com.osfans.trime.data.theme.model
 
 data class ColorScheme(
     val id: String,
-    val values: Map<String, String>,
+    val colors: Map<String, String>,
 )

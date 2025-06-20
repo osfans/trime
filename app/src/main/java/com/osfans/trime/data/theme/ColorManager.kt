@@ -30,7 +30,7 @@ object ColorManager {
     private var isNightMode = false
 
     val presetColorSchemes: List<ColorScheme>
-        get() = theme.presetColorSchemes
+        get() = theme.colorSchemes
 
     private val customFallbackRules: Map<String, String>
         get() = theme.fallbackColors
@@ -46,11 +46,11 @@ object ColorManager {
             _activeColorScheme = value
             lightModeColorScheme =
                 runCatching {
-                    _activeColorScheme.values["light_scheme"]?.let { colorScheme(it) }
+                    _activeColorScheme.colors["light_scheme"]?.let { colorScheme(it) }
                 }.getOrNull()
             darkModeColorScheme =
                 runCatching {
-                    _activeColorScheme.values["dark_scheme"]?.let { colorScheme(it) }
+                    _activeColorScheme.colors["dark_scheme"]?.let { colorScheme(it) }
                 }.getOrNull()
             fireChange()
         }
@@ -209,8 +209,8 @@ object ColorManager {
 
         while (true) {
             when {
-                activeColorScheme.values.containsKey(currentKey) -> {
-                    return parser(activeColorScheme.values[currentKey]!!)
+                activeColorScheme.colors.containsKey(currentKey) -> {
+                    return parser(activeColorScheme.colors[currentKey]!!)
                 }
                 fullFallbackRules.containsKey(currentKey) -> {
                     currentKey =

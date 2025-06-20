@@ -172,7 +172,7 @@ class AppPrefs(
         }
 
         val landscapeModeOption by enum(LANDSCAPE_MODE, LandscapeModeOption.NEVER)
-        val splitSpacePercent by int(SPLIT_SPACE_PERCENT, 100)
+        val splitSpacePercent = int(SPLIT_SPACE_PERCENT, 100)
 
         val hookCtrlA by bool(HOOK_CTRL_A, false)
         val hookCtrlCV by bool(HOOK_CTRL_CV, false)

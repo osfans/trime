@@ -39,9 +39,8 @@ object ThemePickerDialog {
                     ) { dialog, which ->
                         scope.launch {
                             afterConfirm?.invoke()
-                            if (which == selectedIndex) return@launch
                             val newItem = allThemes[which]
-                            ThemeManager.selectTheme(Theme(newItem.configId))
+                            ThemeManager.selectTheme(Theme.open(newItem.configId))
                             dialog.dismiss()
                         }
                     }

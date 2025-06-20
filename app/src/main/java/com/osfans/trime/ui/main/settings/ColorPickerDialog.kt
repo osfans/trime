@@ -28,7 +28,7 @@ object ColorPickerDialog {
                     setMessage(R.string.no_color_to_select)
                 } else {
                     setSingleChoiceItems(
-                        presetSchemes.map { it.values["name"] }.toTypedArray(),
+                        presetSchemes.map { it.colors["name"] }.toTypedArray(),
                         currentIndex,
                     ) { dialog, which ->
                         scope.launch {

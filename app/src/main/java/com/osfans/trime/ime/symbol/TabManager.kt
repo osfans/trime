@@ -4,12 +4,7 @@
 
 package com.osfans.trime.ime.symbol
 
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.util.config.ConfigItem
-import com.osfans.trime.util.config.ConfigList
-import com.osfans.trime.util.config.ConfigMap
-import com.osfans.trime.util.config.ConfigValue
 import timber.log.Timber
 
 object TabManager {
@@ -23,17 +18,10 @@ object TabManager {
         tabTags.clear()
         keyboards.clear()
 
-        val available = theme.liquidKeyboards["keyboards"]?.configList ?: return
-        for (item in available) {
-            val id = item.configValue.getString()
-            Timber.d("preparing data for tab #$id")
-            val keyboard = theme.liquidKeyboards[id]?.configMap ?: continue
-            if (!keyboard.containsKey("type")) continue
-            val name = keyboard.getValue("name")?.getString() ?: id
-            val type = SymbolBoardType.fromString(keyboard.getValue("type")?.getString())
-            val keys = keyboard["keys"]
-            addTabHasKeys(name, type, keys)
+        theme.liquidKeyboard.keyboards.forEach {
+            addListTab(it.name, it.type, it.keys)
         }
+        Timber.d("tabTags: ${tabTags.joinToString()}")
     }
 
     private fun addListTab(
@@ -51,49 +39,6 @@ object TabManager {
         }
         tabTags.add(TabTag(name, type))
         keyboards.add(keyBeans)
-    }
-
-    private fun addTabHasKeys(
-        name: String,
-        type: SymbolBoardType,
-        keys: ConfigItem?,
-    ) {
-        if (keys is ConfigValue?) {
-            // 对于没有按键的类型，也要返回一个空的 key 值，否则无法显示在标签栏内
-            val key = keys?.configValue?.getString() ?: ""
-            when (type) {
-                // 处理 SINGLE 类型：把字符串切分为多个按键
-                SymbolBoardType.SINGLE -> addListTab(name, type, SimpleKeyDao.singleData(key))
-                else -> addListTab(name, type, SimpleKeyDao.simpleKeyboardData(key))
-            }
-        }
-
-        if (keys !is ConfigList) return
-        val keysList = mutableListOf<SimpleKeyBean>()
-        for (k in keys) {
-            if (k is ConfigValue) {
-                keysList.add(SimpleKeyBean(k.getString()))
-            }
-
-            if (k !is ConfigMap) continue
-            val p = k.entries.associate { (s, n) -> s to n.configValue.getString() }
-            if (k.containsKey("click")) {
-                if (p.containsKey("label")) {
-                    keysList.add(SimpleKeyBean(p["click"]!!, p["label"]!!))
-                } else {
-                    keysList.add(SimpleKeyBean(p["click"]!!))
-                }
-                continue
-            }
-
-            val symbolMaps = SchemaManager.activeSchema.symbols
-            for ((key, value) in p) {
-                if (symbolMaps.containsKey(value)) {
-                    keysList.add(SimpleKeyBean(value, key))
-                }
-            }
-        }
-        addListTab(name, type, keysList)
     }
 
     fun selectTabByIndex(index: Int): List<SimpleKeyBean> {
