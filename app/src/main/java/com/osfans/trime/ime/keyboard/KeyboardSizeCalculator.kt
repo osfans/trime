@@ -4,7 +4,7 @@
 
 package com.osfans.trime.ime.keyboard
 
-import com.osfans.trime.util.CollectionUtils.obtainFloat
+import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.sp
 import kotlin.math.abs
@@ -25,7 +25,7 @@ class KeyboardSizeCalculator(
 ) {
     private val splitSpaceRatio: Float = if (isSplit) (splitPercent / 100f) else 0f
 
-    fun calc(lm: List<Map<String, Any>>): KeyboardSize {
+    fun calc(keys: List<TextKeyboard.TextKey>): KeyboardSize {
         var x = mDefaultHorizontalGap / 2
         var y = 0
         var column = 0
@@ -40,13 +40,12 @@ class KeyboardSizeCalculator(
         var maxColumn = 0
         val rowTotalWeight = HashMap<Int, Float>()
 
-        for (mk in lm) {
-            val weight = obtainFloat(mk, "width", 0f)
+        for (key in keys) {
             val keyWidthWeight =
-                if (weight == 0f && mk.contains("click")) {
+                if (key.width == 0f && key.click.isNotEmpty()) {
                     keyboardKeyWidth
                 } else {
-                    weight
+                    key.width
                 }
             val widthPx =
                 (keyWidthWeight * mAllowedWidth / MAX_TOTAL_WEIGHT).toInt() - mDefaultHorizontalGap
@@ -64,11 +63,10 @@ class KeyboardSizeCalculator(
             }
 
             if (column == 0) {
-                val heightK = appContext.sp(obtainFloat(mk, "height", 0f)).toInt()
-                rowHeight = if (heightK > 0) heightK else keyHeight
+                rowHeight = if (key.height > 0) appContext.sp(key.height).toInt() else keyHeight
             }
             totalKeyWidth += keyWidthWeight
-            if (!mk.containsKey("click")) { // 無按鍵事件
+            if (key.click.isEmpty()) { // 無按鍵事件
                 x += widthPx + mDefaultHorizontalGap
                 continue // 縮進
             }

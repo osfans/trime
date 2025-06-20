@@ -13,9 +13,7 @@ import com.osfans.trime.core.Rime.Companion.isComposing
 import com.osfans.trime.core.Rime.Companion.showAsciiPunch
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
-import com.osfans.trime.util.CollectionUtils.obtainBoolean
-import com.osfans.trime.util.CollectionUtils.obtainFloat
-import com.osfans.trime.util.CollectionUtils.obtainString
+import com.osfans.trime.data.theme.model.TextKeyboard
 import java.text.MessageFormat
 
 /** [鍵盤][Keyboard]中的各個按鍵，包含單擊、長按、滑動等多種[事件][KeyAction]  */
@@ -26,10 +24,10 @@ import java.text.MessageFormat
 class Key(
     private val mKeyboard: Keyboard,
 ) {
-    var keyActions = arrayOfNulls<KeyAction>(EVENT_NUM)
+    val keyActions = hashMapOf<KeyBehavior, KeyAction>()
     var edgeFlags = 0
     private var sendBindings = true
-    private lateinit var keyMap: Map<String, Any?>
+    private lateinit var textKey: TextKeyboard.TextKey
 
     var isPressed = false
         private set
@@ -74,57 +72,47 @@ class Key(
     var keyPressOffsetX = 0
     var keyPressOffsetY = 0
 
-    private fun Map<String, Any?>.getColor(key: String) =
-        runCatching {
-            this[key]?.let { ColorManager.resolveColor(it.toString(), false) }
-        }.getOrNull()
+    private fun getColor(src: String) =
+        if (src.isNotEmpty()) {
+            ColorManager.resolveColor(src, false)
+        } else {
+            null
+        }
 
-    private fun Map<String, Any?>.getDrawable(key: String) =
-        runCatching {
-            this[key]?.let { ColorManager.resolveDrawable(it.toString(), false) }
-        }.getOrNull()
+    private fun getDrawable(src: String) =
+        if (src.isNotEmpty()) {
+            ColorManager.resolveDrawable(src, false)
+        } else {
+            null
+        }
 
-    private val keyBackColor get() = keyMap.getDrawable("key_back_color")
-    private val keyTextColor get() = keyMap.getColor("key_text_color")
-    private val keySymbolColor get() = keyMap.getColor("key_symbol_color")
-    private val hilitedKeyBackColor get() = keyMap.getDrawable("hilited_key_back_color")
-    private val hilitedKeyTextColor get() = keyMap.getColor("hilited_key_text_color")
-    private val hilitedKeySymbolColor get() = keyMap.getColor("hilited_key_symbol_color")
+    private val keyBackColor get() = getDrawable(textKey.keyBackColor)
+    private val keyTextColor get() = getColor(textKey.keyTextColor)
+    private val keySymbolColor get() = getColor(textKey.keySymbolColor)
+    private val hilitedKeyBackColor get() = getDrawable(textKey.highlightedKeyBackColor)
+    private val hilitedKeyTextColor get() = getColor(textKey.highlightedKeyTextColor)
+    private val hilitedKeySymbolColor get() = getColor(textKey.highlightedKeySymbolColor)
 
     /**
      * Create an empty key with no attributes.
      *
      * @param parent 按鍵所在的[鍵盤][Keyboard]
-     * @param externalKeyMap 從YAML中解析得到的按键定义
+     * @param textKey 從YAML中解析得到的按键定义
      */
-    constructor(parent: Keyboard, externalKeyMap: Map<String, Any?>) : this(parent) {
-        keyMap = externalKeyMap
-        var hasComposingKey = false
-        KeyBehavior.entries.forEach { behavior ->
-            val behaviorName = behavior.name.lowercase()
-            val what = obtainString(externalKeyMap, behaviorName)
-            when {
-                what.isNotEmpty() -> {
-                    keyActions[behavior.ordinal] = KeyActionManager.getAction(what)
-                    if (behavior.ordinal < KeyBehavior.COMBO.ordinal) {
-                        hasComposingKey = true
-                    }
-                }
-                behavior == KeyBehavior.CLICK -> {
-                    keyActions[behavior.ordinal] = KeyActionManager.getAction("")
-                }
-            }
+    constructor(parent: Keyboard, textKey: TextKeyboard.TextKey) : this(parent) {
+        this.textKey = textKey
+        textKey.behaviors.forEach {
+            keyActions[it.key] = KeyActionManager.getAction(it.value)
         }
+        val hasComposingKey = textKey.behaviors.keys.any { it < KeyBehavior.COMBO }
         if (hasComposingKey) mKeyboard.composingKeys.add(this)
-        label = obtainString(externalKeyMap, "label")
-        labelSymbol = obtainString(externalKeyMap, "label_symbol")
-        hint = obtainString(externalKeyMap, "hint")
-        keyTextSize = obtainFloat(externalKeyMap, "key_text_size")
-        symbolTextSize = obtainFloat(externalKeyMap, "symbol_text_size")
-        roundCorner = obtainFloat(externalKeyMap, "round_corner")
-        sendBindings = externalKeyMap["send_bindings"]?.let {
-            obtainBoolean(externalKeyMap, "send_bindings", true)
-        } ?: hasComposingKey
+        label = textKey.label
+        labelSymbol = textKey.labelSymbol
+        hint = textKey.hint
+        keyTextSize = textKey.keyTextSize
+        symbolTextSize = textKey.symbolTextSize
+        roundCorner = textKey.roundCorner
+        sendBindings = textKey.sendBindings || hasComposingKey
         mKeyboard.setModiferKey(this.code, this)
     }
 
@@ -288,31 +276,31 @@ class Key(
      * @return
      */
     fun sendBindings(behavior: KeyBehavior): Boolean =
-        keyActions[behavior.ordinal]?.takeIf { behavior != KeyBehavior.CLICK } != null || checkKeyAction(sendBindings) != null
+        keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } != null || checkKeyAction(sendBindings) != null
 
     private val keyAction: KeyAction?
         get() = checkKeyAction() ?: click
 
     val click: KeyAction?
-        get() = keyActions[KeyBehavior.CLICK.ordinal]
+        get() = keyActions[KeyBehavior.CLICK]
     val longClick: KeyAction?
-        get() = keyActions[KeyBehavior.LONG_CLICK.ordinal]
+        get() = keyActions[KeyBehavior.LONG_CLICK]
 
-    fun hasAction(behavior: KeyBehavior): Boolean = keyActions[behavior.ordinal] != null
+    fun hasAction(behavior: KeyBehavior): Boolean = keyActions[behavior] != null
 
     fun getAction(behavior: KeyBehavior): KeyAction? =
-        keyActions[behavior.ordinal]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
+        keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
 
     private fun checkKeyAction(): KeyAction? =
-        keyActions[KeyBehavior.ASCII.ordinal].takeIf { isAsciiMode }
-            ?: keyActions[KeyBehavior.PAGING.ordinal]?.takeIf { hasLeft() }
-            ?: keyActions[KeyBehavior.HAS_MENU.ordinal]?.takeIf { hasMenu() }
-            ?: keyActions[KeyBehavior.COMPOSING.ordinal]?.takeIf { isComposing }
+        keyActions[KeyBehavior.ASCII].takeIf { isAsciiMode }
+            ?: keyActions[KeyBehavior.PAGING]?.takeIf { hasLeft() }
+            ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { hasMenu() }
+            ?: keyActions[KeyBehavior.COMPOSING]?.takeIf { isComposing }
 
     private fun checkKeyAction(sendBindings: Boolean): KeyAction? = checkKeyAction().takeIf { sendBindings }
 
     val code: Int
-        get() = click!!.code
+        get() = click?.code ?: KeyEvent.KEYCODE_UNKNOWN
 
     fun getCode(behavior: KeyBehavior): Int = getAction(behavior)!!.code
 
@@ -320,7 +308,7 @@ class Key(
         when {
             label.isNotEmpty() &&
                 keyAction == click &&
-                keyActions[KeyBehavior.ASCII.ordinal] == null &&
+                keyActions[KeyBehavior.ASCII] == null &&
                 !showAsciiPunch() -> label
             else -> keyAction!!.getLabel(mKeyboard) // 中文狀態顯示標籤
         }
@@ -369,8 +357,6 @@ class Key(
                 KEY_STATE_PRESSED, // 4       "hilited_key_back_color"      按键按下的背景
                 KEY_STATE_NORMAL, // 5        "key_back_color"              按键背景
             )
-
-        private val EVENT_NUM = KeyBehavior.entries.size
 
         @JvmStatic
         fun isTrimeModifierKey(keycode: Int): Boolean = keycode != KeyEvent.KEYCODE_FUNCTION && KeyEvent.isModifierKey(keycode)

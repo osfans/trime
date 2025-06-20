@@ -40,9 +40,9 @@ class SimpleAdapter(
 
     override fun getItemId(position: Int): Long = position * 1000L
 
-    private val mSingleWidth = theme.liquidKeyboards["single_width"]?.configValue?.getInt() ?: 0
-    private val mSingleHeight = theme.liquidKeyboards["key_height"]?.configValue?.getInt() ?: 0
-    private val mStringMarginX = theme.liquidKeyboards["margin_x"]?.configValue?.getFloat() ?: 0f
+    private val mSingleWidth = theme.liquidKeyboard.singleWidth
+    private val mSingleHeight = theme.liquidKeyboard.keyHeight
+    private val mStringMarginX = theme.liquidKeyboard.marginX
     private val mTextSize = theme.generalStyle.labelTextSize
     private val mTextColor = ColorManager.getColor("key_text_color")
     private val mTypeface = FontManager.getTypeface("key_font")

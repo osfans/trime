@@ -5,217 +5,87 @@
 package com.osfans.trime.data.theme.mapper
 
 import com.osfans.trime.data.theme.model.GeneralStyle
-import com.osfans.trime.ime.symbol.VarLengthAdapter.SecondTextPosition
-import com.osfans.trime.util.config.ConfigItem
+import com.osfans.trime.util.config.Config
 
 class GeneralStyleMapper(
-    style: Map<String, ConfigItem?>?,
-) : Mapper(style) {
-    fun map(): GeneralStyle {
-        val autoCaps = getString("auto_caps")
-
-        val backgroundDimAmount = getFloat("background_dim_amount")
-
-        val candidateBorder = getInt("candidate_border")
-        val candidateBorderRound = getFloat("candidate_border_round")
-
-        val candidateFont = getStringList("candidate_font")
-
-        val candidatePadding = getInt("candidate_padding")
-
-        val candidateSpacing = getFloat("candidate_spacing")
-
-        val candidateTextSize = getFloat("candidate_text_size")
-
-        val candidateUseCursor = getBoolean("candidate_use_cursor")
-
-        val candidateViewHeight = getInt("candidate_view_height")
-
-        val colorScheme = getString("color_scheme")
-
-        val commentFont = getStringList("comment_font")
-
-        val commentHeight = getInt("comment_height")
-
-        val commentOnTop = getBoolean("comment_on_top")
-        val secondTextPosition =
-            runCatching {
-                val s = getString("comment_position")
-                SecondTextPosition.valueOf(s.uppercase())
-            }.getOrElse {
-                SecondTextPosition.UNKNOWN
-            }
-
-        val commentTextSize = getFloat("comment_text_size")
-
-        val hanbFont = getStringList("hanb_font")
-
-        val horizontal = getBoolean("horizontal")
-
-        val horizontalGap = getInt("horizontal_gap")
-
-        val keyboardPadding = getInt("keyboard_padding")
-
-        val keyboardPaddingLeft = getInt("keyboard_padding_left")
-
-        val keyboardPaddingRight = getInt("keyboard_padding_right")
-
-        val keyboardPaddingBottom = getInt("keyboard_padding_bottom")
-
-        val keyboardPaddingLand = getInt("keyboard_padding_land")
-
-        val keyboardPaddingLandBottom = getInt("keyboard_padding_land_bottom")
-
-        val layout =
-            getObject("layout").let {
-                LayoutStyleMapper(it).map()
-            }
-
-        val keyFont = getStringList("key_font")
-        val keyBorder = getInt("key_border")
-
-        val keyHeight = getInt("key_height")
-
-        val keyLongTextSize = getFloat("key_long_text_size")
-
-        val keyTextSize = getFloat("key_text_size")
-
-        val keyTextOffsetX = getFloat("key_text_offset_x")
-        val keyTextOffsetY = getFloat("key_text_offset_y")
-        val keySymbolOffsetX = getFloat("key_symbol_offset_x")
-        val keySymbolOffsetY = getFloat("key_symbol_offset_y")
-        val keyHintOffsetX = getFloat("key_hint_offset_x")
-        val keyHintOffsetY = getFloat("key_hint_offset_y")
-        val keyPressOffsetX = getInt("key_press_offset_x")
-        val keyPressOffsetY = getInt("key_press_offset_y")
-
-        val keyWidth = getFloat("key_width")
-
-        val keyboards = getStringList("keyboards")
-
-        val labelTextSize = getFloat("label_text_size")
-
-        val labelFont = getStringList("label_font")
-
-        val latinFont = getStringList("latin_font")
-
-        val latinLocale = getString("latin_locale")
-
-        val locale = getString("locale")
-
-        val keyboardHeight = getInt("keyboard_height")
-
-        val keyboardHeightLand = getInt("keyboard_height_land")
-
-        val previewFont = getStringList("preview_font")
-
-        val previewHeight = getInt("preview_height")
-
-        val previewOffset = getInt("preview_offset")
-
-        val previewTextSize = getFloat("preview_text_size")
-
-        val proximityCorrection = getBoolean("proximity_correction")
-
-        val resetASCIIMode = getBoolean("reset_ascii_mode")
-
-        val roundCorner = getFloat("round_corner")
-
-        val shadowRadius = getFloat("shadow_radius")
-
-        val speechOpenccConfig = getString("speech_opencc_config")
-
-        val symbolFont = getStringList("symbol_font")
-
-        val symbolTextSize = getFloat("symbol_text_size")
-
-        val textFont = getStringList("text_font")
-
-        val textSize = getFloat("text_size")
-
-        val verticalCorrection = getInt("vertical_correction")
-
-        val verticalGap = getInt("vertical_gap")
-
-        val longTextFont = getStringList("long_text_font")
-
-        val backgroundFolder = getString("background_folder")
-
-        val keyIntTextBorder = getInt("key_long_text_border")
-
-        val enterLabelMode = getInt("enter_label_mode")
-
-        val enterLabels = EnterLabelStyleMapper((getObject("enter_labels")?.configMap)).map()
-
-        return GeneralStyle(
-            autoCaps,
-            backgroundDimAmount,
-            candidateBorder,
-            candidateBorderRound,
-            candidateFont,
-            candidatePadding,
-            candidateSpacing,
-            candidateTextSize,
-            candidateUseCursor,
-            candidateViewHeight,
-            colorScheme,
-            commentFont,
-            commentHeight,
-            commentOnTop,
-            secondTextPosition,
-            commentTextSize,
-            hanbFont,
-            horizontal,
-            horizontalGap,
-            keyboardPadding,
-            keyboardPaddingLeft,
-            keyboardPaddingRight,
-            keyboardPaddingBottom,
-            keyboardPaddingLand,
-            keyboardPaddingLandBottom,
-            layout,
-            keyFont,
-            keyBorder,
-            keyHeight,
-            keyLongTextSize,
-            keyTextSize,
-            keyTextOffsetX,
-            keyTextOffsetY,
-            keySymbolOffsetX,
-            keySymbolOffsetY,
-            keyHintOffsetX,
-            keyHintOffsetY,
-            keyPressOffsetX,
-            keyPressOffsetY,
-            keyWidth,
-            keyboards,
-            labelTextSize,
-            labelFont,
-            latinFont,
-            latinLocale,
-            locale,
-            keyboardHeight,
-            keyboardHeightLand,
-            previewFont,
-            previewHeight,
-            previewOffset,
-            previewTextSize,
-            proximityCorrection,
-            resetASCIIMode,
-            roundCorner,
-            shadowRadius,
-            speechOpenccConfig,
-            symbolFont,
-            symbolTextSize,
-            textFont,
-            textSize,
-            verticalCorrection,
-            verticalGap,
-            longTextFont,
-            backgroundFolder,
-            keyIntTextBorder,
-            enterLabelMode,
-            enterLabels,
+    prefix: String,
+    config: Config,
+) : Mapper<GeneralStyle>(prefix, config) {
+    override fun map() =
+        GeneralStyle(
+            autoCaps = getString("auto_caps"),
+            backgroundDimAmount = getFloat("background_dim_amount"),
+            candidateBorder = getInt("candidate_border"),
+            candidateBorderRound = getFloat("candidate_border_round"),
+            candidateFont = getStringList("candidate_font"),
+            candidatePadding = getInt("candidate_padding"),
+            candidateSpacing = getFloat("candidate_spacing"),
+            candidateTextSize = getFloat("candidate_text_size"),
+            candidateUseCursor = getBoolean("candidate_use_cursor"),
+            candidateViewHeight = getInt("candidate_view_height"),
+            colorScheme = getString("color_scheme"),
+            commentFont = getStringList("comment_font"),
+            commentHeight = getInt("comment_height"),
+            commentOnTop = getBoolean("comment_on_top"),
+            commentPosition =
+                runCatching {
+                    val s = getString("comment_position")
+                    GeneralStyle.CommentPosition.valueOf(s.uppercase())
+                }.getOrElse {
+                    GeneralStyle.CommentPosition.UNKNOWN
+                },
+            commentTextSize = getFloat("comment_text_size"),
+            hanbFont = getStringList("hanb_font"),
+            horizontal = getBoolean("horizontal"),
+            horizontalGap = getInt("horizontal_gap"),
+            keyboardPadding = getInt("keyboard_padding"),
+            keyboardPaddingLeft = getInt("keyboard_padding_left"),
+            keyboardPaddingRight = getInt("keyboard_padding_right"),
+            keyboardPaddingBottom = getInt("keyboard_padding_bottom"),
+            keyboardPaddingLand = getInt("keyboard_padding_land"),
+            keyboardPaddingLandBottom = getInt("keyboard_padding_land_bottom"),
+            layout = LayoutStyleMapper("$prefix/layout", config).map(),
+            keyFont = getStringList("key_font"),
+            keyBorder = getInt("key_border"),
+            keyHeight = getInt("key_height"),
+            keyLongTextSize = getFloat("key_long_text_size"),
+            keyTextSize = getFloat("key_text_size"),
+            keyTextOffsetX = getFloat("key_text_offset_x"),
+            keyTextOffsetY = getFloat("key_text_offset_y"),
+            keySymbolOffsetX = getFloat("key_symbol_offset_x"),
+            keySymbolOffsetY = getFloat("key_symbol_offset_y"),
+            keyHintOffsetX = getFloat("key_hint_offset_x"),
+            keyHintOffsetY = getFloat("key_hint_offset_y"),
+            keyPressOffsetX = getInt("key_press_offset_x"),
+            keyPressOffsetY = getInt("key_press_offset_y"),
+            keyWidth = getFloat("key_width"),
+            keyboards = getStringList("keyboards"),
+            labelTextSize = getFloat("label_text_size"),
+            labelFont = getStringList("label_font"),
+            latinFont = getStringList("latin_font"),
+            latinLocale = getString("latin_locale"),
+            locale = getString("locale"),
+            keyboardHeight = getInt("keyboard_height"),
+            keyboardHeightLand = getInt("keyboard_height_land"),
+            previewFont = getStringList("preview_font"),
+            previewHeight = getInt("preview_height"),
+            previewOffset = getInt("preview_offset"),
+            previewTextSize = getFloat("preview_text_size"),
+            proximityCorrection = getBoolean("proximity_correction"),
+            resetASCIIMode = getBoolean("reset_ascii_mode"),
+            roundCorner = getFloat("round_corner"),
+            shadowRadius = getFloat("shadow_radius"),
+            speechOpenccConfig = getString("speech_opencc_config"),
+            symbolFont = getStringList("symbol_font"),
+            symbolTextSize = getFloat("symbol_text_size"),
+            textFont = getStringList("text_font"),
+            textSize = getFloat("text_size"),
+            verticalCorrection = getInt("vertical_correction"),
+            verticalGap = getInt("vertical_gap"),
+            longTextFont = getStringList("long_text_font"),
+            backgroundFolder = getString("background_folder"),
+            keyLongTextBorder = getInt("key_long_text_border"),
+            enterLabelMode = getInt("enter_label_mode"),
+            enterLabel = EnterLabelStyleMapper("$prefix/enter_labels", config).map(),
         )
-    }
 }

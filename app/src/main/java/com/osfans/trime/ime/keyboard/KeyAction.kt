@@ -10,8 +10,6 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.util.virtualKeyCharacterMap
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 
 /** [按鍵][Key]的各種事件（單擊、長按、滑動等）  */
 class KeyAction(
@@ -44,7 +42,7 @@ class KeyAction(
     private var label: String = ""
     private var shiftLabel = ""
     private var preview: String = ""
-    private var states: List<String>? = null
+    private var states: List<String> = listOf()
 
     private val hookShiftNum get() = AppPrefs.defaultInstance().keyboard.hookShiftNum
     private val hookShiftSymbol get() = AppPrefs.defaultInstance().keyboard.hookShiftSymbol
@@ -60,7 +58,9 @@ class KeyAction(
         }
 
     fun getLabel(keyboard: Keyboard): String {
-        states?.get(if (Rime.getOption(toggle)) 1 else 0)?.let { return it }
+        if (states.isNotEmpty() && toggle.isNotEmpty()) {
+            return states[if (Rime.getOption(toggle)) 1 else 0]
+        }
         if (keyboard.isOnlyShiftOn) {
             if (!hookShiftNum && !Rime.isComposing && code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9) {
                 return adjustCase(shiftLabel, keyboard)
@@ -97,32 +97,27 @@ class KeyAction(
         when {
             // match like: { x: BackSpace } -> preset_keys/BackSpace: {..., send: BackSpace }
             presetKey != null -> {
-                command = presetKey["command"]?.configValue?.getString() ?: ""
-                option = presetKey["option"]?.configValue?.getString() ?: ""
-                select = presetKey["select"]?.configValue?.getString() ?: ""
-                toggle = presetKey["toggle"]?.configValue?.getString() ?: ""
-                label = presetKey["label"]?.configValue?.getString() ?: ""
-                preview = presetKey["preview"]?.configValue?.getString() ?: ""
-                shiftLock = presetKey["shift_lock"]?.configValue?.getString() ?: ""
-                commit = presetKey["commit"]?.configValue?.getString() ?: ""
-                text = presetKey["text"]?.configValue?.getString() ?: ""
-                isSticky = presetKey["sticky"]?.configValue?.getBool() ?: false
-                isRepeatable = presetKey["repeatable"]?.configValue?.getBool() ?: false
-                isFunctional = presetKey["functional"]?.configValue?.getBool() ?: false
+                command = presetKey.command
+                option = presetKey.option
+                select = presetKey.select
+                toggle = presetKey.toggle
+                label = presetKey.label
+                preview = presetKey.preview
+                shiftLock = presetKey.shiftLock
+                commit = presetKey.commit
+                text = presetKey.text
+                isSticky = presetKey.sticky
+                isRepeatable = presetKey.repeatable
+                isFunctional = presetKey.functional
+                states = presetKey.states
 
-                states =
-                    runCatching {
-                        presetKey["states"]?.configList?.decode(ListSerializer(String.serializer()))
-                    }.getOrDefault(listOf())
-
-                presetKey["send"]?.configValue?.getString()?.let { send ->
+                val send = presetKey.send
+                if (send.isNotEmpty()) {
                     val (c, m) = Keycode.parseSend(send)
                     code = c
                     modifier = m
-                } ?: run {
-                    if (command.isNotEmpty()) {
-                        code = KeyEvent.KEYCODE_FUNCTION
-                    }
+                } else if (command.isNotEmpty()) {
+                    code = KeyEvent.KEYCODE_FUNCTION
                 }
 
                 if (label.isEmpty()) {

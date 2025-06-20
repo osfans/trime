@@ -4,8 +4,6 @@
 
 package com.osfans.trime.data.theme.model
 
-import com.osfans.trime.ime.symbol.VarLengthAdapter.SecondTextPosition
-
 data class GeneralStyle(
     val autoCaps: String,
     val backgroundDimAmount: Float,
@@ -21,7 +19,7 @@ data class GeneralStyle(
     val commentFont: List<String>,
     val commentHeight: Int,
     val commentOnTop: Boolean,
-    val commentPosition: SecondTextPosition,
+    val commentPosition: CommentPosition,
     val commentTextSize: Float,
     val hanbFont: List<String>,
     val horizontal: Boolean,
@@ -75,4 +73,36 @@ data class GeneralStyle(
     val keyLongTextBorder: Int,
     val enterLabelMode: Int,
     val enterLabel: EnterLabel,
-)
+) {
+    enum class CommentPosition {
+        UNKNOWN,
+        TOP,
+        BOTTOM,
+        RIGHT,
+    }
+
+    data class Layout(
+        val border: Int,
+        val maxWidth: Int,
+        val maxHeight: Int,
+        val minWidth: Int,
+        val minHeight: Int,
+        val marginX: Int,
+        val marginY: Int,
+        val lineSpacing: Int,
+        val lineSpacingMultiplier: Float,
+        val spacing: Int,
+        val roundCorner: Float,
+        val alpha: Int,
+    )
+
+    data class EnterLabel(
+        val go: String,
+        val done: String,
+        val next: String,
+        val pre: String,
+        val search: String,
+        val send: String,
+        val default: String,
+    )
+}
