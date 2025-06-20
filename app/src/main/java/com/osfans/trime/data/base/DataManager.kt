@@ -53,6 +53,9 @@ object DataManager {
     val userDataDir
         get() = File(prefs.profile.userDataDir).also { it.mkdirs() }
 
+    val prebuiltDataDir = File(sharedDataDir, "build")
+    val stagingDir get() = File(userDataDir, "build")
+
     /**
      * Return the absolute path of the compiled config file
      * based on given resource id.
@@ -62,9 +65,6 @@ object DataManager {
      */
     @JvmStatic
     fun resolveDeployedResourcePath(resourceId: String): String {
-        val stagingDir = File(userDataDir, "build")
-        val prebuiltDataDir = File(sharedDataDir, "build")
-
         val defaultPath = File(stagingDir, "$resourceId.yaml")
         if (!defaultPath.exists()) {
             val fallbackPath = File(prebuiltDataDir, "$resourceId.yaml")

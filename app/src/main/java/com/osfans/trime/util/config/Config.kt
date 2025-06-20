@@ -14,9 +14,19 @@ class Config(
     private val data: ConfigData = ConfigData(),
 ) {
     companion object {
-        fun create(fileName: String): Config =
+        fun openSchema(schemaId: String): Config =
             Config().apply {
-                data.loadFromFile(DataManager.resolveDeployedResourcePath(fileName))
+                loadFromFile(DataManager.resolveDeployedResourcePath("$schemaId.schema"))
+            }
+
+        fun openConfig(configId: String): Config =
+            Config().apply {
+                loadFromFile(DataManager.resolveDeployedResourcePath(configId))
+            }
+
+        fun openUserConfig(configId: String): Config =
+            Config().apply {
+                loadFromFile(DataManager.userDataDir.resolve("$configId.yaml").absolutePath)
             }
     }
 
@@ -78,24 +88,46 @@ class Config(
         return runCatching { p?.getString() }.getOrNull() ?: defValue
     }
 
-    fun getItem(path: String): ConfigItem? {
+    fun getItem(path: String): Config {
         Timber.d("read: $path")
-        return data.traverse(path)
+        return Config().also {
+            it.data.root = data.traverse(path)
+        }
     }
 
-    fun getValue(path: String): ConfigValue? {
+    fun getValue(path: String): Config {
         Timber.d("read: $path")
-        return data.traverse(path)?.configValue
+        return Config().also {
+            it.data.root = data.traverse(path)?.configValue
+        }
     }
 
-    fun getList(path: String): ConfigList? {
+    fun getList(path: String): List<Config> {
         Timber.d("read: $path")
-        return data.traverse(path)?.configList
+        return data.traverse(path)?.configList?.map { v ->
+            Config().also { it.data.root = v }
+        } ?: emptyList()
     }
 
-    fun getMap(path: String): ConfigMap? {
+    fun getStringList(path: String): List<String> {
         Timber.d("read: $path")
-        return data.traverse(path)?.configMap
+        return data.traverse(path)?.configList?.map { v ->
+            v.configValue.getString()
+        } ?: emptyList()
+    }
+
+    fun getMap(path: String): Map<String, Config> {
+        Timber.d("read: $path")
+        return data.traverse(path)?.configMap?.mapValues { (_, v) ->
+            Config().also { it.data.root = v }
+        } ?: emptyMap()
+    }
+
+    fun getStringValueMap(path: String): Map<String, String> {
+        Timber.d("read: $path")
+        return data.traverse(path)?.configMap?.mapValues { (_, v) ->
+            v.configValue.getString()
+        } ?: emptyMap()
     }
 
     fun getItem() = data.root

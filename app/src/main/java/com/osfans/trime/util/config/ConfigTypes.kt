@@ -18,7 +18,7 @@ import com.charleskorn.kaml.yamlScalar
 import kotlinx.serialization.DeserializationStrategy
 
 /** Config item base class */
-abstract class ConfigItem(
+sealed class ConfigItem(
     val node: YamlNode,
 ) {
     enum class ValueType {

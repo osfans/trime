@@ -5,25 +5,22 @@
 package com.osfans.trime.data.schema
 
 import com.osfans.trime.core.Rime
-import kotlinx.serialization.builtins.ListSerializer
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
     var visibleSwitches: List<Schema.Switch> = listOf()
 
-    private val defaultSchema = Schema()
-
     @JvmStatic
     fun init(schemaId: String) {
-        currentSchema = runCatching { Schema(schemaId) }.getOrDefault(defaultSchema)
-        visibleSwitches = currentSchema.switches
-            ?.decode(ListSerializer(Schema.Switch.serializer()))
-            ?.filter { it.states.isNotEmpty() } ?: listOf() // 剔除没有 states 条目项的值，它们不作为开关使用
+        currentSchema = Schema.open(schemaId)
+        visibleSwitches =
+            currentSchema.switches
+                .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
         updateSwitchOptions()
     }
 
     val activeSchema: Schema
-        get() = runCatching { currentSchema }.getOrDefault(defaultSchema)
+        get() = currentSchema
 
     @JvmStatic
     fun updateSwitchOptions() {
