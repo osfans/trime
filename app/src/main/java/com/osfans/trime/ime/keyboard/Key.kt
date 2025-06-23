@@ -72,26 +72,16 @@ class Key(
     var keyPressOffsetX = 0
     var keyPressOffsetY = 0
 
-    private fun getColor(src: String) =
-        if (src.isNotEmpty()) {
-            ColorManager.resolveColor(src, false)
-        } else {
-            null
-        }
+    private fun getColor(src: String): Int = ColorManager.resolveColor(src)
 
-    private fun getDrawable(src: String) =
-        if (src.isNotEmpty()) {
-            ColorManager.resolveDrawable(src, false)
-        } else {
-            null
-        }
+    private fun getDrawable(src: String) = ColorManager.resolveDrawable(src)
 
-    private val keyBackColor get() = getDrawable(textKey.keyBackColor)
-    private val keyTextColor get() = getColor(textKey.keyTextColor)
-    private val keySymbolColor get() = getColor(textKey.keySymbolColor)
-    private val hilitedKeyBackColor get() = getDrawable(textKey.highlightedKeyBackColor)
-    private val hilitedKeyTextColor get() = getColor(textKey.highlightedKeyTextColor)
-    private val hilitedKeySymbolColor get() = getColor(textKey.highlightedKeySymbolColor)
+    private val keyBackColor by lazy { getDrawable(textKey.keyBackColor) }
+    private val keyTextColor by lazy { getColor(textKey.keyTextColor) }
+    private val keySymbolColor by lazy { getColor(textKey.keySymbolColor) }
+    private val hilitedKeyBackColor by lazy { getDrawable(textKey.hlKeyBackColor) }
+    private val hilitedKeyTextColor by lazy { getColor(textKey.hlKeyTextColor) }
+    private val hilitedKeySymbolColor by lazy { getColor(textKey.hlKeySymbolColor) }
 
     /**
      * Create an empty key with no attributes.
@@ -208,9 +198,9 @@ class Key(
         return xDist * xDist + yDist * yDist
     }
 
-    private val isTrimeModifierKey: Boolean
+    val isModifierKey: Boolean
         // Trime把function键消费掉了，因此键盘只处理function键以外的修饰键
-        get() = isTrimeModifierKey(this.code)
+        get() = KeyEvent.isModifierKey(this.code) && this.code != KeyEvent.KEYCODE_FUNCTION
 
     val currentDrawableState: IntArray
         /**
@@ -220,7 +210,7 @@ class Key(
          * @see android.graphics.drawable.StateListDrawable.setState
          */
         get() {
-            val isShifted = isTrimeModifierKey && mKeyboard.hasModifier(modifierKeyOnMask)
+            val isShifted = isModifierKey && mKeyboard.hasModifier(modifierKeyOnMask)
             val states =
                 when {
                     isShifted || isOn -> if (isPressed) KEY_STATE_ON_PRESSED else KEY_STATE_ON_NORMAL
@@ -229,7 +219,7 @@ class Key(
                 }
 
             // only for modiferKey debug
-            if (isTrimeModifierKey) {
+            if (isModifierKey) {
                 mKeyboard.printModifierKeyState(
                     MessageFormat.format(
                         "getCurrentDrawableState() Key={0} states={1} on={2} isShifted={3} pressed={4} sticky={5}",
@@ -357,8 +347,5 @@ class Key(
                 KEY_STATE_PRESSED, // 4       "hilited_key_back_color"      按键按下的背景
                 KEY_STATE_NORMAL, // 5        "key_back_color"              按键背景
             )
-
-        @JvmStatic
-        fun isTrimeModifierKey(keycode: Int): Boolean = keycode != KeyEvent.KEYCODE_FUNCTION && KeyEvent.isModifierKey(keycode)
     }
 }

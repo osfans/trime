@@ -54,7 +54,10 @@ data class Theme(
                             .getMap("preset_color_schemes")
                             .map { ColorScheme(it.key, it.value.getStringValueMap("")) },
                     fallbackColors = c.getStringValueMap("fallback_colors"),
-                )
+                ).also {
+                    Timber.d("color_schemes: ${it.colorSchemes}")
+                    Timber.d("fallback: ${it.fallbackColors.entries.joinToString()}")
+                }
             }
         }
     }

@@ -43,12 +43,12 @@ class TextKeyboardMapper(
                         keyHintOffsetY = it.getFloat("key_hint_offset_y"),
                         keyPressOffsetX = it.getInt("key_press_offset_x"),
                         keyPressOffsetY = it.getInt("key_press_offset_y"),
-                        keyTextColor = it.getString("key_text_color"),
-                        keyBackColor = it.getString("key_back_color"),
-                        keySymbolColor = it.getString("key_symbol_color"),
-                        highlightedKeyTextColor = it.getString("hilited_key_text_color"),
-                        highlightedKeyBackColor = it.getString("hilited_key_back_color"),
-                        highlightedKeySymbolColor = it.getString("hilited_key_symbol_color"),
+                        keyTextColor = it.getString("key_text_color", "key_text_color"),
+                        keyBackColor = it.getString("key_back_color", "key_back_color"),
+                        keySymbolColor = it.getString("key_symbol_color", "key_symbol_color"),
+                        hlKeyTextColor = it.getString("hilited_key_text_color", "hilited_key_text_color"),
+                        hlKeyBackColor = it.getString("hilited_key_back_color", "hilited_key_back_color"),
+                        hlKeySymbolColor = it.getString("hilited_key_symbol_color", "hilited_key_symbol_color"),
                         behaviors =
                             buildMap {
                                 KeyBehavior.entries.forEach { entry ->

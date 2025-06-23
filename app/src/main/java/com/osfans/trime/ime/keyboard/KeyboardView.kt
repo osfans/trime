@@ -684,7 +684,7 @@ class KeyboardView(
         Timber.d("detectAndSendKey: index=$index, x=$x, y=$y, type=$behavior, mKeys.size=${mKeys.size}")
         if (index in mKeys.indices) {
             val key = mKeys[index]
-            if (Key.isTrimeModifierKey(key.code) && !key.sendBindings(behavior)) {
+            if (key.isModifierKey && !key.sendBindings(behavior)) {
                 Timber.d("detectAndSendKey: ModifierKey, key.getEvent, keyLabel=${key.getLabel()}")
                 setModifier(key, behavior)
             } else {
@@ -793,7 +793,7 @@ class KeyboardView(
             }
             return true
         }
-        if (Key.isTrimeModifierKey(popupKey.code) && !popupKey.sendBindings(KeyBehavior.LONG_CLICK)) {
+        if (popupKey.isModifierKey && !popupKey.sendBindings(KeyBehavior.LONG_CLICK)) {
             setModifier(popupKey, KeyBehavior.LONG_CLICK)
             return true
         }

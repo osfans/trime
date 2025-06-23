@@ -64,9 +64,9 @@ data class TextKeyboard(
         val keyTextColor: String,
         val keyBackColor: String,
         val keySymbolColor: String,
-        val highlightedKeyTextColor: String,
-        val highlightedKeyBackColor: String,
-        val highlightedKeySymbolColor: String,
+        val hlKeyTextColor: String,
+        val hlKeyBackColor: String,
+        val hlKeySymbolColor: String,
         val behaviors: Map<KeyBehavior, String>,
     )
 }

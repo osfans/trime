@@ -5,20 +5,26 @@
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
+import android.content.res.Resources
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.NinePatch
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.NinePatchDrawable
 import androidx.annotation.ColorInt
 import androidx.collection.LruCache
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.util.ColorUtils
+import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
-import com.osfans.trime.util.bitmapDrawable
 import com.osfans.trime.util.isNightMode
 import timber.log.Timber
+import java.io.File
 
 object ColorManager {
     private lateinit var theme: Theme
@@ -168,13 +174,12 @@ object ColorManager {
         putCache: Boolean = true,
     ): Int {
         val color =
-            resolveValue(key) { value ->
-                runCatching {
-                    ColorUtils.parseColor(value)
-                }.getOrElse {
-                    Timber.e(it, "Cannot parse color $key=$value, fallback to 0x00")
-                    Color.TRANSPARENT
+            try {
+                resolveValue(key) { value ->
+                    parseColor(value)
                 }
+            } catch (_: IllegalArgumentException) {
+                parseColor(key)
             }
         if (putCache) {
             synchronized(colorCache) { colorCache.put(key, color) }
@@ -187,12 +192,12 @@ object ColorManager {
         putCache: Boolean = true,
     ): Drawable? {
         val drawable =
-            resolveValue(key) { value ->
-                if (SUPPORTED_IMG_FORMATS.any { value.endsWith(it) }) {
-                    parseFileDrawable(value)
-                } else {
-                    parseColorDrawable(value)
+            try {
+                resolveValue(key) { value ->
+                    parseDrawable(value)
                 }
+            } catch (_: IllegalArgumentException) {
+                parseDrawable(key)
             }
         if (putCache && drawable != null) {
             synchronized(drawableCache) { drawableCache.put(key, drawable) }
@@ -223,14 +228,40 @@ object ColorManager {
         }
     }
 
-    private fun parseColorDrawable(value: String): Drawable {
-        val color = ColorUtils.parseColor(value)
-        return GradientDrawable().apply { setColor(color) }
-    }
+    private fun parseColor(value: String): Int =
+        try {
+            ColorUtils.parseColor(value)
+        } catch (e: Exception) {
+            Timber.e(e, "Cannot parse color $value, fallback to TRANSPARENT")
+            Color.TRANSPARENT
+        }
 
-    private fun parseFileDrawable(value: String): Drawable? {
-        val imgPath = resolveImageFilePath(value)
-        return bitmapDrawable(imgPath)
+    private fun parseDrawable(value: String): Drawable? {
+        if (value.isEmpty()) return null
+        if (SUPPORTED_IMG_FORMATS.any { value.endsWith(it) }) {
+            val path = resolveImageFilePath(value)
+            val file = File(path)
+            val bitmap = BitmapFactory.decodeStream(file.inputStream()) ?: return null
+            if (path.endsWith(".9.png")) {
+                val chunk = bitmap.ninePatchChunk
+                return if (NinePatch.isNinePatchChunk(chunk)) {
+                    // for compiled nine patch image
+                    NinePatchDrawable(Resources.getSystem(), bitmap, chunk, Rect(), null)
+                } else {
+                    // for source nine patch image
+                    NinePatchBitmapFactory.createNinePatchDrawable(Resources.getSystem(), bitmap)
+                }
+            }
+            return BitmapDrawable(Resources.getSystem(), bitmap)
+        } else {
+            val color =
+                try {
+                    ColorUtils.parseColor(value)
+                } catch (_: Exception) {
+                    return null
+                }
+            return GradientDrawable().apply { setColor(color) }
+        }
     }
 
     private fun resolveImageFilePath(value: String): String {

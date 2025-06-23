@@ -5,16 +5,10 @@
 package com.osfans.trime.util
 
 import android.content.res.ColorStateList
-import android.content.res.Resources
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.NinePatch
-import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.NinePatchDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
@@ -70,22 +64,6 @@ fun borderDrawable(
     cornerRadius = radius
     setColor(background)
     setAlpha(alpha)
-}
-
-fun bitmapDrawable(path: String?): Drawable? {
-    path ?: return null
-    val bitmap = BitmapFactory.decodeFile(path) ?: return null
-    if (path.endsWith(".9.png")) {
-        val chunk = bitmap.ninePatchChunk
-        return if (NinePatch.isNinePatchChunk(chunk)) {
-            // for compiled nine patch image
-            NinePatchDrawable(Resources.getSystem(), bitmap, chunk, Rect(), null)
-        } else {
-            // for source nine patch image
-            NinePatchBitmapFactory.createNinePatchDrawable(Resources.getSystem(), bitmap)
-        }
-    }
-    return BitmapDrawable(Resources.getSystem(), bitmap)
 }
 
 fun StateListDrawable.stateDrawableAt(index: Int): Drawable =
