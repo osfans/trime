@@ -5,10 +5,8 @@
 package com.osfans.trime.data.soundeffect
 
 import android.view.KeyEvent
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
+import com.fasterxml.jackson.annotation.JsonIgnore
 
-@Serializable
 data class SoundEffect(
     val name: String = "",
     val sound: List<String>,
@@ -16,7 +14,6 @@ data class SoundEffect(
     val melody: List<String> = listOf(),
     val keyset: List<Key>,
 ) {
-    @Serializable
     data class Key(
         val min: String = "UNKNOWN",
         val max: String = "UNKNOWN",
@@ -24,13 +21,13 @@ data class SoundEffect(
         val inOrder: Boolean,
         val sounds: List<Int>,
     ) {
-        @Transient
+        @JsonIgnore
         private val sysKeyCodes = keys.map { KeyEvent.keyCodeFromString(it.uppercase()) }
 
-        @Transient
+        @JsonIgnore
         private val minKeyCode = KeyEvent.keyCodeFromString(min.uppercase())
 
-        @Transient
+        @JsonIgnore
         private val maxKeyCode = KeyEvent.keyCodeFromString(max.uppercase())
 
         fun querySoundIndex(keyCode: Int): Int {

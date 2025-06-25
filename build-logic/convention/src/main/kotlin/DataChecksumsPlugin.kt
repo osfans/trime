@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -50,7 +49,6 @@ class DataChecksumsPlugin : Plugin<Project> {
     }
 
     abstract class DataChecksumsTask : DefaultTask() {
-        @Serializable
         data class DataChecksums(
             val sha256: String,
             val files: Map<String, String>,
@@ -77,10 +75,10 @@ class DataChecksumsPlugin : Plugin<Project> {
                         ).toString(),
                     files,
                 )
-            file.writeText(json.encodeToString(checksums))
+            file.writeText(json.writerWithDefaultPrettyPrinter().writeValueAsString(checksums))
         }
 
-        private fun deserialize(): Map<String, String> = json.decodeFromString<DataChecksums>(file.readText()).files
+        private fun deserialize(): Map<String, String> = json.readValue<DataChecksums>(file.readText()).files
 
         companion object {
             fun sha256(file: File): String = ByteSource.wrap(file.readBytes()).hash(Hashing.sha256()).toString()

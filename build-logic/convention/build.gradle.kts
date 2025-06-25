@@ -4,7 +4,6 @@
 
 plugins {
     `kotlin-dsl`
-    kotlin("plugin.serialization") version embeddedKotlinVersion
 }
 
 group = "com.osfans.trime.build_logic"
@@ -12,7 +11,8 @@ group = "com.osfans.trime.build_logic"
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
-    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.jackson.databind)
+    implementation(libs.jackson.module.kotlin)
 }
 
 gradlePlugin {

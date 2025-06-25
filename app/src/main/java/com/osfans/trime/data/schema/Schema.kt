@@ -4,42 +4,58 @@
 
 package com.osfans.trime.data.schema
 
-import com.osfans.trime.util.config.Config
-import timber.log.Timber
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
+@JsonDeserialize(using = Schema.Deserializer::class)
 data class Schema(
-    val switches: List<Switch>,
-    val symbols: Map<String, Config>,
-    val alphabet: String,
+    val switches: List<Switch> = emptyList(),
+    val symbols: Map<String, List<String>> = emptyMap(),
+    val alphabet: String = "",
 ) {
     data class Switch(
         val name: String = "",
         val options: List<String> = listOf(),
         val reset: Int = -1,
         val states: List<String> = listOf(),
-        var enabled: Int = 0,
+        @field:JsonIgnore var enabled: Int = 0,
     )
 
-    companion object {
-        fun open(schemaId: String): Schema {
-            val c = Config.openSchema(schemaId)
+    class Deserializer : JsonDeserializer<Schema>() {
+        override fun deserialize(
+            p: JsonParser,
+            ctxt: DeserializationContext,
+        ): Schema {
+            val node = p.codec.readTree<JsonNode>(p)
+            val switches =
+                node["switches"].map {
+                    Switch(
+                        name = it["name"]?.asText() ?: "",
+                        options = it["options"]?.map { o -> o.asText() } ?: emptyList(),
+                        reset = it["reset"]?.intValue() ?: -1,
+                        states = it["states"]?.map { o -> o.asText() } ?: emptyList(),
+                    )
+                }
+            val symbols =
+                buildMap {
+                    node.at("/punctuator/symbols").properties().forEach {
+                        val value =
+                            if (it.value.isArray) {
+                                it.value?.map { v -> v.toString() } ?: emptyList()
+                            } else {
+                                listOf(it.value.toString())
+                            }
+                        put(it.key.toString(), value)
+                    }
+                }
             return Schema(
-                switches =
-                    c.getList("switches").mapNotNull decode@{ e ->
-                        try {
-                            Switch(
-                                name = e.getString("name"),
-                                options = e.getStringList("options"),
-                                reset = e.getInt("reset", -1),
-                                states = e.getStringList("states"),
-                            )
-                        } catch (e: Exception) {
-                            Timber.e(e, "Failed to decode switches of schema '$schemaId'")
-                            null
-                        }
-                    },
-                symbols = c.getMap("punctuator/symbols"),
-                alphabet = c.getString("speller/alphabet"),
+                switches = switches,
+                symbols = symbols,
+                alphabet = node.at("/speller/alphabet").toString(),
             )
         }
     }

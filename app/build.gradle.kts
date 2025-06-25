@@ -12,7 +12,6 @@ plugins {
     id("com.osfans.trime.opencc-data")
     alias(libs.plugins.aboutlibraries)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -141,7 +140,6 @@ android.applicationVariants.all {
 dependencies {
     ksp(project(":codegen"))
     implementation(libs.kotlinx.coroutines)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.autofill)
@@ -162,7 +160,6 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.dataformat.yaml)
-    implementation(libs.kaml)
     implementation(libs.timber)
     implementation(libs.xxpermissions)
     ksp(libs.kotlin.inject.compiler)

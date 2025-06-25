@@ -4,15 +4,19 @@
 
 package com.osfans.trime.data.schema
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.util.legacyYAMLMapper
+import java.io.File
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
     var visibleSwitches: List<Schema.Switch> = listOf()
 
-    @JvmStatic
     fun init(schemaId: String) {
-        currentSchema = Schema.open(schemaId)
+        val schemaFile = File(DataManager.resolveDeployedResourcePath("$schemaId.schema"))
+        currentSchema = legacyYAMLMapper().readValue<Schema>(schemaFile.inputStream())
         visibleSwitches =
             currentSchema.switches
                 .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
@@ -20,9 +24,13 @@ object SchemaManager {
     }
 
     val activeSchema: Schema
-        get() = currentSchema
+        get() =
+            try {
+                currentSchema
+            } catch (_: Exception) {
+                Schema()
+            }
 
-    @JvmStatic
     fun updateSwitchOptions() {
         if (visibleSwitches.isEmpty()) return // 無方案
         visibleSwitches.forEach { s ->

@@ -4,9 +4,6 @@
 
 package com.osfans.trime.data.base
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class DataChecksums(
     val sha256: String,
     val files: Map<String, String>,

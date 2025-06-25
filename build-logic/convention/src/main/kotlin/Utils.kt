@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import kotlinx.serialization.json.Json
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.gradle.api.Project
 
-val json = Json { prettyPrint = true }
+val json = jacksonObjectMapper()
 
 inline fun envOrDefault(
     env: String,

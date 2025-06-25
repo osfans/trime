@@ -18,6 +18,8 @@ fun yamlMapper(initializer: YAMLMapper.Builder.() -> Unit = {}): YAMLMapper {
     return builder.build()
 }
 
+fun jacksonYAMLMapper(): YAMLMapper = yamlMapper { addModule(kotlinModule()) }
+
 fun legacyYAMLMapper(): ObjectMapper =
     yamlMapper {
         propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)

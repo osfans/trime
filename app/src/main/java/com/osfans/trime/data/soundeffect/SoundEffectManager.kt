@@ -4,22 +4,16 @@
 
 package com.osfans.trime.data.soundeffect
 
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlConfiguration
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.FileUtils
+import com.osfans.trime.util.jacksonYAMLMapper
 import timber.log.Timber
 import java.io.File
 
 object SoundEffectManager {
-    private val yaml =
-        Yaml(
-            configuration =
-                YamlConfiguration(
-                    strictMode = false,
-                ),
-        )
+    private val yaml by lazy { jacksonYAMLMapper() }
 
     private val userDir: File
         get() {
@@ -34,7 +28,7 @@ object SoundEffectManager {
             ?.mapNotNull decode@{ f ->
                 val effect =
                     runCatching {
-                        val origin = yaml.decodeFromString(SoundEffect.serializer(), f.readText())
+                        val origin = yaml.readValue<SoundEffect>(f.readText())
                         if (origin.name.isEmpty()) {
                             origin.copy(name = f.name.substringBefore('.'))
                         } else {

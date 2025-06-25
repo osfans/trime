@@ -7,11 +7,12 @@ package com.osfans.trime.data.base
 import android.content.res.AssetManager
 import android.os.Build
 import android.os.Environment
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.FileUtils
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
-import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
@@ -24,9 +25,9 @@ object DataManager {
 
     private val lock = ReentrantLock()
 
-    private val json by lazy { Json }
+    private val json by lazy { jacksonObjectMapper() }
 
-    private fun deserializeDataChecksums(raw: String): DataChecksums = json.decodeFromString<DataChecksums>(raw)
+    private fun deserializeDataChecksums(raw: String): DataChecksums = json.readValue<DataChecksums>(raw)
 
     // If Android version supports direct boot, we put the hierarchy in device encrypted storage
     // instead of credential encrypted storage so that data can be accessed before user unlock
