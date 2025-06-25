@@ -210,8 +210,7 @@ class CommonKeyboardActionListener(
                                 }
                             }
                             "set_color_scheme" -> {
-                                val newScheme = ColorManager.presetColorSchemes.find { it.id == arg }
-                                if (newScheme != null) ColorManager.setColorScheme(newScheme)
+                                ColorManager.setColorScheme(arg)
                             }
                             "broadcast" -> service.sendBroadcast(Intent(arg))
                             "clipboard" -> {

@@ -9,6 +9,7 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.launch
 
 object ColorPickerDialog {
@@ -17,24 +18,26 @@ object ColorPickerDialog {
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val presetSchemes = ColorManager.presetColorSchemes
-        val currentScheme = ColorManager.activeColorScheme
-        val currentIndex = presetSchemes.indexOfFirst { it.id == currentScheme.id }
+        val schemes = ThemeManager.activeTheme.colorSchemes
+        val schemeIds = schemes.keys.toTypedArray()
+        val schemeNames = schemes.map { it.value["name"] ?: context.getString(R.string.unnamed) }.toTypedArray()
+        val currentSchemeId by ThemeManager.prefs.normalModeColor
+        val currentIndex = schemeIds.indexOfFirst { it == currentSchemeId }
         return AlertDialog
             .Builder(context)
             .apply {
                 setTitle(R.string.normal_mode_color)
-                if (presetSchemes.isEmpty()) {
+                if (schemes.isEmpty()) {
                     setMessage(R.string.no_color_to_select)
                 } else {
                     setSingleChoiceItems(
-                        presetSchemes.map { it.colors["name"] }.toTypedArray(),
+                        schemeNames,
                         currentIndex,
                     ) { dialog, which ->
                         scope.launch {
                             afterConfirm?.invoke()
                             if (which != currentIndex) {
-                                val newScheme = presetSchemes[which]
+                                val newScheme = schemeIds[which]
                                 ColorManager.setColorScheme(newScheme)
                             }
                             dialog.dismiss()

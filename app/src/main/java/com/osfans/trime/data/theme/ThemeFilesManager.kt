@@ -5,39 +5,45 @@
 
 package com.osfans.trime.data.theme
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.util.config.Config
+import com.osfans.trime.util.legacyYAMLMapper
 import timber.log.Timber
-import java.io.File
 
 object ThemeFilesManager {
-    fun listThemes(dir: File): MutableList<ThemeItem> {
-        val files = dir.listFiles { _, name -> name.endsWith("trime.yaml") } ?: return mutableListOf()
-        val deployedMap = hashMapOf<String, String>()
-        DataManager.stagingDir.list()?.forEach {
-            deployedMap[it] = it
-        }
-        DataManager.prebuiltDataDir.list()?.forEach {
-            deployedMap[it] = it
-        }
+    private const val CONFIG_VERSION_KEY = "config_version"
+
+    fun listThemes(): MutableList<Theme> {
+        val files =
+            DataManager.stagingDir.listFiles { _, name ->
+                name.endsWith("trime.yaml")
+            } ?: return mutableListOf()
         return files
             .sortedByDescending { it.lastModified() }
             .mapNotNull decode@{
-                val item =
+                val theme =
                     runCatching {
-                        val configId = it.nameWithoutExtension
-                        val name =
-                            if (deployedMap[it.name] != null) {
-                                Config.openConfig(configId).getString("name")
-                            } else {
-                                configId.removeSuffix(".trime")
-                            }
-                        ThemeItem(configId, name)
+                        legacyYAMLMapper().readValue<Theme>(it.inputStream())
                     }.getOrElse { e ->
                         Timber.w("Failed to decode theme file ${it.absolutePath}: ${e.message}")
                         return@decode null
                     }
-                return@decode item
+                return@decode theme.copy(
+                    id = it.nameWithoutExtension.removeSuffix(".trime"),
+                )
             }.toMutableList()
+    }
+
+    fun deployThemes(progress: ((Int, Int) -> Unit)? = null) {
+        val users = DataManager.userDataDir.list() ?: emptyArray()
+        val shareds = DataManager.sharedDataDir.list() ?: emptyArray()
+        val distinct = (users + shareds).distinct()
+        progress?.invoke(0, distinct.size)
+        distinct.forEachIndexed { i, fileName ->
+            Rime.deployRimeConfigFile(fileName.removeSuffix(".yaml"), CONFIG_VERSION_KEY)
+            progress?.invoke(i + 1, distinct.size)
+        }
+        ThemeManager.refreshThemes()
     }
 }

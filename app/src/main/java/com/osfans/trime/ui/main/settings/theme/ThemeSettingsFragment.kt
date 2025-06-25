@@ -21,7 +21,9 @@ class ThemeSettingsFragment : PreferenceDelegateFragment(ThemeManager.prefs) {
     ) {
         super.onCreatePreferences(savedInstanceState, rootKey)
         findPreference<Preference>("selected_theme")?.setOnPreferenceClickListener {
-            lifecycleScope.launch { ThemePickerDialog.build(lifecycleScope, requireContext()).show() }
+            lifecycleScope.launch {
+                ThemePickerDialog.build(lifecycleScope, requireContext()).show()
+            }
             true
         }
         findPreference<Preference>("normal_mode_color")?.setOnPreferenceClickListener {

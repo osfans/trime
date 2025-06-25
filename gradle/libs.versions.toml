@@ -1,5 +1,6 @@
 [versions]
 androidGradlePlugin = "8.8.0"
+jackson = "2.19.1"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
 navigation = "2.8.5"
@@ -32,6 +33,9 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 bravh = { module = "io.github.cymchad:BaseRecyclerViewAdapterHelper4", version = "4.1.4" }
 kaml = { module = "com.charleskorn.kaml:kaml", version = "0.70.0" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }
 kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }

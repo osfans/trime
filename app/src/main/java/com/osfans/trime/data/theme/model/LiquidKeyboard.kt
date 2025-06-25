@@ -5,19 +5,22 @@
 
 package com.osfans.trime.data.theme.model
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.osfans.trime.data.theme.deserializer.LiquidKeyboardDeserializer
 import com.osfans.trime.ime.symbol.SimpleKeyBean
 import com.osfans.trime.ime.symbol.SymbolBoardType
 
+@JsonDeserialize(using = LiquidKeyboardDeserializer::class)
 data class LiquidKeyboard(
-    val singleWidth: Int,
-    val keyHeight: Int,
-    val marginX: Float,
-    val fixedKeyBar: KeyBar,
-    val keyboards: List<Keyboard>,
+    val singleWidth: Int = 0,
+    val keyHeight: Int = 0,
+    val marginX: Float = 0f,
+    val fixedKeyBar: KeyBar = KeyBar(),
+    val keyboards: List<Keyboard> = emptyList(),
 ) {
     data class KeyBar(
-        val keys: List<String>,
-        val position: Position,
+        val keys: List<String> = emptyList(),
+        val position: Position = Position.BOTTOM,
     ) {
         enum class Position {
             TOP,
@@ -28,9 +31,9 @@ data class LiquidKeyboard(
     }
 
     data class Keyboard(
-        val id: String,
-        val type: SymbolBoardType,
-        val name: String,
-        val keys: List<SimpleKeyBean>,
+        val id: String = "",
+        val type: SymbolBoardType = SymbolBoardType.SINGLE,
+        val name: String = "",
+        val keys: List<SimpleKeyBean> = emptyList(),
     )
 }

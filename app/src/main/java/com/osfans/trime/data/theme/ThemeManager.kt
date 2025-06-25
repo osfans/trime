@@ -5,7 +5,6 @@
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
-import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.util.WeakHashSet
@@ -15,10 +14,18 @@ object ThemeManager {
         fun onThemeChange(theme: Theme)
     }
 
-    fun getAllThemes(): List<ThemeItem> {
-        val sharedThemes = ThemeFilesManager.listThemes(DataManager.sharedDataDir)
-        val userThemes = ThemeFilesManager.listThemes(DataManager.userDataDir)
-        return sharedThemes + userThemes
+    val DefaultTheme by lazy {
+        getAllThemes().find { it.id == "trime" }!!
+    }
+
+    private val stagingThemes: MutableList<Theme> = ThemeFilesManager.listThemes()
+
+    fun getAllThemes() = stagingThemes
+
+    fun refreshThemes() {
+        stagingThemes.clear()
+        stagingThemes.addAll(ThemeFilesManager.listThemes())
+        activeTheme = evaluateActiveTheme()
     }
 
     private lateinit var _activeTheme: Theme
@@ -48,7 +55,7 @@ object ThemeManager {
     val prefs = AppPrefs.defaultInstance().registerProvider(::ThemePrefs)
 
     private fun evaluateActiveTheme(): Theme {
-        val newTheme = Theme.open(prefs.selectedTheme.getValue())
+        val newTheme = prefs.selectedTheme.getValue()
         KeyActionManager.resetCache()
         FontManager.resetCache(newTheme)
         ColorManager.switchTheme(newTheme)
@@ -67,6 +74,6 @@ object ThemeManager {
         ColorManager.switchTheme(theme)
         TabManager.resetCache(theme)
         activeTheme = theme
-        prefs.selectedTheme.setValue(theme.configId)
+        prefs.selectedTheme.setValue(theme)
     }
 }

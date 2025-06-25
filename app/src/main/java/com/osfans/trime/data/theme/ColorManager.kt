@@ -18,8 +18,6 @@ import androidx.annotation.ColorInt
 import androidx.collection.LruCache
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.data.theme.model.ColorScheme
-import com.osfans.trime.util.ColorUtils
 import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
@@ -35,13 +33,7 @@ object ColorManager {
 
     private var isNightMode = false
 
-    val presetColorSchemes: List<ColorScheme>
-        get() = theme.colorSchemes
-
-    private val customFallbackRules: Map<String, String>
-        get() = theme.fallbackColors
-
-    private val fullFallbackRules get() = customFallbackRules + defaultFallbackColors
+    private val allFallbackColors get() = theme.fallbackColors + BuiltinFallbackColors
 
     private lateinit var _activeColorScheme: ColorScheme
 
@@ -52,11 +44,11 @@ object ColorManager {
             _activeColorScheme = value
             lightModeColorScheme =
                 runCatching {
-                    _activeColorScheme.colors["light_scheme"]?.let { colorScheme(it) }
+                    _activeColorScheme["light_scheme"]?.let { colorScheme(it) }
                 }.getOrNull()
             darkModeColorScheme =
                 runCatching {
-                    _activeColorScheme.colors["dark_scheme"]?.let { colorScheme(it) }
+                    _activeColorScheme["dark_scheme"]?.let { colorScheme(it) }
                 }.getOrNull()
             fireChange()
         }
@@ -65,7 +57,7 @@ object ColorManager {
 
     private var darkModeColorScheme: ColorScheme? = null
 
-    private val defaultFallbackColors =
+    private val BuiltinFallbackColors =
         mapOf(
             "candidate_text_color" to "text_color",
             "comment_text_color" to "candidate_text_color",
@@ -128,7 +120,7 @@ object ColorManager {
         onChangeListeners.forEach { it.onColorChange(theme) }
     }
 
-    private fun colorScheme(id: String) = presetColorSchemes.find { it.id == id }
+    fun colorScheme(id: String) = theme.colorSchemes[id]
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
@@ -154,13 +146,18 @@ object ColorManager {
         this.theme = theme
         val newScheme = evaluateActiveColorScheme()
         activeColorScheme = newScheme
-        normalModeColor = newScheme.id
+        normalModeColor =
+            theme.colorSchemes.entries
+                .first { it.value == newScheme }
+                .key
     }
 
-    fun setColorScheme(scheme: ColorScheme) {
+    fun setColorScheme(schemeId: String) {
         freeCaches()
-        activeColorScheme = scheme
-        normalModeColor = scheme.id
+        theme.colorSchemes[schemeId]?.let {
+            activeColorScheme = it
+            normalModeColor = schemeId
+        }
     }
 
     private fun freeCaches() {
@@ -214,12 +211,12 @@ object ColorManager {
 
         while (true) {
             when {
-                activeColorScheme.colors.containsKey(currentKey) -> {
-                    return parser(activeColorScheme.colors[currentKey]!!)
+                activeColorScheme.containsKey(currentKey) -> {
+                    return parser(activeColorScheme[currentKey]!!)
                 }
-                fullFallbackRules.containsKey(currentKey) -> {
+                allFallbackColors.containsKey(currentKey) -> {
                     currentKey =
-                        fullFallbackRules[currentKey]!!.also {
+                        allFallbackColors[currentKey]!!.also {
                             check(visitedKeys.add(it)) { "Circular fallback: $key" }
                         }
                 }
@@ -230,9 +227,9 @@ object ColorManager {
 
     private fun parseColor(value: String): Int =
         try {
-            ColorUtils.parseColor(value)
+            Color.parseColor(value)
         } catch (e: Exception) {
-            Timber.e(e, "Cannot parse color $value, fallback to TRANSPARENT")
+            Timber.w(e, "Cannot parse color $value, fallback to TRANSPARENT")
             Color.TRANSPARENT
         }
 
@@ -256,7 +253,7 @@ object ColorManager {
         } else {
             val color =
                 try {
-                    ColorUtils.parseColor(value)
+                    Color.parseColor(value)
                 } catch (_: Exception) {
                     return null
                 }

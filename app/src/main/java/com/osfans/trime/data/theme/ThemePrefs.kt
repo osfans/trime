@@ -7,21 +7,39 @@ package com.osfans.trime.data.theme
 
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.core.content.edit
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.PreferenceDelegateEnum
 import com.osfans.trime.data.prefs.PreferenceDelegateOwner
+import com.osfans.trime.data.prefs.PreferenceDelegateUi
 
 class ThemePrefs(
     sharedPrefs: SharedPreferences,
 ) : PreferenceDelegateOwner(sharedPrefs, R.string.theme) {
+    private fun themePreference(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: Theme,
+        @StringRes
+        summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceThemeDelegate {
+        val pref = PreferenceThemeDelegate(sharedPreferences, key, defaultValue)
+        val ui = PreferenceDelegateUi.StringLike(title, key, defaultValue.id, summary, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     val selectedTheme =
-        string(
+        themePreference(
             R.string.selected_theme,
             SELECTED_THEME,
-            "trime",
+            ThemeManager.DefaultTheme,
             R.string.selected_theme_summary,
-        )
+        ).also { it.register() }
 
     val normalModeColor =
         string(

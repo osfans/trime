@@ -8,24 +8,18 @@ import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 object ThemePickerDialog {
-    suspend fun build(
+    fun build(
         scope: LifecycleCoroutineScope,
         context: Context,
-        afterConfirm: (suspend () -> Unit)? = null,
+        preSelect: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val allThemes =
-            withContext(Dispatchers.IO) {
-                ThemeManager.getAllThemes()
-            }
+        val allThemes = ThemeManager.getAllThemes()
         val selectedTheme by ThemeManager.prefs.selectedTheme
-        val selectedIndex = allThemes.indexOfFirst { it.configId == selectedTheme }
+        val selectedIndex = allThemes.indexOfFirst { it.id == selectedTheme.id }
         return AlertDialog
             .Builder(context)
             .apply {
@@ -38,9 +32,9 @@ object ThemePickerDialog {
                         selectedIndex,
                     ) { dialog, which ->
                         scope.launch {
-                            afterConfirm?.invoke()
-                            val newItem = allThemes[which]
-                            ThemeManager.selectTheme(Theme.open(newItem.configId))
+                            preSelect?.invoke()
+                            val newTheme = allThemes[which]
+                            ThemeManager.selectTheme(newTheme)
                             dialog.dismiss()
                         }
                     }
