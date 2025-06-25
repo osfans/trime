@@ -5,10 +5,13 @@
 
 package com.osfans.trime.data.theme.model
 
+import android.os.Parcelable
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.osfans.trime.data.theme.deserializer.TextKeyDeserializer
 import com.osfans.trime.ime.keyboard.KeyBehavior
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class TextKeyboard(
     val name: String = "",
     val author: String = "",
@@ -38,12 +41,13 @@ data class TextKeyboard(
     val keyPressOffsetY: Int = 0,
     val importPreset: String = "",
     val keys: List<TextKey> = emptyList(),
-) {
+) : Parcelable {
     enum class LabelTransform {
         NONE,
         UPPERCASE,
     }
 
+    @Parcelize
     @JsonDeserialize(using = TextKeyDeserializer::class)
     data class TextKey(
         val width: Float,
@@ -71,5 +75,5 @@ data class TextKeyboard(
         val hlKeyBackColor: String,
         val hlKeySymbolColor: String,
         val behaviors: Map<KeyBehavior, String>,
-    )
+    ) : Parcelable
 }

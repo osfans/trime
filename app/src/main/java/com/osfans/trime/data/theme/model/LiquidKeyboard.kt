@@ -5,11 +5,14 @@
 
 package com.osfans.trime.data.theme.model
 
+import android.os.Parcelable
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.osfans.trime.data.theme.deserializer.LiquidKeyboardDeserializer
 import com.osfans.trime.ime.symbol.SimpleKeyBean
 import com.osfans.trime.ime.symbol.SymbolBoardType
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @JsonDeserialize(using = LiquidKeyboardDeserializer::class)
 data class LiquidKeyboard(
     val singleWidth: Int = 0,
@@ -17,11 +20,12 @@ data class LiquidKeyboard(
     val marginX: Float = 0f,
     val fixedKeyBar: KeyBar = KeyBar(),
     val keyboards: List<Keyboard> = emptyList(),
-) {
+) : Parcelable {
+    @Parcelize
     data class KeyBar(
         val keys: List<String> = emptyList(),
         val position: Position = Position.BOTTOM,
-    ) {
+    ) : Parcelable {
         enum class Position {
             TOP,
             LEFT,
@@ -30,10 +34,11 @@ data class LiquidKeyboard(
         }
     }
 
+    @Parcelize
     data class Keyboard(
         val id: String = "",
         val type: SymbolBoardType = SymbolBoardType.SINGLE,
         val name: String = "",
         val keys: List<SimpleKeyBean> = emptyList(),
-    )
+    ) : Parcelable
 }

@@ -4,6 +4,7 @@
 
 package com.osfans.trime.data.theme
 
+import android.os.Parcelable
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -12,10 +13,12 @@ import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.data.theme.model.TextKeyboard
+import kotlinx.parcelize.Parcelize
 
 typealias ColorScheme = Map<String, String>
 
 /** 主题和样式配置  */
+@Parcelize
 data class Theme(
     @field:JsonIgnore
     val id: String = "",
@@ -29,4 +32,4 @@ data class Theme(
     @field:JsonDeserialize(contentUsing = ColorSchemeDeserializer::class)
     val colorSchemes: Map<String, ColorScheme> = emptyMap(),
     val fallbackColors: Map<String, String> = emptyMap(),
-)
+) : Parcelable

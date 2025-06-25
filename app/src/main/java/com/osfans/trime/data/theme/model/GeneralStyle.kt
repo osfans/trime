@@ -4,6 +4,10 @@
 
 package com.osfans.trime.data.theme.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class GeneralStyle(
     val autoCaps: String = "",
     val backgroundDimAmount: Float = 0f,
@@ -73,7 +77,7 @@ data class GeneralStyle(
     val keyLongTextBorder: Int = 0,
     val enterLabelMode: Int = 0,
     val enterLabel: EnterLabel = EnterLabel(),
-) {
+) : Parcelable {
     enum class CommentPosition {
         UNKNOWN,
         TOP,
@@ -81,6 +85,7 @@ data class GeneralStyle(
         RIGHT,
     }
 
+    @Parcelize
     data class Layout(
         val border: Int = 0,
         val maxWidth: Int = 0,
@@ -94,8 +99,9 @@ data class GeneralStyle(
         val spacing: Int = 0,
         val roundCorner: Float = 0f,
         val alpha: Int = 204,
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class EnterLabel(
         val go: String = "go",
         val done: String = "done",
@@ -104,5 +110,5 @@ data class GeneralStyle(
         val search: String = "search",
         val send: String = "send",
         val default: String = "default",
-    )
+    ) : Parcelable
 }
