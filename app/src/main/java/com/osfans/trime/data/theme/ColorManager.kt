@@ -33,8 +33,6 @@ object ColorManager {
 
     private var isNightMode = false
 
-    private val allFallbackColors get() = theme.fallbackColors + BuiltinFallbackColors
-
     private lateinit var _activeColorScheme: ColorScheme
 
     var activeColorScheme: ColorScheme
@@ -184,7 +182,7 @@ object ColorManager {
         return color
     }
 
-    fun resolveDrawable(
+    private fun resolveDrawable(
         key: String,
         putCache: Boolean = true,
     ): Drawable? {
@@ -207,20 +205,23 @@ object ColorManager {
         parser: (String) -> T,
     ): T {
         var currentKey = key
-        val visitedKeys = mutableSetOf<String>()
 
         while (true) {
-            when {
-                activeColorScheme.containsKey(currentKey) -> {
-                    return parser(activeColorScheme[currentKey]!!)
-                }
-                allFallbackColors.containsKey(currentKey) -> {
-                    currentKey =
-                        allFallbackColors[currentKey]!!.also {
-                            check(visitedKeys.add(it)) { "Circular fallback: $key" }
-                        }
-                }
-                else -> throw IllegalArgumentException("Color not found: $key")
+            val target = activeColorScheme[currentKey]
+            if (!target.isNullOrEmpty()) {
+                Timber.d("current: $currentKey, origin: $key, target: $target")
+                return parser(target)
+            }
+            val fallback = theme.fallbackColors[currentKey]
+            if (!fallback.isNullOrEmpty()) {
+                currentKey = fallback
+                continue
+            }
+            val altFallback = BuiltinFallbackColors[currentKey]
+            if (!altFallback.isNullOrEmpty()) {
+                currentKey = altFallback
+            } else {
+                throw IllegalArgumentException("$key not found")
             }
         }
     }
