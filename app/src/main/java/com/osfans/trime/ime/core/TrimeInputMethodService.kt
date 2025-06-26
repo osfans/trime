@@ -64,10 +64,13 @@ import com.osfans.trime.util.monitorCursorAnchor
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.bitflags.hasFlag
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
@@ -185,7 +188,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             it.registerOnChangeListener(recreateInputViewListener)
         }
         prefs.candidates.registerOnChangeListener(recreateCandidatesViewListener)
-        ThemeManager.init(resources.configuration)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         ColorManager.addOnChangedListener(onColorChangeListener)
         super.onCreate()
@@ -197,6 +199,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             // could crash
             //  and lead to a crash loop
             Timber.d("onCreate")
+            lifecycleScope.launch {
+                withContext(NonCancellable + Dispatchers.Default) {
+                    ThemeManager.init(resources.configuration)
+                }
+            }
             InputFeedbackManager.init(this)
             registerReceiver()
         } catch (e: Exception) {

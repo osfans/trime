@@ -5,6 +5,7 @@
 package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
+import com.osfans.trime.core.Rime
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.util.WeakHashSet
@@ -64,6 +65,8 @@ object ThemeManager {
     }
 
     fun init(configuration: Configuration) {
+        // deploy default theme as fallback
+        Rime.deployRimeConfigFile("trime", "config_version")
         _activeTheme = evaluateActiveTheme()
         ColorManager.init(configuration)
     }
