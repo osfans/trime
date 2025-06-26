@@ -35,14 +35,12 @@ object ThemeFilesManager {
             }.toMutableList()
     }
 
-    fun deployThemes(progress: ((Int, Int) -> Unit)? = null) {
+    fun deployThemes() {
         val users = DataManager.userDataDir.list() ?: emptyArray()
         val shareds = DataManager.sharedDataDir.list() ?: emptyArray()
         val distinct = (users + shareds).distinct()
-        progress?.invoke(0, distinct.size)
-        distinct.forEachIndexed { i, fileName ->
+        distinct.forEach { fileName ->
             Rime.deployRimeConfigFile(fileName.removeSuffix(".yaml"), CONFIG_VERSION_KEY)
-            progress?.invoke(i + 1, distinct.size)
         }
         ThemeManager.refreshThemes()
     }

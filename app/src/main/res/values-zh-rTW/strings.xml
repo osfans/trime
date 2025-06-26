@@ -59,7 +59,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item name="dark">暗色</item>
     </string-array>
     <string name="keyboard__soft_cursor_title">懸浮窗編碼區使用插入符號(^)</string>
-    <string name="pref_deploy">部署</string>
+    <string name="deploy">部署</string>
     <string name="sync_user_data_immediately">立即同步使用者資料</string>
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>

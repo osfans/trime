@@ -59,7 +59,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>Dark</item>
     </string-array>
     <string name="keyboard__soft_cursor_title">Use soft cursor(^) in composition</string>
-    <string name="pref_deploy">Deploy</string>
+    <string name="deploy">Deploy</string>
     <string name="sync_user_data_immediately">Sync user data immediately</string>
     <string name="reset_success">Reset Succeeded!</string>
     <string name="reset_failure">Reset Failed!</string>

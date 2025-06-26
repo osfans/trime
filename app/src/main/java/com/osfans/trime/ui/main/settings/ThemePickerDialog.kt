@@ -8,8 +8,13 @@ import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
+import com.osfans.trime.data.theme.ThemeFilesManager
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ui.components.withLoadingDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object ThemePickerDialog {
     fun build(
@@ -36,6 +41,13 @@ object ThemePickerDialog {
                             val newTheme = allThemes[which]
                             ThemeManager.selectTheme(newTheme)
                             dialog.dismiss()
+                        }
+                    }
+                }
+                setNeutralButton(R.string.deploy) { _, _ ->
+                    scope.withLoadingDialog(context, R.string.deploy_progress) {
+                        withContext(NonCancellable + Dispatchers.Default) {
+                            ThemeFilesManager.deployThemes()
                         }
                     }
                 }
