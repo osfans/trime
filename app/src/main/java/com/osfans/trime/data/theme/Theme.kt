@@ -4,6 +4,7 @@
 
 package com.osfans.trime.data.theme
 
+import android.os.Parcelable
 import com.osfans.trime.core.Rime
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.mapper.LiquidKeyboardMapper
@@ -15,9 +16,11 @@ import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.util.config.Config
+import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
 /** 主题和样式配置  */
+@Parcelize
 data class Theme(
     val configId: String,
     val name: String,
@@ -27,7 +30,7 @@ data class Theme(
     val presetKeyboards: Map<String, TextKeyboard>,
     val colorSchemes: List<ColorScheme>,
     val fallbackColors: Map<String, String>,
-) {
+) : Parcelable {
     companion object {
         private const val CONFIG_VERSION_KEY = "config_version"
 
@@ -54,10 +57,7 @@ data class Theme(
                             .getMap("preset_color_schemes")
                             .map { ColorScheme(it.key, it.value.getStringValueMap("")) },
                     fallbackColors = c.getStringValueMap("fallback_colors"),
-                ).also {
-                    Timber.d("color_schemes: ${it.colorSchemes}")
-                    Timber.d("fallback: ${it.fallbackColors.entries.joinToString()}")
-                }
+                )
             }
         }
     }

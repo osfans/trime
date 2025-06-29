@@ -5,7 +5,11 @@
 
 package com.osfans.trime.data.theme.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class ColorScheme(
     val id: String,
     val colors: Map<String, String>,
-)
+) : Parcelable

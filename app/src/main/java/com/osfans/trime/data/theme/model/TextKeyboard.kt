@@ -5,8 +5,11 @@
 
 package com.osfans.trime.data.theme.model
 
+import android.os.Parcelable
 import com.osfans.trime.ime.keyboard.KeyBehavior
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class TextKeyboard(
     val name: String,
     val author: String,
@@ -36,12 +39,13 @@ data class TextKeyboard(
     val keyPressOffsetY: Int,
     val importPreset: String,
     val keys: List<TextKey>,
-) {
+) : Parcelable {
     enum class LabelTransform {
         NONE,
         UPPERCASE,
     }
 
+    @Parcelize
     data class TextKey(
         val width: Float,
         val height: Float,
@@ -68,5 +72,5 @@ data class TextKeyboard(
         val hlKeyBackColor: String,
         val hlKeySymbolColor: String,
         val behaviors: Map<KeyBehavior, String>,
-    )
+    ) : Parcelable
 }

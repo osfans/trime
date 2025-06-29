@@ -5,6 +5,10 @@
 
 package com.osfans.trime.data.theme.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class PresetKey(
     val command: String,
     val option: String,
@@ -20,4 +24,4 @@ data class PresetKey(
     val functional: Boolean,
     val states: List<String>,
     val send: String,
-)
+) : Parcelable
