@@ -9,6 +9,7 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.launch
 
 object ColorPickerDialog {
@@ -17,7 +18,7 @@ object ColorPickerDialog {
         context: Context,
         afterConfirm: (suspend () -> Unit)? = null,
     ): AlertDialog {
-        val presetSchemes = ColorManager.presetColorSchemes
+        val presetSchemes = ThemeManager.activeTheme.colorSchemes
         val currentScheme = ColorManager.activeColorScheme
         val currentIndex = presetSchemes.indexOfFirst { it.id == currentScheme.id }
         return AlertDialog

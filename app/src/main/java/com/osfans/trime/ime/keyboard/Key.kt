@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.keyboard
 
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import com.osfans.trime.core.Rime.Companion.hasLeft
@@ -72,16 +73,26 @@ class Key(
     var keyPressOffsetX = 0
     var keyPressOffsetY = 0
 
-    private fun getColor(src: String): Int = ColorManager.resolveColor(src)
+    private fun getColor(
+        src: String,
+        fallback: String,
+    ): Int =
+        ColorManager
+            .getColor(src)
+            .takeIf { it != Color.TRANSPARENT }
+            ?: ColorManager.getColor(fallback)
 
-    private fun getDrawable(src: String) = ColorManager.resolveDrawable(src)
+    private fun getDrawable(
+        src: String,
+        fallback: String,
+    ) = ColorManager.getDrawable(src) ?: ColorManager.getDrawable(fallback)
 
-    private val keyBackColor by lazy { getDrawable(textKey.keyBackColor) }
-    private val keyTextColor by lazy { getColor(textKey.keyTextColor) }
-    private val keySymbolColor by lazy { getColor(textKey.keySymbolColor) }
-    private val hilitedKeyBackColor by lazy { getDrawable(textKey.hlKeyBackColor) }
-    private val hilitedKeyTextColor by lazy { getColor(textKey.hlKeyTextColor) }
-    private val hilitedKeySymbolColor by lazy { getColor(textKey.hlKeySymbolColor) }
+    private val keyBackColor by lazy { getDrawable(textKey.keyBackColor, "key_back_color") }
+    private val keyTextColor by lazy { getColor(textKey.keyTextColor, "key_text_color") }
+    private val keySymbolColor by lazy { getColor(textKey.keySymbolColor, "key_symbol_color") }
+    private val hilitedKeyBackColor by lazy { getDrawable(textKey.hlKeyBackColor, "hilited_key_back_color") }
+    private val hilitedKeyTextColor by lazy { getColor(textKey.hlKeyTextColor, "hilited_key_text_color") }
+    private val hilitedKeySymbolColor by lazy { getColor(textKey.hlKeySymbolColor, "hilited_key_symbol_color") }
 
     /**
      * Create an empty key with no attributes.

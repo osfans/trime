@@ -22,6 +22,7 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
+import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
@@ -210,7 +211,7 @@ class CommonKeyboardActionListener(
                                 }
                             }
                             "set_color_scheme" -> {
-                                val newScheme = ColorManager.presetColorSchemes.find { it.id == arg }
+                                val newScheme = ThemeManager.activeTheme.colorSchemes.find { it.id == arg }
                                 if (newScheme != null) ColorManager.setColorScheme(newScheme)
                             }
                             "broadcast" -> service.sendBroadcast(Intent(arg))

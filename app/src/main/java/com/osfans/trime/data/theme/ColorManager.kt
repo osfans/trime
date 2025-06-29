@@ -35,14 +35,6 @@ object ColorManager {
 
     private var isNightMode = false
 
-    val presetColorSchemes: List<ColorScheme>
-        get() = theme.colorSchemes
-
-    private val customFallbackRules: Map<String, String>
-        get() = theme.fallbackColors
-
-    private val fullFallbackRules get() = customFallbackRules + defaultFallbackColors
-
     private lateinit var _activeColorScheme: ColorScheme
 
     var activeColorScheme: ColorScheme
@@ -65,7 +57,7 @@ object ColorManager {
 
     private var darkModeColorScheme: ColorScheme? = null
 
-    private val defaultFallbackColors =
+    private val BuiltinFallbackColors =
         mapOf(
             "candidate_text_color" to "text_color",
             "comment_text_color" to "candidate_text_color",
@@ -128,7 +120,7 @@ object ColorManager {
         onChangeListeners.forEach { it.onColorChange(theme) }
     }
 
-    private fun colorScheme(id: String) = presetColorSchemes.find { it.id == id }
+    private fun colorScheme(id: String) = theme.colorSchemes.find { it.id == id }
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
@@ -169,7 +161,7 @@ object ColorManager {
     }
 
     @ColorInt
-    fun resolveColor(
+    private fun resolveColor(
         key: String,
         putCache: Boolean = true,
     ): Int {
@@ -187,7 +179,7 @@ object ColorManager {
         return color
     }
 
-    fun resolveDrawable(
+    private fun resolveDrawable(
         key: String,
         putCache: Boolean = true,
     ): Drawable? {
@@ -210,20 +202,23 @@ object ColorManager {
         parser: (String) -> T,
     ): T {
         var currentKey = key
-        val visitedKeys = mutableSetOf<String>()
 
         while (true) {
-            when {
-                activeColorScheme.colors.containsKey(currentKey) -> {
-                    return parser(activeColorScheme.colors[currentKey]!!)
-                }
-                fullFallbackRules.containsKey(currentKey) -> {
-                    currentKey =
-                        fullFallbackRules[currentKey]!!.also {
-                            check(visitedKeys.add(it)) { "Circular fallback: $key" }
-                        }
-                }
-                else -> throw IllegalArgumentException("Color not found: $key")
+            val target = activeColorScheme.colors[currentKey]
+            if (!target.isNullOrEmpty()) {
+                Timber.d("current: $currentKey, origin: $key, target: $target")
+                return parser(target)
+            }
+            val fallback = theme.fallbackColors[currentKey]
+            if (!fallback.isNullOrEmpty()) {
+                currentKey = fallback
+                continue
+            }
+            val altFallback = BuiltinFallbackColors[currentKey]
+            if (!altFallback.isNullOrEmpty()) {
+                currentKey = altFallback
+            } else {
+                throw IllegalArgumentException("$key not found")
             }
         }
     }
@@ -276,16 +271,15 @@ object ColorManager {
     @ColorInt
     fun getColor(key: String): Int = colorCache[key] ?: resolveColor(key)
 
-    fun getDrawable(key: String): Drawable? = drawableCache[key] ?: resolveDrawable(key)
-
     fun getDrawable(
         colorKey: String,
         borderColorKey: String? = null,
         borderPx: Int = 0,
         cornerRadius: Float = 0f,
         alpha: Int = 255,
-    ): Drawable? =
-        when (val drawable = getDrawable(colorKey)) {
+    ): Drawable? {
+        val drawable = drawableCache[colorKey] ?: resolveDrawable(colorKey)
+        return when (drawable) {
             is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
             is GradientDrawable ->
                 drawable.also {
@@ -301,6 +295,7 @@ object ColorManager {
                 }
             else -> null
         }
+    }
 
     private val SUPPORTED_IMG_FORMATS = arrayOf(".png", ".webp", ".jpg", ".gif")
 }
