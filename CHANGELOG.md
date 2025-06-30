@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.5] - 2025-07-01
+
+### 🚀 Features
+
+- Implement Parcelable for theme classes
+
+### 🐛 Bug Fixes
+
+- Navigation bar blocked out the virtual keyboard (again)
+- Fix crash on inline suggestions response and improve ui
+- Malfunction of sound effect loading
+- Incorrect sound effect on press of some keys
+- Error on key custom color parsing
+- Custom key colors were transparent sometimes
+
+### 🚜 Refactor
+
+- Polish InputFeedbackManager
+- Enhance Kotlin-made config parser
+- Mapping theme to data classes
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.5
+- Upgrade gradle to 8.14.1
+- Add 3.3.5 changelog
+
 ## [3.3.4] - 2025-05-01
 
 ### 🐛 Bug Fixes
