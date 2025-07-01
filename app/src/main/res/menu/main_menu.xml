@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2015 - 2024 Rime community
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/deploy"
+        android:title="@string/pref_deploy"
+        android:icon="@drawable/ic_baseline_sync_24"
+        app:iconTint="?attr/colorControlNormal"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/about"
+        android:title="@string/settings__about_title" />
+    <item android:id="@+id/edit"
+        android:icon="@drawable/ic_baseline_edit_24"
+        app:iconTint="?attr/colorControlNormal"
+        android:title="@string/edit"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/delete"
+        android:icon="@drawable/ic_baseline_delete_24"
+        app:iconTint="?attr/colorControlNormal"
+        android:title="@string/delete"
+        app:showAsAction="ifRoom" />
+</menu>

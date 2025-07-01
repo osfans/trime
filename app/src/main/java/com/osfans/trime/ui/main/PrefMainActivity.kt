@@ -81,11 +81,6 @@ class PrefMainActivity : AppCompatActivity() {
         viewModel.toolbarTitle.observe(this) {
             binding.prefToolbar.toolbar.title = it
         }
-        viewModel.topOptionsMenu.observe(this) {
-            binding.prefToolbar.toolbar.menu.forEach { m ->
-                m.isVisible = it
-            }
-        }
         navController.addOnDestinationChangedListener { _, dest, _ ->
             dest.label?.let { viewModel.setToolbarTitle(it.toString()) }
             binding.prefToolbar.toolbar.subtitle =
@@ -105,23 +100,50 @@ class PrefMainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.preference_main_menu, menu)
-        menu?.forEach {
-            it.isVisible = viewModel.topOptionsMenu.value ?: true
+        menuInflater.inflate(R.menu.main_menu, menu)
+        menu?.forEach { item ->
+            when (item.itemId) {
+                R.id.deploy, R.id.about -> {
+                    viewModel.topOptionsMenu.observe(this) {
+                        item.isVisible = it
+                    }
+                }
+                R.id.edit -> {
+                    viewModel.toolbarEditButtonVisible.observe(this) {
+                        item.isVisible = it
+                    }
+                }
+                R.id.delete -> {
+                    viewModel.toolbarDeleteButtonOnClickListener.observe(this) {
+                        item.isVisible = it != null
+                    }
+                }
+                else -> {}
+            }
         }
+        // show menu item on demand
+        menu?.forEach { it.isVisible = false }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
-            R.id.preference__menu_deploy -> {
+            R.id.deploy -> {
                 lifecycleScope.launch {
                     RimeDaemon.restartRime(true)
                 }
                 true
             }
-            R.id.preference__menu_about -> {
+            R.id.about -> {
                 navController.navigate(R.id.action_prefFragment_to_aboutFragment)
+                true
+            }
+            R.id.edit -> {
+                viewModel.toolbarEditButtonOnClickListener.value?.invoke()
+                true
+            }
+            R.id.delete -> {
+                viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
                 true
             }
             else -> super.onOptionsItemSelected(item)
