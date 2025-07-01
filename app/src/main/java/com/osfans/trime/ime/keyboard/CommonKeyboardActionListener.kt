@@ -25,7 +25,6 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
-import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.symbol.LiquidKeyboard
@@ -102,20 +101,11 @@ class CommonKeyboardActionListener(
         }
     }
 
-    private fun showAvailableSchemaPicker() {
-        showDialog { api ->
-            AvailableSchemaPickerDialog.build(api, service.lifecycleScope, context)
-        }
-    }
-
     private fun showEnabledSchemaPicker() {
         showDialog { api ->
             EnabledSchemaPickerDialog.build(api, service.lifecycleScope, context) {
-                setPositiveButton(R.string.enable_schemata) { _, _ ->
-                    showAvailableSchemaPicker()
-                }
-                setNegativeButton(R.string.set_ime) { _, _ ->
-                    AppUtils.launchMainActivity(context)
+                setNegativeButton(R.string.schemata) { _, _ ->
+                    AppUtils.launchMainToSchemaList(context)
                 }
             }
         }
@@ -243,7 +233,7 @@ class CommonKeyboardActionListener(
                         when (action.option) {
                             "theme" -> showThemePicker()
                             "color" -> showColorPicker()
-                            "schema" -> showAvailableSchemaPicker()
+                            "schema" -> AppUtils.launchMainToSchemaList(context)
                             "sound" -> showSoundEffectPicker()
                             else -> AppUtils.launchMainActivity(service)
                         }

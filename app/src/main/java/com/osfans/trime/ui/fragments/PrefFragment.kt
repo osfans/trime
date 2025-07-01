@@ -6,29 +6,24 @@ package com.osfans.trime.ui.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.get
 import com.osfans.trime.R
-import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.ime.dialog.AvailableSchemaPickerDialog
-import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
-import kotlinx.coroutines.launch
 
 class PrefFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         viewModel.enableTopOptionsMenu()
     }
 
-    override fun onPause() {
+    override fun onStop() {
         viewModel.disableTopOptionsMenu()
-        super.onPause()
+        super.onStop()
     }
 
     override fun onCreatePreferences(
@@ -38,18 +33,7 @@ class PrefFragment : PaddingPreferenceFragment() {
         setPreferencesFromResource(R.xml.prefs, rootKey)
         with(preferenceScreen) {
             get<Preference>("pref_schemata")?.setOnPreferenceClickListener {
-                viewModel.rime.launchOnReady { api ->
-                    lifecycleScope.launch {
-                        EnabledSchemaPickerDialog
-                            .build(api, lifecycleScope, context) {
-                                setPositiveButton(R.string.enable_schemata) { _, _ ->
-                                    lifecycleScope.launch {
-                                        AvailableSchemaPickerDialog.build(api, lifecycleScope, context).show()
-                                    }
-                                }
-                            }.show()
-                    }
-                }
+                findNavController().navigate(R.id.action_prefFragment_to_schemaListFragment)
                 true
             }
             get<Preference>("pref_user_data")?.setOnPreferenceClickListener {

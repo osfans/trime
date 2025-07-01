@@ -62,6 +62,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <action
             android:id="@+id/action_prefFragment_to_themeSettingsFragment"
             app:destination="@id/themeSettingsFragment" />
+        <action
+            android:id="@+id/action_prefFragment_to_schemaListFragment"
+            app:destination="@id/schemaListFragment" />
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
@@ -111,4 +114,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:id="@+id/themeSettingsFragment"
         android:name="com.osfans.trime.ui.main.settings.theme.ThemeSettingsFragment"
         android:label="@string/theme" />
+    <fragment
+        android:id="@+id/schemaListFragment"
+        android:name="com.osfans.trime.ui.main.settings.schema.SchemaListFragment"
+        android:label="@string/schemata" />
 </navigation>

@@ -226,4 +226,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="navbar_bkg_none">No background</string>
     <string name="navbar_bkg_color_only">Follow keyboard color</string>
     <string name="navbar_bkg_full">Keyboard background image</string>
+    <string name="undo">Undo</string>
+    <string name="added_x">Added %1$s</string>
+    <string name="removed_x">Removed %1$s</string>
+    <string name="removed_n_items">Removed %1$d item(s)</string>
 </resources>
