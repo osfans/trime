@@ -5,6 +5,7 @@
 package com.osfans.trime.data.schema
 
 import com.osfans.trime.core.Rime
+import timber.log.Timber
 
 object SchemaManager {
     private lateinit var currentSchema: Schema
@@ -20,7 +21,13 @@ object SchemaManager {
     }
 
     val activeSchema: Schema
-        get() = currentSchema
+        get() =
+            try {
+                currentSchema
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to get activeSchema")
+                Schema()
+            }
 
     @JvmStatic
     fun updateSwitchOptions() {

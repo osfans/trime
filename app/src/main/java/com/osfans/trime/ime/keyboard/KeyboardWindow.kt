@@ -133,7 +133,7 @@ class KeyboardWindow(
         if (presetKeyboardIds.contains(currentSchema)) {
             return currentSchema
         }
-        val alphabet = SchemaManager.activeSchema.alphabet ?: return "default"
+        val alphabet = SchemaManager.activeSchema.alphabet
         val layout =
             when {
                 alphabet.all { it.isLetter() } -> "qwerty" // 包含 26 个字母
