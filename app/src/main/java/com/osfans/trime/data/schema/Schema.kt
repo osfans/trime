@@ -8,9 +8,9 @@ import com.osfans.trime.util.config.Config
 import timber.log.Timber
 
 data class Schema(
-    val switches: List<Switch>,
-    val symbols: Map<String, Config>,
-    val alphabet: String,
+    val switches: List<Switch> = emptyList(),
+    val symbols: Map<String, Config> = emptyMap(),
+    val alphabet: String = "",
 ) {
     data class Switch(
         val name: String = "",
