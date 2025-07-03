@@ -16,6 +16,7 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.NinePatchDrawable
 import androidx.annotation.ColorInt
 import androidx.collection.LruCache
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.math.MathUtils
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.theme.model.ColorScheme
@@ -247,13 +248,13 @@ object ColorManager {
                     NinePatchBitmapFactory.createNinePatchDrawable(Resources.getSystem(), bitmap)
                 }
             }
-            return BitmapDrawable(Resources.getSystem(), bitmap)
+            return bitmap.toDrawable(Resources.getSystem())
         } else {
             val color =
                 try {
                     ColorUtils.parseColor(value)
                 } catch (_: Exception) {
-                    return null
+                    Color.TRANSPARENT
                 }
             return GradientDrawable().apply { setColor(color) }
         }
@@ -271,15 +272,16 @@ object ColorManager {
     @ColorInt
     fun getColor(key: String): Int = colorCache[key] ?: resolveColor(key)
 
+    fun getDrawable(key: String): Drawable? = drawableCache[key] ?: resolveDrawable(key)
+
     fun getDrawable(
         colorKey: String,
         borderColorKey: String? = null,
         borderPx: Int = 0,
         cornerRadius: Float = 0f,
         alpha: Int = 255,
-    ): Drawable? {
-        val drawable = drawableCache[colorKey] ?: resolveDrawable(colorKey)
-        return when (drawable) {
+    ): Drawable? =
+        when (val drawable = getDrawable(colorKey)) {
             is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
             is GradientDrawable ->
                 drawable.also {
@@ -295,7 +297,6 @@ object ColorManager {
                 }
             else -> null
         }
-    }
 
     private val SUPPORTED_IMG_FORMATS = arrayOf(".png", ".webp", ".jpg", ".gif")
 }
