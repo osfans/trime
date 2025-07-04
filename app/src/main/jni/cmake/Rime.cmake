@@ -24,7 +24,7 @@ option(BUILD_TEST "" OFF)
 option(BUILD_STATIC "" ON)
 add_subdirectory(librime)
 target_compile_options(
-  rime-static PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+  rime-static PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=." "-Wno-error=deprecated-declarations")
 
 target_compile_options(
   rime-lua-objs PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
