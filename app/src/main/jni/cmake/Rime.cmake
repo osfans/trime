@@ -20,9 +20,32 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty")
        COPY_ON_ERROR SYMBOLIC)
 endif()
 
+find_package(Git REQUIRED)
+if(NOT Git_FOUND)
+    message(FATAL_ERROR "Git not found!")
+endif()
+
+set(PATCH_FILE "${CMAKE_SOURCE_DIR}/patches/lua.patch")
+set(PATCH_STAMP "${CMAKE_CURRENT_BINARY_DIR}/.git_patch_applied")
+
+add_custom_command(
+  OUTPUT ${PATCH_STAMP}
+  COMMAND ${GIT_EXECUTABLE} apply ${PATCH_FILE} || true
+  COMMAND ${CMAKE_COMMAND} -E touch ${PATCH_STAMP}
+  COMMAND_EXPAND_LISTS
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/librime/plugins/librime-lua/thirdparty"
+  DEPENDS ${PATCH_FILE}
+  VERBATIM
+)
+
+add_custom_target(apply_git_patch ALL
+  DEPENDS ${PATCH_STAMP}
+)
+
 option(BUILD_TEST "" OFF)
 option(BUILD_STATIC "" ON)
 add_subdirectory(librime)
+add_dependencies(rime-static apply_git_patch)
 target_compile_options(
   rime-static PRIVATE "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=." "-Wno-error=deprecated-declarations")
 

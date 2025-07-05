@@ -1,0 +1,14 @@
+diff --git a/lua5.4/liolib.c b/lua5.4/liolib.c
+index b08397d..2815fa5 100644
+--- a/lua5.4/liolib.c
++++ b/lua5.4/liolib.c
+@@ -115,7 +115,8 @@ static int l_checkmode (const char *mode) {
+ 
+ #if !defined(l_fseek)		/* { */
+ 
+-#if defined(LUA_USE_POSIX)	/* { */
++#if defined(LUA_USE_POSIX) && \
++   (!defined(ANDROID) || (defined(__LP64__) || ANDROID_PLATFORM >= 24))	/* { */
+ 
+ #include <sys/types.h>
+ 
