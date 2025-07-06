@@ -6,7 +6,6 @@ package com.osfans.trime.ime.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -15,13 +14,14 @@ import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.StateListDrawable
 import android.os.SystemClock
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.withClip
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.Rime
@@ -30,9 +30,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.preview.KeyPreviewChoreographer
-import com.osfans.trime.util.indexOfStateSet
 import com.osfans.trime.util.sp
-import com.osfans.trime.util.stateDrawableAt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -57,30 +55,7 @@ class KeyboardView(
     private val labelTextSize =
         theme.generalStyle.keyLongTextSize
             .takeIf { it > 0 } ?: keyTextSize
-    private val mKeyTextColor =
-        ColorStateList(
-            Key.KEY_STATES,
-            intArrayOf(
-                ColorManager.getColor("hilited_on_key_text_color"),
-                ColorManager.getColor("on_key_text_color"),
-                ColorManager.getColor("hilited_off_key_text_color"),
-                ColorManager.getColor("off_key_text_color"),
-                ColorManager.getColor("hilited_key_text_color"),
-                ColorManager.getColor("key_text_color"),
-            ),
-        )
-    private val mKeyBackColor =
-        StateListDrawable().apply {
-            addState(Key.KEY_STATE_ON_PRESSED, ColorManager.getDrawable("hilited_on_key_back_color"))
-            addState(Key.KEY_STATE_ON_NORMAL, ColorManager.getDrawable("on_key_back_color"))
-            addState(Key.KEY_STATE_OFF_PRESSED, ColorManager.getDrawable("hilited_off_key_back_color"))
-            addState(Key.KEY_STATE_OFF_NORMAL, ColorManager.getDrawable("off_key_back_color"))
-            addState(Key.KEY_STATE_PRESSED, ColorManager.getDrawable("hilited_key_back_color"))
-            addState(Key.KEY_STATE_NORMAL, ColorManager.getDrawable("key_back_color"))
-        }
 
-    private val keySymbolColor = ColorManager.getColor("key_symbol_color")
-    private val hilitedKeySymbolColor = ColorManager.getColor("hilited_key_symbol_color")
     private val symbolTextSize = theme.generalStyle.symbolTextSize
     private val mShadowRadius = theme.generalStyle.shadowRadius
     private val mShadowColor = ColorManager.getColor("shadow_color")
@@ -452,7 +427,7 @@ class KeyboardView(
             return false
         }
         freeDrawingBuffer()
-        drawingBuffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        drawingBuffer = createBitmap(width, height)
         return true
     }
 
@@ -484,11 +459,10 @@ class KeyboardView(
                     val x = key.x + paddingLeft
                     val y = key.y + paddingTop
                     dirtyRect.set(x, y, x + key.width, y + key.height)
-                    canvas.save()
-                    canvas.clipRect(dirtyRect)
-                    canvas.drawColor(Color.BLACK, PorterDuff.Mode.CLEAR)
-                    background.draw(canvas)
-                    canvas.restore()
+                    canvas.withClip(dirtyRect) {
+                        drawColor(Color.BLACK, PorterDuff.Mode.CLEAR)
+                        background.draw(this)
+                    }
                 }
                 onDrawKey(key, canvas, paint)
             }
@@ -516,19 +490,16 @@ class KeyboardView(
         val keyDrawY = (key.y + paddingTop).toFloat()
         canvas.translate(keyDrawX, keyDrawY)
 
-        val currentKeyDrawableState = key.currentDrawableState
-        val keyBackground =
-            key.run { getBackColorForState(currentKeyDrawableState) }
-                ?: mKeyBackColor.run { stateDrawableAt(indexOfStateSet(currentKeyDrawableState)) }
-        if (keyBackground is GradientDrawable) {
-            keyBackground.cornerRadius =
-                if (key.roundCorner > 0) {
-                    key.roundCorner
-                } else {
-                    keyboard.roundCorner
-                }
+        val keyBackground = key.getBackgroundDrawable()
+        if (keyBackground != null) {
+            if (keyBackground is GradientDrawable) {
+                floatArrayOf(key.roundCorner, keyboard.roundCorner)
+                    .firstOrNull { it > 0f }
+                    ?.let { keyBackground.cornerRadius = it }
+            }
+            onDrawKeyBackground(key, canvas, keyBackground)
         }
-        onDrawKeyBackground(key, canvas, keyBackground)
+
         // Switch the character to uppercase if shift is pressed
 
         val centerX = key.width * 0.5f
@@ -554,8 +525,7 @@ class KeyboardView(
             val labelX = centerX + sp(key.keyTextOffsetX)
             val labelBaseline = centerY + sp(key.keyTextOffsetY)
 
-            paint.color = key.getTextColorForState(currentKeyDrawableState)
-                ?: mKeyTextColor.getColorForState(currentKeyDrawableState, Color.TRANSPARENT)
+            paint.color = key.getTextColor()
 
             // Draw a drop shadow for the text
             if (mShadowRadius > 0f) {
@@ -572,14 +542,10 @@ class KeyboardView(
 
             if (showKeySymbol || showKeyHint) {
                 paint.typeface = FontManager.getTypeface("symbol_font")
-                paint.textSize =
-                    if (key.symbolTextSize > 0) {
-                        sp(key.symbolTextSize)
-                    } else {
-                        sp(symbolTextSize)
-                    }
-                paint.color = key.getSymbolColorForState(currentKeyDrawableState)
-                    ?: if (key.isPressed) hilitedKeySymbolColor else keySymbolColor
+                floatArrayOf(key.symbolTextSize, symbolTextSize)
+                    .firstOrNull { it > 0f }
+                    ?.let { paint.textSize = sp(it) }
+                paint.color = key.getSymbolColor()
 
                 val fontMetrics = paint.fontMetrics
 

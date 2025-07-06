@@ -7,7 +7,6 @@ package com.osfans.trime.util
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -65,17 +64,3 @@ fun borderDrawable(
     setColor(background)
     setAlpha(alpha)
 }
-
-fun StateListDrawable.stateDrawableAt(index: Int): Drawable =
-    javaClass
-        .getMethod(
-            "getStateDrawable",
-            Int::class.javaPrimitiveType,
-        ).invoke(this, index) as Drawable
-
-fun StateListDrawable.indexOfStateSet(stateSet: IntArray): Int =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        findStateDrawableIndex(stateSet)
-    } else {
-        javaClass.getMethod("getStateDrawableIndex", IntArray::class.java).invoke(this, stateSet) as Int
-    }
