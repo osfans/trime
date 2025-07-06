@@ -15,7 +15,6 @@ import com.osfans.trime.core.Rime.Companion.showAsciiPunch
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.TextKeyboard
-import java.text.MessageFormat
 
 /** [鍵盤][Keyboard]中的各個按鍵，包含單擊、長按、滑動等多種[事件][KeyAction]  */
 @Suppress(
@@ -87,12 +86,25 @@ class Key(
         fallback: String,
     ) = ColorManager.getDrawable(src) ?: ColorManager.getDrawable(fallback)
 
-    private val keyBackColor by lazy { getDrawable(textKey.keyBackColor, "key_back_color") }
+    private val keyBackground by lazy { getDrawable(textKey.keyBackColor, "key_back_color") }
+    private val offKeyBackground by lazy { ColorManager.getDrawable("off_key_back_color") }
+    private val onKeyBackground by lazy { ColorManager.getDrawable("on_key_back_color") }
+
     private val keyTextColor by lazy { getColor(textKey.keyTextColor, "key_text_color") }
+    private val offKeyTextColor by lazy { ColorManager.getColor("off_key_text_color") }
+    private val onKeyTextColor by lazy { ColorManager.getColor("on_key_text_color") }
     private val keySymbolColor by lazy { getColor(textKey.keySymbolColor, "key_symbol_color") }
-    private val hilitedKeyBackColor by lazy { getDrawable(textKey.hlKeyBackColor, "hilited_key_back_color") }
-    private val hilitedKeyTextColor by lazy { getColor(textKey.hlKeyTextColor, "hilited_key_text_color") }
-    private val hilitedKeySymbolColor by lazy { getColor(textKey.hlKeySymbolColor, "hilited_key_symbol_color") }
+    private val offKeySymbolColor by lazy { ColorManager.getColor("off_key_symbol_color") }
+    private val onKeySymbolColor by lazy { ColorManager.getColor("on_key_symbol_color") }
+    private val hlKeyBackground by lazy { getDrawable(textKey.hlKeyBackColor, "hilited_key_back_color") }
+    private val hlOffKeyBackground by lazy { ColorManager.getDrawable("hilited_off_key_back_color") }
+    private val hlOnKeyBackground by lazy { ColorManager.getDrawable("hilited_on_key_back_color") }
+    private val hlKeyTextColor by lazy { getColor(textKey.hlKeyTextColor, "hilited_key_text_color") }
+    private val hlOffKeyTextColor by lazy { ColorManager.getColor("hilited_off_key_text_color") }
+    private val hlOnKeyTextColor by lazy { ColorManager.getColor("hilited_on_key_text_color") }
+    private val hlKeySymbolColor by lazy { getColor(textKey.hlKeySymbolColor, "hilited_key_symbol_color") }
+    private val hlOffKeySymbolColor by lazy { ColorManager.getColor("hilited_off_key_symbol_color") }
+    private val hlOnKeySymbolColor by lazy { ColorManager.getColor("hilited_on_key_symbol_color") }
 
     /**
      * Create an empty key with no attributes.
@@ -126,27 +138,6 @@ class Key(
         get() = if (isPressed) keyPressOffsetX else 0
     private val keyOffsetY: Int
         get() = if (isPressed) keyPressOffsetY else 0
-
-    fun getBackColorForState(drawableState: IntArray): Drawable? =
-        when (drawableState) {
-            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keyBackColor
-            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeyBackColor
-            else -> null
-        }
-
-    fun getTextColorForState(drawableState: IntArray): Int? =
-        when (drawableState) {
-            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keyTextColor
-            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeyTextColor
-            else -> null
-        }
-
-    fun getSymbolColorForState(drawableState: IntArray): Int? =
-        when (drawableState) {
-            KEY_STATE_NORMAL, KEY_STATE_OFF_NORMAL -> keySymbolColor
-            KEY_STATE_PRESSED, KEY_STATE_OFF_PRESSED -> hilitedKeySymbolColor
-            else -> null
-        }
 
     /**
      * Informs the key that it has been pressed, in case it needs to change its appearance or state.
@@ -212,39 +203,6 @@ class Key(
     val isModifierKey: Boolean
         // Trime把function键消费掉了，因此键盘只处理function键以外的修饰键
         get() = KeyEvent.isModifierKey(this.code) && this.code != KeyEvent.KEYCODE_FUNCTION
-
-    val currentDrawableState: IntArray
-        /**
-         * Returns the drawable state for the key, based on the current state and type of the key.
-         *
-         * @return the drawable state of the key.
-         * @see android.graphics.drawable.StateListDrawable.setState
-         */
-        get() {
-            val isShifted = isModifierKey && mKeyboard.hasModifier(modifierKeyOnMask)
-            val states =
-                when {
-                    isShifted || isOn -> if (isPressed) KEY_STATE_ON_PRESSED else KEY_STATE_ON_NORMAL
-                    click!!.isSticky || click!!.isFunctional -> if (isPressed) KEY_STATE_OFF_PRESSED else KEY_STATE_OFF_NORMAL
-                    else -> if (isPressed) KEY_STATE_PRESSED else KEY_STATE_NORMAL
-                }
-
-            // only for modiferKey debug
-            if (isModifierKey) {
-                mKeyboard.printModifierKeyState(
-                    MessageFormat.format(
-                        "getCurrentDrawableState() Key={0} states={1} on={2} isShifted={3} pressed={4} sticky={5}",
-                        getLabel(),
-                        listOf(*KEY_STATES).indexOf(states),
-                        isOn,
-                        isShifted,
-                        isPressed,
-                        click!!.isSticky,
-                    ),
-                )
-            }
-            return states
-        }
 
     val modifierKeyOnMask: Int
         get() = getModifierKeyOnMask(this.code)
@@ -323,40 +281,51 @@ class Key(
     val symbolLabel: String
         get() = labelSymbol.takeIf { it.isNotEmpty() } ?: longClick?.getLabel(mKeyboard) ?: ""
 
-    companion object {
-        val KEY_STATE_ON_NORMAL =
-            intArrayOf(
-                android.R.attr.state_checkable,
-                android.R.attr.state_checked,
-            )
+    private val appearanceType: Int
+        get() {
+            return when {
+                isModifierKey && mKeyboard.hasModifier(modifierKeyOnMask) || isOn -> 2
+                click?.isSticky == true || click?.isFunctional == true -> 1
+                else -> 0
+            }
+        }
 
-        val KEY_STATE_ON_PRESSED =
-            intArrayOf(
-                android.R.attr.state_pressed,
-                android.R.attr.state_checkable,
-                android.R.attr.state_checked,
-            )
+    fun getBackgroundDrawable(): Drawable? =
+        when (appearanceType) {
+            2 -> if (isPressed) hlOnKeyBackground else onKeyBackground
+            1 -> {
+                if (isPressed) {
+                    hlOffKeyBackground ?: hlKeyBackground
+                } else {
+                    offKeyBackground ?: keyBackground
+                }
+            }
+            else -> if (isPressed) hlKeyBackground else keyBackground
+        }
 
-        val KEY_STATE_OFF_NORMAL = intArrayOf(android.R.attr.state_checkable)
+    fun getTextColor(): Int =
+        when (appearanceType) {
+            2 -> if (isPressed) hlOnKeyTextColor else onKeyTextColor
+            1 -> {
+                if (isPressed) {
+                    hlOffKeyTextColor.takeIf { it != Color.TRANSPARENT } ?: hlKeyTextColor
+                } else {
+                    offKeyTextColor.takeIf { it != Color.TRANSPARENT } ?: keyTextColor
+                }
+            }
+            else -> if (isPressed) hlKeyTextColor else keyTextColor
+        }
 
-        val KEY_STATE_OFF_PRESSED =
-            intArrayOf(
-                android.R.attr.state_pressed,
-                android.R.attr.state_checkable,
-            )
-
-        val KEY_STATE_NORMAL = intArrayOf()
-
-        val KEY_STATE_PRESSED = intArrayOf(android.R.attr.state_pressed)
-
-        val KEY_STATES =
-            arrayOf(
-                KEY_STATE_ON_PRESSED, // 0    "hilited_on_key_back_color"   锁定时按下的背景
-                KEY_STATE_ON_NORMAL, // 1     "on_key_back_color"           锁定时背景
-                KEY_STATE_OFF_PRESSED, // 2   "hilited_off_key_back_color"  功能键按下的背景
-                KEY_STATE_OFF_NORMAL, // 3    "off_key_back_color"          功能键背景
-                KEY_STATE_PRESSED, // 4       "hilited_key_back_color"      按键按下的背景
-                KEY_STATE_NORMAL, // 5        "key_back_color"              按键背景
-            )
-    }
+    fun getSymbolColor(): Int =
+        when (appearanceType) {
+            2 -> if (isPressed) hlOnKeySymbolColor else onKeySymbolColor
+            1 -> {
+                if (isPressed) {
+                    hlOffKeySymbolColor.takeIf { it != Color.TRANSPARENT } ?: hlKeySymbolColor
+                } else {
+                    offKeySymbolColor.takeIf { it != Color.TRANSPARENT } ?: keySymbolColor
+                }
+            }
+            else -> if (isPressed) hlKeySymbolColor else keySymbolColor
+        }
 }
