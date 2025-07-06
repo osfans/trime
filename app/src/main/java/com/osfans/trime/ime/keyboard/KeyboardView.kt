@@ -35,6 +35,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import splitties.dimensions.dp
 import timber.log.Timber
 import java.util.Arrays
 import kotlin.math.abs
@@ -495,7 +496,7 @@ class KeyboardView(
             if (keyBackground is GradientDrawable) {
                 floatArrayOf(key.roundCorner, keyboard.roundCorner)
                     .firstOrNull { it > 0f }
-                    ?.let { keyBackground.cornerRadius = it }
+                    ?.let { keyBackground.cornerRadius = dp(it) }
             }
             onDrawKeyBackground(key, canvas, keyBackground)
         }

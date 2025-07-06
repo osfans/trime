@@ -18,6 +18,7 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
@@ -99,11 +100,21 @@ class KeyboardWindow(
         }
     }
 
+    private fun selectKeyboardConfig(name: String): TextKeyboard? {
+        val config = theme.presetKeyboards[name] ?: theme.presetKeyboards["default"]
+        val importPreset = config?.importPreset
+        if (!importPreset.isNullOrEmpty()) {
+            return selectKeyboardConfig(importPreset)
+        }
+        return config
+    }
+
     private fun attachKeyboard(target: String) {
         currentKeyboardId = target
         lastKeyboardId = target
+        val newConfig = selectKeyboardConfig(target)
         val newKeyboard =
-            (currentKeyboard ?: Keyboard(theme, target)).also {
+            (currentKeyboard ?: Keyboard(theme, newConfig)).also {
                 runBlocking {
                     _currentKeyboardHeight.emit(it.keyboardHeight)
                 }
