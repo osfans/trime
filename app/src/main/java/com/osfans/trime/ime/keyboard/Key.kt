@@ -17,27 +17,25 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.TextKeyboard
 
 /** [鍵盤][Keyboard]中的各個按鍵，包含單擊、長按、滑動等多種[事件][KeyAction]  */
-@Suppress(
-    "ktlint:standard:property-naming",
-    "ktlint:standard:value-argument-comment",
-)
 class Key(
-    private val mKeyboard: Keyboard,
+    private val parent: Keyboard,
+    private val selfConfig: TextKeyboard.TextKey? = null,
 ) {
-    val keyActions = hashMapOf<KeyBehavior, KeyAction>()
+    val keyActions: MutableMap<KeyBehavior, KeyAction> =
+        buildMap {
+            selfConfig?.behaviors?.forEach {
+                put(it.key, KeyActionManager.getAction(it.value))
+            }
+        }.toMutableMap()
     var edgeFlags = 0
-    private var sendBindings = true
-    private lateinit var textKey: TextKeyboard.TextKey
+    private val sendBindings: Boolean
 
     var isPressed = false
         private set
     var isOn = false
         private set
 
-    @JvmField
     var x = 0
-
-    @JvmField
     var y = 0
 
     var width = 0
@@ -46,17 +44,13 @@ class Key(
     var row = 0
     var column = 0
 
-    private var label = ""
-    private var labelSymbol = ""
-    var hint: String = ""
-        private set
+    private val label = selfConfig?.label ?: ""
+    private val labelSymbol = selfConfig?.labelSymbol ?: ""
+    val hint: String = selfConfig?.hint ?: ""
 
-    var keyTextSize: Float = 0f
-        private set
-    var symbolTextSize: Float = 0f
-        private set
-    var roundCorner: Float = 0f
-        private set
+    val keyTextSize: Float = selfConfig?.keyTextSize ?: 0f
+    val symbolTextSize: Float = selfConfig?.symbolTextSize ?: 0f
+    val roundCorner: Float = selfConfig?.roundCorner ?: 0f
     var keyTextOffsetX = 0f
         get() = field + keyOffsetX
     var keyTextOffsetY = 0f
@@ -73,60 +67,50 @@ class Key(
     var keyPressOffsetY = 0
 
     private fun getColor(
-        src: String,
+        src: TextKeyboard.TextKey.() -> String,
         fallback: String,
     ): Int =
-        ColorManager
-            .getColor(src)
-            .takeIf { it != Color.TRANSPARENT }
-            ?: ColorManager.getColor(fallback)
+        selfConfig?.let {
+            ColorManager
+                .getColor(src(selfConfig))
+                .takeIf { it != Color.TRANSPARENT }
+        } ?: ColorManager.getColor(fallback)
 
     private fun getDrawable(
-        src: String,
+        src: TextKeyboard.TextKey.() -> String,
         fallback: String,
-    ) = ColorManager.getDrawable(src) ?: ColorManager.getDrawable(fallback)
+    ) = selfConfig?.let { ColorManager.getDrawable(src(it)) }
+        ?: ColorManager.getDrawable(fallback)
 
-    private val keyBackground by lazy { getDrawable(textKey.keyBackColor, "key_back_color") }
+    private val keyBackground by lazy { getDrawable({ keyBackColor }, "key_back_color") }
     private val offKeyBackground by lazy { ColorManager.getDrawable("off_key_back_color") }
     private val onKeyBackground by lazy { ColorManager.getDrawable("on_key_back_color") }
 
-    private val keyTextColor by lazy { getColor(textKey.keyTextColor, "key_text_color") }
+    private val keyTextColor by lazy { getColor({ keyTextColor }, "key_text_color") }
     private val offKeyTextColor by lazy { ColorManager.getColor("off_key_text_color") }
     private val onKeyTextColor by lazy { ColorManager.getColor("on_key_text_color") }
-    private val keySymbolColor by lazy { getColor(textKey.keySymbolColor, "key_symbol_color") }
+    private val keySymbolColor by lazy { getColor({ keySymbolColor }, "key_symbol_color") }
     private val offKeySymbolColor by lazy { ColorManager.getColor("off_key_symbol_color") }
     private val onKeySymbolColor by lazy { ColorManager.getColor("on_key_symbol_color") }
-    private val hlKeyBackground by lazy { getDrawable(textKey.hlKeyBackColor, "hilited_key_back_color") }
+    private val hlKeyBackground by lazy { getDrawable({ hlKeyBackColor }, "hilited_key_back_color") }
     private val hlOffKeyBackground by lazy { ColorManager.getDrawable("hilited_off_key_back_color") }
     private val hlOnKeyBackground by lazy { ColorManager.getDrawable("hilited_on_key_back_color") }
-    private val hlKeyTextColor by lazy { getColor(textKey.hlKeyTextColor, "hilited_key_text_color") }
+    private val hlKeyTextColor by lazy { getColor({ hlKeyTextColor }, "hilited_key_text_color") }
     private val hlOffKeyTextColor by lazy { ColorManager.getColor("hilited_off_key_text_color") }
     private val hlOnKeyTextColor by lazy { ColorManager.getColor("hilited_on_key_text_color") }
-    private val hlKeySymbolColor by lazy { getColor(textKey.hlKeySymbolColor, "hilited_key_symbol_color") }
+    private val hlKeySymbolColor by lazy { getColor({ hlKeySymbolColor }, "hilited_key_symbol_color") }
     private val hlOffKeySymbolColor by lazy { ColorManager.getColor("hilited_off_key_symbol_color") }
     private val hlOnKeySymbolColor by lazy { ColorManager.getColor("hilited_on_key_symbol_color") }
 
-    /**
-     * Create an empty key with no attributes.
-     *
-     * @param parent 按鍵所在的[鍵盤][Keyboard]
-     * @param textKey 從YAML中解析得到的按键定义
-     */
-    constructor(parent: Keyboard, textKey: TextKeyboard.TextKey) : this(parent) {
-        this.textKey = textKey
-        textKey.behaviors.forEach {
-            keyActions[it.key] = KeyActionManager.getAction(it.value)
+    init {
+        if (selfConfig != null) {
+            val hasComposingKey = selfConfig.behaviors.keys.any { it < KeyBehavior.COMBO }
+            if (hasComposingKey) parent.composingKeys.add(this)
+            sendBindings = selfConfig.sendBindings || hasComposingKey
+        } else {
+            sendBindings = true
         }
-        val hasComposingKey = textKey.behaviors.keys.any { it < KeyBehavior.COMBO }
-        if (hasComposingKey) mKeyboard.composingKeys.add(this)
-        label = textKey.label
-        labelSymbol = textKey.labelSymbol
-        hint = textKey.hint
-        keyTextSize = textKey.keyTextSize
-        symbolTextSize = textKey.symbolTextSize
-        roundCorner = textKey.roundCorner
-        sendBindings = textKey.sendBindings || hasComposingKey
-        mKeyboard.setModiferKey(this.code, this)
+        parent.setModiferKey(this.code, this)
     }
 
     fun setOn(on: Boolean): Boolean {
@@ -269,22 +253,22 @@ class Key(
                 keyAction == click &&
                 keyActions[KeyBehavior.ASCII] == null &&
                 !showAsciiPunch() -> label
-            else -> keyAction!!.getLabel(mKeyboard) // 中文狀態顯示標籤
+            else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
         }
 
     fun getPreviewText(behavior: KeyBehavior): String =
         when (behavior) {
-            KeyBehavior.CLICK -> keyAction!!.getPreview(mKeyboard)
-            else -> getAction(behavior)!!.getPreview(mKeyboard)
+            KeyBehavior.CLICK -> keyAction!!.getPreview(parent)
+            else -> getAction(behavior)!!.getPreview(parent)
         }
 
     val symbolLabel: String
-        get() = labelSymbol.takeIf { it.isNotEmpty() } ?: longClick?.getLabel(mKeyboard) ?: ""
+        get() = labelSymbol.ifEmpty { longClick?.getLabel(parent) ?: "" }
 
     private val appearanceType: Int
         get() {
             return when {
-                isModifierKey && mKeyboard.hasModifier(modifierKeyOnMask) || isOn -> 2
+                isModifierKey && parent.hasModifier(modifierKeyOnMask) || isOn -> 2
                 click?.isSticky == true || click?.isFunctional == true -> 1
                 else -> 0
             }
