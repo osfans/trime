@@ -11,7 +11,6 @@ import kotlin.math.abs
 import kotlin.math.ceil
 
 class KeyboardSizeCalculator(
-    val name: String,
     isSplit: Boolean,
     splitPercent: Int,
     private val maxColumns: Int,

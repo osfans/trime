@@ -150,7 +150,7 @@ class CommonKeyboardActionListener(
                     service.commitText(action.commit, true)
                     return
                 }
-                KeyboardSwitcher.currentKeyboard?.let {
+                KeyboardSwitcher.currentKeyboard.let {
                     if (action.getText(it).isNotEmpty()) {
                         onText(action.getText(it))
                         return

@@ -15,18 +15,19 @@ import com.osfans.trime.core.Rime.Companion.showAsciiPunch
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.TextKeyboard
+import splitties.bitflags.hasFlag
 
 /** [鍵盤][Keyboard]中的各個按鍵，包含單擊、長按、滑動等多種[事件][KeyAction]  */
 class Key(
     private val parent: Keyboard,
     private val selfConfig: TextKeyboard.TextKey? = null,
 ) {
-    val keyActions: MutableMap<KeyBehavior, KeyAction> =
+    val keyActions: Map<KeyBehavior, KeyAction> =
         buildMap {
             selfConfig?.behaviors?.forEach {
                 put(it.key, KeyActionManager.getAction(it.value))
             }
-        }.toMutableMap()
+        }
     var edgeFlags = 0
     private val sendBindings: Boolean
 
@@ -268,7 +269,7 @@ class Key(
     private val appearanceType: Int
         get() {
             return when {
-                isModifierKey && parent.hasModifier(modifierKeyOnMask) || isOn -> 2
+                isModifierKey && parent.modifier.hasFlag(modifierKeyOnMask) || isOn -> 2
                 click?.isSticky == true || click?.isFunctional == true -> 1
                 else -> 0
             }
