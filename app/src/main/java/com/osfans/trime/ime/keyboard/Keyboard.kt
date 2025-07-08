@@ -345,7 +345,7 @@ class Keyboard(
         mask: Int,
         value: Boolean,
     ): Boolean {
-        if (!modifier.hasFlag(mask)) return false
+        if (modifier.hasFlag(mask) == value) return false
         modifier = if (value) modifier or mask else modifier and mask.inv()
         return true
     }
