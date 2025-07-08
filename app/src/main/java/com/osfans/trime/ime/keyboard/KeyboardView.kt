@@ -574,7 +574,7 @@ class KeyboardView(
     ) {
         val padding = Rect().also { background.getPadding(it) }
         val bgWidth = key.width + padding.left + padding.right
-        val bgHeight = key.height + padding.top + padding.right
+        val bgHeight = key.height + padding.top + padding.bottom
         val bgX = -padding.left.toFloat()
         val bgY = -padding.top.toFloat()
         background.setBounds(0, 0, bgWidth, bgHeight)
