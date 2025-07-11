@@ -137,9 +137,8 @@ object ColorManager {
     private fun evaluateActiveColorScheme(): ColorScheme =
         when {
             followSystemDayNight -> if (isNightMode) darkModeColorScheme else lightModeColorScheme
-            else -> null
-        } ?: colorScheme(normalModeColor) ?: colorScheme("default")
-            ?: throw IllegalArgumentException("Failed to evaluate valid color scheme")
+            else -> colorScheme(normalModeColor)
+        } ?: colorScheme("default") ?: theme.colorSchemes.first()
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
