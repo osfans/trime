@@ -5,7 +5,11 @@
 package com.osfans.trime.data.theme
 
 import android.os.Parcelable
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.yamlScalar
 import com.osfans.trime.core.Rime
+import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.mapper.LiquidKeyboardMapper
 import com.osfans.trime.data.theme.mapper.PresetKeyMapper
@@ -15,9 +19,10 @@ import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.data.theme.model.TextKeyboard
-import com.osfans.trime.util.config.Config
+import com.osfans.trime.util.getString
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
+import java.io.File
 
 /** 主题和样式配置  */
 @Parcelize
@@ -34,31 +39,43 @@ data class Theme(
     companion object {
         private const val CONFIG_VERSION_KEY = "config_version"
 
-        fun open(configId: String): Theme {
+        fun decodeByConfigId(configId: String): Theme {
             if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
                 Timber.w("Failed to deploy theme config file '$configId.yaml'")
             }
-            return Config.openConfig(configId).let { c ->
-                Theme(
-                    configId = configId,
-                    name = c.getString("name"),
-                    generalStyle = GeneralStyleMapper("style", c).map(),
-                    liquidKeyboard = LiquidKeyboardMapper("liquid_keyboard", c).map(),
-                    presetKeys =
-                        c.getMap("preset_keys").mapValues {
-                            PresetKeyMapper("preset_keys/${it.key}", c).map()
-                        },
-                    presetKeyboards =
-                        c.getMap("preset_keyboards").mapValues {
-                            TextKeyboardMapper("preset_keyboards/${it.key}", c).map()
-                        },
-                    colorSchemes =
-                        c
-                            .getMap("preset_color_schemes")
-                            .map { ColorScheme(it.key, it.value.getStringValueMap("")) },
-                    fallbackColors = c.getStringValueMap("fallback_colors"),
-                )
-            }
+            val file = File(DataManager.resolveDeployedResourcePath(configId))
+            val root = ThemeFilesManager.yaml.parseToYamlNode(file.readText()).yamlMap
+            return Theme(
+                configId = configId,
+                name = root.getString("name"),
+                generalStyle = GeneralStyleMapper(root.get<YamlMap>("style")!!).map(),
+                liquidKeyboard =
+                    when (val node = root.get<YamlMap>("liquid_keyboard")) {
+                        null -> LiquidKeyboard()
+                        else -> LiquidKeyboardMapper(node).map()
+                    },
+                presetKeys =
+                    root.get<YamlMap>("preset_keys")?.entries?.entries?.associate {
+                        it.key.content to PresetKeyMapper(it.value.yamlMap).map()
+                    } ?: emptyMap(),
+                presetKeyboards =
+                    root.get<YamlMap>("preset_keyboards")?.entries?.entries?.associate {
+                        it.key.content to TextKeyboardMapper(it.value.yamlMap).map()
+                    } ?: emptyMap(),
+                colorSchemes =
+                    root.get<YamlMap>("preset_color_schemes")?.entries?.entries?.map {
+                        ColorScheme(
+                            it.key.content,
+                            it.value.yamlMap.entries.entries.associate { (k, v) ->
+                                k.content to v.yamlScalar.content
+                            },
+                        )
+                    } ?: emptyList(),
+                fallbackColors =
+                    root.get<YamlMap>("fallback_colors")?.entries?.entries?.associate {
+                        it.key.content to it.value.yamlScalar.content
+                    } ?: emptyMap(),
+            )
         }
     }
 }

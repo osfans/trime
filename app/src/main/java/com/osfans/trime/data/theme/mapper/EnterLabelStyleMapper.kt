@@ -4,13 +4,12 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.GeneralStyle
-import com.osfans.trime.util.config.Config
 
 class EnterLabelStyleMapper(
-    prefix: String,
-    config: Config,
-) : Mapper<GeneralStyle.EnterLabel>(prefix, config) {
+    node: YamlMap,
+) : Mapper<GeneralStyle.EnterLabel>(node) {
     override fun map() =
         GeneralStyle.EnterLabel(
             go = getString("go", "go"),

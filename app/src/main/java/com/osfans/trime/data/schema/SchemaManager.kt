@@ -4,6 +4,8 @@
 
 package com.osfans.trime.data.schema
 
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import com.osfans.trime.core.Rime
 import timber.log.Timber
 
@@ -11,9 +13,17 @@ object SchemaManager {
     private lateinit var currentSchema: Schema
     var visibleSwitches: List<Schema.Switch> = listOf()
 
+    val yaml =
+        Yaml(
+            configuration =
+                YamlConfiguration(
+                    strictMode = false,
+                ),
+        )
+
     @JvmStatic
     fun init(schemaId: String) {
-        currentSchema = Schema.open(schemaId)
+        currentSchema = Schema.decodeBySchemaId(schemaId)
         visibleSwitches =
             currentSchema.switches
                 .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用

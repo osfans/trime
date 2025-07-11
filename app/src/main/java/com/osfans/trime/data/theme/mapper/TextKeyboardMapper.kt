@@ -5,25 +5,24 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.keyboard.KeyBehavior
-import com.osfans.trime.util.config.Config
+import com.osfans.trime.util.getBool
+import com.osfans.trime.util.getFloat
+import com.osfans.trime.util.getInt
+import com.osfans.trime.util.getString
 import timber.log.Timber
 
 class TextKeyboardMapper(
-    prefix: String,
-    config: Config,
-) : Mapper<TextKeyboard>(prefix, config) {
+    node: YamlMap,
+) : Mapper<TextKeyboard>(node) {
     override fun map(): TextKeyboard {
-        val labelTransform =
-            try {
-                TextKeyboard.LabelTransform.valueOf(getString("label_transform", "NONE").uppercase())
-            } catch (_: IllegalArgumentException) {
-                TextKeyboard.LabelTransform.NONE
-            }
         val keys =
             try {
-                getList("keys").map {
+                getList("keys")?.map { node ->
+                    val it = node.yamlMap
                     TextKeyboard.TextKey(
                         width = it.getFloat("width"),
                         height = it.getFloat("height"),
@@ -59,7 +58,7 @@ class TextKeyboardMapper(
                                 }
                             },
                     )
-                }
+                } ?: emptyList()
             } catch (e: Exception) {
                 Timber.w(e, "Failed to decode TextKeyboard property 'keys'")
                 listOf()
@@ -78,7 +77,7 @@ class TextKeyboardMapper(
             columns = getInt("columns", 30),
             asciiMode = getInt("ascii_mode", 1) == 1,
             resetAsciiMode = getBoolean("reset_ascii_mode", true),
-            labelTransform = labelTransform,
+            labelTransform = getEnum("label_transform", TextKeyboard.LabelTransform.NONE),
             lock = getBoolean("lock"),
             asciiKeyboard = getString("ascii_keyboard"),
             landscapeKeyboard = getString("landscape_keyboard"),

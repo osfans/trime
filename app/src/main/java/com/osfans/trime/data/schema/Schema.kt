@@ -4,12 +4,21 @@
 
 package com.osfans.trime.data.schema
 
-import com.osfans.trime.util.config.Config
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.yamlMap
+import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.util.getInt
+import com.osfans.trime.util.getString
+import com.osfans.trime.util.getStringList
+import com.osfans.trime.util.traverse
 import timber.log.Timber
+import java.io.File
 
 data class Schema(
     val switches: List<Switch> = emptyList(),
-    val symbols: Map<String, Config> = emptyMap(),
+    val symbolKeys: List<String> = emptyList(),
     val alphabet: String = "",
 ) {
     data class Switch(
@@ -21,25 +30,32 @@ data class Schema(
     )
 
     companion object {
-        fun open(schemaId: String): Schema {
-            val c = Config.openSchema(schemaId)
+        fun decodeBySchemaId(schemaId: String): Schema {
+            val file = File(DataManager.resolveDeployedResourcePath("$schemaId.schema"))
+            val root = SchemaManager.yaml.parseToYamlNode(file.readText()).yamlMap
             return Schema(
                 switches =
-                    c.getList("switches").mapNotNull decode@{ e ->
+                    root.get<YamlList>("switches")?.items?.mapNotNull decode@{
+                        val e = it.yamlMap
                         try {
                             Switch(
                                 name = e.getString("name"),
-                                options = e.getStringList("options"),
+                                options = e.getStringList("options") ?: emptyList(),
                                 reset = e.getInt("reset", -1),
-                                states = e.getStringList("states"),
+                                states = e.getStringList("states") ?: emptyList(),
                             )
                         } catch (e: Exception) {
                             Timber.e(e, "Failed to decode switches of schema '$schemaId'")
                             null
                         }
-                    },
-                symbols = c.getMap("punctuator/symbols"),
-                alphabet = c.getString("speller/alphabet"),
+                    } ?: emptyList(),
+                symbolKeys =
+                    root
+                        .traverse<YamlMap>("punctuator/symbols")
+                        ?.entries
+                        ?.keys
+                        ?.map { it.content } ?: emptyList(),
+                alphabet = root.traverse<YamlScalar>("speller/alphabet")?.content ?: "",
             )
         }
     }

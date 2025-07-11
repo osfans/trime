@@ -5,47 +5,55 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlList
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.yamlList
+import com.charleskorn.kaml.yamlScalar
 import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.symbol.SimpleKeyBean
 import com.osfans.trime.ime.symbol.SymbolBoardType
-import com.osfans.trime.util.config.Config
+import com.osfans.trime.util.getEnum
+import com.osfans.trime.util.getString
 import timber.log.Timber
 
 class LiquidKeyboardMapper(
-    prefix: String,
-    config: Config,
-) : Mapper<LiquidKeyboard>(prefix, config) {
+    node: YamlMap,
+) : Mapper<LiquidKeyboard>(node) {
     override fun map(): LiquidKeyboard {
+        val fixedKeyBarNode = node.get<YamlMap>("fixed_key_bar")
         val fixedKeyBar =
-            LiquidKeyboard.KeyBar(
-                position =
-                    try {
-                        LiquidKeyboard.KeyBar.Position.valueOf(
-                            getString("fixed_key_bar/position", "BOTTOM").uppercase(),
-                        )
-                    } catch (_: IllegalArgumentException) {
-                        LiquidKeyboard.KeyBar.Position.BOTTOM
-                    },
-                keys = getStringList("fixed_key_bar/keys"),
-            )
+            if (fixedKeyBarNode != null) {
+                LiquidKeyboard.KeyBar(
+                    position = fixedKeyBarNode.getEnum("position", LiquidKeyboard.KeyBar.Position.BOTTOM),
+                    keys =
+                        fixedKeyBarNode
+                            .get<YamlList>("keys")
+                            ?.items
+                            ?.map { it.yamlScalar.content } ?: emptyList(),
+                )
+            } else {
+                LiquidKeyboard.KeyBar(emptyList(), LiquidKeyboard.KeyBar.Position.BOTTOM)
+            }
         val keyboards =
             getStringList("keyboards").mapNotNull decode@{ id ->
                 try {
-                    if (!config.isNull("$prefix/$id/type")) {
-                        val type =
-                            try {
-                                SymbolBoardType.valueOf(getString("$id/type").uppercase())
-                            } catch (_: IllegalArgumentException) {
-                                return@decode null
-                            }
+                    val keyboardNode = node.get<YamlMap>(id)
+                    val type = keyboardNode?.getEnum<SymbolBoardType>("type")
+                    if (type != null) {
+                        val keysNode = keyboardNode.get<YamlNode>("keys")
                         val keys =
-                            if (config.isList("$prefix/$id/keys")) {
-                                val list = getList("$id/keys")
+                            if (keysNode is YamlList) {
+                                val list = keysNode.yamlList.items
                                 buildList {
                                     for (item in list) {
-                                        if (item.isMap("")) {
-                                            val map = item.getStringValueMap("")
+                                        if (item is YamlMap) {
+                                            val map =
+                                                item.entries.entries.associate {
+                                                    it.key.content to it.value.yamlScalar.content
+                                                }
                                             if (map.containsKey("click")) {
                                                 add(
                                                     SimpleKeyBean(
@@ -54,11 +62,11 @@ class LiquidKeyboardMapper(
                                                     ),
                                                 )
                                             } else {
-                                                val symbolMaps =
-                                                    SchemaManager.activeSchema.symbols
+                                                val symbolKeys =
+                                                    SchemaManager.activeSchema.symbolKeys
                                                 addAll(
                                                     map
-                                                        .filter { symbolMaps.containsKey(it.value) }
+                                                        .filter { symbolKeys.contains(it.value) }
                                                         .map {
                                                             SimpleKeyBean(
                                                                 it.value,
@@ -67,13 +75,13 @@ class LiquidKeyboardMapper(
                                                         },
                                                 )
                                             }
-                                        } else {
-                                            add(SimpleKeyBean(item.getString("")))
+                                        } else if (item is YamlScalar) {
+                                            add(SimpleKeyBean(item.content))
                                         }
                                     }
                                 }
                             } else {
-                                val value = getString("$id/keys")
+                                val value = keysNode?.yamlScalar?.content ?: ""
                                 if (type == SymbolBoardType.SINGLE) { // single data
                                     buildList {
                                         var h = Char(0)
@@ -106,7 +114,7 @@ class LiquidKeyboardMapper(
                         return@decode LiquidKeyboard.Keyboard(
                             id = id,
                             type = type,
-                            name = getString("$id/name", id),
+                            name = keyboardNode.getString("name", id),
                             keys = keys,
                         )
                     } else {
