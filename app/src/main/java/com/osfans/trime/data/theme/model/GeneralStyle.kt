@@ -103,12 +103,12 @@ data class GeneralStyle(
 
     @Parcelize
     data class EnterLabel(
-        val go: String,
-        val done: String,
-        val next: String,
-        val pre: String,
-        val search: String,
-        val send: String,
-        val default: String,
+        val go: String = "go",
+        val done: String = "done",
+        val next: String = "next",
+        val pre: String = "pre",
+        val search: String = "search",
+        val send: String = "send",
+        val default: String = "default",
     ) : Parcelable
 }

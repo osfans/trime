@@ -5,13 +5,12 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.PresetKey
-import com.osfans.trime.util.config.Config
 
 class PresetKeyMapper(
-    prefix: String,
-    config: Config,
-) : Mapper<PresetKey>(prefix, config) {
+    node: YamlMap,
+) : Mapper<PresetKey>(node) {
     override fun map() =
         PresetKey(
             command = getString("command"),

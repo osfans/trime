@@ -48,7 +48,7 @@ object ThemeManager {
     val prefs = AppPrefs.defaultInstance().registerProvider(::ThemePrefs)
 
     private fun evaluateActiveTheme(): Theme {
-        val newTheme = Theme.open(prefs.selectedTheme.getValue())
+        val newTheme = Theme.decodeByConfigId(prefs.selectedTheme.getValue())
         KeyActionManager.resetCache()
         FontManager.resetCache(newTheme)
         ColorManager.switchTheme(newTheme)
@@ -61,7 +61,8 @@ object ThemeManager {
         ColorManager.init(configuration)
     }
 
-    fun selectTheme(theme: Theme) {
+    fun selectTheme(configId: String) {
+        val theme = Theme.decodeByConfigId(configId)
         KeyActionManager.resetCache()
         FontManager.resetCache(theme)
         ColorManager.switchTheme(theme)

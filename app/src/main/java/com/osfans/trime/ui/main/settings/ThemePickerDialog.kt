@@ -8,7 +8,6 @@ import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.osfans.trime.R
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,7 +39,7 @@ object ThemePickerDialog {
                         scope.launch {
                             afterConfirm?.invoke()
                             val newItem = allThemes[which]
-                            ThemeManager.selectTheme(Theme.open(newItem.configId))
+                            ThemeManager.selectTheme(newItem.configId)
                             dialog.dismiss()
                         }
                     }

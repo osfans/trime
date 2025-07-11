@@ -12,16 +12,16 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class LiquidKeyboard(
-    val singleWidth: Int,
-    val keyHeight: Int,
-    val marginX: Float,
-    val fixedKeyBar: KeyBar,
-    val keyboards: List<Keyboard>,
+    val singleWidth: Int = 0,
+    val keyHeight: Int = 0,
+    val marginX: Float = 0f,
+    val fixedKeyBar: KeyBar = KeyBar(),
+    val keyboards: List<Keyboard> = emptyList(),
 ) : Parcelable {
     @Parcelize
     data class KeyBar(
-        val keys: List<String>,
-        val position: Position,
+        val keys: List<String> = emptyList(),
+        val position: Position = Position.BOTTOM,
     ) : Parcelable {
         enum class Position {
             TOP,

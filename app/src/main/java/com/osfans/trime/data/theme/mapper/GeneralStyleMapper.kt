@@ -4,13 +4,12 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.GeneralStyle
-import com.osfans.trime.util.config.Config
 
 class GeneralStyleMapper(
-    prefix: String,
-    config: Config,
-) : Mapper<GeneralStyle>(prefix, config) {
+    node: YamlMap,
+) : Mapper<GeneralStyle>(node) {
     override fun map() =
         GeneralStyle(
             autoCaps = getString("auto_caps"),
@@ -27,13 +26,7 @@ class GeneralStyleMapper(
             commentFont = getStringList("comment_font"),
             commentHeight = getInt("comment_height"),
             commentOnTop = getBoolean("comment_on_top"),
-            commentPosition =
-                runCatching {
-                    val s = getString("comment_position")
-                    GeneralStyle.CommentPosition.valueOf(s.uppercase())
-                }.getOrElse {
-                    GeneralStyle.CommentPosition.UNKNOWN
-                },
+            commentPosition = getEnum("comment_position", GeneralStyle.CommentPosition.UNKNOWN),
             commentTextSize = getFloat("comment_text_size"),
             hanbFont = getStringList("hanb_font"),
             horizontal = getBoolean("horizontal"),
@@ -44,7 +37,7 @@ class GeneralStyleMapper(
             keyboardPaddingBottom = getInt("keyboard_padding_bottom"),
             keyboardPaddingLand = getInt("keyboard_padding_land"),
             keyboardPaddingLandBottom = getInt("keyboard_padding_land_bottom"),
-            layout = LayoutStyleMapper("$prefix/layout", config).map(),
+            layout = LayoutStyleMapper(node.get<YamlMap>("layout")!!).map(),
             keyFont = getStringList("key_font"),
             keyBorder = getInt("key_border"),
             keyHeight = getInt("key_height"),
@@ -86,6 +79,10 @@ class GeneralStyleMapper(
             backgroundFolder = getString("background_folder"),
             keyLongTextBorder = getInt("key_long_text_border"),
             enterLabelMode = getInt("enter_label_mode"),
-            enterLabel = EnterLabelStyleMapper("$prefix/enter_labels", config).map(),
+            enterLabel =
+                when (val map = node.get<YamlMap>("enter_labels")) {
+                    null -> GeneralStyle.EnterLabel()
+                    else -> EnterLabelStyleMapper(map).map()
+                },
         )
 }

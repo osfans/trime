@@ -4,13 +4,12 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlMap
 import com.osfans.trime.data.theme.model.GeneralStyle
-import com.osfans.trime.util.config.Config
 
 class LayoutStyleMapper(
-    prefix: String,
-    config: Config,
-) : Mapper<GeneralStyle.Layout>(prefix, config) {
+    node: YamlMap,
+) : Mapper<GeneralStyle.Layout>(node) {
     override fun map() =
         GeneralStyle.Layout(
             border = getInt("border"),
