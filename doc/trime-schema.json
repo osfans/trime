@@ -23,10 +23,6 @@
           "default": false,
           "description": "自动句首大写"
         },
-        "background_dim_amount": {
-          "type": "number",
-          "description": "备用参数，暂无功能"
-        },
         "candidate_font": {
           "type": "string",
           "description": "候選字型"
@@ -50,10 +46,6 @@
         "candidate_view_height": {
           "type": "integer",
           "description": "候選區高度"
-        },
-        "color_scheme": {
-          "type": "string",
-          "description": "配色方案"
         },
         "comment_font": {
           "type": "string",
@@ -111,20 +103,6 @@
           "type": "object",
           "description": "懸浮窗口設置",
           "properties": {
-            "position": {
-              "enum": [
-                "left",
-                "right",
-                "left_up",
-                "right_up",
-                "fixed",
-                "bottom_left",
-                "bottom_right",
-                "top_left",
-                "top_right"
-              ],
-              "description": "位置 (left、right需要>=Android5.0)"
-            },
             "min_length": {
               "type": "integer",
               "description": "最小詞長"
@@ -132,27 +110,6 @@
             "max_length": {
               "type": "integer",
               "description": "超過字數則換行"
-            },
-            "sticky_lines": {
-              "type": "integer",
-              "description": "固頂行數"
-            },
-            "sticky_lines_land": {
-              "type": "integer",
-              "description": "横屏模式下的固顶行数"
-            },
-            "max_entries": {
-              "type": "integer",
-              "description": "最大詞條數"
-            },
-            "min_check": {
-              "type": "integer",
-              "description": "只要前n个候选词有长度大于等于min_length的词，就会把长度符合以及之前的词全部加到悬浮窗内"
-            },
-            "all_phrases": {
-              "type": "boolean",
-              "default": false,
-              "description": "所有滿足條件的詞語都顯示在窗口"
             },
             "border": {
               "type": "integer",
@@ -182,10 +139,6 @@
               "type": "integer",
               "description": "豎直邊距"
             },
-            "margin_bottom": {
-              "type": "integer",
-              "description": "底部边距 （用于适配特定背景图）"
-            },
             "line_spacing": {
               "type": "integer",
               "description": "候选詞的行間距(px)"
@@ -193,10 +146,6 @@
             "line_spacing_multiplier": {
               "type": "number",
               "description": "候选詞的行間距(倍數)"
-            },
-            "real_margin": {
-              "type": "integer",
-              "description": "屏幕左右边缘和悬浮窗之间的距离"
             },
             "spacing": {
               "type": "integer",
@@ -211,78 +160,6 @@
               "minimum": 0,
               "maximum": 255,
               "description": "透明度"
-            },
-            "elevation": {
-              "type": "integer",
-              "description": "陰影(>=Android5.0)"
-            },
-            "movable": {
-              "enum": [true, false, "once"],
-              "description": "是否可移動窗口，或僅移動一次"
-            }
-          }
-        },
-        "window": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "start": {
-                "type": "string",
-                "default": ""
-              },
-              "end": {
-                "type": "string",
-                "default": ""
-              },
-              "move": {
-                "type": "string",
-                "default": ""
-              },
-              "composition": {
-                "type": "string",
-                "default": ""
-              },
-              "label": {
-                "type": "string",
-                "default": ""
-              },
-              "candidate": {
-                "type": "string",
-                "default": ""
-              },
-              "comment": {
-                "type": "string",
-                "default": ""
-              },
-              "sep": {
-                "type": "string",
-                "default": ""
-              },
-              "letter_spacing": {
-                "type": "number",
-                "default": 0
-              }
-            }
-          }
-        },
-        "liquid_keyboard_window": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "start": {
-                "type": "string",
-                "default": ""
-              },
-              "click": {
-                "type": "string",
-                "default": ""
-              },
-              "label": {
-                "oneOf": [{ "type": "string" }, { "type": "integer" }],
-                "default": ""
-              }
             }
           }
         },
@@ -324,15 +201,6 @@
         "latin_font": {
           "type": "string",
           "description": "西文字型"
-        },
-        "latin_locale": {
-          "type": "string",
-          "description": "西文語言"
-        },
-        "locale": {
-          "type": "string",
-          "enum": ["zh_TW", "zh_CN", "zh_HK", ""],
-          "description": "預設語言"
         },
         "keyboard_height": {
           "type": "integer",

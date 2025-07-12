@@ -5,6 +5,7 @@
 package com.osfans.trime.data.theme.mapper
 
 import com.charleskorn.kaml.YamlMap
+import com.osfans.trime.data.theme.ThemeFilesManager
 import com.osfans.trime.data.theme.model.GeneralStyle
 
 class GeneralStyleMapper(
@@ -12,8 +13,7 @@ class GeneralStyleMapper(
 ) : Mapper<GeneralStyle>(node) {
     override fun map() =
         GeneralStyle(
-            autoCaps = getString("auto_caps"),
-            backgroundDimAmount = getFloat("background_dim_amount"),
+            autoCaps = getBoolean("auto_caps"),
             candidateBorder = getInt("candidate_border"),
             candidateBorderRound = getFloat("candidate_border_round"),
             candidateFont = getStringList("candidate_font"),
@@ -22,7 +22,6 @@ class GeneralStyleMapper(
             candidateTextSize = getFloat("candidate_text_size"),
             candidateUseCursor = getBoolean("candidate_use_cursor"),
             candidateViewHeight = getInt("candidate_view_height"),
-            colorScheme = getString("color_scheme"),
             commentFont = getStringList("comment_font"),
             commentHeight = getInt("comment_height"),
             commentOnTop = getBoolean("comment_on_top"),
@@ -37,7 +36,11 @@ class GeneralStyleMapper(
             keyboardPaddingBottom = getInt("keyboard_padding_bottom"),
             keyboardPaddingLand = getInt("keyboard_padding_land"),
             keyboardPaddingLandBottom = getInt("keyboard_padding_land_bottom"),
-            layout = LayoutStyleMapper(node.get<YamlMap>("layout")!!).map(),
+            layout =
+                when (val map = node.get<YamlMap>("layout")) {
+                    null -> GeneralStyle.Layout()
+                    else -> ThemeFilesManager.yaml.decodeFromYamlNode(map)
+                },
             keyFont = getStringList("key_font"),
             keyBorder = getInt("key_border"),
             keyHeight = getInt("key_height"),
@@ -52,12 +55,9 @@ class GeneralStyleMapper(
             keyPressOffsetX = getInt("key_press_offset_x"),
             keyPressOffsetY = getInt("key_press_offset_y"),
             keyWidth = getFloat("key_width"),
-            keyboards = getStringList("keyboards"),
             labelTextSize = getFloat("label_text_size"),
             labelFont = getStringList("label_font"),
             latinFont = getStringList("latin_font"),
-            latinLocale = getString("latin_locale"),
-            locale = getString("locale"),
             keyboardHeight = getInt("keyboard_height"),
             keyboardHeightLand = getInt("keyboard_height_land"),
             previewFont = getStringList("preview_font"),
@@ -82,7 +82,7 @@ class GeneralStyleMapper(
             enterLabel =
                 when (val map = node.get<YamlMap>("enter_labels")) {
                     null -> GeneralStyle.EnterLabel()
-                    else -> EnterLabelStyleMapper(map).map()
+                    else -> ThemeFilesManager.yaml.decodeFromYamlNode(map)
                 },
         )
 }

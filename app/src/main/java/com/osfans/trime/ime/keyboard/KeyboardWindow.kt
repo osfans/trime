@@ -258,7 +258,7 @@ class KeyboardWindow(
 
     private fun dispatchCapsState(setShift: (Boolean, Boolean) -> Unit) {
         // TODO: 启用自动首句大写后，点击方向键时，保持Shift锁定状态功能将无法生效
-        if (theme.generalStyle.autoCaps.toBoolean() && Rime.isAsciiMode && currentKeyboardView?.isCapsOn == false) {
+        if (theme.generalStyle.autoCaps && Rime.isAsciiMode && currentKeyboardView?.isCapsOn == false) {
             setShift(false, cursorCapsMode != 0)
         }
     }

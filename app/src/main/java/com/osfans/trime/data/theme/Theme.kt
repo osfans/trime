@@ -12,7 +12,6 @@ import com.osfans.trime.core.Rime
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.mapper.LiquidKeyboardMapper
-import com.osfans.trime.data.theme.mapper.PresetKeyMapper
 import com.osfans.trime.data.theme.mapper.TextKeyboardMapper
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
@@ -43,8 +42,9 @@ data class Theme(
             if (!Rime.deployRimeConfigFile(configId, CONFIG_VERSION_KEY)) {
                 Timber.w("Failed to deploy theme config file '$configId.yaml'")
             }
+            val yaml = ThemeFilesManager.yaml
             val file = File(DataManager.resolveDeployedResourcePath(configId))
-            val root = ThemeFilesManager.yaml.parseToYamlNode(file.readText()).yamlMap
+            val root = yaml.parseToYamlNode(file.readText()).yamlMap
             return Theme(
                 configId = configId,
                 name = root.getString("name"),
@@ -55,9 +55,10 @@ data class Theme(
                         else -> LiquidKeyboardMapper(node).map()
                     },
                 presetKeys =
-                    root.get<YamlMap>("preset_keys")?.entries?.entries?.associate {
-                        it.key.content to PresetKeyMapper(it.value.yamlMap).map()
-                    } ?: emptyMap(),
+                    when (val map = root.get<YamlMap>("preset_keys")) {
+                        null -> emptyMap()
+                        else -> yaml.decodeFromYamlNode(map)
+                    },
                 presetKeyboards =
                     root.get<YamlMap>("preset_keyboards")?.entries?.entries?.associate {
                         it.key.content to TextKeyboardMapper(it.value.yamlMap).map()
@@ -72,9 +73,10 @@ data class Theme(
                         )
                     } ?: emptyList(),
                 fallbackColors =
-                    root.get<YamlMap>("fallback_colors")?.entries?.entries?.associate {
-                        it.key.content to it.value.yamlScalar.content
-                    } ?: emptyMap(),
+                    when (val map = root.get<YamlMap>("fallback_colors")) {
+                        null -> emptyMap()
+                        else -> yaml.decodeFromYamlNode(map)
+                    },
             )
         }
     }
