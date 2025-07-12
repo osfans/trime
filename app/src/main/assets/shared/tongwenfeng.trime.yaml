@@ -28,15 +28,12 @@ round_corner:
 #界面风格、功能开关
 style:
   auto_caps: false #自動句首大寫:true|false|ascii
-  background_dim_amount: 0.5
-  root_background: keyboard_back_color # 整个键盘区+候选栏的背景图/色
   candidate_font: han.ttf  #候选字体
   candidate_padding: 5  #候选项内边距
   candidate_spacing: 0.5  #候选间距
   candidate_text_size: 18  #候选字号
   candidate_use_cursor: true #高亮候选项
   candidate_view_height: 28 #候选区高度
-  color_scheme: default #配色方案
   comment_font: comment.ttf #编码提示字体
   comment_height: 14 #编码提示区高度
   comment_on_top: true #编码提示在上方或右侧
@@ -63,12 +60,9 @@ style:
   key_long_text_size: 16 #长标签字号
   key_text_size: 24 #键字号
   key_width: 10.0 #键宽，占屏幕宽的百分比
-  keyboards: [.default, letter, default, number, symbols, edit, move, bqrw1, bqrw2, bqrw3, bqrw4, bqrw5, bqrw6, bqqt1, bqqt2, bqqt3, bqqt4, bqqz1, bqqz2, bqqz3, bqqz4, bqqz5, bqqz6, bqpt1, bqpt2, bqhd1, bqhd2, bqhc1, bqhc2, bqhc3, bqlx1, bqlx2, bqlx3, bqlx4, bqlx5, bqlx6, bqkj1, bqkj2, bqkj3, bqkj4, bqkj5, bqfh1, bqfh2, bqfh3, bqfh4, kao_fond, kao_sad, kao_mad, kao_astonished, kao_impotent, kao_happy, numberb] #键盘配置
   label_text_size: 22 #标签字号
   label_font: label.ttf #编标签字体
   latin_font: latin.ttf #西文本体
-  latin_locale: en_US #西文语言
-  locale: zh_CN #缺省语言 zh_TW,zh_CN,zh_HK,""
   keyboard_height: 250 #锁定键盘高度，避免切换时键盘高度变化而造成闪烁
   keyboard_height_land: 200 #锁定横屏下键盘高度，避免切换时键盘高度变化而造成闪烁
   preview_font: latin.ttf #按键提示字体

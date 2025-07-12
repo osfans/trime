@@ -8,6 +8,7 @@ package com.osfans.trime.data.theme
 import com.charleskorn.kaml.AnchorsAndAliases
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
+import com.charleskorn.kaml.YamlNamingStrategy
 import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.util.getString
@@ -22,6 +23,8 @@ object ThemeFilesManager {
             configuration =
                 YamlConfiguration(
                     strictMode = false,
+                    yamlNamingStrategy = YamlNamingStrategy.SnakeCase,
+                    decodeEnumCaseInsensitive = true,
                     anchorsAndAliases = AnchorsAndAliases.Permitted(null),
                     codePointLimit = CODE_POINT_LIMIT, // 10 MB
                 ),

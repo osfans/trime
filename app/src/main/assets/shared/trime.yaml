@@ -11,14 +11,12 @@ author: osfans #作者資訊
 
 style:
   auto_caps: false #自動句首大寫:true|false|ascii
-  background_dim_amount: 0.5
   candidate_font: han.ttf #候選字型
   candidate_padding: 5 #候選項內邊距
   candidate_spacing: 0.5 #候選間距
   candidate_text_size: 22 #候選字號
   candidate_use_cursor: true #高亮候選項
   candidate_view_height: 28 #候選區高度
-  color_scheme: default #配色方案
   comment_font: comment.ttf #編碼提示字型
   comment_height: 12 #編碼提示區高度
   comment_on_top: true #編碼提示在上方或右側
@@ -51,12 +49,9 @@ style:
   key_long_text_size: 14 #長標籤字號
   key_text_size: 22 #鍵字號
   key_width: 10.0 #鍵寬，佔螢幕寬的百分比
-  keyboards: [.default, letter, number, symbols, mini] #鍵盤配置：自動鍵盤、字母、數字、符號、精简（供插入实体键盘使用）
   label_text_size: 22 #標籤字號
   label_font: label.ttf #編標籤字型
   latin_font: latin.ttf #西文字型
-  latin_locale: en_US #西文語言
-  locale: zh_TW #預設語言 zh_TW,zh_CN,zh_HK,""
   keyboard_height: 250 #锁定键盘高度，避免切换时键盘高度变化而造成闪烁
   keyboard_height_land: 200 #锁定横屏下键盘高度，避免切换时键盘高度变化而造成闪烁
   preview_font: latin.ttf #按鍵提示字型
