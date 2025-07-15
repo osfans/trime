@@ -244,10 +244,10 @@ class AppPrefs(
             const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
         }
 
-        var clipboardCompareRules by string(CLIPBOARD_COMPARE_RULES, "")
-        var clipboardOutputRules by string(CLIPBOARD_OUTPUT_RULES, "")
+        val clipboardCompareRules = string(CLIPBOARD_COMPARE_RULES, "")
+        val clipboardOutputRules = string(CLIPBOARD_OUTPUT_RULES, "")
         var draftOutputRules by string(DRAFT_OUTPUT_RULES, "")
-        var clipboardLimit by int(CLIPBOARD_LIMIT, 10)
+        val clipboardLimit = int(CLIPBOARD_LIMIT, 10)
         var draftLimit by int(DRAFT_LIMIT, 10)
         var draftExcludeApp by string(DRAFT_EXCLUDE_APP, "")
     }

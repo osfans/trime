@@ -6,7 +6,9 @@ package com.osfans.trime.data.db
 
 import android.content.ClipboardManager
 import android.content.Context
+import android.os.Build
 import androidx.room.Room
+import androidx.room.withTransaction
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.matchesAny
@@ -49,21 +51,25 @@ object ClipboardHelper :
         onUpdateListeners.remove(listener)
     }
 
-    private val limit get() = AppPrefs.defaultInstance().clipboard.clipboardLimit
-    private val compare get() =
-        AppPrefs
-            .defaultInstance()
-            .clipboard.clipboardCompareRules
+    private val clipPref = AppPrefs.defaultInstance().clipboard
+
+    private val limit by clipPref.clipboardLimit
+
+    private val compareRules: Set<Regex> by lazy {
+        val rules by clipPref.clipboardCompareRules
+        rules
             .split('\n')
             .map { Regex(it.trim()) }
-            .toHashSet()
-    private val output get() =
-        AppPrefs
-            .defaultInstance()
-            .clipboard.clipboardOutputRules
+            .toSet()
+    }
+
+    private val outputRules: Set<Regex> by lazy {
+        val rules by clipPref.clipboardOutputRules
+        rules
             .split('\n')
             .map { Regex(it) }
-            .toHashSet()
+            .toSet()
+    }
 
     var lastBean: DatabaseBean? = null
 
@@ -117,41 +123,63 @@ object ClipboardHelper :
         updateItemCount()
     }
 
+    private var lastClipTimestamp = -1L
+    private var lastClipHash = 0
+
     /**
      * 此方法设置监听剪贴板变化，如有新的剪贴内容，就启动选定的剪贴板管理器
      *
-     * - [compare] 比较规则。每次通知剪贴板管理器，都会保存 ClipBoardCompare 处理过的 string。
+     * - [compareRules] 比较规则。每次通知剪贴板管理器，都会保存 ClipBoardCompare 处理过的 string。
      * 如果两次处理过的内容不变，则不通知。
      *
-     * - [output] 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
+     * - [outputRules] 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
      */
     override fun onPrimaryClipChanged() {
         if (!(limit != 0 && this::clbDao.isInitialized)) {
             return
         }
-        clipboardManager
-            .primaryClip
-            ?.let { DatabaseBean.fromClipData(it) }
-            ?.takeIf {
-                it.text!!.isNotBlank() &&
-                    !it.text.matchesAny(output)
-            }?.let { b ->
-                if (b.text!!.removeRegexSet(compare).isEmpty()) return
-                Timber.d("Accept clipboard $b")
-                launch {
-                    mutex.withLock {
-                        clbDao.find(b.text)?.let {
-                            clbDao.updateTime(it.id, b.time)
-                            updateLastBean(it.copy(time = b.time))
-                            return@launch
-                        }
-                        val rowId = clbDao.insert(b)
-                        removeOutdated()
-                        updateItemCount()
-                        updateLastBean(clbDao.get(rowId) ?: b)
+        val clip = clipboardManager.primaryClip ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val timestamp = clip.description.timestamp
+            if (timestamp == lastClipTimestamp) return
+            lastClipTimestamp = timestamp
+        } else {
+            val timestamp = System.currentTimeMillis()
+            val hash = clip.hashCode()
+            if (timestamp - lastClipTimestamp < 100L && hash == lastClipHash) return
+            lastClipTimestamp = timestamp
+            lastClipHash = hash
+        }
+        launch {
+            mutex.withLock {
+                val bean = DatabaseBean.fromClipData(clip) ?: return@withLock
+                if (bean.text.isNullOrBlank()) return@withLock
+                if (bean.text.matchesAny(outputRules) ||
+                    bean.text.removeRegexSet(compareRules).isEmpty()
+                ) {
+                    return@withLock
+                }
+                try {
+                    clbDao.find(bean.text)?.let {
+                        updateLastBean(it.copy(time = bean.time))
+                        clbDao.updateTime(it.id, bean.time)
+                        return@withLock
                     }
+                    val insertedBean =
+                        clbDb.withTransaction {
+                            val rowId = clbDao.insert(bean)
+                            removeOutdated()
+                            updateItemCount()
+                            clbDao.get(rowId) ?: bean
+                        }
+                    updateLastBean(insertedBean)
+                    updateItemCount()
+                } catch (exception: Exception) {
+                    Timber.w("Failed to update clipboard database: $exception")
+                    updateLastBean(bean)
                 }
             }
+        }
     }
 
     private suspend fun removeOutdated() {
