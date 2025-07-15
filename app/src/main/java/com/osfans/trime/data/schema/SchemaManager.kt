@@ -21,13 +21,16 @@ object SchemaManager {
                 ),
         )
 
-    @JvmStatic
     fun init(schemaId: String) {
-        currentSchema = Schema.decodeBySchemaId(schemaId)
-        visibleSwitches =
-            currentSchema.switches
-                .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
-        updateSwitchOptions()
+        runCatching {
+            currentSchema = Schema.decodeBySchemaId(schemaId)
+            visibleSwitches =
+                currentSchema.switches
+                    .filter { it.states.isNotEmpty() } // 剔除没有 states 条目项的值，它们不作为开关使用
+            updateSwitchOptions()
+        }.getOrElse {
+            Timber.w(it, "Failed to decode schema file of id '$schemaId'")
+        }
     }
 
     val activeSchema: Schema

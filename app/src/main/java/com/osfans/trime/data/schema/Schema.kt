@@ -31,6 +31,7 @@ data class Schema(
 
     companion object {
         fun decodeBySchemaId(schemaId: String): Schema {
+            if (schemaId == ".default") return Schema()
             val file = File(DataManager.resolveDeployedResourcePath("$schemaId.schema"))
             val root = SchemaManager.yaml.parseToYamlNode(file.readText()).yamlMap
             return Schema(
