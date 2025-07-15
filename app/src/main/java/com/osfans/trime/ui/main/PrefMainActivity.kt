@@ -7,13 +7,14 @@ package com.osfans.trime.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -67,7 +68,16 @@ class PrefMainActivity : AppCompatActivity() {
             .isAppearanceLightStatusBars = false
 
         setContentView(binding.root)
-        setSupportActionBar(binding.prefToolbar.toolbar)
+        // always show toolbar back arrow icon
+        binding.prefToolbar.toolbar.navigationIcon =
+            DrawerArrowDrawable(this).apply {
+                progress = 1f
+                color = ContextCompat.getColor(this@PrefMainActivity, R.color.colorOnPrimary)
+            }
+        // show menu icon and other action icons on toolbar
+        // don't use `setSupportActionBar(binding.toolbar)` here,
+        // because navController would change toolbar title, we need to control it by ourselves
+        setupToolbarMenu(binding.prefToolbar.toolbar.menu)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
         binding.prefToolbar.toolbar.setNavigationOnClickListener {
             // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
@@ -99,55 +109,50 @@ class PrefMainActivity : AppCompatActivity() {
         checkNotificationPermission()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    private fun setupToolbarMenu(menu: Menu) {
         menuInflater.inflate(R.menu.main_menu, menu)
-        menu?.forEach { item ->
+        menu.forEach { item ->
+            // show menu item on demand
+            item.isVisible = false
             when (item.itemId) {
                 R.id.deploy, R.id.about -> {
                     viewModel.topOptionsMenu.observe(this) {
                         item.isVisible = it
+                    }
+                    if (item.itemId == R.id.deploy) {
+                        item.setOnMenuItemClickListener {
+                            lifecycleScope.launch { RimeDaemon.restartRime(true) }
+                            true
+                        }
+                    } else if (item.itemId == R.id.about) {
+                        item.setOnMenuItemClickListener {
+                            navController.navigate(R.id.action_prefFragment_to_aboutFragment)
+                            true
+                        }
                     }
                 }
                 R.id.edit -> {
                     viewModel.toolbarEditButtonVisible.observe(this) {
                         item.isVisible = it
                     }
+                    item.setOnMenuItemClickListener {
+                        viewModel.toolbarEditButtonOnClickListener.value?.invoke()
+                        true
+                    }
                 }
                 R.id.delete -> {
                     viewModel.toolbarDeleteButtonOnClickListener.observe(this) {
                         item.isVisible = it != null
                     }
+                    item.setOnMenuItemClickListener {
+                        viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
+                        true
+                    }
                 }
                 else -> {}
             }
         }
-        // show menu item on demand
-        menu?.forEach { it.isVisible = false }
-        return true
     }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            R.id.deploy -> {
-                lifecycleScope.launch {
-                    RimeDaemon.restartRime(true)
-                }
-                true
-            }
-            R.id.about -> {
-                navController.navigate(R.id.action_prefFragment_to_aboutFragment)
-                true
-            }
-            R.id.edit -> {
-                viewModel.toolbarEditButtonOnClickListener.value?.invoke()
-                true
-            }
-            R.id.delete -> {
-                viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
 
     override fun onPause() {
         super.onPause()
