@@ -168,10 +168,10 @@ object ColorManager {
         val color =
             try {
                 resolveValue(key) { value ->
-                    parseColor(value)
+                    ColorUtils.parseColor(value)
                 }
             } catch (_: IllegalArgumentException) {
-                parseColor(key)
+                ColorUtils.parseColor(key)
             }
         if (putCache) {
             synchronized(colorCache) { colorCache.put(key, color) }
@@ -222,14 +222,6 @@ object ColorManager {
             }
         }
     }
-
-    private fun parseColor(value: String): Int =
-        try {
-            ColorUtils.parseColor(value)
-        } catch (e: Exception) {
-            Timber.e(e, "Cannot parse color $value, fallback to TRANSPARENT")
-            Color.TRANSPARENT
-        }
 
     private fun parseDrawable(value: String): Drawable? {
         if (value.isEmpty()) return null

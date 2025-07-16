@@ -72,16 +72,16 @@ class Key(
         fallback: String,
     ): Int =
         selfConfig?.let {
-            ColorManager
-                .getColor(src(selfConfig))
-                .takeIf { it != Color.TRANSPARENT }
+            runCatching { ColorManager.getColor(src(it)) }.getOrNull()
         } ?: ColorManager.getColor(fallback)
 
     private fun getDrawable(
         src: TextKeyboard.TextKey.() -> String,
         fallback: String,
-    ) = selfConfig?.let { ColorManager.getDrawable(src(it)) }
-        ?: ColorManager.getDrawable(fallback)
+    ) = selfConfig?.let {
+        if (src(it).isEmpty()) null
+        ColorManager.getDrawable(src(it))
+    } ?: ColorManager.getDrawable(fallback)
 
     private val keyBackground by lazy { getDrawable({ keyBackColor }, "key_back_color") }
     private val offKeyBackground by lazy { ColorManager.getDrawable("off_key_back_color") }
