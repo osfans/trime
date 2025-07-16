@@ -4,11 +4,11 @@
 
 package com.osfans.trime.util
 
-import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import androidx.core.graphics.toColorInt
 
 object ColorUtils {
     @ColorInt
@@ -25,7 +25,7 @@ object ColorUtils {
             } else {
                 colorString // red, green, blue ...
             }
-        return Color.parseColor(normalized)
+        return normalized.toColorInt()
     }
 
     /**
