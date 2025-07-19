@@ -4,9 +4,9 @@
 
 package com.osfans.trime.ime.keyboard
 
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
+import androidx.annotation.ColorInt
 import com.osfans.trime.core.Rime.Companion.hasLeft
 import com.osfans.trime.core.Rime.Companion.hasMenu
 import com.osfans.trime.core.Rime.Companion.isAsciiMode
@@ -67,6 +67,7 @@ class Key(
     var keyPressOffsetX = 0
     var keyPressOffsetY = 0
 
+    // get color from key customization or just fallback to specified color
     private fun getColor(
         src: TextKeyboard.TextKey.() -> String,
         fallback: String,
@@ -74,6 +75,12 @@ class Key(
         selfConfig?.let {
             runCatching { ColorManager.getColor(src(it)) }.getOrNull()
         } ?: ColorManager.getColor(fallback)
+
+    // get color from common color schemes or just fallback to default color
+    private fun getColor(
+        key: String,
+        @ColorInt default: Int,
+    ): Int = runCatching { ColorManager.getColor(key) }.getOrDefault(default)
 
     private fun getDrawable(
         src: TextKeyboard.TextKey.() -> String,
@@ -88,20 +95,20 @@ class Key(
     private val onKeyBackground by lazy { ColorManager.getDrawable("on_key_back_color") }
 
     private val keyTextColor by lazy { getColor({ keyTextColor }, "key_text_color") }
-    private val offKeyTextColor by lazy { ColorManager.getColor("off_key_text_color") }
-    private val onKeyTextColor by lazy { ColorManager.getColor("on_key_text_color") }
+    private val offKeyTextColor by lazy { getColor("off_key_text_color", keyTextColor) }
+    private val onKeyTextColor by lazy { getColor("on_key_text_color", keyTextColor) }
     private val keySymbolColor by lazy { getColor({ keySymbolColor }, "key_symbol_color") }
-    private val offKeySymbolColor by lazy { ColorManager.getColor("off_key_symbol_color") }
-    private val onKeySymbolColor by lazy { ColorManager.getColor("on_key_symbol_color") }
+    private val offKeySymbolColor by lazy { getColor("off_key_symbol_color", keySymbolColor) }
+    private val onKeySymbolColor by lazy { getColor("on_key_symbol_color", keySymbolColor) }
     private val hlKeyBackground by lazy { getDrawable({ hlKeyBackColor }, "hilited_key_back_color") }
     private val hlOffKeyBackground by lazy { ColorManager.getDrawable("hilited_off_key_back_color") }
     private val hlOnKeyBackground by lazy { ColorManager.getDrawable("hilited_on_key_back_color") }
     private val hlKeyTextColor by lazy { getColor({ hlKeyTextColor }, "hilited_key_text_color") }
-    private val hlOffKeyTextColor by lazy { ColorManager.getColor("hilited_off_key_text_color") }
-    private val hlOnKeyTextColor by lazy { ColorManager.getColor("hilited_on_key_text_color") }
+    private val hlOffKeyTextColor by lazy { getColor("hilited_off_key_text_color", hlKeyTextColor) }
+    private val hlOnKeyTextColor by lazy { getColor("hilited_on_key_text_color", hlKeyTextColor) }
     private val hlKeySymbolColor by lazy { getColor({ hlKeySymbolColor }, "hilited_key_symbol_color") }
-    private val hlOffKeySymbolColor by lazy { ColorManager.getColor("hilited_off_key_symbol_color") }
-    private val hlOnKeySymbolColor by lazy { ColorManager.getColor("hilited_on_key_symbol_color") }
+    private val hlOffKeySymbolColor by lazy { getColor("hilited_off_key_symbol_color", hlKeySymbolColor) }
+    private val hlOnKeySymbolColor by lazy { getColor("hilited_on_key_symbol_color", hlKeySymbolColor) }
 
     init {
         if (selfConfig != null) {
@@ -291,26 +298,14 @@ class Key(
     fun getTextColor(): Int =
         when (appearanceType) {
             2 -> if (isPressed) hlOnKeyTextColor else onKeyTextColor
-            1 -> {
-                if (isPressed) {
-                    hlOffKeyTextColor.takeIf { it != Color.TRANSPARENT } ?: hlKeyTextColor
-                } else {
-                    offKeyTextColor.takeIf { it != Color.TRANSPARENT } ?: keyTextColor
-                }
-            }
+            1 -> if (isPressed) hlOffKeyTextColor else offKeyTextColor
             else -> if (isPressed) hlKeyTextColor else keyTextColor
         }
 
     fun getSymbolColor(): Int =
         when (appearanceType) {
             2 -> if (isPressed) hlOnKeySymbolColor else onKeySymbolColor
-            1 -> {
-                if (isPressed) {
-                    hlOffKeySymbolColor.takeIf { it != Color.TRANSPARENT } ?: hlKeySymbolColor
-                } else {
-                    offKeySymbolColor.takeIf { it != Color.TRANSPARENT } ?: keySymbolColor
-                }
-            }
+            1 -> if (isPressed) hlOffKeySymbolColor else offKeySymbolColor
             else -> if (isPressed) hlKeySymbolColor else keySymbolColor
         }
 }
