@@ -75,6 +75,9 @@ class QuickBar(
 
     private val alwaysUi: AlwaysUi by lazy {
         AlwaysUi(context, theme).apply {
+            hideKeyboardButton.apply {
+                setOnClickListener { service.requestHideSelf(0) }
+            }
             switchesUi.apply {
                 setSwitches(SchemaManager.visibleSwitches)
                 setOnSwitchClick({ switch ->

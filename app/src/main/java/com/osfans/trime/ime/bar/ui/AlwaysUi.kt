@@ -7,12 +7,17 @@ package com.osfans.trime.ime.bar.ui
 import android.content.Context
 import android.widget.Space
 import android.widget.ViewAnimator
+import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.always.switches.SwitchesUi
-import splitties.views.dsl.constraintlayout.centerInParent
+import splitties.dimensions.dp
+import splitties.views.dsl.constraintlayout.before
+import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.matchConstraints
+import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -31,6 +36,8 @@ class AlwaysUi(
     var currentState = State.Empty
         private set
 
+    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
+
     val emptyBar = Space(ctx)
 
     val switchesUi = SwitchesUi(ctx, theme)
@@ -43,10 +50,20 @@ class AlwaysUi(
 
     override val root =
         constraintLayout {
+            val size = dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
+            add(
+                hideKeyboardButton,
+                lParams(size, size) {
+                    endOfParent()
+                    centerVertically()
+                },
+            )
             add(
                 animator,
                 lParams(matchConstraints, matchParent) {
-                    centerInParent()
+                    startOfParent()
+                    before(hideKeyboardButton)
+                    centerVertically()
                 },
             )
         }
