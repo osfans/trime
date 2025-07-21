@@ -10,15 +10,10 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
-import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
-import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
@@ -33,9 +28,9 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardWindow
+import com.osfans.trime.ime.option.SwitchOptionWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
-import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
@@ -56,8 +51,6 @@ class QuickBar(
 
     private val prefs = AppPrefs.defaultInstance()
 
-    private val showSwitches by prefs.keyboard.showSchemaSwitches
-    private val debounceInterval by prefs.keyboard.switchesDebounceInterval
     private val hideQuickBar by prefs.keyboard.hideQuickBar
 
     val themedHeight =
@@ -66,7 +59,6 @@ class QuickBar(
     private fun evalAlwaysUiState() {
         val newState =
             when {
-                showSwitches -> AlwaysUi.State.Switches
                 else -> AlwaysUi.State.Empty
             }
         if (newState == alwaysUi.currentState) return
@@ -75,30 +67,13 @@ class QuickBar(
 
     private val alwaysUi: AlwaysUi by lazy {
         AlwaysUi(context, theme).apply {
+            moreButton.apply {
+                setOnClickListener {
+                    windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
+                }
+            }
             hideKeyboardButton.apply {
                 setOnClickListener { service.requestHideSelf(0) }
-            }
-            switchesUi.apply {
-                setSwitches(SchemaManager.visibleSwitches)
-                setOnSwitchClick({ switch ->
-                    val prevEnabled = switch.enabled
-                    switch.enabled =
-                        if (switch.options.isEmpty()) {
-                            (1 - prevEnabled).also { newValue ->
-                                rime.launchOnReady {
-                                    it.setRuntimeOption(switch.name, newValue == 1)
-                                }
-                            }
-                        } else {
-                            val options = switch.options
-                            ((prevEnabled + 1) % options.size).also { newValue ->
-                                rime.launchOnReady {
-                                    it.setRuntimeOption(options[prevEnabled], false)
-                                    it.setRuntimeOption(options[newValue], true)
-                                }
-                            }
-                        }
-                }, debounceTime = debounceInterval.toLong())
             }
         }
     }
@@ -119,7 +94,7 @@ class QuickBar(
     }
 
     private val tabUi by lazy {
-        TabUi(context)
+        TabUi(context, theme)
     }
 
     private val barStateMachine =
@@ -183,6 +158,7 @@ class QuickBar(
         if (view.displayedChild == index) return
         val new = view.getChildAt(index)
         if (new != tabUi.root) {
+            tabUi.setBackButtonOnClickListener { }
             tabUi.removeExternal()
         }
         view.displayedChild = index
@@ -216,30 +192,12 @@ class QuickBar(
         evalAlwaysUiState()
     }
 
-    override fun onRimeSchemaUpdated(schema: SchemaItem) {
-        if (alwaysUi.currentState == AlwaysUi.State.Switches) {
-            service.lifecycleScope.launch {
-                alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
-            }
-        }
-    }
-
-    override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
-        when (value.option) {
-            "_hide_comment" -> {
-                // candidateUi.candidates.shouldShowComment = !value.value
-            }
-        }
-        if (alwaysUi.currentState == AlwaysUi.State.Switches) {
-            service.lifecycleScope.launch {
-                alwaysUi.switchesUi.setSwitches(SchemaManager.visibleSwitches)
-            }
-        }
-    }
-
     override fun onWindowAttached(window: BoardWindow) {
         if (window is BoardWindow.BarBoardWindow) {
-            window.onCreateBarView()?.let { tabUi.addExternal(it) }
+            window.onCreateBarView()?.let { tabUi.addExternal(it, window.showTitle) }
+            tabUi.setBackButtonOnClickListener {
+                windowManager.attachWindow(KeyboardWindow)
+            }
             barStateMachine.push(QuickBarStateMachine.TransitionEvent.BarBoardWindowAttached)
         }
     }

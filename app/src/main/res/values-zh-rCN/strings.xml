@@ -42,7 +42,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="speak_key_commit">上屏时朗读字符</string>
     <string name="keyboard__long_press_timeout_title">长按按键的延迟时间</string>
     <string name="keyboard__key_repeat_interval_title">重复按键的重复间隔</string>
-    <string name="show_schema_switches_in_idle">空闲时显示方案开关</string>
     <string name="keyboard__show_key_popup_title">按键时弹出显示字符</string>
     <string-array name="keyboard__landscape_mode_entries">
         <item>永不</item>
@@ -79,7 +78,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clipboard_clipboard_limit">剪贴板历史记录上限</string>
     <string name="clipboard_clipboard_compare_title">剪贴板去重规则</string>
     <string name="clipboard_clipboard_output_title">剪贴板过滤规则</string>
-    <string name="show_arrow_in_switches">方案开关显示箭头符号（→）</string>
     <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -219,7 +217,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_failure">部署失败</string>
     <string name="view_deploy_failure_log">部署失败。点此查看错误日志。</string>
     <string name="hide_quick_bar">隐藏快捷栏</string>
-    <string name="schema_switches_debounce_interval">方案开关连击间隔</string>
     <string name="navbar_bkg_none">无背景</string>
     <string name="navbar_bkg_color_only">跟随键盘背景色</string>
     <string name="navbar_bkg_full">键盘背景图片</string>

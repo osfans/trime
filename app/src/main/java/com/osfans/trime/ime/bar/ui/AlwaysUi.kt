@@ -9,8 +9,8 @@ import android.widget.Space
 import android.widget.ViewAnimator
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.bar.ui.always.switches.SwitchesUi
 import splitties.dimensions.dp
+import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.before
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
@@ -30,27 +30,32 @@ class AlwaysUi(
 ) : Ui {
     enum class State {
         Empty,
-        Switches,
     }
 
     var currentState = State.Empty
         private set
 
+    val moreButton = ToolButton(ctx, R.drawable.ic_baseline_more_horiz_24)
+
     val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
 
     val emptyBar = Space(ctx)
 
-    val switchesUi = SwitchesUi(ctx, theme)
-
     private val animator =
         ViewAnimator(ctx).apply {
             add(emptyBar, lParams(matchParent, matchParent))
-            add(switchesUi.root, lParams(matchParent, matchParent))
         }
 
     override val root =
         constraintLayout {
             val size = dp(theme.generalStyle.run { candidateViewHeight + commentHeight })
+            add(
+                moreButton,
+                lParams(size, size) {
+                    startOfParent()
+                    centerVertically()
+                },
+            )
             add(
                 hideKeyboardButton,
                 lParams(size, size) {
@@ -61,7 +66,7 @@ class AlwaysUi(
             add(
                 animator,
                 lParams(matchConstraints, matchParent) {
-                    startOfParent()
+                    after(moreButton)
                     before(hideKeyboardButton)
                     centerVertically()
                 },
@@ -72,7 +77,6 @@ class AlwaysUi(
         Timber.d("Switch always ui to $state")
         when (state) {
             State.Empty -> animator.displayedChild = 0
-            State.Switches -> animator.displayedChild = 1
         }
         currentState = state
     }

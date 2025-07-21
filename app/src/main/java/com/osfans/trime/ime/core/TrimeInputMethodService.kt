@@ -98,11 +98,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         private set
 
     private val recreateInputViewPrefs: Array<PreferenceDelegate<*>> =
-        arrayOf(
-            prefs.keyboard.showSchemaSwitches,
-            prefs.keyboard.showArrowInSwitches,
-            prefs.keyboard.hideQuickBar,
-        )
+        arrayOf(prefs.keyboard.hideQuickBar)
 
     @Keep
     private val recreateInputViewListener =
