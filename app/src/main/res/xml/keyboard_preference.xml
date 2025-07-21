@@ -64,29 +64,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:iconSpaceReserved="false" />
 
         <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="show_schema_switches_in_idle"
-            android:title="@string/show_schema_switches_in_idle"
-            app:iconSpaceReserved="false" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="show_arrow_in_switches"
-            android:title="@string/show_arrow_in_switches"
-            app:dependency="show_schema_switches_in_idle"
-            app:iconSpaceReserved="false" />
-        <com.osfans.trime.ui.components.DialogSeekBarPreference
-            android:defaultValue="300"
-            android:key="schema_switches_debounce_interval"
-            android:title="@string/schema_switches_debounce_interval"
-            app:allowDividerAbove="false"
-            app:dependency="show_schema_switches_in_idle"
-            app:iconSpaceReserved="false"
-            app:max="1000"
-            app:min="0"
-            app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms"
-            app:useSimpleSummaryProvider="true" />
-        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="hide_quick_bar"
             android:title="@string/hide_quick_bar"

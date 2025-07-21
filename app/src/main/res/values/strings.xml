@@ -45,7 +45,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="speak_key_commit">Voice on commit</string>
     <string name="keyboard__long_press_timeout_title">Long key press delay</string>
     <string name="keyboard__key_repeat_interval_title">Key repeat interval</string>
-    <string name="show_schema_switches_in_idle">Show schema switches in idle</string>
     <string name="keyboard__show_key_popup_title">Popup on key press</string>
     <string-array name="keyboard__landscape_mode_entries">
         <item>Never</item>
@@ -82,7 +81,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clipboard_clipboard_limit">Clipboard History Limit</string>
     <string name="clipboard_clipboard_compare_title">Clipboard Compare Rules</string>
     <string name="clipboard_clipboard_output_title">Clipboard Output Rules</string>
-    <string name="show_arrow_in_switches">Add arrow (→) for schema switches</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -222,7 +220,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_failure">Deploy failure</string>
     <string name="view_deploy_failure_log">Deploy failure. Click here to view error log.</string>
     <string name="hide_quick_bar">Hide quick bar</string>
-    <string name="schema_switches_debounce_interval">Schema switches debounce interval</string>
     <string name="navbar_bkg_none">No background</string>
     <string name="navbar_bkg_color_only">Follow keyboard color</string>
     <string name="navbar_bkg_full">Keyboard background image</string>

@@ -47,6 +47,8 @@ class LiquidKeyboard(
 ) : BoardWindow.BarBoardWindow(),
     ResidentWindow,
     ClipboardHelper.OnClipboardUpdateListener {
+    override val showTitle = false
+
     private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)

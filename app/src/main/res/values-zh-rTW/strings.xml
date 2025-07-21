@@ -45,7 +45,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="speak_key_commit">上屏時朗讀字符</string>
     <string name="keyboard__long_press_timeout_title">長按按鍵的延遲時間</string>
     <string name="keyboard__key_repeat_interval_title">重複按鍵的重複間隔</string>
-    <string name="show_schema_switches_in_idle">空閒時顯示方案開關</string>
     <string name="keyboard__show_key_popup_title">按鍵時彈出顯示字符</string>
     <string-array name="keyboard__landscape_mode_entries">
         <item>永不</item>
@@ -81,7 +80,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="pref__default">預設</string>
     <string name="clipboard_clipboard_compare_title">剪貼板去重規則</string>
     <string name="clipboard_clipboard_output_title">剪貼板過濾規則</string>
-    <string name="show_arrow_in_switches">方案開關顯示箭頭符號（→）</string>
     <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -220,7 +218,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_failure">部署失敗</string>
     <string name="view_deploy_failure_log">部署失敗。點此檢視錯誤日誌。</string>
     <string name="hide_quick_bar">隱藏快捷欄</string>
-    <string name="schema_switches_debounce_interval">方案開關連擊間隔</string>
     <string name="navbar_bkg_none">無背景</string>
     <string name="navbar_bkg_color_only">跟隨鍵盤背景色</string>
     <string name="navbar_bkg_full">鍵盤背景圖片</string>
