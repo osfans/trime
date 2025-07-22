@@ -23,9 +23,4 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <item>always_show</item>
         <item>never_show</item>
     </string-array>
-    <string-array name="navbar_bkg_values">
-        <item>NONE</item>
-        <item>COLOR_ONLY</item>
-        <item>FULL</item>
-    </string-array>
 </resources>
