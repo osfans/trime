@@ -7,11 +7,7 @@ package com.osfans.trime.ime.keyboard
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import androidx.annotation.ColorInt
-import com.osfans.trime.core.Rime.Companion.hasLeft
-import com.osfans.trime.core.Rime.Companion.hasMenu
-import com.osfans.trime.core.Rime.Companion.isAsciiMode
-import com.osfans.trime.core.Rime.Companion.isComposing
-import com.osfans.trime.core.Rime.Companion.showAsciiPunch
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.TextKeyboard
@@ -22,6 +18,8 @@ class Key(
     private val parent: Keyboard,
     private val selfConfig: TextKeyboard.TextKey? = null,
 ) {
+    private val rime = RimeDaemon.getFirstSessionOrNull()!!
+
     val keyActions: Map<KeyBehavior, KeyAction> =
         buildMap {
             selfConfig?.behaviors?.forEach {
@@ -218,7 +216,7 @@ class Key(
             when (click?.shiftLock) {
                 "long" -> false // 长按锁定
                 "click" -> true // 点击锁定
-                "ascii_long" -> !isAsciiMode // 英文长按锁定，中文点击锁定
+                "ascii_long" -> !rime.run { statusCached }.isAsciiMode // 英文长按锁定，中文点击锁定
                 else -> false
             }
 
@@ -242,11 +240,14 @@ class Key(
     fun getAction(behavior: KeyBehavior): KeyAction? =
         keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
 
-    private fun checkKeyAction(): KeyAction? =
-        keyActions[KeyBehavior.ASCII].takeIf { isAsciiMode }
-            ?: keyActions[KeyBehavior.PAGING]?.takeIf { hasLeft() }
-            ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { hasMenu() }
-            ?: keyActions[KeyBehavior.COMPOSING]?.takeIf { isComposing }
+    private fun checkKeyAction(): KeyAction? {
+        val status = rime.run { statusCached }
+        val menu = rime.run { menuCached }
+        return keyActions[KeyBehavior.ASCII].takeIf { status.isAsciiMode }
+            ?: keyActions[KeyBehavior.PAGING]?.takeIf { menu.pageNumber != 0 }
+            ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { menu.candidates.isNotEmpty() }
+            ?: keyActions[KeyBehavior.COMPOSING]?.takeIf { status.isComposing }
+    }
 
     private fun checkKeyAction(sendBindings: Boolean): KeyAction? = checkKeyAction().takeIf { sendBindings }
 
@@ -259,8 +260,8 @@ class Key(
         when {
             label.isNotEmpty() &&
                 keyAction == click &&
-                keyActions[KeyBehavior.ASCII] == null &&
-                !showAsciiPunch() -> label
+                keyActions.containsKey(KeyBehavior.ASCII) &&
+                !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunch } -> label
             else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
         }
 
