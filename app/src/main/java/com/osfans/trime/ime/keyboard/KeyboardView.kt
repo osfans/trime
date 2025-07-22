@@ -24,7 +24,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
@@ -51,6 +51,7 @@ class KeyboardView(
     private val keyboard: Keyboard,
     private val keyPreviewChoreographer: KeyPreviewChoreographer,
 ) : View(context) {
+    private val rime = RimeDaemon.getFirstSessionOrNull()!!
     private var mCurrentKeyIndex = NOT_A_KEY
     private val keyTextSize = theme.generalStyle.keyTextSize
     private val labelTextSize =
@@ -134,8 +135,6 @@ class KeyboardView(
             textAlign = Paint.Align.CENTER
         }
 
-    var showKeyHint = !Rime.getOption("_hide_key_hint")
-    var showKeySymbol = !Rime.getOption("_hide_key_symbol")
     private var labelEnter: String = theme.generalStyle.enterLabel.default
 
     fun onEnterKeyLabelUpdate(label: String) {
@@ -541,6 +540,8 @@ class KeyboardView(
             // Turn off drop shadow
             paint.clearShadowLayer()
 
+            val showKeySymbol = rime.run { !getRuntimeOption("_hide_key_symbol") }
+            val showKeyHint = rime.run { !getRuntimeOption("_hide_key_hint") }
             if (showKeySymbol || showKeyHint) {
                 paint.typeface = FontManager.getTypeface("symbol_font")
                 floatArrayOf(key.symbolTextSize, symbolTextSize)

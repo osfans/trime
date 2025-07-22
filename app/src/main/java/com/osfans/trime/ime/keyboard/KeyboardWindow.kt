@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.osfans.trime.R
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
@@ -257,8 +256,9 @@ class KeyboardWindow(
     }
 
     private fun dispatchCapsState(setShift: (Boolean, Boolean) -> Unit) {
+        val status = rime.run { statusCached }
         // TODO: 启用自动首句大写后，点击方向键时，保持Shift锁定状态功能将无法生效
-        if (theme.generalStyle.autoCaps && Rime.isAsciiMode && currentKeyboardView?.isCapsOn == false) {
+        if (theme.generalStyle.autoCaps && status.isAsciiMode && currentKeyboardView?.isCapsOn == false) {
             setShift(false, cursorCapsMode != 0)
         }
     }
@@ -277,25 +277,20 @@ class KeyboardWindow(
     }
 
     override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
-        when (val opt = value.option) {
-            "_hide_key_hint" -> currentKeyboardView?.showKeyHint = !value.value
-            "_hide_key_symbol" -> currentKeyboardView?.showKeySymbol = !value.value
-            else -> {
-                when {
-                    opt.startsWith("_keyboard_") -> {
-                        val target = opt.removePrefix("_keyboard_")
-                        if (target.isNotEmpty()) {
-                            switchKeyboard(target)
-                        }
-                    }
-                    opt.startsWith("_key_") -> {
-                        val what = opt.removePrefix("_key_")
-                        if (what.isNotEmpty() && value.value) {
-                            commonKeyboardActionListener
-                                .listener
-                                .onAction(KeyActionManager.getAction(what))
-                        }
-                    }
+        val option = value.option
+        when {
+            option.startsWith("_keyboard_") -> {
+                val target = option.removePrefix("_keyboard_")
+                if (target.isNotEmpty()) {
+                    switchKeyboard(target)
+                }
+            }
+            option.startsWith("_key_") -> {
+                val what = option.removePrefix("_key_")
+                if (what.isNotEmpty() && value.value) {
+                    commonKeyboardActionListener
+                        .listener
+                        .onAction(KeyActionManager.getAction(what))
                 }
             }
         }

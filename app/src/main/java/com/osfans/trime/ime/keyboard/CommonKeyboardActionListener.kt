@@ -319,7 +319,8 @@ class CommonKeyboardActionListener(
             }
 
             override fun onText(text: CharSequence) {
-                if (!text.first().isAsciiPrintable() && Rime.isComposing) {
+                val status = rime.run { statusCached }
+                if (!text.first().isAsciiPrintable() && status.isComposing) {
                     service.postRimeJob { commitComposition() }
                 }
 

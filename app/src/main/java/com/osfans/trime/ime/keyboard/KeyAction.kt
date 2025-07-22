@@ -5,7 +5,7 @@
 package com.osfans.trime.ime.keyboard
 
 import android.view.KeyEvent
-import com.osfans.trime.core.Rime
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.enums.Keycode
@@ -47,27 +47,32 @@ class KeyAction(
     private val hookShiftNum get() = AppPrefs.defaultInstance().keyboard.hookShiftNum
     private val hookShiftSymbol get() = AppPrefs.defaultInstance().keyboard.hookShiftSymbol
 
+    private val rime = RimeDaemon.getFirstSessionOrNull()!!
+
     private fun adjustCase(
         str: String,
         keyboard: Keyboard,
-    ): String =
-        if (str.length == 1 && (keyboard.isShifted || (!Rime.isAsciiMode && keyboard.isLabelUppercase))) {
+    ): String {
+        val status = rime.run { statusCached }
+        return if (str.length == 1 && (keyboard.isShifted || (!status.isAsciiMode && keyboard.isLabelUppercase))) {
             str.uppercase()
         } else {
             str
         }
+    }
 
     fun getLabel(keyboard: Keyboard): String {
         if (states.isNotEmpty() && toggle.isNotEmpty()) {
-            return states[if (Rime.getOption(toggle)) 1 else 0]
+            return states[if (rime.run { getRuntimeOption(toggle) }) 1 else 0]
         }
         if (keyboard.isOnlyShiftOn) {
-            if (!hookShiftNum && !Rime.isComposing && code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9) {
+            val status = rime.run { statusCached }
+            if (!hookShiftNum && !status.isComposing && code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9) {
                 return adjustCase(shiftLabel, keyboard)
             }
             if (!hookShiftSymbol &&
                 // TODO: 判断中英模式仅能正确处理已配置映射的符号，对于未配置映射的符号，即使在中文模式下也能上屏 Shift 切换的符号。
-                Rime.isAsciiMode &&
+                status.isAsciiMode &&
                 (
                     code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
                         code == KeyEvent.KEYCODE_COMMA ||
@@ -123,7 +128,7 @@ class KeyAction(
                 if (label.isEmpty()) {
                     label =
                         when (code) {
-                            KeyEvent.KEYCODE_SPACE -> Rime.currentSchemaName
+                            KeyEvent.KEYCODE_SPACE -> rime.run { statusCached }.schemaName
                             KeyEvent.KEYCODE_UNKNOWN -> ""
                             else -> Keycode.getDisplayLabel(code, modifier)
                         }
@@ -153,7 +158,7 @@ class KeyAction(
                 } else if (label.isEmpty()) {
                     label =
                         when (code) {
-                            KeyEvent.KEYCODE_SPACE -> Rime.currentSchemaName
+                            KeyEvent.KEYCODE_SPACE -> rime.run { statusCached }.schemaName
                             KeyEvent.KEYCODE_UNKNOWN -> ""
                             else -> Keycode.getDisplayLabel(code, modifier)
                         }
