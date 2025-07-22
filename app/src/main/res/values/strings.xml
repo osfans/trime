@@ -63,7 +63,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="reset_success">Reset Succeeded!</string>
     <string name="reset_failure">Reset Failed!</string>
     <string name="deploy_progress">Deploying…</string>
-    <string name="set_ime">Preferences</string>
     <string name="other_ime">Other IMEs</string>
     <string name="other__ui_mode_title">Night Mode</string>
     <string name="others">Others</string>
@@ -191,13 +190,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_schema_to_select">Currently there is no schema to select. Please go to enable schemata from the available list.</string>
     <string name="no_schema_to_enable">No schema to enable. Make sure you have prelude and schema files in the user directory.</string>
     <string name="schemata">Schemata</string>
-    <string name="schemata_hint">Select current schema or enable more schemata</string>
     <string name="navbar_background">Navigation bar background</string>
     <string name="no_theme_to_select">Currently there is no theme to select.</string>
     <string name="no_color_to_select">Currently there is no color scheme to select.</string>
     <string name="no_effect_to_select">Currently there is no key sound effect to select.</string>
-    <string name="theme_trime">default</string>
-    <string name="theme_tongwenfeng">tongwenfeng</string>
     <string name="setup_channel">Setup Wizard</string>
     <string name="forget_this_word">Forget this word</string>
     <string name="synchronization">Synchronization</string>
