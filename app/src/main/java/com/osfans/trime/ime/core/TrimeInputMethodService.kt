@@ -146,7 +146,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private suspend fun updateRimeOption(api: RimeApi) {
         try {
-            api.setRuntimeOption("soft_cursor", prefs.keyboard.softCursorEnabled) // 軟光標
+            api.setRuntimeOption("soft_cursor", prefs.keyboard.softCursorEnabled.getValue()) // 軟光標
             api.setRuntimeOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
         } catch (e: Exception) {
             Timber.e(e)
@@ -499,6 +499,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
+    private val draftExcludeApps by AppPrefs.defaultInstance().clipboard.draftExcludeApp
 
     override fun onStartInputView(
         attribute: EditorInfo,
@@ -575,9 +576,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                         normalTextEditor = false
                         Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
                     } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
-                        prefs
-                            .clipboard
-                            .draftExcludeApp
+                        draftExcludeApps
                             .trim()
                             .split('\n')
                             .contains(attribute.packageName)
@@ -880,7 +879,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (prefs.keyboard.hookCtrlZY) {
+            if (prefs.keyboard.hookCtrlZY.getValue()) {
                 when (code) {
                     KeyEvent.KEYCODE_Y -> return ic.performContextMenuAction(android.R.id.redo)
                     KeyEvent.KEYCODE_Z -> return ic.performContextMenuAction(android.R.id.undo)
@@ -891,12 +890,16 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         when (code) {
             KeyEvent.KEYCODE_A -> {
                 // 全选
-                return if (prefs.keyboard.hookCtrlA) ic.performContextMenuAction(android.R.id.selectAll) else false
+                return if (prefs.keyboard.hookCtrlA.getValue()) {
+                    ic.performContextMenuAction(android.R.id.selectAll)
+                } else {
+                    false
+                }
             }
 
             KeyEvent.KEYCODE_X -> {
                 // 剪切
-                if (prefs.keyboard.hookCtrlCV) {
+                if (prefs.keyboard.hookCtrlCV.getValue()) {
                     val etr = ExtractedTextRequest()
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)
@@ -910,7 +913,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
             KeyEvent.KEYCODE_C -> {
                 // 复制
-                if (prefs.keyboard.hookCtrlCV) {
+                if (prefs.keyboard.hookCtrlCV.getValue()) {
                     val etr = ExtractedTextRequest()
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)
@@ -931,7 +934,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
             KeyEvent.KEYCODE_V -> {
                 // 粘贴
-                if (prefs.keyboard.hookCtrlCV) {
+                if (prefs.keyboard.hookCtrlCV.getValue()) {
                     val etr = ExtractedTextRequest()
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)
@@ -950,7 +953,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
 
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (prefs.keyboard.hookCtrlLR) {
+                if (prefs.keyboard.hookCtrlLR.getValue()) {
                     val etr = ExtractedTextRequest()
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)
@@ -963,7 +966,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
 
             KeyEvent.KEYCODE_DPAD_LEFT ->
-                if (prefs.keyboard.hookCtrlLR) {
+                if (prefs.keyboard.hookCtrlLR.getValue()) {
                     val etr = ExtractedTextRequest()
                     etr.token = 0
                     val et = ic.getExtractedText(etr, 0)

@@ -67,7 +67,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
         prefs.periodicBackgroundSyncInterval.registerOnChangeListener(onSyncIntervalChange)
         with(preferenceScreen) {
             get<FolderPickerPreference>("profile_user_data_dir")?.apply {
-                setDefaultValue(DataManager.defaultDataDirectory.path)
+                default = DataManager.defaultDataDir.path
                 registerDocumentTreeLauncher()
             }
             get<Preference>("sync_user_data")?.setOnPreferenceClickListener {

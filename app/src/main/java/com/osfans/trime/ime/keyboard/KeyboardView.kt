@@ -630,7 +630,7 @@ class KeyboardView(
         }
     }
 
-    private val hookShiftArrow get() = AppPrefs.defaultInstance().keyboard.hookShiftArrow
+    private val hookShiftArrow by AppPrefs.defaultInstance().keyboard.hookShiftArrow
 
     fun isHookShiftArrow(keyCode: Int): Boolean {
         if (!hookShiftArrow) return false

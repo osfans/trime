@@ -44,8 +44,8 @@ class KeyAction(
     private var preview: String = ""
     private var states: List<String> = listOf()
 
-    private val hookShiftNum get() = AppPrefs.defaultInstance().keyboard.hookShiftNum
-    private val hookShiftSymbol get() = AppPrefs.defaultInstance().keyboard.hookShiftSymbol
+    private val hookShiftNum by AppPrefs.defaultInstance().keyboard.hookShiftNum
+    private val hookShiftSymbol by AppPrefs.defaultInstance().keyboard.hookShiftSymbol
 
     private val rime = RimeDaemon.getFirstSessionOrNull()!!
 
