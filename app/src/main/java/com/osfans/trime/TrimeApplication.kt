@@ -89,10 +89,6 @@ class TrimeApplication : Application() {
         }
         instance = this
         try {
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            AppPrefs.initDefault(sharedPreferences).apply {
-                initDefaultPreferences()
-            }
             if (BuildConfig.DEBUG) {
                 Timber.plant(
                     object : Timber.DebugTree() {
@@ -129,14 +125,16 @@ class TrimeApplication : Application() {
                     },
                 )
             }
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            val appPrefs = AppPrefs.initDefault(sharedPreferences)
+            appPrefs.initDefaultPreferences()
             // record last pid for crash logs
-            val appPrefs = AppPrefs.defaultInstance()
-            val currentPid = Process.myPid()
             appPrefs.internal.pid.apply {
-                lastPid = this
+                val currentPid = Process.myPid()
+                lastPid = getValue()
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
+                setValue(currentPid)
             }
-            appPrefs.internal.pid = currentPid
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)

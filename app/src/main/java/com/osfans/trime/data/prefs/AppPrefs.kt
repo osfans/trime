@@ -100,7 +100,7 @@ class AppPrefs(
             const val PID = "general__pid"
         }
 
-        var pid by int(PID, 0)
+        val pid = int(PID, 0)
     }
 
     class General(
@@ -154,28 +154,28 @@ class AppPrefs(
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
         }
 
-        val softCursorEnabled by bool(SOFT_CURSOR_ENABLED, true)
+        val softCursorEnabled = bool(SOFT_CURSOR_ENABLED, true)
         val popupKeyPressEnabled = bool(POPUP_KEY_PRESS_ENABLED, false)
         val hideQuickBar = bool(HIDE_QUICK_BAR, false)
 
-        enum class LandscapeModeOption {
+        enum class LandscapeMode {
             NEVER,
             LANDSCAPE,
             AUTO,
             ALWAYS,
         }
 
-        val landscapeModeOption by enum(LANDSCAPE_MODE, LandscapeModeOption.NEVER)
+        val landscapeMode = enum(LANDSCAPE_MODE, LandscapeMode.NEVER)
         val splitSpacePercent = int(SPLIT_SPACE_PERCENT, 100)
 
-        val hookCtrlA by bool(HOOK_CTRL_A, false)
-        val hookCtrlCV by bool(HOOK_CTRL_CV, false)
-        val hookCtrlLR by bool(HOOK_CTRL_LR, false)
-        val hookCtrlZY by bool(HOOK_CTRL_ZY, false)
-        val hookShiftSpace by bool(HOOK_SHIFT_SPACE, false)
-        val hookShiftNum by bool(HOOK_SHIFT_NUM, false)
-        val hookShiftSymbol by bool(HOOK_SHIFT_SYMBOL, false)
-        val hookShiftArrow by bool(HOOK_SHIFT_ARROW, true)
+        val hookCtrlA = bool(HOOK_CTRL_A, false)
+        val hookCtrlCV = bool(HOOK_CTRL_CV, false)
+        val hookCtrlLR = bool(HOOK_CTRL_LR, false)
+        val hookCtrlZY = bool(HOOK_CTRL_ZY, false)
+        val hookShiftSpace = bool(HOOK_SHIFT_SPACE, false)
+        val hookShiftNum = bool(HOOK_SHIFT_NUM, false)
+        val hookShiftSymbol = bool(HOOK_SHIFT_SYMBOL, false)
+        val hookShiftArrow = bool(HOOK_SHIFT_ARROW, true)
 
         val soundOnKeyPress = bool(SOUND_ON_KEYPRESS, false)
         val soundEffectEnabled = bool(SOUND_EFFECT_ENABLED, false)
@@ -219,7 +219,7 @@ class AppPrefs(
             const val LAST_BACKGROUND_SYNC_TIME = "last_background_sync_time"
         }
 
-        var userDataDir by string(USER_DATA_DIR, DataManager.defaultDataDirectory.path)
+        val userDataDir = string(USER_DATA_DIR, DataManager.defaultDataDir.path)
         val periodicBackgroundSync = bool(PERIODIC_BACKGROUND_SYNC, false)
         val periodicBackgroundSyncInterval = int(PERIODIC_BACKGROUND_SYNC_INTERVAL, 30)
         val lastBackgroundSyncStatus = bool(LAST_BACKGROUND_SYNC_STATUS, false)
@@ -240,10 +240,10 @@ class AppPrefs(
 
         val clipboardCompareRules = string(CLIPBOARD_COMPARE_RULES, "")
         val clipboardOutputRules = string(CLIPBOARD_OUTPUT_RULES, "")
-        var draftOutputRules by string(DRAFT_OUTPUT_RULES, "")
+        val draftOutputRules = string(DRAFT_OUTPUT_RULES, "")
         val clipboardLimit = int(CLIPBOARD_LIMIT, 10)
-        var draftLimit by int(DRAFT_LIMIT, 10)
-        var draftExcludeApp by string(DRAFT_EXCLUDE_APP, "")
+        val draftLimit = int(DRAFT_LIMIT, 10)
+        val draftExcludeApp = string(DRAFT_EXCLUDE_APP, "")
     }
 
     /**
@@ -264,6 +264,6 @@ class AppPrefs(
         }
 
         val uiMode = enum(UI_MODE, UiMode.AUTO)
-        var showAppIcon by bool(SHOW_APP_ICON, true)
+        val showAppIcon = bool(SHOW_APP_ICON, true)
     }
 }

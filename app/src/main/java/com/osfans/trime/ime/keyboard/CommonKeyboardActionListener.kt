@@ -243,11 +243,11 @@ class CommonKeyboardActionListener(
                     else -> {
                         if (action.modifier == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
                             val shouldHookSpace =
-                                prefs.keyboard.hookShiftSpace && action.code == KeyEvent.KEYCODE_SPACE
+                                prefs.keyboard.hookShiftSpace.getValue() && action.code == KeyEvent.KEYCODE_SPACE
                             val shouldHookNumber =
-                                prefs.keyboard.hookShiftNum && action.code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9
+                                prefs.keyboard.hookShiftNum.getValue() && action.code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9
                             val shouldHookSymbol =
-                                prefs.keyboard.hookShiftSymbol &&
+                                prefs.keyboard.hookShiftSymbol.getValue() &&
                                     (
                                         action.code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
                                             action.code == KeyEvent.KEYCODE_COMMA ||

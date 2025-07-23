@@ -30,14 +30,14 @@ object DraftHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
         itemCount = dftDao.itemCount()
     }
 
-    private val limit get() = AppPrefs.defaultInstance().clipboard.draftLimit
-    private val output get() =
-        AppPrefs
-            .defaultInstance()
-            .clipboard.draftOutputRules
+    private val limit by AppPrefs.defaultInstance().clipboard.draftLimit
+    private val output by lazy {
+        val rules by AppPrefs.defaultInstance().clipboard.draftOutputRules
+        rules
             .split('\n')
             .map { Regex(it) }
             .toHashSet()
+    }
 
     var lastBean: DatabaseBean? = null
 

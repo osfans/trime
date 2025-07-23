@@ -50,7 +50,7 @@ class OtherFragment : PaddingPreferenceFragment() {
 
     private fun updateLauncherIconStatus() {
         // Set LauncherAlias enabled/disabled state just before destroying/pausing this activity
-        if (prefs.other.showAppIcon) {
+        if (prefs.other.showAppIcon.getValue()) {
             showAppIcon(requireContext())
         } else {
             hideAppIcon(requireContext())

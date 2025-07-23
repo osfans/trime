@@ -44,14 +44,14 @@ object DataManager {
             .use { it.readText() }
             .let { deserializeDataChecksums(it) }
 
-    private val prefs get() = AppPrefs.defaultInstance()
+    private val prefs by lazy { AppPrefs.defaultInstance() }
 
-    val defaultDataDirectory = File(Environment.getExternalStorageDirectory(), "rime")
+    val defaultDataDir = File(Environment.getExternalStorageDirectory(), "rime")
 
     val sharedDataDir = File(appContext.getExternalFilesDir(null), "shared").also { it.mkdirs() }
 
     val userDataDir
-        get() = File(prefs.profile.userDataDir).also { it.mkdirs() }
+        get() = File(prefs.profile.userDataDir.getValue()).also { it.mkdirs() }
 
     val prebuiltDataDir = File(sharedDataDir, "build")
     val stagingDir get() = File(userDataDir, "build")
