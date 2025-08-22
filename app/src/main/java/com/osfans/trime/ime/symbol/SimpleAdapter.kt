@@ -80,6 +80,7 @@ class SimpleAdapter(
                         "key_border_color",
                         dp(theme.generalStyle.keyBorder),
                         dp(theme.generalStyle.roundCorner),
+                        cache = false,
                     )
             }
         }

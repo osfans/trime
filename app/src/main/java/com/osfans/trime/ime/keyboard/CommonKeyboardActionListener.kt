@@ -334,13 +334,9 @@ class CommonKeyboardActionListener(
                         }
 
                     service.postRimeJob {
-                        if (slice.startsWith("{") && slice.endsWith("}")) {
-                            onAction(KeyActionManager.getAction(slice))
-                            return@postRimeJob
-                        }
-
-                        if (!Rime.simulateKeySequence(slice)) {
-                            service.commitText(slice.replace("{Escape}", ""))
+                        when {
+                            slice.startsWith("{") && slice.endsWith("}") -> onAction(KeyActionManager.getAction(slice))
+                            !Rime.simulateKeySequence(slice) -> service.commitText(slice.replace("{Escape}", ""))
                         }
                     }
 

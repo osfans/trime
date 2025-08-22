@@ -304,8 +304,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 ic?.commitText("\n", 1)
                 return
             }
-            if (!actionLabel.isNullOrEmpty() && actionId != EditorInfo.IME_ACTION_UNSPECIFIED
-            ) {
+            if (!actionLabel.isNullOrEmpty() && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
                 currentInputConnection.performEditorAction(actionId)
                 return
             }

@@ -263,7 +263,10 @@ object ColorManager {
     @ColorInt
     fun getColor(key: String): Int = colorCache[key] ?: resolveColor(key)
 
-    fun getDrawable(key: String): Drawable? = drawableCache[key] ?: resolveDrawable(key)
+    fun getDrawable(
+        key: String,
+        cache: Boolean = true,
+    ): Drawable? = if (cache) drawableCache[key] ?: resolveDrawable(key) else resolveDrawable(key)
 
     fun getDrawable(
         colorKey: String,
@@ -271,8 +274,9 @@ object ColorManager {
         borderPx: Int = 0,
         cornerRadius: Float = 0f,
         alpha: Int = 255,
+        cache: Boolean = true,
     ): Drawable? =
-        when (val drawable = getDrawable(colorKey)) {
+        when (val drawable = getDrawable(colorKey, cache)) {
             is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
             is GradientDrawable ->
                 drawable.also {

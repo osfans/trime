@@ -66,6 +66,7 @@ class VarLengthAdapter(
                             "key_border_color",
                             dp(theme.generalStyle.candidateBorder),
                             dp(theme.generalStyle.roundCorner),
+                            cache = false,
                         ),
                     )
                     addState(
