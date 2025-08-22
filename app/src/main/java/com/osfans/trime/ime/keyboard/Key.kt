@@ -290,7 +290,8 @@ class Key(
                 if (isPressed) {
                     hlOffKeyBackground ?: hlKeyBackground
                 } else {
-                    offKeyBackground ?: keyBackground
+                    selfConfig?.keyBackColor.takeIf { !it.isNullOrEmpty() }?.let { keyBackground }
+                        ?: (offKeyBackground ?: keyBackground)
                 }
             }
             else -> if (isPressed) hlKeyBackground else keyBackground
@@ -299,7 +300,7 @@ class Key(
     fun getTextColor(): Int =
         when (appearanceType) {
             2 -> if (isPressed) hlOnKeyTextColor else onKeyTextColor
-            1 -> if (isPressed) hlOffKeyTextColor else offKeyTextColor
+            1 -> if (isPressed) hlOffKeyTextColor else getColor(selfConfig?.keyTextColor ?: "", offKeyTextColor)
             else -> if (isPressed) hlKeyTextColor else keyTextColor
         }
 
