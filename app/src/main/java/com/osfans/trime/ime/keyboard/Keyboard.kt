@@ -216,54 +216,45 @@ class Keyboard(
                         continue // 縮進
                     }
                     val key = Key(this, textKey)
-                    key.keyTextOffsetX =
-                        floatArrayOf(
-                            textKey.keyTextOffsetX,
-                            selfConfig.keyTextOffsetX,
-                            theme.generalStyle.keyTextOffsetX,
-                        ).firstOrNull { it > 0 } ?: 0f
-                    key.keyTextOffsetY =
-                        floatArrayOf(
-                            textKey.keyTextOffsetY,
-                            selfConfig.keyTextOffsetY,
-                            theme.generalStyle.keyTextOffsetY,
-                        ).firstOrNull { it > 0 } ?: 0f
-                    key.keySymbolOffsetX =
-                        floatArrayOf(
-                            textKey.keySymbolOffsetX,
-                            selfConfig.keySymbolOffsetX,
-                            theme.generalStyle.keySymbolOffsetX,
-                        ).firstOrNull { it > 0 } ?: 0f
-                    key.keySymbolOffsetY =
-                        floatArrayOf(
-                            textKey.keySymbolOffsetY,
-                            selfConfig.keySymbolOffsetY,
-                            theme.generalStyle.keySymbolOffsetY,
-                        ).firstOrNull { it > 0 } ?: 0f
-                    key.keyHintOffsetX =
-                        floatArrayOf(
-                            textKey.keyHintOffsetX,
-                            selfConfig.keyHintOffsetX,
-                            theme.generalStyle.keyHintOffsetX,
-                        ).firstOrNull { it > 0 } ?: 0f
-                    key.keyHintOffsetY =
-                        floatArrayOf(
-                            textKey.keyHintOffsetY,
-                            selfConfig.keyHintOffsetY,
-                            theme.generalStyle.keyHintOffsetY,
-                        ).firstOrNull { it > 0 } ?: 0f
-                    key.keyPressOffsetX =
-                        intArrayOf(
-                            textKey.keyPressOffsetX,
-                            selfConfig.keyPressOffsetX,
-                            theme.generalStyle.keyPressOffsetX,
-                        ).firstOrNull { it > 0 } ?: 0
-                    key.keyPressOffsetY =
-                        intArrayOf(
-                            textKey.keyPressOffsetY,
-                            selfConfig.keyPressOffsetY,
-                            theme.generalStyle.keyPressOffsetY,
-                        ).firstOrNull { it > 0 } ?: 0
+                    key.keyTextOffsetX = textKey.keyTextOffsetX
+                        ?: selfConfig.keyTextOffsetX
+                        ?: theme.generalStyle.keyTextOffsetX
+                        ?: 0f
+
+                    key.keyTextOffsetY = textKey.keyTextOffsetY
+                        ?: selfConfig.keyTextOffsetY
+                        ?: theme.generalStyle.keyTextOffsetY
+                        ?: 0f
+
+                    key.keySymbolOffsetX = textKey.keySymbolOffsetX
+                        ?: selfConfig.keySymbolOffsetX
+                        ?: theme.generalStyle.keySymbolOffsetX
+                        ?: 0f
+
+                    key.keySymbolOffsetY = textKey.keySymbolOffsetY
+                        ?: selfConfig.keySymbolOffsetY
+                        ?: theme.generalStyle.keySymbolOffsetY
+                        ?: 0f
+
+                    key.keyHintOffsetX = textKey.keyHintOffsetX
+                        ?: selfConfig.keyHintOffsetX
+                        ?: theme.generalStyle.keyHintOffsetX
+                        ?: 0f
+
+                    key.keyHintOffsetY = textKey.keyHintOffsetY
+                        ?: selfConfig.keyHintOffsetY
+                        ?: theme.generalStyle.keyHintOffsetY
+                        ?: 0f
+
+                    key.keyPressOffsetX = textKey.keyPressOffsetX
+                        ?: selfConfig.keyPressOffsetX
+                        ?: theme.generalStyle.keyPressOffsetX
+                        ?: 0
+
+                    key.keyPressOffsetY = textKey.keyPressOffsetY
+                        ?: selfConfig.keyPressOffsetY
+                        ?: theme.generalStyle.keyPressOffsetY
+                        ?: 0
                     key.x = x
                     key.y = y
                     val rightGap = abs(allowedWidth - x - widthPx - gap / 2)
