@@ -248,9 +248,9 @@ class Keyboard(
                         ).firstOrNull { it > 0 } ?: 0f
                     key.keyHintOffsetY =
                         floatArrayOf(
-                            textKey.keyHintOffsetX,
-                            selfConfig.keyHintOffsetX,
-                            theme.generalStyle.keyHintOffsetX,
+                            textKey.keyHintOffsetY,
+                            selfConfig.keyHintOffsetY,
+                            theme.generalStyle.keyHintOffsetY,
                         ).firstOrNull { it > 0 } ?: 0f
                     key.keyPressOffsetX =
                         intArrayOf(
