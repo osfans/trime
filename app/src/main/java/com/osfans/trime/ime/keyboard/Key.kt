@@ -260,7 +260,7 @@ class Key(
         when {
             label.isNotEmpty() &&
                 keyAction == click &&
-                keyActions.containsKey(KeyBehavior.ASCII) &&
+                !keyActions.containsKey(KeyBehavior.ASCII) &&
                 !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunch } -> label
             else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
         }
