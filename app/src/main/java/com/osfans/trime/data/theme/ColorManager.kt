@@ -6,6 +6,7 @@ package com.osfans.trime.data.theme
 
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.NinePatch
@@ -100,8 +101,7 @@ object ColorManager {
             "long_text_back_color" to "key_back_color",
         )
 
-    private val colorCache = LruCache<String, Int>(10)
-    private val drawableCache = LruCache<String, Drawable>(10)
+    private lateinit var bitmapCache: LruCache<String, Bitmap>
 
     fun interface OnColorChangeListener {
         fun onColorChange(theme: Theme)
@@ -126,10 +126,19 @@ object ColorManager {
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
         activeColorScheme = evaluateActiveColorScheme()
+
+        val maxMemory = Runtime.getRuntime().maxMemory() / 1024
+        val cacheSize = maxMemory / 8
+        bitmapCache =
+            object : LruCache<String, Bitmap>(cacheSize.toInt()) {
+                override fun sizeOf(
+                    key: String,
+                    value: Bitmap,
+                ): Int = value.byteCount / 1024
+            }
     }
 
     fun onSystemNightModeChange(isNight: Boolean) {
-        freeCaches()
         isNightMode = isNight
         activeColorScheme = evaluateActiveColorScheme()
     }
@@ -142,7 +151,6 @@ object ColorManager {
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
-        freeCaches()
         this.theme = theme
         val newScheme = evaluateActiveColorScheme()
         activeColorScheme = newScheme
@@ -150,21 +158,12 @@ object ColorManager {
     }
 
     fun setColorScheme(scheme: ColorScheme) {
-        freeCaches()
         activeColorScheme = scheme
         normalModeColor = scheme.id
     }
 
-    private fun freeCaches() {
-        colorCache.evictAll()
-        drawableCache.evictAll()
-    }
-
     @ColorInt
-    private fun resolveColor(
-        key: String,
-        putCache: Boolean = true,
-    ): Int {
+    private fun resolveColor(key: String): Int {
         val color =
             try {
                 resolveValue(key) { value ->
@@ -173,16 +172,10 @@ object ColorManager {
             } catch (_: IllegalArgumentException) {
                 ColorUtils.parseColor(key)
             }
-        if (putCache) {
-            synchronized(colorCache) { colorCache.put(key, color) }
-        }
         return color
     }
 
-    private fun resolveDrawable(
-        key: String,
-        putCache: Boolean = true,
-    ): Drawable? {
+    private fun resolveDrawable(key: String): Drawable? {
         val drawable =
             try {
                 resolveValue(key) { value ->
@@ -191,9 +184,6 @@ object ColorManager {
             } catch (_: IllegalArgumentException) {
                 parseDrawable(key)
             }
-        if (putCache && drawable != null) {
-            synchronized(drawableCache) { drawableCache.put(key, drawable) }
-        }
         return drawable
     }
 
@@ -227,8 +217,11 @@ object ColorManager {
         if (value.isEmpty()) return null
         if (SUPPORTED_IMG_FORMATS.any { value.endsWith(it) }) {
             val path = resolveImageFilePath(value)
-            val file = File(path)
-            val bitmap = BitmapFactory.decodeStream(file.inputStream()) ?: return null
+            val bitmap =
+                bitmapCache[path]
+                    ?: BitmapFactory.decodeStream(File(path).inputStream())?.also {
+                        bitmapCache.put(path, it)
+                    } ?: return null
             if (path.endsWith(".9.png")) {
                 val chunk = bitmap.ninePatchChunk
                 return if (NinePatch.isNinePatchChunk(chunk)) {
@@ -261,12 +254,9 @@ object ColorManager {
     }
 
     @ColorInt
-    fun getColor(key: String): Int = colorCache[key] ?: resolveColor(key)
+    fun getColor(key: String): Int = resolveColor(key)
 
-    fun getDrawable(
-        key: String,
-        cache: Boolean = true,
-    ): Drawable? = if (cache) drawableCache[key] ?: resolveDrawable(key) else resolveDrawable(key)
+    fun getDrawable(key: String): Drawable? = resolveDrawable(key)
 
     fun getDrawable(
         colorKey: String,
@@ -274,9 +264,8 @@ object ColorManager {
         borderPx: Int = 0,
         cornerRadius: Float = 0f,
         alpha: Int = 255,
-        cache: Boolean = true,
     ): Drawable? =
-        when (val drawable = getDrawable(colorKey, cache)) {
+        when (val drawable = getDrawable(colorKey)) {
             is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
             is GradientDrawable ->
                 drawable.also {

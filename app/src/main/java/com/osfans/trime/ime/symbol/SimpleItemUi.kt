@@ -80,7 +80,6 @@ class SimpleItemUi(
                     "key_long_text_border",
                     dp(theme.generalStyle.keyBorder),
                     dp(theme.generalStyle.roundCorner),
-                    cache = false,
                 )
             add(layout, lParams(matchParent, matchParent))
         }
