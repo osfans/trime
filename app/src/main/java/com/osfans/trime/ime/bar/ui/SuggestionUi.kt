@@ -6,9 +6,6 @@ package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
 import android.view.View
-import com.osfans.trime.R
-import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.after
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
@@ -16,28 +13,19 @@ import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.startOfParent
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
+import splitties.views.dsl.core.wrapContent
 
 class SuggestionUi(
     override val ctx: Context,
     private val compatView: View,
 ) : Ui {
-    val homeButton =
-        ToolButton(ctx, R.drawable.ic_trime_status)
-
     override val root =
         ctx.constraintLayout {
             add(
-                homeButton,
-                lParams(dp(40)) {
+                compatView,
+                lParams(wrapContent, wrapContent) {
                     centerVertically()
                     startOfParent()
-                },
-            )
-            add(
-                compatView,
-                lParams {
-                    centerVertically()
-                    after(homeButton)
                     endOfParent()
                 },
             )
