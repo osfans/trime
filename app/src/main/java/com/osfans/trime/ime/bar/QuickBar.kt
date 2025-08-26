@@ -97,14 +97,7 @@ class QuickBar(
     }
 
     private val suggestionUi by lazy {
-        SuggestionUi(context, candidate.suggestionCandidateModule.view).apply {
-            homeButton.setOnClickListener {
-                barStateMachine.push(
-                    QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
-                    QuickBarStateMachine.BooleanKey.SuggestionEmpty to true,
-                )
-            }
-        }
+        SuggestionUi(context, candidate.suggestionCandidateModule.view)
     }
 
     private val tabUi by lazy {

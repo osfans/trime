@@ -81,7 +81,7 @@ object InlineSuggestionHelper {
                 .build()
         val spec =
             InlinePresentationSpec
-                .Builder(Size(0, 0), Size(ctx.dp(160), Int.MAX_VALUE))
+                .Builder(Size(0, 0), Size(Int.MAX_VALUE, Int.MAX_VALUE))
                 .setStyle(styleBundle)
                 .build()
         return InlineSuggestionsRequest
