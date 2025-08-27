@@ -277,7 +277,8 @@ Java_com_osfans_trime_core_Rime_clearRimeComposition(JNIEnv *env,
 // output
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
-  jobject proto = nullptr;
+  jobject proto = env->NewObject(GlobalRef->CommitProto,
+                                 GlobalRef->CommitProtoInit, nullptr);
   Rime::Instance().commitProto(&proto);
   return proto;
 }
@@ -291,7 +292,8 @@ Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
-  jobject proto = nullptr;
+  jobject proto =
+      env->NewObject(GlobalRef->StatusProto, GlobalRef->StatusProtoDefault);
   Rime::Instance().statusProto(&proto);
   return proto;
 }

@@ -133,6 +133,7 @@ class GlobalRefSingleton {
 
   jclass StatusProto;
   jmethodID StatusProtoInit;
+  jmethodID StatusProtoDefault;
 
   jclass SchemaListItem;
   jmethodID SchemaListItemInit;
@@ -208,6 +209,7 @@ class GlobalRefSingleton {
     StatusProtoInit =
         env->GetMethodID(StatusProto, "<init>",
                          "(Ljava/lang/String;Ljava/lang/String;ZZZZZZZ)V");
+    StatusProtoDefault = env->GetMethodID(StatusProto, "<init>", "()V");
 
     SchemaListItem = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/SchemaItem")));
