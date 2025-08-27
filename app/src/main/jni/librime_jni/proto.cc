@@ -38,10 +38,16 @@ void rime_context_proto(RimeSessionId session_id,
                                        GlobalRef->CompositionProtoDefault);
   if (ctx->IsComposing()) {
     const Preedit &preedit = ctx->GetPreedit();
+    const auto &text = preedit.text;
+    auto length = utf8::distance(text.c_str(), text.c_str() + text.length());
+    auto cursor_pos =
+        utf8::distance(text.c_str(), text.c_str() + preedit.caret_pos);
+    auto sel_start =
+        utf8::distance(text.c_str(), text.c_str() + preedit.sel_start);
+    auto sel_end = utf8::distance(text.c_str(), text.c_str() + preedit.sel_end);
     composition = env->NewObject(
-        GlobalRef->CompositionProto, GlobalRef->CompositionProtoInit,
-        preedit.text.length(), preedit.caret_pos, preedit.sel_start,
-        preedit.sel_end, *JString(env, preedit.text),
+        GlobalRef->CompositionProto, GlobalRef->CompositionProtoInit, length,
+        cursor_pos, sel_start, sel_end, *JString(env, text),
         *JString(env, ctx->GetCommitText()));
   }
   jobject menu =

@@ -67,7 +67,7 @@ class Rime :
 
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
 
-                    requireResponse()
+                    emitResponse()
                     SchemaManager.init(getCurrentRimeSchema())
                 }
 
@@ -99,9 +99,9 @@ class Rime :
         withRimeContext {
             processRimeKey(value, modifiers.toInt()).also {
                 if (it) {
-                    requireResponse()
+                    emitResponse()
                 } else {
-                    requireKeyMessage(value, modifiers.toInt())
+                    emitKeyEvent(value, modifiers.toInt())
                 }
             }
         }
@@ -113,42 +113,42 @@ class Rime :
         withRimeContext {
             processRimeKey(value.value, modifiers.toInt()).also {
                 if (it) {
-                    requireResponse()
+                    emitResponse()
                 } else {
-                    requireKeyMessage(value.value, modifiers.toInt())
+                    emitKeyEvent(value.value, modifiers.toInt())
                 }
             }
         }
 
     override suspend fun selectCandidate(idx: Int): Boolean =
         withRimeContext {
-            selectRimeCandidate(idx).also { if (it) requireResponse() }
+            selectRimeCandidate(idx).also { if (it) emitResponse() }
         }
 
     override suspend fun forgetCandidate(idx: Int): Boolean =
         withRimeContext {
-            forgetRimeCandidate(idx).also { if (it) requireResponse() }
+            forgetRimeCandidate(idx).also { if (it) emitResponse() }
         }
 
     override suspend fun selectPagedCandidate(idx: Int): Boolean =
         withRimeContext {
-            selectRimeCandidateOnCurrentPage(idx).also { if (it) requireResponse() }
+            selectRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
         }
 
     override suspend fun deletedPagedCandidate(idx: Int): Boolean =
         withRimeContext {
-            deleteRimeCandidateOnCurrentPage(idx).also { if (it) requireResponse() }
+            deleteRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
         }
 
     override suspend fun changeCandidatePage(backward: Boolean): Boolean =
         withRimeContext {
-            changeRimeCandidatePage(backward).also { if (it) requireResponse() }
+            changeRimeCandidatePage(backward).also { if (it) emitResponse() }
         }
 
     override suspend fun moveCursorPos(position: Int) =
         withRimeContext {
             setRimeCaretPos(position)
-            requireResponse()
+            emitResponse()
         }
 
     override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
@@ -163,12 +163,12 @@ class Rime :
 
     override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
 
-    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) requireResponse() } }
+    override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) emitResponse() } }
 
     override suspend fun clearComposition() =
         withRimeContext {
             clearRimeComposition()
-            requireResponse()
+            emitResponse()
         }
 
     override suspend fun setRuntimeOption(
@@ -195,11 +195,11 @@ class Rime :
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.SchemaMessage -> {
-                getRimeStatus()?.let { statusCached = it }
+                statusCached = getRimeStatus()
                 SchemaManager.init(it.data.id)
             }
             is RimeMessage.OptionMessage -> {
-                getRimeStatus()?.let { statusCached = it }
+                statusCached = getRimeStatus()
                 SchemaManager.updateSwitchOptions()
             }
             is RimeMessage.DeployMessage -> {
@@ -271,15 +271,15 @@ class Rime :
             val commit = getRimeCommit()
             val ctx = getRimeContext()
 
-            return (simulateResult && (!commit?.text.isNullOrEmpty() || !ctx?.input.isNullOrEmpty())).also {
+            return (simulateResult && (!commit.text.isNullOrEmpty() || ctx.input.isNotEmpty())).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
                 if (it) {
                     handleRimeMessage(
                         4, // RimeMessage.MessageType.Response
                         arrayOf(
-                            commit ?: RimeProto.Commit(null),
-                            ctx ?: return false,
-                            getRimeStatus() ?: return false,
+                            commit,
+                            ctx,
+                            getRimeStatus(),
                         ),
                     )
                 }
@@ -325,13 +325,13 @@ class Rime :
 
         // output
         @JvmStatic
-        external fun getRimeCommit(): RimeProto.Commit?
+        external fun getRimeCommit(): RimeProto.Commit
 
         @JvmStatic
-        external fun getRimeContext(): RimeProto.Context?
+        external fun getRimeContext(): RimeProto.Context
 
         @JvmStatic
-        external fun getRimeStatus(): RimeProto.Status?
+        external fun getRimeStatus(): RimeProto.Status
 
         // runtime options
         @JvmStatic
@@ -406,18 +406,18 @@ class Rime :
             messageFlow_.tryEmit(message)
         }
 
-        private fun requireResponse() {
+        private fun emitResponse() {
             handleRimeMessage(
                 4, // RimeMessage.MessageType.Response
                 arrayOf(
-                    getRimeCommit() ?: RimeProto.Commit(null),
-                    getRimeContext() ?: return,
-                    getRimeStatus() ?: return,
+                    getRimeCommit(),
+                    getRimeContext(),
+                    getRimeStatus(),
                 ),
             )
         }
 
-        private fun requireKeyMessage(
+        private fun emitKeyEvent(
             value: Int,
             modifiers: Int,
         ) {

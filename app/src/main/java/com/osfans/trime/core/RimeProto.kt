@@ -19,33 +19,20 @@ class RimeProto {
         val composition: Composition,
         val menu: Menu,
         val input: String,
-        private val _caretPos: Int,
+        val caretPos: Int,
     ) {
-        /**
-         * Same with [Composition.cursorPos], just directly assign to it.
-         */
-        val caretPos = composition.cursorPos
-
         data class Composition(
-            private val _length: Int = 0,
-            private val _cursorPos: Int = 0,
-            private val _selStart: Int = 0,
-            private val _selEnd: Int = 0,
-            val preedit: String? = null,
-            val commitTextPreview: String? = null,
-        ) {
             /**
              * Actually we can directly use [String.length] on [preedit], but
              * we add it here for the sake of completeness as it is semantically correct
              */
-            val length: Int = preedit.run { if (isNullOrEmpty()) 0 else String(toByteArray(), 0, _length).length }
-
-            val cursorPos: Int = preedit.run { if (isNullOrEmpty()) 0 else String(toByteArray(), 0, _cursorPos).length }
-
-            val selStart: Int = preedit.run { if (isNullOrEmpty()) 0 else String(toByteArray(), 0, _selStart).length }
-
-            val selEnd: Int = preedit.run { if (isNullOrEmpty()) 0 else String(toByteArray(), 0, _selEnd).length }
-        }
+            val length: Int = 0,
+            val cursorPos: Int = 0,
+            val selStart: Int = 0,
+            val selEnd: Int = 0,
+            val preedit: String? = null,
+            val commitTextPreview: String? = null,
+        )
 
         data class Menu(
             val pageSize: Int = 0,
