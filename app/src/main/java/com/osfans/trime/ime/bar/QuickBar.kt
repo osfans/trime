@@ -4,12 +4,14 @@
 
 package com.osfans.trime.ime.bar
 
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
@@ -19,7 +21,8 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
-import com.osfans.trime.ime.bar.ui.SuggestionUi
+import com.osfans.trime.ime.bar.ui.ClipboardSuggestionUi
+import com.osfans.trime.ime.bar.ui.InlineSuggestionUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.CandidateModule
@@ -33,6 +36,9 @@ import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.switches.SwitchOptionWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
@@ -50,6 +56,22 @@ class QuickBar(
     lazyCandidate: Lazy<CandidateModule>,
     lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
 ) : InputBroadcastReceiver {
+
+    private val clipboardListener = ClipboardManager.OnPrimaryClipChangedListener {
+        val content = service.getSystemService(Context.CLIPBOARD_SERVICE)
+            .let { it as? ClipboardManager }
+            ?.primaryClip
+            ?.takeIf { it.itemCount > 0 }
+            ?.getItemAt(0)
+            ?.text
+            ?.toString()
+            ?.takeIf { it.isNotBlank() }
+
+        content?.let { handleClipboardContent(it) }
+    }
+
+    private var clipboardAutoHideJob: Job? = null
+
     private val candidate by lazyCandidate
 
     private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
@@ -96,12 +118,24 @@ class QuickBar(
         }
     }
 
-    private val suggestionUi by lazy {
-        SuggestionUi(context, candidate.suggestionCandidateModule.view)
+    private val inlineSuggestionUi by lazy {
+        InlineSuggestionUi(context, candidate.suggestionCandidateModule.view)
     }
 
     private val tabUi by lazy {
         TabUi(context, theme)
+    }
+
+    private val clipboardSuggestionUi by lazy {
+        ClipboardSuggestionUi(context).apply {
+            root.setOnClickListener {
+                val content = text.text.toString()
+                if (content.isNotEmpty()) {
+                    service.commitText(content)
+                    handleClipboardContent(null)
+                }
+            }
+        }
     }
 
     private val barStateMachine =
@@ -184,9 +218,13 @@ class QuickBar(
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
-            add(suggestionUi.root, lParams(matchParent, matchParent))
+            add(inlineSuggestionUi.root, lParams(matchParent, matchParent))
+            add(clipboardSuggestionUi.root, lParams(matchParent, matchParent))
 
             evalAlwaysUiState()
+
+            (service.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)
+                ?.addPrimaryClipChangedListener(clipboardListener)
         }
     }
 
@@ -213,6 +251,24 @@ class QuickBar(
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
             QuickBarStateMachine.BooleanKey.SuggestionEmpty to isEmpty,
+        )
+    }
+
+    fun handleClipboardContent(content: String?) {
+        val isEmpty = content.isNullOrEmpty()
+
+        if (!isEmpty) {
+            clipboardSuggestionUi.text.text = content
+            clipboardAutoHideJob?.cancel()
+            clipboardAutoHideJob = service.lifecycleScope.launch {
+                delay(10000)
+                handleClipboardContent(null)
+            }
+        }
+
+        barStateMachine.push(
+            QuickBarStateMachine.TransitionEvent.ClipboardUpdated,
+            QuickBarStateMachine.BooleanKey.ClipboardEmpty to isEmpty,
         )
     }
 

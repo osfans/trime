@@ -8,9 +8,11 @@
 package com.osfans.trime.ime.bar
 
 import com.osfans.trime.ime.bar.QuickBarStateMachine.BooleanKey.CandidateEmpty
+import com.osfans.trime.ime.bar.QuickBarStateMachine.BooleanKey.ClipboardEmpty
 import com.osfans.trime.ime.bar.QuickBarStateMachine.BooleanKey.SuggestionEmpty
 import com.osfans.trime.ime.bar.QuickBarStateMachine.State.Always
 import com.osfans.trime.ime.bar.QuickBarStateMachine.State.Candidate
+import com.osfans.trime.ime.bar.QuickBarStateMachine.State.Clipboard
 import com.osfans.trime.ime.bar.QuickBarStateMachine.State.Suggestion
 import com.osfans.trime.ime.bar.QuickBarStateMachine.State.Tab
 import com.osfans.trime.util.BuildTransitionEvent
@@ -23,11 +25,13 @@ object QuickBarStateMachine {
         Candidate,
         Tab,
         Suggestion,
+        Clipboard,
     }
 
     enum class BooleanKey : EventStateMachine.BooleanStateKey {
         CandidateEmpty,
         SuggestionEmpty,
+        ClipboardEmpty,
     }
 
     enum class TransitionEvent(
@@ -37,21 +41,28 @@ object QuickBarStateMachine {
             from(Always) transitTo Candidate on (CandidateEmpty to false)
             from(Candidate) transitTo Always on (CandidateEmpty to true)
             from(Suggestion) transitTo Candidate on (CandidateEmpty to false)
+            from(Clipboard) transitTo Candidate on (CandidateEmpty to false)
         }),
         BarBoardWindowAttached({
             from(Always) transitTo Tab
             from(Candidate) transitTo Tab
             from(Suggestion) transitTo Tab
+            from(Clipboard) transitTo Tab
         }),
         WindowDetached({
             // candidate state has higher priority so here it goes first
             from(Tab) transitTo Candidate on (CandidateEmpty to false)
             from(Tab) transitTo Suggestion on (SuggestionEmpty to false)
+            from(Tab) transitTo Clipboard on (ClipboardEmpty to false)
             from(Tab) transitTo Always
         }),
         SuggestionUpdated({
             from(Always) transitTo Suggestion on (SuggestionEmpty to false)
             from(Suggestion) transitTo Always on (SuggestionEmpty to true)
+        }),
+        ClipboardUpdated({
+            from(Always) transitTo Clipboard on (ClipboardEmpty to false)
+            from(Clipboard) transitTo Always on (ClipboardEmpty to true)
         }),
     }
 
@@ -61,6 +72,7 @@ object QuickBarStateMachine {
         mutableMapOf(
             CandidateEmpty to true,
             SuggestionEmpty to true,
+            ClipboardEmpty to true,
         ),
     ).apply {
         onNewStateListener = block
