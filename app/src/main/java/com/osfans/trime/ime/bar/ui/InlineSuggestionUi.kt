@@ -15,7 +15,7 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.wrapContent
 
-class SuggestionUi(
+class InlineSuggestionUi(
     override val ctx: Context,
     private val compatView: View,
 ) : Ui {

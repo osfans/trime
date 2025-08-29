@@ -24,6 +24,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
@@ -56,6 +57,7 @@ class CommonKeyboardActionListener(
     private val windowManager: BoardWindowManager,
     private val lazyKeyboardWindow: Lazy<KeyboardWindow>,
     private val theme: Theme,
+    private val quickBar: QuickBar,
 ) {
     companion object {
         /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
@@ -147,136 +149,153 @@ class CommonKeyboardActionListener(
             }
 
             override fun onAction(action: KeyAction) {
-                if (action.commit.isNotEmpty()) {
-                    service.commitText(action.commit, true)
-                    return
-                }
-                KeyboardSwitcher.currentKeyboard.let {
-                    if (action.getText(it).isNotEmpty()) {
-                        onText(action.getText(it))
-                        return
+                val shouldHandle = when {
+                    action.commit.isNotEmpty() -> {
+                        service.commitText(action.commit, true)
+                        false
                     }
+                    KeyboardSwitcher.currentKeyboard.let { keyboard ->
+                        action.getText(keyboard).isNotEmpty()
+                    } -> {
+                        onText(action.getText(KeyboardSwitcher.currentKeyboard))
+                        false
+                    }
+                    else -> true
                 }
-                when (action.code) {
-                    KeyEvent.KEYCODE_SWITCH_CHARSET -> { // Switch status
-                        rime.launchOnReady { api ->
-                            service.lifecycleScope.launch {
-                                val option = action.toggle.ifEmpty { return@launch }
-                                val status = api.getRuntimeOption(option)
-                                api.setRuntimeOption(option, !status)
 
-                                api.commitComposition()
-                            }
-                        }
+                if (shouldHandle) {
+                    when (action.code) {
+                        KeyEvent.KEYCODE_SWITCH_CHARSET -> handleSwitchCharset(action)
+                        KeyEvent.KEYCODE_EISU -> keyboardWindow.switchKeyboard(action.select)
+                        KeyEvent.KEYCODE_LANGUAGE_SWITCH -> handleLanguageSwitch(action)
+                        KeyEvent.KEYCODE_FUNCTION -> handleFunctionCommand(action)
+                        KeyEvent.KEYCODE_SETTINGS -> handleSettings(action)
+                        KeyEvent.KEYCODE_PROG_RED -> showColorPicker()
+                        KeyEvent.KEYCODE_MENU -> showEnabledSchemaPicker()
+                        else -> handleDefaultKeyAction(action)
                     }
-                    KeyEvent.KEYCODE_EISU -> { // Switch keyboard
-                        keyboardWindow.switchKeyboard(action.select)
-                    }
-                    KeyEvent.KEYCODE_LANGUAGE_SWITCH -> { // Switch IME
-                        if (action.select == ".next") {
-                            service.switchToNextIme()
-                        } else if (action.select.isNotEmpty()) {
-                            service.switchToPrevIme()
-                        } else {
-                            inputMethodManager.showInputMethodPicker()
-                        }
-                    }
-                    KeyEvent.KEYCODE_FUNCTION -> { // Command Express
-                        val arg = expandActiveText(action.option)
-                        when (action.command) {
-                            "liquid_keyboard" -> {
-                                val liquidTagList = LiquidData.getTagList()
-                                var index = liquidTagList.indexOfFirst { it.label == arg }
-                                if (index == -1) {
-                                    val type = runCatching { LiquidData.Type.valueOf(arg.uppercase()) }
-                                        .getOrNull()
-                                    index = liquidTagList.indexOfFirst { it.type == type }
-                                }
-                                if (index >= 0) {
-                                    windowManager.attachWindow(LiquidWindow)
-                                    liquidWindow.setDataByIndex(index)
-                                } else {
-                                    windowManager.attachWindow(KeyboardWindow)
-                                }
-                            }
-                            "menu_keyboard" -> {
-                                windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
-                            }
-                            "set_color_scheme" -> {
-                                val newScheme = ThemeManager.activeTheme.colorSchemes.find { it.id == arg }
-                                if (newScheme != null) ColorManager.setColorScheme(newScheme)
-                            }
-                            "broadcast" -> service.sendBroadcast(Intent(arg))
-                            "clipboard" -> {
-                                clipboardManager.primaryClip?.getItemAt(0)?.coerceToText(service)?.let {
-                                    service.commitText(it)
-                                }
-                            }
-                            "commit" -> service.commitText(arg)
-                            "date" -> service.commitText(customFormatDateTime(arg))
-                            "run" -> {
-                                val intent = buildIntentFromArgument(arg)
-                                if (intent != null) {
-                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
-                                    service.startActivity(intent)
-                                }
-                            }
-                            "share_text" -> service.shareText()
-                            else -> {
-                                val intent = buildIntentFromAction(action.command, arg)
-                                if (intent != null) {
-                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
-                                    service.startActivity(intent)
-                                }
-                            }
-                        }
-                    }
-                    KeyEvent.KEYCODE_SETTINGS -> { // Settings
-                        when (action.option) {
-                            "theme" -> showThemePicker()
-                            "color" -> showColorPicker()
-                            "schema" -> AppUtils.launchMainToSchemaList(context)
-                            "sound" -> showSoundEffectPicker()
-                            else -> AppUtils.launchMainActivity(service)
-                        }
-                    }
-                    KeyEvent.KEYCODE_PROG_RED -> showColorPicker()
-                    KeyEvent.KEYCODE_MENU -> showEnabledSchemaPicker()
-                    else -> {
-                        if (action.modifier == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn) {
-                            val shouldHookSpace =
-                                prefs.keyboard.hookShiftSpace.getValue() && action.code == KeyEvent.KEYCODE_SPACE
-                            val shouldHookNumber =
-                                prefs.keyboard.hookShiftNum.getValue() && action.code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9
-                            val shouldHookSymbol =
-                                prefs.keyboard.hookShiftSymbol.getValue() &&
-                                    (
-                                        action.code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
-                                            action.code == KeyEvent.KEYCODE_COMMA ||
-                                            action.code == KeyEvent.KEYCODE_PERIOD
-                                        )
-                            if (shouldHookSpace || shouldHookNumber || shouldHookSymbol) {
-                                onKey(action.code, 0)
-                                return
-                            }
-                        }
-                        val modifier =
-                            when {
-                                action.modifier == 0 -> KeyboardSwitcher.currentKeyboard.modifier
-                                (action.modifier and KeyEvent.META_CTRL_ON) != 0 -> {
-                                    when (action.code) {
-                                        in KeyEvent.KEYCODE_DPAD_UP..KeyEvent.KEYCODE_DPAD_RIGHT,
-                                        KeyEvent.KEYCODE_MOVE_HOME, KeyEvent.KEYCODE_MOVE_END,
-                                        -> action.modifier or KeyboardSwitcher.currentKeyboard.modifier
-                                        else -> action.modifier
-                                    }
-                                }
-                                else -> action.modifier
-                            }
-                        onKey(action.code, modifier)
+                }
+
+                quickBar.handleClipboardContent(null)
+            }
+
+            private fun handleSwitchCharset(action: KeyAction) {
+                val option = action.toggle.ifEmpty { return }
+
+                rime.launchOnReady { api ->
+                    service.lifecycleScope.launch {
+                        val status = api.getRuntimeOption(option)
+                        api.setRuntimeOption(option, !status)
+                        api.commitComposition()
                     }
                 }
             }
+
+            private fun handleLanguageSwitch(action: KeyAction) {
+                when {
+                    action.select == ".next" -> service.switchToNextIme()
+                    action.select.isNotEmpty() -> service.switchToPrevIme()
+                    else -> inputMethodManager.showInputMethodPicker()
+                }
+            }
+
+            private fun handleFunctionCommand(action: KeyAction) {
+                val arg = expandActiveText(action.option)
+
+                when (action.command) {
+                    "liquid_keyboard" -> handleLiquidKeyboard(arg)
+                    "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
+                    "set_color_scheme" -> handleColorScheme(arg)
+                    "broadcast" -> service.sendBroadcast(Intent(arg))
+                    "clipboard" -> handleClipboard()
+                    "commit" -> service.commitText(arg)
+                    "date" -> service.commitText(customFormatDateTime(arg))
+                    "run" -> handleRunCommand(arg)
+                    "share_text" -> service.shareText()
+                    else -> handleIntentAction(action.command, arg)
+                }
+            }
+
+            private fun handleLiquidKeyboard(arg: String) {
+                val liquidTagList = LiquidData.getTagList()
+                val index = liquidTagList.indexOfFirst { tag ->
+                    tag.label == arg || runCatching {
+                        LiquidData.Type.valueOf(arg.uppercase())
+                    }.getOrNull() == tag.type
+                }
+
+                if (index >= 0) {
+                    windowManager.attachWindow(LiquidWindow)
+                    liquidWindow.setDataByIndex(index)
+                } else {
+                    windowManager.attachWindow(KeyboardWindow)
+                }
+            }
+
+            private fun handleColorScheme(arg: String) {
+                ThemeManager.activeTheme.colorSchemes
+                    .find { it.id == arg }
+                    ?.let { ColorManager.setColorScheme(it) }
+            }
+
+            private fun handleClipboard() {
+                clipboardManager.primaryClip
+                    ?.getItemAt(0)
+                    ?.coerceToText(service)
+                    ?.let { service.commitText(it) }
+            }
+
+            private fun handleRunCommand(arg: String) {
+                buildIntentFromArgument(arg)?.let { intent ->
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                    service.startActivity(intent)
+                }
+            }
+
+            private fun handleIntentAction(command: String, arg: String) {
+                buildIntentFromAction(command, arg)?.let { intent ->
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                    service.startActivity(intent)
+                }
+            }
+
+            private fun handleSettings(action: KeyAction) {
+                when (action.option) {
+                    "theme" -> showThemePicker()
+                    "color" -> showColorPicker()
+                    "schema" -> AppUtils.launchMainToSchemaList(context)
+                    "sound" -> showSoundEffectPicker()
+                    else -> AppUtils.launchMainActivity(service)
+                }
+            }
+
+            private fun handleDefaultKeyAction(action: KeyAction) {
+                val shouldHookShiftKey = when {
+                    prefs.keyboard.hookShiftSpace.getValue() && action.code == KeyEvent.KEYCODE_SPACE -> true
+                    prefs.keyboard.hookShiftNum.getValue() && action.code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9 -> true
+                    prefs.keyboard.hookShiftSymbol.getValue() && action.code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH -> true
+                    prefs.keyboard.hookShiftSymbol.getValue() && action.code in setOf(KeyEvent.KEYCODE_COMMA, KeyEvent.KEYCODE_PERIOD) -> true
+                    else -> false
+                }
+
+                if (action.modifier == 0 && KeyboardSwitcher.currentKeyboard.isOnlyShiftOn && shouldHookShiftKey) {
+                    onKey(action.code, 0)
+                    return
+                }
+
+                val modifier = when {
+                    action.modifier == 0 -> KeyboardSwitcher.currentKeyboard.modifier
+                    (action.modifier and KeyEvent.META_CTRL_ON) != 0 && isNavigationKey(action.code) ->
+                        action.modifier or KeyboardSwitcher.currentKeyboard.modifier
+                    else -> action.modifier
+                }
+
+                onKey(action.code, modifier)
+            }
+
+            private fun isNavigationKey(keyCode: Int): Boolean = keyCode in KeyEvent.KEYCODE_DPAD_UP..KeyEvent.KEYCODE_DPAD_RIGHT ||
+                keyCode == KeyEvent.KEYCODE_MOVE_HOME ||
+                keyCode == KeyEvent.KEYCODE_MOVE_END
 
             override fun onKey(
                 keyEventCode: Int,
