@@ -151,6 +151,7 @@ object ColorManager {
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
+        bitmapCache.evictAll()
         this.theme = theme
         val newScheme = evaluateActiveColorScheme()
         activeColorScheme = newScheme
