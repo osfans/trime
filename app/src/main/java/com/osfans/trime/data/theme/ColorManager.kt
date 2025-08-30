@@ -101,7 +101,7 @@ object ColorManager {
             "long_text_back_color" to "key_back_color",
         )
 
-    private lateinit var bitmapCache: LruCache<String, Bitmap>
+    private var bitmapCache: LruCache<String, Bitmap>? = null
 
     fun interface OnColorChangeListener {
         fun onColorChange(theme: Theme)
@@ -151,7 +151,7 @@ object ColorManager {
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
-        bitmapCache.evictAll()
+        bitmapCache?.evictAll()
         this.theme = theme
         val newScheme = evaluateActiveColorScheme()
         activeColorScheme = newScheme
@@ -219,9 +219,9 @@ object ColorManager {
         if (SUPPORTED_IMG_FORMATS.any { value.endsWith(it) }) {
             val path = resolveImageFilePath(value)
             val bitmap =
-                bitmapCache[path]
+                bitmapCache?.get(path)
                     ?: BitmapFactory.decodeStream(File(path).inputStream())?.also {
-                        bitmapCache.put(path, it)
+                        bitmapCache?.put(path, it)
                     } ?: return null
             if (path.endsWith(".9.png")) {
                 val chunk = bitmap.ninePatchChunk
