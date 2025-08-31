@@ -143,11 +143,10 @@ object ColorManager {
         activeColorScheme = evaluateActiveColorScheme()
     }
 
-    private fun evaluateActiveColorScheme(): ColorScheme =
-        when {
-            followSystemDayNight -> if (isNightMode) darkModeColorScheme else lightModeColorScheme
-            else -> colorScheme(normalModeColor)
-        } ?: colorScheme("default") ?: theme.colorSchemes.first()
+    private fun evaluateActiveColorScheme(): ColorScheme = when {
+        followSystemDayNight -> if (isNightMode) darkModeColorScheme else lightModeColorScheme
+        else -> colorScheme(normalModeColor)
+    } ?: colorScheme("default") ?: theme.colorSchemes.first()
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
@@ -265,23 +264,22 @@ object ColorManager {
         borderPx: Int = 0,
         cornerRadius: Float = 0f,
         alpha: Int = 255,
-    ): Drawable? =
-        when (val drawable = getDrawable(colorKey)) {
-            is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
-            is GradientDrawable ->
-                drawable.also {
-                    it.cornerRadius = cornerRadius
-                    it.alpha = MathUtils.clamp(alpha, 0, 255)
-                    if (!borderColorKey.isNullOrEmpty()) {
-                        try {
-                            val borderColor = getColor(borderColorKey)
-                            it.setStroke(borderPx, borderColor)
-                        } catch (_: Exception) {
-                        }
+    ): Drawable? = when (val drawable = getDrawable(colorKey)) {
+        is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
+        is GradientDrawable ->
+            drawable.also {
+                it.cornerRadius = cornerRadius
+                it.alpha = MathUtils.clamp(alpha, 0, 255)
+                if (!borderColorKey.isNullOrEmpty()) {
+                    try {
+                        val borderColor = getColor(borderColorKey)
+                        it.setStroke(borderPx, borderColor)
+                    } catch (_: Exception) {
                     }
                 }
-            else -> null
-        }
+            }
+        else -> null
+    }
 
     private val SUPPORTED_IMG_FORMATS = arrayOf(".png", ".webp", ".jpg", ".gif")
 }

@@ -78,20 +78,19 @@ class RimeDataProvider : DocumentsProvider() {
         return true
     }
 
-    override fun queryRoots(projection: Array<String>?) =
-        MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION).apply {
-            newRow().apply {
-                add(Root.COLUMN_ROOT_ID, baseDir.docId)
-                add(
-                    Root.COLUMN_FLAGS,
-                    Root.FLAG_SUPPORTS_CREATE or Root.FLAG_LOCAL_ONLY or Root.FLAG_SUPPORTS_SEARCH or Root.FLAG_SUPPORTS_IS_CHILD,
-                )
-                add(Root.COLUMN_ICON, R.mipmap.ic_app_icon)
-                add(Root.COLUMN_TITLE, context!!.getString(R.string.trime_app_name))
-                add(Root.COLUMN_DOCUMENT_ID, baseDir.docId)
-                add(Root.COLUMN_MIME_TYPES, MIME_TYPE_WILDCARD)
-            }
+    override fun queryRoots(projection: Array<String>?) = MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION).apply {
+        newRow().apply {
+            add(Root.COLUMN_ROOT_ID, baseDir.docId)
+            add(
+                Root.COLUMN_FLAGS,
+                Root.FLAG_SUPPORTS_CREATE or Root.FLAG_LOCAL_ONLY or Root.FLAG_SUPPORTS_SEARCH or Root.FLAG_SUPPORTS_IS_CHILD,
+            )
+            add(Root.COLUMN_ICON, R.mipmap.ic_app_icon)
+            add(Root.COLUMN_TITLE, context!!.getString(R.string.trime_app_name))
+            add(Root.COLUMN_DOCUMENT_ID, baseDir.docId)
+            add(Root.COLUMN_MIME_TYPES, MIME_TYPE_WILDCARD)
         }
+    }
 
     override fun queryDocument(
         documentId: String,
@@ -114,11 +113,10 @@ class RimeDataProvider : DocumentsProvider() {
         documentId: String,
         mode: String,
         signal: CancellationSignal?,
-    ): ParcelFileDescriptor =
-        ParcelFileDescriptor.open(
-            fileFromDocId(documentId),
-            ParcelFileDescriptor.parseMode(mode),
-        )
+    ): ParcelFileDescriptor = ParcelFileDescriptor.open(
+        fileFromDocId(documentId),
+        ParcelFileDescriptor.parseMode(mode),
+    )
 
     @Throws(FileNotFoundException::class)
     override fun openDocumentThumbnail(

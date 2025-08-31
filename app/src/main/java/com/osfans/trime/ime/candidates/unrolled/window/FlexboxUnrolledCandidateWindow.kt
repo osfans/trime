@@ -36,28 +36,26 @@ class FlexboxUnrolledCandidateWindow(
     windowManager: BoardWindowManager,
     compactCandidate: CompactCandidateModule,
 ) : BaseUnrolledCandidateWindow(context, service, rime, theme, bar, windowManager, compactCandidate) {
-    override fun exitAnimation(nextWindow: BoardWindow): Transition =
-        Slide().apply {
-            slideEdge = Gravity.TOP
-        }
+    override fun exitAnimation(nextWindow: BoardWindow): Transition = Slide().apply {
+        slideEdge = Gravity.TOP
+    }
 
     override val adapter by lazy {
         object : PagingCandidateViewAdapter(theme) {
             override fun onCreateViewHolder(
                 parent: ViewGroup,
                 viewType: Int,
-            ): CandidateViewHolder =
-                super.onCreateViewHolder(parent, viewType).apply {
-                    itemView.apply {
-                        minimumWidth = dp(40)
-                        val size = theme.generalStyle.candidatePadding
-                        setPaddingDp(size, 0, size, 0)
-                        layoutParams =
-                            FlexboxLayoutManager
-                                .LayoutParams(wrapContent, dp(theme.generalStyle.run { candidateViewHeight + commentHeight }))
-                                .apply { flexGrow = 1f }
-                    }
+            ): CandidateViewHolder = super.onCreateViewHolder(parent, viewType).apply {
+                itemView.apply {
+                    minimumWidth = dp(40)
+                    val size = theme.generalStyle.candidatePadding
+                    setPaddingDp(size, 0, size, 0)
+                    layoutParams =
+                        FlexboxLayoutManager
+                            .LayoutParams(wrapContent, dp(theme.generalStyle.run { candidateViewHeight + commentHeight }))
+                            .apply { flexGrow = 1f }
                 }
+            }
 
             override fun onBindViewHolder(
                 holder: CandidateViewHolder,
@@ -76,12 +74,11 @@ class FlexboxUnrolledCandidateWindow(
         }
     }
 
-    override fun onCreateCandidateLayout(): UnrolledCandidateLayout =
-        UnrolledCandidateLayout(context, theme).apply {
-            recyclerView.apply {
-                adapter = this@FlexboxUnrolledCandidateWindow.adapter
-                layoutManager = this@FlexboxUnrolledCandidateWindow.layoutManager
-                addItemDecoration(FlexboxHorizontalDecoration(separatorDrawable))
-            }
+    override fun onCreateCandidateLayout(): UnrolledCandidateLayout = UnrolledCandidateLayout(context, theme).apply {
+        recyclerView.apply {
+            adapter = this@FlexboxUnrolledCandidateWindow.adapter
+            layoutManager = this@FlexboxUnrolledCandidateWindow.layoutManager
+            addItemDecoration(FlexboxHorizontalDecoration(separatorDrawable))
         }
+    }
 }

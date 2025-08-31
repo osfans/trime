@@ -78,7 +78,7 @@ class KeyboardSizeCalculator(
                 } else {
                     widthPx
                 }
-            ) + mDefaultHorizontalGap
+                ) + mDefaultHorizontalGap
         }
         rowTotalWeight[row] = totalKeyWidth
 

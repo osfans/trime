@@ -13,38 +13,38 @@ import android.widget.TextView
 
 @SuppressLint("AppCompatCustomView")
 class PreeditTextView
-    @JvmOverloads
-    constructor(
-        context: Context,
-        attributeSet: AttributeSet? = null,
-    ) : TextView(context, attributeSet) {
-        var onMoveCursor: ((Int) -> Unit)? = null
+@JvmOverloads
+constructor(
+    context: Context,
+    attributeSet: AttributeSet? = null,
+) : TextView(context, attributeSet) {
+    var onMoveCursor: ((Int) -> Unit)? = null
 
-        private var touchX: Int = 0
-        private var newSel: CharSequence = ""
+    private var touchX: Int = 0
+    private var newSel: CharSequence = ""
 
-        @SuppressLint("ClickableViewAccessibility")
-        override fun onTouchEvent(event: MotionEvent): Boolean {
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    val x = event.x - paddingLeft
-                    val y = event.y - paddingTop
-                    touchX = getOffsetForPosition(x, y)
-                    newSel = text.subSequence(0, touchX).dropWhile { it.isWhitespace() }
-                    return true
-                }
-                MotionEvent.ACTION_UP -> {
-                    onMoveCursor?.invoke(newSel.length)
-                    touchX = 0
-                    newSel = ""
-                    return true
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    touchX = 0
-                    newSel = ""
-                    return true
-                }
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                val x = event.x - paddingLeft
+                val y = event.y - paddingTop
+                touchX = getOffsetForPosition(x, y)
+                newSel = text.subSequence(0, touchX).dropWhile { it.isWhitespace() }
+                return true
             }
-            return super.onTouchEvent(event)
+            MotionEvent.ACTION_UP -> {
+                onMoveCursor?.invoke(newSel.length)
+                touchX = 0
+                newSel = ""
+                return true
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                touchX = 0
+                newSel = ""
+                return true
+            }
         }
+        return super.onTouchEvent(event)
     }
+}

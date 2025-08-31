@@ -13,14 +13,13 @@ inline fun <T : Throwable> errorT(
     cons: (String) -> T,
     @StringRes messageTemplate: Int,
     messageArg: String? = null,
-): Nothing =
-    throw cons(
-        messageArg?.let {
-            appContext.getString(messageTemplate, it)
-        } ?: appContext.getString(
-            messageTemplate,
-        ),
-    )
+): Nothing = throw cons(
+    messageArg?.let {
+        appContext.getString(messageTemplate, it)
+    } ?: appContext.getString(
+        messageTemplate,
+    ),
+)
 
 fun errorState(
     @StringRes messageTemplate: Int,

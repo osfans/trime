@@ -21,13 +21,13 @@ object ThemeFilesManager {
     val yaml =
         Yaml(
             configuration =
-                YamlConfiguration(
-                    strictMode = false,
-                    yamlNamingStrategy = YamlNamingStrategy.SnakeCase,
-                    decodeEnumCaseInsensitive = true,
-                    anchorsAndAliases = AnchorsAndAliases.Permitted(null),
-                    codePointLimit = CODE_POINT_LIMIT, // 10 MB
-                ),
+            YamlConfiguration(
+                strictMode = false,
+                yamlNamingStrategy = YamlNamingStrategy.SnakeCase,
+                decodeEnumCaseInsensitive = true,
+                anchorsAndAliases = AnchorsAndAliases.Permitted(null),
+                codePointLimit = CODE_POINT_LIMIT, // 10 MB
+            ),
         )
 
     fun listThemes(dir: File): MutableList<ThemeItem> {

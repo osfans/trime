@@ -111,17 +111,16 @@ class CommonKeyboardActionListener(
         }
     }
 
-    private fun expandActiveText(input: String): String =
-        if (input.matches(PLACEHOLDER_PATTERN)) {
-            input.format(
-                service.getActiveText(1),
-                service.getActiveText(2),
-                service.getActiveText(3),
-                service.getActiveText(4),
-            )
-        } else {
-            input
-        }
+    private fun expandActiveText(input: String): String = if (input.matches(PLACEHOLDER_PATTERN)) {
+        input.format(
+            service.getActiveText(1),
+            service.getActiveText(2),
+            service.getActiveText(3),
+            service.getActiveText(4),
+        )
+    } else {
+        input
+    }
 
     val listener by lazy {
         object : KeyboardActionListener {
@@ -252,7 +251,7 @@ class CommonKeyboardActionListener(
                                         action.code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
                                             action.code == KeyEvent.KEYCODE_COMMA ||
                                             action.code == KeyEvent.KEYCODE_PERIOD
-                                    )
+                                        )
                             if (shouldHookSpace || shouldHookNumber || shouldHookSymbol) {
                                 onKey(action.code, 0)
                                 return

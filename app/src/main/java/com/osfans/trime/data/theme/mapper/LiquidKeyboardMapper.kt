@@ -29,10 +29,10 @@ class LiquidKeyboardMapper(
                 LiquidKeyboard.KeyBar(
                     position = fixedKeyBarNode.getEnum("position", LiquidKeyboard.KeyBar.Position.BOTTOM),
                     keys =
-                        fixedKeyBarNode
-                            .get<YamlList>("keys")
-                            ?.items
-                            ?.map { it.yamlScalar.content } ?: emptyList(),
+                    fixedKeyBarNode
+                        .get<YamlList>("keys")
+                        ?.items
+                        ?.map { it.yamlScalar.content } ?: emptyList(),
                 )
             } else {
                 LiquidKeyboard.KeyBar(emptyList(), LiquidKeyboard.KeyBar.Position.BOTTOM)

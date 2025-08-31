@@ -38,11 +38,10 @@ object DataManager {
             File(appContext.applicationInfo.dataDir)
         }
 
-    private fun AssetManager.dataChecksums(): DataChecksums =
-        open(DATA_CHECKSUMS_NAME)
-            .bufferedReader()
-            .use { it.readText() }
-            .let { deserializeDataChecksums(it) }
+    private fun AssetManager.dataChecksums(): DataChecksums = open(DATA_CHECKSUMS_NAME)
+        .bufferedReader()
+        .use { it.readText() }
+        .let { deserializeDataChecksums(it) }
 
     private val prefs by lazy { AppPrefs.defaultInstance() }
 
@@ -73,47 +72,46 @@ object DataManager {
         return defaultPath.absolutePath
     }
 
-    fun sync() =
-        lock.withLock {
-            val oldChecksumsFile = File(dataDir, DATA_CHECKSUMS_NAME)
-            val oldChecksums =
-                oldChecksumsFile
-                    .runCatching { deserializeDataChecksums(bufferedReader().use { it.readText() }) }
-                    .getOrElse { DataChecksums("", emptyMap()) }
+    fun sync() = lock.withLock {
+        val oldChecksumsFile = File(dataDir, DATA_CHECKSUMS_NAME)
+        val oldChecksums =
+            oldChecksumsFile
+                .runCatching { deserializeDataChecksums(bufferedReader().use { it.readText() }) }
+                .getOrElse { DataChecksums("", emptyMap()) }
 
-            val newChecksums = appContext.assets.dataChecksums()
+        val newChecksums = appContext.assets.dataChecksums()
 
-            DataDiff.diff(oldChecksums, newChecksums).sortedByDescending { it.ordinal }.forEach {
-                Timber.d("Diff: $it")
-                when (it) {
-                    is DataDiff.CreateFile,
-                    is DataDiff.UpdateFile,
-                    -> {
-                        val destPath = sharedDataDir.resolveSibling(it.path).absolutePath
-                        ResourceUtils.copyFile(it.path, destPath)
-                    }
-                    is DataDiff.DeleteDir,
-                    is DataDiff.DeleteFile,
-                    -> FileUtils.delete(sharedDataDir.resolve(it.path.substringAfterLast('/'))).getOrThrow()
+        DataDiff.diff(oldChecksums, newChecksums).sortedByDescending { it.ordinal }.forEach {
+            Timber.d("Diff: $it")
+            when (it) {
+                is DataDiff.CreateFile,
+                is DataDiff.UpdateFile,
+                -> {
+                    val destPath = sharedDataDir.resolveSibling(it.path).absolutePath
+                    ResourceUtils.copyFile(it.path, destPath)
                 }
+                is DataDiff.DeleteDir,
+                is DataDiff.DeleteFile,
+                -> FileUtils.delete(sharedDataDir.resolve(it.path.substringAfterLast('/'))).getOrThrow()
             }
+        }
 
-            ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.resolve(DATA_CHECKSUMS_NAME).absolutePath)
+        ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.resolve(DATA_CHECKSUMS_NAME).absolutePath)
 
-            // 创建 default.custom.yaml 并用空方案列表覆盖 default.yaml 默认的方案列表
-            // TODO: 内置明月拼音等方案，提供最小开箱即用环境
-            runCatching {
-                val defaultCustom = File(userDataDir, DEFAULT_CUSTOM_FILE_NAME)
-                if (defaultCustom.createNewFile()) {
-                    defaultCustom.writeText(
-                        """
+        // 创建 default.custom.yaml 并用空方案列表覆盖 default.yaml 默认的方案列表
+        // TODO: 内置明月拼音等方案，提供最小开箱即用环境
+        runCatching {
+            val defaultCustom = File(userDataDir, DEFAULT_CUSTOM_FILE_NAME)
+            if (defaultCustom.createNewFile()) {
+                defaultCustom.writeText(
+                    """
                         patch:
                             schema_list: []
-                        """.trimIndent(),
-                    )
-                }
-            }.getOrElse { Timber.e(it, "Failed to create default.custom.yaml") }
+                    """.trimIndent(),
+                )
+            }
+        }.getOrElse { Timber.e(it, "Failed to create default.custom.yaml") }
 
-            Timber.d("Synced!")
-        }
+        Timber.d("Synced!")
+    }
 }

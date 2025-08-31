@@ -36,12 +36,11 @@ class KeyPreviewChoreographer(
         }
     }
 
-    fun getKeyPreviewUi(key: Key): KeyPreviewUi =
-        showingKeyPreviewUi.remove(key)
-            ?: freeKeyPreviewUi.poll()
-            ?: KeyPreviewUi(context, theme).also {
-                root.add(it.root, MarginLayoutParams(0, 0))
-            }
+    fun getKeyPreviewUi(key: Key): KeyPreviewUi = showingKeyPreviewUi.remove(key)
+        ?: freeKeyPreviewUi.poll()
+        ?: KeyPreviewUi(context, theme).also {
+            root.add(it.root, MarginLayoutParams(0, 0))
+        }
 
     fun isShowingKeyPreview(key: Key): Boolean = showingKeyPreviewUi.containsKey(key)
 
@@ -91,7 +90,7 @@ class KeyPreviewChoreographer(
         var previewX: Int = (
             key.x - (previewWidth - keyDrawWidth) / 2 +
                 originCoords[0]
-        )
+            )
         if (previewX < 0) {
             previewX = 0
             keyPreviewPosition = KeyPreviewUi.Position.LEFT
@@ -107,7 +106,7 @@ class KeyPreviewChoreographer(
         val previewY: Int = (
             key.y - previewHeight + theme.generalStyle.previewOffset +
                 originCoords[1]
-        )
+            )
         keyPreviewUi.root.updateLayoutParams<MarginLayoutParams> {
             width = previewWidth
             height = previewHeight

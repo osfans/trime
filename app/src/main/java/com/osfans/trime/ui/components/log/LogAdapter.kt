@@ -46,21 +46,20 @@ class LogAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): ViewHolder =
-        ViewHolder(
-            TextView(parent.context).apply {
-                textSize = 12f
-                typeface = Typeface.MONOSPACE
-                if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
-                    setTextClassifier(TextClassifier.NO_OP)
+    ): ViewHolder = ViewHolder(
+        TextView(parent.context).apply {
+            textSize = 12f
+            typeface = Typeface.MONOSPACE
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
+                setTextClassifier(TextClassifier.NO_OP)
+            }
+            layoutParams =
+                MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT).apply {
+                    marginStart = dp(4)
+                    marginEnd = dp(4)
                 }
-                layoutParams =
-                    MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT).apply {
-                        marginStart = dp(4)
-                        marginEnd = dp(4)
-                    }
-            },
-        )
+        },
+    )
 
     override fun onBindViewHolder(
         holder: ViewHolder,

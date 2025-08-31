@@ -45,9 +45,8 @@ class RimeLifecycleImpl : RimeLifecycle {
         }
     }
 
-    private fun checkAtState(state: RimeLifecycle.State) =
-        takeIf { (internalStateFlow.value == state) }
-            ?: throw IllegalStateException("Currently not at $state! Actual state is ${internalStateFlow.value}")
+    private fun checkAtState(state: RimeLifecycle.State) = takeIf { (internalStateFlow.value == state) }
+        ?: throw IllegalStateException("Currently not at $state! Actual state is ${internalStateFlow.value}")
 }
 
 interface RimeLifecycle {
@@ -86,15 +85,13 @@ class RimeLifecycleScope(
 suspend fun <T> RimeLifecycle.whenAtState(
     state: RimeLifecycle.State,
     block: suspend CoroutineScope.() -> T,
-): T =
-    if (currentStateFlow.value == state) {
-        block(lifecycleScope)
-    } else {
-        StateDelegate(this, state).run(block)
-    }
+): T = if (currentStateFlow.value == state) {
+    block(lifecycleScope)
+} else {
+    StateDelegate(this, state).run(block)
+}
 
-suspend inline fun <T> RimeLifecycle.whenReady(noinline block: suspend CoroutineScope.() -> T) =
-    whenAtState(RimeLifecycle.State.READY, block)
+suspend inline fun <T> RimeLifecycle.whenReady(noinline block: suspend CoroutineScope.() -> T) = whenAtState(RimeLifecycle.State.READY, block)
 
 private class StateDelegate(
     val lifecycle: RimeLifecycle,

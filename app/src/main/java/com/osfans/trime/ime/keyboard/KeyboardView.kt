@@ -230,12 +230,12 @@ class KeyboardView(
                                 (
                                     deltaY > 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_UP] == null
-                                ) ||
+                                    ) ||
                                 (
                                     deltaY < 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_DOWN] == null
-                                )
-                        ) &&
+                                    )
+                            ) &&
                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_RIGHT] != null
                     ) {
                         // I should have implement mDisambiguateSwipe as a config option, but the logic
@@ -255,12 +255,12 @@ class KeyboardView(
                                 (
                                     deltaY > 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_UP] == null
-                                ) ||
+                                    ) ||
                                 (
                                     deltaY < 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_DOWN] == null
-                                )
-                        ) &&
+                                    )
+                            ) &&
                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_LEFT] != null
                     ) {
                         if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
@@ -275,12 +275,12 @@ class KeyboardView(
                                 (
                                     deltaX > 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_RIGHT] == null
-                                ) ||
+                                    ) ||
                                 (
                                     deltaX < 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_LEFT] == null
-                                )
-                        ) &&
+                                    )
+                            ) &&
                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_UP] != null
                     ) {
                         if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
@@ -295,12 +295,12 @@ class KeyboardView(
                                 (
                                     deltaX > 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_RIGHT] == null
-                                ) ||
+                                    ) ||
                                 (
                                     deltaX < 0 &&
                                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_LEFT] == null
-                                )
-                        ) &&
+                                    )
+                            ) &&
                         mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_DOWN] != null
                     ) {
                         if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {

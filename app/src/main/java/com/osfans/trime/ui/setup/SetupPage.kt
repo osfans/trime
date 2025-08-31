@@ -17,32 +17,29 @@ enum class SetupPage {
     Select,
     ;
 
-    fun getStepText(context: Context) =
-        context.getText(
-            when (this) {
-                Permissions -> R.string.setup__step_one
-                Enable -> R.string.setup__step_two
-                Select -> R.string.setup__step_three
-            },
-        )
+    fun getStepText(context: Context) = context.getText(
+        when (this) {
+            Permissions -> R.string.setup__step_one
+            Enable -> R.string.setup__step_two
+            Select -> R.string.setup__step_three
+        },
+    )
 
-    fun getHintText(context: Context) =
-        context.getText(
-            when (this) {
-                Permissions -> R.string.setup__request_permmision_hint
-                Enable -> R.string.setup__enable_ime_hint
-                Select -> R.string.setup__select_ime_hint
-            },
-        )
+    fun getHintText(context: Context) = context.getText(
+        when (this) {
+            Permissions -> R.string.setup__request_permmision_hint
+            Enable -> R.string.setup__enable_ime_hint
+            Select -> R.string.setup__select_ime_hint
+        },
+    )
 
-    fun getButtonText(context: Context) =
-        context.getText(
-            when (this) {
-                Permissions -> R.string.setup__request_permmision
-                Enable -> R.string.setup__enable_ime
-                Select -> R.string.setup__select_ime
-            },
-        )
+    fun getButtonText(context: Context) = context.getText(
+        when (this) {
+            Permissions -> R.string.setup__request_permmision
+            Enable -> R.string.setup__enable_ime
+            Select -> R.string.setup__select_ime
+        },
+    )
 
     fun getButtonAction(context: Context) {
         when (this) {
@@ -52,12 +49,11 @@ enum class SetupPage {
         }
     }
 
-    fun isDone() =
-        when (this) {
-            Permissions -> appContext.isStorageAvailable()
-            Enable -> InputMethodUtils.checkIsTrimeEnabled()
-            Select -> InputMethodUtils.checkIsTrimeSelected()
-        }
+    fun isDone() = when (this) {
+        Permissions -> appContext.isStorageAvailable()
+        Enable -> InputMethodUtils.checkIsTrimeEnabled()
+        Select -> InputMethodUtils.checkIsTrimeSelected()
+    }
 
     companion object {
         fun SetupPage.isLastPage() = this == entries.last()

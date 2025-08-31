@@ -32,20 +32,19 @@ object AppUtils {
     fun launchKeyCategory(
         context: Context,
         keyCode: Int,
-    ): Boolean =
-        applicationLaunchKeyCategories[keyCode]?.let {
-            Timber.d("launchKeyCategory: $it")
-            try {
-                context.startActivity(
-                    Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, it).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    },
-                )
-                true
-            } catch (_: Exception) {
-                false
-            }
-        } ?: false
+    ): Boolean = applicationLaunchKeyCategories[keyCode]?.let {
+        Timber.d("launchKeyCategory: $it")
+        try {
+            context.startActivity(
+                Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, it).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY)
+                },
+            )
+            true
+        } catch (_: Exception) {
+            false
+        }
+    } ?: false
 
     fun launchMainActivity(context: Context) {
         context.startActivity<PrefMainActivity> {

@@ -77,7 +77,7 @@ class KeyAction(
                     code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
                         code == KeyEvent.KEYCODE_COMMA ||
                         code == KeyEvent.KEYCODE_PERIOD
-                )
+                    )
             ) {
                 return adjustCase(shiftLabel, keyboard)
             }
@@ -85,14 +85,13 @@ class KeyAction(
         return adjustCase(label, keyboard)
     }
 
-    fun getText(keyboard: Keyboard): String =
-        if (text.isNotEmpty()) {
-            adjustCase(text, keyboard)
-        } else if (keyboard.isShifted && code in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z && modifier == 0) {
-            adjustCase(label, keyboard)
-        } else {
-            text
-        }
+    fun getText(keyboard: Keyboard): String = if (text.isNotEmpty()) {
+        adjustCase(text, keyboard)
+    } else if (keyboard.isShifted && code in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z && modifier == 0) {
+        adjustCase(label, keyboard)
+    } else {
+        text
+    }
 
     fun getPreview(keyboard: Keyboard): String = preview.ifEmpty { getLabel(keyboard) }
 
@@ -176,12 +175,11 @@ class KeyAction(
     companion object {
         private val BRACED_STR = Regex("""\{[^{}]+\}""")
 
-        private fun decodeMapFromString(str: String): Map<String, String> =
-            str
-                .removeSurrounding("{", "}")
-                .split(", ")
-                .mapNotNull {
-                    it.split("=").takeIf { it.size == 2 }?.let { (key, value) -> key to value }
-                }.toMap()
+        private fun decodeMapFromString(str: String): Map<String, String> = str
+            .removeSurrounding("{", "}")
+            .split(", ")
+            .mapNotNull {
+                it.split("=").takeIf { it.size == 2 }?.let { (key, value) -> key to value }
+            }.toMap()
     }
 }

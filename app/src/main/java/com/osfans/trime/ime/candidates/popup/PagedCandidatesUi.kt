@@ -45,8 +45,7 @@ class PagedCandidatesUi(
 
     private val candidatesAdapter =
         object : BaseQuickAdapter<RimeProto.Candidate, UiHolder>() {
-            override fun getItemCount(items: List<RimeProto.Candidate>) =
-                items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
+            override fun getItemCount(items: List<RimeProto.Candidate>) = items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
 
             override fun getItemViewType(
                 position: Int,
@@ -57,18 +56,17 @@ class PagedCandidatesUi(
                 context: Context,
                 parent: ViewGroup,
                 viewType: Int,
-            ): UiHolder =
-                when (viewType) {
-                    0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme))
-                    else ->
-                        UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
-                            val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
-                            ui.root.layoutParams =
-                                FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
-                                    flexGrow = 1f
-                                }
-                        }
-                }
+            ): UiHolder = when (viewType) {
+                0 -> UiHolder.Candidate(LabeledCandidateItemUi(ctx, theme))
+                else ->
+                    UiHolder.Pagination(PaginationUi(ctx, theme)).apply {
+                        val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
+                        ui.root.layoutParams =
+                            FlexboxLayoutManager.LayoutParams(wrap, wrap).apply {
+                                flexGrow = 1f
+                            }
+                    }
+            }
 
             override fun onBindViewHolder(
                 holder: UiHolder,

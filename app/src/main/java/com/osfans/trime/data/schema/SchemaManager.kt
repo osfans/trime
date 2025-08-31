@@ -15,9 +15,9 @@ object SchemaManager {
     val yaml =
         Yaml(
             configuration =
-                YamlConfiguration(
-                    strictMode = false,
-                ),
+            YamlConfiguration(
+                strictMode = false,
+            ),
         )
 
     private lateinit var currentSchema: Schema

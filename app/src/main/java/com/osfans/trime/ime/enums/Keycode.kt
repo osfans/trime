@@ -443,25 +443,24 @@ enum class Keycode {
         fun getDisplayLabel(
             keyCode: Int,
             mask: Int,
-        ): String =
-            if (isStdKey(keyCode)) {
-                // Android keycode区域
-                if (virtualKeyCharacterMap.isPrintingKey(keyCode)) {
-                    val charCode = virtualKeyCharacterMap.get(keyCode, mask)
-                    Timber.d("getDisplayLabel(): keycode=$keyCode, mask=$mask, charCode=$charCode")
-                    if (charCode > 0) {
-                        charCode.toChar().toString()
-                    } else {
-                        virtualKeyCharacterMap.getDisplayLabel(keyCode).lowercase()
-                    }
+        ): String = if (isStdKey(keyCode)) {
+            // Android keycode区域
+            if (virtualKeyCharacterMap.isPrintingKey(keyCode)) {
+                val charCode = virtualKeyCharacterMap.get(keyCode, mask)
+                Timber.d("getDisplayLabel(): keycode=$keyCode, mask=$mask, charCode=$charCode")
+                if (charCode > 0) {
+                    charCode.toChar().toString()
                 } else {
-                    keyNameOf(keyCode)
+                    virtualKeyCharacterMap.getDisplayLabel(keyCode).lowercase()
                 }
-            } else if (hasSymbolLabel(keyCode)) { // 可見符號
-                getSymbolLabel(valueOf(keyCode))
             } else {
-                ""
+                keyNameOf(keyCode)
             }
+        } else if (hasSymbolLabel(keyCode)) { // 可見符號
+            getSymbolLabel(valueOf(keyCode))
+        } else {
+            ""
+        }
 
         private val modifiers =
             mapOf(
@@ -476,10 +475,9 @@ enum class Keycode {
         fun fromString(s: String): Keycode = convertMap[s] ?: VoidSymbol
 
         @JvmStatic
-        fun valueOf(ordinal: Int): Keycode =
-            runCatching {
-                entries[ordinal]
-            }.getOrDefault(VoidSymbol)
+        fun valueOf(ordinal: Int): Keycode = runCatching {
+            entries[ordinal]
+        }.getOrDefault(VoidSymbol)
 
         @JvmStatic
         fun keyNameOf(ordinal: Int): String = valueOf(ordinal).toString().substringAfter('_')

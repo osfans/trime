@@ -16,9 +16,9 @@ object SoundEffectManager {
     private val yaml =
         Yaml(
             configuration =
-                YamlConfiguration(
-                    strictMode = false,
-                ),
+            YamlConfiguration(
+                strictMode = false,
+            ),
         )
 
     private val userDir: File

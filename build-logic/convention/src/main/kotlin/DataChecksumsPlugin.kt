@@ -100,12 +100,11 @@ class DataChecksumsPlugin : Plugin<Project> {
                     }?.getOrNull()
                     ?: mutableMapOf()
 
-            fun File.allParents(): List<File> =
-                if (parentFile == null || parentFile.invariantSeparatorsPath in map) {
-                    listOf()
-                } else {
-                    listOf(parentFile) + parentFile.allParents()
-                }
+            fun File.allParents(): List<File> = if (parentFile == null || parentFile.invariantSeparatorsPath in map) {
+                listOf()
+            } else {
+                listOf(parentFile) + parentFile.allParents()
+            }
             inputChanges.getFileChanges(inputDir).forEach { change ->
                 if (change.file.name == file.name) {
                     return@forEach

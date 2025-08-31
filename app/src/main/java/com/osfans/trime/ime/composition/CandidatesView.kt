@@ -114,9 +114,8 @@ class CandidatesView(
         }
     }
 
-    private fun evaluateVisibility(): Boolean =
-        !inputComposition.preedit.isNullOrEmpty() ||
-            menu.candidates.isNotEmpty()
+    private fun evaluateVisibility(): Boolean = !inputComposition.preedit.isNullOrEmpty() ||
+        menu.candidates.isNotEmpty()
 
     private fun updateUi() {
         preeditUi.update(inputComposition)

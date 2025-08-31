@@ -32,10 +32,9 @@ class AppPrefs(
         return provider
     }
 
-    private fun <T : PreferenceDelegateProvider> T.register() =
-        this.apply {
-            registerProvider { this }
-        }
+    private fun <T : PreferenceDelegateProvider> T.register() = this.apply {
+        registerProvider { this }
+    }
 
     val internal = Internal(shared)
     val general = General(shared).register()
@@ -67,14 +66,13 @@ class AppPrefs(
             return instance
         }
 
-        fun defaultInstance(): AppPrefs =
-            defaultInstance
-                ?: throw UninitializedPropertyAccessException(
-                    """
+        fun defaultInstance(): AppPrefs = defaultInstance
+            ?: throw UninitializedPropertyAccessException(
+                """
                     Default preferences not initialized! Make sure to call initDefault()
                     before accessing the default preferences.
-                    """.trimIndent(),
-                )
+                """.trimIndent(),
+            )
     }
 
     /**

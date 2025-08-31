@@ -41,19 +41,18 @@ abstract class ProgressFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View =
-        requireContext()
-            .frameLayout {
-                val androidStyles = AndroidStyles(requireContext())
-                add(
-                    androidStyles.progressBar.default { isIndeterminate = true },
-                    lParams {
-                        width = matchParent
-                        verticalMargin = dp(20)
-                        horizontalMargin = dp(26)
-                    },
-                )
-            }.also { root = it }
+    ): View = requireContext()
+        .frameLayout {
+            val androidStyles = AndroidStyles(requireContext())
+            add(
+                androidStyles.progressBar.default { isIndeterminate = true },
+                lParams {
+                    width = matchParent
+                    verticalMargin = dp(20)
+                    horizontalMargin = dp(26)
+                },
+            )
+        }.also { root = it }
 
     final override fun onViewCreated(
         view: View,

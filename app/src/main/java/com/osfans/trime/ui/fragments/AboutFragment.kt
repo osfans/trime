@@ -75,9 +75,8 @@ class AboutFragment : PaddingPreferenceFragment() {
         private val DASH_G_PATTERN = Regex("^(.*-g)([0-9a-f]+)(.*)$")
         private val COMMON_PATTERN = Regex("^([^-]*)(-.*)$")
 
-        private fun extractCommitHash(versionCode: String): String =
-            DASH_G_PATTERN.find(versionCode)?.groupValues?.get(2)
-                ?: COMMON_PATTERN.find(versionCode)?.groupValues?.get(1)
-                ?: versionCode
+        private fun extractCommitHash(versionCode: String): String = DASH_G_PATTERN.find(versionCode)?.groupValues?.get(2)
+            ?: COMMON_PATTERN.find(versionCode)?.groupValues?.get(1)
+            ?: versionCode
     }
 }

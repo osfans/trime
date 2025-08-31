@@ -30,7 +30,7 @@ class Keyboard(
                 selfConfig?.horizontalGap ?: 0,
                 theme.generalStyle.horizontalGap,
             ).firstOrNull { it > 0 } ?: 0
-        ).also { appContext.dp(it) }
+            ).also { appContext.dp(it) }
 
     /** 默認鍵寬  */
     private val keyWidth: Int = (allowedWidth * theme.generalStyle.keyWidth / 100).toInt()
@@ -42,7 +42,7 @@ class Keyboard(
                 selfConfig?.height?.toInt() ?: 0,
                 theme.generalStyle.keyHeight,
             ).firstOrNull { it > 0 } ?: 0
-        ).also { appContext.dp(it) }
+            ).also { appContext.dp(it) }
 
     /** 默認行距  */
     private val verticalGap: Int =
@@ -51,7 +51,7 @@ class Keyboard(
                 selfConfig?.verticalGap ?: 0,
                 theme.generalStyle.verticalGap,
             ).firstOrNull { it > 0 } ?: 0
-        ).also { appContext.dp(it) }
+            ).also { appContext.dp(it) }
 
     /** 默認按鍵圓角半徑  */
     val roundCorner: Float =
@@ -429,7 +429,7 @@ class Keyboard(
                         (
                             key.squaredDistanceFrom(x + mCellWidth - 1, y + mCellHeight - 1)
                                 < proximityThreshold
-                        ) ||
+                            ) ||
                         key.squaredDistanceFrom(x, y + mCellHeight - 1) < proximityThreshold ||
                         key.isInside(x, y) ||
                         key.isInside(x + mCellWidth - 1, y) ||

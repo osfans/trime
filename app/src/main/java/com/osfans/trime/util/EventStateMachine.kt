@@ -85,20 +85,17 @@ class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey>
         var pred: ((B) -> Boolean?) -> Boolean = { _ -> true }
     }
 
-    infix fun Builder.transitTo(state: State) =
-        apply {
-            target = state
-        }
+    infix fun Builder.transitTo(state: State) = apply {
+        target = state
+    }
 
-    infix fun Builder.on(expected: Pair<B, Boolean>) =
-        apply {
-            this.pred = { it(expected.first) == expected.second }
-        }
+    infix fun Builder.on(expected: Pair<B, Boolean>) = apply {
+        this.pred = { it(expected.first) == expected.second }
+    }
 
-    infix fun Builder.onF(pred: ((B) -> Boolean?) -> Boolean) =
-        apply {
-            this.pred = pred
-        }
+    infix fun Builder.onF(pred: ((B) -> Boolean?) -> Boolean) = apply {
+        this.pred = pred
+    }
 
     val builders = mutableListOf<Builder>()
 
@@ -107,32 +104,30 @@ class TransitionEventBuilder<State : Any, B : EventStateMachine.BooleanStateKey>
     /**
      * Use either [from] or [accept] to build the transition event
      */
-    fun accept(block: ((State, State, (B) -> Boolean?) -> State)) =
-        apply {
-            raw = block
-        }
+    fun accept(block: ((State, State, (B) -> Boolean?) -> State)) = apply {
+        raw = block
+    }
 
-    fun build() =
-        object : EventStateMachine.TransitionEvent<State, B> {
-            override fun accept(
-                initialState: State,
-                currentState: State,
-                useBoolean: (B) -> Boolean?,
-            ): State {
-                if (raw != null) {
-                    return raw!!(initialState, currentState, useBoolean)
-                }
-                val filtered = builders.filter { it.source == currentState && it.pred(useBoolean) }
-                return when (filtered.size) {
-                    0 -> currentState
-                    1 -> filtered[0].target
-                    else -> {
-                        val first = filtered[0].target
-                        first
-                    }
+    fun build() = object : EventStateMachine.TransitionEvent<State, B> {
+        override fun accept(
+            initialState: State,
+            currentState: State,
+            useBoolean: (B) -> Boolean?,
+        ): State {
+            if (raw != null) {
+                return raw!!(initialState, currentState, useBoolean)
+            }
+            val filtered = builders.filter { it.source == currentState && it.pred(useBoolean) }
+            return when (filtered.size) {
+                0 -> currentState
+                1 -> filtered[0].target
+                else -> {
+                    val first = filtered[0].target
+                    first
                 }
             }
         }
+    }
 }
 
 typealias TransitionBuildBlock<State, B> = TransitionEventBuilder<State, B>.() -> Unit
