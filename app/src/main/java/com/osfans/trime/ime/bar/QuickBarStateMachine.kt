@@ -55,15 +55,14 @@ object QuickBarStateMachine {
         }),
     }
 
-    fun new(block: (State) -> Unit) =
-        EventStateMachine<State, TransitionEvent, BooleanKey>(
-            initialState = Always,
-            externalBooleanStates =
-                mutableMapOf(
-                    CandidateEmpty to true,
-                    SuggestionEmpty to true,
-                ),
-        ).apply {
-            onNewStateListener = block
-        }
+    fun new(block: (State) -> Unit) = EventStateMachine<State, TransitionEvent, BooleanKey>(
+        initialState = Always,
+        externalBooleanStates =
+        mutableMapOf(
+            CandidateEmpty to true,
+            SuggestionEmpty to true,
+        ),
+    ).apply {
+        onNewStateListener = block
+    }
 }

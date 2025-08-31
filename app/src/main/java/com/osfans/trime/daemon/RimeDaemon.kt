@@ -53,62 +53,56 @@ object RimeDaemon {
 
     private val lock = ReentrantLock()
 
-    private fun establish(name: String) =
-        object : RimeSession {
-            private inline fun <T> ensureEstablished(block: () -> T) =
-                if (name in sessions) {
-                    block()
-                } else {
-                    throw IllegalStateException("Session $name is not established")
-                }
+    private fun establish(name: String) = object : RimeSession {
+        private inline fun <T> ensureEstablished(block: () -> T) = if (name in sessions) {
+            block()
+        } else {
+            throw IllegalStateException("Session $name is not established")
+        }
 
-            override fun <T> run(block: suspend RimeApi.() -> T): T =
-                ensureEstablished {
-                    runBlocking { block(rimeImpl) }
-                }
+        override fun <T> run(block: suspend RimeApi.() -> T): T = ensureEstablished {
+            runBlocking { block(rimeImpl) }
+        }
 
-            override suspend fun <T> runOnReady(block: suspend RimeApi.() -> T): T =
-                ensureEstablished {
-                    realRime.lifecycle.whenReady { block(rimeImpl) }
-                }
+        override suspend fun <T> runOnReady(block: suspend RimeApi.() -> T): T = ensureEstablished {
+            realRime.lifecycle.whenReady { block(rimeImpl) }
+        }
 
-            override fun runIfReady(block: suspend RimeApi.() -> Unit) {
-                ensureEstablished {
-                    if (realRime.isReady) {
-                        realRime.lifecycleScope.launch {
-                            block(rimeImpl)
-                        }
+        override fun runIfReady(block: suspend RimeApi.() -> Unit) {
+            ensureEstablished {
+                if (realRime.isReady) {
+                    realRime.lifecycleScope.launch {
+                        block(rimeImpl)
                     }
                 }
             }
-
-            override val lifecycleScope: CoroutineScope
-                get() = realRime.lifecycle.lifecycleScope
         }
 
-    fun createSession(name: String): RimeSession =
-        lock.withLock {
-            if (name in sessions) {
-                return@withLock sessions.getValue(name)
-            }
-            if (realRime.lifecycle.currentStateFlow.value == RimeLifecycle.State.STOPPED) {
-                realRime.startup(false)
-            }
-            val session = establish(name)
-            sessions[name] = session
-            return@withLock session
-        }
+        override val lifecycleScope: CoroutineScope
+            get() = realRime.lifecycle.lifecycleScope
+    }
 
-    fun destroySession(name: String): Unit =
-        lock.withLock {
-            if (name !in sessions) {
-                return
-            }
-            sessions -= name
-            if (sessions.isEmpty()) {
-                realRime.finalize()
-            }
+    fun createSession(name: String): RimeSession = lock.withLock {
+        if (name in sessions) {
+            return@withLock sessions.getValue(name)
         }
+        if (realRime.lifecycle.currentStateFlow.value == RimeLifecycle.State.STOPPED) {
+            realRime.startup(false)
+        }
+        val session = establish(name)
+        sessions[name] = session
+        return@withLock session
+    }
+
+    fun destroySession(name: String): Unit = lock.withLock {
+        if (name !in sessions) {
+            return
+        }
+        sessions -= name
+        if (sessions.isEmpty()) {
+            realRime.finalize()
+        }
+    }
 
     /**
      * Reuse a session for remote service
@@ -146,28 +140,27 @@ object RimeDaemon {
     /**
      * Restart Rime instance to deploy while keep the session
      */
-    fun restartRime(fullCheck: Boolean = false) =
-        lock.withLock {
-            val id = restartId++
-            if (!fullCheck) {
-                sendNotification(id) {
-                    setSmallIcon(R.drawable.ic_baseline_sync_24)
-                    setContentTitle(appContext.getString(R.string.rime_daemon))
-                    setContentText(appContext.getString(R.string.restarting_rime))
-                    setOngoing(true)
-                    setProgress(100, 0, true)
-                    setPriority(NotificationCompat.PRIORITY_HIGH)
-                }
-            }
-            realRime.finalize()
-            realRime.startup(fullCheck)
-            TrimeApplication.getInstance().coroutineScope.launch {
-                // cancel notification on ready
-                realRime.lifecycle.whenReady {
-                    notificationManager.cancel(id)
-                }
+    fun restartRime(fullCheck: Boolean = false) = lock.withLock {
+        val id = restartId++
+        if (!fullCheck) {
+            sendNotification(id) {
+                setSmallIcon(R.drawable.ic_baseline_sync_24)
+                setContentTitle(appContext.getString(R.string.rime_daemon))
+                setContentText(appContext.getString(R.string.restarting_rime))
+                setOngoing(true)
+                setProgress(100, 0, true)
+                setPriority(NotificationCompat.PRIORITY_HIGH)
             }
         }
+        realRime.finalize()
+        realRime.startup(fullCheck)
+        TrimeApplication.getInstance().coroutineScope.launch {
+            // cancel notification on ready
+            realRime.lifecycle.whenReady {
+                notificationManager.cancel(id)
+            }
+        }
+    }
 
     private suspend fun handleRimeMessage(it: RimeMessage<*>) {
         if (it is RimeMessage.DeployMessage) {

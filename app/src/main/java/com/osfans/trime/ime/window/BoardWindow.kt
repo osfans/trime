@@ -14,10 +14,9 @@ sealed class BoardWindow {
     /**
      * Animation when the window is added to the layout
      */
-    open fun enterAnimation(lastWindow: BoardWindow): Transition? =
-        Slide().apply {
-            slideEdge = Gravity.TOP
-        }
+    open fun enterAnimation(lastWindow: BoardWindow): Transition? = Slide().apply {
+        slideEdge = Gravity.TOP
+    }
 
     /**
      * Animation when the window is removed from the layout

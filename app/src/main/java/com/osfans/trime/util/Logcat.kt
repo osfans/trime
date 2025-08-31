@@ -36,37 +36,34 @@ class Logcat(
     /**
      * Get a snapshot of logcat
      */
-    fun getLogAsync(): Deferred<Result<List<String>>> =
-        async {
-            runCatching {
-                subprocess("logcat", pid?.let { "--pid=$it" } ?: "", "-d").readLines()
-            }
+    fun getLogAsync(): Deferred<Result<List<String>>> = async {
+        runCatching {
+            subprocess("logcat", pid?.let { "--pid=$it" } ?: "", "-d").readLines()
         }
+    }
 
     /**
      * Clear logcat
      */
-    fun clearLog(): Job =
-        launch {
-            runCatching { subprocess("logcat", "--clear") }
-        }
+    fun clearLog(): Job = launch {
+        runCatching { subprocess("logcat", "--clear") }
+    }
 
     /**
      * Create a process reading logcat, sending lines to [logFlow]
      */
-    fun initLogFlow() =
-        if (process != null) {
-            errorState(R.string.exception_logcat_created)
-        } else {
-            launch {
-                runCatching {
-                    subprocess("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "time")
-                        .also { process = it }
-                        .asFlow()
-                        .collect { flow.emit(it) }
-                }
-            }.also { emittingJob = it }
-        }
+    fun initLogFlow() = if (process != null) {
+        errorState(R.string.exception_logcat_created)
+    } else {
+        launch {
+            runCatching {
+                subprocess("logcat", pid?.let { "--pid=$it" } ?: "", "-v", "time")
+                    .also { process = it }
+                    .asFlow()
+                    .collect { flow.emit(it) }
+            }
+        }.also { emittingJob = it }
+    }
 
     /**
      * Destroy the reading process

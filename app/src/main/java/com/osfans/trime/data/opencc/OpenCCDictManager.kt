@@ -22,15 +22,13 @@ object OpenCCDictManager {
     private val sharedDir = File(DataManager.sharedDataDir, "opencc").also { it.mkdirs() }
     private val userDir get() = File(DataManager.userDataDir, "opencc").also { it.mkdirs() }
 
-    fun sharedDictionaries(): List<Dictionary> =
-        sharedDir
-            .listFiles()
-            ?.mapNotNull { Dictionary.new(it) } ?: listOf()
+    fun sharedDictionaries(): List<Dictionary> = sharedDir
+        .listFiles()
+        ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
-    fun userDictionaries(): List<Dictionary> =
-        userDir
-            .listFiles()
-            ?.mapNotNull { Dictionary.new(it) } ?: listOf()
+    fun userDictionaries(): List<Dictionary> = userDir
+        .listFiles()
+        ?.mapNotNull { Dictionary.new(it) } ?: listOf()
 
     fun getAllDictionaries(): List<Dictionary> = sharedDictionaries() + userDictionaries()
 

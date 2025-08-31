@@ -161,23 +161,21 @@ object NinePatchBitmapFactory {
         return Bitmap.createBitmap(bitmap, 1, 1, width - 2, height - 2)
     }
 
-    fun loadBitmap(file: File): Bitmap? =
-        runCatching {
-            file.inputStream().buffered().use {
-                BitmapFactory.decodeStream(it)
-            }
-        }.getOrNull()
-
-    fun getDensityPostfix(res: Resources): String? =
-        when (res.displayMetrics.densityDpi) {
-            DisplayMetrics.DENSITY_LOW -> "ldpi"
-            DisplayMetrics.DENSITY_MEDIUM -> "mdpi"
-            DisplayMetrics.DENSITY_HIGH -> "hdpi"
-            DisplayMetrics.DENSITY_XHIGH -> "xhdpi"
-            DisplayMetrics.DENSITY_XXHIGH -> "xxhdpi"
-            DisplayMetrics.DENSITY_XXXHIGH -> "xxxhdpi"
-            else -> null
+    fun loadBitmap(file: File): Bitmap? = runCatching {
+        file.inputStream().buffered().use {
+            BitmapFactory.decodeStream(it)
         }
+    }.getOrNull()
+
+    fun getDensityPostfix(res: Resources): String? = when (res.displayMetrics.densityDpi) {
+        DisplayMetrics.DENSITY_LOW -> "ldpi"
+        DisplayMetrics.DENSITY_MEDIUM -> "mdpi"
+        DisplayMetrics.DENSITY_HIGH -> "hdpi"
+        DisplayMetrics.DENSITY_XHIGH -> "xhdpi"
+        DisplayMetrics.DENSITY_XXHIGH -> "xxhdpi"
+        DisplayMetrics.DENSITY_XXXHIGH -> "xxxhdpi"
+        else -> null
+    }
 
     class RangeLists(
         val rangeListX: List<Range>,

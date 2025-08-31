@@ -35,11 +35,9 @@ private typealias KeyPair = Pair<Pair<RimeKeyName, RimeKeyVal>, AndroidKeyCode>
  * The original source code can be found at the following location:
  *  https://github.com/fcitx5-android/fcitx5-android/blob/14fe8c589ecb1546ed76445df0de658f81c4a1ed/codegen/src/main/java/org/fcitx/fcitx5/android/codegen/GenKeyMapping.kt
  */
-@Suppress("ktlint:standard:value-argument-comment")
 internal class GenKeyMappingProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
-    @Suppress("ktlint:standard:no-consecutive-comments")
     private val pairs: List<KeyPair> =
         listOf(
             "space" to 0x0020 to "KEYCODE_SPACE", // U+0020 SPACE

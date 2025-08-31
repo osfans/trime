@@ -155,9 +155,8 @@ class SetupActivity : FragmentActivity() {
     private inner class Adapter : FragmentStateAdapter(this) {
         override fun getItemCount(): Int = SetupPage.entries.size
 
-        override fun createFragment(position: Int): Fragment =
-            SetupFragment().apply {
-                arguments = bundleOf("page" to SetupPage.entries[position])
-            }
+        override fun createFragment(position: Int): Fragment = SetupFragment().apply {
+            arguments = bundleOf("page" to SetupPage.entries[position])
+        }
     }
 }

@@ -69,10 +69,9 @@ class Key(
     private fun getColor(
         src: TextKeyboard.TextKey.() -> String,
         fallback: String,
-    ): Int =
-        selfConfig?.let {
-            runCatching { ColorManager.getColor(src(it)) }.getOrNull()
-        } ?: ColorManager.getColor(fallback)
+    ): Int = selfConfig?.let {
+        runCatching { ColorManager.getColor(src(it)) }.getOrNull()
+    } ?: ColorManager.getColor(fallback)
 
     // get color from common color schemes or just fallback to default color
     private fun getColor(
@@ -171,7 +170,7 @@ class Key(
                 (x < this.x + width || rightEdge && x >= this.x) &&
                 (y >= this.y || topEdge && y <= this.y + height) &&
                 (y < this.y + height || bottomEdge && y >= this.y)
-        )
+            )
     }
 
     /**
@@ -197,15 +196,14 @@ class Key(
     val modifierKeyOnMask: Int
         get() = getModifierKeyOnMask(this.code)
 
-    private fun getModifierKeyOnMask(keycode: Int): Int =
-        when (keycode) {
-            KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> KeyEvent.META_SHIFT_ON
-            KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_CTRL_RIGHT -> KeyEvent.META_CTRL_ON
-            KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_META_RIGHT -> KeyEvent.META_META_ON
-            KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> KeyEvent.META_ALT_ON
-            KeyEvent.KEYCODE_SYM -> KeyEvent.META_SYM_ON
-            else -> 0
-        }
+    private fun getModifierKeyOnMask(keycode: Int): Int = when (keycode) {
+        KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> KeyEvent.META_SHIFT_ON
+        KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_CTRL_RIGHT -> KeyEvent.META_CTRL_ON
+        KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_META_RIGHT -> KeyEvent.META_META_ON
+        KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> KeyEvent.META_ALT_ON
+        KeyEvent.KEYCODE_SYM -> KeyEvent.META_SYM_ON
+        else -> 0
+    }
 
     val isShift: Boolean
         get() = this.code == KeyEvent.KEYCODE_SHIFT_LEFT || this.code == KeyEvent.KEYCODE_SHIFT_RIGHT
@@ -224,8 +222,7 @@ class Key(
      * @param behavior 同文按键模式（点击/长按/滑动）
      * @return
      */
-    fun sendBindings(behavior: KeyBehavior): Boolean =
-        keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } != null || checkKeyAction(sendBindings) != null
+    fun sendBindings(behavior: KeyBehavior): Boolean = keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } != null || checkKeyAction(sendBindings) != null
 
     private val keyAction: KeyAction?
         get() = checkKeyAction() ?: click
@@ -237,8 +234,7 @@ class Key(
 
     fun hasAction(behavior: KeyBehavior): Boolean = keyActions[behavior] != null
 
-    fun getAction(behavior: KeyBehavior): KeyAction? =
-        keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
+    fun getAction(behavior: KeyBehavior): KeyAction? = keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
 
     private fun checkKeyAction(): KeyAction? {
         val status = rime.run { statusCached }
@@ -256,20 +252,18 @@ class Key(
 
     fun getCode(behavior: KeyBehavior): Int = getAction(behavior)!!.code
 
-    fun getLabel(): String =
-        when {
-            label.isNotEmpty() &&
-                keyAction == click &&
-                !keyActions.containsKey(KeyBehavior.ASCII) &&
-                !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunch } -> label
-            else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
-        }
+    fun getLabel(): String = when {
+        label.isNotEmpty() &&
+            keyAction == click &&
+            !keyActions.containsKey(KeyBehavior.ASCII) &&
+            !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunch } -> label
+        else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
+    }
 
-    fun getPreviewText(behavior: KeyBehavior): String =
-        when (behavior) {
-            KeyBehavior.CLICK -> keyAction!!.getPreview(parent)
-            else -> getAction(behavior)!!.getPreview(parent)
-        }
+    fun getPreviewText(behavior: KeyBehavior): String = when (behavior) {
+        KeyBehavior.CLICK -> keyAction!!.getPreview(parent)
+        else -> getAction(behavior)!!.getPreview(parent)
+    }
 
     val symbolLabel: String
         get() = labelSymbol.ifEmpty { longClick?.getLabel(parent) ?: "" }
@@ -283,31 +277,28 @@ class Key(
             }
         }
 
-    fun getBackgroundDrawable(): Drawable? =
-        when (appearanceType) {
-            2 -> if (isPressed) hlOnKeyBackground else onKeyBackground
-            1 -> {
-                if (isPressed) {
-                    hlOffKeyBackground ?: hlKeyBackground
-                } else {
-                    selfConfig?.keyBackColor.takeIf { !it.isNullOrEmpty() }?.let { keyBackground }
-                        ?: (offKeyBackground ?: keyBackground)
-                }
+    fun getBackgroundDrawable(): Drawable? = when (appearanceType) {
+        2 -> if (isPressed) hlOnKeyBackground else onKeyBackground
+        1 -> {
+            if (isPressed) {
+                hlOffKeyBackground ?: hlKeyBackground
+            } else {
+                selfConfig?.keyBackColor.takeIf { !it.isNullOrEmpty() }?.let { keyBackground }
+                    ?: (offKeyBackground ?: keyBackground)
             }
-            else -> if (isPressed) hlKeyBackground else keyBackground
         }
+        else -> if (isPressed) hlKeyBackground else keyBackground
+    }
 
-    fun getTextColor(): Int =
-        when (appearanceType) {
-            2 -> if (isPressed) hlOnKeyTextColor else onKeyTextColor
-            1 -> if (isPressed) hlOffKeyTextColor else getColor(selfConfig?.keyTextColor ?: "", offKeyTextColor)
-            else -> if (isPressed) hlKeyTextColor else keyTextColor
-        }
+    fun getTextColor(): Int = when (appearanceType) {
+        2 -> if (isPressed) hlOnKeyTextColor else onKeyTextColor
+        1 -> if (isPressed) hlOffKeyTextColor else getColor(selfConfig?.keyTextColor ?: "", offKeyTextColor)
+        else -> if (isPressed) hlKeyTextColor else keyTextColor
+    }
 
-    fun getSymbolColor(): Int =
-        when (appearanceType) {
-            2 -> if (isPressed) hlOnKeySymbolColor else onKeySymbolColor
-            1 -> if (isPressed) hlOffKeySymbolColor else offKeySymbolColor
-            else -> if (isPressed) hlKeySymbolColor else keySymbolColor
-        }
+    fun getSymbolColor(): Int = when (appearanceType) {
+        2 -> if (isPressed) hlOnKeySymbolColor else onKeySymbolColor
+        1 -> if (isPressed) hlOffKeySymbolColor else offKeySymbolColor
+        else -> if (isPressed) hlKeySymbolColor else keySymbolColor
+    }
 }

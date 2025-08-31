@@ -108,16 +108,15 @@ class LiquidKeyboard(
         liquidLayout.boardView
     }
 
-    override fun onCreateView(): View =
-        LiquidLayout(context, theme, commonKeyboardActionListener).apply {
-            liquidLayout = this
-            tabsUi.apply {
-                setTabs(TabManager.tabTags)
-                setOnTabClickListener { i ->
-                    select(i)
-                }
+    override fun onCreateView(): View = LiquidLayout(context, theme, commonKeyboardActionListener).apply {
+        liquidLayout = this
+        tabsUi.apply {
+            setTabs(TabManager.tabTags)
+            setOnTabClickListener { i ->
+                select(i)
             }
         }
+    }
 
     override fun onCreateBarView() = liquidLayout.tabsUi.root
 
@@ -150,13 +149,12 @@ class LiquidKeyboard(
     fun select(i: Int) {
         val tag = TabManager.tabTags[i]
 
-        fun loadDbData() =
-            when (tag.type) {
-                SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
-                SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
-                SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
-                else -> null
-            }
+        fun loadDbData() = when (tag.type) {
+            SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
+            SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
+            SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
+            else -> null
+        }
 
         if (TabManager.currentTabIndex == i) {
             loadDbData() ?: return
@@ -259,8 +257,7 @@ class LiquidKeyboard(
         initDbData { ClipboardHelper.getAll() }
     }
 
-    private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean =
-        (!::currentBoardAdapter.isInitialized || currentBoardAdapter != adapter).also {
-            if (it) currentBoardAdapter = adapter
-        }
+    private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean = (!::currentBoardAdapter.isInitialized || currentBoardAdapter != adapter).also {
+        if (it) currentBoardAdapter = adapter
+    }
 }

@@ -52,14 +52,13 @@ open class PreeditUi(
             }
         }
 
-    private fun RimeProto.Context.Composition.toSpannedString() =
-        buildSpannedString {
-            if (!preedit.isNullOrEmpty()) {
-                append(preedit)
-                setSpan(ForegroundColorSpan(highlightTextColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                setSpan(BackgroundColorSpan(highlightBackColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            }
+    private fun RimeProto.Context.Composition.toSpannedString() = buildSpannedString {
+        if (!preedit.isNullOrEmpty()) {
+            append(preedit)
+            setSpan(ForegroundColorSpan(highlightTextColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(BackgroundColorSpan(highlightBackColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
+    }
 
     var visible = false
         private set

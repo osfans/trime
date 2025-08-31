@@ -16,13 +16,12 @@ abstract class Dictionary {
         ;
 
         companion object {
-            fun fromFileName(name: String): Type? =
-                when {
-                    name.endsWith(".ocd2") -> OCD2
-                    name.endsWith(".ocd") -> OCD
-                    name.endsWith(".txt") -> Text
-                    else -> null
-                }
+            fun fromFileName(name: String): Type? = when {
+                name.endsWith(".ocd2") -> OCD2
+                name.endsWith(".ocd") -> OCD
+                name.endsWith(".txt") -> Text
+                else -> null
+            }
         }
     }
 
@@ -70,11 +69,10 @@ abstract class Dictionary {
     override fun toString(): String = "${javaClass.simpleName}[$name -> ${file.path}]"
 
     companion object {
-        fun new(it: File): Dictionary? =
-            when (Type.fromFileName(it.name)) {
-                Type.OCD, Type.OCD2 -> OpenCCDictionary(it)
-                Type.Text -> TextDictionary(it)
-                null -> null
-            }
+        fun new(it: File): Dictionary? = when (Type.fromFileName(it.name)) {
+            Type.OCD, Type.OCD2 -> OpenCCDictionary(it)
+            Type.Text -> TextDictionary(it)
+            null -> null
+        }
     }
 }

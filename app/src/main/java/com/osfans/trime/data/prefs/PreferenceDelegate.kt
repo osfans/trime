@@ -16,20 +16,19 @@ open class PreferenceDelegate<T : Any>(
     val defaultValue: T,
 ) : ReadWriteProperty<Any?, T> {
     @Suppress("UNCHECKED_CAST")
-    open fun getValue(): T =
-        try {
-            when (defaultValue) {
-                is Int -> sharedPreferences.getInt(key, defaultValue)
-                is Long -> sharedPreferences.getLong(key, defaultValue)
-                is Float -> sharedPreferences.getFloat(key, defaultValue)
-                is Boolean -> sharedPreferences.getBoolean(key, defaultValue)
-                is String -> sharedPreferences.getString(key, defaultValue) ?: defaultValue
-                else -> null
-            } as T
-        } catch (e: Exception) {
-            setValue(defaultValue)
-            defaultValue
-        }
+    open fun getValue(): T = try {
+        when (defaultValue) {
+            is Int -> sharedPreferences.getInt(key, defaultValue)
+            is Long -> sharedPreferences.getLong(key, defaultValue)
+            is Float -> sharedPreferences.getFloat(key, defaultValue)
+            is Boolean -> sharedPreferences.getBoolean(key, defaultValue)
+            is String -> sharedPreferences.getString(key, defaultValue) ?: defaultValue
+            else -> null
+        } as T
+    } catch (e: Exception) {
+        setValue(defaultValue)
+        defaultValue
+    }
 
     open fun setValue(value: T) {
         sharedPreferences.edit {
@@ -71,15 +70,14 @@ open class PreferenceDelegate<T : Any>(
             sharedPreferences.edit { putString(key, serializer.serialize(value)) }
         }
 
-        override fun getValue(): T =
-            try {
-                sharedPreferences.getString(key, null)?.let {
-                    serializer.deserialize(it)
-                } ?: defaultValue
-            } catch (e: Exception) {
-                setValue(defaultValue)
-                defaultValue
-            }
+        override fun getValue(): T = try {
+            sharedPreferences.getString(key, null)?.let {
+                serializer.deserialize(it)
+            } ?: defaultValue
+        } catch (e: Exception) {
+            setValue(defaultValue)
+            defaultValue
+        }
     }
 
     fun interface OnChangeListener<in T : Any> {

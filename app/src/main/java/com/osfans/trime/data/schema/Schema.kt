@@ -38,20 +38,20 @@ data class Schema(
             val root = SchemaManager.yaml.parseToYamlNode(file.readText()).yamlMap
             return Schema(
                 switches =
-                    root.get<YamlList>("switches")?.items?.mapNotNull decode@{
-                        try {
-                            SchemaManager.yaml.decodeFromYamlNode<Switch>(it.yamlMap)
-                        } catch (e: Exception) {
-                            Timber.e(e, "Failed to decode switches of schema '$schemaId'")
-                            null
-                        }
-                    } ?: emptyList(),
+                root.get<YamlList>("switches")?.items?.mapNotNull decode@{
+                    try {
+                        SchemaManager.yaml.decodeFromYamlNode<Switch>(it.yamlMap)
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to decode switches of schema '$schemaId'")
+                        null
+                    }
+                } ?: emptyList(),
                 symbolKeys =
-                    root
-                        .traverse<YamlMap>("punctuator/symbols")
-                        ?.entries
-                        ?.keys
-                        ?.map { it.content } ?: emptyList(),
+                root
+                    .traverse<YamlMap>("punctuator/symbols")
+                    ?.entries
+                    ?.keys
+                    ?.map { it.content } ?: emptyList(),
                 alphabet = root.traverse<YamlScalar>("speller/alphabet")?.content ?: "",
             )
         }

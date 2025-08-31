@@ -49,14 +49,14 @@ class TextKeyboardMapper(
                         hlKeyBackColor = it.getString("hilited_key_back_color"),
                         hlKeySymbolColor = it.getString("hilited_key_symbol_color"),
                         behaviors =
-                            buildMap {
-                                KeyBehavior.entries.forEach { entry ->
-                                    val action = it.getString(entry.name.lowercase())
-                                    if (action.isNotEmpty() || entry == KeyBehavior.CLICK) {
-                                        put(entry, action)
-                                    }
+                        buildMap {
+                            KeyBehavior.entries.forEach { entry ->
+                                val action = it.getString(entry.name.lowercase())
+                                if (action.isNotEmpty() || entry == KeyBehavior.CLICK) {
+                                    put(entry, action)
                                 }
-                            },
+                            }
+                        },
                     )
                 } ?: emptyList()
             } catch (e: Exception) {

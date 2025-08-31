@@ -77,79 +77,68 @@ class Rime :
             },
         )
 
-    private suspend inline fun <T> withRimeContext(crossinline block: suspend () -> T): T =
-        withContext(dispatcher) {
-            block()
-        }
+    private suspend inline fun <T> withRimeContext(crossinline block: suspend () -> T): T = withContext(dispatcher) {
+        block()
+    }
 
-    override suspend fun isEmpty(): Boolean =
-        withRimeContext {
-            getCurrentRimeSchema() == ".default" // 無方案
-        }
+    override suspend fun isEmpty(): Boolean = withRimeContext {
+        getCurrentRimeSchema() == ".default" // 無方案
+    }
 
-    override suspend fun syncUserData(): Boolean =
-        withRimeContext {
-            syncRimeUserData()
-        }
+    override suspend fun syncUserData(): Boolean = withRimeContext {
+        syncRimeUserData()
+    }
 
     override suspend fun processKey(
         value: Int,
         modifiers: UInt,
-    ): Boolean =
-        withRimeContext {
-            processRimeKey(value, modifiers.toInt()).also {
-                if (it) {
-                    emitResponse()
-                } else {
-                    emitKeyEvent(value, modifiers.toInt())
-                }
+    ): Boolean = withRimeContext {
+        processRimeKey(value, modifiers.toInt()).also {
+            if (it) {
+                emitResponse()
+            } else {
+                emitKeyEvent(value, modifiers.toInt())
             }
         }
+    }
 
     override suspend fun processKey(
         value: KeyValue,
         modifiers: KeyModifiers,
-    ): Boolean =
-        withRimeContext {
-            processRimeKey(value.value, modifiers.toInt()).also {
-                if (it) {
-                    emitResponse()
-                } else {
-                    emitKeyEvent(value.value, modifiers.toInt())
-                }
+    ): Boolean = withRimeContext {
+        processRimeKey(value.value, modifiers.toInt()).also {
+            if (it) {
+                emitResponse()
+            } else {
+                emitKeyEvent(value.value, modifiers.toInt())
             }
         }
+    }
 
-    override suspend fun selectCandidate(idx: Int): Boolean =
-        withRimeContext {
-            selectRimeCandidate(idx).also { if (it) emitResponse() }
-        }
+    override suspend fun selectCandidate(idx: Int): Boolean = withRimeContext {
+        selectRimeCandidate(idx).also { if (it) emitResponse() }
+    }
 
-    override suspend fun forgetCandidate(idx: Int): Boolean =
-        withRimeContext {
-            forgetRimeCandidate(idx).also { if (it) emitResponse() }
-        }
+    override suspend fun forgetCandidate(idx: Int): Boolean = withRimeContext {
+        forgetRimeCandidate(idx).also { if (it) emitResponse() }
+    }
 
-    override suspend fun selectPagedCandidate(idx: Int): Boolean =
-        withRimeContext {
-            selectRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
-        }
+    override suspend fun selectPagedCandidate(idx: Int): Boolean = withRimeContext {
+        selectRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
+    }
 
-    override suspend fun deletedPagedCandidate(idx: Int): Boolean =
-        withRimeContext {
-            deleteRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
-        }
+    override suspend fun deletedPagedCandidate(idx: Int): Boolean = withRimeContext {
+        deleteRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
+    }
 
-    override suspend fun changeCandidatePage(backward: Boolean): Boolean =
-        withRimeContext {
-            changeRimeCandidatePage(backward).also { if (it) emitResponse() }
-        }
+    override suspend fun changeCandidatePage(backward: Boolean): Boolean = withRimeContext {
+        changeRimeCandidatePage(backward).also { if (it) emitResponse() }
+    }
 
-    override suspend fun moveCursorPos(position: Int) =
-        withRimeContext {
-            setRimeCaretPos(position)
-            emitResponse()
-        }
+    override suspend fun moveCursorPos(position: Int) = withRimeContext {
+        setRimeCaretPos(position)
+        emitResponse()
+    }
 
     override suspend fun availableSchemata(): Array<SchemaItem> = withRimeContext { getAvailableRimeSchemaList() }
 
@@ -165,32 +154,28 @@ class Rime :
 
     override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) emitResponse() } }
 
-    override suspend fun clearComposition() =
-        withRimeContext {
-            clearRimeComposition()
-            emitResponse()
-        }
+    override suspend fun clearComposition() = withRimeContext {
+        clearRimeComposition()
+        emitResponse()
+    }
 
     override suspend fun setRuntimeOption(
         option: String,
         value: Boolean,
-    ): Unit =
-        withRimeContext {
-            setRimeOption(option, value)
-        }
+    ): Unit = withRimeContext {
+        setRimeOption(option, value)
+    }
 
-    override suspend fun getRuntimeOption(option: String): Boolean =
-        withRimeContext {
-            getRimeOption(option)
-        }
+    override suspend fun getRuntimeOption(option: String): Boolean = withRimeContext {
+        getRimeOption(option)
+    }
 
     override suspend fun getCandidates(
         startIndex: Int,
         limit: Int,
-    ): Array<CandidateItem> =
-        withRimeContext {
-            getRimeCandidates(startIndex, limit)
-        }
+    ): Array<CandidateItem> = withRimeContext {
+        getRimeCandidates(startIndex, limit)
+    }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {

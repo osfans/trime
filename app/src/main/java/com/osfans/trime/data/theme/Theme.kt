@@ -50,33 +50,33 @@ data class Theme(
                 name = root.getString("name"),
                 generalStyle = GeneralStyleMapper(root.get<YamlMap>("style")!!).map(),
                 liquidKeyboard =
-                    when (val node = root.get<YamlMap>("liquid_keyboard")) {
-                        null -> LiquidKeyboard()
-                        else -> LiquidKeyboardMapper(node).map()
-                    },
+                when (val node = root.get<YamlMap>("liquid_keyboard")) {
+                    null -> LiquidKeyboard()
+                    else -> LiquidKeyboardMapper(node).map()
+                },
                 presetKeys =
-                    when (val map = root.get<YamlMap>("preset_keys")) {
-                        null -> emptyMap()
-                        else -> yaml.decodeFromYamlNode(map)
-                    },
+                when (val map = root.get<YamlMap>("preset_keys")) {
+                    null -> emptyMap()
+                    else -> yaml.decodeFromYamlNode(map)
+                },
                 presetKeyboards =
-                    root.get<YamlMap>("preset_keyboards")?.entries?.entries?.associate {
-                        it.key.content to TextKeyboardMapper(it.value.yamlMap).map()
-                    } ?: emptyMap(),
+                root.get<YamlMap>("preset_keyboards")?.entries?.entries?.associate {
+                    it.key.content to TextKeyboardMapper(it.value.yamlMap).map()
+                } ?: emptyMap(),
                 colorSchemes =
-                    root.get<YamlMap>("preset_color_schemes")?.entries?.entries?.map {
-                        ColorScheme(
-                            it.key.content,
-                            it.value.yamlMap.entries.entries.associate { (k, v) ->
-                                k.content to v.yamlScalar.content
-                            },
-                        )
-                    } ?: emptyList(),
+                root.get<YamlMap>("preset_color_schemes")?.entries?.entries?.map {
+                    ColorScheme(
+                        it.key.content,
+                        it.value.yamlMap.entries.entries.associate { (k, v) ->
+                            k.content to v.yamlScalar.content
+                        },
+                    )
+                } ?: emptyList(),
                 fallbackColors =
-                    when (val map = root.get<YamlMap>("fallback_colors")) {
-                        null -> emptyMap()
-                        else -> yaml.decodeFromYamlNode(map)
-                    },
+                when (val map = root.get<YamlMap>("fallback_colors")) {
+                    null -> emptyMap()
+                    else -> yaml.decodeFromYamlNode(map)
+                },
             )
         }
     }

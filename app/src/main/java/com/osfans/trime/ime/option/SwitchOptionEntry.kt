@@ -20,13 +20,12 @@ sealed class SwitchOptionEntry(
     ) : SwitchOptionEntry(label, icon)
 
     companion object {
-        fun fromSwitch(it: Schema.Switch): Custom =
-            if (it.options.isEmpty()) {
-                val enabledText = it.states[it.enabledIndex]
-                val disabledText = it.states[1 - it.enabledIndex]
-                Custom(it, "$enabledText → $disabledText", 0)
-            } else {
-                Custom(it, it.states[it.enabledIndex], 0)
-            }
+        fun fromSwitch(it: Schema.Switch): Custom = if (it.options.isEmpty()) {
+            val enabledText = it.states[it.enabledIndex]
+            val disabledText = it.states[1 - it.enabledIndex]
+            Custom(it, "$enabledText → $disabledText", 0)
+        } else {
+            Custom(it, it.states[it.enabledIndex], 0)
+        }
     }
 }

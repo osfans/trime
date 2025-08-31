@@ -72,13 +72,12 @@ class SuggestionCandidateModule(
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView? =
-        suspendCoroutine { c ->
-            // callback view might be null
-            suggestion.inflate(context, suggestionSize, directExecutor) { v ->
-                c.resume(v)
-            }
+    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView? = suspendCoroutine { c ->
+        // callback view might be null
+        suggestion.inflate(context, suggestionSize, directExecutor) { v ->
+            c.resume(v)
         }
+    }
 
     companion object {
         const val HEIGHT = 40
