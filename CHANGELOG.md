@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.6] - 2025-09-01
+
+### 🚀 Features
+
+- Enable schema in list fragment with progressing
+- Add button to bar to hide keyboard
+- Add SwitchOptionWindow
+
+### 🐛 Bug Fixes
+
+- NPE on getting active schema
+- Add missing animations when enter/exit fragments
+- Could not get correct drawable from some colors
+- Update type converter methods for room update to avoid crash
+- Build failure for on 32-bit devices
+- Shift wasn't working
+- Incorrect key background height
+- Never evaluate valid color scheme of some themes
+- Duplicate clip data
+- Crash on first run
+- Key text color specified as transparent didn't take effect
+- Crash on pressing shift key
+- 'LiquidKeyboard' window reloaded, some key styles not as expected
+- 'key_back_color' and 'key_text_color' priority is not as expected
+- Key label not working
+- 'key_hint_offset_y' not working
+- Negative key offset values are not supported
+- Key offset priority is not as expected
+- Key backgrounds didn't get updated after pictures changing by users
+- Evict bitmap cache before initializing
+
+### 🚜 Refactor
+
+- Optimize getting of key background, text and symbol color
+- Polish Key constructing
+- Polish Keyboard constructing
+- Unwrap yaml node to parse configs
+- Enhance processing of nullable theme parameters
+- Setup action bar and menu items manually
+- Remove unused string res
+- Avoid to use Rime companion directly
+- Make all preferences getting by delegate in place
+- Cache bitmap instead of drawable to reduce memory consumption
+- Improve proto getting to increase performance
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.6
+- Update dependencies
+- Update ndk
+- Upgrade rime to 1.14.0
+- Update ktlint to 1.7.1
+- Update the git blame ignore
+- Add 3.3.6 changelog
+
 ## [3.3.5] - 2025-07-01
 
 ### 🚀 Features
