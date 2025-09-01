@@ -27,5 +27,8 @@
 	path = app/src/main/jni/librime-predict
 	url = https://github.com/rime/librime-predict
 [submodule "prelude"]
-	path = app/src/main/assets/prelude
+	path = app/data/rime/prelude
 	url = https://github.com/rime/rime-prelude
+[submodule "luna-pinyin"]
+	path = app/data/rime/luna-pinyin
+	url = https://github.com/rime/rime-luna-pinyin

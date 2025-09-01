@@ -16,6 +16,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.task
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -37,16 +38,15 @@ class DataChecksumsPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        target.task<DataChecksumsTask>(TASK) {
-            inputDir.set(target.assetsDir.resolve("shared"))
+        target.tasks.register<DataChecksumsTask>(TASK) {
+            inputDir.set(target.assetsDir)
             outputFile.set(target.assetsDir.resolve(FILE_NAME))
         }
-        target
-            .task<Delete>(CLEAN_TASK) {
-                delete(target.assetsDir.resolve(FILE_NAME))
-            }.also {
-                target.tasks.findByName("clean")?.dependsOn(it)
-            }
+        target.tasks.register<Delete>(CLEAN_TASK) {
+            delete(target.assetsDir.resolve(FILE_NAME))
+        }.also {
+            target.tasks.findByName("clean")?.dependsOn(it)
+        }
     }
 
     abstract class DataChecksumsTask : DefaultTask() {

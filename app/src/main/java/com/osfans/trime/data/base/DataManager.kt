@@ -98,20 +98,6 @@ object DataManager {
 
         ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.resolve(DATA_CHECKSUMS_NAME).absolutePath)
 
-        // 创建 default.custom.yaml 并用空方案列表覆盖 default.yaml 默认的方案列表
-        // TODO: 内置明月拼音等方案，提供最小开箱即用环境
-        runCatching {
-            val defaultCustom = File(userDataDir, DEFAULT_CUSTOM_FILE_NAME)
-            if (defaultCustom.createNewFile()) {
-                defaultCustom.writeText(
-                    """
-                        patch:
-                            schema_list: []
-                    """.trimIndent(),
-                )
-            }
-        }.getOrElse { Timber.e(it, "Failed to create default.custom.yaml") }
-
         Timber.d("Synced!")
     }
 }
