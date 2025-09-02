@@ -32,3 +32,6 @@
 [submodule "luna-pinyin"]
 	path = app/data/rime/luna-pinyin
 	url = https://github.com/rime/rime-luna-pinyin
+[submodule "stroke"]
+	path = app/data/rime/stroke
+	url = https://github.com/rime/rime-stroke
