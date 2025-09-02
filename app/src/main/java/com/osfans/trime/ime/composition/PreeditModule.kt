@@ -23,6 +23,7 @@ import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
 import splitties.views.backgroundColor
+import splitties.views.startPadding
 
 @InputScope
 @Inject
@@ -50,6 +51,7 @@ class PreeditModule(
             context,
             theme,
             setupPreeditView = {
+                startPadding = dp(theme.generalStyle.layout.marginX)
                 backgroundColor = ColorManager.getColor("text_back_color")
             },
             onMoveCursor = { pos -> rime.launchOnReady { it.moveCursorPos(pos) } },
