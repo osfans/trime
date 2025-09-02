@@ -15,6 +15,7 @@ import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeMessage
@@ -255,6 +256,7 @@ class InputView(
                 endToStartOf(rightPaddingSpace)
             }
         }
+        preedit.ui.root.setPadding(sidePadding, 0, sidePadding, 0)
         quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
