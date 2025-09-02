@@ -26,6 +26,7 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
+import splitties.views.horizontalPadding
 
 class CandidateItemUi(
     override val ctx: Context,
@@ -61,6 +62,7 @@ class CandidateItemUi(
 
     override val root =
         constraintLayout {
+            horizontalPadding = dp(theme.generalStyle.candidatePadding)
             if (theme.generalStyle.commentOnTop) {
                 verticalChain(
                     listOf(lastText, firstText),
