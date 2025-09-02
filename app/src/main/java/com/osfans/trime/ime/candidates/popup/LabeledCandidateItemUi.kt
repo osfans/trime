@@ -21,7 +21,7 @@ import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.textView
-import splitties.views.padding
+import splitties.views.horizontalPadding
 
 class LabeledCandidateItemUi(
     override val ctx: Context,
@@ -43,7 +43,7 @@ class LabeledCandidateItemUi(
 
     override val root =
         textView {
-            padding = dp(theme.generalStyle.candidatePadding)
+            horizontalPadding = dp(theme.generalStyle.candidatePadding)
         }
 
     private inline fun SpannableStringBuilder.inSpanWith(
