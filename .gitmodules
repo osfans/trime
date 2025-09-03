@@ -35,3 +35,6 @@
 [submodule "stroke"]
 	path = app/data/rime/stroke
 	url = https://github.com/rime/rime-stroke
+[submodule "essay"]
+	path = app/data/rime/essay
+	url = https://github.com/rime/rime-essay
