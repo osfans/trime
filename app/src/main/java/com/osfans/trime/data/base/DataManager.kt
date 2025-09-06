@@ -18,9 +18,17 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 object DataManager {
+    private const val DEFAULT_FILE_NAME = "default.yaml"
     private const val DEFAULT_CUSTOM_FILE_NAME = "default.custom.yaml"
 
     private const val DATA_CHECKSUMS_NAME = "checksums.json"
+
+    private const val CUSTOM_PATCH = """
+      patch:
+        schema_list:
+          - schema: luna_pinyin
+          - schema: luna_pinyin_simp
+    """
 
     private val lock = ReentrantLock()
 
@@ -97,6 +105,14 @@ object DataManager {
         }
 
         ResourceUtils.copyFile(DATA_CHECKSUMS_NAME, dataDir.resolve(DATA_CHECKSUMS_NAME).absolutePath)
+
+        val default = userDataDir.resolve(DEFAULT_FILE_NAME)
+        val custom = userDataDir.resolve(DEFAULT_CUSTOM_FILE_NAME)
+        if (!default.exists() && !custom.exists()) {
+            if (custom.createNewFile()) {
+                custom.writeText(CUSTOM_PATCH.trimIndent())
+            }
+        }
 
         Timber.d("Synced!")
     }
