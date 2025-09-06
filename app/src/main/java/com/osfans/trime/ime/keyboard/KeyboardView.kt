@@ -51,7 +51,7 @@ class KeyboardView(
     private val keyboard: Keyboard,
     private val keyPreviewChoreographer: KeyPreviewChoreographer,
 ) : View(context) {
-    private val rime = RimeDaemon.getFirstSessionOrNull()!!
+    private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
     private var mCurrentKeyIndex = NOT_A_KEY
     private val keyTextSize = theme.generalStyle.keyTextSize
     private val labelTextSize =

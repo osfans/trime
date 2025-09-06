@@ -18,7 +18,7 @@ class Key(
     private val parent: Keyboard,
     private val selfConfig: TextKeyboard.TextKey? = null,
 ) {
-    private val rime = RimeDaemon.getFirstSessionOrNull()!!
+    private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
 
     val keyActions: Map<KeyBehavior, KeyAction> =
         buildMap {
