@@ -47,7 +47,7 @@ class KeyAction(
     private val hookShiftNum by AppPrefs.defaultInstance().keyboard.hookShiftNum
     private val hookShiftSymbol by AppPrefs.defaultInstance().keyboard.hookShiftSymbol
 
-    private val rime = RimeDaemon.getFirstSessionOrNull()!!
+    private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
 
     private fun adjustCase(
         str: String,
