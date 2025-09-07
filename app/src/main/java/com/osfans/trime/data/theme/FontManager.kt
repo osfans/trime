@@ -27,6 +27,7 @@ object FontManager {
         SYMBOL_FONT,
         TEXT_FONT,
         LONG_TEXT_FONT,
+        TOOLBAR_FONT,
     }
 
     private val fontDir get() = File(DataManager.userDataDir, "fonts")
@@ -111,6 +112,7 @@ object FontManager {
             FontKey.SYMBOL_FONT -> style.symbolFont
             FontKey.TEXT_FONT -> style.textFont
             FontKey.LONG_TEXT_FONT -> style.longTextFont
+            FontKey.TOOLBAR_FONT -> theme.toolBar.buttonFont
             else -> null
         }
     }

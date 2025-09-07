@@ -13,11 +13,13 @@ import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.mapper.LiquidKeyboardMapper
 import com.osfans.trime.data.theme.mapper.TextKeyboardMapper
+import com.osfans.trime.data.theme.mapper.ToolBarMapper
 import com.osfans.trime.data.theme.model.ColorScheme
 import com.osfans.trime.data.theme.model.GeneralStyle
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.data.theme.model.TextKeyboard
+import com.osfans.trime.data.theme.model.ToolBar
 import com.osfans.trime.util.getString
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -34,6 +36,7 @@ data class Theme(
     val presetKeyboards: Map<String, TextKeyboard>,
     val colorSchemes: List<ColorScheme>,
     val fallbackColors: Map<String, String>,
+    val toolBar: ToolBar,
 ) : Parcelable {
     companion object {
         private const val CONFIG_VERSION_KEY = "config_version"
@@ -53,6 +56,11 @@ data class Theme(
                 when (val node = root.get<YamlMap>("liquid_keyboard")) {
                     null -> LiquidKeyboard()
                     else -> LiquidKeyboardMapper(node).map()
+                },
+                toolBar =
+                when (val node = root.get<YamlMap>("tool_bar")) {
+                    null -> ToolBar()
+                    else -> ToolBarMapper(node).map()
                 },
                 presetKeys =
                 when (val map = root.get<YamlMap>("preset_keys")) {

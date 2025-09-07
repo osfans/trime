@@ -998,7 +998,62 @@ liquid_keyboard:
     type: SYMBOL
     name: 符号表
     keys: [ 符号: '/fh', 电脑: '/dn', 象棋: '/xq', 麻将: '/mj', 骰子: '/sz', 扑克: '/pk', 天气: '/tq', 音乐: '/yy', 八卦: '/bg', 易经: '/lssg', 天体: '/tt',  星座: '/xz',  星号: '/xh',  方块: '/fk',  几何: '/jh',  箭头: '/jt',  数学: '/sx',  上标: '/sb',  下标: '/xb',  单位: '/dw',  货币: '/hb',  拼音: '/py',  注音: '/zy',  假名: '/jm',  片假: '/pjm',  韩文: '/hw',  希腊: '/xl',  希大: '/xld', 罗马:   '/lm',  罗大:   '/lmd', 俄语:   '/ey',  俄大:   '/eyd', 表情:  '/bq',  一: '/1',  二: '/2',  三: '/3',  四: '/4',  五: '/5',  六: '/6',  七: '/7',  八: '/8',  九: '/9',  零: '/0',  十: '/10',  分数: '/fs',  标点: '/bd',  偏旁: '/pp',  竖标:  '/bdz'  ]
-  
+
+tool_bar:
+  button_spacing: 18 # 按钮间距
+  button_font: iconfont.ttf # 按钮字体
+
+  # 左侧固定主按钮配置
+  primary_button:
+    # 背景样式设置
+    background:
+      type: circle           # 高亮形状 (可选值: circle|rectangle)
+      corner_radius: 10      # 圆角半径
+      bg_normal: 0x00        # 正常状态背景颜色
+      bg_highlight: hilited_candidate_button_color  # 高亮状态背景色
+      vertical_inset: 4      # 垂直方向内缩量
+      horizontal_inset: 0    # 水平方向内缩量
+    # 前景内容设置
+    foreground:
+      style: "_more"         # 内置图标样式（以_开头，可选值: _more|_hide|_assignment）
+      bg_normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
+      # bg_highlight:        # 高亮状态前景色
+      padding: 10            # 前景内容与背景边界的内边距
+      # size: [120, 24]      # 视图控件宽高，非前景样式宽高
+    # 按钮点击事件
+    action: menu_keyboard
+
+  # 右侧按钮列表（从右向左排列）
+  button: [hide_button, emoji_button, clipboard_button, edit_button, ascii_mode_button, full_shape_button]
+
+  hide_button:
+    foreground:
+      style: "_hide"
+      bg_normal: candidate_text_color
+    action: Hide
+
+  emoji_button:
+    # 前景样式可以为空，使用默认样式，按钮将显示为 action 的 label
+    action: liquid_keyboard_emoji
+
+  clipboard_button:
+    foreground:
+      style: "_assignment"
+    action: liquid_keyboard_clipboard
+
+  edit_button:
+    foreground:
+      style: "📝"
+    action: Keyboard_numberb
+
+  ascii_mode_button:
+    foreground:
+      style: [中, 英] # 样式也可以为表，将根据 action 的 toggle 决定
+      font_size: 18  # 按钮字体大小
+    action: Mode_switch
+
+  full_shape_button:
+    action: Zenkaku_Hankaku
 
 #键盘布局
 preset_keyboards:
@@ -3966,6 +4021,7 @@ preset_keys:
   liquid_keyboard_tabs: { label: 更多, send: function, command: liquid_keyboard, option: "更多" }
   liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
   liquid_keyboard_clipboard: { label: 剪贴, send: function, command: liquid_keyboard, option: "剪贴" }
+  menu_keyboard: { label: 菜单, send: function, command: menu_keyboard }
   # rime状态
   Mode_switch: {toggle: ascii_mode, functional: false, send: Mode_switch, states: [ 中文, 西文 ]}
   Zenkaku_Hankaku: {toggle: full_shape, send: Mode_switch, states: [ 半角, 全角 ]}
