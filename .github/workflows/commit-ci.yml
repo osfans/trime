@@ -21,7 +21,7 @@ jobs:
       BUILD_ABI: armeabi-v7a,arm64-v8a,x86,x86_64
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -34,7 +34,7 @@ jobs:
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: 17
