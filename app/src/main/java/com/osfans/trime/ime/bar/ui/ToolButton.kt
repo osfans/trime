@@ -54,19 +54,14 @@ class ToolButton : FrameLayout {
 
     private var contentType = ContentType.TEXT
     private var config: ToolBar.Button? = null
-    private var buttonName: String? = null
     private var toggleKey: String? = null
 
     constructor(context: Context, @DrawableRes icon: Int) : super(context) {
         setupContent(ContentType.ICON, icon = icon)
     }
 
-    constructor(context: Context, text: String) : super(context) {
-        setupContent(ContentType.TEXT, text = text)
-    }
-
-    constructor(context: Context, config: ToolBar.Button, buttonName: String) : super(context) {
-        initFromConfig(config, buttonName)
+    constructor(context: Context, config: ToolBar.Button) : super(context) {
+        initFromConfig(config)
     }
 
     fun setIcon(@DrawableRes icon: Int) {
@@ -87,11 +82,10 @@ class ToolButton : FrameLayout {
 
     fun updateStyle() {
         val config = this.config ?: return
-        val buttonName = this.buttonName ?: return
 
         if (needsStyleUpdate()) {
             removeAllViews()
-            setupFromConfig(config, buttonName)
+            setupFromConfig(config)
         }
     }
 
@@ -110,7 +104,7 @@ class ToolButton : FrameLayout {
         when (type) {
             ContentType.ICON -> {
                 icon?.let { image.imageResource = it }
-                foreground?.padding?.let { image.padding = dp(it) } ?: run { image.padding = dp(10) }
+                image.padding = dp(foreground?.padding ?: 10)
                 add(image, lParams(wrapContent, wrapContent, gravityCenter))
             }
             ContentType.TEXT -> {
@@ -153,18 +147,15 @@ class ToolButton : FrameLayout {
         )
     } ?: ColorStateList.valueOf(normalColor)
 
-    private fun initFromConfig(config: ToolBar.Button, buttonName: String) {
+    private fun initFromConfig(config: ToolBar.Button) {
         this.config = config
-        this.buttonName = buttonName
-
-        val action = config.action.takeIf { it.isNotEmpty() } ?: buttonName
-        val toggle = KeyActionManager.getAction(action).toggle
+        val toggle = KeyActionManager.getAction(config.action).toggle
 
         if (toggle.isNotEmpty() && config.foreground?.style?.size == 2) {
             this.toggleKey = toggle
         }
 
-        setupFromConfig(config, buttonName)
+        setupFromConfig(config)
     }
 
     private fun getActiveStyle(config: ToolBar.Button): String {
@@ -179,7 +170,7 @@ class ToolButton : FrameLayout {
         return styles.firstOrNull() ?: ""
     }
 
-    private fun setupFromConfig(config: ToolBar.Button, buttonName: String) {
+    private fun setupFromConfig(config: ToolBar.Button) {
         val style = getActiveStyle(config)
         val foreground = config.foreground
 
@@ -187,18 +178,18 @@ class ToolButton : FrameLayout {
             style.startsWith("_") -> {
                 getBuiltinIconResource(style)?.let { iconRes ->
                     setupContent(ContentType.ICON, icon = iconRes, foreground = foreground)
-                } ?: setupFallbackContent(config, buttonName, foreground)
+                } ?: setupFallbackContent(config, foreground)
             }
             style.matches(IMAGE_PATTERN) -> {
                 ColorManager.getDrawable(style)?.let { drawable ->
                     setupContent(ContentType.LOCAL_IMAGE, drawable = drawable, foreground = foreground)
-                } ?: setupFallbackContent(config, buttonName, foreground)
+                } ?: setupFallbackContent(config, foreground)
             }
             style.isNotEmpty() -> {
                 setupContent(ContentType.TEXT, text = style, foreground = foreground)
             }
             else -> {
-                setupFallbackContent(config, buttonName, foreground)
+                setupFallbackContent(config, foreground)
             }
         }
 
@@ -207,13 +198,11 @@ class ToolButton : FrameLayout {
 
     private fun setupFallbackContent(
         config: ToolBar.Button?,
-        buttonName: String?,
         foreground: ToolBar.Button.Foreground?,
     ) {
-        val action = config?.action?.takeIf { it.isNotEmpty() } ?: buttonName ?: ""
+        val action = config?.action ?: ""
         val fallbackText = KeyActionManager.getAction(action)
             .getLabel(KeyboardSwitcher.currentKeyboard)
-            .takeIf { it.isNotEmpty() } ?: buttonName ?: ""
 
         setupContent(ContentType.TEXT, text = fallbackText, foreground = foreground)
     }

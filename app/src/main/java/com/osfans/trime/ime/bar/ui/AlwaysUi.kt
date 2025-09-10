@@ -5,15 +5,15 @@
 package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
-import android.view.View
-import android.widget.Space
 import android.widget.ViewAnimator
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.ToolBar
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.after
+import splitties.views.dsl.constraintlayout.before
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.endOfParent
@@ -24,7 +24,6 @@ import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.wrapContent
 import timber.log.Timber
 
 class AlwaysUi(
@@ -33,185 +32,81 @@ class AlwaysUi(
     private val onButtonClick: ((String?) -> Unit)? = null,
 ) : Ui {
     enum class State {
-        Empty,
+        Toolbar,
     }
 
-    var currentState = State.Empty
+    var currentState = State.Toolbar
         private set
 
-    private val buttonSpacing = ctx.dp(theme.toolBar.buttonSpacing)
-    private val dynamicButtons = mutableListOf<View>()
+    private fun toolButton(
+        buttonConfig: ToolBar.Button?,
+        @DrawableRes icon: Int = 0,
+    ): ToolButton = if (buttonConfig != null) {
+        ToolButton(ctx, buttonConfig)
+    } else {
+        ToolButton(ctx, icon)
+    }.apply {
+        setOnClickListener { onButtonClick?.invoke(buttonConfig?.action) }
+    }
 
-    val moreButton: ToolButton = createPrimaryButton()
-    val emptyBar = Space(ctx).apply { id = View.generateViewId() }
+    val moreButton: ToolButton = toolButton(
+        theme.toolBar.primaryButton,
+        R.drawable.ic_baseline_more_horiz_24,
+    )
+    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
+
+    val buttonsUi = ButtonsBarUi(ctx, theme, onButtonClick)
 
     private val animator =
         ViewAnimator(ctx).apply {
-            id = View.generateViewId()
-            add(emptyBar, lParams(matchParent, matchParent))
+            add(buttonsUi.root, lParams(matchParent, matchParent))
         }
 
     override val root: ConstraintLayout = constraintLayout {
+        val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
+        val (width, height) = theme.toolBar.primaryButton?.foreground?.size
+            ?.takeIf { it.size == 2 }
+            ?: List(2) { defaultButtonSize }
         add(
             moreButton,
-            lParams(wrapContent, wrapContent) {
+            lParams(dp(width), dp(height)) {
                 startOfParent()
                 centerVertically()
             },
         )
+        if (theme.toolBar.buttons.isEmpty()) {
+            val size = dp(defaultButtonSize)
+            add(
+                hideKeyboardButton,
+                lParams(size, size) {
+                    endOfParent()
+                    centerVertically()
+                },
+            )
+        }
         add(
             animator,
             lParams(matchConstraints, matchParent) {
                 after(moreButton)
+                if (theme.toolBar.buttons.isEmpty()) {
+                    before(hideKeyboardButton)
+                }
                 endOfParent()
                 centerVertically()
             },
         )
     }
 
-    init {
-        theme.toolBar.buttons.forEach { buttonName ->
-            val button = createConfigButton(buttonName)
-            val layoutParams = getCustomButtonLayoutParams(buttonName)
-            root.addView(button, layoutParams)
-            dynamicButtons.add(button)
-        }
-        updateButtonConstraints()
-    }
-
     fun updateButtonsStyle() {
-        (dynamicButtons.asSequence() + moreButton)
-            .filterIsInstance<ToolButton>()
-            .forEach(ToolButton::updateStyle)
+        moreButton.updateStyle()
+        buttonsUi.updateStyle()
     }
 
     fun updateState(state: State) {
         Timber.d("Switch always ui to $state")
         when (state) {
-            State.Empty -> animator.displayedChild = 0
+            State.Toolbar -> animator.displayedChild = 0
         }
         currentState = state
-    }
-
-    private fun createPrimaryButton(): ToolButton {
-        val primaryButton = theme.toolBar.primaryButton
-        return (
-            if (primaryButton != null) {
-                ToolButton(ctx, primaryButton, "primary")
-            } else {
-                ToolButton(ctx, R.drawable.ic_baseline_more_horiz_24)
-            }
-            )
-            .apply {
-                id = View.generateViewId()
-                setOnClickListener { onButtonClick?.invoke(primaryButton?.action) }
-            }
-    }
-
-    private fun createConfigButton(buttonName: String): ToolButton {
-        val config = theme.toolBar.customButtons[buttonName]
-        return (
-            if (config != null) {
-                ToolButton(ctx, config, buttonName)
-            } else {
-                ToolButton(ctx, buttonName)
-            }
-            )
-            .apply {
-                id = View.generateViewId()
-                setOnClickListener { onButtonClick?.invoke(config?.action ?: buttonName) }
-            }
-    }
-
-    private fun getCustomButtonLayoutParams(buttonName: String): ConstraintLayout.LayoutParams {
-        val config = theme.toolBar.customButtons[buttonName]
-        return if (config?.foreground?.size?.size == 2) {
-            val size = config.foreground.size
-            ConstraintLayout.LayoutParams(ctx.dp(size[0]), ctx.dp(size[1]))
-        } else {
-            ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            )
-        }
-    }
-
-    private fun updateButtonConstraints() {
-        val constraintSet = ConstraintSet().apply { clone(root) }
-
-        val animatorEndTarget =
-            if (dynamicButtons.isEmpty()) {
-                ConstraintSet.PARENT_ID to ConstraintSet.END
-            } else {
-                dynamicButtons.last().id to ConstraintSet.START
-            }
-        constraintSet.connect(
-            animator.id,
-            ConstraintSet.END,
-            animatorEndTarget.first,
-            animatorEndTarget.second,
-        )
-
-        dynamicButtons.forEachIndexed { index, button ->
-            constraintSet.connect(
-                button.id,
-                ConstraintSet.TOP,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.TOP,
-            )
-            constraintSet.connect(
-                button.id,
-                ConstraintSet.BOTTOM,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.BOTTOM,
-            )
-
-            when {
-                index == 0 -> {
-                    constraintSet.connect(
-                        button.id,
-                        ConstraintSet.END,
-                        ConstraintSet.PARENT_ID,
-                        ConstraintSet.END,
-                    )
-                    if (dynamicButtons.size == 1) {
-                        constraintSet.connect(
-                            button.id,
-                            ConstraintSet.START,
-                            animator.id,
-                            ConstraintSet.END,
-                            buttonSpacing,
-                        )
-                    }
-                }
-                index == dynamicButtons.size - 1 -> {
-                    constraintSet.connect(
-                        button.id,
-                        ConstraintSet.START,
-                        animator.id,
-                        ConstraintSet.END,
-                        buttonSpacing,
-                    )
-                    constraintSet.connect(
-                        button.id,
-                        ConstraintSet.END,
-                        dynamicButtons[index - 1].id,
-                        ConstraintSet.START,
-                        buttonSpacing,
-                    )
-                }
-                else -> {
-                    constraintSet.connect(
-                        button.id,
-                        ConstraintSet.END,
-                        dynamicButtons[index - 1].id,
-                        ConstraintSet.START,
-                        buttonSpacing,
-                    )
-                }
-            }
-        }
-
-        constraintSet.applyTo(root)
     }
 }

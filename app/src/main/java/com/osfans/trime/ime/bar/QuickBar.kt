@@ -65,7 +65,7 @@ class QuickBar(
     private fun evalAlwaysUiState() {
         val newState =
             when {
-                else -> AlwaysUi.State.Empty
+                else -> AlwaysUi.State.Toolbar
             }
         if (newState == alwaysUi.currentState) return
         alwaysUi.updateState(newState)
@@ -75,6 +75,8 @@ class QuickBar(
         AlwaysUi(context, theme) { action ->
             action?.let { commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(it)) }
                 ?: windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
+        }.apply {
+            hideKeyboardButton.setOnClickListener { service.requestHideSelf(0) }
         }
     }
 

@@ -7,21 +7,14 @@ package com.osfans.trime.data.theme.mapper
 
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.yamlMap
 import com.osfans.trime.data.theme.model.ToolBar
 
 class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
 
     override fun map(): ToolBar = ToolBar(
         primaryButton = node.get<YamlMap>("primary_button")?.let(::mapButton),
-        buttons = getStringList("button"),
-        customButtons = node.entries.mapNotNull { (key, value) ->
-            val keyStr = key.content
-            if (keyStr !in listOf("primary_button", "button", "button_spacing", "button_font") && value is YamlMap) {
-                keyStr to mapButton(value)
-            } else {
-                null
-            }
-        }.toMap(),
+        buttons = getList("buttons")?.map { mapButton(it.yamlMap) } ?: emptyList(),
         buttonSpacing = getInt("button_spacing", 18),
         buttonFont = getStringList("button_font"),
     )
