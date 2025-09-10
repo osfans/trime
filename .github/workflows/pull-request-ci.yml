@@ -40,11 +40,6 @@ jobs:
           echo ${GITHUB_REF#refs/*/}
           echo CI_BRANCH=${GITHUB_REF#refs/*/} >> $GITHUB_ENV
 
-      - name: Install macOS dependency
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          brew install coreutils clang-format
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -72,9 +67,9 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-        
+
       - name: Check code style
-        if: ${{ !startsWith(matrix.os, 'windows') }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           make style-lint
 
