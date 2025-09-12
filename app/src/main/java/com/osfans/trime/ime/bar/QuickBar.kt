@@ -11,10 +11,12 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
 import androidx.annotation.RequiresApi
 import com.osfans.trime.R
+import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
@@ -26,6 +28,7 @@ import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.option.SwitchOptionWindow
@@ -46,8 +49,11 @@ class QuickBar(
     private val theme: Theme,
     private val windowManager: BoardWindowManager,
     lazyCandidate: Lazy<CandidateModule>,
+    lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
 ) : InputBroadcastReceiver {
     private val candidate by lazyCandidate
+
+    private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -59,22 +65,18 @@ class QuickBar(
     private fun evalAlwaysUiState() {
         val newState =
             when {
-                else -> AlwaysUi.State.Empty
+                else -> AlwaysUi.State.Toolbar
             }
         if (newState == alwaysUi.currentState) return
         alwaysUi.updateState(newState)
     }
 
     private val alwaysUi: AlwaysUi by lazy {
-        AlwaysUi(context, theme).apply {
-            moreButton.apply {
-                setOnClickListener {
-                    windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
-                }
-            }
-            hideKeyboardButton.apply {
-                setOnClickListener { service.requestHideSelf(0) }
-            }
+        AlwaysUi(context, theme) { action ->
+            action?.let { commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(it)) }
+                ?: windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
+        }.apply {
+            hideKeyboardButton.setOnClickListener { service.requestHideSelf(0) }
         }
     }
 
@@ -212,5 +214,9 @@ class QuickBar(
             QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
             QuickBarStateMachine.BooleanKey.SuggestionEmpty to isEmpty,
         )
+    }
+
+    override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
+        alwaysUi.updateButtonsStyle()
     }
 }

@@ -22,11 +22,14 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
+import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
+import com.osfans.trime.ime.option.SwitchOptionWindow
 import com.osfans.trime.ime.symbol.LiquidKeyboard
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
@@ -54,6 +57,7 @@ class CommonKeyboardActionListener(
     private val liquidKeyboard: LiquidKeyboard,
     private val windowManager: BoardWindowManager,
     private val lazyKeyboardWindow: Lazy<KeyboardWindow>,
+    private val theme: Theme,
 ) {
     companion object {
         /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
@@ -198,6 +202,9 @@ class CommonKeyboardActionListener(
                                 } else {
                                     windowManager.attachWindow(KeyboardWindow)
                                 }
+                            }
+                            "menu_keyboard" -> {
+                                windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
                             }
                             "set_color_scheme" -> {
                                 val newScheme = ThemeManager.activeTheme.colorSchemes.find { it.id == arg }
