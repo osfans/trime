@@ -1043,7 +1043,7 @@ tool_bar:
 
   edit_button: &edit_button
     foreground:
-      style: "ic@numeric"
+      style: "ic@cursor_text"
     action: Keyboard_numberb
 
   ascii_mode_button: &ascii_mode_button
