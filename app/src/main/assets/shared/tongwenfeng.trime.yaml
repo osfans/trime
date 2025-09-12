@@ -1048,14 +1048,14 @@ tool_bar:
 
   ascii_mode_button: &ascii_mode_button
     foreground:
-      style: ["En", "中"] # 样式也可以为表，将根据 action 的 toggle 决定
+      option_styles: ["En", "中"] # 样式也可以为表，将根据 action 的 toggle 决定
       font_size: 18  # 按钮字体大小
       padding: 10
     action: Mode_switch
 
   full_shape_button: &full_shape_button
     foreground:
-      style: ["ic@moon_full", "ic@moon_new"]
+      option_styles: ["ic@moon_full", "ic@moon_new"]
     action: Zenkaku_Hankaku
 
   # 右侧按钮列表（从右向左排列）

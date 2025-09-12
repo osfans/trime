@@ -91,7 +91,9 @@ class ToolButton : FrameLayout {
         }
     }
 
-    private fun needsStyleUpdate(): Boolean = toggleKey != null || config?.foreground?.style?.firstOrNull()?.isEmpty() != false
+    private fun needsStyleUpdate(): Boolean = toggleKey != null ||
+        !config?.foreground?.style.isNullOrEmpty() ||
+        !config?.foreground?.optionStyles.isNullOrEmpty()
 
     private fun setupContent(
         type: ContentType,
@@ -159,7 +161,7 @@ class ToolButton : FrameLayout {
         this.config = config
         val toggle = KeyActionManager.getAction(config.action).toggle
 
-        if (toggle.isNotEmpty() && config.foreground?.style?.size == 2) {
+        if (toggle.isNotEmpty() && config.foreground?.optionStyles?.size == 2) {
             this.toggleKey = toggle
         }
 
@@ -167,15 +169,16 @@ class ToolButton : FrameLayout {
     }
 
     private fun getActiveStyle(config: ToolBar.Button): String {
-        val styles = config.foreground?.style ?: return ""
+        val optionStyles = config.foreground?.optionStyles
+        val style = config.foreground?.style
 
-        if (toggleKey != null && styles.size == 2) {
+        if (toggleKey != null && optionStyles?.size == 2) {
             val rime = RimeDaemon.getFirstSessionOrNull()
             val isOptionOn = rime?.run { getRuntimeOption(toggleKey!!) } ?: false
-            return if (isOptionOn) styles[0] else styles[1]
+            return if (isOptionOn) optionStyles[0] else optionStyles[1]
         }
 
-        return styles.firstOrNull() ?: ""
+        return style ?: ""
     }
 
     private fun setupFromConfig(config: ToolBar.Button) {

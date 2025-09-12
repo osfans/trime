@@ -35,7 +35,8 @@ data class ToolBar(
 
         @Parcelize
         data class Foreground(
-            val style: List<String> = emptyList(),
+            val style: String = "",
+            val optionStyles: List<String> = emptyList(),
             val bgNormal: String? = null,
             val bgHighlight: String? = null,
             val fontSize: Float = 15f,
