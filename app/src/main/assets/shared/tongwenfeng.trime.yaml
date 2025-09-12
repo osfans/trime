@@ -1015,7 +1015,7 @@ tool_bar:
       horizontal_inset: 0    # 水平方向内缩量
     # 前景内容设置
     foreground:
-      style: "_more"         # 内置图标样式（以_开头，可选值: _more|_hide|_assignment）
+      style: "ic@dots_horizontal"         # 内置质感设计图标样式（以ic@开头）
       bg_normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
       # bg_highlight:        # 高亮状态前景色
       padding: 10            # 前景内容与背景边界的内边距
@@ -1026,31 +1026,36 @@ tool_bar:
 
   hide_button: &hide_button
     foreground:
-      style: "_hide"
+      style: "ic@keyboard_close"
       bg_normal: candidate_text_color
     action: Hide
 
   emoji_button: &emoji_button
+    foreground:
+      style: "ic@emoticon"
     # 前景样式可以为空，使用默认样式，按钮将显示为 action 的 label
     action: liquid_keyboard_emoji
 
   clipboard_button: &clipboard_button
     foreground:
-      style: "_assignment"
+      style: "ic@clipboard"
     action: liquid_keyboard_clipboard
 
   edit_button: &edit_button
     foreground:
-      style: "📝"
+      style: "ic@numeric"
     action: Keyboard_numberb
 
   ascii_mode_button: &ascii_mode_button
     foreground:
-      style: [中, 英] # 样式也可以为表，将根据 action 的 toggle 决定
+      style: ["En", "中"] # 样式也可以为表，将根据 action 的 toggle 决定
       font_size: 18  # 按钮字体大小
+      padding: 10
     action: Mode_switch
 
   full_shape_button: &full_shape_button
+    foreground:
+      style: ["ic@moon_full", "ic@moon_new"]
     action: Zenkaku_Hankaku
 
   # 右侧按钮列表（从右向左排列）

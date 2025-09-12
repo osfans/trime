@@ -13,7 +13,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
-import com.osfans.trime.R
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.sizeDp
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
@@ -28,6 +29,7 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
+import splitties.views.imageDrawable
 import splitties.views.imageResource
 import splitties.views.padding
 
@@ -103,7 +105,13 @@ class ToolButton : FrameLayout {
 
         when (type) {
             ContentType.ICON -> {
-                icon?.let { image.imageResource = it }
+                if (icon != null) {
+                    image.imageResource = icon
+                } else if (!text.isNullOrEmpty()) {
+                    image.imageDrawable = IconicsDrawable(context, text).apply {
+                        sizeDp = foreground?.fontSize?.toInt() ?: 12
+                    }
+                }
                 image.padding = dp(foreground?.padding ?: 10)
                 add(image, lParams(wrapContent, wrapContent, gravityCenter))
             }
@@ -175,18 +183,18 @@ class ToolButton : FrameLayout {
         val foreground = config.foreground
 
         when {
-            style.startsWith("_") -> {
-                getBuiltinIconResource(style)?.let { iconRes ->
-                    setupContent(ContentType.ICON, icon = iconRes, foreground = foreground)
-                } ?: setupFallbackContent(config, foreground)
-            }
             style.matches(IMAGE_PATTERN) -> {
                 ColorManager.getDrawable(style)?.let { drawable ->
                     setupContent(ContentType.LOCAL_IMAGE, drawable = drawable, foreground = foreground)
                 } ?: setupFallbackContent(config, foreground)
             }
             style.isNotEmpty() -> {
-                setupContent(ContentType.TEXT, text = style, foreground = foreground)
+                if (style.startsWith("ic@")) {
+                    val iconName = style.replace("ic@", "cmd_")
+                    setupContent(ContentType.ICON, text = iconName, foreground = foreground)
+                } else {
+                    setupContent(ContentType.TEXT, text = style, foreground = foreground)
+                }
             }
             else -> {
                 setupFallbackContent(config, foreground)
@@ -205,13 +213,6 @@ class ToolButton : FrameLayout {
             .getLabel(KeyboardSwitcher.currentKeyboard)
 
         setupContent(ContentType.TEXT, text = fallbackText, foreground = foreground)
-    }
-
-    private fun getBuiltinIconResource(style: String): Int? = when (style) {
-        "_hide" -> R.drawable.ic_baseline_arrow_drop_down_24
-        "_more" -> R.drawable.ic_baseline_more_horiz_24
-        "_assignment" -> R.drawable.ic_baseline_assignment_24
-        else -> null
     }
 
     private fun setupBackground(background: ToolBar.Button.Background?) {

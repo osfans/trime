@@ -8,6 +8,7 @@ splitties = "3.0.0"
 aboutlibraries = "12.2.3"
 kotest = "5.8.0"
 kotlin-inject = "0.8.0"
+iconics = "5.4.0"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -34,6 +35,8 @@ bravh = { module = "io.github.cymchad:BaseRecyclerViewAdapterHelper4", version =
 kaml = { module = "com.charleskorn.kaml:kaml", version = "0.83.0" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }
+iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics" }
+community-material-typeface = { module = "com.mikepenz:community-material-typeface", version = "7.0.96.1-kotlin" }
 kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }
 kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlin-inject" }
 splitties-bitflags = { module = "com.louiscad.splitties:splitties-bitflags", version.ref = "splitties" }
