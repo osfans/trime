@@ -57,7 +57,7 @@ class ButtonsBarUi(
             }.map { if (it < 0) it else ctx.dp(it) }
             val button = toolButton(config)
             val lParams = FlexboxLayout.LayoutParams(width, height).apply {
-                if (index != 0 && index != theme.toolBar.buttons.lastIndex) {
+                if (index != 0) {
                     marginEnd = ctx.dp(theme.toolBar.buttonSpacing)
                 }
             }
