@@ -11,8 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.chad.library.adapter4.util.setOnDebouncedItemClick
 import com.google.android.flexbox.AlignItems
+import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.daemon.RimeSession
@@ -23,6 +23,7 @@ import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
@@ -32,8 +33,6 @@ import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
-import splitties.dimensions.dp
-import splitties.views.recyclerview.verticalLayoutManager
 
 @InputScope
 @Inject
@@ -59,37 +58,20 @@ class LiquidWindow(
         TabManager.setTabExited()
     }
 
-    private val simpleAdapter by lazy {
-        val itemWidth = context.dp(theme.liquidKeyboard?.singleWidth ?: 0)
-        val columnCount = context.resources.displayMetrics.widthPixels / itemWidth
-        SimpleAdapter(theme, columnCount).apply {
-            setHasStableIds(true)
-            setListener {
-                when (currentBoardType) {
-                    SymbolBoardType.SYMBOL -> triggerSymbolInput(this.text)
-                    else -> {
-                        service.commitText(this.text)
-                        if (currentBoardType != SymbolBoardType.HISTORY) {
-                            symbolHistory.insert(this.text)
-                            symbolHistory.save()
-                        }
-                    }
+    private val mainAdapter by lazy {
+        LiquidAdapter(theme) {
+            when (currentBoardType) {
+                SymbolBoardType.SYMBOL -> triggerSymbolInput(this.text)
+                SymbolBoardType.TABS -> {
+                    val realPosition = TabManager.tabTags.indexOfFirst { it.text == this.text }
+                    select(realPosition)
                 }
-            }
-        }
-    }
-
-    private val varLengthAdapter by lazy {
-        VarLengthAdapter(theme).apply {
-            setOnDebouncedItemClick { _, _, position ->
-                val item = items[position]
-                when (currentBoardType) {
-                    SymbolBoardType.SYMBOL -> triggerSymbolInput(item.second)
-                    SymbolBoardType.TABS -> {
-                        val realPosition = TabManager.tabTags.indexOfFirst { it.text == item.first }
-                        select(realPosition)
+                else -> {
+                    service.commitText(this.text)
+                    if (currentBoardType != SymbolBoardType.HISTORY) {
+                        symbolHistory.insert(this.text)
+                        symbolHistory.save()
                     }
-                    else -> service.currentInputConnection?.commitText(item.first, 1)
                 }
             }
         }
@@ -97,6 +79,18 @@ class LiquidWindow(
 
     private val dbAdapter by lazy {
         DbAdapter(context, service, theme)
+    }
+
+    private val mainLayoutManager by lazy {
+        FlexboxLayoutManager(context).apply {
+            flexDirection = FlexDirection.ROW
+            justifyContent = JustifyContent.SPACE_AROUND
+            alignItems = AlignItems.BASELINE
+        }
+    }
+
+    private val dbLayoutManager by lazy {
+        StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
     }
 
     companion object : ResidentWindow.Key
@@ -129,23 +123,6 @@ class LiquidWindow(
         ClipboardHelper.removeOnUpdateListener(this)
     }
 
-    /**
-     * 使用FlexboxLayoutManager时调用此函数获取
-     */
-    private val flexboxLayoutManager by lazy {
-        FlexboxLayoutManager(context).apply {
-            justifyContent = JustifyContent.SPACE_AROUND
-            alignItems = AlignItems.FLEX_START
-        }
-    }
-
-    /**
-     * 使用 StaggeredGridLayoutManager 时调用此函数获取
-     */
-    private val oneColStaggeredGridLayoutManager by lazy {
-        StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
-    }
-
     fun select(i: Int) {
         val tag = TabManager.tabTags[i]
 
@@ -172,28 +149,20 @@ class LiquidWindow(
             SymbolBoardType.SYMBOL,
             SymbolBoardType.VAR_LENGTH,
             SymbolBoardType.TABS,
-            -> {
-                val items =
-                    data.map {
-                        val text = if (tag.type == SymbolBoardType.SYMBOL) it.label else it.text
-                        val value = if (tag.type == SymbolBoardType.SYMBOL) it.text else ""
-                        text to value
-                    }
-                initVarLengthKeys(items)
-            }
+            -> submitData(data)
             SymbolBoardType.HISTORY -> {
                 symbolHistory.load()
-                initFixData(symbolHistory.toOrderedList().map { SimpleKeyBean(it) })
+                submitData(symbolHistory.toOrderedList().map { LiquidKeyboard.KeyItem(it) })
             }
-            else -> initFixData(data)
+            else -> submitData(data)
         }
     }
 
-    private fun initFixData(data: List<SimpleKeyBean>) {
-        if (onAdapterChange(simpleAdapter)) {
+    private fun submitData(data: List<LiquidKeyboard.KeyItem>) {
+        if (onAdapterChange(mainAdapter)) {
             keyboardView.apply {
-                layoutManager = verticalLayoutManager()
-                adapter = simpleAdapter
+                layoutManager = mainLayoutManager
+                adapter = mainAdapter
                 setItemViewCacheSize(10)
                 setHasFixedSize(true)
                 // 添加分割线
@@ -202,7 +171,7 @@ class LiquidWindow(
                 isSelected = true
             }
         }
-        simpleAdapter.updateBeans(data)
+        mainAdapter.submitList(data)
         keyboardView.scrollToPosition(0)
     }
 
@@ -210,7 +179,7 @@ class LiquidWindow(
         dbAdapter.type = currentBoardType
         if (onAdapterChange(dbAdapter)) {
             keyboardView.apply {
-                layoutManager = oneColStaggeredGridLayoutManager
+                layoutManager = dbLayoutManager
                 adapter = dbAdapter
             }
         }
@@ -220,17 +189,6 @@ class LiquidWindow(
                 keyboardView.post { keyboardView.scrollToPosition(0) }
             }
         }
-    }
-
-    private fun initVarLengthKeys(data: List<Pair<String, String>>) {
-        if (onAdapterChange(varLengthAdapter)) {
-            // 设置布局管理器
-            keyboardView.apply {
-                layoutManager = flexboxLayoutManager
-                adapter = varLengthAdapter
-            }
-        }
-        varLengthAdapter.submitList(data)
     }
 
     private fun triggerSymbolInput(symbol: String) {

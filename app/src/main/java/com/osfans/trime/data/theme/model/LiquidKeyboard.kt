@@ -6,7 +6,6 @@
 package com.osfans.trime.data.theme.model
 
 import android.os.Parcelable
-import com.osfans.trime.ime.symbol.SimpleKeyBean
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import kotlinx.parcelize.Parcelize
 
@@ -36,6 +35,14 @@ data class LiquidKeyboard(
         val id: String,
         val type: SymbolBoardType,
         val name: String,
-        val keys: List<SimpleKeyBean>,
+        val keys: List<KeyItem>,
     ) : Parcelable
+
+    @Parcelize
+    data class KeyItem(
+        val text: String,
+        val altText: String,
+    ) : Parcelable {
+        constructor(text: String) : this(text, text)
+    }
 }

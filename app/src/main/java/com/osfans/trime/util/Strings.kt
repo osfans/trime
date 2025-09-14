@@ -22,3 +22,16 @@ fun CharSequence.findSectionFrom(
         start + subSequence.indexOfFirst { SECTION_DIVIDER.contains(it) }
     }
 }
+
+fun CharSequence.splitWithSurrogates(): List<String> = buildList {
+    var sur = Char(0)
+    for (ch in this@splitWithSurrogates) {
+        if (ch.isHighSurrogate()) {
+            sur = ch
+        } else if (ch.isLowSurrogate()) {
+            add(String(charArrayOf(sur, ch)))
+        } else {
+            add(ch.toString())
+        }
+    }
+}
