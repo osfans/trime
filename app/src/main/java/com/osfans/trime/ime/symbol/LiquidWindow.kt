@@ -37,7 +37,7 @@ import splitties.views.recyclerview.verticalLayoutManager
 
 @InputScope
 @Inject
-class LiquidKeyboard(
+class LiquidWindow(
     private val context: Context,
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
@@ -102,7 +102,7 @@ class LiquidKeyboard(
     companion object : ResidentWindow.Key
 
     override val key: ResidentWindow.Key
-        get() = LiquidKeyboard
+        get() = LiquidWindow
 
     private val keyboardView by lazy {
         liquidLayout.boardView

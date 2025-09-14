@@ -24,13 +24,12 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.option.SwitchOptionWindow
-import com.osfans.trime.ime.symbol.LiquidKeyboard
+import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.symbol.SymbolBoardType
 import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.window.BoardWindowManager
@@ -54,7 +53,7 @@ class CommonKeyboardActionListener(
     private val context: Context,
     private val service: TrimeInputMethodService,
     private val rime: RimeSession,
-    private val liquidKeyboard: LiquidKeyboard,
+    private val liquidWindow: LiquidWindow,
     private val windowManager: BoardWindowManager,
     private val lazyKeyboardWindow: Lazy<KeyboardWindow>,
     private val theme: Theme,
@@ -197,8 +196,8 @@ class CommonKeyboardActionListener(
                                         else -> TabManager.tabTags.indexOfFirst { it.text == arg }
                                     }
                                 if (target >= 0) {
-                                    windowManager.attachWindow(LiquidKeyboard)
-                                    liquidKeyboard.select(target)
+                                    windowManager.attachWindow(LiquidWindow)
+                                    liquidWindow.select(target)
                                 } else {
                                     windowManager.attachWindow(KeyboardWindow)
                                 }

@@ -7,7 +7,6 @@ package com.osfans.trime.ime.core
 import android.annotation.SuppressLint
 import android.os.Build
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestionsResponse
@@ -15,7 +14,6 @@ import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeMessage
@@ -31,7 +29,7 @@ import com.osfans.trime.ime.dependency.create
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.preview.KeyPreviewChoreographer
-import com.osfans.trime.ime.symbol.LiquidKeyboard
+import com.osfans.trime.ime.symbol.LiquidWindow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
@@ -95,7 +93,7 @@ class InputView(
     private val quickBar: QuickBar = inputComponent.quickBar
     private val preedit: PreeditModule = inputComponent.preedit
     private val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
-    private val liquidKeyboard: LiquidKeyboard = inputComponent.liquidKeyboard
+    private val liquidWindow: LiquidWindow = inputComponent.liquidWindow
     private val compactCandidate: CompactCandidateModule = inputComponent.candidate.compactCandidateModule
     private val suggestionCandidate: SuggestionCandidateModule = inputComponent.candidate.suggestionCandidateModule
     private val preview: KeyPreviewChoreographer = inputComponent.preview
@@ -104,7 +102,7 @@ class InputView(
         broadcaster.addReceiver(quickBar)
         broadcaster.addReceiver(preedit)
         broadcaster.addReceiver(keyboardWindow)
-        broadcaster.addReceiver(liquidKeyboard)
+        broadcaster.addReceiver(liquidWindow)
         broadcaster.addReceiver(compactCandidate)
         broadcaster.addReceiver(suggestionCandidate)
     }
@@ -134,7 +132,7 @@ class InputView(
         addBroadcastReceivers()
 
         windowManager.cacheResidentWindow(keyboardWindow, createView = true)
-        windowManager.cacheResidentWindow(liquidKeyboard)
+        windowManager.cacheResidentWindow(liquidWindow)
         // show KeyboardWindow by default
         windowManager.attachWindow(KeyboardWindow)
 
@@ -291,8 +289,8 @@ class InputView(
 
                 if (it.data.option == "_liquid_keyboard") {
                     ContextCompat.getMainExecutor(service).execute {
-                        windowManager.attachWindow(LiquidKeyboard)
-                        liquidKeyboard.select(0)
+                        windowManager.attachWindow(LiquidWindow)
+                        liquidWindow.select(0)
                     }
                 }
             }
