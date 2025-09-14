@@ -57,40 +57,17 @@ class LiquidLayout(
                 val btns =
                     Array(fixedKeys.size) { index ->
                         val presetKeyName = fixedKeys[index]
-                        val text =
-                            textView {
-                                text =
-                                    theme.presetKeys[presetKeyName]?.label ?: ""
-                                textSize = theme.generalStyle.labelTextSize
-                                typeface = FontManager.getTypeface("key_font")
-                                setTextColor(ColorManager.getColor("key_text_color"))
+                        val ui = LiquidItemUi(context, theme)
+                        ui.mainText.text = theme.presetKeys[presetKeyName]?.label ?: ""
+                        // todo 想办法实现退格键、空格键等 repeatable: true 长按连续触发
+                        ui.root.setOnClickListener {
+                            val event = KeyActionManager.getAction(presetKeyName)
+                            commonKeyboardActionListener.listener.run {
+                                onPress(event.code)
+                                onAction(event)
                             }
-                        val root =
-                            frameLayout {
-                                background =
-                                    ColorManager.getDrawable(
-                                        "key_back_color",
-                                        "key_border_color",
-                                        dp(theme.generalStyle.keyBorder),
-                                        dp(theme.generalStyle.roundCorner),
-                                    )
-                                add(
-                                    text,
-                                    lParams(matchParent, wrapContent) {
-                                        gravity = gravityCenter
-                                        padding = dp(5)
-                                    },
-                                )
-                                // todo 想办法实现退格键、空格键等 repeatable: true 长按连续触发
-                                setOnClickListener {
-                                    val event = KeyActionManager.getAction(presetKeyName)
-                                    commonKeyboardActionListener.listener.run {
-                                        onPress(event.code)
-                                        onAction(event)
-                                    }
-                                }
-                            }
-                        return@Array root
+                        }
+                        return@Array ui.root
                     }
                 val marginX = theme.liquidKeyboard.marginX
                 when (theme.liquidKeyboard.fixedKeyBar.position) {

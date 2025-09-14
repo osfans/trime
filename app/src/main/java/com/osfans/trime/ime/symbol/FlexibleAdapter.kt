@@ -65,10 +65,10 @@ abstract class FlexibleAdapter(
         context: Context,
         parent: ViewGroup,
         viewType: Int,
-    ): ViewHolder = ViewHolder(SimpleItemUi(context, theme))
+    ): ViewHolder = ViewHolder(DatabaseItemUi(context, theme))
 
     class ViewHolder(
-        val ui: SimpleItemUi,
+        val ui: DatabaseItemUi,
     ) : RecyclerView.ViewHolder(ui.root)
 
     override fun onBindViewHolder(

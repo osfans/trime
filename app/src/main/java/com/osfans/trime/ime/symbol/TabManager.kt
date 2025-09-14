@@ -5,6 +5,7 @@
 package com.osfans.trime.ime.symbol
 
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.data.theme.model.LiquidKeyboard
 import timber.log.Timber
 
 object TabManager {
@@ -12,7 +13,7 @@ object TabManager {
         private set
 
     val tabTags = arrayListOf<TabTag>()
-    private val keyboards = mutableListOf<List<SimpleKeyBean>>()
+    private val keyboards = mutableListOf<List<LiquidKeyboard.KeyItem>>()
 
     fun resetCache(theme: Theme) {
         tabTags.clear()
@@ -27,28 +28,28 @@ object TabManager {
     private fun addListTab(
         name: String,
         type: SymbolBoardType,
-        keyBeans: List<SimpleKeyBean>,
+        keys: List<LiquidKeyboard.KeyItem>,
     ) {
         if (name.isBlank()) return
         if (SymbolBoardType.hasKeys(type)) {
             val index = tabTags.indexOfFirst { it.text == name }
             if (index >= 0) {
-                keyboards[index] = keyBeans
+                keyboards[index] = keys
                 return
             }
         }
         tabTags.add(TabTag(name, type))
-        keyboards.add(keyBeans)
+        keyboards.add(keys)
     }
 
-    fun selectTabByIndex(index: Int): List<SimpleKeyBean> {
+    fun selectTabByIndex(index: Int): List<LiquidKeyboard.KeyItem> {
         if (index !in tabTags.indices) return listOf()
         currentTabIndex = index
         val tag = tabTags[index]
         if (tag.type == SymbolBoardType.TABS) {
             return tabTags
                 .filter { SymbolBoardType.hasKey(it.type) }
-                .map { SimpleKeyBean(it.text) }
+                .map { LiquidKeyboard.KeyItem(it.text) }
         }
         return keyboards[index]
     }

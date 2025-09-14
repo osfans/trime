@@ -30,7 +30,7 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.imageDrawable
 import splitties.views.setPaddingDp
 
-class SimpleItemUi(
+class DatabaseItemUi(
     override val ctx: Context,
     private val theme: Theme,
 ) : Ui {
@@ -39,16 +39,17 @@ class SimpleItemUi(
             minLines = 1
             maxLines = 4
             textSize = theme.generalStyle.keyLongTextSize
-            typeface = FontManager.getTypeface("long_text_font")
+            typeface = FontManager.getTypeface("key_font")
             setPaddingDp(8, 4, 8, 4)
             ellipsize = TextUtils.TruncateAt.END
-            setTextColor(ColorManager.getColor("long_text_color"))
+            setTextColor(ColorManager.getColor("key_text_color"))
         }
 
     val pin =
         imageView {
             imageDrawable =
                 drawable(R.drawable.ic_baseline_push_pin_24)!!.apply {
+                    setTint(ColorManager.getColor("key_symbol_color"))
                     setAlpha(0.3f)
                 }
         }
@@ -76,8 +77,8 @@ class SimpleItemUi(
             minimumHeight = dp(30)
             background =
                 ColorManager.getDrawable(
-                    "long_text_back_color",
-                    "key_long_text_border",
+                    "key_back_color",
+                    "key_border_color",
                     dp(theme.generalStyle.keyBorder),
                     dp(theme.generalStyle.roundCorner),
                 )
