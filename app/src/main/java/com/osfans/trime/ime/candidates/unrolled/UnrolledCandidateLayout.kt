@@ -29,7 +29,7 @@ class UnrolledCandidateLayout(
     init {
         id = R.id.unrolled_candidate_view
         background =
-            ColorManager.getDrawable(
+            ColorManager.getDecorDrawable(
                 "candidate_background",
                 "candidate_border_color",
                 dp(theme.generalStyle.candidateBorder),

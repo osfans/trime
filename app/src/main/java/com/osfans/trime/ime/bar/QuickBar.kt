@@ -175,7 +175,7 @@ class QuickBar(
                     View.VISIBLE
                 }
             background =
-                ColorManager.getDrawable(
+                ColorManager.getDecorDrawable(
                     "candidate_background",
                     "candidate_border_color",
                     dp(theme.generalStyle.candidateBorder),

@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.NinePatch
 import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.NinePatchDrawable
@@ -26,7 +25,6 @@ import com.osfans.trime.util.NinePatchBitmapFactory
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.isNightMode
 import timber.log.Timber
-import java.io.File
 
 object ColorManager {
     private lateinit var theme: Theme
@@ -219,7 +217,7 @@ object ColorManager {
             val path = resolveImageFilePath(value)
             val bitmap =
                 bitmapCache?.get(path)
-                    ?: BitmapFactory.decodeStream(File(path).inputStream())?.also {
+                    ?: BitmapFactory.decodeFile(path)?.also {
                         bitmapCache?.put(path, it)
                     } ?: return null
             if (path.endsWith(".9.png")) {
@@ -258,14 +256,13 @@ object ColorManager {
 
     fun getDrawable(key: String): Drawable? = resolveDrawable(key)
 
-    fun getDrawable(
+    fun getDecorDrawable(
         colorKey: String,
         borderColorKey: String? = null,
         borderPx: Int = 0,
         cornerRadius: Float = 0f,
         alpha: Int = 255,
     ): Drawable? = when (val drawable = getDrawable(colorKey)) {
-        is BitmapDrawable -> drawable.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
         is GradientDrawable ->
             drawable.also {
                 it.cornerRadius = cornerRadius
@@ -278,7 +275,7 @@ object ColorManager {
                     }
                 }
             }
-        else -> null
+        else -> drawable?.also { it.alpha = MathUtils.clamp(alpha, 0, 255) }
     }
 
     private val SUPPORTED_IMG_FORMATS = arrayOf(".png", ".webp", ".jpg", ".gif")

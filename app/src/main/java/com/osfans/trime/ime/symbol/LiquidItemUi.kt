@@ -19,7 +19,6 @@ import splitties.views.dsl.core.add
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.setPaddingDp
-import timber.log.Timber
 
 class LiquidItemUi(
     override val ctx: Context,
@@ -36,7 +35,7 @@ class LiquidItemUi(
     }
 
     override val root = constraintLayout {
-        background = ColorManager.getDrawable(
+        background = ColorManager.getDecorDrawable(
             "key_back_color",
             "key_border_color",
             dp(theme.generalStyle.keyBorder),
