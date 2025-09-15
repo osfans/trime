@@ -208,7 +208,7 @@ class CandidatesView(
         verticalPadding = dp(theme.generalStyle.layout.marginX)
         horizontalPadding = dp(theme.generalStyle.layout.marginY)
         background =
-            ColorManager.getDrawable(
+            ColorManager.getDecorDrawable(
                 "text_back_color",
                 "border_color",
                 dp(theme.generalStyle.layout.border),

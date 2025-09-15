@@ -76,7 +76,7 @@ class DatabaseItemUi(
             isClickable = true
             minimumHeight = dp(30)
             background =
-                ColorManager.getDrawable(
+                ColorManager.getDecorDrawable(
                     "key_back_color",
                     "key_border_color",
                     dp(theme.generalStyle.keyBorder),

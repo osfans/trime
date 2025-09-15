@@ -43,7 +43,7 @@ class SwitchOptionEntryUi(
     val bkg =
         frameLayout {
             background =
-                ColorManager.getDrawable(
+                ColorManager.getDecorDrawable(
                     "key_back_color",
                     "key_border_color",
                     dp(theme.generalStyle.keyBorder),
