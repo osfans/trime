@@ -5,6 +5,7 @@
 package com.osfans.trime.ime.symbol
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Build
 import android.view.ViewGroup
 import android.widget.PopupMenu
@@ -83,7 +84,7 @@ abstract class FlexibleAdapter(
                 onPaste(bean)
             }
             root.setOnLongClickListener {
-                val iconColor = ctx.styledColor(android.R.attr.colorControlNormal)
+                val iconTint = ctx.styledColor(android.R.attr.colorControlNormal)
                 val menu = PopupMenu(ctx, it)
 
                 fun menuItem(
@@ -92,7 +93,12 @@ abstract class FlexibleAdapter(
                     callback: () -> Unit,
                 ) {
                     menu.menu.add(title).apply {
-                        icon = it.context.drawable(ic)?.apply { setTint(iconColor) }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            iconTintList = ColorStateList.valueOf(iconTint)
+                            setIcon(ic)
+                        } else {
+                            icon = it.context.drawable(ic)?.apply { setTint(iconTint) }
+                        }
                         setOnMenuItemClickListener {
                             callback()
                             true
