@@ -9,7 +9,7 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
@@ -33,6 +33,7 @@ import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
+import splitties.views.recyclerview.verticalLayoutManager
 
 @InputScope
 @Inject
@@ -52,7 +53,6 @@ class LiquidWindow(
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
     private lateinit var currentBoardType: SymbolBoardType
-    private lateinit var currentBoardAdapter: RecyclerView.Adapter<*>
 
     init {
         TabManager.setTabExited()
@@ -98,10 +98,6 @@ class LiquidWindow(
     override val key: ResidentWindow.Key
         get() = LiquidWindow
 
-    private val keyboardView by lazy {
-        liquidLayout.boardView
-    }
-
     override fun onCreateView(): View = LiquidLayout(context, theme, commonKeyboardActionListener).apply {
         liquidLayout = this
         tabsUi.apply {
@@ -109,6 +105,14 @@ class LiquidWindow(
             setOnTabClickListener { i ->
                 select(i)
             }
+        }
+        liquidView.apply {
+            layoutManager = mainLayoutManager
+            adapter = mainAdapter
+        }
+        dbView.apply {
+            layoutManager = dbLayoutManager
+            adapter = dbAdapter
         }
     }
 
@@ -127,9 +131,9 @@ class LiquidWindow(
         val tag = TabManager.tabTags[i]
 
         fun loadDbData() = when (tag.type) {
-            SymbolBoardType.CLIPBOARD -> initDbData { ClipboardHelper.getAll() }
-            SymbolBoardType.COLLECTION -> initDbData { CollectionHelper.getAll() }
-            SymbolBoardType.DRAFT -> initDbData { DraftHelper.getAll() }
+            SymbolBoardType.CLIPBOARD -> submitDbData { ClipboardHelper.getAll() }
+            SymbolBoardType.COLLECTION -> submitDbData { CollectionHelper.getAll() }
+            SymbolBoardType.DRAFT -> submitDbData { DraftHelper.getAll() }
             else -> null
         }
 
@@ -159,35 +163,16 @@ class LiquidWindow(
     }
 
     private fun submitData(data: List<LiquidKeyboard.KeyItem>) {
-        if (onAdapterChange(mainAdapter)) {
-            keyboardView.apply {
-                layoutManager = mainLayoutManager
-                adapter = mainAdapter
-                setItemViewCacheSize(10)
-                setHasFixedSize(true)
-                // 添加分割线
-                // 设置添加删除动画
-                // 调用ListView的setSelected(!ListView.isSelected())方法，这样就能及时刷新布局
-                isSelected = true
-            }
-        }
+        liquidLayout.updateState(LiquidLayout.State.Main)
         mainAdapter.submitList(data)
-        keyboardView.scrollToPosition(0)
     }
 
-    private fun initDbData(data: suspend () -> List<DatabaseBean>) {
+    private fun submitDbData(data: suspend () -> List<DatabaseBean>) {
         dbAdapter.type = currentBoardType
-        if (onAdapterChange(dbAdapter)) {
-            keyboardView.apply {
-                layoutManager = dbLayoutManager
-                adapter = dbAdapter
-            }
-        }
+        liquidLayout.updateState(LiquidLayout.State.Database)
 
         service.lifecycleScope.launch {
-            dbAdapter.submitList(data()) {
-                keyboardView.post { keyboardView.scrollToPosition(0) }
-            }
+            dbAdapter.submitList(data())
         }
     }
 
@@ -212,10 +197,6 @@ class LiquidWindow(
      */
     override fun onUpdate(bean: DatabaseBean) {
         if (currentBoardType != SymbolBoardType.CLIPBOARD) return
-        initDbData { ClipboardHelper.getAll() }
-    }
-
-    private fun onAdapterChange(adapter: RecyclerView.Adapter<*>): Boolean = (!::currentBoardAdapter.isInitialized || currentBoardAdapter != adapter).also {
-        if (it) currentBoardAdapter = adapter
+        submitDbData { ClipboardHelper.getAll() }
     }
 }
