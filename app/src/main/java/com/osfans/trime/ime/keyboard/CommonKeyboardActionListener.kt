@@ -188,17 +188,15 @@ class CommonKeyboardActionListener(
                         when (action.command) {
                             "liquid_keyboard" -> {
                                 val liquidTagList = LiquidData.getTagList()
-                                val target = if (arg.matches("[a-zA-Z]+".toRegex())) {
-                                    val type = runCatching {
-                                        LiquidData.Type.valueOf(arg)
-                                    }.getOrNull() ?: return
-                                    liquidTagList.indexOfFirst { it.type == type }
-                                } else {
-                                    liquidTagList.indexOfFirst { it.label == arg }
+                                var index = liquidTagList.indexOfFirst { it.label == arg }
+                                if (index == -1) {
+                                    val type = runCatching { LiquidData.Type.valueOf(arg.uppercase()) }
+                                        .getOrNull() ?: return
+                                    index = liquidTagList.indexOfFirst { it.type == type }
                                 }
-                                if (target >= 0) {
+                                if (index >= 0) {
                                     windowManager.attachWindow(LiquidWindow)
-                                    liquidWindow.setDataByIndex(target)
+                                    liquidWindow.setDataByIndex(index)
                                 } else {
                                     windowManager.attachWindow(KeyboardWindow)
                                 }
