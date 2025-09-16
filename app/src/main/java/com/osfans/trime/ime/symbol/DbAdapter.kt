@@ -5,7 +5,6 @@
 package com.osfans.trime.ime.symbol
 
 import android.app.AlertDialog
-import android.content.Context
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.data.db.ClipboardHelper
@@ -18,11 +17,12 @@ import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.launch
 
 class DbAdapter(
-    private val ctx: Context,
     private val service: TrimeInputMethodService,
-    theme: Theme,
+    private val theme: Theme,
+    private val liquidWindow: LiquidWindow,
 ) : FlexibleAdapter(theme) {
-    var type = SymbolBoardType.CLIPBOARD
+    private val type: LiquidData.Type
+        get() = liquidWindow.currentDataType
 
     override fun onPaste(bean: DatabaseBean) {
         service.commitText(bean.text ?: "")
@@ -31,9 +31,9 @@ class DbAdapter(
     override fun onPin(bean: DatabaseBean) {
         service.lifecycleScope.launch {
             when (type) {
-                SymbolBoardType.CLIPBOARD -> ClipboardHelper.pin(bean.id)
-                SymbolBoardType.COLLECTION -> CollectionHelper.pin(bean.id)
-                SymbolBoardType.DRAFT -> DraftHelper.pin(bean.id)
+                LiquidData.Type.CLIPBOARD -> ClipboardHelper.pin(bean.id)
+                LiquidData.Type.COLLECTION -> CollectionHelper.pin(bean.id)
+                LiquidData.Type.DRAFT -> DraftHelper.pin(bean.id)
                 else -> {}
             }
             refresh()
@@ -43,9 +43,9 @@ class DbAdapter(
     override fun onUnpin(bean: DatabaseBean) {
         service.lifecycleScope.launch {
             when (type) {
-                SymbolBoardType.CLIPBOARD -> ClipboardHelper.unpin(bean.id)
-                SymbolBoardType.COLLECTION -> CollectionHelper.unpin(bean.id)
-                SymbolBoardType.DRAFT -> DraftHelper.unpin(bean.id)
+                LiquidData.Type.CLIPBOARD -> ClipboardHelper.unpin(bean.id)
+                LiquidData.Type.COLLECTION -> CollectionHelper.unpin(bean.id)
+                LiquidData.Type.DRAFT -> DraftHelper.unpin(bean.id)
                 else -> {}
             }
             refresh()
@@ -55,9 +55,9 @@ class DbAdapter(
     override fun onDelete(bean: DatabaseBean) {
         service.lifecycleScope.launch {
             when (type) {
-                SymbolBoardType.CLIPBOARD -> ClipboardHelper.delete(bean.id)
-                SymbolBoardType.COLLECTION -> CollectionHelper.delete(bean.id)
-                SymbolBoardType.DRAFT -> DraftHelper.delete(bean.id)
+                LiquidData.Type.CLIPBOARD -> ClipboardHelper.delete(bean.id)
+                LiquidData.Type.COLLECTION -> CollectionHelper.delete(bean.id)
+                LiquidData.Type.DRAFT -> DraftHelper.delete(bean.id)
                 else -> {}
             }
             refresh()
@@ -65,7 +65,7 @@ class DbAdapter(
     }
 
     override fun onEdit(bean: DatabaseBean) {
-        bean.text?.let { AppUtils.launchLiquidKeyboardEdit(ctx, type, bean.id, it) }
+        bean.text?.let { AppUtils.launchLiquidEdit(service, type, bean.id, it) }
     }
 
     override fun onCollect(bean: DatabaseBean) {
@@ -82,9 +82,9 @@ class DbAdapter(
                 .setPositiveButton(R.string.ok) { _, _ ->
                     service.lifecycleScope.launch {
                         when (type) {
-                            SymbolBoardType.CLIPBOARD -> ClipboardHelper.deleteAll(ClipboardHelper.haveUnpinned())
-                            SymbolBoardType.COLLECTION -> CollectionHelper.deleteAll(CollectionHelper.haveUnpinned())
-                            SymbolBoardType.DRAFT -> DraftHelper.deleteAll(DraftHelper.haveUnpinned())
+                            LiquidData.Type.CLIPBOARD -> ClipboardHelper.deleteAll(ClipboardHelper.haveUnpinned())
+                            LiquidData.Type.COLLECTION -> CollectionHelper.deleteAll(CollectionHelper.haveUnpinned())
+                            LiquidData.Type.DRAFT -> DraftHelper.deleteAll(DraftHelper.haveUnpinned())
                             else -> {}
                         }
                         refresh()
@@ -94,13 +94,13 @@ class DbAdapter(
         service.showDialog(confirm)
     }
 
-    override val showCollectButton: Boolean = type != SymbolBoardType.COLLECTION
+    override val showCollectButton: Boolean = type != LiquidData.Type.COLLECTION
 
     private suspend fun refresh() {
         when (type) {
-            SymbolBoardType.CLIPBOARD -> submitList(ClipboardHelper.getAll())
-            SymbolBoardType.COLLECTION -> submitList(CollectionHelper.getAll())
-            SymbolBoardType.DRAFT -> submitList(DraftHelper.getAll())
+            LiquidData.Type.CLIPBOARD -> submitList(ClipboardHelper.getAll())
+            LiquidData.Type.COLLECTION -> submitList(CollectionHelper.getAll())
+            LiquidData.Type.DRAFT -> submitList(DraftHelper.getAll())
             else -> {}
         }
     }

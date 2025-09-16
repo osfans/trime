@@ -290,7 +290,7 @@ class InputView(
                 if (it.data.option == "_liquid_keyboard") {
                     ContextCompat.getMainExecutor(service).execute {
                         windowManager.attachWindow(LiquidWindow)
-                        liquidWindow.select(0)
+                        liquidWindow.setDataByIndex(0)
                     }
                 }
             }

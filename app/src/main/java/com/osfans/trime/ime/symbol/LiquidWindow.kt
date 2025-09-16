@@ -9,7 +9,6 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
@@ -33,7 +32,6 @@ import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
-import splitties.views.recyclerview.verticalLayoutManager
 
 @InputScope
 @Inject
@@ -52,23 +50,21 @@ class LiquidWindow(
     private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
-    private lateinit var currentBoardType: SymbolBoardType
-
-    init {
-        TabManager.setTabExited()
-    }
+    var currentDataType: LiquidData.Type = LiquidData.Type.SINGLE
+        private set
 
     private val mainAdapter by lazy {
         LiquidAdapter(theme) {
-            when (currentBoardType) {
-                SymbolBoardType.SYMBOL -> triggerSymbolInput(this.text)
-                SymbolBoardType.TABS -> {
-                    val realPosition = TabManager.tabTags.indexOfFirst { it.text == this.text }
-                    select(realPosition)
+            when (currentDataType) {
+                LiquidData.Type.SYMBOL -> triggerSymbolInput(this.text)
+                LiquidData.Type.TABS -> {
+                    val realPosition = LiquidData.getTagList()
+                        .indexOfFirst { it.label == this.text }
+                    setDataByIndex(realPosition)
                 }
                 else -> {
                     service.commitText(this.text)
-                    if (currentBoardType != SymbolBoardType.HISTORY) {
+                    if (currentDataType != LiquidData.Type.HISTORY) {
                         symbolHistory.insert(this.text)
                         symbolHistory.save()
                     }
@@ -78,7 +74,7 @@ class LiquidWindow(
     }
 
     private val dbAdapter by lazy {
-        DbAdapter(context, service, theme)
+        DbAdapter(service, theme, this)
     }
 
     private val mainLayoutManager by lazy {
@@ -101,9 +97,9 @@ class LiquidWindow(
     override fun onCreateView(): View = LiquidLayout(context, theme, commonKeyboardActionListener).apply {
         liquidLayout = this
         tabsUi.apply {
-            setTabs(TabManager.tabTags)
+            setTags(LiquidData.getTagList())
             setOnTabClickListener { i ->
-                select(i)
+                setDataByIndex(i)
             }
         }
         liquidView.apply {
@@ -127,38 +123,22 @@ class LiquidWindow(
         ClipboardHelper.removeOnUpdateListener(this)
     }
 
-    fun select(i: Int) {
-        val tag = TabManager.tabTags[i]
-
-        fun loadDbData() = when (tag.type) {
-            SymbolBoardType.CLIPBOARD -> submitDbData { ClipboardHelper.getAll() }
-            SymbolBoardType.COLLECTION -> submitDbData { CollectionHelper.getAll() }
-            SymbolBoardType.DRAFT -> submitDbData { DraftHelper.getAll() }
-            else -> null
-        }
-
-        if (TabManager.currentTabIndex == i) {
-            loadDbData() ?: return
-            return
-        }
-
-        currentBoardType = tag.type
+    fun setDataByIndex(i: Int) {
+        val tag = LiquidData.getTagList()[i]
+        currentDataType = tag.type
         liquidLayout.tabsUi.activateTab(i)
-        val data = TabManager.selectTabByIndex(i)
         when (tag.type) {
-            SymbolBoardType.CLIPBOARD,
-            SymbolBoardType.COLLECTION,
-            SymbolBoardType.DRAFT,
-            -> loadDbData()
-            SymbolBoardType.SYMBOL,
-            SymbolBoardType.VAR_LENGTH,
-            SymbolBoardType.TABS,
-            -> submitData(data)
-            SymbolBoardType.HISTORY -> {
+            LiquidData.Type.CLIPBOARD -> submitDbData { ClipboardHelper.getAll() }
+            LiquidData.Type.COLLECTION -> submitDbData { CollectionHelper.getAll() }
+            LiquidData.Type.DRAFT -> submitDbData { DraftHelper.getAll() }
+            LiquidData.Type.HISTORY -> {
                 symbolHistory.load()
                 submitData(symbolHistory.toOrderedList().map { LiquidKeyboard.KeyItem(it) })
             }
-            else -> submitData(data)
+            else -> {
+                val data = LiquidData.getDataByIndex(i)
+                submitData(data)
+            }
         }
     }
 
@@ -168,9 +148,7 @@ class LiquidWindow(
     }
 
     private fun submitDbData(data: suspend () -> List<DatabaseBean>) {
-        dbAdapter.type = currentBoardType
         liquidLayout.updateState(LiquidLayout.State.Database)
-
         service.lifecycleScope.launch {
             dbAdapter.submitList(data())
         }
@@ -185,7 +163,6 @@ class LiquidWindow(
             commonKeyboardActionListener.listener.onText("{Escape}$symbol")
             if (isAsciiPunch) it.setRuntimeOption("ascii_punch", true)
             ContextCompat.getMainExecutor(service).execute {
-                TabManager.setTabExited()
                 windowManager.attachWindow(KeyboardWindow)
             }
         }
@@ -196,7 +173,7 @@ class LiquidWindow(
      * 当剪贴板内容变化且剪贴板视图处于开启状态时，更新视图.
      */
     override fun onUpdate(bean: DatabaseBean) {
-        if (currentBoardType != SymbolBoardType.CLIPBOARD) return
+        if (currentDataType != LiquidData.Type.CLIPBOARD) return
         submitDbData { ClipboardHelper.getAll() }
     }
 }

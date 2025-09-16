@@ -8,7 +8,9 @@ package com.osfans.trime.ime.keyboard
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.text.TextUtils
 import android.view.KeyEvent
+import androidx.core.text.TextUtilsCompat
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifier
@@ -29,9 +31,8 @@ import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.option.SwitchOptionWindow
+import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.ime.symbol.LiquidWindow
-import com.osfans.trime.ime.symbol.SymbolBoardType
-import com.osfans.trime.ime.symbol.TabManager
 import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ui.main.settings.ColorPickerDialog
 import com.osfans.trime.ui.main.settings.SoundEffectPickerDialog
@@ -186,18 +187,18 @@ class CommonKeyboardActionListener(
                         val arg = expandActiveText(action.option)
                         when (action.command) {
                             "liquid_keyboard" -> {
-                                val target =
-                                    when {
-                                        arg.matches("-?\\d+".toRegex()) -> arg.toInt()
-                                        arg.matches("[A-Z]+".toRegex()) -> {
-                                            val type = SymbolBoardType.valueOf(arg)
-                                            TabManager.tabTags.indexOfFirst { it.type == type }
-                                        }
-                                        else -> TabManager.tabTags.indexOfFirst { it.text == arg }
-                                    }
+                                val liquidTagList = LiquidData.getTagList()
+                                val target = if (arg.matches("[a-zA-Z]+".toRegex())) {
+                                    val type = runCatching {
+                                        LiquidData.Type.valueOf(arg)
+                                    }.getOrNull() ?: return
+                                    liquidTagList.indexOfFirst { it.type == type }
+                                } else {
+                                    liquidTagList.indexOfFirst { it.label == arg }
+                                }
                                 if (target >= 0) {
                                     windowManager.attachWindow(LiquidWindow)
-                                    liquidWindow.select(target)
+                                    liquidWindow.setDataByIndex(target)
                                 } else {
                                     windowManager.attachWindow(KeyboardWindow)
                                 }

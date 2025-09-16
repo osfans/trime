@@ -12,7 +12,7 @@ import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlScalar
 import com.osfans.trime.data.theme.model.LiquidKeyboard
-import com.osfans.trime.ime.symbol.SymbolBoardType
+import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.util.getEnum
 import com.osfans.trime.util.getString
 import com.osfans.trime.util.splitWithSurrogates
@@ -33,7 +33,7 @@ class LiquidKeyboardMapper(
             getStringList("keyboards").mapNotNull decode@{ id ->
                 try {
                     val keyboardNode = node.get<YamlMap>(id)
-                    val type = keyboardNode?.getEnum<SymbolBoardType>("type")
+                    val type = keyboardNode?.getEnum<LiquidData.Type>("type")
                         ?: return@decode null
                     val name = keyboardNode.getString("name", id)
                     val keysNode = keyboardNode.get<YamlNode>("keys")
@@ -58,7 +58,7 @@ class LiquidKeyboardMapper(
                         }
                     } else {
                         val value = keysNode?.yamlScalar?.content ?: ""
-                        if (type == SymbolBoardType.SINGLE) { // single data
+                        if (type == LiquidData.Type.SINGLE) { // single data
                             value.splitWithSurrogates().forEach {
                                 keys.add(LiquidKeyboard.KeyItem(it))
                             }
