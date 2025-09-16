@@ -80,11 +80,11 @@ class LiquidTabsUi(
     private var onTabClick: ((Int) -> Unit)? = null
 
     private class TabUiHolder(
-        val ui: LiquidTabsUi.TabUi,
+        val ui: TabUi,
     ) : RecyclerView.ViewHolder(ui.root)
 
     private val adapter by lazy {
-        object : BaseQuickAdapter<TabTag, TabUiHolder>() {
+        object : BaseQuickAdapter<LiquidData.Tag, TabUiHolder>() {
             private var selected = -1
 
             override fun onCreateViewHolder(
@@ -96,10 +96,10 @@ class LiquidTabsUi(
             override fun onBindViewHolder(
                 holder: TabUiHolder,
                 position: Int,
-                item: TabTag?,
+                item: LiquidData.Tag?,
             ) {
                 holder.ui.apply {
-                    setText(item!!.text)
+                    setText(item!!.label)
                     setActive(position == selected)
                     root.run {
                         layoutParams = ViewGroup.LayoutParams(wrapContent, matchParent)
@@ -107,7 +107,7 @@ class LiquidTabsUi(
                 }
             }
 
-            override fun submitList(list: List<TabTag>?) {
+            override fun submitList(list: List<LiquidData.Tag>?) {
                 selected = -1
                 super.submitList(list)
             }
@@ -133,7 +133,7 @@ class LiquidTabsUi(
             isHorizontalScrollBarEnabled = false
         }
 
-    fun setTabs(tags: List<TabTag>) {
+    fun setTags(tags: List<LiquidData.Tag>) {
         adapter.submitList(tags)
     }
 

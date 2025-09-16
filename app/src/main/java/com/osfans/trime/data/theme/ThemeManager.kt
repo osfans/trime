@@ -7,7 +7,7 @@ package com.osfans.trime.data.theme
 import android.content.res.Configuration
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.ime.symbol.TabManager
+import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.util.WeakHashSet
 
 object ThemeManager {
@@ -52,7 +52,7 @@ object ThemeManager {
         KeyActionManager.resetCache()
         FontManager.resetCache(newTheme)
         ColorManager.switchTheme(newTheme)
-        TabManager.resetCache(newTheme)
+        LiquidData.init(newTheme)
         return newTheme
     }
 
@@ -66,7 +66,7 @@ object ThemeManager {
         KeyActionManager.resetCache()
         FontManager.resetCache(theme)
         ColorManager.switchTheme(theme)
-        TabManager.resetCache(theme)
+        LiquidData.init(theme)
         activeTheme = theme
         prefs.selectedTheme.setValue(theme.configId)
     }

@@ -12,7 +12,7 @@ import android.view.KeyEvent
 import androidx.annotation.IdRes
 import androidx.navigation.NavDeepLinkBuilder
 import com.osfans.trime.R
-import com.osfans.trime.ime.symbol.SymbolBoardType
+import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
@@ -80,9 +80,9 @@ object AppUtils {
         context.startActivity<LogActivity>()
     }
 
-    fun launchLiquidKeyboardEdit(
+    fun launchLiquidEdit(
         context: Context,
-        type: SymbolBoardType,
+        type: LiquidData.Type,
         id: Int,
         text: String,
     ) {

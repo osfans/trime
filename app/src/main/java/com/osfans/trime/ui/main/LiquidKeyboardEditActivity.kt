@@ -13,7 +13,7 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.databinding.ActivityLiquidKeyboardEditBinding
-import com.osfans.trime.ime.symbol.SymbolBoardType
+import com.osfans.trime.ime.symbol.LiquidData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -23,7 +23,7 @@ class LiquidKeyboardEditActivity : Activity() {
     private val scope: CoroutineScope = MainScope()
     private var id: Int? = null
     private lateinit var editText: EditText
-    private var type: SymbolBoardType? = null
+    private var type: LiquidData.Type? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +44,8 @@ class LiquidKeyboardEditActivity : Activity() {
     private fun processIntent(intent: Intent) {
         // Extract necessary values.
         if (intent.extras != null) {
-            val strType = intent.getStringExtra(LIQUID_KEYBOARD_TYPE)
-            type = SymbolBoardType.fromString(strType)
+            val strType = intent.getStringExtra(LIQUID_KEYBOARD_TYPE) ?: return
+            type = LiquidData.Type.valueOf(strType)
             id = intent.getIntExtra(DB_BEAN_ID, -1)
             val text = intent.getStringExtra(DB_BEAN_TEXT)
             editText.setText(text)
@@ -60,19 +60,19 @@ class LiquidKeyboardEditActivity : Activity() {
         if (id == null || id == -1) return
         val newText = editText.text.toString()
         when (type) {
-            SymbolBoardType.CLIPBOARD -> {
+            LiquidData.Type.CLIPBOARD -> {
                 scope.launch {
                     ClipboardHelper.updateText(id!!, newText)
                 }
             }
 
-            SymbolBoardType.COLLECTION -> {
+            LiquidData.Type.COLLECTION -> {
                 scope.launch {
                     CollectionHelper.updateText(id!!, newText)
                 }
             }
 
-            SymbolBoardType.DRAFT -> {
+            LiquidData.Type.DRAFT -> {
                 scope.launch {
                     DraftHelper.updateText(id!!, newText)
                 }
