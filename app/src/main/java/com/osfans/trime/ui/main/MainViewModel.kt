@@ -6,15 +6,25 @@ package com.osfans.trime.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
     val toolbarTitle = MutableLiveData<String>()
 
     val topOptionsMenu = MutableLiveData<Boolean>()
 
-    val rime: RimeSession = RimeDaemon.createSession(javaClass.name)
+    private lateinit var _rime: RimeSession
+    val rime: RimeSession get() = _rime
+
+    init {
+        viewModelScope.launch(Dispatchers.Default) {
+            _rime = RimeDaemon.createSession(javaClass.name)
+        }
+    }
 
     val restartBackgroundSyncWork = MutableLiveData(false)
 
