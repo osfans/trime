@@ -14,6 +14,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.data.theme.ThemePrefs
 import com.osfans.trime.util.ColorUtils
+import com.osfans.trime.util.DeviceUtils
 
 class NavigationBarManager {
     private val navbarBackground by ThemeManager.prefs.navbarBackground
@@ -67,6 +68,10 @@ class NavigationBarManager {
                 window.useSystemNavbarBackground(false)
                 window.setNavbarBackgroundColor(Color.TRANSPARENT)
                 window.enforceNavbarContrast(false)
+                // it seems One UI 7.0 (Android 15) does not allow drawing behind navbar
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && DeviceUtils.isSamsungOneUI) {
+                    shouldUpdateNavbarBackground = true
+                }
             }
         }
     }
