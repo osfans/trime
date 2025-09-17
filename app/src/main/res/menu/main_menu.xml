@@ -10,7 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/deploy"
         android:title="@string/pref_deploy"
-        android:icon="@drawable/ic_baseline_sync_24"
+        android:icon="@drawable/ic_baseline_refresh_reversed_24"
         app:showAsAction="ifRoom" />
     <item android:id="@+id/about"
         android:title="@string/settings__about_title" />
