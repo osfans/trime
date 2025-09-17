@@ -7,10 +7,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 <resources>
-    <color name="colorSurface">#000000</color>
-    <color name="colorBackground">#121212</color>
-    <color name="colorError">#F44336</color>
-    <color name="colorOnSurface">#FFFFFF</color>
-    <color name="colorOnBackground">#FFFFFF</color>
-    <color name="colorOnError">#FFFFFF</color>
+    <color name="colorAccent">#0A7CB2</color>
+    <color name="colorAccentDark">#28566d</color>
 </resources>
