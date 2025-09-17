@@ -168,20 +168,23 @@ object RimeDaemon {
                 RimeMessage.DeployMessage.State.Start -> {
                     sendNotification(MESSAGE_ID) {
                         setSmallIcon(R.drawable.ic_baseline_sync_24)
-                        setColor(Color.GRAY)
                         setContentText(appContext.getString(R.string.deploy_progress))
+                        setProgress(0, 0, true)
+                        setOngoing(true)
+                        setAutoCancel(false)
                         setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        setTimeoutAfter(2000L)
                     }
                     withContext(Dispatchers.IO) { subprocess("logcat", "--clear") }
                 }
                 RimeMessage.DeployMessage.State.Success -> {
-                    sendNotification(MESSAGE_ID + 1) {
+                    sendNotification(MESSAGE_ID) {
                         setSmallIcon(R.drawable.ic_baseline_sync_24)
                         setColor(Color.GREEN)
                         setContentText(appContext.getString(R.string.deploy_finish))
+                        setOngoing(false)
+                        setTimeoutAfter(3000L)
+                        setAutoCancel(true)
                         setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        setTimeoutAfter(2000L)
                     }
                 }
                 RimeMessage.DeployMessage.State.Failure -> {
@@ -194,7 +197,7 @@ object RimeDaemon {
                             putExtra(LogActivity.FROM_DEPLOY, true)
                             putExtra(LogActivity.DEPLOY_FAILURE_TRACE, log)
                         }
-                    sendNotification(MESSAGE_ID + 2) {
+                    sendNotification(MESSAGE_ID) {
                         setSmallIcon(R.drawable.ic_baseline_warning_24)
                         setColor(Color.YELLOW)
                         setContentText(appContext.getString(R.string.view_deploy_failure_log))
