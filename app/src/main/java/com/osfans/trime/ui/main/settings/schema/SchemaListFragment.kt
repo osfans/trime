@@ -6,10 +6,16 @@
 package com.osfans.trime.ui.main.settings.schema
 
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.SchemaItem
+import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.ui.components.OnItemChangedListener
 import com.osfans.trime.ui.main.settings.ProgressFragment
+import com.osfans.trime.util.NaiveDustman
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
 
 class SchemaListFragment :
     ProgressFragment(),
@@ -28,6 +34,8 @@ class SchemaListFragment :
 
     private lateinit var ui: SchemaListUi
 
+    private val dustman = NaiveDustman<SchemaItem>()
+
     override suspend fun initialize(): View {
         val available = rime.runOnReady { availableSchemata().toSet() }
         val enabled = rime.runOnReady { enabledSchemata().map { it.id } }
@@ -38,6 +46,7 @@ class SchemaListFragment :
                 initialEntries = entries,
                 contentSource = { (available - adapter.items.toSet()).toTypedArray() },
             )
+        resetDustman()
         ui.adapter.setViewModel(viewModel)
         ui.adapter.addOnItemChangedListener(this)
         viewModel.enableToolbarEditButton(enabled.isNotEmpty()) {
@@ -56,6 +65,7 @@ class SchemaListFragment :
     }
 
     override fun onStop() {
+        persistSchemaList()
         if (::ui.isInitialized) {
             ui.adapter.exitMultiSelect()
         }
@@ -74,21 +84,34 @@ class SchemaListFragment :
         idx: Int,
         item: SchemaItem,
     ) {
-        updateSchemaState()
+        dustman.addOrUpdate(item.toString(), item)
     }
 
     override fun onItemRemoved(
         idx: Int,
         item: SchemaItem,
     ) {
-        updateSchemaState()
+        dustman.remove(item.toString())
     }
 
     override fun onItemAddedBatch(items: List<SchemaItem>) {
-        updateSchemaState()
+        items.forEach { dustman.addOrUpdate(it.toString(), it) }
     }
 
     override fun onItemRemovedBatch(items: List<SchemaItem>) {
-        updateSchemaState()
+        items.forEach { dustman.remove(it.toString()) }
+    }
+
+    private fun persistSchemaList() {
+        if (!dustman.dirty) return
+        resetDustman()
+        lifecycleScope.launch(NonCancellable + Dispatchers.Default) {
+            updateSchemaState()
+            RimeDaemon.restartRime(true)
+        }
+    }
+
+    private fun resetDustman() {
+        dustman.reset(ui.adapter.items.associateBy { it.toString() })
     }
 }
