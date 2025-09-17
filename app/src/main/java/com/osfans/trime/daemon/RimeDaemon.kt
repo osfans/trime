@@ -167,7 +167,7 @@ object RimeDaemon {
             when (it.data) {
                 RimeMessage.DeployMessage.State.Start -> {
                     sendNotification(MESSAGE_ID) {
-                        setSmallIcon(R.drawable.ic_baseline_sync_24)
+                        setSmallIcon(R.drawable.ic_baseline_refresh_reversed_24)
                         setContentText(appContext.getString(R.string.deploy_progress))
                         setProgress(0, 0, true)
                         setOngoing(true)
@@ -178,7 +178,7 @@ object RimeDaemon {
                 }
                 RimeMessage.DeployMessage.State.Success -> {
                     sendNotification(MESSAGE_ID) {
-                        setSmallIcon(R.drawable.ic_baseline_sync_24)
+                        setSmallIcon(R.drawable.ic_baseline_refresh_reversed_24)
                         setColor(Color.GREEN)
                         setContentText(appContext.getString(R.string.deploy_finish))
                         setOngoing(false)
