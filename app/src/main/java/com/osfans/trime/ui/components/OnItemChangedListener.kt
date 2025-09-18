@@ -18,6 +18,8 @@ interface OnItemChangedListener<T> {
         item: T,
     ) {}
 
+    fun onItemAddedBatch(items: List<T>) {}
+
     fun onItemRemovedBatch(items: List<T>) {}
 
     companion object {
@@ -42,6 +44,11 @@ interface OnItemChangedListener<T> {
             ) {
                 l1.onItemRemoved(idx, item)
                 l2.onItemRemoved(idx, item)
+            }
+
+            override fun onItemAddedBatch(items: List<T>) {
+                l1.onItemAddedBatch(items)
+                l2.onItemAddedBatch(items)
             }
 
             override fun onItemRemovedBatch(items: List<T>) {

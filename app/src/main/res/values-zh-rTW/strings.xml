@@ -222,5 +222,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="undo">撤銷</string>
     <string name="added_x">已新增 %1$s</string>
     <string name="removed_x">已移除 %1$s</string>
+    <string name="added_n_items">已新增 %1$d 個項目</string>
     <string name="removed_n_items">已移除 %1$d 個項目</string>
 </resources>

@@ -93,12 +93,23 @@ class SchemaListUi(
             fab.show()
             fab.setOnClickListener {
                 val items = source.map { it.name }.toTypedArray()
+                val checked = BooleanArray(items.size) { false }
                 AlertDialog
                     .Builder(ctx)
                     .setTitle(R.string.enable_schemata)
-                    .setItems(items) { _, which ->
-                        adapter.add(source[which])
-                    }.show()
+                    .setMultiChoiceItems(items, checked) { _, which, isChecked ->
+                        checked[which] = isChecked
+                    }
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        val collection = source.filterIndexed { index, _ -> checked[index] }
+                        if (collection.isEmpty()) return@setPositiveButton
+                        if (collection.size == 1) {
+                            adapter.add(collection[0])
+                        } else {
+                            adapter.addAll(collection)
+                        }
+                    }.setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
         }
     }
@@ -125,6 +136,13 @@ class SchemaListUi(
                             updateFAB()
                             showUndoSnackBar(ctx.getString(R.string.removed_x, item.name)) {
                                 add(idx, item)
+                            }
+                        }
+
+                        override fun onItemAddedBatch(items: List<SchemaItem>) {
+                            updateFAB()
+                            showUndoSnackBar(ctx.getString(R.string.added_n_items, items.size)) {
+                                items.forEach { remove(it) }
                             }
                         }
 
