@@ -149,12 +149,20 @@ open class SchemaListAdapter(
         addInternal(items.size, data)
     }
 
+    @CallSuper
     override fun add(
         position: Int,
         data: SchemaItem,
     ) {
         super.add(position, data)
         addInternal(position, data)
+    }
+
+    @CallSuper
+    override fun addAll(collection: Collection<SchemaItem>) {
+        super.addAll(collection)
+        listener?.onItemAddedBatch(collection.toList())
+        mainViewModel?.showToolbarEditButton()
     }
 
     /** This also valid for [BaseQuickAdapter.remove] */

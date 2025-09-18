@@ -84,6 +84,10 @@ class SchemaListFragment :
         updateSchemaState()
     }
 
+    override fun onItemAddedBatch(items: List<SchemaItem>) {
+        updateSchemaState()
+    }
+
     override fun onItemRemovedBatch(items: List<SchemaItem>) {
         updateSchemaState()
     }
