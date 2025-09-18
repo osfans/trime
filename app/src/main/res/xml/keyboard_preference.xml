@@ -143,14 +143,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
-            android:defaultValue="-1"
+            android:defaultValue="0"
             android:dependency="sound_on_keypress"
             android:key="sound_volume"
             android:title="@string/sound_volume"
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="100"
-            app:systemDefaultValue="-1"
+            app:systemDefaultValue="0"
             app:systemDefaultValueText="@string/system_default"
             app:unit="%"
             app:useSimpleSummaryProvider="true" />
@@ -159,26 +159,26 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:title="@string/vibrate_on_keypress"
             app:iconSpaceReserved="false" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
-            android:defaultValue="-1"
+            android:defaultValue="0"
             android:dependency="vibrate_on_keypress"
             android:key="vibration_duration"
             android:title="@string/vibration_duration"
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="100"
-            app:systemDefaultValue="-1"
+            app:systemDefaultValue="0"
             app:systemDefaultValueText="@string/system_default"
             app:unit="@string/unit__time_ms"
             app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
-            android:defaultValue="-1"
+            android:defaultValue="0"
             android:dependency="vibrate_on_keypress"
             android:key="vibration_amplitude"
             android:title="@string/vibration_amplitude"
             app:allowDividerAbove="false"
             app:iconSpaceReserved="false"
             app:max="255"
-            app:systemDefaultValue="-1"
+            app:systemDefaultValue="0"
             app:systemDefaultValueText="@string/system_default"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
