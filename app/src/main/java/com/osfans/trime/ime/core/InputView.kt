@@ -17,11 +17,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeMessage
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
+import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.suggestion.SuggestionCandidateModule
 import com.osfans.trime.ime.composition.PreeditModule
 import com.osfans.trime.ime.dependency.InputComponent
@@ -106,6 +109,9 @@ class InputView(
         broadcaster.addReceiver(compactCandidate)
         broadcaster.addReceiver(suggestionCandidate)
     }
+
+    private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
+    private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
     private val keyboardSidePadding = theme.generalStyle.keyboardPadding
     private val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
@@ -297,7 +303,19 @@ class InputView(
 
             is RimeMessage.ResponseMessage ->
                 it.data.let event@{
-                    broadcaster.onInputContextUpdate(it.context)
+                    val context = when {
+                        composingTextMode != ComposingTextMode.DISABLE -> {
+                            it.context.copy(composition = RimeProto.Context.Composition())
+                        }
+                        candidatesMode != PopupCandidatesMode.DISABLED -> {
+                            it.context.copy(
+                                composition = RimeProto.Context.Composition(),
+                                menu = RimeProto.Context.Menu(),
+                            )
+                        }
+                        else -> it.context
+                    }
+                    broadcaster.onInputContextUpdate(context)
                 }
 
             else -> {}

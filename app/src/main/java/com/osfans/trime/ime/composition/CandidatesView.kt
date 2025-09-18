@@ -27,6 +27,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
 import com.osfans.trime.ime.core.BaseInputView
+import com.osfans.trime.ime.core.ComposingTextMode
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
@@ -54,6 +55,8 @@ class CandidatesView(
     private val ctx = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
 
     private val position by AppPrefs.defaultInstance().candidates.position
+
+    private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
 
     private var menu = RimeProto.Context.Menu()
     private var inputComposition = RimeProto.Context.Composition()
@@ -108,7 +111,11 @@ class CandidatesView(
 
     override fun handleRimeMessage(it: RimeMessage<*>) {
         if (it is RimeMessage.ResponseMessage) {
-            inputComposition = it.data.context.composition
+            inputComposition = if (composingTextMode != ComposingTextMode.DISABLE) {
+                RimeProto.Context.Composition()
+            } else {
+                it.data.context.composition
+            }
             menu = it.data.context.menu
             updateUi()
         }
@@ -119,22 +126,22 @@ class CandidatesView(
 
     private fun updateUi() {
         preeditUi.update(inputComposition)
-        preeditUi.root.visibility = if (preeditUi.visible) View.VISIBLE else View.INVISIBLE
+        preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
         // if CandidatesView can be shown, rime engine is ready most of the time,
         // so it should be safety to get option immediately
         val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
         candidatesUi.update(menu, isHorizontalLayout)
         if (evaluateVisibility()) {
-            visibility = View.VISIBLE
+            visibility = VISIBLE
         } else {
             // RecyclerView won't update its items when ancestor view is GONE
-            visibility = View.INVISIBLE
+            visibility = INVISIBLE
             touchEventReceiverWindow.dismiss()
         }
     }
 
     private fun updatePosition() {
-        if (visibility != View.VISIBLE) return
+        if (visibility != VISIBLE) return
         val (parentWidth, parentHeight) = parentSize
         if (parentWidth <= 0 || parentHeight <= 0) {
             translationX = 0f
@@ -172,7 +179,7 @@ class CandidatesView(
             }
             PopupPosition.FOLLOW -> {
                 x =
-                    if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+                    if (layoutDirection == LAYOUT_DIRECTION_RTL) {
                         val rtlOffset = parentWidth - horizontal
                         if (rtlOffset + selfWidth > parentWidth) selfWidth - parentWidth else -rtlOffset
                     } else {
@@ -201,7 +208,7 @@ class CandidatesView(
     }
 
     init {
-        visibility = View.INVISIBLE
+        visibility = INVISIBLE
 
         minWidth = dp(theme.generalStyle.layout.minWidth)
         minHeight = dp(theme.generalStyle.layout.minHeight)

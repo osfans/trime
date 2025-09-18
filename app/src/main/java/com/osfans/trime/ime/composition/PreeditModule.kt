@@ -13,11 +13,9 @@ import android.view.ViewOutlineProvider
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
@@ -64,12 +62,7 @@ class PreeditModule(
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(ui.root)
 
-    private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
-
     override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        // TODO: 临时修复状态栏与悬浮窗同时显示，后续需优化：考虑分离数据或寻找更好的实现方式
-        if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) return
-
         ui.update(ctx.composition)
         ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
         if (ctx.composition.length > 0) {
