@@ -17,6 +17,7 @@ import android.widget.ImageView
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.AutoScaleTextView
+import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.above
@@ -76,7 +77,7 @@ class SwitchOptionEntryUi(
         }
 
     override val root =
-        object : FrameLayout(ctx) {
+        object : GestureFrame(ctx) {
             val content =
                 constraintLayout {
                     add(

@@ -12,6 +12,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.ime.keyboard.GestureFrame
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -21,7 +22,6 @@ import splitties.views.dsl.constraintlayout.endOfParent
 import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -72,7 +72,7 @@ class DatabaseItemUi(
         }
 
     override val root =
-        frameLayout {
+        GestureFrame(ctx).apply {
             isClickable = true
             minimumHeight = dp(30)
             background =

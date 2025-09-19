@@ -13,14 +13,15 @@ import com.chad.library.adapter4.BaseQuickAdapter
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.rippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
-import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityCenter
@@ -42,7 +43,7 @@ class LiquidTabsUi(
             }
 
         override val root =
-            frameLayout {
+            view(::GestureFrame) {
                 add(
                     text,
                     lParams {
