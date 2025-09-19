@@ -29,6 +29,7 @@ import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateW
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
+import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.option.SwitchOptionWindow
@@ -71,17 +72,30 @@ class QuickBar(
         alwaysUi.updateState(newState)
     }
 
+    private val swipeDownHideKeyboardCallback: ((GestureFrame.SwipeDirection) -> Unit) = { d ->
+        if (d == GestureFrame.SwipeDirection.Down) {
+            service.requestHideSelf(0)
+        }
+    }
+
     private val alwaysUi: AlwaysUi by lazy {
         AlwaysUi(context, theme) { action ->
             action?.let { commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(it)) }
                 ?: windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
         }.apply {
-            hideKeyboardButton.setOnClickListener { service.requestHideSelf(0) }
+            hideKeyboardButton.apply {
+                setOnClickListener { service.requestHideSelf(0) }
+                onSwipeListener = swipeDownHideKeyboardCallback
+            }
         }
     }
 
     private val candidateUi by lazy {
-        CandidateUi(context, candidate.compactCandidateModule.view)
+        CandidateUi(context, candidate.compactCandidateModule.view).apply {
+            unrollButton.apply {
+                onSwipeListener = swipeDownHideKeyboardCallback
+            }
+        }
     }
 
     private val suggestionUi by lazy {

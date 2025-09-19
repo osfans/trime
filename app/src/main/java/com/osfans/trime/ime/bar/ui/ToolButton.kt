@@ -9,7 +9,6 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
-import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -20,6 +19,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.ToolBar
+import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.util.circlePressHighlightDrawable
 import splitties.dimensions.dp
@@ -33,7 +33,7 @@ import splitties.views.imageDrawable
 import splitties.views.imageResource
 import splitties.views.padding
 
-class ToolButton : FrameLayout {
+class ToolButton : GestureFrame {
     private val image = imageView {
         isClickable = false
         isFocusable = false
