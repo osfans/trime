@@ -12,6 +12,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.AutoScaleTextView
+import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.pressHighlightDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.bottomOfParent
@@ -23,6 +24,9 @@ import splitties.views.dsl.constraintlayout.packed
 import splitties.views.dsl.constraintlayout.topOfParent
 import splitties.views.dsl.constraintlayout.verticalChain
 import splitties.views.dsl.core.Ui
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
@@ -60,9 +64,8 @@ class CandidateItemUi(
             scaleMode = AutoScaleTextView.Mode.Proportional
         }
 
-    override val root =
-        constraintLayout {
-            horizontalPadding = dp(theme.generalStyle.candidatePadding)
+    override val root = view(::GestureFrame) {
+        val content = constraintLayout {
             if (theme.generalStyle.commentOnTop) {
                 verticalChain(
                     listOf(lastText, firstText),
@@ -87,6 +90,19 @@ class CandidateItemUi(
                 )
             }
         }
+
+        /**
+         * candidate long press feedback is handled by `showCandidateActionMenu`
+         */
+        longPressFeedbackEnabled = false
+
+        add(
+            content,
+            lParams(wrapContent, matchParent) {
+                gravity = gravityCenter
+            },
+        )
+    }
 
     fun update(
         item: CandidateItem,

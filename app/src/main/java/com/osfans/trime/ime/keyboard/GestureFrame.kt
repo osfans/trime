@@ -8,6 +8,7 @@ package com.osfans.trime.ime.keyboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -35,6 +36,9 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
     @Volatile
     private var longPressTriggered = false
     private var longPressJob: Job? = null
+
+    @Volatile
+    var longPressFeedbackEnabled = true
 
     @Volatile
     private var swipeTriggered = false
@@ -98,8 +102,10 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                     delay(longPressTimeout.toLong())
                     if (touchId != currentTouchId) return@launch
                     if (!(swipeTriggered || longPressTriggered || shouldPerformSwipe)) {
-                        InputFeedbackManager.keyPressVibrate(this@GestureFrame, true)
-                        longPressTriggered = true
+                        if (longPressFeedbackEnabled) {
+                            InputFeedbackManager.keyPressVibrate(this@GestureFrame, true)
+                        }
+                        longPressTriggered = performLongClick()
                     }
                 }
                 swipeStartX = x
@@ -160,12 +166,6 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                         resetState()
                         return true
                     }
-                }
-
-                if (!swipeTriggered && longPressTriggered) {
-                    performLongClick()
-                    resetState()
-                    return true
                 }
 
                 if (shouldPerformSwipe) {
