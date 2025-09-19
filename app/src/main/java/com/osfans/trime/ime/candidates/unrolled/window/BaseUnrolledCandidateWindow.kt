@@ -116,10 +116,7 @@ abstract class BaseUnrolledCandidateWindow(
     fun bindCandidateUiViewHolder(holder: CandidateViewHolder) {
         holder.itemView.run {
             setOnClickListener { view ->
-                rime.launchOnReady {
-                    InputFeedbackManager.keyPressVibrate(view)
-                    it.selectCandidate(holder.idx)
-                }
+                rime.launchOnReady { it.selectCandidate(holder.idx) }
             }
             setOnLongClickListener { view ->
                 compactCandidate.showCandidateAction(holder.idx, holder.text, view)
