@@ -49,8 +49,7 @@ open class PagingCandidateViewAdapter(
         position: Int,
     ) {
         val item = getItem(position) ?: return
-        val obtainComment = snapshot().items.any { it.comment.isNotEmpty() }
-        holder.ui.update(item, false, obtainComment)
+        holder.ui.update(item, false)
         holder.text = item.text
         holder.comment = item.comment
         holder.idx = position + offset

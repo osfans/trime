@@ -69,8 +69,7 @@ open class CompactCandidateViewAdapter(
     ) {
         item ?: return
         val isHighlighted = position == highlightedIdx
-        val obtainComment = items.any { it.comment.isNotEmpty() }
-        holder.ui.update(item, isHighlighted, obtainComment)
+        holder.ui.update(item, isHighlighted)
         holder.text = item.text
         holder.comment = item.comment
         holder.idx = position // unused
