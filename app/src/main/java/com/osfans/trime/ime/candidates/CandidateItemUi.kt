@@ -6,7 +6,8 @@ package com.osfans.trime.ime.candidates
 
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
-import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isGone
 import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
@@ -15,14 +16,17 @@ import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.pressHighlightDrawable
 import splitties.dimensions.dp
-import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.baselineToBaselineOf
 import splitties.views.dsl.constraintlayout.centerHorizontally
+import splitties.views.dsl.constraintlayout.centerInParent
 import splitties.views.dsl.constraintlayout.centerVertically
 import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.horizontalChain
-import splitties.views.dsl.constraintlayout.packed
+import splitties.views.dsl.constraintlayout.endOfParent
+import splitties.views.dsl.constraintlayout.endToStartOf
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.startOfParent
+import splitties.views.dsl.constraintlayout.startToEndOf
 import splitties.views.dsl.constraintlayout.topOfParent
-import splitties.views.dsl.constraintlayout.verticalChain
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -31,66 +35,83 @@ import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
 import splitties.views.horizontalPadding
+import timber.log.Timber
 
 class CandidateItemUi(
     override val ctx: Context,
     theme: Theme,
 ) : Ui {
-    private val firstTextSize = theme.generalStyle.candidateTextSize
-    private val lastTextSize = theme.generalStyle.commentTextSize
-    private val firstTextFont = FontManager.getTypeface("candidate_font")
-    private val lastTextFont = FontManager.getTypeface("comment_font")
-    private val firstTextColor = ColorManager.getColor("candidate_text_color")
-    private val lastTextColor = ColorManager.getColor("comment_text_color")
-    private val lastTextColorH = ColorManager.getColor("hilited_comment_text_color")
-    private val firstTextColorH = ColorManager.getColor("hilited_candidate_text_color")
-    private val firstBackColorH = ColorManager.getColor("hilited_candidate_back_color")
+    private val textSize = theme.generalStyle.candidateTextSize
+    private val commentSize = theme.generalStyle.commentTextSize
+    private val textFont = FontManager.getTypeface("candidate_font")
+    private val commentFont = FontManager.getTypeface("comment_font")
+    private val textColor = ColorManager.getColor("candidate_text_color")
+    private val commentColor = ColorManager.getColor("comment_text_color")
+    private val hlCommentColor = ColorManager.getColor("hilited_comment_text_color")
+    private val hlTextColor = ColorManager.getColor("hilited_candidate_text_color")
+    private val hlBackColor = ColorManager.getColor("hilited_candidate_back_color")
 
-    private val firstText =
+    private val text =
         view(::AutoScaleTextView) {
-            textSize = firstTextSize
-            typeface = firstTextFont
+            this.textSize = this@CandidateItemUi.textSize
+            typeface = textFont
             isSingleLine = true
             gravity = gravityCenter
             scaleMode = AutoScaleTextView.Mode.Proportional
         }
 
-    private val lastText =
+    private val comment =
         view(::AutoScaleTextView) {
-            textSize = lastTextSize
-            typeface = lastTextFont
+            this.textSize = commentSize
+            typeface = commentFont
             isSingleLine = true
             gravity = gravityCenter
             scaleMode = AutoScaleTextView.Mode.Proportional
         }
+
+    private val content = constraintLayout {
+        horizontalPadding = dp(theme.generalStyle.candidatePadding)
+        if (theme.generalStyle.commentOnTop) {
+            add(
+                comment,
+                lParams {
+                    centerHorizontally()
+                    topOfParent()
+                    width = wrapContent
+                    matchConstraintPercentHeight = 0.3f // TODO: new param for customization
+                },
+            )
+            add(
+                text,
+                lParams {
+                    centerInParent()
+                    width = wrapContent
+                },
+            )
+        } else {
+            add(
+                text,
+                lParams(wrapContent, wrapContent) {
+                    centerVertically()
+                    startOfParent()
+                    horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+                    endToStartOf(comment)
+                },
+            )
+            add(
+                comment,
+                lParams(wrapContent, wrapContent) {
+                    baselineToBaselineOf(text)
+                    startToEndOf(text)
+                    endOfParent()
+                    horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
+                    width = wrapContent
+                },
+            )
+        }
+    }
 
     override val root = view(::GestureFrame) {
-        val content = constraintLayout {
-            if (theme.generalStyle.commentOnTop) {
-                verticalChain(
-                    listOf(lastText, firstText),
-                    style = packed,
-                    defaultWidth = wrapContent,
-                    initFirstViewParams = {
-                        height = dp(theme.generalStyle.commentHeight)
-                        topOfParent()
-                    },
-                    initLastViewParams = {
-                        height = dp(theme.generalStyle.candidateViewHeight)
-                        bottomOfParent()
-                    },
-                    initParams = { centerHorizontally() },
-                )
-            } else {
-                horizontalChain(
-                    listOf(firstText, lastText),
-                    style = packed,
-                    defaultWidth = wrapContent,
-                    initParams = { centerVertically() },
-                )
-            }
-        }
-
         /**
          * candidate long press feedback is handled by `showCandidateActionMenu`
          */
@@ -98,7 +119,7 @@ class CandidateItemUi(
 
         add(
             content,
-            lParams(wrapContent, matchParent) {
+            lParams(matchParent, matchParent) {
                 gravity = gravityCenter
             },
         )
@@ -107,26 +128,19 @@ class CandidateItemUi(
     fun update(
         item: CandidateItem,
         isHighlighted: Boolean,
-        obtainLast: Boolean,
     ) {
-        val firstColor = if (isHighlighted) firstTextColorH else firstTextColor
-        val lastColor = if (isHighlighted) lastTextColorH else lastTextColor
-        firstText.text = item.text
-        firstText.setTextColor(firstColor)
-        lastText.run {
-            if (obtainLast) {
-                lastText.text = item.comment
-                lastText.setTextColor(lastColor)
-                if (visibility == View.GONE) visibility = View.VISIBLE
-            } else if (visibility != View.GONE) {
-                visibility = View.GONE
-            }
-        }
-        root.background =
+        val tColor = if (isHighlighted) hlTextColor else textColor
+        val cColor = if (isHighlighted) hlCommentColor else commentColor
+        text.text = item.text
+        text.setTextColor(tColor)
+        comment.text = item.comment
+        comment.setTextColor(cColor)
+        comment.isGone = item.comment.isEmpty()
+        content.background =
             if (isHighlighted) {
-                ColorDrawable(firstBackColorH)
+                ColorDrawable(hlBackColor)
             } else {
-                pressHighlightDrawable(firstBackColorH)
+                pressHighlightDrawable(hlBackColor)
             }
     }
 }
