@@ -175,7 +175,7 @@ class ToolButton : GestureFrame {
         if (toggleKey != null && optionStyles?.size == 2) {
             val rime = RimeDaemon.getFirstSessionOrNull()
             val isOptionOn = rime?.run { getRuntimeOption(toggleKey!!) } ?: false
-            return if (isOptionOn) optionStyles[0] else optionStyles[1]
+            return if (isOptionOn) optionStyles[1] else optionStyles[0]
         }
 
         return style ?: ""
