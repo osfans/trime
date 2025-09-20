@@ -6,6 +6,7 @@ package com.osfans.trime.ime.candidates
 
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
+import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import com.osfans.trime.core.CandidateItem
@@ -53,6 +54,7 @@ class CandidateItemUi(
 
     private val text =
         view(::AutoScaleTextView) {
+            id = View.generateViewId()
             this.textSize = this@CandidateItemUi.textSize
             typeface = textFont
             isSingleLine = true
@@ -70,7 +72,6 @@ class CandidateItemUi(
         }
 
     private val content = constraintLayout {
-        horizontalPadding = dp(theme.generalStyle.candidatePadding)
         if (theme.generalStyle.commentOnTop) {
             add(
                 comment,
@@ -101,11 +102,10 @@ class CandidateItemUi(
             add(
                 comment,
                 lParams(wrapContent, wrapContent) {
-                    baselineToBaselineOf(text)
                     startToEndOf(text)
                     endOfParent()
+                    baselineToBaselineOf(text)
                     horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
-                    width = wrapContent
                 },
             )
         }
@@ -136,7 +136,7 @@ class CandidateItemUi(
         comment.text = item.comment
         comment.setTextColor(cColor)
         comment.isGone = item.comment.isEmpty()
-        content.background =
+        root.background =
             if (isHighlighted) {
                 ColorDrawable(hlBackColor)
             } else {

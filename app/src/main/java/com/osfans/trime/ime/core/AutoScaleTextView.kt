@@ -18,6 +18,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 @SuppressLint("AppCompatCustomView")
 class AutoScaleTextView
@@ -202,4 +203,6 @@ constructor(
     }
 
     override fun getTextScaleX(): Float = textScaleX
+
+    override fun getBaseline(): Int = (-fontMetrics.top * textScaleY).roundToInt()
 }
