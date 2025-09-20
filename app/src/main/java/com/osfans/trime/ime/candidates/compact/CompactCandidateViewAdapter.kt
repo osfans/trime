@@ -21,7 +21,14 @@ import splitties.views.setPaddingDp
 open class CompactCandidateViewAdapter(
     val theme: Theme,
 ) : BaseQuickAdapter<CandidateItem, CandidateViewHolder>() {
-    var isLastPage: Boolean = false
+
+    var candidates: Array<CandidateItem>
+        get() = items.toTypedArray()
+        private set(value) {
+            super.submitList(value.toList())
+        }
+
+    var total = -1
         private set
 
     var previous: Int = 0
@@ -31,15 +38,13 @@ open class CompactCandidateViewAdapter(
         private set
 
     fun updateCandidates(
-        list: List<CandidateItem>,
-        isLastPage: Boolean,
-        previous: Int,
-        highlightedIdx: Int,
+        data: Array<CandidateItem>,
+        total: Int,
+        highlightedIndex: Int,
     ) {
-        this.isLastPage = isLastPage
-        this.previous = previous
-        this.highlightedIdx = highlightedIdx
-        super.submitList(list)
+        this.candidates = data
+        this.total = total
+        this.highlightedIdx = highlightedIndex
     }
 
     override fun onCreateViewHolder(
@@ -63,12 +68,12 @@ open class CompactCandidateViewAdapter(
         item: CandidateItem?,
     ) {
         item ?: return
-        val isHighlighted = theme.generalStyle.candidateUseCursor && position == highlightedIdx
+        val isHighlighted = position == highlightedIdx
         val obtainComment = items.any { it.comment.isNotEmpty() }
         holder.ui.update(item, isHighlighted, obtainComment)
         holder.text = item.text
         holder.comment = item.comment
-        holder.idx = previous + position // unused
+        holder.idx = position // unused
         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
             minWidth = 0
             flexGrow = 0f

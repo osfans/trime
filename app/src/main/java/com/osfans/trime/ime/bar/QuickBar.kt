@@ -12,7 +12,6 @@ import android.widget.ViewAnimator
 import androidx.annotation.RequiresApi
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -24,7 +23,6 @@ import com.osfans.trime.ime.bar.ui.SuggestionUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.CandidateModule
-import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
@@ -157,15 +155,10 @@ class QuickBar(
         candidateUi.unrollButton.visibility = if (enabled) View.VISIBLE else View.INVISIBLE
     }
 
-    private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
-
-    override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        // TODO: 临时修复状态栏与悬浮窗同时显示，后续需优化：考虑分离数据或寻找更好的实现方式
-        if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) return
-
+    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.CandidatesUpdated,
-            QuickBarStateMachine.BooleanKey.CandidateEmpty to ctx.menu.candidates.isEmpty(),
+            QuickBarStateMachine.BooleanKey.CandidateEmpty to data.candidates.isEmpty(),
         )
     }
 

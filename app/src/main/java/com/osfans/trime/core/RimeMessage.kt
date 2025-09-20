@@ -67,18 +67,58 @@ sealed class RimeMessage<T>(
         override fun toString() = "DeployMessage(state=$data)"
     }
 
-    data class ResponseMessage(
+    data class CommitTextMessage(
+        override val data: RimeProto.Commit,
+    ) : RimeMessage<RimeProto.Commit>(data) {
+        override val messageType = MessageType.Commit
+    }
+
+    data class CompositionMessage(
+        override val data: RimeProto.Context.Composition,
+    ) : RimeMessage<RimeProto.Context.Composition>(data) {
+        override val messageType = MessageType.Composition
+    }
+
+    data class CandidateMenuMessage(
+        override val data: RimeProto.Context.Menu,
+    ) : RimeMessage<RimeProto.Context.Menu>(data) {
+        override val messageType = MessageType.Menu
+    }
+
+    data class StatusMessage(
+        override val data: RimeProto.Status,
+    ) : RimeMessage<RimeProto.Status>(data) {
+        override val messageType = MessageType.Status
+    }
+
+    data class CandidateListMessage(
         override val data: Data,
-    ) : RimeMessage<ResponseMessage.Data>(data) {
-        override val messageType = MessageType.Response
+    ) : RimeMessage<CandidateListMessage.Data>(data) {
 
-        data class Data(
-            val commit: RimeProto.Commit,
-            val context: RimeProto.Context,
-            val status: RimeProto.Status,
-        )
+        override val messageType = MessageType.Candidate
 
-        override fun toString(): String = "ResponseMessage(candidates=[${data.context.menu.candidates.joinToString(limit = 5) }], ...)"
+        data class Data(val total: Int = -1, val candidates: Array<CandidateItem> = emptyArray()) {
+
+            override fun toString(): String = "total=$total, candidates=[${candidates.joinToString(limit = 5)}]"
+
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as Data
+
+                if (total != other.total) return false
+                if (!candidates.contentEquals(other.candidates)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = total
+                result = 31 * result + candidates.contentHashCode()
+                return result
+            }
+        }
     }
 
     data class KeyMessage(
@@ -97,7 +137,11 @@ sealed class RimeMessage<T>(
         Schema,
         Option,
         Deploy,
-        Response,
+        Commit,
+        Composition,
+        Menu,
+        Status,
+        Candidate,
         Key,
     }
 
@@ -125,12 +169,19 @@ sealed class RimeMessage<T>(
                 DeployMessage(
                     DeployMessage.State.valueOf((params[0] as String).replaceFirstChar { it.titlecase() }),
                 )
-            MessageType.Response ->
-                ResponseMessage(
-                    ResponseMessage.Data(
-                        params[0] as RimeProto.Commit,
-                        params[1] as RimeProto.Context,
-                        params[2] as RimeProto.Status,
+            MessageType.Commit ->
+                CommitTextMessage(params[0] as RimeProto.Commit)
+            MessageType.Composition ->
+                CompositionMessage(params[0] as RimeProto.Context.Composition)
+            MessageType.Menu ->
+                CandidateMenuMessage(params[0] as RimeProto.Context.Menu)
+            MessageType.Status ->
+                StatusMessage(params[0] as RimeProto.Status)
+            MessageType.Candidate ->
+                CandidateListMessage(
+                    CandidateListMessage.Data(
+                        params[0] as Int,
+                        params[1] as Array<CandidateItem>,
                     ),
                 )
             MessageType.Key ->

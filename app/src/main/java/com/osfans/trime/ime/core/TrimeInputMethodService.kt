@@ -202,16 +202,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
-            is RimeMessage.ResponseMessage ->
-                it.data.let event@{
-                    val (commit, ctx) = it
-                    if (commit.text?.isNotEmpty() == true) {
-                        commitText(commit.text)
-                        InputFeedbackManager.textCommitSpeak(commit.text)
-                    }
-                    updateComposingText(ctx)
-                    KeyboardSwitcher.currentKeyboardView?.invalidateAllKeys()
+            is RimeMessage.CommitTextMessage -> {
+                if (!it.data.text.isNullOrEmpty()) {
+                    commitText(it.data.text)
                 }
+            }
+            is RimeMessage.CompositionMessage -> {
+                updateComposingText(it.data)
+                KeyboardSwitcher.currentKeyboardView?.invalidateAllKeys()
+            }
             is RimeMessage.KeyMessage ->
                 it.data.let event@{
                     val keyCode = it.value.keyCode
@@ -617,6 +616,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (ic.commitText(text, 1)) {
             lastCommittedText = text
         }
+        InputFeedbackManager.textCommitSpeak(text.toString())
         if (clearMeatKeyState) {
             ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
             DraftHelper.onExtractedTextChanged(ic)
@@ -992,14 +992,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private val composingTextMode by prefs.general.composingTextMode
 
-    private fun updateComposingText(ctx: RimeProto.Context) {
+    private fun updateComposingText(composition: RimeProto.Context.Composition) {
         val ic = currentInputConnection ?: return
         val text =
             when (composingTextMode) {
                 ComposingTextMode.DISABLE -> ""
-                ComposingTextMode.PREEDIT -> ctx.composition.preedit ?: ""
-                ComposingTextMode.COMMIT_TEXT_PREVIEW -> ctx.composition.commitTextPreview ?: ""
-                ComposingTextMode.RAW_INPUT -> ctx.input
+                ComposingTextMode.PREEDIT -> composition.preedit ?: ""
+                ComposingTextMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
+                ComposingTextMode.RAW_INPUT -> rime.run { rawInputCached }
             }
         if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
             ic.setComposingText(text, 1)

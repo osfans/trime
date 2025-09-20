@@ -23,7 +23,13 @@ interface InputBroadcastReceiver {
 
     fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {}
 
-    fun onInputContextUpdate(ctx: RimeProto.Context) {}
+    fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {}
+
+    fun onCompositionUpdate(data: RimeProto.Context.Composition) {}
+
+    fun onCandidateMenuUpdate(data: RimeProto.Context.Menu) {}
+
+    fun onInputStatusUpdate(value: RimeProto.Status) {}
 
     fun onWindowAttached(window: BoardWindow) {}
 
