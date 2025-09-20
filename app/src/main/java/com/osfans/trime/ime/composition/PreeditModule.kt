@@ -62,10 +62,10 @@ class PreeditModule(
 
     private val touchEventReceiverWindow = TouchEventReceiverWindow(ui.root)
 
-    override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        ui.update(ctx.composition)
+    override fun onCompositionUpdate(data: RimeProto.Context.Composition) {
+        ui.update(data)
         ui.root.visibility = if (ui.visible) View.VISIBLE else View.INVISIBLE
-        if (ctx.composition.length > 0) {
+        if (data.length > 0) {
             touchEventReceiverWindow.show()
         } else {
             touchEventReceiverWindow.dismiss()

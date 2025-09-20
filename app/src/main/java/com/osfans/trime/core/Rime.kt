@@ -192,13 +192,12 @@ class Rime :
                     OpenCCDictManager.buildOpenCCDict()
                 }
             }
-            is RimeMessage.ResponseMessage ->
-                it.data.let event@{ data ->
-                    statusCached = data.status
-                    compositionCached = data.context.composition
-                    menuCached = data.context.menu
-                    rawInputCached = data.context.input
-                }
+            is RimeMessage.CompositionMessage -> {
+                compositionCached = it.data
+                rawInputCached = getRimeRawInput() ?: ""
+            }
+            is RimeMessage.CandidateMenuMessage -> menuCached = it.data
+            is RimeMessage.StatusMessage -> statusCached = it.data
             else -> {}
         }
     }
@@ -259,14 +258,7 @@ class Rime :
             return (simulateResult && (!commit.text.isNullOrEmpty() || ctx.input.isNotEmpty())).also {
                 Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
                 if (it) {
-                    handleRimeMessage(
-                        4, // RimeMessage.MessageType.Response
-                        arrayOf(
-                            commit,
-                            ctx,
-                            getRimeStatus(),
-                        ),
-                    )
+                    emitResponse(commit, ctx)
                 }
             }
         }
@@ -391,14 +383,17 @@ class Rime :
             messageFlow_.tryEmit(message)
         }
 
-        private fun emitResponse() {
+        private fun emitResponse(
+            commit: RimeProto.Commit = getRimeCommit(),
+            context: RimeProto.Context = getRimeContext(),
+        ) {
+            handleRimeMessage(4, arrayOf(commit))
+            handleRimeMessage(5, arrayOf(context.composition))
+            handleRimeMessage(6, arrayOf(context.menu))
+            handleRimeMessage(7, arrayOf(getRimeStatus()))
             handleRimeMessage(
-                4, // RimeMessage.MessageType.Response
-                arrayOf(
-                    getRimeCommit(),
-                    getRimeContext(),
-                    getRimeStatus(),
-                ),
+                8,
+                arrayOf(16, getRimeCandidates(0, 16)),
             )
         }
 
@@ -407,7 +402,7 @@ class Rime :
             modifiers: Int,
         ) {
             handleRimeMessage(
-                5, // RimeMessage.MessageType.Key,
+                9, // RimeMessage.MessageType.Key,
                 arrayOf(value, modifiers),
             )
         }

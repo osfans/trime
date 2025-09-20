@@ -8,7 +8,6 @@ package com.osfans.trime.ime.composition
 import android.annotation.SuppressLint
 import android.graphics.RectF
 import android.os.Build
-import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
@@ -59,7 +58,7 @@ class CandidatesView(
     private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
 
     private var menu = RimeProto.Context.Menu()
-    private var inputComposition = RimeProto.Context.Composition()
+    private var composition = RimeProto.Context.Composition()
 
     private val anchorPosition = RectF()
     private val parentSize = floatArrayOf(0f, 0f)
@@ -110,22 +109,28 @@ class CandidatesView(
     private var bottomInsets = 0
 
     override fun handleRimeMessage(it: RimeMessage<*>) {
-        if (it is RimeMessage.ResponseMessage) {
-            inputComposition = if (composingTextMode != ComposingTextMode.DISABLE) {
-                RimeProto.Context.Composition()
-            } else {
-                it.data.context.composition
+        when (it) {
+            is RimeMessage.CompositionMessage -> {
+                composition = if (composingTextMode != ComposingTextMode.DISABLE) {
+                    RimeProto.Context.Composition()
+                } else {
+                    it.data
+                }
+                updateUi()
             }
-            menu = it.data.context.menu
-            updateUi()
+            is RimeMessage.CandidateMenuMessage -> {
+                menu = it.data
+                updateUi()
+            }
+            else -> {}
         }
     }
 
-    private fun evaluateVisibility(): Boolean = !inputComposition.preedit.isNullOrEmpty() ||
+    private fun evaluateVisibility(): Boolean = !composition.preedit.isNullOrEmpty() ||
         menu.candidates.isNotEmpty()
 
     private fun updateUi() {
-        preeditUi.update(inputComposition)
+        preeditUi.update(composition)
         preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
         // if CandidatesView can be shown, rime engine is ready most of the time,
         // so it should be safety to get option immediately

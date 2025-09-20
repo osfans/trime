@@ -300,24 +300,27 @@ class InputView(
                     }
                 }
             }
-
-            is RimeMessage.ResponseMessage ->
-                it.data.let event@{
-                    val context = when {
-                        composingTextMode != ComposingTextMode.DISABLE -> {
-                            it.context.copy(composition = RimeProto.Context.Composition())
-                        }
-                        candidatesMode != PopupCandidatesMode.DISABLED -> {
-                            it.context.copy(
-                                composition = RimeProto.Context.Composition(),
-                                menu = RimeProto.Context.Menu(),
-                            )
-                        }
-                        else -> it.context
-                    }
-                    broadcaster.onInputContextUpdate(context)
+            is RimeMessage.CompositionMessage -> {
+                val shouldBroadcastComposition = composingTextMode == ComposingTextMode.DISABLE ||
+                    candidatesMode != PopupCandidatesMode.ALWAYS_SHOW
+                val data = if (shouldBroadcastComposition) {
+                    it.data
+                } else {
+                    RimeProto.Context.Composition()
                 }
-
+                broadcaster.onCompositionUpdate(data)
+            }
+            is RimeMessage.CandidateMenuMessage -> {
+                broadcaster.onCandidateMenuUpdate(it.data)
+            }
+            is RimeMessage.CandidateListMessage -> {
+                val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
+                    RimeMessage.CandidateListMessage.Data()
+                } else {
+                    it.data
+                }
+                broadcaster.onCandidateListUpdate(data)
+            }
             else -> {}
         }
     }

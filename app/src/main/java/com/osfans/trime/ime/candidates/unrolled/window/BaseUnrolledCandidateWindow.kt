@@ -79,12 +79,19 @@ abstract class BaseUnrolledCandidateWindow(
     private var offsetJob: Job? = null
 
     private val candidatesPager by lazy {
-        Pager(PagingConfig(pageSize = 48)) {
-            CandidatesPagingSource(
-                rime,
-                offset = adapter.offset,
-            )
-        }
+        Pager(
+            config = PagingConfig(
+                pageSize = 48,
+                enablePlaceholders = false,
+            ),
+            pagingSourceFactory = {
+                CandidatesPagingSource(
+                    rime,
+                    total = compactCandidate.adapter.total,
+                    offset = adapter.offset,
+                )
+            },
+        )
     }
 
     private var candidatesSubmitJob: Job? = null
@@ -137,7 +144,7 @@ abstract class BaseUnrolledCandidateWindow(
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesDetached,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (compactCandidate.adapter.run { isLastPage && (previous + itemCount) == adapter.offset }),
+                (compactCandidate.adapter.total == adapter.offset),
         )
         offsetJob?.cancel()
         candidatesSubmitJob?.cancel()

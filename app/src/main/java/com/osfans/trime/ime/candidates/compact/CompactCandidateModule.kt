@@ -17,8 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
-import com.osfans.trime.core.CandidateItem
-import com.osfans.trime.core.RimeProto
+import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.theme.ColorManager
@@ -54,13 +53,14 @@ class CompactCandidateModule(
     val unrolledCandidateOffset = _unrolledCandidateOffset.asSharedFlow()
 
     fun refreshUnrolled() {
+        val childCount = layoutManager.childCount
         runBlocking {
-            _unrolledCandidateOffset.emit(adapter.previous + view.childCount)
+            _unrolledCandidateOffset.emit(childCount)
         }
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (adapter.run { isLastPage && itemCount == layoutManager.childCount }),
+                (adapter.total == childCount),
         )
     }
 
@@ -69,11 +69,11 @@ class CompactCandidateModule(
             setOnItemClickListener { _, view, position ->
                 rime.launchOnReady {
                     InputFeedbackManager.keyPressVibrate(view)
-                    it.selectCandidate(previous + position)
+                    it.selectCandidate(position)
                 }
             }
             setOnItemLongClickListener { _, view, position ->
-                showCandidateAction(previous + position, items[position].text, view)
+                showCandidateAction(position, items[position].text, view)
                 true
             }
         }
@@ -110,12 +110,12 @@ class CompactCandidateModule(
         }
     }
 
-    override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        val candidates = ctx.menu.candidates.map { CandidateItem(it.text, it.comment ?: "") }
-        val isLastPage = ctx.menu.isLastPage
-        val previous = ctx.menu.run { pageSize * pageNumber }
-        val highlightedIdx = ctx.menu.highlightedCandidateIndex
-        adapter.updateCandidates(candidates, isLastPage, previous, highlightedIdx)
+    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
+        val candidates = data.candidates
+        val total = data.total
+        val menu = rime.run { menuCached }
+        val highlightedIndex = menu.run { highlightedCandidateIndex + pageSize * pageNumber }
+        adapter.updateCandidates(candidates, total, highlightedIndex)
         if (candidates.isEmpty()) {
             refreshUnrolled()
         }

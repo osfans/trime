@@ -56,8 +56,20 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onRimeOptionUpdated(value) }
     }
 
-    override fun onInputContextUpdate(ctx: RimeProto.Context) {
-        receivers.forEach { it.onInputContextUpdate(ctx) }
+    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
+        receivers.forEach { it.onCandidateListUpdate(data) }
+    }
+
+    override fun onCompositionUpdate(data: RimeProto.Context.Composition) {
+        receivers.forEach { it.onCompositionUpdate(data) }
+    }
+
+    override fun onCandidateMenuUpdate(data: RimeProto.Context.Menu) {
+        receivers.forEach { it.onCandidateMenuUpdate(data) }
+    }
+
+    override fun onInputStatusUpdate(value: RimeProto.Status) {
+        receivers.forEach { it.onInputStatusUpdate(value) }
     }
 
     override fun onWindowAttached(window: BoardWindow) {
