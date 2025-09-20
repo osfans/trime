@@ -1048,7 +1048,7 @@ tool_bar:
 
   ascii_mode_button: &ascii_mode_button
     foreground:
-      option_styles: ["En", "中"] # 样式也可以为表，将根据 action 的 toggle 决定
+      option_styles: ["中", "En"] # 样式也可以为表，将根据 action 的 toggle 决定
       font_size: 18  # 按钮字体大小
       padding: 10
     action: Mode_switch
