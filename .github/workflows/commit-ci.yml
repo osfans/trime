@@ -41,6 +41,13 @@ jobs:
           # will restore cache of dependencies and wrappers
           cache: 'gradle'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "cmake;3.31.6"
+
       - name: Calculate JNI cache hash
         id: cache-hash
         run: |
@@ -57,9 +64,6 @@ jobs:
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
         run: |
           git submodule update --init --recursive
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
         
       - name: Check code style
         if: ${{ startsWith(matrix.os, 'ubuntu') }}

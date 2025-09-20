@@ -28,6 +28,13 @@ jobs:
           # will restore cache of dependencies and wrappers
           cache: 'gradle'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "cmake;3.31.6"
+
       - name: Calculate JNI cache hash
         id: cache-hash
         run: |
@@ -39,9 +46,6 @@ jobs:
         with:
           path: "app/prebuilt"
           key: ${{ runner.os }}-trime-jni-release-${{ steps.cache-hash.outputs.native-cache-hash }}
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
 
       - name: Setup Keystore
         run: |
