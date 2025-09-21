@@ -191,7 +191,7 @@ class CommonKeyboardActionListener(
                                 var index = liquidTagList.indexOfFirst { it.label == arg }
                                 if (index == -1) {
                                     val type = runCatching { LiquidData.Type.valueOf(arg.uppercase()) }
-                                        .getOrNull() ?: return
+                                        .getOrNull()
                                     index = liquidTagList.indexOfFirst { it.type == type }
                                 }
                                 if (index >= 0) {
