@@ -158,7 +158,7 @@ constructor(
 
         @SuppressLint("RtlHardcoded")
         val shouldAlignLeft = gravity and Gravity.HORIZONTAL_GRAVITY_MASK == Gravity.LEFT
-        if (textWidth >= contentWidth) {
+        if (textWidth > contentWidth) {
             when (scaleMode) {
                 Mode.None -> {
                     textScaleX = 1.0f
