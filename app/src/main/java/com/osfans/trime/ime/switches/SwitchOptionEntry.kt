@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package com.osfans.trime.ime.option
+package com.osfans.trime.ime.switches
 
 import androidx.annotation.DrawableRes
 import com.osfans.trime.data.schema.Schema
