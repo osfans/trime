@@ -301,12 +301,12 @@ class InputView(
                 }
             }
             is RimeMessage.CompositionMessage -> {
-                val shouldBroadcastComposition = composingTextMode == ComposingTextMode.DISABLE ||
-                    candidatesMode != PopupCandidatesMode.ALWAYS_SHOW
-                val data = if (shouldBroadcastComposition) {
-                    it.data
-                } else {
+                val data = if (composingTextMode != ComposingTextMode.DISABLE ||
+                    candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
+                ) {
                     RimeProto.Context.Composition()
+                } else {
+                    it.data
                 }
                 broadcaster.onCompositionUpdate(data)
             }
