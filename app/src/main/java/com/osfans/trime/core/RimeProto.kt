@@ -16,10 +16,10 @@ class RimeProto {
     )
 
     data class Context(
-        val composition: Composition,
-        val menu: Menu,
-        val input: String,
-        val caretPos: Int,
+        val composition: Composition = Composition(),
+        val menu: Menu = Menu(),
+        val input: String = "",
+        val caretPos: Int = 0,
     ) {
         data class Composition(
             /**

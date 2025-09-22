@@ -17,14 +17,7 @@ class MainViewModel : ViewModel() {
 
     val topOptionsMenu = MutableLiveData<Boolean>()
 
-    private lateinit var _rime: RimeSession
-    val rime: RimeSession get() = _rime
-
-    init {
-        viewModelScope.launch(Dispatchers.Default) {
-            _rime = RimeDaemon.createSession(javaClass.name)
-        }
-    }
+    val rime = RimeDaemon.createSession(javaClass.name)
 
     val restartBackgroundSyncWork = MutableLiveData(false)
 
