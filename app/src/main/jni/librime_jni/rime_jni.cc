@@ -60,11 +60,7 @@ class Rime {
     }
     rime->initialize(&trime_traits);
     rime->set_notification_handler(notificationHandler, GlobalRef->jvm);
-    if (rime->start_maintenance(fullCheck)) {
-      rime->join_maintenance_thread();
-    }
-
-    session_ = rime->create_session();
+    rime->start_maintenance(fullCheck);
   }
 
   bool processKey(int keycode, int mask) {
@@ -120,7 +116,10 @@ class Rime {
     return rime->select_schema(session(), schemaId.data());
   }
 
-  std::string rawInput() { return rime->get_input(session()); }
+  std::string rawInput() {
+    auto cStr = rime->get_input(session());
+    return cStr ? cStr : "";
+  }
 
   size_t caretPosition() { return rime->get_caret_pos(session()); }
 
@@ -285,7 +284,8 @@ Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
-  jobject proto = nullptr;
+  jobject proto =
+      env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoDefault);
   Rime::Instance().contextProto(&proto);
   return proto;
 }

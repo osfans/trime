@@ -122,6 +122,7 @@ class GlobalRefSingleton {
 
   jclass ContextProto;
   jmethodID ContextProtoInit;
+  jmethodID ContextProtoDefault;
 
   jclass CompositionProto;
   jmethodID CompositionProtoInit;
@@ -187,6 +188,7 @@ class GlobalRefSingleton {
         "(Lcom/osfans/trime/core/RimeProto$Context$Composition;Lcom/osfans/"
         "trime/core/"
         "RimeProto$Context$Menu;Ljava/lang/String;I)V");
+    ContextProtoDefault = env->GetMethodID(ContextProto, "<init>", "()V");
 
     CompositionProto = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/RimeProto$Context$Composition")));
