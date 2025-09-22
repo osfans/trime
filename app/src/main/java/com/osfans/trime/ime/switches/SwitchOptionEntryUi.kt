@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-package com.osfans.trime.ime.option
+package com.osfans.trime.ime.switches
 
 import android.content.Context
 import android.graphics.Typeface
@@ -12,7 +12,6 @@ import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme

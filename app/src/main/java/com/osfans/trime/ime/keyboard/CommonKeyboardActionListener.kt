@@ -8,9 +8,7 @@ package com.osfans.trime.ime.keyboard
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
 import android.view.KeyEvent
-import androidx.core.text.TextUtilsCompat
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifier
@@ -30,7 +28,7 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
-import com.osfans.trime.ime.option.SwitchOptionWindow
+import com.osfans.trime.ime.switches.SwitchOptionWindow
 import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.window.BoardWindowManager
