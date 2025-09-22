@@ -224,6 +224,7 @@ class CommonKeyboardActionListener(
                                 }
                             }
                             "share_text" -> service.shareText()
+                            "voice_input" -> service.startVoiceInput()
                             else -> {
                                 val intent = buildIntentFromAction(action.command, arg)
                                 if (intent != null) {

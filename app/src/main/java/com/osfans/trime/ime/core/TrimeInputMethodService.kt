@@ -55,6 +55,7 @@ import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHelper
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.ime.voice.VoiceInputManager
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.util.any
 import com.osfans.trime.util.findSectionFrom
@@ -93,6 +94,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             navBarManager.evaluate(w, useVirtualKeyboard = it)
         }
     private val rimeIntentReceiver = RimeIntentReceiver()
+    private var voiceInputManager: VoiceInputManager? = null
 
     var lastCommittedText: CharSequence = ""
         private set
@@ -144,6 +146,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      */
     fun postRimeJob(block: suspend RimeApi.() -> Unit) = postJob(rime.lifecycleScope) { rime.runOnReady(block) }
 
+    /**
+     * Start voice input if available
+     */
+    fun startVoiceInput() {
+        voiceInputManager?.startVoiceInput()
+    }
+
     private suspend fun updateRimeOption(api: RimeApi) {
         try {
             api.setRuntimeOption("soft_cursor", prefs.keyboard.softCursorEnabled.getValue()) // 軟光標
@@ -194,6 +203,18 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             //  and lead to a crash loop
             Timber.d("onCreate")
             InputFeedbackManager.init(this)
+            // Initialize voice input manager
+            voiceInputManager = VoiceInputManager.create(
+                context = this,
+                onResult = { recognizedText ->
+                    // Commit the recognized text to the input field
+                    commitText(recognizedText)
+                },
+                onError = { errorMessage ->
+                    Timber.w("Voice input error: $errorMessage")
+                    // Optionally show a toast or other user feedback
+                }
+            )
             registerReceiver()
         } catch (e: Exception) {
             Timber.e(e)
@@ -280,6 +301,8 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onDestroy() {
         InputFeedbackManager.destroy()
+        voiceInputManager?.destroy()
+        voiceInputManager = null
         inputView = null
         recreateInputViewPrefs.forEach {
             it.unregisterOnChangeListener(recreateInputViewListener)
