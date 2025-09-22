@@ -967,6 +967,7 @@ preset_keys:
   Deploy: {label: 部署, command: broadcast, option: "com.osfans.trime.deploy"}
   Sync: {label: 同步, command: broadcast, option: "com.osfans.trime.sync"}
   RepeatCommit: { label: 重复,  command: commit, option: "%1$s" } #重复输入刚上屏的内容
+  VoiceInput: {label: 🎤, send: function, command: voice_input} #语音输入
 
 preset_keyboards:
   default:
