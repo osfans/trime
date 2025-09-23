@@ -190,6 +190,9 @@ class Rime :
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Start) {
                     OpenCCDictManager.buildOpenCCDict()
+                } else if (it.data == RimeMessage.DeployMessage.State.Success) {
+                    emitResponse()
+                    SchemaManager.init(getCurrentRimeSchema())
                 }
             }
             is RimeMessage.CompositionMessage -> {
