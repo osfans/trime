@@ -6,15 +6,10 @@
 package com.osfans.trime.ime.bar.ui
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RectShape
 import androidx.annotation.DrawableRes
 import androidx.core.view.children
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxItemDecoration
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.data.theme.Theme
@@ -22,8 +17,6 @@ import com.osfans.trime.data.theme.model.ToolBar
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.view
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 class ButtonsBarUi(
     override val ctx: Context,

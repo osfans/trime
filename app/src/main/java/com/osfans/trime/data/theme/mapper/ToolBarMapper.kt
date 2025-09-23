@@ -45,8 +45,8 @@ private class ToolBarButtonForegroundMapper(node: YamlMap) : Mapper<ToolBar.Butt
     override fun map(): ToolBar.Button.Foreground = ToolBar.Button.Foreground(
         style = getString("style"),
         optionStyles = getStringList("option_styles"),
-        bgNormal = getString("bg_normal"),
-        bgHighlight = getString("bg_highlight"),
+        fgNormal = getString("fg_normal"),
+        fgHighlight = getString("fg_highlight"),
         fontSize = getFloat("font_size", 18f),
         size = getStringList("size").mapNotNull { it.toIntOrNull() },
         padding = getInt("padding", 5),

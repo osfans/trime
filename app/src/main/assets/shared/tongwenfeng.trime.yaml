@@ -1016,8 +1016,8 @@ tool_bar:
     # 前景内容设置
     foreground:
       style: "ic@dots_horizontal"         # 内置质感设计图标样式（以ic@开头）
-      bg_normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
-      # bg_highlight:        # 高亮状态前景色
+      fg_normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
+      # fg_highlight:        # 高亮状态前景色
       padding: 10            # 前景内容与背景边界的内边距
       # size: [120, 24]      # 视图控件宽高，非前景样式宽高
     # 按钮点击事件
@@ -1027,7 +1027,7 @@ tool_bar:
   hide_button: &hide_button
     foreground:
       style: "ic@keyboard_close"
-      bg_normal: candidate_text_color
+      fg_normal: candidate_text_color
     action: Hide
 
   emoji_button: &emoji_button

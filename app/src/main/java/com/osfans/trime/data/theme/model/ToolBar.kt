@@ -37,8 +37,8 @@ data class ToolBar(
         data class Foreground(
             val style: String = "",
             val optionStyles: List<String> = emptyList(),
-            val bgNormal: String? = null,
-            val bgHighlight: String? = null,
+            val fgNormal: String? = null,
+            val fgHighlight: String? = null,
             val fontSize: Float = 15f,
             val size: List<Int> = emptyList(),
             val padding: Int = 5,
