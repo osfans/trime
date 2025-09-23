@@ -135,7 +135,7 @@ class ToolButton : GestureFrame {
     }
 
     private fun applyColors(foreground: ToolBar.Button.Foreground?) {
-        val normalColor = foreground?.bgNormal?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
+        val normalColor = foreground?.fgNormal?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
             ?: ColorManager.getColor("candidate_text_color")
 
         val colorStateList = createColorStateList(foreground, normalColor)
@@ -150,7 +150,7 @@ class ToolButton : GestureFrame {
     private fun createColorStateList(
         foreground: ToolBar.Button.Foreground?,
         normalColor: Int,
-    ): ColorStateList = foreground?.bgHighlight?.takeIf { it.isNotEmpty() }?.let { highlight ->
+    ): ColorStateList = foreground?.fgHighlight?.takeIf { it.isNotEmpty() }?.let { highlight ->
         ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
             intArrayOf(ColorManager.getColor(highlight), normalColor),
