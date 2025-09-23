@@ -394,9 +394,10 @@ class Rime :
             handleRimeMessage(5, arrayOf(context.composition))
             handleRimeMessage(6, arrayOf(context.menu))
             handleRimeMessage(7, arrayOf(getRimeStatus()))
+            val candidates = getRimeCandidates(0, 16)
             handleRimeMessage(
                 8,
-                arrayOf(16, getRimeCandidates(0, 16)),
+                arrayOf(candidates.size, candidates),
             )
         }
 
