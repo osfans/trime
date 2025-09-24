@@ -9,6 +9,7 @@ import android.annotation.SuppressLint
 import android.graphics.RectF
 import android.os.Build
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.view.WindowInsets
@@ -215,18 +216,17 @@ class CandidatesView(
     init {
         visibility = INVISIBLE
 
-        minWidth = dp(theme.generalStyle.layout.minWidth)
-        minHeight = dp(theme.generalStyle.layout.minHeight)
-        verticalPadding = dp(theme.generalStyle.layout.marginX)
-        horizontalPadding = dp(theme.generalStyle.layout.marginY)
+        minWidth = dp(theme.window.minWidth)
+        verticalPadding = dp(theme.window.insets.vertical)
+        horizontalPadding = dp(theme.window.insets.horizontal)
+        alpha = theme.window.alpha
         background =
             ColorManager.getDecorDrawable(
-                "text_back_color",
-                "border_color",
-                dp(theme.generalStyle.layout.border),
-                dp(theme.generalStyle.layout.roundCorner),
-                theme.generalStyle.layout.alpha,
+                colorKey = "text_back_color",
+                cornerRadius = dp(theme.window.cornerRadius),
             )
+        clipToOutline = true
+        outlineProvider = ViewOutlineProvider.BACKGROUND
         add(
             preeditUi.root,
             lParams(wrapContent, wrapContent) {

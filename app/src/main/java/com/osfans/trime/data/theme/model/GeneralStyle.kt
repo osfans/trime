@@ -34,7 +34,6 @@ data class GeneralStyle(
     val keyboardPaddingBottom: Int = 0,
     val keyboardPaddingLand: Int = 0,
     val keyboardPaddingLandBottom: Int = 0,
-    val layout: Layout = Layout(),
     val keyFont: List<String> = emptyList(),
     val keyBorder: Int = 0,
     val keyHeight: Int = 0,
@@ -81,23 +80,6 @@ data class GeneralStyle(
         BOTTOM,
         RIGHT,
     }
-
-    @Serializable
-    @Parcelize
-    data class Layout(
-        val border: Int = 0,
-        val maxWidth: Int = 0,
-        val maxHeight: Int = 0,
-        val minWidth: Int = 0,
-        val minHeight: Int = 0,
-        val marginX: Int = 0,
-        val marginY: Int = 0,
-        val lineSpacing: Int = 0,
-        val lineSpacingMultiplier: Float = 0f,
-        val spacing: Int = 0,
-        val roundCorner: Float = 0f,
-        val alpha: Int = 255,
-    ) : Parcelable
 
     @Serializable
     @Parcelize

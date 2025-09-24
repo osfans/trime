@@ -27,9 +27,9 @@ class LabeledCandidateItemUi(
     override val ctx: Context,
     val theme: Theme,
 ) : Ui {
-    private val labelSize = theme.generalStyle.labelTextSize
-    private val textSize = theme.generalStyle.candidateTextSize
-    private val commentSize = theme.generalStyle.commentTextSize
+    private val labelSize = theme.window.foreground.labelFontSize
+    private val textSize = theme.window.foreground.textFontSize
+    private val commentSize = theme.window.foreground.commentFontSize
     private val labelFont = FontManager.getTypeface("label_font")
     private val textFont = FontManager.getTypeface("candidate_font")
     private val commentFont = FontManager.getTypeface("comment_font")
@@ -43,7 +43,9 @@ class LabeledCandidateItemUi(
 
     override val root =
         textView {
-            horizontalPadding = dp(theme.generalStyle.candidatePadding)
+            val v = dp(theme.window.itemPadding.vertical)
+            val h = dp(theme.window.itemPadding.horizontal)
+            setPadding(h, v, h, v)
         }
 
     private inline fun SpannableStringBuilder.inSpanWith(
@@ -74,7 +76,7 @@ class LabeledCandidateItemUi(
             GradientDrawable().apply {
                 if (highlighted) {
                     setColor(highlightBackColor)
-                    cornerRadius = ctx.dp(theme.generalStyle.layout.roundCorner)
+                    cornerRadius = ctx.dp(theme.window.cornerRadius)
                 } else {
                     setColor(Color.TRANSPARENT)
                 }

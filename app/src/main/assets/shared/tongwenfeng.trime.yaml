@@ -41,20 +41,6 @@ style:
   hanb_font: hanb.ttf #扩充字体
   horizontal: true #水平模式
   horizontal_gap: *hgap #键水平间距
-  layout:
-    border: 0 #候选窗口边框宽度
-    max_width: 360 #最大宽度，超过则自动换行
-    max_height: 300 #最大高度
-    min_width: 0 #最小宽度
-    min_height: 50 #最小高度
-    margin_x: 5 #水平邊距 NOTE: margin_{x, y, bottom} 实际为 padding
-    margin_y: 5 #竖直边距
-    line_spacing: 0 #候选词的行间距(px)
-    line_spacing_multiplier: 1.2 #候选词的行间距(倍数)
-    spacing: 1 #屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离
-    round_corner: *round2 #候选窗口圆角
-    alpha: 0xff #透明度(0-255)
-    background: background.png #颜色或者backgrounds目录下的图片文档名
   key_font: symbol.ttf #键盘字体
   key_height: *jpgd4 #键高
   key_long_text_size: 16 #长标签字号
@@ -90,6 +76,21 @@ style:
     search: 搜索
     send: 发送
     default: Enter   # 定义默认Enter键的文本
+
+window:               # 候选窗口（悬浮窗）参数
+  insets:               # 窗口内边距
+    vertical: 4           # 纵向内边距（整数）
+    horizontal: 4         # 横向内边距（整数）
+  item_padding:         # 候选项内边距
+#    vertical: 0           # 纵向内边距（整数）
+    horizontal: 4         # 横向内边距（整数）
+#  min_width: 0          # 最小宽度（整数）
+#  corner_radius: 0      # 圆角半径（浮点）
+#  alpha: 1              # 透明度（0-1，浮点）
+  foreground:           # 前景样式
+    label_font_size: 20   # 序号字体大小（浮点）
+    text_font_size: 20    # 文字字体大小（浮点）
+    comment_font_size: 16  # 注释字体大小（浮点）
 
 # 最好保留一项，防止其他主题使用 __include 时无法加载
 fallback_colors:
