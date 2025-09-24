@@ -6,8 +6,6 @@ package com.osfans.trime.data.theme
 
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.core.Rime
-import com.osfans.trime.core.RimeConfig
-import com.osfans.trime.data.theme.mapper.GeneralStyleMapper
 import com.osfans.trime.data.theme.model.GeneralStyle
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -26,15 +24,11 @@ class GeneralStyleTest :
             )
 
             When("loaded") {
-                val generalStyle =
-                    RimeConfig.openUserConfig("trime").use {
-                        GeneralStyleMapper("style", it).map()
-                    }
+                val generalStyle = Theme.decodeByConfigId("trime").generalStyle
 
                 Then("it should not be null") {
                     generalStyle shouldNotBe null
                     generalStyle.autoCaps shouldBe "false"
-                    generalStyle.backgroundDimAmount shouldBe 0.5
 
                     generalStyle.candidateFont shouldBe listOf("han.ttf")
                 }
@@ -53,23 +47,16 @@ class GeneralStyleTest :
             )
 
             When("loaded") {
-                val generalStyle =
-                    RimeConfig.openUserConfig("incorrect").use {
-                        GeneralStyleMapper("style", it).map()
-                    }
+                val generalStyle = Theme.decodeByConfigId("incorrect").generalStyle
 
                 Then("with default value without exception") {
                     generalStyle.autoCaps shouldBe ""
-                    generalStyle.backgroundDimAmount shouldBe 0
                     generalStyle.candidateBorder shouldBe 0
                     generalStyle.candidateFont shouldBe emptyList()
-                    generalStyle.candidateUseCursor shouldBe false
                     generalStyle.commentPosition shouldBe GeneralStyle.CommentPosition.UNKNOWN
 
                     generalStyle.enterLabel shouldNotBe null
                     generalStyle.enterLabel.go shouldBe "go"
-
-                    generalStyle.layout shouldNotBe null
                 }
             }
 

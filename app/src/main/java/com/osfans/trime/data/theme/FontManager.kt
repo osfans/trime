@@ -111,7 +111,6 @@ object FontManager {
             FontKey.PREVIEW_FONT -> style.previewFont
             FontKey.SYMBOL_FONT -> style.symbolFont
             FontKey.TEXT_FONT -> style.textFont
-            FontKey.LONG_TEXT_FONT -> style.longTextFont
             FontKey.TOOLBAR_FONT -> theme.toolBar.buttonFont
             else -> null
         }

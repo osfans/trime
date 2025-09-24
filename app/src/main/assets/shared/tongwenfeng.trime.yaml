@@ -59,12 +59,9 @@ style:
   reset_ascii_mode: false #显示键盘时重置为中文状态
   round_corner: *round1 #按键圆角半径
   shadow_radius: 0.0 #按键阴影半径
-  speech_opencc_config: none #语音输入简繁转换
   symbol_font: symbol.ttf #符号字体
   symbol_text_size: 10 #符号字号
   text_font: latin.ttf #编码字体
-  #text_height: 32 #编码区高度
-  text_size: 14 #编码区字号
   vertical_correction: -5
   vertical_gap: *sgap #键盘行距
   enter_label_mode: 0  #是否使用App提供的ActionLabel内容作为Enter键的文本（由于多数App没有适配ActionLable，实际影响不大）。0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel
