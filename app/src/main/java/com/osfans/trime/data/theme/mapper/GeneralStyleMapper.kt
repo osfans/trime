@@ -35,11 +35,6 @@ class GeneralStyleMapper(
         keyboardPaddingBottom = getInt("keyboard_padding_bottom"),
         keyboardPaddingLand = getInt("keyboard_padding_land"),
         keyboardPaddingLandBottom = getInt("keyboard_padding_land_bottom"),
-        layout =
-        when (val map = node.get<YamlMap>("layout")) {
-            null -> GeneralStyle.Layout()
-            else -> ThemeFilesManager.yaml.decodeFromYamlNode(map)
-        },
         keyFont = getStringList("key_font"),
         keyBorder = getInt("key_border"),
         keyHeight = getInt("key_height"),

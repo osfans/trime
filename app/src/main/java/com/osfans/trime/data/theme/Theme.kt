@@ -20,6 +20,7 @@ import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.data.theme.model.PresetKey
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.data.theme.model.ToolBar
+import com.osfans.trime.data.theme.model.Window
 import com.osfans.trime.util.getString
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -31,6 +32,7 @@ data class Theme(
     val configId: String,
     val name: String,
     val generalStyle: GeneralStyle,
+    val window: Window,
     val liquidKeyboard: LiquidKeyboard,
     val presetKeys: Map<String, PresetKey>,
     val presetKeyboards: Map<String, TextKeyboard>,
@@ -52,6 +54,10 @@ data class Theme(
                 configId = configId,
                 name = root.getString("name"),
                 generalStyle = GeneralStyleMapper(root.get<YamlMap>("style")!!).map(),
+                window = when (val node = root.get<YamlMap>("window")) {
+                    null -> Window()
+                    else -> yaml.decodeFromYamlNode(node)
+                },
                 liquidKeyboard =
                 when (val node = root.get<YamlMap>("liquid_keyboard")) {
                     null -> LiquidKeyboard()

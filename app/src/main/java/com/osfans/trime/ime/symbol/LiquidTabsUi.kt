@@ -70,12 +70,7 @@ class LiquidTabsUi(
                 }
             val background = if (active) ColorManager.getColor("hilited_candidate_back_color") else Color.TRANSPARENT
             text.setTextColor(color)
-            root.background =
-                PaintDrawable(background).apply {
-                    setCornerRadius(
-                        theme.generalStyle.layout.roundCorner,
-                    )
-                }
+            root.background = PaintDrawable(background)
         }
     }
 

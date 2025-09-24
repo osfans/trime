@@ -30,20 +30,6 @@ style:
   keyboard_padding_bottom: 0 #竖屏模式下，屏幕下边缘与键盘的距离（避免误触发全面屏手势）
   keyboard_padding_land: 40 #横屏模式下，屏幕左右两侧与键盘的距离（避免横屏按键过度拉伸变形）
   keyboard_padding_land_bottom: 0 #横屏模式下，屏幕下侧与键盘的距离
-  layout: #懸浮窗口設置
-    border: 2 #邊框寬度
-    max_width: 230 #最大寬度，超過則自動換行
-    max_height: 400 #最大高度
-    min_width: 40 #最小寬度
-    min_height: 0 #最小高度
-    margin_x: 5 #水平邊距 NOTE: margin_{x, y, bottom} 实际为 padding
-    margin_y: 5 #豎直邊距
-    line_spacing: 0 #候选詞的行間距(px)
-    line_spacing_multiplier: 1.2 #候选詞的行間距(倍數)
-    spacing: 1 #屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离
-    round_corner: 8 #窗口圓角
-    alpha: 0xdd #透明度(0-255)
-    elevation: 5 #陰影(>=Android5.0)
   key_font: symbol.ttf #鍵盤字型
   key_height: 44 #鍵高
   key_long_text_size: 14 #長標籤字號
@@ -82,6 +68,21 @@ style:
     search: 搜索
     send: 发送
     default: Enter   # 定义默认Enter键的文本
+
+window:               # 候选窗口（悬浮窗）参数
+  insets:               # 窗口内边距
+    vertical: 4           # 纵向内边距（整数）
+    horizontal: 4         # 横向内边距（整数）
+  item_padding:         # 候选项内边距
+#    vertical: 0           # 纵向内边距（整数）
+    horizontal: 4         # 横向内边距（整数）
+#  min_width: 0          # 最小宽度（整数）
+#  corner_radius: 0      # 圆角半径（浮点）
+#  alpha: 1              # 透明度（0-1，浮点）
+  foreground: # 前景样式
+    label_font_size: 20   # 序号字体大小（浮点）
+    text_font_size: 20    # 文字字体大小（浮点）
+    comment_font_size: 16  # 注释字体大小（浮点）
 
 # 最好保留一项，防止其他主题使用 __include 时无法加载
 fallback_colors:
