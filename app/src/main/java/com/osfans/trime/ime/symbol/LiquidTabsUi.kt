@@ -44,6 +44,7 @@ class LiquidTabsUi(
 
         override val root =
             view(::GestureFrame) {
+                minimumWidth = dp(40)
                 add(
                     text,
                     lParams {

@@ -125,7 +125,7 @@ class LiquidLayout(
 
     val liquidView =
         recyclerView {
-            val space = dp(3)
+            val space = dp(theme.liquidKeyboard.marginX.toInt())
             addItemDecoration(SpacesItemDecoration(space))
             setPadding(space)
         }

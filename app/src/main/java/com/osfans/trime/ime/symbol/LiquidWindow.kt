@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.daemon.RimeSession
@@ -56,7 +57,7 @@ class LiquidWindow(
     private val mainAdapter by lazy {
         LiquidAdapter(theme) {
             when (currentDataType) {
-                LiquidData.Type.SYMBOL -> triggerSymbolInput(this.text)
+                LiquidData.Type.SYMBOL -> triggerSymbolInput(this.altText)
                 LiquidData.Type.TABS -> {
                     val realPosition = LiquidData.getTagList()
                         .indexOfFirst { it.label == this.text }
@@ -80,8 +81,7 @@ class LiquidWindow(
     private val mainLayoutManager by lazy {
         FlexboxLayoutManager(context).apply {
             flexDirection = FlexDirection.ROW
-            justifyContent = JustifyContent.SPACE_AROUND
-            alignItems = AlignItems.BASELINE
+            flexWrap = FlexWrap.WRAP
         }
     }
 

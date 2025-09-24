@@ -48,9 +48,9 @@ class LiquidKeyboardMapper(
                                 if (map.containsKey("click")) {
                                     val clickText = map["click"] ?: ""
                                     val labelText = map["label"] ?: ""
-                                    LiquidKeyboard.KeyItem(clickText, labelText)
+                                    keys.add(LiquidKeyboard.KeyItem(clickText, labelText))
                                 } else {
-                                    map.forEach { keys.add(LiquidKeyboard.KeyItem(it.value, it.key)) }
+                                    map.forEach { keys.add(LiquidKeyboard.KeyItem(it.key, it.value)) }
                                 }
                             } else if (item is YamlScalar) {
                                 keys.add(LiquidKeyboard.KeyItem(item.content))
