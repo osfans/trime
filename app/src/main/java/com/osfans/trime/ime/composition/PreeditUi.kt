@@ -36,7 +36,7 @@ open class PreeditUi(
     val preedit =
         view(::PreeditTextView) {
             setTextColor(textColor)
-            textSize = theme.generalStyle.textSize
+            textSize = theme.preedit.foreground.fontSize
             typeface = FontManager.getTypeface("text_font")
             setupPreeditView?.invoke(this)
             onMoveCursor = this@PreeditUi.onMoveCursor

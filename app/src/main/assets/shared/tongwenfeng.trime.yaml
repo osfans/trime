@@ -77,6 +77,13 @@ style:
     send: 发送
     default: Enter   # 定义默认Enter键的文本
 
+preedit:                  # 预编辑文本视图参数
+  horizontal_padding: 8     # 横向内边距（整数）
+#  alpha: 0.8                 # 透明度（0-1，浮点）
+  top_end_radius: 4         # 末上端圆角（浮点）
+  foreground:               # 前景样式
+    font_size: 16             # 预编辑字体大小（浮点）
+
 window:               # 候选窗口（悬浮窗）参数
   insets:               # 窗口内边距
     vertical: 4           # 纵向内边距（整数）
