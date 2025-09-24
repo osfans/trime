@@ -1,6 +1,93 @@
 {
   "$id": "https://github.com/osfans/trime/blob/develop/doc/trime-schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JSON schema for Trime theme configuration",
+  "definitions": {
+    "ToolBar.Button.Background": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "rectangle"
+        },
+        "corner_radius": {
+          "type": "number",
+          "default": 10
+        },
+        "bg_normal": {
+          "type": "string",
+          "default": ""
+        },
+        "bg_highlight": {
+          "type": "string",
+          "default": ""
+        },
+        "vertical_inset": {
+          "type": "integer",
+          "default": 4
+        },
+        "horizontal_inset": {
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
+    "ToolBar.Button.Foreground": {
+      "type": "object",
+      "properties": {
+        "style": {
+          "type": "string",
+          "default": ""
+        },
+        "option_styles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "fg_normal": {
+          "type": ["string", "null"],
+          "default": null
+        },
+        "fg_highlight": {
+          "type": ["string", "null"],
+          "default": null
+        },
+        "font_size": {
+          "type": "number",
+          "default": 15
+        },
+        "size": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "default": []
+        },
+        "padding": {
+          "type": "integer",
+          "default": 5
+        }
+      }
+    },
+    "ToolBar.Button": {
+      "type": "object",
+      "properties": {
+        "background": {
+          "$ref": "#/definitions/ToolBar.Button.Background"
+        },
+        "foreground": {
+          "$ref": "#/definitions/ToolBar.Button.Foreground"
+        },
+        "action": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    }
+  },
+  "type": "object",
   "properties": {
     "config_version": {
       "type": "string",
@@ -38,10 +125,6 @@
         "candidate_text_size": {
           "type": "integer",
           "description": "候選字號"
-        },
-        "candidate_use_cursor": {
-          "type": "boolean",
-          "description": "高亮候選項"
         },
         "candidate_view_height": {
           "type": "integer",
@@ -99,70 +182,6 @@
           "type": "integer",
           "description": "横屏模式下，屏幕下侧与键盘的距离"
         },
-        "layout": {
-          "type": "object",
-          "description": "懸浮窗口設置",
-          "properties": {
-            "min_length": {
-              "type": "integer",
-              "description": "最小詞長"
-            },
-            "max_length": {
-              "type": "integer",
-              "description": "超過字數則換行"
-            },
-            "border": {
-              "type": "integer",
-              "description": "邊框寬度"
-            },
-            "max_width": {
-              "type": "integer",
-              "description": "最大寬度，超過則自動換行"
-            },
-            "max_height": {
-              "type": "integer",
-              "description": "最大高度"
-            },
-            "min_width": {
-              "type": "integer",
-              "description": "最小寬度"
-            },
-            "min_height": {
-              "type": "integer",
-              "description": "最小高度"
-            },
-            "margin_x": {
-              "type": "integer",
-              "description": "水平邊距"
-            },
-            "margin_y": {
-              "type": "integer",
-              "description": "豎直邊距"
-            },
-            "line_spacing": {
-              "type": "integer",
-              "description": "候选詞的行間距(px)"
-            },
-            "line_spacing_multiplier": {
-              "type": "number",
-              "description": "候选詞的行間距(倍數)"
-            },
-            "spacing": {
-              "type": "integer",
-              "description": "屏幕上下边缘或预编辑上下边缘和悬浮窗之间的距离"
-            },
-            "round_corner": {
-              "type": "integer",
-              "description": "窗口圓角"
-            },
-            "alpha": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 255,
-              "description": "透明度"
-            }
-          }
-        },
         "key_font": {
           "type": "string",
           "description": "鍵盤字型"
@@ -170,10 +189,6 @@
         "key_height": {
           "type": "integer",
           "description": "鍵高"
-        },
-        "key_long_text_size": {
-          "type": "integer",
-          "description": "長標籤字號"
         },
         "key_text_size": {
           "type": "integer",
@@ -243,10 +258,6 @@
           "type": "number",
           "description": "按鍵陰影半徑"
         },
-        "speech_opencc_config": {
-          "type": "string",
-          "description": "語音輸入簡繁轉換"
-        },
         "symbol_font": {
           "type": "string",
           "description": "符號字型"
@@ -254,14 +265,6 @@
         "symbol_text_size": {
           "type": "integer",
           "description": "編碼字型"
-        },
-        "text_height": {
-          "type": "integer",
-          "description": "編碼區高度"
-        },
-        "text_size": {
-          "type": "integer",
-          "description": "編碼區字號"
         },
         "vertical_correction": {
           "type": "number",
@@ -272,17 +275,9 @@
           "type": "number",
           "description": "鍵盤行距"
         },
-        "long_text_font": {
-          "type": "string",
-          "description": "剪贴板等可能包含大段文本使用的字体"
-        },
         "background_folder": {
           "type": "string",
           "description": "背景图保存在background目录下的哪个子目录"
-        },
-        "key_long_text_border": {
-          "type": "string",
-          "description": ""
         },
         "enter_label_mode": {
           "type": "integer",
@@ -323,6 +318,145 @@
               "default": "Enter"
             }
           }
+        }
+      }
+    },
+    "preedit": {
+      "type": "object",
+      "properties": {
+        "horizontal_padding": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64,
+          "default": 8
+        },
+        "top_end_radius": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 48,
+          "default": 0.0
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 1.0
+        },
+        "foreground": {
+          "type": "object",
+          "properties": {
+            "font_size": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 64,
+              "default": 16
+            }
+          }
+        }
+      }
+    },
+    "window": {
+      "type": "object",
+      "properties": {
+        "insets": {
+          "type": "object",
+          "properties": {
+            "vertical": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64,
+              "default": 0
+            },
+            "horizontal": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64,
+              "default": 0
+            }
+          }
+        },
+        "item_padding": {
+          "type": "object",
+          "properties": {
+            "vertical": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64,
+              "default": 0
+            },
+            "horizontal": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64,
+              "default": 0
+            }
+          }
+        },
+        "min_width": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 640,
+          "default": 0
+        },
+        "corner_radius": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 48,
+          "default": 0
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 1.0
+        },
+        "foreground": {
+          "type": "object",
+          "properties": {
+            "label_font_size": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 64,
+              "default": 20
+            },
+            "text_font_size": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 64,
+              "default": 20
+            },
+            "comment_font_size": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 64,
+              "default": 16
+            }
+          }
+        }
+      }
+    },
+    "tool_bar": {
+      "properties": {
+        "primary_button": {
+          "$ref": "#/definitions/ToolBar.Button"
+        },
+        "buttons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ToolBar.Button"
+          },
+          "default": []
+        },
+        "button_spacing": {
+          "type": "integer",
+          "default": 18
+        },
+        "button_font": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
         }
       }
     },
@@ -767,7 +901,5 @@
         }
       }
     }
-  },
-  "title": "JSON schema for trime.yaml",
-  "type": "object"
+  }
 }
