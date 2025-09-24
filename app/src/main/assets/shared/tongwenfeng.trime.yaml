@@ -861,7 +861,7 @@ liquid_keyboard:
   key_height_land: 40 #横屏模式按键高度
   single_width: 60    #single类型的按键宽度
   vertical_gap: 8     #纵向按键间隙
-  margin_x: 2       #左右按键间隙的1/2
+  margin_x: 5       #左右按键间隙的1/2
   fixed_key_bar: # 固定按键条
     position: bottom  # 摆放位置（在滚动区域的……） top|bottom|left|right
     keys: # 按键（显示名称为对应的label，不能放太多）

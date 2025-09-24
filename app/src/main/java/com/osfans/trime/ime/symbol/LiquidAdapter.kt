@@ -7,10 +7,15 @@ package com.osfans.trime.ime.symbol
 
 import android.content.Context
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.LiquidKeyboard
+import com.osfans.trime.ime.core.AutoScaleTextView
+import splitties.dimensions.dp
+import splitties.views.gravityCenter
 
 class LiquidAdapter(
     private val theme: Theme,
@@ -24,7 +29,17 @@ class LiquidAdapter(
         context: Context,
         parent: ViewGroup,
         viewType: Int,
-    ): ViewHolder = ViewHolder(LiquidItemUi(context, theme))
+    ): ViewHolder {
+        val ui = LiquidItemUi(context, theme)
+        ui.mainText.apply {
+            scaleMode = AutoScaleTextView.Mode.Proportional
+            gravity = gravityCenter
+            updateLayoutParams {
+                width = context.dp(theme.liquidKeyboard.singleWidth)
+            }
+        }
+        return ViewHolder(ui)
+    }
 
     override fun onBindViewHolder(
         holder: ViewHolder,
