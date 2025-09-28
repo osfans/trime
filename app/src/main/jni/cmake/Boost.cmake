@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-set(BOOST_VER 1.89.0)
+set(BOOST_VERSION 1.89.0)
 
-if(NOT EXISTS "boost-${BOOST_VER}.tar.xz")
-  message(STATUS "Downloading Boost ${BOOST_VER} ......")
+if(NOT EXISTS "boost-${BOOST_VERSION}.tar.xz")
+  message(STATUS "Downloading Boost ${BOOST_VERSION} ......")
   file(
     DOWNLOAD
-    "https://github.com/boostorg/boost/releases/download/boost-${BOOST_VER}/boost-${BOOST_VER}-cmake.tar.xz"
-    boost-${BOOST_VER}.tar.xz
+    "https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}-cmake.tar.xz"
+    boost-${BOOST_VERSION}.tar.xz
     EXPECTED_HASH
       SHA256=67acec02d0d118b5de9eb441f5fb707b3a1cdd884be00ca24b9a73c995511f74
     SHOW_PROGRESS)
@@ -19,10 +19,10 @@ if(NOT EXISTS "boost-${BOOST_VER}.tar.xz")
 endif()
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/boost")
-  message(STATUS "Extracting Boost ${BOOST_VER} ......")
-  file(ARCHIVE_EXTRACT INPUT boost-${BOOST_VER}.tar.xz DESTINATION
+  message(STATUS "Extracting Boost ${BOOST_VERSION} ......")
+  file(ARCHIVE_EXTRACT INPUT boost-${BOOST_VERSION}.tar.xz DESTINATION
        ${CMAKE_SOURCE_DIR})
-  file(RENAME "boost-${BOOST_VER}" boost)
+  file(RENAME "boost-${BOOST_VERSION}" boost)
 endif()
 
 set(BOOST_INCLUDE_LIBRARIES
