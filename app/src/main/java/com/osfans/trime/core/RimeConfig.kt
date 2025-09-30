@@ -29,6 +29,8 @@ class RimeConfig private constructor(
         return values
     }
 
+    fun setBool(key: String, value: Boolean) = setRimeConfigBool(peer, key, value)
+
     override fun close() {
         closeRimeConfig(peer)
     }
@@ -36,10 +38,15 @@ class RimeConfig private constructor(
     companion object {
         fun openConfig(configId: String): RimeConfig = RimeConfig(openRimeConfig(configId))
 
+        fun openUserConfig(configId: String): RimeConfig = RimeConfig(openRimeUserConfig(configId))
+
         fun openSchema(schemaId: String): RimeConfig = RimeConfig(openRimeSchema(schemaId))
 
         @JvmStatic
         private external fun openRimeConfig(configId: String): Long
+
+        @JvmStatic
+        private external fun openRimeUserConfig(configId: String): Long
 
         @JvmStatic
         private external fun openRimeSchema(schemaId: String): Long
@@ -52,6 +59,9 @@ class RimeConfig private constructor(
 
         @JvmStatic
         private external fun getRimeConfigListItemPath(peer: Long, key: String): Array<String>
+
+        @JvmStatic
+        private external fun setRimeConfigBool(peer: Long, key: String, value: Boolean)
 
         @JvmStatic
         private external fun closeRimeConfig(peer: Long)
