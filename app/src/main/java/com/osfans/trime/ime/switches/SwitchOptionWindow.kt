@@ -9,6 +9,8 @@ import android.content.Context
 import android.view.View
 import android.widget.PopupMenu
 import com.osfans.trime.R
+import com.osfans.trime.core.RimeApi
+import com.osfans.trime.core.RimeConfig
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
@@ -35,6 +37,21 @@ class SwitchOptionWindow(
     InputBroadcastReceiver {
     var popupMenu: PopupMenu? = null
 
+    private val saveOptions by lazy {
+        RimeConfig.openConfig("default").use {
+            it.getList("switcher/save_options", RimeConfig::getString).toSet()
+        }
+    }
+
+    private suspend fun RimeApi.applyOption(option: String, value: Boolean) {
+        setRuntimeOption(option, value)
+        if (option in saveOptions) {
+            RimeConfig.openUserConfig("user").use {
+                it.setBool("var/option/$option", value)
+            }
+        }
+    }
+
     private val adapter: SwitchOptionAdapter by lazy {
         object : SwitchOptionAdapter() {
             override val theme: Theme = this@SwitchOptionWindow.theme
@@ -49,7 +66,7 @@ class SwitchOptionWindow(
                         if (options.isEmpty()) {
                             rime.launchOnReady {
                                 val oldValue = it.getRuntimeOption(entry.switch.name)
-                                it.setRuntimeOption(entry.switch.name, !oldValue)
+                                it.applyOption(entry.switch.name, !oldValue)
                             }
                         } else {
                             val popup = PopupMenu(context, view)
@@ -59,7 +76,7 @@ class SwitchOptionWindow(
                                     setOnMenuItemClickListener {
                                         rime.launchOnReady {
                                             options.forEachIndexed { j, option ->
-                                                it.setRuntimeOption(option, i == j)
+                                                it.applyOption(option, i == j)
                                             }
                                         }
                                         true
