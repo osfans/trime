@@ -6,7 +6,7 @@
 package com.osfans.trime.ime.switches
 
 import androidx.annotation.DrawableRes
-import com.osfans.trime.data.schema.Schema
+import com.osfans.trime.core.RimeSchema
 
 sealed class SwitchOptionEntry(
     val label: String,
@@ -14,13 +14,13 @@ sealed class SwitchOptionEntry(
     val icon: Int,
 ) {
     class Custom(
-        val switch: Schema.Switch,
+        val switch: RimeSchema.Switch,
         label: String,
         icon: Int,
     ) : SwitchOptionEntry(label, icon)
 
     companion object {
-        fun fromSwitch(it: Schema.Switch): Custom = if (it.options.isEmpty()) {
+        fun fromSwitch(it: RimeSchema.Switch): Custom = if (it.options.isEmpty()) {
             val enabledText = it.states[it.enabledIndex]
             val disabledText = it.states[1 - it.enabledIndex]
             Custom(it, "$enabledText → $disabledText", 0)

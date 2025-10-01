@@ -14,7 +14,6 @@ import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
@@ -143,7 +142,7 @@ class KeyboardWindow(
         if (presetKeyboardIds.contains(currentSchema)) {
             return currentSchema
         }
-        val alphabet = SchemaManager.activeSchema.alphabet
+        val alphabet = rime.run { schemaCached }.alphabet
         val layout =
             when {
                 alphabet.all { it.isLetter() } -> "qwerty" // 包含 26 个字母
