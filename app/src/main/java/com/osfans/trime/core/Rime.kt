@@ -66,9 +66,6 @@ class Rime :
                     startupRime(sharedDataDir, userDataDir, BuildConfig.BUILD_VERSION_NAME, fullCheck)
 
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
-
-                    emitResponse()
-                    SchemaManager.init(getCurrentRimeSchema())
                 }
 
                 override fun nativeFinalize() {
@@ -79,6 +76,16 @@ class Rime :
 
     private suspend inline fun <T> withRimeContext(crossinline block: suspend () -> T): T = withContext(dispatcher) {
         block()
+    }
+
+    override suspend fun createSession() = withRimeContext {
+        createRimeSession()
+        emitResponse()
+        SchemaManager.init(getCurrentRimeSchema())
+    }
+
+    override suspend fun destroySession() = withRimeContext {
+        destroyRimeSession()
     }
 
     override suspend fun isEmpty(): Boolean = withRimeContext {
@@ -190,9 +197,6 @@ class Rime :
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Start) {
                     OpenCCDictManager.buildOpenCCDict()
-                } else if (it.data == RimeMessage.DeployMessage.State.Success) {
-                    emitResponse()
-                    SchemaManager.init(getCurrentRimeSchema())
                 }
             }
             is RimeMessage.CompositionMessage -> {
@@ -277,6 +281,12 @@ class Rime :
 
         @JvmStatic
         external fun exitRime()
+
+        @JvmStatic
+        external fun createRimeSession()
+
+        @JvmStatic
+        external fun destroyRimeSession()
 
         @JvmStatic
         external fun deployRimeSchemaFile(schemaFile: String): Boolean
