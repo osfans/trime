@@ -13,6 +13,8 @@ interface RimeApi {
 
     val isReady: Boolean
 
+    val schemaCached: RimeSchema
+
     val statusCached: RimeProto.Status
 
     val compositionCached: RimeProto.Context.Composition

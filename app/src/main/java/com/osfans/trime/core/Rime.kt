@@ -7,7 +7,6 @@ package com.osfans.trime.core
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.isAsciiPrintable
 import com.osfans.trime.util.isStorageAvailable
@@ -16,6 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.math.max
 
 /**
  * Rime JNI and instance methods
@@ -34,6 +34,9 @@ class Rime :
 
     override val isReady: Boolean
         get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
+
+    override var schemaCached = RimeSchema(".default")
+        private set
 
     override var statusCached = RimeProto.Status()
         private set
@@ -81,7 +84,7 @@ class Rime :
     override suspend fun createSession() = withRimeContext {
         createRimeSession()
         emitResponse()
-        SchemaManager.init(getCurrentRimeSchema())
+        schemaCached = RimeSchema(getCurrentRimeSchema())
     }
 
     override suspend fun destroySession() = withRimeContext {
@@ -188,11 +191,12 @@ class Rime :
         when (it) {
             is RimeMessage.SchemaMessage -> {
                 statusCached = getRimeStatus()
-                SchemaManager.init(it.data.id)
+                schemaCached = RimeSchema(it.data.id)
+                updateSwitchOptions()
             }
             is RimeMessage.OptionMessage -> {
                 statusCached = getRimeStatus()
-                SchemaManager.updateSwitchOptions()
+                updateSwitchOptions()
             }
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Start) {
@@ -235,6 +239,30 @@ class Rime :
         }
         lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
         unregisterRimeMessageHandler(::handleRimeMessage)
+    }
+
+    private fun updateSwitchOptions() {
+        val switches = schemaCached.switches
+        if (switches.isEmpty()) return // 無方案
+
+        for (s in switches) {
+            val labels = s.states
+            // 剔除没有 states 条目项的值，它们不作为开关使用
+            if (labels.size <= 1) continue
+            if (s.name.isNotEmpty()) {
+                if (labels.size != 2) continue
+                // 只有单 Rime 运行时选项的开关，开关名即选项名，标记其启用状态
+                s.enabledIndex = getRimeOption(s.name).compareTo(false)
+            } else {
+                // 带有一系列 Rime 运行时选项的开关，找到启用的选项并标记
+                // 将启用状态标记为此选项的索引值，方便切换时直接从选项列表中获取
+                // 注意：有可能每个 option 的状态都为 false（未启用）, 因此 indexOfFirst 可能会返回 -1,
+                // 需要确保其至少为 0
+                val options = s.options
+                if (options.size != labels.size) continue
+                s.enabledIndex = max(0, options.indexOfFirst { getRimeOption(it) })
+            }
+        }
     }
 
     companion object {

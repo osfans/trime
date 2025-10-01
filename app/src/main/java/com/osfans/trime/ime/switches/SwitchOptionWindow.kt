@@ -13,7 +13,6 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.schema.SchemaManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
@@ -85,7 +84,7 @@ class SwitchOptionWindow(
 
     private fun updateSchemaOptionEntries() {
         adapter.submitList(
-            SchemaManager.activeSchema.switches
+            rime.run { schemaCached }.switches
                 .filter { it.states.size > 1 }
                 .map { SwitchOptionEntry.fromSwitch(it) },
         )
