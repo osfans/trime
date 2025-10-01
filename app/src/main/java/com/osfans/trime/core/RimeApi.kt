@@ -23,6 +23,10 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
+    suspend fun createSession()
+
+    suspend fun destroySession()
+
     suspend fun syncUserData(): Boolean
 
     suspend fun processKey(
