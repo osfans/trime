@@ -11,9 +11,7 @@ class RimeSchema(schemaId: String) {
         val options: List<String> = listOf(),
         val reset: Int = -1,
         val states: List<String> = listOf(),
-    ) {
-        var enabledIndex: Int = 0
-    }
+    )
 
     val switches: List<Switch>
     val alphabet: String

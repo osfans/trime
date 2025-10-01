@@ -46,11 +46,11 @@ class SwitchOptionWindow(
                 when (entry) {
                     is SwitchOptionEntry.Custom -> {
                         val options = entry.switch.options
-                        val oldEnabled = entry.switch.enabledIndex
                         if (options.isEmpty()) {
-                            val newEnabled = 1 - oldEnabled
-                            entry.switch.enabledIndex = newEnabled
-                            rime.launchOnReady { it.setRuntimeOption(entry.switch.name, newEnabled == 1) }
+                            rime.launchOnReady {
+                                val oldValue = it.getRuntimeOption(entry.switch.name)
+                                it.setRuntimeOption(entry.switch.name, !oldValue)
+                            }
                         } else {
                             val popup = PopupMenu(context, view)
                             val menu = popup.menu
@@ -58,8 +58,9 @@ class SwitchOptionWindow(
                                 menu.add(0, 0, 0, state).apply {
                                     setOnMenuItemClickListener {
                                         rime.launchOnReady {
-                                            it.setRuntimeOption(options[oldEnabled], false)
-                                            it.setRuntimeOption(options[i], true)
+                                            options.forEachIndexed { j, option ->
+                                                it.setRuntimeOption(option, i == j)
+                                            }
                                         }
                                         true
                                     }
@@ -85,8 +86,7 @@ class SwitchOptionWindow(
     private fun updateSchemaOptionEntries() {
         adapter.submitList(
             rime.run { schemaCached }.switches
-                .filter { it.states.size > 1 }
-                .map { SwitchOptionEntry.fromSwitch(it) },
+                .mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) },
         )
     }
 
