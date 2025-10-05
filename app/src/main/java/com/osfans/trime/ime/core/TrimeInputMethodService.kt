@@ -816,7 +816,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     override fun onViewClicked(focusChanged: Boolean) {
         super.onViewClicked(focusChanged)
         if (Build.VERSION.SDK_INT < 34) {
-            decorLocationUpdated = false
             inputDeviceManager.evaluateOnViewClicked(this)
         }
     }
@@ -824,7 +823,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     @TargetApi(34)
     override fun onUpdateEditorToolType(toolType: Int) {
         super.onUpdateEditorToolType(toolType)
-        decorLocationUpdated = false
         inputDeviceManager.evaluateOnUpdateEditorToolType(toolType, this)
     }
 
@@ -1081,10 +1079,5 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
         dialog.show()
         showingDialog = dialog
-    }
-
-    companion object {
-        /** Delimiter regex to split language/locale tags. */
-        private val DELIMITER_SPLITTER = """[-_]""".toRegex()
     }
 }
