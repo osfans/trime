@@ -21,7 +21,7 @@ class InputDeviceManager(
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
 
-    private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
+    private val candidatesViewMode by AppPrefs.defaultInstance().candidates.mode
 
     private fun setupInputViewCallback(isVirtual: Boolean) {
         inputView?.handleMessages = isVirtual
@@ -29,7 +29,7 @@ class InputDeviceManager(
     }
 
     private fun setupCandidatesViewCallback(isVirtual: Boolean) {
-        val shouldSetupView = !isVirtual || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
+        val shouldSetupView = !isVirtual || candidatesViewMode == PopupCandidatesMode.ALWAYS_SHOW
         candidatesView?.handleMessages = shouldSetupView
         if (!shouldSetupView) {
             candidatesView?.visibility = View.GONE
@@ -83,7 +83,7 @@ class InputDeviceManager(
         startedInputView = true
         isNullInputType = info.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         val useVirtualKeyboard =
-            when (candidatesMode) {
+            when (candidatesViewMode) {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE -> isVirtualKeyboard
                 PopupCandidatesMode.ALWAYS_SHOW -> true
@@ -101,8 +101,8 @@ class InputDeviceManager(
         service: TrimeInputMethodService,
     ): Boolean {
         if (startedInputView) {
-            // filter out back/home/volume buttons
-            if (e.isPrintingKey) {
+            // filter out back/home/volume buttons and combination keys
+            if (e.isPrintingKey && e.hasNoModifiers()) {
                 // evaluate virtual keyboard visibility when pressing physical keyboard while InputView visible
                 evaluateOnKeyDownInner(service)
             }
@@ -111,7 +111,7 @@ class InputDeviceManager(
         } else {
             // force show InputView when focusing on text input (likely inputType is not TYPE_NULL)
             // and pressing any digit/letter/punctuation key on physical keyboard
-            val showInputView = !isNullInputType && e.isPrintingKey
+            val showInputView = !isNullInputType && e.isPrintingKey && e.hasNoModifiers()
             if (showInputView) {
                 evaluateOnKeyDownInner(service)
             }
@@ -121,7 +121,7 @@ class InputDeviceManager(
 
     private fun evaluateOnKeyDownInner(service: TrimeInputMethodService) {
         val useVirtualKeyboard =
-            when (candidatesMode) {
+            when (candidatesViewMode) {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE -> false
                 PopupCandidatesMode.ALWAYS_SHOW -> false
@@ -131,8 +131,9 @@ class InputDeviceManager(
     }
 
     fun evaluateOnViewClicked(service: TrimeInputMethodService) {
+        if (!startedInputView) return
         val useVirtualKeyboard =
-            when (candidatesMode) {
+            when (candidatesViewMode) {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 else -> true
             }
@@ -143,11 +144,17 @@ class InputDeviceManager(
         toolType: Int,
         service: TrimeInputMethodService,
     ) {
+        if (!startedInputView) return
         val useVirtualKeyboard =
-            when (candidatesMode) {
+            when (candidatesViewMode) {
                 PopupCandidatesMode.SYSTEM_DEFAULT -> service.superEvaluateInputViewShown()
                 PopupCandidatesMode.INPUT_DEVICE ->
-                    toolType == MotionEvent.TOOL_TYPE_FINGER || toolType == MotionEvent.TOOL_TYPE_STYLUS
+                    // switch to virtual keyboard on touch screen events, otherwise preserve current mode
+                    if (toolType == MotionEvent.TOOL_TYPE_FINGER || toolType == MotionEvent.TOOL_TYPE_STYLUS) {
+                        true
+                    } else {
+                        isVirtualKeyboard
+                    }
                 PopupCandidatesMode.ALWAYS_SHOW -> true
                 PopupCandidatesMode.DISABLED -> true
             }
