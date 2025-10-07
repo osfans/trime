@@ -212,42 +212,55 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 KeyboardSwitcher.currentKeyboardView?.invalidateAllKeys()
             }
             is RimeMessage.KeyMessage ->
-                it.data.let event@{
-                    val keyCode = it.value.keyCode
-                    if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-                        when {
-                            !it.modifiers.release && it.value.value > 0 -> {
-                                runCatching {
-                                    commitText("${Char(it.value.value)}")
+                it.data.let msg@{
+                    if (it.isVirtual) {
+                        when (it.value.value) {
+                            RimeKeyMapping.RimeKey_Return -> handleReturnKey()
+                            else -> {
+                                val keyCode = it.value.keyCode
+                                if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                                    // recognized keyCode
+                                    sendDownUpKeyEvent(
+                                        keyCode,
+                                        it.modifiers.metaState or meta(
+                                            alt = it.modifiers.alt,
+                                            shift = it.modifiers.shift,
+                                            ctrl = it.modifiers.ctrl,
+                                            meta = it.modifiers.meta,
+                                        ),
+                                    )
+                                    if (it.modifiers.ctrl && keyCode == KeyEvent.KEYCODE_C) clearTextSelection()
+                                } else {
+                                    if (it.value.value > 0) {
+                                        runCatching {
+                                            commitText(Character.toString(it.value.value))
+                                        }.getOrElse { t -> Timber.w(t, "Unhandled Virtual KeyEvent: $it") }
+                                    } else {
+                                        Timber.w("Unhandled Virtual KeyEvent: $it")
+                                    }
                                 }
                             }
-                            else -> Timber.w("Unhandled Rime KeyEvent: $it")
                         }
-                        return
+                    } else {
+                        val keyCode = it.value.keyCode
+                        if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                            // recognized keyCode
+                            val eventTime = SystemClock.uptimeMillis()
+                            if (it.modifiers.release) {
+                                sendUpKeyEvent(eventTime, keyCode, it.modifiers.metaState)
+                            } else {
+                                sendDownKeyEvent(eventTime, keyCode, it.modifiers.metaState)
+                            }
+                        } else {
+                            if (!it.modifiers.release && it.value.value > 0) {
+                                runCatching {
+                                    commitText(Character.toString(it.value.value))
+                                }.getOrElse { t -> Timber.w(t, "Unhandled Rime KeyEvent: $it") }
+                            } else {
+                                Timber.w("Unhandled Rime KeyEvent: $it")
+                            }
+                        }
                     }
-
-                    val eventTime = SystemClock.uptimeMillis()
-                    if (it.modifiers.release) {
-                        sendUpKeyEvent(eventTime, keyCode, it.modifiers.metaState)
-                        return
-                    }
-
-                    // TODO: look for better workaround for this
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        handleReturnKey()
-                        return
-                    }
-
-                    if (keyCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
-                        // ignore KP_X keys, which is handled in `CommonKeyboardActionListener`.
-                        // Requires this empty body becoz Kotlin request it
-                        return
-                    }
-
-                    if (it.modifiers.shift) sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
-                    sendDownKeyEvent(eventTime, keyCode, it.modifiers.metaState)
-                    if (it.modifiers.shift) sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
-                    if (it.modifiers.ctrl && keyCode == KeyEvent.KEYCODE_C) clearTextSelection()
                 }
             else -> {}
         }
@@ -635,29 +648,18 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      * @return An integer containing all meta flags passed and formatted for use in a [KeyEvent].
      */
     fun meta(
-        ctrl: Boolean = false,
         alt: Boolean = false,
+        ctrl: Boolean = false,
         shift: Boolean = false,
         meta: Boolean = false,
         sym: Boolean = false,
     ): Int {
         var metaState = 0
-        if (ctrl) {
-            metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
-        }
-        if (alt) {
-            metaState = metaState or KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
-        }
-        if (shift) {
-            metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
-        }
-        if (meta) {
-            metaState = metaState or KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON
-        }
-        if (sym) {
-            metaState = metaState or KeyEvent.META_SYM_ON
-        }
-
+        if (alt) metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
+        if (ctrl) metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
+        if (shift) metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
+        if (meta) metaState = metaState or KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON
+        if (sym) metaState = metaState or KeyEvent.META_SYM_ON
         return metaState
     }
 
@@ -710,33 +712,19 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      *
      * @param keyEventCode The key code to send, use a key code defined in Android's [KeyEvent].
      * @param metaState Flags indicating which meta keys are currently pressed.
-     * @param count How often the key is pressed while the meta keys passed are down. Must be greater than or equal to
-     *  `1`, else this method will immediately return false.
      *
      * @return True on success, false if an error occurred or the input connection is invalid.
      */
     fun sendDownUpKeyEvent(
         keyEventCode: Int,
         metaState: Int = meta(),
-        count: Int = 1,
     ): Boolean {
-        if (count < 1) return false
-        val ic = currentInputConnection ?: return false
-        ic.clearMetaKeyStates(
-            KeyEvent.META_FUNCTION_ON
-                or KeyEvent.META_SHIFT_MASK
-                or KeyEvent.META_ALT_MASK
-                or KeyEvent.META_CTRL_MASK
-                or KeyEvent.META_META_MASK
-                or KeyEvent.META_SYM_ON,
-        )
-        ic.beginBatchEdit()
         val eventTime = SystemClock.uptimeMillis()
-        if (metaState and KeyEvent.META_CTRL_ON != 0) {
-            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
-        }
         if (metaState and KeyEvent.META_ALT_ON != 0) {
             sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
+        }
+        if (metaState and KeyEvent.META_CTRL_ON != 0) {
+            sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
         }
         if (metaState and KeyEvent.META_SHIFT_ON != 0) {
             sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
@@ -744,50 +732,46 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (metaState and KeyEvent.META_META_ON != 0) {
             sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT)
         }
-
         if (metaState and KeyEvent.META_SYM_ON != 0) {
             sendDownKeyEvent(eventTime, KeyEvent.KEYCODE_SYM)
         }
-
-        for (n in 0 until count) {
-            sendDownKeyEvent(eventTime, keyEventCode, metaState)
-            sendUpKeyEvent(eventTime, keyEventCode, metaState)
+        sendDownKeyEvent(eventTime, keyEventCode, metaState)
+        sendUpKeyEvent(eventTime, keyEventCode, metaState)
+        if (metaState and KeyEvent.META_SYM_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SYM)
+        }
+        if (metaState and KeyEvent.META_META_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT)
         }
         if (metaState and KeyEvent.META_SHIFT_ON != 0) {
             sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SHIFT_LEFT)
         }
-        if (metaState and KeyEvent.META_ALT_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
-        }
         if (metaState and KeyEvent.META_CTRL_ON != 0) {
             sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_CTRL_LEFT)
         }
-
-        if (metaState and KeyEvent.META_META_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_META_LEFT)
+        if (metaState and KeyEvent.META_ALT_ON != 0) {
+            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_ALT_LEFT)
         }
-
-        if (metaState and KeyEvent.META_SYM_ON != 0) {
-            sendUpKeyEvent(eventTime, KeyEvent.KEYCODE_SYM)
-        }
-
-        ic.endBatchEdit()
         return true
     }
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
         val modifiers = KeyModifiers.fromKeyEvent(event)
         val charCode = event.unicodeChar
-        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code) {
+        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
+            // drop modifier state when using combination keys to input number/symbol on some phones
+            // because rime doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
+            // in which case event.getNumber().toInt() == event.getUnicodeChar()
+            val m = if (event.number.code == charCode) KeyModifiers.Empty else modifiers
             postRimeJob {
-                processKey(charCode, modifiers.modifiers)
+                processKey(charCode, m.modifiers, isVirtual = false)
             }
             return true
         }
         val keyVal = KeyValue.fromKeyEvent(event)
         if (keyVal.value != RimeKeyMapping.RimeKey_VoidSymbol) {
             postRimeJob {
-                processKey(keyVal, modifiers)
+                processKey(keyVal, modifiers, isVirtual = false)
             }
             return true
         }

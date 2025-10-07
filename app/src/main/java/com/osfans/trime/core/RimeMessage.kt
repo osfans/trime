@@ -129,6 +129,7 @@ sealed class RimeMessage<T>(
         data class Data(
             val value: KeyValue,
             val modifiers: KeyModifiers,
+            val isVirtual: Boolean,
         )
     }
 
@@ -189,6 +190,7 @@ sealed class RimeMessage<T>(
                     KeyMessage.Data(
                         KeyValue(params[0] as Int),
                         KeyModifiers.of(params[1] as Int),
+                        params[2] as Boolean,
                     ),
                 )
             else -> UnknownMessage(params)
