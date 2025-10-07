@@ -63,6 +63,7 @@ value class KeyModifiers(
     val ctrl get() = has(KeyModifier.Control)
     val shift get() = has(KeyModifier.Shift)
     val meta get() = has(KeyModifier.Meta)
+    val numLock get() = has(KeyModifier.Mod2) // NumLock
     val capsLock get() = has(KeyModifier.Lock)
 
     val release get() = has(KeyModifier.Release)
@@ -73,6 +74,7 @@ value class KeyModifiers(
         if (ctrl) metaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
         if (shift) metaState = metaState or KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
         if (meta) metaState = metaState or KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON
+        if (numLock) metaState = metaState or KeyEvent.META_NUM_LOCK_ON
         if (capsLock) metaState = metaState or KeyEvent.META_CAPS_LOCK_ON
         return metaState
     }
@@ -91,6 +93,7 @@ value class KeyModifiers(
                 if (isCtrlPressed) states += KeyModifier.Control
                 if (isShiftPressed) states += KeyModifier.Shift
                 if (isCapsLockOn) states += KeyModifier.Lock
+                if (isNumLockOn) states += KeyModifier.Mod2 // NumLock
                 if (isMetaPressed) states += KeyModifier.Meta
                 if (action == KeyEvent.ACTION_UP) states += KeyModifier.Release
             }
@@ -102,8 +105,9 @@ value class KeyModifiers(
             if (metaState.hasFlag(KeyEvent.META_ALT_ON)) states += KeyModifier.Alt
             if (metaState.hasFlag(KeyEvent.META_CTRL_ON)) states += KeyModifier.Control
             if (metaState.hasFlag(KeyEvent.META_SHIFT_ON)) states += KeyModifier.Shift
+            if (metaState.hasFlag(KeyEvent.META_NUM_LOCK_ON)) states += KeyModifier.Mod2 // NumLock
             if (metaState.hasFlag(KeyEvent.META_CAPS_LOCK_ON)) states += KeyModifier.Lock
-            if (metaState.hasFlag(KeyEvent.META_META_ON)) states + KeyModifier.Meta
+            if (metaState.hasFlag(KeyEvent.META_META_ON)) states += KeyModifier.Meta
             return KeyModifiers(states)
         }
 

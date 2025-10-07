@@ -288,9 +288,14 @@ class CommonKeyboardActionListener(
                         .keyCodeToVal(keyEventCode)
                         .takeIf { it != RimeKeyMapping.RimeKey_VoidSymbol }
                         ?: RimeKeyEvent.getKeycodeByName(Keycode.keyNameOf(keyEventCode))
-                val modifiers = KeyModifiers.fromMetaState(metaState).modifiers
+                val m = if (keyEventCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
+                    metaState or KeyEvent.META_NUM_LOCK_ON
+                } else {
+                    metaState
+                }
+                val modifiers = KeyModifiers.fromMetaState(m).modifiers
                 service.postRimeJob {
-                    if (service.hookKeyboard(keyEventCode, metaState)) {
+                    if (service.hookKeyboard(keyEventCode, m)) {
                         Timber.d("handleKey: hook")
                         return@postRimeJob
                     }
@@ -304,19 +309,6 @@ class CommonKeyboardActionListener(
                         return@postRimeJob
                     }
                     shouldReleaseKey = false
-
-                    when (keyEventCode) {
-                        KeyEvent.KEYCODE_BACK -> service.requestHideSelf(0)
-                        else -> {
-                            // 小键盘自动增加锁定
-                            if (keyEventCode in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
-                                service.sendDownUpKeyEvent(
-                                    keyEventCode,
-                                    metaState or KeyEvent.META_NUM_LOCK_ON,
-                                )
-                            }
-                        }
-                    }
                 }
             }
 

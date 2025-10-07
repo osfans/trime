@@ -101,12 +101,13 @@ class Rime :
     override suspend fun processKey(
         value: Int,
         modifiers: UInt,
+        isVirtual: Boolean,
     ): Boolean = withRimeContext {
         processRimeKey(value, modifiers.toInt()).also {
             if (it) {
                 emitResponse()
             } else {
-                emitKeyEvent(value, modifiers.toInt())
+                emitKeyEvent(value, modifiers.toInt(), isVirtual)
             }
         }
     }
@@ -114,12 +115,13 @@ class Rime :
     override suspend fun processKey(
         value: KeyValue,
         modifiers: KeyModifiers,
+        isVirtual: Boolean,
     ): Boolean = withRimeContext {
         processRimeKey(value.value, modifiers.toInt()).also {
             if (it) {
                 emitResponse()
             } else {
-                emitKeyEvent(value.value, modifiers.toInt())
+                emitKeyEvent(value.value, modifiers.toInt(), isVirtual)
             }
         }
     }
@@ -415,10 +417,11 @@ class Rime :
         private fun emitKeyEvent(
             value: Int,
             modifiers: Int,
+            isVirtual: Boolean,
         ) {
             handleRimeMessage(
                 9, // RimeMessage.MessageType.Key,
-                arrayOf(value, modifiers),
+                arrayOf(value, modifiers, isVirtual),
             )
         }
 
