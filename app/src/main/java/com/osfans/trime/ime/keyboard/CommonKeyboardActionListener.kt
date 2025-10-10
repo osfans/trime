@@ -308,6 +308,10 @@ class CommonKeyboardActionListener(
                         Timber.d("handleKey: openCategory")
                         return@postRimeJob
                     }
+                    // other special cases
+                    if (keyEventCode == KeyEvent.KEYCODE_BACK) {
+                        service.requestHideSelf(0)
+                    }
                     shouldReleaseKey = false
                 }
             }
