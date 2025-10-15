@@ -130,7 +130,6 @@ class KeyboardWindow(
                 cachedKeyboards[target] = newKeyboard to it
             }
         newView.let {
-            KeyboardSwitcher.currentKeyboardView = it
             it.keyboardActionListener = keyboardActionListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
         }
