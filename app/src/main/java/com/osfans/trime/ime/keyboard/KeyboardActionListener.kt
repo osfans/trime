@@ -45,5 +45,5 @@ interface KeyboardActionListener {
      *
      * @param text the sequence of characters to be displayed.
      */
-    fun onText(text: CharSequence)
+    fun onText(text: String)
 }

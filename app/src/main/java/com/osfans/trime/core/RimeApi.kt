@@ -43,6 +43,10 @@ interface RimeApi {
         isVirtual: Boolean = true,
     ): Boolean
 
+    suspend fun simulateKeySequence(
+        sequence: String,
+    ): Boolean
+
     suspend fun selectCandidate(idx: Int): Boolean
 
     suspend fun forgetCandidate(idx: Int): Boolean
