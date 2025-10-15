@@ -316,9 +316,10 @@ class CommonKeyboardActionListener(
                 }
             }
 
-            override fun onText(text: CharSequence) {
+            override fun onText(text: String) {
+                if (text.isEmpty()) return
                 val status = rime.run { statusCached }
-                if (!text.first().isAsciiPrintable() && status.isComposing) {
+                if (!text[0].isAsciiPrintable() && status.isComposing) {
                     service.postRimeJob { commitComposition() }
                 }
 
@@ -328,13 +329,17 @@ class CommonKeyboardActionListener(
                         when {
                             UNBRACED_CHAR.matches(sequence) -> UNBRACED_CHAR.matchEntire(sequence)?.groupValues?.get(1) ?: ""
                             BRACED_KEY_EVENT.matches(sequence) -> BRACED_KEY_EVENT.matchEntire(sequence)?.groupValues?.get(1) ?: ""
-                            else -> sequence.first().toString()
+                            else -> sequence[0].toString()
                         }
 
                     service.postRimeJob {
-                        when {
-                            slice.startsWith("{") && slice.endsWith("}") -> onAction(KeyActionManager.getAction(slice))
-                            !Rime.simulateKeySequence(slice) -> service.commitText(slice.replace("{Escape}", ""))
+                        if (slice.run { startsWith('{') && endsWith('}') }) {
+                            onAction(KeyActionManager.getAction(slice))
+                        } else if (!slice[0].isAsciiPrintable()) {
+                            service.commitText(slice)
+                        } else {
+                            val escapedSlice = slice.replace("{}", "{braceleft}{braceright}")
+                            simulateKeySequence(escapedSlice)
                         }
                     }
 

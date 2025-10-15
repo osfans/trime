@@ -126,6 +126,23 @@ class Rime :
         }
     }
 
+    override suspend fun simulateKeySequence(sequence: String): Boolean = withRimeContext {
+        Timber.d("simulateKeySequence: $sequence")
+        if (simulateRimeKeySequence(sequence)) {
+            val commit = getRimeCommit()
+            val input = getRimeRawInput()
+            if (!commit.text.isNullOrEmpty() || input.isNotEmpty()) {
+                emitResponse { commit }
+                true
+            } else {
+                emitResponse { RimeProto.Commit(sequence) }
+                false
+            }
+        } else {
+            false
+        }.also { Timber.d("simulateKeySequence ${if (it) "success" else "failed"}") }
+    }
+
     override suspend fun selectCandidate(idx: Int): Boolean = withRimeContext {
         selectRimeCandidate(idx).also { if (it) emitResponse() }
     }
@@ -204,7 +221,7 @@ class Rime :
             }
             is RimeMessage.CompositionMessage -> {
                 compositionCached = it.data
-                rawInputCached = getRimeRawInput() ?: ""
+                rawInputCached = getRimeRawInput()
             }
             is RimeMessage.CandidateMenuMessage -> menuCached = it.data
             is RimeMessage.StatusMessage -> statusCached = it.data
@@ -251,26 +268,6 @@ class Rime :
 
         init {
             System.loadLibrary("rime_jni")
-        }
-
-        @JvmStatic
-        fun simulateKeySequence(sequence: CharSequence): Boolean {
-            if (!sequence.first().isAsciiPrintable()) return false
-            Timber.d("simulateKeySequence: $sequence")
-
-            val simulateResult =
-                simulateRimeKeySequence(
-                    sequence.toString().replace("{}", "{braceleft}{braceright}"),
-                )
-            val commit = getRimeCommit()
-            val ctx = getRimeContext()
-
-            return (simulateResult && (!commit.text.isNullOrEmpty() || ctx.input.isNotEmpty())).also {
-                Timber.d("simulateKeySequence ${if (it) "success" else "failed"}")
-                if (it) {
-                    emitResponse(commit, ctx)
-                }
-            }
         }
 
         // init
@@ -350,7 +347,7 @@ class Rime :
         external fun simulateRimeKeySequence(keySequence: String): Boolean
 
         @JvmStatic
-        external fun getRimeRawInput(): String?
+        external fun getRimeRawInput(): String
 
         @JvmStatic
         external fun getRimeCaretPos(): Int
@@ -400,10 +397,10 @@ class Rime :
         }
 
         private fun emitResponse(
-            commit: RimeProto.Commit = getRimeCommit(),
-            context: RimeProto.Context = getRimeContext(),
+            commit: (() -> RimeProto.Commit) = { getRimeCommit() },
         ) {
-            handleRimeMessage(4, arrayOf(commit))
+            handleRimeMessage(4, arrayOf(commit.invoke()))
+            val context = getRimeContext()
             handleRimeMessage(5, arrayOf(context.composition))
             handleRimeMessage(6, arrayOf(context.menu))
             handleRimeMessage(7, arrayOf(getRimeStatus()))
