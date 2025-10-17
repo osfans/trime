@@ -10,6 +10,7 @@ import android.os.Build
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ViewAnimator
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
@@ -41,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
+import splitties.systemservices.clipboardManager
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -57,20 +59,14 @@ class QuickBar(
     lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
 ) : InputBroadcastReceiver {
 
+    @Keep
     private val clipboardListener = ClipboardManager.OnPrimaryClipChangedListener {
-        val content = service.getSystemService(Context.CLIPBOARD_SERVICE)
-            .let { it as? ClipboardManager }
-            ?.primaryClip
-            ?.takeIf { it.itemCount > 0 }
-            ?.getItemAt(0)
-            ?.text
-            ?.toString()
-            ?.takeIf { it.isNotBlank() }
-
+        val clip = clipboardManager.primaryClip
+        val content = clip?.getItemAt(0)?.text?.toString()?.takeIf { it.isNotBlank() }
         content?.let { handleClipboardContent(it) }
     }
 
-    private var clipboardAutoHideJob: Job? = null
+    private var clipboardTimeoutJob: Job? = null
 
     private val candidate by lazyCandidate
 
@@ -79,6 +75,10 @@ class QuickBar(
     private val prefs = AppPrefs.defaultInstance()
 
     private val hideQuickBar by prefs.keyboard.hideQuickBar
+
+    private val clipboardSuggestion by prefs.clipboard.clipboardSuggestion
+
+    private val clipboardSuggestionTimeout by prefs.clipboard.clipboardSuggestionTimeout
 
     val themedHeight =
         theme.generalStyle.candidateViewHeight + theme.generalStyle.commentHeight
@@ -223,8 +223,7 @@ class QuickBar(
 
             evalAlwaysUiState()
 
-            (service.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)
-                ?.addPrimaryClipChangedListener(clipboardListener)
+            clipboardManager.addPrimaryClipChangedListener(clipboardListener)
         }
     }
 
@@ -255,13 +254,13 @@ class QuickBar(
     }
 
     fun handleClipboardContent(content: String?) {
-        val isEmpty = content.isNullOrEmpty()
+        val isEmpty = content.isNullOrEmpty() || !clipboardSuggestion
 
         if (!isEmpty) {
             clipboardSuggestionUi.text.text = content
-            clipboardAutoHideJob?.cancel()
-            clipboardAutoHideJob = service.lifecycleScope.launch {
-                delay(10000)
+            clipboardTimeoutJob?.cancel()
+            clipboardTimeoutJob = service.lifecycleScope.launch {
+                delay(clipboardSuggestionTimeout * 1000L)
                 handleClipboardContent(null)
             }
         }

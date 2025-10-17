@@ -168,7 +168,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:max="100"
             app:systemDefaultValue="0"
             app:systemDefaultValueText="@string/system_default"
-            app:unit="@string/unit__time_ms"
+            app:unit="ms"
             app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="0"
@@ -222,7 +222,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:max="800"
             app:min="100"
             app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms"
+            app:unit="ms"
             app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="30"
@@ -233,7 +233,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:max="100"
             app:min="10"
             app:seekBarIncrement="10"
-            app:unit="@string/unit__time_ms"
+            app:unit="ms"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
