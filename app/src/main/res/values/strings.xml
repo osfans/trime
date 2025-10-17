@@ -40,7 +40,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="vibrate_on_keypress">Vibrate on key press</string>
     <string name="vibration_duration">Vibration duration on key press</string>
     <string name="vibration_amplitude">Vibration amplitude on key press</string>
-    <string name="unit__time_ms">ms</string>
     <string name="speak_on_keypress">Voice on key press</string>
     <string name="speak_key_commit">Voice on commit</string>
     <string name="keyboard__long_press_timeout_title">Long key press delay</string>
@@ -80,6 +79,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clipboard_clipboard_limit">Clipboard History Limit</string>
     <string name="clipboard_clipboard_compare_title">Clipboard Compare Rules</string>
     <string name="clipboard_clipboard_output_title">Clipboard Output Rules</string>
+    <string name="clipboard_suggestion">Show clipboard suggestions</string>
+    <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
     <string-array name="keyboard__fullscreen_mode_entries">

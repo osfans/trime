@@ -40,7 +40,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="vibrate_on_keypress">按鍵時振動</string>
     <string name="vibration_duration">按鍵振動時長</string>
     <string name="vibration_amplitude">按鍵振動強度</string>
-    <string name="unit__time_ms">毫秒</string>
     <string name="speak_on_keypress">按鍵時朗讀字符</string>
     <string name="speak_key_commit">上屏時朗讀字符</string>
     <string name="keyboard__long_press_timeout_title">長按按鍵的延遲時間</string>
@@ -77,8 +76,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="other__show_app_icon_title">在啟動器中顯示圖示</string>
     <string name="other__show_app_icon_off_summary">在某些 ROM 中，您仍會看到圖示顯示，並可能在>點選它後轉到系統的應用資訊頁</string>
     <string name="pref__default">預設</string>
-    <string name="clipboard_clipboard_compare_title">剪貼板去重規則</string>
-    <string name="clipboard_clipboard_output_title">剪貼板過濾規則</string>
+    <string name="clipboard_clipboard_limit">剪貼簿歷史記錄上限</string>
+    <string name="clipboard_clipboard_compare_title">剪貼簿去重規則</string>
+    <string name="clipboard_clipboard_output_title">剪貼簿過濾規則</string>
+    <string name="clipboard_suggestion">顯示剪貼簿建議</string>
+    <string name="clipboard_suggestion_timeout">剪貼簿項目逾時</string>
     <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">
@@ -165,7 +167,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>
     <string name="clipboard">剪貼簿</string>
     <string name="clipboard_draft">草稿箱</string>
-    <string name="clipboard_clipboard_limit">剪貼簿歷史記錄上限</string>
     <string name="clipboard_collection">收藏夾</string>
     <string name="simple_key_unpin">取消置頂</string>
     <string name="simple_key_pin">置頂</string>

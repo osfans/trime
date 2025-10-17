@@ -37,7 +37,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="vibrate_on_keypress">按键时振动</string>
     <string name="vibration_duration">按键振动时长</string>
     <string name="vibration_amplitude">按键振动强度</string>
-    <string name="unit__time_ms">" 毫秒"</string>
     <string name="speak_on_keypress">按键时朗读字符</string>
     <string name="speak_key_commit">上屏时朗读字符</string>
     <string name="keyboard__long_press_timeout_title">长按按键的延迟时间</string>
@@ -77,6 +76,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clipboard_clipboard_limit">剪贴板历史记录上限</string>
     <string name="clipboard_clipboard_compare_title">剪贴板去重规则</string>
     <string name="clipboard_clipboard_output_title">剪贴板过滤规则</string>
+    <string name="clipboard_suggestion">显示剪贴板提示</string>
+    <string name="clipboard_suggestion_timeout">剪贴板提示超时</string>
     <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
     <string-array name="keyboard__fullscreen_mode_entries">

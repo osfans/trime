@@ -228,18 +228,22 @@ class AppPrefs(
         shared: SharedPreferences,
     ) : PreferenceDelegateOwner(shared) {
         companion object {
+            const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
             const val CLIPBOARD_COMPARE_RULES = "clipboard_clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "clipboard_clipboard_output"
+            const val CLIPBOARD_SUGGESTION = "clipboard_suggestion"
+            const val CLIPBOARD_SUGGESTION_TIMEOUT = "clipboard_suggestion_timeout"
             const val DRAFT_OUTPUT_RULES = "clipboard_draft_output"
             const val DRAFT_EXCLUDE_APP = "clipboard_draft_exclude_app"
             const val DRAFT_LIMIT = "clipboard_draft_limit"
-            const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
         }
 
+        val clipboardLimit = int(CLIPBOARD_LIMIT, 10)
         val clipboardCompareRules = string(CLIPBOARD_COMPARE_RULES, "")
         val clipboardOutputRules = string(CLIPBOARD_OUTPUT_RULES, "")
+        val clipboardSuggestion = bool(CLIPBOARD_SUGGESTION, true)
+        val clipboardSuggestionTimeout = int(CLIPBOARD_SUGGESTION_TIMEOUT, 20)
         val draftOutputRules = string(DRAFT_OUTPUT_RULES, "")
-        val clipboardLimit = int(CLIPBOARD_LIMIT, 10)
         val draftLimit = int(DRAFT_LIMIT, 10)
         val draftExcludeApp = string(DRAFT_EXCLUDE_APP, "")
     }
