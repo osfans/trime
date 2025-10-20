@@ -79,6 +79,15 @@ class Rime {
     session_ = 0;
   }
 
+  bool deploySchema(std::string_view schemaFile) {
+    return rime->deploy_schema(schemaFile.data());
+  }
+
+  bool deployConfigFile(std::string_view configFile,
+                        std::string_view versionKey) {
+    return rime->deploy_config_file(configFile.data(), versionKey.data());
+  }
+
   bool processKey(int keycode, int mask) {
     return rime->process_key(session_, keycode, mask);
   }
@@ -254,7 +263,7 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_deployRimeSchemaFile(JNIEnv *env,
                                                      jclass /* thiz */,
                                                      jstring schema_file) {
-  return rime_get_api()->deploy_schema(CString(env, schema_file));
+  return Rime::Instance().deploySchema(*CString(env, schema_file));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -262,8 +271,8 @@ Java_com_osfans_trime_core_Rime_deployRimeConfigFile(JNIEnv *env,
                                                      jclass /* thiz */,
                                                      jstring file_name,
                                                      jstring version_key) {
-  return rime_get_api()->deploy_config_file(CString(env, file_name),
-                                            CString(env, version_key));
+  return Rime::Instance().deployConfigFile(*CString(env, file_name),
+                                           *CString(env, version_key));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
