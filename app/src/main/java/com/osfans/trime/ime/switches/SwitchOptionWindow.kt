@@ -8,6 +8,7 @@ package com.osfans.trime.ime.switches
 import android.content.Context
 import android.view.View
 import android.widget.PopupMenu
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeConfig
@@ -21,6 +22,7 @@ import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.util.AppUtils
+import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
@@ -133,7 +135,14 @@ class SwitchOptionWindow(
     override fun onCreateBarView() = barExternalView
 
     override fun onAttached() {
-        updateSchemaOptionEntries()
+        rime.launchOnReady { api ->
+            val data = api.currentSchema().switches
+            service.lifecycleScope.launch {
+                adapter.submitList(
+                    data.mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) },
+                )
+            }
+        }
     }
 
     override fun onDetached() {

@@ -67,12 +67,6 @@ class Rime {
     }
   }
 
-  void createSession() {
-    if (session_ == 0 || !rime->find_session(session_)) {
-      session_ = rime->create_session();
-    }
-  }
-
   void destroySession() {
     if (session_ == 0) return;
     rime->destroy_session(session_);
@@ -89,40 +83,40 @@ class Rime {
   }
 
   bool processKey(int keycode, int mask) {
-    return rime->process_key(session_, keycode, mask);
+    return rime->process_key(session(), keycode, mask);
   }
 
   bool simulateKeySequence(const std::string &sequence) {
-    return rime->simulate_key_sequence(session_, sequence.data());
+    return rime->simulate_key_sequence(session(), sequence.data());
   }
 
-  bool commitComposition() { return rime->commit_composition(session_); }
+  bool commitComposition() { return rime->commit_composition(session()); }
 
-  void clearComposition() { rime->clear_composition(session_); }
+  void clearComposition() { rime->clear_composition(session()); }
 
   void commitProto(RIME_PROTO_BUILDER *builder) {
-    proto->commit_proto(session_, builder);
+    proto->commit_proto(session(), builder);
   }
 
   void contextProto(RIME_PROTO_BUILDER *builder) {
-    proto->context_proto(session_, builder);
+    proto->context_proto(session(), builder);
   }
 
   void statusProto(RIME_PROTO_BUILDER *builder) {
-    proto->status_proto(session_, builder);
+    proto->status_proto(session(), builder);
   }
 
   void setOption(std::string_view key, bool value) {
-    rime->set_option(session_, key.data(), value);
+    rime->set_option(session(), key.data(), value);
   }
 
   bool getOption(std::string_view key) {
-    return rime->get_option(session_, key.data());
+    return rime->get_option(session(), key.data());
   }
 
   std::string currentSchemaId() {
     char result[MAX_BUFFER_LENGTH];
-    return rime->get_current_schema(session_, result, MAX_BUFFER_LENGTH)
+    return rime->get_current_schema(session(), result, MAX_BUFFER_LENGTH)
                ? result
                : "";
   }
@@ -138,45 +132,45 @@ class Rime {
   }
 
   bool selectSchema(std::string_view schemaId) {
-    return rime->select_schema(session_, schemaId.data());
+    return rime->select_schema(session(), schemaId.data());
   }
 
   std::string rawInput() {
-    auto cStr = rime->get_input(session_);
+    auto cStr = rime->get_input(session());
     return cStr ? cStr : "";
   }
 
-  size_t caretPosition() { return rime->get_caret_pos(session_); }
+  size_t caretPosition() { return rime->get_caret_pos(session()); }
 
   void setCaretPosition(size_t caretPos) {
-    rime->set_caret_pos(session_, caretPos);
+    rime->set_caret_pos(session(), caretPos);
   }
 
   bool selectCandidateOnCurrentPage(size_t index) {
-    return rime->select_candidate_on_current_page(session_, index);
+    return rime->select_candidate_on_current_page(session(), index);
   }
 
   bool deleteCandidateOnCurrentPage(size_t index) {
-    return rime->delete_candidate_on_current_page(session_, index);
+    return rime->delete_candidate_on_current_page(session(), index);
   }
 
   bool selectCandidate(size_t index) {
-    return rime->select_candidate(session_, index);
+    return rime->select_candidate(session(), index);
   }
 
   bool forgetCandidate(size_t index) {
-    return rime->delete_candidate(session_, index);
+    return rime->delete_candidate(session(), index);
   }
 
   bool changePage(bool backward) {
-    return rime->change_page(session_, backward);
+    return rime->change_page(session(), backward);
   }
 
   std::vector<CandidateItem> getCandidates(int startIndex, int limit) {
     std::vector<CandidateItem> result;
     result.reserve(limit);
     RimeCandidateListIterator iter{};
-    if (rime->candidate_list_from_index(session_, &iter, startIndex)) {
+    if (rime->candidate_list_from_index(session(), &iter, startIndex)) {
       int count = 0;
       while (rime->candidate_list_next(&iter)) {
         if (count >= limit) break;
@@ -200,6 +194,13 @@ class Rime {
   RimeApi *rime;
   RimeProtoApi *proto;
   RimeSessionId session_ = 0;
+
+  RimeSessionId session() {
+    if (session_ == 0) {
+      session_ = rime->create_session();
+    }
+    return session_;
+  }
 };
 
 GlobalRefSingleton *GlobalRef;
@@ -244,18 +245,6 @@ extern "C" JNIEXPORT void JNICALL Java_com_osfans_trime_core_Rime_startupRime(
 extern "C" JNIEXPORT void JNICALL
 Java_com_osfans_trime_core_Rime_exitRime(JNIEnv *env, jclass /* thiz */) {
   Rime::Instance().exit();
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_osfans_trime_core_Rime_createRimeSession(JNIEnv *env,
-                                                  jclass /* thiz */) {
-  Rime::Instance().createSession();
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_osfans_trime_core_Rime_destroyRimeSession(JNIEnv *env,
-                                                   jclass /* thiz */) {
-  Rime::Instance().destroySession();
 }
 
 // deployment

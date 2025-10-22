@@ -79,16 +79,6 @@ class Rime :
         block()
     }
 
-    override suspend fun createSession() = withRimeContext {
-        createRimeSession()
-        emitResponse()
-        schemaCached = RimeSchema(getCurrentRimeSchema())
-    }
-
-    override suspend fun destroySession() = withRimeContext {
-        destroyRimeSession()
-    }
-
     override suspend fun isEmpty(): Boolean = withRimeContext {
         getCurrentRimeSchema() == ".default" // 無方案
     }
@@ -178,6 +168,10 @@ class Rime :
     override suspend fun selectedSchemaId(): String = withRimeContext { getCurrentRimeSchema() }
 
     override suspend fun selectSchema(schemaId: String) = withRimeContext { selectRimeSchema(schemaId) }
+
+    override suspend fun currentSchema(): RimeSchema = withRimeContext {
+        RimeSchema(getCurrentRimeSchema())
+    }
 
     override suspend fun commitComposition(): Boolean = withRimeContext { commitRimeComposition().also { if (it) emitResponse() } }
 
@@ -280,12 +274,6 @@ class Rime :
 
         @JvmStatic
         external fun exitRime()
-
-        @JvmStatic
-        external fun createRimeSession()
-
-        @JvmStatic
-        external fun destroyRimeSession()
 
         @JvmStatic
         external fun deployRimeSchemaFile(schemaFile: String): Boolean
