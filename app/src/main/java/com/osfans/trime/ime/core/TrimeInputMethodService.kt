@@ -809,13 +809,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         inputDeviceManager.evaluateOnUpdateEditorToolType(toolType, this)
     }
 
-    override fun onBindInput() {
-        Timber.d("onBindInput")
-        postRimeJob {
-            createSession()
-        }
-    }
-
     fun switchToPrevIme() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -1035,13 +1028,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onEvaluateFullscreenMode(): Boolean = false
-
-    override fun onUnbindInput() {
-        Timber.d("onUnbindInput")
-        postRimeJob {
-            destroySession()
-        }
-    }
 
     private var showingDialog: Dialog? = null
 

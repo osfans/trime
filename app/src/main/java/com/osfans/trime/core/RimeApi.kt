@@ -25,10 +25,6 @@ interface RimeApi {
 
     suspend fun isEmpty(): Boolean
 
-    suspend fun createSession()
-
-    suspend fun destroySession()
-
     suspend fun syncUserData(): Boolean
 
     suspend fun processKey(
@@ -70,6 +66,8 @@ interface RimeApi {
     suspend fun selectedSchemaId(): String
 
     suspend fun selectSchema(schemaId: String): Boolean
+
+    suspend fun currentSchema(): RimeSchema
 
     suspend fun commitComposition(): Boolean
 
