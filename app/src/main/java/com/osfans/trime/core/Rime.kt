@@ -205,7 +205,9 @@ class Rime :
                 schemaCached = RimeSchema(it.data.id)
             }
             is RimeMessage.OptionMessage -> {
+                // Option change won't trigger response update
                 statusCached = getRimeStatus()
+                updateSchemaCached(statusCached)
             }
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Start) {
@@ -217,8 +219,25 @@ class Rime :
                 rawInputCached = getRimeRawInput()
             }
             is RimeMessage.CandidateMenuMessage -> menuCached = it.data
-            is RimeMessage.StatusMessage -> statusCached = it.data
+            is RimeMessage.StatusMessage -> {
+                statusCached = it.data
+                updateSchemaCached(it.data)
+            }
             else -> {}
+        }
+    }
+
+    private fun updateSchemaCached(status: RimeProto.Status) {
+        val (schemaId, schemaName) = status
+        // Engine response update won't send SchemaMessage, but usually update RimeStatus
+        if (schemaId != schemaCached.schemaId) {
+            schemaCached = RimeSchema(schemaId)
+            // notify downstream consumers that schema has changed
+            messageFlow_.tryEmit(
+                RimeMessage.SchemaMessage(
+                    SchemaItem(schemaId, schemaName),
+                ),
+            )
         }
     }
 
