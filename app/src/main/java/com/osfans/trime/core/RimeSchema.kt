@@ -5,7 +5,7 @@
 
 package com.osfans.trime.core
 
-class RimeSchema(schemaId: String) {
+class RimeSchema(val schemaId: String) {
     data class Switch(
         val name: String = "",
         val options: List<String> = listOf(),
