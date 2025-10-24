@@ -84,6 +84,8 @@ value class KeyModifiers(
     companion object {
         val Empty = KeyModifiers(0u)
 
+        val Release = KeyModifiers(KeyModifier.Release)
+
         fun of(v: Int) = KeyModifiers(v.toUInt())
 
         fun fromKeyEvent(event: KeyEvent): KeyModifiers {
