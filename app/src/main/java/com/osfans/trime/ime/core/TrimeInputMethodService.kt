@@ -755,13 +755,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
+        val up = event.action == KeyEvent.ACTION_UP
         val modifiers = KeyModifiers.fromKeyEvent(event)
         val charCode = event.unicodeChar
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
             // drop modifier state when using combination keys to input number/symbol on some phones
             // because rime doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
             // in which case event.getNumber().toInt() == event.getUnicodeChar()
-            val m = if (event.number.code == charCode) KeyModifiers.Empty else modifiers
+            val empty = if (up) KeyModifiers.Release else KeyModifiers.Empty
+            val m = if (event.number.code == charCode) empty else modifiers
             postRimeJob {
                 processKey(charCode, m.modifiers, isVirtual = false)
             }
