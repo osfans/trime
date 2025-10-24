@@ -11,6 +11,7 @@
 #include "jni-utils.h"
 #include "objconv.h"
 #include "proto.h"
+#include "session.h"
 
 #define MAX_BUFFER_LENGTH 2048
 
@@ -65,12 +66,6 @@ class Rime {
     if (fullCheck || autoDeploy) {
       rime->start_maintenance(fullCheck);
     }
-  }
-
-  void destroySession() {
-    if (session_ == 0) return;
-    rime->destroy_session(session_);
-    session_ = 0;
   }
 
   bool deploySchema(std::string_view schemaFile) {
@@ -184,7 +179,7 @@ class Rime {
   }
 
   void exit() {
-    destroySession();
+    session_.reset();
     rime->finalize();
   }
 
@@ -193,13 +188,21 @@ class Rime {
  private:
   RimeApi *rime;
   RimeProtoApi *proto;
-  RimeSessionId session_ = 0;
+  std::shared_ptr<SessionHolder> session_;
 
-  RimeSessionId session() {
-    if (session_ == 0) {
-      session_ = rime->create_session();
+  RimeSessionId session(bool requestNewSession = true) {
+    if (!session_ && requestNewSession) {
+      try {
+        auto newSession = std::make_shared<SessionHolder>();
+        session_ = newSession;
+      } catch (...) {
+        session_ = nullptr;
+      }
     }
-    return session_;
+    if (!session_) {
+      return 0;
+    }
+    return session_->id();
   }
 };
 
