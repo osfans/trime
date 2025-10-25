@@ -113,18 +113,11 @@ object RimeDaemon {
     private const val MESSAGE_ID = 2331
     private var restartId = 0
 
-    private const val NOTIFICATION_TIMEOUT = 60000L // 60secs
-    private const val SILENCE_DURATION = 30L // 30ms
-
-    private var silenceNotificationUntil = 0L
-    private var allowNotificationUntil = 0L
-
     init {
         createNotificationChannel(
             CHANNEL_ID,
             appContext.getString(R.string.rime_daemon),
         )
-        allowNotification()
         TrimeApplication.getInstance().coroutineScope.launch {
             realRime.messageFlow.collect {
                 handleRimeMessage(it)
@@ -144,10 +137,6 @@ object RimeDaemon {
         builder.build().let { notificationManager.notify(id, it) }
     }
 
-    private fun allowNotification() {
-        allowNotificationUntil = System.currentTimeMillis() + NOTIFICATION_TIMEOUT
-    }
-
     /**
      * Restart Rime instance to deploy while keep the session
      */
@@ -164,7 +153,6 @@ object RimeDaemon {
             }
         }
         realRime.finalize()
-        allowNotification()
         realRime.startup(fullCheck)
         TrimeApplication.getInstance().coroutineScope.launch {
             // cancel notification on ready
@@ -177,7 +165,6 @@ object RimeDaemon {
     private suspend fun handleRimeMessage(it: RimeMessage<*>) {
         if (it is RimeMessage.DeployMessage) {
             val buildNotification: NotificationCompat.Builder.() -> Unit
-            var blockMessage = false
             when (it.data) {
                 RimeMessage.DeployMessage.State.Start -> {
                     buildNotification = {
@@ -200,7 +187,6 @@ object RimeDaemon {
                         setAutoCancel(true)
                         setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     }
-                    blockMessage = true
                 }
                 RimeMessage.DeployMessage.State.Failure -> {
                     val intent =
@@ -229,17 +215,9 @@ object RimeDaemon {
                         setAutoCancel(true)
                         setPriority(NotificationCompat.PRIORITY_HIGH)
                     }
-                    blockMessage = true
                 }
             }
-            val current = System.currentTimeMillis()
-            if (current > silenceNotificationUntil && current < allowNotificationUntil) {
-                sendNotification(MESSAGE_ID, buildNotification)
-            }
-
-            if (blockMessage) {
-                silenceNotificationUntil = current + SILENCE_DURATION
-            }
+            sendNotification(MESSAGE_ID, buildNotification)
         }
     }
 }
