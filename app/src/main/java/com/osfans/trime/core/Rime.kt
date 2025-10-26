@@ -50,7 +50,7 @@ class Rime :
 
     private val dispatcher =
         RimeDispatcher(
-            object : RimeDispatcher.RimeLooper {
+            object : RimeDispatcher.RimeController {
                 override fun nativeStartup() {
                     DataManager.sync()
                     startRime(false)
