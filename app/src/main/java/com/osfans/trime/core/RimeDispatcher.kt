@@ -8,29 +8,28 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
 /**
- * RimeDispatcher is a wrapper of a single-threaded executor that runs RimeLooper.
+ * RimeDispatcher is a wrapper of a single-threaded executor that runs RimeController.
  * It provides a coroutine-based interface for dispatching jobs to the executor.
  * It also provides a stop() method to gracefully stop the executor and return the remaining jobs.
  *
  * Adapted from [fcitx5-android/FcitxDispatcher.kt](https://github.com/fcitx5-android/fcitx5-android/blob/364afb44dcf0d9e3db3d43a21a32601b2190cbdf/app/src/main/java/org/fcitx/fcitx5/android/core/FcitxDispatcher.kt).
  */
 class RimeDispatcher(
-    private val looper: RimeLooper,
+    private val controller: RimeController,
 ) : CoroutineDispatcher() {
-    interface RimeLooper {
+    interface RimeController {
         fun nativeStartup()
 
         fun nativeFinalize()
@@ -72,11 +71,9 @@ class RimeDispatcher(
 
     private val mutex = Mutex()
 
-    private val queue = ConcurrentLinkedQueue<WrappedRunnable>()
+    private val queue = LinkedBlockingQueue<WrappedRunnable>()
 
     private val isRunning = AtomicBoolean(false)
-
-    private val channel = Channel<Unit>(Channel.UNLIMITED)
 
     /**
      * Start the dispatcher
@@ -88,18 +85,13 @@ class RimeDispatcher(
             mutex.withLock {
                 if (isRunning.compareAndSet(false, true)) {
                     Timber.d("nativeStartup()")
-                    looper.nativeStartup()
+                    controller.nativeStartup()
                     while (isActive && isRunning.get()) {
-                        // TODO: because we have nothing to block currently,
-                        //  here we use a channel to wait for a signal.
-                        runBlocking { channel.receive() }
-                        while (true) {
-                            val block = queue.poll() ?: break
-                            block.run()
-                        }
+                        val block = queue.take()
+                        block.run()
                     }
                     Timber.i("nativeFinalize()")
-                    looper.nativeFinalize()
+                    controller.nativeFinalize()
                 }
             }
         }
@@ -113,10 +105,9 @@ class RimeDispatcher(
         Timber.i("RimeDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
             runBlocking {
-                channel.trySend(Unit)
                 mutex.withLock {
-                    val rest = queue.toList()
-                    queue.clear()
+                    val rest = mutableListOf<WrappedRunnable>()
+                    queue.drainTo(rest)
                     rest
                 }
             }
@@ -132,7 +123,6 @@ class RimeDispatcher(
         if (!isRunning.get()) {
             throw IllegalStateException("Dispatcher is not in running state!")
         }
-        queue.offer(WrappedRunnable(block))
-        channel.trySend(Unit)
+        queue.put(WrappedRunnable(block))
     }
 }
