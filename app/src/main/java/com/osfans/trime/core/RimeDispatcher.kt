@@ -31,7 +31,7 @@ class RimeDispatcher(
     private val looper: RimeLooper,
 ) : CoroutineDispatcher() {
     interface RimeLooper {
-        fun nativeStartup(fullCheck: Boolean)
+        fun nativeStartup()
 
         fun nativeFinalize()
     }
@@ -82,13 +82,13 @@ class RimeDispatcher(
      * Start the dispatcher
      * This function returns immediately
      */
-    fun start(fullCheck: Boolean) {
+    fun start() {
         Timber.d("RimeDispatcher start()")
         internalScope.launch {
             mutex.withLock {
                 if (isRunning.compareAndSet(false, true)) {
                     Timber.d("nativeStartup()")
-                    looper.nativeStartup(fullCheck)
+                    looper.nativeStartup()
                     while (isActive && isRunning.get()) {
                         // TODO: because we have nothing to block currently,
                         //  here we use a channel to wait for a signal.

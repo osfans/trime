@@ -105,9 +105,9 @@ class SchemaListFragment :
     private fun persistSchemaList() {
         if (!dustman.dirty) return
         resetDustman()
+        updateSchemaState()
         lifecycleScope.launch(NonCancellable + Dispatchers.Default) {
-            updateSchemaState()
-            RimeDaemon.restartRime(true)
+            rime.runOnReady { deploy() }
         }
     }
 

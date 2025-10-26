@@ -27,6 +27,7 @@ import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
 import com.osfans.trime.daemon.RimeDaemon
+import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.databinding.ActivityPrefBinding
@@ -121,7 +122,9 @@ class PrefMainActivity : AppCompatActivity() {
                     }
                     if (item.itemId == R.id.deploy) {
                         item.setOnMenuItemClickListener {
-                            lifecycleScope.launch { RimeDaemon.restartRime(true) }
+                            viewModel.rime.launchOnReady {
+                                it.deploy()
+                            }
                             true
                         }
                     } else if (item.itemId == R.id.about) {

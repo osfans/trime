@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.daemon.RimeDaemon
+import com.osfans.trime.daemon.launchOnReady
 import timber.log.Timber
 
 class RimeIntentReceiver : BroadcastReceiver() {
@@ -22,11 +23,11 @@ class RimeIntentReceiver : BroadcastReceiver() {
         when (intent.action) {
             ACTION_DEPLOY -> {
                 Timber.i("try to start maintenance ...")
-                RimeDaemon.restartRime(true)
+                rime.launchOnReady { it.deploy() }
             }
             ACTION_SYNC_USER_DATA -> {
                 Timber.i("try to sync rime user data ...")
-                rime.run { syncUserData() }
+                rime.launchOnReady { it.syncUserData() }
             }
             else -> {}
         }
