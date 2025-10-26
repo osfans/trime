@@ -87,7 +87,7 @@ object RimeDaemon {
             return@withLock sessions.getValue(name)
         }
         if (realRime.lifecycle.currentStateFlow.value == RimeLifecycle.State.STOPPED) {
-            realRime.startup(false)
+            realRime.startup()
         }
         val session = establish(name)
         sessions[name] = session
@@ -153,7 +153,7 @@ object RimeDaemon {
             }
         }
         realRime.finalize()
-        realRime.startup(fullCheck)
+        realRime.startup()
         TrimeApplication.getInstance().coroutineScope.launch {
             // cancel notification on ready
             realRime.lifecycle.whenReady {

@@ -51,21 +51,9 @@ class Rime :
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeLooper {
-                override fun nativeStartup(fullCheck: Boolean) {
+                override fun nativeStartup() {
                     DataManager.sync()
-
-                    val sharedDataDir = DataManager.sharedDataDir.absolutePath
-                    val userDataDir = DataManager.userDataDir.absolutePath
-                    Timber.d(
-                        """
-                        Starting rime with:
-                        sharedDataDir: $sharedDataDir
-                        userDataDir: $userDataDir
-                        fullCheck: $fullCheck
-                        """.trimIndent(),
-                    )
-                    startupRime(sharedDataDir, userDataDir, BuildConfig.BUILD_VERSION_NAME, fullCheck)
-
+                    startRime(false)
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
                 }
 
@@ -81,6 +69,11 @@ class Rime :
 
     override suspend fun isEmpty(): Boolean = withRimeContext {
         getCurrentRimeSchema() == ".default" // 無方案
+    }
+
+    override suspend fun deploy() = withRimeContext {
+        exitRime()
+        startRime(true)
     }
 
     override suspend fun syncUserData(): Boolean = withRimeContext {
@@ -198,6 +191,20 @@ class Rime :
         getRimeCandidates(startIndex, limit)
     }
 
+    private fun startRime(fullCheck: Boolean) {
+        val sharedDataDir = DataManager.sharedDataDir.absolutePath
+        val userDataDir = DataManager.userDataDir.absolutePath
+        Timber.d(
+            """
+            Starting rime with:
+            sharedDataDir: $sharedDataDir
+            userDataDir: $userDataDir
+            fullCheck: $fullCheck
+            """.trimIndent(),
+        )
+        startupRime(sharedDataDir, userDataDir, BuildConfig.BUILD_VERSION_NAME, fullCheck)
+    }
+
     private fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.SchemaMessage -> {
@@ -241,7 +248,7 @@ class Rime :
         }
     }
 
-    fun startup(fullCheck: Boolean) {
+    fun startup() {
         if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
             return
@@ -249,7 +256,7 @@ class Rime :
         if (appContext.isStorageAvailable()) {
             registerRimeMessageHandler(::handleRimeMessage)
             lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
-            dispatcher.start(fullCheck)
+            dispatcher.start()
         }
     }
 
