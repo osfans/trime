@@ -85,13 +85,7 @@ class Rime :
         modifiers: UInt,
         isVirtual: Boolean,
     ): Boolean = withRimeContext {
-        processRimeKey(value, modifiers.toInt()).also {
-            if (it) {
-                emitResponse()
-            } else {
-                emitKeyEvent(value, modifiers.toInt(), isVirtual)
-            }
-        }
+        processKeyInner(value, modifiers.toInt(), isVirtual)
     }
 
     override suspend fun processKey(
@@ -99,13 +93,7 @@ class Rime :
         modifiers: KeyModifiers,
         isVirtual: Boolean,
     ): Boolean = withRimeContext {
-        processRimeKey(value.value, modifiers.toInt()).also {
-            if (it) {
-                emitResponse()
-            } else {
-                emitKeyEvent(value.value, modifiers.toInt(), isVirtual)
-            }
-        }
+        processKeyInner(value.value, modifiers.toInt(), isVirtual)
     }
 
     override suspend fun simulateKeySequence(sequence: String): Boolean = withRimeContext {
@@ -203,6 +191,33 @@ class Rime :
             """.trimIndent(),
         )
         startupRime(sharedDataDir, userDataDir, BuildConfig.BUILD_VERSION_NAME, fullCheck)
+    }
+
+    private fun processKeyInner(value: Int, modifiers: Int, isVirtual: Boolean): Boolean {
+        val handled = processRimeKey(value, modifiers)
+        emitResponse()
+        if (!handled) {
+            handleRimeMessage(
+                9, // RimeMessage.MessageType.Key,
+                arrayOf(value, modifiers, isVirtual),
+            )
+        }
+        return handled
+    }
+
+    private fun emitResponse(
+        commit: (() -> RimeProto.Commit) = { getRimeCommit() },
+    ) {
+        handleRimeMessage(4, arrayOf(commit.invoke()))
+        val context = getRimeContext()
+        handleRimeMessage(5, arrayOf(context.composition))
+        handleRimeMessage(6, arrayOf(context.menu))
+        handleRimeMessage(7, arrayOf(getRimeStatus()))
+        val candidates = getRimeCandidates(0, 16)
+        handleRimeMessage(
+            8,
+            arrayOf(candidates.size, candidates),
+        )
     }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
@@ -407,32 +422,6 @@ class Rime :
             Timber.d("Handling $message")
             rimeMessageHandlers.forEach { it.invoke(message) }
             messageFlow_.tryEmit(message)
-        }
-
-        private fun emitResponse(
-            commit: (() -> RimeProto.Commit) = { getRimeCommit() },
-        ) {
-            handleRimeMessage(4, arrayOf(commit.invoke()))
-            val context = getRimeContext()
-            handleRimeMessage(5, arrayOf(context.composition))
-            handleRimeMessage(6, arrayOf(context.menu))
-            handleRimeMessage(7, arrayOf(getRimeStatus()))
-            val candidates = getRimeCandidates(0, 16)
-            handleRimeMessage(
-                8,
-                arrayOf(candidates.size, candidates),
-            )
-        }
-
-        private fun emitKeyEvent(
-            value: Int,
-            modifiers: Int,
-            isVirtual: Boolean,
-        ) {
-            handleRimeMessage(
-                9, // RimeMessage.MessageType.Key,
-                arrayOf(value, modifiers, isVirtual),
-            )
         }
 
         private fun registerRimeMessageHandler(handler: (RimeMessage<*>) -> Unit) {
