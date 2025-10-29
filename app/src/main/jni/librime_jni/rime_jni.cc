@@ -4,7 +4,6 @@
 
 #include <rime_api.h>
 
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -26,8 +25,6 @@ static void declare_librime_module_dependencies() {
   rime_require_module_predict();
   rime_require_module_proto();
 }
-
-namespace fs = std::filesystem;
 
 class Rime {
  public:
@@ -59,13 +56,9 @@ class Rime {
     trime_traits.distribution_version = versionName;
 
     rime->setup(&trime_traits);
-    auto staging = fs::path(userDir) / "build/default.yaml";
-    auto autoDeploy = !(fs::exists(staging) && fs::is_regular_file(staging));
     rime->initialize(&trime_traits);
     rime->set_notification_handler(notificationHandler, GlobalRef->jvm);
-    if (fullCheck || autoDeploy) {
-      rime->start_maintenance(fullCheck);
-    }
+    rime->start_maintenance(fullCheck);
   }
 
   bool deploySchema(std::string_view schemaFile) {
