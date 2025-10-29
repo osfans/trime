@@ -183,7 +183,10 @@ class Rime {
     rime->finalize();
   }
 
-  bool sync() { return rime->sync_user_data(); }
+  bool sync() {
+    session_.reset();
+    return rime->sync_user_data();
+  }
 
  private:
   RimeApi *rime;
