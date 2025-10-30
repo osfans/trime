@@ -5,6 +5,8 @@
 package com.osfans.trime.ime.keyboard
 
 import android.view.KeyEvent
+import android.view.WindowInsets
+import android.view.WindowManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
@@ -13,6 +15,7 @@ import com.osfans.trime.util.appContext
 import com.osfans.trime.util.sp
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
+import splitties.systemservices.windowManager
 import timber.log.Timber
 import kotlin.math.abs
 import kotlin.math.pow
@@ -91,10 +94,17 @@ class Keyboard(
     /** Width of the screen available to fit the keyboard  */
     private val allowedWidth: Int
         get() {
-            val keyboardSidePadding = theme.generalStyle.keyboardPadding
-            val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
-            val sidePaddingPx = if (appContext.isLandscapeMode()) keyboardSidePaddingLandscape else keyboardSidePadding
-            return appContext.resources.displayMetrics.widthPixels - 2 * appContext.dp(sidePaddingPx)
+            val padding = theme.generalStyle.run {
+                if (appContext.isLandscapeMode()) keyboardPaddingLand else keyboardPadding
+            }
+
+            val windowMetrics = appContext.windowManager.currentWindowMetrics
+            val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+            )
+
+            val safeWidth = windowMetrics.bounds.width() - insets.left - insets.right
+            return safeWidth - 2 * appContext.dp(padding)
         }
 
     /** Keyboard default ascii mode  */
