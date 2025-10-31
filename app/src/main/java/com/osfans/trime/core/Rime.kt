@@ -63,6 +63,12 @@ class Rime :
             },
         )
 
+    init {
+        if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
+            throw IllegalStateException("Rime has already been created!")
+        }
+    }
+
     private suspend inline fun <T> withRimeContext(crossinline block: suspend () -> T): T = withContext(dispatcher) {
         block()
     }
