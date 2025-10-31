@@ -519,84 +519,81 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         InputFeedbackManager.startInput()
         postRimeJob {
             updateRimeOption(this)
-            ContextCompat.getMainExecutor(this@TrimeInputMethodService).execute {
-                val useVirtualKeyboard =
-                    inputDeviceManager.evaluateOnStartInputView(attribute, this@TrimeInputMethodService)
-                if (useVirtualKeyboard) {
-                    inputView?.startInput(attribute, restarting)
+        }
+        val useVirtualKeyboard =
+            inputDeviceManager.evaluateOnStartInputView(attribute, this)
+        if (useVirtualKeyboard) {
+            inputView?.startInput(attribute, restarting)
+        }
+        if (!useVirtualKeyboard || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
+            if (currentInputConnection?.monitorCursorAnchor() != true) {
+                if (!decorLocationUpdated) {
+                    updateDecorLocation()
                 }
-                if (!useVirtualKeyboard || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
-                    if (currentInputConnection?.monitorCursorAnchor() != true) {
-                        if (!decorLocationUpdated) {
-                            updateDecorLocation()
-                        }
-                        workaroundNullCursorAnchorInfo()
-                    }
-                }
+                workaroundNullCursorAnchorInfo()
             }
-            when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
-                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
-                -> {
-                    Timber.d(
-                        "EditorInfo: private;" +
-                            " packageName=" +
-                            attribute.packageName +
-                            "; fieldName=" +
-                            attribute.fieldName +
-                            "; actionLabel=" +
-                            attribute.actionLabel +
-                            "; inputType=" +
-                            attribute.inputType +
-                            "; VARIATION=" +
-                            (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                            "; CLASS=" +
-                            (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                            "; ACTION=" +
-                            (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                    )
+        }
+        when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
+            InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+            -> {
+                Timber.d(
+                    "EditorInfo: private;" +
+                        " packageName=" +
+                        attribute.packageName +
+                        "; fieldName=" +
+                        attribute.fieldName +
+                        "; actionLabel=" +
+                        attribute.actionLabel +
+                        "; inputType=" +
+                        attribute.inputType +
+                        "; VARIATION=" +
+                        (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
+                        "; CLASS=" +
+                        (attribute.inputType and InputType.TYPE_MASK_CLASS) +
+                        "; ACTION=" +
+                        (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
+                )
+                normalTextEditor = false
+            }
+            else -> {
+                Timber.d(
+                    "EditorInfo: normal;" +
+                        " packageName=" +
+                        attribute.packageName +
+                        "; fieldName=" +
+                        attribute.fieldName +
+                        "; actionLabel=" +
+                        attribute.actionLabel +
+                        "; inputType=" +
+                        attribute.inputType +
+                        "; VARIATION=" +
+                        (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
+                        "; CLASS=" +
+                        (attribute.inputType and InputType.TYPE_MASK_CLASS) +
+                        "; ACTION=" +
+                        (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
+                )
+                if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                    == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                ) {
+                    // 应用程序请求以隐身模式打开键盘
                     normalTextEditor = false
-                }
-
-                else -> {
-                    Timber.d(
-                        "EditorInfo: normal;" +
-                            " packageName=" +
-                            attribute.packageName +
-                            "; fieldName=" +
-                            attribute.fieldName +
-                            "; actionLabel=" +
-                            attribute.actionLabel +
-                            "; inputType=" +
-                            attribute.inputType +
-                            "; VARIATION=" +
-                            (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                            "; CLASS=" +
-                            (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                            "; ACTION=" +
-                            (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                    )
-                    if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                        == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                    ) {
-                        //  应用程求以隐身模式打开键盘应用程序
-                        normalTextEditor = false
-                        Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
-                    } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
-                        draftExcludeApps
-                            .trim()
-                            .split('\n')
-                            .contains(attribute.packageName)
-                    ) {
-                        normalTextEditor = false
-                        Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
-                    } else {
-                        normalTextEditor = true
-                        currentInputConnection?.let { DraftHelper.onExtractedTextChanged(it) }
-                    }
+                    Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
+                } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
+                    draftExcludeApps
+                        .trim()
+                        .split('\n')
+                        .contains(attribute.packageName)
+                ) {
+                    normalTextEditor = false
+                    Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
+                } else {
+                    normalTextEditor = true
+                    currentInputConnection?.let { DraftHelper.onExtractedTextChanged(it) }
                 }
             }
         }
