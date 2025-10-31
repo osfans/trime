@@ -55,6 +55,10 @@ class RimeDispatcher(
         }
 
         override fun toString(): String = "WrappedRunnable[${name ?: hashCode()}]"
+
+        companion object {
+            val Empty = WrappedRunnable({}, "Empty")
+        }
     }
 
     companion object {
@@ -105,6 +109,7 @@ class RimeDispatcher(
         Timber.i("RimeDispatcher stop()")
         return if (isRunning.compareAndSet(true, false)) {
             runBlocking {
+                queue.offer(WrappedRunnable.Empty)
                 mutex.withLock {
                     val rest = mutableListOf<WrappedRunnable>()
                     queue.drainTo(rest)
@@ -123,6 +128,6 @@ class RimeDispatcher(
         if (!isRunning.get()) {
             throw IllegalStateException("Dispatcher is not in running state!")
         }
-        queue.put(WrappedRunnable(block))
+        queue.offer(WrappedRunnable(block))
     }
 }
