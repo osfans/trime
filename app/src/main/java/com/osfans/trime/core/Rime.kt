@@ -52,7 +52,6 @@ class Rime :
         RimeDispatcher(
             object : RimeDispatcher.RimeController {
                 override fun nativeStartup() {
-                    DataManager.sync()
                     startRime(false)
                     lifecycleImpl.emitState(RimeLifecycle.State.READY)
                 }
@@ -186,6 +185,7 @@ class Rime :
     }
 
     private fun startRime(fullCheck: Boolean) {
+        DataManager.sync()
         val sharedDataDir = DataManager.sharedDataDir.absolutePath
         val userDataDir = DataManager.userDataDir.absolutePath
         Timber.d(
