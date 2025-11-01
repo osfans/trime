@@ -2,6 +2,114 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.7] - 2025-11-01
+
+### 🚀 Features
+
+- Builtin minimal usable schema
+- Bring back preedit view padding
+- *(theme)* Add toolbar theme config options (#1729)
+- *(ui)* Persist schema list (deploy) after changing enabled schemas
+- *(composition)* Hide preedit view when enable inline composing text
+- Implement GestureFrame to support gesture actions on view
+- *(theme)* New candidates window params
+- *(theme)* New preedit params
+- Quick bar display copy content
+- Add clipboard suggestion toggle and timeout preferences
+
+### 🐛 Bug Fixes
+
+- Keyboard components sometimes got invalid rime session
+- *(toolbar)* Add missing end spacing for the last secondary button
+- Views cannot use nine patch drawable as their background
+- *(ime)* Workaround Samsung One UI navbar coloring
+- *(symbol)* Cannot switch to emoji tab page via preset key action
+- *(composition)* CandidatesView OnGlobalLayoutListener memory leak
+- *(keyboard)* Crash when key press vibration duration or amplitude is set as system default
+- *(candidates)* Baseline alignment between text and comment didn't take effect
+- *(ime)* NaN exception when getting AutoScaleTextView baseline
+- *(keyboard)* Exit key in liquid keyboard wasn't working
+- *(InputView)* Preedit didn't dismiss when inline composition is enabled
+- *(PreeditTextView)* Avoid IndexOutOfBoundsException when moving cursor
+- *(SwitchOptionWindow)* Option switches might disappear after changing schema
+- *(core)* Incorrect candidate list total size
+- *(switches)* Switch option state of schema cannot be saved
+- Preset BACK key could not hide keyboard
+- *(api/switches)* Option switches would disappear once be clicked
+- *(ime)* Duplicate symbol input with physical keyboard
+- *(daemon)* Notification couldn't cancel after rime deploy finish
+- App not response if user repeat deploy too quickly
+- Keyboard clipping in landscape
+- *(RimeDispatcher)* Offer empty to queue when stop to avoid blocked by taking
+- *(keyboard)* Add version check for WindowMetrics API on Android < 11 (#1782)
+
+### 🚜 Refactor
+
+- Only apply padding horizontally for candidate item
+- Always generate builtin default.custom.yaml in user data dir
+- *(assets)* Fix inaccurate icon name for edit tool button in tongwenfeng theme
+- *(symbol)* Rename LiquidKeyboard to LiquidWindow
+- *(symbol)* Simplify liquid / database items display
+- *(symbol)* Use animator to switch view in LiquidLayout
+- *(symbol)* Merge TabTag, TabManager and SymbolBoardType as LiquidData
+- *(symbol)* Uniform the color tint of icons in popupmenu
+- *(ui)* Create rime session async to avoid blocking users from entering
+- *(daemon)* Keep notification when deploying
+- *(ui)* Allow to enable multiple schemas at once
+- New icon for deploy action to avoid confusion with the sync icon
+- *(ui)* Adjust theme color schemes
+- Break down rime response proto into finer granularities ...
+- Wrap candidate item view with GestureFrame
+- Improve single candidate displaying
+- *(bar)* Reverse option styles
+- *(jni,core)* Don't join maintenance thread to avoid blocking rime starting
+- *(switches)* Rename package name from `option` to `switches`
+- *(symbol)* Improve liquid keyboard displaying
+- *(theme)* Rename `bg_*` to `fg_*` in tool bar button foreground style
+- *(theme)* Cleanup deprecated params
+- Create/destroy session on (un)bind input
+- Cache (Rime)Schema instance in Rime
+- *(switches)* Simplify switch option state updating
+- *(daemon)* Reduce the frequency of annoying notifications
+- *(ime)* Slightly refactors for InputDeviceManager
+- Clean up handling of key events
+- *(engine)* Only perform actual deploying when is needed
+- *(data)* Create `default.custom.yaml` in user data dir once not exists
+- *(core)* Move `simulateKeySequence` to RimeApi
+- *(ime)* Don't invalidate all keys on each rime context update
+- Autofill suggestion view centered and unrestricted width
+- *(api)* Wrap rime config/schema deploy api in C++ wrapper
+- *(api)* Request session if necessary
+- *(api)* Request new session by default
+- Use BlockingQueue for simpler dispatcher implementation
+- *(api)* Always handle response no matter if rime process a key
+- *(Rime)* Check current state on init
+- *(api)* Reset session before syncing user data
+- *(engine)* Always `start_maintenance` when start rime
+- *(ime)* Start input out of rime context
+- *(Rime)* Always sync base data on rime start
+
+### 📚 Documentation
+
+- Update trime-schema
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.7
+- Add stroke schema for reverse lookup of luna pinyin
+- Add missing essay.txt as prelude for some schemas
+- Fix code style error on macos
+- Upgrade the github action to v5
+- Make sure Android NDK installed
+- Upgrade boost to 1.89.0
+- Use the full name for boost version
+- Upgrade upload action to v5
+- Add 3.3.7 changelog
+
+### Deps
+
+- Drop snappy
+
 ## [3.3.6] - 2025-09-01
 
 ### 🚀 Features
