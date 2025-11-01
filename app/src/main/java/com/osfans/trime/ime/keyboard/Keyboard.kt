@@ -4,6 +4,8 @@
 
 package com.osfans.trime.ime.keyboard
 
+import android.graphics.Point
+import android.os.Build
 import android.view.KeyEvent
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -98,12 +100,19 @@ class Keyboard(
                 if (appContext.isLandscapeMode()) keyboardPaddingLand else keyboardPadding
             }
 
-            val windowMetrics = appContext.windowManager.currentWindowMetrics
-            val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
-            )
-
-            val safeWidth = windowMetrics.bounds.width() - insets.left - insets.right
+            val safeWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val windowMetrics = appContext.windowManager.currentWindowMetrics
+                val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
+                    WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+                )
+                windowMetrics.bounds.width() - insets.left - insets.right
+            } else {
+                @Suppress("DEPRECATION")
+                val size = Point()
+                @Suppress("DEPRECATION")
+                appContext.windowManager.defaultDisplay.getSize(size)
+                size.x
+            }
             return safeWidth - 2 * appContext.dp(padding)
         }
 
