@@ -50,6 +50,7 @@ import com.osfans.trime.data.prefs.PreferenceDelegateProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
+import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHelper
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
@@ -145,7 +146,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private suspend fun updateRimeOption(api: RimeApi) {
         try {
             api.setRuntimeOption("soft_cursor", prefs.keyboard.softCursorEnabled.getValue()) // 軟光標
-            api.setRuntimeOption("_horizontal", ThemeManager.activeTheme.generalStyle.horizontal) // 水平模式
         } catch (e: Exception) {
             Timber.e(e)
         }

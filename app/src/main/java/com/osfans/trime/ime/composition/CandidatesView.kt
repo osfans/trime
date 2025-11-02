@@ -54,6 +54,7 @@ class CandidatesView(
 ) : BaseInputView(service, rime, theme) {
     private val ctx = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
 
+    private val layout by AppPrefs.defaultInstance().candidates.layout
     private val position by AppPrefs.defaultInstance().candidates.position
 
     private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
@@ -135,8 +136,10 @@ class CandidatesView(
         preeditUi.root.visibility = if (preeditUi.visible) VISIBLE else GONE
         // if CandidatesView can be shown, rime engine is ready most of the time,
         // so it should be safety to get option immediately
-        val isHorizontalLayout = rime.run { getRuntimeOption("_horizontal") }
-        candidatesUi.update(menu, isHorizontalLayout)
+        val isHorizontalLayout = rime.run {
+            getRuntimeOption("_linear") || getRuntimeOption("_horizontal")
+        }
+        candidatesUi.update(menu, isHorizontalLayout, layout)
         if (evaluateVisibility()) {
             visibility = VISIBLE
         } else {
