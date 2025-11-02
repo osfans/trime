@@ -10,6 +10,7 @@ import androidx.annotation.Keep
 import androidx.preference.PreferenceManager
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
 import com.osfans.trime.ime.core.ComposingTextMode
@@ -196,10 +197,12 @@ class AppPrefs(
     ) : PreferenceDelegateOwner(shared, R.string.candidates_window) {
         companion object {
             const val MODE = "show_candidates_window"
+            const val LAYOUT = "candidates_layout"
             const val POSITION = "candidates_window_position"
         }
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
+        val layout = enum(R.string.candidates_layout, LAYOUT, PopupCandidatesLayout.AUTOMATIC)
         val position = enum(R.string.candidates_window_position, POSITION, PopupPosition.BOTTOM_LEFT)
     }
 

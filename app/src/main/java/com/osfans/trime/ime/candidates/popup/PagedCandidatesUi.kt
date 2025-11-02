@@ -122,10 +122,14 @@ class PagedCandidatesUi(
 
     fun update(
         menu: RimeProto.Context.Menu,
-        isHorizontal: Boolean,
+        horizontal: Boolean,
+        layout: PopupCandidatesLayout,
     ) {
         this.menu = menu
-        this.isHorizontal = isHorizontal
+        this.isHorizontal = when (layout) {
+            PopupCandidatesLayout.AUTOMATIC -> horizontal
+            else -> layout == PopupCandidatesLayout.HORIZONTAL
+        }
         candidatesLayoutManager.apply {
             if (isHorizontal) {
                 flexDirection = FlexDirection.ROW

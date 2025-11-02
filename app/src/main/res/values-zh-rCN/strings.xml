@@ -224,4 +224,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="removed_x">已移除 %1$s</string>
     <string name="added_n_items">已添加 %1$d 个项目</string>
     <string name="removed_n_items">已移除 %1$d 个项目</string>
+    <string name="candidates_layout">候选词列表布局</string>
+    <string name="automatic">自动</string>
+    <string name="horizontal">横向</string>
+    <string name="vertical">纵向</string>
 </resources>
