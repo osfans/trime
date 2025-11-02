@@ -52,7 +52,7 @@ void rime_context_proto(RimeSessionId session_id,
   }
   jobject menu =
       env->NewObject(GlobalRef->MenuProto, GlobalRef->MenuProtoDefault);
-  if (ctx->HasMenu()) {
+  if (ctx->HasMenu() && ctx->get_option("paging_mode")) {
     Segment &seg = ctx->composition().back();
     Schema *schema = session->schema();
     int page_size = schema ? schema->page_size() : 5;
