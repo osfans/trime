@@ -101,6 +101,7 @@ class CompactCandidateModule(
 
     val view by lazy {
         context.recyclerView(R.id.candidate_view) {
+            itemAnimator = null
             adapter = this@CompactCandidateModule.adapter
             layoutManager = this@CompactCandidateModule.layoutManager
             addItemDecoration(FlexboxVerticalDecoration(separatorDrawable))
