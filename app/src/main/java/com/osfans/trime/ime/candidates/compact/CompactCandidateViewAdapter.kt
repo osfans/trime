@@ -21,6 +21,11 @@ import splitties.views.setPaddingDp
 open class CompactCandidateViewAdapter(
     val theme: Theme,
 ) : BaseQuickAdapter<CandidateItem, CandidateViewHolder>() {
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun getItemId(position: Int): Long = items.getOrNull(position).hashCode().toLong()
 
     var candidates: Array<CandidateItem>
         get() = items.toTypedArray()

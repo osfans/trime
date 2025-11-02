@@ -45,6 +45,14 @@ class PagedCandidatesUi(
 
     private val candidatesAdapter =
         object : BaseQuickAdapter<RimeProto.Candidate, UiHolder>() {
+            init {
+                // We must do this to avoid ArrayIndexOutOfBoundsException
+                // https://github.com/google/flexbox-layout/issues/363#issuecomment-382949953
+                setHasStableIds(true)
+            }
+
+            override fun getItemId(position: Int): Long = items.getOrNull(position).hashCode().toLong()
+
             override fun getItemCount(items: List<RimeProto.Candidate>) = items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
 
             override fun getItemViewType(
@@ -96,10 +104,6 @@ class PagedCandidatesUi(
                     }
                 }
             }
-        }.apply {
-            // We must do this to avoid ArrayIndexOutOfBoundsException
-            // https://github.com/google/flexbox-layout/issues/363#issuecomment-382949953
-            setHasStableIds(true)
         }
 
     private val candidatesLayoutManager =
