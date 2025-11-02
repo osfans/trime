@@ -217,13 +217,16 @@ class Rime :
         handleRimeMessage(4, arrayOf(commit.invoke()))
         val context = getRimeContext()
         handleRimeMessage(5, arrayOf(context.composition))
-        handleRimeMessage(6, arrayOf(context.menu))
+        if (getRimeOption("paging_mode")) {
+            handleRimeMessage(6, arrayOf(context.menu))
+        } else {
+            val candidates = getRimeCandidates(0, 16)
+            handleRimeMessage(
+                8,
+                arrayOf(candidates.size, candidates),
+            )
+        }
         handleRimeMessage(7, arrayOf(getRimeStatus()))
-        val candidates = getRimeCandidates(0, 16)
-        handleRimeMessage(
-            8,
-            arrayOf(candidates.size, candidates),
-        )
     }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {

@@ -50,11 +50,9 @@ import com.osfans.trime.data.prefs.PreferenceDelegateProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHelper
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
-import com.osfans.trime.ime.keyboard.KeyboardSwitcher
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.util.any
 import com.osfans.trime.util.findSectionFrom
@@ -508,7 +506,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return inputView?.handleInlineSuggestions(response) == true
     }
 
-    private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
     private val draftExcludeApps by AppPrefs.defaultInstance().clipboard.draftExcludeApp
 
     override fun onStartInputView(
@@ -520,12 +517,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         postRimeJob {
             updateRimeOption(this)
         }
-        val useVirtualKeyboard =
+        val (useVirtualKeyboard, useCandidatesView) =
             inputDeviceManager.evaluateOnStartInputView(attribute, this)
         if (useVirtualKeyboard) {
             inputView?.startInput(attribute, restarting)
         }
-        if (!useVirtualKeyboard || candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
+        if (useCandidatesView) {
             if (currentInputConnection?.monitorCursorAnchor() != true) {
                 if (!decorLocationUpdated) {
                     updateDecorLocation()

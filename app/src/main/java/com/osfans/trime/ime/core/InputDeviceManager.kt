@@ -23,13 +23,16 @@ class InputDeviceManager(
 
     private val candidatesViewMode by AppPrefs.defaultInstance().candidates.mode
 
+    private val alwaysShowCandidatesView: Boolean
+        get() = candidatesViewMode == PopupCandidatesMode.ALWAYS_SHOW
+
     private fun setupInputViewCallback(isVirtual: Boolean) {
         inputView?.handleMessages = isVirtual
         inputView?.visibility = if (isVirtual) View.VISIBLE else View.GONE
     }
 
     private fun setupCandidatesViewCallback(isVirtual: Boolean) {
-        val shouldSetupView = !isVirtual || candidatesViewMode == PopupCandidatesMode.ALWAYS_SHOW
+        val shouldSetupView = !isVirtual || alwaysShowCandidatesView
         candidatesView?.handleMessages = shouldSetupView
         if (!shouldSetupView) {
             candidatesView?.visibility = View.GONE
@@ -47,6 +50,8 @@ class InputDeviceManager(
             setupViewCallbacks(value)
         }
 
+    private var withCandidatesView = false
+
     fun setInputView(inputView: InputView) {
         this.inputView = inputView
         setupInputViewCallback(this.isVirtualKeyboard)
@@ -61,12 +66,17 @@ class InputDeviceManager(
         service: TrimeInputMethodService,
         useVirtualKeyboard: Boolean,
     ) {
-        if (useVirtualKeyboard == isVirtualKeyboard) {
+        val useCandidatesView = !useVirtualKeyboard || alwaysShowCandidatesView
+        if (useVirtualKeyboard == isVirtualKeyboard && useCandidatesView == withCandidatesView) {
             return
         }
         // monitor CursorAnchorInfo when switching to CandidatesView
         service.currentInputConnection.monitorCursorAnchor(!useVirtualKeyboard)
+        service.postRimeJob {
+            setRuntimeOption("paging_mode", useCandidatesView)
+        }
         isVirtualKeyboard = useVirtualKeyboard
+        withCandidatesView = useCandidatesView
         onChange(isVirtualKeyboard)
     }
 
@@ -74,12 +84,12 @@ class InputDeviceManager(
     private var isNullInputType = true
 
     /**
-     * @return should use virtual keyboard
+     * @return should use virtual keyboard or should use candidates view
      */
     fun evaluateOnStartInputView(
         info: EditorInfo,
         service: TrimeInputMethodService,
-    ): Boolean {
+    ): Pair<Boolean, Boolean> {
         startedInputView = true
         isNullInputType = info.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         val useVirtualKeyboard =
@@ -89,8 +99,9 @@ class InputDeviceManager(
                 PopupCandidatesMode.ALWAYS_SHOW -> true
                 PopupCandidatesMode.DISABLED -> true
             }
+        val useCandidatesView = !useVirtualKeyboard || alwaysShowCandidatesView
         applyMode(service, useVirtualKeyboard)
-        return useVirtualKeyboard
+        return useVirtualKeyboard to useCandidatesView
     }
 
     /**
