@@ -25,7 +25,6 @@ data class GeneralStyle(
     val commentPosition: CommentPosition = CommentPosition.RIGHT,
     val commentTextSize: Float = 15f,
     val hanbFont: List<String> = emptyList(),
-    val horizontal: Boolean = true,
     val horizontalGap: Int = 0,
     val keyboardPadding: Int = 0,
     val keyboardPaddingLeft: Int = 0,
