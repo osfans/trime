@@ -150,10 +150,6 @@
           "type": "string",
           "description": "擴充字型"
         },
-        "horizontal": {
-          "type": "boolean",
-          "description": "水平模式"
-        },
         "horizontal_gap": {
           "type": "integer",
           "description": "鍵水平間距"

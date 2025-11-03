@@ -26,7 +26,6 @@ class GeneralStyleMapper(
         commentPosition = getEnum("comment_position", GeneralStyle.CommentPosition.UNKNOWN),
         commentTextSize = getFloat("comment_text_size"),
         hanbFont = getStringList("hanb_font"),
-        horizontal = getBoolean("horizontal"),
         horizontalGap = getInt("horizontal_gap"),
         keyboardPadding = getInt("keyboard_padding"),
         keyboardPaddingLeft = getInt("keyboard_padding_left"),

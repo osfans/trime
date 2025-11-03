@@ -21,7 +21,6 @@ style:
   comment_on_top: true #編碼提示在上方或右側
   comment_text_size: 12 #編碼提示字號
   hanb_font: hanb.ttf #擴充字型
-  horizontal: true #水平模式
   horizontal_gap: 1 #鍵水平間距
   keyboard_padding: 0 #竖屏模式下，屏幕左右两侧与键盘的距离（曲面屏减少误触）
   keyboard_padding_left: 0 #竖屏屏模式下，左手键盘布局，屏幕左侧与键盘的距离
