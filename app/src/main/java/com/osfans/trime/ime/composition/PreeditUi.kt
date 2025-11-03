@@ -14,10 +14,15 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.util.CancellableDelay
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -71,15 +76,23 @@ open class PreeditUi(
         visibility = if (visible) View.VISIBLE else View.GONE
     }
 
+    private var autoHideJob: Job? = null
+    private val delayControl = CancellableDelay()
+
     fun update(inputComposition: RimeProto.Context.Composition) {
         val string = inputComposition.toSpannedString()
         val cursorPos = inputComposition.cursorPos
         val hasPreedit = inputComposition.length > 0
-        visible = hasPreedit
-        if (!visible) {
+
+        if (!hasPreedit) {
+            if (autoHideJob?.isActive == true) return
+            visible = false
             updateTextView("", false)
             return
         }
+        delayControl.skipDelay()
+        visible = true
+
         val stringWithCursor =
             if (cursorPos == 0 || cursorPos == string.length) {
                 string
@@ -89,6 +102,24 @@ open class PreeditUi(
                     append(string, cursorPos, string.length)
                 }
             }
-        updateTextView(stringWithCursor, hasPreedit)
+        updateTextView(stringWithCursor, true)
+    }
+
+    fun show(
+        text: String,
+        onIndicatorHidden: (() -> Unit)? = null,
+    ) {
+        autoHideJob?.cancel()
+        updateTextView(text, true)
+        root.visibility = View.VISIBLE
+        visible = true
+        autoHideJob = root.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            if (!delayControl.delay(1000)) {
+                updateTextView("", false)
+                root.visibility = View.INVISIBLE
+                visible = false
+                onIndicatorHidden?.invoke()
+            }
+        }
     }
 }

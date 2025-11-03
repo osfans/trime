@@ -229,4 +229,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="automatic">自動</string>
     <string name="horizontal">橫向</string>
     <string name="vertical">"縱向 "</string>
+    <string name="show_ascii_indicator">ASCII 模式切換提示</string>
 </resources>
