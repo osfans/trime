@@ -50,8 +50,6 @@ class InputDeviceManager(
             setupViewCallbacks(value)
         }
 
-    private var withCandidatesView = false
-
     fun setInputView(inputView: InputView) {
         this.inputView = inputView
         setupInputViewCallback(this.isVirtualKeyboard)
@@ -67,16 +65,18 @@ class InputDeviceManager(
         useVirtualKeyboard: Boolean,
     ) {
         val useCandidatesView = !useVirtualKeyboard || alwaysShowCandidatesView
-        if (useVirtualKeyboard == isVirtualKeyboard && useCandidatesView == withCandidatesView) {
+        service.postRimeJob {
+            // restart rime or start rime deploy will reset the options
+            // in rime engine, so we need to always set the option on
+            // each evaluation
+            setRuntimeOption("paging_mode", useCandidatesView)
+        }
+        if (useVirtualKeyboard == isVirtualKeyboard) {
             return
         }
         // monitor CursorAnchorInfo when switching to CandidatesView
         service.currentInputConnection.monitorCursorAnchor(!useVirtualKeyboard)
-        service.postRimeJob {
-            setRuntimeOption("paging_mode", useCandidatesView)
-        }
         isVirtualKeyboard = useVirtualKeyboard
-        withCandidatesView = useCandidatesView
         onChange(isVirtualKeyboard)
     }
 
