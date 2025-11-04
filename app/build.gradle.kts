@@ -1,8 +1,10 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
-
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 @file:Suppress("UnstableApiUsage")
+
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.osfans.trime.app-convention")
@@ -30,12 +32,16 @@ android {
         versionName = "3.3.8"
 
         multiDexEnabled = true
-        setProperty("archivesBaseName", "$applicationId-$buildVersionName")
         buildConfigField("String", "BUILDER", "\"${project.builder}\"")
         buildConfigField("long", "BUILD_TIMESTAMP", project.buildTimestamp)
         buildConfigField("String", "BUILD_COMMIT_HASH", "\"${project.buildCommitHash}\"")
         buildConfigField("String", "BUILD_GIT_REPO", "\"${project.buildGitRepo}\"")
         buildConfigField("String", "BUILD_VERSION_NAME", "\"${project.buildVersionName}\"")
+    }
+
+    base {
+        // https://www.norio.be/blog/archivesBaseName-removed-from-gradle9.html
+        archivesName = "${android.defaultConfig.applicationId}-$buildVersionName"
     }
 
     buildTypes {
@@ -80,8 +86,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+    kotlin {
+        compilerOptions {
+            // https://youtrack.jetbrains.com/issue/KT-55947
+            jvmTarget.set(JvmTarget.JVM_11)
+            // https://youtrack.jetbrains.com/issue/KT-73255/Change-defaulting-rule-for-annotations
+            freeCompilerArgs.add("-Xannotation-default-target=param-property")
+        }
     }
 
     // hack workaround lint gradle 8.0.2
@@ -121,11 +132,17 @@ kotlin {
 }
 
 aboutLibraries {
-    configPath = "app/licenses"
-    excludeFields = arrayOf("generated", "developers", "organization", "scm", "funding", "content")
-    fetchRemoteLicense = false
-    fetchRemoteFunding = false
-    includePlatform = false
+    collect {
+        configPath.set(file("licenses").takeIf { it.exists() })
+        fetchRemoteLicense.set(false)
+        fetchRemoteFunding.set(false)
+        includePlatform.set(false)
+    }
+    export {
+        excludeFields.set(
+            setOf("generated", "developers", "organization", "scm", "funding", "content"),
+        )
+    }
 }
 
 ksp {

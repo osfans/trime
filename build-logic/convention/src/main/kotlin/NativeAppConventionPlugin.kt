@@ -6,19 +6,19 @@ import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
+@Suppress("unused")
 class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
     private val Project.librimeVersion: String
         get() =
             runCmd(
-                "git describe --tags --long --always --exclude 'latest'",
-                workingDir = file("src/main/jni/librime"),
+                "git -C app/src/main/jni/librime describe " +
+                    "--tags --long --always --exclude=latest",
             )
 
     private val Project.openccVersion: String
         get() =
             runCmd(
-                "git describe --tags --long --always",
-                workingDir = file("src/main/jni/OpenCC"),
+                "git -C app/src/main/jni/OpenCC describe --tags --long --always",
             )
 
     override fun apply(target: Project) {

@@ -13,6 +13,7 @@ import org.gradle.api.internal.provider.AbstractProperty
 import org.gradle.api.internal.provider.Providers
 import org.gradle.kotlin.dsl.withType
 
+@Suppress("unused")
 class AndroidAppConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         // remove META-INF/com/android/build/gradle/app-metadata.properties

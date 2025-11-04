@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2024 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -13,7 +13,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 
 class OpenCCDataPlugin : Plugin<Project> {
     companion object {
@@ -34,7 +34,7 @@ class OpenCCDataPlugin : Plugin<Project> {
 
     private fun registerInstallTask(project: Project) {
         val task =
-            project.task<InstallOpenCCDataTask>(INSTALL_TASK) {
+            project.tasks.register<InstallOpenCCDataTask>(INSTALL_TASK) {
                 inputDir.set(project.dataBaseDir)
                 outputDir.set(project.dataInstallDir)
             }
@@ -44,7 +44,7 @@ class OpenCCDataPlugin : Plugin<Project> {
 
     private fun registerCleanTask(project: Project) {
         project
-            .task<Delete>(CLEAN_TASK) {
+            .tasks.register<Delete>(CLEAN_TASK) {
                 delete(project.dataInstallDir)
             }.also {
                 project.cleanTask.dependsOn(it)
@@ -102,7 +102,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                     sources: List<String>,
                     outputFilePath: String,
                 ) {
-                    project.exec {
+                    project.providers.exec {
                         workingDir = output
                         commandLine = listOf("python3", merge) + sources + outputFilePath
                     }
@@ -112,7 +112,7 @@ class OpenCCDataPlugin : Plugin<Project> {
                     source: String,
                     outputFilePath: String,
                 ) {
-                    project.exec {
+                    project.providers.exec {
                         workingDir = output
                         commandLine = listOf("python3", reverse, source, outputFilePath)
                     }
