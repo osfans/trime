@@ -1,12 +1,12 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
-
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 
 open class NativeBaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -43,7 +43,7 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
 
     private fun registerCleanCxxTask(project: Project) {
         project
-            .task<Delete>("cleanCxxIntermediates") {
+            .tasks.register<Delete>("cleanCxxIntermediates") {
                 delete(project.file(".cxx"))
             }.also {
                 project.cleanTask.dependsOn(it)

@@ -1,20 +1,21 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
-
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 import org.jetbrains.kotlin.com.google.common.hash.Hashing
 import org.jetbrains.kotlin.com.google.common.io.ByteSource
 import java.io.File
 
+@Suppress("unused")
 class NativeCacheHashPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        target.task<NativeCacheHashCalcTask>("calculateNativeCacheHash")
+        target.tasks.register<NativeCacheHashCalcTask>("calculateNativeCacheHash")
     }
 
     abstract class NativeCacheHashCalcTask : DefaultTask() {
