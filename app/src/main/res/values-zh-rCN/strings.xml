@@ -229,4 +229,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="horizontal">横向</string>
     <string name="vertical">纵向</string>
     <string name="ascii_switch_tips">切换中英文模式时显示提示</string>
+    <string name="keyboard__key_double_tap_timeout">按键双击超时</string>
+    <string name="keyboard__key_slide_step_size">按键滑动步长</string>
 </resources>

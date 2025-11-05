@@ -23,6 +23,8 @@ data class PresetKey(
     val text: String = "",
     val sticky: Boolean = false,
     val repeatable: Boolean = false,
+    val slideCursor: Boolean = false,
+    val slideDelete: Boolean = false,
     val functional: Boolean = false,
     val states: List<String> = emptyList(),
     val send: String = "",

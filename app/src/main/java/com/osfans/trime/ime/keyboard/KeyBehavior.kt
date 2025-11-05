@@ -13,6 +13,8 @@ enum class KeyBehavior {
     COMBO,
     ASCII,
     CLICK,
+    DOUBLE_CLICK,
+    LAZY_DOUBLE_CLICK,
     SWIPE_UP,
     LONG_CLICK,
     SWIPE_DOWN,

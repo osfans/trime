@@ -1097,7 +1097,7 @@ preset_keyboards:
       - {click: l, long_click: '(){Left}', swipe_down: "=", key_back_color: bh2, key_text_color: th2}
       - {width: 5, key_back_color: bh2, key_text_color: th2}
 
-      - {click: Shift_L, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: Shift_L, double_click: Shift_L3, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
       - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
@@ -1105,7 +1105,7 @@ preset_keyboards:
       - {click: b, long_click: ";", swipe_down: "\\", key_back_color: bh3, key_text_color: th3}
       - {click: n, long_click: ":", key_back_color: bh3, key_text_color: th3}
       - {click: m, long_click: '?', swipe_down: "|", key_back_color: bh3, key_text_color: th3}
-      - {click: BackSpace, width: 15, key_back_color: bbs, key_text_color: tbs}
+      - {click: BackSpace2, width: 15, key_back_color: bbs, key_text_color: tbs}
 
       - {click: Keyboard_number, long_click: Menu, width: 12.5, key_back_color: bgn, key_text_color: tgn}
       - {click: Keyboard_bqrw, long_click: Theme_settings, swipe_down: Color_switch, swipe_up: Color_switch, width: 12.5, key_text_size: "18", key_back_color: bgn, key_text_color: tgn}
@@ -3973,12 +3973,14 @@ preset_keys:
   VOLUME_MUTE: {label: 静音, send: VOLUME_MUTE}
   # 编辑
   Shift_L: {label: Shift, preview: '⇪', functional: false, send: Shift_L}
+  Shift_L3: {label: Shift, preview: '⇪', functional: false, send: Shift_L, shift_lock: click}
   Return: { label: enter_labels, preview: '↩', functional: false, send: Return }
   Return1: {label: Enter, preview: '↩', functional: false, send: Return}
   Return2: {label: 回车, send: Return }
   Hide: {label: 隐藏, send: BACK}
   BackSpace: {label: 退格, preview: '⇦', repeatable: true, functional: false, send: BackSpace}
-  space: {repeatable: false, preview: ' ', functional: false, label: '_______', send: space}
+  BackSpace2: {label: 退格, preview: '⇦', repeatable: true, functional: false, slide_delete: true, send: BackSpace}
+  space: {repeatable: false, preview: ' ', functional: false, slide_cursor: true, label: '_______', send: space}
   space1: {repeatable: false, label: '空格', functional: false, send: space}
   Clear: {label: 全清, send: Clear}
   Escape: {label: 取消, functional: false, send: Escape}

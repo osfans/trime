@@ -126,7 +126,7 @@ class KeyboardWindow(
                 KeyboardSwitcher.currentKeyboard = it
             }
         val newView =
-            currentKeyboardView ?: KeyboardView(context, theme, newKeyboard, keyPreviewChoreographer).also {
+            currentKeyboardView ?: KeyboardView(context, theme, newKeyboard, keyPreviewChoreographer, service).also {
                 cachedKeyboards[target] = newKeyboard to it
             }
         newView.let {

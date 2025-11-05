@@ -153,6 +153,8 @@ class AppPrefs(
             const val SWIPE_VELOCITY = "keyboard__key_swipe_velocity"
             const val LONG_PRESS_TIMEOUT = "keyboard__key_long_press_timeout"
             const val REPEAT_INTERVAL = "keyboard__key_repeat_interval"
+            const val DOUBLE_TAP_TIMEOUT = "keyboard__key_double_tap_timeout"
+            const val SLIDE_STEP_SIZE = "keyboard__key_slide_step_size"
         }
 
         val softCursorEnabled = bool(SOFT_CURSOR_ENABLED, true)
@@ -185,13 +187,15 @@ class AppPrefs(
         val vibrateOnKeyPress = bool(VIBRATE_ON_KEYPRESS, false)
         val vibrationDuration = int(VIBRATION_DURATION, 10)
         val vibrationAmplitude = int(VIBRATION_AMPLITUDE, -1)
+        val speakOnKeyPress = bool(SPEAK_ON_KEYPRESS, false)
+        val speakOnCommit = bool(SPEAK_ON_COMMIT, false)
         val swipeEnabled = bool(SWIPE_ENABLED, true)
         val swipeTravel = int(SWIPE_TRAVEL, 80)
         val swipeVelocity = int(SWIPE_VELOCITY, 800)
         val longPressTimeout = int(LONG_PRESS_TIMEOUT, 400)
         val repeatInterval = int(REPEAT_INTERVAL, 50)
-        val speakOnKeyPress = bool(SPEAK_ON_KEYPRESS, false)
-        val speakOnCommit = bool(SPEAK_ON_COMMIT, false)
+        val doubleTapTimeout = int(DOUBLE_TAP_TIMEOUT, 300)
+        val slideStepSize = int(SLIDE_STEP_SIZE, 24)
     }
 
     class Candidates(

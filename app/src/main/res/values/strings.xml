@@ -230,4 +230,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
     <string name="ascii_switch_tips">Show tips when switching ASCII mode</string>
+    <string name="keyboard__key_double_tap_timeout">Key double tap timeout</string>
+    <string name="keyboard__key_slide_step_size">Step size for key sliding</string>
 </resources>

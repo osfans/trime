@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.keyboard
 
@@ -8,7 +9,6 @@ import android.graphics.Point
 import android.os.Build
 import android.view.KeyEvent
 import android.view.WindowInsets
-import android.view.WindowManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
@@ -334,7 +334,7 @@ class Keyboard(
         return appContext.dp(keyboardHeight)
     }
 
-    fun setModiferKey(
+    fun setModifierKey(
         c: Int,
         key: Key?,
     ) {
@@ -399,7 +399,7 @@ class Keyboard(
      * @param keycode 修饰键的 KeyEvent 掩码
      * @return 修饰键状态是否改变
      */
-    fun clikModifierKey(
+    fun clickModifierKey(
         on: Boolean,
         keycode: Int,
     ): Boolean {

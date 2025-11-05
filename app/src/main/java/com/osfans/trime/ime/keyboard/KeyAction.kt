@@ -37,6 +37,26 @@ class KeyAction(
         private set
     var isSticky = false
         private set
+    var isSlideCursor = false
+        private set
+    var isSlideDelete = false
+        private set
+
+    val isModifierKey: Boolean
+        // Trime把function键消费掉了，因此键盘只处理function键以外的修饰键
+        get() = KeyEvent.isModifierKey(this.code) && this.code != KeyEvent.KEYCODE_FUNCTION
+
+    val isShiftLock: Boolean
+        get() =
+            when (shiftLock) {
+                "long" -> false // 长按锁定
+                "click" -> true // 点击锁定
+                "ascii_long" -> !rime.run { statusCached }.isAsciiMode // 英文长按锁定，中文点击锁定
+                else -> false
+            }
+
+    val modifierKeyOnMask: Int
+        get() = getModifierKeyOnMask(this.code)
 
     private var text: String = ""
     private var label: String = ""
@@ -113,6 +133,8 @@ class KeyAction(
                 isSticky = presetKey.sticky
                 isRepeatable = presetKey.repeatable
                 isFunctional = presetKey.functional
+                isSlideCursor = presetKey.slideCursor
+                isSlideDelete = presetKey.slideDelete
                 states = presetKey.states
 
                 val send = presetKey.send
@@ -181,5 +203,14 @@ class KeyAction(
             .mapNotNull {
                 it.split("=").takeIf { it.size == 2 }?.let { (key, value) -> key to value }
             }.toMap()
+
+        fun getModifierKeyOnMask(keycode: Int): Int = when (keycode) {
+            KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> KeyEvent.META_SHIFT_ON
+            KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_CTRL_RIGHT -> KeyEvent.META_CTRL_ON
+            KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_META_RIGHT -> KeyEvent.META_META_ON
+            KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> KeyEvent.META_ALT_ON
+            KeyEvent.KEYCODE_SYM -> KeyEvent.META_SYM_ON
+            else -> 0
+        }
     }
 }
