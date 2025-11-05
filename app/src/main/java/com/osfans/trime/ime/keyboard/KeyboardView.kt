@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.keyboard
 
@@ -14,12 +15,7 @@ import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.os.SystemClock
-import android.view.GestureDetector
-import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.KeyEvent
-import android.view.MotionEvent
-import android.view.View
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -29,17 +25,14 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
+import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.preview.KeyPreviewChoreographer
 import com.osfans.trime.util.sp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import timber.log.Timber
-import java.util.Arrays
-import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -50,9 +43,10 @@ class KeyboardView(
     private val theme: Theme,
     private val keyboard: Keyboard,
     private val keyPreviewChoreographer: KeyPreviewChoreographer,
-) : View(context) {
+    private val service: TrimeInputMethodService,
+) : KeyboardGestureFrame(context) {
+
     private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
-    private var mCurrentKeyIndex = NOT_A_KEY
     private val keyTextSize = theme.generalStyle.keyTextSize
     private val labelTextSize =
         theme.generalStyle.keyLongTextSize
@@ -67,7 +61,8 @@ class KeyboardView(
     private val mKeys get() = keyboard.keys
 
     var keyboardActionListener: KeyboardActionListener? = null
-    private val mVerticalCorrection = theme.generalStyle.verticalCorrection
+    override val verticalCorrection: Int
+        get() = theme.generalStyle.verticalCorrection
     private var mProximityThreshold = 0
 
     /**
@@ -75,44 +70,14 @@ class KeyboardView(
      * the depressed key. By default the preview is enabled.
      */
     private val showPreview by AppPrefs.defaultInstance().keyboard.popupKeyPressEnabled
-    private var mLastX = 0
-    private var mLastY = 0
-    private var mStartX = 0
-    private var mStartY = 0
-    private var touchX0 = 0
-    private var touchY0 = 0
-    private var touchOnePoint = false
+
+    private val deletedTextBuffer = ArrayDeque<String>()
 
     /**
      * 是否允許距離校正 When enabled, calls to [KeyboardActionListener.onKey] will include key codes for
      * adjacent keys. When disabled, only the primary key code will be reported.
      */
     private val enableProximityCorrection = theme.generalStyle.proximityCorrection
-    private var mDownTime: Long = 0
-    private var mLastMoveTime: Long = 0
-    private var mLastKey = 0
-    private var mLastCodeX = 0
-    private var mLastCodeY = 0
-    private var mCurrentKey = NOT_A_KEY
-    private var mDownKey = NOT_A_KEY
-    private var mLastKeyTime: Long = 0
-    private var mCurrentKeyTime: Long = 0
-    private var mLastUpTime: Long = 0
-    private val mKeyIndices = IntArray(12)
-    private var mRepeatKeyIndex = -1
-    private var mAbortKey = true
-    private val mDisambiguateSwipe = false
-
-    // Variables for dealing with multiple pointers
-    private var mOldPointerCount = 1
-    private val mComboCodes = IntArray(10)
-    private var mComboCount = 0
-    private var mComboMode = false
-    private val mDistances = IntArray(MAX_NEARBY_KEYS)
-
-    // For multi-tap
-    private var mLastSentIndex = -1
-    private var mLastTapTime: Long = -1
 
     /** True if all keys should be drawn */
     private var invalidateAllKeys = false
@@ -141,187 +106,79 @@ class KeyboardView(
         labelEnter = label
     }
 
-    private val lifecycleScope by lazy {
-        findViewTreeLifecycleOwner()?.lifecycleScope!!
-    }
-
-    private var longPressJob: Job? = null
-    private var repeatJob: Job? = null
-    private var removePreviewJob: Job? = null
-
-    private fun handleLongPressJob() {
-        longPressJob?.cancel()
-        longPressJob =
-            lifecycleScope.launch {
-                delay(longPressTimeout.toLong())
-                InputFeedbackManager.keyPressVibrate(this@KeyboardView, true)
-                openPopupIfRequired()
-            }
-    }
-
-    private fun handleRepeatJob() {
-        repeatJob?.cancel()
-        repeatJob =
-            lifecycleScope.launch {
-                delay(longPressTimeout.toLong())
-                var lastTriggerTime: Long
-                while (isActive && isEnabled) {
-                    lastTriggerTime = SystemClock.uptimeMillis()
-                    if (repeatKey()) {
-                        val t = lastTriggerTime + repeatInterval - SystemClock.uptimeMillis()
-                        if (t > 0) delay(t)
-                    }
-                }
-            }
-    }
-
-    private fun handleRemovePreviewJob(key: Key) {
-        removePreviewJob?.cancel()
-        removePreviewJob =
-            lifecycleScope.launch {
-                delay(DELAY_AFTER_PREVIEW)
-                dismissKeyPreviewWithoutDelay(key)
-            }
-    }
-
     init {
         computeProximityThreshold(keyboard)
         invalidateAllKeys()
+
+        onKeyActionListener = { keyIndex, behavior, repeat ->
+            if (!repeat) keyboardActionListener?.onPress(keyIndex)
+            detectAndSendKey(keyIndex, behavior)
+            true
+        }
+
+        onKeySlideListener = { keyIndex, deltaX, x, y ->
+            val key = mKeys[keyIndex]
+            val ic = service.currentInputConnection
+
+            when {
+                key.click?.isSlideCursor == true -> {
+                    when {
+                        deltaX > 0 -> keyboardActionListener?.onAction(KeyAction("Right"))
+                        deltaX < 0 -> keyboardActionListener?.onAction(KeyAction("Left"))
+                    }
+                    true
+                }
+                key.click?.isSlideDelete == true -> {
+                    when {
+                        deltaX < 0 -> {
+                            val beforeText = ic.getTextBeforeCursor(1, 0) ?: ""
+                            if (beforeText.isNotEmpty()) {
+                                deletedTextBuffer.addFirst(beforeText.toString())
+                                ic?.deleteSurroundingText(1, 0)
+                            }
+                            true
+                        }
+                        deltaX > 0 -> {
+                            if (deletedTextBuffer.isNotEmpty()) {
+                                ic?.commitText(deletedTextBuffer.removeFirst(), 1)
+                            }
+                            true
+                        }
+                    }
+                }
+            }
+            false
+        }
+
+        onKeyPreviewListener = { keyIndex, behavior, showing ->
+            val key = mKeys[keyIndex]
+            if (showing) {
+                key.onPressed()
+                invalidateKey(key)
+                if (showPreview) showKeyPreview(key, behavior)
+            } else {
+                key.onReleased()
+                invalidateKey(key)
+                if (showPreview) dismissKeyPreview(key)
+            }
+        }
+
+        onKeyReleaseListener = {
+            deletedTextBuffer.clear()
+        }
     }
 
-    private val swipeEnabled by AppPrefs.defaultInstance().keyboard.swipeEnabled
-    private val swipeTravel by AppPrefs.defaultInstance().keyboard.swipeTravel // threshold distance
-    private val swipeVelocity by AppPrefs.defaultInstance().keyboard.swipeVelocity // threshold velocity
+    override fun getKeyIndex(x: Float, y: Float): Int = getKeyIndices(x.toInt(), y.toInt())
+    override fun isKeyRepeatable(keyIndex: Int): Boolean = mKeys.getOrNull(keyIndex)?.click?.isRepeatable ?: false
+    override fun isKeySlideCursor(keyIndex: Int): Boolean = mKeys.getOrNull(keyIndex)?.click?.isSlideCursor ?: false
+    override fun isKeySlideDelete(keyIndex: Int): Boolean = mKeys.getOrNull(keyIndex)?.click?.isSlideDelete ?: false
+    override fun hasAction(keyIndex: Int, behavior: KeyBehavior): Boolean = mKeys.getOrNull(keyIndex)?.hasAction(behavior) ?: false
 
-    private val customSwipeTracker = CustomSwipeTracker()
-    private val customGestureDetector =
-        GestureDetector(
-            context,
-            object : SimpleOnGestureListener() {
-                override fun onFling(
-                    me1: MotionEvent?,
-                    me2: MotionEvent,
-                    velocityX: Float,
-                    velocityY: Float,
-                ): Boolean {
-                        /*
-                    Judgment basis: the sliding distance exceeds the threshold value,
-                    and the sliding distance on the corresponding axis is less than
-                    the sliding distance on the other coordinate axis.
-                         */
-                    if (mDownKey == -1) return false
-                    val deltaX = me2.x - me1!!.x // distance X
-                    val deltaY = me2.y - me1.y // distance Y
-                    val absX = abs(deltaX) // absolute value of distance X
-                    val absY = abs(deltaY) // absolute value of distance Y
-                    customSwipeTracker.computeCurrentVelocity(10)
-                    val endingVelocityX: Float = customSwipeTracker.xVelocity
-                    val endingVelocityY: Float = customSwipeTracker.yVelocity
-                    var sendDownKey = false
-                    var behavior = KeyBehavior.CLICK
-                    //  In my tests velocity always smaller than 400
-                    //  so I don't really why we need to compare velocity here,
-                    //  as default value of getSwipeVelocity() is 800
-                    //  and default value of getSwipeVelocityHi() is 25000,
-                    //  so for most of the users that judgment is always true
-                    if ((deltaX > swipeTravel || velocityX > swipeVelocity) &&
-                        (
-                            absY < absX ||
-                                (
-                                    deltaY > 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_UP] == null
-                                    ) ||
-                                (
-                                    deltaY < 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_DOWN] == null
-                                    )
-                            ) &&
-                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_RIGHT] != null
-                    ) {
-                        // I should have implement mDisambiguateSwipe as a config option, but the logic
-                        // here is really weird, and I don't really know
-                        // when it is enabled what should be the behavior, so I just left it always false.
-                        // endingVelocityX and endingVelocityY seems always > 0 but velocityX and
-                        // velocityY can be negative.
-                        if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
-                            return true
-                        } else {
-                            sendDownKey = true
-                            behavior = KeyBehavior.SWIPE_RIGHT
-                        }
-                    } else if ((deltaX < -swipeTravel || velocityX < -swipeVelocity) &&
-                        (
-                            absY < absX ||
-                                (
-                                    deltaY > 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_UP] == null
-                                    ) ||
-                                (
-                                    deltaY < 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_DOWN] == null
-                                    )
-                            ) &&
-                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_LEFT] != null
-                    ) {
-                        if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
-                            return true
-                        } else {
-                            sendDownKey = true
-                            behavior = KeyBehavior.SWIPE_LEFT
-                        }
-                    } else if ((deltaY < -swipeTravel || velocityY < -swipeVelocity) &&
-                        (
-                            absX < absY ||
-                                (
-                                    deltaX > 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_RIGHT] == null
-                                    ) ||
-                                (
-                                    deltaX < 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_LEFT] == null
-                                    )
-                            ) &&
-                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_UP] != null
-                    ) {
-                        if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
-                            return true
-                        } else {
-                            sendDownKey = true
-                            behavior = KeyBehavior.SWIPE_UP
-                        }
-                    } else if ((deltaY > swipeTravel || velocityY > swipeVelocity) &&
-                        (
-                            absX < absY ||
-                                (
-                                    deltaX > 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_RIGHT] == null
-                                    ) ||
-                                (
-                                    deltaX < 0 &&
-                                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_LEFT] == null
-                                    )
-                            ) &&
-                        mKeys[mDownKey].keyActions[KeyBehavior.SWIPE_DOWN] != null
-                    ) {
-                        if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
-                            return true
-                        } else {
-                            sendDownKey = true
-                            behavior = KeyBehavior.SWIPE_DOWN
-                        }
-                    } else {
-                        Timber.d("swipeDebug.onFling fail , dY=$deltaY, vY=$velocityY, eVY=$endingVelocityY, travel=$swipeTravel")
-                    }
-                    if (sendDownKey) {
-                        Timber.d("initGestureDetector: sendDownKey")
-                        showPreview(mDownKey, behavior)
-                        detectAndSendKey(mDownKey, mStartX, mStartY, me1.eventTime, behavior)
-                        return true
-                    }
-                    return false
-                }
-            },
-        ).apply { setIsLongpressEnabled(false) }
+    private val lifecycleScope by lazy {
+        findViewTreeLifecycleOwner()?.lifecycleScope
+    }
+
+    private var removePreviewJob: Job? = null
 
     private fun showKeyPreview(
         key: Key,
@@ -344,22 +201,25 @@ class KeyboardView(
         handleRemovePreviewJob(key)
     }
 
-    /**
-     * 设置键盘修饰键的状态
-     *
-     * @param key 按下的修饰键(非组合键）
-     * @param behavior 按键行为(单击、长按等)
-     * @return
-     */
+    private fun handleRemovePreviewJob(key: Key) {
+        removePreviewJob?.cancel()
+        // NOTE: hide without delay when the view is destroyed
+        val scope = lifecycleScope ?: return dismissKeyPreviewWithoutDelay(key)
+        removePreviewJob = scope.launch {
+            delay(DELAY_AFTER_PREVIEW)
+            dismissKeyPreviewWithoutDelay(key)
+        }
+    }
+
     private fun setModifier(
-        key: Key,
+        action: KeyAction,
         behavior: KeyBehavior,
-    ): Boolean = setModifier(key.isShiftLock xor (behavior == KeyBehavior.LONG_CLICK), key.modifierKeyOnMask)
+    ): Boolean = setModifier(action.isShiftLock xor (behavior == KeyBehavior.LONG_CLICK), action.modifierKeyOnMask)
 
     private fun setModifier(
         on: Boolean,
         code: Int,
-    ): Boolean = keyboard.clikModifierKey(on, code).also { if (it) invalidateAllKeys() }
+    ): Boolean = keyboard.clickModifierKey(on, code).also { if (it) invalidateAllKeys() }
 
     // 重置全部修饰键的状态(如果有锁定则不重置）
     private fun refreshModifier() {
@@ -468,15 +328,6 @@ class KeyboardView(
             }
         }
 
-        // debug: show touch points
-//        paint.alpha = 128
-//        paint.color = -0x10000
-//        canvas.drawCircle(mStartX.toFloat(), mStartY.toFloat(), 3f, paint)
-//        canvas.drawLine(mStartX.toFloat(), mStartY.toFloat(), mLastX.toFloat(), mLastY.toFloat(), paint)
-//        paint.color = -0xffff01
-//        canvas.drawCircle(mLastX.toFloat(), mLastY.toFloat(), 3f, paint)
-//        paint.color = -0xff0100
-//        canvas.drawCircle((mStartX + mLastX) / 2f, (mStartY + mLastY) / 2f, 2f, paint)
         invalidatedKeys.clear()
         invalidateAllKeys = false
     }
@@ -591,7 +442,7 @@ class KeyboardView(
         var primaryIndex = -1
         var closestKey = -1
         var closestKeyDist = mProximityThreshold + 1
-        mDistances.fill(Int.MAX_VALUE)
+        IntArray(MAX_NEARBY_KEYS).fill(Int.MAX_VALUE)
         val nearestKeyIndices = keyboard.getNearestKeys(x, y)
         for (nearestKeyIndex in nearestKeyIndices!!) {
             val key = mKeys[nearestKeyIndex]
@@ -615,19 +466,8 @@ class KeyboardView(
     }
 
     private fun releaseKey(code: Int) {
-        Timber.d("releaseKey: keyCode=$code, comboMode=$mComboMode, comboCount=$mComboCount")
-        if (mComboMode) {
-            if (mComboCount > 9) mComboCount = 9
-            mComboCodes[mComboCount++] = code
-        } else {
-            keyboardActionListener?.onRelease(code)
-            if (mComboCount > 0) {
-                for (i in 0 until mComboCount) {
-                    keyboardActionListener?.onRelease(mComboCodes[i])
-                }
-                mComboCount = 0
-            }
-        }
+        Timber.d("releaseKey: keyCode=$code")
+        keyboardActionListener?.onRelease(code)
     }
 
     private val hookShiftArrow by AppPrefs.defaultInstance().keyboard.hookShiftArrow
@@ -644,59 +484,21 @@ class KeyboardView(
 
     private fun detectAndSendKey(
         index: Int,
-        x: Int,
-        y: Int,
-        eventTime: Long,
         behavior: KeyBehavior = KeyBehavior.CLICK,
     ) {
-        Timber.d("detectAndSendKey: index=$index, x=$x, y=$y, type=$behavior, mKeys.size=${mKeys.size}")
-        if (index in mKeys.indices) {
-            val key = mKeys[index]
-            if (key.isModifierKey && !key.sendBindings(behavior)) {
-                Timber.d("detectAndSendKey: ModifierKey, key.getEvent, keyLabel=${key.getLabel()}")
-                setModifier(key, behavior)
-            } else {
-                if (key.click!!.isRepeatable) {
-                    if (behavior > KeyBehavior.CLICK) mAbortKey = true
-                    if (!key.hasAction(behavior)) return
-                }
-                val code = key.getCode(behavior)
-                // TextEntryState.keyPressedAt(key, x, y);
-                // getKeyIndices(x, y, codes); // 这里实际上并没有生效
-                Timber.d("detectAndSendKey: onEvent, code=$code, key.getEvent")
-                // 可以在这里把 mKeyboard.getModifer() 获取的修饰键状态写入event里
-                key.getAction(behavior)?.let { keyboardActionListener?.onAction(it) }
-                releaseKey(code)
-                Timber.d("detectAndSendKey: refreshModifier")
-                if (!isHookShiftArrow(code)) {
-                    refreshModifier()
-                }
-            }
-            mLastSentIndex = index
-            mLastTapTime = eventTime
-        }
-    }
+        val key = mKeys.getOrNull(index) ?: return
+        val action = key.getAction(behavior) ?: return
+        Timber.d("detectAndSendKey: label=${key.getLabel()}, code=${action.code}, type=$behavior, modifier=${action.isModifierKey}")
 
-    private fun showPreview(
-        keyIndex: Int,
-        behavior: KeyBehavior = KeyBehavior.COMPOSING,
-    ) {
-        val oldKeyIndex = mCurrentKeyIndex
-        mCurrentKeyIndex = keyIndex
-        // Release the old key and press the new key
-        val keys = mKeys
-        if (oldKeyIndex != mCurrentKeyIndex) {
-            keys.getOrNull(oldKeyIndex)?.let { oldKey ->
-                oldKey.onReleased()
-                invalidateKey(oldKey)
-                if (showPreview) dismissKeyPreview(oldKey)
-            }
-            keys.getOrNull(mCurrentKeyIndex)?.let { newKey ->
-                newKey.onPressed()
-                invalidateKey(newKey)
-                if (showPreview) showKeyPreview(newKey, behavior)
-            }
+        if (action.isModifierKey) {
+            setModifier(action, behavior)
+            return
         }
+
+        keyboardActionListener?.onAction(action)
+        releaseKey(action.code)
+        if (!isHookShiftArrow(action.code)) refreshModifier()
+        return
     }
 
     /**
@@ -727,324 +529,9 @@ class KeyboardView(
         invalidate()
     }
 
-    private fun openPopupIfRequired(): Boolean {
-        // Check if we have a popup layout specified first.
-        if (mCurrentKey !in mKeys.indices) {
-            return false
-        }
-        showPreview(mCurrentKey, KeyBehavior.LONG_CLICK)
-        val popupKey = mKeys[mCurrentKey]
-        return onLongPress(popupKey).also {
-            if (it) {
-                mAbortKey = true
-                showPreview(NOT_A_KEY)
-            }
-        }
-    }
-
-    /**
-     * Called when a key is long pressed. By default this will open any popup keyboard associated with
-     * this key through the attributes popupLayout and popupCharacters.
-     *
-     * @param popupKey the key that was long pressed
-     * @return true if the long press is handled, false otherwise. Subclasses should call the method
-     * on the base class if the subclass doesn't wish to handle the call.
-     */
-    private fun onLongPress(popupKey: Key): Boolean {
-        popupKey.longClick?.let {
-            cancelAllJobs()
-            mAbortKey = true
-            keyboardActionListener?.onAction(it)
-            releaseKey(it.code)
-            if (!isHookShiftArrow(it.code)) {
-                refreshModifier()
-            }
-            return true
-        }
-        if (popupKey.isModifierKey && !popupKey.sendBindings(KeyBehavior.LONG_CLICK)) {
-            setModifier(popupKey, KeyBehavior.LONG_CLICK)
-            return true
-        }
-        return false
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(me: MotionEvent): Boolean {
-        // Convert multi-pointer up/down events to single up/down events to
-        // deal with the typical multi-pointer behavior of two-thumb typing
-        val index = me.actionIndex
-        val pointerCount = me.pointerCount
-        val action = me.actionMasked
-        var result: Boolean
-        val now = me.eventTime
-        mComboMode = false
-        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_CANCEL) {
-            mComboCount = 0
-        } else if (pointerCount > 1 || action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_POINTER_UP) {
-            mComboMode = true
-        }
-        if (action == MotionEvent.ACTION_UP) {
-            Timber.d("swipeDebug.onTouchEvent ?, action = ACTION_UP")
-        }
-        if (action == MotionEvent.ACTION_POINTER_UP || mOldPointerCount > 1 && action == MotionEvent.ACTION_UP) {
-            // 並擊鬆開前的虛擬按鍵事件
-            val ev =
-                MotionEvent.obtain(
-                    now,
-                    now,
-                    MotionEvent.ACTION_POINTER_DOWN,
-                    me.getX(index),
-                    me.getY(index),
-                    me.metaState,
-                )
-            result = onModifiedTouchEvent(ev)
-            ev.recycle()
-            Timber.d("\t<TrimeInput>\tonTouchEvent()\tactionUp done")
-        }
-        if (action == MotionEvent.ACTION_POINTER_DOWN) {
-            // 並擊中的按鍵事件，需要按鍵提示
-            val ev =
-                MotionEvent.obtain(
-                    now,
-                    now,
-                    MotionEvent.ACTION_DOWN,
-                    me.getX(index),
-                    me.getY(index),
-                    me.metaState,
-                )
-            result = onModifiedTouchEvent(ev)
-            ev.recycle()
-            Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\tactionDown done")
-        } else {
-            Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\tonModifiedTouchEvent")
-            result = onModifiedTouchEvent(me)
-            Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\tnot actionDown done")
-        }
-        if (action != MotionEvent.ACTION_MOVE) mOldPointerCount = pointerCount
-        performClick()
-        return result
-    }
-
-    private val longPressTimeout by AppPrefs.defaultInstance().keyboard.longPressTimeout
-    private val repeatInterval by AppPrefs.defaultInstance().keyboard.repeatInterval
-
-    private fun onModifiedTouchEvent(me: MotionEvent): Boolean {
-        // final int pointerCount = me.getPointerCount();
-        val index = me.actionIndex
-        var touchX = me.getX(index).toInt() - paddingLeft
-        var touchY = me.getY(index).toInt() - paddingTop
-        if (touchY >= -mVerticalCorrection) touchY += mVerticalCorrection
-        val action = me.actionMasked
-        val eventTime = me.eventTime
-        val keyIndex = getKeyIndices(touchX, touchY)
-
-        // Track the last few movements to look for spurious swipes.
-        if (action == MotionEvent.ACTION_DOWN) customSwipeTracker.clear()
-        customSwipeTracker.addMovement(me)
-        when (action) {
-            MotionEvent.ACTION_CANCEL -> {
-                Timber.d("swipeDebug.onModifiedTouchEvent before gesture, action = cancel")
-            }
-            MotionEvent.ACTION_UP -> {
-                Timber.d("swipeDebug.onModifiedTouchEvent before gesture, action = UP")
-            }
-            else -> {
-                Timber.d("swipeDebug.onModifiedTouchEvent before gesture, action != UP")
-            }
-        }
-
-        // Ignore all motion events until a DOWN.
-        if (mAbortKey && action != MotionEvent.ACTION_DOWN && action != MotionEvent.ACTION_CANCEL) {
-            return true
-        }
-
-        // 优先判定是否触发了滑动手势
-        if (swipeEnabled) {
-            if (customGestureDetector.onTouchEvent(me)) {
-                showPreview(NOT_A_KEY)
-                repeatJob?.cancel()
-                repeatJob = null
-                longPressJob?.cancel()
-                longPressJob = null
-                return true
-            }
-        }
-
-        fun modifiedPointerDown() {
-            mAbortKey = false
-            mStartX = touchX
-            mStartY = touchY
-            mLastCodeX = touchX
-            mLastCodeY = touchY
-            mLastKeyTime = 0
-            mCurrentKeyTime = 0
-            mLastKey = NOT_A_KEY
-            mCurrentKey = keyIndex
-            mDownKey = keyIndex
-            mDownTime = me.eventTime
-            mLastMoveTime = mDownTime
-            touchOnePoint = false
-            if (action == MotionEvent.ACTION_POINTER_DOWN) return // 並擊鬆開前的虛擬按鍵事件
-            checkMultiTap(eventTime, keyIndex)
-            keyboardActionListener?.onPress(if (keyIndex != NOT_A_KEY) mKeys[keyIndex].code else 0)
-            if (mCurrentKey >= 0 && mKeys[mCurrentKey].click!!.isRepeatable) {
-                mRepeatKeyIndex = mCurrentKey
-                handleRepeatJob()
-                // Delivering the key could have caused an abort
-                if (mAbortKey) {
-                    mRepeatKeyIndex = NOT_A_KEY
-                    return
-                }
-            }
-            if (mCurrentKey != NOT_A_KEY) {
-                handleLongPressJob()
-            }
-            showPreview(keyIndex, KeyBehavior.CLICK)
-        }
-
-        /**
-         * @return 跳出外层函数
-         */
-        fun modifiedPointerUp(): Boolean {
-            cancelAllJobs()
-            mLastUpTime = eventTime
-            if (keyIndex == mCurrentKey) {
-                mCurrentKeyTime += eventTime - mLastMoveTime
-            } else {
-                resetMultiTap()
-                mLastKey = mCurrentKey
-                mLastKeyTime = mCurrentKeyTime + eventTime - mLastMoveTime
-                mCurrentKey = keyIndex
-                mCurrentKeyTime = 0
-            }
-            if (swipeEnabled) {
-                val dx = touchX - touchX0
-                val dy = touchY - touchY0
-                val absX = abs(dx)
-                val absY = abs(dy)
-                if (max(absY, absX) > swipeTravel && touchOnePoint) {
-                    Timber.d("\t<TrimeInput>\tonModifiedTouchEvent()\ttouch")
-                    val keyBehavior =
-                        if (absX < absY) {
-                            Timber.d("swipeDebug.ext y, dX=$dx, dY=$dy")
-                            if (dy > swipeTravel) KeyBehavior.SWIPE_DOWN else KeyBehavior.SWIPE_UP
-                        } else {
-                            Timber.d("swipeDebug.ext x, dX=$dx, dY=$dy")
-                            if (dx > swipeTravel) KeyBehavior.SWIPE_RIGHT else KeyBehavior.SWIPE_LEFT
-                        }
-                    showPreview(NOT_A_KEY)
-                    repeatJob?.cancel()
-                    repeatJob = null
-                    longPressJob?.cancel()
-                    longPressJob = null
-                    detectAndSendKey(mDownKey, mStartX, mStartY, me.eventTime, keyBehavior)
-                    return true
-                } else {
-                    Timber.d("swipeDebug.ext fail, dX=$dx, dY=$dy")
-                }
-            }
-            if (mCurrentKeyTime < mLastKeyTime && mCurrentKeyTime < DEBOUNCE_TIME && mLastKey != NOT_A_KEY) {
-                mCurrentKey = mLastKey
-                touchX = mLastCodeX
-                touchY = mLastCodeY
-            }
-            showPreview(NOT_A_KEY)
-            Arrays.fill(mKeyIndices, NOT_A_KEY)
-            if (mRepeatKeyIndex != NOT_A_KEY && !mAbortKey) repeatKey()
-            if (mRepeatKeyIndex == NOT_A_KEY && !mAbortKey) {
-                Timber.d("onModifiedTouchEvent: detectAndSendKey")
-                detectAndSendKey(
-                    mCurrentKey,
-                    touchX,
-                    touchY,
-                    eventTime,
-                    if (mOldPointerCount > 1 || mComboMode) KeyBehavior.COMBO else KeyBehavior.CLICK,
-                )
-            }
-            mRepeatKeyIndex = NOT_A_KEY
-            return false
-        }
-
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                touchX0 = touchX
-                touchY0 = touchY
-                touchOnePoint = true
-                modifiedPointerDown()
-            }
-
-            MotionEvent.ACTION_POINTER_DOWN -> {
-                modifiedPointerDown()
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                var continueLongPress = false
-                if (keyIndex != NOT_A_KEY) {
-                    if (mCurrentKey == NOT_A_KEY) {
-                        mCurrentKey = keyIndex
-                        mCurrentKeyTime = eventTime - mDownTime
-                    } else {
-                        if (keyIndex == mCurrentKey) {
-                            mCurrentKeyTime += eventTime - mLastMoveTime
-                            continueLongPress = true
-                        } else if (mRepeatKeyIndex == NOT_A_KEY) {
-                            resetMultiTap()
-                            mLastKey = mCurrentKey
-                            mLastCodeX = mLastX
-                            mLastCodeY = mLastY
-                            mLastKeyTime = mCurrentKeyTime + eventTime - mLastMoveTime
-                            mCurrentKey = keyIndex
-                            mCurrentKeyTime = 0
-                        }
-                    }
-                }
-                if (!mComboMode && !continueLongPress) {
-                    // Start new long press if key has changed
-                    if (keyIndex != NOT_A_KEY) {
-                        handleLongPressJob()
-                    }
-                }
-                showPreview(mCurrentKey)
-                mLastMoveTime = eventTime
-            }
-
-            MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_POINTER_UP,
-            -> {
-                val breakout = modifiedPointerUp()
-                if (breakout) return true
-            }
-
-            MotionEvent.ACTION_CANCEL -> {
-                cancelAllJobs()
-                mAbortKey = true
-                showPreview(NOT_A_KEY)
-                invalidateKey(mKeys[mCurrentKey])
-            }
-        }
-        mLastX = touchX
-        mLastY = touchY
-        return true
-    }
-
-    private fun repeatKey(): Boolean {
-        Timber.d("repeatKey")
-        val key = mKeys[mRepeatKeyIndex]
-        detectAndSendKey(mCurrentKey, key.x, key.y, mLastTapTime)
-        return true
-    }
-
-    private fun cancelAllJobs() {
-        repeatJob?.cancel()
-        repeatJob = null
-        longPressJob?.cancel()
-        longPressJob = null
+    fun onDetach() {
         removePreviewJob?.cancel()
         removePreviewJob = null
-    }
-
-    fun onDetach() {
-        cancelAllJobs()
         freeDrawingBuffer()
     }
 
@@ -1053,27 +540,8 @@ class KeyboardView(
         freeDrawingBuffer()
     }
 
-    private fun resetMultiTap() {
-        mLastSentIndex = -1
-        // final int mTapCount = 0;
-        mLastTapTime = -1
-        // final boolean mInMultiTap = false;
-    }
-
-    private fun checkMultiTap(
-        eventTime: Long,
-        keyIndex: Int,
-    ) {
-        if (keyIndex == NOT_A_KEY) return
-        if (eventTime > mLastTapTime + longPressTimeout || keyIndex != mLastSentIndex) {
-            resetMultiTap()
-        }
-    }
-
     companion object {
-        private const val NOT_A_KEY = -1
         private const val DELAY_AFTER_PREVIEW = 100L
-        private const val DEBOUNCE_TIME = 70
         private const val MAX_NEARBY_KEYS = 12
     }
 }

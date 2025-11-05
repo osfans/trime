@@ -115,7 +115,7 @@ class Key(
         } else {
             sendBindings = true
         }
-        parent.setModiferKey(this.code, this)
+        parent.setModifierKey(this.code, this)
     }
 
     fun setOn(on: Boolean): Boolean {
@@ -189,34 +189,8 @@ class Key(
         return xDist * xDist + yDist * yDist
     }
 
-    val isModifierKey: Boolean
-        // Trime把function键消费掉了，因此键盘只处理function键以外的修饰键
-        get() = KeyEvent.isModifierKey(this.code) && this.code != KeyEvent.KEYCODE_FUNCTION
-
-    val modifierKeyOnMask: Int
-        get() = getModifierKeyOnMask(this.code)
-
-    private fun getModifierKeyOnMask(keycode: Int): Int = when (keycode) {
-        KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> KeyEvent.META_SHIFT_ON
-        KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_CTRL_RIGHT -> KeyEvent.META_CTRL_ON
-        KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_META_RIGHT -> KeyEvent.META_META_ON
-        KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> KeyEvent.META_ALT_ON
-        KeyEvent.KEYCODE_SYM -> KeyEvent.META_SYM_ON
-        else -> 0
-    }
-
     val isShift: Boolean
         get() = this.code == KeyEvent.KEYCODE_SHIFT_LEFT || this.code == KeyEvent.KEYCODE_SHIFT_RIGHT
-
-    val isShiftLock: Boolean
-        // Shift、Ctrl、Alt、Meta 等修饰键在点击时是否触发锁定
-        get() =
-            when (click?.shiftLock) {
-                "long" -> false // 长按锁定
-                "click" -> true // 点击锁定
-                "ascii_long" -> !rime.run { statusCached }.isAsciiMode // 英文长按锁定，中文点击锁定
-                else -> false
-            }
 
     /**
      * @param behavior 同文按键模式（点击/长按/滑动）
@@ -271,7 +245,7 @@ class Key(
     private val appearanceType: Int
         get() {
             return when {
-                isModifierKey && parent.modifier.hasFlag(modifierKeyOnMask) || isOn -> 2
+                click?.isModifierKey == true && parent.modifier.hasFlag(click!!.modifierKeyOnMask) || isOn -> 2
                 click?.isSticky == true || click?.isFunctional == true -> 1
                 else -> 0
             }
