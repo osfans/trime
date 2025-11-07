@@ -32,7 +32,15 @@ class RimeProto {
             val selEnd: Int = 0,
             val preedit: String? = null,
             val commitTextPreview: String? = null,
-        )
+        ) {
+            constructor(text: String) : this(
+                text.length,
+                text.length,
+                text.length,
+                text.length,
+                text,
+            )
+        }
 
         data class Menu(
             val pageSize: Int = 0,

@@ -1,17 +1,22 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.core
 
 import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.isStorageAvailable
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -61,6 +66,10 @@ class Rime :
                 }
             },
         )
+
+    private val showAsciiSwitchTips by AppPrefs.defaultInstance().general.asciiSwitchTips
+    private var lastAsciiTipsText = ""
+    private var asciiSwitchTipsJob: Job? = null
 
     init {
         if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
@@ -200,6 +209,7 @@ class Rime :
     }
 
     private fun processKeyInner(value: Int, modifiers: Int, isVirtual: Boolean): Boolean {
+        lastAsciiTipsText = asciiTipsText
         val handled = processRimeKey(value, modifiers)
         emitResponse()
         if (!handled) {
@@ -211,12 +221,29 @@ class Rime :
         return handled
     }
 
+    private val asciiTipsText: String
+        get() {
+            val status = getRimeStatus()
+            return if (status.isAsciiMode) {
+                "En"
+            } else if (status.schemaName.isNotEmpty() &&
+                !status.schemaName.startsWith('.')
+            ) {
+                status.schemaName.take(2)
+            } else {
+                ""
+            }
+        }
+
     private fun emitResponse(
         commit: (() -> RimeProto.Commit) = { getRimeCommit() },
     ) {
         handleRimeMessage(4, arrayOf(commit.invoke()))
         val context = getRimeContext()
         handleRimeMessage(5, arrayOf(context.composition))
+        if (context.composition.length <= 0 && lastAsciiTipsText != asciiTipsText) {
+            showAsciiSwitchTips()
+        }
         if (getRimeOption("paging_mode")) {
             handleRimeMessage(6, arrayOf(context.menu))
         } else {
@@ -237,8 +264,12 @@ class Rime :
             }
             is RimeMessage.OptionMessage -> {
                 // Option change won't trigger response update
-                statusCached = getRimeStatus()
-                updateSchemaCached(statusCached)
+                val status = getRimeStatus()
+                statusCached = status
+                updateSchemaCached(status)
+                if (it.data.option == "ascii_mode") {
+                    showAsciiSwitchTips()
+                }
             }
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Start) {
@@ -269,6 +300,20 @@ class Rime :
                     SchemaItem(schemaId, schemaName),
                 ),
             )
+        }
+    }
+
+    private fun showAsciiSwitchTips() {
+        if (!showAsciiSwitchTips) return
+        val tipsText = asciiTipsText
+        if (tipsText.isEmpty()) return
+        val tips = RimeProto.Context.Composition(tipsText)
+        handleRimeMessage(5, arrayOf(tips))
+        asciiSwitchTipsJob?.cancel()
+        asciiSwitchTipsJob = lifecycleScope.launch {
+            delay(1000L)
+            val ctx = getRimeContext()
+            handleRimeMessage(5, arrayOf(ctx.composition))
         }
     }
 
