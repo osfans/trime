@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2024 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -56,7 +56,6 @@ class CandidatesView(
 
     private val layout by AppPrefs.defaultInstance().candidates.layout
     private val position by AppPrefs.defaultInstance().candidates.position
-    private val showAsciiIndicator by AppPrefs.defaultInstance().candidates.asciiIndicator
 
     private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
 
@@ -111,8 +110,6 @@ class CandidatesView(
 
     private var bottomInsets = 0
 
-    private var shouldShowAsciiIndicator = false
-
     override fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.CompositionMessage -> {
@@ -127,28 +124,12 @@ class CandidatesView(
                 menu = it.data
                 updateUi()
             }
-            is RimeMessage.OptionMessage -> {
-                if (!showAsciiIndicator || it.data.option != "ascii_mode") return
-                val text = if (it.data.value) "En" else rime.run { statusCached }.schemaName.take(2)
-                preeditUi.root.post {
-                    shouldShowAsciiIndicator = true
-                    visibility = VISIBLE
-                    candidatesUi.root.visibility = GONE
-                    preeditUi.show(text) {
-                        shouldShowAsciiIndicator = false
-                        visibility = INVISIBLE
-                        candidatesUi.root.visibility = VISIBLE
-                    }
-                }
-            }
-
             else -> {}
         }
     }
 
     private fun evaluateVisibility(): Boolean = !composition.preedit.isNullOrEmpty() ||
-        menu.candidates.isNotEmpty() ||
-        shouldShowAsciiIndicator
+        menu.candidates.isNotEmpty()
 
     private fun updateUi() {
         preeditUi.update(composition)

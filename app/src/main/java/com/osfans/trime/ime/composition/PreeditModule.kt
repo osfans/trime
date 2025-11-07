@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2024 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -9,15 +9,12 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.ViewOutlineProvider
-import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.dependency.InputScope
 import me.tatarka.inject.annotations.Inject
@@ -68,14 +65,5 @@ class PreeditModule(
         } else {
             touchEventReceiverWindow.dismiss()
         }
-    }
-
-    private val showAsciiIndicator by AppPrefs.defaultInstance().candidates.asciiIndicator
-    private val candidatesViewMode by AppPrefs.defaultInstance().candidates.mode
-
-    override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
-        if (!showAsciiIndicator || candidatesViewMode == PopupCandidatesMode.ALWAYS_SHOW || value.option != "ascii_mode") return
-        val text = if (value.value) "En" else rime.run { statusCached }.schemaName.take(2)
-        ui.root.post { ui.show(text) }
     }
 }

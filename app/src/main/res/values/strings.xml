@@ -229,5 +229,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="automatic">Automatic</string>
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
-    <string name="show_ascii_indicator">ASCII mode switch indicator</string>
+    <string name="ascii_switch_tips">Show tips when switching ASCII mode</string>
 </resources>

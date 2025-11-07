@@ -107,9 +107,11 @@ class AppPrefs(
     ) : PreferenceDelegateOwner(shared, R.string.general) {
         companion object {
             const val COMPOSING_TEXT_MODE = "composing_text_mode"
+            const val ASCII_SWITCH_TIPS = "ascii_switch_tips"
         }
 
         val composingTextMode = enum(R.string.composing_text_mode, COMPOSING_TEXT_MODE, ComposingTextMode.DISABLE)
+        val asciiSwitchTips = switch(R.string.ascii_switch_tips, ASCII_SWITCH_TIPS, true)
     }
 
     /**
@@ -199,13 +201,11 @@ class AppPrefs(
             const val MODE = "show_candidates_window"
             const val LAYOUT = "candidates_layout"
             const val POSITION = "candidates_window_position"
-            const val ASCII_INDICATOR = "show_ascii_indicator"
         }
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
         val layout = enum(R.string.candidates_layout, LAYOUT, PopupCandidatesLayout.AUTOMATIC)
         val position = enum(R.string.candidates_window_position, POSITION, PopupPosition.BOTTOM_LEFT)
-        val asciiIndicator = switch(R.string.show_ascii_indicator, ASCII_INDICATOR, true)
     }
 
     /**
