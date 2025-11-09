@@ -8,27 +8,28 @@
 
 #include "helper-types.h"
 #include "jni-utils.h"
+#include "proto.h"
 
-inline jobject rimeSchemaListItemToJObject(JNIEnv *env,
-                                           const SchemaItem &item) {
+inline jobject rimeSchemaListItemToJObject(JNIEnv* env,
+                                           const SchemaItem& item) {
   return env->NewObject(GlobalRef->SchemaListItem,
                         GlobalRef->SchemaListItemInit,
                         *JString(env, item.schemaId), *JString(env, item.name));
 }
 
 inline jobjectArray rimeSchemaListToJObjectArray(
-    JNIEnv *env, const std::vector<SchemaItem> &list) {
+    JNIEnv* env, const std::vector<SchemaItem>& list) {
   jobjectArray array = env->NewObjectArray(static_cast<int>(list.size()),
                                            GlobalRef->SchemaListItem, nullptr);
   int i = 0;
-  for (const auto &item : list) {
+  for (const auto& item : list) {
     auto jItem = JRef(env, rimeSchemaListItemToJObject(env, item));
     env->SetObjectArrayElement(array, i++, jItem);
   }
   return array;
 }
 
-inline std::vector<std::string> stringArrayToStringVector(JNIEnv *env,
+inline std::vector<std::string> stringArrayToStringVector(JNIEnv* env,
                                                           jobjectArray array) {
   auto length = env->GetArrayLength(array);
   std::vector<std::string> result;
@@ -41,20 +42,94 @@ inline std::vector<std::string> stringArrayToStringVector(JNIEnv *env,
   return std::move(result);
 }
 
-inline jobject rimeCandidateItemToJObject(JNIEnv *env,
-                                          const CandidateItem &item) {
+inline jobject rimeCandidateItemToJObject(JNIEnv* env,
+                                          const CandidateItem& item) {
   return env->NewObject(GlobalRef->CandidateItem, GlobalRef->CandidateItemInit,
                         *JString(env, item.text), *JString(env, item.comment));
 }
 
 inline jobjectArray rimeCandidateListToJObjectArray(
-    JNIEnv *env, const std::vector<CandidateItem> &list) {
+    JNIEnv* env, const std::vector<CandidateItem>& list) {
   jobjectArray array = env->NewObjectArray(static_cast<int>(list.size()),
                                            GlobalRef->CandidateItem, nullptr);
   int i = 0;
-  for (const auto &item : list) {
+  for (const auto& item : list) {
     auto jItem = JRef(env, rimeCandidateItemToJObject(env, item));
     env->SetObjectArrayElement(array, i++, jItem);
   }
   return array;
+}
+
+inline jobjectArray stringVectorToJStringArray(
+    JNIEnv* env, const std::vector<std::string>& strings) {
+  jobjectArray array = env->NewObjectArray(static_cast<int>(strings.size()),
+                                           GlobalRef->String, nullptr);
+  int i = 0;
+  for (const auto& s : strings) {
+    env->SetObjectArrayElement(array, i++, JString(env, s));
+  }
+  return array;
+}
+
+inline jobject rimeProtoCommitToJObject(JNIEnv* env,
+                                        const rime::proto::Commit& commit) {
+  return env->NewObject(GlobalRef->CommitProto, GlobalRef->CommitProtoInit,
+                        commit.text ? *JString(env, *commit.text) : nullptr);
+}
+
+inline jobject rimeProtoCandidateToJObject(
+    JNIEnv* env, const rime::proto::Candidate& candidate) {
+  return env->NewObject(
+      GlobalRef->CandidateProto, GlobalRef->CandidateProtoInit,
+      *JString(env, candidate.text),
+      candidate.comment ? *JString(env, *candidate.comment) : nullptr,
+      *JString(env, candidate.label));
+}
+
+inline jobject rimeProtoCompositionToJObject(
+    JNIEnv* env, const rime::proto::Composition& composition) {
+  return env->NewObject(
+      GlobalRef->CompositionProto, GlobalRef->CompositionProtoInit,
+      composition.length, composition.cursorPos, composition.selStart,
+      composition.selEnd,
+      composition.preedit ? *JString(env, *composition.preedit) : nullptr,
+      composition.commitTextPreview
+          ? *JString(env, *composition.commitTextPreview)
+          : nullptr);
+}
+
+inline jobject rimeProtoMenuToJObject(JNIEnv* env,
+                                      const rime::proto::Menu& menu) {
+  int numCandidates = static_cast<int>(menu.candidates.size());
+  auto jCandidates = JRef<jobjectArray>(
+      env,
+      env->NewObjectArray(numCandidates, GlobalRef->CandidateProto, nullptr));
+  for (int i = 0; i < numCandidates; ++i) {
+    auto jCandidate =
+        JRef(env, rimeProtoCandidateToJObject(env, menu.candidates[i]));
+    env->SetObjectArrayElement(jCandidates, i, jCandidate);
+  }
+  return env->NewObject(GlobalRef->MenuProto, GlobalRef->MenuProtoInit,
+                        menu.pageSize, menu.pageNumber, menu.isLastPage,
+                        menu.highlightedCandidateIndex, *jCandidates,
+                        *JString(env, menu.selectKeys),
+                        stringVectorToJStringArray(env, menu.selectLabels));
+}
+
+inline jobject rimeProtoContextToJObject(JNIEnv* env,
+                                         const rime::proto::Context& context) {
+  return env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoInit,
+                        rimeProtoCompositionToJObject(env, context.composition),
+                        rimeProtoMenuToJObject(env, context.menu),
+                        *JString(env, context.input), context.caretPos);
+}
+
+inline jobject rimeProtoStatusToJObject(JNIEnv* env,
+                                        const rime::proto::Status& status) {
+  return env->NewObject(GlobalRef->StatusProto, GlobalRef->StatusProtoInit,
+                        *JString(env, status.schemaId),
+                        *JString(env, status.schemaName), status.isDisabled,
+                        status.isComposing, status.isAsciiMode,
+                        status.isFullShape, status.isSimplified,
+                        status.isTraditional, status.isAsciiPunct);
 }
