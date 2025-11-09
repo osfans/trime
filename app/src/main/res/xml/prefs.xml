@@ -14,6 +14,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:title="@string/schemata"
         app:icon="@drawable/ic_pref_schema" />
 
+    <Preference android:key="pref_user_dict"
+        android:title="@string/user_dictionary"
+        app:icon="@drawable/ic_baseline_book_24" />
+
     <Preference android:key="pref_user_data"
         android:title="@string/profile"
         app:icon="@drawable/ic_baseline_snippet_folder_24"
