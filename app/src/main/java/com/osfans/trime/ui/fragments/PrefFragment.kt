@@ -36,6 +36,10 @@ class PrefFragment : PaddingPreferenceFragment() {
                 findNavController().navigate(R.id.action_prefFragment_to_schemaListFragment)
                 true
             }
+            get<Preference>("pref_user_dict")?.setOnPreferenceClickListener {
+                findNavController().navigate(R.id.action_prefFragment_to_userDictionaryFragment)
+                true
+            }
             get<Preference>("pref_user_data")?.setOnPreferenceClickListener {
                 findNavController().navigate(R.id.action_prefFragment_to_profileFragment)
                 true

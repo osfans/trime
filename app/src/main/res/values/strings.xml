@@ -234,4 +234,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="ascii_switch_tips">Show tips when switching ASCII mode</string>
     <string name="keyboard__key_double_tap_timeout">Key double tap timeout</string>
     <string name="keyboard__key_slide_step_size">Step size for key sliding</string>
+    <string name="user_dictionary">User dictionary</string>
+    <string name="import_">Import</string>
+    <string name="import_error">Import error</string>
+    <string name="import_n_entries">Imported %1$d entry(-ies)</string>
+    <string name="exported_n_entries">Exported %1$d entry(-ies)</string>
+    <string name="backed_up_x_to_sync_dir">Backed up %1$s to sync dir</string>
+    <string name="restored_from_x">Restored from %1$s</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
 </resources>

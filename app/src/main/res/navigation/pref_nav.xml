@@ -85,6 +85,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
+        <action
+            android:id="@+id/action_prefFragment_to_userDictionaryFragment"
+            app:destination="@id/userDictionaryFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
@@ -138,4 +145,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:id="@+id/schemaListFragment"
         android:name="com.osfans.trime.ui.main.settings.schema.SchemaListFragment"
         android:label="@string/schemata" />
+    <fragment
+        android:id="@+id/userDictionaryFragment"
+        android:name="com.osfans.trime.ui.main.settings.userdict.UserDictionaryFragment"
+        android:label="@string/user_dictionary" />
 </navigation>
