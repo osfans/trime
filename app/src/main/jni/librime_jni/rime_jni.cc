@@ -17,20 +17,16 @@
 extern void rime_require_module_lua();
 extern void rime_require_module_octagram();
 extern void rime_require_module_predict();
-extern void rime_require_module_proto();
 // librime is compiled as a static library, we have to link modules explicitly
 static void declare_librime_module_dependencies() {
   rime_require_module_lua();
   rime_require_module_octagram();
   rime_require_module_predict();
-  rime_require_module_proto();
 }
 
 class Rime {
  public:
-  Rime() : rime(rime_get_api()) {
-    proto = (RimeProtoApi *)rime->find_module("proto")->get_api();
-  }
+  Rime() : rime(rime_get_api()) {}
   Rime(Rime const &) = delete;
   void operator=(Rime const &) = delete;
 
@@ -82,17 +78,13 @@ class Rime {
 
   void clearComposition() { rime->clear_composition(session()); }
 
-  void commitProto(RIME_PROTO_BUILDER *builder) {
-    proto->commit_proto(session(), builder);
+  void commitProto(uintptr_t builder) { rime_commit_proto(session(), builder); }
+
+  void contextProto(uintptr_t builder) {
+    rime_context_proto(session(), builder);
   }
 
-  void contextProto(RIME_PROTO_BUILDER *builder) {
-    proto->context_proto(session(), builder);
-  }
-
-  void statusProto(RIME_PROTO_BUILDER *builder) {
-    proto->status_proto(session(), builder);
-  }
+  void statusProto(uintptr_t builder) { rime_status_proto(session(), builder); }
 
   void setOption(std::string_view key, bool value) {
     rime->set_option(session(), key.data(), value);
@@ -183,7 +175,6 @@ class Rime {
 
  private:
   RimeApi *rime;
-  RimeProtoApi *proto;
   std::shared_ptr<SessionHolder> session_;
 
   RimeSessionId session(bool requestNewSession = true) {
@@ -291,26 +282,23 @@ Java_com_osfans_trime_core_Rime_clearRimeComposition(JNIEnv *env,
 // output
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
-  jobject proto = env->NewObject(GlobalRef->CommitProto,
-                                 GlobalRef->CommitProtoInit, nullptr);
-  Rime::Instance().commitProto(&proto);
-  return proto;
+  rime::proto::Commit commit;
+  Rime::Instance().commitProto(reinterpret_cast<uintptr_t>(&commit));
+  return rimeProtoCommitToJObject(env, commit);
 }
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
-  jobject proto =
-      env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoDefault);
-  Rime::Instance().contextProto(&proto);
-  return proto;
+  rime::proto::Context context;
+  Rime::Instance().contextProto(reinterpret_cast<uintptr_t>(&context));
+  return rimeProtoContextToJObject(env, context);
 }
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
-  jobject proto =
-      env->NewObject(GlobalRef->StatusProto, GlobalRef->StatusProtoDefault);
-  Rime::Instance().statusProto(&proto);
-  return proto;
+  rime::proto::Status status;
+  Rime::Instance().statusProto(reinterpret_cast<uintptr_t>(&status));
+  return rimeProtoStatusToJObject(env, status);
 }
 
 // runtime options

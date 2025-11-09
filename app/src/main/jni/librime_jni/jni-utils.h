@@ -122,19 +122,15 @@ class GlobalRefSingleton {
 
   jclass ContextProto;
   jmethodID ContextProtoInit;
-  jmethodID ContextProtoDefault;
 
   jclass CompositionProto;
   jmethodID CompositionProtoInit;
-  jmethodID CompositionProtoDefault;
 
   jclass MenuProto;
   jmethodID MenuProtoInit;
-  jmethodID MenuProtoDefault;
 
   jclass StatusProto;
   jmethodID StatusProtoInit;
-  jmethodID StatusProtoDefault;
 
   jclass SchemaListItem;
   jmethodID SchemaListItemInit;
@@ -188,15 +184,12 @@ class GlobalRefSingleton {
         "(Lcom/osfans/trime/core/RimeProto$Context$Composition;Lcom/osfans/"
         "trime/core/"
         "RimeProto$Context$Menu;Ljava/lang/String;I)V");
-    ContextProtoDefault = env->GetMethodID(ContextProto, "<init>", "()V");
 
     CompositionProto = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/RimeProto$Context$Composition")));
     CompositionProtoInit =
         env->GetMethodID(CompositionProto, "<init>",
                          "(IIIILjava/lang/String;Ljava/lang/String;)V");
-    CompositionProtoDefault =
-        env->GetMethodID(CompositionProto, "<init>", "()V");
 
     MenuProto = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/RimeProto$Context$Menu")));
@@ -204,14 +197,12 @@ class GlobalRefSingleton {
         MenuProto, "<init>",
         "(IIZI[Lcom/osfans/trime/core/RimeProto$Candidate;Ljava/lang/"
         "String;[Ljava/lang/String;)V");
-    MenuProtoDefault = env->GetMethodID(MenuProto, "<init>", "()V");
 
     StatusProto = reinterpret_cast<jclass>(env->NewGlobalRef(
         env->FindClass("com/osfans/trime/core/RimeProto$Status")));
     StatusProtoInit =
         env->GetMethodID(StatusProto, "<init>",
                          "(Ljava/lang/String;Ljava/lang/String;ZZZZZZZ)V");
-    StatusProtoDefault = env->GetMethodID(StatusProto, "<init>", "()V");
 
     SchemaListItem = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("com/osfans/trime/core/SchemaItem")));
