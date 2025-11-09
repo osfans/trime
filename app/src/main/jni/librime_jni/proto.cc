@@ -7,72 +7,72 @@
 #include <rime/schema.h>
 #include <rime/service.h>
 #include <rime_api.h>
-
-#include "jni-utils.h"
+#include <utf8.h>
 
 using namespace rime;
 
-void rime_commit_proto(RimeSessionId session_id,
-                       RIME_PROTO_BUILDER *commit_builder) {
+void rime_commit_proto(RimeSessionId session_id, uintptr_t commit_builder) {
   an<Session> session(Service::instance().GetSession(session_id));
   if (!session) return;
-  auto env = GlobalRef->AttachEnv();
-  const string &commit_text(session->commit_text());
+  const string& commit_text(session->commit_text());
   if (!commit_text.empty()) {
-    auto *commit = (jobject *)commit_builder;
-    *commit = env->NewObject(GlobalRef->CommitProto, GlobalRef->CommitProtoInit,
-                             *JString(env, commit_text));
+    auto* commit = reinterpret_cast<rime::proto::Commit*>(commit_builder);
+    commit->text = commit_text;
     session->ResetCommitText();
   }
 }
 
-void rime_context_proto(RimeSessionId session_id,
-                        RIME_PROTO_BUILDER *context_builder) {
+void rime_context_proto(RimeSessionId session_id, uintptr_t context_builder) {
   an<Session> session = Service::instance().GetSession(session_id);
   if (!session) return;
-  Context *ctx = session->context();
+  Context* ctx = session->context();
   if (!ctx) return;
-  auto env = GlobalRef->AttachEnv();
-  auto *context = (jobject *)context_builder;
-  jobject composition = env->NewObject(GlobalRef->CompositionProto,
-                                       GlobalRef->CompositionProtoDefault);
+  auto* context = reinterpret_cast<rime::proto::Context*>(context_builder);
+  context->input = ctx->input();
+  context->caretPos = static_cast<int>(ctx->caret_pos());
   if (ctx->IsComposing()) {
-    const Preedit &preedit = ctx->GetPreedit();
-    const auto &text = preedit.text;
-    auto length = utf8::distance(text.c_str(), text.c_str() + text.length());
-    auto cursor_pos =
-        utf8::distance(text.c_str(), text.c_str() + preedit.caret_pos);
-    auto sel_start =
-        utf8::distance(text.c_str(), text.c_str() + preedit.sel_start);
-    auto sel_end = utf8::distance(text.c_str(), text.c_str() + preedit.sel_end);
-    composition = env->NewObject(
-        GlobalRef->CompositionProto, GlobalRef->CompositionProtoInit, length,
-        cursor_pos, sel_start, sel_end, *JString(env, text),
-        *JString(env, ctx->GetCommitText()));
+    auto& composition = context->composition;
+    const Preedit& preedit = ctx->GetPreedit();
+    const auto& text = preedit.text;
+    composition.length = static_cast<int>(
+        utf8::distance(text.c_str(), text.c_str() + text.length()));
+    composition.preedit = text;
+    composition.cursorPos = static_cast<int>(
+        utf8::distance(text.c_str(), text.c_str() + preedit.caret_pos));
+    composition.selStart = static_cast<int>(
+        utf8::distance(text.c_str(), text.c_str() + preedit.sel_start));
+    composition.selEnd = static_cast<int>(
+        utf8::distance(text.c_str(), text.c_str() + preedit.sel_end));
+    const auto& commit_text = ctx->GetCommitText();
+    if (!commit_text.empty()) {
+      composition.commitTextPreview = commit_text;
+    }
   }
-  jobject menu =
-      env->NewObject(GlobalRef->MenuProto, GlobalRef->MenuProtoDefault);
-  if (ctx->HasMenu() && ctx->get_option("paging_mode")) {
-    Segment &seg = ctx->composition().back();
-    Schema *schema = session->schema();
+  if (ctx->HasMenu()) {
+    auto& menu = context->menu;
+    Segment& seg = ctx->composition().back();
+    Schema* schema = session->schema();
     int page_size = schema ? schema->page_size() : 5;
     int selected_index = seg.selected_index;
     int page_number = selected_index / page_size;
-    int highlighted_index = selected_index % page_size;
-    const string &select_keys = schema ? schema->select_keys() : "";
     the<Page> page(seg.menu->CreatePage(page_size, page_number));
     if (page) {
+      menu.pageSize = page_size;
+      menu.pageNumber = page_number;
+      menu.isLastPage = page->is_last_page;
+      menu.highlightedCandidateIndex = selected_index % page_size;
       vector<string> labels;
-      auto dest_labels =
-          env->NewObjectArray(page_size, GlobalRef->String, nullptr);
       if (schema) {
-        Config *config = schema->config();
+        const auto& select_keys = schema->select_keys();
+        if (!select_keys.empty()) {
+          menu.selectKeys = select_keys;
+        }
+        Config* config = schema->config();
         auto src_labels = config->GetList("menu/alternative_select_labels");
         if (src_labels && (size_t)page_size <= src_labels->size()) {
           for (int i = 0; i < page_size; ++i) {
             if (an<ConfigValue> value = src_labels->GetValueAt(i)) {
-              env->SetObjectArrayElement(dest_labels, i,
-                                         *JString(env, value->str()));
+              menu.selectLabels.emplace_back(value->str());
               labels.emplace_back(value->str());
             }
           }
@@ -84,63 +84,39 @@ void rime_context_proto(RimeSessionId session_id,
         }
       }
       int num_candidates = page->candidates.size();
-      auto dest_candidates = env->NewObjectArray(
-          num_candidates, GlobalRef->CandidateProto, nullptr);
+      auto& dest_candidates = menu.candidates;
+      dest_candidates.reserve(num_candidates);
       int index = 0;
-      for (const an<Candidate> &src : page->candidates) {
-        const string &label =
+      for (const an<Candidate>& src : page->candidates) {
+        dest_candidates.emplace_back();
+        dest_candidates.back().text = src->text();
+        const auto& comment = src->comment();
+        if (!comment.empty()) {
+          dest_candidates.back().comment = comment;
+        }
+        const auto& label =
             index < labels.size() ? labels[index] : std::to_string(index + 1);
-        auto dest = JRef(env, env->NewObject(GlobalRef->CandidateProto,
-                                             GlobalRef->CandidateProtoInit,
-                                             *JString(env, src->text()),
-                                             *JString(env, src->comment()),
-                                             *JString(env, label)));
-        env->SetObjectArrayElement(dest_candidates, index++, *dest);
+        dest_candidates.back().label = label;
+        ++index;
       }
-      menu = env->NewObject(
-          GlobalRef->MenuProto, GlobalRef->MenuProtoInit, page_size,
-          page_number, page->is_last_page, highlighted_index,
-          *JRef<jobjectArray>(env, dest_candidates), *JString(env, select_keys),
-          *JRef<jobjectArray>(env, dest_labels));
     }
   }
-  *context =
-      env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoInit,
-                     *JRef(env, composition), *JRef(env, menu),
-                     *JString(env, ctx->input()), ctx->caret_pos());
 }
 
-void rime_status_proto(RimeSessionId session_id,
-                       RIME_PROTO_BUILDER *status_builder) {
+void rime_status_proto(RimeSessionId session_id, uintptr_t status_builder) {
   an<Session> session(Service::instance().GetSession(session_id));
   if (!session) return;
-  Schema *schema = session->schema();
-  Context *ctx = session->context();
+  Schema* schema = session->schema();
+  Context* ctx = session->context();
   if (!schema || !ctx) return;
-  auto env = GlobalRef->AttachEnv();
-  auto *status = (jobject *)status_builder;
-  *status = env->NewObject(
-      GlobalRef->StatusProto, GlobalRef->StatusProtoInit,
-      *JString(env, schema->schema_id()), *JString(env, schema->schema_name()),
-      Service::instance().disabled(), ctx->IsComposing(),
-      ctx->get_option("ascii_mode"), ctx->get_option("full_shape"),
-      ctx->get_option("simplification"), ctx->get_option("traditional"),
-      ctx->get_option("ascii_punct"));
+  auto* status = reinterpret_cast<rime::proto::Status*>(status_builder);
+  status->schemaId = schema->schema_id();
+  status->schemaName = schema->schema_name();
+  status->isDisabled = Service::instance().disabled();
+  status->isComposing = ctx->IsComposing();
+  status->isAsciiMode = ctx->get_option("ascii_mode");
+  status->isFullShape = ctx->get_option("full_shape");
+  status->isSimplified = ctx->get_option("simplification");
+  status->isTraditional = ctx->get_option("traditional");
+  status->isAsciiPunct = ctx->get_option("ascii_punct");
 }
-
-static void rime_proto_initialize() {}
-
-static void rime_proto_finalize() {}
-
-static RimeCustomApi *rime_proto_get_api() {
-  static RimeProtoApi s_api = {0};
-  if (!s_api.data_size) {
-    RIME_STRUCT_INIT(RimeProtoApi, s_api);
-    s_api.commit_proto = &rime_commit_proto;
-    s_api.context_proto = &rime_context_proto;
-    s_api.status_proto = &rime_status_proto;
-  }
-  return (RimeCustomApi *)&s_api;
-}
-
-RIME_REGISTER_CUSTOM_MODULE(proto) { module->get_api = &rime_proto_get_api; }
