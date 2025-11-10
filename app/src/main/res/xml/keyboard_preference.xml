@@ -155,12 +155,22 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:unit="%"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
-            android:key="vibrate_on_keypress"
-            android:title="@string/vibrate_on_keypress"
+            android:key="vibrate_on_key_press"
+            android:title="@string/vibrate_on_key_press"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:key="vibrate_on_key_release"
+            android:title="@string/vibrate_on_key_release"
+            android:dependency="vibrate_on_key_press"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:key="vibrate_on_key_repeat"
+            android:title="@string/vibrate_on_key_repeat"
+            android:dependency="vibrate_on_key_press"
             app:iconSpaceReserved="false" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="0"
-            android:dependency="vibrate_on_keypress"
+            android:dependency="vibrate_on_key_press"
             android:key="vibration_duration"
             android:title="@string/vibration_duration"
             app:allowDividerAbove="false"
@@ -172,7 +182,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:useSimpleSummaryProvider="true" />
         <com.osfans.trime.ui.components.DialogSeekBarPreference
             android:defaultValue="0"
-            android:dependency="vibrate_on_keypress"
+            android:dependency="vibrate_on_key_press"
             android:key="vibration_amplitude"
             android:title="@string/vibration_amplitude"
             app:allowDividerAbove="false"

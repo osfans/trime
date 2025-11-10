@@ -141,7 +141,9 @@ class AppPrefs(
             const val SOUND_EFFECT_ENABLED = "custom_sound_effect_enabled"
             const val CUSTOM_SOUND_EFFECT = "custom_sound_effect_name"
 
-            const val VIBRATE_ON_KEYPRESS = "vibrate_on_keypress"
+            const val VIBRATE_ON_KEY_PRESS = "vibrate_on_key_press"
+            const val VIBRATE_ON_KEY_RELEASE = "vibrate_on_key_release"
+            const val VIBRATE_ON_KEY_REPEAT = "vibrate_on_key_repeat"
             const val VIBRATION_DURATION = "vibration_duration"
             const val VIBRATION_AMPLITUDE = "vibration_amplitude"
 
@@ -184,7 +186,9 @@ class AppPrefs(
         val soundEffectEnabled = bool(SOUND_EFFECT_ENABLED, false)
         val customSoundEffect = string(CUSTOM_SOUND_EFFECT, "")
         val soundVolume = int(KEY_SOUND_VALUE, 100)
-        val vibrateOnKeyPress = bool(VIBRATE_ON_KEYPRESS, false)
+        val vibrateOnKeyPress = bool(VIBRATE_ON_KEY_PRESS, false)
+        val vibrateOnKeyRelease = bool(VIBRATE_ON_KEY_RELEASE, false)
+        val vibrateOnKeyRepeat = bool(VIBRATE_ON_KEY_REPEAT, false)
         val vibrationDuration = int(VIBRATION_DURATION, 10)
         val vibrationAmplitude = int(VIBRATION_AMPLITUDE, -1)
         val speakOnKeyPress = bool(SPEAK_ON_KEYPRESS, false)

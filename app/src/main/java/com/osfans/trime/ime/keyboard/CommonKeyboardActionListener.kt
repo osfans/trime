@@ -128,10 +128,10 @@ class CommonKeyboardActionListener(
 
     val listener by lazy {
         object : KeyboardActionListener {
-            override fun onPress(keyEventCode: Int) {
+            override fun onPress(keyEventCode: Int, isSound: Boolean) {
                 InputFeedbackManager.run {
                     keyPressVibrate(service.window.window!!.decorView)
-                    keyPressSound(keyEventCode)
+                    if (isSound) keyPressSound(keyEventCode)
                     keyPressSpeak(keyEventCode)
                 }
             }

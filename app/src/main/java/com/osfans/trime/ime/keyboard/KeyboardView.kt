@@ -70,6 +70,8 @@ class KeyboardView(
      * the depressed key. By default the preview is enabled.
      */
     private val showPreview by AppPrefs.defaultInstance().keyboard.popupKeyPressEnabled
+    private val vibrateOnKeyRelease by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRelease
+    private val vibrateOnKeyRepeat by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRepeat
 
     private val deletedTextBuffer = ArrayDeque<String>()
 
@@ -110,8 +112,7 @@ class KeyboardView(
         computeProximityThreshold(keyboard)
         invalidateAllKeys()
 
-        onKeyActionListener = { keyIndex, behavior, repeat ->
-            if (!repeat) keyboardActionListener?.onPress(keyIndex)
+        onKeyActionListener = { keyIndex, behavior ->
             detectAndSendKey(keyIndex, behavior)
             true
         }
@@ -150,16 +151,20 @@ class KeyboardView(
             false
         }
 
-        onKeyPreviewListener = { keyIndex, behavior, showing ->
+        onKeyStateListener = { keyIndex, behavior, isVisible, isPressed, isRepeating ->
             val key = mKeys[keyIndex]
-            if (showing) {
-                key.onPressed()
-                invalidateKey(key)
-                if (showPreview) showKeyPreview(key, behavior)
-            } else {
-                key.onReleased()
-                invalidateKey(key)
-                if (showPreview) dismissKeyPreview(key)
+            if (isPressed || (isRepeating && vibrateOnKeyRepeat)) keyboardActionListener?.onPress(keyIndex, !isRepeating)
+            if (!isRepeating) {
+                if (isVisible) {
+                    key.onPressed()
+                    invalidateKey(key)
+                    if (showPreview) showKeyPreview(key, behavior)
+                } else {
+                    key.onReleased()
+                    invalidateKey(key)
+                    if (showPreview) dismissKeyPreview(key)
+                    if (vibrateOnKeyRelease) keyboardActionListener?.onPress(keyIndex, false)
+                }
             }
         }
 
