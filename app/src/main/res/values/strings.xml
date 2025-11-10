@@ -37,7 +37,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_reset_summary">Overwrite the same files in shared directory with default built-in assets</string>
     <string name="sound_on_keypress">Sound on key press</string>
     <string name="sound_volume">Sound volume on key press</string>
-    <string name="vibrate_on_keypress">Vibrate on key press</string>
+    <string name="vibrate_on_key_press">Vibrate on key press</string>
+    <string name="vibrate_on_key_release">Vibrate on key release</string>
+    <string name="vibrate_on_key_repeat">Vibrate on key repeat</string>
     <string name="vibration_duration">Vibration duration on key press</string>
     <string name="vibration_amplitude">Vibration amplitude on key press</string>
     <string name="speak_on_keypress">Voice on key press</string>

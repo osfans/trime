@@ -37,7 +37,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_reset_summary">使用預設的內建設置覆蓋共享資料夾下相同檔案</string>
     <string name="sound_on_keypress">按鍵聲音</string>
     <string name="sound_volume">按鍵音量</string>
-    <string name="vibrate_on_keypress">按鍵時振動</string>
+    <string name="vibrate_on_key_press">按鍵時振動</string>
+    <string name="vibrate_on_key_release">按鍵鬆開時振動</string>
+    <string name="vibrate_on_key_repeat">重複按鍵時振動</string>
     <string name="vibration_duration">按鍵振動時長</string>
     <string name="vibration_amplitude">按鍵振動強度</string>
     <string name="speak_on_keypress">按鍵時朗讀字符</string>
