@@ -26,11 +26,10 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.preview.KeyPreviewChoreographer
+import com.osfans.trime.ime.popup.PopupAction
+import com.osfans.trime.ime.popup.PopupActionListener
+import com.osfans.trime.ime.popup.PopupComponent
 import com.osfans.trime.util.sp
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import timber.log.Timber
 import kotlin.math.min
@@ -42,7 +41,7 @@ class KeyboardView(
     context: Context,
     private val theme: Theme,
     private val keyboard: Keyboard,
-    private val keyPreviewChoreographer: KeyPreviewChoreographer,
+    private val popupComponent: PopupComponent,
     private val service: TrimeInputMethodService,
 ) : KeyboardGestureFrame(context) {
 
@@ -108,28 +107,39 @@ class KeyboardView(
         labelEnter = label
     }
 
+    private val popupActionListener: PopupActionListener by lazy { popupComponent.listener }
+
     init {
         computeProximityThreshold(keyboard)
         invalidateAllKeys()
 
         onKeyActionListener = { keyIndex, behavior ->
-            detectAndSendKey(keyIndex, behavior)
-            true
+            if (behavior == KeyBehavior.LONG_CLICK && hasPopupKeys(keyIndex)) {
+                val popupKeys = mKeys.get(keyIndex).popup
+                val bounds = getKeyBounds(keyIndex)
+                popupActionListener.onPopupAction(
+                    PopupAction.ShowKeyboardAction(keyIndex, popupKeys, bounds),
+                )
+                false
+            } else {
+                detectAndSendKey(keyIndex, behavior)
+                true
+            }
         }
 
         onKeySlideListener = { keyIndex, deltaX, x, y ->
-            val key = mKeys[keyIndex]
+            val key = mKeys.getOrNull(keyIndex)
             val ic = service.currentInputConnection
 
             when {
-                key.click?.isSlideCursor == true -> {
+                key?.click?.isSlideCursor == true -> {
                     when {
                         deltaX > 0 -> keyboardActionListener?.onAction(KeyAction("Right"))
                         deltaX < 0 -> keyboardActionListener?.onAction(KeyAction("Left"))
                     }
                     true
                 }
-                key.click?.isSlideDelete == true -> {
+                key?.click?.isSlideDelete == true -> {
                     when {
                         deltaX < 0 -> {
                             val beforeText = ic.getTextBeforeCursor(1, 0) ?: ""
@@ -152,24 +162,43 @@ class KeyboardView(
         }
 
         onKeyStateListener = { keyIndex, behavior, isVisible, isPressed, isRepeating ->
-            val key = mKeys[keyIndex]
+            val key = mKeys.getOrNull(keyIndex)
             if (isPressed || (isRepeating && vibrateOnKeyRepeat)) keyboardActionListener?.onPress(keyIndex, !isRepeating)
             if (!isRepeating) {
                 if (isVisible) {
-                    key.onPressed()
+                    key?.onPressed()
                     invalidateKey(key)
-                    if (showPreview) showKeyPreview(key, behavior)
+                    if (showPreview) showPopup(keyIndex, behavior)
                 } else {
-                    key.onReleased()
+                    key?.onReleased()
                     invalidateKey(key)
-                    if (showPreview) dismissKeyPreview(key)
+                    hidePopup(keyIndex)
                     if (vibrateOnKeyRelease) keyboardActionListener?.onPress(keyIndex, false)
                 }
             }
         }
 
-        onKeyReleaseListener = {
+        onKeyReleaseListener = { keyIndex ->
             deletedTextBuffer.clear()
+        }
+
+        onPopupSelected = { keyIndex ->
+            val triggerAction = PopupAction.TriggerAction(keyIndex)
+            popupActionListener.onPopupAction(triggerAction)
+            triggerAction.outAction?.let { action ->
+                keyboardActionListener?.onAction(KeyAction(action))
+            }
+        }
+
+        onPopupChangeFocus = { keyIndex, x, y ->
+            val key = mKeys.getOrNull(keyIndex)
+            if (key != null) {
+                val relativeX = x - key.x.toFloat()
+                val relativeY = y - key.y.toFloat()
+
+                val changeFocusAction = PopupAction.ChangeFocusAction(keyIndex, relativeX, relativeY)
+                popupActionListener.onPopupAction(changeFocusAction)
+            }
         }
     }
 
@@ -178,42 +207,37 @@ class KeyboardView(
     override fun isKeySlideCursor(keyIndex: Int): Boolean = mKeys.getOrNull(keyIndex)?.click?.isSlideCursor ?: false
     override fun isKeySlideDelete(keyIndex: Int): Boolean = mKeys.getOrNull(keyIndex)?.click?.isSlideDelete ?: false
     override fun hasAction(keyIndex: Int, behavior: KeyBehavior): Boolean = mKeys.getOrNull(keyIndex)?.hasAction(behavior) ?: false
+    override fun hasPopupKeys(keyIndex: Int): Boolean = mKeys.getOrNull(keyIndex)?.popup?.isNotEmpty() == true
 
-    private val lifecycleScope by lazy {
-        findViewTreeLifecycleOwner()?.lifecycleScope
-    }
-
-    private var removePreviewJob: Job? = null
-
-    private fun showKeyPreview(
-        key: Key,
-        behavior: KeyBehavior,
-    ) {
-        getLocationInWindow(originCoords)
-        keyPreviewChoreographer.placeAndShowKeyPreview(key, key.getPreviewText(behavior), width, originCoords)
-    }
-
-    private fun dismissKeyPreviewWithoutDelay(key: Key) {
-        keyPreviewChoreographer.dismissKeyPreview(key)
-        invalidateKey(key)
-    }
-
-    private fun dismissKeyPreview(key: Key) {
-        if (isHardwareAccelerated) {
-            keyPreviewChoreographer.dismissKeyPreview(key)
-            return
+    private fun showPopup(keyIndex: Int, behavior: KeyBehavior = KeyBehavior.CLICK) {
+        val key = mKeys.getOrNull(keyIndex) ?: return
+        val bounds = getKeyBounds(keyIndex)
+        val previewText = key.getPreviewText(behavior)
+        val context = if (previewText.isNotEmpty()) {
+            String(Character.toChars(previewText.codePointAt(0)))
+        } else {
+            ""
         }
-        handleRemovePreviewJob(key)
+
+        popupActionListener.onPopupAction(
+            PopupAction.PreviewAction(keyIndex, context, bounds),
+        )
     }
 
-    private fun handleRemovePreviewJob(key: Key) {
-        removePreviewJob?.cancel()
-        // NOTE: hide without delay when the view is destroyed
-        val scope = lifecycleScope ?: return dismissKeyPreviewWithoutDelay(key)
-        removePreviewJob = scope.launch {
-            delay(DELAY_AFTER_PREVIEW)
-            dismissKeyPreviewWithoutDelay(key)
-        }
+    private fun hidePopup(keyIndex: Int) {
+        popupActionListener.onPopupAction(PopupAction.DismissAction(keyIndex))
+    }
+
+    private fun getKeyBounds(keyIndex: Int): Rect {
+        val key = mKeys.getOrNull(keyIndex) ?: return Rect()
+        val location = intArrayOf(0, 0)
+        getLocationInWindow(location)
+        return Rect(
+            key.x + location[0],
+            key.y + location[1],
+            key.x + key.width + location[0],
+            key.y + key.height + location[1],
+        )
     }
 
     private fun setModifier(
@@ -535,8 +559,7 @@ class KeyboardView(
     }
 
     fun onDetach() {
-        removePreviewJob?.cancel()
-        removePreviewJob = null
+        popupComponent.dismissAll()
         freeDrawingBuffer()
     }
 
@@ -546,7 +569,6 @@ class KeyboardView(
     }
 
     companion object {
-        private const val DELAY_AFTER_PREVIEW = 100L
         private const val MAX_NEARBY_KEYS = 12
     }
 }

@@ -50,10 +50,12 @@ style:
   latin_font: latin.ttf #西文本体
   keyboard_height: 250 #锁定键盘高度，避免切换时键盘高度变化而造成闪烁
   keyboard_height_land: 200 #锁定横屏下键盘高度，避免切换时键盘高度变化而造成闪烁
-  preview_font: latin.ttf #按键提示字体
-  preview_height: 56 #按键提示高度
-  preview_offset: -32 #按键提示纵向偏移
-  preview_text_size: 40 #按键提示字号
+  popup_font: latin.ttf #按键提示字体
+  popup_width: 38 #按键提示宽度
+  popup_height: 48 #按键提示高度
+  popup_bottom_margin: 68 #按键提示底边距
+  popup_key_height: 48 #按键提示内键高度
+  popup_text_size: 23 #按键提示字号
   proximity_correction: true #按键纠错
   reset_ascii_mode: false #显示键盘时重置为中文状态
   round_corner: *round1 #按键圆角半径
@@ -1048,7 +1050,7 @@ tool_bar:
   edit_button: &edit_button
     foreground:
       style: "ic@cursor_text"
-    action: Keyboard_numberb
+    action: Keyboard_edit
 
   ascii_mode_button: &ascii_mode_button
     foreground:
@@ -1097,7 +1099,7 @@ preset_keyboards:
       - {click: l, long_click: '(){Left}', swipe_down: "=", key_back_color: bh2, key_text_color: th2}
       - {width: 5, key_back_color: bh2, key_text_color: th2}
 
-      - {click: Shift_L, double_click: Shift_L3, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
+      - {click: Shift_L, label_symbol: " ", long_click: Shift_L, double_click: Shift_L3, composing: delimiter, width: 15, hilited_key_back_color: benter, key_back_color: bbs, key_text_color: tbs}
       - {click: z, long_click: '`', swipe_down: '[]{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: x, long_click: cut, swipe_down: '{}{Left}', key_back_color: bh3, key_text_color: th3}
       - {click: c, long_click: copy, swipe_down: ' ', key_back_color: bh3, key_text_color: th3}
@@ -1113,7 +1115,7 @@ preset_keyboards:
       - {click: space, long_click: Mode_switch, swipe_left: "Left", swipe_right: "Right", swipe_up: Schema_switchcn, width: 30, key_back_color: bkg, key_text_color: tkg}
       - {click: '.', label: '。', long_click: liquid_keyboard_clipboard, key_back_color: bh4, key_text_color: th4}
       - {click: '/', long_click: liquid_keyboard_switch , key_text_size: "18", key_back_color: bh4, key_text_color: th4}
-      - {click: Return, composing: Return1, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
+      - {click: Return, label_symbol: "wiki", popup: ["TrimeWiki", "Settings"], composing: Return1, swipe_up: Escape, width: 15, key_back_color: benter, key_text_color: tenter}
 
   letter:
     author: "暖暖"
@@ -1200,7 +1202,7 @@ preset_keyboards:
       - {click: '=', long_click: '≠', key_back_color: bgn, key_text_color: tgn}
       - {click: Return, long_click: Menu, key_back_color: benter, key_text_color: tenter}
       
-  numberb:
+  edit:
     ascii_mode: 1
     author: flypy.com
     name: "编辑键盘"
@@ -4021,7 +4023,7 @@ preset_keys:
   Keyboard_default: { label: 返回, functional: false, send: Eisu_toggle, select: .default }
   Keyboard_switch: { label: 键盘, functional: true, send: Eisu_toggle, select: .next }
   Keyboard_number: { label: 123, functional: false, send: Eisu_toggle, select: number }
-  Keyboard_numberb: { label: 123, functional: false, send: Eisu_toggle, select: numberb }
+  Keyboard_edit: { label: edit, functional: false, send: Eisu_toggle, select: edit }
   Keyboard_symbols: { label: 更多, functional: false, send: Eisu_toggle, select: symbols }
   Keyboard_move: { label: ❖, functional: true, send: Eisu_toggle, select: move }
   Keyboard_next: { label: 后退, functional: false, send: Eisu_toggle, select: .next }
@@ -4058,6 +4060,7 @@ preset_keys:
   TrimeApp: {label: 同文, send: function, command: run, option: "com.osfans.trime"} #運行程序: run 包名
   TrimeCmp: {label: 同文組件, send: function, command: run, option: "com.osfans.trime/.Pref"} #運行程序指定組件: run 包名/組件名
   Homepage: {label: 同文主頁, send: function, command: run, option: "https://github.com/osfans/trime"} #查看網頁: run 網址
+  TrimeWiki: {label: Wiki, send: function, command: run, option: "https://github.com/osfans/trime/wiki/trime.yaml-詳解"}
   Wiki: {label: 維基, send: function, command: run, option: "https://zh.wikipedia.org/wiki/%s"} #搜索網頁: %s或者%1$s爲當前字符
   Google: {label: 谷歌, send: function, command: run, option: "https://www.google.com/search?q=%s"} #搜索網頁: %s或者%1$s爲當前字符
   MoeDict: {label: 萌典, send: function, command: run, option: "https://www.moedict.tw/%3$s"} #搜索網頁: %3$s爲光標前字符

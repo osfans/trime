@@ -16,7 +16,7 @@ import com.osfans.trime.ime.core.InputView
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardWindow
-import com.osfans.trime.ime.preview.KeyPreviewChoreographer
+import com.osfans.trime.ime.popup.PopupComponent
 import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import me.tatarka.inject.annotations.Component
@@ -36,7 +36,7 @@ abstract class InputComponent(
     abstract val quickBar: QuickBar
     abstract val preedit: PreeditModule
     abstract val windowManager: BoardWindowManager
-    abstract val preview: KeyPreviewChoreographer
+    abstract val popup: PopupComponent
     abstract val keyboardWindow: KeyboardWindow
     abstract val commonKeyboardActionListener: CommonKeyboardActionListener
     abstract val liquidWindow: LiquidWindow

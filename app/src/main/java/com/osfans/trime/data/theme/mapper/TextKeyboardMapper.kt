@@ -13,6 +13,7 @@ import com.osfans.trime.util.getBool
 import com.osfans.trime.util.getFloat
 import com.osfans.trime.util.getInt
 import com.osfans.trime.util.getString
+import com.osfans.trime.util.getStringList
 import timber.log.Timber
 
 class TextKeyboardMapper(
@@ -48,6 +49,7 @@ class TextKeyboardMapper(
                         hlKeyTextColor = it.getString("hilited_key_text_color"),
                         hlKeyBackColor = it.getString("hilited_key_back_color"),
                         hlKeySymbolColor = it.getString("hilited_key_symbol_color"),
+                        popup = it.getStringList("popup") ?: emptyList(),
                         behaviors =
                         buildMap {
                             KeyBehavior.entries.forEach { entry ->
