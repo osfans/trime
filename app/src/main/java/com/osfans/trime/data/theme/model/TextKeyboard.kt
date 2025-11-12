@@ -71,6 +71,7 @@ data class TextKeyboard(
         val hlKeyTextColor: String,
         val hlKeyBackColor: String,
         val hlKeySymbolColor: String,
+        val popup: List<String> = emptyList(),
         val behaviors: Map<KeyBehavior, String>,
     ) : Parcelable
 }

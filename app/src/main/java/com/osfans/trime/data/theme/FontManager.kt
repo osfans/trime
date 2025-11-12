@@ -23,7 +23,7 @@ object FontManager {
         COMMENT_FONT,
         KEY_FONT,
         LABEL_FONT,
-        PREVIEW_FONT,
+        POPUP_FONT,
         SYMBOL_FONT,
         TEXT_FONT,
         LONG_TEXT_FONT,
@@ -108,7 +108,7 @@ object FontManager {
             FontKey.COMMENT_FONT -> style.commentFont
             FontKey.KEY_FONT -> style.keyFont
             FontKey.LABEL_FONT -> style.labelFont
-            FontKey.PREVIEW_FONT -> style.previewFont
+            FontKey.POPUP_FONT -> style.popupFont
             FontKey.SYMBOL_FONT -> style.symbolFont
             FontKey.TEXT_FONT -> style.textFont
             FontKey.TOOLBAR_FONT -> theme.toolBar.buttonFont

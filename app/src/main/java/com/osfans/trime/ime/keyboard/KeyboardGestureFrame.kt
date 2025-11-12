@@ -53,13 +53,16 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
     var onKeyActionListener: ((keyIndex: Int, behavior: KeyBehavior) -> Boolean)? = null
     var onKeySlideListener: ((keyIndex: Int, deltaX: Int, x: Float, y: Float) -> Boolean)? = null
     var onKeyStateListener: ((keyIndex: Int, behavior: KeyBehavior, isVisible: Boolean, isPressed: Boolean, isRepeating: Boolean) -> Unit)? = null
-    var onKeyReleaseListener: (() -> Unit)? = null
+    var onKeyReleaseListener: ((keyIndex: Int) -> Unit)? = null
+    var onPopupChangeFocus: ((keyIndex: Int, x: Float, y: Float) -> Unit)? = null
+    var onPopupSelected: ((keyIndex: Int) -> Unit)? = null
 
     open fun getKeyIndex(x: Float, y: Float): Int = -1
     open fun isKeyRepeatable(keyIndex: Int): Boolean = false
     open fun isKeySlideCursor(keyIndex: Int): Boolean = false
     open fun isKeySlideDelete(keyIndex: Int): Boolean = false
     open fun hasAction(keyIndex: Int, behavior: KeyBehavior): Boolean = false
+    open fun hasPopupKeys(keyIndex: Int): Boolean = false
     open val verticalCorrection: Int = 0
 
     init {
@@ -91,7 +94,8 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
 
                 onKeyStateListener?.invoke(keyIndex, KeyBehavior.CLICK, true, true, false)
                 val hasLongClick = hasAction(keyIndex, KeyBehavior.LONG_CLICK)
-                if (hasLongClick || isKeyRepeatable(keyIndex)) launchLongPressJob(pointerId, state)
+                val hasPopup = hasPopupKeys(keyIndex)
+                if (hasLongClick || hasPopup || isKeyRepeatable(keyIndex)) launchLongPressJob(pointerId, state)
             }
 
             MotionEvent.ACTION_MOVE -> {
@@ -110,8 +114,8 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                     if (!swipeEnabled) {
                         val currentKeyIndex = getKeyIndex(x, y)
                         if (currentKeyIndex != -1 && currentKeyIndex != state.keyIndex) {
-                            showPreview(currentKeyIndex)
-                            hidePreview(state.keyIndex)
+                            activateKeyFeedback(currentKeyIndex)
+                            deactivateKeyFeedback(state.keyIndex)
                             state.keyIndex = currentKeyIndex
                         }
                         state.longPressJob?.cancel()
@@ -122,7 +126,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                         val behavior = getSwipeBehavior(state, dx, dy)
                         if (state.lastSwipeBehavior != behavior) {
                             state.lastSwipeBehavior = behavior
-                            showPreview(keyIndex, behavior)
+                            activateKeyFeedback(keyIndex, behavior)
                         }
                     }
 
@@ -146,6 +150,10 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                             }
                         }
                     }
+
+                    if (state.isLongPressed) {
+                        onPopupChangeFocus?.invoke(keyIndex, x, y)
+                    }
                 }
             }
 
@@ -162,21 +170,26 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                 if (state.slideActivated) onKeySlideListener?.invoke(keyIndex, 0, x, y)
                 state.longPressJob?.cancel()
                 state.repeatJob?.cancel()
-                onKeyReleaseListener?.invoke()
+                onKeyReleaseListener?.invoke(keyIndex)
 
-                if (state.isLongPressed) return true
                 val hasLazy = hasAction(keyIndex, KeyBehavior.LAZY_DOUBLE_CLICK)
                 val hasDouble = hasAction(keyIndex, KeyBehavior.DOUBLE_CLICK)
 
+                if (state.isLongPressed) {
+                    onPopupSelected?.invoke(keyIndex)
+                    deactivateKeyFeedback(keyIndex)
+                    return true
+                }
+
                 if (state.shouldPerformSwipe && !state.slideActivated) {
                     onKeyActionListener?.invoke(keyIndex, state.lastSwipeBehavior!!)
-                    hidePreview(keyIndex)
+                    deactivateKeyFeedback(keyIndex)
                     return true
                 }
 
                 if (activePointers.isNotEmpty()) {
                     onKeyActionListener?.invoke(keyIndex, KeyBehavior.COMBO)
-                    hidePreview(keyIndex)
+                    deactivateKeyFeedback(keyIndex)
                     return true
                 }
 
@@ -184,7 +197,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                     if (!state.slideActivated) {
                         onKeyActionListener?.invoke(keyIndex, KeyBehavior.CLICK)
                     }
-                    hidePreview(keyIndex)
+                    deactivateKeyFeedback(keyIndex)
                     return true
                 }
 
@@ -214,16 +227,16 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                     onKeyActionListener?.invoke(keyIndex, KeyBehavior.CLICK)
                 }
 
-                hidePreview(keyIndex)
+                deactivateKeyFeedback(keyIndex)
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                onKeyReleaseListener?.invoke()
+                onKeyReleaseListener?.invoke(-1)
                 for (i in 0 until activePointers.size) {
                     val state = activePointers.valueAt(i)
                     state.longPressJob?.cancel()
                     state.repeatJob?.cancel()
-                    hidePreview(state.keyIndex)
+                    deactivateKeyFeedback(state.keyIndex)
                 }
                 activePointers.clear()
                 lastTapTimes.clear()
@@ -243,8 +256,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                 onKeyActionListener?.invoke(keyIndex, KeyBehavior.CLICK)
                 launchRepeatClickJob(pointerId, state)
             } else {
-                onKeyActionListener?.invoke(keyIndex, KeyBehavior.LONG_CLICK)
-                hidePreview(keyIndex)
+                if (onKeyActionListener?.invoke(keyIndex, KeyBehavior.LONG_CLICK) == true) deactivateKeyFeedback(keyIndex)
             }
         }
     }
@@ -260,7 +272,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                     delay(repeatInterval.toLong())
                 }
             } finally {
-                hidePreview(keyIndex)
+                deactivateKeyFeedback(keyIndex)
             }
         }
     }
@@ -291,11 +303,11 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
 
     fun getNStep(start: Float, end: Float, step: Float): Int = (if (start < end) 1 else -1) * floor(abs(end - start) / step).toInt()
 
-    private fun showPreview(keyIndex: Int, behavior: KeyBehavior = KeyBehavior.CLICK) {
+    private fun activateKeyFeedback(keyIndex: Int, behavior: KeyBehavior = KeyBehavior.CLICK) {
         onKeyStateListener?.invoke(keyIndex, behavior, true, false, false)
     }
 
-    private fun hidePreview(keyIndex: Int) {
+    private fun deactivateKeyFeedback(keyIndex: Int) {
         onKeyStateListener?.invoke(keyIndex, KeyBehavior.CLICK, false, false, false)
     }
 

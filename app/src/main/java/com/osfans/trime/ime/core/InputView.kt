@@ -31,7 +31,7 @@ import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
-import com.osfans.trime.ime.preview.KeyPreviewChoreographer
+import com.osfans.trime.ime.popup.PopupComponent
 import com.osfans.trime.ime.symbol.LiquidWindow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -99,7 +99,7 @@ class InputView(
     private val liquidWindow: LiquidWindow = inputComponent.liquidWindow
     private val compactCandidate: CompactCandidateModule = inputComponent.candidate.compactCandidateModule
     private val suggestionCandidate: SuggestionCandidateModule = inputComponent.candidate.suggestionCandidateModule
-    private val preview: KeyPreviewChoreographer = inputComponent.preview
+    private val popup: PopupComponent = inputComponent.popup
 
     private fun addBroadcastReceivers() {
         broadcaster.addReceiver(quickBar)
@@ -221,7 +221,7 @@ class InputView(
         )
 
         add(
-            preview.root,
+            popup.root,
             lParams(matchParent, matchParent) {
                 centerInParent()
             },
@@ -345,7 +345,7 @@ class InputView(
         // cancel the notification job and clear all broadcast receivers,
         // implies that InputView should not be attached again after detached.
         updateWindowViewHeightJob.cancel()
-        preview.root.removeAllViews()
+        popup.root.removeAllViews()
         broadcaster.clear()
         super.onDetachedFromWindow()
     }
