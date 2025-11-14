@@ -12,6 +12,7 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
+import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.KeyActionManager
@@ -258,6 +259,13 @@ class KeyboardWindow(
         // TODO: 启用自动首句大写后，点击方向键时，保持Shift锁定状态功能将无法生效
         if (theme.generalStyle.autoCaps && status.isAsciiMode && currentKeyboardView?.isCapsOn == false) {
             setShift(false, cursorCapsMode != 0)
+        }
+    }
+
+    override fun onCompositionUpdate(data: RimeProto.Context.Composition) {
+        val status = rime.run { statusCached }
+        if (!status.isAsciiMode && data.length == 0 && data.preedit.isNullOrEmpty()) {
+            currentKeyboardView?.invalidateAllKeys()
         }
     }
 
