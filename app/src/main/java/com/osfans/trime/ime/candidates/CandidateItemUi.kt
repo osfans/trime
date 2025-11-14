@@ -16,7 +16,6 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.util.pressHighlightDrawable
-import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.baselineToBaselineOf
 import splitties.views.dsl.constraintlayout.centerHorizontally
 import splitties.views.dsl.constraintlayout.centerInParent
@@ -35,12 +34,10 @@ import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.gravityCenter
-import splitties.views.horizontalPadding
-import timber.log.Timber
 
 class CandidateItemUi(
     override val ctx: Context,
-    theme: Theme,
+    private val theme: Theme,
 ) : Ui {
     private val textSize = theme.generalStyle.candidateTextSize
     private val commentSize = theme.generalStyle.commentTextSize
@@ -133,7 +130,7 @@ class CandidateItemUi(
         val cColor = if (isHighlighted) hlCommentColor else commentColor
         text.text = item.text
         text.setTextColor(tColor)
-        comment.text = item.comment
+        comment.text = if (theme.generalStyle.commentOnTop) item.comment else " ${item.comment}"
         comment.setTextColor(cColor)
         comment.isGone = item.comment.isEmpty()
         root.background =
