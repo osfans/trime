@@ -162,7 +162,6 @@ class QuickBar(
 
     private fun setUnrollButtonToAttach() {
         candidateUi.unrollButton.setOnClickListener { view ->
-            InputFeedbackManager.keyPressVibrate(view)
             windowManager.attachWindow(
                 FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate.compactCandidateModule),
             )
@@ -172,7 +171,6 @@ class QuickBar(
 
     private fun setUnrollButtonToDetach() {
         candidateUi.unrollButton.setOnClickListener { view ->
-            InputFeedbackManager.keyPressVibrate(view)
             windowManager.attachWindow(KeyboardWindow)
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_less_24)

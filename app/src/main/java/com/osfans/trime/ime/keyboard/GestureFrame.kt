@@ -38,7 +38,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
     private var longPressJob: Job? = null
 
     @Volatile
-    var longPressFeedbackEnabled = true
+    var longPressFeedbackEnabled = false
 
     @Volatile
     private var swipeTriggered = false

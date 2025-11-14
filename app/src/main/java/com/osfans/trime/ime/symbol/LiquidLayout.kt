@@ -65,7 +65,6 @@ class LiquidLayout(
                         ui.root.setOnClickListener {
                             val event = KeyActionManager.getAction(presetKeyName)
                             commonKeyboardActionListener.listener.run {
-                                onPress(event.code)
                                 onAction(event)
                             }
                         }

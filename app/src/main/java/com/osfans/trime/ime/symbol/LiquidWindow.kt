@@ -155,7 +155,6 @@ class LiquidWindow(
     }
 
     private fun triggerSymbolInput(symbol: String) {
-        commonKeyboardActionListener.listener.onPress(KeyEvent.KEYCODE_UNKNOWN)
         rime.launchOnReady {
             val (isAsciiMode, isAsciiPunch) = it.statusCached.run { isAsciiMode to isAsciiPunch }
             if (isAsciiMode) it.setRuntimeOption("ascii_mode", false)
