@@ -41,7 +41,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <Preference android:key="pref_clipboard"
         android:title="@string/clipboard"
-        android:summary="@string/pref_clipboard_summary"
         app:icon="@drawable/ic_baseline_assignment_24"/>
 
     <Preference android:key="pref_toolkit"

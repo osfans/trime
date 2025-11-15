@@ -11,7 +11,6 @@ import android.view.Gravity
 import android.widget.EditText
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
-import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.databinding.ActivityLiquidKeyboardEditBinding
 import com.osfans.trime.ime.symbol.LiquidData
 import kotlinx.coroutines.CoroutineScope
@@ -71,13 +70,6 @@ class LiquidKeyboardEditActivity : Activity() {
                     CollectionHelper.updateText(id!!, newText)
                 }
             }
-
-            LiquidData.Type.DRAFT -> {
-                scope.launch {
-                    DraftHelper.updateText(id!!, newText)
-                }
-            }
-
             else -> return
         }
     }

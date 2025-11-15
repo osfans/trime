@@ -34,7 +34,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.BuildConfig
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.RimeApi
@@ -43,14 +42,12 @@ import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.prefs.PreferenceDelegateProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHelper
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
@@ -78,9 +75,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var rime: RimeSession
     private val jobs = Channel<Job>(capacity = Channel.UNLIMITED)
 
-    private var normalTextEditor = false
-    private val prefs: AppPrefs
-        get() = AppPrefs.defaultInstance()
+    private val prefs = AppPrefs.defaultInstance()
     private lateinit var decorView: View
     private lateinit var contentView: FrameLayout
     private var inputView: InputView? = null
@@ -506,8 +501,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         return inputView?.handleInlineSuggestions(response) == true
     }
 
-    private val draftExcludeApps by AppPrefs.defaultInstance().clipboard.draftExcludeApp
-
     override fun onStartInputView(
         attribute: EditorInfo,
         restarting: Boolean,
@@ -530,70 +523,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 workaroundNullCursorAnchorInfo()
             }
         }
-        when (attribute.inputType and InputType.TYPE_MASK_VARIATION) {
-            InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-            InputType.TYPE_TEXT_VARIATION_PASSWORD,
-            InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-            InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-            InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
-            -> {
-                Timber.d(
-                    "EditorInfo: private;" +
-                        " packageName=" +
-                        attribute.packageName +
-                        "; fieldName=" +
-                        attribute.fieldName +
-                        "; actionLabel=" +
-                        attribute.actionLabel +
-                        "; inputType=" +
-                        attribute.inputType +
-                        "; VARIATION=" +
-                        (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                        "; CLASS=" +
-                        (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                        "; ACTION=" +
-                        (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                )
-                normalTextEditor = false
-            }
-            else -> {
-                Timber.d(
-                    "EditorInfo: normal;" +
-                        " packageName=" +
-                        attribute.packageName +
-                        "; fieldName=" +
-                        attribute.fieldName +
-                        "; actionLabel=" +
-                        attribute.actionLabel +
-                        "; inputType=" +
-                        attribute.inputType +
-                        "; VARIATION=" +
-                        (attribute.inputType and InputType.TYPE_MASK_VARIATION) +
-                        "; CLASS=" +
-                        (attribute.inputType and InputType.TYPE_MASK_CLASS) +
-                        "; ACTION=" +
-                        (attribute.imeOptions and EditorInfo.IME_MASK_ACTION),
-                )
-                if (attribute.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                    == EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                ) {
-                    // 应用程序请求以隐身模式打开键盘
-                    normalTextEditor = false
-                    Timber.d("EditorInfo: normal -> private, IME_FLAG_NO_PERSONALIZED_LEARNING")
-                } else if (attribute.packageName == BuildConfig.APPLICATION_ID ||
-                    draftExcludeApps
-                        .trim()
-                        .split('\n')
-                        .contains(attribute.packageName)
-                ) {
-                    normalTextEditor = false
-                    Timber.d("EditorInfo: normal -> exclude, packageName=%s", attribute.packageName)
-                } else {
-                    normalTextEditor = true
-                    currentInputConnection?.let { DraftHelper.onExtractedTextChanged(it) }
-                }
-            }
-        }
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -601,9 +530,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         decorLocationUpdated = false
         inputDeviceManager.onFinishInputView()
         currentInputConnection?.apply {
-            if (normalTextEditor) {
-                DraftHelper.onExtractedTextChanged(this)
-            }
             finishComposingText()
             monitorCursorAnchor(false)
         }
@@ -625,7 +551,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         InputFeedbackManager.textCommitSpeak(text.toString())
         if (clearMeatKeyState) {
             ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
-            DraftHelper.onExtractedTextChanged(ic)
         }
     }
 

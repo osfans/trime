@@ -15,7 +15,6 @@ object LiquidData {
         TABS,
         CLIPBOARD,
         COLLECTION,
-        DRAFT,
         HISTORY,
     }
 

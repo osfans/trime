@@ -5,23 +5,19 @@
 package com.osfans.trime.ime.symbol
 
 import android.content.Context
-import android.view.KeyEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
-import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -130,7 +126,6 @@ class LiquidWindow(
         when (tag.type) {
             LiquidData.Type.CLIPBOARD -> submitDbData { ClipboardHelper.getAll() }
             LiquidData.Type.COLLECTION -> submitDbData { CollectionHelper.getAll() }
-            LiquidData.Type.DRAFT -> submitDbData { DraftHelper.getAll() }
             LiquidData.Type.HISTORY -> {
                 symbolHistory.load()
                 submitData(symbolHistory.toOrderedList().map { LiquidKeyboard.KeyItem(it) })

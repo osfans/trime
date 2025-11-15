@@ -101,8 +101,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="external_storage_permission_granted">已授予儲存許可權</string>
     <string name="external_storage_permission_denied">已拒絕授權儲存許可權，部署或讀取方案和配置功能或不可用</string>
     <string name="custom_sound_effect_name">自訂按鍵音效</string>
-    <string name="clipboard_draft_limit">草稿箱歷史記錄上限</string>
-    <string name="clipboard_draft_output_title">草稿箱過濾規則</string>
     <string name="setup__next">下一步</string>
     <string name="setup__done">完成</string>
     <string name="setup__enable_ime_hint">在語言和輸入設定中啟用<b>同文輸入法</b></string>
@@ -164,17 +162,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="liquid_keyboard_ask_to_delete_all">刪除全部？</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
-    <string name="clipboard_draft_exclude_app_title">不自動保存草稿的應用（包名）</string>
     <string name="about__licensing">許可</string>
     <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>
     <string name="clipboard">剪貼簿</string>
-    <string name="clipboard_draft">草稿箱</string>
     <string name="clipboard_collection">收藏夾</string>
     <string name="simple_key_unpin">取消置頂</string>
     <string name="simple_key_pin">置頂</string>
     <string name="delete_all">刪除全部</string>
     <string name="disable">停用</string>
-    <string name="pref_clipboard_summary">收藏夾和草稿箱也在這裡管理</string>
     <string name="a_regular_expression_per_line">一行一條正則表示式</string>
     <string name="custom_sound_effect_enabled">使用自訂按鍵音</string>
     <string name="pref_keyboard__landscape">橫向模式</string>
