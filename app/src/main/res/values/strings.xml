@@ -102,8 +102,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="external_storage_permission_granted">External storage permission is granted</string>
     <string name="external_storage_permission_denied">External storage permission was denied, deployment or reading schemas and config may not be available</string>
     <string name="custom_sound_effect_name">Key Sound Effect</string>
-    <string name="clipboard_draft_limit">Draft History Limit</string>
-    <string name="clipboard_draft_output_title">Draft Filter</string>
     <string name="setup__next">Next</string>
     <string name="setup__done">Done</string>
     <string name="setup__enable_ime_hint">Enable <b>Trime</b> in Language and input settings</string>
@@ -165,16 +163,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="liquid_keyboard_ask_to_delete_all">Delete All?</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
-    <string name="clipboard_draft_exclude_app_title">Apps not save draft (package name)</string>
     <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
-    <string name="clipboard_draft">Draft</string>
     <string name="clipboard_collection">Collection</string>
     <string name="simple_key_unpin">Unpin</string>
     <string name="simple_key_pin">Pin</string>
     <string name="delete_all">Delete all</string>
-    <string name="disable">Disbale</string>
-    <string name="pref_clipboard_summary">Collection and draft are also managed here</string>
+    <string name="disable">Disable</string>
     <string name="a_regular_expression_per_line">A regular expression per line</string>
     <string name="custom_sound_effect_enabled">Use custom key sound</string>
     <string name="pref_keyboard__landscape">Landscape Mode</string>

@@ -98,8 +98,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="external_storage_permission_granted">已授予存储权限</string>
     <string name="external_storage_permission_denied">已拒绝授权存储权限，部署或读取方案和配置功能或不可用</string>
     <string name="custom_sound_effect_name">自定义按键音效</string>
-    <string name="clipboard_draft_limit">草稿箱历史记录上限</string>
-    <string name="clipboard_draft_output_title">草稿箱过滤规则</string>
     <string name="setup__next">下一步</string>
     <string name="setup__done">完成</string>
     <string name="setup__enable_ime_hint">在语言和输入设置中启用<b>同文输入法</b></string>
@@ -163,17 +161,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="liquid_keyboard_ask_to_delete_all">删除全部？</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
-    <string name="clipboard_draft_exclude_app_title">不自动保存草稿的应用（包名）</string>
     <string name="about__open_source_licenses">开源软件许可</string>
     <string name="about__open_source_licenses_summary">第三方软件库许可证</string>
     <string name="clipboard">剪贴板</string>
-    <string name="clipboard_draft">草稿箱</string>
     <string name="clipboard_collection">收藏夹</string>
     <string name="simple_key_unpin">取消置顶</string>
     <string name="simple_key_pin">置顶</string>
     <string name="delete_all">删除全部</string>
     <string name="disable">禁用</string>
-    <string name="pref_clipboard_summary">收藏夹和草稿箱也在这里管理</string>
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
     <string name="custom_sound_effect_enabled">使用自定义按键音效</string>
     <string name="pref_keyboard__landscape">横屏模式</string>

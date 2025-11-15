@@ -10,7 +10,6 @@ import com.osfans.trime.R
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
-import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.util.AppUtils
@@ -33,7 +32,6 @@ class DbAdapter(
             when (type) {
                 LiquidData.Type.CLIPBOARD -> ClipboardHelper.pin(bean.id)
                 LiquidData.Type.COLLECTION -> CollectionHelper.pin(bean.id)
-                LiquidData.Type.DRAFT -> DraftHelper.pin(bean.id)
                 else -> {}
             }
             refresh()
@@ -45,7 +43,6 @@ class DbAdapter(
             when (type) {
                 LiquidData.Type.CLIPBOARD -> ClipboardHelper.unpin(bean.id)
                 LiquidData.Type.COLLECTION -> CollectionHelper.unpin(bean.id)
-                LiquidData.Type.DRAFT -> DraftHelper.unpin(bean.id)
                 else -> {}
             }
             refresh()
@@ -57,7 +54,6 @@ class DbAdapter(
             when (type) {
                 LiquidData.Type.CLIPBOARD -> ClipboardHelper.delete(bean.id)
                 LiquidData.Type.COLLECTION -> CollectionHelper.delete(bean.id)
-                LiquidData.Type.DRAFT -> DraftHelper.delete(bean.id)
                 else -> {}
             }
             refresh()
@@ -84,7 +80,6 @@ class DbAdapter(
                         when (type) {
                             LiquidData.Type.CLIPBOARD -> ClipboardHelper.deleteAll(ClipboardHelper.haveUnpinned())
                             LiquidData.Type.COLLECTION -> CollectionHelper.deleteAll(CollectionHelper.haveUnpinned())
-                            LiquidData.Type.DRAFT -> DraftHelper.deleteAll(DraftHelper.haveUnpinned())
                             else -> {}
                         }
                         refresh()
@@ -100,7 +95,6 @@ class DbAdapter(
         when (type) {
             LiquidData.Type.CLIPBOARD -> submitList(ClipboardHelper.getAll())
             LiquidData.Type.COLLECTION -> submitList(CollectionHelper.getAll())
-            LiquidData.Type.DRAFT -> submitList(DraftHelper.getAll())
             else -> {}
         }
     }

@@ -683,7 +683,7 @@ liquid_keyboard:
       - Return2
       - liquid_keyboard_clipboard
       - liquid_keyboard_switch
-  keyboards: [emoji, math, ascii, cn, history, clipboard, collection, draft, symbollist, list, ids, symbol, tabs, pinyin, script_symbols, jp, grease, rusa, korea, lation, yinbiao, unit, yanwenzi, combing, emoji_full, candidate]  #tab列表
+  keyboards: [emoji, math, ascii, cn, history, clipboard, collection, symbollist, list, ids, symbol, tabs, pinyin, script_symbols, jp, grease, rusa, korea, lation, yinbiao, unit, yanwenzi, combing, emoji_full, candidate]  #tab列表
   tabs:
     name: 更多
     type: TABS
@@ -706,9 +706,6 @@ liquid_keyboard:
   collection:
     type: COLLECTION
     name: 收藏
-  draft:
-    type: DRAFT
-    name: 草稿
   math:   #tab名称
     type: SINGLE
     name: 数学

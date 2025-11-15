@@ -14,7 +14,6 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
-import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity
@@ -136,7 +135,6 @@ class TrimeApplication : Application() {
             }
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
-            DraftHelper.init(applicationContext)
             registerBroadcastReceiver()
             startWorkManager()
         } catch (e: Exception) {
