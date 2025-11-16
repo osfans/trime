@@ -9,10 +9,17 @@ import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import timber.log.Timber
 
 object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private lateinit var cltDb: Database
     private lateinit var cltDao: DatabaseDao
+
+    private val mutex = Mutex()
+
+    var lastBean: DatabaseBean? = null
 
     fun init(context: Context) {
         cltDb =
@@ -23,7 +30,19 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
         cltDao = cltDb.databaseDao()
     }
 
-    suspend fun insert(bean: DatabaseBean) = cltDao.insert(bean)
+    suspend fun insert(bean: DatabaseBean) {
+        mutex.withLock {
+            cltDao.find(bean.text!!)?.let {
+                Timber.d("Update existing collection item: $it")
+                lastBean = it.copy(time = bean.time)
+                cltDao.updateTime(it.id, bean.time)
+                return
+            }
+            Timber.d("Insert new collection item: $bean")
+            val rowId = cltDao.insert(bean)
+            cltDao.get(rowId)?.let { lastBean = it }
+        }
+    }
 
     suspend fun haveUnpinned() = cltDao.haveUnpinned()
 
@@ -46,5 +65,10 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
     suspend fun updateText(
         id: Int,
         text: String,
-    ) = cltDao.updateText(id, text)
+    ) {
+        lastBean?.let {
+            if (id == it.id) lastBean = it.copy(text = text)
+        }
+        cltDao.updateText(id, text)
+    }
 }
