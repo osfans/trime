@@ -238,4 +238,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="restored_from_x">Restored from %1$s</string>
     <string name="backup">Backup</string>
     <string name="restore">Restore</string>
+    <string name="clipboard_listening">Clipboard listening</string>
 </resources>

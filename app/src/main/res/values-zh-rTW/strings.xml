@@ -238,4 +238,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="restored_from_x">已從 %1$s 還原</string>
     <string name="backup">備份</string>
     <string name="restore">還原</string>
+    <string name="clipboard_listening">監聽剪貼簿</string>
 </resources>
