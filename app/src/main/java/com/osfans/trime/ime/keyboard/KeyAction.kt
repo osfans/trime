@@ -69,6 +69,14 @@ class KeyAction(
 
     private val rime get() = RimeDaemon.getFirstSessionOrNull()!!
 
+    // 获取空格键的schemaName，处理初始化时可能为空的情况
+    private fun getSpaceKeySchemaName(): String = rime.run {
+        statusCached.schemaName.ifEmpty {
+            // 如果schemaName为空，尝试使用schemaId作为显示名称
+            schemaCached.schemaId.takeIf { it.isNotEmpty() && it != ".default" } ?: ""
+        }
+    }
+
     private fun adjustCase(
         str: String,
         keyboard: Keyboard,
@@ -102,7 +110,11 @@ class KeyAction(
                 return adjustCase(shiftLabel, keyboard)
             }
         }
-        return adjustCase(label, keyboard)
+        val currentLabel = label.ifEmpty {
+            // 特殊处理空格键：如果label为空且是空格键，尝试获取最新的schemaName
+            getSpaceKeySchemaName().takeIf { code == KeyEvent.KEYCODE_SPACE } ?: label
+        }
+        return adjustCase(currentLabel, keyboard)
     }
 
     fun getText(keyboard: Keyboard): String = if (text.isNotEmpty()) {
@@ -149,7 +161,7 @@ class KeyAction(
                 if (label.isEmpty()) {
                     label =
                         when (code) {
-                            KeyEvent.KEYCODE_SPACE -> rime.run { statusCached }.schemaName
+                            KeyEvent.KEYCODE_SPACE -> getSpaceKeySchemaName()
                             KeyEvent.KEYCODE_UNKNOWN -> ""
                             else -> Keycode.getDisplayLabel(code, modifier)
                         }
@@ -179,7 +191,7 @@ class KeyAction(
                 } else if (label.isEmpty()) {
                     label =
                         when (code) {
-                            KeyEvent.KEYCODE_SPACE -> rime.run { statusCached }.schemaName
+                            KeyEvent.KEYCODE_SPACE -> getSpaceKeySchemaName()
                             KeyEvent.KEYCODE_UNKNOWN -> ""
                             else -> Keycode.getDisplayLabel(code, modifier)
                         }
