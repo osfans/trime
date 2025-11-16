@@ -87,7 +87,7 @@ class KeyboardWindow(
 
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
-        attachKeyboard(evalKeyboard(rime.run { statusCached }.schemaId))
+        attachKeyboard(evalKeyboard(".default"))
         return keyboardView
     }
 
@@ -97,6 +97,7 @@ class KeyboardWindow(
             keyboardView.removeView(it)
             it.keyboardActionListener = null
         }
+        currentKeyboard?.lastAsciiMode = rime.run { statusCached }.isAsciiMode
     }
 
     private fun selectKeyboardConfig(name: String): TextKeyboard? {
@@ -111,26 +112,33 @@ class KeyboardWindow(
     private fun attachKeyboard(target: String) {
         currentKeyboardId = target
         lastKeyboardId = target
-        val newConfig = selectKeyboardConfig(target)
-        val newKeyboard =
-            (currentKeyboard ?: Keyboard(theme, newConfig)).also {
-                runBlocking {
-                    _currentKeyboardHeight.emit(it.keyboardHeight)
-                }
-                if (it.isLock) lastLockKeyboardId = target
-                dispatchCapsState(it::setShifted)
-                val isAsciiMode = rime.run { statusCached }.isAsciiMode
-                if (isAsciiMode != it.asciiMode) {
-                    service.postRimeJob { setRuntimeOption("ascii_mode", it.asciiMode) }
-                }
-                // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
-                KeyboardSwitcher.currentKeyboard = it
+
+        val config = selectKeyboardConfig(target)
+        val keyboard = currentKeyboard ?: Keyboard(theme, config)
+        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popupComponent, service)
+
+        if (currentKeyboard == null) {
+            cachedKeyboards[target] = keyboard to view
+            keyboard.lastAsciiMode = keyboard.asciiMode
+        }
+
+        keyboard.also {
+            runBlocking { _currentKeyboardHeight.emit(it.keyboardHeight) }
+            if (it.isLock) lastLockKeyboardId = target
+            dispatchCapsState(it::setShifted)
+
+            val currentMode = rime.run { statusCached }.isAsciiMode
+            val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
+
+            if (currentMode != targetMode) {
+                service.postRimeJob { setRuntimeOption("ascii_mode", targetMode) }
             }
-        val newView =
-            currentKeyboardView ?: KeyboardView(context, theme, newKeyboard, popupComponent, service).also {
-                cachedKeyboards[target] = newKeyboard to it
-            }
-        newView.let {
+
+            // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher
+            KeyboardSwitcher.currentKeyboard = it
+        }
+
+        view.let {
             it.keyboardActionListener = keyboardActionListener
             keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
         }
@@ -241,14 +249,9 @@ class KeyboardWindow(
                     service.postRimeJob { setRuntimeOption("ascii_mode", true) }
                 }
             } else if (theme.generalStyle.resetASCIIMode) {
-                if (it.resetAsciiMode) {
-                    if (isAsciiMode != it.asciiMode) {
-                        service.postRimeJob { setRuntimeOption("ascii_mode", it.asciiMode) }
-                    }
-                } else {
-                    if (isAsciiMode) {
-                        service.postRimeJob { setRuntimeOption("ascii_mode", false) }
-                    }
+                val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
+                if (isAsciiMode != targetMode) {
+                    service.postRimeJob { setRuntimeOption("ascii_mode", targetMode) }
                 }
             }
         }
@@ -279,7 +282,7 @@ class KeyboardWindow(
     }
 
     override fun onRimeSchemaUpdated(schema: SchemaItem) {
-        switchKeyboard(schema.id)
+        switchKeyboard(".default")
     }
 
     override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {
