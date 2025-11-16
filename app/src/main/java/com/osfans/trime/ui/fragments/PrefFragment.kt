@@ -61,7 +61,7 @@ class PrefFragment : PaddingPreferenceFragment() {
                 true
             }
             get<Preference>("pref_clipboard")?.setOnPreferenceClickListener {
-                findNavController().navigate(R.id.action_prefFragment_to_clipboardFragment)
+                findNavController().navigate(R.id.action_prefFragment_to_clipboardSettingsFragment)
                 true
             }
             get<Preference>("pref_toolkit")?.setOnPreferenceClickListener {

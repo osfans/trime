@@ -51,8 +51,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_clipboardFragment"
-            app:destination="@id/clipboardFragment"
+            android:id="@+id/action_prefFragment_to_clipboardSettingsFragment"
+            app:destination="@id/clipboardSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -126,8 +126,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:name="com.osfans.trime.ui.fragments.LicenseFragment"
         android:label="@string/license" />
     <fragment
-        android:id="@+id/clipboardFragment"
-        android:name="com.osfans.trime.ui.fragments.ClipboardFragment"
+        android:id="@+id/clipboardSettingsFragment"
+        android:name="com.osfans.trime.ui.main.settings.ClipboardSettingsFragment"
         android:label="@string/clipboard" />
     <fragment
         android:id="@+id/candidatesSettingsFragment"

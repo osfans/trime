@@ -41,7 +41,7 @@ class AppPrefs(
     val general = General(shared).register()
     val keyboard = Keyboard(shared)
     val profile = Profile(shared).register()
-    val clipboard = Clipboard(shared)
+    val clipboard = Clipboard(shared).register()
     val other = Other(shared)
 
     val candidates = Candidates(shared).register()
@@ -239,7 +239,7 @@ class AppPrefs(
 
     class Clipboard(
         shared: SharedPreferences,
-    ) : PreferenceDelegateOwner(shared) {
+    ) : PreferenceDelegateOwner(shared, R.string.clipboard) {
         companion object {
             const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
             const val CLIPBOARD_COMPARE_RULES = "clipboard_clipboard_compare"
@@ -247,12 +247,28 @@ class AppPrefs(
             const val CLIPBOARD_SUGGESTION = "clipboard_suggestion"
             const val CLIPBOARD_SUGGESTION_TIMEOUT = "clipboard_suggestion_timeout"
         }
-
-        val clipboardLimit = int(CLIPBOARD_LIMIT, 10)
-        val clipboardCompareRules = string(CLIPBOARD_COMPARE_RULES, "")
-        val clipboardOutputRules = string(CLIPBOARD_OUTPUT_RULES, "")
-        val clipboardSuggestion = bool(CLIPBOARD_SUGGESTION, true)
-        val clipboardSuggestionTimeout = int(CLIPBOARD_SUGGESTION_TIMEOUT, 20)
+        val clipboardLimit = int(R.string.clipboard_limit, CLIPBOARD_LIMIT, 10)
+        val clipboardCompareRules = editText(
+            R.string.clipboard_compare_rules,
+            CLIPBOARD_COMPARE_RULES,
+            "",
+            R.string.a_regular_expression_per_line,
+        )
+        val clipboardOutputRules = editText(
+            R.string.clipboard_output_rules,
+            CLIPBOARD_OUTPUT_RULES,
+            "",
+            R.string.a_regular_expression_per_line,
+        )
+        val clipboardSuggestion = switch(R.string.clipboard_suggestion, CLIPBOARD_SUGGESTION, true)
+        val clipboardSuggestionTimeout = int(
+            R.string.clipboard_suggestion_timeout,
+            CLIPBOARD_SUGGESTION_TIMEOUT,
+            20,
+            0,
+            100,
+            "s",
+        ) { clipboardSuggestion.getValue() }
     }
 
     /**

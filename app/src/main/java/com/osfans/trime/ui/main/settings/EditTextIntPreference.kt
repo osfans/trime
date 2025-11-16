@@ -17,7 +17,7 @@ class EditTextIntPreference
 @JvmOverloads
 constructor(
     context: Context,
-    attrs: AttributeSet?,
+    attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.preference.R.attr.editTextPreferenceStyle,
 ) : EditTextPreference(context, attrs, defStyleAttr) {
     private var value = 0

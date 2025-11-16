@@ -6,9 +6,12 @@ package com.osfans.trime.data.prefs
 
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
+import com.osfans.trime.ui.components.DialogSeekBarPreference
+import com.osfans.trime.ui.main.settings.EditTextIntPreference
 
 abstract class PreferenceDelegateUi<T : Preference>(
     val key: String,
@@ -81,6 +84,81 @@ abstract class PreferenceDelegateUi<T : Preference>(
             setTitle(this@StringList.title)
             entries = this@StringList.entryLabels.map { context.getString(it) }.toTypedArray()
             setDialogTitle(this@StringList.title)
+        }
+    }
+
+    class EditText(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: String,
+        @StringRes
+        val message: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<EditTextPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = EditTextPreference(context).apply {
+            key = this@EditText.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            setDefaultValue(this@EditText.defaultValue)
+            setTitle(this@EditText.title)
+            setDialogTitle(this@EditText.title)
+            if (this@EditText.message != null) {
+                setDialogMessage(this@EditText.message)
+            }
+        }
+    }
+
+    class EditTextInt(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: Int,
+        val min: Int,
+        val max: Int,
+        val unit: String = "",
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<EditTextPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = EditTextIntPreference(context).apply {
+            key = this@EditTextInt.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = EditTextIntPreference.SimpleSummaryProvider
+            setDefaultValue(this@EditTextInt.defaultValue)
+            setTitle(this@EditTextInt.title)
+            setDialogTitle(this@EditTextInt.title)
+            min = this@EditTextInt.min
+            max = this@EditTextInt.max
+            unit = this@EditTextInt.unit
+        }
+    }
+
+    class SeekBarInt(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: Int,
+        val min: Int,
+        val max: Int,
+        val unit: String = "",
+        val step: Int = 1,
+        @StringRes
+        val defaultLabel: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<DialogSeekBarPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = DialogSeekBarPreference(context).apply {
+            key = this@SeekBarInt.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
+            this@SeekBarInt.defaultLabel?.let { systemDefaultValueText = context.getString(it) }
+            setDefaultValue(this@SeekBarInt.defaultValue)
+            setTitle(this@SeekBarInt.title)
+            min = this@SeekBarInt.min
+            max = this@SeekBarInt.max
+            unit = this@SeekBarInt.unit
+            step = this@SeekBarInt.step
         }
     }
 }
