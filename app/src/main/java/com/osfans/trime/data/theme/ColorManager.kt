@@ -35,6 +35,9 @@ object ColorManager {
 
     private var isNightMode = false
 
+    // 添加一个变量来保存用户实际选择的配色方案ID
+    private var userSelectedColorSchemeId: String? = null
+
     private lateinit var _activeColorScheme: ColorScheme
 
     var activeColorScheme: ColorScheme
@@ -125,6 +128,8 @@ object ColorManager {
 
     fun init(configuration: Configuration) {
         isNightMode = configuration.isNightMode()
+        // 初始化时保存用户的实际配色选择
+        userSelectedColorSchemeId = normalModeColor
         activeColorScheme = evaluateActiveColorScheme()
 
         val maxMemory = Runtime.getRuntime().maxMemory() / 1024
@@ -140,26 +145,88 @@ object ColorManager {
 
     fun onSystemNightModeChange(isNight: Boolean) {
         isNightMode = isNight
+
+        // 获取当前用户选择的基础配色
+        val userBaseSchemeId = userSelectedColorSchemeId ?: normalModeColor
+        val userBaseScheme = colorScheme(userBaseSchemeId)
+
+        // 如果用户有选择基础配色，先确保activeColorScheme被设置为该配色
+        if (userBaseScheme != null && _activeColorScheme.id != userBaseScheme.id) {
+            activeColorScheme = userBaseScheme
+        }
+
+        // 然后再根据夜间模式设置选择对应的配色
         activeColorScheme = evaluateActiveColorScheme()
     }
 
-    private fun evaluateActiveColorScheme(): ColorScheme = when {
-        followSystemDayNight -> if (isNightMode) darkModeColorScheme else lightModeColorScheme
-        else -> colorScheme(normalModeColor)
-    } ?: colorScheme("default") ?: theme.colorSchemes.first()
+    private fun evaluateActiveColorScheme(): ColorScheme {
+        if (followSystemDayNight) {
+            // 先获取用户选择的基础配色方案
+            val userBaseScheme = colorScheme(userSelectedColorSchemeId ?: normalModeColor)
+                ?: colorScheme("default")
+                ?: theme.colorSchemes.first()
+
+            // 确保activeColorScheme被设置为用户基础配色，这样可以正确初始化lightModeColorScheme和darkModeColorScheme
+            if (!this::_activeColorScheme.isInitialized || _activeColorScheme.id != userBaseScheme.id) {
+                activeColorScheme = userBaseScheme
+            }
+
+            // 然后根据当前模式选择对应的配色
+            val targetScheme = if (isNightMode) darkModeColorScheme else lightModeColorScheme
+            // 如果有对应的明暗模式配色，则使用它；否则使用用户选择的基础配色
+            if (targetScheme != null) return targetScheme
+        }
+        // 当不跟随系统或没有对应的明暗模式配色时，使用用户选择的配色
+        return colorScheme(userSelectedColorSchemeId ?: normalModeColor)
+            ?: colorScheme("default")
+            ?: theme.colorSchemes.first()
+    }
 
     /** 每次切换主题后，都要调用此函数，初始化配色 */
     fun switchTheme(theme: Theme) {
         bitmapCache?.evictAll()
         this.theme = theme
-        val newScheme = evaluateActiveColorScheme()
+
+        // 确定要使用的配色方案ID
+        val targetSchemeId = when {
+            // 优先使用用户明确选择的配色
+            userSelectedColorSchemeId != null -> userSelectedColorSchemeId
+            // 如果没有明确选择，尝试使用保存的normalModeColor
+            else -> normalModeColor
+        }
+
+        // 尝试在新主题中找到对应的配色方案
+        var newScheme = targetSchemeId?.let { colorScheme(it) }
+
+        // 如果找不到对应的配色，使用默认配色
+        if (newScheme == null) {
+            newScheme = colorScheme("default") ?: theme.colorSchemes.first()
+            // 更新用户选择的配色方案ID
+            userSelectedColorSchemeId = newScheme.id
+        } else {
+            // 确保userSelectedColorSchemeId被设置
+            if (userSelectedColorSchemeId == null) {
+                userSelectedColorSchemeId = targetSchemeId
+            }
+        }
+
+        // 无论如何都更新normalModeColor，确保持久化存储
+        normalModeColor = userSelectedColorSchemeId ?: newScheme.id
+
+        // 设置当前激活的配色方案
         activeColorScheme = newScheme
-        normalModeColor = newScheme.id
+
+        // 检查是否需要根据当前的夜间模式调整配色
+        if (followSystemDayNight) {
+            activeColorScheme = evaluateActiveColorScheme()
+        }
     }
 
     fun setColorScheme(scheme: ColorScheme) {
-        activeColorScheme = scheme
+        // 用户手动选择配色时，保存到userSelectedColorSchemeId和normalModeColor
+        userSelectedColorSchemeId = scheme.id
         normalModeColor = scheme.id
+        activeColorScheme = scheme
     }
 
     @ColorInt
