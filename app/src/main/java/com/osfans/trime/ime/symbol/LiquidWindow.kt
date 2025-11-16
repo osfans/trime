@@ -54,6 +54,9 @@ class LiquidWindow(
     var currentDataType: LiquidData.Type = LiquidData.Type.SINGLE
         private set
 
+    // 找不到获取currentList的方法，添加lastDbList成员变量来代替
+    private var lastDbList: List<DatabaseBean> = emptyList()
+
     private val mainAdapter by lazy {
         LiquidAdapter(theme) {
             when (currentDataType) {
@@ -125,8 +128,15 @@ class LiquidWindow(
 
     fun setDataByIndex(i: Int) {
         val tag = LiquidData.getTagList()[i]
+        val oldDataType = currentDataType
         currentDataType = tag.type
         liquidLayout.tabsUi.activateTab(i)
+
+        // 只要类型改变且lastDbList不为空，就重置lastDbList
+        if (oldDataType != tag.type && lastDbList.isNotEmpty()) {
+            lastDbList = emptyList()
+        }
+
         when (tag.type) {
             LiquidData.Type.CLIPBOARD -> submitDbData { ClipboardHelper.getAll() }
             LiquidData.Type.COLLECTION -> submitDbData { CollectionHelper.getAll() }
@@ -150,7 +160,53 @@ class LiquidWindow(
     private fun submitDbData(data: suspend () -> List<DatabaseBean>) {
         liquidLayout.updateState(LiquidLayout.State.Database)
         service.lifecycleScope.launch {
-            dbAdapter.submitList(data())
+            // 获取旧数据
+            val oldDbList = lastDbList
+            // 加载新数据
+            val newDbList = data()
+            // 当从空列表切换到有数据列表时执行特殊处理
+            if (oldDbList.isEmpty() && newDbList.isNotEmpty()) {
+                // 先提交null重置状态
+                dbAdapter.submitList(null) {
+                    // 然后在UI线程重新提交真实数据
+                    service.mainExecutor.execute {
+                        // 更新lastDbList
+                        lastDbList = newDbList.toList()
+                        dbAdapter.submitList(newDbList) { handleScrollLogic(oldDbList, newDbList) }
+                    }
+                }
+            } else {
+                lastDbList = newDbList.toList()
+                dbAdapter.submitList(newDbList) { handleScrollLogic(oldDbList, newDbList) }
+            }
+        }
+    }
+
+    private fun handleScrollLogic(oldList: List<DatabaseBean>, newList: List<DatabaseBean>) {
+        // 判断是否需要滚动到顶部的情况
+        val shouldScrollToTop = when {
+            // 1. 旧列表为空，新列表有数据（首次加载或清空后新增）
+            oldList.isEmpty() && newList.isNotEmpty() -> true
+            // 2. 新列表长度大于旧列表（有新增条目）
+            newList.size > oldList.size -> true
+            // 3. 新列表长度等于旧列表，但可能有新增条目替换（需要比较首个非固定条目）
+            newList.size == oldList.size -> {
+                val oldFirstUnpinned = oldList.find { !it.pinned }
+                val newFirstUnpinned = newList.find { !it.pinned }
+                // 如果存在非固定条目且它们不同，说明有新增
+                newFirstUnpinned != null &&
+                    oldFirstUnpinned != null &&
+                    newFirstUnpinned.id != oldFirstUnpinned.id
+            }
+            // 其他情况（如删除条目导致新列表更短）不需要滚动
+            else -> false
+        }
+
+        if (shouldScrollToTop) {
+            // 在UI线程滚动到顶部
+            liquidLayout.dbView.post {
+                liquidLayout.dbView.scrollToPosition(0)
+            }
         }
     }
 
