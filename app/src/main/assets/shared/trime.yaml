@@ -926,6 +926,7 @@ preset_keys:
   liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
   liquid_keyboard_clipboard: { label: 剪贴, send: function, command: liquid_keyboard, option: "剪贴" }
   set_color_ink: { label: 切换到ink配色, send: function, command: set_color_scheme, option: "ink" }
+  set_theme_ink: { label: 切换到ink主题, send: function, command: set_theme, option: "ink" } #空参数为刷新主题
   # trime設定
   IME_switch: { label: 🌐, send: LANGUAGE_SWITCH } #彈出對話框選擇輸入法
   IME_last: { label: 上一輸入法, send: LANGUAGE_SWITCH, select: .last } #直接切換到上一輸入法

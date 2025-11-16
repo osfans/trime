@@ -206,6 +206,7 @@ class CommonKeyboardActionListener(
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
                     "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
                     "set_color_scheme" -> handleColorScheme(arg)
+                    "set_theme" -> handleTheme(arg)
                     "broadcast" -> service.sendBroadcast(Intent(arg))
                     "clipboard" -> handleClipboard()
                     "commit" -> service.commitText(arg)
@@ -236,6 +237,19 @@ class CommonKeyboardActionListener(
                 ThemeManager.activeTheme.colorSchemes
                     .find { it.id == arg }
                     ?.let { ColorManager.setColorScheme(it) }
+            }
+
+            private fun handleTheme(arg: String) {
+                if (arg.isEmpty()) {
+                    // 参数为空时，刷新当前主题
+                    ThemeManager.selectTheme(ThemeManager.activeTheme.configId)
+                } else {
+                    // 通过主题名称查找对应的配置ID并切换主题
+                    ThemeManager.getAllThemes()
+                        .find { it.name.equals(arg, ignoreCase = true) }?.let {
+                            ThemeManager.selectTheme(it.configId)
+                        }
+                }
             }
 
             private fun handleClipboard() {
