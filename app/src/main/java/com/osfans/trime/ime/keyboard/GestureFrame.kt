@@ -62,6 +62,9 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         // disable system sound effect and haptic feedback
         isSoundEffectsEnabled = false
         isHapticFeedbackEnabled = false
+        // avoid gaining focus unexpectedly
+        isFocusable = false
+        isFocusableInTouchMode = false
     }
 
     fun getSwipeDirection(dx: Float, dy: Float): SwipeDirection = if (abs(dx) > abs(dy)) {
