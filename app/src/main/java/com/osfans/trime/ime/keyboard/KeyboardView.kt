@@ -54,6 +54,7 @@ class KeyboardView(
     private val symbolTextSize = theme.generalStyle.symbolTextSize
     private val mShadowRadius = theme.generalStyle.shadowRadius
     private val mShadowColor = ColorManager.getColor("shadow_color")
+    private val keyBorderColor = ColorManager.getColor("key_border_color")
 
     // Working variable
     private val originCoords = intArrayOf(0, 0)
@@ -373,9 +374,12 @@ class KeyboardView(
         val keyBackground = key.getBackgroundDrawable()
         if (keyBackground != null) {
             if (keyBackground is GradientDrawable) {
-                floatArrayOf(key.roundCorner, keyboard.roundCorner)
-                    .firstOrNull { it > 0f }
-                    ?.let { keyBackground.cornerRadius = dp(it) }
+                (key.roundCorner ?: keyboard.roundCorner).takeIf { it > 0f }?.let {
+                    keyBackground.cornerRadius = dp(it)
+                }
+                (key.keyBorder ?: keyboard.keyBorder).takeIf { it > 0 }?.let {
+                    keyBackground.setStroke(dp(it), keyBorderColor)
+                }
             }
             onDrawKeyBackground(key, canvas, keyBackground)
         }

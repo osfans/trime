@@ -50,7 +50,8 @@ class Key(
 
     val keyTextSize: Float = selfConfig?.keyTextSize ?: 0f
     val symbolTextSize: Float = selfConfig?.symbolTextSize ?: 0f
-    val roundCorner: Float = selfConfig?.roundCorner ?: 0f
+    val roundCorner: Float? = selfConfig?.roundCorner?.takeIf { it >= 0 }
+    val keyBorder: Int? = selfConfig?.keyBorder?.takeIf { it >= 0 }
     var keyTextOffsetX = 0f
         get() = field + keyOffsetX
     var keyTextOffsetY = 0f

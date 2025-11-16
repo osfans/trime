@@ -60,10 +60,11 @@ class Keyboard(
 
     /** 默認按鍵圓角半徑  */
     val roundCorner: Float =
-        floatArrayOf(
-            selfConfig?.roundCorner ?: 0f,
-            theme.generalStyle.roundCorner,
-        ).firstOrNull { it > 0 } ?: 0f
+        selfConfig?.roundCorner?.takeIf { it >= 0f } ?: theme.generalStyle.roundCorner
+
+    /** 默認按鍵邊框寬度  */
+    val keyBorder: Int =
+        selfConfig?.keyBorder?.takeIf { it >= 0 } ?: theme.generalStyle.keyBorder
 
     /** 鍵盤的Shift鍵  */
     var mShiftKey: Key? = null
