@@ -135,8 +135,7 @@ class TrimeApplication : Application() {
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
                 setValue(currentPid)
             }
-
-            SoundEffectManager.init() // 应对手机重启后
+            SoundEffectManager.init()
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)

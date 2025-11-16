@@ -165,13 +165,6 @@ class PrefMainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (isStorageAvailable()) {
-            SoundEffectManager.init()
-        }
-    }
-
     private fun checkNotificationPermission() {
         if (XXPermissions.isGranted(this, Permission.POST_NOTIFICATIONS)) {
             return

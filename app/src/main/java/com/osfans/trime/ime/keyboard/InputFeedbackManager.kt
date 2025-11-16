@@ -48,7 +48,7 @@ object InputFeedbackManager {
                             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                             .build(),
                     ).build()
-            cacheSoundId() // 在初始化时就缓存音效ID
+            cacheSoundId()
         } catch (e: Exception) {
             Timber.e(e, "Error on initializing InputFeedbackManager")
         }
@@ -65,7 +65,7 @@ object InputFeedbackManager {
     }
 
     fun startInput() {
-        cacheSoundId() // 配置变更时能重新加载
+        cacheSoundId()
     }
 
     private val hasAmplitudeControl =
