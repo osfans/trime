@@ -7,9 +7,11 @@ package com.osfans.trime.data.db
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
+import androidx.annotation.Keep
 import androidx.room.Room
 import androidx.room.withTransaction
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.util.WeakHashSet
 import com.osfans.trime.util.matchesAny
 import com.osfans.trime.util.removeRegexSet
@@ -53,7 +55,23 @@ object ClipboardHelper :
 
     private val clipPref = AppPrefs.defaultInstance().clipboard
 
-    private val limit by clipPref.clipboardLimit
+    private val enabledPref = clipPref.clipboardListening
+
+    @Keep
+    private val enabledListener = PreferenceDelegate.OnChangeListener<Boolean> { _, value ->
+        if (value) {
+            clipboardManager.addPrimaryClipChangedListener(this)
+        } else {
+            clipboardManager.removePrimaryClipChangedListener(this)
+        }
+    }
+
+    private val limitPref = clipPref.clipboardLimit
+
+    @Keep
+    private val limitListener = PreferenceDelegate.OnChangeListener<Int> { _, _ ->
+        launch { removeOutdated() }
+    }
 
     private val compareRules: Set<Regex> by lazy {
         val rules by clipPref.clipboardCompareRules
@@ -86,6 +104,10 @@ object ClipboardHelper :
                 .addMigrations(Database.MIGRATION_3_4)
                 .build()
         clbDao = clbDb.databaseDao()
+        enabledListener.onChange(enabledPref.key, enabledPref.getValue())
+        enabledPref.registerOnChangeListener(enabledListener)
+        limitListener.onChange(limitPref.key, limitPref.getValue())
+        limitPref.registerOnChangeListener(limitListener)
         launch { updateItemCount() }
     }
 
@@ -135,9 +157,6 @@ object ClipboardHelper :
      * - [outputRules] 输出规则。如果剪贴板内容与规则匹配，则不通知剪贴板管理器。
      */
     override fun onPrimaryClipChanged() {
-        if (!(limit != 0 && this::clbDao.isInitialized)) {
-            return
-        }
         val clip = clipboardManager.primaryClip ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val timestamp = clip.description.timestamp
@@ -183,6 +202,7 @@ object ClipboardHelper :
     }
 
     private suspend fun removeOutdated() {
+        val limit = limitPref.getValue()
         val unpinned = clbDao.getAllUnpinned()
         if (unpinned.size > limit) {
             val outdated =

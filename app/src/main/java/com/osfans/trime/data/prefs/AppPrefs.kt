@@ -241,26 +241,36 @@ class AppPrefs(
         shared: SharedPreferences,
     ) : PreferenceDelegateOwner(shared, R.string.clipboard) {
         companion object {
+            const val CLIPBOARD_LISTENING = "clipboard_listening"
             const val CLIPBOARD_LIMIT = "clipboard_clipboard_limit"
             const val CLIPBOARD_COMPARE_RULES = "clipboard_clipboard_compare"
             const val CLIPBOARD_OUTPUT_RULES = "clipboard_clipboard_output"
             const val CLIPBOARD_SUGGESTION = "clipboard_suggestion"
             const val CLIPBOARD_SUGGESTION_TIMEOUT = "clipboard_suggestion_timeout"
         }
-        val clipboardLimit = int(R.string.clipboard_limit, CLIPBOARD_LIMIT, 10)
+        val clipboardListening = switch(R.string.clipboard_listening, CLIPBOARD_LISTENING, true)
+        val clipboardLimit = int(
+            R.string.clipboard_limit,
+            CLIPBOARD_LIMIT,
+            10,
+        ) { clipboardListening.getValue() }
         val clipboardCompareRules = editText(
             R.string.clipboard_compare_rules,
             CLIPBOARD_COMPARE_RULES,
             "",
             R.string.a_regular_expression_per_line,
-        )
+        ) { clipboardListening.getValue() }
         val clipboardOutputRules = editText(
             R.string.clipboard_output_rules,
             CLIPBOARD_OUTPUT_RULES,
             "",
             R.string.a_regular_expression_per_line,
-        )
-        val clipboardSuggestion = switch(R.string.clipboard_suggestion, CLIPBOARD_SUGGESTION, true)
+        ) { clipboardListening.getValue() }
+        val clipboardSuggestion = switch(
+            R.string.clipboard_suggestion,
+            CLIPBOARD_SUGGESTION,
+            true,
+        ) { clipboardListening.getValue() }
         val clipboardSuggestionTimeout = int(
             R.string.clipboard_suggestion_timeout,
             CLIPBOARD_SUGGESTION_TIMEOUT,
@@ -268,7 +278,7 @@ class AppPrefs(
             0,
             100,
             "s",
-        ) { clipboardSuggestion.getValue() }
+        ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
     }
 
     /**
