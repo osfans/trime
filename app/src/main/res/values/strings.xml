@@ -78,9 +78,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="other__show_app_icon_on_summary">This option is only available on some ROMs</string>
     <string name="other__show_app_icon_off_summary">In some ROMs, you will still see this icon in the launcher and may go to the system\'s app information page after tapping it</string>
     <string name="pref__default">Default</string>
-    <string name="clipboard_clipboard_limit">Clipboard History Limit</string>
-    <string name="clipboard_clipboard_compare_title">Clipboard Compare Rules</string>
-    <string name="clipboard_clipboard_output_title">Clipboard Output Rules</string>
+    <string name="clipboard_limit">Clipboard history limit</string>
+    <string name="clipboard_compare_rules">Clipboard compare rules</string>
+    <string name="clipboard_output_rules">Clipboard output rules</string>
     <string name="clipboard_suggestion">Show clipboard suggestions</string>
     <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
     <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>

@@ -110,6 +110,57 @@ abstract class PreferenceDelegateOwner(
         return pref
     }
 
+    protected fun editText(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: String,
+        @StringRes
+        message: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate<String> {
+        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
+        val ui = PreferenceDelegateUi.EditText(title, key, defaultValue, message, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
+    protected fun int(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: Int,
+        min: Int = 0,
+        max: Int = Int.MAX_VALUE,
+        unit: String = "",
+        step: Int = 1,
+        @StringRes
+        defaultLabel: Int? = null,
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate<Int> {
+        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
+        // Int can overflow when min < 0 && max == Int.MAX_VALUE
+        val ui = if ((max.toLong() - min.toLong()) / step.toLong() >= 240L) {
+            PreferenceDelegateUi.EditTextInt(
+                title,
+                key,
+                defaultValue,
+                min,
+                max,
+                unit,
+                enableUiOn,
+            )
+        } else {
+            PreferenceDelegateUi.SeekBarInt(
+                title, key, defaultValue, min, max, unit, step, defaultLabel, enableUiOn,
+            )
+        }
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     override fun createUi(screen: PreferenceScreen) {
         val ctx = screen.context
         preferenceDelegatesUi.forEach {

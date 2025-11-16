@@ -5,6 +5,7 @@
 package com.osfans.trime.ui.components
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.SeekBar
@@ -21,7 +22,7 @@ import com.osfans.trime.databinding.SeekBarDialogBinding
  * @see R.styleable.DialogSeekBarPreferenceAttrs for which xml attributes this preference accepts
  *  besides the default Preference attributes.
  *
- * @property defaultValue The default value of this preference.
+ * @property default The default value of this preference.
  * @property min The minimum value of the seek bar. Must not be greater or equal than [max].
  * @property max The maximum value of the seek bar. Must not be lesser or equal than [min].
  * @property step The step in which the seek bar increases per move. If the provided value is less
@@ -30,7 +31,8 @@ import com.osfans.trime.databinding.SeekBarDialogBinding
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
 class DialogSeekBarPreference : Preference {
-    var defaultValue: Int
+    private var value = 0
+    var default: Int
     var systemDefaultValue: Int
     var systemDefaultValueText: String
     var min: Int
@@ -48,7 +50,7 @@ class DialogSeekBarPreference : Preference {
                 min = getInt(R.styleable.DialogSeekBarPreferenceAttrs_min, 0)
                 max = getInt(R.styleable.DialogSeekBarPreferenceAttrs_max, 100)
                 step = getInt(R.styleable.DialogSeekBarPreferenceAttrs_seekBarIncrement, 1)
-                defaultValue =
+                default =
                     getInt(R.styleable.DialogSeekBarPreferenceAttrs_android_defaultValue, 0)
                 systemDefaultValue =
                     getInt(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValue, -1)
@@ -64,8 +66,20 @@ class DialogSeekBarPreference : Preference {
         }
     }
 
-    private val currentValue: Int
-        get() = getPersistedInt(defaultValue)
+    override fun persistInt(value: Int): Boolean = super.persistInt(value).also {
+        if (it) this@DialogSeekBarPreference.value = value
+    }
+
+    override fun setDefaultValue(defaultValue: Any?) {
+        super.setDefaultValue(defaultValue)
+        default = defaultValue as? Int ?: 0
+    }
+
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any = a.getInteger(index, default)
+
+    override fun onSetInitialValue(defaultValue: Any?) {
+        value = getPersistedInt(defaultValue as? Int ?: default)
+    }
 
     override fun onClick() {
         showSeekBarDialog()
@@ -86,12 +100,11 @@ class DialogSeekBarPreference : Preference {
      * Shows the seek bar dialog.
      */
     private fun showSeekBarDialog() = with(context) {
-        val initValue = currentValue
         val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(this))
-        dialogView.textView.text = getTextForValue(initValue)
+        dialogView.textView.text = getTextForValue(value)
         dialogView.seekBar.apply {
             max = getProgressForValue(this@DialogSeekBarPreference.max)
-            progress = getProgressForValue(initValue)
+            progress = getProgressForValue(value)
             setOnSeekBarChangeListener(
                 object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(
@@ -119,7 +132,7 @@ class DialogSeekBarPreference : Preference {
                     notifyChanged()
                 }
             }.setNeutralButton(R.string.pref__default) { _, _ ->
-                persistInt(defaultValue)
+                persistInt(default)
                 notifyChanged()
             }.setNegativeButton(android.R.string.cancel, null)
             .show()
@@ -143,6 +156,6 @@ class DialogSeekBarPreference : Preference {
     private fun getValueForProgress(progress: Int) = (progress * step) + min
 
     object SimpleSummaryProvider : SummaryProvider<DialogSeekBarPreference> {
-        override fun provideSummary(preference: DialogSeekBarPreference): CharSequence = preference.getTextForValue(preference.currentValue)
+        override fun provideSummary(preference: DialogSeekBarPreference): CharSequence = preference.getTextForValue(preference.value)
     }
 }
