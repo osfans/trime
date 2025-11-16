@@ -148,13 +148,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 android:data="https://github.com/osfans/trime" />
         </Preference>
 
-        <Preference app:key="about__product_prime"
-            app:title="@string/about__product_prime"
-            app:iconSpaceReserved="false">
-            <intent android:action="android.intent.action.VIEW"
-                android:data="https://github.com/osfans/PRIME" />
-        </Preference>
-
     </PreferenceCategory>
 
 </PreferenceScreen>

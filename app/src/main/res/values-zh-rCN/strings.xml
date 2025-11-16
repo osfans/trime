@@ -25,7 +25,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__changelog">更新日志</string>
     <string name="license">许可证</string>
     <string name="pref_credits">贡献代码</string>
-    <string name="about__product_prime">微软平台PRIME输入法</string>
     <string name="about__privacy_policy">隐私策略</string>
     <string name="about__build_info_format">构建者：%1$s\nGit 仓库：%2$s\n构建 Git 哈希：%3$s\n构建时间：%4$s</string>
     <string name="selected_theme">主题</string>
@@ -92,7 +91,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__support">支持</string>
     <string name="system_default">系统默认</string>
     <string name="keyboard__key_swipe_travel_title">触发按键滑动手势的距离</string>
-    <string name="keyboard__hook_candidate">点击候选词</string>
     <string name="trime_app_slogan">击响中文之韵</string>
     <string name="external_storage_permission_not_available">存储权限不可用</string>
     <string name="external_storage_permission_granted">已授予存储权限</string>
@@ -119,8 +117,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_ctrl_lr">拦截 Ctrl+Left/Right</string>
     <string name="keyboard__hook_ctrl_zy">拦截 Ctrl+Z/Y</string>
     <string name="pref_keyboard__hook_summary">事件不发送给被编辑的 App 及 librime</string>
-    <string name="keyboard__hook_candidate_on">直接上屏候选词</string>
-    <string name="keyboard__hook_candidate_off">发送数字键模拟键盘输入</string>
     <string name="keyboard__swipe_enabled">允许触发按键的滑动手势</string>
     <string name="keyboard__key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
     <string name="about__build_info">构建信息</string>
@@ -144,7 +140,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="app_crash_message">抱歉，但我们提供了日志以供调查。</string>
     <string name="virtual_keyboard">虚拟键盘</string>
     <string name="about">关于</string>
-    <string name="theme">主题</string>
+    <string name="theme">键盘样式</string>
     <string name="profile">配置</string>
     <string name="storage">存储</string>
     <string name="maintenance">维护</string>

@@ -77,13 +77,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:title="@string/pref_keyboard__hook">
 
         <SwitchPreferenceCompat
-            android:key="keyboard__hook_candidate"
-            android:summaryOff="@string/keyboard__hook_candidate_off"
-            android:summaryOn="@string/keyboard__hook_candidate_on"
-            android:title="@string/keyboard__hook_candidate"
-            app:iconSpaceReserved="false" />
-
-        <SwitchPreferenceCompat
             android:key="keyboard__hook_ctrl_lr"
             android:title="@string/keyboard__hook_ctrl_lr"
             app:iconSpaceReserved="false" />

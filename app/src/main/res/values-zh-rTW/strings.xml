@@ -26,7 +26,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__changelog">更新日誌</string>
     <string name="license">許可證</string>
     <string name="pref_credits">貢獻代碼</string>
-    <string name="about__product_prime">Win10 PRIME輸入法平臺</string>
     <string name="about__privacy_policy">隱私權政策</string>
     <string name="about__build_info_format">建構者：%1$s\nGit 倉庫：%2$s\n建構 Git 雜湊值：%3$s\n建構時間：%4$s</string>
     <string name="selected_theme">主題</string>
@@ -95,7 +94,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__open_source_licenses">開放源代碼軟體許可</string>
     <string name="system_default">系統預設</string>
     <string name="keyboard__key_swipe_travel_title">觸發滑動手勢的最短距離</string>
-    <string name="keyboard__hook_candidate">點擊候選詞</string>
     <string name="trime_app_slogan">擊響中文之韻</string>
     <string name="external_storage_permission_not_available">儲存許可權不可用</string>
     <string name="external_storage_permission_granted">已授予儲存許可權</string>
@@ -122,8 +120,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_ctrl_lr">攔截 Ctrl+Left/Right</string>
     <string name="keyboard__hook_ctrl_zy">攔截 Ctrl+Z/Y</string>
     <string name="pref_keyboard__hook_summary">事件不發送給被編輯的 App 及 librime</string>
-    <string name="keyboard__hook_candidate_on">直接上屏候選詞</string>
-    <string name="keyboard__hook_candidate_off">發送數字鍵模擬鍵盤錄入</string>
     <string name="keyboard__swipe_enabled">允許觸發按鍵的滑動手勢</string>
     <string name="keyboard__key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
     <string name="about__build_info">建構資訊</string>
@@ -146,7 +142,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="toolkit">工具箱</string>
     <string name="exception_logcat_created">Logcat 行程已建立</string>
     <string name="about">關於</string>
-    <string name="theme">主題</string>
+    <string name="theme">鍵盤樣式</string>
     <string name="profile">配置</string>
     <string name="profile_summary">設定儲存位置和修改同步設定等</string>
     <string name="virtual_keyboard">虛擬鍵盤</string>

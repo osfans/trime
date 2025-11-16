@@ -26,7 +26,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__changelog">Change Log</string>
     <string name="license">License</string>
     <string name="pref_credits">Contribute</string>
-    <string name="about__product_prime">Win10 PRIME Platform</string>
     <string name="about__privacy_policy">Privacy Policy</string>
     <string name="about__build_info_format">Builder: %1$s\nGit Repo: %2$s\nBuild Git Hash: %3$s\nBuild Time: %4$s</string>
     <string name="selected_theme">Themes</string>
@@ -96,7 +95,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__open_source_licenses">Open Source Licenses</string>
     <string name="system_default">System default</string>
     <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
-    <string name="keyboard__hook_candidate">Click candidate</string>c
     <string name="trime_app_slogan">Rimes with Your Keystrokes on Android</string>
     <string name="external_storage_permission_not_available">External storage permission is not available</string>
     <string name="external_storage_permission_granted">External storage permission is granted</string>
@@ -123,10 +121,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__hook_ctrl_lr">Hook Ctrl+Left/Right</string>
     <string name="keyboard__hook_ctrl_zy">Hook Ctrl+Z/Y</string>
     <string name="pref_keyboard__hook_summary">Not handled by the App being edited or librime</string>
-    <string name="keyboard__hook_candidate_on">Commit directly</string>
-    <string name="keyboard__hook_candidate_off">Send number key to librime</string>
-     <string name="keyboard__swipe_enabled">Allow swipe gestures to trigger keys</string>
-     <string name="keyboard__key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
+    <string name="keyboard__swipe_enabled">Allow swipe gestures to trigger keys</string>
+    <string name="keyboard__key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
     <string name="about__build_info">Build Info</string>
     <string name="pref_trime_telegram">Telegram Group</string>
     <string name="quick_bar">Quick bar</string>
@@ -148,7 +144,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="toolkit">Toolkit</string>
     <string name="profile">Profile</string>
     <string name="virtual_keyboard">Virtual Keyboard</string>
-    <string name="theme">Theme</string>
+    <string name="theme">Keyboard Style</string>
     <string name="about">About</string>
     <string name="storage">Storage</string>
     <string name="maintenance">Maintenance</string>
