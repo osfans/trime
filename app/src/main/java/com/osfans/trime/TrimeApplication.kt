@@ -16,6 +16,7 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DraftHelper
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.worker.BackgroundSyncWork
@@ -134,6 +135,8 @@ class TrimeApplication : Application() {
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
                 setValue(currentPid)
             }
+
+            SoundEffectManager.init() // 应对手机重启后
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             DraftHelper.init(applicationContext)
