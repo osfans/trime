@@ -15,6 +15,7 @@ import androidx.preference.PreferenceManager
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.worker.BackgroundSyncWork
@@ -133,6 +134,7 @@ class TrimeApplication : Application() {
                 Timber.d("Last pid is $lastPid. Set it to current pid: $currentPid")
                 setValue(currentPid)
             }
+            SoundEffectManager.init()
             ClipboardHelper.init(applicationContext)
             CollectionHelper.init(applicationContext)
             registerBroadcastReceiver()
