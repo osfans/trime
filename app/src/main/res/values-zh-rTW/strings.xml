@@ -154,7 +154,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="delete">刪除</string>
     <string name="edit">編輯</string>
     <string name="collect">收藏</string>
-    <string name="liquid_keyboard_edit_text_hint">在此處編輯文本</string>
+    <string name="clip_edit_text_hint">在此處編輯文本</string>
     <string name="liquid_keyboard_ask_to_delete_all">刪除全部？</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>

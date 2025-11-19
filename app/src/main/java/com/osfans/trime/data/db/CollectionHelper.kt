@@ -25,6 +25,8 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
 
     suspend fun insert(bean: DatabaseBean) = cltDao.insert(bean)
 
+    suspend fun get(id: Int) = cltDao.get(id)
+
     suspend fun haveUnpinned() = cltDao.haveUnpinned()
 
     suspend fun getAll() = cltDao.getAll()
