@@ -155,7 +155,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="collect">Collect</string>
-    <string name="liquid_keyboard_edit_text_hint">Edit text here</string>
+    <string name="clip_edit_text_hint">Edit text here</string>
     <string name="liquid_keyboard_ask_to_delete_all">Delete All?</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>

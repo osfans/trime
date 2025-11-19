@@ -74,7 +74,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:parentActivityName=".ui.main.PrefMainActivity" />
 
         <activity
-            android:name=".ui.main.LiquidKeyboardEditActivity"
+            android:name=".ui.main.ClipEditActivity"
             android:autoRemoveFromRecents="true"
             android:excludeFromRecents="true"
             android:label="@string/edit"

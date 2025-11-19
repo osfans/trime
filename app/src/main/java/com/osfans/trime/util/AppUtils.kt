@@ -13,7 +13,7 @@ import androidx.annotation.IdRes
 import androidx.navigation.NavDeepLinkBuilder
 import com.osfans.trime.R
 import com.osfans.trime.ime.symbol.LiquidData
-import com.osfans.trime.ui.main.LiquidKeyboardEditActivity
+import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
 import timber.log.Timber
@@ -80,17 +80,15 @@ object AppUtils {
         context.startActivity<LogActivity>()
     }
 
-    fun launchLiquidEdit(
+    fun launchClipEdit(
         context: Context,
-        type: LiquidData.Type,
         id: Int,
-        text: String,
+        type: LiquidData.Type,
     ) {
-        context.startActivity<LiquidKeyboardEditActivity> {
+        context.startActivity<ClipEditActivity> {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(LiquidKeyboardEditActivity.DB_BEAN_ID, id)
-            putExtra(LiquidKeyboardEditActivity.DB_BEAN_TEXT, text)
-            putExtra(LiquidKeyboardEditActivity.LIQUID_KEYBOARD_TYPE, type.name)
+            putExtra(ClipEditActivity.BEAN_ID, id)
+            putExtra(ClipEditActivity.CLIP_TYPE, type.name)
         }
     }
 }

@@ -61,7 +61,7 @@ class DbAdapter(
     }
 
     override fun onEdit(bean: DatabaseBean) {
-        bean.text?.let { AppUtils.launchLiquidEdit(service, type, bean.id, it) }
+        AppUtils.launchClipEdit(service, bean.id, type)
     }
 
     override fun onCollect(bean: DatabaseBean) {
