@@ -234,4 +234,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="backup">备份</string>
     <string name="restore">还原</string>
     <string name="clipboard_listening">记录剪贴板历史</string>
+    <string name="clipboard_return_after_paste">粘贴后返回</string>
 </resources>

@@ -235,4 +235,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="backup">Backup</string>
     <string name="restore">Restore</string>
     <string name="clipboard_listening">Clipboard listening</string>
+    <string name="clipboard_return_after_paste">Return after pasting</string>
 </resources>
