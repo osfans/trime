@@ -247,6 +247,7 @@ class AppPrefs(
             const val CLIPBOARD_OUTPUT_RULES = "clipboard_clipboard_output"
             const val CLIPBOARD_SUGGESTION = "clipboard_suggestion"
             const val CLIPBOARD_SUGGESTION_TIMEOUT = "clipboard_suggestion_timeout"
+            const val CLIPBOARD_RETURN_AFTER_PASTE = "clipboard_return_after_paste"
         }
         val clipboardListening = switch(R.string.clipboard_listening, CLIPBOARD_LISTENING, true)
         val clipboardLimit = int(
@@ -279,6 +280,11 @@ class AppPrefs(
             100,
             "s",
         ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
+        val clipboardReturnAfterPaste = switch(
+            R.string.clipboard_return_after_paste,
+            CLIPBOARD_RETURN_AFTER_PASTE,
+            true,
+        ) { clipboardListening.getValue() }
     }
 
     /**

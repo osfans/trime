@@ -16,6 +16,7 @@ import com.osfans.trime.R
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
@@ -41,6 +42,9 @@ class ClipboardWindow(
     private lateinit var clipboardLayout: ClipboardLayout
     private lateinit var clipboardPagesAdapter: ClipboardPagesAdapter
 
+    private val prefs = AppPrefs.defaultInstance().clipboard
+    private val clipboardReturnAfterPaste by prefs.clipboardReturnAfterPaste
+
     private val clipboardBeansPager by lazy {
         Pager(PagingConfig(pageSize = 16)) { ClipboardHelper.allBeans() }
     }
@@ -55,6 +59,9 @@ class ClipboardWindow(
             override fun onPaste(bean: DatabaseBean) {
                 val text = bean.text ?: return
                 service.commitText(text)
+                if (clipboardReturnAfterPaste) {
+                    windowManager.attachWindow(KeyboardWindow)
+                }
             }
 
             override fun onPin(id: Int) {
@@ -88,6 +95,9 @@ class ClipboardWindow(
             override fun onPaste(bean: DatabaseBean) {
                 val text = bean.text ?: return
                 service.commitText(text)
+                if (clipboardReturnAfterPaste) {
+                    windowManager.attachWindow(KeyboardWindow)
+                }
             }
 
             override fun onEdit(id: Int) {
