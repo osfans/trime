@@ -7,13 +7,22 @@ package com.osfans.trime.data.db
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.withTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import timber.log.Timber
 
 object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private lateinit var cltDb: Database
     private lateinit var cltDao: DatabaseDao
+
+    private val mutex = Mutex()
+
+    private var lastBean: DatabaseBean? = null
 
     fun init(context: Context) {
         cltDb =
@@ -49,5 +58,34 @@ object CollectionHelper : CoroutineScope by CoroutineScope(SupervisorJob() + Dis
     suspend fun updateText(
         id: Int,
         text: String,
-    ) = cltDao.updateText(id, text)
+    ) {
+        lastBean?.let {
+            if (id == it.id) lastBean = it.copy(text = text)
+        }
+        cltDao.updateText(id, text)
+    }
+
+    fun addNewBean(text: String) {
+        launch {
+            mutex.withLock {
+                val bean = DatabaseBean(text = text)
+                if (bean.text.isNullOrBlank()) return@withLock
+                try {
+                    cltDao.find(text)?.let {
+                        lastBean = it.copy(time = bean.time)
+                        cltDao.updateTime(it.id, bean.time)
+                        return@withLock
+                    }
+                    val insertedBean = cltDb.withTransaction {
+                        val rowId = cltDao.insert(bean)
+                        cltDao.get(rowId) ?: bean
+                    }
+                    lastBean = insertedBean
+                } catch (e: Exception) {
+                    Timber.w("Failed to update collection database: $e")
+                    lastBean = bean
+                }
+            }
+        }
+    }
 }
