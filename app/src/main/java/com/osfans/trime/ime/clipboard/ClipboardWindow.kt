@@ -71,7 +71,7 @@ class ClipboardWindow(
 
             override fun onCollect(bean: DatabaseBean) {
                 service.lifecycleScope.launch {
-                    CollectionHelper.insert(DatabaseBean(text = bean.text))
+                    CollectionHelper.addNewBean(bean.text ?: "")
                 }
             }
 
