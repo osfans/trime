@@ -1,9 +1,11 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.data.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -58,7 +60,7 @@ interface DatabaseDao {
     suspend fun deletedUnpinnedEarlierThan(timestamp: Long)
 
     @Query("SELECT * FROM ${DatabaseBean.TABLE_NAME} ORDER BY pinned DESC, time DESC")
-    suspend fun getAll(): List<DatabaseBean>
+    fun allBeans(): PagingSource<Int, DatabaseBean>
 
     @Query("SELECT * FROM ${DatabaseBean.TABLE_NAME} WHERE id=:id LIMIT 1")
     suspend fun get(id: Int): DatabaseBean?

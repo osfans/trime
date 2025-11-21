@@ -25,6 +25,7 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
@@ -205,6 +206,7 @@ class CommonKeyboardActionListener(
                 when (action.command) {
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
                     "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
+                    "clipboard_window" -> windowManager.attachWindow(ClipboardWindow(context, service, windowManager, theme))
                     "set_color_scheme" -> handleColorScheme(arg)
                     "set_theme" -> handleTheme(arg)
                     "broadcast" -> service.sendBroadcast(Intent(arg))
@@ -218,6 +220,11 @@ class CommonKeyboardActionListener(
             }
 
             private fun handleLiquidKeyboard(arg: String) {
+                // for compatibility
+                if (arg == "剪贴" || arg == "clipboard") {
+                    windowManager.attachWindow(ClipboardWindow(context, service, windowManager, theme))
+                    return
+                }
                 val liquidTagList = LiquidData.getTagList()
                 val index = liquidTagList.indexOfFirst { tag ->
                     tag.label == arg || runCatching {

@@ -15,7 +15,6 @@ import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.db.CollectionHelper
 import com.osfans.trime.data.db.DatabaseBean
 import com.osfans.trime.databinding.ActivityClipEditBinding
-import com.osfans.trime.ime.symbol.LiquidData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.NonCancellable
@@ -28,7 +27,7 @@ class ClipEditActivity : Activity() {
     private val scope: CoroutineScope = MainScope()
     private var beanId: Int = -1
     private lateinit var editText: EditText
-    private var clipType: LiquidData.Type? = null
+    private var clipType: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +47,8 @@ class ClipEditActivity : Activity() {
         val str = editText.editableText.toString()
         scope.launch(NonCancellable) {
             when (clipType) {
-                LiquidData.Type.CLIPBOARD -> ClipboardHelper.updateText(beanId, str)
-                LiquidData.Type.COLLECTION -> CollectionHelper.updateText(beanId, str)
+                FROM_CLIPBOARD -> ClipboardHelper.updateText(beanId, str)
+                FROM_COLLECTION -> CollectionHelper.updateText(beanId, str)
                 else -> {}
             }
         }
@@ -69,13 +68,12 @@ class ClipEditActivity : Activity() {
     private fun processIntent(intent: Intent) {
         scope.launch {
             intent.run {
-                val clipTypeStr = intent.getStringExtra(CLIP_TYPE) ?: return@launch
-                val clipType = LiquidData.Type.valueOf(clipTypeStr)
+                val clipType = intent.getStringExtra(CLIP_TYPE) ?: return@launch
                 val beanId = getIntExtra(BEAN_ID, -1)
                 Timber.d("processIntent: id=$beanId, type=$clipType")
                 when (clipType) {
-                    LiquidData.Type.CLIPBOARD -> ClipboardHelper.get(beanId)
-                    LiquidData.Type.COLLECTION -> CollectionHelper.get(beanId)
+                    FROM_CLIPBOARD -> ClipboardHelper.get(beanId)
+                    FROM_COLLECTION -> CollectionHelper.get(beanId)
                     else -> null
                 }?.also {
                     this@ClipEditActivity.clipType = clipType
@@ -98,5 +96,7 @@ class ClipEditActivity : Activity() {
     companion object {
         const val BEAN_ID = "id"
         const val CLIP_TYPE = "clip_type"
+        const val FROM_CLIPBOARD = "from_clipboard"
+        const val FROM_COLLECTION = "from_collection"
     }
 }

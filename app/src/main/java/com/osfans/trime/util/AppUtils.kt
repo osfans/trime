@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.util
 
@@ -12,7 +13,6 @@ import android.view.KeyEvent
 import androidx.annotation.IdRes
 import androidx.navigation.NavDeepLinkBuilder
 import com.osfans.trime.R
-import com.osfans.trime.ime.symbol.LiquidData
 import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.ui.main.LogActivity
 import com.osfans.trime.ui.main.PrefMainActivity
@@ -83,12 +83,12 @@ object AppUtils {
     fun launchClipEdit(
         context: Context,
         id: Int,
-        type: LiquidData.Type,
+        type: String,
     ) {
         context.startActivity<ClipEditActivity> {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(ClipEditActivity.BEAN_ID, id)
-            putExtra(ClipEditActivity.CLIP_TYPE, type.name)
+            putExtra(ClipEditActivity.CLIP_TYPE, type)
         }
     }
 }

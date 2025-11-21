@@ -156,12 +156,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="edit">Edit</string>
     <string name="collect">Collect</string>
     <string name="clip_edit_text_hint">Edit text here</string>
-    <string name="liquid_keyboard_ask_to_delete_all">Delete All?</string>
+    <string name="ask_to_delete_all">Delete All?</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
     <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
-    <string name="clipboard_collection">Collection</string>
+    <string name="collection">Collection</string>
     <string name="simple_key_unpin">Unpin</string>
     <string name="simple_key_pin">Pin</string>
     <string name="delete_all">Delete all</string>
