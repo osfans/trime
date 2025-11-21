@@ -13,8 +13,6 @@ object LiquidData {
         SINGLE,
         SYMBOL,
         TABS,
-        CLIPBOARD,
-        COLLECTION,
         HISTORY,
     }
 

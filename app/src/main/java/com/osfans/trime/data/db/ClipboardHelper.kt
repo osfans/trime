@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.data.db
 
@@ -115,7 +116,7 @@ object ClipboardHelper :
 
     suspend fun haveUnpinned() = clbDao.haveUnpinned()
 
-    suspend fun getAll() = clbDao.getAll()
+    fun allBeans() = clbDao.allBeans()
 
     suspend fun pin(id: Int) = clbDao.updatePinned(id, true)
 

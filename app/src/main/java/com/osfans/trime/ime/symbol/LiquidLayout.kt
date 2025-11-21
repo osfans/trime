@@ -6,7 +6,7 @@ package com.osfans.trime.ime.symbol
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.ViewAnimator
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
 import com.osfans.trime.data.theme.KeyActionManager
@@ -34,9 +34,9 @@ import splitties.views.dsl.constraintlayout.topToBottomOf
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
-import timber.log.Timber
 
 @SuppressLint("ViewConstructor")
 class LiquidLayout(
@@ -44,12 +44,6 @@ class LiquidLayout(
     theme: Theme,
     commonKeyboardActionListener: CommonKeyboardActionListener,
 ) : ConstraintLayout(context) {
-    // TODO: split out database part from LiquidWindow
-    enum class State {
-        Main,
-        Database,
-    }
-
     // TODO: 继承一个键盘视图嵌入到这里，而不是自定义一个视图
     private val fixedKeyBar =
         constraintLayout {
@@ -122,23 +116,15 @@ class LiquidLayout(
             }
         }
 
-    val liquidView =
+    val recyclerView =
         recyclerView {
             val space = dp(theme.liquidKeyboard.marginX.toInt())
             addItemDecoration(SpacesItemDecoration(space))
             setPadding(space)
         }
 
-    val dbView =
-        recyclerView {
-            val space = dp(3)
-            addItemDecoration(SpacesItemDecoration(space))
-            setPadding(space)
-        }
-
-    val root = ViewAnimator(context).apply {
-        add(liquidView, lParams(matchParent, matchParent))
-        add(dbView, lParams(matchParent, matchParent))
+    val root = view(::FrameLayout) {
+        add(recyclerView, lParams(matchParent, matchParent))
     }
 
     val tabsUi = LiquidTabsUi(context, theme)
@@ -217,14 +203,6 @@ class LiquidLayout(
                     },
                 )
             }
-        }
-    }
-
-    fun updateState(state: State) {
-        Timber.d("Switch liquid layout to $state")
-        when (state) {
-            State.Main -> root.displayedChild = 0
-            State.Database -> root.displayedChild = 1
         }
     }
 }
