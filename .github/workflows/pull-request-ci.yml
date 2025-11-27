@@ -77,10 +77,9 @@ jobs:
         run: |
           make style-lint
 
-      # `make debug` works not well on Windows
       - name: Build debug Trime
         run: |
-          ./gradlew :app:assembleDebug
+          make debug
 
       - name: Add JNI cache
         if: ${{ !steps.jni-cache.outputs.cache-hit }}
