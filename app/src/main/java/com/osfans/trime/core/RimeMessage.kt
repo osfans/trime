@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2024 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -92,32 +92,27 @@ sealed class RimeMessage<T>(
     }
 
     data class CandidateListMessage(
-        override val data: Data,
-    ) : RimeMessage<CandidateListMessage.Data>(data) {
+        override val data: Array<CandidateItem>,
+    ) : RimeMessage<Array<CandidateItem>>(data) {
 
         override val messageType = MessageType.Candidate
 
-        data class Data(val total: Int = -1, val candidates: Array<CandidateItem> = emptyArray()) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
 
-            override fun toString(): String = "total=$total, candidates=[${candidates.joinToString(limit = 5)}]"
+            other as CandidateListMessage
 
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
+            if (!data.contentEquals(other.data)) return false
+            if (messageType != other.messageType) return false
 
-                other as Data
+            return true
+        }
 
-                if (total != other.total) return false
-                if (!candidates.contentEquals(other.candidates)) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                var result = total
-                result = 31 * result + candidates.contentHashCode()
-                return result
-            }
+        override fun hashCode(): Int {
+            var result = data.contentHashCode()
+            result = 31 * result + messageType.hashCode()
+            return result
         }
     }
 
@@ -149,6 +144,7 @@ sealed class RimeMessage<T>(
     companion object {
         private val types = MessageType.entries.toTypedArray()
 
+        @Suppress("UNCHECKED_CAST")
         fun nativeCreate(
             type: Int,
             params: Array<Any>,
@@ -179,12 +175,7 @@ sealed class RimeMessage<T>(
             MessageType.Status ->
                 StatusMessage(params[0] as RimeProto.Status)
             MessageType.Candidate ->
-                CandidateListMessage(
-                    CandidateListMessage.Data(
-                        params[0] as Int,
-                        params[1] as Array<CandidateItem>,
-                    ),
-                )
+                CandidateListMessage(params[0] as Array<CandidateItem>)
             MessageType.Key ->
                 KeyMessage(
                     KeyMessage.Data(

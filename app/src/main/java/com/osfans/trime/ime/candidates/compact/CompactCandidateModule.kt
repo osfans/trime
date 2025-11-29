@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2024 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -17,7 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
-import com.osfans.trime.core.RimeMessage
+import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.theme.ColorManager
@@ -60,7 +60,7 @@ class CompactCandidateModule(
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (adapter.total == childCount),
+                (childCount == 0),
         )
     }
 
@@ -108,12 +108,10 @@ class CompactCandidateModule(
         }
     }
 
-    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
-        val candidates = data.candidates
-        val total = data.total
+    override fun onCandidateListUpdate(candidates: Array<CandidateItem>) {
         val menu = rime.run { menuCached }
         val highlightedIndex = menu.run { highlightedCandidateIndex + pageSize * pageNumber }
-        adapter.updateCandidates(candidates, total, highlightedIndex)
+        adapter.updateCandidates(candidates, highlightedIndex)
         if (candidates.isEmpty()) {
             refreshUnrolled()
         }

@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.core
 
@@ -315,7 +316,7 @@ class InputView(
             }
             is RimeMessage.CandidateListMessage -> {
                 val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
-                    RimeMessage.CandidateListMessage.Data()
+                    emptyArray()
                 } else {
                     it.data
                 }

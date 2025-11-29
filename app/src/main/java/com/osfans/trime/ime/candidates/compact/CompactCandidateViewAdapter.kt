@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.candidates.compact
 
@@ -27,28 +28,14 @@ open class CompactCandidateViewAdapter(
 
     override fun getItemId(position: Int): Long = items.getOrNull(position).hashCode().toLong()
 
-    var candidates: Array<CandidateItem>
-        get() = items.toTypedArray()
-        private set(value) {
-            super.submitList(value.toList())
-        }
-
-    var total = -1
-        private set
-
-    var previous: Int = 0
-        private set
-
     var highlightedIdx: Int = -1
         private set
 
     fun updateCandidates(
         data: Array<CandidateItem>,
-        total: Int,
         highlightedIndex: Int,
     ) {
-        this.candidates = data
-        this.total = total
+        super.submitList(data.toList())
         this.highlightedIdx = highlightedIndex
     }
 
