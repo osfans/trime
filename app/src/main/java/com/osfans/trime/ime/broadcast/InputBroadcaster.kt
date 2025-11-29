@@ -1,11 +1,13 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InlineSuggestion
+import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
@@ -56,8 +58,8 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onRimeOptionUpdated(value) }
     }
 
-    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
-        receivers.forEach { it.onCandidateListUpdate(data) }
+    override fun onCandidateListUpdate(candidates: Array<CandidateItem>) {
+        receivers.forEach { it.onCandidateListUpdate(candidates) }
     }
 
     override fun onCompositionUpdate(data: RimeProto.Context.Composition) {

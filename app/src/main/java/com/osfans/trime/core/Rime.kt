@@ -250,7 +250,7 @@ class Rime :
             val candidates = getRimeCandidates(0, 16)
             handleRimeMessage(
                 8,
-                arrayOf(candidates.size, candidates),
+                arrayOf(candidates),
             )
         }
         handleRimeMessage(7, arrayOf(getRimeStatus()))
