@@ -1,12 +1,13 @@
 /*
- * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2025 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 package com.osfans.trime.ime.popup
 
 import android.content.Context
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
@@ -87,9 +88,17 @@ class PopupComponent(
             lastShowTime = System.currentTimeMillis()
             setText(content)
         }
+        placePopup(popup, bounds)
+        showingEntryUi[viewId] = popup
+    }
+
+    private fun placePopup(ui: PopupEntryUi, bounds: Rect) {
+        val v = ui.root
+        if (v.parent == root) return
+        (v.parent as? ViewGroup)?.removeView(v)
         root.apply {
             add(
-                popup.root,
+                v,
                 lParams(popupWidth, popupHeight) {
                     // align popup bottom with key border bottom
                     topMargin = bounds.bottom - popupHeight - popupBottomMargin
@@ -97,7 +106,6 @@ class PopupComponent(
                 },
             )
         }
-        showingEntryUi[viewId] = popup
     }
 
     private fun updatePopup(viewId: Int, content: String) {
