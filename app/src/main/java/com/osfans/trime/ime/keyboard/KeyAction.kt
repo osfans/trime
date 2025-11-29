@@ -110,11 +110,9 @@ class KeyAction(
                 return adjustCase(shiftLabel, keyboard)
             }
         }
-        val currentLabel = label.ifEmpty {
-            // 特殊处理空格键：如果label为空且是空格键，尝试获取最新的schemaName
-            getSpaceKeySchemaName().takeIf { code == KeyEvent.KEYCODE_SPACE } ?: label
-        }
-        return adjustCase(currentLabel, keyboard)
+        // 仅在为空格键且 label 为空时才去查询 schema 名称，先检查键码以减少无谓计算
+        val displayLabel = takeIf { code == KeyEvent.KEYCODE_SPACE && label.isEmpty() }?.let { getSpaceKeySchemaName() } ?: label
+        return adjustCase(displayLabel, keyboard)
     }
 
     fun getText(keyboard: Keyboard): String = if (text.isNotEmpty()) {
@@ -161,7 +159,7 @@ class KeyAction(
                 if (label.isEmpty()) {
                     label =
                         when (code) {
-                            KeyEvent.KEYCODE_SPACE -> getSpaceKeySchemaName()
+                            KeyEvent.KEYCODE_SPACE -> ""
                             KeyEvent.KEYCODE_UNKNOWN -> ""
                             else -> Keycode.getDisplayLabel(code, modifier)
                         }
@@ -191,7 +189,7 @@ class KeyAction(
                 } else if (label.isEmpty()) {
                     label =
                         when (code) {
-                            KeyEvent.KEYCODE_SPACE -> getSpaceKeySchemaName()
+                            KeyEvent.KEYCODE_SPACE -> ""
                             KeyEvent.KEYCODE_UNKNOWN -> ""
                             else -> Keycode.getDisplayLabel(code, modifier)
                         }
