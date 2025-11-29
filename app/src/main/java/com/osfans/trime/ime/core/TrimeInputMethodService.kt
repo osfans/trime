@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.core
 
@@ -45,6 +46,7 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.prefs.PreferenceDelegateProvider
+import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
@@ -177,20 +179,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ThemeManager.init(resources.configuration)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         ColorManager.addOnChangedListener(onColorChangeListener)
+        SoundEffectManager.init()
+        InputFeedbackManager.init(this)
+        registerReceiver()
         super.onCreate()
+        Timber.d("onCreate")
         decorView = window.window!!.decorView
         contentView = decorView.findViewById(android.R.id.content)
-        // MUST WRAP all code within Service onCreate() in try..catch to prevent any crash loops
-        try {
-            // Additional try..catch wrapper as the event listeners chain or the super.onCreate() method
-            // could crash
-            //  and lead to a crash loop
-            Timber.d("onCreate")
-            InputFeedbackManager.init(this)
-            registerReceiver()
-        } catch (e: Exception) {
-            Timber.e(e)
-        }
     }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
