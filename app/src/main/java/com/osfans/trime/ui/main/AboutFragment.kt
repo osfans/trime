@@ -65,7 +65,7 @@ class AboutFragment : PaddingPreferenceFragment() {
             }
             get<Preference>("open_source_licenses")?.apply {
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_aboutFragment_to_licenseFragment)
+                    findNavController().navigate(NavigationRoute.License)
                     true
                 }
             }

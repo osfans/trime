@@ -22,14 +22,18 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.fragment.NavHostFragment
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
+import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.databinding.ActivityMainBinding
 import com.osfans.trime.ui.setup.SetupActivity
+import com.osfans.trime.util.parcelable
+import com.osfans.trime.util.startActivity
 import com.osfans.trime.worker.BackgroundSyncWork
 import splitties.views.topPadding
 
@@ -76,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         // because navController would change toolbar title, we need to control it by ourselves
         setupToolbarMenu(binding.mainToolbar.toolbar.menu)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
+        navController.graph = NavigationRoute.createGraph(navController)
         binding.mainToolbar.toolbar.setNavigationOnClickListener {
             // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
             if (onBackPressedDispatcher.hasEnabledCallbacks()) {
@@ -91,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, dest, _ ->
             dest.label?.let { viewModel.setToolbarTitle(it.toString()) }
             binding.mainToolbar.toolbar.subtitle =
-                if (dest.id == R.id.mainFragment) {
+                if (dest.hasRoute<NavigationRoute.Main>()) {
                     getString(R.string.trime_app_slogan)
                 } else {
                     ""
@@ -99,11 +104,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        if (SetupActivity.shouldSetup()) {
-            startActivity(Intent(this, SetupActivity::class.java))
-        }
-
+        processIntent(intent)
         checkNotificationPermission()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        processIntent(intent)
+    }
+
+    private fun processIntent(intent: Intent?) {
+        val action = intent?.action ?: return
+        when (action) {
+            Intent.ACTION_MAIN -> if (SetupActivity.shouldSetup()) {
+                startActivity<SetupActivity>()
+            }
+            Intent.ACTION_RUN -> {
+                val route = intent.parcelable<NavigationRoute>(EXTRA_SETTINGS_ROUTE) ?: return
+                navController.popBackStack(NavigationRoute.Main, false)
+                navController.navigate(route)
+            }
+        }
     }
 
     private fun setupToolbarMenu(menu: Menu) {
@@ -127,13 +148,13 @@ class MainActivity : AppCompatActivity() {
                         }
                         R.id.developer -> {
                             item.setOnMenuItemClickListener {
-                                navController.navigate(R.id.action_mainFragment_to_developerFragment)
+                                navController.navigate(NavigationRoute.Developer)
                                 true
                             }
                         }
                         R.id.about -> {
                             item.setOnMenuItemClickListener {
-                                navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                                navController.navigate(NavigationRoute.About)
                                 true
                             }
                         }
@@ -187,5 +208,9 @@ class MainActivity : AppCompatActivity() {
                 }.setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
+    }
+
+    companion object {
+        const val EXTRA_SETTINGS_ROUTE = "${BuildConfig.APPLICATION_ID}.EXTRA_SETTINGS_ROUTE"
     }
 }
