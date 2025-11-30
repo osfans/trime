@@ -1,17 +1,17 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.ui.fragments
+package com.osfans.trime.ui.main.settings
 
 import android.os.Bundle
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import com.osfans.trime.R
-import com.osfans.trime.ui.components.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
-import com.osfans.trime.ui.main.settings.SoundEffectPickerDialog
 import kotlinx.coroutines.launch
 
 class KeyboardFragment : PaddingPreferenceFragment() {

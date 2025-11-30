@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.ui.fragments
+package com.osfans.trime.ui.main
 
 import android.content.Intent
 import android.net.Uri
@@ -12,8 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.get
 import com.osfans.trime.R
-import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.util.Const
 import com.osfans.trime.util.formatDateTime
 

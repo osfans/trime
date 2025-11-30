@@ -13,7 +13,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.osfans.trime.ui.fragments.MainFragment"
+        android:name="com.osfans.trime.ui.main.MainFragment"
         android:label="@string/trime_app_name" >
         <action
             android:id="@+id/action_mainFragment_to_profileFragment"
@@ -95,23 +95,23 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.osfans.trime.ui.fragments.ProfileFragment"
+        android:name="com.osfans.trime.ui.main.settings.ProfileFragment"
         android:label="@string/profile" />
     <fragment
         android:id="@+id/keyboardFragment"
-        android:name="com.osfans.trime.ui.fragments.KeyboardFragment"
+        android:name="com.osfans.trime.ui.main.settings.KeyboardFragment"
         android:label="@string/virtual_keyboard" />
     <fragment
         android:id="@+id/otherFragment"
-        android:name="com.osfans.trime.ui.fragments.OtherFragment"
+        android:name="com.osfans.trime.ui.main.settings.OtherFragment"
         android:label="@string/others" />
     <fragment
         android:id="@+id/toolkitFragment"
-        android:name="com.osfans.trime.ui.fragments.ToolkitFragment"
+        android:name="com.osfans.trime.ui.main.ToolkitFragment"
         android:label="@string/toolkit" />
     <fragment
         android:id="@+id/aboutFragment"
-        android:name="com.osfans.trime.ui.fragments.AboutFragment"
+        android:name="com.osfans.trime.ui.main.AboutFragment"
         android:label="@string/about" >
         <action
             android:id="@+id/action_aboutFragment_to_licenseFragment"
@@ -123,7 +123,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </fragment>
     <fragment
         android:id="@+id/licenseFragment"
-        android:name="com.osfans.trime.ui.fragments.LicenseFragment"
+        android:name="com.osfans.trime.ui.main.LicenseFragment"
         android:label="@string/license" />
     <fragment
         android:id="@+id/clipboardSettingsFragment"

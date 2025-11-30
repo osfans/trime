@@ -10,7 +10,7 @@ import androidx.annotation.Keep
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
-import com.osfans.trime.ui.components.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import kotlinx.coroutines.launch
 
 abstract class PreferenceDelegateFragment(

@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.ui.fragments
+package com.osfans.trime.ui.main.settings
 
 import android.content.ComponentName
 import android.content.Context
@@ -13,12 +14,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.ui.components.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 
 class OtherFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
-    private val prefs get() = AppPrefs.defaultInstance()
+    private val prefs get() = AppPrefs.Companion.defaultInstance()
 
     override fun onCreatePreferences(
         savedInstanceState: Bundle?,

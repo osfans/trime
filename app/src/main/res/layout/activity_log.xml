@@ -21,7 +21,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.osfans.trime.ui.components.log.LogView
+    <com.osfans.trime.ui.main.log.LogView
         android:id="@+id/logView"
         android:layout_width="match_parent"
         android:layout_height="0dp"

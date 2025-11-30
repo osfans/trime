@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.ui.fragments
+package com.osfans.trime.ui.main.settings
 
 import android.os.Bundle
 import android.provider.DocumentsContract
@@ -11,7 +12,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
-import androidx.preference.Preference.SummaryProvider
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import com.osfans.trime.R
@@ -19,11 +19,9 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
-import com.osfans.trime.ui.components.FolderPickerPreference
-import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.components.withLoadingDialog
+import com.osfans.trime.ui.common.PaddingPreferenceFragment
+import com.osfans.trime.ui.common.withLoadingDialog
 import com.osfans.trime.ui.main.MainViewModel
-import com.osfans.trime.ui.main.settings.EditTextIntPreference
 import com.osfans.trime.util.ResourceUtils
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.customFormatTimeInDefault
@@ -34,7 +32,7 @@ import kotlinx.coroutines.withContext
 
 class ProfileFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
-    private val prefs = AppPrefs.defaultInstance().profile
+    private val prefs = AppPrefs.Companion.defaultInstance().profile
     private val backgroundSyncEnable by prefs.periodicBackgroundSync
     private val lastSyncTime by prefs.lastBackgroundSyncTime
     private val lastSyncStatus by prefs.lastBackgroundSyncStatus
@@ -78,7 +76,7 @@ class ProfileFragment : PaddingPreferenceFragment() {
             }
             get<SwitchPreferenceCompat>("periodic_background_sync")?.apply {
                 summaryProvider =
-                    SummaryProvider<SwitchPreferenceCompat> {
+                    Preference.SummaryProvider<SwitchPreferenceCompat> {
                         if (backgroundSyncEnable) {
                             getString(
                                 R.string.periodic_background_sync_status,
@@ -112,7 +110,8 @@ class ProfileFragment : PaddingPreferenceFragment() {
                                     items
                                         .filterIndexed { index, _ -> checkedItems[index] }
                                         .fold(true) { acc, asset ->
-                                            val destPath = DataManager.sharedDataDir.resolve(asset).absolutePath
+                                            val destPath =
+                                                DataManager.sharedDataDir.resolve(asset).absolutePath
                                             ResourceUtils
                                                 .copyFile("$base/$asset", destPath)
                                                 .fold({ acc and true }, { acc and false })
