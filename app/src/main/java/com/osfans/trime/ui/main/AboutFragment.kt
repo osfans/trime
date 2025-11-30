@@ -8,7 +8,6 @@ package com.osfans.trime.ui.main
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.get
@@ -18,7 +17,6 @@ import com.osfans.trime.util.Const
 import com.osfans.trime.util.formatDateTime
 
 class AboutFragment : PaddingPreferenceFragment() {
-    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreatePreferences(
         savedInstanceState: Bundle?,
@@ -26,27 +24,17 @@ class AboutFragment : PaddingPreferenceFragment() {
     ) {
         setPreferencesFromResource(R.xml.about_preference, rootKey)
         with(preferenceScreen) {
-            get<Preference>("about__changelog")?.apply {
+            get<Preference>("current_version")?.apply {
                 summary = Const.VERSION_NAME
                 isCopyingEnabled = true
                 intent =
                     Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("${Const.GIT_REPO}/commits/${Const.BUILD_COMMIT_HASH}"),
+                        Uri.parse("${Const.GIT_REPO}/commit/${Const.BUILD_COMMIT_HASH}"),
                     )
             }
-            get<Preference>("about__build_info")?.apply {
-                summary =
-                    requireContext().getString(
-                        R.string.about__build_info_format,
-                        Const.BUILDER,
-                        Const.GIT_REPO,
-                        Const.BUILD_COMMIT_HASH,
-                        formatDateTime(Const.BUILD_TIMESTAMP),
-                    )
-                isCopyingEnabled = true
-            }
-            get<Preference>("about__librime_version")?.apply {
+
+            get<Preference>("librime_version")?.apply {
                 val code = Const.LIBRIME_VERSION
                 val hash = extractCommitHash(code)
                 summary = code
@@ -54,7 +42,7 @@ class AboutFragment : PaddingPreferenceFragment() {
                     intent!!.data = Uri.withAppendedPath(it, "commit/$hash")
                 }
             }
-            get<Preference>("about__opencc_version")?.apply {
+            get<Preference>("opencc_version")?.apply {
                 val code = Const.OPENCC_VERSION
                 val hash = extractCommitHash(code)
                 summary = code
@@ -62,7 +50,20 @@ class AboutFragment : PaddingPreferenceFragment() {
                     intent!!.data = Uri.withAppendedPath(it, "commit/$hash")
                 }
             }
-            get<Preference>("about__open_source_licenses")?.apply {
+            get<Preference>("build_info")?.apply {
+                summary =
+                    requireContext().getString(
+                        R.string.build_info_format,
+                        Const.BUILDER,
+                        Const.BUILD_COMMIT_HASH,
+                        formatDateTime(Const.BUILD_TIMESTAMP),
+                    )
+                isCopyingEnabled = true
+            }
+            get<Preference>("source_code")?.apply {
+                intent = Intent(Intent.ACTION_VIEW, Uri.parse(Const.GIT_REPO))
+            }
+            get<Preference>("open_source_licenses")?.apply {
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_aboutFragment_to_licenseFragment)
                     true

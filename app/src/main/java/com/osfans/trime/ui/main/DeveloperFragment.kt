@@ -14,7 +14,7 @@ import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.util.AppUtils
 import com.osfans.trime.util.Logcat
 
-class ToolkitFragment : PaddingPreferenceFragment() {
+class DeveloperFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreatePreferences(

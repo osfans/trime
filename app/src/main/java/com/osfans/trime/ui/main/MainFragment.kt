@@ -33,70 +33,63 @@ class MainFragment : PaddingPreferenceFragment() {
     ) {
         setPreferencesFromResource(R.xml.prefs, rootKey)
         with(preferenceScreen) {
-            get<Preference>("pref_schemata")?.apply {
+            get<Preference>("schemata")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_schemaListFragment)
                     true
                 }
             }
-            get<Preference>("pref_user_dict")?.apply {
+            get<Preference>("user_dict")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_userDictionaryFragment)
                     true
                 }
             }
-            get<Preference>("pref_user_data")?.apply {
+            get<Preference>("user_data")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_profileFragment)
                     true
                 }
             }
-            get<Preference>("pref_general")?.apply {
+            get<Preference>("general")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_generalSettingsFragment)
                     true
                 }
             }
-            get<Preference>("pref_keyboard")?.apply {
+            get<Preference>("keyboard")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_keyboardFragment)
                     true
                 }
             }
-            get<Preference>("pref_candidates")?.apply {
+            get<Preference>("candidates")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_candidatesSettingsFragment)
                     true
                 }
             }
-            get<Preference>("pref_theme_and_color")?.apply {
+            get<Preference>("theme")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_themeSettingsFragment)
                     true
                 }
             }
-            get<Preference>("pref_clipboard")?.apply {
+            get<Preference>("clipboard")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_clipboardSettingsFragment)
                     true
                 }
             }
-            get<Preference>("pref_toolkit")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_mainFragment_to_toolkitFragment)
-                    true
-                }
-            }
-            get<Preference>("pref_others")?.apply {
+            get<Preference>("advanced")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
                     findNavController().navigate(R.id.action_mainFragment_to_otherFragment)

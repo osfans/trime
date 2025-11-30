@@ -1,33 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
     <!-- Input Method Platform Tittle  -->
     <string name="app_name_release">Trime</string>
     <string name="app_name_debug">Trime (Debug)</string>
     <!-- Preference settings -->
-    <string name="settings__help_title">Help</string>
-    <string name="pref_wiki">Wiki</string>
-    <string name="pref_issues">Report Issues</string>
-    <string name="pref_trime_qq">Trime QQ Group 1</string>
-    <string name="pref_trime_qq2">Trime QQ Group 2</string>
-    <string name="pref_rime_qq">Rime QQ Group</string>
-    <string name="pref_market">Google Play</string>
-    <string name="about__donation_title">Donate</string>
-    <string name="about__donation_summary">Use Alipay to support Trime and PRIME</string>
-    <string name="settings__about_title">About</string>
-    <string name="about__librime_version">Rime Version</string>
-    <string name="about__opencc_version">OpenCC Version</string>
-    <string name="about__changelog">Change Log</string>
+    <string name="qq_group_1">Trime QQ group 1</string>
+    <string name="qq_group_2">Trime QQ group 2</string>
+    <string name="rime_qq_group">RIME QQ group</string>
+    <string name="librime_version">RIME version</string>
+    <string name="opencc_version">OpenCC version</string>
+    <string name="current_version">Current version</string>
     <string name="license">License</string>
-    <string name="pref_credits">Contribute</string>
-    <string name="about__privacy_policy">Privacy Policy</string>
-    <string name="about__build_info_format">Builder: %1$s\nGit Repo: %2$s\nBuild Git Hash: %3$s\nBuild Time: %4$s</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="build_info_format">Builder: %1$s\nBuild Git Hash: %2$s\nBuild Time: %3$s</string>
     <string name="selected_theme">Themes</string>
     <string name="selected_theme_summary">Select desired theme</string>
     <string name="normal_mode_color">Colors</string>
@@ -65,7 +56,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_progress">Deploying…</string>
     <string name="other_ime">Other IMEs</string>
     <string name="other__ui_mode_title">Night Mode</string>
-    <string name="others">Others</string>
+    <string name="advanced">Advanced</string>
     <string name="profile_user_data_dir">User directory</string>
     <string name="periodic_background_sync">Periodic background sync</string>
     <string name="periodic_background_sync_status">Last: %1$s (%2$s)</string>
@@ -92,7 +83,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="about__app_info">App Information</string>
     <string name="about__licensing">Licensing</string>
     <string name="about__support">Support</string>
-    <string name="about__open_source_licenses">Open Source Licenses</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
     <string name="system_default">System default</string>
     <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
     <string name="trime_app_slogan">Rimes with Your Keystrokes on Android</string>
@@ -124,7 +115,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__swipe_enabled">Allow swipe gestures to trigger keys</string>
     <string name="keyboard__key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
     <string name="about__build_info">Build Info</string>
-    <string name="pref_trime_telegram">Telegram Group</string>
+    <string name="telegram">Telegram</string>
     <string name="quick_bar">Quick bar</string>
     <string name="copy_done">Copied to clipboard!</string>
     <string name="keyboard__hook_shift_space">Ignore Shift locked for Space</string>
@@ -141,7 +132,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clear">Clear Screen</string>
     <string name="export">Export</string>
     <string name="scroll_to_bottom">Jump to Bottom</string>
-    <string name="toolkit">Toolkit</string>
+    <string name="developer">Developer</string>
     <string name="profile">Profile</string>
     <string name="virtual_keyboard">Virtual Keyboard</string>
     <string name="theme">Keyboard Style</string>
@@ -151,7 +142,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="loading">Loading</string>
     <string name="success">success</string>
     <string name="failure">failure</string>
-    <string name="profile_summary">Define storage locations and change sync settings, etc.</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="collect">Collect</string>
@@ -159,7 +149,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="ask_to_delete_all">Delete All?</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
-    <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
+    <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
     <string name="collection">Collection</string>
     <string name="simple_key_unpin">Unpin</string>
@@ -236,4 +226,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="restore">Restore</string>
     <string name="clipboard_listening">Clipboard listening</string>
     <string name="clipboard_return_after_paste">Return after pasting</string>
+    <string name="source_code">Source code</string>
+    <string name="git_repo">Git repository</string>
 </resources>

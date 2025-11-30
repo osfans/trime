@@ -1,56 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:title="@string/trime_app_name">
 
-    <Preference android:key="pref_schemata"
+    <Preference android:key="schemata"
         android:title="@string/schemata"
-        app:icon="@drawable/ic_round_view_list_24"
-        app:tint="?android:attr/colorControlNormal" />
+        app:icon="@drawable/ic_round_view_list_24" />
 
 
-    <Preference android:key="pref_user_dict"
+    <Preference android:key="user_dict"
         android:title="@string/user_dictionary"
         app:icon="@drawable/ic_baseline_book_24" />
 
-    <Preference android:key="pref_user_data"
+    <Preference android:key="user_data"
         android:title="@string/profile"
-        app:icon="@drawable/ic_baseline_snippet_folder_24"
-        android:summary="@string/profile_summary"/>
+        app:icon="@drawable/ic_baseline_snippet_folder_24" />
 
-    <Preference android:key="pref_general"
-        android:title="@string/general"
-        app:icon="@drawable/ic_baseline_tune_24" />
+    <PreferenceCategory app:iconSpaceReserved="false" >
+        <Preference android:key="general"
+            android:title="@string/general"
+            app:icon="@drawable/ic_baseline_tune_24" />
 
-    <Preference android:key="pref_keyboard"
-        android:title="@string/virtual_keyboard"
-        app:icon="@drawable/ic_baseline_keyboard_24" />
+        <Preference android:key="keyboard"
+            android:title="@string/virtual_keyboard"
+            app:icon="@drawable/ic_baseline_keyboard_24" />
 
-    <Preference android:key="pref_candidates"
-        android:title="@string/candidates_window"
-        app:icon="@drawable/ic_baseline_list_alt_24" />
+        <Preference android:key="candidates"
+            android:title="@string/candidates_window"
+            app:icon="@drawable/ic_baseline_list_alt_24" />
 
-    <Preference android:key="pref_theme_and_color"
-        android:title="@string/theme"
-        app:icon="@drawable/ic_baseline_color_lens_24" />
+        <Preference android:key="theme"
+            android:title="@string/theme"
+            app:icon="@drawable/ic_baseline_color_lens_24" />
 
-    <Preference android:key="pref_clipboard"
-        android:title="@string/clipboard"
-        app:icon="@drawable/ic_clipboard_24"/>
+        <Preference android:key="clipboard"
+            android:title="@string/clipboard"
+            app:icon="@drawable/ic_clipboard_24"/>
 
-    <Preference android:key="pref_toolkit"
-        android:title="@string/toolkit"
-        app:icon="@drawable/ic_iconpark_toolkit_24" />
-
-    <Preference android:key="pref_others"
-        android:title="@string/others"
-        app:icon="@drawable/ic_baseline_more_horiz_24" />
-
+        <Preference android:key="advanced"
+            android:title="@string/advanced"
+            app:icon="@drawable/ic_baseline_more_horiz_24" />
+    </PreferenceCategory>
 </PreferenceScreen>

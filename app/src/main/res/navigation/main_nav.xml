@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -31,14 +30,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
             android:id="@+id/action_mainFragment_to_otherFragment"
-            app:destination="@id/otherFragment"
+            app:destination="@id/advancedSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_mainFragment_to_toolkitFragment"
-            app:destination="@id/toolkitFragment"
+            android:id="@+id/action_mainFragment_to_developerFragment"
+            app:destination="@id/developerFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -102,13 +101,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:name="com.osfans.trime.ui.main.settings.KeyboardFragment"
         android:label="@string/virtual_keyboard" />
     <fragment
-        android:id="@+id/otherFragment"
-        android:name="com.osfans.trime.ui.main.settings.OtherFragment"
-        android:label="@string/others" />
+        android:id="@+id/advancedSettingsFragment"
+        android:name="com.osfans.trime.ui.main.settings.AdvancedSettingsFragment"
+        android:label="@string/advanced" />
     <fragment
-        android:id="@+id/toolkitFragment"
-        android:name="com.osfans.trime.ui.main.ToolkitFragment"
-        android:label="@string/toolkit" />
+        android:id="@+id/developerFragment"
+        android:name="com.osfans.trime.ui.main.DeveloperFragment"
+        android:label="@string/developer" />
     <fragment
         android:id="@+id/aboutFragment"
         android:name="com.osfans.trime.ui.main.AboutFragment"

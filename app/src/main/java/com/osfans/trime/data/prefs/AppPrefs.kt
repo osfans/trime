@@ -85,7 +85,7 @@ class AppPrefs(
             applicationContext.get()?.let { context ->
                 PreferenceManager.setDefaultValues(context, R.xml.keyboard_preference, true)
                 PreferenceManager.setDefaultValues(context, R.xml.profile_preference, true)
-                PreferenceManager.setDefaultValues(context, R.xml.other_preference, true)
+                PreferenceManager.setDefaultValues(context, R.xml.advanced_preference, true)
             }
         } catch (e: Exception) {
             e.fillInStackTrace()

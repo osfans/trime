@@ -1,32 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 输入法平台名称  -->
     <string name="app_name_release">同文输入法</string>
     <string name="app_name_debug">同文输入法（调试）</string>
-    <string name="settings__help_title">寻求帮助</string>
-    <string name="pref_wiki">维基教程</string>
-    <string name="pref_issues">问题反馈</string>
-    <string name="pref_trime_qq">同文QQ群 1</string>
-    <string name="pref_trime_qq2">同文QQ群 2</string>
-    <string name="pref_rime_qq">中州韵QQ群</string>
-    <string name="pref_market">谷歌市场</string>
-    <string name="about__donation_title">捐赠</string>
-    <string name="about__donation_summary">使用支付宝捐助同文和PRIME的开发</string>
-    <string name="settings__about_title">关于</string>
-    <string name="about__librime_version">RIME版本</string>
-    <string name="about__opencc_version">OpenCC版本</string>
-    <string name="about__changelog">更新日志</string>
+    <string name="qq_group_1">同文 QQ 群 1</string>
+    <string name="qq_group_2">同文 QQ 群 2</string>
+    <string name="rime_qq_group">中州韵 QQ 群</string>
+    <string name="librime_version">RIME 版本</string>
+    <string name="opencc_version">OpenCC 版本</string>
+    <string name="current_version">当前版本</string>
     <string name="license">许可证</string>
-    <string name="pref_credits">贡献代码</string>
-    <string name="about__privacy_policy">隐私策略</string>
-    <string name="about__build_info_format">构建者：%1$s\nGit 仓库：%2$s\n构建 Git 哈希：%3$s\n构建时间：%4$s</string>
+    <string name="privacy_policy">隐私策略</string>
+    <string name="build_info_format">构建者：%1$s\n构建 Git 哈希：%2$s\n构建时间：%3$s</string>
     <string name="selected_theme">主题</string>
     <string name="selected_theme_summary">选取主题</string>
     <string name="normal_mode_color">配色</string>
@@ -62,7 +53,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="deploy_progress">正在部署…</string>
     <string name="other_ime">其他输入法</string>
     <string name="other__ui_mode_title">夜间模式</string>
-    <string name="others">其他</string>
+    <string name="advanced">高级</string>
     <string name="profile_user_data_dir">用户文件夹</string>
     <string name="periodic_background_sync">后台定时同步</string>
     <string name="periodic_background_sync_status">上次同步时间（状态）：%1$s（%2$s）</string>
@@ -120,14 +111,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="keyboard__swipe_enabled">允许触发按键的滑动手势</string>
     <string name="keyboard__key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
     <string name="about__build_info">构建信息</string>
-    <string name="pref_trime_telegram">Telegram群组</string>
+    <string name="telegram">Telegram</string>
     <string name="quick_bar">快捷栏</string>
     <string name="copy_done">已复制</string>
     <string name="keyboard__hook_shift_space">点击空格时，忽略Shift的锁定状态</string>
     <string name="keyboard__hook_shift_num">点击0-9时，忽略Shift的锁定状态</string>
     <string name="keyboard__hook_shift_symbol">点击符号键时，忽略Shift的锁定状态</string>
     <string name="keyboard__hook_shift_arrow">点击方向键时，保持Shift的锁定状态</string>
-    <string name="toolkit">工具箱</string>
+    <string name="developer">开发者</string>
     <string name="export">导出</string>
     <string name="scroll_to_bottom">跳到最后</string>
     <string name="clear">清除画面</string>
@@ -148,7 +139,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="profile_reset">恢复默认设置</string>
     <string name="success">成功</string>
     <string name="failure">失败</string>
-    <string name="profile_summary">设定存储位置和修改同步设置等</string>
     <string name="profile_reset_summary">用默认的内置配置覆盖共享目录中的相同文件</string>
     <string name="delete">删除</string>
     <string name="edit">编辑</string>
@@ -157,8 +147,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="ask_to_delete_all">删除全部？</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
-    <string name="about__open_source_licenses">开源软件许可</string>
-    <string name="about__open_source_licenses_summary">第三方软件库许可证</string>
+    <string name="open_source_licenses">开源软件许可</string>
+    <string name="licenses_of_third_party_libraries">第三方软件库许可证</string>
     <string name="clipboard">剪贴板</string>
     <string name="collection">收藏夹</string>
     <string name="simple_key_unpin">取消置顶</string>
@@ -235,4 +225,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="restore">还原</string>
     <string name="clipboard_listening">记录剪贴板历史</string>
     <string name="clipboard_return_after_paste">粘贴后返回</string>
+    <string name="source_code">源代码</string>
+    <string name="git_repo">Git 仓库</string>
 </resources>

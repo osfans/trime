@@ -112,21 +112,30 @@ class MainActivity : AppCompatActivity() {
             // show menu item on demand
             item.isVisible = false
             when (item.itemId) {
-                R.id.deploy, R.id.about -> {
+                R.id.deploy, R.id.developer, R.id.about -> {
                     viewModel.topOptionsMenu.observe(this) {
                         item.isVisible = it
                     }
-                    if (item.itemId == R.id.deploy) {
-                        item.setOnMenuItemClickListener {
-                            viewModel.rime.launchOnReady {
-                                it.deploy()
+                    when (item.itemId) {
+                        R.id.deploy -> {
+                            item.setOnMenuItemClickListener {
+                                viewModel.rime.launchOnReady {
+                                    it.deploy()
+                                }
+                                true
                             }
-                            true
                         }
-                    } else if (item.itemId == R.id.about) {
-                        item.setOnMenuItemClickListener {
-                            navController.navigate(R.id.action_mainFragment_to_aboutFragment)
-                            true
+                        R.id.developer -> {
+                            item.setOnMenuItemClickListener {
+                                navController.navigate(R.id.action_mainFragment_to_developerFragment)
+                                true
+                            }
+                        }
+                        R.id.about -> {
+                            item.setOnMenuItemClickListener {
+                                navController.navigate(R.id.action_mainFragment_to_aboutFragment)
+                                true
+                            }
                         }
                     }
                 }

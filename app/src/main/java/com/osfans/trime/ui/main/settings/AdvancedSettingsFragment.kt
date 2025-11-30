@@ -17,7 +17,7 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 
-class OtherFragment : PaddingPreferenceFragment() {
+class AdvancedSettingsFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private val prefs get() = AppPrefs.Companion.defaultInstance()
 
@@ -25,7 +25,7 @@ class OtherFragment : PaddingPreferenceFragment() {
         savedInstanceState: Bundle?,
         rootKey: String?,
     ) {
-        addPreferencesFromResource(R.xml.other_preference)
+        addPreferencesFromResource(R.xml.advanced_preference)
         findPreference<ListPreference>("other__ui_mode")?.setOnPreferenceChangeListener { _, newValue ->
             val uiMode =
                 when (newValue) {
