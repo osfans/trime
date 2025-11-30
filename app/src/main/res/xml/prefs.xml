@@ -12,7 +12,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <Preference android:key="pref_schemata"
         android:title="@string/schemata"
-        app:icon="@drawable/ic_pref_schema" />
+        app:icon="@drawable/ic_round_view_list_24"
+        app:tint="?android:attr/colorControlNormal" />
+
 
     <Preference android:key="pref_user_dict"
         android:title="@string/user_dictionary"
@@ -37,11 +39,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <Preference android:key="pref_theme_and_color"
         android:title="@string/theme"
-        app:icon="@drawable/ic_pref_theme_color" />
+        app:icon="@drawable/ic_baseline_color_lens_24" />
 
     <Preference android:key="pref_clipboard"
         android:title="@string/clipboard"
-        app:icon="@drawable/ic_baseline_assignment_24"/>
+        app:icon="@drawable/ic_clipboard_24"/>
 
     <Preference android:key="pref_toolkit"
         android:title="@string/toolkit"
@@ -49,6 +51,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <Preference android:key="pref_others"
         android:title="@string/others"
-        app:icon="@drawable/ic_pref_other" />
+        app:icon="@drawable/ic_baseline_more_horiz_24" />
 
 </PreferenceScreen>
