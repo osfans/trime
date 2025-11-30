@@ -58,7 +58,7 @@ class OtherFragment : PaddingPreferenceFragment() {
     }
 
     companion object {
-        private const val SETTINGS_ACTIVITY_NAME = "com.osfans.trime.PrefLauncherAlias"
+        private const val SETTINGS_ACTIVITY_NAME = "com.osfans.trime.MainLauncherAlias"
 
         fun hideAppIcon(context: Context) {
             val pkg: PackageManager = context.packageManager

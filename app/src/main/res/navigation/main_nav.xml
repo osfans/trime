@@ -8,85 +8,85 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/pref_nav"
-    app:startDestination="@id/prefFragment">
+    android:id="@+id/main_nav"
+    app:startDestination="@id/mainFragment">
 
     <fragment
-        android:id="@+id/prefFragment"
-        android:name="com.osfans.trime.ui.fragments.PrefFragment"
+        android:id="@+id/mainFragment"
+        android:name="com.osfans.trime.ui.fragments.MainFragment"
         android:label="@string/trime_app_name" >
         <action
-            android:id="@+id/action_prefFragment_to_profileFragment"
+            android:id="@+id/action_mainFragment_to_profileFragment"
             app:destination="@id/profileFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_keyboardFragment"
+            android:id="@+id/action_mainFragment_to_keyboardFragment"
             app:destination="@id/keyboardFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_otherFragment"
+            android:id="@+id/action_mainFragment_to_otherFragment"
             app:destination="@id/otherFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_toolkitFragment"
+            android:id="@+id/action_mainFragment_to_toolkitFragment"
             app:destination="@id/toolkitFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_aboutFragment"
+            android:id="@+id/action_mainFragment_to_aboutFragment"
             app:destination="@id/aboutFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_clipboardSettingsFragment"
+            android:id="@+id/action_mainFragment_to_clipboardSettingsFragment"
             app:destination="@id/clipboardSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_candidatesSettingsFragment"
+            android:id="@+id/action_mainFragment_to_candidatesSettingsFragment"
             app:destination="@id/candidatesSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_generalSettingsFragment"
+            android:id="@+id/action_mainFragment_to_generalSettingsFragment"
             app:destination="@id/generalSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_themeSettingsFragment"
+            android:id="@+id/action_mainFragment_to_themeSettingsFragment"
             app:destination="@id/themeSettingsFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_prefFragment_to_schemaListFragment"
+            android:id="@+id/action_mainFragment_to_schemaListFragment"
             app:destination="@id/schemaListFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
         <action
-            android:id="@+id/action_prefFragment_to_userDictionaryFragment"
+            android:id="@+id/action_mainFragment_to_userDictionaryFragment"
             app:destination="@id/userDictionaryFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"

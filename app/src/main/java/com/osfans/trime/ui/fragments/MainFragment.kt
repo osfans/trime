@@ -15,7 +15,7 @@ import com.osfans.trime.ui.components.PaddingPreferenceFragment
 import com.osfans.trime.ui.main.MainViewModel
 import splitties.resources.styledColor
 
-class PrefFragment : PaddingPreferenceFragment() {
+class MainFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onStart() {
@@ -37,70 +37,70 @@ class PrefFragment : PaddingPreferenceFragment() {
             get<Preference>("pref_schemata")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_schemaListFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_schemaListFragment)
                     true
                 }
             }
             get<Preference>("pref_user_dict")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_userDictionaryFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_userDictionaryFragment)
                     true
                 }
             }
             get<Preference>("pref_user_data")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_profileFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_profileFragment)
                     true
                 }
             }
             get<Preference>("pref_general")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_generalSettingsFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_generalSettingsFragment)
                     true
                 }
             }
             get<Preference>("pref_keyboard")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_keyboardFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_keyboardFragment)
                     true
                 }
             }
             get<Preference>("pref_candidates")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_candidatesSettingsFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_candidatesSettingsFragment)
                     true
                 }
             }
             get<Preference>("pref_theme_and_color")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_themeSettingsFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_themeSettingsFragment)
                     true
                 }
             }
             get<Preference>("pref_clipboard")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_clipboardSettingsFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_clipboardSettingsFragment)
                     true
                 }
             }
             get<Preference>("pref_toolkit")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_toolkitFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_toolkitFragment)
                     true
                 }
             }
             get<Preference>("pref_others")?.apply {
                 icon?.setTint(styledColor(android.R.attr.colorControlNormal))
                 setOnPreferenceClickListener {
-                    findNavController().navigate(R.id.action_prefFragment_to_otherFragment)
+                    findNavController().navigate(R.id.action_mainFragment_to_otherFragment)
                     true
                 }
             }

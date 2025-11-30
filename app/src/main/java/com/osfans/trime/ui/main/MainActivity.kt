@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ui.main
 
@@ -20,24 +21,19 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 import com.osfans.trime.R
-import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.data.soundeffect.SoundEffectManager
-import com.osfans.trime.databinding.ActivityPrefBinding
+import com.osfans.trime.databinding.ActivityMainBinding
 import com.osfans.trime.ui.setup.SetupActivity
-import com.osfans.trime.util.isStorageAvailable
 import com.osfans.trime.worker.BackgroundSyncWork
-import kotlinx.coroutines.launch
 import splitties.views.topPadding
 
-class PrefMainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     private val uiMode by AppPrefs.defaultInstance().other.uiMode
@@ -54,14 +50,14 @@ class PrefMainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(uiMode)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val binding = ActivityPrefBinding.inflate(layoutInflater)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
             val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = systemBars.left
                 rightMargin = systemBars.right
             }
-            binding.prefToolbar.root.topPadding = systemBars.top
+            binding.mainToolbar.root.topPadding = systemBars.top
             windowInsets
         }
         WindowCompat
@@ -70,17 +66,17 @@ class PrefMainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         // always show toolbar back arrow icon
-        binding.prefToolbar.toolbar.navigationIcon =
+        binding.mainToolbar.toolbar.navigationIcon =
             DrawerArrowDrawable(this).apply {
                 progress = 1f
-                color = ContextCompat.getColor(this@PrefMainActivity, R.color.toolbarForegroundColor)
+                color = ContextCompat.getColor(this@MainActivity, R.color.toolbarForegroundColor)
             }
         // show menu icon and other action icons on toolbar
         // don't use `setSupportActionBar(binding.toolbar)` here,
         // because navController would change toolbar title, we need to control it by ourselves
-        setupToolbarMenu(binding.prefToolbar.toolbar.menu)
+        setupToolbarMenu(binding.mainToolbar.toolbar.menu)
         navController = binding.navHostFragment.getFragment<NavHostFragment>().navController
-        binding.prefToolbar.toolbar.setNavigationOnClickListener {
+        binding.mainToolbar.toolbar.setNavigationOnClickListener {
             // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
             if (onBackPressedDispatcher.hasEnabledCallbacks()) {
                 onBackPressedDispatcher.onBackPressed()
@@ -90,12 +86,12 @@ class PrefMainActivity : AppCompatActivity() {
             navController.navigateUp() || onSupportNavigateUp() || moveTaskToBack(false)
         }
         viewModel.toolbarTitle.observe(this) {
-            binding.prefToolbar.toolbar.title = it
+            binding.mainToolbar.toolbar.title = it
         }
         navController.addOnDestinationChangedListener { _, dest, _ ->
             dest.label?.let { viewModel.setToolbarTitle(it.toString()) }
-            binding.prefToolbar.toolbar.subtitle =
-                if (dest.id == R.id.prefFragment) {
+            binding.mainToolbar.toolbar.subtitle =
+                if (dest.id == R.id.mainFragment) {
                     getString(R.string.trime_app_slogan)
                 } else {
                     ""
@@ -129,7 +125,7 @@ class PrefMainActivity : AppCompatActivity() {
                         }
                     } else if (item.itemId == R.id.about) {
                         item.setOnMenuItemClickListener {
-                            navController.navigate(R.id.action_prefFragment_to_aboutFragment)
+                            navController.navigate(R.id.action_mainFragment_to_aboutFragment)
                             true
                         }
                     }

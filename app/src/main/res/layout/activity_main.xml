@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -12,7 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include android:id="@+id/prefToolbar" layout="@layout/toolbar" />
+    <include android:id="@+id/mainToolbar" layout="@layout/toolbar" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -20,5 +19,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/pref_nav" />
+        app:navGraph="@navigation/main_nav" />
 </LinearLayout>

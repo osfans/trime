@@ -4044,7 +4044,7 @@ preset_keys:
   Date: {label: 日期, send: function, command: date, option: " yyyy-MM-dd "}
   Time: {label: 時間, send: function, command: date, option: "HH:mm:ss"} #時間： date 格式
   TrimeApp: {label: 同文, send: function, command: run, option: "com.osfans.trime"} #運行程序: run 包名
-  TrimeCmp: {label: 同文組件, send: function, command: run, option: "com.osfans.trime/.ui.main.PrefMainActivity"} #運行程序指定組件: run 包名/組件名
+  TrimeCmp: {label: 同文組件, send: function, command: run, option: "com.osfans.trime/.ui.main.MainActivity"} #運行程序指定組件: run 包名/組件名
   Homepage: {label: 同文主頁, send: function, command: run, option: "https://github.com/osfans/trime"} #查看網頁: run 網址
   TrimeWiki: {label: Wiki, send: function, command: run, option: "https://github.com/osfans/trime/wiki/trime.yaml-詳解"}
   Wiki: {label: 維基, send: function, command: run, option: "https://zh.wikipedia.org/wiki/%s"} #搜索網頁: %s或者%1$s爲當前字符

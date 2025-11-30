@@ -15,7 +15,7 @@ import androidx.navigation.NavDeepLinkBuilder
 import com.osfans.trime.R
 import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.ui.main.LogActivity
-import com.osfans.trime.ui.main.PrefMainActivity
+import com.osfans.trime.ui.main.MainActivity
 import timber.log.Timber
 
 object AppUtils {
@@ -47,7 +47,7 @@ object AppUtils {
     } ?: false
 
     fun launchMainActivity(context: Context) {
-        context.startActivity<PrefMainActivity> {
+        context.startActivity<MainActivity> {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
         }
     }
@@ -58,8 +58,8 @@ object AppUtils {
         arguments: Bundle? = null,
     ) {
         NavDeepLinkBuilder(context)
-            .setComponentName(PrefMainActivity::class.java)
-            .setGraph(R.navigation.pref_nav)
+            .setComponentName(MainActivity::class.java)
+            .setGraph(R.navigation.main_nav)
             .addDestination(dest, arguments)
             .createTaskStackBuilder()
             /**
