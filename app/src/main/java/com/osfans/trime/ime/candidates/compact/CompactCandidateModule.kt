@@ -60,7 +60,7 @@ class CompactCandidateModule(
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (childCount == 0),
+                (adapter.itemCount == childCount),
         )
     }
 

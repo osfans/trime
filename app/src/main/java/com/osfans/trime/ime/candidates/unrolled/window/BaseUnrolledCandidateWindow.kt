@@ -31,7 +31,6 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
@@ -101,7 +100,12 @@ abstract class BaseUnrolledCandidateWindow(
         offsetJob =
             lifecycleCoroutineScope.launch {
                 compactCandidate.unrolledCandidateOffset.collect {
-                    updateCandidatesWithOffset(it)
+                    if (it <= 0) {
+                        windowManager.attachWindow(KeyboardWindow)
+                    } else {
+                        adapter.refreshWithOffset(it)
+                        candidateLayout.resetPosition()
+                    }
                 }
             }
         candidatesSubmitJob =
@@ -124,23 +128,11 @@ abstract class BaseUnrolledCandidateWindow(
         }
     }
 
-    private fun updateCandidatesWithOffset(offset: Int) {
-        val candidates = compactCandidate.adapter.items
-        if (candidates.isEmpty()) {
-            windowManager.attachWindow(KeyboardWindow)
-        } else {
-            adapter.refreshWithOffset(offset)
-            lifecycleCoroutineScope.launch(Dispatchers.Main) {
-                candidateLayout.resetPosition()
-            }
-        }
-    }
-
     override fun onDetached() {
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesDetached,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (adapter.offset == 0),
+                (compactCandidate.adapter.itemCount == adapter.offset),
         )
         offsetJob?.cancel()
         candidatesSubmitJob?.cancel()
