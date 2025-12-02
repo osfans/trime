@@ -52,11 +52,8 @@ class CompactCandidateModule(
 
     val unrolledCandidateOffset = _unrolledCandidateOffset.asSharedFlow()
 
-    fun refreshUnrolled() {
-        val childCount = layoutManager.childCount
-        runBlocking {
-            _unrolledCandidateOffset.emit(childCount)
-        }
+    fun refreshUnrolled(childCount: Int) {
+        _unrolledCandidateOffset.tryEmit(childCount)
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
@@ -84,7 +81,7 @@ class CompactCandidateModule(
 
             override fun onLayoutCompleted(state: RecyclerView.State?) {
                 super.onLayoutCompleted(state)
-                refreshUnrolled()
+                refreshUnrolled(this.childCount)
             }
         }
     }
@@ -113,7 +110,7 @@ class CompactCandidateModule(
         val highlightedIndex = menu.run { highlightedCandidateIndex + pageSize * pageNumber }
         adapter.updateCandidates(candidates, highlightedIndex)
         if (candidates.isEmpty()) {
-            refreshUnrolled()
+            refreshUnrolled(0)
         }
     }
 
