@@ -37,17 +37,6 @@
     <string name="key_long_press_timeout">長按按鍵的延遲時間</string>
     <string name="key_repeat_interval">重複按鍵的重複間隔</string>
     <string name="popup_on_key_press">按鍵時彈出顯示字符</string>
-    <string-array name="keyboard__landscape_mode_entries">
-        <item>永不</item>
-        <item>只在橫屏時</item>
-        <item>在闊螢幕或橫屏時</item>
-        <item>永遠都是</item>
-    </string-array>
-    <string-array name="other__ui_mode_entries" >
-        <item name="auto">系統預設</item>
-        <item name="light">亮色</item>
-        <item name="dark">暗色</item>
-    </string-array>
     <string name="use_soft_cursor">預編輯區使用插入符號（^）</string>
     <string name="deploy">部署</string>
     <string name="sync_user_data_immediately">立即同步使用者資料</string>
@@ -60,9 +49,6 @@
     <string name="user_data_dir">使用者資料夾</string>
     <string name="periodic_background_sync">後台定時同步</string>
     <string name="periodic_background_sync_status">上次同步時間（狀態）：%1$s（%2$s）</string>
-    <string name="pref_help__marketplace">應用市場</string>
-    <string name="pref_help__user_community">使用者社群</string>
-    <string name="pref_keyboard__function">檢視</string>
     <string name="effects">效果</string>
     <string name="only_available_on_some_roms">此選項僅對部分 ROM 有效</string>
     <string name="show_app_icon">在啟動器中顯示圖示</string>
@@ -72,15 +58,7 @@
     <string name="clipboard_output_rules">剪貼簿過濾規則</string>
     <string name="clipboard_suggestion">顯示剪貼簿建議</string>
     <string name="clipboard_suggestion_timeout">剪貼簿項目逾時</string>
-    <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
-    <string-array name="keyboard__fullscreen_mode_entries">
-        <item>自動</item>
-        <item>總是</item>
-        <item>從不</item>
-    </string-array>
-    <string name="about__app_info">應用資訊</string>
-    <string name="about__support">支援</string>
     <string name="open_source_licenses">開放源代碼軟體許可</string>
     <string name="system_default">系統預設</string>
     <string name="key_swipe_travel">觸發滑動手勢的最短距離</string>
@@ -104,12 +82,10 @@
     <string name="setup__skip_hint_yes">好的，謝謝</string>
     <string name="setup__skip_hint_no">不，我想留在這兒</string>
     <string name="follow_system_day_night_color">跟隨系統設定主題色調</string>
-    <string name="pref_keyboard__hook">攔截事件</string>
     <string name="hook_ctrl_a">攔截 Ctrl+A</string>
     <string name="hook_ctrl_cv">攔截 Ctrl+C/V/X</string>
     <string name="hook_ctrl_lr">攔截 Ctrl+Left/Right</string>
     <string name="hook_ctrl_zy">攔截 Ctrl+Z/Y</string>
-    <string name="pref_keyboard__hook_summary">事件不發送給被編輯的 App 及 librime</string>
     <string name="key_swipe_enabled">允許觸發按鍵的滑動手勢</string>
     <string name="key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
     <string name="build_info">建構資訊</string>
@@ -147,7 +123,6 @@
     <string name="ask_to_delete_all">刪除全部？</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
-    <string name="about__licensing">許可</string>
     <string name="licenses_of_third_party_libraries">第三方軟體庫許可證</string>
     <string name="clipboard">剪貼簿</string>
     <string name="collection">收藏夾</string>
@@ -157,7 +132,6 @@
     <string name="disable">停用</string>
     <string name="a_regular_expression_per_line">一行一條正則表示式</string>
     <string name="custom_sound_effect_enabled">使用自訂按鍵音</string>
-    <string name="pref_keyboard__landscape">橫向模式</string>
     <string name="enable_landscape_mode">啟用橫屏模式</string>
     <string name="split_space_percent">自動分割鍵盤比例</string>
     <string name="setup__step_three">第 3 步</string>

@@ -37,17 +37,6 @@
     <string name="key_long_press_timeout">Long key press delay</string>
     <string name="key_repeat_interval">Key repeat interval</string>
     <string name="popup_on_key_press">Popup on key press</string>
-    <string-array name="keyboard__landscape_mode_entries">
-        <item>Never</item>
-        <item>Only in landscape mode</item>
-        <item>Auto (In wide screen or landscape mode)</item>
-        <item>Always</item>
-    </string-array>
-    <string-array name="other__ui_mode_entries" >
-        <item>System Default</item>
-        <item>Light</item>
-        <item>Dark</item>
-    </string-array>
     <string name="use_soft_cursor">Use soft cursor (^) in preedit</string>
     <string name="deploy">Deploy</string>
     <string name="sync_user_data_immediately">Sync user data immediately</string>
@@ -60,9 +49,6 @@
     <string name="user_data_dir">User directory</string>
     <string name="periodic_background_sync">Periodic background sync</string>
     <string name="periodic_background_sync_status">Last: %1$s (%2$s)</string>
-    <string name="pref_help__marketplace">Marketplace</string>
-    <string name="pref_help__user_community">User Community</string>
-    <string name="pref_keyboard__function">View</string>
     <string name="effects">Effects</string>
     <string name="show_app_icon">Show app icon in launcher</string>
     <string name="only_available_on_some_roms">This option is only available on some ROMs</string>
@@ -72,16 +58,7 @@
     <string name="clipboard_output_rules">Clipboard output rules</string>
     <string name="clipboard_suggestion">Show clipboard suggestions</string>
     <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
-    <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
-    <string-array name="keyboard__fullscreen_mode_entries">
-        <item>auto_show</item>
-        <item>always_show</item>
-        <item>never_show</item>
-    </string-array>
-    <string name="about__app_info">App Information</string>
-    <string name="about__licensing">Licensing</string>
-    <string name="about__support">Support</string>
     <string name="open_source_licenses">Open Source Licenses</string>
     <string name="system_default">System default</string>
     <string name="key_swipe_travel">Min travel for gesture</string>
@@ -105,12 +82,10 @@
     <string name="setup__skip_hint_yes">OK, thanks</string>
     <string name="setup__skip_hint_no">No, please leave me here</string>
     <string name="follow_system_day_night_color">Follow system day/night color</string>
-    <string name="pref_keyboard__hook">Hook</string>
     <string name="hook_ctrl_a">Hook Ctrl+A</string>
     <string name="hook_ctrl_cv">Hook Ctrl+C/V/X</string>
     <string name="hook_ctrl_lr">Hook Ctrl+Left/Right</string>
     <string name="hook_ctrl_zy">Hook Ctrl+Z/Y</string>
-    <string name="pref_keyboard__hook_summary">Not handled by the App being edited or librime</string>
     <string name="key_swipe_enabled">Allow swipe gestures to trigger keys</string>
     <string name="key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
     <string name="build_info">Build Info</string>
@@ -157,7 +132,6 @@
     <string name="disable">Disable</string>
     <string name="a_regular_expression_per_line">A regular expression per line</string>
     <string name="custom_sound_effect_enabled">Use custom key sound</string>
-    <string name="pref_keyboard__landscape">Landscape Mode</string>
     <string name="enable_landscape_mode">Enable Landscape Mode</string>
     <string name="split_space_percent">Auto Split Keyboard Space Ratio</string>
     <string name="setup__step_three">Setup 3</string>

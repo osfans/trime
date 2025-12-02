@@ -34,17 +34,6 @@
     <string name="key_long_press_timeout">长按按键的延迟时间</string>
     <string name="key_repeat_interval">重复按键的重复间隔</string>
     <string name="popup_on_key_press">按键时弹出显示字符</string>
-    <string-array name="keyboard__landscape_mode_entries">
-        <item>永不</item>
-        <item>只在横屏时</item>
-        <item>在屏幕较宽或横屏时</item>
-        <item>永远都是</item>
-    </string-array>
-    <string-array name="other__ui_mode_entries" >
-        <item name="auto">系统默认</item>
-        <item name="light">亮色</item>
-        <item name="dark">暗色</item>
-    </string-array>
     <string name="use_soft_cursor">预编辑区使用插入符号（^）</string>
     <string name="deploy">部署</string>
     <string name="sync_user_data_immediately">立即同步用户数据</string>
@@ -57,10 +46,7 @@
     <string name="user_data_dir">用户文件夹</string>
     <string name="periodic_background_sync">后台定时同步</string>
     <string name="periodic_background_sync_status">上次同步时间（状态）：%1$s（%2$s）</string>
-    <string name="pref_help__marketplace">应用市场</string>
-    <string name="pref_help__user_community">用户社区</string>
     <string name="effects">效果</string>
-    <string name="pref_keyboard__function">视图</string>
     <string name="show_app_icon">在启动器中显示图标</string>
     <string name="only_available_on_some_roms">此选项仅对部分 ROM 有效</string>
     <string name="default_">默认</string>
@@ -69,16 +55,7 @@
     <string name="clipboard_output_rules">剪贴板过滤规则</string>
     <string name="clipboard_suggestion">显示剪贴板提示</string>
     <string name="clipboard_suggestion_timeout">剪贴板提示超时</string>
-    <string name="keyboard__fullscreen_mode_title">横屏时全屏编辑</string>
     <string name="deploy_finish">部署完成</string>
-    <string-array name="keyboard__fullscreen_mode_entries">
-        <item>自动</item>
-        <item>总是</item>
-        <item>从不</item>
-    </string-array>
-    <string name="about__app_info">应用信息</string>
-    <string name="about__licensing">许可</string>
-    <string name="about__support">支持</string>
     <string name="system_default">系统默认</string>
     <string name="key_swipe_travel">触发按键滑动手势的距离</string>
     <string name="trime_app_slogan">击响中文之韵</string>
@@ -101,12 +78,10 @@
     <string name="setup__skip_hint_yes">好的，谢谢</string>
     <string name="setup__skip_hint_no">不，我想留在这儿</string>
     <string name="follow_system_day_night_color">跟随系统夜间模式</string>
-    <string name="pref_keyboard__hook">拦截事件</string>
     <string name="hook_ctrl_a">拦截 Ctrl+A</string>
     <string name="hook_ctrl_cv">拦截 Ctrl+C/V/X</string>
     <string name="hook_ctrl_lr">拦截 Ctrl+Left/Right</string>
     <string name="hook_ctrl_zy">拦截 Ctrl+Z/Y</string>
-    <string name="pref_keyboard__hook_summary">事件不发送给被编辑的 App 及 librime</string>
     <string name="key_swipe_enabled">允许触发按键的滑动手势</string>
     <string name="key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
     <string name="build_info">构建信息</string>
@@ -156,7 +131,6 @@
     <string name="disable">禁用</string>
     <string name="a_regular_expression_per_line">一行一条正则表达式</string>
     <string name="custom_sound_effect_enabled">使用自定义按键音效</string>
-    <string name="pref_keyboard__landscape">横屏模式</string>
     <string name="enable_landscape_mode">启用横屏模式</string>
     <string name="split_space_percent">自动分割键盘比例</string>
     <string name="setup__step_three">第 3 步</string>
