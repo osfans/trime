@@ -32,24 +32,26 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.databinding.ActivityMainBinding
 import com.osfans.trime.ui.setup.SetupActivity
+import com.osfans.trime.util.item
 import com.osfans.trime.util.parcelable
 import com.osfans.trime.util.startActivity
 import com.osfans.trime.worker.BackgroundSyncWork
+import splitties.resources.styledColor
 import splitties.views.topPadding
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
 
-    private val uiMode by AppPrefs.defaultInstance().other.uiMode
+    private val uiMode by AppPrefs.defaultInstance().advanced.uiMode
 
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val uiMode =
             when (uiMode) {
-                AppPrefs.Other.UiMode.AUTO -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                AppPrefs.Other.UiMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
-                AppPrefs.Other.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+                AppPrefs.Advanced.UiMode.AUTO -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                AppPrefs.Advanced.UiMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                AppPrefs.Advanced.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
             }
         AppCompatDelegate.setDefaultNightMode(uiMode)
         super.onCreate(savedInstanceState)
@@ -128,58 +130,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbarMenu(menu: Menu) {
-        menuInflater.inflate(R.menu.main_menu, menu)
+        val optionMenuItems = listOf(
+            menu.item(R.string.deploy, R.drawable.ic_baseline_refresh_reversed_24, showAsAction = true) {
+                viewModel.rime.launchOnReady { it.deploy() }
+            },
+            menu.item(R.string.developer) {
+                navController.navigate(NavigationRoute.Developer)
+            },
+            menu.item(R.string.about) {
+                navController.navigate(NavigationRoute.About)
+            },
+        )
+        optionMenuItems.forEach { item ->
+            viewModel.topOptionsMenu.observe(this) { enabled ->
+                item.isVisible = enabled
+            }
+        }
+        menu.item(R.string.edit, R.drawable.ic_baseline_edit_24, showAsAction = true) {
+            viewModel.toolbarEditButtonOnClickListener.value?.invoke()
+        }.apply {
+            viewModel.toolbarEditButtonVisible.observe(this@MainActivity) {
+                isVisible = it
+            }
+        }
+        menu.item(R.string.delete, R.drawable.ic_baseline_delete_24, showAsAction = true) {
+            viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
+        }.apply {
+            viewModel.toolbarDeleteButtonOnClickListener.observe(this@MainActivity) {
+                isVisible = it != null
+            }
+        }
         menu.forEach { item ->
             // show menu item on demand
             item.isVisible = false
-            when (item.itemId) {
-                R.id.deploy, R.id.developer, R.id.about -> {
-                    viewModel.topOptionsMenu.observe(this) {
-                        item.isVisible = it
-                    }
-                    when (item.itemId) {
-                        R.id.deploy -> {
-                            item.setOnMenuItemClickListener {
-                                viewModel.rime.launchOnReady {
-                                    it.deploy()
-                                }
-                                true
-                            }
-                        }
-                        R.id.developer -> {
-                            item.setOnMenuItemClickListener {
-                                navController.navigate(NavigationRoute.Developer)
-                                true
-                            }
-                        }
-                        R.id.about -> {
-                            item.setOnMenuItemClickListener {
-                                navController.navigate(NavigationRoute.About)
-                                true
-                            }
-                        }
-                    }
-                }
-                R.id.edit -> {
-                    viewModel.toolbarEditButtonVisible.observe(this) {
-                        item.isVisible = it
-                    }
-                    item.setOnMenuItemClickListener {
-                        viewModel.toolbarEditButtonOnClickListener.value?.invoke()
-                        true
-                    }
-                }
-                R.id.delete -> {
-                    viewModel.toolbarDeleteButtonOnClickListener.observe(this) {
-                        item.isVisible = it != null
-                    }
-                    item.setOnMenuItemClickListener {
-                        viewModel.toolbarDeleteButtonOnClickListener.value?.invoke()
-                        true
-                    }
-                }
-                else -> {}
-            }
         }
     }
 

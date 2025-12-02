@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 /**
  * Adapted from [fcitx5-android/DeviceInfo.kt](https://github.com/fcitx5-android/fcitx5-android/blob/e44c1c7/app/src/main/java/org/fcitx/fcitx5/android/utils/DeviceInfo.kt)
@@ -38,10 +39,10 @@ object DeviceInfo {
         )
         appendLine("--------- Build Info")
         appendLine("Package Name: ${BuildConfig.APPLICATION_ID}")
-        appendLine("Builder: ${Const.BUILDER}")
+        appendLine("Builder: ${BuildConfig.BUILDER}")
         appendLine("Version Code: ${BuildConfig.VERSION_CODE}")
         appendLine("Version Name: ${Const.VERSION_NAME}")
-        appendLine("Build Time: ${iso8601UTCDateTime(Const.BUILD_TIMESTAMP)}")
-        appendLine("Build Git Hash: ${Const.BUILD_COMMIT_HASH}")
+        appendLine("Build Time: ${iso8601UTCDateTime(BuildConfig.BUILD_TIMESTAMP)}")
+        appendLine("Build Git Hash: ${BuildConfig.BUILD_COMMIT_HASH}")
     }
 }

@@ -5,68 +5,133 @@
 
 package com.osfans.trime.ui.main
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
-import androidx.preference.get
+import com.osfans.trime.BuildConfig
 import com.osfans.trime.R
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import com.osfans.trime.util.Const
+import com.osfans.trime.util.addCategory
+import com.osfans.trime.util.addPreference
 import com.osfans.trime.util.formatDateTime
 
 class AboutFragment : PaddingPreferenceFragment() {
 
+    @SuppressLint("UseKtx")
     override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?,
     ) {
-        setPreferencesFromResource(R.xml.about_preference, rootKey)
-        with(preferenceScreen) {
-            get<Preference>("current_version")?.apply {
-                summary = Const.VERSION_NAME
-                isCopyingEnabled = true
-                intent =
+        preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+            addPreference(R.string.current_version, Const.VERSION_NAME) {
+                startActivity(
                     Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("${Const.GIT_REPO}/commit/${Const.BUILD_COMMIT_HASH}"),
-                    )
+                        Uri.parse("${BuildConfig.BUILD_GIT_REPO}/commit/${BuildConfig.BUILD_COMMIT_HASH}"),
+                    ),
+                )
             }
-
-            get<Preference>("librime_version")?.apply {
-                val code = Const.LIBRIME_VERSION
-                val hash = extractCommitHash(code)
-                summary = code
-                intent?.data?.also {
-                    intent!!.data = Uri.withAppendedPath(it, "commit/$hash")
-                }
+            addPreference(R.string.librime_version, BuildConfig.LIBRIME_VERSION) {
+                val hash = getCommitFromVersionName(BuildConfig.LIBRIME_VERSION)
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("${Const.LIBRIME_URL}/commit/$hash"),
+                    ),
+                )
             }
-            get<Preference>("opencc_version")?.apply {
-                val code = Const.OPENCC_VERSION
-                val hash = extractCommitHash(code)
-                summary = code
-                intent?.data?.also {
-                    intent!!.data = Uri.withAppendedPath(it, "commit/$hash")
-                }
+            addPreference(R.string.opencc_version, BuildConfig.OPENCC_VERSION) {
+                val hash = getCommitFromVersionName(BuildConfig.OPENCC_VERSION)
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("${Const.OPENCC_URL}/commit/$hash"),
+                    ),
+                )
             }
-            get<Preference>("build_info")?.apply {
-                summary =
-                    requireContext().getString(
+            addPreference(
+                Preference(requireContext()).apply {
+                    isIconSpaceReserved = false
+                    isCopyingEnabled = true
+                    setTitle(R.string.build_info)
+                    summary = requireContext().getString(
                         R.string.build_info_format,
-                        Const.BUILDER,
-                        Const.BUILD_COMMIT_HASH,
-                        formatDateTime(Const.BUILD_TIMESTAMP),
+                        BuildConfig.BUILDER,
+                        BuildConfig.BUILD_COMMIT_HASH,
+                        formatDateTime(BuildConfig.BUILD_TIMESTAMP),
                     )
-                isCopyingEnabled = true
-            }
-            get<Preference>("source_code")?.apply {
-                intent = Intent(Intent.ACTION_VIEW, Uri.parse(Const.GIT_REPO))
-            }
-            get<Preference>("open_source_licenses")?.apply {
-                setOnPreferenceClickListener {
+                },
+            )
+            addCategory("") {
+                isIconSpaceReserved = false
+                addPreference(R.string.privacy_policy) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(Const.PRIVACY_POLICY_URL),
+                        ),
+                    )
+                }
+                addPreference(R.string.source_code, R.string.git_repo) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(BuildConfig.BUILD_GIT_REPO),
+                        ),
+                    )
+                }
+                addPreference(R.string.license, Const.LICENSE_SPDX_ID) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(Const.LICENSE_URL),
+                        ),
+                    )
+                }
+                addPreference(
+                    R.string.open_source_licenses,
+                    R.string.licenses_of_third_party_libraries,
+                ) {
                     findNavController().navigate(NavigationRoute.License)
-                    true
+                }
+            }
+            addCategory("") {
+                isIconSpaceReserved = false
+                addPreference(R.string.qq_group_1, Const.QQ_GROUP_1_NUM) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(Const.QQ_GROUP_1_URL),
+                        ),
+                    )
+                }
+                addPreference(R.string.qq_group_2, Const.QQ_GROUP_2_NUM) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(Const.QQ_GROUP_2_URL),
+                        ),
+                    )
+                }
+                addPreference(R.string.rime_qq_group, Const.RIME_QQ_GROUP_NUM) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(Const.RIME_QQ_GROUP_URL),
+                        ),
+                    )
+                }
+                addPreference(R.string.telegram, Const.TELEGRAM_NAME) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(Const.TELEGRAM_URL),
+                        ),
+                    )
                 }
             }
         }
@@ -76,8 +141,10 @@ class AboutFragment : PaddingPreferenceFragment() {
         private val DASH_G_PATTERN = Regex("^(.*-g)([0-9a-f]+)(.*)$")
         private val COMMON_PATTERN = Regex("^([^-]*)(-.*)$")
 
-        private fun extractCommitHash(versionCode: String): String = DASH_G_PATTERN.find(versionCode)?.groupValues?.get(2)
-            ?: COMMON_PATTERN.find(versionCode)?.groupValues?.get(1)
-            ?: versionCode
+        private fun getCommitFromVersionName(versionCode: String): String {
+            val dashG = DASH_G_PATTERN.find(versionCode)?.groupValues?.get(2)
+            val common = COMMON_PATTERN.find(versionCode)?.groupValues?.get(1)
+            return dashG ?: common ?: versionCode
+        }
     }
 }

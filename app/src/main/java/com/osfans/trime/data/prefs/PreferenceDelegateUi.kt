@@ -152,7 +152,7 @@ abstract class PreferenceDelegateUi<T : Preference>(
             isIconSpaceReserved = false
             isSingleLineTitle = false
             summaryProvider = DialogSeekBarPreference.SimpleSummaryProvider
-            this@SeekBarInt.defaultLabel?.let { systemDefaultValueText = context.getString(it) }
+            this@SeekBarInt.defaultLabel?.let { systemDefaultText = context.getString(it) }
             setDefaultValue(this@SeekBarInt.defaultValue)
             setTitle(this@SeekBarInt.title)
             min = this@SeekBarInt.min

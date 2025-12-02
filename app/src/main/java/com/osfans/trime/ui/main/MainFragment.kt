@@ -6,13 +6,16 @@
 package com.osfans.trime.ui.main
 
 import android.os.Bundle
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.preference.Preference
-import androidx.preference.get
+import androidx.preference.PreferenceGroup
 import com.osfans.trime.R
 import com.osfans.trime.ui.common.PaddingPreferenceFragment
-import splitties.resources.styledColor
+import com.osfans.trime.util.addCategory
+import com.osfans.trime.util.addPreference
+import com.osfans.trime.util.navigateWithAnim
 
 class MainFragment : PaddingPreferenceFragment() {
     private val viewModel: MainViewModel by activityViewModels()
@@ -27,74 +30,68 @@ class MainFragment : PaddingPreferenceFragment() {
         super.onStop()
     }
 
+    private fun PreferenceGroup.addDestinationPreference(
+        @StringRes title: Int,
+        @DrawableRes icon: Int,
+        route: NavigationRoute,
+    ) {
+        addPreference(title, icon = icon) {
+            findNavController().navigateWithAnim(route)
+        }
+    }
+
     override fun onCreatePreferences(
         savedInstanceState: Bundle?,
         rootKey: String?,
     ) {
-        setPreferencesFromResource(R.xml.prefs, rootKey)
-        with(preferenceScreen) {
-            get<Preference>("schemata")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.SchemaList)
-                    true
-                }
-            }
-            get<Preference>("user_dict")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.UserDict)
-                    true
-                }
-            }
-            get<Preference>("user_data")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.Profile)
-                    true
-                }
-            }
-            get<Preference>("general")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.General)
-                    true
-                }
-            }
-            get<Preference>("keyboard")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.VirtualKeyboard)
-                    true
-                }
-            }
-            get<Preference>("candidates")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.CandidatesWindow)
-                    true
-                }
-            }
-            get<Preference>("theme")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.Theme)
-                    true
-                }
-            }
-            get<Preference>("clipboard")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.Clipboard)
-                    true
-                }
-            }
-            get<Preference>("advanced")?.apply {
-                icon?.setTint(styledColor(android.R.attr.colorControlNormal))
-                setOnPreferenceClickListener {
-                    findNavController().navigate(NavigationRoute.Advanced)
-                    true
-                }
+        preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+            addDestinationPreference(
+                R.string.schemata,
+                R.drawable.ic_round_view_list_24,
+                NavigationRoute.SchemaList,
+            )
+            addDestinationPreference(
+                R.string.user_dictionary,
+                R.drawable.ic_baseline_book_24,
+                NavigationRoute.UserDict,
+            )
+            addDestinationPreference(
+                R.string.profile,
+                R.drawable.ic_baseline_snippet_folder_24,
+                NavigationRoute.Profile,
+            )
+            addCategory("") {
+                isIconSpaceReserved = false
+                addDestinationPreference(
+                    R.string.general,
+                    R.drawable.ic_baseline_tune_24,
+                    NavigationRoute.General,
+                )
+                addDestinationPreference(
+                    R.string.virtual_keyboard,
+                    R.drawable.ic_baseline_keyboard_24,
+                    NavigationRoute.VirtualKeyboard,
+                )
+                addDestinationPreference(
+                    R.string.candidates_window,
+                    R.drawable.ic_baseline_list_alt_24,
+                    NavigationRoute.CandidatesWindow,
+                )
+                addDestinationPreference(
+                    R.string.theme,
+                    R.drawable.ic_baseline_color_lens_24,
+                    NavigationRoute.Theme,
+                )
+                addDestinationPreference(
+                    R.string.clipboard,
+                    R.drawable.ic_clipboard_24,
+                    NavigationRoute.Clipboard,
+                )
+                addDestinationPreference(
+                    R.string.advanced,
+                    R.drawable.ic_baseline_more_horiz_24,
+                    NavigationRoute.Advanced,
+                )
             }
         }
     }

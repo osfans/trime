@@ -9,72 +9,57 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.fragment.app.activityViewModels
-import androidx.preference.ListPreference
-import com.osfans.trime.R
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.ui.common.PaddingPreferenceFragment
-import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.data.prefs.PreferenceDelegate
+import com.osfans.trime.data.prefs.PreferenceDelegateFragment
 
-class AdvancedSettingsFragment : PaddingPreferenceFragment() {
-    private val viewModel: MainViewModel by activityViewModels()
-    private val prefs get() = AppPrefs.Companion.defaultInstance()
+class AdvancedSettingsFragment : PreferenceDelegateFragment(AppPrefs.defaultInstance().advanced) {
 
-    override fun onCreatePreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
-        addPreferencesFromResource(R.xml.advanced_preference)
-        findPreference<ListPreference>("other__ui_mode")?.setOnPreferenceChangeListener { _, newValue ->
-            val uiMode =
-                when (newValue) {
-                    "auto" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                    "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-                    else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
-                }
-            AppCompatDelegate.setDefaultNightMode(uiMode)
-            true
+    private val uiMode = AppPrefs.defaultInstance().advanced.uiMode
+
+    private val showAppIcon = AppPrefs.defaultInstance().advanced.showAppIcon
+
+    @Keep
+    private val onUiModeChange = PreferenceDelegate.OnChangeListener<AppPrefs.Advanced.UiMode> { _, v ->
+        val mode = when (v) {
+            AppPrefs.Advanced.UiMode.AUTO -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            AppPrefs.Advanced.UiMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+            AppPrefs.Advanced.UiMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES
         }
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.disableTopOptionsMenu()
+    @Keep
+    private val onShowAppIconChange = PreferenceDelegate.OnChangeListener<Boolean> { _, v ->
+        showAppIcon(requireContext(), v)
     }
 
-    override fun onPause() {
-        updateLauncherIconStatus()
-        super.onPause()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        uiMode.registerOnChangeListener(onUiModeChange)
+        showAppIcon.registerOnChangeListener(onShowAppIconChange)
     }
 
-    private fun updateLauncherIconStatus() {
-        // Set LauncherAlias enabled/disabled state just before destroying/pausing this activity
-        if (prefs.other.showAppIcon.getValue()) {
-            showAppIcon(requireContext())
-        } else {
-            hideAppIcon(requireContext())
-        }
+    override fun onDestroy() {
+        uiMode.unregisterOnChangeListener(onUiModeChange)
+        showAppIcon.unregisterOnChangeListener(onShowAppIconChange)
+        super.onDestroy()
     }
 
     companion object {
         private const val SETTINGS_ACTIVITY_NAME = "com.osfans.trime.MainLauncherAlias"
 
-        fun hideAppIcon(context: Context) {
-            val pkg: PackageManager = context.packageManager
-            pkg.setComponentEnabledSetting(
+        fun showAppIcon(context: Context, enable: Boolean) {
+            val state = if (enable) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            } else {
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            }
+            context.packageManager.setComponentEnabledSetting(
                 ComponentName(context, SETTINGS_ACTIVITY_NAME),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP,
-            )
-        }
-
-        fun showAppIcon(context: Context) {
-            val pkg: PackageManager = context.packageManager
-            pkg.setComponentEnabledSetting(
-                ComponentName(context, SETTINGS_ACTIVITY_NAME),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                state,
                 PackageManager.DONT_KILL_APP,
             )
         }

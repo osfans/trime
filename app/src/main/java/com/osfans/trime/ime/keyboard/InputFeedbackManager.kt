@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.keyboard
 
@@ -134,7 +135,7 @@ object InputFeedbackManager {
     }
 
     private val soundOnKeyPress by keyboardPrefs.soundOnKeyPress
-    private val soundEffectEnabled by keyboardPrefs.soundEffectEnabled
+    private val soundEffectEnabled by keyboardPrefs.useCustomSoundEffect
     private val soundVolume by keyboardPrefs.soundVolume
 
     /**

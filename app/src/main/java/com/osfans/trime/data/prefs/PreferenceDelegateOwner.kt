@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.data.prefs
 
@@ -141,7 +142,7 @@ abstract class PreferenceDelegateOwner(
     ): PreferenceDelegate<Int> {
         val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
         // Int can overflow when min < 0 && max == Int.MAX_VALUE
-        val ui = if ((max.toLong() - min.toLong()) / step.toLong() >= 240L) {
+        val ui = if ((max.toLong() - min.toLong()) / step.toLong() >= 256L) {
             PreferenceDelegateUi.EditTextInt(
                 title,
                 key,

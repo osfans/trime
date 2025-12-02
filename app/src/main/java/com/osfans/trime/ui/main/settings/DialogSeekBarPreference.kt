@@ -8,12 +8,22 @@ package com.osfans.trime.ui.main.settings
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.Preference
+import androidx.preference.DialogPreference
 import com.osfans.trime.R
-import com.osfans.trime.databinding.SeekBarDialogBinding
+import splitties.dimensions.dp
+import splitties.resources.resolveThemeAttribute
+import splitties.views.dsl.core.add
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.seekBar
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.verticalMargin
+import splitties.views.gravityHorizontalCenter
+import splitties.views.textAppearance
 
 /**
  * Custom preference which represents a seek bar which shows the current value in the summary. The
@@ -31,11 +41,10 @@ import com.osfans.trime.databinding.SeekBarDialogBinding
  *  [R.styleable.DialogSeekBarPreferenceAttrs_seekBarIncrement].
  * @property unit The unit to show after the value. Set to an empty string to disable this feature.
  */
-class DialogSeekBarPreference : Preference {
+class DialogSeekBarPreference : DialogPreference {
     private var value = 0
     var default: Int
-    var systemDefaultValue: Int
-    var systemDefaultValueText: String
+    var systemDefaultText: String? = null
     var min: Int
     var max: Int
     var step: Int
@@ -53,10 +62,8 @@ class DialogSeekBarPreference : Preference {
                 step = getInt(R.styleable.DialogSeekBarPreferenceAttrs_seekBarIncrement, 1)
                 default =
                     getInt(R.styleable.DialogSeekBarPreferenceAttrs_android_defaultValue, 0)
-                systemDefaultValue =
-                    getInt(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValue, -1)
-                systemDefaultValueText =
-                    getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText) ?: ""
+                systemDefaultText =
+                    getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText)
                 unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: ""
                 if (getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_useSimpleSummaryProvider, false)) {
                     summaryProvider = SimpleSummaryProvider
@@ -88,11 +95,11 @@ class DialogSeekBarPreference : Preference {
 
     /**
      * Generates the text for the given [value] and adds the defined [unit] at the end.
-     * If [systemDefaultValueText] is not null this method tries to match the given [value] with
-     * [systemDefaultValue] and returns [systemDefaultValueText] upon matching.
+     * If [systemDefaultText] is not null this method tries to match the given [value] with
+     * [default] and returns [systemDefaultText] upon matching.
      */
-    private fun getTextForValue(value: Int): String = if (value == systemDefaultValue && systemDefaultValueText.isNotEmpty()) {
-        systemDefaultValueText
+    private fun getTextForValue(value: Int): String = if (value == default && systemDefaultText != null) {
+        systemDefaultText!!
     } else {
         "$value $unit"
     }
@@ -101,9 +108,11 @@ class DialogSeekBarPreference : Preference {
      * Shows the seek bar dialog.
      */
     private fun showSeekBarDialog() = with(context) {
-        val dialogView = SeekBarDialogBinding.inflate(LayoutInflater.from(this))
-        dialogView.textView.text = getTextForValue(value)
-        dialogView.seekBar.apply {
+        val textView = textView {
+            text = getTextForValue(value)
+            textAppearance = resolveThemeAttribute(android.R.attr.textAppearanceListItem)
+        }
+        val seekBar = seekBar {
             max = getProgressForValue(this@DialogSeekBarPreference.max)
             progress = getProgressForValue(value)
             setOnSeekBarChangeListener(
@@ -113,26 +122,51 @@ class DialogSeekBarPreference : Preference {
                         progress: Int,
                         fromUser: Boolean,
                     ) {
-                        dialogView.textView.text = getTextForValue(getValueForProgress(progress))
+                        textView.text = getTextForValue(getValueForProgress(progress))
                     }
-
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                },
+            )
+        }
+        val dialogView = verticalLayout {
+            gravity = gravityHorizontalCenter
+            if (dialogMessage != null) {
+                val messageText = textView { text = dialogMessage }
+                add(
+                    messageText,
+                    lParams {
+                        verticalMargin = dp(8)
+                        horizontalMargin = dp(24)
+                    },
+                )
+            }
+            add(
+                textView,
+                lParams {
+                    verticalMargin = dp(24)
+                },
+            )
+            add(
+                seekBar,
+                lParams {
+                    width = matchParent
+                    horizontalMargin = dp(10)
+                    bottomMargin = dp(10)
                 },
             )
         }
         AlertDialog
             .Builder(this)
             .setTitle(this@DialogSeekBarPreference.title)
-            .setView(dialogView.root)
+            .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                val actualValue = getValueForProgress(dialogView.seekBar.progress)
+                val actualValue = getValueForProgress(seekBar.progress)
                 if (callChangeListener(actualValue)) {
                     persistInt(actualValue)
                     notifyChanged()
                 }
-            }.setNeutralButton(R.string.pref__default) { _, _ ->
+            }.setNeutralButton(R.string.default_) { _, _ ->
                 persistInt(default)
                 notifyChanged()
             }.setNegativeButton(android.R.string.cancel, null)
