@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime
 
@@ -126,7 +127,6 @@ class TrimeApplication : Application() {
             }
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
             val appPrefs = AppPrefs.initDefault(sharedPreferences)
-            appPrefs.initDefaultPreferences()
             // record last pid for crash logs
             appPrefs.internal.pid.apply {
                 val currentPid = Process.myPid()

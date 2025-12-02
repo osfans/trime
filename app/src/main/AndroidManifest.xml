@@ -59,7 +59,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
         <!-- Settings activity -->
         <activity
-            android:name=".ui.main.PrefMainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTask" />
 
@@ -71,7 +71,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:name=".ui.main.LogActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:parentActivityName=".ui.main.PrefMainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
 
         <activity
             android:name=".ui.main.ClipEditActivity"
@@ -85,11 +85,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
         <!-- Using an activity alias to disable/enable the app icon in the launcher -->
         <activity-alias
-            android:name="com.osfans.trime.PrefLauncherAlias"
+            android:name="com.osfans.trime.MainLauncherAlias"
             android:exported="true"
             android:label="@string/trime_app_name"
             android:launchMode="singleTask"
-            android:targetActivity=".ui.main.PrefMainActivity">
+            android:targetActivity=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

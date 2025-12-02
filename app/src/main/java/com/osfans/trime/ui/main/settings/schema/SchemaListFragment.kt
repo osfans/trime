@@ -8,9 +8,8 @@ package com.osfans.trime.ui.main.settings.schema
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.core.SchemaItem
-import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.launchOnReady
-import com.osfans.trime.ui.components.OnItemChangedListener
+import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.settings.ProgressFragment
 import com.osfans.trime.util.NaiveDustman
 import kotlinx.coroutines.Dispatchers

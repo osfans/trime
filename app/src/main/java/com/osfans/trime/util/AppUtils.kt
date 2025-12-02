@@ -7,15 +7,12 @@ package com.osfans.trime.util
 
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.util.SparseArray
 import android.view.KeyEvent
-import androidx.annotation.IdRes
-import androidx.navigation.NavDeepLinkBuilder
-import com.osfans.trime.R
 import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.ui.main.LogActivity
-import com.osfans.trime.ui.main.PrefMainActivity
+import com.osfans.trime.ui.main.MainActivity
+import com.osfans.trime.ui.main.NavigationRoute
 import timber.log.Timber
 
 object AppUtils {
@@ -47,34 +44,23 @@ object AppUtils {
     } ?: false
 
     fun launchMainActivity(context: Context) {
-        context.startActivity<PrefMainActivity> {
+        context.startActivity<MainActivity> {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
         }
     }
 
     private fun launchMainToDest(
         context: Context,
-        @IdRes dest: Int,
-        arguments: Bundle? = null,
+        route: NavigationRoute,
     ) {
-        NavDeepLinkBuilder(context)
-            .setComponentName(PrefMainActivity::class.java)
-            .setGraph(R.navigation.pref_nav)
-            .addDestination(dest, arguments)
-            .createTaskStackBuilder()
-            /**
-             * [androidx.core.app.TaskStackBuilder.getIntents] would add unwanted flags
-             * [Intent.FLAG_ACTIVITY_CLEAR_TASK] and [Intent.FLAG_ACTIVITY_TASK_ON_HOME]
-             * so we must launch the Intent by ourselves
-             */
-            .editIntentAt(0)
-            ?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                context.startActivity(this)
-            }
+        context.startActivity<MainActivity> {
+            action = Intent.ACTION_RUN
+            putExtra(MainActivity.EXTRA_SETTINGS_ROUTE, route)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+        }
     }
 
-    fun launchMainToSchemaList(context: Context) = launchMainToDest(context, R.id.schemaListFragment)
+    fun launchMainToSchemaList(context: Context) = launchMainToDest(context, NavigationRoute.SchemaList)
 
     fun launchLogActivity(context: Context) {
         context.startActivity<LogActivity>()

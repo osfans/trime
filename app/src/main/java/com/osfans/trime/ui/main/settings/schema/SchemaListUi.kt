@@ -23,7 +23,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.osfans.trime.R
 import com.osfans.trime.core.SchemaItem
-import com.osfans.trime.ui.components.OnItemChangedListener
+import com.osfans.trime.ui.common.OnItemChangedListener
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.resources.styledColor

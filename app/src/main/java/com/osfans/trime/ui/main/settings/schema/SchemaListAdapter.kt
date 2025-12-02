@@ -15,7 +15,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
 import com.osfans.trime.core.SchemaItem
-import com.osfans.trime.ui.components.OnItemChangedListener
+import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.MainViewModel
 
 open class SchemaListAdapter(

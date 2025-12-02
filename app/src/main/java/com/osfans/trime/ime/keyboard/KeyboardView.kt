@@ -18,8 +18,6 @@ import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -69,7 +67,7 @@ class KeyboardView(
      * Enables or disables the key feedback popup. This is a popup that shows a magnified version of
      * the depressed key. By default the preview is enabled.
      */
-    private val showPreview by AppPrefs.defaultInstance().keyboard.popupKeyPressEnabled
+    private val showPreview by AppPrefs.defaultInstance().keyboard.popupOnKeyPress
     private val vibrateOnKeyRelease by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRelease
     private val vibrateOnKeyRepeat by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRepeat
 

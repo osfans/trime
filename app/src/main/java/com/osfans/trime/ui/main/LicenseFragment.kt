@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-package com.osfans.trime.ui.fragments
+package com.osfans.trime.ui.main
 
 import android.content.Intent
 import android.net.Uri
@@ -15,8 +16,7 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.License
 import com.mikepenz.aboutlibraries.util.withJson
 import com.osfans.trime.R
-import com.osfans.trime.ui.components.PaddingPreferenceFragment
-import com.osfans.trime.ui.main.MainViewModel
+import com.osfans.trime.ui.common.PaddingPreferenceFragment
 import kotlinx.coroutines.launch
 
 class LicenseFragment : PaddingPreferenceFragment() {

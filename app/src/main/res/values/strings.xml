@@ -1,39 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
     <!-- Input Method Platform Tittle  -->
     <string name="app_name_release">Trime</string>
     <string name="app_name_debug">Trime (Debug)</string>
     <!-- Preference settings -->
-    <string name="settings__help_title">Help</string>
-    <string name="pref_wiki">Wiki</string>
-    <string name="pref_issues">Report Issues</string>
-    <string name="pref_trime_qq">Trime QQ Group 1</string>
-    <string name="pref_trime_qq2">Trime QQ Group 2</string>
-    <string name="pref_rime_qq">Rime QQ Group</string>
-    <string name="pref_market">Google Play</string>
-    <string name="about__donation_title">Donate</string>
-    <string name="about__donation_summary">Use Alipay to support Trime and PRIME</string>
-    <string name="settings__about_title">About</string>
-    <string name="about__librime_version">Rime Version</string>
-    <string name="about__opencc_version">OpenCC Version</string>
-    <string name="about__changelog">Change Log</string>
+    <string name="qq_group_1">Trime QQ group 1</string>
+    <string name="qq_group_2">Trime QQ group 2</string>
+    <string name="rime_qq_group">RIME QQ group</string>
+    <string name="librime_version">RIME version</string>
+    <string name="opencc_version">OpenCC version</string>
+    <string name="current_version">Current version</string>
     <string name="license">License</string>
-    <string name="pref_credits">Contribute</string>
-    <string name="about__privacy_policy">Privacy Policy</string>
-    <string name="about__build_info_format">Builder: %1$s\nGit Repo: %2$s\nBuild Git Hash: %3$s\nBuild Time: %4$s</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="build_info_format">Builder: %1$s\nBuild Git Hash: %2$s\nBuild Time: %3$s</string>
     <string name="selected_theme">Themes</string>
     <string name="selected_theme_summary">Select desired theme</string>
     <string name="normal_mode_color">Colors</string>
     <string name="normal_mode_color_summary">Select desired color</string>
-    <string name="profile_reset">Reset</string>
-    <string name="profile_reset_summary">Overwrite the same files in shared directory with default built-in assets</string>
+    <string name="reset">Reset</string>
+    <string name="reset_hint">Overwrite the same files in shared directory with default built-in assets</string>
     <string name="sound_on_keypress">Sound on key press</string>
     <string name="sound_volume">Sound volume on key press</string>
     <string name="vibrate_on_key_press">Vibrate on key press</string>
@@ -42,64 +33,40 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="vibration_duration">Vibration duration on key press</string>
     <string name="vibration_amplitude">Vibration amplitude on key press</string>
     <string name="speak_on_keypress">Voice on key press</string>
-    <string name="speak_key_commit">Voice on commit</string>
-    <string name="keyboard__long_press_timeout_title">Long key press delay</string>
-    <string name="keyboard__key_repeat_interval_title">Key repeat interval</string>
-    <string name="keyboard__show_key_popup_title">Popup on key press</string>
-    <string-array name="keyboard__landscape_mode_entries">
-        <item>Never</item>
-        <item>Only in landscape mode</item>
-        <item>Auto (In wide screen or landscape mode)</item>
-        <item>Always</item>
-    </string-array>
-    <string-array name="other__ui_mode_entries" >
-        <item>System Default</item>
-        <item>Light</item>
-        <item>Dark</item>
-    </string-array>
-    <string name="keyboard__soft_cursor_title">Use soft cursor(^) in composition</string>
-    <string name="pref_deploy">Deploy</string>
+    <string name="speak_on_commit">Voice on commit</string>
+    <string name="key_long_press_timeout">Long key press delay</string>
+    <string name="key_repeat_interval">Key repeat interval</string>
+    <string name="popup_on_key_press">Popup on key press</string>
+    <string name="use_soft_cursor">Use soft cursor (^) in preedit</string>
+    <string name="deploy">Deploy</string>
     <string name="sync_user_data_immediately">Sync user data immediately</string>
     <string name="reset_success">Reset Succeeded!</string>
     <string name="reset_failure">Reset Failed!</string>
     <string name="deploy_progress">Deploying…</string>
     <string name="other_ime">Other IMEs</string>
-    <string name="other__ui_mode_title">Night Mode</string>
-    <string name="others">Others</string>
-    <string name="profile_user_data_dir">User directory</string>
+    <string name="ui_mode">UI mode</string>
+    <string name="advanced">Advanced</string>
+    <string name="user_data_dir">User directory</string>
     <string name="periodic_background_sync">Periodic background sync</string>
     <string name="periodic_background_sync_status">Last: %1$s (%2$s)</string>
-    <string name="pref_help__marketplace">Marketplace</string>
-    <string name="pref_help__user_community">User Community</string>
-    <string name="pref_keyboard__function">View</string>
     <string name="effects">Effects</string>
-    <string name="other__show_app_icon_title">Show app icon in launcher</string>
-    <string name="other__show_app_icon_on_summary">This option is only available on some ROMs</string>
-    <string name="other__show_app_icon_off_summary">In some ROMs, you will still see this icon in the launcher and may go to the system\'s app information page after tapping it</string>
-    <string name="pref__default">Default</string>
+    <string name="show_app_icon">Show app icon in launcher</string>
+    <string name="only_available_on_some_roms">This option is only available on some ROMs</string>
+    <string name="default_">Default</string>
     <string name="clipboard_limit">Clipboard history limit</string>
     <string name="clipboard_compare_rules">Clipboard compare rules</string>
     <string name="clipboard_output_rules">Clipboard output rules</string>
     <string name="clipboard_suggestion">Show clipboard suggestions</string>
     <string name="clipboard_suggestion_timeout">Clipboard suggestion timeout</string>
-    <string name="keyboard__fullscreen_mode_title">Landscape fullscreen input</string>
     <string name="deploy_finish">Deploy finish</string>
-    <string-array name="keyboard__fullscreen_mode_entries">
-        <item>auto_show</item>
-        <item>always_show</item>
-        <item>never_show</item>
-    </string-array>
-    <string name="about__app_info">App Information</string>
-    <string name="about__licensing">Licensing</string>
-    <string name="about__support">Support</string>
-    <string name="about__open_source_licenses">Open Source Licenses</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
     <string name="system_default">System default</string>
-    <string name="keyboard__key_swipe_travel_title">Min travel for gesture</string>
+    <string name="key_swipe_travel">Min travel for gesture</string>
     <string name="trime_app_slogan">Rimes with Your Keystrokes on Android</string>
     <string name="external_storage_permission_not_available">External storage permission is not available</string>
     <string name="external_storage_permission_granted">External storage permission is granted</string>
     <string name="external_storage_permission_denied">External storage permission was denied, deployment or reading schemas and config may not be available</string>
-    <string name="custom_sound_effect_name">Key Sound Effect</string>
+    <string name="custom_sound_effect_name">Custom key Sound Effect</string>
     <string name="setup__next">Next</string>
     <string name="setup__done">Done</string>
     <string name="setup__enable_ime_hint">Enable <b>Trime</b> in Language and input settings</string>
@@ -115,22 +82,20 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__skip_hint_yes">OK, thanks</string>
     <string name="setup__skip_hint_no">No, please leave me here</string>
     <string name="follow_system_day_night_color">Follow system day/night color</string>
-    <string name="pref_keyboard__hook">Hook</string>
-    <string name="keyboard__hook_ctrl_a">Hook Ctrl+A</string>
-    <string name="keyboard__hook_ctrl_cv">Hook Ctrl+C/V/X</string>
-    <string name="keyboard__hook_ctrl_lr">Hook Ctrl+Left/Right</string>
-    <string name="keyboard__hook_ctrl_zy">Hook Ctrl+Z/Y</string>
-    <string name="pref_keyboard__hook_summary">Not handled by the App being edited or librime</string>
-    <string name="keyboard__swipe_enabled">Allow swipe gestures to trigger keys</string>
-    <string name="keyboard__key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
-    <string name="about__build_info">Build Info</string>
-    <string name="pref_trime_telegram">Telegram Group</string>
+    <string name="hook_ctrl_a">Hook Ctrl+A</string>
+    <string name="hook_ctrl_cv">Hook Ctrl+C/V/X</string>
+    <string name="hook_ctrl_lr">Hook Ctrl+Left/Right</string>
+    <string name="hook_ctrl_zy">Hook Ctrl+Z/Y</string>
+    <string name="key_swipe_enabled">Allow swipe gestures to trigger keys</string>
+    <string name="key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
+    <string name="build_info">Build Info</string>
+    <string name="telegram">Telegram</string>
     <string name="quick_bar">Quick bar</string>
     <string name="copy_done">Copied to clipboard!</string>
-    <string name="keyboard__hook_shift_space">Ignore Shift locked for Space</string>
-    <string name="keyboard__hook_shift_num">Ignore Shift locked for 0-9</string>
-    <string name="keyboard__hook_shift_symbol">Ignore Shift locked for Symbol keys</string>
-    <string name="keyboard__hook_shift_arrow">Keep Shift locked for Arrow keys</string>
+    <string name="hook_shift_space">Ignore Shift locked for Space</string>
+    <string name="hook_shift_num">Ignore Shift locked for 0-9</string>
+    <string name="hook_shift_symbol">Ignore Shift locked for Symbol keys</string>
+    <string name="hook_shift_arrow">Keep Shift locked for Arrow keys</string>
     <string name="exception_logcat_created">Logcat process is already created</string>
     <string name="app_crash">Application crashed</string>
     <string name="app_crash_message">Sorry, but we bring you some logs to investigate.</string>
@@ -141,7 +106,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="clear">Clear Screen</string>
     <string name="export">Export</string>
     <string name="scroll_to_bottom">Jump to Bottom</string>
-    <string name="toolkit">Toolkit</string>
+    <string name="developer">Developer</string>
     <string name="profile">Profile</string>
     <string name="virtual_keyboard">Virtual Keyboard</string>
     <string name="theme">Keyboard Style</string>
@@ -151,7 +116,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="loading">Loading</string>
     <string name="success">success</string>
     <string name="failure">failure</string>
-    <string name="profile_summary">Define storage locations and change sync settings, etc.</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="collect">Collect</string>
@@ -159,7 +123,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="ask_to_delete_all">Delete All?</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
-    <string name="about__open_source_licenses_summary">Licenses of third-party libraries</string>
+    <string name="licenses_of_third_party_libraries">Licenses of third-party libraries</string>
     <string name="clipboard">Clipboard</string>
     <string name="collection">Collection</string>
     <string name="simple_key_unpin">Unpin</string>
@@ -168,9 +132,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="disable">Disable</string>
     <string name="a_regular_expression_per_line">A regular expression per line</string>
     <string name="custom_sound_effect_enabled">Use custom key sound</string>
-    <string name="pref_keyboard__landscape">Landscape Mode</string>
-    <string name="keyboard__landscape_mode_title">Enable Landscape Mode</string>
-    <string name="keyboard__split_space_title">Auto Split Keyboard Space Ratio</string>
+    <string name="enable_landscape_mode">Enable Landscape Mode</string>
+    <string name="split_space_percent">Auto Split Keyboard Space Ratio</string>
     <string name="setup__step_three">Setup 3</string>
     <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>
     <string name="setup__request_permmision">Request storage permmision</string>
@@ -223,8 +186,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
     <string name="ascii_switch_tips">Show tips when switching ASCII mode</string>
-    <string name="keyboard__key_double_tap_timeout">Key double tap timeout</string>
-    <string name="keyboard__key_slide_step_size">Step size for key sliding</string>
+    <string name="key_double_tap_timeout">Key double tap timeout</string>
+    <string name="key_slide_step_size">Step size for key sliding</string>
     <string name="user_dictionary">User dictionary</string>
     <string name="import_">Import</string>
     <string name="import_error">Import error</string>
@@ -236,4 +199,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="restore">Restore</string>
     <string name="clipboard_listening">Clipboard listening</string>
     <string name="clipboard_return_after_paste">Return after pasting</string>
+    <string name="source_code">Source code</string>
+    <string name="git_repo">Git repository</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="never">Never</string>
+    <string name="landscape_only">Landscape only</string>
+    <string name="wide_or_landscape">Wide or landscape</string>
+    <string name="always">Always</string>
 </resources>

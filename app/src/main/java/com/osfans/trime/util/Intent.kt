@@ -8,6 +8,18 @@ package com.osfans.trime.util
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.Parcelable
+
+inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? {
+    // https://issuetracker.google.com/issues/240585930#comment6
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        getParcelableExtra(key, T::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        getParcelableExtra(key) as? T
+    }
+}
 
 private const val ANDROID_INTENT_ACTION_PREFIX = "android.intent.action"
 

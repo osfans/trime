@@ -142,7 +142,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private suspend fun updateRimeOption(api: RimeApi) {
         try {
-            api.setRuntimeOption("soft_cursor", prefs.keyboard.softCursorEnabled.getValue()) // 軟光標
+            api.setRuntimeOption("soft_cursor", prefs.keyboard.useSoftCursor.getValue()) // 軟光標
         } catch (e: Exception) {
             Timber.e(e)
         }

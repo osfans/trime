@@ -1,39 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-SPDX-FileCopyrightText: 2015 - 2024 Rime community
-
-SPDX-License-Identifier: GPL-3.0-or-later
--->
+  ~ SPDX-FileCopyrightText: 2015 - 2025 Rime community
+  ~ SPDX-License-Identifier: GPL-3.0-or-later
+  -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- 輸入法平臺名稱  -->
     <string name="app_name_release">同文輸入法</string>
     <string name="app_name_debug">同文輸入法（除錯模式）</string>
     <!-- Preference settings -->
-    <string name="settings__help_title">尋求幫助</string>
-    <string name="pref_wiki">維基教程</string>
-    <string name="pref_issues">問題反饋</string>
-    <string name="pref_trime_qq">同文QQ羣 1</string>
-    <string name="pref_trime_qq2">同文QQ羣 2</string>
-    <string name="pref_rime_qq">中州韻QQ羣</string>
-    <string name="pref_market">谷歌市場</string>
-    <string name="about__donation_title">捐贈</string>
-    <string name="about__donation_summary">自願用支付寶捐助同文和PRIME的開發</string>
-    <string name="settings__about_title">關於</string>
-    <string name="about__librime_version">RIME版本</string>
-    <string name="about__opencc_version">OpenCC版本</string>
-    <string name="about__changelog">更新日誌</string>
+    <string name="qq_group_1">同文 QQ 羣 1</string>
+    <string name="qq_group_2">同文 QQ 羣 2</string>
+    <string name="rime_qq_group">中州韻 QQ 羣</string>
+    <string name="librime_version">RIME 版本</string>
+    <string name="opencc_version">OpenCC 版本</string>
+    <string name="current_version">當前版本</string>
     <string name="license">許可證</string>
-    <string name="pref_credits">貢獻代碼</string>
-    <string name="about__privacy_policy">隱私權政策</string>
-    <string name="about__build_info_format">建構者：%1$s\nGit 倉庫：%2$s\n建構 Git 雜湊值：%3$s\n建構時間：%4$s</string>
+    <string name="privacy_policy">隱私權政策</string>
+    <string name="build_info_format">建構者：%1$s\n建構 Git 雜湊值：%2$s\n建構時間：%3$s</string>
     <string name="selected_theme">主題</string>
     <string name="selected_theme_summary">選取想要的主題</string>
     <string name="normal_mode_color">配色</string>
     <string name="normal_mode_color_summary">選取想要的配色</string>
-    <string name="profile_reset">回廠</string>
-    <string name="profile_reset_summary">使用預設的內建設置覆蓋共享資料夾下相同檔案</string>
+    <string name="reset">回廠</string>
+    <string name="reset_hint">使用預設的內建設置覆蓋共享資料夾下相同檔案</string>
     <string name="sound_on_keypress">按鍵聲音</string>
     <string name="sound_volume">按鍵音量</string>
     <string name="vibrate_on_key_press">按鍵時振動</string>
@@ -42,58 +33,35 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="vibration_duration">按鍵振動時長</string>
     <string name="vibration_amplitude">按鍵振動強度</string>
     <string name="speak_on_keypress">按鍵時朗讀字符</string>
-    <string name="speak_key_commit">上屏時朗讀字符</string>
-    <string name="keyboard__long_press_timeout_title">長按按鍵的延遲時間</string>
-    <string name="keyboard__key_repeat_interval_title">重複按鍵的重複間隔</string>
-    <string name="keyboard__show_key_popup_title">按鍵時彈出顯示字符</string>
-    <string-array name="keyboard__landscape_mode_entries">
-        <item>永不</item>
-        <item>只在橫屏時</item>
-        <item>在闊螢幕或橫屏時</item>
-        <item>永遠都是</item>
-    </string-array>
-    <string-array name="other__ui_mode_entries" >
-        <item name="auto">系統預設</item>
-        <item name="light">亮色</item>
-        <item name="dark">暗色</item>
-    </string-array>
-    <string name="keyboard__soft_cursor_title">懸浮窗編碼區使用插入符號(^)</string>
-    <string name="pref_deploy">部署</string>
+    <string name="speak_on_commit">上屏時朗讀字符</string>
+    <string name="key_long_press_timeout">長按按鍵的延遲時間</string>
+    <string name="key_repeat_interval">重複按鍵的重複間隔</string>
+    <string name="popup_on_key_press">按鍵時彈出顯示字符</string>
+    <string name="use_soft_cursor">預編輯區使用插入符號（^）</string>
+    <string name="deploy">部署</string>
     <string name="sync_user_data_immediately">立即同步使用者資料</string>
     <string name="reset_success">回廠成功</string>
     <string name="reset_failure">回廠失敗</string>
     <string name="deploy_progress">正在部署…</string>
     <string name="other_ime">其他輸入法</string>
-    <string name="other__ui_mode_title">夜間模式</string>
-    <string name="others">其他</string>
-    <string name="profile_user_data_dir">使用者資料夾</string>
+    <string name="ui_mode">使用者界面模式</string>
+    <string name="advanced">高級</string>
+    <string name="user_data_dir">使用者資料夾</string>
     <string name="periodic_background_sync">後台定時同步</string>
     <string name="periodic_background_sync_status">上次同步時間（狀態）：%1$s（%2$s）</string>
-    <string name="pref_help__marketplace">應用市場</string>
-    <string name="pref_help__user_community">使用者社群</string>
-    <string name="pref_keyboard__function">檢視</string>
     <string name="effects">效果</string>
-    <string name="other__show_app_icon_on_summary">此選項僅對部分 ROM 有效</string>
-    <string name="other__show_app_icon_title">在啟動器中顯示圖示</string>
-    <string name="other__show_app_icon_off_summary">在某些 ROM 中，您仍會看到圖示顯示，並可能在>點選它後轉到系統的應用資訊頁</string>
-    <string name="pref__default">預設</string>
+    <string name="only_available_on_some_roms">此選項僅對部分 ROM 有效</string>
+    <string name="show_app_icon">在啟動器中顯示圖示</string>
+    <string name="default_">預設</string>
     <string name="clipboard_limit">剪貼簿歷史記錄上限</string>
     <string name="clipboard_compare_rules">剪貼簿去重規則</string>
     <string name="clipboard_output_rules">剪貼簿過濾規則</string>
     <string name="clipboard_suggestion">顯示剪貼簿建議</string>
     <string name="clipboard_suggestion_timeout">剪貼簿項目逾時</string>
-    <string name="keyboard__fullscreen_mode_title">橫屏時全屏編輯</string>
     <string name="deploy_finish">部署完成</string>
-    <string-array name="keyboard__fullscreen_mode_entries">
-        <item>自動</item>
-        <item>總是</item>
-        <item>從不</item>
-    </string-array>
-    <string name="about__app_info">應用資訊</string>
-    <string name="about__support">支援</string>
-    <string name="about__open_source_licenses">開放源代碼軟體許可</string>
+    <string name="open_source_licenses">開放源代碼軟體許可</string>
     <string name="system_default">系統預設</string>
-    <string name="keyboard__key_swipe_travel_title">觸發滑動手勢的最短距離</string>
+    <string name="key_swipe_travel">觸發滑動手勢的最短距離</string>
     <string name="trime_app_slogan">擊響中文之韻</string>
     <string name="external_storage_permission_not_available">儲存許可權不可用</string>
     <string name="external_storage_permission_granted">已授予儲存許可權</string>
@@ -114,22 +82,20 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="setup__skip_hint_yes">好的，謝謝</string>
     <string name="setup__skip_hint_no">不，我想留在這兒</string>
     <string name="follow_system_day_night_color">跟隨系統設定主題色調</string>
-    <string name="pref_keyboard__hook">攔截事件</string>
-    <string name="keyboard__hook_ctrl_a">攔截 Ctrl+A</string>
-    <string name="keyboard__hook_ctrl_cv">攔截 Ctrl+C/V/X</string>
-    <string name="keyboard__hook_ctrl_lr">攔截 Ctrl+Left/Right</string>
-    <string name="keyboard__hook_ctrl_zy">攔截 Ctrl+Z/Y</string>
-    <string name="pref_keyboard__hook_summary">事件不發送給被編輯的 App 及 librime</string>
-    <string name="keyboard__swipe_enabled">允許觸發按鍵的滑動手勢</string>
-    <string name="keyboard__key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
-    <string name="about__build_info">建構資訊</string>
-    <string name="pref_trime_telegram">Telegram群組</string>
+    <string name="hook_ctrl_a">攔截 Ctrl+A</string>
+    <string name="hook_ctrl_cv">攔截 Ctrl+C/V/X</string>
+    <string name="hook_ctrl_lr">攔截 Ctrl+Left/Right</string>
+    <string name="hook_ctrl_zy">攔截 Ctrl+Z/Y</string>
+    <string name="key_swipe_enabled">允許觸發按鍵的滑動手勢</string>
+    <string name="key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
+    <string name="build_info">建構資訊</string>
+    <string name="telegram">Telegram</string>
     <string name="quick_bar">快捷欄</string>
     <string name="copy_done">已複製</string>
-    <string name="keyboard__hook_shift_space">點擊空格時，忽略Shift的鎖定狀態</string>
-    <string name="keyboard__hook_shift_num">點擊0-9時，忽略Shift的鎖定狀態</string>
-    <string name="keyboard__hook_shift_symbol">點擊符號鍵時，忽略Shift的鎖定狀態</string>
-    <string name="keyboard__hook_shift_arrow">點選方向鍵時，保持Shift的鎖定狀態</string>
+    <string name="hook_shift_space">點擊空格時，忽略Shift的鎖定狀態</string>
+    <string name="hook_shift_num">點擊0-9時，忽略Shift的鎖定狀態</string>
+    <string name="hook_shift_symbol">點擊符號鍵時，忽略Shift的鎖定狀態</string>
+    <string name="hook_shift_arrow">點選方向鍵時，保持Shift的鎖定狀態</string>
     <string name="export">匯出</string>
     <string name="scroll_to_bottom">跳到最後</string>
     <string name="app_crash_message">抱歉，但我們為您帶來了一些紀錄檔以供調查。</string>
@@ -139,12 +105,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="real_time_logs_clear">清除所有紀錄檔</string>
     <string name="real_time_logs_confirm">要清除有紀錄檔嗎？(此動作不能復原)</string>
     <string name="clear">清除畫面</string>
-    <string name="toolkit">工具箱</string>
+    <string name="developer">開發者</string>
     <string name="exception_logcat_created">Logcat 行程已建立</string>
     <string name="about">關於</string>
     <string name="theme">鍵盤樣式</string>
     <string name="profile">配置</string>
-    <string name="profile_summary">設定儲存位置和修改同步設定等</string>
     <string name="virtual_keyboard">虛擬鍵盤</string>
     <string name="storage">儲存</string>
     <string name="maintenance">維護</string>
@@ -158,8 +123,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="ask_to_delete_all">刪除全部？</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
-    <string name="about__licensing">許可</string>
-    <string name="about__open_source_licenses_summary">第三方軟體庫許可證</string>
+    <string name="licenses_of_third_party_libraries">第三方軟體庫許可證</string>
     <string name="clipboard">剪貼簿</string>
     <string name="collection">收藏夾</string>
     <string name="simple_key_unpin">取消置頂</string>
@@ -168,9 +132,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="disable">停用</string>
     <string name="a_regular_expression_per_line">一行一條正則表示式</string>
     <string name="custom_sound_effect_enabled">使用自訂按鍵音</string>
-    <string name="pref_keyboard__landscape">橫向模式</string>
-    <string name="keyboard__landscape_mode_title">啟用橫屏模式</string>
-    <string name="keyboard__split_space_title">自動分割鍵盤比例</string>
+    <string name="enable_landscape_mode">啟用橫屏模式</string>
+    <string name="split_space_percent">自動分割鍵盤比例</string>
     <string name="setup__step_three">第 3 步</string>
     <string name="setup__request_permmision_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>
     <string name="setup__request_permmision">请求存储权限</string>
@@ -223,8 +186,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="horizontal">橫向</string>
     <string name="vertical">"縱向 "</string>
     <string name="ascii_switch_tips">切換中英文模式時顯示提示</string>
-    <string name="keyboard__key_double_tap_timeout">按鍵連擊逾時</string>
-    <string name="keyboard__key_slide_step_size">按鍵滑動步長</string>
+    <string name="key_double_tap_timeout">按鍵連擊逾時</string>
+    <string name="key_slide_step_size">按鍵滑動步長</string>
     <string name="user_dictionary">使用者詞典</string>
     <string name="exported_n_entries">已匯出 %1$d 個詞條</string>
     <string name="backed_up_x_to_sync_dir">已備份 %1$s 到同步目錄</string>
@@ -236,4 +199,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="restore">還原</string>
     <string name="clipboard_listening">監聽剪貼簿</string>
     <string name="clipboard_return_after_paste">貼上後返回</string>
+    <string name="source_code">原始碼</string>
+    <string name="git_repo">Git 儲存庫</string>
+    <string name="light">亮色</string>
+    <string name="dark">暗色</string>
+    <string name="never">從不</string>
+    <string name="landscape_only">僅限橫屏</string>
+    <string name="wide_or_landscape">寬屏或橫屏</string>
+    <string name="always">始終</string>
 </resources>

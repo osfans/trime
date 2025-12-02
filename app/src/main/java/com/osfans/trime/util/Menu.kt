@@ -20,12 +20,16 @@ fun MenuItem.setup(
     showAsAction: Boolean,
     onClick: Function0<Any?>?,
 ): MenuItem {
-    if (icon != 0 && iconTint != 0) {
+    if (icon != 0) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            iconTintList = ColorStateList.valueOf(iconTint)
+            if (iconTint != 0) {
+                iconTintList = ColorStateList.valueOf(iconTint)
+            }
             setIcon(icon)
         } else {
-            setIcon(appContext.drawable(icon)?.apply { setTint(iconTint) })
+            val drawable = appContext.drawable(icon)
+            if (iconTint != 0) drawable?.setTint(iconTint)
+            setIcon(drawable)
         }
     }
     if (showAsAction) {

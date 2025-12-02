@@ -8,7 +8,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:supportsSwitchingToNextInputMethod="true"
-    android:settingsActivity="com.osfans.trime.ui.main.PrefMainActivity">
+    android:settingsActivity="com.osfans.trime.ui.main.MainActivity">
 
     <!-- Add default system subtype so we can properly set the icon and label -->
     <subtype android:label="@string/trime_app_slogan"
