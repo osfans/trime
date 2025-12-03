@@ -49,7 +49,6 @@ object InputFeedbackManager {
                             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                             .build(),
                     ).build()
-            cacheSoundId()
         } catch (e: Exception) {
             Timber.e(e, "Error on initializing InputFeedbackManager")
         }
@@ -66,6 +65,9 @@ object InputFeedbackManager {
     }
 
     fun startInput() {
+        if (SoundEffectManager.activeSoundEffect == null) {
+            SoundEffectManager.init()
+        }
         cacheSoundId()
     }
 

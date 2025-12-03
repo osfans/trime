@@ -46,7 +46,6 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.prefs.PreferenceDelegate
 import com.osfans.trime.data.prefs.PreferenceDelegateProvider
-import com.osfans.trime.data.soundeffect.SoundEffectManager
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
@@ -179,7 +178,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         ThemeManager.init(resources.configuration)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         ColorManager.addOnChangedListener(onColorChangeListener)
-        SoundEffectManager.init()
         InputFeedbackManager.init(this)
         registerReceiver()
         super.onCreate()
