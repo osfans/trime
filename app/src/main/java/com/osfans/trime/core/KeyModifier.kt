@@ -89,15 +89,30 @@ value class KeyModifiers(
         fun of(v: Int) = KeyModifiers(v.toUInt())
 
         fun fromKeyEvent(event: KeyEvent): KeyModifiers {
+            val isRelease = event.action == KeyEvent.ACTION_UP
+            // drop modifier state when using combination keys to input number/symbol on some phones
+            // because rime doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
+            // in which case event.getNumber().toInt() == event.getUnicodeChar()
+            // ... but some keys can have event.getNumber() return 0, need to check displayLabel as well
+            val unicode = event.unicodeChar
+            // skip ' ', because it would produce same unicodeChar regardless of the modifier
+            if (unicode != 0 && unicode != ' '.code) {
+                val char = unicode.toChar()
+                if (char == event.number || event.displayLabel.uppercaseChar() != char.uppercaseChar()) {
+                    return if (isRelease) Release else Empty
+                }
+            }
             var states = KeyModifier.None.modifier
             event.apply {
+                // we just need to make rime care about following uncommented
+                // modifier states when forwarding physical keyboard event
                 if (isAltPressed) states += KeyModifier.Alt
                 if (isCtrlPressed) states += KeyModifier.Control
                 if (isShiftPressed) states += KeyModifier.Shift
                 if (isCapsLockOn) states += KeyModifier.Lock
-                if (isNumLockOn) states += KeyModifier.Mod2 // NumLock
-                if (isMetaPressed) states += KeyModifier.Meta
-                if (action == KeyEvent.ACTION_UP) states += KeyModifier.Release
+//                if (isNumLockOn) states += KeyModifier.Mod2 // NumLock
+//                if (isMetaPressed) states += KeyModifier.Meta
+                if (isRelease) states += KeyModifier.Release
             }
             return KeyModifiers(states)
         }

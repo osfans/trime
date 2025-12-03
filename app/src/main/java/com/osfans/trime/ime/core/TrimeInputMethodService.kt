@@ -35,7 +35,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import com.osfans.trime.core.KeyModifier
 import com.osfans.trime.core.KeyModifiers
 import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.RimeApi
@@ -668,27 +667,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
-        val up = event.action == KeyEvent.ACTION_UP
-        var modifiers = KeyModifiers.fromKeyEvent(event)
-        // Filter out NumLock for non-numpad keys to fix scrcpy issue
-        // where NumLock is incorrectly sent with keys like space and backspace
-        if (event.keyCode !in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
-            modifiers = KeyModifiers(modifiers.modifiers and KeyModifier.Mod2.modifier.inv())
-        }
-        val charCode = event.unicodeChar
-        if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
-            // drop modifier state when using combination keys to input number/symbol on some phones
-            // because rime doesn't recognize selection key with modifiers (eg. Alt+Q for 1)
-            // in which case event.getNumber().toInt() == event.getUnicodeChar()
-            val empty = if (up) KeyModifiers.Release else KeyModifiers.Empty
-            val m = if (event.number.code == charCode) empty else modifiers
-            postRimeJob {
-                processKey(charCode, m.modifiers, isVirtual = false)
-            }
-            return true
-        }
         val keyVal = KeyValue.fromKeyEvent(event)
         if (keyVal.value != RimeKeyMapping.RimeKey_VoidSymbol) {
+            val modifiers = KeyModifiers.fromKeyEvent(event)
             postRimeJob {
                 processKey(keyVal, modifiers, isVirtual = false)
             }
