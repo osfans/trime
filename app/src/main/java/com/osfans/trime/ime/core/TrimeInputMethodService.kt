@@ -673,7 +673,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         // Filter out NumLock for non-numpad keys to fix scrcpy issue
         // where NumLock is incorrectly sent with keys like space and backspace
         if (event.keyCode !in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
-            modifiers = KeyModifiers(modifiers.modifiers - KeyModifier.Mod2)
+            modifiers = KeyModifiers(modifiers.modifiers and KeyModifier.Mod2.modifier.inv())
         }
         val charCode = event.unicodeChar
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
