@@ -668,7 +668,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun forwardKeyEvent(event: KeyEvent): Boolean {
         val up = event.action == KeyEvent.ACTION_UP
-        val modifiers = KeyModifiers.fromKeyEvent(event)
+        var modifiers = KeyModifiers.fromKeyEvent(event)
+        // Filter out NumLock for non-numpad keys to fix scrcpy issue
+        // where NumLock is incorrectly sent with keys like space and backspace
+        if (event.keyCode !in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_EQUALS) {
+            modifiers = KeyModifiers(modifiers.modifiers - KeyModifier.Mod2)
+        }
         val charCode = event.unicodeChar
         if (charCode > 0 && charCode != '\t'.code && charCode != '\n'.code && charCode != ' '.code) {
             // drop modifier state when using combination keys to input number/symbol on some phones
