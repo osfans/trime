@@ -87,6 +87,28 @@ abstract class PreferenceDelegateUi<T : Preference>(
         }
     }
 
+    class StringOnlyList(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: String,
+        val entryValues: (() -> List<String>),
+        val entryLabels: (() -> List<String>),
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<ListPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = ListPreference(context).apply {
+            key = this@StringOnlyList.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            entryValues = this@StringOnlyList.entryValues().toTypedArray()
+            summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+            setDefaultValue(defaultValue)
+            setTitle(this@StringOnlyList.title)
+            entries = this@StringOnlyList.entryLabels().toTypedArray()
+            setDialogTitle(this@StringOnlyList.title)
+        }
+    }
+
     class EditText(
         @StringRes
         val title: Int,

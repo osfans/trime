@@ -207,4 +207,5 @@
     <string name="landscape_only">Landscape only</string>
     <string name="wide_or_landscape">Wide or landscape</string>
     <string name="always">Always</string>
+    <string name="selected_voice_input">Voice Input Method</string>
 </resources>

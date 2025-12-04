@@ -111,6 +111,21 @@ abstract class PreferenceDelegateOwner(
         return pref
     }
 
+    protected inline fun stringList(
+        @StringRes title: Int,
+        key: String,
+        defaultValue: String,
+        noinline entryValues: (() -> List<String>),
+        noinline entryLabels: (() -> List<String>),
+        noinline enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate<String> {
+        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
+        val ui = PreferenceDelegateUi.StringOnlyList(title, key, defaultValue, entryValues, entryLabels, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     protected fun editText(
         @StringRes
         title: Int,
