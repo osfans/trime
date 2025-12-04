@@ -33,3 +33,5 @@ class CandidateItem {
       : text(candidate.text),
         comment(candidate.comment ? candidate.comment : "") {}
 };
+
+using CandidateList = std::vector<CandidateItem>;

@@ -182,10 +182,10 @@ class QuickBar(
         candidateUi.unrollButton.visibility = if (enabled) View.VISIBLE else View.INVISIBLE
     }
 
-    override fun onCandidateListUpdate(candidates: Array<CandidateItem>) {
+    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.CandidatesUpdated,
-            QuickBarStateMachine.BooleanKey.CandidateEmpty to candidates.isEmpty(),
+            QuickBarStateMachine.BooleanKey.CandidateEmpty to data.candidates.isEmpty(),
         )
     }
 

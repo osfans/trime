@@ -58,8 +58,8 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onRimeOptionUpdated(value) }
     }
 
-    override fun onCandidateListUpdate(candidates: Array<CandidateItem>) {
-        receivers.forEach { it.onCandidateListUpdate(candidates) }
+    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
+        receivers.forEach { it.onCandidateListUpdate(data) }
     }
 
     override fun onCompositionUpdate(data: RimeProto.Context.Composition) {

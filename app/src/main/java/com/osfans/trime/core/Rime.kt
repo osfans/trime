@@ -247,11 +247,8 @@ class Rime :
         if (getRimeOption("paging_mode")) {
             handleRimeMessage(6, arrayOf(context.menu))
         } else {
-            val candidates = getRimeCandidates(0, 16)
-            handleRimeMessage(
-                8,
-                arrayOf(candidates),
-            )
+            val bulk = getRimeBulkCandidates()
+            handleRimeMessage(8, bulk)
         }
         handleRimeMessage(7, arrayOf(getRimeStatus()))
     }
@@ -466,6 +463,9 @@ class Rime :
             startIndex: Int,
             limit: Int,
         ): Array<CandidateItem>
+
+        @JvmStatic
+        external fun getRimeBulkCandidates(): Array<Any>
 
         @JvmStatic
         fun handleRimeMessage(

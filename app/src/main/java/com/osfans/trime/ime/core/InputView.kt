@@ -316,7 +316,7 @@ class InputView(
             }
             is RimeMessage.CandidateListMessage -> {
                 val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
-                    emptyArray()
+                    RimeMessage.CandidateListMessage.Data()
                 } else {
                     it.data
                 }
