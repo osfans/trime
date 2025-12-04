@@ -25,7 +25,7 @@ interface InputBroadcastReceiver {
 
     fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {}
 
-    fun onCandidateListUpdate(candidates: Array<CandidateItem>) {}
+    fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {}
 
     fun onCompositionUpdate(data: RimeProto.Context.Composition) {}
 

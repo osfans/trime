@@ -146,8 +146,8 @@ class Rime {
     return rime->change_page(session(), backward);
   }
 
-  std::vector<CandidateItem> getCandidates(int startIndex, int limit) {
-    std::vector<CandidateItem> result;
+  CandidateList getCandidates(int startIndex, int limit) {
+    CandidateList result;
     result.reserve(limit);
     RimeCandidateListIterator iter{};
     if (rime->candidate_list_from_index(session(), &iter, startIndex)) {
@@ -161,6 +161,14 @@ class Rime {
       rime->candidate_list_end(&iter);
     }
     return std::move(result);
+  }
+
+  std::tuple<int, CandidateList> getBulkCandidates() {
+    constexpr int limit = 16;
+    auto list = getCandidates(0, limit);
+    // use -1 to indicate it's not sure how many candidates now
+    auto size = list.size() < limit ? list.size() : -1;
+    return std::make_tuple(size, std::move(list));
   }
 
   void exit() {
@@ -396,4 +404,18 @@ Java_com_osfans_trime_core_Rime_getRimeCandidates(JNIEnv *env, jclass clazz,
                                                   jint limit) {
   return rimeCandidateListToJObjectArray(
       env, Rime::Instance().getCandidates(start_index, limit));
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_osfans_trime_core_Rime_getRimeBulkCandidates(JNIEnv *env,
+                                                      jclass clazz) {
+  auto [size, list] = Rime::Instance().getBulkCandidates();
+  auto jSize = JRef(
+      env, env->NewObject(GlobalRef->Integer, GlobalRef->IntegerInit, size));
+  auto jList =
+      JRef<jobjectArray>(env, rimeCandidateListToJObjectArray(env, list));
+  auto params = env->NewObjectArray(2, GlobalRef->Object, nullptr);
+  env->SetObjectArrayElement(params, 0, jSize);
+  env->SetObjectArrayElement(params, 1, jList);
+  return params;
 }

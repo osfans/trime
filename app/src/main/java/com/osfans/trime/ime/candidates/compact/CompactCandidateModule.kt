@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.osfans.trime.R
 import com.osfans.trime.core.CandidateItem
+import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.theme.ColorManager
@@ -57,7 +58,7 @@ class CompactCandidateModule(
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (adapter.itemCount == childCount),
+                (adapter.total == childCount),
         )
     }
 
@@ -105,10 +106,11 @@ class CompactCandidateModule(
         }
     }
 
-    override fun onCandidateListUpdate(candidates: Array<CandidateItem>) {
+    override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
+        val (total, candidates) = data
         val menu = rime.run { menuCached }
         val highlightedIndex = menu.run { highlightedCandidateIndex + pageSize * pageNumber }
-        adapter.updateCandidates(candidates, highlightedIndex)
+        adapter.updateCandidates(candidates, total, highlightedIndex)
         if (candidates.isEmpty()) {
             refreshUnrolled(0)
         }

@@ -28,14 +28,19 @@ open class CompactCandidateViewAdapter(
 
     override fun getItemId(position: Int): Long = items.getOrNull(position).hashCode().toLong()
 
+    var total: Int = -1
+        private set
+
     var highlightedIdx: Int = -1
         private set
 
     fun updateCandidates(
         data: Array<CandidateItem>,
+        total: Int,
         highlightedIndex: Int,
     ) {
         super.submitList(data.toList())
+        this.total = total
         this.highlightedIdx = highlightedIndex
     }
 

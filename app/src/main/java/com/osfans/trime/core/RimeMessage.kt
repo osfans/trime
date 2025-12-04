@@ -92,27 +92,29 @@ sealed class RimeMessage<T>(
     }
 
     data class CandidateListMessage(
-        override val data: Array<CandidateItem>,
-    ) : RimeMessage<Array<CandidateItem>>(data) {
+        override val data: Data,
+    ) : RimeMessage<CandidateListMessage.Data>(data) {
 
         override val messageType = MessageType.Candidate
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+        data class Data(val total: Int = -1, val candidates: Array<CandidateItem> = arrayOf()) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
 
-            other as CandidateListMessage
+                other as Data
 
-            if (!data.contentEquals(other.data)) return false
-            if (messageType != other.messageType) return false
+                if (total != other.total) return false
+                if (!candidates.contentEquals(other.candidates)) return false
 
-            return true
-        }
+                return true
+            }
 
-        override fun hashCode(): Int {
-            var result = data.contentHashCode()
-            result = 31 * result + messageType.hashCode()
-            return result
+            override fun hashCode(): Int {
+                var result = total
+                result = 31 * result + candidates.contentHashCode()
+                return result
+            }
         }
     }
 
@@ -175,7 +177,12 @@ sealed class RimeMessage<T>(
             MessageType.Status ->
                 StatusMessage(params[0] as RimeProto.Status)
             MessageType.Candidate ->
-                CandidateListMessage(params[0] as Array<CandidateItem>)
+                CandidateListMessage(
+                    CandidateListMessage.Data(
+                        params[0] as Int,
+                        params[1] as Array<CandidateItem>,
+                    ),
+                )
             MessageType.Key ->
                 KeyMessage(
                     KeyMessage.Data(

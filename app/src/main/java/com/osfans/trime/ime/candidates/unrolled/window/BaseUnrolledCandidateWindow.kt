@@ -32,6 +32,7 @@ import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import splitties.dimensions.dp
 import kotlin.math.max
@@ -86,6 +87,7 @@ abstract class BaseUnrolledCandidateWindow(
             pagingSourceFactory = {
                 CandidatesPagingSource(
                     rime,
+                    total = compactCandidate.adapter.total,
                     offset = adapter.offset,
                 )
             },
@@ -103,14 +105,14 @@ abstract class BaseUnrolledCandidateWindow(
                     if (it <= 0) {
                         windowManager.attachWindow(KeyboardWindow)
                     } else {
-                        adapter.refreshWithOffset(it)
                         candidateLayout.resetPosition()
+                        adapter.refreshWithOffset(it)
                     }
                 }
             }
         candidatesSubmitJob =
             lifecycleCoroutineScope.launch {
-                candidatesPager.flow.collect {
+                candidatesPager.flow.collectLatest {
                     adapter.submitData(it)
                 }
             }
@@ -132,7 +134,7 @@ abstract class BaseUnrolledCandidateWindow(
         bar.unrollButtonStateMachine.push(
             UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesDetached,
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
-                (compactCandidate.adapter.itemCount == adapter.offset),
+                (compactCandidate.adapter.total == adapter.offset),
         )
         offsetJob?.cancel()
         candidatesSubmitJob?.cancel()
