@@ -100,18 +100,29 @@ class AppPrefs(
 
         val voiceAssistInput = stringList(R.string.selected_voice_input, VOICE_ASSIST_INPUT, "", {
             val imm = appContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.enabledInputMethodList.filter { ime ->
-                (0 until ime.subtypeCount).any { idx ->
-                    ime.getSubtypeAt(idx).mode == "voice"
+            val list = imm.enabledInputMethodList
+                .filter { ime ->
+                    (0 until ime.subtypeCount).any { idx ->
+                        ime.getSubtypeAt(idx).mode == "voice"
+                    }
                 }
-            }.map { it.id }
+                .map { it.id }
+                .toMutableList()
+            list.add(0, "")
+            list
         }, {
-            val imm = appContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.enabledInputMethodList.filter { ime ->
-                (0 until ime.subtypeCount).any { idx ->
-                    ime.getSubtypeAt(idx).mode == "voice"
+            val imm =
+                appContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val list = imm.enabledInputMethodList
+                .filter { ime ->
+                    (0 until ime.subtypeCount).any { idx ->
+                        ime.getSubtypeAt(idx).mode == "voice"
+                    }
                 }
-            }.map { it.loadLabel(appContext.packageManager).toString() }
+                .map { it.loadLabel(appContext.packageManager).toString() }
+                .toMutableList()
+            list.add(0, appContext.getString(R.string.system_default))
+            list
         })
     }
 
