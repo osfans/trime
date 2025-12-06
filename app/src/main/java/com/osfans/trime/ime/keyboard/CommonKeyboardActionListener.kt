@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2024 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -8,17 +8,11 @@ package com.osfans.trime.ime.keyboard
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.text.TextUtils
 import android.view.KeyEvent
-import android.view.inputmethod.InputMethodInfo
-import android.view.inputmethod.InputMethodManager
-import androidx.core.text.TextUtilsCompat
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.KeyModifier
 import com.osfans.trime.core.KeyModifiers
-import com.osfans.trime.core.Rime
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyEvent
 import com.osfans.trime.core.RimeKeyMapping
@@ -43,10 +37,12 @@ import com.osfans.trime.ui.main.settings.ColorPickerDialog
 import com.osfans.trime.ui.main.settings.SoundEffectPickerDialog
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.AppUtils
+import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.buildIntentFromAction
 import com.osfans.trime.util.buildIntentFromArgument
 import com.osfans.trime.util.customFormatDateTime
 import com.osfans.trime.util.isAsciiPrintable
+import com.osfans.trime.util.toast
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.systemservices.clipboardManager
@@ -297,30 +293,21 @@ class CommonKeyboardActionListener(
             }
 
             private fun switchToVoiceInputMethod() {
-                val imm = service.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-                val selectedIme = prefs.general.voiceAssistInput.getValue()
-                val imeId = selectedIme.ifEmpty {
-                    imm.enabledInputMethodList.firstOrNull { imi ->
-                        (0 until imi.subtypeCount).any { index ->
-                            imi.getSubtypeAt(index).mode == "voice"
-                        }
-                    }?.id
-                }
-
-                if (imeId?.isNotEmpty() == true) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        service.switchInputMethod(imeId)
-                        return
-                    } else {
-                        service.window.window?.let { window ->
-                            @Suppress("DEPRECATION")
-                            imm.setInputMethod(window.attributes.token, imeId)
-                            return
-                        }
-                    }
+                val pkgName = prefs.general.preferredVoiceInput.getValue()
+                val voiceInputSubType = if (pkgName.isNotEmpty()) {
+                    InputMethodUtils.voiceInputMethods().find {
+                        it.first.packageName == pkgName
+                    }?.let {
+                        it.first.id to it.second
+                    } ?: InputMethodUtils.firstVoiceInput()
                 } else {
-                    Timber.w("No Voice IME found")
+                    InputMethodUtils.firstVoiceInput()
+                }
+                if (voiceInputSubType != null) {
+                    val (id, subType) = voiceInputSubType
+                    InputMethodUtils.switchInputMethod(service, id, subType)
+                } else {
+                    service.toast(R.string.no_voice_input_installed)
                 }
             }
 

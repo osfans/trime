@@ -206,5 +206,6 @@
     <string name="landscape_only">仅限横屏</string>
     <string name="wide_or_landscape">宽屏或横屏</string>
     <string name="always">始终</string>
-    <string name="selected_voice_input">语音输入法</string>
+    <string name="preferred_voice_input">首选语音输入法</string>
+    <string name="no_voice_input_installed">未安装语音输入</string>
 </resources>

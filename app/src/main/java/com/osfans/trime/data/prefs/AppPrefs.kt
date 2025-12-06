@@ -7,7 +7,6 @@ package com.osfans.trime.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.view.inputmethod.InputMethodManager
 import androidx.annotation.Keep
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
@@ -15,6 +14,7 @@ import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
 import com.osfans.trime.ime.core.ComposingTextMode
+import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
 
@@ -92,38 +92,21 @@ class AppPrefs(
         companion object {
             const val COMPOSING_TEXT_MODE = "composing_text_mode"
             const val ASCII_SWITCH_TIPS = "ascii_switch_tips"
-            const val VOICE_ASSIST_INPUT = "voice_assist_input"
+            const val PREFERRED_VOICE_INPUT = "preferred_voice_input"
         }
 
         val composingTextMode = enum(R.string.composing_text_mode, COMPOSING_TEXT_MODE, ComposingTextMode.DISABLE)
         val asciiSwitchTips = switch(R.string.ascii_switch_tips, ASCII_SWITCH_TIPS, true)
 
-        val voiceAssistInput = stringList(R.string.selected_voice_input, VOICE_ASSIST_INPUT, "", {
-            val imm = appContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            val list = imm.enabledInputMethodList
-                .filter { ime ->
-                    (0 until ime.subtypeCount).any { idx ->
-                        ime.getSubtypeAt(idx).mode == "voice"
-                    }
-                }
-                .map { it.id }
-                .toMutableList()
-            list.add(0, "")
-            list
-        }, {
-            val imm =
-                appContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            val list = imm.enabledInputMethodList
-                .filter { ime ->
-                    (0 until ime.subtypeCount).any { idx ->
-                        ime.getSubtypeAt(idx).mode == "voice"
-                    }
-                }
-                .map { it.loadLabel(appContext.packageManager).toString() }
-                .toMutableList()
-            list.add(0, appContext.getString(R.string.system_default))
-            list
-        })
+        val preferredVoiceInput = list(
+            R.string.preferred_voice_input,
+            PREFERRED_VOICE_INPUT,
+            "",
+            { InputMethodUtils.voiceInputMethods().map { it.first.packageName } },
+            { ctx ->
+                InputMethodUtils.voiceInputMethods().map { it.first.loadLabel(ctx.packageManager) }
+            },
+        )
     }
 
     /**

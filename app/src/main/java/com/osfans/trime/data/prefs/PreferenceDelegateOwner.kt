@@ -5,6 +5,7 @@
 
 package com.osfans.trime.data.prefs
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceScreen
@@ -89,6 +90,40 @@ abstract class PreferenceDelegateOwner(
         return pref
     }
 
+    protected fun <T : Any> list(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: T,
+        serializer: PreferenceDelegate.Serializer<T>,
+        entryValues: List<T>,
+        @StringRes
+        entryLabels: List<Int>,
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate.SerializableDelegate<T> {
+        val pref = PreferenceDelegate.SerializableDelegate(sharedPreferences, key, defaultValue, serializer)
+        val ui = PreferenceDelegateUi.StringList(title, key, defaultValue, serializer, entryValues, entryLabels, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
+    protected fun <T : Any> list(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: T,
+        entryValues: (() -> List<String>),
+        entryLabels: ((Context) -> List<CharSequence>),
+        enableUiOn: (() -> Boolean)? = null,
+    ): PreferenceDelegate<String> {
+        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue.toString())
+        val ui = PreferenceDelegateUi.UniversalStringList(title, key, defaultValue, entryValues, entryLabels, enableUiOn)
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     // TODO: replace all [enum] with this
     protected inline fun <reified T> enum(
         @StringRes title: Int,
@@ -104,26 +139,7 @@ abstract class PreferenceDelegateOwner(
             }
         val entryValues = enumValues<T>().toList()
         val entryLabels = entryValues.map { it.stringRes }
-        val pref = serializable(key, defaultValue, serializer)
-        val ui = PreferenceDelegateUi.StringList(title, key, defaultValue, serializer, entryValues, entryLabels, enableUiOn)
-        pref.register()
-        ui.registerUi()
-        return pref
-    }
-
-    protected inline fun stringList(
-        @StringRes title: Int,
-        key: String,
-        defaultValue: String,
-        noinline entryValues: (() -> List<String>),
-        noinline entryLabels: (() -> List<String>),
-        noinline enableUiOn: (() -> Boolean)? = null,
-    ): PreferenceDelegate<String> {
-        val pref = PreferenceDelegate(sharedPreferences, key, defaultValue)
-        val ui = PreferenceDelegateUi.StringOnlyList(title, key, defaultValue, entryValues, entryLabels, enableUiOn)
-        pref.register()
-        ui.registerUi()
-        return pref
+        return list(title, key, defaultValue, serializer, entryValues, entryLabels, enableUiOn)
     }
 
     protected fun editText(

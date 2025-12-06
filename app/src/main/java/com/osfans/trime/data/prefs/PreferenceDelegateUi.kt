@@ -87,25 +87,25 @@ abstract class PreferenceDelegateUi<T : Preference>(
         }
     }
 
-    class StringOnlyList(
+    class UniversalStringList<T : Any>(
         @StringRes
         val title: Int,
         key: String,
-        val defaultValue: String,
+        val defaultValue: T,
         val entryValues: (() -> List<String>),
-        val entryLabels: (() -> List<String>),
+        val entryLabels: ((Context) -> List<CharSequence>),
         enableUiOn: (() -> Boolean)? = null,
     ) : PreferenceDelegateUi<ListPreference>(key, enableUiOn) {
         override fun createUi(context: Context) = ListPreference(context).apply {
-            key = this@StringOnlyList.key
+            key = this@UniversalStringList.key
             isIconSpaceReserved = false
             isSingleLineTitle = false
-            entryValues = this@StringOnlyList.entryValues().toTypedArray()
+            entryValues = this@UniversalStringList.entryValues().toTypedArray()
             summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
-            setDefaultValue(defaultValue)
-            setTitle(this@StringOnlyList.title)
-            entries = this@StringOnlyList.entryLabels().toTypedArray()
-            setDialogTitle(this@StringOnlyList.title)
+            setDefaultValue(defaultValue.toString())
+            setTitle(this@UniversalStringList.title)
+            entries = this@UniversalStringList.entryLabels(context).toTypedArray()
+            setDialogTitle(this@UniversalStringList.title)
         }
     }
 
