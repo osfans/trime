@@ -12,11 +12,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
 
 class UserDictListAdapter(
-    override var items: List<String>,
+    items: List<String>,
     val initMoreButton: (ImageButton.(String) -> Unit) = {},
-) : BaseQuickAdapter<String, UserDictListAdapter.ViewHolder>() {
+) : BaseQuickAdapter<String, UserDictListAdapter.ViewHolder>(items) {
 
-    inner class ViewHolder(
+    class ViewHolder(
         ui: UserDictListEntryUi,
     ) : RecyclerView.ViewHolder(ui.root) {
         val nameText = ui.nameText

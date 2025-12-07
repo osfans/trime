@@ -104,9 +104,9 @@ class LiquidTabsUi(
                 }
             }
 
-            override fun submitList(list: List<LiquidData.Tag>?) {
+            override fun submitList(list: List<LiquidData.Tag>?, commitCallback: Runnable?) {
                 selected = -1
-                super.submitList(list)
+                super.submitList(list, commitCallback)
             }
 
             fun activateTab(position: Int) {
