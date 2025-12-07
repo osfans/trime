@@ -87,6 +87,28 @@ abstract class PreferenceDelegateUi<T : Preference>(
         }
     }
 
+    class UniversalStringList<T : Any>(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: T,
+        val entryValues: (() -> List<String>),
+        val entryLabels: ((Context) -> List<CharSequence>),
+        enableUiOn: (() -> Boolean)? = null,
+    ) : PreferenceDelegateUi<ListPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = ListPreference(context).apply {
+            key = this@UniversalStringList.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            entryValues = this@UniversalStringList.entryValues().toTypedArray()
+            summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+            setDefaultValue(defaultValue.toString())
+            setTitle(this@UniversalStringList.title)
+            entries = this@UniversalStringList.entryLabels(context).toTypedArray()
+            setDialogTitle(this@UniversalStringList.title)
+        }
+    }
+
     class EditText(
         @StringRes
         val title: Int,
