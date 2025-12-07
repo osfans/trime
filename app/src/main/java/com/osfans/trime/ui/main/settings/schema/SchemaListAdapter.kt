@@ -19,8 +19,8 @@ import com.osfans.trime.ui.common.OnItemChangedListener
 import com.osfans.trime.ui.main.MainViewModel
 
 open class SchemaListAdapter(
-    override var items: List<SchemaItem>,
-) : BaseQuickAdapter<SchemaItem, SchemaListAdapter.ViewHolder>() {
+    items: List<SchemaItem>,
+) : BaseQuickAdapter<SchemaItem, SchemaListAdapter.ViewHolder>(items) {
     var multiselect = false
         private set
 
@@ -144,32 +144,29 @@ open class SchemaListAdapter(
     }
 
     @CallSuper
-    override fun add(data: SchemaItem) {
-        super.add(data)
+    override fun add(data: SchemaItem, commitCallback: Runnable?) {
+        super.add(data, commitCallback)
         addInternal(items.size, data)
     }
 
     @CallSuper
-    override fun add(
-        position: Int,
-        data: SchemaItem,
-    ) {
-        super.add(position, data)
+    override fun add(position: Int, data: SchemaItem, commitCallback: Runnable?) {
+        super.add(position, data, commitCallback)
         addInternal(position, data)
     }
 
     @CallSuper
-    override fun addAll(collection: Collection<SchemaItem>) {
-        super.addAll(collection)
+    override fun addAll(collection: Collection<SchemaItem>, commitCallback: Runnable?) {
+        super.addAll(collection, commitCallback)
         listener?.onItemAddedBatch(collection.toList())
         mainViewModel?.showToolbarEditButton()
     }
 
     /** This also valid for [BaseQuickAdapter.remove] */
     @CallSuper
-    override fun removeAt(position: Int) {
+    override fun removeAt(position: Int, commitCallback: Runnable?) {
         listener?.onItemRemoved(position, items[position])
-        super.removeAt(position)
+        super.removeAt(position, commitCallback)
         if (items.isEmpty()) {
             mainViewModel?.hideToolbarEditButton()
         }

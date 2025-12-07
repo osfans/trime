@@ -39,7 +39,7 @@ open class CompactCandidateViewAdapter(
         total: Int,
         highlightedIndex: Int,
     ) {
-        super.submitList(data.toList())
+        super.submitList(data.toList(), null)
         this.total = total
         this.highlightedIdx = highlightedIndex
     }
