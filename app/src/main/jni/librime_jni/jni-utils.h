@@ -6,7 +6,6 @@
 #pragma once
 
 #include <jni.h>
-#include <utf8.h>
 
 #include <string>
 
@@ -56,16 +55,9 @@ class JString {
   JNIEnv *env_;
   jstring jstring_;
 
-  static inline jstring toJString(JNIEnv *env, const char *chars) {
-    if (chars == nullptr) return nullptr;
-    auto u16str = utf8::utf8to16(chars);
-    return env->NewString(reinterpret_cast<const jchar *>(u16str.data()),
-                          static_cast<int>(u16str.length()));
-  }
-
  public:
   JString(JNIEnv *env, const char *chars)
-      : env_(env), jstring_(toJString(env, chars)) {}
+      : env_(env), jstring_(env->NewStringUTF(chars)) {}
 
   JString(JNIEnv *env, const std::string &string)
       : JString(env, string.c_str()) {}
