@@ -9,8 +9,6 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
-import com.osfans.trime.util.appContext
-import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -28,15 +26,13 @@ import timber.log.Timber
 class Rime :
     RimeApi,
     RimeLifecycleOwner {
-    private val lifecycleImpl = RimeLifecycleImpl()
-    override val lifecycle get() = lifecycleImpl
+    private val lifecycleRegistry = RimeLifecycleRegistry()
+    override val lifecycle get() = lifecycleRegistry
 
     override val messageFlow = messageFlow_.asSharedFlow()
 
-    override val stateFlow get() = lifecycle.currentStateFlow
-
     override val isReady: Boolean
-        get() = lifecycle.currentStateFlow.value == RimeLifecycle.State.READY
+        get() = lifecycle.currentState == RimeLifecycle.State.READY
 
     override var schemaCached = RimeSchema(".default")
         private set
@@ -58,7 +54,7 @@ class Rime :
             object : RimeDispatcher.RimeController {
                 override fun nativeStartup() {
                     startRime(false)
-                    lifecycleImpl.emitState(RimeLifecycle.State.READY)
+                    lifecycleRegistry.emitState(RimeLifecycle.State.READY)
                 }
 
                 override fun nativeFinalize() {
@@ -72,7 +68,7 @@ class Rime :
     private var asciiSwitchTipsJob: Job? = null
 
     init {
-        if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
+        if (lifecycle.currentState != RimeLifecycle.State.STOPPED) {
             throw IllegalStateException("Rime has already been created!")
         }
     }
@@ -315,30 +311,28 @@ class Rime :
     }
 
     fun startup() {
-        if (lifecycle.currentStateFlow.value != RimeLifecycle.State.STOPPED) {
+        if (lifecycle.currentState != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
             return
         }
-        if (appContext.isStorageAvailable()) {
-            registerRimeMessageHandler(::handleRimeMessage)
-            lifecycleImpl.emitState(RimeLifecycle.State.STARTING)
-            dispatcher.start()
-        }
+        registerRimeMessageHandler(::handleRimeMessage)
+        lifecycleRegistry.emitState(RimeLifecycle.State.STARTING)
+        dispatcher.start()
     }
 
     fun finalize() {
-        if (lifecycle.currentStateFlow.value != RimeLifecycle.State.READY) {
+        if (lifecycle.currentState != RimeLifecycle.State.READY) {
             Timber.w("Skip stopping rime: not at ready state!")
             return
         }
-        lifecycleImpl.emitState(RimeLifecycle.State.STOPPING)
+        lifecycleRegistry.emitState(RimeLifecycle.State.STOPPING)
         Timber.i("Rime finalize()")
         dispatcher.stop().let {
             if (it.isNotEmpty()) {
                 Timber.w("${it.size} job(s) didn't get a chance to run!")
             }
         }
-        lifecycleImpl.emitState(RimeLifecycle.State.STOPPED)
+        lifecycleRegistry.emitState(RimeLifecycle.State.STOPPED)
         unregisterRimeMessageHandler(::handleRimeMessage)
     }
 

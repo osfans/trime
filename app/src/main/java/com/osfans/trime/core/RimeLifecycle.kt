@@ -1,57 +1,71 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 // Adapted from https://github.com/fcitx5-android/fcitx5-android/blob/364afb44dcf0d9e3db3d43a21a32601b2190cbdf/app/src/main/java/org/fcitx/fcitx5/android/core/FcitxLifecycle.kt
 package com.osfans.trime.core
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class RimeLifecycleImpl : RimeLifecycle {
-    private val internalStateFlow = MutableStateFlow(RimeLifecycle.State.STOPPED)
-    override val currentStateFlow = internalStateFlow.asStateFlow()
+class RimeLifecycleRegistry : RimeLifecycle {
+
+    private val observers = ConcurrentLinkedQueue<RimeLifecycleObserver>()
+
+    override fun addObserver(observer: RimeLifecycleObserver) {
+        observers.add(observer)
+    }
+
+    override fun removeObserver(observer: RimeLifecycleObserver) {
+        observers.remove(observer)
+    }
+
+    override val currentState: RimeLifecycle.State
+        get() = internalState
+
+    private var internalState = RimeLifecycle.State.STOPPED
 
     override val lifecycleScope: CoroutineScope = RimeLifecycleScope(this)
 
-    fun emitState(state: RimeLifecycle.State) {
+    fun emitState(state: RimeLifecycle.State) = synchronized(internalState) {
         when (state) {
             RimeLifecycle.State.STARTING -> {
                 checkAtState(RimeLifecycle.State.STOPPED)
-                internalStateFlow.value = RimeLifecycle.State.STARTING
+                internalState = RimeLifecycle.State.STARTING
             }
             RimeLifecycle.State.READY -> {
                 checkAtState(RimeLifecycle.State.STARTING)
-                internalStateFlow.value = RimeLifecycle.State.READY
+                internalState = RimeLifecycle.State.READY
             }
             RimeLifecycle.State.STOPPING -> {
                 checkAtState(RimeLifecycle.State.READY)
-                internalStateFlow.value = RimeLifecycle.State.STOPPING
+                internalState = RimeLifecycle.State.STOPPING
             }
             RimeLifecycle.State.STOPPED -> {
                 checkAtState(RimeLifecycle.State.STOPPING)
-                internalStateFlow.value = RimeLifecycle.State.STOPPED
+                internalState = RimeLifecycle.State.STOPPED
             }
         }
+        observers.forEach { it.onChanged(state) }
     }
 
-    private fun checkAtState(state: RimeLifecycle.State) = takeIf { (internalStateFlow.value == state) }
-        ?: throw IllegalStateException("Currently not at $state! Actual state is ${internalStateFlow.value}")
+    private fun checkAtState(state: RimeLifecycle.State) = takeIf { (internalState == state) }
+        ?: throw IllegalStateException("Currently not at $state! Actual state is $internalState")
 }
 
 interface RimeLifecycle {
-    val currentStateFlow: StateFlow<State>
+    val currentState: State
     val lifecycleScope: CoroutineScope
+
+    fun addObserver(observer: RimeLifecycleObserver)
+    fun removeObserver(observer: RimeLifecycleObserver)
 
     enum class State {
         STARTING,
@@ -67,17 +81,18 @@ interface RimeLifecycleOwner {
 
 val RimeLifecycleOwner.lifecycleScope get() = lifecycle.lifecycleScope
 
+fun interface RimeLifecycleObserver {
+    fun onChanged(value: RimeLifecycle.State)
+}
+
 class RimeLifecycleScope(
     val lifecycle: RimeLifecycle,
     override val coroutineContext: CoroutineContext = SupervisorJob(),
-) : CoroutineScope {
-    init {
-        launch {
-            lifecycle.currentStateFlow.collect {
-                if (it == RimeLifecycle.State.STOPPED) {
-                    coroutineContext.cancelChildren()
-                }
-            }
+) : CoroutineScope,
+    RimeLifecycleObserver {
+    override fun onChanged(value: RimeLifecycle.State) {
+        if (lifecycle.currentState >= RimeLifecycle.State.STOPPING) {
+            coroutineContext.cancelChildren()
         }
     }
 }
@@ -85,37 +100,35 @@ class RimeLifecycleScope(
 suspend fun <T> RimeLifecycle.whenAtState(
     state: RimeLifecycle.State,
     block: suspend CoroutineScope.() -> T,
-): T = if (currentStateFlow.value == state) {
+): T = if (state == currentState) {
     block(lifecycleScope)
 } else {
     StateDelegate(this, state).run(block)
 }
 
-suspend inline fun <T> RimeLifecycle.whenReady(noinline block: suspend CoroutineScope.() -> T) = whenAtState(RimeLifecycle.State.READY, block)
+suspend inline fun <T> RimeLifecycle.whenReady(
+    noinline block: suspend CoroutineScope.() -> T,
+) = whenAtState(RimeLifecycle.State.READY, block)
 
 private class StateDelegate(
     val lifecycle: RimeLifecycle,
     val state: RimeLifecycle.State,
 ) {
-    private var job: Job? = null
+    private val observer = RimeLifecycleObserver {
+        if (lifecycle.currentState == state) {
+            continuation?.resume(Unit)
+        }
+    }
 
     init {
-        job =
-            lifecycle.lifecycleScope.launch {
-                lifecycle.currentStateFlow.collect {
-                    if (it == state) {
-                        continuation?.resume(Unit)
-                    }
-                }
-            }
+        lifecycle.addObserver(observer)
     }
 
     private var continuation: Continuation<Unit>? = null
 
     suspend fun <T> run(block: suspend CoroutineScope.() -> T): T {
         suspendCoroutine { continuation = it }
-        job?.cancel()
-        job = null
+        lifecycle.removeObserver(observer)
         return block(lifecycle.lifecycleScope)
     }
 }
