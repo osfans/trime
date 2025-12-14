@@ -101,7 +101,7 @@ class CandidatesView(
         PagedCandidatesUi(
             ctx,
             theme,
-            onCandidateClick = { index -> rime.launchOnReady { it.selectPagedCandidate(index) } },
+            onCandidateClick = { index -> rime.launchOnReady { it.selectCandidate(index, global = false) } },
             onPrevPage = { rime.launchOnReady { it.changeCandidatePage(true) } },
             onNextPage = { rime.launchOnReady { it.changeCandidatePage(false) } },
         )

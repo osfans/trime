@@ -65,7 +65,7 @@ class CompactCandidateModule(
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
             setOnItemClickListener { _, view, position ->
-                rime.launchOnReady { it.selectCandidate(position) }
+                rime.launchOnReady { it.selectCandidate(position, global = true) }
             }
             setOnItemLongClickListener { _, view, position ->
                 showCandidateAction(position, items[position].text, view)
@@ -140,7 +140,7 @@ class CompactCandidateModule(
                             isEnabled = false
                         }
                     menu.add(R.string.forget_this_word).setOnMenuItemClickListener {
-                        rime.runIfReady { forgetCandidate(idx) }
+                        rime.runIfReady { deleteCandidate(idx, global = true) }
                         true
                     }
                     setOnDismissListener {

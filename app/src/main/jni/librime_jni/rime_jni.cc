@@ -126,20 +126,20 @@ class Rime {
     rime->set_caret_pos(session(), caretPos);
   }
 
-  bool selectCandidateOnCurrentPage(size_t index) {
-    return rime->select_candidate_on_current_page(session(), index);
+  bool selectCandidate(size_t index, bool global) {
+    if (global) {
+      return rime->select_candidate(session(), index);
+    } else {
+      return rime->select_candidate_on_current_page(session(), index);
+    }
   }
 
-  bool deleteCandidateOnCurrentPage(size_t index) {
-    return rime->delete_candidate_on_current_page(session(), index);
-  }
-
-  bool selectCandidate(size_t index) {
-    return rime->select_candidate(session(), index);
-  }
-
-  bool forgetCandidate(size_t index) {
-    return rime->delete_candidate(session(), index);
+  bool deleteCandidate(size_t index, bool global) {
+    if (global) {
+      return rime->delete_candidate(session(), index);
+    } else {
+      return rime->delete_candidate_on_current_page(session(), index);
+    }
   }
 
   bool changePage(bool backward) {
@@ -366,29 +366,19 @@ Java_com_osfans_trime_core_Rime_setRimeCaretPos(JNIEnv *env, jclass /* thiz */,
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_selectRimeCandidateOnCurrentPage(
-    JNIEnv *env, jclass /* thiz */, jint index) {
-  return Rime::Instance().selectCandidateOnCurrentPage(index);
-}
-
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_deleteRimeCandidateOnCurrentPage(
-    JNIEnv *env, jclass /* thiz */, jint index) {
-  return Rime::Instance().deleteCandidateOnCurrentPage(index);
-}
-
-extern "C" JNIEXPORT jboolean JNICALL
 Java_com_osfans_trime_core_Rime_selectRimeCandidate(JNIEnv *env,
                                                     jclass /* thiz */,
-                                                    jint index) {
-  return Rime::Instance().selectCandidate(index);
+                                                    jint index,
+                                                    jboolean global) {
+  return Rime::Instance().selectCandidate(index, global);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_osfans_trime_core_Rime_forgetRimeCandidate(JNIEnv *env,
+Java_com_osfans_trime_core_Rime_deleteRimeCandidate(JNIEnv *env,
                                                     jclass /* thiz */,
-                                                    jint index) {
-  return Rime::Instance().forgetCandidate(index);
+                                                    jint index,
+                                                    jboolean global) {
+  return Rime::Instance().deleteCandidate(index, global);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
