@@ -881,7 +881,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 ComposingTextMode.DISABLE -> ""
                 ComposingTextMode.PREEDIT -> composition.preedit ?: ""
                 ComposingTextMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
-                ComposingTextMode.RAW_INPUT -> rime.run { rawInputCached }
             }
         if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
             ic.setComposingText(text, 1)
@@ -889,7 +888,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     fun getActiveText(type: Int): String {
-        if (type == 2) return rime.run { rawInputCached } // 當前編碼
+        if (type == 2) return rime.run { compositionCached }.preedit ?: "" // 當前編碼
         var text: CharSequence? = rime.run { compositionCached }.commitTextPreview // 當前候選
         if (text.isNullOrEmpty()) {
             val info = currentInputEditorInfo

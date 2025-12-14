@@ -46,9 +46,6 @@ class Rime :
     override var menuCached = RimeProto.Context.Menu()
         private set
 
-    override var rawInputCached = ""
-        private set
-
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeController {
@@ -263,7 +260,6 @@ class Rime :
             }
             is RimeMessage.CompositionMessage -> {
                 compositionCached = it.data
-                rawInputCached = getRimeRawInput()
             }
             is RimeMessage.CandidateMenuMessage -> menuCached = it.data
             is RimeMessage.StatusMessage -> {

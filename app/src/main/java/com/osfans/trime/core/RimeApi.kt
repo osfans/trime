@@ -20,8 +20,6 @@ interface RimeApi {
 
     val menuCached: RimeProto.Context.Menu
 
-    val rawInputCached: String
-
     suspend fun isEmpty(): Boolean
 
     suspend fun deploy()
