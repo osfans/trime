@@ -44,13 +44,9 @@ interface RimeApi {
         sequence: String,
     ): Boolean
 
-    suspend fun selectCandidate(idx: Int): Boolean
+    suspend fun selectCandidate(idx: Int, global: Boolean): Boolean
 
-    suspend fun forgetCandidate(idx: Int): Boolean
-
-    suspend fun selectPagedCandidate(idx: Int): Boolean
-
-    suspend fun deletedPagedCandidate(idx: Int): Boolean
+    suspend fun deleteCandidate(idx: Int, global: Boolean): Boolean
 
     suspend fun changeCandidatePage(backward: Boolean): Boolean
 

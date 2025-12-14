@@ -123,24 +123,16 @@ class Rime :
         }.also { Timber.d("simulateKeySequence ${if (it) "success" else "failed"}") }
     }
 
-    override suspend fun selectCandidate(idx: Int): Boolean = withRimeContext {
-        selectRimeCandidate(idx).also { if (it) emitResponse() }
+    override suspend fun selectCandidate(idx: Int, global: Boolean): Boolean = withRimeContext {
+        selectRimeCandidate(idx, global).also { emitResponse() }
     }
 
-    override suspend fun forgetCandidate(idx: Int): Boolean = withRimeContext {
-        forgetRimeCandidate(idx).also { if (it) emitResponse() }
-    }
-
-    override suspend fun selectPagedCandidate(idx: Int): Boolean = withRimeContext {
-        selectRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
-    }
-
-    override suspend fun deletedPagedCandidate(idx: Int): Boolean = withRimeContext {
-        deleteRimeCandidateOnCurrentPage(idx).also { if (it) emitResponse() }
+    override suspend fun deleteCandidate(idx: Int, global: Boolean): Boolean = withRimeContext {
+        deleteRimeCandidate(idx, global).also { emitResponse() }
     }
 
     override suspend fun changeCandidatePage(backward: Boolean): Boolean = withRimeContext {
-        changeRimeCandidatePage(backward).also { if (it) emitResponse() }
+        changeRimeCandidatePage(backward).also { emitResponse() }
     }
 
     override suspend fun moveCursorPos(position: Int) = withRimeContext {
@@ -429,16 +421,10 @@ class Rime :
         external fun setRimeCaretPos(caretPos: Int)
 
         @JvmStatic
-        external fun selectRimeCandidateOnCurrentPage(index: Int): Boolean
+        external fun selectRimeCandidate(index: Int, global: Boolean): Boolean
 
         @JvmStatic
-        external fun deleteRimeCandidateOnCurrentPage(index: Int): Boolean
-
-        @JvmStatic
-        external fun selectRimeCandidate(index: Int): Boolean
-
-        @JvmStatic
-        external fun forgetRimeCandidate(index: Int): Boolean
+        external fun deleteRimeCandidate(index: Int, global: Boolean): Boolean
 
         @JvmStatic
         external fun changeRimeCandidatePage(backward: Boolean): Boolean
