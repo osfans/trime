@@ -15,5 +15,4 @@ enum class ComposingTextMode(
     DISABLE(R.string.disable),
     PREEDIT(R.string.preedit),
     COMMIT_TEXT_PREVIEW(R.string.commit_text_preview),
-    RAW_INPUT(R.string.raw_input),
 }
