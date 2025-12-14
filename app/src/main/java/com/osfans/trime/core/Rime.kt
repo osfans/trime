@@ -43,7 +43,16 @@ class Rime :
     override var compositionCached = RimeProto.Context.Composition()
         private set
 
-    override var menuCached = RimeProto.Context.Menu()
+    override var isComposing: Boolean = false
+        private set
+
+    override var hasMenu: Boolean = false
+        private set
+
+    override var paging: Boolean = false
+        private set
+
+    override var globalHighlightedIdx: Int = 0
         private set
 
     private val dispatcher =
@@ -259,9 +268,21 @@ class Rime :
                 }
             }
             is RimeMessage.CompositionMessage -> {
-                compositionCached = it.data
+                val composition = it.data
+                isComposing = composition.length > 0
+                compositionCached = composition
             }
-            is RimeMessage.CandidateMenuMessage -> menuCached = it.data
+            is RimeMessage.CandidateMenuMessage -> {
+                val menu = it.data
+                paging = menu.pageNumber != 0
+                globalHighlightedIdx = menu.run {
+                    highlightedCandidateIndex + pageSize * pageNumber
+                }
+                hasMenu = menu.candidates.isNotEmpty()
+            }
+            is RimeMessage.CandidateListMessage -> {
+                hasMenu = it.data.candidates.isNotEmpty()
+            }
             is RimeMessage.StatusMessage -> {
                 statusCached = it.data
                 updateSchemaCached(it.data)

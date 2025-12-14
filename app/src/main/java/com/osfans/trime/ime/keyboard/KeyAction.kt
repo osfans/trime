@@ -94,13 +94,14 @@ class KeyAction(
             return states[if (rime.run { getRuntimeOption(toggle) }) 1 else 0]
         }
         if (keyboard.isOnlyShiftOn) {
-            val status = rime.run { statusCached }
-            if (!hookShiftNum && !status.isComposing && code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9) {
+            val asciiMode = rime.run { statusCached }.isAsciiMode
+            val composing = rime.run { isComposing }
+            if (!hookShiftNum && !composing && code in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9) {
                 return adjustCase(shiftLabel, keyboard)
             }
             if (!hookShiftSymbol &&
                 // TODO: 判断中英模式仅能正确处理已配置映射的符号，对于未配置映射的符号，即使在中文模式下也能上屏 Shift 切换的符号。
-                status.isAsciiMode &&
+                asciiMode &&
                 (
                     code in KeyEvent.KEYCODE_GRAVE..KeyEvent.KEYCODE_SLASH ||
                         code == KeyEvent.KEYCODE_COMMA ||

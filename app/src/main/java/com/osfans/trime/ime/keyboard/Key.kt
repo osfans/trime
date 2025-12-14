@@ -213,12 +213,15 @@ class Key(
     fun getAction(behavior: KeyBehavior): KeyAction? = keyActions[behavior]?.takeIf { behavior != KeyBehavior.CLICK } ?: checkKeyAction(sendBindings) ?: click
 
     private fun checkKeyAction(): KeyAction? {
-        val status = rime.run { statusCached }
-        val menu = rime.run { menuCached }
-        return keyActions[KeyBehavior.ASCII].takeIf { status.isAsciiMode }
-            ?: keyActions[KeyBehavior.PAGING]?.takeIf { menu.pageNumber != 0 }
-            ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { menu.candidates.isNotEmpty() }
-            ?: keyActions[KeyBehavior.COMPOSING]?.takeIf { status.isComposing }
+        val rime = rime
+        val asciiMode = rime.run { statusCached }.isAsciiMode
+        val paging = rime.run { paging }
+        val hasMenu = rime.run { hasMenu }
+        val composing = rime.run { isComposing }
+        return keyActions[KeyBehavior.ASCII].takeIf { asciiMode }
+            ?: keyActions[KeyBehavior.PAGING]?.takeIf { paging }
+            ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { hasMenu }
+            ?: keyActions[KeyBehavior.COMPOSING]?.takeIf { composing }
     }
 
     private fun checkKeyAction(sendBindings: Boolean): KeyAction? = checkKeyAction().takeIf { sendBindings }
@@ -232,7 +235,7 @@ class Key(
         label.isNotEmpty() &&
             keyAction == click &&
             !keyActions.containsKey(KeyBehavior.ASCII) &&
-            !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunch } -> label
+            !rime.run { statusCached }.let { it.isAsciiMode || it.isAsciiPunct } -> label
         else -> keyAction!!.getLabel(parent) // 中文狀態顯示標籤
     }
 
