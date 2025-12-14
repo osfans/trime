@@ -117,7 +117,7 @@ class LiquidWindow(
 
     private fun triggerSymbolInput(symbol: String) {
         rime.launchOnReady {
-            val (isAsciiMode, isAsciiPunch) = it.statusCached.run { isAsciiMode to isAsciiPunch }
+            val (isAsciiMode, isAsciiPunch) = it.statusCached.run { isAsciiMode to isAsciiPunct }
             if (isAsciiMode) it.setRuntimeOption("ascii_mode", false)
             if (isAsciiPunch) it.setRuntimeOption("ascii_punch", false)
             commonKeyboardActionListener.listener.onText("{Escape}$symbol")

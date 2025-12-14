@@ -90,6 +90,6 @@ class RimeProto {
         val isFullShape: Boolean = false,
         val isSimplified: Boolean = false,
         val isTraditional: Boolean = false,
-        val isAsciiPunch: Boolean = true,
+        val isAsciiPunct: Boolean = true,
     )
 }
