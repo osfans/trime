@@ -107,9 +107,8 @@ class CompactCandidateModule(
     }
 
     override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
-        val (total, candidates) = data
-        val highlightedIndex = rime.run { globalHighlightedIdx }
-        adapter.updateCandidates(candidates, total, highlightedIndex)
+        val (total, highlighted, candidates) = data
+        adapter.updateCandidates(candidates, total, highlighted)
         if (candidates.isEmpty()) {
             refreshUnrolled(0)
         }

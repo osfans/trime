@@ -69,6 +69,7 @@ extern "C" {
 void rime_commit_proto(RimeSessionId session_id, uintptr_t commit_builder);
 void rime_context_proto(RimeSessionId session_id, uintptr_t context_builder);
 void rime_status_proto(RimeSessionId session_id, uintptr_t status_builder);
+size_t rime_get_highlighted_candidate_index(RimeSessionId session_id);
 
 #ifdef __cplusplus
 }

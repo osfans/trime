@@ -120,3 +120,12 @@ void rime_status_proto(RimeSessionId session_id, uintptr_t status_builder) {
   status->isTraditional = ctx->get_option("traditional");
   status->isAsciiPunct = ctx->get_option("ascii_punct");
 }
+
+size_t rime_get_highlighted_candidate_index(RimeSessionId session_id) {
+  an<Session> session(Service::instance().GetSession(session_id));
+  if (!session) return 0;
+  Context* ctx = session->context();
+  if (!ctx || !ctx->HasMenu()) return 0;
+  auto& seg(ctx->composition().back());
+  return seg.selected_index;
+}

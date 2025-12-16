@@ -97,7 +97,11 @@ sealed class RimeMessage<T>(
 
         override val messageType = MessageType.Candidate
 
-        data class Data(val total: Int = -1, val candidates: Array<CandidateItem> = arrayOf()) {
+        data class Data(
+            val total: Int = -1,
+            val highlighted: Int = 0,
+            val candidates: Array<CandidateItem> = arrayOf(),
+        ) {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (javaClass != other?.javaClass) return false
@@ -105,6 +109,7 @@ sealed class RimeMessage<T>(
                 other as Data
 
                 if (total != other.total) return false
+                if (highlighted != other.highlighted) return false
                 if (!candidates.contentEquals(other.candidates)) return false
 
                 return true
@@ -112,6 +117,7 @@ sealed class RimeMessage<T>(
 
             override fun hashCode(): Int {
                 var result = total
+                result = 31 * result + highlighted
                 result = 31 * result + candidates.contentHashCode()
                 return result
             }
@@ -180,7 +186,8 @@ sealed class RimeMessage<T>(
                 CandidateListMessage(
                     CandidateListMessage.Data(
                         params[0] as Int,
-                        params[1] as Array<CandidateItem>,
+                        params[1] as Int,
+                        params[2] as Array<CandidateItem>,
                     ),
                 )
             MessageType.Key ->

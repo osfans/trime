@@ -52,9 +52,6 @@ class Rime :
     override var paging: Boolean = false
         private set
 
-    override var globalHighlightedIdx: Int = 0
-        private set
-
     private val dispatcher =
         RimeDispatcher(
             object : RimeDispatcher.RimeController {
@@ -275,9 +272,6 @@ class Rime :
             is RimeMessage.CandidateMenuMessage -> {
                 val menu = it.data
                 paging = menu.pageNumber != 0
-                globalHighlightedIdx = menu.run {
-                    highlightedCandidateIndex + pageSize * pageNumber
-                }
                 hasMenu = menu.candidates.isNotEmpty()
             }
             is RimeMessage.CandidateListMessage -> {
