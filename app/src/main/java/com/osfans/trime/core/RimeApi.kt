@@ -24,8 +24,6 @@ interface RimeApi {
 
     val paging: Boolean
 
-    val globalHighlightedIdx: Int
-
     suspend fun isEmpty(): Boolean
 
     suspend fun deploy()
