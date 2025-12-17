@@ -9,6 +9,8 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.util.appContext
+import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -314,6 +316,10 @@ class Rime :
     }
 
     fun startup() {
+        if (!appContext.isStorageAvailable()) {
+            Timber.w("Skip starting rime: storage not available!")
+            return
+        }
         if (lifecycle.currentState != RimeLifecycle.State.STOPPED) {
             Timber.w("Skip starting rime: not at stopped state!")
             return
