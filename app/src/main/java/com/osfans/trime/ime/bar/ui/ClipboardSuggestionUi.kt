@@ -1,6 +1,6 @@
 /*
- * SPDX-License-Identifier: LGPL-2.1-or-later
- * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 package com.osfans.trime.ime.bar.ui
 
@@ -8,6 +8,8 @@ import android.content.Context
 import android.text.TextUtils
 import com.osfans.trime.R
 import com.osfans.trime.data.theme.ColorManager
+import com.osfans.trime.ime.keyboard.GestureFrame
+import com.osfans.trime.util.rippleDrawable
 import splitties.dimensions.dp
 import splitties.resources.drawable
 import splitties.views.dsl.constraintlayout.after
@@ -69,10 +71,15 @@ class ClipboardSuggestionUi(
             )
         }
 
+    val suggestionView = GestureFrame(ctx).apply {
+        add(layout, lParams(wrapContent, matchParent))
+        background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
+    }
+
     override val root =
         constraintLayout {
             add(
-                layout,
+                suggestionView,
                 lParams(wrapContent, matchConstraints) {
                     centerInParent()
                     verticalMargin = dp(4)

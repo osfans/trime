@@ -178,8 +178,6 @@ class CommonKeyboardActionListener(
                         else -> handleDefaultKeyAction(action)
                     }
                 }
-
-                quickBar.handleClipboardContent(null)
             }
 
             private fun handleSwitchCharset(action: KeyAction) {

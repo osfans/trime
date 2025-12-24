@@ -5,7 +5,6 @@
 
 package com.osfans.trime.ime.bar
 
-import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.view.View
@@ -15,16 +14,15 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
-import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
-import com.osfans.trime.ime.bar.ui.ClipboardSuggestionUi
 import com.osfans.trime.ime.bar.ui.InlineSuggestionUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
@@ -34,17 +32,17 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.GestureFrame
-import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.switches.SwitchOptionWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
+import com.osfans.trime.ui.main.ClipEditActivity
+import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import splitties.dimensions.dp
-import splitties.systemservices.clipboardManager
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
@@ -61,18 +59,11 @@ class QuickBar(
     lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
 ) : InputBroadcastReceiver {
 
-    @Keep
-    private val clipboardListener = ClipboardManager.OnPrimaryClipChangedListener {
-        val clip = clipboardManager.primaryClip
-        val content = clip?.getItemAt(0)?.text?.toString()?.takeIf { it.isNotBlank() }
-        content?.let { handleClipboardContent(it) }
-    }
-
-    private var clipboardTimeoutJob: Job? = null
-
     private val candidate by lazyCandidate
 
     private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
+
+    val themedHeight = theme.generalStyle.run { candidateViewHeight + commentHeight }
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -82,12 +73,40 @@ class QuickBar(
 
     private val clipboardSuggestionTimeout by prefs.clipboard.clipboardSuggestionTimeout
 
-    val themedHeight =
-        theme.generalStyle.candidateViewHeight + theme.generalStyle.commentHeight
+    private var clipboardTimeoutJob: Job? = null
+
+    private var isClipboardFresh: Boolean = false
+
+    @Keep
+    private val onClipboardUpdateListener = ClipboardHelper.OnClipboardUpdateListener {
+        if (!clipboardSuggestion) return@OnClipboardUpdateListener
+        service.lifecycleScope.launch {
+            if (it.text.isNullOrEmpty()) {
+                isClipboardFresh = false
+            } else {
+                alwaysUi.clipboardUi.text.text = it.text.take(42)
+                isClipboardFresh = true
+                launchClipboardTimeoutJob()
+            }
+            evalAlwaysUiState()
+        }
+    }
+
+    private fun launchClipboardTimeoutJob() {
+        clipboardTimeoutJob?.cancel()
+        val timeout = clipboardSuggestionTimeout * 1000L
+        if (timeout < 0L) return
+        clipboardTimeoutJob = service.lifecycleScope.launch {
+            delay(timeout)
+            isClipboardFresh = false
+            clipboardTimeoutJob = null
+        }
+    }
 
     private fun evalAlwaysUiState() {
         val newState =
             when {
+                isClipboardFresh -> AlwaysUi.State.Clipboard
                 else -> AlwaysUi.State.Toolbar
             }
         if (newState == alwaysUi.currentState) return
@@ -109,6 +128,22 @@ class QuickBar(
                 setOnClickListener { service.requestHideSelf(0) }
                 onSwipeListener = swipeDownHideKeyboardCallback
             }
+            clipboardUi.suggestionView.apply {
+                setOnClickListener {
+                    val content = ClipboardHelper.lastBean?.text
+                    content?.let { service.commitText(it) }
+                    clipboardTimeoutJob?.cancel()
+                    clipboardTimeoutJob = null
+                    isClipboardFresh = false
+                    evalAlwaysUiState()
+                }
+                setOnLongClickListener {
+                    ClipboardHelper.lastBean?.let {
+                        AppUtils.launchClipEdit(context, it.id, ClipEditActivity.FROM_CLIPBOARD)
+                    }
+                    true
+                }
+            }
         }
     }
 
@@ -126,18 +161,6 @@ class QuickBar(
 
     private val tabUi by lazy {
         TabUi(context, theme)
-    }
-
-    private val clipboardSuggestionUi by lazy {
-        ClipboardSuggestionUi(context).apply {
-            root.setOnClickListener {
-                val content = text.text.toString()
-                if (content.isNotEmpty()) {
-                    service.commitText(content)
-                    handleClipboardContent(null)
-                }
-            }
-        }
     }
 
     private val barStateMachine =
@@ -219,11 +242,9 @@ class QuickBar(
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
             add(inlineSuggestionUi.root, lParams(matchParent, matchParent))
-            add(clipboardSuggestionUi.root, lParams(matchParent, matchParent))
 
             evalAlwaysUiState()
-
-            clipboardManager.addPrimaryClipChangedListener(clipboardListener)
+            ClipboardHelper.addOnUpdateListener(onClipboardUpdateListener)
         }
     }
 
@@ -250,24 +271,6 @@ class QuickBar(
         barStateMachine.push(
             QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
             QuickBarStateMachine.BooleanKey.SuggestionEmpty to isEmpty,
-        )
-    }
-
-    fun handleClipboardContent(content: String?) {
-        val isEmpty = content.isNullOrEmpty() || !clipboardSuggestion
-
-        if (!isEmpty) {
-            clipboardSuggestionUi.text.text = content
-            clipboardTimeoutJob?.cancel()
-            clipboardTimeoutJob = service.lifecycleScope.launch {
-                delay(clipboardSuggestionTimeout * 1000L)
-                handleClipboardContent(null)
-            }
-        }
-
-        barStateMachine.push(
-            QuickBarStateMachine.TransitionEvent.ClipboardUpdated,
-            QuickBarStateMachine.BooleanKey.ClipboardEmpty to isEmpty,
         )
     }
 
