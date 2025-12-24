@@ -1,6 +1,7 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.bar.ui
 
@@ -33,6 +34,7 @@ class AlwaysUi(
 ) : Ui {
     enum class State {
         Toolbar,
+        Clipboard,
     }
 
     var currentState = State.Toolbar
@@ -57,9 +59,12 @@ class AlwaysUi(
 
     val buttonsUi = ButtonsBarUi(ctx, theme, onButtonClick)
 
+    val clipboardUi = ClipboardSuggestionUi(ctx)
+
     private val animator =
         ViewAnimator(ctx).apply {
             add(buttonsUi.root, lParams(matchParent, matchParent))
+            add(clipboardUi.root, lParams(matchParent, matchParent))
         }
 
     override val root: ConstraintLayout = constraintLayout {
@@ -106,6 +111,7 @@ class AlwaysUi(
         Timber.d("Switch always ui to $state")
         when (state) {
             State.Toolbar -> animator.displayedChild = 0
+            State.Clipboard -> animator.displayedChild = 1
         }
         currentState = state
     }
