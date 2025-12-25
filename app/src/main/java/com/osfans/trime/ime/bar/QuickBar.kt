@@ -7,9 +7,14 @@ package com.osfans.trime.ime.bar
 
 import android.content.Context
 import android.os.Build
+import android.util.Size
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestion
+import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.ViewAnimator
+import android.widget.inline.InlineContentView
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
@@ -23,10 +28,9 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
-import com.osfans.trime.ime.bar.ui.InlineSuggestionUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.CandidateModule
+import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputScope
@@ -39,6 +43,8 @@ import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
@@ -46,6 +52,9 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
+import java.util.concurrent.Executor
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @InputScope
 @Inject
@@ -55,7 +64,7 @@ class QuickBar(
     private val rime: RimeSession,
     private val theme: Theme,
     private val windowManager: BoardWindowManager,
-    lazyCandidate: Lazy<CandidateModule>,
+    lazyCandidate: Lazy<CompactCandidateModule>,
     lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
 ) : InputBroadcastReceiver {
 
@@ -76,6 +85,7 @@ class QuickBar(
     private var clipboardTimeoutJob: Job? = null
 
     private var isClipboardFresh: Boolean = false
+    private var isInlineSuggestionPresent: Boolean = false
 
     @Keep
     private val onClipboardUpdateListener = ClipboardHelper.OnClipboardUpdateListener {
@@ -107,6 +117,7 @@ class QuickBar(
         val newState =
             when {
                 isClipboardFresh -> AlwaysUi.State.Clipboard
+                isInlineSuggestionPresent -> AlwaysUi.State.InlineSuggestion
                 else -> AlwaysUi.State.Toolbar
             }
         if (newState == alwaysUi.currentState) return
@@ -148,15 +159,11 @@ class QuickBar(
     }
 
     private val candidateUi by lazy {
-        CandidateUi(context, candidate.compactCandidateModule.view).apply {
+        CandidateUi(context, candidate.view).apply {
             unrollButton.apply {
                 onSwipeListener = swipeDownHideKeyboardCallback
             }
         }
-    }
-
-    private val inlineSuggestionUi by lazy {
-        InlineSuggestionUi(context, candidate.suggestionCandidateModule.view)
     }
 
     private val tabUi by lazy {
@@ -188,7 +195,7 @@ class QuickBar(
     private fun setUnrollButtonToAttach() {
         candidateUi.unrollButton.setOnClickListener { view ->
             windowManager.attachWindow(
-                FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate.compactCandidateModule),
+                FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate),
             )
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_more_24)
@@ -241,7 +248,6 @@ class QuickBar(
             add(alwaysUi.root, lParams(matchParent, matchParent))
             add(candidateUi.root, lParams(matchParent, matchParent))
             add(tabUi.root, lParams(matchParent, matchParent))
-            add(inlineSuggestionUi.root, lParams(matchParent, matchParent))
 
             evalAlwaysUiState()
             ClipboardHelper.addOnUpdateListener(onClipboardUpdateListener)
@@ -266,12 +272,59 @@ class QuickBar(
         barStateMachine.push(QuickBarStateMachine.TransitionEvent.WindowDetached)
     }
 
+    private val suggestionSize by lazy {
+        Size(ViewGroup.LayoutParams.WRAP_CONTENT, context.dp(themedHeight))
+    }
+
+    private val directExecutor by lazy {
+        Executor { it.run() }
+    }
+
     @RequiresApi(Build.VERSION_CODES.R)
-    fun handleInlineSuggestions(isEmpty: Boolean) {
-        barStateMachine.push(
-            QuickBarStateMachine.TransitionEvent.SuggestionUpdated,
-            QuickBarStateMachine.BooleanKey.SuggestionEmpty to isEmpty,
-        )
+    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
+        val suggestions = response.inlineSuggestions
+        if (suggestions.isEmpty()) {
+            isInlineSuggestionPresent = false
+            return true
+        }
+        var pinned: InlineSuggestion? = null
+        val scrollable = mutableListOf<InlineSuggestion>()
+        var extraPinnedCount = 0
+        suggestions.forEach {
+            if (it.info.isPinned) {
+                if (pinned == null) {
+                    pinned = it
+                } else {
+                    scrollable.add(extraPinnedCount++, it)
+                }
+            } else {
+                scrollable.add(it)
+            }
+        }
+        service.lifecycleScope.launch {
+            alwaysUi.inlineSuggestionsUi.setPinnedView(
+                pinned?.let { inflateInlineContentView(it) },
+            )
+        }
+        service.lifecycleScope.launch {
+            val views = scrollable.map { s ->
+                service.lifecycleScope.async {
+                    inflateInlineContentView(s)
+                }
+            }.awaitAll()
+            alwaysUi.inlineSuggestionsUi.setScrollableViews(views)
+        }
+        isInlineSuggestionPresent = true
+        evalAlwaysUiState()
+        return true
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private suspend fun inflateInlineContentView(suggestion: InlineSuggestion): InlineContentView? = suspendCoroutine { c ->
+        // callback view might be null
+        suggestion.inflate(context, suggestionSize, directExecutor) { v ->
+            c.resume(v)
+        }
     }
 
     override fun onRimeOptionUpdated(value: RimeMessage.OptionMessage.Data) {

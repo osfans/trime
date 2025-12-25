@@ -208,4 +208,5 @@
     <string name="always">始终</string>
     <string name="preferred_voice_input">首选语音输入法</string>
     <string name="no_voice_input_installed">未安装语音输入</string>
+    <string name="inline_suggestions">显示内嵌自动填充建议</string>
 </resources>
