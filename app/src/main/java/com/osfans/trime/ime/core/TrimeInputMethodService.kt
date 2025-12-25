@@ -49,7 +49,6 @@ import com.osfans.trime.data.prefs.PreferenceDelegateProvider
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.candidates.suggestion.InlineSuggestionHelper
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import com.osfans.trime.receiver.RimeIntentReceiver
@@ -482,10 +481,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
+    private val inlineSuggestions by prefs.general.inlineSuggestions
+
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateInlineSuggestionsRequest(uiExtras: Bundle): InlineSuggestionsRequest? {
-        if (!inputDeviceManager.isVirtualKeyboard) return null
-        return InlineSuggestionHelper.createRequest(this)
+        if (!inlineSuggestions || !inputDeviceManager.isVirtualKeyboard) return null
+        return InlineSuggestions.createRequest(this)
     }
 
     @SuppressLint("NewApi")

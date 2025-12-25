@@ -35,6 +35,7 @@ class AlwaysUi(
     enum class State {
         Toolbar,
         Clipboard,
+        InlineSuggestion,
     }
 
     var currentState = State.Toolbar
@@ -61,10 +62,13 @@ class AlwaysUi(
 
     val clipboardUi = ClipboardSuggestionUi(ctx)
 
+    val inlineSuggestionsUi = InlineSuggestionsUi(ctx)
+
     private val animator =
         ViewAnimator(ctx).apply {
             add(buttonsUi.root, lParams(matchParent, matchParent))
             add(clipboardUi.root, lParams(matchParent, matchParent))
+            add(inlineSuggestionsUi.root, lParams(matchParent, matchParent))
         }
 
     override val root: ConstraintLayout = constraintLayout {
@@ -112,6 +116,7 @@ class AlwaysUi(
         when (state) {
             State.Toolbar -> animator.displayedChild = 0
             State.Clipboard -> animator.displayedChild = 1
+            State.InlineSuggestion -> animator.displayedChild = 2
         }
         currentState = state
     }

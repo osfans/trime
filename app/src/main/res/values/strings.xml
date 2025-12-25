@@ -209,4 +209,5 @@
     <string name="always">Always</string>
     <string name="preferred_voice_input">Preferred voice input</string>
     <string name="no_voice_input_installed">No voice input installed</string>
+    <string name="inline_suggestions">Show inline autofill suggestions</string>
 </resources>

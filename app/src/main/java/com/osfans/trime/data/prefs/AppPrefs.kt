@@ -92,11 +92,13 @@ class AppPrefs(
         companion object {
             const val COMPOSING_TEXT_MODE = "composing_text_mode"
             const val ASCII_SWITCH_TIPS = "ascii_switch_tips"
+            const val INLINE_SUGGESTIONS = "inline_suggestions"
             const val PREFERRED_VOICE_INPUT = "preferred_voice_input"
         }
 
         val composingTextMode = enum(R.string.composing_text_mode, COMPOSING_TEXT_MODE, ComposingTextMode.DISABLE)
         val asciiSwitchTips = switch(R.string.ascii_switch_tips, ASCII_SWITCH_TIPS, true)
+        val inlineSuggestions = switch(R.string.inline_suggestions, INLINE_SUGGESTIONS, true)
 
         val preferredVoiceInput = list(
             R.string.preferred_voice_input,

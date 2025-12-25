@@ -26,7 +26,6 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
-import com.osfans.trime.ime.candidates.suggestion.SuggestionCandidateModule
 import com.osfans.trime.ime.composition.PreeditModule
 import com.osfans.trime.ime.dependency.InputComponent
 import com.osfans.trime.ime.dependency.create
@@ -98,8 +97,7 @@ class InputView(
     private val preedit: PreeditModule = inputComponent.preedit
     private val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
     private val liquidWindow: LiquidWindow = inputComponent.liquidWindow
-    private val compactCandidate: CompactCandidateModule = inputComponent.candidate.compactCandidateModule
-    private val suggestionCandidate: SuggestionCandidateModule = inputComponent.candidate.suggestionCandidateModule
+    private val compactCandidate: CompactCandidateModule = inputComponent.candidate
     private val popup: PopupComponent = inputComponent.popup
 
     private fun addBroadcastReceivers() {
@@ -108,7 +106,6 @@ class InputView(
         broadcaster.addReceiver(keyboardWindow)
         broadcaster.addReceiver(liquidWindow)
         broadcaster.addReceiver(compactCandidate)
-        broadcaster.addReceiver(suggestionCandidate)
     }
 
     private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
@@ -334,12 +331,7 @@ class InputView(
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean {
-        val suggestions = response.inlineSuggestions
-        broadcaster.onInlineSuggestions(suggestions)
-        quickBar.handleInlineSuggestions(suggestions.isEmpty())
-        return true
-    }
+    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean = quickBar.handleInlineSuggestions(response)
 
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)

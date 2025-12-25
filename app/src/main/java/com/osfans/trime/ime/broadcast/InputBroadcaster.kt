@@ -85,8 +85,4 @@ class InputBroadcaster : InputBroadcastReceiver {
     override fun onEnterKeyLabelUpdate(label: String) {
         receivers.forEach { it.onEnterKeyLabelUpdate(label) }
     }
-
-    override fun onInlineSuggestions(suggestions: List<InlineSuggestion>) {
-        receivers.forEach { it.onInlineSuggestions(suggestions) }
-    }
 }
