@@ -21,7 +21,7 @@ jobs:
       BUILD_ABI: armeabi-v7a,arm64-v8a,x86,x86_64
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
@@ -54,7 +54,7 @@ jobs:
             ./gradlew :app:calculateNativeCacheHash
 
       - name: Fetch JNI cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: jni-cache
         with:
           path: "app/prebuilt"
@@ -80,7 +80,7 @@ jobs:
         run: cp -R app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib app/prebuilt
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: trime-${{ matrix.os }}
           path: app/build/outputs/apk/debug/
@@ -88,7 +88,7 @@ jobs:
           retention-days: 90
 
       - name: Upload APK artifact (ARM64_V8A only)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: trime-arm64-v8a-${{ matrix.os }}
           path: app/build/outputs/apk/debug/*arm64-v8a-*.apk
@@ -96,7 +96,7 @@ jobs:
           retention-days: 90
 
       - name: Upload JNI artifact (librime_jni.so)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: librime_jni-${{ matrix.os }}
           path: app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/*
