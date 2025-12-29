@@ -250,7 +250,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
         val keyIndex = state.keyIndex
         state.longPressJob = lifecycleScope.launch {
             delay(longPressTimeout.toLong())
-            if (activePointers.get(pointerId) != state || state.shouldPerformSwipe) return@launch
+            if (activePointers.get(pointerId) != state || state.shouldPerformSwipe || state.slideActivated) return@launch
             state.isLongPressed = true
             if (isKeyRepeatable(keyIndex)) {
                 onKeyActionListener?.invoke(keyIndex, KeyBehavior.CLICK)
