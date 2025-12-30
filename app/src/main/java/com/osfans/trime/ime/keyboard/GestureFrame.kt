@@ -38,7 +38,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
     private var longPressJob: Job? = null
 
     @Volatile
-    var longPressFeedbackEnabled = false
+    var longPressFeedbackEnabled = true
 
     @Volatile
     private var swipeTriggered = false
@@ -105,10 +105,10 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                     delay(longPressTimeout.toLong())
                     if (touchId != currentTouchId) return@launch
                     if (!(swipeTriggered || longPressTriggered || shouldPerformSwipe)) {
-                        if (longPressFeedbackEnabled) {
+                        longPressTriggered = performLongClick()
+                        if (longPressFeedbackEnabled && longPressTriggered) {
                             InputFeedbackManager.keyPressVibrate(this@GestureFrame, true)
                         }
-                        longPressTriggered = performLongClick()
                     }
                 }
                 swipeStartX = x

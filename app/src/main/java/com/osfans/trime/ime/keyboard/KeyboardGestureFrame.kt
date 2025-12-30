@@ -177,7 +177,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
 
                 if (state.isLongPressed) {
                     onPopupSelected?.invoke(keyIndex)
-                    deactivateKeyFeedback(keyIndex)
+                    deactivateKeyFeedback(keyIndex, KeyBehavior.LONG_CLICK)
                     return true
                 }
 
@@ -256,7 +256,10 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                 onKeyActionListener?.invoke(keyIndex, KeyBehavior.CLICK)
                 launchRepeatClickJob(pointerId, state)
             } else {
-                if (onKeyActionListener?.invoke(keyIndex, KeyBehavior.LONG_CLICK) == true) deactivateKeyFeedback(keyIndex)
+                if (onKeyActionListener?.invoke(keyIndex, KeyBehavior.LONG_CLICK) == true) {
+                    deactivateKeyFeedback(keyIndex, KeyBehavior.LONG_CLICK)
+                    activePointers.delete(pointerId)
+                }
             }
         }
     }
@@ -307,8 +310,8 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
         onKeyStateListener?.invoke(keyIndex, behavior, true, false, false)
     }
 
-    private fun deactivateKeyFeedback(keyIndex: Int) {
-        onKeyStateListener?.invoke(keyIndex, KeyBehavior.CLICK, false, false, false)
+    private fun deactivateKeyFeedback(keyIndex: Int, behavior: KeyBehavior = KeyBehavior.CLICK) {
+        onKeyStateListener?.invoke(keyIndex, behavior, false, false, false)
     }
 
     private val touchPaint by lazy {

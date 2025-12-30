@@ -114,6 +114,7 @@ class KeyboardView(
 
         onKeyActionListener = { keyIndex, behavior ->
             if (behavior == KeyBehavior.LONG_CLICK && hasPopupKeys(keyIndex)) {
+                keyboardActionListener?.onPress(keyIndex, false)
                 val popupKeys = mKeys.get(keyIndex).popup
                 val bounds = getKeyBounds(keyIndex)
                 popupActionListener.onPopupAction(
@@ -172,7 +173,7 @@ class KeyboardView(
                     key?.onReleased()
                     invalidateKey(key)
                     hidePopup(keyIndex)
-                    if (vibrateOnKeyRelease) keyboardActionListener?.onPress(keyIndex, false)
+                    if (behavior == KeyBehavior.LONG_CLICK || vibrateOnKeyRelease) keyboardActionListener?.onPress(keyIndex, false)
                 }
             }
         }
