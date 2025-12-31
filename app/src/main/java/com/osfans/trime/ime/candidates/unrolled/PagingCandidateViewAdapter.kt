@@ -34,8 +34,12 @@ open class PagingCandidateViewAdapter(
     var offset: Int = 0
         private set
 
-    fun refreshWithOffset(offset: Int) {
+    var highlightedIndex: Int = -1
+        private set
+
+    fun refreshWith(offset: Int, highlightedIndex: Int) {
         this.offset = offset
+        this.highlightedIndex = highlightedIndex
         refresh()
     }
 
@@ -49,9 +53,11 @@ open class PagingCandidateViewAdapter(
         position: Int,
     ) {
         val item = getItem(position) ?: return
-        holder.ui.update(item, false)
+        val idx = position + offset
+        val highlighted = idx == highlightedIndex
+        holder.ui.update(item, highlighted)
         holder.text = item.text
         holder.comment = item.comment
-        holder.idx = position + offset
+        holder.idx = idx
     }
 }

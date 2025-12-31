@@ -4,6 +4,7 @@
 
 package com.osfans.trime.ime.candidates
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.view.View
@@ -122,19 +123,20 @@ class CandidateItemUi(
         )
     }
 
+    @SuppressLint("UseKtx")
     fun update(
         item: CandidateItem,
-        isHighlighted: Boolean,
+        highlighted: Boolean,
     ) {
-        val tColor = if (isHighlighted) hlTextColor else textColor
-        val cColor = if (isHighlighted) hlCommentColor else commentColor
+        val tColor = if (highlighted) hlTextColor else textColor
+        val cColor = if (highlighted) hlCommentColor else commentColor
         text.text = item.text
         text.setTextColor(tColor)
         comment.text = if (theme.generalStyle.commentOnTop) item.comment else " ${item.comment}"
         comment.setTextColor(cColor)
         comment.isGone = item.comment.isEmpty()
         root.background =
-            if (isHighlighted) {
+            if (highlighted) {
                 ColorDrawable(hlBackColor)
             } else {
                 pressHighlightDrawable(hlBackColor)

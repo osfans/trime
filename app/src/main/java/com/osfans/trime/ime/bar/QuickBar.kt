@@ -178,6 +178,13 @@ class QuickBar(
     val unrollButtonStateMachine =
         UnrollButtonStateMachine.new {
             when (it) {
+                UnrollButtonStateMachine.State.AboutToAttachWindow -> {
+                    setUnrollButtonToDetach()
+                    setUnrollButtonEnabled(true)
+                    windowManager.attachWindow(
+                        FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate),
+                    )
+                }
                 UnrollButtonStateMachine.State.ClickToAttachWindow -> {
                     setUnrollButtonToAttach()
                     setUnrollButtonEnabled(true)
@@ -193,7 +200,7 @@ class QuickBar(
         }
 
     private fun setUnrollButtonToAttach() {
-        candidateUi.unrollButton.setOnClickListener { view ->
+        candidateUi.unrollButton.setOnClickListener {
             windowManager.attachWindow(
                 FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate),
             )
@@ -202,7 +209,7 @@ class QuickBar(
     }
 
     private fun setUnrollButtonToDetach() {
-        candidateUi.unrollButton.setOnClickListener { view ->
+        candidateUi.unrollButton.setOnClickListener {
             windowManager.attachWindow(KeyboardWindow)
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_less_24)

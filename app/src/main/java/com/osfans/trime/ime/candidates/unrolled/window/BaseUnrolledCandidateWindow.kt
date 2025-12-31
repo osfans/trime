@@ -106,7 +106,10 @@ abstract class BaseUnrolledCandidateWindow(
                         windowManager.attachWindow(KeyboardWindow)
                     } else {
                         candidateLayout.resetPosition()
-                        adapter.refreshWithOffset(it)
+                        adapter.refreshWith(
+                            offset = it,
+                            highlightedIndex = compactCandidate.adapter.highlightedIdx,
+                        )
                     }
                 }
             }
@@ -120,7 +123,7 @@ abstract class BaseUnrolledCandidateWindow(
 
     fun bindCandidateUiViewHolder(holder: CandidateViewHolder) {
         holder.itemView.run {
-            setOnClickListener { view ->
+            setOnClickListener { _ ->
                 rime.launchOnReady { it.selectCandidate(holder.idx, global = true) }
             }
             setOnLongClickListener { view ->

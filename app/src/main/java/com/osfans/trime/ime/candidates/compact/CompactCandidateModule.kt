@@ -62,11 +62,16 @@ class CompactCandidateModule(
             UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesEmpty to
                 (adapter.total == childCount),
         )
+        bar.unrollButtonStateMachine.push(
+            UnrollButtonStateMachine.TransitionEvent.UnrolledCandidatesUpdated,
+            UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesHighlighted to
+                (adapter.highlightedIdx >= childCount),
+        )
     }
 
     val adapter by lazy {
         CompactCandidateViewAdapter(theme).apply {
-            setOnItemClickListener { _, view, position ->
+            setOnItemClickListener { _, _, position ->
                 rime.launchOnReady { it.selectCandidate(position, global = true) }
             }
             setOnItemLongClickListener { _, view, position ->
