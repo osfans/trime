@@ -256,6 +256,7 @@ open class KeyboardGestureFrame(context: Context) : FrameLayout(context) {
                 onKeyActionListener?.invoke(keyIndex, KeyBehavior.CLICK)
                 launchRepeatClickJob(pointerId, state)
             } else {
+                if (hasPopupKeys(keyIndex)) onKeyStateListener?.invoke(keyIndex, KeyBehavior.LONG_CLICK, true, true, false)
                 if (onKeyActionListener?.invoke(keyIndex, KeyBehavior.LONG_CLICK) == true) {
                     deactivateKeyFeedback(keyIndex, KeyBehavior.LONG_CLICK)
                     activePointers.delete(pointerId)
