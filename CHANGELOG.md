@@ -2,6 +2,91 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.8] - 2026-01-01
+
+### 🚀 Features
+
+- *(candidates)* Set candidate list layout by preference
+- Add ASCII mode switch indicator
+- Enhance keyboard haptic feedback with additional vibration options
+- Support user dict management
+- Enhance key preview with popup keyboard support
+- Add spacing for candidate comment layout
+- Add clipboard listening switch
+- *(prefs)* Update pref ui in time when the dependent condition changes
+- *(keyboard)* Add set_theme command for theme switching and refreshing
+- *(keyboard)* Add border support for main keyboard keys
+- Standalone clipboard window
+- *(clipboard)* Return after pasting
+- Add support for voice assitant
+- Add native method to get global highlighted candidate index
+- Enable highlight effect for unrolled candidates
+
+### 🐛 Bug Fixes
+
+- *(ime)* Candidates would disappear in candidate window after rime deploy
+- *(gestures)* Remove duplicate vibration feedback and unused classe
+- Key state not updated after `composing` & `has_menu` state completed
+- *(keyboard)* Resolve abnormal display of space bar schemaName
+- *(keyboard)* Resolve GestureFrame gaining focus unexpectedly
+- *(keyboard)* Key press sound effect not working after device reboot (#1815)
+- *(keyboard)* Resolve incorrect behavior of reset_ascii_mode and ascii_mode
+- *(keyboard)* Resolve schema name not refreshing when switching input methods after librime update
+- *(popup)* Potential crash on showing popup
+- Not full candidate list
+- Workaround for sound effect malfunction
+- *(candidates)* Unroll button was still visible when candidates is few
+- *(candidates)* Keyboard would be blank after selecting unrolled candidates
+- *(keyboard)* Resolve key press sound effect not working on some devices after reboot and no sound effect selected in settings page
+- *(keyboard)* Filter NumLock modifier for non-numpad keys in scrcpy (#1844)
+- Candidates usually couldn't be unrolled in landscape mode
+- Starting rime failure without storage availability check
+- Prevent `long_click` during slide gesture
+- Restore haptic feedback for long press gestures
+- Correct placeholder replacement logic for %3%s and %4%s
+- Ensure correct dark scheme persistence during theme reload and orientation
+- Use actual keycode instead of index for key sound feedback
+
+### 🚜 Refactor
+
+- *(candidates)* Implement "stable id" for candidate adapters
+- *(api)* Emit candidate menu or list depending on `paging_mode` option
+- *(theme)* Deprecate `style/horizontal`
+- Improve the implementation of ascii mode switch indicator
+- *(jni)* Improve rime proto object conversion
+- *(gestures)* Introduce KeyboardGestureFrame for advanced handling
+- Drop draft box feature
+- Build clipboard settings fragment dynamically
+- Rename LiquidKeyboardEditActivity to ClipEditActivity
+- Improve collection bean adding
+- Polish app UI (#1840)
+- *(core)* Normalize key event forwarding from physical keyboard
+- Improve rime lifecycle state observing
+- Improve API calling that will trigger message emitting
+- Use NewStringUTF back to convert C string to jstring
+- Remove RAW_INPUT mode from ComposingTextMode
+- Only cache necessary states from RimeMenu instead of the whole instance
+- Enhance clipboard suggestion
+- Enhance inline suggestion
+
+### 📚 Documentation
+
+- Correct textual content throughout the application
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.8
+- Upgrade gradle to 9.2.0
+- Upgrade librime to 1.15.0
+- Update dependency
+- Upgrade action with node 24
+- Add 3.3.8 changelog
+
+### Build
+
+- Migrate deprecations in gradle 8.14
+- Add patch-apply in Makefile
+
 ## [3.3.7] - 2025-11-01
 
 ### 🚀 Features
