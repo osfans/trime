@@ -889,41 +889,40 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     fun getActiveText(type: Int): String {
-        if (type == 2) return rime.run { compositionCached }.preedit ?: "" // 當前編碼
-        var text: CharSequence? = rime.run { compositionCached }.commitTextPreview // 當前候選
-        if (text.isNullOrEmpty()) {
-            val info = currentInputEditorInfo
-            text = EditorInfoCompat.getInitialSelectedText(info, 0) // 選中字
-        }
-        if (text.isNullOrEmpty()) {
-            if (type == 1) text = lastCommittedText // 剛上屏字
-        }
-        if (text.isNullOrEmpty()) {
-            val step = if (type == 4) 1024 else 1
-            text = getTextAroundCursor(step, before = true)
-        }
-        if (text.isNullOrEmpty()) {
-            text = getTextAroundCursor(before = false)
-        }
-        return text.toString()
+        val rimeComposition = rime.run { compositionCached }
+        val selected = currentInputConnection?.getSelectedText(0)?.toString()
+        val commitPreview = rimeComposition.commitTextPreview
+        val preedit = rimeComposition.preedit ?: ""
+        val beforeCursor = getTextAroundCursor(1024, before = true) ?: ""
+        val afterCursor = getTextAroundCursor(before = false) ?: ""
+        val lastCommitted = lastCommittedText.toString()
+
+        return sequenceOf(
+            when (type) {
+                2 -> preedit
+                3 -> selected
+                4 -> beforeCursor
+                1 -> lastCommitted
+                else -> null
+            },
+            commitPreview,
+            selected,
+            lastCommitted,
+            beforeCursor,
+            afterCursor,
+        )
+            .firstOrNull { it?.isNotEmpty() == true } ?: ""
     }
 
     private fun getTextAroundCursor(
         initialStep: Int = 1024,
         before: Boolean,
     ): String? {
-        val info = currentInputEditorInfo ?: return null
+        val ic = currentInputConnection ?: return null
         var step = initialStep
         while (true) {
-            val text =
-                if (before) {
-                    EditorInfoCompat.getInitialTextBeforeCursor(info, step, 0)
-                } else {
-                    EditorInfoCompat.getInitialTextAfterCursor(info, step, 0)
-                } ?: return null
-            if (text.length < step) {
-                return text.toString()
-            }
+            val text = (if (before) ic.getTextBeforeCursor(step, 0) else ic.getTextAfterCursor(step, 0)) ?: return ""
+            if (text.length < step) return text.toString()
             step *= 2
         }
     }
