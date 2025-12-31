@@ -39,17 +39,9 @@ object ColorManager {
 
     var activeColorScheme: ColorScheme
         get() = _activeColorScheme
-        set(value) {
+        private set(value) {
             if (this::_activeColorScheme.isInitialized && _activeColorScheme == value) return
             _activeColorScheme = value
-            lightModeColorScheme =
-                runCatching {
-                    _activeColorScheme.colors["light_scheme"]?.let { colorScheme(it) }
-                }.getOrNull()
-            darkModeColorScheme =
-                runCatching {
-                    _activeColorScheme.colors["dark_scheme"]?.let { colorScheme(it) }
-                }.getOrNull()
             fireChange()
         }
 
@@ -152,9 +144,10 @@ object ColorManager {
     fun switchTheme(theme: Theme) {
         bitmapCache?.evictAll()
         this.theme = theme
-        val newScheme = evaluateActiveColorScheme()
-        activeColorScheme = newScheme
-        normalModeColor = newScheme.id
+        val defaultScheme = colorScheme("default") ?: theme.colorSchemes.first()
+        lightModeColorScheme = defaultScheme.colors["light_scheme"]?.let { colorScheme(it) }
+        darkModeColorScheme = defaultScheme.colors["dark_scheme"]?.let { colorScheme(it) }
+        activeColorScheme = evaluateActiveColorScheme()
     }
 
     fun setColorScheme(scheme: ColorScheme) {
