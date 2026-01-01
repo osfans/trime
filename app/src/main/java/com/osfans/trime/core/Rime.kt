@@ -306,7 +306,8 @@ class Rime :
         val tipsText = asciiTipsText
         if (tipsText.isEmpty()) return
         val tips = RimeProto.Context.Composition(tipsText)
-        handleRimeMessage(5, arrayOf(tips))
+        messageFlow_.tryEmit(RimeMessage.CompositionMessage(tips))
+        compositionCached = tips
         asciiSwitchTipsJob?.cancel()
         asciiSwitchTipsJob = lifecycleScope.launch {
             delay(1000L)
