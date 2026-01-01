@@ -110,6 +110,7 @@ class QuickBar(
             delay(timeout)
             isClipboardFresh = false
             clipboardTimeoutJob = null
+            evalAlwaysUiState()
         }
     }
 
