@@ -305,6 +305,9 @@ class Rime :
         if (!showAsciiSwitchTips) return
         val tipsText = asciiTipsText
         if (tipsText.isEmpty()) return
+
+        lastAsciiTipsText = tipsText
+
         val tips = RimeProto.Context.Composition(tipsText)
         messageFlow_.tryEmit(RimeMessage.CompositionMessage(tips))
         compositionCached = tips
