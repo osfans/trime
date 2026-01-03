@@ -188,6 +188,12 @@
     <string name="ascii_switch_tips">切換中英文模式時顯示提示</string>
     <string name="key_double_tap_timeout">按鍵連擊逾時</string>
     <string name="key_slide_step_size">按鍵滑動步長</string>
+    <string name="horizontal_candidate_style">橫向候選詞樣式</string>
+    <string name="horizontal_candidate_never_fill">從不填充寬度</string>
+    <string name="horizontal_candidate_auto_fill">按需填充寬度</string>
+    <string name="horizontal_candidate_always_fill">總是填充寬度</string>
+    <string name="max_span_count">每行最大候選詞數</string>
+    <string name="max_span_count_landscape">每行最大候選詞數(橫屏)</string>
     <string name="user_dictionary">使用者詞典</string>
     <string name="exported_n_entries">已匯出 %1$d 個詞條</string>
     <string name="backed_up_x_to_sync_dir">已備份 %1$s 到同步目錄</string>

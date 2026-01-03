@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import androidx.annotation.Keep
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
+import com.osfans.trime.ime.candidates.compact.HorizontalCandidateMode
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
@@ -152,6 +153,9 @@ class AppPrefs(
             const val HOOK_SHIFT_NUM = "hook_shift_num"
             const val HOOK_SHIFT_SYMBOL = "hook_shift_symbol"
             const val HOOK_SHIFT_ARROW = "hook_shift_arrow"
+
+            const val MAX_SPAN_COUNT = "max_span_count"
+            const val MAX_SPAN_COUNT_LANDSCAPE = "max_span_count_landscape"
         }
 
         enum class LandscapeMode(override val stringRes: Int) : PreferenceDelegateEnum {
@@ -292,6 +296,32 @@ class AppPrefs(
             "dp",
         )
 
+        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, Candidates.HORIZONTAL_CANDIDATE_MODE, HorizontalCandidateMode.AUTO_FILL)
+
+        val maxSpanCount = int(
+            R.string.max_span_count,
+            MAX_SPAN_COUNT,
+            6,
+            1,
+            10,
+            enableUiOn = {
+                shared.getString(Candidates.HORIZONTAL_CANDIDATE_MODE, null) ==
+                    HorizontalCandidateMode.AUTO_FILL.name
+            },
+        )
+
+        val maxSpanCountLandscape = int(
+            R.string.max_span_count_landscape,
+            MAX_SPAN_COUNT_LANDSCAPE,
+            8,
+            4,
+            12,
+            enableUiOn = {
+                shared.getString(Candidates.HORIZONTAL_CANDIDATE_MODE, null) ==
+                    HorizontalCandidateMode.AUTO_FILL.name
+            },
+        )
+
         val hookCtrlA = switch(R.string.hook_ctrl_a, HOOK_CTRL_A, false)
         val hookCtrlCV = switch(R.string.hook_ctrl_cv, HOOK_CTRL_CV, false)
         val hookCtrlLR = switch(R.string.hook_ctrl_lr, HOOK_CTRL_LR, false)
@@ -309,6 +339,7 @@ class AppPrefs(
             const val MODE = "show_candidates_window"
             const val LAYOUT = "candidates_layout"
             const val POSITION = "candidates_window_position"
+            const val HORIZONTAL_CANDIDATE_MODE = "horizontal_candidate_mode"
         }
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)

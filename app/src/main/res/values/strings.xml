@@ -188,6 +188,12 @@
     <string name="ascii_switch_tips">Show tips when switching ASCII mode</string>
     <string name="key_double_tap_timeout">Key double tap timeout</string>
     <string name="key_slide_step_size">Step size for key sliding</string>
+    <string name="horizontal_candidate_style">Horizontal candidate style</string>
+    <string name="horizontal_candidate_never_fill">Never fill width</string>
+    <string name="horizontal_candidate_auto_fill">Fill width on demand</string>
+    <string name="horizontal_candidate_always_fill">Always fill width</string>
+    <string name="max_span_count">Maximum candidates per row</string>
+    <string name="max_span_count_landscape">Maximum candidates per row (landscape)</string>
     <string name="user_dictionary">User dictionary</string>
     <string name="import_">Import</string>
     <string name="import_error">Import error</string>

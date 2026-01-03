@@ -34,6 +34,17 @@ open class CompactCandidateViewAdapter(
     var highlightedIdx: Int = -1
         private set
 
+    var layoutMinWidth: Int = 0
+        private set
+
+    var layoutFlexGrow: Float = 0f
+        private set
+
+    fun updateLayoutParams(minWidth: Int, flexGrow: Float) {
+        layoutMinWidth = minWidth
+        layoutFlexGrow = flexGrow
+    }
+
     fun updateCandidates(
         data: Array<CandidateItem>,
         total: Int,
@@ -71,8 +82,8 @@ open class CompactCandidateViewAdapter(
         holder.comment = item.comment
         holder.idx = position // unused
         holder.ui.root.updateLayoutParams<FlexboxLayoutManager.LayoutParams> {
-            minWidth = 0
-            flexGrow = 0f
+            minWidth = this@CompactCandidateViewAdapter.layoutMinWidth
+            flexGrow = this@CompactCandidateViewAdapter.layoutFlexGrow
         }
     }
 }
