@@ -78,8 +78,8 @@ class ToolButton : GestureFrame {
         label.setTextColor(color)
     }
 
-    fun setIconTint(@ColorInt color: Int) {
-        image.imageTintList = ColorStateList.valueOf(color)
+    fun setIconTint(@ColorInt color: Int?) {
+        image.imageTintList = ColorStateList.valueOf(color ?: ColorManager.getColor("candidate_text_color"))
     }
 
     fun updateStyle() {
@@ -143,7 +143,7 @@ class ToolButton : GestureFrame {
         when (contentType) {
             ContentType.ICON -> image.imageTintList = colorStateList
             ContentType.TEXT -> label.setTextColor(colorStateList)
-            ContentType.LOCAL_IMAGE -> { /* 本地图片不进行着色 */ }
+            ContentType.LOCAL_IMAGE -> image.imageTintList = null
         }
     }
 

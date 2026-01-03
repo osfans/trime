@@ -132,11 +132,28 @@ class AlwaysUi(
         }
         currentState = state
         updateRightButton(state)
+        updateMoreButton(state)
     }
 
     private fun updateRightButton(state: State) {
         val shouldShowFirstButton = buttonsUi.firstButton != null &&
             !(theme.toolBar.buttons.isEmpty() && state == State.Toolbar)
         rightButtonAnimator.displayedChild = if (shouldShowFirstButton) 1 else 0
+    }
+
+    private fun updateMoreButton(state: State) = moreButton.apply {
+        when (state) {
+            State.Toolbar -> updateStyle()
+            else -> {
+                setIcon(R.drawable.ic_baseline_arrow_back_24)
+                setIconTint(null)
+            }
+        }
+        setOnClickListener {
+            when (state) {
+                State.Toolbar -> onButtonClick?.invoke(theme.toolBar.primaryButton?.action)
+                else -> updateState(State.Toolbar)
+            }
+        }
     }
 }
