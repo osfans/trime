@@ -29,6 +29,8 @@ class ButtonsBarUi(
         flexDirection = FlexDirection.ROW_REVERSE
     }
 
+    val firstButton: ToolButton?
+
     private fun toolButton(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
@@ -42,7 +44,10 @@ class ButtonsBarUi(
 
     init {
         val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
-        theme.toolBar.buttons.forEachIndexed { index, config ->
+        val buttons = theme.toolBar.buttons
+        firstButton = buttons.firstOrNull()?.let { toolButton(it) }
+
+        buttons.drop(1).forEachIndexed { _, config ->
             val (width, height) = if (config.foreground?.size?.size == 2) {
                 config.foreground.size
             } else {
@@ -50,9 +55,7 @@ class ButtonsBarUi(
             }.map { if (it < 0) it else ctx.dp(it) }
             val button = toolButton(config)
             val lParams = FlexboxLayout.LayoutParams(width, height).apply {
-                if (index != 0) {
-                    marginEnd = ctx.dp(theme.toolBar.buttonSpacing)
-                }
+                marginEnd = ctx.dp(theme.toolBar.buttonSpacing)
             }
             root.addView(button, lParams)
         }

@@ -56,13 +56,19 @@ class AlwaysUi(
         theme.toolBar.primaryButton,
         R.drawable.ic_baseline_more_horiz_24,
     )
-    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
 
     val buttonsUi = ButtonsBarUi(ctx, theme, onButtonClick)
 
     val clipboardUi = ClipboardSuggestionUi(ctx)
 
     val inlineSuggestionsUi = InlineSuggestionsUi(ctx)
+
+    val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
+    private val rightButtonAnimator =
+        ViewAnimator(ctx).apply {
+            add(hideKeyboardButton, lParams(matchParent, matchParent))
+            buttonsUi.firstButton?.let { add(it, lParams(matchParent, matchParent)) }
+        }
 
     private val animator =
         ViewAnimator(ctx).apply {
@@ -73,41 +79,47 @@ class AlwaysUi(
 
     override val root: ConstraintLayout = constraintLayout {
         val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
-        val (width, height) = theme.toolBar.primaryButton?.foreground?.size
-            ?.takeIf { it.size == 2 }
-            ?: List(2) { defaultButtonSize }
+        val (primaryWidth, primaryHeight) =
+            (
+                theme.toolBar.primaryButton?.foreground?.size?.takeIf { it.size == 2 }
+                    ?: List(2) { defaultButtonSize }
+                )
+        val (rightWidth, rightHeight) =
+            (
+                theme.toolBar.buttons.firstOrNull()?.foreground?.size?.takeIf { it.size == 2 }
+                    ?: List(2) { defaultButtonSize }
+                )
+
         add(
             moreButton,
-            lParams(dp(width), dp(height)) {
+            lParams(dp(primaryWidth), dp(primaryHeight)) {
                 startOfParent()
                 centerVertically()
             },
         )
-        if (theme.toolBar.buttons.isEmpty()) {
-            val size = dp(defaultButtonSize)
-            add(
-                hideKeyboardButton,
-                lParams(size, size) {
-                    endOfParent()
-                    centerVertically()
-                },
-            )
-        }
         add(
-            animator,
-            lParams(matchConstraints, matchParent) {
-                after(moreButton)
-                if (theme.toolBar.buttons.isEmpty()) {
-                    before(hideKeyboardButton)
-                }
+            rightButtonAnimator,
+            lParams(dp(rightWidth), dp(rightHeight)) {
                 endOfParent()
                 centerVertically()
             },
         )
+        add(
+            animator,
+            lParams(matchConstraints, matchParent) {
+                after(moreButton)
+                before(rightButtonAnimator)
+                endOfParent()
+                centerVertically()
+            },
+        )
+    }.apply {
+        updateRightButton(State.Toolbar)
     }
 
     fun updateButtonsStyle() {
         moreButton.updateStyle()
+        buttonsUi.firstButton?.updateStyle()
         buttonsUi.updateStyle()
     }
 
@@ -119,5 +131,12 @@ class AlwaysUi(
             State.InlineSuggestion -> animator.displayedChild = 2
         }
         currentState = state
+        updateRightButton(state)
+    }
+
+    private fun updateRightButton(state: State) {
+        val shouldShowFirstButton = buttonsUi.firstButton != null &&
+            !(theme.toolBar.buttons.isEmpty() && state == State.Toolbar)
+        rightButtonAnimator.displayedChild = if (shouldShowFirstButton) 1 else 0
     }
 }
