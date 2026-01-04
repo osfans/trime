@@ -22,6 +22,7 @@ import com.osfans.trime.data.soundeffect.SoundEffectManager
 import splitties.systemservices.audioManager
 import splitties.systemservices.vibrator
 import timber.log.Timber
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Manage the key press effects, such as vibration, sound, speaking and so on.
@@ -33,18 +34,19 @@ object InputFeedbackManager {
     private var soundPool: SoundPool? = null
 
     private var effectPlayProgress = 0
-    private val cachedSoundIds = SparseIntArray(30)
+    private val cachedSoundIds = SparseIntArray()
+
+    private val loadedSounds = ConcurrentHashMap<String, Int>()
+    private var effectHash = 0
 
     fun init(context: Context) {
         try {
             tts = TextToSpeech(context, null)
             soundPool =
-                SoundPool
-                    .Builder()
+                SoundPool.Builder()
                     .setMaxStreams(3)
                     .setAudioAttributes(
-                        AudioAttributes
-                            .Builder()
+                        AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                             .build(),
@@ -55,19 +57,35 @@ object InputFeedbackManager {
     }
 
     private fun cacheSoundId() {
-        cachedSoundIds.clear()
-        SoundEffectManager.activeAudioPaths.forEachIndexed { i, path ->
-            val id = soundPool?.load(path, 1) ?: 0
-            if (id != 0 && !cachedSoundIds.containsValue(id)) {
-                cachedSoundIds.put(i, id)
-            }
-        }
-    }
+        if (!soundEffectEnabled) return
 
-    fun startInput() {
         if (SoundEffectManager.activeSoundEffect == null) {
             SoundEffectManager.init()
         }
+
+        val paths = SoundEffectManager.activeAudioPaths
+        val hash = paths.hashCode()
+
+        if (hash == effectHash) return
+
+        cachedSoundIds.clear()
+
+        paths.forEachIndexed { i, path ->
+            val soundId = loadedSounds.getOrPut(path) { soundPool?.load(path, 1) ?: 0 }
+            if (soundId != 0 && !cachedSoundIds.containsValue(soundId)) {
+                cachedSoundIds.put(i, soundId)
+            }
+        }
+
+        effectHash = hash
+    }
+
+    fun startInput() {
+        cacheSoundId()
+    }
+
+    fun reloadSoundEffects() {
+        effectHash = 0
         cacheSoundId()
     }
 
@@ -131,7 +149,6 @@ object InputFeedbackManager {
                     break
                 }
             }
-            Timber.d("without melody: index: $index, sounds.size=${sounds.size}")
             index
         }
     }
@@ -212,5 +229,9 @@ object InputFeedbackManager {
         tts = null
         soundPool?.release()
         soundPool = null
+
+        loadedSounds.clear()
+        cachedSoundIds.clear()
+        effectHash = 0
     }
 }
