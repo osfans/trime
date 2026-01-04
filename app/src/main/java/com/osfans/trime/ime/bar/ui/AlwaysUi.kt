@@ -70,6 +70,16 @@ class AlwaysUi(
             buttonsUi.firstButton?.let { add(it, lParams(matchParent, matchParent)) }
         }
 
+    private val backButton: ToolButton
+    private val moreButtonAnimator =
+        ViewAnimator(ctx).apply {
+            add(moreButton, lParams(matchParent, matchParent))
+            backButton =
+                createBackButton().also {
+                    add(it, lParams(matchParent, matchParent))
+                }
+        }
+
     private val animator =
         ViewAnimator(ctx).apply {
             add(buttonsUi.root, lParams(matchParent, matchParent))
@@ -79,19 +89,18 @@ class AlwaysUi(
 
     override val root: ConstraintLayout = constraintLayout {
         val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
-        val (primaryWidth, primaryHeight) =
-            (
-                theme.toolBar.primaryButton?.foreground?.size?.takeIf { it.size == 2 }
-                    ?: List(2) { defaultButtonSize }
-                )
-        val (rightWidth, rightHeight) =
-            (
-                theme.toolBar.buttons.firstOrNull()?.foreground?.size?.takeIf { it.size == 2 }
-                    ?: List(2) { defaultButtonSize }
-                )
+
+        fun getButtonSize(config: ToolBar.Button?): Pair<Int, Int> {
+            val sizeList = config?.foreground?.size?.takeIf { it.size == 2 } ?: List(2) { defaultButtonSize }
+            val (width, height) = sizeList
+            return width to height
+        }
+
+        val (primaryWidth, primaryHeight) = getButtonSize(theme.toolBar.primaryButton)
+        val (rightWidth, rightHeight) = getButtonSize(theme.toolBar.buttons.firstOrNull())
 
         add(
-            moreButton,
+            moreButtonAnimator,
             lParams(dp(primaryWidth), dp(primaryHeight)) {
                 startOfParent()
                 centerVertically()
@@ -107,7 +116,7 @@ class AlwaysUi(
         add(
             animator,
             lParams(matchConstraints, matchParent) {
-                after(moreButton)
+                after(moreButtonAnimator)
                 before(rightButtonAnimator)
                 endOfParent()
                 centerVertically()
@@ -117,8 +126,23 @@ class AlwaysUi(
         updateRightButton(State.Toolbar)
     }
 
+    private fun createBackButton(): ToolButton {
+        val firstConfig = theme.toolBar.buttons.firstOrNull()
+        val backConfig =
+            if (ToolButton.getContentType(firstConfig?.foreground?.style) == ToolButton.ContentType.TEXT) {
+                firstConfig?.copy(foreground = firstConfig.foreground?.copy(style = "ic@arrow-left"))
+            } else {
+                null
+            }
+
+        return toolButton(backConfig, R.drawable.ic_baseline_arrow_back_24).apply {
+            setOnClickListener { updateState(State.Toolbar) }
+        }
+    }
+
     fun updateButtonsStyle() {
         moreButton.updateStyle()
+        backButton.updateStyle()
         buttonsUi.firstButton?.updateStyle()
         buttonsUi.updateStyle()
     }
@@ -141,19 +165,7 @@ class AlwaysUi(
         rightButtonAnimator.displayedChild = if (shouldShowFirstButton) 1 else 0
     }
 
-    private fun updateMoreButton(state: State) = moreButton.apply {
-        when (state) {
-            State.Toolbar -> updateStyle()
-            else -> {
-                setIcon(R.drawable.ic_baseline_arrow_back_24)
-                setIconTint(null)
-            }
-        }
-        setOnClickListener {
-            when (state) {
-                State.Toolbar -> onButtonClick?.invoke(theme.toolBar.primaryButton?.action)
-                else -> updateState(State.Toolbar)
-            }
-        }
+    private fun updateMoreButton(state: State) {
+        moreButtonAnimator.displayedChild = if (state == State.Toolbar) 0 else 1
     }
 }

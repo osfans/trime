@@ -47,18 +47,24 @@ class ButtonsBarUi(
         val buttons = theme.toolBar.buttons
         firstButton = buttons.firstOrNull()?.let { toolButton(it) }
 
-        buttons.drop(1).forEachIndexed { _, config ->
-            val (width, height) = if (config.foreground?.size?.size == 2) {
-                config.foreground.size
-            } else {
-                List(2) { defaultButtonSize }
-            }.map { if (it < 0) it else ctx.dp(it) }
+        buttons.drop(1).forEach { config ->
             val button = toolButton(config)
-            val lParams = FlexboxLayout.LayoutParams(width, height).apply {
+            val size = getButtonSize(config, defaultButtonSize)
+            val lParams = FlexboxLayout.LayoutParams(size.first, size.second).apply {
                 marginEnd = ctx.dp(theme.toolBar.buttonSpacing)
             }
             root.addView(button, lParams)
         }
+    }
+
+    private fun getButtonSize(config: ToolBar.Button, defaultSize: Int): Pair<Int, Int> {
+        val sizeList = config.foreground?.size?.takeIf { it.size == 2 } ?: List(2) { defaultSize }
+        val (width, height) = sizeList
+
+        val finalWidth = if (width >= 0) ctx.dp(width) else width
+        val finalHeight = if (height >= 0) ctx.dp(height) else height
+
+        return finalWidth to finalHeight
     }
 
     fun updateStyle() {

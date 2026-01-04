@@ -48,13 +48,14 @@ class ToolButton : GestureFrame {
         ellipsize = null
     }
 
-    private enum class ContentType {
+    enum class ContentType {
         ICON,
         TEXT,
         LOCAL_IMAGE,
     }
 
-    private var contentType = ContentType.TEXT
+    var contentType = ContentType.TEXT
+        private set
     private var config: ToolBar.Button? = null
     private var toggleKey: String? = null
 
@@ -263,5 +264,12 @@ class ToolButton : GestureFrame {
 
     companion object {
         private val IMAGE_PATTERN = ".*\\.(png|jpg|gif|webp)$".toRegex()
+
+        fun getContentType(style: String?): ContentType = when {
+            style.isNullOrEmpty() -> ContentType.TEXT
+            style.matches(IMAGE_PATTERN) -> ContentType.LOCAL_IMAGE
+            style.startsWith("ic@") -> ContentType.ICON
+            else -> ContentType.TEXT
+        }
     }
 }
