@@ -131,7 +131,10 @@ class KeyboardWindow(
             val targetMode = if (it.resetAsciiMode) it.asciiMode else it.lastAsciiMode
 
             if (currentMode != targetMode) {
-                service.postRimeJob { setRuntimeOption("ascii_mode", targetMode) }
+                service.postRimeJob {
+                    commitComposition()
+                    setRuntimeOption("ascii_mode", targetMode)
+                }
             }
 
             // TODO：为避免过量重构，这里暂时将 currentKeyboard 同步到 KeyboardSwitcher

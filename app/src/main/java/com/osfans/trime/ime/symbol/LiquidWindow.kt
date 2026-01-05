@@ -120,7 +120,8 @@ class LiquidWindow(
             val (isAsciiMode, isAsciiPunch) = it.statusCached.run { isAsciiMode to isAsciiPunct }
             if (isAsciiMode) it.setRuntimeOption("ascii_mode", false)
             if (isAsciiPunch) it.setRuntimeOption("ascii_punch", false)
-            commonKeyboardActionListener.listener.onText("{Escape}$symbol")
+            it.clearComposition()
+            it.simulateKeySequence(symbol)
             if (isAsciiPunch) it.setRuntimeOption("ascii_punch", true)
             ContextCompat.getMainExecutor(service).execute {
                 windowManager.attachWindow(KeyboardWindow)
