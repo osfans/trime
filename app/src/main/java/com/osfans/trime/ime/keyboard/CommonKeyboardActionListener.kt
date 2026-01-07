@@ -215,6 +215,7 @@ class CommonKeyboardActionListener(
                     "date" -> service.commitText(customFormatDateTime(arg))
                     "run" -> handleRunCommand(arg)
                     "share_text" -> service.shareText()
+                    "select_candidate" -> handleSelectCandidate(arg)
                     else -> handleIntentAction(action.command, arg)
                 }
             }
@@ -277,6 +278,15 @@ class CommonKeyboardActionListener(
                 buildIntentFromAction(command, arg)?.let { intent ->
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
                     service.startActivity(intent)
+                }
+            }
+
+            private fun handleSelectCandidate(arg: String) {
+                val index = arg.toIntOrNull() ?: return
+                rime.launchOnReady { api ->
+                    service.lifecycleScope.launch {
+                        api.selectCandidate(index, false)
+                    }
                 }
             }
 
