@@ -217,7 +217,7 @@ class KeyboardView(
         val bounds = getKeyBounds(keyIndex)
         val previewText = key.getPreviewText(behavior)
         val context = if (previewText.isNotEmpty()) {
-            String(Character.toChars(previewText.codePointAt(0)))
+            if (previewText.isIconFont) previewText else String(Character.toChars(previewText.codePointAt(0)))
         } else {
             ""
         }
