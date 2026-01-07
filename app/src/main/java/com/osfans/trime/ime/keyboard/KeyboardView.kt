@@ -10,14 +10,18 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.graphics.Paint
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.sizeDp
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -369,6 +373,17 @@ class KeyboardView(
         val keyDrawY = (key.y + paddingTop).toFloat()
         canvas.translate(keyDrawX, keyDrawY)
 
+        drawKeyBackground(key, canvas)
+        drawKeyLabel(key, canvas, paint)
+        drawKeySymbol(key, canvas, paint)
+
+        canvas.translate(-keyDrawX, -keyDrawY)
+    }
+
+    private fun drawKeyBackground(
+        key: Key,
+        canvas: Canvas,
+    ) {
         val keyBackground = key.getBackgroundDrawable()
         if (keyBackground != null) {
             if (keyBackground is GradientDrawable) {
@@ -381,73 +396,110 @@ class KeyboardView(
             }
             onDrawKeyBackground(key, canvas, keyBackground)
         }
+    }
 
-        // Switch the character to uppercase if shift is pressed
+    private fun drawKeyLabel(
+        key: Key,
+        canvas: Canvas,
+        paint: Paint,
+    ) {
+        val keyLabel = key.getLabel().let {
+            if (it == "enter_labels") labelEnter else it
+        }
+        if (keyLabel.isEmpty()) return
+
+        if (keyLabel.isIconFont) {
+            val size = if (key.keyTextSize > 0) sp(key.keyTextSize) else sp(if (keyLabel.length > 1) labelTextSize else keyTextSize)
+            drawIconLabel(key, keyLabel, canvas, size, centered = true)
+        } else {
+            drawTextLabel(key, keyLabel, canvas, paint)
+        }
+    }
+
+    private fun drawIconLabel(
+        key: Key,
+        label: String,
+        canvas: Canvas,
+        size: Float,
+        color: Int = key.getTextColor(),
+        offsetX: Float = key.keyTextOffsetX,
+        offsetY: Float = key.keyTextOffsetY,
+        centered: Boolean = true,
+    ) {
+        val iconSize = size / resources.displayMetrics.density
+        val icon = IconicsDrawable(context, label.toIconName()).apply {
+            sizeDp = iconSize.toInt()
+            colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+        }
+
+        val centerX = key.width / 2f - icon.intrinsicWidth / 2f
+        val centerY = if (centered) key.height / 2f else key.height.toFloat()
+        val x = (centerX + sp(offsetX)).toInt()
+        val y = (centerY - icon.intrinsicHeight / 2f + sp(offsetY)).toInt()
+
+        icon.setBounds(x, y, x + icon.intrinsicWidth, y + icon.intrinsicHeight)
+        icon.draw(canvas)
+    }
+
+    private fun drawTextLabel(
+        key: Key,
+        label: String,
+        canvas: Canvas,
+        paint: Paint,
+    ) {
+        paint.typeface = FontManager.getTypeface("key_font")
+        paint.textSize = if (key.keyTextSize > 0) sp(key.keyTextSize) else sp(if (label.length > 1) labelTextSize else keyTextSize)
+        paint.color = key.getTextColor()
 
         val centerX = key.width * 0.5f
         val centerY = key.height * 0.5f
-        val keyLabel =
-            key.getLabel().let {
-                if (it == "enter_labels") {
-                    labelEnter
-                } else {
-                    it
-                }
-            }
-        if (keyLabel.isNotEmpty()) {
-            paint.typeface = FontManager.getTypeface("key_font")
-            // For characters, use large font. For labels like "Done", use small font.
-            paint.textSize =
-                if (key.keyTextSize > 0) {
-                    sp(key.keyTextSize)
-                } else {
-                    sp(if (keyLabel.length > 1) labelTextSize else keyTextSize)
-                }
+        val labelX = centerX + sp(key.keyTextOffsetX)
+        val labelBaseline = centerY + sp(key.keyTextOffsetY)
 
-            val labelX = centerX + sp(key.keyTextOffsetX)
-            val labelBaseline = centerY + sp(key.keyTextOffsetY)
+        if (mShadowRadius > 0f) {
+            paint.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
+        }
 
-            paint.color = key.getTextColor()
+        val adjustmentY = (paint.textSize - paint.descent()) / 2f
+        canvas.drawText(label, labelX, labelBaseline + adjustmentY, paint)
 
-            // Draw a drop shadow for the text
-            if (mShadowRadius > 0f) {
-                paint.setShadowLayer(mShadowRadius, 0f, 0f, mShadowColor)
-            } else {
-                paint.clearShadowLayer()
-            }
+        paint.clearShadowLayer()
+    }
 
-            val adjustmentY = paint.run { textSize - descent() } / 2f
-            // Draw the text
-            canvas.drawText(keyLabel, labelX, labelBaseline + adjustmentY, paint)
-            // Turn off drop shadow
-            paint.clearShadowLayer()
+    private fun drawKeySymbol(
+        key: Key,
+        canvas: Canvas,
+        paint: Paint,
+    ) {
+        val showSymbol = rime.run { !getRuntimeOption("_hide_key_symbol") }
+        val showHint = rime.run { !getRuntimeOption("_hide_key_hint") }
+        if (!showSymbol && !showHint) return
 
-            val showKeySymbol = rime.run { !getRuntimeOption("_hide_key_symbol") }
-            val showKeyHint = rime.run { !getRuntimeOption("_hide_key_hint") }
-            if (showKeySymbol || showKeyHint) {
-                paint.typeface = FontManager.getTypeface("symbol_font")
-                floatArrayOf(key.symbolTextSize, symbolTextSize)
-                    .firstOrNull { it > 0f }
-                    ?.let { paint.textSize = sp(it) }
-                paint.color = key.getSymbolColor()
+        paint.apply {
+            typeface = FontManager.getTypeface("symbol_font")
+            textSize = listOf(key.symbolTextSize, symbolTextSize).firstOrNull { it > 0f }?.let { sp(it) } ?: sp(symbolTextSize)
+            color = key.getSymbolColor()
+        }
 
-                val fontMetrics = paint.fontMetrics
+        val fontMetrics = paint.fontMetrics
+        val centerX = key.width / 2f
+        val symbolSize = listOf(key.symbolTextSize, symbolTextSize).firstOrNull { it > 0f }?.let { sp(it) } ?: sp(symbolTextSize)
 
-                val symbolLabel = key.symbolLabel
-                if (showKeySymbol && symbolLabel.isNotEmpty()) {
-                    val symbolX = centerX + sp(key.keySymbolOffsetX)
-                    val symbolBaseline = -fontMetrics.top
-                    canvas.drawText(symbolLabel, symbolX, symbolBaseline + sp(key.keySymbolOffsetY), paint)
-                }
-                val hintLabel = key.hint
-                if (showKeyHint && hintLabel.isNotEmpty()) {
-                    val hintX = centerX + sp(key.keyHintOffsetX)
-                    val hintBaseline = -fontMetrics.bottom
-                    canvas.drawText(hintLabel, hintX, hintBaseline + key.height + sp(key.keyHintOffsetY), paint)
-                }
+        showSymbol.takeIf { key.symbolLabel.isNotEmpty() }?.let {
+            val label = key.symbolLabel
+            when {
+                label.isIconFont -> drawIconLabel(key, label, canvas, symbolSize, key.getSymbolColor(), key.keySymbolOffsetX, key.keySymbolOffsetY, centered = false)
+                else -> canvas.drawText(label, centerX + sp(key.keySymbolOffsetX), -fontMetrics.top + sp(key.keySymbolOffsetY), paint)
             }
         }
-        canvas.translate(-keyDrawX, -keyDrawY)
+
+        showHint.takeIf { key.hint.isNotEmpty() }?.let {
+            val label = key.hint
+            when {
+                label.isIconFont -> drawIconLabel(key, label, canvas, symbolSize, key.getSymbolColor(), key.keyHintOffsetX, key.keyHintOffsetY, centered = false)
+                else -> canvas.drawText(label, centerX + sp(key.keyHintOffsetX), key.height - fontMetrics.bottom + sp(key.keyHintOffsetY), paint)
+            }
+        }
     }
 
     private fun onDrawKeyBackground(

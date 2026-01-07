@@ -281,3 +281,10 @@ class Key(
         else -> if (isPressed) hlKeySymbolColor else keySymbolColor
     }
 }
+
+private const val ICON_PREFIX = "ic@"
+
+val String.isIconFont: Boolean
+    get() = startsWith(ICON_PREFIX)
+
+fun String.toIconName(): String = replace(ICON_PREFIX, "cmd_")
