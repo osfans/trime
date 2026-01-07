@@ -5,15 +5,23 @@
 package com.osfans.trime.ime.popup
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.ViewOutlineProvider
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.view.isVisible
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.sizeDp
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.AutoScaleTextView
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
+import com.osfans.trime.ime.keyboard.isIconFont
+import com.osfans.trime.ime.keyboard.toIconName
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
@@ -62,12 +70,13 @@ class PopupKeyboardUi(
     class PopupKeyUi(override val ctx: Context, val theme: Theme, val text: String) : Ui {
 
         val textView = view(::AutoScaleTextView) {
-            text = this@PopupKeyUi.text
             scaleMode = AutoScaleTextView.Mode.Proportional
             textSize = theme.generalStyle.popupTextSize
             setTextColor(ColorManager.getColor("popup_text_color"))
             typeface = FontManager.getTypeface("POPUP_FONT")
         }
+
+        val imageView = view(::AppCompatImageView) {}
 
         override val root = frameLayout {
             add(
@@ -76,6 +85,29 @@ class PopupKeyboardUi(
                     gravity = gravityCenter
                 },
             )
+            add(
+                imageView,
+                lParams {
+                    gravity = gravityCenter
+                },
+            )
+        }
+
+        init {
+            if (text.isIconFont) {
+                imageView.setImageDrawable(
+                    IconicsDrawable(ctx, text.toIconName()).apply {
+                        sizeDp = theme.generalStyle.popupTextSize.toInt()
+                        colorFilter = PorterDuffColorFilter(ColorManager.getColor("popup_text_color"), PorterDuff.Mode.SRC_IN)
+                    },
+                )
+                imageView.isVisible = true
+                textView.isVisible = false
+            } else {
+                textView.text = text
+                textView.isVisible = true
+                imageView.isVisible = false
+            }
         }
     }
 
@@ -163,10 +195,13 @@ class PopupKeyboardUi(
             if (label.length == 1 && label[0].code < 128) {
                 label
             } else {
-                KeyActionManager
-                    .getAction(label)
-                    .getLabel(KeyboardSwitcher.currentKeyboard)
-                    .let { if (it.isNotEmpty()) String(Character.toChars(it.codePointAt(0))) else "" }
+                KeyActionManager.getAction(label).getLabel(KeyboardSwitcher.currentKeyboard).let {
+                    when {
+                        it.isIconFont -> it
+                        it.isNotEmpty() -> String(Character.toChars(it.codePointAt(0)))
+                        else -> ""
+                    }
+                }
             }
 
         PopupKeyUi(ctx, theme, displayLabel)
@@ -205,14 +240,18 @@ class PopupKeyboardUi(
     private fun markFocus(index: Int) {
         keyUis.getOrNull(index)?.apply {
             root.background = focusBackground
-            textView.setTextColor(ColorManager.getColor("hilited_popup_text_color"))
+            val color = ColorManager.getColor("hilited_popup_text_color")
+            textView.setTextColor(color)
+            imageView.drawable?.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
         }
     }
 
     private fun markInactive(index: Int) {
         keyUis.getOrNull(index)?.apply {
             root.background = null
-            textView.setTextColor(ColorManager.getColor("popup_text_color"))
+            val color = ColorManager.getColor("popup_text_color")
+            textView.setTextColor(color)
+            imageView.drawable?.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
         }
     }
 
