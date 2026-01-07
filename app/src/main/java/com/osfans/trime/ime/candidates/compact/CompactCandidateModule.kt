@@ -66,7 +66,7 @@ class CompactCandidateModule(
     private var layoutFlexGrow = 0f
 
     /**
-     * (for [HorizontalCandidateMode.AutoFill] only)
+     * (for [CompactCandidateMode.AUTO_FILL] only)
      * Second layout pass is needed when:
      * [^1] total candidates count < maxSpanCount && [^2] RecyclerView cannot display all of them
      * In that case, displayed candidates should be stretched evenly (by setting flexGrow to 1.0f).
@@ -154,6 +154,15 @@ class CompactCandidateModule(
     }
 
     val view by lazy {
+        object : RecyclerView(context) {
+            override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+                super.onSizeChanged(w, h, oldw, oldh)
+                if (fillStyle == CompactCandidateMode.AUTO_FILL) {
+                    val maxSpanCount = maxSpanCountPref.getValue()
+                    layoutMinWidth = w / maxSpanCount - separatorDrawable.intrinsicWidth
+                }
+            }
+        }
         context.recyclerView(R.id.candidate_view) {
             itemAnimator = null
             adapter = this@CompactCandidateModule.adapter
@@ -162,49 +171,25 @@ class CompactCandidateModule(
         }
     }
 
-    init {
-        // Update layoutMinWidth when view size changes
-        view.addOnLayoutChangeListener(
-            object : View.OnLayoutChangeListener {
-                override fun onLayoutChange(
-                    v: View,
-                    left: Int,
-                    top: Int,
-                    right: Int,
-                    bottom: Int,
-                    oldLeft: Int,
-                    oldTop: Int,
-                    oldRight: Int,
-                    oldBottom: Int,
-                ) {
-                    if (fillStyle == HorizontalCandidateMode.AUTO_FILL) {
-                        val maxSpanCount = maxSpanCountPref.getValue()
-                        layoutMinWidth = v.width / maxSpanCount - separatorDrawable.intrinsicWidth
-                    }
-                }
-            },
-        )
-    }
-
     override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
         val (total, highlighted, candidates) = data
 
         val maxSpanCount = maxSpanCountPref.getValue()
 
         when (fillStyle) {
-            HorizontalCandidateMode.NEVER_FILL -> {
+            CompactCandidateMode.NEVER_FILL -> {
                 layoutMinWidth = 0
                 layoutFlexGrow = 0f
                 secondLayoutPassNeeded = false
             }
-            HorizontalCandidateMode.AUTO_FILL -> {
+            CompactCandidateMode.AUTO_FILL -> {
                 layoutMinWidth = view.width / maxSpanCount - separatorDrawable.intrinsicWidth
                 layoutFlexGrow = if (candidates.size < maxSpanCount) 0f else 1f
                 // [^1] total candidates count < maxSpanCount
                 secondLayoutPassNeeded = candidates.size < maxSpanCount
                 secondLayoutPassDone = false
             }
-            HorizontalCandidateMode.ALWAYS_FILL -> {
+            CompactCandidateMode.ALWAYS_FILL -> {
                 layoutMinWidth = 0
                 layoutFlexGrow = 1f
                 secondLayoutPassNeeded = false

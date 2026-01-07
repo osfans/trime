@@ -10,7 +10,7 @@ import android.content.SharedPreferences
 import androidx.annotation.Keep
 import com.osfans.trime.R
 import com.osfans.trime.data.base.DataManager
-import com.osfans.trime.ime.candidates.compact.HorizontalCandidateMode
+import com.osfans.trime.ime.candidates.compact.CompactCandidateMode
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
@@ -296,7 +296,7 @@ class AppPrefs(
             "dp",
         )
 
-        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, Candidates.HORIZONTAL_CANDIDATE_MODE, HorizontalCandidateMode.AUTO_FILL)
+        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, Candidates.HORIZONTAL_CANDIDATE_MODE, CompactCandidateMode.AUTO_FILL)
 
         val maxSpanCount = int(
             R.string.max_span_count,
@@ -306,7 +306,7 @@ class AppPrefs(
             10,
             enableUiOn = {
                 shared.getString(Candidates.HORIZONTAL_CANDIDATE_MODE, null) ==
-                    HorizontalCandidateMode.AUTO_FILL.name
+                    CompactCandidateMode.AUTO_FILL.name
             },
         )
 
@@ -318,7 +318,7 @@ class AppPrefs(
             12,
             enableUiOn = {
                 shared.getString(Candidates.HORIZONTAL_CANDIDATE_MODE, null) ==
-                    HorizontalCandidateMode.AUTO_FILL.name
+                    CompactCandidateMode.AUTO_FILL.name
             },
         )
 

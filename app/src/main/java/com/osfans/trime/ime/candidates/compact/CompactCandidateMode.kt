@@ -8,7 +8,7 @@ package com.osfans.trime.ime.candidates.compact
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.PreferenceDelegateEnum
 
-enum class HorizontalCandidateMode(
+enum class CompactCandidateMode(
     override val stringRes: Int,
 ) : PreferenceDelegateEnum {
     NEVER_FILL(R.string.horizontal_candidate_never_fill),
