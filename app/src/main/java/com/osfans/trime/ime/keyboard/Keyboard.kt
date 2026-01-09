@@ -27,35 +27,30 @@ class Keyboard(
     private val theme: Theme,
     selfConfig: TextKeyboard? = null,
 ) {
+    // TODO: Apply proper dp unit conversion for keyHeight, verticalGap, and horizontalGap in a future breaking change
     /** 按鍵默認水平間距  */
     private val horizontalGap: Int =
-        (
-            intArrayOf(
-                selfConfig?.horizontalGap ?: 0,
-                theme.generalStyle.horizontalGap,
-            ).firstOrNull { it > 0 } ?: 0
-            ).also { appContext.dp(it) }
+        intArrayOf(
+            selfConfig?.horizontalGap ?: 0,
+            theme.generalStyle.horizontalGap,
+        ).firstOrNull { it > 0 } ?: 0
 
     /** 默認鍵寬  */
     private val keyWidth: Int = (allowedWidth * theme.generalStyle.keyWidth / 100).toInt()
 
     /** 默認鍵高  */
     private val keyHeight: Int =
-        (
-            intArrayOf(
-                selfConfig?.height?.toInt() ?: 0,
-                theme.generalStyle.keyHeight,
-            ).firstOrNull { it > 0 } ?: 0
-            ).also { appContext.dp(it) }
+        intArrayOf(
+            selfConfig?.height?.toInt() ?: 0,
+            theme.generalStyle.keyHeight,
+        ).firstOrNull { it > 0 } ?: 0
 
     /** 默認行距  */
     private val verticalGap: Int =
-        (
-            intArrayOf(
-                selfConfig?.verticalGap ?: 0,
-                theme.generalStyle.verticalGap,
-            ).firstOrNull { it > 0 } ?: 0
-            ).also { appContext.dp(it) }
+        intArrayOf(
+            selfConfig?.verticalGap ?: 0,
+            theme.generalStyle.verticalGap,
+        ).firstOrNull { it > 0 } ?: 0
 
     /** 默認按鍵圓角半徑  */
     val roundCorner: Float =
