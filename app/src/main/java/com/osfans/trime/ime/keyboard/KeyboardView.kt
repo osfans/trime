@@ -475,29 +475,35 @@ class KeyboardView(
         val showHint = rime.run { !getRuntimeOption("_hide_key_hint") }
         if (!showSymbol && !showHint) return
 
-        paint.apply {
-            typeface = FontManager.getTypeface("symbol_font")
-            textSize = listOf(key.symbolTextSize, symbolTextSize).firstOrNull { it > 0f }?.let { sp(it) } ?: sp(symbolTextSize)
-            color = key.getSymbolColor()
-        }
-
-        val fontMetrics = paint.fontMetrics
         val centerX = key.width / 2f
         val symbolSize = listOf(key.symbolTextSize, symbolTextSize).firstOrNull { it > 0f }?.let { sp(it) } ?: sp(symbolTextSize)
 
-        showSymbol.takeIf { key.symbolLabel.isNotEmpty() }?.let {
+        fun drawSymbolText(label: String, offsetX: Float, offsetY: Float, isTop: Boolean) {
+            paint.apply {
+                typeface = FontManager.getTypeface("symbol_font")
+                textSize = symbolSize
+                color = key.getSymbolColor()
+            }
+            val fontMetrics = paint.fontMetrics
+            val y = if (isTop) -fontMetrics.top + sp(offsetY) else key.height - fontMetrics.bottom + sp(offsetY)
+            canvas.drawText(label, centerX + sp(offsetX), y, paint)
+        }
+
+        if (showSymbol && key.symbolLabel.isNotEmpty()) {
             val label = key.symbolLabel
-            when {
-                label.isIconFont -> drawIconLabel(key, label, canvas, symbolSize, key.getSymbolColor(), key.keySymbolOffsetX, key.keySymbolOffsetY, centered = false)
-                else -> canvas.drawText(label, centerX + sp(key.keySymbolOffsetX), -fontMetrics.top + sp(key.keySymbolOffsetY), paint)
+            if (label.isIconFont) {
+                drawIconLabel(key, label, canvas, symbolSize, key.getSymbolColor(), key.keySymbolOffsetX, key.keySymbolOffsetY, centered = false)
+            } else {
+                drawSymbolText(label, key.keySymbolOffsetX, key.keySymbolOffsetY, isTop = true)
             }
         }
 
-        showHint.takeIf { key.hint.isNotEmpty() }?.let {
+        if (showHint && key.hint.isNotEmpty()) {
             val label = key.hint
-            when {
-                label.isIconFont -> drawIconLabel(key, label, canvas, symbolSize, key.getSymbolColor(), key.keyHintOffsetX, key.keyHintOffsetY, centered = false)
-                else -> canvas.drawText(label, centerX + sp(key.keyHintOffsetX), key.height - fontMetrics.bottom + sp(key.keyHintOffsetY), paint)
+            if (label.isIconFont) {
+                drawIconLabel(key, label, canvas, symbolSize, key.getSymbolColor(), key.keyHintOffsetX, key.keyHintOffsetY, centered = false)
+            } else {
+                drawSymbolText(label, key.keyHintOffsetX, key.keyHintOffsetY, isTop = false)
             }
         }
     }
