@@ -14,7 +14,6 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.sp
 import splitties.bitflags.hasFlag
 import splitties.dimensions.dp
 import splitties.systemservices.windowManager
@@ -225,11 +224,7 @@ class Keyboard(
                             if (keyboardHeight > 0) {
                                 scaledHeight[row]
                             } else {
-                                if (textKey.height > 0) {
-                                    appContext.sp(textKey.height).toInt()
-                                } else {
-                                    keyHeight
-                                }
+                                if (textKey.height > 0) textKey.height.toInt() else keyHeight
                             }
                     }
                     if (textKey.click.isEmpty()) { // 無按鍵事件

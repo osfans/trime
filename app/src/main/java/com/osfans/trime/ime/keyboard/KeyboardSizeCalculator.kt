@@ -6,7 +6,6 @@ package com.osfans.trime.ime.keyboard
 
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.util.appContext
-import com.osfans.trime.util.sp
 import kotlin.math.abs
 import kotlin.math.ceil
 
@@ -62,7 +61,7 @@ class KeyboardSizeCalculator(
             }
 
             if (column == 0) {
-                rowHeight = if (key.height > 0) appContext.sp(key.height).toInt() else keyHeight
+                rowHeight = if (key.height > 0) key.height.toInt() else keyHeight
             }
             totalKeyWidth += keyWidthWeight
             if (key.click.isEmpty()) { // 無按鍵事件
