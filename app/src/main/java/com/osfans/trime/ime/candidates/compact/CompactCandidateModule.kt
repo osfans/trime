@@ -30,26 +30,25 @@ import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxVerticalDecoration
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import me.tatarka.inject.annotations.Inject
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.math.max
 
-@InputScope
-@Inject
-class CompactCandidateModule(
-    val context: Context,
-    val service: TrimeInputMethodService,
-    val rime: RimeSession,
-    val theme: Theme,
-    val bar: QuickBar,
-) : InputBroadcastReceiver {
+class CompactCandidateModule : InputBroadcastReceiver {
+    private val di = InputDependencyManager.getInstance().di
+    private val context: Context by di.instance()
+    val service: TrimeInputMethodService by di.instance()
+    val rime: RimeSession by di.instance()
+    val theme: Theme by di.instance()
+    val bar: QuickBar by di.instance()
+
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode
 
     private val maxSpanCountPref by lazy {

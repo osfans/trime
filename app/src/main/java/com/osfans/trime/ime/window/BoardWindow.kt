@@ -4,13 +4,20 @@
 
 package com.osfans.trime.ime.window
 
+import android.content.Context
 import android.view.Gravity
 import android.view.View
 import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.Transition
+import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.instance
 
 sealed class BoardWindow {
+    protected val di = InputDependencyManager.getInstance().di
+
+    protected val context: Context by di.instance()
+
     /**
      * Animation when the window is added to the layout
      */

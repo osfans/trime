@@ -7,7 +7,6 @@ room = "2.7.2"
 splitties = "3.0.0"
 aboutlibraries = "13.1.0"
 kotest = "6.0.7"
-kotlin-inject = "0.8.0"
 iconics = "5.4.0"
 
 [libraries]
@@ -38,8 +37,7 @@ timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version = "18.5" }
 iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics" }
 community-material-typeface = { module = "com.mikepenz:community-material-typeface", version = "7.0.96.1-kotlin" }
-kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }
-kotlin-inject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlin-inject" }
+kodein-di = { module = "org.kodein.di:kodein-di", version = "7.30.0" }
 splitties-bitflags = { module = "com.louiscad.splitties:splitties-bitflags", version.ref = "splitties" }
 splitties-systemservices = { module = "com.louiscad.splitties:splitties-systemservices", version.ref = "splitties" }
 splitties-views-dsl = { module = "com.louiscad.splitties:splitties-views-dsl", version.ref = "splitties" }

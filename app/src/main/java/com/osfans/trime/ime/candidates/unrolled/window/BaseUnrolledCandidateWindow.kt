@@ -34,19 +34,20 @@ import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import kotlin.math.max
 
-abstract class BaseUnrolledCandidateWindow(
-    protected val context: Context,
-    protected val service: TrimeInputMethodService,
-    protected val rime: RimeSession,
-    protected val theme: Theme,
-    private val bar: QuickBar,
-    private val windowManager: BoardWindowManager,
-    private val compactCandidate: CompactCandidateModule,
-) : BoardWindow.NoBarBoardWindow(),
+abstract class BaseUnrolledCandidateWindow :
+    BoardWindow.NoBarBoardWindow(),
     InputBroadcastReceiver {
+    protected val service: TrimeInputMethodService by di.instance()
+    protected val rime: RimeSession by di.instance()
+    protected val theme: Theme by di.instance()
+    private val bar: QuickBar by di.instance()
+    private val windowManager: BoardWindowManager by di.instance()
+    private val compactCandidate: CompactCandidateModule by di.instance()
+
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
     private lateinit var candidateLayout: UnrolledCandidateLayout
 

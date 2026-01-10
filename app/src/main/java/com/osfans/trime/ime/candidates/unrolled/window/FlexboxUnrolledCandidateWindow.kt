@@ -27,15 +27,7 @@ import splitties.dimensions.dp
 import splitties.views.dsl.core.wrapContent
 import splitties.views.setPaddingDp
 
-class FlexboxUnrolledCandidateWindow(
-    context: Context,
-    service: TrimeInputMethodService,
-    rime: RimeSession,
-    theme: Theme,
-    bar: QuickBar,
-    windowManager: BoardWindowManager,
-    compactCandidate: CompactCandidateModule,
-) : BaseUnrolledCandidateWindow(context, service, rime, theme, bar, windowManager, compactCandidate) {
+class FlexboxUnrolledCandidateWindow : BaseUnrolledCandidateWindow() {
     override fun exitAnimation(nextWindow: BoardWindow): Transition = Slide().apply {
         slideEdge = Gravity.TOP
     }

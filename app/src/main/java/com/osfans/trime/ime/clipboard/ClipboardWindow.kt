@@ -28,15 +28,14 @@ import com.osfans.trime.ui.main.ClipEditActivity
 import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
 import splitties.views.recyclerview.verticalLayoutManager
 
-class ClipboardWindow(
-    private val context: Context,
-    private val service: TrimeInputMethodService,
-    private val windowManager: BoardWindowManager,
-    private val theme: Theme,
-) : BoardWindow.BarBoardWindow() {
+class ClipboardWindow : BoardWindow.BarBoardWindow() {
 
+    private val service: TrimeInputMethodService by di.instance()
+    private val windowManager: BoardWindowManager by di.instance()
+    private val theme: Theme by di.instance()
     override val showTitle: Boolean = false
 
     private lateinit var clipboardLayout: ClipboardLayout

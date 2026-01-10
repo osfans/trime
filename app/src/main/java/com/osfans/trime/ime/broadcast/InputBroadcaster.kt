@@ -6,18 +6,12 @@
 package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InlineSuggestion
-import com.osfans.trime.core.CandidateItem
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
-import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.window.BoardWindow
-import me.tatarka.inject.annotations.Inject
 import java.util.concurrent.ConcurrentLinkedQueue
 
-@InputScope
-@Inject
 class InputBroadcaster : InputBroadcastReceiver {
     private val receivers = ConcurrentLinkedQueue<InputBroadcastReceiver>()
 

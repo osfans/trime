@@ -11,24 +11,21 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.dependency.InputDependencyManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.tatarka.inject.annotations.Inject
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import java.util.LinkedList
 
-@InputScope
-@Inject
-class PopupComponent(
-    private val context: Context,
-    private val theme: Theme,
-    private val service: TrimeInputMethodService,
-) {
+class PopupComponent {
+    private val context: Context by InputDependencyManager.getInstance().di.instance()
+    private val theme: Theme by InputDependencyManager.getInstance().di.instance()
+    private val service: TrimeInputMethodService by InputDependencyManager.getInstance().di.instance()
 
     private val showingEntryUi = HashMap<Int, PopupEntryUi>()
     private val dismissJobs = HashMap<Int, Job>()

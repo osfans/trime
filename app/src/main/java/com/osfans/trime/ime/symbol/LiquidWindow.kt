@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2015 - 2024 Rime community
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 package com.osfans.trime.ime.symbol
 
-import android.content.Context
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.google.android.flexbox.FlexDirection
@@ -16,28 +16,24 @@ import com.osfans.trime.data.SymbolHistory
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.LiquidKeyboard
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
-import me.tatarka.inject.annotations.Inject
+import org.kodein.di.instance
 
-@InputScope
-@Inject
-class LiquidWindow(
-    private val context: Context,
-    private val service: TrimeInputMethodService,
-    private val rime: RimeSession,
-    private val theme: Theme,
-    private val windowManager: BoardWindowManager,
-    lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
-) : BoardWindow.BarBoardWindow(),
+class LiquidWindow :
+    BoardWindow.BarBoardWindow(),
     ResidentWindow {
     override val showTitle = false
 
-    private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
+    private val service: TrimeInputMethodService by di.instance()
+    private val rime: RimeSession by di.instance()
+    private val theme: Theme by di.instance()
+    private val windowManager: BoardWindowManager by di.instance()
+    private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
+
     private lateinit var liquidLayout: LiquidLayout
     private val symbolHistory = SymbolHistory(180)
     var currentDataType: LiquidData.Type = LiquidData.Type.SINGLE

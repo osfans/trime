@@ -12,20 +12,18 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.osfans.trime.R
 import com.osfans.trime.ime.broadcast.InputBroadcaster
-import com.osfans.trime.ime.dependency.InputScope
-import me.tatarka.inject.annotations.Inject
+import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.instance
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import timber.log.Timber
 
-@InputScope
-@Inject
-class BoardWindowManager(
-    private val context: Context,
-    private val broadcaster: InputBroadcaster,
-) {
+class BoardWindowManager {
+    private val context: Context by InputDependencyManager.getInstance().di.instance()
+    private val broadcaster: InputBroadcaster by InputDependencyManager.getInstance().di.instance()
+
     private val cachedResidentWindows = mutableMapOf<ResidentWindow.Key, Pair<BoardWindow, View?>>()
 
     private var currentWindow: BoardWindow? = null

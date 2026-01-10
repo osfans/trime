@@ -16,18 +16,16 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
-import com.osfans.trime.ime.dependency.InputScope
-import me.tatarka.inject.annotations.Inject
+import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.horizontalPadding
 
-@InputScope
-@Inject
-class PreeditModule(
-    context: Context,
-    theme: Theme,
-    private val rime: RimeSession,
-) : InputBroadcastReceiver {
+class PreeditModule : InputBroadcastReceiver {
+
+    private val context: Context by InputDependencyManager.getInstance().di.instance()
+    private val theme: Theme by InputDependencyManager.getInstance().di.instance()
+    private val rime: RimeSession by InputDependencyManager.getInstance().di.instance()
 
     val ui =
         PreeditUi(
