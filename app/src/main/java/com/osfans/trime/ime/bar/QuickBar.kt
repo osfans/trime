@@ -20,7 +20,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.db.ClipboardHelper
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -33,7 +32,7 @@ import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.ime.keyboard.KeyboardWindow
@@ -47,7 +46,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.tatarka.inject.annotations.Inject
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.lParams
@@ -56,21 +55,14 @@ import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-@InputScope
-@Inject
-class QuickBar(
-    private val context: Context,
-    private val service: TrimeInputMethodService,
-    private val rime: RimeSession,
-    private val theme: Theme,
-    private val windowManager: BoardWindowManager,
-    lazyCandidate: Lazy<CompactCandidateModule>,
-    lazyCommonKeyboardActionListener: Lazy<CommonKeyboardActionListener>,
-) : InputBroadcastReceiver {
-
-    private val candidate by lazyCandidate
-
-    private val commonKeyboardActionListener by lazyCommonKeyboardActionListener
+class QuickBar : InputBroadcastReceiver {
+    private val di = InputDependencyManager.getInstance().di
+    private val context: Context by di.instance()
+    private val service: TrimeInputMethodService by di.instance()
+    private val theme: Theme by di.instance()
+    private val windowManager: BoardWindowManager by di.instance()
+    private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
+    private val candidate: CompactCandidateModule by di.instance()
 
     val themedHeight = theme.generalStyle.run { candidateViewHeight + commentHeight }
 
@@ -133,8 +125,11 @@ class QuickBar(
 
     private val alwaysUi: AlwaysUi by lazy {
         AlwaysUi(context, theme) { action ->
-            action?.let { commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(it)) }
-                ?: windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
+            if (action != null) {
+                commonKeyboardActionListener.listener.onAction(KeyActionManager.getAction(action))
+            } else {
+                windowManager.attachWindow(SwitchOptionWindow())
+            }
         }.apply {
             hideKeyboardButton.apply {
                 setOnClickListener { service.requestHideSelf(0) }
@@ -182,9 +177,7 @@ class QuickBar(
                 UnrollButtonStateMachine.State.AboutToAttachWindow -> {
                     setUnrollButtonToDetach()
                     setUnrollButtonEnabled(true)
-                    windowManager.attachWindow(
-                        FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate),
-                    )
+                    windowManager.attachWindow(FlexboxUnrolledCandidateWindow())
                 }
                 UnrollButtonStateMachine.State.ClickToAttachWindow -> {
                     setUnrollButtonToAttach()
@@ -202,9 +195,7 @@ class QuickBar(
 
     private fun setUnrollButtonToAttach() {
         candidateUi.unrollButton.setOnClickListener {
-            windowManager.attachWindow(
-                FlexboxUnrolledCandidateWindow(context, service, rime, theme, this, windowManager, candidate),
-            )
+            windowManager.attachWindow(FlexboxUnrolledCandidateWindow())
         }
         candidateUi.unrollButton.setIcon(R.drawable.ic_baseline_expand_more_24)
     }

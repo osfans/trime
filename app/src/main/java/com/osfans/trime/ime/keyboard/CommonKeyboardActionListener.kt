@@ -21,12 +21,10 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.KeyActionManager
-import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
-import com.osfans.trime.ime.bar.QuickBar
 import com.osfans.trime.ime.clipboard.ClipboardWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputScope
+import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.enums.Keycode
 import com.osfans.trime.ime.switches.SwitchOptionWindow
@@ -44,34 +42,20 @@ import com.osfans.trime.util.customFormatDateTime
 import com.osfans.trime.util.isAsciiPrintable
 import com.osfans.trime.util.toast
 import kotlinx.coroutines.launch
-import me.tatarka.inject.annotations.Inject
+import org.kodein.di.instance
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
 
-@InputScope
-@Inject
-class CommonKeyboardActionListener(
-    private val context: Context,
-    private val service: TrimeInputMethodService,
-    private val rime: RimeSession,
-    private val liquidWindow: LiquidWindow,
-    private val windowManager: BoardWindowManager,
-    private val lazyKeyboardWindow: Lazy<KeyboardWindow>,
-    private val theme: Theme,
-    private val quickBar: QuickBar,
-) {
-    companion object {
-        /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
-        private val BRACED_KEY_EVENT = """^(\{[^{}]+\}).*$""".toRegex()
+class CommonKeyboardActionListener {
+    private val di = InputDependencyManager.getInstance().di
 
-        /** Pattern for unbraced characters (including {Escape}) like `abc`, `{Escape}jk` etc. */
-        private val UNBRACED_CHAR = """^((\{Escape\})?[^{}]+).*$""".toRegex()
-
-        private val PLACEHOLDER_PATTERN = Regex(".*(%([1-4]\\$)?s).*")
-    }
-
-    private val keyboardWindow by lazyKeyboardWindow
+    private val context: Context by di.instance()
+    private val service: TrimeInputMethodService by di.instance()
+    private val rime: RimeSession by di.instance()
+    private val windowManager: BoardWindowManager by di.instance()
+    private val keyboardWindow: KeyboardWindow by di.instance()
+    private val liquidWindow: LiquidWindow by di.instance()
 
     private val prefs = AppPrefs.defaultInstance()
 
@@ -205,8 +189,8 @@ class CommonKeyboardActionListener(
 
                 when (action.command) {
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
-                    "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow(context, service, rime, theme))
-                    "clipboard_window" -> windowManager.attachWindow(ClipboardWindow(context, service, windowManager, theme))
+                    "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow())
+                    "clipboard_window" -> windowManager.attachWindow(ClipboardWindow())
                     "set_color_scheme" -> handleColorScheme(arg)
                     "set_theme" -> handleTheme(arg)
                     "broadcast" -> service.sendBroadcast(Intent(arg))
@@ -223,7 +207,7 @@ class CommonKeyboardActionListener(
             private fun handleLiquidKeyboard(arg: String) {
                 // for compatibility
                 if (arg == "剪贴" || arg == "clipboard") {
-                    windowManager.attachWindow(ClipboardWindow(context, service, windowManager, theme))
+                    windowManager.attachWindow(ClipboardWindow())
                     return
                 }
                 val liquidTagList = LiquidData.getTagList()
@@ -417,5 +401,15 @@ class CommonKeyboardActionListener(
                 shouldReleaseKey = false
             }
         }
+    }
+
+    companion object {
+        /** Pattern for braced key event like `{Left}`, `{Right}`, etc. */
+        private val BRACED_KEY_EVENT = """^(\{[^{}]+\}).*$""".toRegex()
+
+        /** Pattern for unbraced characters (including {Escape}) like `abc`, `{Escape}jk` etc. */
+        private val UNBRACED_CHAR = """^((\{Escape\})?[^{}]+).*$""".toRegex()
+
+        private val PLACEHOLDER_PATTERN = Regex(".*(%([1-4]\\$)?s).*")
     }
 }

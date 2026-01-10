@@ -7,16 +7,14 @@ package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.dependency.InputScope
-import me.tatarka.inject.annotations.Inject
+import com.osfans.trime.ime.dependency.InputDependencyManager
+import org.kodein.di.instance
 import splitties.bitflags.hasFlag
 
-@InputScope
-@Inject
-class EnterKeyLabelModule(
-    private val broadcaster: InputBroadcaster,
-    private val theme: Theme,
-) {
+class EnterKeyLabelModule {
+    private val broadcaster: InputBroadcaster by InputDependencyManager.getInstance().di.instance()
+    private val theme: Theme by InputDependencyManager.getInstance().di.instance()
+
     companion object {
         const val DEFAULT_LABEL = "⏎"
     }

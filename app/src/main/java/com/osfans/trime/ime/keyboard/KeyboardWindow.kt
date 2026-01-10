@@ -4,7 +4,6 @@
 
 package com.osfans.trime.ime.keyboard
 
-import android.content.Context
 import android.text.InputType
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -20,36 +19,31 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
-import com.osfans.trime.ime.dependency.InputScope
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.popup.PopupComponent
 import com.osfans.trime.ime.window.BoardWindow
-import com.osfans.trime.ime.window.BoardWindowManager
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
-import me.tatarka.inject.annotations.Inject
+import org.kodein.di.instance
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import timber.log.Timber
 
-@InputScope
-@Inject
-class KeyboardWindow(
-    private val context: Context,
-    private val service: TrimeInputMethodService,
-    private val theme: Theme,
-    private val rime: RimeSession,
-    private val commonKeyboardActionListener: CommonKeyboardActionListener,
-    private val windowManager: BoardWindowManager,
-    private val popupComponent: PopupComponent,
-) : BoardWindow.NoBarBoardWindow(),
+class KeyboardWindow :
+    BoardWindow.NoBarBoardWindow(),
     ResidentWindow,
     InputBroadcastReceiver {
+    private val service: TrimeInputMethodService by di.instance()
+    private val theme: Theme by di.instance()
+    private val rime: RimeSession by di.instance()
+    private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
+    private val popup: PopupComponent by di.instance()
+
     private val cursorCapsMode: Int
         get() =
             service.currentInputEditorInfo.run {
@@ -115,7 +109,7 @@ class KeyboardWindow(
 
         val config = selectKeyboardConfig(target)
         val keyboard = currentKeyboard ?: Keyboard(theme, config)
-        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popupComponent, service)
+        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service)
 
         if (currentKeyboard == null) {
             cachedKeyboards[target] = keyboard to view

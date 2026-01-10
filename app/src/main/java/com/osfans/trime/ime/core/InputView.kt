@@ -24,17 +24,20 @@ import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.broadcast.EnterKeyLabelModule
+import com.osfans.trime.ime.broadcast.InputBroadcaster
 import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PreeditModule
-import com.osfans.trime.ime.dependency.InputComponent
-import com.osfans.trime.ime.dependency.create
+import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
 import com.osfans.trime.ime.popup.PopupComponent
 import com.osfans.trime.ime.symbol.LiquidWindow
+import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.constraintlayout.above
 import splitties.views.dsl.constraintlayout.below
@@ -89,24 +92,16 @@ class InputView(
     private val updateWindowViewHeightJob: Job
 
     private val themedContext = context.withTheme(android.R.style.Theme_DeviceDefault_Settings)
-    private val inputComponent = InputComponent::class.create(this, themedContext, theme, service, rime)
-    private val broadcaster = inputComponent.broadcaster
-    private val enterKeyLabel = inputComponent.enterKeyLabel
-    private val windowManager = inputComponent.windowManager
-    private val quickBar: QuickBar = inputComponent.quickBar
-    private val preedit: PreeditModule = inputComponent.preedit
-    private val keyboardWindow: KeyboardWindow = inputComponent.keyboardWindow
-    private val liquidWindow: LiquidWindow = inputComponent.liquidWindow
-    private val compactCandidate: CompactCandidateModule = inputComponent.candidate
-    private val popup: PopupComponent = inputComponent.popup
-
-    private fun addBroadcastReceivers() {
-        broadcaster.addReceiver(quickBar)
-        broadcaster.addReceiver(preedit)
-        broadcaster.addReceiver(keyboardWindow)
-        broadcaster.addReceiver(liquidWindow)
-        broadcaster.addReceiver(compactCandidate)
-    }
+    private val inputDepMgr = InputDependencyManager.initialize(themedContext, theme, service, rime)
+    private val di = inputDepMgr.di
+    private val broadcaster: InputBroadcaster by di.instance()
+    private val popup: PopupComponent by di.instance()
+    private val enterKeyLabel: EnterKeyLabelModule by di.instance()
+    private val preedit: PreeditModule by di.instance()
+    private val windowManager: BoardWindowManager by di.instance()
+    private val quickBar: QuickBar by di.instance()
+    private val keyboardWindow: KeyboardWindow by di.instance()
+    private val liquidWindow: LiquidWindow by di.instance()
 
     private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
@@ -133,7 +128,8 @@ class InputView(
     val keyboardView: View
 
     init {
-        addBroadcastReceivers()
+        // MUST call before any operation
+        inputDepMgr.start()
 
         windowManager.cacheResidentWindow(keyboardWindow, createView = true)
         windowManager.cacheResidentWindow(liquidWindow)
@@ -339,7 +335,7 @@ class InputView(
         // implies that InputView should not be attached again after detached.
         updateWindowViewHeightJob.cancel()
         popup.root.removeAllViews()
-        broadcaster.clear()
+        inputDepMgr.stop()
         super.onDetachedFromWindow()
     }
 }

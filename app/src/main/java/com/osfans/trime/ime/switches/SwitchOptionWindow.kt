@@ -23,6 +23,7 @@ import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.horizontalLayout
@@ -30,13 +31,13 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.recyclerview.gridLayoutManager
 
-class SwitchOptionWindow(
-    private val context: Context,
-    private val service: TrimeInputMethodService,
-    private val rime: RimeSession,
-    private val theme: Theme,
-) : BoardWindow.BarBoardWindow(),
+class SwitchOptionWindow :
+    BoardWindow.BarBoardWindow(),
     InputBroadcastReceiver {
+    private val service: TrimeInputMethodService by di.instance()
+    private val rime: RimeSession by di.instance()
+    private val theme: Theme by di.instance()
+
     var popupMenu: PopupMenu? = null
 
     private val saveOptions by lazy {
