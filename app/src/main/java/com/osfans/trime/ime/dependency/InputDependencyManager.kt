@@ -8,16 +8,16 @@ package com.osfans.trime.ime.dependency
 import android.content.Context
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.bar.QuickBar
-import com.osfans.trime.ime.broadcast.EnterKeyLabelModule
+import com.osfans.trime.ime.bar.InputBarDelegate
+import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.broadcast.InputBroadcaster
-import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
-import com.osfans.trime.ime.composition.PreeditModule
+import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
+import com.osfans.trime.ime.composition.PreeditDelegate
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.CommonKeyboardActionListener
 import com.osfans.trime.ime.keyboard.KeyboardWindow
-import com.osfans.trime.ime.popup.PopupComponent
+import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import org.kodein.di.DI
@@ -37,13 +37,13 @@ class InputDependencyManager(
         bindSingleton { service }
         bindSingleton { rime }
         bindSingleton { InputBroadcaster() }
-        bindSingleton { PopupComponent() }
-        bindSingleton { EnterKeyLabelModule() }
-        bindSingleton { PreeditModule() }
+        bindSingleton { PopupDelegate() }
+        bindSingleton { EnterKeyDisplayDelegate() }
+        bindSingleton { PreeditDelegate() }
         bindSingleton { CommonKeyboardActionListener() }
         bindSingleton { BoardWindowManager() }
-        bindSingleton { QuickBar() }
-        bindSingleton { CompactCandidateModule() }
+        bindSingleton { InputBarDelegate() }
+        bindSingleton { CompactCandidateDelegate() }
         bindSingleton { KeyboardWindow() }
         bindSingleton { LiquidWindow() }
     }

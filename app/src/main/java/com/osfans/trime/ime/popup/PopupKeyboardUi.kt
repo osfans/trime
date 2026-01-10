@@ -41,7 +41,7 @@ import kotlin.math.roundToInt
 /**
  * @param ctx [Context]
  * @param theme [Theme]
- * @param outerBounds bound [Rect] of [PopupComponent] root view.
+ * @param outerBounds bound [Rect] of [PopupDelegate] root view.
  * @param triggerBounds bound [Rect] of popup trigger view. Used to calculate free space of both sides and
  * determine column order. See [focusColumn] and [columnOrder].
  * @param onDismissSelf callback when popup keyboard wants to close

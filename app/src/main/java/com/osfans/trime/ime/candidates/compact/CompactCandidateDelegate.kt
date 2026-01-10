@@ -25,7 +25,7 @@ import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.bar.QuickBar
+import com.osfans.trime.ime.bar.InputBarDelegate
 import com.osfans.trime.ime.bar.UnrollButtonStateMachine
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.candidates.unrolled.decoration.FlexboxVerticalDecoration
@@ -41,13 +41,13 @@ import splitties.dimensions.dp
 import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.math.max
 
-class CompactCandidateModule : InputBroadcastReceiver {
+class CompactCandidateDelegate : InputBroadcastReceiver {
     private val di = InputDependencyManager.getInstance().di
     private val context: Context by di.instance()
     val service: TrimeInputMethodService by di.instance()
     val rime: RimeSession by di.instance()
     val theme: Theme by di.instance()
-    val bar: QuickBar by di.instance()
+    val bar: InputBarDelegate by di.instance()
 
     private val fillStyle by AppPrefs.defaultInstance().keyboard.horizontalCandidateMode
 
@@ -164,8 +164,8 @@ class CompactCandidateModule : InputBroadcastReceiver {
         }
         context.recyclerView(R.id.candidate_view) {
             itemAnimator = null
-            adapter = this@CompactCandidateModule.adapter
-            layoutManager = this@CompactCandidateModule.layoutManager
+            adapter = this@CompactCandidateDelegate.adapter
+            layoutManager = this@CompactCandidateDelegate.layoutManager
             addItemDecoration(FlexboxVerticalDecoration(separatorDrawable))
         }
     }

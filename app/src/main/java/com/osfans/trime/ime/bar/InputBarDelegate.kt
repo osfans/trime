@@ -29,7 +29,7 @@ import com.osfans.trime.ime.bar.ui.AlwaysUi
 import com.osfans.trime.ime.bar.ui.CandidateUi
 import com.osfans.trime.ime.bar.ui.TabUi
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
-import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
+import com.osfans.trime.ime.candidates.compact.CompactCandidateDelegate
 import com.osfans.trime.ime.candidates.unrolled.window.FlexboxUnrolledCandidateWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.dependency.InputDependencyManager
@@ -55,20 +55,20 @@ import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class QuickBar : InputBroadcastReceiver {
+class InputBarDelegate : InputBroadcastReceiver {
     private val di = InputDependencyManager.getInstance().di
     private val context: Context by di.instance()
     private val service: TrimeInputMethodService by di.instance()
     private val theme: Theme by di.instance()
     private val windowManager: BoardWindowManager by di.instance()
     private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
-    private val candidate: CompactCandidateModule by di.instance()
+    private val candidate: CompactCandidateDelegate by di.instance()
 
     val themedHeight = theme.generalStyle.run { candidateViewHeight + commentHeight }
 
     private val prefs = AppPrefs.defaultInstance()
 
-    private val hideQuickBar by prefs.keyboard.hideQuickBar
+    private val hideQuickBar by prefs.keyboard.hideInputBar
 
     private val clipboardSuggestion by prefs.clipboard.clipboardSuggestion
 

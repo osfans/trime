@@ -171,7 +171,7 @@
     <string name="candidates_window_position">候选词窗口位置</string>
     <string name="deploy_failure">部署失败</string>
     <string name="view_deploy_failure_log">部署失败。点此查看错误日志。</string>
-    <string name="hide_quick_bar">隐藏快捷栏</string>
+    <string name="hide_input_bar">隐藏输入工具栏</string>
     <string name="navbar_bkg_none">无背景</string>
     <string name="navbar_bkg_color_only">跟随键盘背景色</string>
     <string name="navbar_bkg_full">键盘背景图片</string>

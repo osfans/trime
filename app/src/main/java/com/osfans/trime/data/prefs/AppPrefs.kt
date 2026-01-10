@@ -123,7 +123,7 @@ class AppPrefs(
             const val SPLIT_SPACE_PERCENT = "keyboard_split_space"
 
             const val USE_SOFT_CURSOR = "use_soft_cursor"
-            const val HIDE_QUICK_BAR = "hide_quick_bar"
+            const val HIDE_INPUT_BAR = "hide_input_bar"
 
             const val SOUND_ON_KEYPRESS = "sound_on_keypress"
             const val KEY_SOUND_VOLUME = "sound_volume"
@@ -156,6 +156,7 @@ class AppPrefs(
 
             const val MAX_SPAN_COUNT = "max_span_count"
             const val MAX_SPAN_COUNT_LANDSCAPE = "max_span_count_landscape"
+            const val HORIZONTAL_CANDIDATE_MODE = "horizontal_candidate_mode"
         }
 
         enum class LandscapeMode(override val stringRes: Int) : PreferenceDelegateEnum {
@@ -177,7 +178,7 @@ class AppPrefs(
 
         val useSoftCursor = switch(R.string.use_soft_cursor, USE_SOFT_CURSOR, true)
 
-        val hideQuickBar = switch(R.string.hide_quick_bar, HIDE_QUICK_BAR, false)
+        val hideInputBar = switch(R.string.hide_input_bar, HIDE_INPUT_BAR, false)
 
         val soundOnKeyPress = switch(R.string.sound_on_keypress, SOUND_ON_KEYPRESS, false)
         val soundVolume = int(
@@ -296,7 +297,7 @@ class AppPrefs(
             "dp",
         )
 
-        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, Candidates.HORIZONTAL_CANDIDATE_MODE, CompactCandidateMode.AUTO_FILL)
+        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, HORIZONTAL_CANDIDATE_MODE, CompactCandidateMode.AUTO_FILL)
 
         val maxSpanCount = int(
             R.string.max_span_count,
@@ -305,7 +306,7 @@ class AppPrefs(
             1,
             10,
             enableUiOn = {
-                shared.getString(Candidates.HORIZONTAL_CANDIDATE_MODE, null) ==
+                shared.getString(HORIZONTAL_CANDIDATE_MODE, null) ==
                     CompactCandidateMode.AUTO_FILL.name
             },
         )
@@ -317,7 +318,7 @@ class AppPrefs(
             4,
             12,
             enableUiOn = {
-                shared.getString(Candidates.HORIZONTAL_CANDIDATE_MODE, null) ==
+                shared.getString(HORIZONTAL_CANDIDATE_MODE, null) ==
                     CompactCandidateMode.AUTO_FILL.name
             },
         )
@@ -339,7 +340,6 @@ class AppPrefs(
             const val MODE = "show_candidates_window"
             const val LAYOUT = "candidates_layout"
             const val POSITION = "candidates_window_position"
-            const val HORIZONTAL_CANDIDATE_MODE = "horizontal_candidate_mode"
         }
 
         val mode = enum(R.string.show_candidates_window, MODE, PopupCandidatesMode.DISABLED)
