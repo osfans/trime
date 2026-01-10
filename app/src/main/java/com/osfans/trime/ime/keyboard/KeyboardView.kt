@@ -10,7 +10,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorFilter
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -30,7 +29,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.popup.PopupAction
 import com.osfans.trime.ime.popup.PopupActionListener
-import com.osfans.trime.ime.popup.PopupComponent
+import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import timber.log.Timber
@@ -43,7 +42,7 @@ class KeyboardView(
     context: Context,
     private val theme: Theme,
     private val keyboard: Keyboard,
-    private val popupComponent: PopupComponent,
+    private val popup: PopupDelegate,
     private val service: TrimeInputMethodService,
 ) : KeyboardGestureFrame(context) {
 
@@ -110,7 +109,7 @@ class KeyboardView(
         labelEnter = label
     }
 
-    private val popupActionListener: PopupActionListener by lazy { popupComponent.listener }
+    private val popupActionListener: PopupActionListener by lazy { popup.listener }
 
     init {
         computeProximityThreshold(keyboard)
@@ -619,7 +618,7 @@ class KeyboardView(
     }
 
     fun onDetach() {
-        popupComponent.dismissAll()
+        popup.dismissAll()
         freeDrawingBuffer()
     }
 

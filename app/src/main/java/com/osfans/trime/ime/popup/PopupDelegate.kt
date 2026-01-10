@@ -22,7 +22,7 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import java.util.LinkedList
 
-class PopupComponent {
+class PopupDelegate {
     private val context: Context by InputDependencyManager.getInstance().di.instance()
     private val theme: Theme by InputDependencyManager.getInstance().di.instance()
     private val service: TrimeInputMethodService by InputDependencyManager.getInstance().di.instance()

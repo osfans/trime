@@ -23,16 +23,15 @@ import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
-import com.osfans.trime.ime.bar.QuickBar
-import com.osfans.trime.ime.broadcast.EnterKeyLabelModule
+import com.osfans.trime.ime.bar.InputBarDelegate
+import com.osfans.trime.ime.broadcast.EnterKeyDisplayDelegate
 import com.osfans.trime.ime.broadcast.InputBroadcaster
-import com.osfans.trime.ime.candidates.compact.CompactCandidateModule
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
-import com.osfans.trime.ime.composition.PreeditModule
+import com.osfans.trime.ime.composition.PreeditDelegate
 import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
-import com.osfans.trime.ime.popup.PopupComponent
+import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.window.BoardWindowManager
 import kotlinx.coroutines.Job
@@ -95,11 +94,11 @@ class InputView(
     private val inputDepMgr = InputDependencyManager.initialize(themedContext, theme, service, rime)
     private val di = inputDepMgr.di
     private val broadcaster: InputBroadcaster by di.instance()
-    private val popup: PopupComponent by di.instance()
-    private val enterKeyLabel: EnterKeyLabelModule by di.instance()
-    private val preedit: PreeditModule by di.instance()
+    private val popup: PopupDelegate by di.instance()
+    private val enterKeyDisplay: EnterKeyDisplayDelegate by di.instance()
+    private val preedit: PreeditDelegate by di.instance()
     private val windowManager: BoardWindowManager by di.instance()
-    private val quickBar: QuickBar by di.instance()
+    private val inputBar: InputBarDelegate by di.instance()
     private val keyboardWindow: KeyboardWindow by di.instance()
     private val liquidWindow: LiquidWindow by di.instance()
 
@@ -148,8 +147,8 @@ class InputView(
                     },
                 )
                 add(
-                    quickBar.view,
-                    lParams(matchParent, dp(quickBar.themedHeight)) {
+                    inputBar.view,
+                    lParams(matchParent, dp(inputBar.themedHeight)) {
                         topOfParent()
                         centerHorizontally()
                     },
@@ -157,7 +156,7 @@ class InputView(
                 add(
                     leftPaddingSpace,
                     lParams {
-                        below(quickBar.view)
+                        below(inputBar.view)
                         startOfParent()
                         bottomOfParent()
                     },
@@ -165,7 +164,7 @@ class InputView(
                 add(
                     rightPaddingSpace,
                     lParams {
-                        below(quickBar.view)
+                        below(inputBar.view)
                         endOfParent()
                         bottomOfParent()
                     },
@@ -173,7 +172,7 @@ class InputView(
                 add(
                     windowManager.view,
                     lParams {
-                        below(quickBar.view)
+                        below(inputBar.view)
                         above(bottomPaddingSpace)
                     },
                 )
@@ -255,7 +254,7 @@ class InputView(
             }
         }
         preedit.ui.root.setPadding(sidePadding, 0, sidePadding, 0)
-        quickBar.view.setPadding(sidePadding, 0, sidePadding, 0)
+        inputBar.view.setPadding(sidePadding, 0, sidePadding, 0)
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
@@ -270,7 +269,7 @@ class InputView(
         restarting: Boolean = false,
     ) {
         broadcaster.onStartInput(info)
-        enterKeyLabel.updateLabelOnEditorInfo(info)
+        enterKeyDisplay.updateLabelOnEditorInfo(info)
         if (!restarting) {
             windowManager.attachWindow(KeyboardWindow)
         }
@@ -327,7 +326,7 @@ class InputView(
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean = quickBar.handleInlineSuggestions(response)
+    fun handleInlineSuggestions(response: InlineSuggestionsResponse): Boolean = inputBar.handleInlineSuggestions(response)
 
     override fun onDetachedFromWindow() {
         ViewCompat.setOnApplyWindowInsetsListener(this, null)

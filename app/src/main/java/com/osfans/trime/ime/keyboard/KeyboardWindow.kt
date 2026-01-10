@@ -20,7 +20,7 @@ import com.osfans.trime.data.theme.model.TextKeyboard
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
-import com.osfans.trime.ime.popup.PopupComponent
+import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ime.window.ResidentWindow
 import kotlinx.coroutines.channels.BufferOverflow
@@ -42,7 +42,7 @@ class KeyboardWindow :
     private val theme: Theme by di.instance()
     private val rime: RimeSession by di.instance()
     private val commonKeyboardActionListener: CommonKeyboardActionListener by di.instance()
-    private val popup: PopupComponent by di.instance()
+    private val popup: PopupDelegate by di.instance()
 
     private val cursorCapsMode: Int
         get() =

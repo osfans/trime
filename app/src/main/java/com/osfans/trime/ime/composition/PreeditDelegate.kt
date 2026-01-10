@@ -21,7 +21,7 @@ import org.kodein.di.instance
 import splitties.dimensions.dp
 import splitties.views.horizontalPadding
 
-class PreeditModule : InputBroadcastReceiver {
+class PreeditDelegate : InputBroadcastReceiver {
 
     private val context: Context by InputDependencyManager.getInstance().di.instance()
     private val theme: Theme by InputDependencyManager.getInstance().di.instance()

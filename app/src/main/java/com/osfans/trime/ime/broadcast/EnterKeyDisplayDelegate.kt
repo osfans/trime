@@ -11,7 +11,7 @@ import com.osfans.trime.ime.dependency.InputDependencyManager
 import org.kodein.di.instance
 import splitties.bitflags.hasFlag
 
-class EnterKeyLabelModule {
+class EnterKeyDisplayDelegate {
     private val broadcaster: InputBroadcaster by InputDependencyManager.getInstance().di.instance()
     private val theme: Theme by InputDependencyManager.getInstance().di.instance()
 
