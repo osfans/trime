@@ -877,15 +877,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private val composingTextMode by prefs.general.composingTextMode
+    private val inlinePreeditMode by prefs.general.inlinePreeditMode
 
     private fun updateComposingText(composition: RimeProto.Context.Composition) {
         val ic = currentInputConnection ?: return
         val text =
-            when (composingTextMode) {
-                ComposingTextMode.DISABLE -> ""
-                ComposingTextMode.PREEDIT -> composition.preedit ?: ""
-                ComposingTextMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
+            when (inlinePreeditMode) {
+                InlinePreeditMode.DISABLE -> ""
+                InlinePreeditMode.COMPOSING_TEXT -> composition.preedit ?: ""
+                InlinePreeditMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
             }
         if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
             ic.setComposingText(text, 1)

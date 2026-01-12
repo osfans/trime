@@ -9,10 +9,10 @@ import androidx.annotation.StringRes
 import com.osfans.trime.R
 import com.osfans.trime.data.prefs.PreferenceDelegateEnum
 
-enum class ComposingTextMode(
+enum class InlinePreeditMode(
     @StringRes override val stringRes: Int,
 ) : PreferenceDelegateEnum {
     DISABLE(R.string.disable),
-    PREEDIT(R.string.preedit),
+    COMPOSING_TEXT(R.string.composing_text),
     COMMIT_TEXT_PREVIEW(R.string.commit_text_preview),
 }

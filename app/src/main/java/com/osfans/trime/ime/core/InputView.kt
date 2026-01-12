@@ -102,7 +102,7 @@ class InputView(
     private val keyboardWindow: KeyboardWindow by di.instance()
     private val liquidWindow: LiquidWindow by di.instance()
 
-    private val composingTextMode by AppPrefs.defaultInstance().general.composingTextMode
+    private val inlinePreeditMode by AppPrefs.defaultInstance().general.inlinePreeditMode
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
     private val keyboardSidePadding = theme.generalStyle.keyboardPadding
@@ -294,7 +294,7 @@ class InputView(
                 }
             }
             is RimeMessage.CompositionMessage -> {
-                val data = if (composingTextMode != ComposingTextMode.DISABLE ||
+                val data = if (inlinePreeditMode != InlinePreeditMode.DISABLE ||
                     candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
                 ) {
                     RimeProto.Context.Composition()
