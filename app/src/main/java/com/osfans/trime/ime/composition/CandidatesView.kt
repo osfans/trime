@@ -162,13 +162,14 @@ class CandidatesView(
         val h = height
         val selfWidth = w.toFloat()
         val selfHeight = h.toFloat()
+        val spacingDp = dp(SPACING)
 
         val x: Float
         val y: Float
-        val minX = 0f
-        val minY = 0f
-        val maxX = parentWidth - selfWidth
-        val maxY = (if (bottom + selfHeight > parentHeight) top else parentHeight) - selfHeight
+        val minX = spacingDp
+        val minY = spacingDp
+        val maxX = parentWidth - selfWidth - spacingDp
+        val maxY = (if (bottom + selfHeight > parentHeight) top else parentHeight) - selfHeight - spacingDp
         when (position) {
             PopupPosition.TOP_RIGHT -> {
                 x = maxX
@@ -194,8 +195,8 @@ class CandidatesView(
                     } else {
                         if (horizontal + selfWidth > parentWidth) parentWidth - selfWidth else horizontal
                     }
-                val bottomLimit = parentHeight - bottomInsets
-                y = if (bottom + selfHeight > bottomLimit) top - selfHeight else bottom
+                val bottomLimit = parentHeight - bottomInsets - spacingDp
+                y = if (bottom + selfHeight > bottomLimit) top - selfHeight - spacingDp else bottom + spacingDp
             }
         }
         translationX = x
@@ -269,5 +270,13 @@ class CandidatesView(
         viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
         touchEventReceiverWindow.dismiss()
         super.onDetachedFromWindow()
+    }
+
+    companion object {
+        /**
+         * Minimum spacing in density-independent pixels (dp) between the candidate window
+         * and the screen edges.
+         */
+        private const val SPACING = 5f
     }
 }
