@@ -157,10 +157,10 @@
     <string name="candidates_window">候选窗口</string>
     <string name="show_candidates_window">显示候选词窗口</string>
     <string name="general">常规</string>
-    <string name="preedit">预编辑码</string>
+    <string name="composing_text">编辑中文本</string>
     <string name="commit_text_preview">首选词预览</string>
     <string name="raw_input">原始输入码</string>
-    <string name="composing_text_mode">在程序中显示撰写文本</string>
+    <string name="inline_preedit_mode">嵌入式预编辑模式</string>
     <string name="depends_on_input_device">根据输入设备而定</string>
     <string name="always_show">始终显示</string>
     <string name="follow_cursor">跟随光标</string>

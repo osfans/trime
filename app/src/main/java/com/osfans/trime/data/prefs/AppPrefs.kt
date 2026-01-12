@@ -14,7 +14,7 @@ import com.osfans.trime.ime.candidates.compact.CompactCandidateMode
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesLayout
 import com.osfans.trime.ime.candidates.popup.PopupCandidatesMode
 import com.osfans.trime.ime.composition.PopupPosition
-import com.osfans.trime.ime.core.ComposingTextMode
+import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.InputMethodUtils
 import com.osfans.trime.util.appContext
 import java.lang.ref.WeakReference
@@ -91,13 +91,13 @@ class AppPrefs(
         shared: SharedPreferences,
     ) : PreferenceDelegateOwner(shared, R.string.general) {
         companion object {
-            const val COMPOSING_TEXT_MODE = "composing_text_mode"
+            const val INLINE_PREEDIT_MODE = "inline_preedit_mode"
             const val ASCII_SWITCH_TIPS = "ascii_switch_tips"
             const val INLINE_SUGGESTIONS = "inline_suggestions"
             const val PREFERRED_VOICE_INPUT = "preferred_voice_input"
         }
 
-        val composingTextMode = enum(R.string.composing_text_mode, COMPOSING_TEXT_MODE, ComposingTextMode.DISABLE)
+        val inlinePreeditMode = enum(R.string.inline_preedit_mode, INLINE_PREEDIT_MODE, InlinePreeditMode.DISABLE)
         val asciiSwitchTips = switch(R.string.ascii_switch_tips, ASCII_SWITCH_TIPS, true)
         val inlineSuggestions = switch(R.string.inline_suggestions, INLINE_SUGGESTIONS, true)
 

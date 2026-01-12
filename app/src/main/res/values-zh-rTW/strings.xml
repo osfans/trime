@@ -158,10 +158,10 @@
     <string name="candidates_window">候选視窗</string>
     <string name="show_candidates_window">顯示候選詞視窗</string>
     <string name="general">常規</string>
-    <string name="preedit">預編輯碼</string>
+    <string name="composing_text">預編輯碼</string>
     <string name="commit_text_preview">首選詞預覽</string>
     <string name="raw_input">原始輸入碼</string>
-    <string name="composing_text_mode">在程式中顯示撰寫文字</string>
+    <string name="inline_preedit_mode">嵌入式預編輯模式</string>
     <string name="depends_on_input_device">視輸入設備而定</string>
     <string name="always_show">始終顯示</string>
     <string name="follow_cursor">跟隨游標</string>

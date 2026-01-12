@@ -158,10 +158,10 @@
     <string name="candidates_window">Candidates Window</string>
     <string name="show_candidates_window">Show candidates window</string>
     <string name="general">General</string>
-    <string name="preedit">Preedit</string>
+    <string name="composing_text">Composing text</string>
     <string name="commit_text_preview">Commit text preview</string>
     <string name="raw_input">Raw input</string>
-    <string name="composing_text_mode">Show composing text in editor</string>
+    <string name="inline_preedit_mode">Inline preedit mode</string>
     <string name="depends_on_input_device">Depends on input device</string>
     <string name="always_show">Always show</string>
     <string name="follow_cursor">Follow cursor</string>
