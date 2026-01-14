@@ -137,7 +137,7 @@ class CommonKeyboardActionListener {
             override fun onAction(action: KeyAction) {
                 val shouldHandle = when {
                     action.commit.isNotEmpty() -> {
-                        service.commitText(action.commit, true)
+                        service.commitText(action.commit)
                         false
                     }
                     KeyboardSwitcher.currentKeyboard.let { keyboard ->
@@ -248,7 +248,7 @@ class CommonKeyboardActionListener {
                 clipboardManager.primaryClip
                     ?.getItemAt(0)
                     ?.coerceToText(service)
-                    ?.let { service.commitText(it) }
+                    ?.let { service.commitText(it.toString()) }
             }
 
             private fun handleRunCommand(arg: String) {

@@ -27,7 +27,6 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.candidates.popup.PagedCandidatesUi
 import com.osfans.trime.ime.core.BaseInputView
-import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.ime.core.TouchEventReceiverWindow
 import com.osfans.trime.ime.core.TrimeInputMethodService
 import splitties.dimensions.dp
@@ -56,8 +55,6 @@ class CandidatesView(
 
     private val layout by AppPrefs.defaultInstance().candidates.layout
     private val position by AppPrefs.defaultInstance().candidates.position
-
-    private val inlinePreeditMode by AppPrefs.defaultInstance().general.inlinePreeditMode
 
     private var menu = RimeProto.Context.Menu()
     private var composition = RimeProto.Context.Composition()
@@ -113,11 +110,7 @@ class CandidatesView(
     override fun handleRimeMessage(it: RimeMessage<*>) {
         when (it) {
             is RimeMessage.CompositionMessage -> {
-                composition = if (inlinePreeditMode != InlinePreeditMode.DISABLE) {
-                    RimeProto.Context.Composition()
-                } else {
-                    it.data
-                }
+                composition = it.data
                 updateUi()
             }
             is RimeMessage.CandidateMenuMessage -> {
