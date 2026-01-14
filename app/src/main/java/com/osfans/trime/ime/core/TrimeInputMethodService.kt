@@ -39,7 +39,6 @@ import com.osfans.trime.core.KeyValue
 import com.osfans.trime.core.RimeApi
 import com.osfans.trime.core.RimeKeyMapping
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeDaemon
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
@@ -87,8 +86,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     private val rimeIntentReceiver = RimeIntentReceiver()
 
-    var lastCommittedText: CharSequence = ""
-        private set
+    private var lastCommittedText: String = ""
+
+    private var composingText: String = ""
+
+    private var cursorUpdateIndex = 0
 
     private val recreateInputViewPrefs: Array<PreferenceDelegate<*>> =
         arrayOf(prefs.keyboard.hideInputBar)
@@ -191,7 +193,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                     commitText(it.data.text)
                 }
             }
-            is RimeMessage.CompositionMessage -> {
+            is RimeMessage.InlinePreeditMessage -> {
                 updateComposingText(it.data)
             }
             is RimeMessage.KeyMessage ->
@@ -405,18 +407,45 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             candidatesStart,
             candidatesEnd,
         )
-        if (candidatesEnd != -1 && (newSelStart != candidatesEnd || newSelEnd != candidatesEnd)) {
-            // 移動光標時，更新候選區
-            if (newSelEnd in candidatesStart..<candidatesEnd) {
-                val newPosition = newSelEnd - candidatesStart
-                postRimeJob { moveCursorPos(newPosition) }
+        cursorUpdateIndex += 1
+        handleCursorUpdate(newSelStart, newSelEnd, candidatesStart, candidatesEnd, cursorUpdateIndex)
+        inputView?.updateSelection(newSelStart, newSelEnd)
+    }
+
+    private fun handleCursorUpdate(
+        newSelStart: Int,
+        newSelEnd: Int,
+        candidatesStart: Int,
+        candidatesEnd: Int,
+        updateIndex: Int,
+    ) {
+        if (newSelStart != newSelEnd) return
+        if (candidatesStart == candidatesEnd) {
+            postRimeJob {
+                if (isComposing) {
+                    Timber.d("handleCursorUpdate: commit composition")
+                    commitComposition()
+                }
+            }
+            return
+        }
+        if (newSelStart in candidatesStart..candidatesEnd) {
+            val position = newSelStart - candidatesStart
+            if (position != composingText.length) {
+                postRimeJob {
+                    if (updateIndex != cursorUpdateIndex) return@postRimeJob
+                    Timber.d("handleCursorUpdate: move rime cursor to $position")
+                    moveCursorPos(position)
+                }
+            }
+        } else {
+            Timber.d("handleCursorUpdate: clear composition")
+            composingText = ""
+            currentInputConnection?.finishComposingText()
+            postRimeJob {
+                clearComposition()
             }
         }
-        if (candidatesStart == -1 && candidatesEnd == -1 && newSelStart == 0 && newSelEnd == 0) {
-            // 上屏後，清除候選區
-            postRimeJob { clearComposition() }
-        }
-        inputView?.updateSelection(newSelStart, newSelEnd)
     }
 
     private val inputViewLocation = intArrayOf(0, 0)
@@ -476,12 +505,15 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         attribute: EditorInfo,
         restarting: Boolean,
     ) {
+        composingText = ""
         Timber.d("onStartInput: restarting=$restarting")
+        val isNullType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         postRimeJob {
             if (restarting) {
                 // when input restarts in the same editor, clear previous composition
                 clearComposition()
             }
+            setRuntimeOption("no_inline_preedit", isNullType)
         }
     }
 
@@ -531,25 +563,25 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             finishComposingText()
             monitorCursorAnchor(false)
         }
+        composingText = ""
         postRimeJob {
             clearComposition()
         }
         InputFeedbackManager.finishInput()
     }
 
-    // 直接commit不做任何处理
-    fun commitText(
-        text: CharSequence,
-        clearMeatKeyState: Boolean = false,
-    ) {
+    fun commitText(text: String) {
         val ic = currentInputConnection ?: return
-        if (ic.commitText(text, 1)) {
-            lastCommittedText = text
+        // when composing text equals commit content, finish composing text as-is
+        if (composingText == text) {
+            composingText = ""
+            ic.finishComposingText()
+            return
         }
-        InputFeedbackManager.textCommitSpeak(text.toString())
-        if (clearMeatKeyState) {
-            ic.clearMetaKeyStates(KeyEvent.getModifierMetaStateMask())
-        }
+        ic.commitText(text, 1)
+        lastCommittedText = text
+        composingText = ""
+        InputFeedbackManager.textCommitSpeak(text)
     }
 
     /**
@@ -877,19 +909,20 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         }
     }
 
-    private val inlinePreeditMode by prefs.general.inlinePreeditMode
-
-    private fun updateComposingText(composition: RimeProto.Context.Composition) {
+    private fun updateComposingText(text: String) {
         val ic = currentInputConnection ?: return
-        val text =
-            when (inlinePreeditMode) {
-                InlinePreeditMode.DISABLE -> ""
-                InlinePreeditMode.COMPOSING_TEXT -> composition.preedit ?: ""
-                InlinePreeditMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
+        ic.beginBatchEdit()
+        if (composingText.isNotEmpty() || text.isNotEmpty()) {
+            if (!ic.getSelectedText(0).isNullOrEmpty()) {
+                ic.deleteSurroundingText(1, 0)
             }
-        if (ic.getSelectedText(0).isNullOrEmpty() || text.isNotEmpty()) {
             ic.setComposingText(text, 1)
+            if (text.isEmpty()) {
+                ic.finishComposingText()
+            }
         }
+        composingText = text
+        ic.endBatchEdit()
     }
 
     fun getActiveText(type: Int): String {
@@ -899,7 +932,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val preedit = rimeComposition.preedit ?: ""
         val beforeCursor = getTextAroundCursor(1024, before = true) ?: ""
         val afterCursor = getTextAroundCursor(before = false) ?: ""
-        val lastCommitted = lastCommittedText.toString()
+        val lastCommitted = lastCommittedText
 
         return sequenceOf(
             when (type) {

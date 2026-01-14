@@ -9,6 +9,7 @@ import com.osfans.trime.BuildConfig
 import com.osfans.trime.data.base.DataManager
 import com.osfans.trime.data.opencc.OpenCCDictManager
 import com.osfans.trime.data.prefs.AppPrefs
+import com.osfans.trime.ime.core.InlinePreeditMode
 import com.osfans.trime.util.appContext
 import com.osfans.trime.util.isStorageAvailable
 import kotlinx.coroutines.Job
@@ -68,6 +69,7 @@ class Rime :
             },
         )
 
+    private val inlinePreeditMode by AppPrefs.defaultInstance().general.inlinePreeditMode
     private val showAsciiSwitchTips by AppPrefs.defaultInstance().general.asciiSwitchTips
     private var lastAsciiTipsText = ""
     private var asciiSwitchTipsJob: Job? = null
@@ -207,7 +209,7 @@ class Rime :
         emitResponse()
         if (!handled) {
             handleRimeMessage(
-                9, // RimeMessage.MessageType.Key,
+                10, // RimeMessage.MessageType.Key,
                 arrayOf(value, modifiers, isVirtual),
             )
         }
@@ -233,17 +235,37 @@ class Rime :
     ) {
         handleRimeMessage(4, arrayOf(commit.invoke()))
         val context = getRimeContext()
-        handleRimeMessage(5, arrayOf(context.composition))
+        handlePreedit(context.composition)
         if (context.composition.length <= 0 && lastAsciiTipsText != asciiTipsText) {
             showAsciiSwitchTips()
         }
         if (getRimeOption("paging_mode")) {
-            handleRimeMessage(6, arrayOf(context.menu))
+            handleRimeMessage(7, arrayOf(context.menu))
         } else {
             val bulk = getRimeBulkCandidates()
-            handleRimeMessage(8, bulk)
+            handleRimeMessage(9, bulk)
         }
-        handleRimeMessage(7, arrayOf(getRimeStatus()))
+        handleRimeMessage(8, arrayOf(getRimeStatus()))
+    }
+
+    private fun handlePreedit(composition: RimeProto.Context.Composition) {
+        val mode = if (getRimeOption("no_inline_preedit")) {
+            InlinePreeditMode.DISABLE
+        } else {
+            inlinePreeditMode
+        }
+        val inlinePreedit = when (mode) {
+            InlinePreeditMode.DISABLE -> ""
+            InlinePreeditMode.COMPOSING_TEXT -> composition.preedit ?: ""
+            InlinePreeditMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
+        }
+        val composition = if (mode == InlinePreeditMode.COMPOSING_TEXT) {
+            RimeProto.Context.Composition()
+        } else {
+            composition
+        }
+        handleRimeMessage(5, arrayOf(inlinePreedit))
+        handleRimeMessage(6, arrayOf(composition))
     }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
@@ -315,7 +337,7 @@ class Rime :
         asciiSwitchTipsJob = lifecycleScope.launch {
             delay(1000L)
             val ctx = getRimeContext()
-            handleRimeMessage(5, arrayOf(ctx.composition))
+            handleRimeMessage(6, arrayOf(ctx.composition))
         }
     }
 

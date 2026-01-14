@@ -294,9 +294,7 @@ class InputView(
                 }
             }
             is RimeMessage.CompositionMessage -> {
-                val data = if (inlinePreeditMode != InlinePreeditMode.DISABLE ||
-                    candidatesMode == PopupCandidatesMode.ALWAYS_SHOW
-                ) {
+                val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
                     RimeProto.Context.Composition()
                 } else {
                     it.data
