@@ -217,7 +217,7 @@ class Key(
         val asciiMode = rime.run { statusCached }.isAsciiMode
         val paging = rime.run { paging }
         val hasMenu = rime.run { hasMenu }
-        val composing = rime.run { isComposing }
+        val composing = rime.run { statusCached }.isComposing
         return keyActions[KeyBehavior.ASCII].takeIf { asciiMode }
             ?: keyActions[KeyBehavior.PAGING]?.takeIf { paging }
             ?: keyActions[KeyBehavior.HAS_MENU]?.takeIf { hasMenu }

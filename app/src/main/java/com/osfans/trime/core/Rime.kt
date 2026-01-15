@@ -46,9 +46,6 @@ class Rime :
     override var compositionCached = RimeProto.Context.Composition()
         private set
 
-    override var isComposing: Boolean = false
-        private set
-
     override var hasMenu: Boolean = false
         private set
 
@@ -290,7 +287,6 @@ class Rime :
             }
             is RimeMessage.CompositionMessage -> {
                 val composition = it.data
-                isComposing = composition.length > 0
                 compositionCached = composition
             }
             is RimeMessage.CandidateMenuMessage -> {
