@@ -420,15 +420,19 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         updateIndex: Int,
     ) {
         if (newSelStart != newSelEnd) return
-        if (candidatesStart == candidatesEnd) {
-            postRimeJob {
-                if (statusCached.isComposing) {
-                    Timber.d("handleCursorUpdate: commit composition")
-                    commitComposition()
-                }
-            }
-            return
-        }
+        // TODO: here is originally to fix some problems when user input is
+        //  too fast, but if users enable prediction, the composing can be
+        //  empty while candidates is not empty, leading to new issue caused
+        //  by here.
+//        if (candidatesStart == candidatesEnd) {
+//            postRimeJob {
+//                if (statusCached.isComposing) {
+//                    Timber.d("handleCursorUpdate: commit composition")
+//                    commitComposition()
+//                }
+//            }
+//            return
+//        }
         if (newSelStart in candidatesStart..candidatesEnd) {
             val position = newSelStart - candidatesStart
             if (position != composingText.length) {
