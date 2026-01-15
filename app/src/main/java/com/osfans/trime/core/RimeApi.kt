@@ -18,8 +18,6 @@ interface RimeApi {
 
     val compositionCached: RimeProto.Context.Composition
 
-    val isComposing: Boolean
-
     val hasMenu: Boolean
 
     val paging: Boolean
