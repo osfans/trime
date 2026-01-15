@@ -10,7 +10,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.TextView
-import androidx.core.math.MathUtils
 
 @SuppressLint("AppCompatCustomView")
 class PreeditTextView
@@ -20,7 +19,6 @@ constructor(
     attributeSet: AttributeSet? = null,
 ) : TextView(context, attributeSet) {
     var onMoveCursor: ((Int) -> Unit)? = null
-    private var lastTapOffset = -1
     private var newCursorPos = -1
 
     @SuppressLint("ClickableViewAccessibility")
@@ -30,23 +28,24 @@ constructor(
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 val textString = text.toString()
-                lastTapOffset = MathUtils.clamp(
-                    getOffsetForPosition(x, y),
-                    0,
-                    textString.length,
-                )
-                val bytes = textString.substring(0, lastTapOffset).toByteArray()
-                newCursorPos = bytes.size
+                val textLength = textString.length
+                val position = getOffsetForPosition(x, y)
+                if (position != textLength) {
+                    val codePointPosition = if (textLength < position) {
+                        textString.codePointCount(0, textLength)
+                    } else {
+                        textString.codePointCount(0, position)
+                    } + if (textString.contains('‸')) -1 else 0
+                    newCursorPos = codePointPosition
+                }
                 return true
             }
             MotionEvent.ACTION_UP -> {
                 onMoveCursor?.invoke(newCursorPos)
-                lastTapOffset = -1
                 newCursorPos = -1
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
-                lastTapOffset = -1
                 newCursorPos = -1
                 return true
             }
