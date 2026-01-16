@@ -422,9 +422,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (newSelStart != newSelEnd) return
         if (candidatesStart == candidatesEnd) {
             postRimeJob {
-                if (statusCached.isComposing && !hasMenu) {
-                    Timber.d("handleCursorUpdate: commit composition")
-                    commitComposition()
+                if (statusCached.isComposing || hasMenu) {
+                    Timber.d("handleCursorUpdate: clear composition")
+                    clearComposition()
                 }
             }
             return
