@@ -572,8 +572,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     fun commitText(text: String) {
         val ic = currentInputConnection ?: return
+        val isComposing = rime.run { statusCached.isComposing }
+
         // when composing text equals commit content, finish composing text as-is
-        if (composingText == text) {
+        if (composingText == text && !isComposing) {
             composingText = ""
             ic.finishComposingText()
             return
