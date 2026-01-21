@@ -35,10 +35,11 @@ class BackgroundSyncWork(
         if (!enable) {
             return Result.failure()
         }
-        val rime = RimeDaemon.getFirstSessionOrNull() ?: return Result.retry()
+        val rime = RimeDaemon.createSession(javaClass.name)
         val success = rime.runOnReady { syncUserData() }
         lastSyncTime = System.currentTimeMillis()
         lastSyncStatus = success
+        RimeDaemon.destroySession(javaClass.name)
 
         return if (success) Result.success() else Result.retry()
     }
