@@ -422,7 +422,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         if (newSelStart != newSelEnd) return
         if (candidatesStart == candidatesEnd) {
             postRimeJob {
-                if (statusCached.isComposing || hasMenu) {
+                if (composingText.isNotEmpty() && (statusCached.isComposing || hasMenu)) {
                     Timber.d("handleCursorUpdate: clear composition")
                     clearComposition()
                 }
@@ -440,8 +440,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
         } else {
             Timber.d("handleCursorUpdate: clear composition")
-            composingText = ""
-            currentInputConnection?.finishComposingText()
+            if (!rime.run { statusCached.isComposing }) {
+                composingText = ""
+                currentInputConnection?.finishComposingText()
+            }
             postRimeJob {
                 clearComposition()
             }
