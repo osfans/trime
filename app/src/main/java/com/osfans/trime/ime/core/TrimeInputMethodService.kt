@@ -420,15 +420,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         updateIndex: Int,
     ) {
         if (newSelStart != newSelEnd) return
-        if (candidatesStart == candidatesEnd) {
-            postRimeJob {
-                if (composingText.isNotEmpty() && (statusCached.isComposing || hasMenu)) {
-                    Timber.d("handleCursorUpdate: clear composition")
-                    clearComposition()
-                }
-            }
-            return
-        }
+        if (candidatesStart == candidatesEnd) return
         if (newSelStart in candidatesStart..candidatesEnd) {
             val position = newSelStart - candidatesStart
             if (position != composingText.length) {
@@ -440,10 +432,6 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
             }
         } else {
             Timber.d("handleCursorUpdate: clear composition")
-            if (!rime.run { statusCached.isComposing }) {
-                composingText = ""
-                currentInputConnection?.finishComposingText()
-            }
             postRimeJob {
                 clearComposition()
             }
@@ -574,10 +562,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     fun commitText(text: String) {
         val ic = currentInputConnection ?: return
-        val isComposing = rime.run { statusCached.isComposing }
 
         // when composing text equals commit content, finish composing text as-is
-        if (composingText == text && !isComposing) {
+        if (composingText.isNotEmpty() && composingText == text) {
             composingText = ""
             ic.finishComposingText()
             return
