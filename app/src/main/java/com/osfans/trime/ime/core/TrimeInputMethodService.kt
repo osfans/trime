@@ -570,11 +570,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
         // when composing text equals commit content, finish composing text as-is
         if (composingText.isNotEmpty() && composingText == text) {
-            composingText = ""
             ic.finishComposingText()
-            return
+        } else {
+            ic.commitText(text, 1)
         }
-        ic.commitText(text, 1)
         lastCommittedText = text
         composingText = ""
         InputFeedbackManager.textCommitSpeak(text)
