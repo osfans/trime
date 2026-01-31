@@ -1002,25 +1002,24 @@ tool_bar:
     background:
       type: circle           # 高亮形状 (可选值: circle|rectangle)
       corner_radius: 10      # 圆角半径
-      bg_normal: 0x00        # 正常状态背景颜色
-      bg_highlight: hilited_candidate_button_color  # 高亮状态背景色
+      normal: 0x00        # 正常状态背景颜色
+      highlight: hilited_candidate_button_color  # 高亮状态背景色
       vertical_inset: 4      # 垂直方向内缩量
       horizontal_inset: 0    # 水平方向内缩量
     # 前景内容设置
     foreground:
       style: "ic@dots_horizontal"         # 内置质感设计图标样式（以ic@开头）
-      fg_normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
-      # fg_highlight:        # 高亮状态前景色
+      normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
+      # highlight:        # 高亮状态前景色
       padding: 10            # 前景内容与背景边界的内边距
       # size: [120, 24]      # 视图控件宽高，非前景样式宽高
     # 按钮点击事件
     action: menu_keyboard
 
-
   hide_button: &hide_button
     foreground:
       style: "ic@keyboard_close"
-      fg_normal: candidate_text_color
+      normal: candidate_text_color
     action: Hide
 
   emoji_button: &emoji_button

@@ -27,8 +27,8 @@ data class ToolBar(
         data class Background(
             val type: String = "rectangle",
             val cornerRadius: Float = 10f,
-            val bgNormal: String = "",
-            val bgHighlight: String = "",
+            val normal: String = "",
+            val highlight: String = "",
             val verticalInset: Int = 4,
             val horizontalInset: Int = 0,
         ) : Parcelable
@@ -37,8 +37,8 @@ data class ToolBar(
         data class Foreground(
             val style: String = "",
             val optionStyles: List<String> = emptyList(),
-            val fgNormal: String? = null,
-            val fgHighlight: String? = null,
+            val normal: String? = null,
+            val highlight: String? = null,
             val fontSize: Float = 15f,
             val size: List<Int> = emptyList(),
             val padding: Int = 5,
