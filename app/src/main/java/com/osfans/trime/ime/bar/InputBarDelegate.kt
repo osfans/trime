@@ -174,11 +174,6 @@ class InputBarDelegate : InputBroadcastReceiver {
     val unrollButtonStateMachine =
         UnrollButtonStateMachine.new {
             when (it) {
-                UnrollButtonStateMachine.State.AboutToAttachWindow -> {
-                    setUnrollButtonToDetach()
-                    setUnrollButtonEnabled(true)
-                    windowManager.attachWindow(FlexboxUnrolledCandidateWindow())
-                }
                 UnrollButtonStateMachine.State.ClickToAttachWindow -> {
                     setUnrollButtonToAttach()
                     setUnrollButtonEnabled(true)
@@ -186,6 +181,7 @@ class InputBarDelegate : InputBroadcastReceiver {
                 UnrollButtonStateMachine.State.ClickToDetachWindow -> {
                     setUnrollButtonToDetach()
                     setUnrollButtonEnabled(true)
+                    setUnrollWindowToAttach()
                 }
                 UnrollButtonStateMachine.State.Hidden -> {
                     setUnrollButtonEnabled(false)
@@ -209,6 +205,15 @@ class InputBarDelegate : InputBroadcastReceiver {
 
     private fun setUnrollButtonEnabled(enabled: Boolean) {
         candidateUi.unrollButton.visibility = if (enabled) View.VISIBLE else View.INVISIBLE
+    }
+
+    private fun setUnrollWindowToAttach() {
+        unrollButtonStateMachine.getBooleanState(
+            UnrollButtonStateMachine.BooleanKey.UnrolledCandidatesHighlighted,
+        )?.let {
+            if (!it) return@let
+            windowManager.attachWindow(FlexboxUnrolledCandidateWindow())
+        }
     }
 
     override fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {
