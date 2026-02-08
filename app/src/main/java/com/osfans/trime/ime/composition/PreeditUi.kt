@@ -14,7 +14,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
-import com.osfans.trime.core.RimeProto
+import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
@@ -52,7 +52,7 @@ open class PreeditUi(
             }
         }
 
-    private fun RimeProto.Context.Composition.toSpannedString() = buildSpannedString {
+    private fun CompositionProto.toSpannedString() = buildSpannedString {
         if (!preedit.isNullOrEmpty()) {
             append(preedit)
             setSpan(ForegroundColorSpan(highlightTextColor), selStart, selEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -71,7 +71,7 @@ open class PreeditUi(
         visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    fun update(inputComposition: RimeProto.Context.Composition) {
+    fun update(inputComposition: CompositionProto) {
         val string = inputComposition.toSpannedString()
         val cursorPos = inputComposition.cursorPos
         val hasPreedit = inputComposition.length > 0

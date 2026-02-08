@@ -6,9 +6,11 @@
 package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
+import com.osfans.trime.core.CompositionProto
+import com.osfans.trime.core.MenuProto
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
+import com.osfans.trime.core.StatusProto
 import com.osfans.trime.ime.window.BoardWindow
 
 interface InputBroadcastReceiver {
@@ -25,11 +27,11 @@ interface InputBroadcastReceiver {
 
     fun onCandidateListUpdate(data: RimeMessage.CandidateListMessage.Data) {}
 
-    fun onCompositionUpdate(data: RimeProto.Context.Composition) {}
+    fun onCompositionUpdate(data: CompositionProto) {}
 
-    fun onCandidateMenuUpdate(data: RimeProto.Context.Menu) {}
+    fun onCandidateMenuUpdate(data: MenuProto) {}
 
-    fun onInputStatusUpdate(value: RimeProto.Status) {}
+    fun onInputStatusUpdate(value: StatusProto) {}
 
     fun onWindowAttached(window: BoardWindow) {}
 

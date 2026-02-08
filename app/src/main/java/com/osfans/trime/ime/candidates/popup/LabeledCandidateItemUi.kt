@@ -13,7 +13,7 @@ import android.text.SpannableStringBuilder
 import androidx.annotation.ColorInt
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
-import com.osfans.trime.core.RimeProto
+import com.osfans.trime.core.CandidateProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
@@ -21,7 +21,6 @@ import com.osfans.trime.util.sp
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.textView
-import splitties.views.horizontalPadding
 
 class LabeledCandidateItemUi(
     override val ctx: Context,
@@ -56,7 +55,7 @@ class LabeledCandidateItemUi(
     ) = inSpans(CandidateItemSpan(color, textSize, typeface), builderAction)
 
     fun update(
-        candidate: RimeProto.Candidate,
+        candidate: CandidateProto,
         highlighted: Boolean,
     ) {
         val labelFg = if (highlighted) highlightLabelColor else labelColor

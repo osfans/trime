@@ -15,7 +15,8 @@ import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.osfans.trime.core.RimeProto
+import com.osfans.trime.core.CandidateProto
+import com.osfans.trime.core.MenuProto
 import com.osfans.trime.data.theme.Theme
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.recyclerview.recyclerView
@@ -27,7 +28,7 @@ class PagedCandidatesUi(
     private val onPrevPage: () -> Unit,
     private val onNextPage: () -> Unit,
 ) : Ui {
-    private var menu = RimeProto.Context.Menu()
+    private var menu = MenuProto()
 
     private var isHorizontal = true
 
@@ -44,7 +45,7 @@ class PagedCandidatesUi(
     }
 
     private val candidatesAdapter =
-        object : BaseQuickAdapter<RimeProto.Candidate, UiHolder>() {
+        object : BaseQuickAdapter<CandidateProto, UiHolder>() {
             init {
                 // We must do this to avoid ArrayIndexOutOfBoundsException
                 // https://github.com/google/flexbox-layout/issues/363#issuecomment-382949953
@@ -53,11 +54,11 @@ class PagedCandidatesUi(
 
             override fun getItemId(position: Int): Long = items.getOrNull(position).hashCode().toLong()
 
-            override fun getItemCount(items: List<RimeProto.Candidate>) = items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
+            override fun getItemCount(items: List<CandidateProto>) = items.size + (if (menu.pageNumber != 0 || !menu.isLastPage) 1 else 0)
 
             override fun getItemViewType(
                 position: Int,
-                list: List<RimeProto.Candidate>,
+                list: List<CandidateProto>,
             ) = if (position < list.size) 0 else 1
 
             override fun onCreateViewHolder(
@@ -79,7 +80,7 @@ class PagedCandidatesUi(
             override fun onBindViewHolder(
                 holder: UiHolder,
                 position: Int,
-                item: RimeProto.Candidate?,
+                item: CandidateProto?,
             ) {
                 when (holder) {
                     is UiHolder.Candidate -> {
@@ -121,7 +122,7 @@ class PagedCandidatesUi(
         }
 
     fun update(
-        menu: RimeProto.Context.Menu,
+        menu: MenuProto,
         horizontal: Boolean,
         layout: PopupCandidatesLayout,
     ) {

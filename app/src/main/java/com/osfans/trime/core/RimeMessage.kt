@@ -68,8 +68,8 @@ sealed class RimeMessage<T>(
     }
 
     data class CommitTextMessage(
-        override val data: RimeProto.Commit,
-    ) : RimeMessage<RimeProto.Commit>(data) {
+        override val data: CommitProto,
+    ) : RimeMessage<CommitProto>(data) {
         override val messageType = MessageType.Commit
     }
 
@@ -80,20 +80,20 @@ sealed class RimeMessage<T>(
     }
 
     data class CompositionMessage(
-        override val data: RimeProto.Context.Composition,
-    ) : RimeMessage<RimeProto.Context.Composition>(data) {
+        override val data: CompositionProto,
+    ) : RimeMessage<CompositionProto>(data) {
         override val messageType = MessageType.Composition
     }
 
     data class CandidateMenuMessage(
-        override val data: RimeProto.Context.Menu,
-    ) : RimeMessage<RimeProto.Context.Menu>(data) {
+        override val data: MenuProto,
+    ) : RimeMessage<MenuProto>(data) {
         override val messageType = MessageType.Menu
     }
 
     data class StatusMessage(
-        override val data: RimeProto.Status,
-    ) : RimeMessage<RimeProto.Status>(data) {
+        override val data: StatusProto,
+    ) : RimeMessage<StatusProto>(data) {
         override val messageType = MessageType.Status
     }
 
@@ -182,15 +182,15 @@ sealed class RimeMessage<T>(
                     DeployMessage.State.valueOf((params[0] as String).replaceFirstChar { it.titlecase() }),
                 )
             MessageType.Commit ->
-                CommitTextMessage(params[0] as RimeProto.Commit)
+                CommitTextMessage(params[0] as CommitProto)
             MessageType.InlinePreedit ->
                 InlinePreeditMessage(params[0] as String)
             MessageType.Composition ->
-                CompositionMessage(params[0] as RimeProto.Context.Composition)
+                CompositionMessage(params[0] as CompositionProto)
             MessageType.Menu ->
-                CandidateMenuMessage(params[0] as RimeProto.Context.Menu)
+                CandidateMenuMessage(params[0] as MenuProto)
             MessageType.Status ->
-                StatusMessage(params[0] as RimeProto.Status)
+                StatusMessage(params[0] as StatusProto)
             MessageType.Candidate ->
                 CandidateListMessage(
                     CandidateListMessage.Data(

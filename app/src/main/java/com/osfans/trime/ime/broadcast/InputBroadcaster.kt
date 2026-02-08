@@ -6,9 +6,11 @@
 package com.osfans.trime.ime.broadcast
 
 import android.view.inputmethod.EditorInfo
+import com.osfans.trime.core.CompositionProto
+import com.osfans.trime.core.MenuProto
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
+import com.osfans.trime.core.StatusProto
 import com.osfans.trime.ime.window.BoardWindow
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -56,15 +58,15 @@ class InputBroadcaster : InputBroadcastReceiver {
         receivers.forEach { it.onCandidateListUpdate(data) }
     }
 
-    override fun onCompositionUpdate(data: RimeProto.Context.Composition) {
+    override fun onCompositionUpdate(data: CompositionProto) {
         receivers.forEach { it.onCompositionUpdate(data) }
     }
 
-    override fun onCandidateMenuUpdate(data: RimeProto.Context.Menu) {
+    override fun onCandidateMenuUpdate(data: MenuProto) {
         receivers.forEach { it.onCandidateMenuUpdate(data) }
     }
 
-    override fun onInputStatusUpdate(value: RimeProto.Status) {
+    override fun onInputStatusUpdate(value: StatusProto) {
         receivers.forEach { it.onInputStatusUpdate(value) }
     }
 

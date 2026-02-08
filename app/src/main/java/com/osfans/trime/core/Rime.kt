@@ -40,10 +40,10 @@ class Rime :
     override var schemaCached = RimeSchema(".default")
         private set
 
-    override var statusCached = RimeProto.Status()
+    override var statusCached = StatusProto()
         private set
 
-    override var compositionCached = RimeProto.Context.Composition()
+    override var compositionCached = CompositionProto()
         private set
 
     override var hasMenu: Boolean = false
@@ -119,7 +119,7 @@ class Rime :
                 emitResponse { commit }
                 true
             } else {
-                emitResponse { RimeProto.Commit(sequence) }
+                emitResponse { CommitProto(sequence) }
                 false
             }
         } else {
@@ -228,7 +228,7 @@ class Rime :
         }
 
     private fun emitResponse(
-        commit: (() -> RimeProto.Commit) = { getRimeCommit() },
+        commit: (() -> CommitProto) = { getRimeCommit() },
     ) {
         handleRimeMessage(4, arrayOf(commit.invoke()))
         val context = getRimeContext()
@@ -245,7 +245,7 @@ class Rime :
         handleRimeMessage(8, arrayOf(getRimeStatus()))
     }
 
-    private fun handlePreedit(composition: RimeProto.Context.Composition) {
+    private fun handlePreedit(composition: CompositionProto) {
         val mode = if (getRimeOption("no_inline_preedit")) {
             InlinePreeditMode.DISABLE
         } else {
@@ -257,7 +257,7 @@ class Rime :
             InlinePreeditMode.COMMIT_TEXT_PREVIEW -> composition.commitTextPreview ?: ""
         }
         val composition = if (mode == InlinePreeditMode.COMPOSING_TEXT) {
-            RimeProto.Context.Composition()
+            CompositionProto()
         } else {
             composition
         }
@@ -305,7 +305,7 @@ class Rime :
         }
     }
 
-    private fun updateSchemaCached(status: RimeProto.Status) {
+    private fun updateSchemaCached(status: StatusProto) {
         val (schemaId, schemaName) = status
         // Engine response update won't send SchemaMessage, but usually update RimeStatus
         if (schemaId != schemaCached.schemaId) {
@@ -326,7 +326,7 @@ class Rime :
 
         lastAsciiTipsText = tipsText
 
-        val tips = RimeProto.Context.Composition(tipsText)
+        val tips = CompositionProto(tipsText)
         messageFlow_.tryEmit(RimeMessage.CompositionMessage(tips))
         compositionCached = tips
         asciiSwitchTipsJob?.cancel()
@@ -419,13 +419,13 @@ class Rime :
 
         // output
         @JvmStatic
-        external fun getRimeCommit(): RimeProto.Commit
+        external fun getRimeCommit(): CommitProto
 
         @JvmStatic
-        external fun getRimeContext(): RimeProto.Context
+        external fun getRimeContext(): ContextProto
 
         @JvmStatic
-        external fun getRimeStatus(): RimeProto.Status
+        external fun getRimeStatus(): StatusProto
 
         // runtime options
         @JvmStatic

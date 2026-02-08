@@ -4,12 +4,13 @@
 
 #include <rime_api.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
+#include "frontend.h"
 #include "jni-utils.h"
 #include "objconv.h"
-#include "proto.h"
 #include "session.h"
 
 #define MAX_BUFFER_LENGTH 2048
@@ -78,13 +79,38 @@ class Rime {
 
   void clearComposition() { rime->clear_composition(session()); }
 
-  void commitProto(uintptr_t builder) { rime_commit_proto(session(), builder); }
-
-  void contextProto(uintptr_t builder) {
-    rime_context_proto(session(), builder);
+  std::unique_ptr<CommitProto> commit() {
+    RIME_STRUCT(RimeCommit, data)
+    if (rime->get_commit(session(), &data)) {
+      auto p = std::make_unique<CommitProto>(&data);
+      rime->free_commit(&data);
+      return p;
+    }
+    return std::make_unique<CommitProto>();
   }
 
-  void statusProto(uintptr_t builder) { rime_status_proto(session(), builder); }
+  std::unique_ptr<ContextProto> context() {
+    RIME_STRUCT(RimeContext, data)
+    auto s = session();
+    if (rime->get_context(s, &data)) {
+      auto input = rime->get_input(s);
+      auto caretPos = rime->get_caret_pos(s);
+      auto p = std::make_unique<ContextProto>(&data, input, caretPos);
+      rime->free_context(&data);
+      return p;
+    }
+    return std::make_unique<ContextProto>();
+  }
+
+  std::unique_ptr<StatusProto> status() {
+    RIME_STRUCT(RimeStatus, data)
+    if (rime->get_status(session(), &data)) {
+      auto p = std::make_unique<StatusProto>(&data);
+      rime->free_status(&data);
+      return p;
+    }
+    return std::make_unique<StatusProto>();
+  }
 
   void setOption(std::string_view key, bool value) {
     rime->set_option(session(), key.data(), value);
@@ -291,23 +317,20 @@ Java_com_osfans_trime_core_Rime_clearRimeComposition(JNIEnv *env,
 // output
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeCommit(JNIEnv *env, jclass /* thiz */) {
-  rime::proto::Commit commit;
-  Rime::Instance().commitProto(reinterpret_cast<uintptr_t>(&commit));
-  return rimeProtoCommitToJObject(env, commit);
+  auto commit = Rime::Instance().commit();
+  return rimeCommitToJObject(env, *commit);
 }
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeContext(JNIEnv *env, jclass /* thiz */) {
-  rime::proto::Context context;
-  Rime::Instance().contextProto(reinterpret_cast<uintptr_t>(&context));
-  return rimeProtoContextToJObject(env, context);
+  auto context = Rime::Instance().context();
+  return rimeContextToJObject(env, *context);
 }
 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_osfans_trime_core_Rime_getRimeStatus(JNIEnv *env, jclass /* thiz */) {
-  rime::proto::Status status;
-  Rime::Instance().statusProto(reinterpret_cast<uintptr_t>(&status));
-  return rimeProtoStatusToJObject(env, status);
+  auto status = Rime::Instance().status();
+  return rimeStatusToJObject(env, *status);
 }
 
 // runtime options
