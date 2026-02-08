@@ -10,8 +10,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.osfans.trime.R
+import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.theme.KeyActionManager
@@ -262,7 +262,7 @@ class KeyboardWindow :
         }
     }
 
-    override fun onCompositionUpdate(data: RimeProto.Context.Composition) {
+    override fun onCompositionUpdate(data: CompositionProto) {
         val status = rime.run { statusCached }
         if (!status.isAsciiMode && data.length == 0 && data.preedit.isNullOrEmpty()) {
             currentKeyboardView?.invalidateAllKeys()

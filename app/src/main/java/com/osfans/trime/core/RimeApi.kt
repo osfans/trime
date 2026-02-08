@@ -14,9 +14,9 @@ interface RimeApi {
 
     val schemaCached: RimeSchema
 
-    val statusCached: RimeProto.Status
+    val statusCached: StatusProto
 
-    val compositionCached: RimeProto.Context.Composition
+    val compositionCached: CompositionProto
 
     val hasMenu: Boolean
 

@@ -17,8 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.ColorManager
@@ -295,7 +295,7 @@ class InputView(
             }
             is RimeMessage.CompositionMessage -> {
                 val data = if (candidatesMode == PopupCandidatesMode.ALWAYS_SHOW) {
-                    RimeProto.Context.Composition()
+                    CompositionProto()
                 } else {
                     it.data
                 }

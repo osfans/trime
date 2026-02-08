@@ -8,7 +8,6 @@
 
 #include "helper-types.h"
 #include "jni-utils.h"
-#include "proto.h"
 
 inline jobject rimeSchemaListItemToJObject(JNIEnv* env,
                                            const SchemaItem& item) {
@@ -71,14 +70,13 @@ inline jobjectArray stringVectorToJStringArray(
   return array;
 }
 
-inline jobject rimeProtoCommitToJObject(JNIEnv* env,
-                                        const rime::proto::Commit& commit) {
+inline jobject rimeCommitToJObject(JNIEnv* env, const CommitProto& commit) {
   return env->NewObject(GlobalRef->CommitProto, GlobalRef->CommitProtoInit,
                         commit.text ? *JString(env, *commit.text) : nullptr);
 }
 
-inline jobject rimeProtoCandidateToJObject(
-    JNIEnv* env, const rime::proto::Candidate& candidate) {
+inline jobject rimeCandidateToJObject(JNIEnv* env,
+                                      const CandidateProto& candidate) {
   return env->NewObject(
       GlobalRef->CandidateProto, GlobalRef->CandidateProtoInit,
       *JString(env, candidate.text),
@@ -86,8 +84,8 @@ inline jobject rimeProtoCandidateToJObject(
       *JString(env, candidate.label));
 }
 
-inline jobject rimeProtoCompositionToJObject(
-    JNIEnv* env, const rime::proto::Composition& composition) {
+inline jobject rimeCompositionToJObject(JNIEnv* env,
+                                        const CompositionProto& composition) {
   return env->NewObject(
       GlobalRef->CompositionProto, GlobalRef->CompositionProtoInit,
       composition.length, composition.cursorPos, composition.selStart,
@@ -98,15 +96,14 @@ inline jobject rimeProtoCompositionToJObject(
           : nullptr);
 }
 
-inline jobject rimeProtoMenuToJObject(JNIEnv* env,
-                                      const rime::proto::Menu& menu) {
+inline jobject rimeMenuToJObject(JNIEnv* env, const MenuProto& menu) {
   int numCandidates = static_cast<int>(menu.candidates.size());
   auto jCandidates = JRef<jobjectArray>(
       env,
       env->NewObjectArray(numCandidates, GlobalRef->CandidateProto, nullptr));
   for (int i = 0; i < numCandidates; ++i) {
     auto jCandidate =
-        JRef(env, rimeProtoCandidateToJObject(env, menu.candidates[i]));
+        JRef(env, rimeCandidateToJObject(env, menu.candidates[i]));
     env->SetObjectArrayElement(jCandidates, i, jCandidate);
   }
   return env->NewObject(GlobalRef->MenuProto, GlobalRef->MenuProtoInit,
@@ -116,16 +113,14 @@ inline jobject rimeProtoMenuToJObject(JNIEnv* env,
                         stringVectorToJStringArray(env, menu.selectLabels));
 }
 
-inline jobject rimeProtoContextToJObject(JNIEnv* env,
-                                         const rime::proto::Context& context) {
+inline jobject rimeContextToJObject(JNIEnv* env, const ContextProto& context) {
   return env->NewObject(GlobalRef->ContextProto, GlobalRef->ContextProtoInit,
-                        rimeProtoCompositionToJObject(env, context.composition),
-                        rimeProtoMenuToJObject(env, context.menu),
+                        rimeCompositionToJObject(env, context.composition),
+                        rimeMenuToJObject(env, context.menu),
                         *JString(env, context.input), context.caretPos);
 }
 
-inline jobject rimeProtoStatusToJObject(JNIEnv* env,
-                                        const rime::proto::Status& status) {
+inline jobject rimeStatusToJObject(JNIEnv* env, const StatusProto& status) {
   return env->NewObject(GlobalRef->StatusProto, GlobalRef->StatusProtoInit,
                         *JString(env, status.schemaId),
                         *JString(env, status.schemaName), status.isDisabled,

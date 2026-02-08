@@ -10,7 +10,7 @@ import android.content.res.ColorStateList
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import com.osfans.trime.R
-import com.osfans.trime.core.RimeProto
+import com.osfans.trime.core.MenuProto
 import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.util.styledFloat
@@ -63,7 +63,7 @@ class PaginationUi(
             )
         }
 
-    fun update(menu: RimeProto.Context.Menu) {
+    fun update(menu: MenuProto) {
         prevIcon.alpha = if (menu.pageNumber != 0) 1f else disabledAlpha
         nextIcon.alpha = if (!menu.isLastPage) 1f else disabledAlpha
     }

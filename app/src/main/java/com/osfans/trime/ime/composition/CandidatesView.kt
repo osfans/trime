@@ -18,8 +18,9 @@ import androidx.core.graphics.component1
 import androidx.core.graphics.component2
 import androidx.core.graphics.component3
 import androidx.core.graphics.component4
+import com.osfans.trime.core.CompositionProto
+import com.osfans.trime.core.MenuProto
 import com.osfans.trime.core.RimeMessage
-import com.osfans.trime.core.RimeProto
 import com.osfans.trime.daemon.RimeSession
 import com.osfans.trime.daemon.launchOnReady
 import com.osfans.trime.data.prefs.AppPrefs
@@ -56,8 +57,8 @@ class CandidatesView(
     private val layout by AppPrefs.defaultInstance().candidates.layout
     private val position by AppPrefs.defaultInstance().candidates.position
 
-    private var menu = RimeProto.Context.Menu()
-    private var composition = RimeProto.Context.Composition()
+    private var menu = MenuProto()
+    private var composition = CompositionProto()
 
     private val anchorPosition = RectF()
     private val parentSize = floatArrayOf(0f, 0f)
