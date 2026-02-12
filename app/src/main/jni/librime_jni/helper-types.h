@@ -102,7 +102,9 @@ class ContextProto {
       composition.selStart = distance(t, t + c.sel_start);
       composition.selEnd = distance(t, t + c.sel_end);
       composition.preedit = t;
-      composition.commitTextPreview = context->commit_text_preview;
+      if (context->commit_text_preview) {
+        composition.commitTextPreview = context->commit_text_preview;
+      }
     }
     if (context->menu.num_candidates > 0) {
       auto& m = context->menu;
