@@ -70,15 +70,16 @@ abstract class BaseInputView(
             return 0
         }
         val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
-        // use navigation bar insets when available
         val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-        // in case navigation bar insets goes wrong (eg. on LineageOS 21+ with gesture navigation)
-        // use mandatory system gesture insets
         val mandatory = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+        // If navBars is 0 but mandatory is non-zero, likely gesture nav - don't add inset
+        if (navBars.bottom == 0 && mandatory.bottom > 0) {
+            return 0
+        }
         var insetsBottom = max(navBars.bottom, mandatory.bottom)
         if (insetsBottom <= 0) {
-            // check system gesture insets and fallback to navigation_bar_frame_height just in case
-            val gesturesBottom = insets.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom
+            val gestures = insets.getInsets(WindowInsetsCompat.Type.systemGestures())
+            val gesturesBottom = gestures.bottom
             if (gesturesBottom > 0) {
                 insetsBottom = max(gesturesBottom, navBarFrameHeight)
             }

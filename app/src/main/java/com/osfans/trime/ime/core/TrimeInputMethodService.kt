@@ -31,6 +31,7 @@ import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -449,8 +450,12 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
             }
         } else {
-            val n = decorView.findViewById<View>(android.R.id.navigationBarBackground)?.height ?: 0
-            val h = decorView.height - n
+            val insets = WindowInsetsCompat.toWindowInsetsCompat(decorView.rootWindowInsets)
+            val navBarHeight = insets?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+            val mandatoryHeight = insets?.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())?.bottom ?: 0
+            // If navBarHeight is 0 but mandatory is non-zero, likely gesture nav - don't add inset
+            val finalNavHeight = if (navBarHeight == 0 && mandatoryHeight > 0) 0 else maxOf(navBarHeight, mandatoryHeight)
+            val h = decorView.height - finalNavHeight
             outInsets.apply {
                 contentTopInsets = h
                 visibleTopInsets = h
