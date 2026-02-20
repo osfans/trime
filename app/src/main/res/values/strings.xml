@@ -135,8 +135,8 @@
     <string name="enable_landscape_mode">Enable Landscape Mode</string>
     <string name="split_space_percent">Auto Split Keyboard Space Ratio</string>
     <string name="setup__step_three">Setup 3</string>
-    <string name="setup__request_permmision_hint">Currently Trime requests storage permmissions to access its configuration\nand allow users to modify easily.</string>
-    <string name="setup__request_permmision">Request storage permmision</string>
+    <string name="setup__request_permission_hint">Currently Trime requests storage permissions to access its configuration\nand allow users to modify easily.</string>
+    <string name="setup__request_permission">Request storage permission</string>
     <string name="grant_permission">Grant permission</string>
     <string name="notification_permission_title">No Notification Permission</string>
     <string name="notification_permission_message">Without the permission to post notifications, we are not able to notify you when some time-consuming operations are done.</string>
