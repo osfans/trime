@@ -27,7 +27,7 @@ enum class SetupPage {
 
     fun getHintText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__request_permmision_hint
+            Permissions -> R.string.setup__request_permission_hint
             Enable -> R.string.setup__enable_ime_hint
             Select -> R.string.setup__select_ime_hint
         },
@@ -35,7 +35,7 @@ enum class SetupPage {
 
     fun getButtonText(context: Context) = context.getText(
         when (this) {
-            Permissions -> R.string.setup__request_permmision
+            Permissions -> R.string.setup__request_permission
             Enable -> R.string.setup__enable_ime
             Select -> R.string.setup__select_ime
         },

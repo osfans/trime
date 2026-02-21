@@ -135,8 +135,8 @@
     <string name="enable_landscape_mode">啟用橫屏模式</string>
     <string name="split_space_percent">自動分割鍵盤比例</string>
     <string name="setup__step_three">第 3 步</string>
-    <string name="setup__request_permmision_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>
-    <string name="setup__request_permmision">请求存储权限</string>
+    <string name="setup__request_permission_hint">當前同文須要存儲權限以訪問配置檔案、使得使用者容易修改。</string>
+    <string name="setup__request_permission">请求存储权限</string>
     <string name="grant_permission">授予權限</string>
     <string name="notification_permission_title">沒有通知權限</string>
     <string name="notification_permission_message">尚未賦予通知權限，因此無法在耗時較長的操作完成後給您發送通知。</string>
