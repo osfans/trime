@@ -39,7 +39,7 @@ class LabeledCandidateItemUi(
     private val highlightLabelColor = ColorManager.getColor("hilited_label_color")
     private val highlightCommentTextColor = ColorManager.getColor("hilited_comment_text_color")
     private val highlightCandidateTextColor = ColorManager.getColor("hilited_candidate_text_color")
-    private val highlightBackColor = ColorManager.getColor("hilited_back_color")
+    private val highlightCandidateBackColor = ColorManager.getColor("hilited_candidate_back_color")
 
     override val root =
         textView {
@@ -75,7 +75,7 @@ class LabeledCandidateItemUi(
         val bg =
             GradientDrawable().apply {
                 if (highlighted) {
-                    setColor(highlightBackColor)
+                    setColor(highlightCandidateBackColor)
                     cornerRadius = ctx.dp(theme.window.cornerRadius)
                 } else {
                     setColor(Color.TRANSPARENT)
