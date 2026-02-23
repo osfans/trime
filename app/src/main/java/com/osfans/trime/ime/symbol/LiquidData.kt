@@ -36,7 +36,9 @@ object LiquidData {
         val item = data[index]
         val tag = item.first
         return if (tag.type == Type.TABS) {
-            data.map { LiquidKeyboard.KeyItem(it.first.label) }
+            data.mapNotNull {
+                if (it.first.type != Type.TABS) LiquidKeyboard.KeyItem(it.first.label) else null
+            }
         } else {
             item.second.toList()
         }
