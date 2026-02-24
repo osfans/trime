@@ -5,9 +5,11 @@
 
 package com.osfans.trime.data.theme.mapper
 
+import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.yamlScalar
 import com.osfans.trime.data.theme.model.ToolBar
 
 class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
@@ -27,6 +29,7 @@ class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
             ToolBarButtonForegroundMapper(fg).map()
         },
         action = node.get<YamlScalar>("action")?.content ?: "",
+        size = node.get<YamlList>("size")?.items?.mapNotNull { it.yamlScalar.content.toIntOrNull() } ?: emptyList(),
     )
 }
 
@@ -48,7 +51,6 @@ private class ToolBarButtonForegroundMapper(node: YamlMap) : Mapper<ToolBar.Butt
         normal = getString("normal"),
         highlight = getString("highlight"),
         fontSize = getFloat("font_size", 18f),
-        size = getStringList("size").mapNotNull { it.toIntOrNull() },
         padding = getInt("padding", 5),
     )
 }

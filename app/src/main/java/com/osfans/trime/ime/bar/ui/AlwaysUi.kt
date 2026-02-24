@@ -44,15 +44,10 @@ class AlwaysUi(
     private fun toolButton(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
-    ): ToolButton = if (buttonConfig != null) {
-        ToolButton(ctx, buttonConfig)
-    } else {
-        ToolButton(ctx, icon)
-    }.apply {
-        setOnClickListener { onButtonClick?.invoke(buttonConfig?.action) }
-    }
+    ): ToolButton = (if (buttonConfig != null) ToolButton(ctx, buttonConfig) else ToolButton(ctx, icon))
+        .also { it.setOnClickListener { onButtonClick?.invoke(buttonConfig?.action) } }
 
-    val moreButton: ToolButton = toolButton(
+    private val leftMostIcon: ToolButton = toolButton(
         theme.toolBar.primaryButton,
         R.drawable.ic_baseline_more_horiz_24,
     )
@@ -64,16 +59,16 @@ class AlwaysUi(
     val inlineSuggestionsUi = InlineSuggestionsUi(ctx)
 
     val hideKeyboardButton = ToolButton(ctx, R.drawable.ic_baseline_arrow_drop_down_24)
-    private val rightButtonAnimator =
+    private val rightMostButton =
         ViewAnimator(ctx).apply {
             add(hideKeyboardButton, lParams(matchParent, matchParent))
             buttonsUi.firstButton?.let { add(it, lParams(matchParent, matchParent)) }
         }
 
     private val backButton: ToolButton
-    private val moreButtonAnimator =
+    private val leftMostButton =
         ViewAnimator(ctx).apply {
-            add(moreButton, lParams(matchParent, matchParent))
+            add(leftMostIcon, lParams(matchParent, matchParent))
             backButton =
                 createBackButton().also {
                     add(it, lParams(matchParent, matchParent))
@@ -88,27 +83,19 @@ class AlwaysUi(
         }
 
     override val root: ConstraintLayout = constraintLayout {
-        val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
-
-        fun getButtonSize(config: ToolBar.Button?): Pair<Int, Int> {
-            val sizeList = config?.foreground?.size?.takeIf { it.size == 2 } ?: List(2) { defaultButtonSize }
-            val (width, height) = sizeList
-            return width to height
-        }
-
-        val (primaryWidth, primaryHeight) = getButtonSize(theme.toolBar.primaryButton)
-        val (rightWidth, rightHeight) = getButtonSize(theme.toolBar.buttons.firstOrNull())
+        val (leftWidth, leftHeight) = buttonsUi.getButtonSize(theme.toolBar.primaryButton)
+        val (rightWidth, rightHeight) = buttonsUi.getButtonSize(theme.toolBar.buttons.firstOrNull())
 
         add(
-            moreButtonAnimator,
-            lParams(dp(primaryWidth), dp(primaryHeight)) {
+            leftMostButton,
+            lParams(leftWidth, leftHeight) {
                 startOfParent()
                 centerVertically()
             },
         )
         add(
-            rightButtonAnimator,
-            lParams(dp(rightWidth), dp(rightHeight)) {
+            rightMostButton,
+            lParams(rightWidth, rightHeight) {
                 endOfParent()
                 centerVertically()
             },
@@ -116,32 +103,28 @@ class AlwaysUi(
         add(
             animator,
             lParams(matchConstraints, matchParent) {
-                after(moreButtonAnimator)
-                before(rightButtonAnimator)
+                after(leftMostButton)
+                before(rightMostButton)
                 endOfParent()
                 centerVertically()
             },
         )
     }.apply {
-        updateRightButton(State.Toolbar)
+        updateRightMostButton(State.Toolbar)
     }
 
     private fun createBackButton(): ToolButton {
         val firstConfig = theme.toolBar.buttons.firstOrNull()
-        val backConfig =
-            if (ToolButton.getContentType(firstConfig?.foreground?.style) == ToolButton.ContentType.TEXT) {
-                firstConfig?.copy(foreground = firstConfig.foreground?.copy(style = "ic@arrow-left"))
-            } else {
-                null
-            }
+        val backConfig = firstConfig
+            ?.takeIf { ToolButton.getContentType(it.foreground?.style) == ToolButton.ContentType.TEXT }
+            ?.copy(foreground = firstConfig.foreground?.copy(style = "ic@arrow-left"))
 
-        return toolButton(backConfig, R.drawable.ic_baseline_arrow_back_24).apply {
-            setOnClickListener { updateState(State.Toolbar) }
-        }
+        return toolButton(backConfig, R.drawable.ic_baseline_arrow_back_24)
+            .also { it.setOnClickListener { updateState(State.Toolbar) } }
     }
 
     fun updateButtonsStyle() {
-        moreButton.updateStyle()
+        leftMostIcon.updateStyle()
         backButton.updateStyle()
         buttonsUi.firstButton?.updateStyle()
         buttonsUi.updateStyle()
@@ -149,23 +132,32 @@ class AlwaysUi(
 
     fun updateState(state: State) {
         Timber.d("Switch always ui to $state")
-        when (state) {
-            State.Toolbar -> animator.displayedChild = 0
-            State.Clipboard -> animator.displayedChild = 1
-            State.InlineSuggestion -> animator.displayedChild = 2
-        }
+        animator.displayedChild = state.ordinal
         currentState = state
-        updateRightButton(state)
-        updateMoreButton(state)
+        updateRightMostButton(state)
+        updateLeftMostButton(state)
     }
 
-    private fun updateRightButton(state: State) {
-        val shouldShowFirstButton = buttonsUi.firstButton != null &&
-            !(theme.toolBar.buttons.isEmpty() && state == State.Toolbar)
-        rightButtonAnimator.displayedChild = if (shouldShowFirstButton) 1 else 0
+    private fun updateRightMostButton(state: State) {
+        val hasFirstButton = buttonsUi.firstButton != null
+        val showFirst = hasFirstButton && (theme.toolBar.buttons.isNotEmpty() || state != State.Toolbar)
+        rightMostButton.displayedChild = if (showFirst) 1 else 0
     }
 
-    private fun updateMoreButton(state: State) {
-        moreButtonAnimator.displayedChild = if (state == State.Toolbar) 0 else 1
+    private fun updateLeftMostButton(state: State) {
+        leftMostButton.displayedChild = if (state == State.Toolbar) 0 else 1
+
+        val buttonConfig =
+            if (state == State.Toolbar) {
+                theme.toolBar.primaryButton
+            } else {
+                theme.toolBar.buttons.firstOrNull()
+            }
+
+        val (buttonWidth, buttonHeight) = buttonsUi.getButtonSize(buttonConfig)
+        leftMostButton.layoutParams = leftMostButton.layoutParams.apply {
+            width = buttonWidth
+            height = buttonHeight
+        }
     }
 }

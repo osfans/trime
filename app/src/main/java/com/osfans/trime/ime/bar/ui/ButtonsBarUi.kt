@@ -31,6 +31,8 @@ class ButtonsBarUi(
 
     val firstButton: ToolButton?
 
+    private val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
+
     private fun toolButton(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
@@ -43,13 +45,12 @@ class ButtonsBarUi(
     }
 
     init {
-        val defaultButtonSize = theme.generalStyle.run { candidateViewHeight + commentHeight }
         val buttons = theme.toolBar.buttons
         firstButton = buttons.firstOrNull()?.let { toolButton(it) }
 
         buttons.drop(1).forEach { config ->
             val button = toolButton(config)
-            val size = getButtonSize(config, defaultButtonSize)
+            val size = getButtonSize(config)
             val lParams = FlexboxLayout.LayoutParams(size.first, size.second).apply {
                 marginEnd = ctx.dp(theme.toolBar.buttonSpacing)
             }
@@ -57,8 +58,8 @@ class ButtonsBarUi(
         }
     }
 
-    private fun getButtonSize(config: ToolBar.Button, defaultSize: Int): Pair<Int, Int> {
-        val sizeList = config.foreground?.size?.takeIf { it.size == 2 } ?: List(2) { defaultSize }
+    internal fun getButtonSize(config: ToolBar.Button?, customDefaultSize: Int = defaultButtonSize): Pair<Int, Int> {
+        val sizeList = config?.size?.takeIf { it.size == 2 } ?: List(2) { customDefaultSize }
         val (width, height) = sizeList
 
         val finalWidth = if (width >= 0) ctx.dp(width) else width

@@ -21,6 +21,7 @@ data class ToolBar(
         val background: Background? = null,
         val foreground: Foreground? = null,
         val action: String = "",
+        val size: List<Int> = emptyList(),
     ) : Parcelable {
 
         @Parcelize
@@ -40,7 +41,6 @@ data class ToolBar(
             val normal: String? = null,
             val highlight: String? = null,
             val fontSize: Float = 15f,
-            val size: List<Int> = emptyList(),
             val padding: Int = 5,
         ) : Parcelable
     }

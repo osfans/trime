@@ -998,6 +998,7 @@ tool_bar:
 
   # 左侧固定主按钮配置
   primary_button:
+    # size: [120, 24]      # 视图组件整体宽高 (支持: -1: 填充(matchParent), -2: 自适应(wrapContent))
     # 背景样式设置
     background:
       type: circle           # 高亮形状 (可选值: circle|rectangle)
@@ -1012,7 +1013,6 @@ tool_bar:
       normal: candidate_text_color  # 正常状态前景色 (本地图片不允许着色)
       # highlight:        # 高亮状态前景色
       padding: 10            # 前景内容与背景边界的内边距
-      # size: [120, 24]      # 视图控件宽高，非前景样式宽高
     # 按钮点击事件
     action: menu_keyboard
 
