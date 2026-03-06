@@ -298,13 +298,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     private fun handleReturnKey() {
         currentInputEditorInfo.run {
-            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL) {
+            if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL ||
+                imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)
+            ) {
                 sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
-                return
-            }
-            if (imeOptions.hasFlag(EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
-                val ic = currentInputConnection
-                ic?.commitText("\n", 1)
                 return
             }
             if (!actionLabel.isNullOrEmpty() && actionId != EditorInfo.IME_ACTION_UNSPECIFIED) {
@@ -312,7 +309,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 return
             }
             when (val action = imeOptions and EditorInfo.IME_MASK_ACTION) {
-                EditorInfo.IME_ACTION_UNSPECIFIED, EditorInfo.IME_ACTION_NONE -> currentInputConnection.commitText("\n", 1)
+                EditorInfo.IME_ACTION_UNSPECIFIED,
+                EditorInfo.IME_ACTION_NONE,
+                -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
                 else -> currentInputConnection.performEditorAction(action)
             }
         }
