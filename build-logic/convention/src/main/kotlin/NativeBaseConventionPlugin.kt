@@ -13,6 +13,14 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
         target.pluginManager.apply("com.android.application")
         target.extensions.configure(CommonExtension::class.java) {
             ndkVersion = target.ndkVersion
+            defaultConfig {
+                @Suppress("UnstableApiUsage")
+                externalNativeBuild {
+                    cmake {
+                        arguments("-DANDROID_STL=c++_static")
+                    }
+                }
+            }
             // Use prebuilt JNI library if the "app/prebuilt" exists
             //
             // Steps to generate the prebuilt directory:
