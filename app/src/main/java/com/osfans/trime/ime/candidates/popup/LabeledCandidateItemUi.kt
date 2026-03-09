@@ -75,7 +75,7 @@ class LabeledCandidateItemUi(
             GradientDrawable().apply {
                 if (highlighted) {
                     setColor(highlightCandidateBackColor)
-                    cornerRadius = ctx.dp(theme.window.cornerRadius)
+                    cornerRadius = ctx.dp(theme.generalStyle.candidateCornerRadius)
                 } else {
                     setColor(Color.TRANSPARENT)
                 }

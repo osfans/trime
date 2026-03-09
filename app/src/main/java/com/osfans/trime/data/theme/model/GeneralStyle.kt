@@ -19,6 +19,7 @@ data class GeneralStyle(
     val candidateSpacing: Float = 0f,
     val candidateTextSize: Float = 15f,
     val candidateViewHeight: Int = 28,
+    val candidateCornerRadius: Float = 0f,
     val commentFont: List<String> = emptyList(),
     val commentHeight: Int = 12,
     val commentOnTop: Boolean = false,
