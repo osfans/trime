@@ -19,6 +19,7 @@ class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
         buttons = getList("buttons")?.map { mapButton(it.yamlMap) } ?: emptyList(),
         buttonSpacing = getInt("button_spacing", 18),
         buttonFont = getStringList("button_font"),
+        backStyle = getString("back_style", "ic@arrow-left"),
     )
 
     private fun mapButton(node: YamlMap): ToolBar.Button = ToolBar.Button(

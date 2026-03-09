@@ -117,7 +117,7 @@ class AlwaysUi(
         val firstConfig = theme.toolBar.buttons.firstOrNull()
         val backConfig = firstConfig
             ?.takeIf { ToolButton.getContentType(it.foreground?.style) == ToolButton.ContentType.TEXT }
-            ?.copy(foreground = firstConfig.foreground?.copy(style = "ic@arrow-left"))
+            ?.copy(foreground = firstConfig.foreground?.copy(style = theme.toolBar.backStyle))
 
         return toolButton(backConfig, R.drawable.ic_baseline_arrow_back_24)
             .also { it.setOnClickListener { updateState(State.Toolbar) } }
