@@ -61,7 +61,7 @@ class KeyAction(
     private var text: String = ""
     private var label: String = ""
     private var shiftLabel = ""
-    private var preview: String = ""
+    private var preview: String? = null
     private var states: List<String> = listOf()
 
     private val hookShiftNum by AppPrefs.defaultInstance().keyboard.hookShiftNum
@@ -124,7 +124,7 @@ class KeyAction(
         text
     }
 
-    fun getPreview(keyboard: Keyboard): String = preview.ifEmpty { getLabel(keyboard) }
+    fun getPreview(keyboard: Keyboard): String = preview ?: getLabel(keyboard)
 
     init {
         val unbraced = raw.removeSurrounding("{", "}")
