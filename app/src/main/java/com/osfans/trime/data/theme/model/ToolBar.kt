@@ -14,6 +14,7 @@ data class ToolBar(
     val buttons: List<Button> = emptyList(),
     val buttonSpacing: Int = 18,
     val buttonFont: List<String> = emptyList(),
+    val backStyle: String = "ic@arrow-left",
 ) : Parcelable {
 
     @Parcelize

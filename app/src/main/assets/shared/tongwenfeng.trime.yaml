@@ -995,6 +995,7 @@ liquid_keyboard:
 tool_bar:
   button_spacing: 5 # 按钮间距
   button_font: iconfont.ttf # 按钮字体
+  back_style: "ic@arrow-left" # 左侧返回按钮样式
 
   # 左侧固定主按钮配置
   primary_button:
