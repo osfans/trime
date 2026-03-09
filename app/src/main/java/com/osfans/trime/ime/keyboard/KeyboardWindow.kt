@@ -14,6 +14,7 @@ import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
+import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
@@ -70,9 +71,10 @@ class KeyboardWindow :
         get() = KeyboardWindow
 
     private val presetKeyboardIds = theme.presetKeyboards.keys.toList()
-    private var currentKeyboardId = ""
+    private val appPrefs = AppPrefs.defaultInstance()
+    private var currentKeyboardId by appPrefs.internal.currentKeyboardId
     private var lastKeyboardId = ""
-    private var lastLockKeyboardId = ""
+    private var lastLockKeyboardId by appPrefs.internal.lastLockKeyboardId
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
@@ -81,7 +83,16 @@ class KeyboardWindow :
 
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
-        attachKeyboard(evalKeyboard(".default"))
+
+        // 使用保存的键盘ID或默认值，并经过evalKeyboard处理（包括横屏逻辑）
+        val targetKeyboardId =
+            evalKeyboard(
+                currentKeyboardId
+                    .takeIf { it.isNotEmpty() && presetKeyboardIds.contains(it) }
+                    ?: ".default",
+            )
+
+        attachKeyboard(targetKeyboardId)
         return keyboardView
     }
 
@@ -137,7 +148,10 @@ class KeyboardWindow :
 
         view.let {
             it.keyboardActionListener = keyboardActionListener
-            keyboardView.apply { add(it, lParams(matchParent, matchParent)) }
+            keyboardView.apply {
+                (it.parent as? android.view.ViewGroup)?.removeView(it)
+                add(it, lParams(matchParent, matchParent))
+            }
         }
     }
 
