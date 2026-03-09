@@ -215,12 +215,11 @@ class KeyboardView(
         val key = mKeys.getOrNull(keyIndex) ?: return
         val bounds = getKeyBounds(keyIndex)
         val previewText = key.getPreviewText(behavior)
-        val context = if (previewText.isNotEmpty()) {
-            if (previewText.isIconFont) previewText else String(Character.toChars(previewText.codePointAt(0)))
-        } else {
-            ""
-        }
 
+        // 当preview显式为空时，不显示气泡提示
+        if (previewText.isEmpty()) return
+
+        val context = if (previewText.isIconFont) previewText else String(Character.toChars(previewText.codePointAt(0)))
         popupActionListener.onPopupAction(
             PopupAction.PreviewAction(keyIndex, context, bounds),
         )
