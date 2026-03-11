@@ -114,8 +114,6 @@ class CandidateItemUi(
         /**
          * candidate long press feedback is handled by `showCandidateActionMenu`
          */
-        longPressFeedbackEnabled = false
-
         add(
             content,
             lParams(matchParent, matchParent) {

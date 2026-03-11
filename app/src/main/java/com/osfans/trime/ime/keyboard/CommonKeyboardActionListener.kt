@@ -48,6 +48,7 @@ import org.kodein.di.instance
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
 import timber.log.Timber
+import java.io.File
 
 class CommonKeyboardActionListener {
     private val di = InputDependencyManager.getInstance().di
@@ -116,10 +117,9 @@ class CommonKeyboardActionListener {
 
     val listener by lazy {
         object : KeyboardActionListener {
-            override fun onPress(keyEventCode: Int, isSound: Boolean) {
+            override fun onPress(keyEventCode: Int) {
                 InputFeedbackManager.run {
-                    keyPressVibrate(service.window.window!!.decorView)
-                    if (isSound) keyPressSound(keyEventCode)
+                    keyPressSound(keyEventCode)
                     keyPressSpeak(keyEventCode)
                 }
             }
