@@ -6,9 +6,9 @@
 package com.osfans.trime.ime.core
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.app.Dialog
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.RectF
 import android.inputmethodservice.InputMethodService
@@ -54,7 +54,6 @@ import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.util.any
 import com.osfans.trime.util.findSectionFrom
 import com.osfans.trime.util.forceShowSelf
-import com.osfans.trime.util.isNightMode
 import com.osfans.trime.util.monitorCursorAnchor
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.CoroutineScope
@@ -77,6 +76,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val prefs = AppPrefs.defaultInstance()
     private lateinit var decorView: View
     private lateinit var contentView: FrameLayout
+    private lateinit var lastKnownConfig: Configuration
     private var inputView: InputView? = null
     private var candidatesView: CandidatesView? = null
     private val navBarManager = NavigationBarManager()
@@ -185,6 +185,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         Timber.d("onCreate")
         decorView = window.window!!.decorView
         contentView = decorView.findViewById(android.R.id.content)
+        lastKnownConfig = Configuration(resources.configuration)
     }
 
     private fun handleRimeMessage(it: RimeMessage<*>) {
@@ -312,15 +313,26 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 EditorInfo.IME_ACTION_UNSPECIFIED,
                 EditorInfo.IME_ACTION_NONE,
                 -> sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER)
+
                 else -> currentInputConnection.performEditorAction(action)
             }
         }
     }
 
+    /**
+     * https://github.com/fcitx5-android/fcitx5-android/blob/fe3a618c8fd18842305d2f8ec2880fcc67ec1679/app/src/main/java/org/fcitx/fcitx5/android/input/FcitxInputMethodService.kt#L523-#L547
+     */
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
         postRimeJob { clearComposition() }
-        ColorManager.onSystemNightModeChange(newConfig.isNightMode())
+        val keyboardUiModeMask = ActivityInfo.CONFIG_KEYBOARD or
+            ActivityInfo.CONFIG_KEYBOARD_HIDDEN or
+            ActivityInfo.CONFIG_UI_MODE
+        val diff = lastKnownConfig.diff(newConfig)
+        Timber.d("onConfigurationChanged diff=$diff")
+        if (diff and keyboardUiModeMask != diff) {
+            super.onConfigurationChanged(newConfig)
+        }
+        lastKnownConfig.setTo(newConfig)
     }
 
     override fun onWindowShown() {
@@ -727,15 +739,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     ): Boolean = forwardKeyEvent(event) || super.onKeyUp(keyCode, event)
 
     // Added in API level 14, deprecated in 29
+    // it's needed because editors still use it even on API 36
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onViewClicked(focusChanged: Boolean) {
         super.onViewClicked(focusChanged)
-        if (Build.VERSION.SDK_INT < 34) {
-            inputDeviceManager.evaluateOnViewClicked(this)
-        }
+        inputDeviceManager.evaluateOnViewClicked(this)
     }
 
-    @TargetApi(34)
+    @RequiresApi(34)
     override fun onUpdateEditorToolType(toolType: Int) {
         super.onUpdateEditorToolType(toolType)
         inputDeviceManager.evaluateOnUpdateEditorToolType(toolType, this)
