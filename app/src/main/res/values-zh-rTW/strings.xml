@@ -86,7 +86,6 @@
     <string name="hook_ctrl_cv">攔截 Ctrl+C/V/X</string>
     <string name="hook_ctrl_lr">攔截 Ctrl+Left/Right</string>
     <string name="hook_ctrl_zy">攔截 Ctrl+Z/Y</string>
-    <string name="key_swipe_enabled">允許觸發按鍵的滑動手勢</string>
     <string name="key_swipe_velocity">觸發按鍵滑動手勢的速度（距離/速度滿足其一即可）</string>
     <string name="build_info">建構資訊</string>
     <string name="telegram">Telegram</string>

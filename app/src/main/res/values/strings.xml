@@ -86,7 +86,6 @@
     <string name="hook_ctrl_cv">Hook Ctrl+C/V/X</string>
     <string name="hook_ctrl_lr">Hook Ctrl+Left/Right</string>
     <string name="hook_ctrl_zy">Hook Ctrl+Z/Y</string>
-    <string name="key_swipe_enabled">Allow swipe gestures to trigger keys</string>
     <string name="key_swipe_velocity">The speed of triggering the button swipe gesture (the distance/velocity is sufficient)</string>
     <string name="build_info">Build Info</string>
     <string name="telegram">Telegram</string>

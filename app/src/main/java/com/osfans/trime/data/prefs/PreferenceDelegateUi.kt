@@ -167,6 +167,7 @@ abstract class PreferenceDelegateUi<T : Preference>(
         val step: Int = 1,
         @StringRes
         val defaultLabel: Int? = null,
+        val useMinAsDefault: Boolean = false,
         enableUiOn: (() -> Boolean)? = null,
     ) : PreferenceDelegateUi<DialogSeekBarPreference>(key, enableUiOn) {
         override fun createUi(context: Context) = DialogSeekBarPreference(context).apply {
@@ -181,6 +182,7 @@ abstract class PreferenceDelegateUi<T : Preference>(
             max = this@SeekBarInt.max
             unit = this@SeekBarInt.unit
             step = this@SeekBarInt.step
+            useMinAsDefault = this@SeekBarInt.useMinAsDefault
         }
     }
 }

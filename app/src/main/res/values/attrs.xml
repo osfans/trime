@@ -17,6 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <attr name="systemDefaultValueText" format="string" />
         <attr name="unit" format="string" />
         <attr name="useSimpleSummaryProvider" />
+        <attr name="useMinAsDefault" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="FolderPickerPreferenceAttrs">

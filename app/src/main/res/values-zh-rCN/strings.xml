@@ -82,7 +82,6 @@
     <string name="hook_ctrl_cv">拦截 Ctrl+C/V/X</string>
     <string name="hook_ctrl_lr">拦截 Ctrl+Left/Right</string>
     <string name="hook_ctrl_zy">拦截 Ctrl+Z/Y</string>
-    <string name="key_swipe_enabled">允许触发按键的滑动手势</string>
     <string name="key_swipe_velocity">触发按键滑动手势的速度（距离/速度满足其一即可）</string>
     <string name="build_info">构建信息</string>
     <string name="telegram">Telegram</string>

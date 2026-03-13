@@ -49,6 +49,7 @@ class DialogSeekBarPreference : DialogPreference {
     var max: Int
     var step: Int
     var unit: String
+    var useMinAsDefault: Boolean
 
     @Suppress("unused")
     constructor(context: Context) : this(context, null)
@@ -65,6 +66,7 @@ class DialogSeekBarPreference : DialogPreference {
                 systemDefaultText =
                     getString(R.styleable.DialogSeekBarPreferenceAttrs_systemDefaultValueText)
                 unit = getString(R.styleable.DialogSeekBarPreferenceAttrs_unit) ?: ""
+                useMinAsDefault = getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_useMinAsDefault, false)
                 if (getBoolean(R.styleable.DialogSeekBarPreferenceAttrs_useSimpleSummaryProvider, false)) {
                     summaryProvider = SimpleSummaryProvider
                 }
@@ -98,7 +100,7 @@ class DialogSeekBarPreference : DialogPreference {
      * If [systemDefaultText] is not null this method tries to match the given [value] with
      * [default] and returns [systemDefaultText] upon matching.
      */
-    private fun getTextForValue(value: Int): String = if (value == default && systemDefaultText != null) {
+    private fun getTextForValue(value: Int): String = if (systemDefaultText != null && value == (if (useMinAsDefault) min else default)) {
         systemDefaultText!!
     } else {
         "$value $unit"
