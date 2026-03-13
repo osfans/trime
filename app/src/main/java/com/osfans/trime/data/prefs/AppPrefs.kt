@@ -250,16 +250,19 @@ class AppPrefs(
             400,
             "dp",
             10,
+            R.string.disable,
+            useMinAsDefault = true,
         ) { swipeEnabled.getValue() }
 
         val swipeVelocity = int(
             R.string.key_swipe_velocity,
             SWIPE_VELOCITY,
-            1600,
+            0,
             0,
             10000,
             "dp/s",
             100,
+            R.string.disable,
         ) { swipeEnabled.getValue() }
 
         val longPressTimeout = int(

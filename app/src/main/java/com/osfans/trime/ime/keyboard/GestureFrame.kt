@@ -250,7 +250,9 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
             0f
         }
 
-        val isSwipe = distance >= swipeTravel || velocity >= swipeVelocity
+        val isSwipe =
+            (swipeTravel > 0 && distance >= swipeTravel) ||
+                (swipeVelocity > 0 && velocity >= swipeVelocity)
         shouldPerformSwipe = isSwipe
 
         if (!isSwipe) return KeyBehavior.CLICK
