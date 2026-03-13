@@ -75,6 +75,7 @@ class KeyboardWindow :
     private var currentKeyboardId by appPrefs.internal.currentKeyboardId
     private var lastKeyboardId = ""
     private var lastLockKeyboardId by appPrefs.internal.lastLockKeyboardId
+    private var lastComposing = false
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
@@ -276,7 +277,9 @@ class KeyboardWindow :
 
     override fun onCompositionUpdate(data: CompositionProto) {
         val status = rime.run { statusCached }
-        if (!status.isAsciiMode && data.length == 0 && data.preedit.isNullOrEmpty()) {
+        val isComposing = data.length == 0 && data.preedit.isNullOrEmpty()
+        if (!status.isAsciiMode && lastComposing != isComposing) {
+            lastComposing = isComposing
             currentKeyboardView?.invalidateAllKeys()
         }
     }
