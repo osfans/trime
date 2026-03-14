@@ -216,4 +216,5 @@
     <string name="preferred_voice_input">Preferred voice input</string>
     <string name="no_voice_input_installed">No voice input installed</string>
     <string name="inline_suggestions">Show inline autofill suggestions</string>
+    <string name="update_config">Update config</string>
 </resources>

@@ -5,9 +5,10 @@
 
 package com.osfans.trime.ime.switches
 
-import android.content.Context
+import android.app.Dialog
 import android.view.View
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.osfans.trime.R
 import com.osfans.trime.core.RimeApi
@@ -20,7 +21,9 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.window.BoardWindow
+import com.osfans.trime.ui.main.settings.ThemePickerDialog
 import com.osfans.trime.util.AppUtils
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
@@ -37,6 +40,31 @@ class SwitchOptionWindow :
     private val service: TrimeInputMethodService by di.instance()
     private val rime: RimeSession by di.instance()
     private val theme: Theme by di.instance()
+
+    private val staticEntries by lazy {
+        arrayOf(
+            SwitchOptionEntry.Static(
+                context.getString(R.string.theme),
+                R.drawable.ic_baseline_color_lens_24,
+                SwitchOptionEntry.Static.Type.ThemeList,
+            ),
+            SwitchOptionEntry.Static(
+                context.getString(R.string.schemata),
+                R.drawable.ic_round_view_list_24,
+                SwitchOptionEntry.Static.Type.SchemaList,
+            ),
+            SwitchOptionEntry.Static(
+                context.getString(R.string.update_config),
+                R.drawable.ic_baseline_sync_24,
+                SwitchOptionEntry.Static.Type.UpdateConfig,
+            ),
+            SwitchOptionEntry.Static(
+                context.getString(R.string.virtual_keyboard),
+                R.drawable.ic_baseline_keyboard_24,
+                SwitchOptionEntry.Static.Type.Keyboard,
+            ),
+        )
+    }
 
     var popupMenu: PopupMenu? = null
 
@@ -55,6 +83,14 @@ class SwitchOptionWindow :
         }
     }
 
+    private fun showDialog(builder: suspend (RimeApi) -> Dialog) {
+        rime.launchOnReady { api ->
+            service.lifecycleScope.launch {
+                service.showDialog(builder(api))
+            }
+        }
+    }
+
     private val adapter: SwitchOptionAdapter by lazy {
         object : SwitchOptionAdapter() {
             override val theme: Theme = this@SwitchOptionWindow.theme
@@ -64,6 +100,27 @@ class SwitchOptionWindow :
                 entry: SwitchOptionEntry,
             ) {
                 when (entry) {
+                    is SwitchOptionEntry.Static -> when (entry.type) {
+                        SwitchOptionEntry.Static.Type.SchemaList -> showDialog { r ->
+                            EnabledSchemaPickerDialog.build(r, service.lifecycleScope, service) {
+                                setNegativeButton(R.string.enable_schemata) { _, _ ->
+                                    AppUtils.launchMainToSchemaList(context)
+                                }
+                            }
+                        }
+                        SwitchOptionEntry.Static.Type.UpdateConfig -> rime.launchOnReady { r ->
+                            r.updateConfig()
+                            service.lifecycleScope.launch {
+                                Toast.makeText(service, R.string.done, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        SwitchOptionEntry.Static.Type.Keyboard -> AppUtils.launchMainToKeyboard(context)
+                        SwitchOptionEntry.Static.Type.ThemeList -> showDialog { r ->
+                            ThemePickerDialog.build(service.lifecycleScope, context) {
+                                r.commitComposition()
+                            }
+                        }
+                    }
                     is SwitchOptionEntry.Custom -> {
                         val options = entry.switch.options
                         if (options.isEmpty()) {
@@ -104,9 +161,12 @@ class SwitchOptionWindow :
     }
 
     private fun updateSchemaOptionEntries() {
+        val switches = rime.run { schemaCached }.switches
         adapter.submitList(
-            rime.run { schemaCached }.switches
-                .mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) },
+            listOf(
+                *staticEntries,
+                *switches.mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) }.toTypedArray(),
+            ),
         )
     }
 
@@ -140,7 +200,10 @@ class SwitchOptionWindow :
             val data = api.currentSchema().switches
             service.lifecycleScope.launch {
                 adapter.submitList(
-                    data.mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) },
+                    listOf(
+                        *staticEntries,
+                        *data.mapNotNull { SwitchOptionEntry.fromSwitch(rime, it) }.toTypedArray(),
+                    ),
                 )
             }
         }
