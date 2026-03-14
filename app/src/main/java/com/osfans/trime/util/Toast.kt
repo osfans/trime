@@ -39,7 +39,7 @@ suspend fun <T> Context.toast(
 ) {
     withContext(Dispatchers.Main.immediate) {
         result
-            .onSuccess { toast(R.string.setup__done, duration) }
+            .onSuccess { toast(R.string.done, duration) }
             .onFailure { toast(it, duration) }
     }
 }

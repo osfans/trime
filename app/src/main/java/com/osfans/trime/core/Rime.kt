@@ -90,6 +90,11 @@ class Rime :
         startRime(true)
     }
 
+    override suspend fun updateConfig() = withRimeContext {
+        exitRime()
+        startRime(false)
+    }
+
     override suspend fun syncUserData(): Boolean = withRimeContext {
         syncRimeUserData()
     }
