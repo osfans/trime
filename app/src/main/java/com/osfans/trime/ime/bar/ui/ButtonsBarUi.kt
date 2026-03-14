@@ -42,6 +42,12 @@ class ButtonsBarUi(
         ToolButton(ctx, icon)
     }.apply {
         setOnClickListener { onButtonClick?.invoke(buttonConfig?.action) }
+        buttonConfig?.longPressAction?.takeIf { it.isNotEmpty() }?.let { action ->
+            setOnLongClickListener {
+                onButtonClick?.invoke(action)
+                true
+            }
+        }
     }
 
     init {

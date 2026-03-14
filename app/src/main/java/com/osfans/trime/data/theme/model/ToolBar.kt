@@ -22,6 +22,7 @@ data class ToolBar(
         val background: Background? = null,
         val foreground: Foreground? = null,
         val action: String = "",
+        val longPressAction: String = "",
         val size: List<Int> = emptyList(),
     ) : Parcelable {
 

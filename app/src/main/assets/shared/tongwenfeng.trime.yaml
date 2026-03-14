@@ -1014,6 +1014,7 @@ tool_bar:
       padding: 10            # 前景内容与背景边界的内边距
     # 按钮点击事件
     action: menu_keyboard
+    long_press_action: Settings
 
   hide_button: &hide_button
     foreground:
