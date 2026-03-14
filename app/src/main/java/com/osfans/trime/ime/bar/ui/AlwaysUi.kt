@@ -45,7 +45,15 @@ class AlwaysUi(
         buttonConfig: ToolBar.Button?,
         @DrawableRes icon: Int = 0,
     ): ToolButton = (if (buttonConfig != null) ToolButton(ctx, buttonConfig) else ToolButton(ctx, icon))
-        .also { it.setOnClickListener { onButtonClick?.invoke(buttonConfig?.action) } }
+        .also {
+            it.setOnClickListener { onButtonClick?.invoke(buttonConfig?.action) }
+            buttonConfig?.longPressAction?.takeIf { it.isNotEmpty() }?.let { action ->
+                it.setOnLongClickListener {
+                    onButtonClick?.invoke(action)
+                    true
+                }
+            }
+        }
 
     private val leftMostIcon: ToolButton = toolButton(
         theme.toolBar.primaryButton,
