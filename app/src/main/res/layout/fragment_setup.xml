@@ -74,7 +74,7 @@
         android:id="@+id/done_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/setup__done"
+        android:text="@string/done"
         android:textColor="?android:attr/colorAccent"
         android:textSize="20sp"
         android:textStyle="bold"

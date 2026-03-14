@@ -68,7 +68,7 @@
     <string name="external_storage_permission_denied">External storage permission was denied, deployment or reading schemas and config may not be available</string>
     <string name="custom_sound_effect_name">Custom key Sound Effect</string>
     <string name="setup__next">Next</string>
-    <string name="setup__done">Done</string>
+    <string name="done">Done</string>
     <string name="setup__enable_ime_hint">Enable <b>Trime</b> in Language and input settings</string>
     <string name="setup__select_ime_hint">Select <b>Trime</b> as your default input method</string>
     <string name="setup__enable_ime">Enable Input Method</string>
