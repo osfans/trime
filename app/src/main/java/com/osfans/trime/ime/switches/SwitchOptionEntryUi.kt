@@ -118,7 +118,9 @@ class SwitchOptionEntryUi(
         if (entry.icon != 0) {
             icon.visibility = View.VISIBLE
             textIcon.visibility = View.GONE
-            icon.imageDrawable = ctx.drawable(entry.icon)
+            icon.imageDrawable = ctx.drawable(entry.icon)!!.apply {
+                setTint(ColorManager.getColor("key_text_color"))
+            }
         } else {
             icon.visibility = View.GONE
             textIcon.visibility = View.VISIBLE

@@ -155,11 +155,10 @@ object RimeDaemon {
         }
         realRime.finalize()
         realRime.startup()
-        // Block until Rime is ready to prevent crashes when accessing API
-        runBlocking {
-            realRime.lifecycle.whenReady {}
-            delay(1000) // Add delay to allow notification to be visible
-            notificationManager.cancel(id)
+        TrimeApplication.getInstance().coroutineScope.launch {
+            realRime.lifecycle.whenReady {
+                notificationManager.cancel(id)
+            }
         }
     }
 
