@@ -62,6 +62,8 @@ object AppUtils {
 
     fun launchMainToSchemaList(context: Context) = launchMainToDest(context, NavigationRoute.SchemaList)
 
+    fun launchMainToKeyboard(context: Context) = launchMainToDest(context, NavigationRoute.VirtualKeyboard)
+
     fun launchLogActivity(context: Context) {
         context.startActivity<LogActivity>()
     }

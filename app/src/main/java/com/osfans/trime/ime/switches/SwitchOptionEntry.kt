@@ -14,6 +14,15 @@ sealed class SwitchOptionEntry(
     @param:DrawableRes
     val icon: Int,
 ) {
+    class Static(label: String, icon: Int, val type: Type) : SwitchOptionEntry(label, icon) {
+        enum class Type {
+            SchemaList,
+            UpdateConfig,
+            Keyboard,
+            ThemeList,
+        }
+    }
+
     class Custom(
         val switch: RimeSchema.Switch,
         label: String,
