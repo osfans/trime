@@ -75,6 +75,7 @@ class KeyboardWindow :
     private var currentKeyboardId by appPrefs.internal.currentKeyboardId
     private var lastKeyboardId = ""
     private var lastLockKeyboardId by appPrefs.internal.lastLockKeyboardId
+    private var lastComposing = false
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second
@@ -100,7 +101,6 @@ class KeyboardWindow :
         currentKeyboardView?.also {
             it.onDetach()
             keyboardView.removeView(it)
-            it.keyboardActionListener = null
         }
         currentKeyboard?.lastAsciiMode = rime.run { statusCached }.isAsciiMode
     }
@@ -120,7 +120,7 @@ class KeyboardWindow :
 
         val config = selectKeyboardConfig(target)
         val keyboard = currentKeyboard ?: Keyboard(theme, config)
-        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service)
+        val view = currentKeyboardView ?: KeyboardView(context, theme, keyboard, popup, service, keyboardActionListener)
 
         if (currentKeyboard == null) {
             cachedKeyboards[target] = keyboard to view
@@ -147,7 +147,6 @@ class KeyboardWindow :
         }
 
         view.let {
-            it.keyboardActionListener = keyboardActionListener
             keyboardView.apply {
                 (it.parent as? android.view.ViewGroup)?.removeView(it)
                 add(it, lParams(matchParent, matchParent))
@@ -278,7 +277,9 @@ class KeyboardWindow :
 
     override fun onCompositionUpdate(data: CompositionProto) {
         val status = rime.run { statusCached }
-        if (!status.isAsciiMode && data.length == 0 && data.preedit.isNullOrEmpty()) {
+        val isComposing = data.length == 0 && data.preedit.isNullOrEmpty()
+        if (!status.isAsciiMode && lastComposing != isComposing) {
+            lastComposing = isComposing
             currentKeyboardView?.invalidateAllKeys()
         }
     }
@@ -322,13 +323,9 @@ class KeyboardWindow :
     }
 
     override fun onAttached() {
-        currentKeyboardView?.keyboardActionListener = keyboardActionListener
     }
 
     override fun onDetached() {
-        currentKeyboardView?.let {
-            it.onDetach()
-            it.keyboardActionListener = null
-        }
+        currentKeyboardView?.onDetach()
     }
 }

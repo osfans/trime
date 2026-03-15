@@ -160,12 +160,14 @@ class ToolButton : GestureFrame {
 
     private fun initFromConfig(config: ToolBar.Button) {
         this.config = config
-        val toggle = KeyActionManager.getAction(config.action).toggle
+        val keyAction = KeyActionManager.getAction(config.action)
+        val toggle = keyAction.toggle
 
         if (toggle.isNotEmpty() && config.foreground?.optionStyles?.size == 2) {
             this.toggleKey = toggle
         }
 
+        isRepeatable = keyAction.isRepeatable
         setupFromConfig(config)
     }
 

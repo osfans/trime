@@ -17,11 +17,11 @@ height:
   4: &jpgd4 48 #主键盘
   5: &jpgd5 39.5 #符号键盘
   6: &hgap 4 #键盘横缝大小
-  7: &sgap 8 #键盘竖缝大小
+  7: &sgap 14 #键盘竖缝大小
 
 #键盘高度
 round_corner:
-  1: &round1 12 #按键圆角半径
+  1: &round1 6 #按键圆角半径
   2: &round2 0 #候选窗口圆角
   3: &round3 12 #回车键圆角
   
@@ -55,14 +55,12 @@ style:
   popup_bottom_margin: 68 #按键提示底边距
   popup_key_height: 48 #按键提示内键高度
   popup_text_size: 23 #按键提示字号
-  proximity_correction: true #按键纠错
   reset_ascii_mode: false #显示键盘时重置为中文状态
   round_corner: *round1 #按键圆角半径
   shadow_radius: 0.0 #按键阴影半径
   symbol_font: symbol.ttf #符号字体
   symbol_text_size: 10 #符号字号
   text_font: latin.ttf #编码字体
-  vertical_correction: -5
   vertical_gap: *sgap #键盘行距
   enter_label_mode: 0  #是否使用App提供的ActionLabel内容作为Enter键的文本（由于多数App没有适配ActionLable，实际影响不大）。0不使用，1只使用actionlabel，2优先使用，3当其他方式没有获得label时才读取actionlabel
   enter_labels:  # 定义Enter键的文本
@@ -1016,6 +1014,7 @@ tool_bar:
       padding: 10            # 前景内容与背景边界的内边距
     # 按钮点击事件
     action: menu_keyboard
+    long_press_action: Settings
 
   hide_button: &hide_button
     foreground:

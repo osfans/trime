@@ -13,7 +13,7 @@ interface KeyboardActionListener {
      * @param keyEventCode the unicode of the key being pressed. If the touch is not on a valid key,
      * the value will be zero.
      */
-    fun onPress(keyEventCode: Int, isSound: Boolean = true)
+    fun onPress(keyEventCode: Int)
 
     /**
      * Called when the user releases a key. This is sent after the [.onKey] is called. For

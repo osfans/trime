@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015 - 2025 Rime community
+ * SPDX-FileCopyrightText: 2015 - 2026 Rime community
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -7,8 +7,8 @@ package com.osfans.trime.ime.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.SystemClock
 import android.view.MotionEvent
-import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -18,198 +18,303 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.floor
+import kotlin.math.max
 
 open class GestureFrame(context: Context) : FrameLayout(context) {
-    enum class SwipeDirection {
-        Up,
-        Down,
-        Left,
-        Right,
-    }
+
+    private var startX = 0f
+    private var startY = 0f
+    private var lastX = 0f
+    private var startTime = 0L
+
+    private var isLongPressed = false
+    private var slideActivated = false
+    private var shouldPerformSwipe = false
+
+    private var longPressJob: Job? = null
+    private var repeatJob: Job? = null
+    private var doubleTapJob: Job? = null
+
+    private var lastTapTime = 0L
+    private var lastSwipeBehavior: KeyBehavior = KeyBehavior.CLICK
 
     private val lifecycleScope by lazy {
         findViewTreeLifecycleOwner()?.lifecycleScope!!
     }
 
-    private var touchId = 0
+    var onClick: (() -> Unit)? = null
+    var onDoubleClick: (() -> Unit)? = null
+    var onLazyDoubleClick: (() -> Unit)? = null
+    var onLongClick: (() -> Unit)? = null
 
-    @Volatile
-    private var longPressTriggered = false
-    private var longPressJob: Job? = null
+    var onSwipeLeft: (() -> Unit)? = null
+    var onSwipeRight: (() -> Unit)? = null
+    var onSwipeUp: (() -> Unit)? = null
+    var onSwipeDown: (() -> Unit)? = null
 
-    @Volatile
-    var longPressFeedbackEnabled = true
+    var onSlide: ((delta: Int, x: Float, y: Float) -> Unit)? = null
 
-    @Volatile
-    private var swipeTriggered = false
-    private var shouldPerformSwipe = false
-    private var swipeStartX = -1f
-    private var swipeStartY = -1f
-    private var swipeLastX = -1f
+    var onPress: (() -> Unit)? = null
+    var onRelease: ((behavior: KeyBehavior, longPress: Boolean) -> Unit)? = null
+    var onCancel: (() -> Unit)? = null
+    var onMove: ((x: Float, y: Float, longPress: Boolean) -> Unit)? = null
+    var onSwipe: ((behavior: KeyBehavior) -> Unit)? = null
 
-    @Volatile
-    private var slideActivated = false
+    var isRepeatable = false
+    var isSlideCursor = false
+    var isSlideDelete = false
 
-    private var lastTapTime = 0L
-    private var maybeDoubleTap = false
-
-    var onDoubleTapListener: (() -> Unit)? = null
-    var onSwipeListener: ((SwipeDirection) -> Unit)? = null
-    var onSlideListener: ((Int) -> Unit)? = null
-    var onReleaseListener: (() -> Unit)? = null
+    var hasLongPress = false
+    var hasDouble = false
+    var hasLazyDouble = false
+    var hasPopup = false
 
     init {
-        // disable system sound effect and haptic feedback
-        isSoundEffectsEnabled = false
-        isHapticFeedbackEnabled = false
-        // avoid gaining focus unexpectedly
-        isFocusable = false
-        isFocusableInTouchMode = false
-    }
-
-    fun getSwipeDirection(dx: Float, dy: Float): SwipeDirection = if (abs(dx) > abs(dy)) {
-        if (dx > 0) SwipeDirection.Right else SwipeDirection.Left
-    } else {
-        if (dy > 0) SwipeDirection.Down else SwipeDirection.Up
-    }
-
-    fun getNStep(start: Float, end: Float, step: Float): Int = (if (start < end) 1 else -1) * floor(abs(end - start) / step).toInt()
-
-    private fun resetState() {
-        onReleaseListener?.invoke()
-        swipeStartX = -1f
-        swipeStartY = -1f
-        swipeLastX = -1f
-        longPressTriggered = false
-        longPressJob?.cancel()
-        longPressJob = null
-        shouldPerformSwipe = false
-        swipeTriggered = false
-        slideActivated = false
+        setWillNotDraw(false)
+        isClickable = true
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
-        when (event.actionMasked) {
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                if (!isEnabled) return false
-                touchId = (touchId) and 0xFFFF
-                val currentTouchId = touchId
-                drawableHotspotChanged(x, y)
-                isPressed = true
-                InputFeedbackManager.keyPressVibrate(this)
-                longPressJob?.cancel()
-                longPressJob = lifecycleScope.launch {
-                    delay(longPressTimeout.toLong())
-                    if (touchId != currentTouchId) return@launch
-                    if (!(swipeTriggered || longPressTriggered || shouldPerformSwipe)) {
-                        longPressTriggered = performLongClick()
-                        if (longPressFeedbackEnabled && longPressTriggered) {
-                            InputFeedbackManager.keyPressVibrate(this@GestureFrame, true)
-                        }
-                    }
-                }
-                swipeStartX = x
-                swipeStartY = y
-                swipeLastX = x
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                if (!isEnabled) return false
-                drawableHotspotChanged(x, y)
-                val dx = x - swipeStartX
-                val dy = y - swipeStartY
+                startX = event.x
+                startY = event.y
+                lastX = startX
+                startTime = SystemClock.elapsedRealtime()
 
-                if (!longPressTriggered) {
-                    if (!shouldPerformSwipe && (abs(dx) > SWIPE_THRESHOLD || abs(dy) > SWIPE_THRESHOLD)) {
-                        shouldPerformSwipe = true
-                        swipeTriggered = true
-                    }
+                isLongPressed = false
+                slideActivated = false
+                shouldPerformSwipe = false
+                lastSwipeBehavior = KeyBehavior.CLICK
+
+                if (vibrateOnKeyPress) InputFeedbackManager.keyPressVibrate(this)
+                onPress?.invoke()
+
+                if (hasLongPress || isRepeatable || hasPopup) {
+                    startLongPressJob()
                 }
-                val onSlide = onSlideListener
-                if (onSlide != null) {
-                    if (!slideActivated) {
-                        if (abs(dx) >= SWIPE_THRESHOLD) {
-                            val startX = swipeStartX
-                            slideActivated = true
-                            swipeLastX = startX + (if (dx > 0) SWIPE_THRESHOLD else -SWIPE_THRESHOLD)
-                        }
-                    }
-                    if (slideActivated) {
-                        val startX = swipeStartX
-                        val lastX = swipeLastX
-                        val totalPast = getNStep(startX, lastX, SLIDE_STEP_SIZE)
-                        val totalNow = getNStep(startX, x, SLIDE_STEP_SIZE)
-                        val delta = totalNow - totalPast
-                        if (delta != 0) {
-                            onSlide(delta)
-                        }
-                        swipeLastX = x
-                    }
-                } else if (longPressTriggered) {
-                    val lastX = swipeLastX
-                    val delta = getNStep(lastX, x, SWIPE_MOVE_SIZE)
-                    if (delta != 0) {
-                        swipeLastX += delta.toFloat() * SWIPE_MOVE_SIZE
-                    }
-                }
+
                 return true
             }
+
+            MotionEvent.ACTION_MOVE -> {
+                val x = event.x
+                val y = event.y
+                val dx = x - startX
+                val dy = y - startY
+
+                if (!isLongPressed) {
+                    val behavior = detectSwipe(dx, dy)
+                    if (behavior != lastSwipeBehavior) {
+                        lastSwipeBehavior = behavior
+                        if (behavior != KeyBehavior.CLICK) {
+                            onSwipe?.invoke(behavior)
+                        }
+                    }
+                }
+
+                onMove?.invoke(x, y, isLongPressed)
+
+                if ((isSlideCursor || isSlideDelete) && onSlide != null && !isLongPressed) {
+                    if (!slideActivated) {
+                        if (abs(dx) >= swipeTravel) {
+                            slideActivated = true
+                            lastX = startX
+                        }
+                    }
+
+                    if (slideActivated) {
+                        val step = getNStep(lastX, x, slideStepSize.toFloat())
+                        if (step != 0) {
+                            onSlide?.invoke(step, x, y)
+                            lastX = x
+                        }
+                    }
+                }
+
+                return true
+            }
+
             MotionEvent.ACTION_UP -> {
-                isPressed = false
-                val dx = x - swipeStartX
-                val dy = y - swipeStartY
+                val x = event.x
+                val y = event.y
+
+                if (vibrateOnKeyRelease) InputFeedbackManager.keyPressVibrate(this)
+                cancelJobs()
 
                 if (slideActivated) {
-                    val onSlide = onSlideListener
-                    if (onSlide != null) {
-                        onSlide(0)
-                        resetState()
-                        return true
-                    }
+                    onSlide?.invoke(0, x, y)
+                    onCancel?.invoke()
+                    return true
+                }
+
+                if (isLongPressed) {
+                    dispatchBehavior(KeyBehavior.LONG_CLICK, true)
+                    return true
                 }
 
                 if (shouldPerformSwipe) {
-                    if (!longPressTriggered) {
-                        onSwipeListener?.invoke(getSwipeDirection(dx, dy))
+                    dispatchBehavior(lastSwipeBehavior, false)
+                    return true
+                }
+
+                if (!hasDouble && !hasLazyDouble) {
+                    dispatchBehavior(KeyBehavior.CLICK, false)
+                    return true
+                }
+
+                val now = SystemClock.elapsedRealtime()
+                val delta = now - lastTapTime
+                if (delta <= doubleTapTimeout) {
+                    lastTapTime = 0
+                    doubleTapJob?.cancel()
+                    if (hasDouble) {
+                        dispatchBehavior(KeyBehavior.DOUBLE_CLICK, false)
+                    } else {
+                        dispatchBehavior(KeyBehavior.LAZY_DOUBLE_CLICK, false)
                     }
                 } else {
-                    if (!longPressTriggered) {
-                        val onDoubleTap = onDoubleTapListener
-                        if (onDoubleTap != null) {
-                            val now = System.currentTimeMillis()
-                            if (maybeDoubleTap && now - lastTapTime <= longPressTimeout) {
-                                maybeDoubleTap = false
-                                onDoubleTap()
-                            } else {
-                                maybeDoubleTap = true
-                                performClick()
+                    lastTapTime = now
+                    if (hasLazyDouble && !hasDouble) {
+                        doubleTapJob = lifecycleScope.launch {
+                            delay(doubleTapTimeout.toLong())
+                            if (lastTapTime == now) {
+                                lastTapTime = 0
+                                dispatchBehavior(KeyBehavior.CLICK, false)
                             }
-                            lastTapTime = now
-                        } else {
-                            performClick()
                         }
+                    } else {
+                        dispatchBehavior(KeyBehavior.CLICK, false)
                     }
                 }
-                resetState()
                 return true
             }
+
             MotionEvent.ACTION_CANCEL -> {
-                isPressed = false
-                resetState()
+                cancelJobs()
+
+                isLongPressed = false
+                slideActivated = false
+                shouldPerformSwipe = false
+
+                onCancel?.invoke()
                 return true
             }
         }
+
         return true
     }
 
-    companion object {
-        private const val SWIPE_THRESHOLD = 24f
-        private const val SWIPE_MOVE_SIZE = 24f
-        private const val SLIDE_STEP_SIZE = 12f
+    private fun startLongPressJob() {
+        longPressJob = lifecycleScope.launch {
+            delay(longPressTimeout.toLong())
 
+            if (shouldPerformSwipe || slideActivated) return@launch
+            isLongPressed = true
+
+            if (vibrateOnKeyPress) InputFeedbackManager.keyPressVibrate(this@GestureFrame, true)
+
+            if (isRepeatable) {
+                startRepeatJob()
+            } else {
+                performLongClick()
+            }
+        }
+    }
+
+    private fun startRepeatJob() {
+        repeatJob = lifecycleScope.launch {
+            try {
+                while (true) {
+                    if (vibrateOnKeyRepeat) InputFeedbackManager.keyPressVibrate(this@GestureFrame)
+                    dispatchBehavior(KeyBehavior.CLICK, true)
+                    delay(repeatInterval.toLong())
+                }
+            } finally {
+                onCancel?.invoke()
+            }
+        }
+    }
+
+    private fun detectSwipe(dx: Float, dy: Float): KeyBehavior {
+        val absDx = abs(dx)
+        val absDy = abs(dy)
+
+        val distance = max(absDx, absDy)
+        val elapsed = SystemClock.elapsedRealtime() - startTime
+
+        val velocity = if (elapsed > 0) {
+            (distance / elapsed) * 1000f
+        } else {
+            0f
+        }
+
+        val isSwipe =
+            (swipeTravel > 0 && distance >= swipeTravel) ||
+                (swipeVelocity > 0 && velocity >= swipeVelocity)
+        shouldPerformSwipe = isSwipe
+
+        if (!isSwipe) return KeyBehavior.CLICK
+        return if (absDx > absDy) {
+            if (dx > 0) KeyBehavior.SWIPE_RIGHT else KeyBehavior.SWIPE_LEFT
+        } else {
+            if (dy > 0) KeyBehavior.SWIPE_DOWN else KeyBehavior.SWIPE_UP
+        }
+    }
+
+    private fun dispatchBehavior(
+        behavior: KeyBehavior,
+        longPress: Boolean,
+    ) {
+        onRelease?.invoke(behavior, longPress)
+        when (behavior) {
+            KeyBehavior.CLICK -> performClick()
+            KeyBehavior.DOUBLE_CLICK -> onDoubleClick?.invoke()
+            KeyBehavior.LAZY_DOUBLE_CLICK -> onLazyDoubleClick?.invoke()
+            KeyBehavior.SWIPE_LEFT -> onSwipeLeft?.invoke()
+            KeyBehavior.SWIPE_RIGHT -> onSwipeRight?.invoke()
+            KeyBehavior.SWIPE_UP -> onSwipeUp?.invoke()
+            KeyBehavior.SWIPE_DOWN -> onSwipeDown?.invoke()
+            else -> {}
+        }
+    }
+
+    private fun cancelJobs() {
+        longPressJob?.cancel()
+        repeatJob?.cancel()
+        doubleTapJob?.cancel()
+    }
+
+    fun getNStep(start: Float, end: Float, step: Float): Int = (if (start < end) 1 else -1) *
+        floor(abs(end - start) / step).toInt()
+
+    override fun setOnLongClickListener(l: OnLongClickListener?) {
+        hasLongPress = l != null
+        super.setOnLongClickListener(l)
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        onClick?.invoke()
+        return true
+    }
+
+    override fun performLongClick(): Boolean {
+        val handled = super.performLongClick()
+        onLongClick?.invoke()
+        return handled || onLongClick != null
+    }
+
+    companion object {
+        private val swipeTravel by AppPrefs.defaultInstance().keyboard.swipeTravel
+        private val swipeVelocity by AppPrefs.defaultInstance().keyboard.swipeVelocity
         private val longPressTimeout by AppPrefs.defaultInstance().keyboard.longPressTimeout
+        private val repeatInterval by AppPrefs.defaultInstance().keyboard.repeatInterval
+        private val doubleTapTimeout by AppPrefs.defaultInstance().keyboard.doubleTapTimeout
+        private val slideStepSize by AppPrefs.defaultInstance().keyboard.slideStepSize
+        private val vibrateOnKeyPress by AppPrefs.defaultInstance().keyboard.vibrateOnKeyPress
+        private val vibrateOnKeyRelease by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRelease
+        private val vibrateOnKeyRepeat by AppPrefs.defaultInstance().keyboard.vibrateOnKeyRepeat
     }
 }

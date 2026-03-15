@@ -30,6 +30,7 @@ class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
             ToolBarButtonForegroundMapper(fg).map()
         },
         action = node.get<YamlScalar>("action")?.content ?: "",
+        longPressAction = node.get<YamlScalar>("long_press_action")?.content ?: "",
         size = node.get<YamlList>("size")?.items?.mapNotNull { it.yamlScalar.content.toIntOrNull() } ?: emptyList(),
     )
 }
