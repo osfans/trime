@@ -16,6 +16,7 @@ style:
   candidate_spacing: 0.5 #候選間距
   candidate_text_size: 22 #候選字號
   candidate_view_height: 28 #候選區高度
+  #candidate_corner_radius: 4 #候選項圓角半徑
   comment_font: comment.ttf #編碼提示字型
   comment_height: 12 #編碼提示區高度
   comment_on_top: true #編碼提示在上方或右側
@@ -954,8 +955,9 @@ preset_keys:
   WebSearch: {label: 搜索網頁, command: web_search, option: "%4$s"} #搜索，其他view、dial、edit、search等intent，參考安卓的intent文檔：https://developer.android.com/reference/android/content/Intent.html
   Search: {label: 搜索, command: search, option: "%1$s"} #搜索短信、字典等
   Share: {label: 分享, command: send, option: "%s"} #分享指定文本: %s或者%1$s爲當前字符
-  Deploy: {label: 部署, command: broadcast, option: "com.osfans.trime.action.DEPLOY"}
-  Sync: {label: 同步, command: broadcast, option: "com.osfans.trime.action.SYNC_USER_DATA"}
+  Deploy: {label: 部署, send: function, command: apply, option: "DEPLOY"}
+  Sync: {label: 同步, send: function, command: apply, option: "SYNC_USER_DATA"}
+  RestartRime: {label: 重啟, send: function, command: apply, option: "RESTART_RIME"}
   RepeatCommit: { label: 重复,  command: commit, option: "%1$s" } #重复输入刚上屏的内容
 
 preset_keyboards:

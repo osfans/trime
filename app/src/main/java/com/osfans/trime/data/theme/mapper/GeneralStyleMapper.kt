@@ -20,6 +20,7 @@ class GeneralStyleMapper(
         candidateSpacing = getFloat("candidate_spacing"),
         candidateTextSize = getFloat("candidate_text_size"),
         candidateViewHeight = getInt("candidate_view_height"),
+        candidateCornerRadius = getFloat("candidate_corner_radius"),
         commentFont = getStringList("comment_font"),
         commentHeight = getInt("comment_height"),
         commentOnTop = getBoolean("comment_on_top"),

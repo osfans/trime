@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.9] - 2026-02-28
+
+### 🚀 Features
+
+- Enable more button to close clipboard and inline suggestion states
+- Implement horizontal candidate layout styles with flexible width filling
+- Commit composition on keyboard switch with `ascii_mode` change
+- Add Iconics font support for key labels and symbols
+- Add Iconics font support for popup UI components
+- Add preset key support for candidate selection
+- Coordinating popup candidate window with fixed spacing
+
+### 🐛 Bug Fixes
+
+- Ensure UI update after clipboard suggestion timeout
+- Avoid keys entering composing state in `showAsciiSwitchTips`
+- Ensure ASCII tips proper dismissal in preedit mode
+- Clipboard and inline suggestions UI not centered with toolbar buttons
+- Render Iconics font in key preview
+- Prevent interference between hint and symbol rendering
+- Reload theme after successful deployment
+- Remove incorrect sp unit conversion for key height calculation
+- *(provider)* Crash on creating RimeDataProvider onCreate fails
+- Composing state didn't get update in time again
+- Fix prediction and composite issue
+- Prevent unexpected continuous commits from `auto_select`
+- Further prevent unexpected commits from `auto_select`
+- Potential crash on rime context conversion
+- Remove extra space under the input window (#1930)
+- Fix permission string typo (#1931)
+- Properly handle commit when inline preedit matches committed text
+- Hilited_candidate_back_color not working in floating candidate window
+- Remove unnecessary padding from preedit UI root as it already has its own internal padding
+- Exclude TABS type item from being displayed in TABS page of liquid
+
+### 🚜 Refactor
+
+- *(toolbar)* Streamline button state management and layout coordination
+- Implement intelligent sound effect caching and reuse
+- Remove ineffective dp unit conversion code
+- *(candidates)* Some normalization for recent changes
+- Replace kotlin-inject with Kodein for dependency injection
+- Normalize the naming of the subview controllers of InputView
+- Rename ComposingTextMode back to InlinePreeditMode
+- Improve inline preedit update
+- Remove unreachable composition clearing code
+- Simplify event transition of UnrollButtonStateMachine
+- *(worker)* Create separate rime session when sync on background
+- Simplify rime proto conversion
+- *(toolbar)* Remove redundant `bg_` and `fg_` prefixes
+- *(toolbar)* Move button `size` config from `Foreground` to `Button` level
+- Improve default values for key volume and swipe gestures
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump version to 3.3.9
+- Upgrade librime to 1.16.0
+- Upgrade librime to 1.16.1
+- Add 3.3.9 changelog
+
 ## [3.3.8] - 2026-01-01
 
 ### 🚀 Features

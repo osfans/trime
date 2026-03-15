@@ -28,8 +28,8 @@ android {
         applicationId = "com.osfans.trime"
         minSdk = 21
         targetSdk = 35
-        versionCode = 20260301
-        versionName = "3.3.9"
+        versionCode = 20260601
+        versionName = "3.3.10"
 
         multiDexEnabled = true
         buildConfigField("String", "BUILDER", "\"${project.builder}\"")

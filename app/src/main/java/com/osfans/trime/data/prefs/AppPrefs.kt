@@ -82,9 +82,13 @@ class AppPrefs(
     ) : PreferenceDelegateOwner(shared) {
         companion object {
             const val PID = "general__pid"
+            const val CURRENT_KEYBOARD_ID = "internal__current_keyboard_id"
+            const val LAST_LOCK_KEYBOARD_ID = "internal__last_lock_keyboard_id"
         }
 
         val pid = int(PID, 0)
+        val currentKeyboardId = string(CURRENT_KEYBOARD_ID, "")
+        val lastLockKeyboardId = string(LAST_LOCK_KEYBOARD_ID, "")
     }
 
     class General(
@@ -184,7 +188,7 @@ class AppPrefs(
         val soundVolume = int(
             R.string.sound_volume,
             KEY_SOUND_VOLUME,
-            0,
+            10,
             0,
             100,
             "%",
@@ -241,7 +245,7 @@ class AppPrefs(
         val swipeTravel = int(
             R.string.key_swipe_travel,
             SWIPE_TRAVEL,
-            30,
+            80,
             0,
             400,
             "dp",
@@ -251,7 +255,7 @@ class AppPrefs(
         val swipeVelocity = int(
             R.string.key_swipe_velocity,
             SWIPE_VELOCITY,
-            800,
+            1600,
             0,
             10000,
             "dp/s",
@@ -297,7 +301,7 @@ class AppPrefs(
             "dp",
         )
 
-        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, HORIZONTAL_CANDIDATE_MODE, CompactCandidateMode.AUTO_FILL)
+        val horizontalCandidateMode = enum(R.string.horizontal_candidate_style, HORIZONTAL_CANDIDATE_MODE, CompactCandidateMode.NEVER_FILL)
 
         val maxSpanCount = int(
             R.string.max_span_count,

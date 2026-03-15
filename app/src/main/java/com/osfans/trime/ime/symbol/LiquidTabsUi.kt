@@ -6,7 +6,6 @@ package com.osfans.trime.ime.symbol
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.PaintDrawable
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter4.BaseQuickAdapter
@@ -14,7 +13,7 @@ import com.osfans.trime.data.theme.ColorManager
 import com.osfans.trime.data.theme.FontManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.keyboard.GestureFrame
-import com.osfans.trime.util.rippleDrawable
+import com.osfans.trime.util.roundedRippleDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.add
@@ -34,12 +33,16 @@ class LiquidTabsUi(
 ) : Ui {
     inner class TabUi : Ui {
         override val ctx = this@LiquidTabsUi.ctx
+        private val textColor = ColorManager.getColor("candidate_text_color")
+        private val hlTextColor = ColorManager.getColor("hilited_candidate_text_color")
+        private val hlBackColor = ColorManager.getColor("hilited_candidate_back_color")
+        private val cornerRadius = ctx.dp(theme.generalStyle.candidateCornerRadius)
 
         val text =
             textView {
                 textSize = theme.generalStyle.candidateTextSize
                 typeface = FontManager.getTypeface("candidate_font")
-                setTextColor(ColorManager.getColor("candidate_text_color"))
+                setTextColor(textColor)
             }
 
         override val root =
@@ -52,7 +55,7 @@ class LiquidTabsUi(
                         horizontalPadding = dp(theme.generalStyle.candidatePadding)
                     },
                 )
-                background = rippleDrawable(ColorManager.getColor("hilited_candidate_back_color"))
+                background = roundedRippleDrawable(hlBackColor, cornerRadius)
             }
 
         fun setText(str: String) {
@@ -60,17 +63,10 @@ class LiquidTabsUi(
         }
 
         fun setActive(active: Boolean) {
-            val color =
-                if (active) {
-                    ColorManager.getColor(
-                        "hilited_candidate_text_color",
-                    )
-                } else {
-                    ColorManager.getColor("candidate_text_color")
-                }
-            val background = if (active) ColorManager.getColor("hilited_candidate_back_color") else Color.TRANSPARENT
+            val color = if (active) hlTextColor else textColor
+            val contentColor = if (active) hlBackColor else Color.TRANSPARENT
             text.setTextColor(color)
-            root.background = PaintDrawable(background)
+            root.background = roundedRippleDrawable(hlBackColor, cornerRadius, contentColor)
         }
     }
 

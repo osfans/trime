@@ -136,7 +136,7 @@ class ToolButton : GestureFrame {
     }
 
     private fun applyColors(foreground: ToolBar.Button.Foreground?) {
-        val normalColor = foreground?.fgNormal?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
+        val normalColor = foreground?.normal?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
             ?: ColorManager.getColor("candidate_text_color")
 
         val colorStateList = createColorStateList(foreground, normalColor)
@@ -151,7 +151,7 @@ class ToolButton : GestureFrame {
     private fun createColorStateList(
         foreground: ToolBar.Button.Foreground?,
         normalColor: Int,
-    ): ColorStateList = foreground?.fgHighlight?.takeIf { it.isNotEmpty() }?.let { highlight ->
+    ): ColorStateList = foreground?.highlight?.takeIf { it.isNotEmpty() }?.let { highlight ->
         ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
             intArrayOf(ColorManager.getColor(highlight), normalColor),
@@ -228,11 +228,11 @@ class ToolButton : GestureFrame {
         }
     }
 
-    private fun getHighlightColor(background: ToolBar.Button.Background?): Int = background?.bgHighlight?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
+    private fun getHighlightColor(background: ToolBar.Button.Background?): Int = background?.highlight?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
         ?: ColorManager.getColor("hilited_candidate_button_color")
 
     private fun setRectangleBackground(background: ToolBar.Button.Background, highlightColor: Int) {
-        val normalColor = background.bgNormal.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor) ?: 0
+        val normalColor = background.normal.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor) ?: 0
         val cornerRadius = dp(background.cornerRadius.toInt()).toFloat()
         val vInset = dp(background.verticalInset)
         val hInset = dp(background.horizontalInset)

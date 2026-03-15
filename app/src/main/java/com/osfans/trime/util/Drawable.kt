@@ -20,6 +20,24 @@ fun rippleDrawable(
     @ColorInt color: Int,
 ) = RippleDrawable(ColorStateList.valueOf(color), null, ColorDrawable(Color.WHITE))
 
+fun roundedRippleDrawable(
+    @ColorInt color: Int,
+    cornerRadius: Float,
+    contentColor: Int = Color.TRANSPARENT,
+): RippleDrawable {
+    val contentDrawable = contentColor.takeUnless { it == Color.TRANSPARENT }?.let {
+        GradientDrawable().apply {
+            setColor(it)
+            this.cornerRadius = cornerRadius
+        }
+    }
+    val maskDrawable = GradientDrawable().apply {
+        setColor(Color.WHITE)
+        this.cornerRadius = cornerRadius
+    }
+    return RippleDrawable(ColorStateList.valueOf(color), contentDrawable, maskDrawable)
+}
+
 @RequiresApi(Build.VERSION_CODES.M)
 fun borderlessRippleDrawable(
     @ColorInt color: Int,
