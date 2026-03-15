@@ -32,6 +32,7 @@ import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -455,23 +456,36 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     override fun onComputeInsets(outInsets: Insets) {
         if (inputDeviceManager.isVirtualKeyboard) {
             inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
+            val top = inputViewLocation[1]
             outInsets.apply {
-                contentTopInsets = inputViewLocation[1]
-                visibleTopInsets = inputViewLocation[1]
+                contentTopInsets = top
+                visibleTopInsets = top
                 touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
             }
-        } else {
-            val insets = WindowInsetsCompat.toWindowInsetsCompat(decorView.rootWindowInsets)
-            val navBarHeight = insets?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
-            val mandatoryHeight = insets?.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())?.bottom ?: 0
-            // If navBarHeight is 0 but mandatory is non-zero, likely gesture nav - don't add inset
-            val finalNavHeight = if (navBarHeight == 0 && mandatoryHeight > 0) 0 else maxOf(navBarHeight, mandatoryHeight)
-            val h = decorView.height - finalNavHeight
-            outInsets.apply {
-                contentTopInsets = h
-                visibleTopInsets = h
-                touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
-            }
+            return
+        }
+        val insets = ViewCompat.getRootWindowInsets(decorView)
+        val navBarHeight =
+            insets?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+        val tappableHeight =
+            insets?.getInsets(WindowInsetsCompat.Type.tappableElement())?.bottom ?: 0
+        val mandatoryHeight =
+            insets?.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())?.bottom ?: 0
+        val systemGestureHeight =
+            insets?.getInsets(WindowInsetsCompat.Type.systemGestures())?.bottom ?: 0
+        val threshold = (decorView.resources.displayMetrics.density * 40).toInt()
+        val finalNavHeight = when {
+            navBarHeight > 0 -> navBarHeight
+            tappableHeight > 0 -> tappableHeight
+            mandatoryHeight > threshold -> mandatoryHeight
+            systemGestureHeight > threshold -> systemGestureHeight
+            else -> 0
+        }
+        val keyboardTop = decorView.height - finalNavHeight
+        outInsets.apply {
+            contentTopInsets = keyboardTop
+            visibleTopInsets = keyboardTop
+            touchableInsets = Insets.TOUCHABLE_INSETS_VISIBLE
         }
     }
 
