@@ -69,24 +69,23 @@ abstract class BaseInputView(
         if (navBarBackground != ThemePrefs.NavbarBackground.FULL) {
             return 0
         }
-        val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
-        val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-        val mandatory = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
-        // If navBars is 0 but mandatory is non-zero, likely gesture nav - don't add inset
-        if (navBars.bottom == 0 && mandatory.bottom > 0) {
-            return 0
-        }
-        var insetsBottom = max(navBars.bottom, mandatory.bottom)
-        if (insetsBottom <= 0) {
-            val gestures = insets.getInsets(WindowInsetsCompat.Type.systemGestures())
-            val gesturesBottom = gestures.bottom
-            if (gesturesBottom > 0) {
-                insetsBottom = max(gesturesBottom, navBarFrameHeight)
-            }
-        }
-        return insetsBottom
-    }
 
+        val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
+
+        val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+        val tappable = insets.getInsets(WindowInsetsCompat.Type.tappableElement()).bottom
+        val mandatory = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures()).bottom
+        val systemGestures = insets.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom
+        val threshold = (resources.displayMetrics.density * 40).toInt()
+
+        return when {
+            nav > 0 -> nav
+            tappable > 0 -> tappable
+            mandatory > threshold -> mandatory
+            systemGestures > threshold -> systemGestures
+            else -> 0
+        }
+    }
     override fun onDetachedFromWindow() {
         handleMessages = false
         super.onDetachedFromWindow()
