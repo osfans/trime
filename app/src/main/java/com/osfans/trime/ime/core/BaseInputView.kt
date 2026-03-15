@@ -66,6 +66,10 @@ abstract class BaseInputView(
         }
 
     protected fun getNavBarBottomInset(windowInsets: WindowInsets): Int {
+        if (navBarBackground != ThemePrefs.NavbarBackground.FULL) {
+            return 0
+        }
+
         val insets = WindowInsetsCompat.toWindowInsetsCompat(windowInsets)
 
         val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
