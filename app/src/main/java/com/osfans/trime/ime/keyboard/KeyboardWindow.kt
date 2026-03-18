@@ -75,7 +75,7 @@ class KeyboardWindow :
     private var currentKeyboardId by appPrefs.internal.currentKeyboardId
     private var lastKeyboardId = ""
     private var lastLockKeyboardId by appPrefs.internal.lastLockKeyboardId
-    private var lastComposing = false
+    private var lastComposing = true
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
     private val currentKeyboardView: KeyboardView? get() = cachedKeyboards[currentKeyboardId]?.second

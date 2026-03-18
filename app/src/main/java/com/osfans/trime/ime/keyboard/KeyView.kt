@@ -241,6 +241,7 @@ class KeyView(
     }
 
     private fun showPopupPreview(behavior: KeyBehavior = KeyBehavior.CLICK) {
+        if (!keyboardView.popupOnKeyPress) return
         key.getPreviewText(behavior).takeIf { it.isNotEmpty() }?.let { previewText ->
             val context = if (previewText.isIconFont) {
                 previewText
@@ -316,7 +317,7 @@ class KeyView(
 
     private fun drawLabel(canvas: Canvas, label: String, k: Key) {
         val textColor = k.getTextColor()
-        val textSize = if (k.keyTextSize > 0) sp(k.keyTextSize) else sp(if (label.length > 1) keyboardView.labelTextSize else keyboardView.keyTextSize)
+        val textSize = sp(k.keyTextSize.takeIf { it > 0 } ?: if (label.length > 1) keyboardView.keyLongTextSize else keyboardView.keyTextSize)
 
         if (label.isIconFont) {
             drawIcon(canvas, label, textSize, textColor)
@@ -374,7 +375,7 @@ class KeyView(
         if (!isTop && !showHint) return
 
         val textColor = k.getSymbolColor()
-        val textSize = if (k.symbolTextSize > 0) sp(k.symbolTextSize) else sp(12f)
+        val textSize = sp(k.symbolTextSize.takeIf { it > 0f } ?: keyboardView.symbolTextSize)
 
         if (text.isIconFont) {
             drawIcon(canvas, text, textSize, textColor)
