@@ -135,27 +135,25 @@ class KeyView(
         }
 
         onSlide = { delta, _, _ ->
-            service.let { svc ->
-                if (isSlideCursor) {
-                    repeat(kotlin.math.abs(delta)) {
-                        val keyCode = if (delta > 0) KeyEvent.KEYCODE_DPAD_RIGHT else KeyEvent.KEYCODE_DPAD_LEFT
-                        svc.sendDownUpKeyEvent(keyCode)
-                    }
-                } else if (isSlideDelete) {
-                    val ic = svc.currentInputConnection
-                    when {
-                        delta < 0 -> {
-                            val beforeText = ic.getTextBeforeCursor(1, 0) ?: ""
-                            if (beforeText.isNotEmpty()) {
-                                deletedTextBuffer.addFirst(beforeText.toString())
-                                ic.deleteSurroundingText(1, 0)
-                            }
+            if (isSlideCursor) {
+                when {
+                    delta > 0 -> keyboardActionListener?.onAction(KeyAction("Right"))
+                    delta < 0 -> keyboardActionListener?.onAction(KeyAction("Left"))
+                }
+            } else if (isSlideDelete) {
+                val ic = service.currentInputConnection
+                when {
+                    delta < 0 -> {
+                        val beforeText = ic.getTextBeforeCursor(1, 0) ?: ""
+                        if (beforeText.isNotEmpty()) {
+                            deletedTextBuffer.addFirst(beforeText.toString())
+                            ic.deleteSurroundingText(1, 0)
                         }
+                    }
 
-                        delta > 0 -> {
-                            if (deletedTextBuffer.isNotEmpty()) {
-                                ic.commitText(deletedTextBuffer.removeFirst(), 1)
-                            }
+                    delta > 0 -> {
+                        if (deletedTextBuffer.isNotEmpty()) {
+                            ic.commitText(deletedTextBuffer.removeFirst(), 1)
                         }
                     }
                 }
