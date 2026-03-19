@@ -8,7 +8,9 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
+import android.graphics.drawable.shapes.OvalShape
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -21,7 +23,6 @@ import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.model.ToolBar
 import com.osfans.trime.ime.keyboard.GestureFrame
 import com.osfans.trime.ime.keyboard.KeyboardSwitcher
-import com.osfans.trime.util.circlePressHighlightDrawable
 import splitties.dimensions.dp
 import splitties.views.dsl.core.add
 import splitties.views.dsl.core.imageView
@@ -56,10 +57,11 @@ class ToolButton : GestureFrame {
 
     var contentType = ContentType.TEXT
         private set
-    private var config: ToolBar.Button? = null
+    private lateinit var config: ToolBar.Button
     private var toggleKey: String? = null
 
     constructor(context: Context, @DrawableRes icon: Int) : super(context) {
+        config = ToolBar.Button()
         setupContent(ContentType.ICON, icon = icon)
     }
 
@@ -84,25 +86,23 @@ class ToolButton : GestureFrame {
     }
 
     fun updateStyle() {
-        val config = this.config ?: return
-
         if (needsStyleUpdate()) {
             removeAllViews()
-            setupFromConfig(config)
+            setupFromConfig()
         }
     }
 
     private fun needsStyleUpdate(): Boolean = toggleKey != null ||
-        !config?.foreground?.style.isNullOrEmpty() ||
-        !config?.foreground?.optionStyles.isNullOrEmpty()
+        !config.foreground.style.isNullOrEmpty() ||
+        !config.foreground.optionStyles.isNullOrEmpty()
 
     private fun setupContent(
         type: ContentType,
         @DrawableRes icon: Int? = null,
         text: String? = null,
         drawable: android.graphics.drawable.Drawable? = null,
-        foreground: ToolBar.Button.Foreground? = null,
     ) {
+        val foreground = config.foreground
         contentType = type
         removeAllViews()
 
@@ -112,34 +112,41 @@ class ToolButton : GestureFrame {
                     image.imageResource = icon
                 } else if (!text.isNullOrEmpty()) {
                     image.imageDrawable = IconicsDrawable(context, text).apply {
-                        sizeDp = foreground?.fontSize?.toInt() ?: 12
+                        sizeDp = foreground.fontSize.toInt()
                     }
                 }
-                image.padding = dp(foreground?.padding ?: 10)
+                image.padding = dp(foreground.padding)
                 add(image, lParams(wrapContent, wrapContent, gravityCenter))
             }
             ContentType.TEXT -> {
                 text?.let { label.text = it }
-                foreground?.fontSize?.let { label.textSize = it }
-                foreground?.padding?.let { label.padding = dp(it) }
+                label.textSize = foreground.fontSize
+                label.padding = dp(foreground.padding)
                 label.typeface = FontManager.getTypeface("toolbar_font")
                 add(label, lParams(wrapContent, wrapContent, gravityCenter))
             }
             ContentType.LOCAL_IMAGE -> {
                 drawable?.let { image.setImageDrawable(it) }
-                foreground?.padding?.let { image.padding = dp(it) }
+                image.padding = dp(foreground.padding)
                 add(image, lParams(wrapContent, wrapContent, gravityCenter))
             }
         }
 
-        applyColors(foreground)
+        applyColors()
     }
 
-    private fun applyColors(foreground: ToolBar.Button.Foreground?) {
-        val normalColor = foreground?.normal?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
-            ?: ColorManager.getColor("candidate_text_color")
+    private fun applyColors() {
+        val foreground = config.foreground
+        val normalColor = foreground.normal.takeIf { it.isNotEmpty() }
+            ?.let(ColorManager::getColor) ?: ColorManager.getColor("candidate_text_color")
 
-        val colorStateList = createColorStateList(foreground, normalColor)
+        val highlightColor = foreground.highlight.takeIf { it.isNotEmpty() }
+            ?.let(ColorManager::getColor) ?: ColorManager.getColor("hilited_candidate_text_color")
+
+        val colorStateList = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
+            intArrayOf(highlightColor, normalColor),
+        )
 
         when (contentType) {
             ContentType.ICON -> image.imageTintList = colorStateList
@@ -148,120 +155,73 @@ class ToolButton : GestureFrame {
         }
     }
 
-    private fun createColorStateList(
-        foreground: ToolBar.Button.Foreground?,
-        normalColor: Int,
-    ): ColorStateList = foreground?.highlight?.takeIf { it.isNotEmpty() }?.let { highlight ->
-        ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf()),
-            intArrayOf(ColorManager.getColor(highlight), normalColor),
-        )
-    } ?: ColorStateList.valueOf(normalColor)
-
     private fun initFromConfig(config: ToolBar.Button) {
         this.config = config
         val keyAction = KeyActionManager.getAction(config.action)
         val toggle = keyAction.toggle
 
-        if (toggle.isNotEmpty() && config.foreground?.optionStyles?.size == 2) {
+        if (toggle.isNotEmpty() && config.foreground.optionStyles.size == 2) {
             this.toggleKey = toggle
         }
 
         isRepeatable = keyAction.isRepeatable
-        setupFromConfig(config)
+        setupFromConfig()
     }
 
-    private fun getActiveStyle(config: ToolBar.Button): String {
-        val optionStyles = config.foreground?.optionStyles
-        val style = config.foreground?.style
-
-        if (toggleKey != null && optionStyles?.size == 2) {
-            val rime = RimeDaemon.getFirstSessionOrNull()
-            val isOptionOn = rime?.run { getRuntimeOption(toggleKey!!) } ?: false
-            return if (isOptionOn) optionStyles[1] else optionStyles[0]
+    private fun getActiveStyle(): String {
+        val optionStyles = config.foreground.optionStyles
+        if (toggleKey != null && optionStyles.size == 2) {
+            val rime = RimeDaemon.getFirstSessionOrNull()!!
+            val toggleOn = rime.run { getRuntimeOption(toggleKey!!) }
+            return optionStyles[if (toggleOn) 1 else 0]
         }
-
-        return style ?: ""
+        return config.foreground.style
     }
 
-    private fun setupFromConfig(config: ToolBar.Button) {
-        val style = getActiveStyle(config)
-        val foreground = config.foreground
+    private fun setupFromConfig() {
+        val style = getActiveStyle()
 
         when {
             style.matches(IMAGE_PATTERN) -> {
-                ColorManager.getDrawable(style)?.let { drawable ->
-                    setupContent(ContentType.LOCAL_IMAGE, drawable = drawable, foreground = foreground)
-                } ?: setupFallbackContent(config, foreground)
+                ColorManager.getDrawable(style)?.let { setupContent(ContentType.LOCAL_IMAGE, drawable = it) }
+                    ?: setupFallbackContent(config)
             }
             style.isNotEmpty() -> {
-                if (style.startsWith("ic@")) {
-                    val iconName = style.replace("ic@", "cmd_")
-                    setupContent(ContentType.ICON, text = iconName, foreground = foreground)
-                } else {
-                    setupContent(ContentType.TEXT, text = style, foreground = foreground)
-                }
+                val type = if (style.startsWith("ic@")) ContentType.ICON else ContentType.TEXT
+                val text = if (style.startsWith("ic@")) style.replace("ic@", "cmd_") else style
+                setupContent(type, text = text)
             }
-            else -> {
-                setupFallbackContent(config, foreground)
-            }
+            else -> setupFallbackContent(config)
         }
 
-        setupBackground(config.background)
-    }
+        val bg = config.background
+        val normalColor = bg.normal.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor) ?: 0
+        val highlightColor = bg.highlight.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
+            ?: ColorManager.getColor("hilited_candidate_button_color")
 
-    private fun setupFallbackContent(
-        config: ToolBar.Button?,
-        foreground: ToolBar.Button.Foreground?,
-    ) {
-        val action = config?.action ?: ""
-        val fallbackText = KeyActionManager.getAction(action)
-            .getLabel(KeyboardSwitcher.currentKeyboard)
-
-        setupContent(ContentType.TEXT, text = fallbackText, foreground = foreground)
-    }
-
-    private fun setupBackground(background: ToolBar.Button.Background?) {
-        val highlightColor = getHighlightColor(background)
-
-        when (background?.type) {
-            "rectangle" -> setRectangleBackground(background, highlightColor)
-            else -> setPressHighlightColor(highlightColor)
-        }
-    }
-
-    private fun getHighlightColor(background: ToolBar.Button.Background?): Int = background?.highlight?.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor)
-        ?: ColorManager.getColor("hilited_candidate_button_color")
-
-    private fun setRectangleBackground(background: ToolBar.Button.Background, highlightColor: Int) {
-        val normalColor = background.normal.takeIf { it.isNotEmpty() }?.let(ColorManager::getColor) ?: 0
-        val cornerRadius = dp(background.cornerRadius.toInt()).toFloat()
-        val vInset = dp(background.verticalInset)
-        val hInset = dp(background.horizontalInset)
-
-        val stateListDrawable = StateListDrawable().apply {
+        val vInset = dp(bg.verticalInset)
+        val hInset = dp(bg.horizontalInset)
+        background = StateListDrawable().apply {
             listOf(
-                intArrayOf(android.R.attr.state_pressed) to highlightColor,
-                intArrayOf() to normalColor,
-            ).forEach { (state, color) ->
-                val drawable = createRoundedDrawable(color, cornerRadius)
-                val layerDrawable = LayerDrawable(arrayOf(drawable)).apply {
-                    setLayerInset(0, hInset, vInset, hInset, vInset)
+                highlightColor to intArrayOf(android.R.attr.state_pressed),
+                normalColor to intArrayOf(),
+            ).forEach { (color, state) ->
+                val shape = when (bg.type) {
+                    "rectangle" -> GradientDrawable().apply {
+                        setColor(color)
+                        cornerRadius = dp(bg.cornerRadius.toInt()).toFloat()
+                    }
+                    "circle" -> ShapeDrawable(OvalShape()).apply { paint.color = color }
+                    else -> return@forEach
                 }
-                addState(state, layerDrawable)
+                addState(state, LayerDrawable(arrayOf(shape)).apply { setLayerInset(0, hInset, vInset, hInset, vInset) })
             }
         }
-
-        this.background = stateListDrawable
     }
 
-    private fun createRoundedDrawable(color: Int, cornerRadius: Float) = GradientDrawable().apply {
-        setColor(color)
-        this.cornerRadius = cornerRadius
-    }
-
-    private fun setPressHighlightColor(@ColorInt color: Int) {
-        this.background = circlePressHighlightDrawable(color)
+    private fun setupFallbackContent(config: ToolBar.Button) {
+        val action = KeyActionManager.getAction(config.action).getLabel(KeyboardSwitcher.currentKeyboard)
+        setupContent(ContentType.TEXT, text = action)
     }
 
     companion object {

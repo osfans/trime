@@ -19,8 +19,8 @@ data class ToolBar(
 
     @Parcelize
     data class Button(
-        val background: Background? = null,
-        val foreground: Foreground? = null,
+        val background: Background = Background(),
+        val foreground: Foreground = Foreground(),
         val action: String = "",
         val longPressAction: String = "",
         val size: List<Int> = emptyList(),
@@ -33,17 +33,17 @@ data class ToolBar(
             val normal: String = "",
             val highlight: String = "",
             val verticalInset: Int = 4,
-            val horizontalInset: Int = 0,
+            val horizontalInset: Int = 4,
         ) : Parcelable
 
         @Parcelize
         data class Foreground(
             val style: String = "",
             val optionStyles: List<String> = emptyList(),
-            val normal: String? = null,
-            val highlight: String? = null,
-            val fontSize: Float = 15f,
-            val padding: Int = 5,
+            val normal: String = "",
+            val highlight: String = "",
+            val fontSize: Float = 18f,
+            val padding: Int = 4,
         ) : Parcelable
     }
 }

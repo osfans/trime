@@ -15,7 +15,7 @@ import com.osfans.trime.data.theme.model.ToolBar
 class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
 
     override fun map(): ToolBar = ToolBar(
-        primaryButton = node.get<YamlMap>("primary_button")?.let(::mapButton),
+        primaryButton = node.get<YamlMap>("primary_button")?.let { mapButton(it) },
         buttons = getList("buttons")?.map { mapButton(it.yamlMap) } ?: emptyList(),
         buttonSpacing = getInt("button_spacing", 18),
         buttonFont = getStringList("button_font"),
@@ -25,10 +25,10 @@ class ToolBarMapper(node: YamlMap) : Mapper<ToolBar>(node) {
     private fun mapButton(node: YamlMap): ToolBar.Button = ToolBar.Button(
         background = node.get<YamlMap>("background")?.let { bg ->
             ToolBarButtonBackgroundMapper(bg).map()
-        },
+        } ?: ToolBar.Button.Background(),
         foreground = node.get<YamlMap>("foreground")?.let { fg ->
             ToolBarButtonForegroundMapper(fg).map()
-        },
+        } ?: ToolBar.Button.Foreground(),
         action = node.get<YamlScalar>("action")?.content ?: "",
         longPressAction = node.get<YamlScalar>("long_press_action")?.content ?: "",
         size = node.get<YamlList>("size")?.items?.mapNotNull { it.yamlScalar.content.toIntOrNull() } ?: emptyList(),
@@ -42,7 +42,7 @@ private class ToolBarButtonBackgroundMapper(node: YamlMap) : Mapper<ToolBar.Butt
         normal = getString("normal"),
         highlight = getString("highlight"),
         verticalInset = getInt("vertical_inset", 4),
-        horizontalInset = getInt("horizontal_inset"),
+        horizontalInset = getInt("horizontal_inset", 4),
     )
 }
 
@@ -53,6 +53,6 @@ private class ToolBarButtonForegroundMapper(node: YamlMap) : Mapper<ToolBar.Butt
         normal = getString("normal"),
         highlight = getString("highlight"),
         fontSize = getFloat("font_size", 18f),
-        padding = getInt("padding", 5),
+        padding = getInt("padding", 4),
     )
 }
