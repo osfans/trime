@@ -14,7 +14,6 @@ import com.osfans.trime.core.CompositionProto
 import com.osfans.trime.core.RimeMessage
 import com.osfans.trime.core.SchemaItem
 import com.osfans.trime.daemon.RimeSession
-import com.osfans.trime.data.prefs.AppPrefs
 import com.osfans.trime.data.theme.KeyActionManager
 import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.model.TextKeyboard
@@ -71,10 +70,9 @@ class KeyboardWindow :
         get() = KeyboardWindow
 
     private val presetKeyboardIds = theme.presetKeyboards.keys.toList()
-    private val appPrefs = AppPrefs.defaultInstance()
-    private var currentKeyboardId by appPrefs.internal.currentKeyboardId
+    private var currentKeyboardId = ""
     private var lastKeyboardId = ""
-    private var lastLockKeyboardId by appPrefs.internal.lastLockKeyboardId
+    private var lastLockKeyboardId = ""
     private var lastComposing = true
     private val cachedKeyboards = mutableMapOf<String, Pair<Keyboard, KeyboardView>>()
     private val currentKeyboard: Keyboard? get() = cachedKeyboards[currentKeyboardId]?.first
@@ -84,16 +82,7 @@ class KeyboardWindow :
 
     override fun onCreateView(): View {
         keyboardView = context.frameLayout(R.id.keyboard_view)
-
-        // 使用保存的键盘ID或默认值，并经过evalKeyboard处理（包括横屏逻辑）
-        val targetKeyboardId =
-            evalKeyboard(
-                currentKeyboardId
-                    .takeIf { it.isNotEmpty() && presetKeyboardIds.contains(it) }
-                    ?: ".default",
-            )
-
-        attachKeyboard(targetKeyboardId)
+        attachKeyboard(evalKeyboard(".default"))
         return keyboardView
     }
 
