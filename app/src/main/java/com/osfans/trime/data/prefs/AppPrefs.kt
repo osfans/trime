@@ -293,7 +293,7 @@ class AppPrefs(
             R.string.key_slide_step_size,
             SLIDE_STEP_SIZE,
             24,
-            0,
+            1,
             100,
             "dp",
         )
