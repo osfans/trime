@@ -21,6 +21,7 @@ import kotlin.math.floor
 
 open class GestureFrame(context: Context) : FrameLayout(context) {
 
+    private var touchId = 0
     private var startX = 0f
     private var startY = 0f
     private var lastX = 0f
@@ -28,7 +29,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
 
     private var isLongPressed = false
     private var slideActivated = false
-    private var shouldPerformSwipe = false
+    private var swipeTriggered = false
 
     private var longPressJob: Job? = null
     private var repeatJob: Job? = null
@@ -79,41 +80,45 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when (event.action) {
+        val x = event.x
+        val y = event.y
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                startX = event.x
-                startY = event.y
+                if (!isEnabled) return false
+                touchId = (touchId + 1) and 0xFFFF
+                val currentTouchId = touchId
+                startX = x
+                startY = y
                 lastX = startX
                 startTime = SystemClock.elapsedRealtime()
 
                 isLongPressed = false
                 slideActivated = false
-                shouldPerformSwipe = false
+                swipeTriggered = false
                 lastSwipeBehavior = KeyBehavior.CLICK
 
+                drawableHotspotChanged(x, y)
+                isPressed = true
                 if (vibrateOnKeyPress) InputFeedbackManager.keyPressVibrate(this)
                 onPress?.invoke()
 
                 if (hasLongPress || isRepeatable || hasPopup) {
-                    startLongPressJob()
+                    startLongPressJob(currentTouchId)
                 }
 
                 return true
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val x = event.x
-                val y = event.y
+                if (!isEnabled) return false
+                drawableHotspotChanged(x, y)
+
                 val dx = x - startX
                 val dy = y - startY
 
                 if (!isLongPressed) {
-                    val behavior = detectSwipe(dx, dy)
-                    if (behavior != lastSwipeBehavior) {
-                        lastSwipeBehavior = behavior
-                        if (behavior != KeyBehavior.CLICK) {
-                            onSwipe?.invoke(behavior)
-                        }
+                    if (!swipeTriggered && (abs(dx) >= swipeTravel || abs(dy) >= swipeTravel)) {
+                        swipeTriggered = true
                     }
                 }
 
@@ -136,13 +141,24 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                     }
                 }
 
+                if (!isLongPressed) {
+                    val behavior = detectSwipe(dx, dy)
+                    if (behavior != lastSwipeBehavior) {
+                        lastSwipeBehavior = behavior
+                        if (behavior != KeyBehavior.CLICK) {
+                            onSwipe?.invoke(behavior)
+                        }
+                    }
+                }
+
                 return true
             }
 
             MotionEvent.ACTION_UP -> {
-                val x = event.x
-                val y = event.y
+                val dx = x - startX
+                val dy = y - startY
 
+                isPressed = false
                 if (vibrateOnKeyRelease) InputFeedbackManager.keyPressVibrate(this)
                 cancelJobs()
 
@@ -157,7 +173,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
                     return true
                 }
 
-                if (shouldPerformSwipe) {
+                if (swipeTriggered) {
                     dispatchBehavior(lastSwipeBehavior, false)
                     return true
                 }
@@ -195,11 +211,12 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
             }
 
             MotionEvent.ACTION_CANCEL -> {
+                isPressed = false
                 cancelJobs()
 
                 isLongPressed = false
                 slideActivated = false
-                shouldPerformSwipe = false
+                swipeTriggered = false
 
                 onCancel?.invoke()
                 return true
@@ -209,11 +226,11 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         return true
     }
 
-    private fun startLongPressJob() {
+    private fun startLongPressJob(currentTouchId: Int) {
         longPressJob = lifecycleScope.launch {
             delay(longPressTimeout.toLong())
-
-            if (shouldPerformSwipe || slideActivated) return@launch
+            if (touchId != currentTouchId) return@launch
+            if (swipeTriggered || slideActivated) return@launch
             isLongPressed = true
 
             if (vibrateOnKeyPress) InputFeedbackManager.keyPressVibrate(this@GestureFrame, true)
@@ -256,7 +273,7 @@ open class GestureFrame(context: Context) : FrameLayout(context) {
         val isSwipe =
             (swipeTravel > 0 && distance >= swipeTravel) ||
                 (swipeVelocity > 0 && velocity >= swipeVelocity)
-        shouldPerformSwipe = isSwipe
+        swipeTriggered = isSwipe
 
         if (!isSwipe) return KeyBehavior.CLICK
         return if (absDx > absDy) {
