@@ -102,7 +102,7 @@ class SwitchOptionWindow :
                 when (entry) {
                     is SwitchOptionEntry.Static -> when (entry.type) {
                         SwitchOptionEntry.Static.Type.SchemaList -> showDialog { r ->
-                            EnabledSchemaPickerDialog.build(r, service.lifecycleScope, service) {
+                            EnabledSchemaPickerDialog.build(r, service.lifecycleScope, context) {
                                 setNegativeButton(R.string.enable_schemata) { _, _ ->
                                     AppUtils.launchMainToSchemaList(context)
                                 }
