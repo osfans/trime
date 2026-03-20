@@ -266,7 +266,7 @@ class KeyboardWindow :
 
     override fun onCompositionUpdate(data: CompositionProto) {
         val status = rime.run { statusCached }
-        val isComposing = data.length == 0 && data.preedit.isNullOrEmpty()
+        val isComposing = status.isComposing
         if (!status.isAsciiMode && lastComposing != isComposing) {
             lastComposing = isComposing
             currentKeyboardView?.invalidateAllKeys()
