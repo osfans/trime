@@ -267,8 +267,8 @@ class Keyboard(
 
                 val totalWeight = rowWidthTotalWeight[row]
 
-                // if split keyboard layout is enabled, insert split gap at row middle when cumulative width ≥ 50%
-                if (isSplit && !splitInserted && rowWeightAccumulo >= totalWeight * 0.5f) {
+                // if split keyboard layout is enabled, insert split gap at row middle when cumulative width > 50%
+                if (isSplit && !splitInserted && rowWeightAccumulo > totalWeight * 0.5f) {
                     splitInserted = true
                     val gap = (totalWeight * splitRatio * oneWeightWidthPx).toInt()
 
