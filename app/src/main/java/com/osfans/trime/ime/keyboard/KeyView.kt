@@ -276,11 +276,10 @@ class KeyView(
 
         drawBackground(canvas, key)
 
-        val label = if (key.code == KeyEvent.KEYCODE_ENTER && keyboardView.labelEnter.isNotEmpty()) {
-            keyboardView.labelEnter
-        } else {
-            key.getLabel()
+        val label = key.getLabel().let {
+            if (it == "enter_labels") keyboardView.labelEnter else it
         }
+
         if (label.isNotEmpty()) {
             drawLabel(canvas, label)
         }
