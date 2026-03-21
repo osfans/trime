@@ -282,17 +282,17 @@ class KeyView(
             key.getLabel()
         }
         if (label.isNotEmpty()) {
-            drawLabel(canvas, label, key)
+            drawLabel(canvas, label)
         }
 
         val symbol = key.symbolLabel
         if (symbol.isNotEmpty()) {
-            drawSymbol(canvas, symbol, key)
+            drawSymbol(canvas, symbol)
         }
 
         val hint = key.hint
         if (hint.isNotEmpty()) {
-            drawSymbol(canvas, hint, key, isTop = false)
+            drawSymbol(canvas, hint, isTop = false)
         }
     }
 
@@ -313,12 +313,12 @@ class KeyView(
         bg.draw(canvas)
     }
 
-    private fun drawLabel(canvas: Canvas, label: String, k: Key) {
-        val textColor = k.getTextColor()
-        val textSize = sp(k.keyTextSize.takeIf { it > 0 } ?: if (label.length > 1) keyboardView.keyLongTextSize else keyboardView.keyTextSize)
+    private fun drawLabel(canvas: Canvas, label: String) {
+        val textColor = key.getTextColor()
+        val textSize = sp(key.keyTextSize.takeIf { it > 0 } ?: if (label.length > 1) keyboardView.keyLongTextSize else keyboardView.keyTextSize)
 
         if (label.isIconFont) {
-            drawIcon(canvas, label, textSize, textColor)
+            drawIcon(canvas, label, textSize.toInt(), textColor, key.keyTextOffsetX, key.keyTextOffsetY)
         } else {
             textPaint.apply {
                 color = textColor
@@ -330,53 +330,67 @@ class KeyView(
             val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft
             val centerY = (height - paddingTop - paddingBottom) / 2f + paddingTop
             val adjustmentY = (textPaint.textSize - textPaint.descent()) / 2f
-            val offsetX = k.keyTextOffsetX
-            val offsetY = k.keyTextOffsetY
 
-            canvas.drawText(label, centerX + sp(offsetX), centerY + adjustmentY + sp(offsetY), textPaint)
+            canvas.drawText(label, centerX + sp(key.keyTextOffsetX), centerY + adjustmentY + sp(key.keyTextOffsetY), textPaint)
         }
     }
 
-    private fun drawIcon(canvas: Canvas, iconName: String, size: Float, color: Int) {
-        val iconSize = (size / resources.displayMetrics.density).toInt()
-        val cmdName = iconName.toIconName()
+    private fun drawIcon(
+        canvas: Canvas,
+        iconName: String,
+        size: Int,
+        color: Int,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f,
+        isTop: Boolean? = null,
+    ) {
+        val halfSize = size / 2
 
+        val cmdName = iconName.toIconName()
         val icon = if (cachedIconName == cmdName) {
             cachedIcon!!
         } else {
             IconicsDrawable(context, cmdName).apply {
-                sizeDp = iconSize
-                cachedIcon = this
+                sizeDp = size
+            }.also {
+                cachedIcon = it
                 cachedIconName = cmdName
             }
         }
 
         icon.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
 
-        val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft + sp(key.keyTextOffsetX)
-        val centerY = (height - paddingTop - paddingBottom) / 2f + paddingTop
+        val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft + sp(offsetX)
+
+        val centerY = when (isTop) {
+            true -> paddingTop + halfSize + sp(offsetY)
+            false -> height - paddingBottom - size + sp(offsetY)
+            null -> (height - paddingTop - paddingBottom) / 2f + paddingTop + sp(offsetY)
+        }
 
         icon.setBounds(
-            (centerX - icon.intrinsicWidth / 2).toInt(),
-            (centerY - icon.intrinsicHeight / 2).toInt(),
-            (centerX + icon.intrinsicWidth / 2).toInt(),
-            (centerY + icon.intrinsicHeight / 2).toInt(),
+            (centerX - halfSize).toInt(),
+            (centerY - halfSize).toInt(),
+            (centerX + halfSize).toInt(),
+            (centerY + halfSize).toInt(),
         )
         icon.draw(canvas)
     }
 
-    private fun drawSymbol(canvas: Canvas, text: String, k: Key, isTop: Boolean = true) {
+    private fun drawSymbol(canvas: Canvas, text: String, isTop: Boolean = true) {
         val showSymbol = rime.run { !getRuntimeOption("_hide_key_symbol") }
         val showHint = rime.run { !getRuntimeOption("_hide_key_hint") }
 
         if (isTop && !showSymbol) return
         if (!isTop && !showHint) return
 
-        val textColor = k.getSymbolColor()
-        val textSize = sp(k.symbolTextSize.takeIf { it > 0f } ?: keyboardView.symbolTextSize)
+        val textColor = key.getSymbolColor()
+        val textSize = sp(key.symbolTextSize.takeIf { it > 0f } ?: keyboardView.symbolTextSize)
+        val offsetX = if (isTop) key.keySymbolOffsetX else key.keyHintOffsetX
+        val offsetY = if (isTop) key.keySymbolOffsetY else key.keyHintOffsetY
 
         if (text.isIconFont) {
-            drawIcon(canvas, text, textSize, textColor)
+            drawIcon(canvas, text, textSize.toInt(), textColor, offsetX, offsetY, isTop)
         } else {
             symbolPaint.apply {
                 color = textColor
@@ -385,8 +399,6 @@ class KeyView(
             }
 
             val fontMetrics = symbolPaint.fontMetrics
-            val offsetX = if (isTop) k.keySymbolOffsetX else k.keyHintOffsetX
-            val offsetY = if (isTop) k.keySymbolOffsetY else k.keyHintOffsetY
             val centerX = (width - paddingLeft - paddingRight) / 2f + paddingLeft + sp(offsetX)
             val centerY = if (isTop) {
                 paddingTop - fontMetrics.top + sp(offsetY)
