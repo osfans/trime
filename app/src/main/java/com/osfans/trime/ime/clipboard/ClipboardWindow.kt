@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.instance
 import splitties.views.recyclerview.verticalLayoutManager
 
-class ClipboardWindow : BoardWindow.BarBoardWindow() {
+class ClipboardWindow(private val initialTab: Int = 0) : BoardWindow.BarBoardWindow() {
 
     private val service: TrimeInputMethodService by di.instance()
     private val windowManager: BoardWindowManager by di.instance()
@@ -140,7 +140,6 @@ class ClipboardWindow : BoardWindow.BarBoardWindow() {
         }
         viewPager.apply {
             adapter = clipboardPagesAdapter
-            setCurrentItem(0, false)
         }
         titleUi.apply {
             backButton.setOnClickListener {
@@ -186,6 +185,7 @@ class ClipboardWindow : BoardWindow.BarBoardWindow() {
     }
 
     override fun onAttached() {
+        clipboardLayout.viewPager.setCurrentItem(initialTab, false)
         clipboardBeansSubmitJob = service.lifecycleScope.launch {
             clipboardBeansPager.flow.collect {
                 clipboardBeansAdapter.submitData(it)

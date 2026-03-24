@@ -4020,7 +4020,7 @@ preset_keys:
   liquid_keyboard_tabs: { label: 更多, send: function, command: liquid_keyboard, option: "更多" }
   liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
   menu_keyboard: { label: 菜单, send: function, command: menu_keyboard }
-  clipboard_window: { label: "剪贴", send: function, command: "clipboard_window" }
+  clipboard_window: { label: "剪贴", send: function, command: "clipboard_window", option: '0' } #0剪贴板，1收藏夹
   # rime状态
   Mode_switch: {toggle: ascii_mode, functional: false, send: Mode_switch, states: [ 中文, 西文 ]}
   Zenkaku_Hankaku: {toggle: full_shape, send: Mode_switch, states: [ 半角, 全角 ]}

@@ -914,7 +914,7 @@ preset_keys:
   liquid_keyboard_switch: { label: 更多, send: function, command: liquid_keyboard, option: "更多" }
   liquid_keyboard_exit: {label: 返回, send: function, command: liquid_keyboard, option: "-1"}  #退出liquidkeyboard
   liquid_keyboard_emoji: { label: 🙂, send: function, command: liquid_keyboard, option: "emoji" }
-  clipboard_window: { label: "剪贴", send: function, command: "clipboard_window" }
+  clipboard_window: { label: "剪贴", send: function, command: "clipboard_window", option: '0' } #0剪贴板，1收藏夹
   set_color_ink: { label: 切换到ink配色, send: function, command: set_color_scheme, option: "ink" }
   set_theme_ink: { label: 切换到ink主题, send: function, command: set_theme, option: "ink" } #空参数为刷新主题
   # trime設定

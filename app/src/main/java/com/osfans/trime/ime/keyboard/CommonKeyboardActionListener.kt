@@ -190,7 +190,7 @@ class CommonKeyboardActionListener {
                 when (action.command) {
                     "liquid_keyboard" -> handleLiquidKeyboard(arg)
                     "menu_keyboard" -> windowManager.attachWindow(SwitchOptionWindow())
-                    "clipboard_window" -> windowManager.attachWindow(ClipboardWindow())
+                    "clipboard_window" -> handleClipboardWindow(arg)
                     "set_color_scheme" -> handleColorScheme(arg)
                     "set_theme" -> handleTheme(arg)
                     "broadcast" -> service.sendBroadcast(Intent(arg))
@@ -224,6 +224,11 @@ class CommonKeyboardActionListener {
                 } else {
                     windowManager.attachWindow(KeyboardWindow)
                 }
+            }
+
+            private fun handleClipboardWindow(arg: String) {
+                val tabIndex = arg.toIntOrNull()?.coerceIn(0, 1) ?: 0
+                windowManager.attachWindow(ClipboardWindow(tabIndex))
             }
 
             private fun handleColorScheme(arg: String) {
